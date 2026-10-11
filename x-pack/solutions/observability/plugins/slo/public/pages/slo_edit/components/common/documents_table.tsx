@@ -13,7 +13,8 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { QuerySchema } from '@kbn/slo-schema';
 import { kqlQuerySchema } from '@kbn/slo-schema';
-import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiResizableContainer, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { TimeRange } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import type { FieldPath } from 'react-hook-form';
@@ -61,9 +62,7 @@ export function DocumentsTable({ dataView, name, searchBarProps }: Props) {
       {error && !loading && (
         <>
           <EuiSpacer size="xs" />
-          <EuiCallOut announceOnMount color="danger">
-            {error?.message}
-          </EuiCallOut>
+          <KbnDangerCallout announceOnMount title={error.message} />
         </>
       )}
       <EuiResizableContainer

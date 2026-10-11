@@ -46,7 +46,7 @@ describe('EvalsPublicPlugin', () => {
       getStartServices: jest.fn(),
     } as any);
 
-  it('registers the Stack Management AI entry when management is available', () => {
+  it('registers the standalone app and the Stack Management AI entry when management is available', () => {
     const plugin = createPlugin(true);
     const management = createManagementMock();
 
@@ -54,7 +54,14 @@ describe('EvalsPublicPlugin', () => {
 
     plugin.setup(coreSetup, { management });
 
-    expect(coreSetup.application.register).not.toHaveBeenCalled();
+    expect(coreSetup.application.register).toHaveBeenCalledTimes(1);
+    expect(coreSetup.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'evals',
+        appRoute: '/app/evals',
+        euiIconType: 'flask',
+      })
+    );
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledTimes(1);
     expect(management.sections.section.ai.registerApp).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -65,15 +72,21 @@ describe('EvalsPublicPlugin', () => {
     );
   });
 
-  it('does not register the Stack Management AI entry when management is not available', () => {
+  it('registers the standalone app even when management is not available', () => {
     const plugin = createPlugin(true);
 
     const coreSetup = createCoreSetupMock();
 
     plugin.setup(coreSetup, {});
 
-    // nothing to assert besides no throw; management was undefined
-    expect(true).toBe(true);
+    expect(coreSetup.application.register).toHaveBeenCalledTimes(1);
+    expect(coreSetup.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'evals',
+        appRoute: '/app/evals',
+        euiIconType: 'flask',
+      })
+    );
   });
 
   it('registers the ai.evals.* Workflows editor steps when the feature flag is enabled', () => {

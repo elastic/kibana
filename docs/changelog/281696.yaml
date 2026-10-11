@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/281696
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-07
-- product: kibana
-title: Fix execution highlight in graph view on branching scenarios

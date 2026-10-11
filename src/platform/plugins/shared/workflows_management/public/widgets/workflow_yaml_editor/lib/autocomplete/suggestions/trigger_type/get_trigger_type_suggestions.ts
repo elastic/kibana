@@ -75,6 +75,7 @@ export function getTriggerTypeSuggestions(
     const triggerDef = triggerSchemas.getTriggerDefinition(triggerType.type);
     const snippetText = generateTriggerSnippet(triggerType.type, {
       defaultCondition: triggerDef?.snippets?.condition,
+      requiresConnectorId: triggerDef?.requiresConnectorId,
     });
 
     // Extended range for multi-line insertion

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { RULES_API_ALL, RULES_API_READ } from '@kbn/security-solution-features/constants';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID,
@@ -43,11 +42,7 @@ import {
 
 export { ALERT_ANALYSIS_WORKFLOW_SETTINGS_ROUTE };
 
-const REQUIRED_PRIVILEGES = [
-  'manage_advanced_settings',
-  RULES_API_ALL,
-  WorkflowsManagementApiActions.updateManaged,
-];
+const REQUIRED_PRIVILEGES = ['manage_advanced_settings', RULES_API_ALL];
 
 const LICENSE_ERROR_MESSAGE = i18n.translate(
   'xpack.securitySolution.alertAnalysisWorkflow.settingsRoute.licenseError',
@@ -58,18 +53,20 @@ const LICENSE_ERROR_MESSAGE = i18n.translate(
 // sends the full object, and defaulting a missing field to `true` would let a partial body silently
 // re-enable the workflow or conversation creation. `connectorId` stays optional because an empty
 // connector is a valid, explicit state (the workflow no-ops at run time when it is empty).
-const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkflowSettings.extend({
-  connectorId: z.string().optional(),
-  workflowEnabled: z.boolean(),
-  createConversation: z.boolean(),
-})
-  // The threshold range only applies to auto-close, so mirror the client (`index.tsx`
-  // `isThresholdRangeInvalid`) and only enforce min < max when auto-close is enabled. Otherwise the
-  // UI would let the user save an out-of-range pair while the server rejected it with a 400.
-  .refine(
-    (settings) => !settings.autoCloseEnabled || isThresholdRangeValid(settings),
-    THRESHOLD_RANGE_REFINEMENT
-  );
+const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = lazySchema(() =>
+  AlertAnalysisWorkflowSettings.extend({
+    connectorId: z.string().optional(),
+    workflowEnabled: z.boolean(),
+    createConversation: z.boolean(),
+  })
+    // The threshold range only applies to auto-close, so mirror the client (`index.tsx`
+    // `isThresholdRangeInvalid`) and only enforce min < max when auto-close is enabled. Otherwise the
+    // UI would let the user save an out-of-range pair while the server rejected it with a 400.
+    .refine(
+      (settings) => !settings.autoCloseEnabled || isThresholdRangeValid(settings),
+      THRESHOLD_RANGE_REFINEMENT
+    )
+);
 
 type AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType = z.infer<
   typeof AlertAnalysisWorkflowSettingsWithConnectorRequestBody

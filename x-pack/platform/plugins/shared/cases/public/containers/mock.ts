@@ -371,21 +371,6 @@ export const basicCasePost: CaseUI = {
   updatedBy: null,
 };
 
-export const basicCommentPatch: AttachmentUI = {
-  ...basicComment,
-  updatedAt: basicUpdatedAt,
-  updatedBy: {
-    username: 'elastic',
-    email: 'elastic@elastic.co',
-    fullName: 'Elastic',
-  },
-};
-
-export const basicCaseCommentPatch = {
-  ...basicCase,
-  comments: [basicCommentPatch],
-};
-
 export const casesMetrics: CasesMetrics = {
   mttr: 12,
   status: {
@@ -778,6 +763,17 @@ export const getUserAction = (
         type: UserActionTypes.customFields,
         payload: {
           customFields: customFieldsMock,
+        },
+        ...overrides,
+      };
+
+    case UserActionTypes.workflow:
+      return {
+        ...commonProperties,
+        type: UserActionTypes.workflow,
+        payload: {
+          workflow: { id: 'wf-1', name: 'My Workflow', executionId: 'exec-1' },
+          origin: { type: 'cases.case', id: basicCaseId },
         },
         ...overrides,
       };

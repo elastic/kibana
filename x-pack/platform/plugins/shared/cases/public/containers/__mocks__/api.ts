@@ -20,7 +20,6 @@ import {
   allCases,
   basicCase,
   basicCaseMetrics,
-  basicCaseCommentPatch,
   basicCasePost,
   basicResolvedCase,
   pushedCase,
@@ -141,7 +140,7 @@ export const patchComment = async (
   commentUpdate: string,
   version: string,
   signal: AbortSignal
-): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
+): Promise<void> => Promise.resolve(undefined);
 
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<boolean> =>
   Promise.resolve(true);

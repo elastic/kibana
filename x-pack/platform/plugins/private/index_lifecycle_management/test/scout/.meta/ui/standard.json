@@ -1,5 +1,8 @@
 {
-  "sha1": "1b30e48fbdea3549ceb0db11b15adeeb9027a182",
+  "sha1": "3c35a7241bf9313d59fe849f0b94f403440280a2",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "f87a8d4bdab7457-3168ea966d63c88",
@@ -11,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_duplicate_managed_policy.spec.ts",
-        "line": 37,
-        "column": 9
+        "line": 33,
+        "column": 26
       }
     },
     {
@@ -25,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_home_page.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 21,
+        "column": 5
       }
     },
     {
@@ -39,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_home_page.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 31,
+        "column": 23
       }
     },
     {
@@ -53,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/index_lifecycle_management/test/scout/ui/tests/ilm_read_only_view.spec.ts",
-        "line": 27,
-        "column": 7
+        "line": 23,
+        "column": 8
       }
     }
   ]

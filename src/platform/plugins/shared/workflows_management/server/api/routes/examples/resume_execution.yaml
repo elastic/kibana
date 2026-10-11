@@ -8,6 +8,7 @@ requestBody:
             input:
               approved: true
               comment: Approved by analyst
+            stepExecutionId: step-exec-a1b2c3d4
 responses:
   200:
     description: 'Indicates a successful response'
@@ -32,7 +33,8 @@ x-codeSamples:
           "input": {
             "approved": true,
             "comment": "Approved by analyst"
-          }
+          },
+          "stepExecutionId": "step-exec-a1b2c3d4"
         }'
   - lang: Console
     source: |
@@ -41,5 +43,6 @@ x-codeSamples:
         "input": {
           "approved": true,
           "comment": "Approved by analyst"
-        }
+        },
+        "stepExecutionId": "step-exec-a1b2c3d4"
       }

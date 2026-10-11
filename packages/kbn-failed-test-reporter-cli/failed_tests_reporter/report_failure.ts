@@ -8,11 +8,19 @@
  */
 
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
+import {
+  NOT_AVAILABLE,
+  formatDurationFromTime,
+  formatDurationSeconds,
+  formatOwners,
+  getConfigPathFromCommandLine,
+} from './failure_details';
 import type { TestFailure } from './get_failures';
 import { getLocationFromClassname, getReportNameFromClassname } from './get_failures';
 import type { ScoutTestFailureExtended } from './get_scout_failures';
 import type { GithubApi, GithubIssueComment } from './github_api';
 import { getIssueMetadata, updateIssueMetadata } from './issue_metadata';
+import { withTestHistoryDashboardLink } from './test_history_dashboard';
 
 function redactHostnameSuffix(text: string, suffix: string): string {
   const escaped = suffix.replace(/\./g, '\\.');
@@ -133,8 +141,6 @@ function renderErrorMessageSection({
   return '';
 }
 
-const NOT_AVAILABLE = 'N/A';
-
 /**
  * Render a `| Field | Value |` markdown table. Shared by all test types so the
  * issue format stays aligned.
@@ -145,38 +151,6 @@ function renderDetailsTable(rows: Array<[string, string]>): string[] {
     '|-------|-------|',
     ...rows.map(([field, value]) => `| ${field} | ${value || NOT_AVAILABLE} |`),
   ];
-}
-
-/**
- * Normalize a comma separated list of code owners so it renders consistently
- * regardless of whether the source joined with `,` (FTR) or `, ` (Scout).
- */
-function formatOwners(owners?: string): string {
-  if (!owners) {
-    return NOT_AVAILABLE;
-  }
-  const normalized = owners
-    .split(',')
-    .map((owner) => owner.trim())
-    .filter(Boolean)
-    .join(', ');
-  return normalized || NOT_AVAILABLE;
-}
-
-function formatDurationSeconds(seconds: number): string {
-  return `${seconds.toFixed(2)}s`;
-}
-
-/**
- * Duration is reported as a seconds string in JUnit reports, but is not always
- * present (and unit tests may pass non-numeric values).
- */
-function formatDurationFromTime(time?: string): string {
-  if (!time) {
-    return NOT_AVAILABLE;
-  }
-  const seconds = Number(time);
-  return Number.isFinite(seconds) ? formatDurationSeconds(seconds) : NOT_AVAILABLE;
 }
 
 /*
@@ -236,16 +210,10 @@ function createJUnitBody(
     metadata['test.type'] = failure.testType;
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), metadata);
-}
-
-/**
- * Extract the config path from a command line, e.g. the Playwright/FTR `--config` flag.
- */
-function getConfigPathFromCommandLine(command?: string): string {
-  if (!command) return NOT_AVAILABLE;
-  const configMatch = command.match(/--config(?:=|\s+)(\S+)/);
-  return configMatch ? configMatch[1] : NOT_AVAILABLE;
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), metadata),
+    failure
+  );
 }
 
 /**
@@ -301,12 +269,15 @@ function createScoutBody(
     }
   }
 
-  return updateIssueMetadata(bodyContent.join('\n'), {
-    'test.class': failure.classname,
-    'test.name': failure.name,
-    'test.failCount': 1,
-    'test.type': 'scout',
-  });
+  return withTestHistoryDashboardLink(
+    updateIssueMetadata(bodyContent.join('\n'), {
+      'test.class': failure.classname,
+      'test.name': failure.name,
+      'test.failCount': 1,
+      'test.type': 'scout',
+    }),
+    failure
+  );
 }
 
 async function createJUnitFailureIssue(
@@ -357,16 +328,18 @@ function createJUnitComment(
   buildUrl: string,
   branch: string,
   pipeline: string,
-  errorMessage: ErrorMessageForComment
+  errorMessage: ErrorMessageForComment,
+  failure?: TestFailure
 ): string {
   /*
    * The error message is only included when it has not been reported on the
    * issue before (see getErrorMessageForComment), so repeat failures with a
    * known error stay compact while genuinely new errors surface immediately.
    */
-  return `New failure: [${
-    pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
+  const buildLink = `New failure: [${pipeline || 'CI Build'} - ${branch}](${buildUrl})`;
+  const prefix =
+    branch === 'main' && failure ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 function createScoutComment(
@@ -401,9 +374,11 @@ function createScoutComment(
    * previous comment), a short note replaces the code block. When no message
    * was available to compare, only the link line is posted.
    */
-  return `New failure for "${failure.target}" target: [${
+  const buildLink = `New failure for "${failure.target}" target: [${
     pipeline || 'CI Build'
-  } - ${branch}](${buildUrl})${renderErrorMessageSection(errorMessage)}`;
+  } - ${branch}](${buildUrl})`;
+  const prefix = branch === 'main' ? withTestHistoryDashboardLink(buildLink, failure) : buildLink;
+  return `${prefix}${renderErrorMessageSection(errorMessage)}`;
 }
 
 async function updateJUnitFailureIssue(
@@ -415,9 +390,12 @@ async function updateJUnitFailureIssue(
   failure?: TestFailure
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = failure
+    ? withTestHistoryDashboardLink(
+        updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+        failure
+      )
+    : updateIssueMetadata(issue.github.body, { 'test.failCount': newCount });
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 
@@ -431,7 +409,7 @@ async function updateJUnitFailureIssue(
     );
   }
 
-  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage);
+  const commentText = createJUnitComment(buildUrl, branch, pipeline, errorMessage, failure);
   await api.addIssueComment(issue.github.number, commentText);
 
   return { newBody, newCount };
@@ -446,9 +424,10 @@ async function updateScoutFailureIssue(
   failure: ScoutTestFailureExtended
 ) {
   const newCount = getIssueMetadata(issue.github.body, 'test.failCount', 0) + 1;
-  const newBody = updateIssueMetadata(issue.github.body, {
-    'test.failCount': newCount,
-  });
+  const newBody = withTestHistoryDashboardLink(
+    updateIssueMetadata(issue.github.body, { 'test.failCount': newCount }),
+    failure
+  );
 
   await api.editIssueBodyAndEnsureOpen(issue.github.number, newBody);
 

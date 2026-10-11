@@ -30,10 +30,28 @@ export type UiamClientAuthenticationParams =
       credential: HTTPAuthorizationHeader;
     }
   | {
+      /**
+       * The credential is a user-created (external) UIAM API key. UIAM rejects external keys
+       * presented with client authentication, so the shared secret must never be attached to it.
+       * Consumers signal this by marking the fake request that carries the credential with
+       * `markExternalUiamCredential` from `@kbn/core-security-server`.
+       */
+      credentialSource: 'external';
+      /** The credential that will be sent to Elasticsearch. */
+      credential: HTTPAuthorizationHeader;
+    }
+  | {
       /** The credential rode in over HTTP, so the request has to vouch for it. */
       credentialSource: 'inbound';
       /** The credential that will be sent to Elasticsearch. */
       credential: HTTPAuthorizationHeader;
+      /**
+       * The client authentication already resolved for the credential, either relayed by the
+       * upstream caller or chosen by the authentication provider that produced the credential.
+       * Read from the same headers as the credential, not from the raw request: a provider may
+       * have set it without it ever riding in on the wire.
+       */
+      relayedClientAuthentication: string | string[] | undefined;
       /**
        * Raw inbound request headers, carrying the attestation that proves an attacker-reachable
        * request nonetheless came from a trusted loopback caller. Nothing in here is trustworthy
@@ -57,10 +75,15 @@ export interface CoreUiamService {
    *
    * - non-UIAM credential -> `undefined`;
    * - internal UIAM credential -> the shared secret;
-   * - inbound UIAM credential -> the shared secret only with a valid attestation, proving the
-   * loopback caller is trusted.
+   * - external (user-created) UIAM credential -> `undefined`, UIAM rejects external API keys
+   * presented with client authentication;
+   * - inbound UIAM credential -> the relayed client authentication when there is one, even if
+   * empty; otherwise the shared secret only with a valid attestation, proving the loopback caller
+   * is trusted.
    */
-  getElasticsearchClientAuthentication(params: UiamClientAuthenticationParams): string | undefined;
+  getElasticsearchClientAuthentication(
+    params: UiamClientAuthenticationParams
+  ): string | string[] | undefined;
 }
 
 /**
@@ -84,7 +107,18 @@ export function createCoreUiamService(sharedSecret: string): CoreUiamService {
         return;
       }
 
+      if (params.credentialSource === 'external') {
+        return;
+      }
+
       if (params.credentialSource === 'inbound') {
+        // The token may be bound to another client, so whatever already speaks for it is never
+        // replaced by Kibana's own secret. Checked ahead of the attestation so that, should a
+        // caller ever present both, the outcome is its own secret and never Kibana's.
+        if (params.relayedClientAuthentication !== undefined) {
+          return params.relayedClientAuthentication;
+        }
+
         // The attestation is bound to the credential it rides with, so one captured from another
         // request (or another credential) does not validate here.
         const expected = deriveInternalCallerAttestation(sharedSecret, params.credential);

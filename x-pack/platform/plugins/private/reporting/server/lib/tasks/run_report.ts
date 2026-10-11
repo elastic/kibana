@@ -11,6 +11,7 @@ import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KibanaRequest, Logger, SavedObject } from '@kbn/core/server';
+import { isExternalUiamCredential, markExternalUiamCredential } from '@kbn/core-security-server';
 import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
@@ -381,7 +382,18 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       headersToUse = decryptedHeaders || {};
     }
 
-    return this.getFakeRequest(headersToUse, spaceId, this.logger);
+    const requestToUse = this.getFakeRequest(headersToUse, spaceId, this.logger);
+
+    // The external-credential verdict Task Manager marked on `requestFromTask` is bound to that
+    // request object, so rebuilding the request drops it. Re-mark the rebuilt request: its
+    // `authorization` header is the task request's one (decrypted `authorization` is excluded from
+    // the merge above), and UIAM rejects user-created (external) Cloud API keys presented with the
+    // UIAM shared secret.
+    if (requestFromTask && isExternalUiamCredential(requestFromTask)) {
+      markExternalUiamCredential(requestToUse);
+    }
+
+    return requestToUse;
   }
 
   protected getFakeRequest(

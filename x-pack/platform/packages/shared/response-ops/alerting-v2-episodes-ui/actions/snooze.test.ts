@@ -57,7 +57,7 @@ describe('createSnoozeAction', () => {
         episodes: [
           makeEpisode({
             last_snooze_action: 'snooze',
-            snooze_expiry: '2020-01-01T00:00:00.000Z',
+            snoozed_until: '2020-01-01T00:00:00.000Z',
           }),
         ],
       })
@@ -71,14 +71,16 @@ describe('createSnoozeAction', () => {
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
+    jest
+      .spyOn(bulk, 'bulkSnoozeSeriesActions')
+      .mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createSnoozeAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
       onSuccess,
     });
-    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
-      { group_hash: 'g1', action_type: 'snooze', expiry: '2026-05-01T00:00:00Z' },
+    expect(bulk.bulkSnoozeSeriesActions).toHaveBeenCalledWith(deps.http, [
+      { group_hash: 'g1', snoozed_until: '2026-05-01T00:00:00Z' },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();

@@ -115,7 +115,7 @@ export function runFtrCli() {
           err instanceof Error ? err : new Error(`non-Error type rejection value: ${inspect(err)}`)
         )
       );
-      exitHook(teardown);
+      exitHook(() => teardown());
 
       try {
         if (flagsReader.boolean('test-stats')) {

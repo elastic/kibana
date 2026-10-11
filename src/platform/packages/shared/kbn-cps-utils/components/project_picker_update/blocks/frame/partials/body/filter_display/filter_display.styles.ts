@@ -14,5 +14,6 @@ export const filterDisplayStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>)
   filterBadgesContainer: css({
     width: '100%',
     overflowX: 'hidden',
+    flexWrap: 'wrap',
   }),
 });

@@ -14,7 +14,7 @@ import {
   BASE_NEXT_ATTEMPT_DELAY,
 } from './check_metadata_transforms_task';
 import { createMockEndpointAppContext } from '../../mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -44,8 +44,14 @@ const MOCK_TASK_INSTANCE = {
   state: {},
   taskType: TYPE,
 };
-const failedTransformId = 'failing-transform';
-const goodTransformId = 'good-transform';
+const PACKAGE_VERSION = '8.11.0';
+const failedTransformId = `endpoint.metadata_united-default-${PACKAGE_VERSION}`;
+const goodTransformId = `endpoint.metadata_current-default-${PACKAGE_VERSION}`;
+// left behind in Elasticsearch by a previous package version, see https://github.com/elastic/kibana/issues/217503
+const orphanedTransformId = 'endpoint.metadata_united-default-8.10.0';
+const installedTransformAssets: EsAssetReference[] = [goodTransformId, failedTransformId].map(
+  (id) => ({ id, type: ElasticsearchAssetType.transform })
+);
 
 describe('check metadata transforms task', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -55,6 +61,7 @@ describe('check metadata transforms task', () => {
   let mockCore: CoreSetup;
   let mockTaskManagerSetup: jest.Mocked<TaskManagerSetupContract>;
   let mockEndpointAppContext: EndpointAppContext;
+  let getInstallationSpy: jest.SpyInstance;
   beforeEach(() => {
     mockCore = coreSetupMock();
     mockTaskManagerSetup = tmSetupMock();
@@ -64,14 +71,11 @@ describe('check metadata transforms task', () => {
       core: mockCore,
       taskManager: mockTaskManagerSetup,
     });
-    jest
+    getInstallationSpy = jest
       .spyOn(mockEndpointAppContext.service.getInternalFleetServices().packages, 'getInstallation')
       .mockResolvedValue({
-        installed_es: [
-          { type: ElasticsearchAssetType.transform } as EsAssetReference,
-          { type: ElasticsearchAssetType.transform } as EsAssetReference,
-        ],
-        version: '8.11.0',
+        installed_es: installedTransformAssets,
+        version: PACKAGE_VERSION,
       } as Installation);
   });
 
@@ -176,6 +180,44 @@ describe('check metadata transforms task', () => {
           [goodTransformId]: 0,
           [failedTransformId]: 0,
         });
+      });
+
+      it('should not restart transforms the installation does not expect', async () => {
+        const staleTransformStatsResponseMock = {
+          body: {
+            transforms: [
+              { id: goodTransformId, state: TRANSFORM_STATES.STARTED },
+              { id: failedTransformId, state: TRANSFORM_STATES.STARTED },
+              { id: orphanedTransformId, state: TRANSFORM_STATES.FAILED },
+            ],
+          },
+        } as unknown as TransportResult<TransformGetTransformStatsResponse>;
+        esClient.transform.getTransformStats.mockResponse(staleTransformStatsResponseMock.body);
+
+        const taskResponse = (await runTask()) as RunResult;
+
+        expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+        expect(esClient.transform.startTransform).not.toHaveBeenCalled();
+        expect(taskResponse?.state?.restartAttempts).toEqual({
+          [goodTransformId]: 0,
+          [failedTransformId]: 0,
+        });
+      });
+
+      it('should not restart any transform when the installation has no transform assets', async () => {
+        getInstallationSpy.mockResolvedValue({
+          installed_es: [],
+          version: PACKAGE_VERSION,
+        } as unknown as Installation);
+        const transformStatsResponseMock = buildFailedStatsResponse();
+        esClient.transform.getTransformStats.mockResponse(transformStatsResponseMock.body);
+
+        const taskResponse = (await runTask()) as RunResult;
+
+        expect(esClient.transform.stopTransform).not.toHaveBeenCalled();
+        expect(esClient.transform.startTransform).not.toHaveBeenCalled();
+        expect(taskResponse?.state?.restartAttempts).toEqual({});
+        expect(taskResponse?.runAt).toBeUndefined();
       });
 
       it('should correctly track transform restart attempts', async () => {
@@ -310,7 +352,7 @@ describe('check metadata transforms task', () => {
           body: {
             transforms: [
               {
-                id: 'transform1',
+                id: goodTransformId,
                 state: TRANSFORM_STATES.STARTED,
               },
             ],
@@ -409,23 +451,18 @@ describe('check metadata transforms task', () => {
         })) as RunResult;
         expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(4);
 
-        // back to base delay after success
-        delay = BASE_NEXT_ATTEMPT_DELAY * 60000;
-        expectedRunAt = taskStartedAt.getTime() + delay;
-        expect(taskResponse?.runAt?.getTime()).toBeGreaterThanOrEqual(expectedRunAt);
-        // we don't have the exact timestamp it uses so give a buffer
-        expectedRunAtUpperBound = expectedRunAt + 1000;
-        expect(taskResponse?.runAt?.getTime()).toBeLessThanOrEqual(expectedRunAtUpperBound);
+        // back to the regular interval after a successful reinstall
+        expect(taskResponse?.runAt).toBeUndefined();
 
         const goodTransformStatsResponseMock = {
           body: {
             transforms: [
               {
-                id: 'transform1',
+                id: goodTransformId,
                 state: TRANSFORM_STATES.STARTED,
               },
               {
-                id: 'transform2',
+                id: failedTransformId,
                 state: TRANSFORM_STATES.STARTED,
               },
             ],
@@ -440,6 +477,95 @@ describe('check metadata transforms task', () => {
         // same since shouldn't call it when transforms are good
         expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(4);
         // no more explicit runAt after subsequent success
+        expect(taskResponse?.runAt).toBeUndefined();
+      });
+
+      it('should not reinstall if elasticsearch has transforms the installation does not expect', async () => {
+        const staleTransformStatsResponseMock = {
+          body: {
+            transforms: [
+              { id: goodTransformId, state: TRANSFORM_STATES.STARTED },
+              { id: failedTransformId, state: TRANSFORM_STATES.STARTED },
+              { id: orphanedTransformId, state: TRANSFORM_STATES.STARTED },
+              { id: 'endpoint.metadata_current-default-8.10.0', state: TRANSFORM_STATES.STARTED },
+            ],
+            count: 4,
+          },
+        } as unknown as TransportResult<TransformGetTransformStatsResponse>;
+        esClient.transform.getTransformStats.mockResponse(staleTransformStatsResponseMock.body);
+
+        const taskResponse = (await runTask()) as RunResult;
+
+        expect(reinstallEsAssetsSpy).not.toHaveBeenCalled();
+        expect(taskResponse?.runAt).toBeUndefined();
+      });
+
+      it('should reinstall if an expected transform is missing while a stale one is present', async () => {
+        const mixedTransformStatsResponseMock = {
+          body: {
+            transforms: [
+              { id: goodTransformId, state: TRANSFORM_STATES.STARTED },
+              { id: orphanedTransformId, state: TRANSFORM_STATES.STARTED },
+            ],
+            count: 2,
+          },
+        } as unknown as TransportResult<TransformGetTransformStatsResponse>;
+        esClient.transform.getTransformStats.mockResponse(mixedTransformStatsResponseMock.body);
+        getPackageSpy.mockResolvedValue({
+          packageInfo: { name: 'package name' },
+          paths: ['some/test/transform/path'],
+        });
+        reinstallEsAssetsSpy.mockResolvedValue([{}]);
+
+        await runTask();
+
+        expect(reinstallEsAssetsSpy).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not reinstall if the installation has no transform assets', async () => {
+        getInstallationSpy.mockResolvedValue({
+          installed_es: [],
+          version: PACKAGE_VERSION,
+        } as unknown as Installation);
+
+        const taskResponse = (await runTask()) as RunResult;
+
+        expect(reinstallEsAssetsSpy).not.toHaveBeenCalled();
+        expect(taskResponse?.runAt).toBeUndefined();
+        expect(loggingSystemMock.collect(mockEndpointAppContext.logFactory).warn).toContainEqual([
+          expect.stringContaining('no metadata transforms are registered'),
+        ]);
+      });
+
+      it('should not reinstall if the installation only has non metadata transform assets', async () => {
+        getInstallationSpy.mockResolvedValue({
+          installed_es: [
+            { id: 'endpoint.some_other_transform-default', type: ElasticsearchAssetType.transform },
+          ],
+          version: PACKAGE_VERSION,
+        } as unknown as Installation);
+
+        await runTask();
+
+        expect(reinstallEsAssetsSpy).not.toHaveBeenCalled();
+      });
+
+      it('should return to the regular interval after a successful reinstall', async () => {
+        getPackageSpy.mockResolvedValue({
+          packageInfo: { name: 'package name' },
+          paths: ['some/test/transform/path'],
+        });
+        reinstallEsAssetsSpy.mockRejectedValueOnce({}).mockResolvedValueOnce([{}]);
+
+        let taskResponse = (await runTask()) as RunResult;
+        expect(taskResponse?.state.reinstallAttempts).toEqual(1);
+        expect(taskResponse?.runAt).toBeDefined();
+
+        taskResponse = (await runTask({
+          ...MOCK_TASK_INSTANCE,
+          state: taskResponse.state,
+        })) as RunResult;
+        expect(taskResponse?.state.reinstallAttempts).toEqual(0);
         expect(taskResponse?.runAt).toBeUndefined();
       });
     });

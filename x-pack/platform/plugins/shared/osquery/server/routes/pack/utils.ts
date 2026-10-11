@@ -31,9 +31,13 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import type { Shard } from '../../../common/utils/converters';
-import { DEFAULT_PLATFORM } from '../../../common/constants';
+import { isAllPlatforms } from '../../../common/platform';
 import type { RRuleScheduleConfig, ScheduleType } from '../../../common';
 import { MAX_SPLAY_SECONDS } from '../../../common';
+import type { ResultType } from '../../../common/result_type';
+import { mapResultTypeToWire, mapWireToExplicitResultType } from '../../../common/result_type';
+import type { PackExecutionDefaults } from '../../../common/pack_execution';
+import { isPackQueryEnabled, resolveEffectiveQueryExecution } from '../../../common/pack_execution';
 import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import { parseRRule } from '../../../common/utils/rrule_parser';
@@ -70,6 +74,10 @@ export interface PackQueryInput {
   schedule_type?: ScheduleType;
   /** Per-query RRULE override (only present when `schedule_type === 'rrule'`). */
   rrule_schedule?: RRuleScheduleConfig;
+  /** Whether this query is enabled. When false it is omitted from the Fleet emit. Default: true. */
+  enabled?: boolean;
+  /** Per-query result type override. Present when the query overrides the pack default. */
+  result_type?: ResultType;
 }
 
 export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
@@ -77,7 +85,7 @@ export interface SOPackQuery extends Omit<PackQueryInput, 'name'> {
   name: string;
 }
 
-// Byte-identical to the pre-rrule pick list.
+// Byte-identical to the pre-rrule pick list (plus V5 fields).
 const INTERVAL_MODE_PICK = [
   'name',
   'query',
@@ -89,6 +97,8 @@ const INTERVAL_MODE_PICK = [
   'timeout',
   'schedule_id',
   'start_date',
+  'enabled',
+  'result_type',
 ] as const;
 
 const RRULE_MODE_PICK = [
@@ -101,6 +111,8 @@ const RRULE_MODE_PICK = [
   'timeout',
   'schedule_id',
   'start_date',
+  'enabled',
+  'result_type',
 ] as const;
 
 export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>): SOPackQuery[] =>
@@ -116,6 +128,13 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         value.schedule_type === 'rrule' ? RRULE_MODE_PICK : INTERVAL_MODE_PICK
       );
 
+      // Canonical `result_type` wins: drop the legacy boolean pair so a
+      // request cannot persist contradictory encodings
+      // (`result_type: 'differential'` + `snapshot: true`). Boolean-only
+      // records (no `result_type`) are unchanged so pre-V5 data round-trips.
+      const { snapshot: _snapshot, removed: _removed, ...withoutLegacyPair } = baseFields;
+      const persistedFields = baseFields.result_type != null ? withoutLegacyPair : baseFields;
+
       // Defense in depth: if a query carries `rrule_schedule` without
       // `schedule_type`, drop it. The route validator rejects this earlier;
       // this branch covers code paths that bypass the validator.
@@ -128,7 +147,7 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
 
       acc.push({
         id: key,
-        ...baseFields,
+        ...persistedFields,
         ...scheduleOverride,
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       } as SOPackQuery);
@@ -149,7 +168,8 @@ export const deriveEffectiveQueryKey = (
 ): string => (query.id ? query.id : String(indexOrKey));
 
 // Shape-agnostic emptiness check for a pack's `queries` (array or record).
-// Shared by the V4 mint guard and the reconcile filter so they can't drift.
+// Shared by the V4 mint guard and the reconciler's per-pack skip so they can't
+// drift (the reconciler checks at its write site, being wire-first).
 // Typed as a guard so a truthy result narrows away null/undefined.
 export const hasQueries = <T extends unknown[] | Record<string, unknown>>(
   queries: T | null | undefined
@@ -173,7 +193,7 @@ export const convertSOQueriesToPack = (queries: SOPackQuery[] | Record<string, P
             ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
             : { ecs_mapping }
           : {}),
-        ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
+        ...(isAllPlatforms(platform) || platform === undefined ? {} : { platform }),
       };
 
       return acc;
@@ -262,6 +282,38 @@ export const buildScheduleResponseSlice = (
 
   return {};
 };
+
+/**
+ * Build the pack-level execution-defaults slice for a route response.
+ * Omits null/undefined fields so the public API matches OAS optional non-null
+ * (absent when unset), the same convention as {@link buildScheduleResponseSlice}.
+ */
+export const buildExecutionDefaultsResponseSlice = (
+  attributes: PackExecutionDefaults
+): {
+  min_osquery_version?: string;
+  result_type?: ResultType;
+  platform?: string;
+} => ({
+  ...(attributes.min_osquery_version != null
+    ? { min_osquery_version: attributes.min_osquery_version }
+    : {}),
+  ...(attributes.result_type != null ? { result_type: attributes.result_type } : {}),
+  ...(attributes.platform != null ? { platform: attributes.platform } : {}),
+});
+
+/**
+ * Normalize pack SO / request attributes into {@link PackExecutionDefaults}
+ * for {@link convertSOQueriesToPackConfig}. Applies `?? undefined` uniformly
+ * so stored `null` does not leak onto the Fleet emit.
+ */
+export const toPackExecutionDefaults = (
+  attributes: PackExecutionDefaults
+): PackExecutionDefaults => ({
+  min_osquery_version: attributes.min_osquery_version ?? undefined,
+  result_type: attributes.result_type ?? undefined,
+  platform: attributes.platform ?? undefined,
+});
 
 // Response-side mirror of the wire-boundary gate: strips per-query rrule
 // fields when the flag is off. No-op (no copy) when the flag is on.
@@ -352,12 +404,25 @@ export const convergePerQueryIntervals = (
   );
 };
 
+// Pack-level execution defaults and the per-query precedence rule live in
+// `common/` because the browser response-action form shares them with the
+// scheduled Fleet emit and the live-query path. Re-exported here so existing
+// server importers keep their import site.
+export type { PackExecutionDefaults };
+export { isPackQueryEnabled, resolveEffectiveQueryExecution };
+
 export interface ConvertSOQueriesToPackConfigOptions {
   spaceId?: string;
   packSchedule?: PackScheduleInput;
   // Required — callers must resolve this explicitly so a missing wiring
   // never silently ships RRULE state to Fleet.
   isRruleFeatureEnabled: boolean;
+  // Anchor used when the stored start_date is absent or the epoch sentinel.
+  // The pack's created_at. When absent or unparseable the epoch sentinel is
+  // emitted — deterministic, so the reconciler's diff gate holds.
+  fallbackStartDate?: string;
+  /** V5: Pack-level execution defaults to fan out onto inheriting queries. */
+  packExecutionDefaults?: PackExecutionDefaults;
 }
 
 export interface PackConfigOutput {
@@ -373,7 +438,16 @@ export const convertSOQueriesToPackConfig = (
   queries: SOPackQuery[] | Record<string, PackQueryInput>,
   options: ConvertSOQueriesToPackConfigOptions
 ): PackConfigOutput => {
-  const { spaceId, packSchedule, isRruleFeatureEnabled } = options;
+  const { spaceId, packSchedule, isRruleFeatureEnabled, fallbackStartDate, packExecutionDefaults } =
+    options;
+  // Never `now()`: a time-of-write anchor differs on every call, so the
+  // reconciler would rewrite the policy (re-anchoring execution numbering) on
+  // every restart. Validate rather than `?? EPOCH` — `created_at` is
+  // `schema.maybe(schema.string())`, and an anchor beats can't parse (including
+  // `''`, which `??` misses) makes it report execution count 0.
+  const resolvedFallback = isValidRfc3339(fallbackStartDate)
+    ? fallbackStartDate
+    : START_DATE_EPOCH_FALLBACK;
 
   const packMode: ScheduleType | undefined = isRruleFeatureEnabled
     ? packSchedule?.schedule_type ?? undefined
@@ -397,11 +471,42 @@ export const convertSOQueriesToPackConfig = (
         rrule_schedule: queryRrule,
         start_date: legacyStartDate,
         schedule_id: scheduleId,
+        // V5: strip SO-only fields from ...rest so they don't leak to the wire
+        enabled: queryEnabled,
+        result_type: queryResultType,
         ...rest
       }: SOPackQuery,
       key: number
     ) => {
-      const resultType = snapshot === false ? { removed, snapshot } : {};
+      // V5: disabled queries are filtered before fan-out (D7 / Path A)
+      if (!isPackQueryEnabled({ enabled: queryEnabled })) {
+        return null;
+      }
+
+      // V5: Path A fan-out — compute effective result type (per-query override
+      // or pack default).
+      //
+      // A pre-V5 query records its result type only as the stored
+      // `snapshot`/`removed` pair, and a *deliberate* pair outranks the pack
+      // default exactly as `result_type` does: reading the pack default first
+      // would silently rewrite a legacy differential query to snapshot the
+      // moment a curator set any pack-level result type — an unannounced change
+      // on the agent wire.
+      //
+      // Only `snapshot === false` counts as deliberate, which is why this uses
+      // `mapWireToExplicitResultType` rather than the plain inverse. The flyout
+      // used to seed `snapshot: true, removed: false` into every new query, so
+      // honouring that pair as an override would leave a pack-level result type
+      // applying to no pre-existing query at all.
+      const packDefaultResultType = packExecutionDefaults?.result_type ?? undefined;
+      const storedResultType: ResultType | undefined =
+        queryResultType ?? mapWireToExplicitResultType({ snapshot, removed });
+      const effectiveResultType: ResultType | undefined =
+        storedResultType ?? packDefaultResultType ?? undefined;
+      const wireResultType: Record<string, unknown> = effectiveResultType
+        ? mapResultTypeToWire(effectiveResultType)
+        : {};
+
       const index = deriveEffectiveQueryKey({ id: queryId }, key);
 
       let scheduleFields: Record<string, unknown> = {};
@@ -427,18 +532,38 @@ export const convertSOQueriesToPackConfig = (
       }
 
       // Suppress start_date for rrule-mode (osquerybeat would honour the stale
-      // value over the override) and the V4 epoch-fallback (avoid a bogus 1970
-      // on interval packs that never had one).
-      const startDateField =
-        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule')
-          ? {}
-          : legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
-          ? { start_date: legacyStartDate }
-          : {};
+      // value over the rrule_schedule.start_date anchor).
+      // Interval mode must always carry an anchor or osquerybeat's
+      // nativeScheduleExecutionCount returns 0 for every run.
+      const isRruleMode =
+        isRruleFeatureEnabled && (packMode === 'rrule' || querySchedType === 'rrule');
+      const startDateField = isRruleMode
+        ? {}
+        : {
+            start_date:
+              legacyStartDate !== undefined && legacyStartDate !== START_DATE_EPOCH_FALLBACK
+                ? legacyStartDate
+                : resolvedFallback,
+          };
+
+      // V5: Path A fan-out for version / platform. Shared helper so the
+      // live-query path cannot drift: per-query wins, empty-token and all-OS
+      // platforms inherit the pack default, and an all-OS effective value is
+      // suppressed from the wire (emitting it is a no-op for osquery).
+      // `version` lives in rest; extract so a stored empty string cannot leak
+      // onto the wire after the helper omits it.
+      const { version: perQueryVersion, ...restWithoutVersion } = rest as PackQueryInput & {
+        version?: string;
+      };
+      const { version: effectiveVersion, platform: effectivePlatform } =
+        resolveEffectiveQueryExecution(
+          { version: perQueryVersion, platform },
+          packExecutionDefaults
+        );
 
       queriesOut[index] = omitBy(
         {
-          ...rest,
+          ...restWithoutVersion,
           // Emitted flag-independent: it's a stable results-join key, not an rrule field.
           schedule_id: scheduleId,
           ...startDateField,
@@ -449,8 +574,9 @@ export const convertSOQueriesToPackConfig = (
               ? { ecs_mapping: convertECSMappingToObject(ecs_mapping) }
               : { ecs_mapping }
             : {}),
-          ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
-          ...resultType,
+          ...(effectivePlatform ? { platform: effectivePlatform } : {}),
+          ...wireResultType,
+          ...(effectiveVersion ? { version: effectiveVersion } : {}),
           ...(spaceId ? { space_id: spaceId } : {}),
         },
         isUndefined
@@ -760,7 +886,7 @@ export const policyHasPack = (
   packName: string,
   spaceId: string
 ): boolean =>
-  has(packagePolicy, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`) ||
+  has(packagePolicy, `inputs[0].config.osquery.value.packs.${makePackKey(packName, spaceId)}`) ||
   has(packagePolicy, `inputs[0].config.osquery.value.packs.${packName}`);
 
 export const removePackFromPolicy = (
@@ -768,11 +894,19 @@ export const removePackFromPolicy = (
   packName: string,
   spaceId: string
 ): void => {
-  unset(draft, `inputs[0].config.osquery.value.packs.${spaceId}--${packName}`);
+  unset(draft, `inputs[0].config.osquery.value.packs.${makePackKey(packName, spaceId)}`);
   unset(draft, `inputs[0].config.osquery.value.packs.${packName}`);
 };
 
-export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--${packName}`;
+/**
+ * Separator between a pack block's space id and pack name on the wire. Both
+ * halves can contain it, so it is only ever used to BUILD a key or to strip a
+ * known prefix — never to split an arbitrary key into two parts.
+ */
+export const PACK_KEY_SEPARATOR = '--';
+
+export const makePackKey = (packName: string, spaceId: string) =>
+  `${spaceId}${PACK_KEY_SEPARATOR}${packName}`;
 
 /**
  * Drain ALL osquery package policies via keyset `fetchAllItems`. Shared by the
@@ -782,14 +916,21 @@ export const makePackKey = (packName: string, spaceId: string) => `${spaceId}--$
 export const fetchAllPackagePolicies = async (
   packagePolicyService: PackagePolicyClient | undefined,
   soClient: SavedObjectsClientContract,
-  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`
+  kuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+  // With Fleet space awareness enabled, policies live in per-space namespaces
+  // and the drain only sees the soClient's space unless told otherwise. Pass
+  // `['*']` to enumerate every space (Fleet's documented wildcard).
+  spaceIds?: string[]
 ): Promise<PackagePolicy[]> => {
   const packagePolicies: PackagePolicy[] = [];
   if (!packagePolicyService) {
     return packagePolicies;
   }
 
-  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, { kuery })) {
+  for await (const policyBatch of await packagePolicyService.fetchAllItems(soClient, {
+    kuery,
+    ...(spaceIds ? { spaceIds } : {}),
+  })) {
     packagePolicies.push(...policyBatch);
   }
 

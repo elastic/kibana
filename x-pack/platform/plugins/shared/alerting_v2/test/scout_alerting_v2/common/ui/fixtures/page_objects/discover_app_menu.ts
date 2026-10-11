@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, ScoutPage } from '@kbn/scout';
+import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 
 /**
  * Page object for the alerting_v2 entries inside Discover's app-menu.
@@ -21,9 +21,8 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  * the popover panel item.
  */
 export class DiscoverAppMenu {
+  private readonly appMenu: AppMenu;
   public readonly alertsTrigger: Locator;
-  public readonly overflowButton: Locator;
-  public readonly overflowPopover: Locator;
   public readonly selectorFlyout: Locator;
   public readonly createEsqlRuleCard: Locator;
   public readonly createAlertButton: Locator;
@@ -31,9 +30,8 @@ export class DiscoverAppMenu {
   public readonly rulesTopLevelButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
+    this.appMenu = new AppMenu(page);
     this.alertsTrigger = this.page.testSubj.locator('discoverAlertsButton');
-    this.overflowButton = this.page.testSubj.locator('app-menu-overflow-button');
-    this.overflowPopover = this.page.testSubj.locator('app-menu-popover');
     this.selectorFlyout = this.page.testSubj.locator('ruleCreateOptionsFlyout');
     this.createEsqlRuleCard = this.page.testSubj.locator('createEsqlRuleCard');
     this.createAlertButton = this.page.testSubj.locator('discoverCreateAlertButton');
@@ -45,37 +43,17 @@ export class DiscoverAppMenu {
    * Opens the Alerts entry in Discover's app-menu.
    *
    * With v2 enabled this opens the rule-create-options selector flyout.
-   *
-   * @param isInOverflowMenu Force the overflow path. When omitted, the method
-   *   clicks the trigger directly if it's already visible on the top bar and
-   *   falls back to opening the overflow popover otherwise.
    */
-  async openAlertsMenu({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
-    if (!isInOverflowMenu && (await this.alertsTrigger.isVisible())) {
-      await this.alertsTrigger.click();
-      return;
-    }
-
-    // Dismiss any stale popovers from a previous interaction so the next click
-    // opens the overflow rather than closing it.
-    if (await this.overflowPopover.isVisible()) {
-      await this.overflowButton.click();
-      await this.overflowPopover.waitFor({ state: 'hidden' });
-    }
-
-    await this.overflowButton.waitFor({ state: 'visible' });
-    await this.overflowButton.click();
-    await this.overflowPopover.waitFor({ state: 'visible' });
-    await this.alertsTrigger.waitFor({ state: 'visible' });
-    await this.alertsTrigger.click();
+  async openAlertsMenu() {
+    await this.appMenu.clickItem(this.alertsTrigger);
   }
 
   /**
    * Opens Alerts → selector flyout → "Create ES|QL rule" card and leaves the
    * rule form flyout open.
    */
-  async openCreateEsqlRuleFlyout(options: { isInOverflowMenu?: boolean } = {}) {
-    await this.openAlertsMenu(options);
+  async openCreateEsqlRuleFlyout() {
+    await this.openAlertsMenu();
     await this.selectorFlyout.waitFor({ state: 'visible' });
     await this.createEsqlRuleCard.click();
     await this.waitForComposeDiscoverFlyout();

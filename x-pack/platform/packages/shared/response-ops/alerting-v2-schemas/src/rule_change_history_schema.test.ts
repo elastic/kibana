@@ -11,6 +11,7 @@ import {
 } from './constants';
 import {
   getRuleChangeHistoryEventParamsSchema,
+  getRuleChangeHistoryEventQuerySchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
   ruleChangeHistoryDetailSchema,
@@ -18,34 +19,67 @@ import {
 
 describe('listRuleChangeHistoryRequestSchema', () => {
   it('applies defaults for page and per_page', () => {
-    expect(listRuleChangeHistoryRequestSchema.parse({})).toEqual({
+    expect(listRuleChangeHistoryRequestSchema.parse({ rule_id: 'rule-1' })).toEqual({
+      rule_id: 'rule-1',
       page: 1,
       per_page: RULE_CHANGE_HISTORY_DEFAULT_PER_PAGE,
     });
   });
 
+  it('requires rule_id', () => {
+    expect(listRuleChangeHistoryRequestSchema.safeParse({ page: 1 }).success).toBe(false);
+  });
+
   it('coerces numeric query strings', () => {
-    expect(listRuleChangeHistoryRequestSchema.parse({ page: '2', per_page: '10' })).toEqual({
-      page: 2,
-      per_page: 10,
-    });
+    expect(
+      listRuleChangeHistoryRequestSchema.parse({ rule_id: 'rule-1', page: '2', per_page: '10' })
+    ).toEqual({ rule_id: 'rule-1', page: 2, per_page: 10 });
   });
 
   it('rejects pages that exceed the max result window', () => {
     const result = listRuleChangeHistoryRequestSchema.safeParse({
+      rule_id: 'rule-1',
       page: RULE_CHANGE_HISTORY_MAX_RESULT_WINDOW / 20 + 1,
       per_page: 20,
     });
     expect(result.success).toBe(false);
   });
+
+  it('rejects unknown keys (strict mode)', () => {
+    expect(
+      listRuleChangeHistoryRequestSchema.safeParse({ rule_id: 'rule-1', unknown_field: 'x' })
+        .success
+    ).toBe(false);
+  });
 });
 
 describe('getRuleChangeHistoryEventParamsSchema', () => {
-  it('requires both id and eventId', () => {
+  it('requires change_id', () => {
+    expect(getRuleChangeHistoryEventParamsSchema.parse({ change_id: 'event-1' })).toEqual({
+      change_id: 'event-1',
+    });
+    expect(getRuleChangeHistoryEventParamsSchema.safeParse({}).success).toBe(false);
+  });
+
+  it('rejects unknown keys', () => {
     expect(
-      getRuleChangeHistoryEventParamsSchema.parse({ id: 'rule-1', eventId: 'event-1' })
-    ).toEqual({ id: 'rule-1', eventId: 'event-1' });
-    expect(getRuleChangeHistoryEventParamsSchema.safeParse({ id: 'rule-1' }).success).toBe(false);
+      getRuleChangeHistoryEventParamsSchema.safeParse({
+        change_id: 'event-1',
+        foo: 'bar',
+      }).success
+    ).toBe(false);
+  });
+});
+
+describe('getRuleChangeHistoryEventQuerySchema', () => {
+  it('requires rule_id and rejects unknown keys', () => {
+    expect(getRuleChangeHistoryEventQuerySchema.parse({ rule_id: 'rule-1' })).toEqual({
+      rule_id: 'rule-1',
+    });
+    expect(getRuleChangeHistoryEventQuerySchema.safeParse({}).success).toBe(false);
+    expect(
+      getRuleChangeHistoryEventQuerySchema.safeParse({ rule_id: 'rule-1', foo: 'bar' }).success
+    ).toBe(false);
   });
 });
 
@@ -56,16 +90,32 @@ describe('listRuleChangeHistoryResponseSchema', () => {
         items: [
           {
             id: 'event-1',
-            timestamp: '2026-01-15T12:00:00.000Z',
+            created_at: '2026-01-15T12:00:00.000Z',
             actor: { name: 'elastic' },
             action: 'rule_create',
-            isCurrent: true,
-            metadata: { version: 1 },
+            is_current: true,
+            version: 1,
           },
         ],
         total: 1,
       }).success
     ).toBe(true);
+  });
+
+  it('rejects an action outside the recorded lifecycle vocabulary', () => {
+    expect(
+      listRuleChangeHistoryResponseSchema.safeParse({
+        items: [
+          {
+            id: 'event-1',
+            created_at: '2026-01-15T12:00:00.000Z',
+            actor: { name: 'elastic' },
+            action: 'rule_archive',
+          },
+        ],
+        total: 1,
+      }).success
+    ).toBe(false);
   });
 });
 
@@ -74,8 +124,8 @@ describe('ruleChangeHistoryDetailSchema', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
-        timestamp: '2026-01-15T12:00:00.000Z',
-        actor: { name: 'elastic', profileId: 'u_1' },
+        created_at: '2026-01-15T12:00:00.000Z',
+        actor: { name: 'elastic', profile_id: 'u_1' },
         action: 'rule_update',
         changes: { count: 1, summary: { metadata: { name: 'old' } } },
         snapshot: { id: 'rule-1', unexpected_legacy_field: true },
@@ -87,7 +137,7 @@ describe('ruleChangeHistoryDetailSchema', () => {
     expect(
       ruleChangeHistoryDetailSchema.safeParse({
         id: 'event-1',
-        timestamp: '2026-01-15T12:00:00.000Z',
+        created_at: '2026-01-15T12:00:00.000Z',
         actor: { name: 'elastic' },
         action: 'rule_create',
       }).success

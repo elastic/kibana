@@ -7,11 +7,36 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERT_TIMELINE_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.title',
+  { defaultMessage: 'Alert series' }
+);
+
+export const ALERT_TIMELINE_EMPTY_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.emptyTitle',
+  { defaultMessage: 'No alert activity' }
+);
+
+export const ALERT_TIMELINE_EMPTY_BODY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.emptyBody',
+  { defaultMessage: 'Alert activity appears here when episode events are available.' }
+);
+
+export const ALERT_TIMELINE_LIFECYCLE_LANE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.lifecycleLaneLabel',
+  { defaultMessage: 'Lifecycle' }
+);
+
+export const ALERT_TIMELINE_SEVERITY_LANE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.severityLaneLabel',
+  { defaultMessage: 'Severity' }
+);
+
 /** --- Overview list --- */
 export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.overviewListSection.loadError',
   {
-    defaultMessage: 'Could not load episode details.',
+    defaultMessage: 'Could not load alert details.',
   }
 );
 
@@ -47,7 +72,7 @@ export const ACTIONS_OVERVIEW_SNOOZED_UNTIL = i18n.translate(
 export const FLYOUT_ARIA_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.ariaLabel',
   {
-    defaultMessage: 'Alert episode details',
+    defaultMessage: 'Alert details',
   }
 );
 
@@ -55,13 +80,6 @@ export const FLYOUT_TAB_OVERVIEW = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.overview',
   {
     defaultMessage: 'Overview',
-  }
-);
-
-export const FLYOUT_TAB_RELATED = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.flyout.tab.related',
-  {
-    defaultMessage: 'Related',
   }
 );
 
@@ -79,10 +97,99 @@ export const FLYOUT_TAB_METADATA = i18n.translate(
   }
 );
 
-export const FLYOUT_TAB_RUNBOOK = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.flyout.tab.runbook',
+export const FLYOUT_ACCORDION_ABOUT = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.accordion.about',
   {
-    defaultMessage: 'Runbook',
+    defaultMessage: 'About',
+  }
+);
+
+export const FLYOUT_ACCORDION_INVESTIGATION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.accordion.investigation',
+  {
+    defaultMessage: 'Investigation',
+  }
+);
+
+export const FLYOUT_ACCORDION_RULE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.accordion.rule',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_ALERT_ID = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertId',
+  {
+    defaultMessage: 'Alert ID',
+  }
+);
+
+export const getFlyoutCopyAlertIdTooltip = (alertId: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.infoBlock.copyAlertIdTooltip', {
+    defaultMessage: 'Click to copy the full alert ID: {alertId}',
+    values: { alertId },
+  });
+
+export const FLYOUT_ALERT_ID_COPIED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.alertIdCopied',
+  {
+    defaultMessage: 'Alert ID copied',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_SEVERITY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.severity',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_ASSIGNEE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee',
+  {
+    defaultMessage: 'Assignee',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_DURATION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.duration',
+  {
+    defaultMessage: 'Duration',
+  }
+);
+
+export const FLYOUT_BADGE_FLAPPING = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.badge.flapping',
+  {
+    defaultMessage: 'Flapping',
+  }
+);
+
+export const FLYOUT_BADGE_SNOOZED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.badge.snoozed',
+  {
+    defaultMessage: 'Snoozed',
+  }
+);
+
+export const getFlyoutSnoozedUntilTooltip = (expiry: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.snoozedUntilTooltip', {
+    defaultMessage: 'Notifications snoozed until {expiry}.',
+    values: { expiry },
+  });
+
+export const FLYOUT_SNOOZED_TOOLTIP_UNKNOWN_EXPIRY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.snoozedTooltipUnknownExpiry',
+  {
+    defaultMessage: 'Notifications are snoozed.',
+  }
+);
+
+export const FLYOUT_BADGE_ACKNOWLEDGED = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.badge.acknowledged',
+  {
+    defaultMessage: 'Acknowledged',
   }
 );
 
@@ -93,22 +200,22 @@ export const FLYOUT_VIEW_DETAILS = i18n.translate(
   }
 );
 
+export const FLYOUT_TAKE_ACTION = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.takeAction',
+  {
+    defaultMessage: 'Take action',
+  }
+);
+
 export const FLYOUT_CLOSE = i18n.translate('xpack.alertingV2EpisodesUi.details.flyout.close', {
   defaultMessage: 'Close',
 });
 
 /** --- Header --- */
-export const HEADER_LOADING_TITLE = i18n.translate(
-  'xpack.alertingV2EpisodesUi.details.header.loadingTitle',
-  {
-    defaultMessage: 'Loading…',
-  }
-);
-
 export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.header.episodeTitleFallback',
   {
-    defaultMessage: 'Alert episode',
+    defaultMessage: 'Alert',
   }
 );
 
@@ -116,21 +223,21 @@ export const HEADER_EPISODE_TITLE_FALLBACK = i18n.translate(
 export const LIFECYCLE_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.title',
   {
-    defaultMessage: 'Episode timeline',
+    defaultMessage: 'Alert timeline',
   }
 );
 
 export const LIFECYCLE_HEATMAP_EMPTY_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.emptyTitle',
   {
-    defaultMessage: 'No events in this episode yet',
+    defaultMessage: 'No events in this alert yet',
   }
 );
 
 export const LIFECYCLE_HEATMAP_EMPTY_BODY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.lifecycleHeatmap.emptyBody',
   {
-    defaultMessage: 'Status changes across the episode lifecycle will appear here.',
+    defaultMessage: 'Status changes across the alert lifecycle will appear here.',
   }
 );
 
@@ -173,7 +280,7 @@ export const LIFECYCLE_HEATMAP_UNKNOWN_STATUS_LABEL = i18n.translate(
 export const SEVERITY_HEATMAP_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.severityHeatmap.title',
   {
-    defaultMessage: 'Severity Timeline',
+    defaultMessage: 'Severity timeline',
   }
 );
 
@@ -223,7 +330,7 @@ export const SEVERITY_HEATMAP_DETAIL_PANEL_EMPTY = i18n.translate(
 export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.severityHeatmapSection.loadError',
   {
-    defaultMessage: 'Could not load episode severity.',
+    defaultMessage: 'Could not load alert severity.',
   }
 );
 
@@ -231,7 +338,7 @@ export const SEVERITY_HEATMAP_SECTION_LOAD_ERROR = i18n.translate(
 export const TIMELINE_HEATMAPS_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timelineHeatmapsSection.loadError',
   {
-    defaultMessage: 'Could not load episode timeline.',
+    defaultMessage: 'Could not load alert timeline.',
   }
 );
 
@@ -274,7 +381,7 @@ export const METADATA_LIST_ASSIGNEE_LABEL = i18n.translate(
 export const METADATA_LIST_TAGS_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.tagsLabel',
   {
-    defaultMessage: 'Tags',
+    defaultMessage: 'Alert tags',
   }
 );
 
@@ -338,7 +445,7 @@ export const METADATA_SECTION_ERROR = i18n.translate(
 export const METADATA_SECTION_EMPTY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataSection.empty',
   {
-    defaultMessage: 'No evaluation data is available for this episode.',
+    defaultMessage: 'No evaluation data is available for this alert.',
   }
 );
 
@@ -354,7 +461,7 @@ export const getMetadataTableStaleDataCallout = (timestamp: string): string =>
 export const RELATED_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.relatedSection.loadError',
   {
-    defaultMessage: 'Could not load related episodes.',
+    defaultMessage: 'Could not load related alerts.',
   }
 );
 
@@ -396,6 +503,24 @@ export const RULE_OVERVIEW_PANEL_SECTION_ERROR_TITLE = i18n.translate(
 );
 
 /** --- Runbook --- */
+export const RUNBOOK_TITLE = i18n.translate('xpack.alertingV2EpisodesUi.details.runbook.title', {
+  defaultMessage: 'Runbook',
+});
+
+export const RUNBOOK_SHOW_FULL_GUIDE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.runbook.showFullGuide',
+  {
+    defaultMessage: 'Show full guide',
+  }
+);
+
+export const RUNBOOK_FULL_GUIDE_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.runbook.fullGuideAriaLabel',
+  {
+    defaultMessage: 'Runbook full guide',
+  }
+);
+
 export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.details.runbook.empty', {
   defaultMessage: 'No runbook available for this rule.',
 });
@@ -404,7 +529,7 @@ export const RUNBOOK_EMPTY = i18n.translate('xpack.alertingV2EpisodesUi.details.
 export const RUNBOOK_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.runbookSection.loadError',
   {
-    defaultMessage: 'Could not load the runbook for this episode.',
+    defaultMessage: 'Could not load the runbook for this alert.',
   }
 );
 

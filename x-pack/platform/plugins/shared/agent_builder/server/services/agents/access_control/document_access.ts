@@ -19,6 +19,7 @@ import {
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
+  matchesAccessControlEntry,
 } from './authorization';
 import type { AgentProperties } from '../persisted/client/storage';
 
@@ -40,7 +41,7 @@ export const normalizeAccessControl = (
   entries: source.access_control?.entries ?? source.acl?.entries ?? [],
 });
 
-const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
+export const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
@@ -48,95 +49,78 @@ const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
 export const hasReadAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   hasAgentReadAccess({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasUseAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   hasAgentUseAccess({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasWriteAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   hasAgentWriteAccess({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasDeleteAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   canDeleteAgent({
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const hasManageAccessControlAccess = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean =>
   canChangeAgentAccessControl({
     agentId: source.id,
     accessControl: normalizeAccessControl(source),
     owner: sourceToOwner(source),
     currentUser: user,
-    isAdmin,
   });
 
 export const getAgentPermissions = ({
   source,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): AgentPermissions => ({
-  update_agent: hasWriteAccess({ source, user, isAdmin }),
-  update_access_control: hasManageAccessControlAccess({ source, user, isAdmin }),
+  update_agent: hasWriteAccess({ source, user }),
+  update_access_control: hasManageAccessControlAccess({ source, user }),
 });
 
 /**
@@ -148,17 +132,15 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
   definition,
   source,
   user,
-  isAdmin,
 }: {
   definition: T;
   source: AgentProperties;
   user: CurrentUser;
-  isAdmin: boolean;
 }): T => {
   if (!definition.access_control || definition.access_control.entries.length === 0) {
     return definition;
   }
-  const canManage = hasManageAccessControlAccess({ source, user, isAdmin });
+  const canManage = hasManageAccessControlAccess({ source, user });
   if (canManage) {
     return definition;
   }
@@ -166,8 +148,8 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
     ...definition,
     access_control: {
       ...definition.access_control,
-      entries: definition.access_control.entries.filter(
-        (entry) => entry.type === 'user' && user.username && entry.name === user.username
+      entries: definition.access_control.entries.filter((entry) =>
+        matchesAccessControlEntry(entry, user)
       ),
     },
   };
@@ -177,12 +159,10 @@ export const validateAccessControlUpdateAccess = ({
   source,
   update,
   user,
-  isAdmin,
 }: {
   source: AgentProperties;
   update: AgentUpdateRequest;
   user: CurrentUser;
-  isAdmin: boolean;
 }): boolean => {
   const currentAccessControl = normalizeAccessControl(source);
   const currentAccessMode = currentAccessControl.access_mode;
@@ -196,7 +176,6 @@ export const validateAccessControlUpdateAccess = ({
       accessControl: currentAccessControl,
       owner: sourceToOwner(source),
       currentUser: user,
-      isAdmin,
     })
   );
 };

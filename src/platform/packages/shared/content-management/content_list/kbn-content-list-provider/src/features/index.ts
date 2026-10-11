@@ -20,7 +20,12 @@ export { isSortingConfig, isPaginationConfig, isSearchConfig, isFilterFacetConfi
 
 // Sorting feature.
 export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
-export { useContentListSort, DEFAULT_SORT_FIELDS, DEFAULT_INITIAL_SORT } from './sorting';
+export {
+  useContentListSort,
+  DEFAULT_SORT_FIELDS,
+  DEFAULT_INITIAL_SORT,
+  getSortFieldDirections,
+} from './sorting';
 
 // Pagination feature.
 export type { PaginationConfig, UseContentListPaginationReturn } from './pagination';

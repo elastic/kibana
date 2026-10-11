@@ -16,10 +16,10 @@ export interface IntegrationGroup {
 }
 
 /**
- * Static descriptors for the initial set of integration collection tiles.
- * Keys match the `group` field value in the member package manifests.
- * Adding a new group requires a corresponding PR to elastic/integrations to tag
- * the member packages with `group: <id>` in their manifests.
+ * Static descriptors for the initial set of integration collection tiles, and the
+ * allowlist for grouping: manifest groups without an entry here stay ungrouped.
+ * Keys match the `group` field value in the member package manifests, so adding a
+ * group requires a matching elastic/integrations PR tagging the members.
  */
 export const INTEGRATION_GROUPS: Record<string, IntegrationGroup> = {
   nginx: {

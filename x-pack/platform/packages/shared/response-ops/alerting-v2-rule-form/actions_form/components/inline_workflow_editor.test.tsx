@@ -45,6 +45,20 @@ jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ setQueryData: jest.fn() }),
 }));
 
+jest.mock('./connector_selector', () => ({
+  ConnectorSelector: ({
+    connectorCreationConfig,
+  }: {
+    connectorCreationConfig?: { mode: string; href?: string };
+  }) => (
+    <div
+      data-test-subj="connectorSelector"
+      data-connector-creation-mode={connectorCreationConfig?.mode}
+      data-connector-creation-href={connectorCreationConfig?.href}
+    />
+  ),
+}));
+
 jest.mock('@kbn/code-editor', () => ({
   CodeEditor: ({
     value,
@@ -106,5 +120,18 @@ describe('InlineWorkflowEditor', () => {
   it('always renders the ParamsEditor', () => {
     renderEditor();
     expect(screen.getByTestId('mockedCodeEditor')).toBeInTheDocument();
+  });
+
+  it('forwards the connector creation mode to the connector selector', () => {
+    renderEditor({ connectorCreationConfig: { mode: 'new-tab', href: '/connectors' } });
+
+    expect(screen.getByTestId('connectorSelector')).toHaveAttribute(
+      'data-connector-creation-mode',
+      'new-tab'
+    );
+    expect(screen.getByTestId('connectorSelector')).toHaveAttribute(
+      'data-connector-creation-href',
+      '/connectors'
+    );
   });
 });

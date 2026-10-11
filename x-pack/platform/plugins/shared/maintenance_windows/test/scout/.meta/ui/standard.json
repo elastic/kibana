@@ -1,0 +1,64 @@
+{
+  "sha1": "67f0be2363df71c0fc7e3e4d1bf6cfcccdfbe199",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7d65d00f72085db-ff8cac6bb86c5ab",
+      "title": "Maintenance window create form creates a maintenance window with a custom recurring schedule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maintenance_windows/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 127,
+        "column": 8
+      }
+    },
+    {
+      "id": "7d65d00f72085db-3bea0e7834b08b5",
+      "title": "Maintenance window create form shows confirmation modal when Alerts is toggled off before submitting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maintenance_windows/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 118,
+        "column": 24
+      }
+    },
+    {
+      "id": "7d65d00f72085db-ce9f05d87274a3b",
+      "title": "Maintenance window create form shows a callout when filters toggle is on and scope query is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maintenance_windows/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 166,
+        "column": 5
+      }
+    },
+    {
+      "id": "7d65d00f72085db-d4d8cdbc70dc9af",
+      "title": "Maintenance window create form creates with Episodes scope and verifies the filter is restored on edit",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/maintenance_windows/test/scout/ui/tests/maintenance_window_create.spec.ts",
+        "line": 191,
+        "column": 96
+      }
+    }
+  ]
+}

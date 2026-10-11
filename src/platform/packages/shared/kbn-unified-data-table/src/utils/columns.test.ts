@@ -49,4 +49,12 @@ describe('getDisplayedColumns', () => {
     const result2 = getDisplayedColumns([], dataViewWithTimefieldMock);
     expect(result).toBe(result2);
   });
+  test('returns only the source column in JSON mode even when fields are selected', () => {
+    expect(getDisplayedColumns(['bytes', 'extension'], dataViewWithTimefieldMock, 'json')).toEqual([
+      '_source',
+    ]);
+  });
+  test('returns the selected fields in summary mode', () => {
+    expect(getDisplayedColumns(['bytes'], dataViewWithTimefieldMock, 'table')).toEqual(['bytes']);
+  });
 });

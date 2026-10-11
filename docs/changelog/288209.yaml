@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/288209
+issues:
+- https://github.com/elastic/kibana/issues/288195
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Quote KQL value in snapshot query to handle ARN identifiers

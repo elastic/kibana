@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/291514
+type: breaking-change
+subtype: other
+products:
+- product: cloud-serverless
+- product: kibana
+title: Remove the Playground app
+description: Removes the Playground app. Saved playgrounds (prompts, queries, index selections, and connector settings) are deleted on upgrade and cannot be exported.
+impact: "Playground is no longer available. Saved playgrounds are deleted when you upgrade, and you can't export them afterward. Any `xpack.searchPlayground.*` setting in `kibana.yml` is ignored and logs a deprecation warning. Kibana still starts."
+action: "Use Agent Builder instead of Playground."

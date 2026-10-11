@@ -9,14 +9,14 @@
 
 import * as authTypeSpecs from './all_auth_types';
 import * as connectorsSpecs from './all_specs';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector_spec';
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
-import { buildEventId } from './event_type_id';
+import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from './event_type_id';
 import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
-const MAX_CONNECTOR_ID_LENGTH = 64;
 const allSpecs = Object.entries(connectorsSpecs) as Array<[string, ConnectorSpec]>;
 const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[];
 
@@ -37,14 +37,16 @@ describe('connector spec contracts', () => {
     const { metadata } = spec;
 
     expect(metadata.id).toMatch(CONNECTOR_ID_PATTERN);
-    expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_ID_LENGTH);
+    expect(metadata.id.length).toBeLessThanOrEqual(MAX_CONNECTOR_TYPE_ID_LENGTH);
     expect(metadata.displayName.trim()).not.toHaveLength(0);
     expect(metadata.description.trim()).not.toHaveLength(0);
-    // supportedFeatureIds may be [] for support-only connectors (not yet feature-enabled).
-    // Non-empty entries must be valid feature ID strings.
-    if (metadata.supportedFeatureIds.length > 0) {
-      expect(metadata.supportedFeatureIds.every((id) => typeof id === 'string')).toBe(true);
-    }
+    // `ensureSufficientLicense` in the actions plugin rejects a third party action type
+    // below a gold license at registration time, which makes Kibana exit on startup.
+    // Catch it here instead. New connectors are scaffolded at enterprise by policy, but
+    // gold is the floor the platform enforces, so existing gold specs stay valid.
+    expect(LICENSE_TYPE[metadata.minimumLicense]).toBeGreaterThanOrEqual(LICENSE_TYPE.gold);
+    expect(metadata.supportedFeatureIds.length).toBeGreaterThan(0);
+    expect(metadata.supportedFeatureIds.every((id) => typeof id === 'string')).toBe(true);
   });
 
   it.each(allSpecs)('%s has valid authentication configuration', (_exportName, spec) => {
@@ -85,6 +87,15 @@ describe('connector spec contracts', () => {
 
     expect(mappedIconIds).toEqual(connectorIdsRequiringMappedIcons);
   });
+
+  it.each(allSpecs)(
+    '%s does not enable test unless it has outbound actions',
+    (_exportName, spec) => {
+      if (spec.test.enabled) {
+        expect(Object.keys(spec.actions).length).toBeGreaterThan(0);
+      }
+    }
+  );
 
   it.each(allSpecs)('%s does not declare events unless allowlisted', (_exportName, spec) => {
     if (spec.events === undefined) {

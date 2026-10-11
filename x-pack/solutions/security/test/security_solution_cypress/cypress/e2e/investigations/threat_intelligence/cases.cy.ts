@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
-  navigateToThreatIntelligence,
   openFlyout,
   openFlyoutTakeAction,
   openIndicatorsTableMoreActions,
-  waitForViewToBeLoaded,
+  visitIndicatorsWithTimeRange,
 } from '../../../tasks/threat_intelligence/common';
+import { deleteCases } from '../../../tasks/api_calls/cases';
 import {
   createNewCaseFromTI,
   navigateToCaseViaToaster,
@@ -23,15 +22,11 @@ import {
   selectExistingCase,
 } from '../../../tasks/threat_intelligence/cases';
 import {
-  CASE_COMMENT_EXTERNAL_REFERENCE,
-  FLYOUT_ADD_TO_EXISTING_CASE_ITEM,
-  FLYOUT_ADD_TO_NEW_CASE_ITEM,
-  INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON,
-  INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON,
+  CASE_COMMENT_INDICATOR_ATTACHMENT,
+  FLYOUT_ADD_TO_CASE_ITEM,
+  INDICATORS_TABLE_ADD_TO_CASE_ITEM,
 } from '../../../screens/threat_intelligence/cases';
 import { login } from '../../../tasks/login';
-
-const URL = '/app/security/threat_intelligence/indicators';
 
 // Failing: See https://github.com/elastic/kibana/issues/244231
 describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
@@ -41,22 +36,19 @@ describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should disable the indicators table context menu items and flyout context menu items', () => {
     const documentsNumber = 22;
     openIndicatorsTableMoreActions(documentsNumber - 1);
 
-    cy.get(INDICATORS_TABLE_ADD_TO_EXISTING_CASE_BUTTON_ICON).should('be.disabled');
-    cy.get(INDICATORS_TABLE_ADD_TO_NEW_CASE_BUTTON_ICON).should('be.disabled');
+    cy.get(INDICATORS_TABLE_ADD_TO_CASE_ITEM).should('be.disabled');
 
     openFlyout(documentsNumber - 1);
     openFlyoutTakeAction();
 
-    cy.get(FLYOUT_ADD_TO_EXISTING_CASE_ITEM).should('be.disabled');
-    cy.get(FLYOUT_ADD_TO_NEW_CASE_ITEM).should('be.disabled');
+    cy.get(FLYOUT_ADD_TO_CASE_ITEM).should('be.disabled');
   });
 });
 
@@ -67,8 +59,10 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(URL);
-    waitForViewToBeLoaded();
+    // this suite attaches to "the case I just created" by picking the first row of the existing
+    // cases modal, so it needs to start from a stack with no cases left over from a previous run
+    deleteCases();
+    visitIndicatorsWithTimeRange();
   });
 
   it('should add to new case and to existing case from the indicators table and the flyout', () => {
@@ -79,14 +73,14 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     createNewCaseFromTI();
     navigateToCaseViaToaster();
 
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    navigateToThreatIntelligence();
+    visitIndicatorsWithTimeRange();
 
     cy.log('should add to existing case when clicking on the button in the indicators table');
 
@@ -95,14 +89,14 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     selectExistingCase();
     navigateToCaseViaToaster();
 
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    navigateToThreatIntelligence();
+    visitIndicatorsWithTimeRange();
 
     cy.log('should add to new case when clicking on the button in the indicators flyout');
 
@@ -112,14 +106,14 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     createNewCaseFromTI();
 
     navigateToCaseViaToaster();
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')
       .and('contain.text', 'Indicator type')
       .and('contain.text', 'Feed name');
 
-    navigateToThreatIntelligence();
+    visitIndicatorsWithTimeRange();
 
     cy.log('should add to existing case when clicking on the button in the indicators flyout');
 
@@ -129,7 +123,7 @@ describe('Cases interactions', { tags: ['@ess'] }, () => {
     selectExistingCase();
 
     navigateToCaseViaToaster();
-    cy.get(CASE_COMMENT_EXTERNAL_REFERENCE)
+    cy.get(CASE_COMMENT_INDICATOR_ATTACHMENT)
       .should('exist')
       .and('contain.text', 'added an indicator of compromise')
       .and('contain.text', 'Indicator name')

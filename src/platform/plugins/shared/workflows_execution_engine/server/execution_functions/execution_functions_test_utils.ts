@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 
 import type { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { MockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
@@ -65,9 +66,21 @@ export interface MockWorkflowExecutionRepository {
 }
 
 export const createMockWorkflowExecutionRepository = (): MockWorkflowExecutionRepository => ({
-  getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+  getWorkflowExecutionById: jest.fn().mockResolvedValue({
+    id: 'test-workflow-run-id',
+    workflowId: 'workflow',
+    spaceId: 'default',
+    status: ExecutionStatus.PENDING,
+  }),
   updateWorkflowExecution: jest.fn().mockResolvedValue(undefined),
 });
+
+export const createMockStepExecutionRepository = (): jest.Mocked<StepExecutionRepository> =>
+  ({
+    bulkUpsert: jest.fn().mockResolvedValue(undefined),
+    markNonTerminalStepsFailed: jest.fn().mockResolvedValue(undefined),
+    getStepExecutionsByWorkflowExecution: jest.fn().mockResolvedValue([]),
+  } as unknown as jest.Mocked<StepExecutionRepository>);
 
 export interface MockTelemetryClient {
   reportEventDrivenExecutionSuppressed: jest.Mock;
@@ -111,6 +124,7 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
   workflowLogger: {},
+  eventQueue: undefined,
   nodesFactory: {},
   workflowExecutionGraph: {},
   esClient: {},

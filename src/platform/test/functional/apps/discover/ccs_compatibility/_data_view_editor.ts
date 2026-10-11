@@ -9,6 +9,13 @@
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 
+/**
+ * Migration recommendation: DELETE. Creating a data view from the Discover search bar is
+ * already covered in
+ * src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/data_view_create.spec.ts
+ * (ad hoc and saved). The CCS variant only changes the title to `ftr-remote:logstash`.
+ */
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const kibanaServer = getService('kibanaServer');
@@ -53,6 +60,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
     });
 
+    /**
+     * Migration recommendation: DELETE. Same as the file-level note. If we need to prove a
+     * remote-cluster title is accepted, that is a data-views API test, not a browser test.
+     */
     it('allows creating a new data view', async function () {
       const dataViewToCreate = config.get('esTestCluster.ccs') ? 'ftr-remote:logstash' : 'logstash';
       await dataViews.createFromSearchBar({ name: dataViewToCreate });

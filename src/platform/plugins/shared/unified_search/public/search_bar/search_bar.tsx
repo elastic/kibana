@@ -49,7 +49,7 @@ import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import { QueryBarMenu } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps } from '../dataview_picker';
-import type { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
+import type { QueryBarTopRowProps, ShowDatePicker } from '../query_string_input/query_bar_top_row';
 import { QueryBarTopRow } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import { searchBarStyles } from './search_bar.styles';
@@ -77,7 +77,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryMenu?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
-  showDatePicker?: boolean;
+  // Toggle the datepicker with a boolean, or use `{ disabled: true }` to show it disabled
+  showDatePicker?: ShowDatePicker;
   showAutoRefreshOnly?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -152,6 +153,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Disables all inputs and interactive elements,
    */
   isDisabled?: boolean;
+  /**
+   * Disables only the submit / Search button, unlike `isDisabled` which
+   * greys out the entire query bar.
+   */
+  disableSubmitAction?: boolean;
 
   submitOnBlur?: boolean;
 
@@ -179,6 +185,11 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    * Enable data source browser suggestion in ES|QL editor.
    */
   enableResourceBrowser?: boolean;
+  /**
+   * Show the action to create an ES|QL view from the editor query.
+   * Hidden unless a host opts in.
+   */
+  enableCreateView?: boolean;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -508,13 +519,16 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       return;
     }
 
-    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER;
+    let source: QuerySource.SEARCH_BUTTON | QuerySource.TIME_FILTER | QuerySource.QUICK_SEARCH_KQL;
     switch (trigger) {
       case QuerySubmitTrigger.QUERY_BAR_SUBMIT:
         source = QuerySource.SEARCH_BUTTON;
         break;
       case QuerySubmitTrigger.TIME_FILTER:
         source = QuerySource.TIME_FILTER;
+        break;
+      case QuerySubmitTrigger.QUICK_SEARCH:
+        source = QuerySource.QUICK_SEARCH_KQL;
         break;
       default:
         return;
@@ -593,20 +607,24 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           defaultMessage='"{name}" is running now. Feel free to close the tab. <link>Check its progress here.</link>'
           values={{
             name,
-            link: (chunks: React.ReactNode) => (
-              <EuiLink
-                data-test-subj="backgroundSearchToastLink"
-                onClick={() => {
-                  this.services.notifications.toasts.remove(toast);
-                  this.services.data.search.showSearchSessionsFlyout({
-                    appId: this.services.appName,
-                    trackingProps: { openedFrom: 'toast' },
-                  });
-                }}
-              >
-                {chunks}
-              </EuiLink>
-            ),
+            link: (chunks: React.ReactNode) => {
+              const { searchSessionsManagement } = this.services;
+              if (!searchSessionsManagement) return chunks;
+              return (
+                <EuiLink
+                  data-test-subj="backgroundSearchToastLink"
+                  onClick={() => {
+                    this.services.notifications.toasts.remove(toast);
+                    searchSessionsManagement.openFlyout({
+                      appId: this.services.appName,
+                      trackingProps: { openedFrom: 'toast' },
+                    });
+                  }}
+                >
+                  {chunks}
+                </EuiLink>
+              );
+            },
           }}
         />,
         this.services
@@ -798,6 +816,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           showQueryInput={this.props.showQueryInput}
           showAddFilter={this.props.showFilterBar}
           isDisabled={this.props.isDisabled}
+          disableSubmitAction={this.props.disableSubmitAction}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
           onCancel={this.props.onCancel}
@@ -845,6 +864,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}
           enableResourceBrowser={this.props.enableResourceBrowser}
+          enableCreateView={this.props.enableCreateView}
         />
       </div>
     );

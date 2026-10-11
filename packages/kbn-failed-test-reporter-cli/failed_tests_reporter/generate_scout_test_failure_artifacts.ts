@@ -12,7 +12,7 @@ import Path from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createHash } from 'crypto';
 import fs from 'fs';
-import globby from 'globby';
+import { globby } from 'globby';
 import type { BuildkiteMetadata } from './buildkite_metadata';
 import {
   SCOUT_GITHUB_ISSUES_FILENAME,

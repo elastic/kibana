@@ -7,44 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-
-import { createCircuitBreakerError } from './__fixtures__/circuit_breaker_error';
-
-const mockCreateIndexes = jest.fn();
-jest.mock('../common', () => ({
-  createIndexes: (...args: unknown[]) => mockCreateIndexes(...args),
-}));
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
+import {
+  mockDataClientBundleInitSetup,
+  mockDataClientBundleInitStart,
+} from './test_utils/data_client_jest_mock';
 
-/**
- * The plugin lazily creates execution + step indices on the first contract
- * call via a memoized promise:
- *
- *   if (!this.initializePromise) {
- *     this.initializePromise = createIndexes({ ... });
- *   }
- *   await this.initializePromise;
- *
- * Without clearing the cached promise on rejection, a single transient
- * `circuit_breaking_exception` from `createIndexes` poisons the plugin: every
- * subsequent invocation re-awaits the *same* rejected promise and short-circuits
- * with the same error. That turns a recoverable cluster blip into a permanent
- * plugin-level outage that only a Kibana restart fixes.
- *
- * This test exercises `initialize` directly via a typed test-only accessor
- * rather than booting all the contract methods that depend on it. That keeps
- * the test focused on the rejection-cache contract.
- */
-
-interface InitializeAccessor {
-  initialize(coreStart: CoreStart): Promise<void>;
-}
-
-const accessInitialize = (plugin: WorkflowsExecutionEnginePlugin): InitializeAccessor =>
-  plugin as unknown as InitializeAccessor;
+jest.mock('./repositories/data_access_layer', () => {
+  const actual = jest.requireActual('./repositories/data_access_layer');
+  const { createDataClientJestMock: createDataAccessMock } = jest.requireActual(
+    './test_utils/data_client_jest_mock'
+  );
+  return {
+    ...actual,
+    createDataClientBundle: jest.fn(() => createDataAccessMock()),
+  };
+});
 
 const createPlugin = (): WorkflowsExecutionEnginePlugin => {
   const initializerContext = coreMock.createPluginInitializerContext({
@@ -54,62 +36,43 @@ const createPlugin = (): WorkflowsExecutionEnginePlugin => {
   return new WorkflowsExecutionEnginePlugin(initializerContext);
 };
 
-describe('WorkflowsExecutionEnginePlugin.initialize — rejection caching', () => {
+describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
   beforeEach(() => {
-    mockCreateIndexes.mockReset();
+    jest.clearAllMocks();
+    mockDataClientBundleInitSetup.mockResolvedValue(undefined);
+    mockDataClientBundleInitStart.mockResolvedValue(undefined);
   });
 
-  it('does not cache a rejected createIndexes promise — a subsequent call retries', async () => {
-    mockCreateIndexes
-      .mockRejectedValueOnce(createCircuitBreakerError())
-      .mockResolvedValueOnce(undefined);
-
+  it('calls initSetup during setup', () => {
     const plugin = createPlugin();
-    const coreStart = coreMock.createStart();
-
-    await expect(accessInitialize(plugin).initialize(coreStart)).rejects.toMatchObject({
-      statusCode: 429,
-      body: { error: { type: 'circuit_breaking_exception' } },
+    plugin.setup(coreMock.createSetup() as any, {
+      taskManager: taskManagerMock.createSetup(),
+      cloud: {} as any,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
     });
 
-    await expect(accessInitialize(plugin).initialize(coreStart)).resolves.toBeUndefined();
-
-    expect(mockCreateIndexes).toHaveBeenCalledTimes(2);
+    expect(mockDataClientBundleInitSetup).toHaveBeenCalledTimes(1);
+    expect(mockDataClientBundleInitStart).not.toHaveBeenCalled();
   });
 
-  it('still memoizes a successful initialization (createIndexes runs exactly once across many calls)', async () => {
-    mockCreateIndexes.mockResolvedValue(undefined);
-
+  it('calls initStart and exposes the execution data access during start', () => {
     const plugin = createPlugin();
-    const coreStart = coreMock.createStart();
+    plugin.setup(coreMock.createSetup() as any, {
+      taskManager: taskManagerMock.createSetup(),
+      cloud: {} as any,
+      workflowsExtensions: { registerConnectorAdapter: jest.fn() } as any,
+    });
 
-    await accessInitialize(plugin).initialize(coreStart);
-    await accessInitialize(plugin).initialize(coreStart);
-    await accessInitialize(plugin).initialize(coreStart);
+    const startContract = plugin.start(coreMock.createStart(), {
+      taskManager: taskManagerMock.createStart(),
+      actions: {} as any,
+      cloud: {} as any,
+      workflowsExtensions: {} as any,
+      licensing: licensingMock.createStart(),
+    });
 
-    expect(mockCreateIndexes).toHaveBeenCalledTimes(1);
-  });
-
-  it('deduplicates concurrent in-flight calls to a single createIndexes invocation', async () => {
-    let resolveCreate!: () => void;
-    mockCreateIndexes.mockImplementationOnce(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveCreate = resolve;
-        })
-    );
-
-    const plugin = createPlugin();
-    const coreStart = coreMock.createStart();
-
-    const first = accessInitialize(plugin).initialize(coreStart);
-    const second = accessInitialize(plugin).initialize(coreStart);
-
-    expect(mockCreateIndexes).toHaveBeenCalledTimes(1);
-
-    resolveCreate();
-    await Promise.all([first, second]);
-
-    expect(mockCreateIndexes).toHaveBeenCalledTimes(1);
+    expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
+    expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
+    expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
   });
 });

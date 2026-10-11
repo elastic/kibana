@@ -7,6 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 
@@ -57,8 +58,6 @@ jest.mock('react-use/lib/useLocalStorage', () => ({
 
 jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamingContext: () => ({
-    removeAllErrors: jest.fn(),
-    removeError: jest.fn(),
     activeStreams: new Set(),
     byConversationId: {},
   }),
@@ -79,9 +78,11 @@ import { UnifiedSidebar } from './unified_sidebar';
 
 const renderSidebar = (path: string) =>
   render(
-    <MemoryRouter initialEntries={[path]}>
-      <UnifiedSidebar isCondensed={false} onToggleCondensed={jest.fn()} />
-    </MemoryRouter>
+    <EuiProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <UnifiedSidebar isCondensed={false} onToggleCondensed={jest.fn()} />
+      </MemoryRouter>
+    </EuiProvider>
   );
 
 describe('UnifiedSidebar', () => {

@@ -14,6 +14,7 @@ import type {
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { RuleCreationState } from './state';
@@ -24,12 +25,14 @@ import { getEsqlQueryGraphWithTool } from './sub_graphs/esql_with_tool/esql_quer
 import { addScheduleNode } from './nodes/add_schedule';
 import { addMitreMappingsNode } from './nodes/add_mitre_mappings';
 import { terminalValidationNode } from './nodes/terminal_validation';
+import { addSeverityAndRiskScoreNode } from './nodes/add_severity_and_risk_score';
 
 export const BUILD_AGENT_NODE_NAMES = {
   ESQL_QUERY_CREATION: 'esqlQueryCreation',
   GET_TAGS: 'getTags',
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
   ADD_MITRE_MAPPINGS: 'addMitreMappings',
+  ADD_SEVERITY_AND_RISK_SCORE: 'addSeverityAndRiskScore',
   ADD_SCHEDULE: 'addSchedule',
   TERMINAL_VALIDATION: 'terminalValidation',
   REJECTION: 'rejection',
@@ -40,6 +43,7 @@ const {
   GET_TAGS,
   CREATE_RULE_NAME_AND_DESCRIPTION,
   ADD_MITRE_MAPPINGS,
+  ADD_SEVERITY_AND_RISK_SCORE,
   ADD_SCHEDULE,
   TERMINAL_VALIDATION,
   REJECTION,
@@ -55,6 +59,8 @@ export interface GetBuildAgentParams {
   savedObjectsClient: SavedObjectsClientContract;
   rulesClient: RulesClient;
   events?: ToolEventEmitter;
+  /** Resolved managed MITRE data client. Absent when xpack.mitreAttack.managedSourceEnabled is off. */
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 export const getBuildAgent = async ({
@@ -67,6 +73,7 @@ export const getBuildAgent = async ({
   savedObjectsClient,
   rulesClient,
   events,
+  mitreDataClient,
 }: GetBuildAgentParams) => {
   const buildAgentGraph = new StateGraph(RuleCreationAnnotation)
     .addNode(
@@ -83,7 +90,8 @@ export const getBuildAgent = async ({
     )
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model, events }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
-    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
+    .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events, mitreDataClient }))
+    .addNode(ADD_SEVERITY_AND_RISK_SCORE, addSeverityAndRiskScoreNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
     .addNode(TERMINAL_VALIDATION, terminalValidationNode())
     .addNode(REJECTION, rejectionNode)
@@ -99,7 +107,8 @@ export const getBuildAgent = async ({
       rejection: REJECTION,
     })
     .addEdge(GET_TAGS, ADD_MITRE_MAPPINGS)
-    .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
+    .addEdge(ADD_MITRE_MAPPINGS, ADD_SEVERITY_AND_RISK_SCORE)
+    .addEdge(ADD_SEVERITY_AND_RISK_SCORE, ADD_SCHEDULE)
     .addEdge(ADD_SCHEDULE, TERMINAL_VALIDATION)
     .addConditionalEdges(TERMINAL_VALIDATION, resolveRejectionRoute, {
       continue: END,

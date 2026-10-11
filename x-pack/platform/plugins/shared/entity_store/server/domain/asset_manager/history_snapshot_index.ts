@@ -34,22 +34,54 @@ const getLegacySecurityHistorySnapshotBasePattern = (namespace: string): string 
     namespace,
   });
 
+const toHistorySnapshotDateHour = (historySnapshotDate: Date): string => {
+  const y = historySnapshotDate.getUTCFullYear();
+  const m = String(historySnapshotDate.getUTCMonth() + 1).padStart(2, '0');
+  const d = String(historySnapshotDate.getUTCDate()).padStart(2, '0');
+  const h = String(historySnapshotDate.getUTCHours()).padStart(2, '0');
+  return `${y}-${m}-${d}-${h}`;
+};
+
+/** Matches `.YYYY-MM-DD-HH` at the end of a history snapshot index name. */
+const HISTORY_SNAPSHOT_DATE_SUFFIX_RE = /\.(\d{4}-\d{2}-\d{2})-\d{2}$/;
+
+/**
+ * Returns the UTC calendar date (`YYYY-MM-DD`) encoded in a history snapshot index name.
+ * The hour suffix is ignored so retention can be applied at day fidelity.
+ */
+export const parseHistorySnapshotIndexDate = (indexName: string): string | undefined => {
+  const date = indexName.match(HISTORY_SNAPSHOT_DATE_SUFFIX_RE)?.[1];
+  if (!date) {
+    return undefined;
+  }
+  const [year, month, day] = date.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return undefined;
+  }
+  return date;
+};
+
 /**
  * Returns the history snapshot index name for a given namespace and date (with hour).
  * Format: .entities.v2.history.<namespace>.<YYYY-MM-DD>-<HH>
  * Hour is included so sub-daily frequencies (e.g. 12h, 1h) use distinct indices.
  */
-export const getHistorySnapshotIndexName = (
+export const getHistorySnapshotIndexName = (namespace: string, historySnapshotDate: Date): string =>
+  `${getHistorySnapshotBasePattern(namespace)}.${toHistorySnapshotDateHour(historySnapshotDate)}`;
+
+/** @deprecated Legacy Security-scoped history index name; used until migration deletes those indices. */
+export const getLegacySecurityHistorySnapshotIndexName = (
   namespace: string,
   historySnapshotDate: Date
-): string => {
-  const y = historySnapshotDate.getUTCFullYear();
-  const m = String(historySnapshotDate.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(historySnapshotDate.getUTCDate()).padStart(2, '0');
-  const h = String(historySnapshotDate.getUTCHours()).padStart(2, '0');
-  const dateHourStr = `${y}-${m}-${d}-${h}`;
-  return `${getHistorySnapshotBasePattern(namespace)}.${dateHourStr}`;
-};
+): string =>
+  `${getLegacySecurityHistorySnapshotBasePattern(namespace)}.${toHistorySnapshotDateHour(
+    historySnapshotDate
+  )}`;
 
 /**
  * Returns the index pattern matching all history snapshot indices for a namespace.

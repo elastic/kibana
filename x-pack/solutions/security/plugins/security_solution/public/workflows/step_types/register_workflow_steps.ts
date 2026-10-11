@@ -62,6 +62,12 @@ export const registerWorkflowSteps = (
   );
 
   workflowsExtensions.registerStepDefinition(() =>
+    import('./build_exception_entries_filter_step/build_exception_entries_filter_step').then(
+      (m) => m.buildExceptionEntriesFilterStepDefinition
+    )
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
     import('./create_exception_list_item_step/create_exception_list_item_step').then(
       (m) => m.createExceptionListItemStepDefinition
     )
@@ -69,5 +75,31 @@ export const registerWorkflowSteps = (
 
   workflowsExtensions.registerStepDefinition(() =>
     import('./create_note_step/create_note_step').then((m) => m.createNoteStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./delete_note_step/delete_note_step').then((m) => m.deleteNoteStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_notes_step/get_notes_step').then((m) => m.getNotesStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./update_note_step/update_note_step').then((m) => m.updateNoteStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./create_rule_step/create_rule_step').then((m) => m.createRuleStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./patch_rule_step/patch_rule_step').then((m) => m.patchRuleStepDefinition)
+  );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./get_alert_entities_step/get_alert_entities_step').then(
+      (m) => m.getAlertEntitiesStepDefinition
+    )
   );
 };

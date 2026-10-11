@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { getServerlessTypeFromCloudData } from '@kbn/apm-plugin/common/serverless';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { dataConfig, generateData } from './generate_data';
@@ -22,7 +23,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
 
-  async function callApi() {
+  async function callApi(environment: string = ENVIRONMENT_ALL.value) {
     return await apmApiClient.readUser({
       endpoint: 'GET /internal/apm/services/{serviceName}/metadata/icons',
       params: {
@@ -30,6 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         query: {
           start: new Date(start).toISOString(),
           end: new Date(end).toISOString(),
+          environment,
         },
       },
     });
@@ -74,6 +76,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(body.serverlessType).to.be(
           getServerlessTypeFromCloudData(cloudProvider, cloudServiceName)
         );
+      });
+
+      it('applies the environment filter', async () => {
+        const { agentName } = dataConfig;
+
+        const matchingEnvironment = await callApi('production');
+        expect(matchingEnvironment.status).to.be(200);
+        expect(matchingEnvironment.body.agentName).to.be(agentName);
+
+        const nonMatchingEnvironment = await callApi('non-existent-environment');
+        expect(nonMatchingEnvironment.status).to.be(200);
+        expect(nonMatchingEnvironment.body).to.empty();
       });
     });
   });

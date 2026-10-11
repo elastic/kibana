@@ -30,6 +30,7 @@ export class DeleteRuleRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Delete a rule',
     oasOperationObject: deleteRuleOasExamples,
   } as const;

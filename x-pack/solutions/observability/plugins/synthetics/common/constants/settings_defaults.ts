@@ -23,4 +23,5 @@ export const DYNAMIC_SETTINGS_DEFAULTS: DynamicSettings & { privateLocationsSync
     defaultTLSRuleEnabled: true,
     defaultStatusRuleEnabled: true,
     privateLocationsSyncInterval: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+    rebalancePrivateLocationShardsEnabled: true,
   };

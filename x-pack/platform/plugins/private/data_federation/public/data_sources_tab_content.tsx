@@ -51,6 +51,17 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
 
   const existingDataSourceNames = useMemo(() => dataSources.map((ds) => ds.name), [dataSources]);
 
+  const refreshDataSources = useCallback(async () => {
+    try {
+      await loadDataSources();
+    } catch (e) {
+      toasts.addDanger({
+        title: mainTranslations.refreshDataSourcesErrorTitle,
+        text: getFlyoutSaveErrorMessage(e),
+      });
+    }
+  }, [loadDataSources, toasts]);
+
   const dataSetsCountByDataSource = useMemo(() => {
     const counts = new Map<string, number>();
     for (const ds of dataSets) {
@@ -73,10 +84,10 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     (result?: { savedChanges?: boolean }) => {
       setFlyout({ mode: 'closed' });
       if (result?.savedChanges) {
-        void loadDataSources();
+        void refreshDataSources();
       }
     },
-    [loadDataSources]
+    [refreshDataSources]
   );
 
   const handleDeleteDataSource = useCallback((item: DataSource) => {
@@ -115,7 +126,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       await dataSourcesClient.delete(pendingDeleteDataSource.name);
       setSelectedDataSources([]);
       setPendingDeleteDataSource(null);
-      void loadDataSources();
+      void refreshDataSources();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSourceError(message);
@@ -126,7 +137,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     } finally {
       setIsDeletingDataSource(false);
     }
-  }, [dataSourcesClient, loadDataSources, pendingDeleteDataSource, toasts]);
+  }, [dataSourcesClient, pendingDeleteDataSource, refreshDataSources, toasts]);
 
   const confirmDeleteDataSources = useCallback(async () => {
     if (!pendingDeleteDataSources || pendingDeleteDataSources.length === 0) {
@@ -147,7 +158,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       await dataSourcesClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
       setSelectedDataSources([]);
       setPendingDeleteDataSources(null);
-      void loadDataSources();
+      void refreshDataSources();
     } catch (e) {
       const message = getFlyoutSaveErrorMessage(e);
       setDeleteDataSourcesError(message);
@@ -161,7 +172,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   }, [
     dataSetsCountByDataSource,
     dataSourcesClient,
-    loadDataSources,
+    refreshDataSources,
     setSelectedDataSources,
     pendingDeleteDataSources,
     toasts,

@@ -14,6 +14,7 @@ import { act, screen } from '@testing-library/react';
 import { allSuggestionsMock } from '../../__mocks__/suggestions';
 import { BehaviorSubject } from 'rxjs';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { DataViewSource, EsqlSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { getFetch$Mock, getFetchParamsMock } from '../../__mocks__/fetch_params';
 import { getLensProps, useLensProps } from './hooks/use_lens_props';
@@ -64,9 +65,9 @@ const renderComponent = async ({
 
   const fetch$: UnifiedHistogramFetch$ = getFetch$Mock();
 
+  const esqlQuery = 'FROM index1';
   const fetchParams = getFetchParamsMock({
     searchSessionId: '123',
-    dataView: dataViewWithTimefieldMock,
     timeRange: {
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
@@ -75,14 +76,22 @@ const renderComponent = async ({
       from: '2020-05-14T11:05:13.590',
       to: '2020-05-14T11:20:13.590',
     },
-    query: isPlainRecord ? { esql: 'FROM index1' } : undefined,
+    ...(isPlainRecord
+      ? {
+          query: { esql: esqlQuery },
+          dataSource: await EsqlSource.create({
+            query: esqlQuery,
+            timeFieldName: '@timestamp',
+          }),
+        }
+      : {}),
   });
 
   const lensVisMock = await getLensVisMock({
     allSuggestions: hasLensSuggestions ? allSuggestionsMock : undefined,
     breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
     columns: [],
-    dataView: fetchParams.dataView,
+    dataView: dataViewWithTimefieldMock,
     filters: fetchParams.filters,
     isPlainRecord: fetchParams.isESQLQuery,
     query: fetchParams.query,
@@ -98,7 +107,7 @@ const renderComponent = async ({
     fetch$,
     onLoad: jest.fn(),
     withDefaultActions: undefined,
-    dataView: fetchParams.dataView,
+    dataSource: new DataViewSource(dataViewWithTimefieldMock),
     abortController: fetchParams.abortController,
     isPlainRecord: fetchParams.isESQLQuery,
     bucketInterval: undefined,

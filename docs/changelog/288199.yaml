@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/288199
+issues:
+- https://github.com/elastic/kibana/issues/287784
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix Entity Analytics AI summaries failing to save in Serverless
+description: Fixes a 500 error that prevented entity AI summaries from being persisted in Serverless environments when the metadata data stream did not exist.

@@ -33,12 +33,16 @@ const mockConfigurationData = {
   id: '',
   owner: mockedTestProvidersOwner[0],
   observableTypes: [],
+  extractObservables: true,
+  workflowTags: [],
 };
 
 export const useCaseConfigureResponse = {
   data: mockConfigurationData,
   isLoading: false,
   isFetching: false,
+  isFetched: true,
+  isError: false,
   refetch: jest.fn(),
 };
 

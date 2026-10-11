@@ -166,6 +166,7 @@ describe('When entering data into the Console input', () => {
         hasArgs: false,
         input: 'cmd1 ',
         name: 'cmd1',
+        params: [],
       },
       commandDefinition: cmd1Command,
       input: 'cmd1 ',
@@ -526,6 +527,53 @@ describe('When entering data into the Console input', () => {
 
       expect(getLeftOfCursorText()).toEqual('isolate');
       expect(getRightOfCursorText()).toEqual('');
+    });
+  });
+
+  describe('and keyboard shortcut ALT+SPACE is pressed', () => {
+    it('should open the command selector popover', async () => {
+      render();
+
+      await triggerConsoleCommandInputEvent(renderResult, {
+        key: ' ',
+        code: 'Space',
+        altKey: true,
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Available commands')).not.toBeNull();
+      });
+    });
+  });
+
+  describe('and TAB is pressed while a suggestion is being displayed', () => {
+    beforeEach(async () => {
+      render();
+      // Typing a partial command name triggers auto-complete. 'cmd' matches the first command
+      // definition (cmd1 via Array.find()), producing a suggestion of '1'
+      await enterCommand('cmd', { inputOnly: true });
+    });
+
+    it('should display an auto-complete suggestion for the partial command name', async () => {
+      await waitFor(() => {
+        const suggestionEl = renderResult.getByTestId('test-cmdInput-suggestion');
+        expect(suggestionEl).not.toBeNull();
+        expect(suggestionEl.textContent).toContain('1');
+      });
+    });
+
+    it('should apply the suggestion to the input when TAB is pressed', async () => {
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-cmdInput-suggestion')).not.toBeNull();
+      });
+
+      await triggerConsoleCommandInputEvent(renderResult, { key: 'Tab', code: 'Tab' });
+
+      expect(getLeftOfCursorText()).toEqual('cmd1');
+
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('test-cmdInput-suggestion')).toBeNull();
+      });
     });
   });
 

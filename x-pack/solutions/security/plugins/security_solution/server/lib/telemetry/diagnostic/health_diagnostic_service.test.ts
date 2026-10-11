@@ -21,8 +21,8 @@ import {
   QueryType,
   type ApiExecutableQuery,
   type HealthDiagnosticQuery,
-  type HealthDiagnosticQueryV1,
-  type HealthDiagnosticQueryV3,
+  type IndexQuery,
+  type ApiQuery,
   type ResolvedQuery,
 } from './health_diagnostic_service.types';
 import { artifactService } from '../artifact';
@@ -83,7 +83,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
             if ('_raw' in q) {
               return { kind: 'skipped', query: q, reason: 'parse_failure' };
             }
-            return { kind: 'executable', query: q as HealthDiagnosticQueryV1 };
+            return { kind: 'executable', query: q as IndexQuery };
           })
         )
       ),
@@ -138,7 +138,6 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           name: 'test-query',
           passed: true,
           status: 'success',
-          descriptorVersion: 1,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -181,8 +180,109 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
       });
 
+      test('should skip queries whose expiresAt is in the past', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2000-01-01' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt is a bare date of today (start-of-day)', async () => {
+        const today = new Date().toISOString().slice(0, 10);
+        setupDefaultArtifact({ version: 4, expiresAt: today });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt datetime already passed today', async () => {
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        setupDefaultArtifact({ version: 4, expiresAt: oneHourAgo });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should run queries whose expiresAt datetime is later today', async () => {
+        const oneHourAhead = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+        setupDefaultArtifact({ version: 4, expiresAt: oneHourAhead });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries whose expiresAt is in the future', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2099-12-31' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries with no expiresAt set', async () => {
+        setupDefaultArtifact();
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      describe('stackVersions filtering', () => {
+        const setupStackVersion = (stackVersion: string) => {
+          service.setup({
+            taskManager: { registerTaskDefinitions: jest.fn() } as never,
+            isServerless: false,
+            stackVersion,
+          });
+        };
+
+        test('should run a query when the cluster version satisfies stackVersions', async () => {
+          setupStackVersion('9.4.0');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+
+        test('should silently skip a query when the cluster version is outside stackVersions', async () => {
+          setupStackVersion('9.2.0');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(0);
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        });
+
+        test('should coerce a -SNAPSHOT cluster version before evaluating the range', async () => {
+          setupStackVersion('9.4.0-SNAPSHOT');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+
+        test('should run a query with no stackVersions regardless of cluster version', async () => {
+          setupStackVersion('9.2.0');
+          setupDefaultArtifact({ version: 4 });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+      });
+
       describe('query attribute filtering', () => {
-        test('should emit a skipped stat for queries with unrecognised versions', async () => {
+        test('should silently skip queries with unrecognised versions — no stat doc, debug log only', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: unknown-version-query
@@ -198,17 +298,16 @@ enabled: true`,
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(1);
-          expect(result[0]).toMatchObject({
-            name: 'unknown-version-query',
-            status: 'skipped',
-            skipReason: 'parse_failure',
-            passed: false,
-          });
+          expect(result).toHaveLength(0);
           expect(mockQueryExecutor.search).not.toHaveBeenCalled();
-          expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
-            TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT.eventType,
-            expect.objectContaining({ status: 'skipped', skipReason: 'parse_failure' })
+          expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('unknown version'),
+            expect.anything()
+          );
+          expect(mockLogger.warn).not.toHaveBeenCalledWith(
+            'Skipping query that failed to parse',
+            expect.anything()
           );
         });
 
@@ -236,7 +335,7 @@ filterlist:
           expect(mockQueryExecutor.search).not.toHaveBeenCalled();
         });
 
-        test('should execute valid queries and emit skipped stats for unknown-version queries', async () => {
+        test('should execute valid queries and silently drop unknown-version queries', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: valid-query-1
@@ -264,15 +363,13 @@ enabled: true`,
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(2);
-          const validResult = result.find((r) => r.name === 'valid-query-1');
-          const unknownResult = result.find((r) => r.name === 'unknown-version-query');
-          expect(validResult).toMatchObject({ status: 'success', passed: true });
-          expect(unknownResult).toMatchObject({
-            status: 'skipped',
-            skipReason: 'parse_failure',
-            passed: false,
+          expect(result).toHaveLength(1);
+          expect(result[0]).toMatchObject({
+            name: 'valid-query-1',
+            status: 'success',
+            passed: true,
           });
+          expect(result.find((r) => r.name === 'unknown-version-query')).toBeUndefined();
           expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
         });
       });
@@ -336,7 +433,6 @@ enabled: true`,
           name: 'test-query',
           passed: false,
           status: 'failed',
-          descriptorVersion: 1,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
@@ -586,9 +682,7 @@ enabled: true`,
     });
 
     describe('runHealthDiagnosticQueries — API queries', () => {
-      const buildResolvedApiQuery = (
-        overrides: Partial<HealthDiagnosticQueryV3> = {}
-      ): ApiExecutableQuery => ({
+      const buildResolvedApiQuery = (overrides: Partial<ApiQuery> = {}): ApiExecutableQuery => ({
         kind: 'executable_api',
         query: createMockApiQueryV3(overrides),
       });

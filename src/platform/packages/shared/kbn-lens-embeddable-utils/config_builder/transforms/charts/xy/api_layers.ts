@@ -47,7 +47,7 @@ import {
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
 } from '../../coloring';
-import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING } from './defaults';
+import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING, DEFAULT_REFERENCE_LINE_AXIS } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
@@ -132,7 +132,7 @@ function convertDataLayerToAPI(
             ...(breakdown_by
               ? {}
               : { color: fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR }),
-            ...(onAxis !== 'y' ? { axis: onAxis } : {}),
+            axis: onAxis,
           };
         })
         .filter(nonNullable) ?? [];
@@ -175,7 +175,7 @@ function convertDataLayerToAPI(
     return {
       ...getValueApiColumn(accessor, layer),
       ...(breakdown_by ? {} : { color: fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR }),
-      ...(axis !== 'y' ? { axis } : {}),
+      axis,
     };
   });
 
@@ -279,11 +279,10 @@ function convertReferenceLinesDecorationsToAPIFormat(
   ReferenceLineDef,
   'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
 > {
-  const resolvedOnAxis = (): ReferenceLineDef['axis'] | undefined => {
-    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
+  const resolvedOnAxis = (): ReferenceLineDef['axis'] => {
+    if (!yConfig.axisMode || yConfig.axisMode === 'auto') return DEFAULT_REFERENCE_LINE_AXIS;
     if (yConfig.axisMode === 'bottom') return 'x';
-    const axisId = resolveAxisId(yConfig.axisMode);
-    return axisId !== 'y' ? axisId : undefined;
+    return resolveAxisId(yConfig.axisMode);
   };
   return stripUndefined({
     color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
@@ -298,16 +297,6 @@ function convertReferenceLinesDecorationsToAPIFormat(
     axis: resolvedOnAxis(),
     text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
-}
-
-function getLabelFromLayer(
-  forAccessor: string,
-  layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
-): string | undefined {
-  if (isFormBasedLayer(layer)) {
-    return layer.columns[forAccessor]?.label;
-  }
-  return layer.columns.find((col) => col.columnId === forAccessor)?.label;
 }
 
 function convertReferenceLineLayerToAPI(
@@ -328,7 +317,6 @@ function convertReferenceLineLayerToAPI(
   const yConfigMap = new Map(visualization.yConfig?.map((y) => [y.forAccessor, y]));
   const thresholds = (visualization.accessors
     ?.map((accessor): ReferenceLineDef | undefined => {
-      const label = getLabelFromLayer(accessor, layer);
       const { forAccessor, ...yConfigRest } = yConfigMap.get(accessor) || {};
       const decorationConfig = convertReferenceLinesDecorationsToAPIFormat(
         yConfigRest,
@@ -344,7 +332,6 @@ function convertReferenceLineLayerToAPI(
         }
         return {
           ...op,
-          ...(label != null ? { label } : {}),
           ...decorationConfig,
         };
       }
@@ -354,7 +341,6 @@ function convertReferenceLineLayerToAPI(
       }
       return {
         ...op,
-        ...(label != null ? { label } : {}),
         ...decorationConfig,
       };
     })

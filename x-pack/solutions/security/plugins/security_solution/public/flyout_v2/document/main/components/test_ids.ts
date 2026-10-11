@@ -67,6 +67,8 @@ export const HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}BasicCell` as const;
 export const HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}LinkedCell` as const;
+export const HIGHLIGHTED_FIELDS_CUSTOM_YARA_SIGNATURE_NOT_FOUND_TEST_ID =
+  `${HIGHLIGHTED_FIELDS_TEST_ID}CustomYaraSignatureNotFound` as const;
 export const HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID =
   `${HIGHLIGHTED_FIELDS_TEST_ID}AgentStatusCell` as const;
 
@@ -177,6 +179,10 @@ export const RESPONSE_SECTION_TEST_ID = `${RESPONSE_TEST_ID}Section` as const;
 export const RESPONSE_SECTION_HEADER_TEST_ID = `${RESPONSE_SECTION_TEST_ID}Header` as const;
 export const RESPONSE_SECTION_CONTENT_TEST_ID = `${RESPONSE_SECTION_TEST_ID}Content` as const;
 export const RESPONSE_BUTTON_TEST_ID = `${RESPONSE_TEST_ID}Button` as const;
+
+/* AI summary section */
+
+export const AI_SUMMARY_SECTION_TEST_ID = `${PREFIX}AISummarySection` as const;
 
 /* Footer */
 

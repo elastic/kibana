@@ -476,4 +476,81 @@ describe('getForFeature', () => {
       soEntryFound: true,
     });
   });
+
+  describe('onlyReturnConfigured option', () => {
+    it('returns empty list instead of KIBANA_DEFAULT when no SO or recommended endpoints exist', async () => {
+      registry.register(createValidFeature({ featureId: 'f1', taskType: 'chat_completion' }));
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById([]),
+        'f1',
+        logger,
+        { onlyReturnConfigured: true }
+      );
+      expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });
+    });
+
+    it('returns recommendedEndpoints when present and onlyReturnConfigured is true', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: ['rec1'],
+          taskType: 'chat_completion',
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['rec1']),
+        'f1',
+        logger,
+        { onlyReturnConfigured: true }
+      );
+      expect(result).toEqual({
+        endpoints: [createConnector('rec1')],
+        warnings: [],
+        soEntryFound: false,
+      });
+    });
+
+    it('returns SO override when present and onlyReturnConfigured is true', async () => {
+      registry.register(createValidFeature({ featureId: 'f1', taskType: 'chat_completion' }));
+      const result = await getForFeature(
+        registry,
+        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
+        createGetConnectorById(['so_ep']),
+        'f1',
+        logger,
+        { onlyReturnConfigured: true }
+      );
+      expect(result).toEqual({
+        endpoints: [createConnector('so_ep')],
+        warnings: [],
+        soEntryFound: true,
+      });
+    });
+
+    it('excludes unavailable connector from recommendedEndpoints and emits a warning', async () => {
+      registry.register(
+        createValidFeature({
+          featureId: 'f1',
+          recommendedEndpoints: ['available', 'missing'],
+          taskType: 'chat_completion',
+        })
+      );
+      const result = await getForFeature(
+        registry,
+        createSoClient(),
+        createGetConnectorById(['available']),
+        'f1',
+        logger,
+        { onlyReturnConfigured: true }
+      );
+      expect(result.endpoints).toEqual([createConnector('available')]);
+      expect(result.warnings).toHaveLength(1);
+      expect(result.warnings[0]).toContain('missing');
+      expect(result.soEntryFound).toBe(false);
+    });
+  });
 });

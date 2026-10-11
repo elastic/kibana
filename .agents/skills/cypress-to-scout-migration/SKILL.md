@@ -153,7 +153,9 @@ Use the solution-specific skill's page object and API service templates as start
 |---------|-------|
 | `cy.visit()` | `page.gotoApp()` or page object `goto()` |
 | `cy.get('[data-test-subj="x"]')` | `page.testSubj.locator('x')` |
-| `cy.intercept() + cy.wait()` | Playwright auto-waiting or `expect.poll()` |
+| `cy.intercept()` for stubbing/mocking | `page.route()` in a dedicated `fixtures/mocks.ts` helper |
+| `cy.wait('@alias')` for synchronization | Wait for the resulting UI readiness signal with a locator assertion or `expect.poll()` |
+| `cy.intercept()` for API contract assertions | Move the contract check to a Scout API test; use `page.waitForResponse()` only when the response itself is part of the UI behavior |
 | `cy.request()` (setup/teardown) | `apiServices` / `kbnClient` in `beforeAll` |
 | `cy.wait(ms)` | **Forbidden** — use `expect.poll()` or locator assertions |
 | Screens files (selectors) | Page object class with locators |
@@ -179,7 +181,7 @@ Use the solution-specific skill's page object and API service templates as start
 
 2. **Add explicit cleanup** in the Scout test (`afterAll` / `afterEach`)
 
-3. **Add defensive cleanup in `beforeAll`** — handles leftover data from a previous failed run
+3. **Add targeted defensive cleanup in `beforeAll` when needed** — remove deterministic resources left by an interrupted previous run. Do not run broad catch-all cleanup there; primary cleanup belongs in `afterAll` / `afterEach`.
 
 4. **Verify cleanup works** — run the test twice in a row locally. Second run fails → cleanup is incomplete.
 
@@ -190,21 +192,22 @@ Read the `scout-ui-testing` or `scout-api-testing` skill for implementation deta
 Key rules:
 - **Tags are required** — Scout validates UI test tags at runtime
 - **One suite per file** — single top-level `test.describe()` or `spaceTest.describe()`
+- **One role + one flow** — split when roles or flows diverge, or when the spec would become a worker bottleneck or give a skip a large blast radius; aim for about a minute per spec.
 - **UI actions in page objects**, assertions in specs
 - **API-based setup/teardown** via `apiServices` / `kbnClient`
 - **Use `test.step()`** for multi-step flows to reuse browser context
 - **Parallelize when possible** — use `spaceTest` + `scoutSpace` for worker-isolated spaces
 - **Test fixture** for per-test isolated setup; **Worker fixture** for shared setup
 - **Page objects** encapsulate selectors and actions; assertions stay in specs
-- **EUI test helpers** — drive EUI components through the `page.components` fixture (e.g. `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`); Scout pre-binds them to the page, so don't import from `@elastic/eui-test-helpers` directly
+- **EUI test helpers** — drive non-trivial EUI components through published Component Objects via the `page.components` fixture (e.g. `page.components.comboBox(testSubj)`, `page.components.dataGrid(testSubj)`); Scout pre-binds them to the page, so don't import from `@elastic/eui-test-helpers` directly. Use existing `Eui*Wrapper` classes only as compatibility fallbacks when no Component Object exists; don't add or extend wrappers in a test suite.
 - **All created data must be cleaned up** — see Step 3b
 
 ### Step 5: Review and verify `[low freedom — mandatory checklist]`
 
 1. Run the `scout-best-practices-reviewer` skill against the new test
 2. **Make sure the test fails** — intentionally break the feature and confirm the test catches it
-3. Run locally: `node scripts/scout.js run-tests --stateful --testFiles <path>`
-4. Update manifests: `node scripts/scout.js update-test-config-manifests`
+3. Run locally: `node scripts/scout run-tests --arch stateful --domain classic --testFiles <path>`
+4. Update manifests: `node scripts/scout update-test-config-manifests`
 5. Open a PR with **only this spec file's migration** (one spec per PR)
 6. **Run the [Flaky Test Runner](https://ci-stats.kibana.dev/trigger_flaky_test_runner)** — do not merge until stable
 
@@ -216,7 +219,7 @@ After the Scout test is verified:
 2. Remove orphaned code (tasks, screens, objects only used by the deleted test)
 3. Check for orphaned imports (grep to verify no other usages)
 4. Remove from all relevant config/index files
-5. Update manifests: `node scripts/scout.js update-test-config-manifests`
+5. Update manifests: `node scripts/scout update-test-config-manifests`
 
 ## Common mistakes
 
@@ -229,13 +232,14 @@ After the Scout test is verified:
 - Using `page.waitForLoadState('networkidle')` — anti-pattern, actively removed from Scout tests; wait for specific elements instead
 - Using short custom timeouts on `waitFor()` (e.g., 3s) — causes CI flakiness; use the default (10s)
 - Adding explicit waits before `clear()`, `fill()`, `click()` — these auto-wait; the extra wait is redundant
-- Specifying `{ state: 'visible' }` on `waitFor()` — it's the default, omit it
+- Using a bare `waitFor()` for a readiness signal — prefer `waitFor({ state: 'visible' })` so the expected state is explicit
 - Missing Scout tags (validated at runtime)
 - Using `esArchiver` for system indices (use `kbnClient`)
 - Not parallelizing tests that could run in parallel
 - Putting assertions in page objects (keep in specs)
 - Skipping the "make sure your test fails" verification
 - Batching multiple spec migrations into a single PR
+- Porting a large Cypress spec 1:1 into one Scout file instead of splitting by role and user flow
 - Merging without running the Flaky Test Runner
 - Using `fill()` on Kibana query bars — `QueryStringInput` submits React props, not DOM value; use `pressSequentially()` (see best practices)
 - Asserting `.euiTableRow` count as 0 — `EuiBasicTable` always renders an empty-state row; assert on the message text instead (see best practices)
@@ -266,4 +270,4 @@ Open only what you need:
 
 Load the matching skill when migrating tests from that solution:
 
-- **Security Solution** (tests in `x-pack/solutions/security/`): `x-pack/solutions/security/plugins/security_solution/.agents/skills/cypress-to-scout-migration/SKILL.md`
+- **Security Solution** (tests in `x-pack/solutions/security/`): `x-pack/solutions/security/plugins/security_solution/.agents/skills/security-cypress-to-scout-migration/SKILL.md`

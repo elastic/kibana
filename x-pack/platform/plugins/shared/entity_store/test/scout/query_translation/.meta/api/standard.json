@@ -1,8 +1,7 @@
 {
-  "sha1": "33c139b566bd91acd13e709c5c9e56d959940179",
+  "sha1": "3a4696ad4061db0002981f09a349f5f7d1808d13",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
     {
@@ -17,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 97,
+        "line": 103,
         "column": 22
       }
     },
@@ -33,8 +32,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 115,
-        "column": 25
+        "line": 121,
+        "column": 29
       }
     },
     {
@@ -49,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 128,
-        "column": 5
+        "line": 132,
+        "column": 4
       }
     },
     {
@@ -65,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 137,
-        "column": 91
+        "line": 144,
+        "column": 50
       }
     },
     {
@@ -81,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 144,
-        "column": 88
+        "line": 151,
+        "column": 75
       }
     },
     {
@@ -97,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -113,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -129,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -145,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -161,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -177,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -193,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -209,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -225,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -241,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -257,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -273,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -289,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -305,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -321,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -337,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -353,24 +352,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
-      }
-    },
-    {
-      "id": "45b3d09166622fb-ffede76b443a709",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-okta-user-id\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -385,40 +368,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
-      }
-    },
-    {
-      "id": "45b3d09166622fb-0320318eb1a5364",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-ad-user-name-domain\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
-      }
-    },
-    {
-      "id": "45b3d09166622fb-87402f3901cb755",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-okta-from-dataset\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -433,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -449,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -465,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -481,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 159,
-        "column": 5
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -497,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 176,
-        "column": 4
+        "line": 181,
+        "column": 7
       }
     },
     {
@@ -513,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 176,
-        "column": 4
+        "line": 181,
+        "column": 7
       }
     },
     {
@@ -529,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 176,
-        "column": 4
+        "line": 181,
+        "column": 7
       }
     },
     {
@@ -545,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 176,
-        "column": 4
+        "line": 181,
+        "column": 7
       }
     },
     {
@@ -561,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 205,
-        "column": 3
+        "line": 211,
+        "column": 6
       }
     },
     {
@@ -577,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 233,
-        "column": 22
+        "line": 239,
+        "column": 16
       }
     },
     {
@@ -593,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 250,
-        "column": 73
+        "line": 257,
+        "column": 19
       }
     },
     {
@@ -609,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 257,
-        "column": 46
+        "line": 264,
+        "column": 34
       }
     },
     {
@@ -625,8 +576,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 268,
-        "column": 22
+        "line": 273,
+        "column": 14
       }
     },
     {
@@ -641,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 311,
-        "column": 11
+        "line": 317,
+        "column": 38
       }
     },
     {
@@ -657,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 326,
-        "column": 28
+        "line": 333,
+        "column": 9
       }
     },
     {
@@ -673,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 51,
+        "line": 57,
         "column": 11
       }
     },
@@ -689,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 64,
-        "column": 54
+        "line": 71,
+        "column": 41
       }
     },
     {
@@ -705,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 84,
-        "column": 41
+        "line": 91,
+        "column": 33
       }
     },
     {
@@ -721,7 +672,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 98,
+        "line": 104,
         "column": 14
       }
     },
@@ -737,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 107,
-        "column": 33
+        "line": 114,
+        "column": 25
       }
     },
     {
@@ -753,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 131,
-        "column": 16
+        "line": 137,
+        "column": 25
       }
     },
     {
@@ -769,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 151,
-        "column": 13
+        "line": 156,
+        "column": 9
       }
     },
     {
@@ -785,8 +736,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 169,
-        "column": 22
+        "line": 175,
+        "column": 8
       }
     },
     {
@@ -801,8 +752,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 190,
-        "column": 24
+        "line": 197,
+        "column": 16
       }
     },
     {
@@ -817,8 +768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 190,
-        "column": 24
+        "line": 197,
+        "column": 16
       }
     },
     {
@@ -833,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 190,
-        "column": 24
+        "line": 197,
+        "column": 16
       }
     },
     {
@@ -849,8 +800,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 190,
-        "column": 24
+        "line": 197,
+        "column": 16
       }
     },
     {
@@ -865,8 +816,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 212,
-        "column": 25
+        "line": 218,
+        "column": 29
       }
     },
     {
@@ -881,8 +832,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/esql_translation.spec.ts",
-        "line": 222,
-        "column": 14
+        "line": 228,
+        "column": 41
       }
     },
     {
@@ -897,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 119,
+        "line": 125,
         "column": 40
       }
     },
@@ -913,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 119,
+        "line": 125,
         "column": 40
       }
     },
@@ -929,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 119,
+        "line": 125,
         "column": 40
       }
     },
@@ -945,392 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 119,
+        "line": 125,
         "column": 40
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-e1ca0ce15d2b750",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for documents-filter-outcome-failure",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 146,
-        "column": 20
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-76a8dbf7b198c99",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for postagg-fail-no-idp-signal-non-idp",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 146,
-        "column": 20
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-0ee4aab18f76f37",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for postagg-fail-illegal-idp-shape",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 146,
-        "column": 20
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-1a47fe31f75248c",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-user-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-e514b7c673e635c",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for non-idp-asset-azure-user-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-92d4fc4edac9bbc",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-entra-id-module-user-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-0256cb1f0beaeee",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-o365-user-id-priority",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-311f068244f8d17",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-o365-metrics-user-id-only",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-0eb12039befabe7",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-ad-user-name-domain",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-08494c882740ff0",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-user-email",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-0a3169cbe98ab43",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-aws-user-name-domain",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-7ec2baf2e944287",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-gcp-user-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-01be88842d3773a",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-user-id-empty-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-44ad1aa1e60f7c8",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-azure-user-id-null-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-adeb961cb6dadcd",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-o365-user-name-only",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-c616cf89679f2bd",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-ad-user-name-only",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-c0ec4075adc6292",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-email-over-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-9ca8c1dd9ecbe49",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-entra-user-name",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-08a2ef749588bff",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-aws-empty-domain",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-21d73d111b4401e",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-gcp-null-domain",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-e7bd1c1b9e3c48e",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-no-host",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-2f9e9c25ffa342a",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-gcp-no-host",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-254c2a37114b74d",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-azure-no-host",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-f8aa7d8afc9c0ec",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-with-host-local",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
       }
     },
     {
@@ -1345,24 +912,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-f9fe91592ccea9b",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-azure-null-kind-email",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 152,
+        "column": 29
       }
     },
     {
@@ -1377,8 +928,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 152,
+        "column": 29
       }
     },
     {
@@ -1393,8 +944,408 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-e1ca0ce15d2b750",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for documents-filter-outcome-failure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-76a8dbf7b198c99",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for postagg-fail-no-idp-signal-non-idp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-0ee4aab18f76f37",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for postagg-fail-illegal-idp-shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-1a47fe31f75248c",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-user-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-e514b7c673e635c",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for non-idp-asset-azure-user-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-92d4fc4edac9bbc",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-entra-id-module-user-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-0256cb1f0beaeee",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-o365-user-id-priority",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-311f068244f8d17",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-o365-metrics-user-id-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-0eb12039befabe7",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-ad-user-name-domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-08494c882740ff0",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-user-email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-0a3169cbe98ab43",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-aws-user-name-domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-7ec2baf2e944287",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-gcp-user-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-01be88842d3773a",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-user-id-empty-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-44ad1aa1e60f7c8",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-azure-user-id-null-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-adeb961cb6dadcd",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-o365-user-name-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-c616cf89679f2bd",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-ad-user-name-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-c0ec4075adc6292",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-okta-email-over-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-9ca8c1dd9ecbe49",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-entra-user-name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-08a2ef749588bff",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-aws-empty-domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-21d73d111b4401e",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-asset-gcp-null-domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-e7bd1c1b9e3c48e",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-no-host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-2f9e9c25ffa342a",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-gcp-no-host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-254c2a37114b74d",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-azure-no-host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-f8aa7d8afc9c0ec",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for asset-cloud-provider-aws-with-host-local",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-f9fe91592ccea9b",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-azure-null-kind-email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -1409,8 +1360,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -1425,8 +1376,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -1441,8 +1392,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -1457,8 +1408,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -1473,8 +1424,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 156,
-        "column": 6
+        "line": 161,
+        "column": 9
       }
     },
     {
@@ -1489,8 +1440,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 178,
-        "column": 21
+        "line": 184,
+        "column": 31
       }
     }
   ]

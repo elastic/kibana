@@ -23,11 +23,15 @@ interface State {
 }
 
 export class ClustersView extends Component<DetailViewProps, State> {
-  static shouldShow = (request: Request) =>
-    Boolean(
-      (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
-        (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
-    );
+  static shouldShow = (request: Request, isCpsMultiProject?: boolean) =>
+    isCpsMultiProject
+      ? false
+      : Boolean(
+          (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
+            ?._shards ||
+            (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse
+              ?._clusters
+        );
 
   constructor(props: DetailViewProps) {
     super(props);

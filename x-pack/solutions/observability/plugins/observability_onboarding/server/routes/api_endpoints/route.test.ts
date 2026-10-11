@@ -167,7 +167,7 @@ describe('create_key handler', () => {
   it.each([ApiEndpointId.Supabase, ApiEndpointId.Vercel])(
     'names vendor keys after the endpoint id for %s',
     async (id) => {
-      const factory = jest.fn().mockResolvedValue({ encoded: 'encoded-key' });
+      const factory = jest.fn().mockResolvedValue({ id: 'api-key-id', encoded: 'encoded-key' });
       (resolveApiKeyFactory as jest.Mock).mockReturnValue(factory);
 
       const result = await handler(createResources({ id }));
@@ -176,7 +176,7 @@ describe('create_key handler', () => {
         application: [APM_EVENT_WRITE_APPLICATION],
       });
       expect(factory).toHaveBeenCalledWith(expect.anything(), `onboarding-${id}-api`);
-      expect(result).toEqual({ encodedApiKey: 'encoded-key' });
+      expect(result).toEqual({ apiKeyId: 'api-key-id', encodedApiKey: 'encoded-key' });
     }
   );
 

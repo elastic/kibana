@@ -10,9 +10,11 @@ import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { OverlayStart } from '@kbn/core/public';
 import { CoreScopedHistory, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { coreMock, notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -31,7 +33,7 @@ jest.mock('@elastic/eui/lib/components/overlay_mask', () => {
 });
 
 const space: Space = {
-  id: 'my-space',
+  id: asSpaceId('my-space'),
   name: 'My Space',
   disabledFeatures: [],
 };
@@ -39,7 +41,7 @@ const space: Space = {
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
   new KibanaFeature({
-    id: 'feature-1',
+    id: asSpaceId('feature-1'),
     name: 'feature 1',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
@@ -50,7 +52,12 @@ featuresStart.getFeatures.mockResolvedValue([
 const reportEvent = jest.fn();
 const eventTracker = new EventTracker({ reportEvent });
 
-const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithIntl = (ui: React.ReactElement) =>
+  render(
+    <I18nProvider>
+      <MockAppHeaderProvider>{ui}</MockAppHeaderProvider>
+    </I18nProvider>
+  );
 
 describe('ManageSpacePage', () => {
   beforeAll(() => {
@@ -61,6 +68,7 @@ describe('ManageSpacePage', () => {
   });
 
   const history = scopedHistoryMock.create();
+  history.createHref.mockImplementation(({ pathname } = { pathname: '/' }) => pathname ?? '/');
   const coreStart = coreMock.createStart();
   const navigationServices = {
     http: coreStart.http,
@@ -475,7 +483,7 @@ describe('ManageSpacePage', () => {
     spacesManager.createSpace = jest.fn(spacesManager.createSpace);
     spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
 
-    const mockFetchProjects = jest.fn().mockResolvedValue({
+    const mockProjectRoutingFetchResult = {
       origin: {
         _alias: 'local_project',
         _id: 'abcde1234567890',
@@ -492,13 +500,18 @@ describe('ManageSpacePage', () => {
           env: 'local',
         },
       ],
-    });
+    };
+
+    const mockFetchProjects = jest.fn().mockResolvedValue(mockProjectRoutingFetchResult);
 
     renderWithIntl(
       <KibanaContextProvider
         services={{
           cps: {
-            cpsManager: { fetchProjects: mockFetchProjects },
+            cpsManager: {
+              fetchProjects: mockFetchProjects,
+              getConfigurationLinks: jest.fn(),
+            },
           },
           application: {
             capabilities: {
@@ -547,8 +560,10 @@ describe('ManageSpacePage', () => {
 
     await updateSolutionView('oblt');
 
-    // Click "This project" (sets routing to _alias:_origin)
-    await userEvent.click(screen.getByRole('button', { name: /this project/i }));
+    // deselect origin project
+    await userEvent.click(
+      screen.getByTestId(`projectPickerListItemSwitch-${mockProjectRoutingFetchResult.origin._id}`)
+    );
 
     await userEvent.click(screen.getByTestId('save-space-button'));
 
@@ -562,7 +577,7 @@ describe('ManageSpacePage', () => {
       name: 'New Space Name',
       description: 'some description',
       solution: 'oblt',
-      projectRouting: '_alias:_origin',
+      projectRouting: `_alias:* AND (_id:* AND NOT _id:${mockProjectRoutingFetchResult.origin._id})`,
     });
   }, 10000);
 

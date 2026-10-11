@@ -11,6 +11,7 @@ import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors'
 import { bulkDeleteFileAttachments, retrieveFilesIgnoringNotFound } from './bulk_delete';
 import { MAX_DELETE_FILES } from '../../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
+import { commentFileExternalReference } from '../cases/mock';
 
 describe('bulk_delete', () => {
   describe('bulkDeleteFileAttachments', () => {
@@ -27,10 +28,84 @@ describe('bulk_delete', () => {
 
         await expect(
           bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
         );
       });
+    });
+  });
+
+  describe('attachmentsDeleted event', () => {
+    const casesClient = createCasesClientMock();
+    const clientArgs = createCasesClientMockArgs();
+    const { id, version, ...attributes } = commentFileExternalReference;
+    const fileAttachment = {
+      id: 'file-attachment-1',
+      type: 'cases-comments',
+      attributes,
+      references: [],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+      ]);
+    });
+
+    it('emits the event for the deleted file attachments', async () => {
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['file-attachment-1'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('only emits the event for the file attachments confirmed deleted', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+        fileAttachment,
+        { ...fileAttachment, id: 'file-attachment-2' },
+      ]);
+      clientArgs.services.attachmentService.bulkDelete.mockResolvedValueOnce(['file-attachment-2']);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1', 'file-2'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          attachmentIds: ['file-attachment-2'],
+          attachmentType: 'externalReference',
+          owner: 'securitySolution',
+        }
+      );
+    });
+
+    it('does not emit the event when no file attachments were found', async () => {
+      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([]);
+
+      await bulkDeleteFileAttachments(
+        { caseId: 'mock-id-1', fileIds: ['file-1'] },
+        clientArgs,
+        casesClient
+      );
+
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).not.toHaveBeenCalled();
     });
   });
 
@@ -53,7 +128,7 @@ describe('bulk_delete', () => {
       const fileNotFound = new FileNotFoundError('not found');
 
       expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc'], mockLogger)).toEqual([]);
-      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to find file id: abc: Error: not found",
@@ -65,7 +140,7 @@ describe('bulk_delete', () => {
       const fileNotFound = new FileNotFoundError('not found');
 
       expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc', '123'], mockLogger)).toEqual([]);
-      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to find file: Error: not found",
@@ -78,10 +153,10 @@ describe('bulk_delete', () => {
 
       expect.assertions(2);
 
-      expect(() => retrieveFilesIgnoringNotFound([otherError], ['abc'], mockLogger)).toThrowError(
+      expect(() => retrieveFilesIgnoringNotFound([otherError], ['abc'], mockLogger)).toThrow(
         otherError
       );
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('throws when encountering an error that is not a file not found after a valid file', async () => {
@@ -92,8 +167,8 @@ describe('bulk_delete', () => {
 
       expect(() =>
         retrieveFilesIgnoringNotFound([fileResult, otherError], ['1', '2'], mockLogger)
-      ).toThrowError(otherError);
-      expect(mockLogger.warn).not.toBeCalled();
+      ).toThrow(otherError);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

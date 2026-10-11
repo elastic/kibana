@@ -44,7 +44,7 @@ describe('push', () => {
 
     it('should call find with correct arguments', async () => {
       await getPushedTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           references: {
             nested: {

@@ -116,6 +116,12 @@ jest.mock('../../../entity_resolution/hooks/use_resolution_group', () => ({
   useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
 }));
 
+const mockUseEntityFromStore = jest.fn().mockReturnValue({ entityRecord: null });
+
+jest.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
+}));
+
 const mockUseStableExpandableFlyoutState = jest.fn().mockReturnValue({});
 
 jest.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => ({
@@ -186,6 +192,7 @@ describe('RiskInputsTab', () => {
     mockGetEuidFromObject.mockReturnValue('user:entity-1');
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
     mockUseGetWatchlists.mockReturnValue({ data: [] });
+    mockUseEntityFromStore.mockReturnValue({ entityRecord: null });
     mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseRiskScoreHistory.mockReturnValue({ data: undefined, isFetching: false });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
@@ -476,6 +483,119 @@ describe('RiskInputsTab', () => {
     );
 
     expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+2.22');
+  });
+
+  // Client half of the fix for https://github.com/elastic/kibana/issues/280414.
+  //
+  // The Contexts row used to show the level stored on the risk score, which is only set when the
+  // score is written, so it could be out of date. It now reads the entity store record. The server
+  // half writes a fresh score, so in the normal case both agree and the contribution still shows.
+  // A `-` means the score has not caught up yet, or the recalculation did not land.
+  describe('asset criticality read from the entity store record', () => {
+    const scoreWithCriticality = (criticalityLevel: string, contribution: number) => ({
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          modifiers: [
+            {
+              type: 'asset_criticality',
+              contribution,
+              metadata: { criticality_level: criticalityLevel },
+            },
+          ],
+        },
+      },
+    });
+
+    const renderWithScore = (score: unknown) => {
+      mockUseUiSetting.mockReturnValue([true]);
+      mockUseRiskScore.mockImplementation((params?: { skip?: boolean }) =>
+        params?.skip
+          ? { loading: false, error: false, data: [] }
+          : { loading: false, error: false, data: [score] }
+      );
+
+      return render(
+        <TestProviders>
+          <RiskInputsTab
+            entityType={EntityType.user}
+            entityName="elastic"
+            entityId="user:elastic"
+            onShowAlert={mockOnShowAlert}
+          />
+        </TestProviders>
+      );
+    };
+
+    it('shows the current level and blanks the contribution when the score has not caught up', () => {
+      mockUseEntityFromStore.mockReturnValue({
+        entityRecord: {
+          entity: { id: 'user:elastic', name: 'elastic' },
+          asset: { criticality: 'extreme_impact' },
+        },
+      });
+
+      const { getByTestId } = renderWithScore(scoreWithCriticality('low_impact', -2.5));
+
+      expect(getByTestId('risk-inputs-asset-criticality-badge')).toHaveTextContent(
+        'Extreme Impact'
+      );
+      const contextsTable = getByTestId('risk-input-contexts-table');
+      expect(contextsTable).not.toHaveTextContent('Low Impact');
+      // The stored contribution came from the old level, so it does not belong on this row.
+      expect(contextsTable).not.toHaveTextContent('2.50');
+    });
+
+    it('keeps the contribution when the current level matches the score', () => {
+      mockUseEntityFromStore.mockReturnValue({
+        entityRecord: {
+          entity: { id: 'user:elastic', name: 'elastic' },
+          asset: { criticality: 'high_impact' },
+        },
+      });
+
+      const { getByTestId } = renderWithScore(scoreWithCriticality('high_impact', 2.22));
+
+      expect(getByTestId('risk-inputs-asset-criticality-badge')).toHaveTextContent('High Impact');
+      expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+2.22');
+    });
+
+    it('renders the row when criticality was assigned to an entity the score has none for', () => {
+      mockUseEntityFromStore.mockReturnValue({
+        entityRecord: {
+          entity: { id: 'user:elastic', name: 'elastic' },
+          asset: { criticality: 'high_impact' },
+        },
+      });
+
+      const { getByTestId } = renderWithScore(riskScore);
+
+      expect(getByTestId('risk-input-contexts-title')).toBeInTheDocument();
+      expect(getByTestId('risk-inputs-asset-criticality-badge')).toHaveTextContent('High Impact');
+    });
+
+    it('drops the row when criticality was removed from the entity', () => {
+      // The record loaded fine. No `asset.criticality` on it means the level was removed.
+      mockUseEntityFromStore.mockReturnValue({
+        entityRecord: { entity: { id: 'user:elastic', name: 'elastic' } },
+      });
+
+      const { queryByTestId } = renderWithScore(scoreWithCriticality('high_impact', 4.5));
+
+      expect(queryByTestId('risk-inputs-asset-criticality-badge')).not.toBeInTheDocument();
+      expect(queryByTestId('risk-input-contexts-title')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the score when the entity record is unavailable', () => {
+      mockUseEntityFromStore.mockReturnValue({ entityRecord: null });
+
+      const { getByTestId } = renderWithScore(scoreWithCriticality('low_impact', -2.5));
+
+      expect(getByTestId('risk-inputs-asset-criticality-badge')).toHaveTextContent('Low Impact');
+      expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('-2.50');
+    });
   });
 
   it('shows extra alerts contribution message', () => {
@@ -874,6 +994,70 @@ describe('RiskInputsTab', () => {
     const contextsTable = getByTestId('risk-input-contexts-table');
     expect(contextsTable).toHaveTextContent('entity-1');
     expect(contextsTable).not.toHaveTextContent('elastic');
+  });
+
+  it('keeps reading the score in the resolution view even when the entity record differs', () => {
+    // The resolution view is about the whole group, not the entity you opened, so the entity
+    // store record must not override it.
+    const resolutionRiskScore = {
+      '@timestamp': '2021-08-19T16:00:00.000Z',
+      user: {
+        name: 'elastic',
+        risk: {
+          ...riskScore.user.risk,
+          modifiers: [
+            {
+              type: 'asset_criticality',
+              contribution: 4.5,
+              metadata: { criticality_level: 'high_impact' },
+            },
+          ],
+        },
+      },
+    };
+
+    mockUseEntityFromStore.mockReturnValue({
+      entityRecord: {
+        entity: { id: 'user:elastic', name: 'elastic' },
+        asset: { criticality: 'extreme_impact' },
+      },
+    });
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: { id: 'user:elastic', name: 'elastic', attributes: { watchlists: [] } },
+          asset: { criticality: 'high_impact' },
+        },
+        aliases: [
+          {
+            entity: { id: 'user:entity-1', name: 'entity-1', attributes: { watchlists: [] } },
+            asset: { criticality: 'high_impact' },
+          },
+        ],
+        group_size: 2,
+      },
+    });
+    mockUseRiskScore.mockImplementation((params?: { filterQuery?: unknown }) =>
+      isResolutionFilter(params)
+        ? { loading: false, error: false, data: [resolutionRiskScore] }
+        : { loading: false, error: false, data: [riskScore] }
+    );
+
+    const { getByText, getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+          entityId="user:elastic"
+        />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByText('Resolution group risk score'));
+
+    expect(getByTestId('risk-inputs-asset-criticality-badge')).toHaveTextContent('High Impact');
+    expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+4.50');
   });
 
   it('initializes to resolution view when flyout state subTab is "resolution"', () => {
@@ -1341,6 +1525,29 @@ describe('RiskInputsTab', () => {
       expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+5.00');
     });
 
+    it('keeps reading the score when a point in time is selected', () => {
+      // A point-in-time row shows an old score, so the entity's current level must not replace
+      // the level that score was written with.
+      enableHistoryFlag();
+      mockUseEntityFromStore.mockReturnValue({
+        entityRecord: {
+          entity: { id: 'user:elastic', name: 'elastic' },
+          asset: { criticality: 'extreme_impact' },
+        },
+      });
+      mockUseRiskScoreHistory.mockReturnValue({
+        data: { entity_id: 'user:elastic', entity_type: 'user', entries: [pitEntry] },
+        isFetching: false,
+      });
+
+      const { getByTestId } = renderTab();
+
+      fireEvent.click(getByTestId('mockSelectPoint'));
+
+      expect(getByTestId('risk-inputs-asset-criticality-badge')).toHaveTextContent('High Impact');
+      expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+5.00');
+    });
+
     it('returns to the latest record when the selection is cleared', () => {
       enableHistoryFlag();
       mockUseRiskScoreHistory.mockReturnValue({
@@ -1496,6 +1703,7 @@ describe('RiskInputsTab - alert preview navigation', () => {
     mockUseStableExpandableFlyoutState.mockReturnValue({});
     mockUseGetWatchlists.mockReturnValue({ data: [] });
     mockUseResolutionGroup.mockReturnValue({ data: undefined });
+    mockUseEntityFromStore.mockReturnValue({ entityRecord: null });
     mockUseRiskScore.mockReturnValue({ loading: false, error: false, data: [riskScore] });
     mockUseRiskContributingAlerts.mockReturnValue({
       loading: false,

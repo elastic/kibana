@@ -16,7 +16,8 @@
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/tooling-log",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/core-test-helpers-kbn-server"
   ],
   "exclude": [
     "target/**/*"

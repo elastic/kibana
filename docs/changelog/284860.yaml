@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/284860
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: "Create workflow execution indices as hidden indices"

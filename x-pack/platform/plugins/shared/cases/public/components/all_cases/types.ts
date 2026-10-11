@@ -9,24 +9,42 @@ import type * as rt from 'io-ts';
 import type { FilterOptions, QueryParams, SortOrder } from '../../../common/ui';
 import type { AllCasesURLQueryParamsRt } from './schema';
 
-export const CASES_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
-
-export interface EuiBasicTableSortTypes {
-  field: string;
-  direction: SortOrder;
+export interface FilterConfigState {
+  key: string;
+  isActive: boolean;
 }
 
+export type FilterChangeHandler = (params: Partial<FilterOptions>) => void;
+
+export interface FilterConfigRenderParams {
+  filterOptions: FilterOptions;
+}
+
+export interface FilterConfig {
+  key: string;
+  label: string;
+  isActive: boolean;
+  isAvailable: boolean;
+  /**
+   * Returns a partial FilterOptions that clears this filter's value.
+   * Receives the current filterOptions so array-shaped filters (extendedFieldFilters)
+   * can remove only their own entries instead of wiping the whole array.
+   */
+  getEmptyOptions: (filterOptions: FilterOptions) => Partial<FilterOptions>;
+  render: (params: FilterConfigRenderParams) => React.ReactNode;
+}
+
+export const CASES_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
+
 export interface EuiBasicTableOnChange {
-  page: {
+  page?: {
     index: number;
     size: number;
   };
-  sort?: EuiBasicTableSortTypes;
-}
-export interface Solution {
-  id: string;
-  label: string;
-  iconType: string;
+  sort?: {
+    field: string;
+    direction: SortOrder;
+  };
 }
 
 export interface CasesColumnSelection {

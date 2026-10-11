@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { useLayoutEffect } from 'react';
+import React, { cloneElement, isValidElement, useLayoutEffect, useState } from 'react';
 
 import classNames from 'classnames';
 import { useValues } from 'kea';
 
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { FlashMessages } from '../flash_messages';
 import { HttpLogic } from '../http';
@@ -23,7 +25,11 @@ import { KibanaLogic } from '../kibana';
 import type { BreadcrumbTrail } from '../kibana_chrome/generate_breadcrumbs';
 import { Loading } from '../loading';
 
-import { EndpointsHeaderAction } from './endpoints_header_action';
+import {
+  createEndpointsAppHeaderMenuItem,
+  EndpointsApiKeysFlyout,
+  EndpointsHeaderAction,
+} from './endpoints_header_action';
 import * as Styles from './styles';
 
 /*
@@ -38,6 +44,7 @@ import * as Styles from './styles';
  */
 
 export type PageTemplateProps = KibanaPageTemplateProps & {
+  appHeader?: React.ReactNode;
   customPageSections?: boolean; // If false, automatically wraps children in an EuiPageSection
   emptyState?: React.ReactNode;
   hideFlashMessages?: boolean;
@@ -51,7 +58,22 @@ export type PageTemplateProps = KibanaPageTemplateProps & {
   hideEmbeddedConsole?: boolean;
 };
 
+const mergeEndpointsMenuItem = (
+  menu: AppHeaderMenu | undefined,
+  item: NonNullable<AppHeaderMenu['items']>[number]
+): AppHeaderMenu => {
+  const items = menu?.items ?? [];
+  if (items.some((existing) => existing.id === item.id)) {
+    return menu ?? { items: [item] };
+  }
+  return {
+    ...menu,
+    items: [...items, item],
+  };
+};
+
 export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = ({
+  appHeader,
   children,
   className,
   customPageSections,
@@ -81,14 +103,31 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       <SolutionViewSwitchCallout currentSolution="es" />
     ) : undefined;
 
+  const [isEndpointsFlyoutOpen, setIsEndpointsFlyoutOpen] = useState(false);
+  const showEndpointsInAppHeader = Boolean(appHeader) && useEndpointHeaderActions;
+
   useLayoutEffect(() => {
-    if (useEndpointHeaderActions) {
+    if (useEndpointHeaderActions && !appHeader) {
       renderHeaderActions(EndpointsHeaderAction);
     }
     return () => {
       renderHeaderActions(undefined);
     };
-  }, []);
+  }, [appHeader, renderHeaderActions, useEndpointHeaderActions]);
+
+  const resolvedAppHeader =
+    showEndpointsInAppHeader && isValidElement<{ menu?: AppHeaderMenu }>(appHeader)
+      ? cloneElement(appHeader, {
+          menu: mergeEndpointsMenuItem(
+            appHeader.props.menu,
+            createEndpointsAppHeaderMenuItem({
+              isSelected: isEndpointsFlyoutOpen,
+              onToggle: () => setIsEndpointsFlyoutOpen((open) => !open),
+            })
+          ),
+        })
+      : appHeader;
+
   return (
     <KibanaPageTemplate
       {...pageTemplateProps}
@@ -108,12 +147,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
       }
     >
       {setPageChrome}
+      {resolvedAppHeader}
       {readOnlyMode && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
-            color="warning"
-            iconType="lock"
             title={i18n.translate('xpack.enterpriseSearch.readOnlyMode.warning', {
               defaultMessage:
                 'Enterprise Search is in read-only mode. You will be unable to make changes such as creating, editing, or deleting.',
@@ -136,6 +174,9 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         <consolePlugin.EmbeddableConsole />
       ) : (
         <></>
+      )}
+      {showEndpointsInAppHeader && isEndpointsFlyoutOpen && (
+        <EndpointsApiKeysFlyout onClose={() => setIsEndpointsFlyoutOpen(false)} />
       )}
     </KibanaPageTemplate>
   );

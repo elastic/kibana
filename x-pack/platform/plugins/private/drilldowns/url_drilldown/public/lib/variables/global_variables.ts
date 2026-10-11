@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
+import { monaco } from '@kbn/code-editor';
+import type { UrlTemplateEditorVariable } from '../components/url_template_editor';
 import type { UrlDrilldownGlobalScope } from '../types';
 import { txtValue } from './i18n';
 

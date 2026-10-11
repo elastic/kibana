@@ -7,7 +7,7 @@ exports[`AddItemPopover renders the popover 1`] = `
     id="add_item_popover"
   >
     <button
-      class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-primary"
+      class="euiButton emotion-euiButtonDisplay-s-base-primary"
       data-test-subj="mlFilterListOpenNewItemsPopoverButton"
       type="button"
     >

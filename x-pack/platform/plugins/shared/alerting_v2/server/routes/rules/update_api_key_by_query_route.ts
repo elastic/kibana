@@ -32,6 +32,7 @@ export class UpdateApiKeyByQueryRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
+    access: 'public' as const,
     summary: 'Update the API key of rules matching a query (dry-run by default)',
     description:
       'Rotates each matching rule executor task API key to one derived from the current user’s credentials.',

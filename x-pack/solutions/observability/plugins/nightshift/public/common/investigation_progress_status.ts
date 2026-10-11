@@ -7,6 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
+import type { InvestigationRunStatus } from '@kbn/significant-events-schema';
+
+const RUN_STATUS_TO_INVESTIGATION_STATUS: Record<InvestigationRunStatus, InvestigationStatus> = {
+  pending: 'running',
+  complete: 'complete',
+  failed: 'failed',
+  unavailable: 'unavailable',
+};
+
+export const toInvestigationStatus = (status: InvestigationRunStatus): InvestigationStatus =>
+  RUN_STATUS_TO_INVESTIGATION_STATUS[status];
 
 export const getInvestigationProgressStatusLabel = (isInvestigated: boolean): string =>
   isInvestigated

@@ -56,6 +56,7 @@ describe('transformUpdateBody', () => {
       },
       scope: {
         alerting: {
+          enabled: true,
           kql: "_id: '1234'",
           filters: [],
         },

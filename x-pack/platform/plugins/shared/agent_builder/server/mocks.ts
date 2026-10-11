@@ -21,6 +21,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     agents: {
       register: jest.fn(),
       registerType: jest.fn(),
+      registerAiIndexResolver: jest.fn(),
     },
     tools: {
       register: jest.fn(),
@@ -31,6 +32,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     renderers: {
       register: jest.fn(),
     },
+    conversationEvents: {
+      register: jest.fn(),
+    },
     skills: {
       register: jest.fn(),
     },
@@ -38,6 +42,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
       register: jest.fn(),
     },
     plugins: {
+      register: jest.fn(),
+    },
+    conversationTemplates: {
       register: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },
@@ -77,6 +84,19 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
         get: jest.fn(),
         list: jest.fn(),
       }),
+    },
+    attachments: {
+      getScopedClient: jest.fn().mockResolvedValue({
+        create: jest.fn(),
+        get: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+        list: jest.fn().mockResolvedValue({ results: [], total_token_estimate: 0 }),
+      }),
+    },
+    conversationTemplates: {
+      get: jest.fn(),
+      list: jest.fn(),
     },
   };
 };

@@ -83,9 +83,6 @@ export const ReplacementCard = ({ replacements }: Props) => {
   return (
     <div
       css={css`
-        & .euiAccordion__button {
-          color: ${euiTheme.colors.link};
-        }
         & .euiAccordion-isOpen .euiAccordion__childWrapper {
           margin-top: ${euiTheme.size.m};
         }

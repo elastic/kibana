@@ -23,9 +23,9 @@ Scout requires Kibana and Elasticsearch to be running before running tests again
 Start the Kibana and Elasticsearch servers once:
 
 ```bash
-node scripts/scout.js start-server \
+node scripts/scout start-server \
   --arch <stateful|serverless> \
-  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai>
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai|vectordb>
 ```
 
 :::::
@@ -51,9 +51,9 @@ We recommend checking out Playwright's [**UI mode**](./debugging.md#playwright-u
 ### Alternative: one command to start servers + run tests [scout-run-tests-cli]
 
 ```bash
-node scripts/scout.js run-tests \
+node scripts/scout run-tests \
   --arch <stateful|serverless> \
-  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai> \
+  --domain <classic|search|observability_complete|observability_logs_essentials|security_complete|security_essentials|security_ease|workplaceai|vectordb> \
   --config <plugin-path>/test/scout/ui/playwright.config.ts
 ```
 
@@ -64,7 +64,7 @@ When Scout starts Kibana and Elasticsearch locally, it saves the server configur
 Directory:
 
 ```bash
-node scripts/scout.js run-tests \
+node scripts/scout run-tests \
   --arch <stateful|serverless> \
   --domain <domain> \
   --testFiles <plugin-path>/test/scout/ui/tests/some_dir
@@ -73,7 +73,7 @@ node scripts/scout.js run-tests \
 Comma-separated file list:
 
 ```bash
-node scripts/scout.js run-tests \
+node scripts/scout run-tests \
   --arch <stateful|serverless> \
   --domain <domain> \
   --testFiles <path/to/one.spec.ts>,<path/to/two.spec.ts>
@@ -87,23 +87,22 @@ All `--testFiles` paths must fall under the same Scout root (for example, `scout
 
 By default, Scout starts Kibana and Elasticsearch using the built-in `default` configuration set. This works for most tests and requires no extra flags. Because all suites that use the default config share the same servers, they can be grouped together in CI, saving both time and resources.
 
-If your tests need specific server-level settings that must be present at boot time (for example, feature flags that cannot be toggled at runtime), you can point Scout at a **custom configuration set** with `--serverConfigSet`. Each custom config set requires its own dedicated server instance, so prefer [runtime feature flags](./feature-flags.md#scout-feature-flags-runtime) whenever possible.
+If your tests need specific server-level settings that must be present at boot time (for example, feature flags that cannot be toggled at runtime), use a **custom configuration set**. With `start-server`, select it using `--serverConfigSet`. Each custom config set requires its own dedicated server instance, so prefer [runtime feature flags](./feature-flags.md#scout-feature-flags-runtime) whenever possible.
 
 ```bash
-node scripts/scout.js start-server \
+node scripts/scout start-server \
   --arch stateful \
   --domain classic \
   --serverConfigSet evals_entity_analytics
 ```
 
-Or with `run-tests`:
+With `run-tests`, Scout detects the configuration set from the `test/scout_<name>/` directory in the Playwright config path:
 
 ```bash
-node scripts/scout.js run-tests \
+node scripts/scout run-tests \
   --arch stateful \
   --domain classic \
-  --serverConfigSet evals_entity_analytics \
-  --config <plugin-path>/test/scout/ui/playwright.config.ts
+  --config <plugin-path>/test/scout_evals_entity_analytics/ui/playwright.config.ts
 ```
 
 See [Feature flags](./feature-flags.md#scout-feature-flags-custom-servers) for more details on when and how to use custom server configurations.

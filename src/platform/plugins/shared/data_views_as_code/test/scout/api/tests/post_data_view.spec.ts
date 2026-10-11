@@ -24,7 +24,7 @@ const INDEX_PATTERNS_READ_ROLE: KibanaRole = {
   ],
 };
 
-apiTest.describe('POST /api/data_views - as code', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('POST /api/data_views/v2 - as code', { tag: tags.deploymentAgnostic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let readOnlyApiCredentials: RoleApiCredentials;
 

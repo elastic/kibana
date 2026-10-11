@@ -14,344 +14,423 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Provider, NonEmptyString } from '../../common_attributes.gen';
 
 /**
  * LLM API configuration for attack discovery schedules
  */
+export const AttackDiscoveryApiConfig = lazySchema(() =>
+  z.object({
+    /**
+     * Connector ID
+     */
+    connector_id: z.string().max(1024).describe('Connector ID'),
+    /**
+     * Action type ID
+     */
+    action_type_id: z.string().max(1024).describe('Action type ID'),
+    /**
+     * Default system prompt ID
+     */
+    default_system_prompt_id: z.string().max(1024).optional().describe('Default system prompt ID'),
+    /**
+     * Provider
+     */
+    provider: Provider.optional().describe('Provider'),
+    /**
+     * Model
+     */
+    model: z.string().max(1024).optional().describe('Model'),
+    /**
+     * The name of the connector
+     */
+    name: z.string().max(1024).optional().describe('The name of the connector'),
+  })
+);
 export type AttackDiscoveryApiConfig = z.infer<typeof AttackDiscoveryApiConfig>;
-export const AttackDiscoveryApiConfig = z.object({
-  /**
-   * Connector ID
-   */
-  connector_id: z.string().max(1024),
-  /**
-   * Action type ID
-   */
-  action_type_id: z.string().max(1024),
-  /**
-   * Default system prompt ID
-   */
-  default_system_prompt_id: z.string().max(1024).optional(),
-  /**
-   * Provider
-   */
-  provider: Provider.optional(),
-  /**
-   * Model
-   */
-  model: z.string().max(1024).optional(),
-  /**
-   * The name of the connector
-   */
-  name: z.string().max(1024).optional(),
-});
 
 /**
  * Composite workflow configuration for alert retrieval and validation. Three independent retrieval toggles (skill_enabled, default_retrieval_enabled, alert_retrieval_workflows_enabled) compose the alert set; at least one must be enabled.
  */
+export const WorkflowConfig = lazySchema(() =>
+  z.object({
+    /**
+     * Query mode for the built-in default alert retrieval workflow. Only meaningful when default_retrieval_enabled is true.
+     */
+    alert_retrieval_mode: z
+      .enum(['custom_query', 'esql'])
+      .optional()
+      .default('custom_query')
+      .describe(
+        'Query mode for the built-in default alert retrieval workflow. Only meaningful when default_retrieval_enabled is true.'
+      ),
+    /**
+     * Array of user-created alert retrieval workflow IDs to execute. Only meaningful when alert_retrieval_workflows_enabled is true.
+     */
+    alert_retrieval_workflow_ids: z
+      .array(z.string().max(1024))
+      .optional()
+      .default([])
+      .describe(
+        'Array of user-created alert retrieval workflow IDs to execute. Only meaningful when alert_retrieval_workflows_enabled is true.'
+      ),
+    /**
+     * Toggle 3 - whether the user-created alert retrieval workflows run.
+     */
+    alert_retrieval_workflows_enabled: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe('Toggle 3 - whether the user-created alert retrieval workflows run.'),
+    /**
+     * Toggle 2 - whether the built-in default alert retrieval workflow runs.
+     */
+    default_retrieval_enabled: z
+      .boolean()
+      .optional()
+      .default(false)
+      .describe('Toggle 2 - whether the built-in default alert retrieval workflow runs.'),
+    /**
+     * ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql').
+     */
+    esql_query: z
+      .string()
+      .max(10000)
+      .optional()
+      .describe(
+        "ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql')."
+      ),
+    /**
+     * Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
+     */
+    skill_enabled: z
+      .boolean()
+      .optional()
+      .default(true)
+      .describe(
+        'Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.'
+      ),
+    /**
+     * ID of the validation workflow to use (or 'default' for built-in)
+     */
+    validation_workflow_id: z
+      .string()
+      .max(1024)
+      .optional()
+      .default('default')
+      .describe("ID of the validation workflow to use (or 'default' for built-in)"),
+  })
+);
 export type WorkflowConfig = z.infer<typeof WorkflowConfig>;
-export const WorkflowConfig = z.object({
-  /**
-   * Query mode for the built-in default alert retrieval workflow. Only meaningful when default_retrieval_enabled is true.
-   */
-  alert_retrieval_mode: z.enum(['custom_query', 'esql']).optional().default('custom_query'),
-  /**
-   * Array of user-created alert retrieval workflow IDs to execute. Only meaningful when alert_retrieval_workflows_enabled is true.
-   */
-  alert_retrieval_workflow_ids: z.array(z.string().max(1024)).optional().default([]),
-  /**
-   * Toggle 3 - whether the user-created alert retrieval workflows run.
-   */
-  alert_retrieval_workflows_enabled: z.boolean().optional().default(false),
-  /**
-   * Toggle 2 - whether the built-in default alert retrieval workflow runs.
-   */
-  default_retrieval_enabled: z.boolean().optional().default(false),
-  /**
-   * ES|QL query for alert retrieval (required when default_retrieval_enabled is true and alert_retrieval_mode is 'esql').
-   */
-  esql_query: z.string().max(10000).optional(),
-  /**
-   * Toggle 1 - whether the attack discovery skill performs its own additional alert retrieval.
-   */
-  skill_enabled: z.boolean().optional().default(true),
-  /**
-   * ID of the validation workflow to use (or 'default' for built-in)
-   */
-  validation_workflow_id: z.string().max(1024).optional().default('default'),
-});
 
 /**
  * The filter array used to define conditions for alert selection. Defaults to an empty array.
  */
+export const Filters = lazySchema(() => z.array(z.unknown()));
 export type Filters = z.infer<typeof Filters>;
-export const Filters = z.array(z.unknown());
 
 /**
  * A query condition to filter alerts
  */
+export const Query = lazySchema(() =>
+  z.object({
+    query: z.union([z.string().max(10000), z.object({}).catchall(z.unknown())]),
+    language: z.string().max(1024),
+  })
+);
 export type Query = z.infer<typeof Query>;
-export const Query = z.object({
-  query: z.union([z.string().max(10000), z.object({}).catchall(z.unknown())]),
-  language: z.string().max(1024),
-});
 
 /**
  * Attack discovery schedule configuration parameters
  */
+export const AttackDiscoveryScheduleParams = lazySchema(() =>
+  z.object({
+    /**
+     * The index pattern to get alerts from
+     */
+    alerts_index_pattern: z.string().max(1024).describe('The index pattern to get alerts from'),
+    /**
+     * LLM API configuration
+     */
+    api_config: AttackDiscoveryApiConfig.describe('LLM API configuration'),
+    /**
+     * Combined filter for alert retrieval
+     */
+    combined_filter: z
+      .object({})
+      .catchall(z.unknown())
+      .optional()
+      .describe('Combined filter for alert retrieval'),
+    /**
+     * End time for alert retrieval
+     */
+    end: z.string().max(1024).optional().describe('End time for alert retrieval'),
+    filters: Filters.optional(),
+    query: Query.optional(),
+    /**
+     * Maximum number of alerts to retrieve
+     */
+    size: z.number().describe('Maximum number of alerts to retrieve'),
+    /**
+     * Start time for alert retrieval
+     */
+    start: z.string().max(1024).optional().describe('Start time for alert retrieval'),
+    /**
+     * Workflow configuration for alert retrieval and validation
+     */
+    workflow_config: WorkflowConfig.optional().describe(
+      'Workflow configuration for alert retrieval and validation'
+    ),
+  })
+);
 export type AttackDiscoveryScheduleParams = z.infer<typeof AttackDiscoveryScheduleParams>;
-export const AttackDiscoveryScheduleParams = z.object({
-  /**
-   * The index pattern to get alerts from
-   */
-  alerts_index_pattern: z.string().max(1024),
-  /**
-   * LLM API configuration
-   */
-  api_config: AttackDiscoveryApiConfig,
-  /**
-   * Combined filter for alert retrieval
-   */
-  combined_filter: z.object({}).catchall(z.unknown()).optional(),
-  /**
-   * End time for alert retrieval
-   */
-  end: z.string().max(1024).optional(),
-  filters: Filters.optional(),
-  query: Query.optional(),
-  /**
-   * Maximum number of alerts to retrieve
-   */
-  size: z.number(),
-  /**
-   * Start time for alert retrieval
-   */
-  start: z.string().max(1024).optional(),
-  /**
-   * Workflow configuration for alert retrieval and validation
-   */
-  workflow_config: WorkflowConfig.optional(),
-});
 
+export const IntervalSchedule = lazySchema(() =>
+  z.object({
+    /**
+     * The schedule interval
+     */
+    interval: z.string().max(1024).describe('The schedule interval'),
+  })
+);
 export type IntervalSchedule = z.infer<typeof IntervalSchedule>;
-export const IntervalSchedule = z.object({
-  /**
-   * The schedule interval
-   */
-  interval: z.string().max(1024),
-});
 
 /**
  * Defines how often schedule actions are taken. Time interval in seconds, minutes, hours, or days.
  */
+export const ScheduleActionThrottle = lazySchema(() =>
+  z
+    .string()
+    .max(1024)
+    .regex(/^[1-9]\d*[smhd]$/)
+);
 export type ScheduleActionThrottle = z.infer<typeof ScheduleActionThrottle>;
-export const ScheduleActionThrottle = z
-  .string()
-  .max(1024)
-  .regex(/^[1-9]\d*[smhd]$/);
 
 /**
  * The condition for throttling the notification: `onActionGroupChange`, `onActiveAlert`, or `onThrottleInterval`
  */
+export const ScheduleActionNotifyWhen = lazySchema(() =>
+  z.enum(['onActiveAlert', 'onThrottleInterval', 'onActionGroupChange'])
+);
 export type ScheduleActionNotifyWhen = z.infer<typeof ScheduleActionNotifyWhen>;
-export const ScheduleActionNotifyWhen = z.enum([
-  'onActiveAlert',
-  'onThrottleInterval',
-  'onActionGroupChange',
-]);
 export type ScheduleActionNotifyWhenEnum = typeof ScheduleActionNotifyWhen.enum;
 export const ScheduleActionNotifyWhenEnum = ScheduleActionNotifyWhen.enum;
 
 /**
  * The action frequency defines when the action runs.
  */
+export const ScheduleActionFrequency = lazySchema(() =>
+  z.object({
+    /**
+     * Whether to send a summary notification about all generated alerts
+     */
+    summary: z
+      .boolean()
+      .describe('Whether to send a summary notification about all generated alerts'),
+    notify_when: ScheduleActionNotifyWhen,
+    throttle: ScheduleActionThrottle.nullable(),
+  })
+);
 export type ScheduleActionFrequency = z.infer<typeof ScheduleActionFrequency>;
-export const ScheduleActionFrequency = z.object({
-  /**
-   * Whether to send a summary notification about all generated alerts
-   */
-  summary: z.boolean(),
-  notify_when: ScheduleActionNotifyWhen,
-  throttle: ScheduleActionThrottle.nullable(),
-});
 
+export const ScheduleActionAlertsFilter = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ScheduleActionAlertsFilter = z.infer<typeof ScheduleActionAlertsFilter>;
-export const ScheduleActionAlertsFilter = z.object({}).catchall(z.unknown());
 
 /**
  * Object containing the allowed connector fields, which varies according to the connector type.
  */
+export const ScheduleActionParams = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type ScheduleActionParams = z.infer<typeof ScheduleActionParams>;
-export const ScheduleActionParams = z.object({}).catchall(z.unknown());
 
 /**
  * Groups actions by use cases. Use `default` for alert notifications.
  */
+export const ScheduleActionGroup = lazySchema(() => z.string().max(1024));
 export type ScheduleActionGroup = z.infer<typeof ScheduleActionGroup>;
-export const ScheduleActionGroup = z.string().max(1024);
 
 /**
  * The connector ID.
  */
+export const ScheduleActionId = lazySchema(() => z.string().max(1024));
 export type ScheduleActionId = z.infer<typeof ScheduleActionId>;
-export const ScheduleActionId = z.string().max(1024);
 
+export const ScheduleGeneralAction = lazySchema(() =>
+  z.object({
+    /**
+     * The action type used for sending notifications.
+     */
+    action_type_id: z
+      .string()
+      .max(1024)
+      .describe('The action type used for sending notifications.'),
+    group: ScheduleActionGroup,
+    id: ScheduleActionId,
+    params: ScheduleActionParams,
+    uuid: NonEmptyString.optional(),
+    alerts_filter: ScheduleActionAlertsFilter.optional(),
+    frequency: ScheduleActionFrequency.optional(),
+  })
+);
 export type ScheduleGeneralAction = z.infer<typeof ScheduleGeneralAction>;
-export const ScheduleGeneralAction = z.object({
-  /**
-   * The action type used for sending notifications.
-   */
-  action_type_id: z.string().max(1024),
-  group: ScheduleActionGroup,
-  id: ScheduleActionId,
-  params: ScheduleActionParams,
-  uuid: NonEmptyString.optional(),
-  alerts_filter: ScheduleActionAlertsFilter.optional(),
-  frequency: ScheduleActionFrequency.optional(),
-});
 
+export const ScheduleSystemAction = lazySchema(() =>
+  z.object({
+    /**
+     * The action type used for sending notifications.
+     */
+    action_type_id: z
+      .string()
+      .max(1024)
+      .describe('The action type used for sending notifications.'),
+    id: ScheduleActionId,
+    params: ScheduleActionParams,
+    uuid: NonEmptyString.optional(),
+  })
+);
 export type ScheduleSystemAction = z.infer<typeof ScheduleSystemAction>;
-export const ScheduleSystemAction = z.object({
-  /**
-   * The action type used for sending notifications.
-   */
-  action_type_id: z.string().max(1024),
-  id: ScheduleActionId,
-  params: ScheduleActionParams,
-  uuid: NonEmptyString.optional(),
-});
 
+export const ScheduleAction = lazySchema(() =>
+  z.union([ScheduleGeneralAction, ScheduleSystemAction])
+);
 export type ScheduleAction = z.infer<typeof ScheduleAction>;
-export const ScheduleAction = z.union([ScheduleGeneralAction, ScheduleSystemAction]);
 
 /**
  * A schedule execution status
  */
+export const ScheduleExecutionStatus = lazySchema(() =>
+  z.enum(['ok', 'active', 'error', 'unknown', 'warning'])
+);
 export type ScheduleExecutionStatus = z.infer<typeof ScheduleExecutionStatus>;
-export const ScheduleExecutionStatus = z.enum(['ok', 'active', 'error', 'unknown', 'warning']);
 export type ScheduleExecutionStatusEnum = typeof ScheduleExecutionStatus.enum;
 export const ScheduleExecutionStatusEnum = ScheduleExecutionStatus.enum;
 
 /**
  * Schedule execution information
  */
+export const ScheduleExecution = lazySchema(() =>
+  z.object({
+    /**
+     * Date of the execution
+     */
+    date: z.string().datetime().describe('Date of the execution'),
+    /**
+     * Duration of the execution
+     */
+    duration: z.number().optional().describe('Duration of the execution'),
+    /**
+     * Status of the execution
+     */
+    status: ScheduleExecutionStatus.describe('Status of the execution'),
+    message: z.string().optional(),
+  })
+);
 export type ScheduleExecution = z.infer<typeof ScheduleExecution>;
-export const ScheduleExecution = z.object({
-  /**
-   * Date of the execution
-   */
-  date: z.string().datetime(),
-  /**
-   * Duration of the execution
-   */
-  duration: z.number().optional(),
-  /**
-   * Status of the execution
-   */
-  status: ScheduleExecutionStatus,
-  message: z.string().optional(),
-});
 
 /**
  * An attack discovery schedule
  */
+export const AttackDiscoverySchedule = lazySchema(() =>
+  z.object({
+    /**
+     * UUID of the schedule
+     */
+    id: z.string().describe('UUID of the schedule'),
+    /**
+     * The name of the schedule
+     */
+    name: z.string().describe('The name of the schedule'),
+    /**
+     * The name of the user that created the schedule
+     */
+    created_by: z.string().describe('The name of the user that created the schedule'),
+    /**
+     * The name of the user that updated the schedule
+     */
+    updated_by: z.string().describe('The name of the user that updated the schedule'),
+    /**
+     * The date the schedule was created
+     */
+    created_at: z.string().datetime().describe('The date the schedule was created'),
+    /**
+     * The date the schedule was updated
+     */
+    updated_at: z.string().datetime().describe('The date the schedule was updated'),
+    /**
+     * Indicates whether the schedule is enabled
+     */
+    enabled: z.boolean().describe('Indicates whether the schedule is enabled'),
+    /**
+     * The schedule configuration parameters
+     */
+    params: AttackDiscoveryScheduleParams.describe('The schedule configuration parameters'),
+    /**
+     * The schedule interval
+     */
+    schedule: IntervalSchedule.describe('The schedule interval'),
+    /**
+     * The schedule actions
+     */
+    actions: z.array(ScheduleAction).describe('The schedule actions'),
+    /**
+     * The schedule last execution summary
+     */
+    last_execution: ScheduleExecution.optional().describe('The schedule last execution summary'),
+  })
+);
 export type AttackDiscoverySchedule = z.infer<typeof AttackDiscoverySchedule>;
-export const AttackDiscoverySchedule = z.object({
-  /**
-   * UUID of the schedule
-   */
-  id: z.string(),
-  /**
-   * The name of the schedule
-   */
-  name: z.string(),
-  /**
-   * The name of the user that created the schedule
-   */
-  created_by: z.string(),
-  /**
-   * The name of the user that updated the schedule
-   */
-  updated_by: z.string(),
-  /**
-   * The date the schedule was created
-   */
-  created_at: z.string().datetime(),
-  /**
-   * The date the schedule was updated
-   */
-  updated_at: z.string().datetime(),
-  /**
-   * Indicates whether the schedule is enabled
-   */
-  enabled: z.boolean(),
-  /**
-   * The schedule configuration parameters
-   */
-  params: AttackDiscoveryScheduleParams,
-  /**
-   * The schedule interval
-   */
-  schedule: IntervalSchedule,
-  /**
-   * The schedule actions
-   */
-  actions: z.array(ScheduleAction),
-  /**
-   * The schedule last execution summary
-   */
-  last_execution: ScheduleExecution.optional(),
-});
 
 /**
  * Properties for creating an attack discovery schedule
  */
+export const AttackDiscoveryScheduleCreateProps = lazySchema(() =>
+  z.object({
+    /**
+     * The name of the schedule
+     */
+    name: z.string().max(1024).describe('The name of the schedule'),
+    /**
+     * Indicates whether the schedule is enabled
+     */
+    enabled: z.boolean().optional().describe('Indicates whether the schedule is enabled'),
+    /**
+     * The schedule configuration parameters
+     */
+    params: AttackDiscoveryScheduleParams.describe('The schedule configuration parameters'),
+    /**
+     * The schedule interval
+     */
+    schedule: IntervalSchedule.describe('The schedule interval'),
+    /**
+     * The schedule actions
+     */
+    actions: z.array(ScheduleAction).optional().describe('The schedule actions'),
+  })
+);
 export type AttackDiscoveryScheduleCreateProps = z.infer<typeof AttackDiscoveryScheduleCreateProps>;
-export const AttackDiscoveryScheduleCreateProps = z.object({
-  /**
-   * The name of the schedule
-   */
-  name: z.string().max(1024),
-  /**
-   * Indicates whether the schedule is enabled
-   */
-  enabled: z.boolean().optional(),
-  /**
-   * The schedule configuration parameters
-   */
-  params: AttackDiscoveryScheduleParams,
-  /**
-   * The schedule interval
-   */
-  schedule: IntervalSchedule,
-  /**
-   * The schedule actions
-   */
-  actions: z.array(ScheduleAction).optional(),
-});
 
 /**
  * Properties for updating an attack discovery schedule
  */
+export const AttackDiscoveryScheduleUpdateProps = lazySchema(() =>
+  z.object({
+    /**
+     * The name of the schedule
+     */
+    name: z.string().max(1024).describe('The name of the schedule'),
+    /**
+     * The schedule configuration parameters
+     */
+    params: AttackDiscoveryScheduleParams.describe('The schedule configuration parameters'),
+    /**
+     * The schedule interval
+     */
+    schedule: IntervalSchedule.describe('The schedule interval'),
+    /**
+     * The schedule actions
+     */
+    actions: z.array(ScheduleAction).describe('The schedule actions'),
+  })
+);
 export type AttackDiscoveryScheduleUpdateProps = z.infer<typeof AttackDiscoveryScheduleUpdateProps>;
-export const AttackDiscoveryScheduleUpdateProps = z.object({
-  /**
-   * The name of the schedule
-   */
-  name: z.string().max(1024),
-  /**
-   * The schedule configuration parameters
-   */
-  params: AttackDiscoveryScheduleParams,
-  /**
-   * The schedule interval
-   */
-  schedule: IntervalSchedule,
-  /**
-   * The schedule actions
-   */
-  actions: z.array(ScheduleAction),
-});

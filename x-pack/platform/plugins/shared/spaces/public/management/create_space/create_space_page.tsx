@@ -11,7 +11,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiPageSection,
   EuiSpacer,
   hexToHsv,
@@ -20,6 +19,7 @@ import {
 import { difference } from 'lodash';
 import React, { Component } from 'react';
 
+import { AppHeader } from '@kbn/app-header';
 import type {
   ApplicationStart,
   Capabilities,
@@ -28,6 +28,7 @@ import type {
   OverlayStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
@@ -50,6 +51,15 @@ import { SolutionView } from '../components/solution_view';
 import { haveFormValuesChanged, toSpaceIdentifier } from '../lib';
 import { SpaceValidator } from '../lib/validate_space';
 import type { CustomizeSpaceFormValues } from '../types';
+
+const spacesListTitle = i18n.translate('xpack.spaces.management.spacesGridPage.spacesTitle', {
+  defaultMessage: 'Spaces',
+});
+
+const createSpaceTitle = i18n.translate(
+  'xpack.spaces.management.manageSpacePage.createSpaceTitle',
+  { defaultMessage: 'Create space' }
+);
 
 interface Props {
   getFeatures: FeaturesPluginStart['getFeatures'];
@@ -203,18 +213,21 @@ export class CreateSpacePage extends Component<Props, State> {
             space can itself fail and send the user back to the list */}
         <NavigateOnLeave isLeaving={this.state.isLeaving} history={this.props.history} />
 
+        <AppHeader
+          title={createSpaceTitle}
+          description={getSpacesFeatureDescription()}
+          back={{
+            href: this.props.history.createHref({ pathname: '/' }),
+            label: spacesListTitle,
+          }}
+          spacing="bleed"
+        />
+        <EuiSpacer size="l" />
+
         {this.state.isLoading ? (
           this.getLoadingIndicator()
         ) : (
-          <EuiPageSection restrictWidth>
-            <EuiPageHeader
-              pageTitle={this.getTitle()}
-              description={getSpacesFeatureDescription()}
-            />
-            <EuiSpacer size="l" />
-
-            {this.getForm()}
-          </EuiPageSection>
+          <EuiPageSection restrictWidth>{this.getForm()}</EuiPageSection>
         )}
       </>
     );
@@ -306,15 +319,6 @@ export class CreateSpacePage extends Component<Props, State> {
           />
         )}
       </div>
-    );
-  };
-
-  public getTitle = () => {
-    return (
-      <FormattedMessage
-        id="xpack.spaces.management.manageSpacePage.createSpaceTitle"
-        defaultMessage="Create space"
-      />
     );
   };
 
@@ -473,9 +477,27 @@ export class CreateSpacePage extends Component<Props, State> {
       projectRouting,
     } = this.state.space;
 
-    const params = {
+    // Draft form id is a plain string; validate-and-brand at the create write boundary.
+    // The form validator already rejects invalid identifiers before save, but `asSpaceId`
+    // throws synchronously (before the request promise exists, so the `.catch` below can't
+    // see it). Guard against the two validators diverging by surfacing a toast rather than
+    // letting an unhandled error break the form.
+    let brandedId: SpaceId;
+    try {
+      brandedId = asSpaceId(id);
+    } catch (error) {
+      this.props.notifications.toasts.addDanger(
+        i18n.translate('xpack.spaces.management.manageSpacePage.errorSavingSpaceTitle', {
+          defaultMessage: 'Error saving space: {message}',
+          values: { message: error?.message ?? '' },
+        })
+      );
+      return;
+    }
+
+    const params: Space = {
       name,
-      id,
+      id: brandedId,
       description,
       initials: avatarType !== 'image' ? initials : '',
       color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : undefined, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits

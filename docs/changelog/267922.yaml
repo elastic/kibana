@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/267922
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Redesign the ES|QL editor
+description: Moves the time picker to the right, keeps the visor always visible at the top in Discover, removes the sources dropdown from the KQL visor, and adds a stop button for AI query generation.

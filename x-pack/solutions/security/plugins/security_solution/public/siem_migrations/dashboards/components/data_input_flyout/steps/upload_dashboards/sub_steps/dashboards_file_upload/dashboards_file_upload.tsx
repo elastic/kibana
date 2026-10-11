@@ -8,10 +8,7 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isPlainObject } from 'lodash';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../../../../../../../common/components/migration_steps';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { SplunkRow } from '../../../../../../../common/hooks/use_parse_file_input';
@@ -46,7 +43,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
     createMigration,
   }) => {
     const [uploadedDashboards, setUploadedDashboards] = useState<SplunkDashboardsResult[]>([]);
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const onFileParsed = useCallback(
       (content: string) => {
@@ -97,7 +94,7 @@ export const DashboardsFileUpload = React.memo<DashboardsFileUploadProps>(
             <EuiFilePicker
               isInvalid={error != null}
               id="dashboardsFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">

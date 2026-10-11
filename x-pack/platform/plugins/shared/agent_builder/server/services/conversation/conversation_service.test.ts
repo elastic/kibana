@@ -7,8 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType } from '@kbn/agent-builder-common';
-import { getUserFromRequest, isAdminFromRequest } from '../utils';
+import { getUserFromRequest } from '../utils';
 import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
 
@@ -16,7 +15,6 @@ jest.mock('../utils');
 jest.mock('./client');
 
 const getUserFromRequestMock = getUserFromRequest as jest.MockedFunction<typeof getUserFromRequest>;
-const isAdminFromRequestMock = isAdminFromRequest as jest.MockedFunction<typeof isAdminFromRequest>;
 const createClientMock = createClient as jest.MockedFunction<typeof createClient>;
 
 const request = { headers: {} } as unknown as KibanaRequest;
@@ -25,7 +23,11 @@ const request = { headers: {} } as unknown as KibanaRequest;
 const asCurrentUser = { name: 'as-current-user' } as never;
 const asInternalUser = { name: 'as-internal-user' } as never;
 
-const createService = ({ agents = {} }: { agents?: object } = {}) => {
+const createService = ({
+  agents = {},
+  attachments = { getTypeDefinition: jest.fn() },
+  eventBus,
+}: { agents?: object; attachments?: object; eventBus?: object } = {}) => {
   return new ConversationServiceImpl({
     logger: loggingSystemMock.createLogger(),
     security: {} as never,
@@ -35,84 +37,67 @@ const createService = ({ agents = {} }: { agents?: object } = {}) => {
       },
     } as never,
     agents: agents as never,
+    conversationEvents: { getDefinition: jest.fn(), list: jest.fn().mockReturnValue([]) },
+    ...(eventBus ? { eventBus: eventBus as never } : {}),
   });
 };
 
 describe('ConversationServiceImpl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane' });
-    isAdminFromRequestMock.mockResolvedValue(false);
+    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin: false });
   });
 
   describe('getScopedClient', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
-    it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
-      isAdminFromRequestMock.mockResolvedValue(isAdmin);
+    it('wires the scoped event emitter to the event bus with the request', async () => {
+      const eventBus = { emitMetadataPatched: jest.fn(), emitAttachmentEvents: jest.fn() };
+      await createService({ agents, eventBus }).getScopedClient({ request });
 
-      await createService({ agents }).getScopedClient({ request });
+      const { eventEmitter } = createClientMock.mock.calls[0][0];
+      const metadataPayload = { conversationId: 'conv-1', changedFields: ['x'] };
+      const attachmentPayload = { conversationId: 'conv-1', events: [] };
+      eventEmitter!.emitMetadataPatched(metadataPayload);
+      eventEmitter!.emitAttachmentEvents(attachmentPayload);
 
-      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ isAdmin }));
+      expect(eventBus.emitMetadataPatched).toHaveBeenCalledWith(request, metadataPayload);
+      expect(eventBus.emitAttachmentEvents).toHaveBeenCalledWith(request, attachmentPayload);
     });
 
-    it('resolves the admin privilege against the caller-scoped client, not the internal one', async () => {
+    it('leaves eventEmitter undefined without an event bus', async () => {
       await createService({ agents }).getScopedClient({ request });
 
-      expect(isAdminFromRequestMock).toHaveBeenCalledWith({ esClient: asCurrentUser });
+      expect(createClientMock.mock.calls[0][0].eventEmitter).toBeUndefined();
+    });
+
+    it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
+      const user = { id: 'profile-1', username: 'jane', isAdmin };
+      getUserFromRequestMock.mockResolvedValue(user);
+
+      await createService({ agents }).getScopedClient({ request });
+
+      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user }));
+    });
+
+    it('acts as the given user, without resolving the request identity', async () => {
+      const owner = { id: 'profile-alice', username: 'alice', isAdmin: false };
+
+      await createService({ agents }).getScopedClientAsUser({ request, user: owner });
+
+      expect(getUserFromRequestMock).not.toHaveBeenCalled();
+      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ user: owner }));
+    });
+
+    it('uses the internal client for conversation storage', async () => {
+      await createService({ agents }).getScopedClient({ request });
+
       expect(createClientMock).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: asInternalUser })
       );
-    });
-  });
-
-  describe('getConversationRoundAuthor', () => {
-    it('prefers the external origin author over the Kibana user', async () => {
-      const service = createService();
-      const externalAuthor = { id: 'U123', username: 'jane', full_name: 'Jane Doe' };
-
-      const author = await service.getConversationRoundAuthor({
-        request,
-        origin: {
-          type: ConversationOriginType.Slack,
-          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-          author: externalAuthor,
-        },
-      });
-
-      expect(author).toEqual(externalAuthor);
-      expect(getUserFromRequestMock).not.toHaveBeenCalled();
-    });
-
-    it('attributes rounds from an external origin without author to the current Kibana user', async () => {
-      const service = createService();
-
-      const author = await service.getConversationRoundAuthor({
-        request,
-        origin: {
-          type: ConversationOriginType.Slack,
-          external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
-        },
-      });
-
-      expect(author).toEqual({ id: 'profile-1', username: 'jane' });
-    });
-
-    it('attributes rounds to the current Kibana user', async () => {
-      const service = createService();
-
-      const author = await service.getConversationRoundAuthor({ request });
-
-      expect(author).toEqual({ id: 'profile-1', username: 'jane' });
-    });
-
-    it('does not assign an author when the user has no profile id', async () => {
-      const service = createService();
-      getUserFromRequestMock.mockResolvedValue({ username: 'jane' });
-
-      const author = await service.getConversationRoundAuthor({ request });
-
-      expect(author).toBeUndefined();
+      expect(getUserFromRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: asCurrentUser })
+      );
     });
   });
 });

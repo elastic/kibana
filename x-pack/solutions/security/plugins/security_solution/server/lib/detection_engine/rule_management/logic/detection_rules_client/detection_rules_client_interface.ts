@@ -10,21 +10,25 @@ import type { SecurityRuleChangeTracking } from '../../../../../../common/detect
 import type {
   RuleCreateProps,
   RuleUpdateProps,
-  RulePatchProps,
   RuleObjectId,
   RuleResponse,
   RuleToImport,
-  RuleSource,
 } from '../../../../../../common/api/detection_engine';
 import type {
   RuleChangesHistoryResponse,
   RestoreRuleFromHistoryResponse,
+  UnresolvedRulePatchProps,
 } from '../../../../../../common/api/detection_engine/rule_management';
-import type { IRuleSourceImporter } from '../import/rule_source_importer';
-import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
+import type {
+  ImportRuleSuccess,
+  ImportRulesResult,
+  ImportRuleError,
+} from './methods/import_rules/types';
+
+export type { ImportRuleSuccess, ImportRulesResult, ImportRuleError };
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
@@ -39,8 +43,7 @@ export interface IDetectionRulesClient {
   bulkDeleteRules: (args: BulkDeleteRulesArgs) => Promise<BulkDeleteRulesReturn>;
   upgradePrebuiltRule: (args: UpgradePrebuiltRuleArgs) => Promise<RuleResponse>;
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
-  importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
-  importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  importRules: (args: ImportRulesArgs) => Promise<ImportRulesResult>;
   getHistoryForRule: (args: GetHistoryForRuleArgs) => Promise<RuleChangesHistoryResponse>;
   restoreRuleFromHistory: (
     args: RestoreRuleFromHistoryArgs
@@ -63,7 +66,11 @@ export interface UpdateRuleArgs {
 }
 
 export interface PatchRuleArgs {
-  rulePatch: RulePatchProps;
+  /**
+   * Type-specific fields of the patch are validated against the existing rule's type in
+   * `patchTypeSpecificParams`, so only the type-independent props are typed here.
+   */
+  rulePatch: UnresolvedRulePatchProps;
   changeTracking?: SecurityRuleChangeTracking;
 }
 
@@ -92,20 +99,12 @@ export interface RevertPrebuiltRuleArgs {
   changeTracking?: SecurityRuleChangeTracking<never>;
 }
 
-export interface ImportRuleArgs {
-  ruleToImport: RuleToImport;
-  overrideFields?: { rule_source: RuleSource; immutable: boolean };
-  overwriteRules?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking<never>;
-}
-
 export interface ImportRulesArgs {
   rules: RuleToImport[];
   overwriteRules: boolean;
-  ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
-  changeTracking?: SecurityRuleChangeTracking<never>;
+  changeTracking?: SecurityRuleChangeTracking;
+  batchSize?: number;
 }
 
 export interface GetHistoryForRuleArgs {

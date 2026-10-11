@@ -125,4 +125,61 @@ describe('When displaying the EndpointPolicyEditExtension fleet UI extension', (
     ).toBeInTheDocument();
     expect(renderResult.getByTestId('blocklists-fleet-integration-card')).toBeInTheDocument();
   });
+
+  it('should display yara signatures card when feature flag is enabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.getByTestId('customYaraSignatures-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('customYaraSignatures-link-to-exceptions').getAttribute('href')
+    ).toEqual(
+      '/app/security/administration/custom_yara_signatures?includedPolicies=someid%2Cglobal'
+    );
+
+    // Other cards should still be visible
+    expect(renderResult.getByTestId('trustedApps-fleet-integration-card')).toBeInTheDocument();
+    expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('endpointExceptions-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(
+      renderResult.getByTestId('hostIsolationExceptions-fleet-integration-card')
+    ).toBeInTheDocument();
+    expect(renderResult.getByTestId('blocklists-fleet-integration-card')).toBeInTheDocument();
+  });
+
+  it('should not display yara signatures card when feature flag is disabled', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: false,
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.queryByTestId('customYaraSignatures-fleet-integration-card')
+    ).not.toBeInTheDocument();
+  });
+
+  it('should not display yara signatures card when user lacks privilege', () => {
+    mockedTestContext.setExperimentalFlag({
+      customYaraSignaturesEnabled: true,
+    });
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canReadCustomYaraSignatures: false,
+      }),
+    });
+
+    const renderResult = render();
+
+    expect(
+      renderResult.queryByTestId('customYaraSignatures-fleet-integration-card')
+    ).not.toBeInTheDocument();
+  });
 });

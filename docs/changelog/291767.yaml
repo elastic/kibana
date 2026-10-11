@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/291767
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: Fix live query results not visible in non-default spaces

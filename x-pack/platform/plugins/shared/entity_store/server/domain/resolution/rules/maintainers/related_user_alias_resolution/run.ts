@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { getLatestEntitiesIndexName } from '../../../../../../common';
+import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import type { ResolutionClient } from '../../..';
 import { NAMESPACE_PRIORITY } from '../../..';
 import { getFieldValue } from '../../../../../../common/domain/euid/commons';
@@ -226,7 +226,7 @@ export async function runRelatedUserAliasResolution(
   deps: RunRelatedUserAliasResolutionDeps
 ): Promise<PerRuleState> {
   const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
-  const index = getLatestEntitiesIndexName(namespace);
+  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
   const seeds = await collectSeeds({ esClient, index, abortSignal: signal });
   const lastRun: RelatedUserAliasResolutionLastRun = {
     seedsScanned: seeds.length,

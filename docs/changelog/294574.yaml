@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/294574
+issues:
+- https://github.com/elastic/kibana/issues/294496
+type: other
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Rename the `dashboard-management` skill to `dashboards`
+description: The built-in Agent Builder dashboards skill id changes from `dashboard-management` to `dashboards`. Custom agents that list `dashboard-management` no longer load that skill, and a custom skill with the id `dashboards` is shadowed by the built-in skill. The skills API is experimental.

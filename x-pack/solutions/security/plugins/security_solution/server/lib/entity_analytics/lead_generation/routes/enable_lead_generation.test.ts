@@ -18,7 +18,7 @@ import {
 
 const mockCreateIndices = jest.fn();
 jest.mock('../indices/lead_index_service', () => ({
-  createLeadIndexService: () => ({ createIndices: mockCreateIndices }),
+  createLeadIndexService: () => ({ createIndex: mockCreateIndices }),
 }));
 
 const mockStartTask = jest.fn();

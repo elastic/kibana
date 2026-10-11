@@ -23,7 +23,6 @@ import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { CoreAuthenticationService } from '@kbn/core-security-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
@@ -50,7 +49,6 @@ export interface RenderingServiceRenderCoreDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
-  featureFlags: FeatureFlagsStart;
   http: InternalHttpStart;
   docLinks: DocLinksStart;
   customBranding: CustomBrandingStart;

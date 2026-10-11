@@ -6,7 +6,8 @@
  */
 
 import { newestValue } from './field_retention_operations';
-import type { EntityDefinitionWithoutId } from './entity_schema';
+import type { EntityDefinitionManagedBy, EntityDefinitionWithoutId } from './entity_schema';
+import { PLUGIN_ID } from '../../plugin_id';
 import {
   ENTITY_SOURCE_FIELD_EVALUATION,
   getCommonFieldDescriptions,
@@ -17,8 +18,11 @@ import {
 // GCP Resource Names, Kubernetes pods) sourced from CSP integrations that populate `entity.id`.
 // They are consumed by Graph (entity and event flyout visualizations) and Asset Inventory.
 // Customers without CSP integrations will not produce any generic entities.
+// Single-document creation is disabled because using `entity.id` verbatim would let arbitrary
+// strings mint entities.
 export const genericEntityDefinition = {
   type: 'generic',
+  managedBy: { kind: 'plugin', id: PLUGIN_ID },
   name: `Security 'generic' Entity Store Definition`,
   identityField: { singleField: 'entity.id', skipTypePrepend: true },
   indexPatterns: [],
@@ -59,4 +63,4 @@ export const genericEntityDefinition = {
 
     ...getCommonFieldDescriptions('entity'),
   ],
-} satisfies EntityDefinitionWithoutId;
+} satisfies EntityDefinitionWithoutId & { managedBy: EntityDefinitionManagedBy };

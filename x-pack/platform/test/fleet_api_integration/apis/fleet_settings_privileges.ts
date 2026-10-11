@@ -157,6 +157,16 @@ export default function (providerContext: FtrProviderContext) {
       scenarios: READ_SCENARIOS_2,
     },
     {
+      method: 'PUT',
+      path: '/api/fleet/outputs/test-privileges-output-1',
+      scenarios: ALL_SCENARIOS,
+      send: {
+        name: 'Test privileges es output 1',
+        type: 'elasticsearch',
+        hosts: ['https://test.fr'],
+      },
+    },
+    {
       method: 'POST',
       path: '/api/fleet/outputs',
       scenarios: ALL_SCENARIOS,

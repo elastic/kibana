@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import {
   ALERT_FLAPPING,
@@ -524,12 +525,11 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        await retry.try(async () => {
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-            .set('kbn-xsrf', 'foo');
-          expect(response.status).to.eql(204);
-        });
+        await waitForRuleTaskIdle(ruleId);
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(response.status).to.eql(204);
 
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
@@ -559,6 +559,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 1 more time
       for (let i = 0; i < 1; i++) {
+        await waitForRuleTaskIdle(ruleId);
         const response = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
           .set('kbn-xsrf', 'foo');
@@ -586,6 +587,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
+        await waitForRuleTaskIdle(ruleId);
         const response = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
           .set('kbn-xsrf', 'foo');
@@ -613,6 +615,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 3 more times
       for (let i = 0; i < 3; i++) {
+        await waitForRuleTaskIdle(ruleId);
         const response = await supertestWithoutAuth
           .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
           .set('kbn-xsrf', 'foo');
@@ -1119,6 +1122,20 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
     });
 
     return JSON.parse(task._source!.task.state);
+  }
+
+  // The `execute` event log doc is written before Task Manager returns the task to `idle`, so `_run_soon` must wait for `idle` to avoid a 200 soft failure.
+  async function waitForRuleTaskIdle(ruleId: string) {
+    await retry.try(async () => {
+      const task = await es.get<TaskManagerDoc>({
+        id: `task:${ruleId}`,
+        index: '.kibana_task_manager',
+      });
+      const status = task._source!.task.status;
+      if (status !== TaskStatus.Idle) {
+        throw new Error(`Expected task:${ruleId} to be idle but was ${status}`);
+      }
+    });
   }
 
   async function queryForAlertDocs<T>(ruleId: string): Promise<Array<SearchHit<T>>> {

@@ -1,0 +1,7 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/lens-test-helpers",
+  "owner": "@elastic/kibana-dashboards",
+  "group": "platform",
+  "visibility": "shared"
+}

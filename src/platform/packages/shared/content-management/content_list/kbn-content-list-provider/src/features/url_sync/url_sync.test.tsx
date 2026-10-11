@@ -28,6 +28,15 @@ describe('ContentListUrlSync', () => {
     })
   );
 
+  /** A sort field that only offers descending order, like "Recently viewed". */
+  const descOnlySorting: ContentListFeatures['sorting'] = {
+    initialSort: { field: 'updatedAt', direction: 'desc' },
+    fields: [
+      { field: 'updatedAt', name: 'Last updated' },
+      { field: 'accessedAt', name: 'Recently viewed', allowedDirections: ['desc'] },
+    ],
+  };
+
   const createWrapper = ({
     history,
     features,
@@ -143,6 +152,84 @@ describe('ContentListUrlSync', () => {
       q: 'dashboard createdBy:"jane@example.com" is:starred',
       sort: 'updatedAt:asc',
       space: 'default',
+    });
+  });
+
+  describe('with a sort field that only offers one direction', () => {
+    it('falls back to the initial sort and cleans the URL for an unsupported direction', async () => {
+      const warnSpy = jest.spyOn(globalThis.console, 'warn').mockImplementation(() => {});
+      const history = createMemoryHistory({
+        initialEntries: ['/app?q=dashboard&sort=accessedAt%3Aasc'],
+      });
+
+      const { result } = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, features: { sorting: descOnlySorting } }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.state.queryText).toBe('dashboard');
+      });
+
+      expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
+      await waitFor(() => {
+        expect(history.location.search).toBe('?q=dashboard');
+      });
+      expect(warnSpy).toHaveBeenCalledWith(
+        '[ContentListUrlSync] Ignoring unknown URL sort value',
+        'accessedAt:asc'
+      );
+
+      warnSpy.mockRestore();
+    });
+
+    it('falls back to the initial sort and cleans the URL for an unsupported legacy direction', async () => {
+      const warnSpy = jest.spyOn(globalThis.console, 'warn').mockImplementation(() => {});
+      const history = createMemoryHistory({
+        initialEntries: ['/app?sort=accessedAt&sortdir=asc&space=default'],
+      });
+
+      const { result } = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, features: { sorting: descOnlySorting } }),
+      });
+
+      await waitFor(() => {
+        expect(history.location.search).toBe('?space=default');
+      });
+
+      expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
+
+      warnSpy.mockRestore();
+    });
+
+    it('ignores an unsupported direction from a URL change after mount', async () => {
+      const warnSpy = jest.spyOn(globalThis.console, 'warn').mockImplementation(() => {});
+      const history = createMemoryHistory({ initialEntries: ['/app'] });
+
+      const { result } = renderHook(() => useContentListState(), {
+        wrapper: createWrapper({ history, features: { sorting: descOnlySorting } }),
+      });
+
+      await waitFor(() => {
+        expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
+      });
+
+      act(() => {
+        history.push({ search: '?sort=accessedAt:desc' });
+      });
+
+      await waitFor(() => {
+        expect(result.current.state.sort).toEqual({ field: 'accessedAt', direction: 'desc' });
+      });
+
+      act(() => {
+        history.push({ search: '?sort=accessedAt:asc' });
+      });
+
+      await waitFor(() => {
+        expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
+      });
+
+      warnSpy.mockRestore();
     });
   });
 

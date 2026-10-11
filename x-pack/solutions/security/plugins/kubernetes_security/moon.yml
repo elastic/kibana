@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kubernetes-security-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/kibana-cloud-security-posture'
+  defaultOwner: '@elastic/contextual-security-apps'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/kubernetes-security-plugin'
   description: Moon project for @kbn/kubernetes-security-plugin
   channel: ''
-  owner: '@elastic/kibana-cloud-security-posture'
+  owner: '@elastic/contextual-security-apps'
   sourceRoot: x-pack/solutions/security/plugins/kubernetes_security
 dependsOn:
   - '@kbn/core'

@@ -29,7 +29,7 @@ export const ReadRuleExecutionResultsRequestParams = lazySchema(() =>
     /**
      * Saved object ID of the rule to get execution results for.
      */
-    ruleId: z.string().min(1),
+    ruleId: z.string().min(1).describe('Saved object ID of the rule to get execution results for.'),
   })
 );
 export type ReadRuleExecutionResultsRequestParams = z.infer<
@@ -49,21 +49,42 @@ export const ReadRuleExecutionResultsRequestBody = lazySchema(() =>
         /**
          * Filter by execution outcome (success, warning, failure). Empty = all outcomes.
          */
-        outcome: z.array(UnifiedExecutionStatus).max(3).optional().default([]),
+        outcome: z
+          .array(UnifiedExecutionStatus)
+          .max(3)
+          .optional()
+          .default([])
+          .describe(
+            'Filter by execution outcome (success, warning, failure). Empty = all outcomes.'
+          ),
         /**
          * Filter by run type (standard, backfill). Empty = all run types.
          */
-        run_type: z.array(RuleRunType).max(2).optional().default([]),
+        run_type: z
+          .array(RuleRunType)
+          .max(2)
+          .optional()
+          .default([])
+          .describe('Filter by run type (standard, backfill). Empty = all run types.'),
         /**
          * Start of the time range (executions that started within this range).
          */
-        from: z.string().datetime(),
+        from: z
+          .string()
+          .datetime()
+          .describe('Start of the time range (executions that started within this range).'),
         /**
          * End of the time range (executions that started within this range).
          */
-        to: z.string().datetime(),
+        to: z
+          .string()
+          .datetime()
+          .describe('End of the time range (executions that started within this range).'),
       })
-      .optional(),
+      .optional()
+      .describe(
+        'Filtering criteria for execution results. If omitted, defaults to the last 2 hours (from: now-2h, to: now).'
+      ),
     /**
      * Sorting configuration for execution results.
      */
@@ -72,21 +93,31 @@ export const ReadRuleExecutionResultsRequestBody = lazySchema(() =>
         /**
          * Field to sort results by.
          */
-        field: UnifiedExecutionResultSortField.optional().default('execution_start'),
+        field: UnifiedExecutionResultSortField.optional()
+          .default('execution_start')
+          .describe('Field to sort results by.'),
         /**
          * Sort order (asc or desc).
          */
-        order: SortOrder.optional().default('desc'),
+        order: SortOrder.optional().default('desc').describe('Sort order (asc or desc).'),
       })
-      .optional(),
+      .optional()
+      .describe('Sorting configuration for execution results.'),
     /**
      * Page number to return.
      */
-    page: z.number().int().min(1).optional().default(1),
+    page: z.number().int().min(1).optional().default(1).describe('Page number to return.'),
     /**
      * Number of results per page.
      */
-    per_page: z.number().int().min(1).max(100).optional().default(20),
+    per_page: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .default(20)
+      .describe('Number of results per page.'),
   })
 );
 export type ReadRuleExecutionResultsRequestBody = z.infer<
@@ -102,15 +133,15 @@ export const ReadRuleExecutionResultsResponse = lazySchema(() =>
     /**
      * Total number of results matching the filter.
      */
-    total: z.number().int(),
+    total: z.number().int().describe('Total number of results matching the filter.'),
     /**
      * Current page number (echoed from request).
      */
-    page: z.number().int(),
+    page: z.number().int().describe('Current page number (echoed from request).'),
     /**
      * Number of results per page (echoed from request).
      */
-    per_page: z.number().int(),
+    per_page: z.number().int().describe('Number of results per page (echoed from request).'),
   })
 );
 export type ReadRuleExecutionResultsResponse = z.infer<typeof ReadRuleExecutionResultsResponse>;

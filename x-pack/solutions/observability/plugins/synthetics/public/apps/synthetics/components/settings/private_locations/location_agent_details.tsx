@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiHealth,
   EuiIcon,
   EuiIconTip,
@@ -25,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import { useSyntheticsSettingsContext } from '../../../contexts';
@@ -71,6 +71,7 @@ export const LocationAgentDetails = ({
   }
 
   const agents = stats?.agents ?? [];
+  const isAgentSharding = stats?.isAgentSharding === true;
   const healthyAgents = agents.filter((agent) => agent.healthy).length;
   const unhealthyAgents = agents.filter((agent) => !agent.healthy);
   const pressuredAgents = agents.filter(
@@ -89,7 +90,7 @@ export const LocationAgentDetails = ({
   if (pressuredAgents.length > 0) {
     warnings.push(MEMORY_PRESSURE_WARNING(pressuredAgents.length));
   }
-  const calloutColor = unhealthyAgents.length > 0 ? 'danger' : 'warning';
+  const WarningsCallout = unhealthyAgents.length > 0 ? KbnDangerCallout : KbnWarningCallout;
 
   const columns: Array<EuiBasicTableColumn<AgentStat>> = [
     {
@@ -121,44 +122,47 @@ export const LocationAgentDetails = ({
       name: MONITORS_LABEL,
       width: '90px',
       align: 'right',
-      // Every enrolled agent runs all of the location's monitors today.
-      render: (agent: AgentStat) =>
-        locationMonitorCount > 0 ? (
+      render: (agent: AgentStat) => {
+        const monitorsRun = agent.monitorsAssigned ?? locationMonitorCount;
+        return monitorsRun > 0 ? (
           <EuiLink
             data-test-subj="syntheticsAgentMonitorsLink"
             href={locationMonitorsHref}
             title={VIEW_LOCATION_MONITORS}
             className="eui-textNoWrap"
           >
-            <strong>{locationMonitorCount}</strong>
+            <strong>{monitorsRun}</strong>
           </EuiLink>
         ) : (
           <EuiText size="s" color="subdued" className="eui-textNoWrap">
-            {locationMonitorCount}
+            {monitorsRun}
           </EuiText>
-        ),
+        );
+      },
     },
     {
       name: DISTRIBUTION_COLUMN,
       width: '200px',
-      // In the single-agent model each agent runs the full set (100%).
-      render: (agent: AgentStat) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiProgress
-              value={locationMonitorCount > 0 ? 1 : 0}
-              max={1}
-              size="s"
-              color={agent.healthy ? 'success' : 'danger'}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued" className="eui-textNoWrap">
-              {locationMonitorCount > 0 ? '100%' : '—'}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      render: (agent: AgentStat) => {
+        const share = agentShare(agent, locationMonitorCount, isAgentSharding);
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiProgress
+                value={share ?? 0}
+                max={1}
+                size="s"
+                color={agent.healthy ? 'success' : 'danger'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+                {share == null ? '—' : `${Math.round(share * 100)}%`}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     {
       field: 'usedMemoryPct',
@@ -346,11 +350,9 @@ export const LocationAgentDetails = ({
         {warnings.length > 0 && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut
+            <WarningsCallout
               announceOnMount
               size="s"
-              color={calloutColor}
-              iconType="warning"
               title={ATTENTION_TITLE}
               data-test-subj="locationAgentWarnings"
             >
@@ -359,7 +361,7 @@ export const LocationAgentDetails = ({
                   <li key={i}>{warning}</li>
                 ))}
               </ul>
-            </EuiCallOut>
+            </WarningsCallout>
           </>
         )}
 
@@ -368,7 +370,11 @@ export const LocationAgentDetails = ({
         <EuiTitle size="xxs">
           <h4>
             {DISTRIBUTION_TITLE}{' '}
-            <EuiIconTip content={DISTRIBUTION_HELP} position="right" type="question" />
+            <EuiIconTip
+              content={isAgentSharding ? DISTRIBUTION_HELP_SHARDED : DISTRIBUTION_HELP}
+              position="right"
+              type="question"
+            />
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -384,12 +390,26 @@ export const LocationAgentDetails = ({
         <AgentDetailsFlyout
           agent={flyoutAgent}
           agentPolicyId={agentPolicyId}
-          monitorsRun={locationMonitorCount}
+          monitorsRun={flyoutAgent.monitorsAssigned ?? locationMonitorCount}
           onClose={() => setFlyoutAgent(null)}
         />
       )}
     </>
   );
+};
+
+const agentShare = (
+  agent: AgentStat,
+  locationMonitorCount: number,
+  isAgentSharding: boolean
+): number | null => {
+  if (locationMonitorCount <= 0) {
+    return null;
+  }
+  if (!isAgentSharding || agent.monitorsAssigned == null) {
+    return 1;
+  }
+  return agent.monitorsAssigned / locationMonitorCount;
 };
 
 /**
@@ -590,6 +610,14 @@ const DISTRIBUTION_HELP = i18n.translate(
   {
     defaultMessage:
       "Every enrolled agent on this location's agent policy currently runs all of the location's monitors.",
+  }
+);
+
+const DISTRIBUTION_HELP_SHARDED = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.distributionShardedHelpDescription',
+  {
+    defaultMessage:
+      "Share of this location's monitors assigned to each agent via a per-monitor host condition.",
   }
 );
 

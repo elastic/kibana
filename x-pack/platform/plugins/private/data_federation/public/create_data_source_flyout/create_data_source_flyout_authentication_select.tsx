@@ -5,82 +5,114 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
-  EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataSourceType } from '../../common/datasource_types';
+import type { DataFederationKibanaServices } from '../types';
 import {
-  createDataSourceFlyoutAuthenticationHelpAriaLabel,
-  createDataSourceFlyoutAuthenticationLabel,
-  createDataSourceFlyoutAuthenticationTitle,
+  AUTHENTICATION_DOC_LINK_KEYS,
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,
   getCreateDataSourceAuthenticationOptions,
   type CreateDataSourceAuthenticationMode,
 } from './create_data_source_flyout_authentication';
+import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
+
+const withRecommendedBadge = (label: ReactNode, recommended?: boolean): ReactNode => {
+  if (!recommended) {
+    return label;
+  }
+
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{authenticationStrings.recommendedBadge}</EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 export function CreateDataSourceFlyoutAuthenticationSelect({
   dataSourceType,
   authenticationMode,
   enableFederatedIdentity,
   onAuthenticationModeChange,
-  authenticationDocsUrl,
 }: {
   dataSourceType: DataSourceType;
   authenticationMode: CreateDataSourceAuthenticationMode;
   enableFederatedIdentity?: boolean;
   onAuthenticationModeChange: (mode: CreateDataSourceAuthenticationMode) => void;
-  authenticationDocsUrl: string;
 }) {
-  const options = useMemo(
-    () => getCreateDataSourceAuthenticationOptions(dataSourceType, { enableFederatedIdentity }),
-    [dataSourceType, enableFederatedIdentity]
-  );
+  const {
+    services: { docLinks },
+  } = useKibana<DataFederationKibanaServices>();
 
   if (!DATA_SOURCE_TYPES_WITH_AUTHENTICATION.has(dataSourceType)) {
     return null;
   }
 
+  const options = getCreateDataSourceAuthenticationOptions(dataSourceType, {
+    enableFederatedIdentity,
+  });
+  const selectedDescription = options.find((o) => o.value === authenticationMode)?.description;
+  const docsUrl = docLinks.links.dataFederation[AUTHENTICATION_DOC_LINK_KEYS[authenticationMode]];
+
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{createDataSourceFlyoutAuthenticationTitle()}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            href={authenticationDocsUrl}
-            target="_blank"
-            external={false}
-            rel="noopener noreferrer"
-            aria-label={createDataSourceFlyoutAuthenticationHelpAriaLabel()}
-            data-test-subj="createDataSourceFlyoutAuthenticationHelpLink"
-          >
-            <EuiIcon type="question" aria-hidden={true} />
-          </EuiLink>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>{authenticationStrings.title}</h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFormRow label={createDataSourceFlyoutAuthenticationLabel()} fullWidth>
-        <EuiSelect
+      <EuiFormRow
+        label={authenticationStrings.preferredMethodLabel}
+        fullWidth
+        helpText={
+          selectedDescription && (
+            <>
+              {selectedDescription}{' '}
+              <EuiLink
+                href={docsUrl}
+                target="_blank"
+                external
+                data-test-subj={`createDataSourceFlyoutAuthenticationLearnMore-${authenticationMode}`}
+              >
+                {authenticationStrings.learnMore}
+              </EuiLink>
+            </>
+          )
+        }
+      >
+        <EuiSuperSelect
           data-test-subj="createDataSourceFlyoutAuthentication"
           fullWidth
-          options={options}
-          value={authenticationMode}
-          onChange={(e) =>
-            onAuthenticationModeChange(e.target.value as CreateDataSourceAuthenticationMode)
-          }
+          valueOfSelected={authenticationMode}
+          onChange={onAuthenticationModeChange}
+          options={options.map(({ value, text, description, recommended }) => ({
+            value,
+            inputDisplay: withRecommendedBadge(text, recommended),
+            dropdownDisplay: (
+              <>
+                {withRecommendedBadge(<strong>{text}</strong>, recommended)}
+                <EuiText size="s" color="subdued">
+                  {description}
+                </EuiText>
+              </>
+            ),
+          }))}
         />
       </EuiFormRow>
     </>

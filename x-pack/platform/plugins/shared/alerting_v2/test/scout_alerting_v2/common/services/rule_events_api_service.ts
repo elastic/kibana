@@ -22,6 +22,12 @@ export interface RuleEventFilter {
   status?: AlertEventStatus;
   type?: AlertEventType;
   episodeStatus?: AlertEpisodeStatus;
+  /** Max events to return; defaults to 100. */
+  size?: number;
+}
+
+export interface RuleEventsCleanUpFilter {
+  ruleId?: string;
 }
 
 /**
@@ -39,8 +45,11 @@ export interface RuleEventsApiService {
    * Bulk-seed alert events directly into the `.rule-events` data stream.
    */
   seed: (events: AlertEvent[]) => Promise<void>;
-  /** Removes every document from the `.rule-events` data stream. */
-  cleanUp: () => Promise<void>;
+  /**
+   * Removes documents from the `.rule-events` data stream.
+   * Pass `ruleId` to delete only that run's events; omit it to wipe the stream.
+   */
+  cleanUp: (filter?: RuleEventsCleanUpFilter) => Promise<void>;
 }
 
 export const getRuleEventsApiService = ({
@@ -64,7 +73,7 @@ export const getRuleEventsApiService = ({
         index: ALERT_EVENTS_DATA_STREAM,
         query: { bool: { filter: must } },
         sort: [{ '@timestamp': 'asc' }],
-        size: 100,
+        size: filter.size ?? 100,
       });
       return result.hits.hits.map((hit) => hit._source as AlertEvent);
     });
@@ -127,12 +136,12 @@ export const getRuleEventsApiService = ({
       });
     });
 
-  const cleanUp: RuleEventsApiService['cleanUp'] = () =>
+  const cleanUp: RuleEventsApiService['cleanUp'] = (filter = {}) =>
     measurePerformanceAsync(log, `dataStream[${ALERT_EVENTS_DATA_STREAM}].cleanUp`, async () => {
       await esClient.deleteByQuery(
         {
           index: ALERT_EVENTS_DATA_STREAM,
-          query: { match_all: {} },
+          query: filter.ruleId ? { term: { 'rule.id': filter.ruleId } } : { match_all: {} },
           refresh: true,
           wait_for_completion: true,
           conflicts: 'proceed',

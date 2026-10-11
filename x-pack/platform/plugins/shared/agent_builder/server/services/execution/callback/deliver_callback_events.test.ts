@@ -12,6 +12,7 @@ import {
   AgentExecutionMode,
   ChatEventType,
   createRequestAbortedError,
+  TimelineEventType,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
@@ -53,6 +54,50 @@ const createRoundCompleteEvent = (): ChatEvent =>
   ({
     type: ChatEventType.roundComplete,
     data: { round: { id: 'round-1' } },
+  } as unknown as ChatEvent);
+
+const createExecutionStartedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_started',
+    type: TimelineEventType.executionStarted,
+    created_at: '2024-01-01T00:00:00.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { trigger_type: 'user_message' },
+  } as unknown as ChatEvent);
+
+const createExecutionTerminatedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_terminated',
+    type: TimelineEventType.executionTerminated,
+    created_at: '2024-01-01T00:00:00.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: {},
+  } as unknown as ChatEvent);
+
+const createExecutionFailedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_failed',
+    type: TimelineEventType.executionFailed,
+    created_at: '2024-01-01T00:00:01.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { time_to_last_token: 1, error: { code: 'internalError', message: 'boom' } },
+  } as unknown as ChatEvent);
+
+const createExecutionAbortedEvent = (): ChatEvent =>
+  ({
+    id: 'round-1::execution_aborted',
+    type: TimelineEventType.executionAborted,
+    created_at: '2024-01-01T00:00:01.000Z',
+    actor: { type: 'agent', id: 'agent-1' },
+    execution_id: 'round-1::execution',
+    trigger_event_id: 'round-1::user_message',
+    data: { time_to_last_token: 1 },
   } as unknown as ChatEvent);
 
 const createCallbackDeliveryServiceMock = () => {
@@ -155,9 +200,11 @@ describe('deliverCallbackEvents', () => {
     );
   });
 
-  it('filters out message_chunk events and delivers the rest', async () => {
+  it('filters out message_chunk + execution_started + execution_terminated events and delivers the rest', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const reasoningEvent = createReasoningEvent('progress');
+    const executionStartedEvent = createExecutionStartedEvent();
+    const executionTerminatedEvent = createExecutionTerminatedEvent();
     const roundCompleteEvent = createRoundCompleteEvent();
 
     await deliverCallbackEvents({
@@ -166,6 +213,8 @@ describe('deliverCallbackEvents', () => {
         createMessageChunkEvent('chunk one'),
         reasoningEvent,
         createMessageChunkEvent('chunk two'),
+        executionStartedEvent,
+        executionTerminatedEvent,
         roundCompleteEvent
       ),
       callbackDeliveryService: service,
@@ -178,6 +227,12 @@ describe('deliverCallbackEvents', () => {
 
     expect(deliveredEvents).toEqual([reasoningEvent, roundCompleteEvent]);
     expect(deliveredEvents.some((event) => event.type === ChatEventType.messageChunk)).toBe(false);
+    expect(deliveredEvents.some((event) => event.type === TimelineEventType.executionStarted)).toBe(
+      false
+    );
+    expect(
+      deliveredEvents.some((event) => event.type === TimelineEventType.executionTerminated)
+    ).toBe(false);
   });
 
   it('retries only round_complete events; other events are delivered at-most-once', async () => {
@@ -332,6 +387,54 @@ describe('deliverCallbackEvents', () => {
       transport,
       retry: true,
     });
+  });
+
+  it('never delivers execution_failed as an event: the failure callback is the single terminal representation', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoning = createReasoningEvent('progress');
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: concat(
+        of(reasoning, createExecutionFailedEvent()),
+        throwError(() => new Error('agent boom'))
+      ),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    const payloads = service.makeCallbackRequest.mock.calls.map(([{ payload }]) => payload);
+    const delivered = payloads
+      .filter((payload) => 'event' in payload)
+      .map((payload) => (payload as { event: ChatEvent }).event);
+    expect(delivered).toEqual([reasoning]);
+    const failures = payloads.filter((payload) => 'error' in payload);
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toMatchObject({ error: { message: 'agent boom' } });
+  });
+
+  it('never delivers execution_aborted as an event: exactly one failure callback with requestAborted', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoning = createReasoningEvent('progress');
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: concat(
+        of(reasoning, createExecutionAbortedEvent()),
+        throwError(() => createRequestAbortedError('request aborted'))
+      ),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    const payloads = service.makeCallbackRequest.mock.calls.map(([{ payload }]) => payload);
+    const delivered = payloads
+      .filter((payload) => 'event' in payload)
+      .map((payload) => (payload as { event: ChatEvent }).event);
+    expect(delivered).toEqual([reasoning]);
+    const failures = payloads.filter((payload) => 'error' in payload);
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toMatchObject({ error: { code: AgentBuilderErrorCode.requestAborted } });
   });
 
   it('delivers a failure payload with the requestAborted error code for aborts', async () => {

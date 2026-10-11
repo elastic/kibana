@@ -10,6 +10,7 @@ export XPACK_DIR="$KIBANA_DIR/x-pack"
 
 export CACHE_DIR="$HOME/.kibana"
 export ES_CACHE_DIR="$HOME/.es-snapshot-cache"
+export NODE_CACHE_DIR="${NODE_CACHE_DIR:-$HOME/.cache/node}"
 PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
@@ -73,8 +74,6 @@ export NODE_OPTIONS="--max-old-space-size=4096"
 
 export FORCE_COLOR=1
 export TEST_BROWSER_HEADLESS=1
-
-export KBN_DISALLOW_CODE_GEN_FROM_STRINGS=true
 
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.01

@@ -6,7 +6,7 @@
  */
 
 import type { CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
-import type { AlertAction } from '../../resources/datastreams/alert_actions';
+import type { AlertActionDocument } from '../../resources/datastreams/alert_actions';
 import { alertEpisodeStatus, alertEventStatus } from '../../resources/datastreams/alert_events';
 import type { HandlerItem } from './handler';
 import type { AlertEventRecord } from './types';
@@ -17,7 +17,7 @@ import type { AlertEventRecord } from './types';
  * synthetic `.rule-events` doc (lifecycle actions). Tests assert on
  * identity, never on content, so the shape is deliberately opaque.
  */
-const SENTINEL_ALERT_ACTION_DOC = { sentinel: 'audit-doc' } as unknown as AlertAction;
+const SENTINEL_ALERT_ACTION_DOC = { sentinel: 'audit-doc' } as unknown as AlertActionDocument;
 
 /**
  * Builds a `HandlerItem<TBody>` — the single-argument struct the
@@ -29,7 +29,7 @@ const SENTINEL_ALERT_ACTION_DOC = { sentinel: 'audit-doc' } as unknown as AlertA
 export const buildHandlerItem = <TBody extends CreateAlertActionBody>(
   action: TBody,
   alertEvent: AlertEventRecord,
-  alertActionDoc: AlertAction = SENTINEL_ALERT_ACTION_DOC
+  alertActionDoc: AlertActionDocument = SENTINEL_ALERT_ACTION_DOC
 ): HandlerItem<TBody> => ({ action, alertEvent, alertActionDoc });
 
 /**

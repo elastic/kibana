@@ -18,6 +18,8 @@ import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../
 
 import { useGetPackagePoliciesQuery, useGetIlmPoliciesQuery } from '../../../../../hooks';
 
+import { useOutputs } from './components/hooks';
+
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
 jest.mock('./components/hooks', () => ({
@@ -320,6 +322,71 @@ describe('StepDefinePackagePolicy', () => {
         />
       );
       expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
+    });
+
+    describe('inherit option label', () => {
+      const mockUseOutputs = jest.mocked(useOutputs);
+      const renderWithOutput = () =>
+        testRenderer.render(
+          <StepDefinePackagePolicy
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+            packageInfo={packageInfo}
+            packagePolicy={{ ...packagePolicy, output_id: null }}
+            updatePackagePolicy={mockUpdatePackagePolicy}
+            validationResults={validationResults}
+            submitAttempted={false}
+            noAdvancedToggle={true}
+            agentPolicies={agentPolicies}
+          />
+        );
+
+      const getInheritOption = () => {
+        const select = renderResult.getByTestId('packagePolicyOutputInput') as HTMLSelectElement;
+        return {
+          select,
+          option: [...select.options].find((option) => option.value === ''),
+        };
+      };
+
+      beforeEach(() => {
+        mockUseOutputs.mockReturnValue({
+          isLoading: false,
+          canUseOutputPerIntegration: true,
+          allowedOutputs: [
+            { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
+          ] as any,
+          inheritedOutputName: undefined,
+        });
+      });
+
+      it('should label the inherit option instead of rendering it as an empty row', () => {
+        // An unset output_id means "inherit from the parent agent policy"; EuiSelect represents
+        // that with an empty value, which must still carry a label.
+        renderResult = renderWithOutput();
+
+        const { select, option } = getInheritOption();
+
+        expect(option?.text).toEqual('Inherited from agent policy');
+        expect([...select.options].every((o) => o.text !== '')).toBe(true);
+        expect(select.value).toEqual('');
+      });
+
+      it('should name the effective output on the inherit option when it is resolvable', () => {
+        mockUseOutputs.mockReturnValue({
+          isLoading: false,
+          canUseOutputPerIntegration: true,
+          allowedOutputs: [
+            { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
+          ] as any,
+          inheritedOutputName: 'Default output',
+        });
+
+        renderResult = renderWithOutput();
+
+        expect(getInheritOption().option?.text).toEqual(
+          'Inherited from agent policy (currently Default output)'
+        );
+      });
     });
 
     it('should disable output selector when parent agent policy is managed', () => {
@@ -716,6 +783,30 @@ describe('StepDefinePackagePolicy', () => {
             renderResult.queryByTestId('packagePolicyNamespaceCustomizationOptOutImpactWarning')
           ).not.toBeInTheDocument();
         });
+      });
+
+      it('does not enable the other-policies query before initialization, preventing a spurious warning flash', () => {
+        // Regression test for a race between the async packageInfo load and the init effect:
+        // on the first render, initialized=false and namespaceCustomizationEnabled=false while
+        // isOptedIn is already true (packageInfo available synchronously in tests, or warm cache
+        // in production). Without the `initialized` guard the query fires immediately, and with a
+        // warm React Query cache the opt-out warning flashes on screen before the init effect
+        // corrects the state.
+        mockUseGetPackagePoliciesQuery.mockClear();
+        mockUseGetPackagePoliciesQuery.mockReturnValue({
+          data: { items: [{ id: 'other-policy-1' }] },
+        });
+        renderResult = renderWithToggle({
+          packagePolicyOverride: { namespace: 'staging' },
+          packageInfoOverride: {
+            installationInfo: {
+              namespace_customization_enabled_for: ['staging'],
+            } as any,
+          },
+        });
+        // The first render call must have enabled: false so the query never fires during
+        // the initialization window.
+        expect(mockUseGetPackagePoliciesQuery.mock.calls[0][1]).toMatchObject({ enabled: false });
       });
 
       it('shows no warning when toggle is turned on but there are no other policies', async () => {

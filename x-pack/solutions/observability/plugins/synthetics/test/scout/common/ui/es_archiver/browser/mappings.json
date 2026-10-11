@@ -7743,10 +7743,6 @@
     "settings": {
       "index": {
         "codec": "best_compression",
-        "lifecycle": {
-          "name": "heartbeat",
-          "rollover_alias": "heartbeat-8.1.0"
-        },
         "mapping": {
           "total_fields": {
             "limit": "10000"

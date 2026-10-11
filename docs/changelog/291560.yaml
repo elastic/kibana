@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/291560
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Improve performance of detection rule import with overwrite

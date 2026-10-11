@@ -43,14 +43,14 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       await entityStore.createEntity('user', {
-        user: { name: 'alice' },
-        entity: { id: userEuid('alice'), type: 'user' },
+        user: { name: 'alice-add' },
+        entity: { id: userEuid('alice-add'), type: 'user' },
       });
 
-      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
+      await utils.addUsersToSourceIndex(['alice-add'], sourceIndexName);
       await utils.syncWatchlist(watchlistId);
 
-      const watchlists = await entityStore.getEntityWatchlists(userEuid('alice'));
+      const watchlists = await entityStore.getEntityWatchlists(userEuid('alice-add'));
       expect(watchlists).toContain(watchlistId);
     });
 
@@ -63,18 +63,18 @@ export default ({ getService }: FtrProviderContext) => {
 
       // Pre-seed alice with a fake watchlist id to verify it is preserved after removal
       await entityStore.createEntity('user', {
-        user: { name: 'alice' },
+        user: { name: 'alice-remove' },
         entity: {
-          id: userEuid('alice'),
+          id: userEuid('alice-remove'),
           type: 'user',
           attributes: { watchlists: [FAKE_WATCHLIST_ID] },
         },
       });
 
-      await utils.addUsersToSourceIndex(['alice'], sourceIndexName);
+      await utils.addUsersToSourceIndex(['alice-remove'], sourceIndexName);
       await utils.syncWatchlist(watchlistId);
 
-      const watchlistsAfterSync = await entityStore.getEntityWatchlists(userEuid('alice'));
+      const watchlistsAfterSync = await entityStore.getEntityWatchlists(userEuid('alice-remove'));
       expect(watchlistsAfterSync).toContain(watchlistId);
       expect(watchlistsAfterSync).toContain(FAKE_WATCHLIST_ID);
 
@@ -82,7 +82,9 @@ export default ({ getService }: FtrProviderContext) => {
       await utils.clearSourceIndex(sourceIndexName);
       await utils.syncWatchlist(watchlistId);
 
-      const watchlistsAfterRemoval = await entityStore.getEntityWatchlists(userEuid('alice'));
+      const watchlistsAfterRemoval = await entityStore.getEntityWatchlists(
+        userEuid('alice-remove')
+      );
       expect(watchlistsAfterRemoval).not.toContain(watchlistId);
       expect(watchlistsAfterRemoval).toContain(FAKE_WATCHLIST_ID);
     });

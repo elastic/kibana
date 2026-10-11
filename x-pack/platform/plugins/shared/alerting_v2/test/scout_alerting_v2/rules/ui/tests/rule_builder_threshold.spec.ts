@@ -15,10 +15,11 @@ const EDITED_RULE_NAME = 'scout-rule-builder-edited';
 
 test.describe(
   'Rule Builder — threshold create and edit flows',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -52,7 +53,9 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
     });
 
@@ -112,18 +115,26 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
       });
 
-      await test.step('verify rule created with builder_type metadata', async () => {
+      await test.step('capture created rule for teardown', async () => {
         await expect
           .poll(
             async () => {
               const { items } = await apiServices.alertingV2.rules.find({
                 search: RULE_NAME,
               });
-              return items[0]?.metadata?.builder_type;
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
+              return items.length;
             },
             { timeout: 30_000 }
           )
-          .toBe('threshold');
+          .toBeGreaterThanOrEqual(1);
+      });
+
+      await test.step('the persisted rule has builder metadata', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(items[0]?.metadata?.builder).toStrictEqual({ type: 'threshold' });
       });
     });
 
@@ -136,17 +147,16 @@ test.describe(
       await test.step('seed a builder rule via API', async () => {
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
-            metadata: { name: EDIT_RULE_NAME, builder_type: 'threshold' },
+            metadata: { name: EDIT_RULE_NAME, builder: { type: 'threshold' } },
             query: {
-              format: 'composed',
               base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
               breach: { segment: '| WHERE count > 5' },
             },
             time_field: '@timestamp',
-            recovery_strategy: undefined,
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh rules list', async () => {
@@ -192,6 +202,10 @@ test.describe(
       pageObjects,
     }) => {
       await test.step('login as viewer', async () => {
+        // beforeEach leaves the rules app open as the editor. Replacing the
+        // session cookie in place makes that page redirect on the next 401,
+        // which aborts the following goto (net::ERR_ABORTED).
+        await page.goto('about:blank');
         await browserAuth.loginAsAlertingV2Viewer();
         await pageObjects.rulesList.goto();
         await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
@@ -199,6 +213,138 @@ test.describe(
 
       await test.step('create rule button is not visible', async () => {
         await expect(pageObjects.composeDiscover.createRuleSplitDropdownButton).toBeHidden();
+      });
+    });
+
+    test('builder-to-esql: rule without builder metadata opens in ES|QL mode', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      let ruleId: string | undefined;
+
+      await test.step('create a builder rule then clear builder metadata via upsert', async () => {
+        const created = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'was-builder-rule', builder: { type: 'threshold' } },
+            query: {
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+        ruleId = created.id;
+        createdRuleIds.push(ruleId);
+        await apiServices.alertingV2.rules.upsert(
+          ruleId,
+          buildCreateRuleData({
+            metadata: { name: 'was-builder-rule' },
+            query: {
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+      });
+
+      await test.step('open rule for editing', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+      });
+
+      await test.step('verify flyout opens in ES|QL mode (no builder switch button)', async () => {
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
+      });
+    });
+
+    test('builder-to-esql: unparseable query shows confirmation modal', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      let ruleId: string | undefined;
+
+      await test.step('create builder rule with unparseable query', async () => {
+        const created = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'unparseable-builder-rule', builder: { type: 'threshold' } },
+            query: {
+              base: `FROM ${TEST_INDEX} | STATS COUNT(*) BY host.name`,
+              breach: { segment: '| WHERE `COUNT(*)` > 3.0' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+        ruleId = created.id;
+        createdRuleIds.push(ruleId);
+      });
+
+      await test.step('open rule for editing', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+      });
+
+      await test.step('confirmation modal appears', async () => {
+        await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible({
+          timeout: 30_000,
+        });
+      });
+
+      await test.step('confirm opens flyout in ES|QL mode', async () => {
+        await pageObjects.composeDiscover.confirmBuilderToEsql();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
+      });
+    });
+
+    test('builder-to-esql: switch toggle shows confirmation modal', async ({
+      page,
+      apiServices,
+      pageObjects,
+    }) => {
+      let ruleId: string | undefined;
+
+      await test.step('create a valid builder rule', async () => {
+        const created = await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({
+            metadata: { name: 'switch-modal-rule', builder: { type: 'threshold' } },
+            query: {
+              base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
+              breach: { segment: '| WHERE count > 5' },
+            },
+            time_field: '@timestamp',
+          })
+        );
+        ruleId = created.id;
+        createdRuleIds.push(ruleId);
+      });
+
+      await test.step('open rule for editing in builder mode', async () => {
+        await pageObjects.rulesList.goto();
+        await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
+        await pageObjects.composeDiscover.openEditFlyout(ruleId!);
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+      });
+
+      await test.step('click ES|QL switch button', async () => {
+        await pageObjects.composeDiscover.clickSwitchToEsql();
+      });
+
+      await test.step('confirmation modal appears', async () => {
+        await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible({
+          timeout: 10_000,
+        });
+      });
+
+      await test.step('confirm switches to ES|QL mode', async () => {
+        await pageObjects.composeDiscover.confirmBuilderToEsql();
+        await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeHidden();
+        await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
       });
     });
   }

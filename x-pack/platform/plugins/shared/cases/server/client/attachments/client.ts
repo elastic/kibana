@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Case, AttachmentsV2, AttachmentV2 } from '../../../common/types/domain';
+import type { Case, AttachmentsV2, UnifiedAttachment } from '../../../common/types/domain';
 import type {
   DocumentResponse,
-  AttachmentsFindResponse,
-  BulkGetAttachmentsResponseV2,
+  UnifiedAttachmentsFindResponse,
+  BulkGetUnifiedAttachmentsResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
@@ -21,7 +21,7 @@ import type {
   AddArgs,
   DeleteAllArgs,
   DeleteArgs,
-  FindCommentsArgs,
+  FindAttachmentsArgs,
   GetAllDocumentsAttachedToCase,
   GetAllArgs,
   GetArgs,
@@ -44,11 +44,11 @@ import { withUsageCounter } from '../usage_counters';
  */
 export interface AttachmentsSubClient {
   /**
-   * Adds an attachment to a case.
+   * Adds an attachment to a case. Returns the case with comments.
    */
   add(params: AddArgs): Promise<Case>;
   bulkCreate(params: BulkCreateArgs): Promise<Case>;
-  bulkGet(params: BulkGetArgs): Promise<BulkGetAttachmentsResponseV2>;
+  bulkGet(params: BulkGetArgs): Promise<BulkGetUnifiedAttachmentsResponse>;
   /**
    * Deletes all attachments associated with a single case.
    */
@@ -59,9 +59,9 @@ export interface AttachmentsSubClient {
   delete(deleteArgs: DeleteArgs): Promise<void>;
   bulkDeleteFileAttachments(deleteArgs: BulkDeleteFileArgs): Promise<void>;
   /**
-   * Retrieves all comments matching the search criteria.
+   * Finds attachments for a case, optionally filtered by `type`.
    */
-  find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponse>;
+  find(findArgs: FindAttachmentsArgs): Promise<UnifiedAttachmentsFindResponse>;
   /**
    * Retrieves all documents attached to a case given a single case ID
    */
@@ -73,11 +73,9 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<AttachmentV2>;
+  get(getArgs: GetArgs): Promise<UnifiedAttachment>;
   /**
-   * Updates a specific attachment.
-   *
-   * The request must include all fields for the attachment. Even the fields that are not changing.
+   * Full replace. The request must include every field. Returns the case with comments.
    */
   update(updateArgs: UpdateArgs): Promise<Case>;
   /**
@@ -135,7 +133,7 @@ export const createAttachmentsSubClient = (
       clientArgs,
       (params: BulkDeleteFileArgs) => bulkDeleteFileAttachments(params, clientArgs, casesClient)
     ),
-    find: (params: FindCommentsArgs) => find(params, clientArgs),
+    find: (params: FindAttachmentsArgs) => find(params, clientArgs),
     getAllDocumentsAttachedToCase: (params: GetAllDocumentsAttachedToCase) =>
       getAllDocumentsAttachedToCase(params, clientArgs, casesClient),
     getAll: (params: GetAllArgs) => getAll(params, clientArgs),

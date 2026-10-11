@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux-v7';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { dataTableActions, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
 import type { SetOptional } from 'type-fest';
-import { noop } from 'lodash';
+import { isEmpty, noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
@@ -144,8 +144,6 @@ const sort: GetSecurityAlertsTableProp<'sort'> = [
 const casesConfiguration = {
   featureId: CASES_FEATURE_ID,
   owner: [APP_ID],
-  syncAlerts: true,
-  extractObservables: true,
 };
 const emptyInputFilters: Filter[] = [];
 
@@ -275,10 +273,15 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     [columns, license]
   );
 
-  const finalBrowserFields = useMemo(
-    () => (isEventRenderedView ? {} : browserFields),
-    [isEventRenderedView, browserFields]
-  );
+  // Pass undefined (not {}) when browserFields is empty so the shared alerts table can fall back to
+  // its own /internal/rac/alerts/browser_fields fetch, recovering the field browser independently.
+  // Keep the deliberate {} for event-rendered view where browser fields are intentionally suppressed.
+  const finalBrowserFields = useMemo(() => {
+    if (isEventRenderedView) {
+      return {};
+    }
+    return isEmpty(browserFields) ? undefined : browserFields;
+  }, [isEventRenderedView, browserFields]);
 
   const finalColumns = useMemo(
     () => (isEventRenderedView ? eventRenderedViewColumns : alertColumns),
@@ -366,7 +369,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
-  const bulkActions = useBulkActionsByTableType(tableType, finalBoolQuery, refreshAlertsTable);
+  const bulkActions = useBulkActionsByTableType(
+    tableType,
+    finalBoolQuery,
+    refreshAlertsTable,
+    runtimeMappings
+  );
 
   useEffect(() => {
     if (isDataTableInitialized) return;

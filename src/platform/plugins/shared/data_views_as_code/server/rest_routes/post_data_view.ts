@@ -23,6 +23,7 @@ export const registerPostDataViewAsCodeRoute = ({
     .post({
       path: CREATE_DATA_VIEW_AS_CODE_PATH,
       access: 'internal',
+      enableQueryVersion: true,
       description: 'Create a data view',
       options: {
         availability: {

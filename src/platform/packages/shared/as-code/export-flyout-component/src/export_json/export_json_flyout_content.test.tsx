@@ -37,7 +37,7 @@ describe('ExportJsonFlyoutContent', () => {
     );
 
     expect(getExportJson).toHaveBeenCalledWith();
-    expect(screen.getByRole('heading', { name: 'Export object as JSON' })).toHaveAttribute(
+    expect(screen.getByRole('heading', { name: 'Export Object as JSON' })).toHaveAttribute(
       'id',
       'exportJsonTitle'
     );

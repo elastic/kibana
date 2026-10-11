@@ -66,17 +66,22 @@ import {
 } from '../cases_analytics_v2';
 import { CasesEventBus } from '../events/event_bus';
 
-const createCasesEventBusMock = (): CasesEventBus => {
-  return {
-    ...new CasesEventBus(),
+export const createCasesEventBusMock = (): CasesEventBus =>
+  Object.assign(new CasesEventBus(), {
     emitCaseCreated: jest.fn(),
     emitCaseUpdated: jest.fn(),
     emitAttachmentsAdded: jest.fn(),
+    emitAttachmentsDeleted: jest.fn(),
+    emitObservablesAdded: jest.fn(),
+    emitAlertStatusChanged: jest.fn(),
     onCaseCreated: jest.fn(),
     onCaseUpdated: jest.fn(),
     onAttachmentsAdded: jest.fn(),
-  };
-};
+    onAttachmentsDeleted: jest.fn(),
+    onObservablesAdded: jest.fn(),
+    onAlertStatusChanged: jest.fn(),
+    hasAlertStatusChangedListeners: jest.fn().mockReturnValue(false),
+  });
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
 
@@ -102,6 +107,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
     bulkAddObservables: jest.fn(),
+    bulkDeleteObservables: jest.fn(),
     getApplicableFields: jest.fn(),
   });
 };
@@ -181,7 +187,9 @@ const createFieldDefinitionsSubClientMock = (): FieldDefinitionsSubClientMock =>
     getFieldDefinitions: jest.fn(),
     getFieldDefinition: jest.fn(),
     createFieldDefinition: jest.fn(),
+    validateCreateFieldDefinition: jest.fn(),
     updateFieldDefinition: jest.fn(),
+    validateUpdateFieldDefinition: jest.fn(),
     deleteFieldDefinition: jest.fn(),
   });
 };
@@ -233,6 +241,7 @@ export const createCasesClientFactory = (): CasesClientFactoryMock => {
   const factory: PublicMethodsOf<CasesClientFactory> = {
     initialize: jest.fn(),
     create: jest.fn(),
+    createWorkflowRunContext: jest.fn(),
   };
 
   return factory as unknown as CasesClientFactoryMock;

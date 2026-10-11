@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getRemoteClusterName, getRemoteMonitorInfo } from './remote_result_utils';
+import {
+  getRemoteClusterName,
+  getRemoteMonitorInfo,
+  isRemoteIndexMetadataEnabled,
+} from './remote_result_utils';
 
 describe('remote_result_utils', () => {
   describe('getRemoteClusterName', () => {
@@ -67,6 +71,34 @@ describe('remote_result_utils', () => {
       const result = getRemoteMonitorInfo('cluster1:synthetics-browser-default', undefined);
       expect(result).toEqual({ remoteName: 'cluster1' });
       expect(result).not.toHaveProperty('kibanaUrl');
+    });
+
+    it('treats a CPS project-alias prefix as remote', () => {
+      expect(
+        getRemoteMonitorInfo('obs-prod:.ds-synthetics-http-default-2026.01.01-000001')
+      ).toEqual({
+        remoteName: 'obs-prod',
+      });
+    });
+  });
+
+  describe('isRemoteIndexMetadataEnabled', () => {
+    it('is true on stateful (CCS)', () => {
+      expect(
+        isRemoteIndexMetadataEnabled({ isElasticsearchServerless: false, isCpsEnabled: false })
+      ).toBe(true);
+    });
+
+    it('is true on serverless when platform CPS is on', () => {
+      expect(
+        isRemoteIndexMetadataEnabled({ isElasticsearchServerless: true, isCpsEnabled: true })
+      ).toBe(true);
+    });
+
+    it('is false on serverless when platform CPS is off', () => {
+      expect(
+        isRemoteIndexMetadataEnabled({ isElasticsearchServerless: true, isCpsEnabled: false })
+      ).toBe(false);
     });
   });
 });

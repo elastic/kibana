@@ -19,6 +19,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import {
@@ -33,6 +34,7 @@ import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
 import { triggerSchemas } from './trigger_schemas';
+import { registerConnectorEventTriggersPublic } from './triggers/register_connector_event_triggers';
 import type {
   WorkflowsPublicPluginSetup,
   WorkflowsPublicPluginSetupDependencies,
@@ -94,13 +96,19 @@ export class WorkflowsPlugin
 
     registerConnectorType();
 
+    registerConnectorEventTriggersPublic({
+      inboundEventsEnabled: plugins.actions.isInboundEventsEnabled,
+      registerTriggerDefinition: (definition) =>
+        plugins.workflowsExtensions.registerTriggerDefinition(definition),
+    });
+
     this.setupAgentBuilderStart(core);
 
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       appRoute: '/app/workflows',
-      euiIconType: 'workflowsApp',
+      euiIconType: 'logoElastic',
       visibleIn: this.getVisibleIn({ isAuthorized: true, isAvailable: true }),
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
@@ -172,9 +180,35 @@ export class WorkflowsPlugin
         })
       )
       .subscribe(() => {
-        core.http.post('/internal/workflows/disable', { version: '1' }).catch((err) => {
-          this.logger.error('Failed to disable all workflows on opt-out', { error: err });
-        });
+        core.http
+          .post<{ failures: Array<{ id: string; error: string }> }>('/internal/workflows/disable', {
+            version: '1',
+          })
+          .then(({ failures }) => {
+            if (failures.length > 0) {
+              core.notifications.toasts.addWarning({
+                title: i18n.translate('workflowsManagement.disableAll.partialFailureTitle', {
+                  defaultMessage: 'Some workflows could not be disabled',
+                }),
+                text: i18n.translate('workflowsManagement.disableAll.partialFailureDescription', {
+                  defaultMessage:
+                    '{count, plural, one {# workflow could} other {# workflows could}} not be disabled and may still run.',
+                  values: { count: failures.length },
+                }),
+              });
+            }
+          })
+          .catch((err) => {
+            this.logger.error('Failed to disable all workflows on opt-out', { error: err });
+            core.notifications.toasts.addDanger({
+              title: i18n.translate('workflowsManagement.disableAll.failureTitle', {
+                defaultMessage: 'Could not disable workflows',
+              }),
+              text: i18n.translate('workflowsManagement.disableAll.failureDescription', {
+                defaultMessage: 'Workflows may still run. Try again.',
+              }),
+            });
+          });
       });
   }
 
@@ -191,7 +225,7 @@ export class WorkflowsPlugin
     const deepLinksFlags$: Observable<DeepLinksParams> = combineLatest({
       libraryEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
-        false
+        true
       ),
       executionsViewEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
@@ -267,6 +301,7 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      securityUi: depsStart.security.uiApi,
       workflowsManagement: {
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
@@ -280,6 +315,7 @@ export class WorkflowsPlugin
     return {
       ...coreStart,
       ...depsStart,
+      security: coreStart.security,
       ...additionalServices,
     };
   }

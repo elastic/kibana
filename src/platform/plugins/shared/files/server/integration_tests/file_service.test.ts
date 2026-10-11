@@ -168,7 +168,7 @@ describe('FileService', () => {
 
     await expect(async () => {
       await fileService.bulkGetById({ ids: [file1.id, unknownID] });
-    }).rejects.toThrowError(`File [${unknownID}] not found`);
+    }).rejects.toThrow(`File [${unknownID}] not found`);
   });
 
   it('does not throw if one of the file does not exists', async () => {

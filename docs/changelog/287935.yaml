@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/287935
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+areas:
+- Dashboards and visualizations
+title: Limit Canvas data table cell count to prevent excessive memory use

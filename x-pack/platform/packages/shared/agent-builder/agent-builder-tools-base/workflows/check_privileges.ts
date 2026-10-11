@@ -49,6 +49,12 @@ const hasAllApiPrivileges = async ({
 export const hasWorkflowReadPrivilege = (params: CheckWorkflowPrivilegeParams): Promise<boolean> =>
   hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.read });
 
+/** Verifies the caller can read workflow execution data through Agent Builder. */
+export const hasWorkflowExecutionReadPrivilege = (
+  params: CheckWorkflowPrivilegeParams
+): Promise<boolean> =>
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.readExecution });
+
 /**
  * Verifies the caller holds the privileges required to execute a workflow through
  * Agent Builder. Executing does not require reading the definition: the workflow
@@ -58,3 +64,13 @@ export const hasWorkflowExecutePrivilege = (
   params: CheckWorkflowPrivilegeParams
 ): Promise<boolean> =>
   hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.execute });
+
+export const hasWorkflowCreatePrivilege = (
+  params: CheckWorkflowPrivilegeParams
+): Promise<boolean> =>
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.create });
+
+export const hasWorkflowUpdatePrivilege = (
+  params: CheckWorkflowPrivilegeParams
+): Promise<boolean> =>
+  hasAllApiPrivileges({ ...params, actions: WorkflowsManagementOperationPrivileges.update });

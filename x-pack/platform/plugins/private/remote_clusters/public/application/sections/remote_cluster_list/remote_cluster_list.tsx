@@ -6,16 +6,16 @@
  */
 
 import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ScopedHistory } from '@kbn/core/public';
+import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiLoadingLogo,
   EuiOverlayMask,
   EuiSpacer,
-  EuiPageHeader,
   EuiPageSection,
   EuiPageBody,
   EuiPageTemplate,
@@ -244,32 +244,32 @@ export class RemoteClusterList extends Component<Props> {
   }
 
   renderList() {
-    const { clusters } = this.props;
+    const { clusters, history } = this.props;
+    const menu: AppHeaderMenu = {
+      primaryActionItem: {
+        id: 'addRemoteCluster',
+        label: i18n.translate('xpack.remoteClusters.remoteClusterList.connectButtonLabel', {
+          defaultMessage: 'Add a remote cluster',
+        }),
+        iconType: 'plusCircle',
+        href: history.createHref({ pathname: '/add' }),
+        run: () => {
+          history.push('/add');
+        },
+        testId: 'remoteClusterCreateButton',
+      },
+    };
 
     return (
       <EuiPageBody data-test-subj="remote-clusters-list">
         <EuiPageSection paddingSize="none">
-          <EuiPageHeader
-            bottomBorder
-            pageTitle={
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterListTitle"
-                defaultMessage="Remote Clusters"
-              />
-            }
-            rightSideItems={[
-              <EuiButtonEmpty
-                href={remoteClustersUrl}
-                target="_blank"
-                iconType="question"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.remoteClustersDocsLinkText"
-                  defaultMessage="Remote Clusters docs"
-                />
-              </EuiButtonEmpty>,
-            ]}
+          <AppHeader
+            title={i18n.translate('xpack.remoteClusters.remoteClusterListTitle', {
+              defaultMessage: 'Remote Clusters',
+            })}
+            docLink={remoteClustersUrl}
+            menu={menu}
+            spacing="bleed"
           />
 
           <EuiSpacer size="l" />

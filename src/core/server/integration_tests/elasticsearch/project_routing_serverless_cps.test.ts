@@ -54,8 +54,7 @@ const SORTED_COUNTS_DESC = [...TEST_DOCUMENTS]
  *
  * @see src/core/packages/elasticsearch/server-internal/src/elasticsearch_service.ts
  */
-// Failing: See https://github.com/elastic/kibana/issues/254398
-describe.skip('project_routing on serverless CPS', () => {
+describe('project_routing on serverless CPS', () => {
   let serverlessES: TestServerlessESUtils;
   let serverlessKibana: TestServerlessKibanaUtils;
   let client: ElasticsearchClient;
@@ -64,7 +63,7 @@ describe.skip('project_routing on serverless CPS', () => {
     const { startES, startKibana } = createTestServerlessInstances({
       adjustTimeout: (timeout: number) => jest.setTimeout(timeout),
       enableCPS: true,
-      // Match `yarn es serverless --projectType observability ...`
+      // Match `pnpm es serverless --projectType observability ...`
       projectType: 'oblt',
       // Setup-only: use superuser so tests can create temp indices.
       kibana: {

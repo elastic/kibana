@@ -415,7 +415,7 @@ export function CustomTimeRangePanel() {
       if (saveAsPreset && onPresetSave) {
         onPresetSave({ start: startDateString, end: endDateString, label: inputText });
       }
-      applyRange();
+      applyRange(undefined, inputText);
     },
     [applyRange, saveAsPreset, onPresetSave, startDateString, endDateString, inputText]
   );

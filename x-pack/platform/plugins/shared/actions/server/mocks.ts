@@ -40,16 +40,12 @@ const createSetupMock = () => {
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
     getActionsHealth: jest.fn(),
-    getActionsConfigurationUtilities: jest.fn().mockReturnValue({
-      getAwsSesConfig: jest.fn(),
-      getWebhookSettings: jest.fn(),
-      getEarsUrl: jest.fn(),
-      getRelaySSLSettings: jest.fn(),
-    }),
+    getActionsConfigurationUtilities: jest.fn().mockReturnValue(actionsConfigMock.create()),
     getRelayClient: jest.fn(),
     setEnabledConnectorTypes: jest.fn(),
     isActionTypeEnabled: jest.fn(),
     registerConnectorLifecycleListener: jest.fn(),
+    registerConnectorEventEmitter: jest.fn(),
   });
   return mock;
 };

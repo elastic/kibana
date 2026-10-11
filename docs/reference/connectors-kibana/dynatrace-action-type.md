@@ -11,9 +11,11 @@ applies_to:
 
 The Dynatrace connector connects directly to the Dynatrace Environment API v2. It lets a workflow or agent triage Davis problems — list, read, comment, and close — plus ingest events, query metrics and entities, and manage maintenance windows, without opening the Dynatrace console.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that uses Dynatrace's REST API with `Authorization: Api-Token` authentication. You configure your environment URL and an API access token when creating the connector.
+The Dynatrace connector uses Dynatrace's REST API with `Authorization: Api-Token` authentication. You configure your environment URL and an API access token when creating the connector.
 
 ## Create connectors in {{kib}} [define-dynatrace-ui]
 

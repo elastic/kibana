@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AttachmentType } from './attachment_types';
 import {
   getLatestVersion,
   getVersion,
@@ -13,6 +14,7 @@ import {
   isAttachmentActive,
   getActiveAttachments,
   isVersionedAttachmentWithOrigin,
+  isVersionedAttachmentOfType,
   hashContent,
   estimateTokens,
   attachmentVersionSchema,
@@ -346,6 +348,31 @@ describe('versioned_attachment', () => {
       expect(isVersionedAttachmentWithOrigin(attachment)).toBe(true);
       if (isVersionedAttachmentWithOrigin(attachment)) {
         expect(attachment.origin).toBe('saved-object-id');
+      }
+    });
+  });
+
+  describe('isVersionedAttachmentOfType', () => {
+    it('returns false when attachment.type does not match', () => {
+      const attachment = createTestAttachment({ type: AttachmentType.text });
+      expect(isVersionedAttachmentOfType(attachment, AttachmentType.image)).toBe(false);
+    });
+
+    it('returns true when attachment.type matches and narrows the data type', () => {
+      const attachment = createTestAttachment({
+        type: AttachmentType.image,
+        versions: [
+          {
+            version: 1,
+            data: { file_id: 'file-1', name: 'photo.png', mime_type: 'image/png' },
+            created_at: '2025-01-01T00:00:00Z',
+            content_hash: 'abc123',
+          },
+        ],
+      });
+      expect(isVersionedAttachmentOfType(attachment, AttachmentType.image)).toBe(true);
+      if (isVersionedAttachmentOfType(attachment, AttachmentType.image)) {
+        expect(getVersion(attachment, 1)?.data.name).toBe('photo.png');
       }
     });
   });

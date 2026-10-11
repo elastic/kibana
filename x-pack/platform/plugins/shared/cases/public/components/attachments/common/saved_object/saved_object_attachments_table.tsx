@@ -15,7 +15,9 @@ import {
 } from '@elastic/eui';
 import type { CaseUI, AttachmentUIV2 } from '../../../../../common/ui/types';
 import { FormattedRelativePreferenceDate } from '../../../formatted_date';
+import { useCasesContext } from '../../../cases_context/use_cases_context';
 import { SavedObjectLink } from './saved_object_link';
+import { SavedObjectDeleteButton } from './saved_object_delete_button';
 import { useSavedObjectInAppUrls } from './use_saved_object_in_app_url';
 import { getSavedObjectAttachmentAttributes, isSavedObjectAttachment } from './helpers';
 import * as i18n from './translations';
@@ -89,6 +91,8 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
   attachmentTypeId,
   soType,
 }) => {
+  const { permissions } = useCasesContext();
+
   const allRows = useMemo<SavedObjectAttachmentRow[]>(
     () =>
       caseData.comments.reduce<SavedObjectAttachmentRow[]>((rows, attachment) => {
@@ -118,8 +122,8 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
   const ids = useMemo(() => filteredRows.map((row) => row.attachmentId), [filteredRows]);
   const pathById = useSavedObjectInAppUrls(soType, ids);
 
-  const columns = useMemo<Array<EuiBasicTableColumn<SavedObjectAttachmentRow>>>(
-    () => [
+  const columns = useMemo<Array<EuiBasicTableColumn<SavedObjectAttachmentRow>>>(() => {
+    const baseColumns: Array<EuiBasicTableColumn<SavedObjectAttachmentRow>> = [
       {
         name: i18n.TITLE,
         field: 'title',
@@ -145,9 +149,25 @@ export const SavedObjectAttachmentsTable: React.FC<SavedObjectAttachmentsTablePr
         field: 'createdBy',
         'data-test-subj': 'cases-so-attachments-table-created-by',
       },
-    ],
-    [pathById]
-  );
+    ];
+
+    if (permissions.delete) {
+      baseColumns.push({
+        name: i18n.ACTIONS,
+        width: '80px',
+        actions: [
+          {
+            name: i18n.ACTIONS,
+            render: (row: SavedObjectAttachmentRow) => (
+              <SavedObjectDeleteButton caseId={caseData.id} commentId={row.id} />
+            ),
+          },
+        ],
+      });
+    }
+
+    return baseColumns;
+  }, [caseData.id, pathById, permissions.delete]);
 
   const rowProps = useCallback(
     (row: SavedObjectAttachmentRow) => ({

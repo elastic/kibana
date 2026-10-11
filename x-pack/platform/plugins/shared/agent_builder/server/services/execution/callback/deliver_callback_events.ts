@@ -17,12 +17,14 @@ import {
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import {
+  isExecutionStartedEvent,
+  isExecutionTerminalEvent,
   isMessageChunkEvent,
   isRoundCompleteEvent,
   type ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution } from '@kbn/agent-builder-server/execution';
-import { serializeExecutionError } from '../execution_runner';
+import { serializeExecutionError } from '../utils/serialize_execution_error';
 import type { CallbackDeliveryService } from './callback_delivery_service';
 
 /**
@@ -90,7 +92,15 @@ export const deliverCallbackEvents = ({
 
     events$
       .pipe(
-        filter((event) => !isMessageChunkEvent(event)),
+        filter(
+          (event) =>
+            !isMessageChunkEvent(event) &&
+            !isExecutionStartedEvent(event) &&
+            // Terminal timeline events (terminated / failed / aborted) are never delivered as
+            // events: the completion payload and the failure callback are the terminal
+            // representations a callback consumer gets.
+            !isExecutionTerminalEvent(event)
+        ),
         concatMap((event) => {
           // Hold the terminal event back until the stream completes (persistence succeeded).
           if (isRoundCompleteEvent(event)) {

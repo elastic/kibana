@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/290872
+issues:
+- https://github.com/elastic/security-team/issues/19344
+type: bug-fix
+products:
+- product: cloud-serverless
+- product: kibana
+title: 'Fix Re-run in the Workflows execution flyout starting a run without showing the inputs modal'
+description: Re-run in the execution flyout now opens the inputs modal with the previous run's inputs prefilled, so you can review or change them before starting the run. The flyout switches to the new run after you submit, and closing the modal leaves the current execution open.

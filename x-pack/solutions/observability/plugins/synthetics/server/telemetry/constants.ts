@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const MONITOR_UPDATE_CHANNEL = 'synthetics-monitor-update';
-export const MONITOR_CURRENT_CHANNEL = 'synthetics-monitor-current';
-export const MONITOR_ERROR_EVENTS_CHANNEL = 'synthetics-monitor-error-events';
+export const MONITOR_UPDATE_EVENT_TYPE = 'synthetics_monitor_update';
+export const MONITOR_CURRENT_EVENT_TYPE = 'synthetics_monitor_current';
+export const MONITOR_ERROR_EVENT_TYPE = 'synthetics_monitor_error';

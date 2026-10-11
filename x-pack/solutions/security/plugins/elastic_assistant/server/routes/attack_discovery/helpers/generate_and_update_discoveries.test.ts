@@ -219,7 +219,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         withReplacements: false,
       });
 
-      expect(handleGraphError).not.toBeCalled();
+      expect(handleGraphError).not.toHaveBeenCalled();
     });
 
     it('should return valid results', async () => {
@@ -377,7 +377,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         withReplacements: false,
       });
 
-      expect(reportAttackDiscoverySuccessTelemetry).not.toBeCalled();
+      expect(reportAttackDiscoverySuccessTelemetry).not.toHaveBeenCalled();
     });
 
     it('should return an error', async () => {
@@ -425,7 +425,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         withReplacements: false,
       });
 
-      expect(handleGraphError).not.toBeCalled();
+      expect(handleGraphError).not.toHaveBeenCalled();
     });
 
     it('should return valid results', async () => {

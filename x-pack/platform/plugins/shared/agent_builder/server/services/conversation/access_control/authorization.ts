@@ -5,45 +5,40 @@
  * 2.0.
  */
 
-import type { UserIdAndName } from '@kbn/agent-builder-common';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
-import type { ConversationPermissions } from '../../../../common/http_api/conversations';
-import type { ConversationProperties } from '../client/storage';
+import type { ConversationWithoutRounds, CurrentUser } from '@kbn/agent-builder-common';
+import { isPublicConversation } from '@kbn/agent-builder-common';
 
 export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
 
+interface ConversationOwner {
+  userId?: string;
+  username: string;
+}
+
 export const isConversationOwner = ({
-  conversation,
+  owner,
   user,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
+  owner: ConversationOwner;
+  user: CurrentUser;
 }): boolean => {
-  if (conversation.user_id !== undefined && user.id !== undefined) {
-    return conversation.user_id === user.id;
+  if (owner.userId !== undefined && user.id !== undefined) {
+    return owner.userId === user.id;
   }
 
-  if (conversation.user_id === undefined && user.username !== undefined) {
-    return conversation.user_name === user.username;
+  if (owner.userId === undefined && user.username !== undefined) {
+    return owner.username === user.username;
   }
 
   return false;
-};
-
-const isPublicConversation = ({
-  conversation,
-}: {
-  conversation: ConversationProperties;
-}): boolean => {
-  return conversation.access_control?.access_mode === ConversationAccessControlMode.Public;
 };
 
 export const isConversationMember = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
 }): boolean => {
   if (user.id === undefined || conversation.access_control?.entries === undefined) {
     return false;
@@ -58,66 +53,60 @@ export const hasConversationConverseAccess = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
 }): boolean => {
-  if (isConversationOwner({ conversation, user })) {
+  if (
+    isConversationOwner({
+      owner: { userId: conversation.user.id, username: conversation.user.username },
+      user,
+    })
+  ) {
     return true;
   }
 
-  return isPublicConversation({ conversation }) || isConversationMember({ conversation, user });
+  return (
+    isPublicConversation(conversation.access_control) ||
+    isConversationMember({ conversation, user })
+  );
 };
 
 export const hasConversationOwnerAccess = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
-}): boolean => isConversationOwner({ conversation, user });
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
+}): boolean =>
+  isConversationOwner({
+    owner: { userId: conversation.user.id, username: conversation.user.username },
+    user,
+  });
 
 export const hasConversationRenameAccess = ({
   conversation,
   user,
-  isAdmin,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
-  isAdmin: boolean;
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
 }): boolean =>
   hasConversationOwnerAccess({ conversation, user }) ||
-  (isAdmin && isPublicConversation({ conversation }));
+  (user.isAdmin && isPublicConversation(conversation.access_control));
 
 export const hasConversationDeleteAccess = ({
   conversation,
   user,
-  isAdmin,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
-  isAdmin: boolean;
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
 }): boolean =>
   hasConversationOwnerAccess({ conversation, user }) ||
-  (isAdmin && isPublicConversation({ conversation }));
+  (user.isAdmin && isPublicConversation(conversation.access_control));
 
 export const hasConversationUpdateAccessControlAccess = ({
   conversation,
   user,
 }: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
+  conversation: ConversationWithoutRounds;
+  user: CurrentUser;
 }): boolean => hasConversationOwnerAccess({ conversation, user });
-
-export const getConversationPermissions = ({
-  conversation,
-  user,
-  isAdmin,
-}: {
-  conversation: ConversationProperties;
-  user: UserIdAndName;
-  isAdmin: boolean;
-}): ConversationPermissions => ({
-  rename: hasConversationRenameAccess({ conversation, user, isAdmin }),
-  delete: hasConversationDeleteAccess({ conversation, user, isAdmin }),
-  update_access_control: hasConversationUpdateAccessControlAccess({ conversation, user }),
-});

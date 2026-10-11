@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType, type ErrorResult } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -29,77 +29,79 @@ import { requireResolvedEntity } from './entity_resolution';
 import { parseTimeBound, timeRangeParseError } from './time_range_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of the subject entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The subject entity id (EUID), canonical entity.name, or user.full_name whose relationship history to query. ' +
-        'Examples: "user:alice@local" (prefixed EUID), "alice@local" (non-prefixed), "Alice" (name). ' +
-        'When a security.entity attachment identifies the subject, use its prefixed entity id here.'
-    ),
-  kind: z
-    .enum(RELATIONSHIP_KINDS)
-    .optional()
-    .describe(
-      'Filter by relationship type, e.g. "accesses_frequently" or "communicates_with". ' +
-        'Omit to return all relationship types.'
-    ),
-  targetType: IdentifierType.describe(
-    'The type of the relationship target entity: host, user, service, or generic. ' +
-      'Optional; helps disambiguate when resolving target by name.'
-  ).optional(),
-  target: z
-    .string()
-    .min(1)
-    .max(512)
-    .optional()
-    .describe(
-      'Filter by relationship target — prefixed EUID, canonical name, or full name ' +
-        '(same resolution as entityId). Examples: "host:laptopA", "laptopA". ' +
-        'Combine with "kind" for a precise lookup, or use alone to search across all relationship types. ' +
-        'Optional targetType helps disambiguate.'
-    ),
-  from: z
-    .string()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe(
-      'Start of the time range in Kibana date-math (e.g. "now-30d", "now-1y", "2026-01-01"). ' +
-        'For "last 30 days" pass from="now-30d"; for a calendar date use ISO.'
-    ),
-  to: z
-    .string()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe(
-      'End of the time range in Kibana date-math (e.g. "now", "2026-03-15"). Omit to leave the range open-ended.'
-    ),
-  sortOrder: z
-    .enum(['asc', 'desc'])
-    .optional()
-    .describe(
-      '"asc" returns the oldest record first — use with maxResults 1 to find first-seen. ' +
-        '"desc" returns the newest first — use with maxResults 1 to find last-seen. Defaults to "desc".'
-    ),
-  maxResults: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe(
-      'Maximum number of relationship observations to return (default 50, max 100). ' +
-        'Use 1 with sortOrder for a single first/last-seen boundary. ' +
-        'For "what did they touch in the last N days" lists, omit or use a higher value; ' +
-        'if total exceeds the returned records, say the result is truncated.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of the subject entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The subject entity id (EUID), canonical entity.name, or user.full_name whose relationship history to query. ' +
+          'Examples: "user:alice@local" (prefixed EUID), "alice@local" (non-prefixed), "Alice" (name). ' +
+          'When a security.entity attachment identifies the subject, use its prefixed entity id here.'
+      ),
+    kind: z
+      .enum(RELATIONSHIP_KINDS)
+      .optional()
+      .describe(
+        'Filter by relationship type, e.g. "accesses_frequently" or "communicates_with". ' +
+          'Omit to return all relationship types.'
+      ),
+    targetType: IdentifierType.describe(
+      'The type of the relationship target entity: host, user, service, or generic. ' +
+        'Optional; helps disambiguate when resolving target by name.'
+    ).optional(),
+    target: z
+      .string()
+      .min(1)
+      .max(512)
+      .optional()
+      .describe(
+        'Filter by relationship target — prefixed EUID, canonical name, or full name ' +
+          '(same resolution as entityId). Examples: "host:laptopA", "laptopA". ' +
+          'Combine with "kind" for a precise lookup, or use alone to search across all relationship types. ' +
+          'Optional targetType helps disambiguate.'
+      ),
+    from: z
+      .string()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'Start of the time range in Kibana date-math (e.g. "now-30d", "now-1y", "2026-01-01"). ' +
+          'For "last 30 days" pass from="now-30d"; for a calendar date use ISO.'
+      ),
+    to: z
+      .string()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'End of the time range in Kibana date-math (e.g. "now", "2026-03-15"). Omit to leave the range open-ended.'
+      ),
+    sortOrder: z
+      .enum(['asc', 'desc'])
+      .optional()
+      .describe(
+        '"asc" returns the oldest record first — use with maxResults 1 to find first-seen. ' +
+          '"desc" returns the newest first — use with maxResults 1 to find last-seen. Defaults to "desc".'
+      ),
+    maxResults: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'Maximum number of relationship observations to return (default 50, max 100). ' +
+          'Use 1 with sortOrder for a single first/last-seen boundary. ' +
+          'For "what did they touch in the last N days" lists, omit or use a higher value; ' +
+          'if total exceeds the returned records, say the result is truncated.'
+      ),
+  })
+);
 
 export const SECURITY_ENTITY_RELATIONSHIP_HISTORY_TOOL_ID = securityTool(
   'entity_relationship_history'
@@ -157,6 +159,13 @@ Do NOT use this for generic entity profiles, risk history, or profile trends —
 First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with maxResults 1. Resolves subject and optional target names to canonical EUIDs via the entity store (same as get_entity / get_entity_graph); when multiple candidates match, ask the user to pick an exact EUID.`,
     schema,
     tags: ['security', 'entity-analytics', 'entity-relationships'],
+    annotations: {
+      title: 'Get Entity Relationship History',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
@@ -240,7 +249,10 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
           entityType,
         });
         if (!resolvedSubject.ok) {
-          return { results: resolvedSubject.results };
+          if (resolvedSubject.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolvedSubject.result.data.message);
+          }
+          return { results: [resolvedSubject.result] };
         }
 
         const resolvedTarget =
@@ -253,7 +265,10 @@ First-seen: sortOrder "asc" with maxResults 1. Last-seen: sortOrder "desc" with 
               })
             : undefined;
         if (resolvedTarget !== undefined && !resolvedTarget.ok) {
-          return { results: resolvedTarget.results };
+          if (resolvedTarget.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolvedTarget.result.data.message);
+          }
+          return { results: [resolvedTarget.result] };
         }
 
         const { entityStoreId } = resolvedSubject.identity;

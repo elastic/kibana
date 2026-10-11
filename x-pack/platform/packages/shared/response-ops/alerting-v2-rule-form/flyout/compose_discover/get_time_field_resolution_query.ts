@@ -5,28 +5,19 @@
  * 2.0.
  */
 
+import { getAnySourceCommandFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleQuery } from '../../form/types';
-import { getBreachQuery } from '../../form/utils/query_helpers';
-
-const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
 
 /**
  * Returns the ES|QL query used to resolve index date fields for time-field
- * selection. Uses the base query in alert (tracking) mode and the full breach
- * query in signal mode.
+ * selection, or an empty string when nothing is resolvable yet. `base` is the
+ * only block that carries a source command, so it is always the candidate.
  *
- * Alert + standalone is YAML-only and never authored by the form, but the
- * Query sandbox still opens from YAML mode — those rules have no composed
- * base, so fall back to `breach.query` for field-caps resolution.
+ * Any registered ES|QL source command (FROM, TS, PROMQL, ROW, SHOW, …) is
+ * eligible; the language registry is the source of truth so new commands do
+ * not need a local allowlist.
  */
-export function getTimeFieldResolutionQuery(
-  query: RuleQuery,
-  isAlert: boolean,
-  queryCommitted: boolean
-): string {
-  const baseQuery = query.format === 'composed' ? query.base : '';
-  const fullQuery = getBreachQuery(query);
-  // Prefer composed base for alerts; YAML-only standalone alerts only have breach.query.
-  const candidate = isAlert ? baseQuery || fullQuery : fullQuery;
-  return FROM_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
+export function getTimeFieldResolutionQuery(query: RuleQuery, queryCommitted: boolean): string {
+  const candidate = query.base;
+  return queryCommitted && Boolean(getAnySourceCommandFromESQLQuery(candidate)) ? candidate : '';
 }

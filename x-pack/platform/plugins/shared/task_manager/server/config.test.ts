@@ -15,6 +15,9 @@ describe('config validation', () => {
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
+        "claim_nudge": Object {
+          "enabled": true,
+        },
         "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
@@ -82,6 +85,9 @@ describe('config validation', () => {
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
+        "claim_nudge": Object {
+          "enabled": true,
+        },
         "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
@@ -147,6 +153,9 @@ describe('config validation', () => {
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
+        "claim_nudge": Object {
+          "enabled": true,
+        },
         "claim_strategy": "mget",
         "discovery": Object {
           "active_nodes_lookback": "30s",
@@ -228,7 +237,7 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('the monitored_task_execution_thresholds ensures that the warn_threshold is lte error_threshold on custom thresholds', () => {
@@ -266,7 +275,7 @@ describe('config validation', () => {
     };
     expect(() => {
       configSchema.validate(config);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('any claim strategy is valid and poll interval uses default value', () => {
@@ -303,6 +312,16 @@ describe('config validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"[discovery.active_nodes_lookback]: active node lookback duration cannot exceed five minutes"`
     );
+  });
+
+  test('claim_nudge.enabled defaults to true', () => {
+    const result = configSchema.validate({});
+    expect(result.claim_nudge.enabled).toEqual(true);
+  });
+
+  test('claim_nudge.enabled can be disabled', () => {
+    const result = configSchema.validate({ claim_nudge: { enabled: false } });
+    expect(result.claim_nudge.enabled).toEqual(false);
   });
 
   test('should not throw if ephemeral_tasks is defined', () => {

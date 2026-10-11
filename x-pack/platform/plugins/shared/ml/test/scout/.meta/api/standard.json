@@ -1,10 +1,672 @@
 {
-  "sha1": "ced47ddfa9cfe6cbc92c73894a2a76996867826e",
+  "sha1": "420797461098f097d2669438e484659bce566917",
   "testChannels": [
-    "ci-on-commit",
-    "ci-batch-3h"
+    "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "97e576c0d6b0f41-d345041eb543bba",
+      "title": "close anomaly detector job with spaces ML poweruser can close a job from the correct space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/close_with_spaces.spec.ts",
+        "line": 24,
+        "column": 49
+      }
+    },
+    {
+      "id": "97e576c0d6b0f41-1fd8ddf83cea954",
+      "title": "close anomaly detector job with spaces ML poweruser cannot close a job from the wrong space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/close_with_spaces.spec.ts",
+        "line": 38,
+        "column": 30
+      }
+    },
+    {
+      "id": "a6b16fbfec3ac99-79b705a59055cbf",
+      "title": "create anomaly detector job with inline datafeed config ML poweruser creates a single metric job with datafeed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create_with_datafeed.spec.ts",
+        "line": 27,
+        "column": 49
+      }
+    },
+    {
+      "id": "42ed6b8cc7c7be3-e1f42bb2f2211c2",
+      "title": "create anomaly detector job in a space should create a job in space1 and associate it with that space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create_with_spaces.spec.ts",
+        "line": 25,
+        "column": 49
+      }
+    },
+    {
+      "id": "c3e1c2ce0526fc5-4876c0edda4a457",
+      "title": "create anomaly detector job ML poweruser creates a single metric job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create.spec.ts",
+        "line": 13,
+        "column": 11
+      }
+    },
+    {
+      "id": "c3e1c2ce0526fc5-0076da193f17b97",
+      "title": "create anomaly detector job ML viewer cannot create a job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/create.spec.ts",
+        "line": 24,
+        "column": 22
+      }
+    },
+    {
+      "id": "7f231750ccdbc5c-3f38d9dc8a72dcf",
+      "title": "delete anomaly detector job with spaces ML poweruser can delete a job that belongs to their space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/delete_with_spaces.spec.ts",
+        "line": 24,
+        "column": 49
+      }
+    },
+    {
+      "id": "7f231750ccdbc5c-02909afd4d0f51d",
+      "title": "delete anomaly detector job with spaces ML poweruser cannot delete a job from a different space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/delete_with_spaces.spec.ts",
+        "line": 36,
+        "column": 15
+      }
+    },
+    {
+      "id": "fd0fb7eb5e27128-70bf858e1a79342",
+      "title": "POST anomaly_detectors _forecast with spaces forecast for non-existent job returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/forecast_with_spaces.spec.ts",
+        "line": 41,
+        "column": 9
+      }
+    },
+    {
+      "id": "fd0fb7eb5e27128-4a1d641171a29c0",
+      "title": "POST anomaly_detectors _forecast with spaces forecast in wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/forecast_with_spaces.spec.ts",
+        "line": 51,
+        "column": 47
+      }
+    },
+    {
+      "id": "fd0fb7eb5e27128-91d533515b66826",
+      "title": "POST anomaly_detectors _forecast with spaces forecast lifecycle journey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/forecast_with_spaces.spec.ts",
+        "line": 65,
+        "column": 70
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-071104c35ce4f2c",
+      "title": "POST anomaly_detectors results buckets should get buckets with correct structure for a job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 35,
+        "column": 28
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-2008db1a62cce46",
+      "title": "POST anomaly_detectors results buckets should get a single bucket when timestamp is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 52,
+        "column": 21
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-ccf211eeffe8525",
+      "title": "POST anomaly_detectors results buckets should fail with non-existent job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 77,
+        "column": 66
+      }
+    },
+    {
+      "id": "cfddbf1d73e3894-7f61c33342628b2",
+      "title": "POST anomaly_detectors results buckets should fail with non-existent timestamp",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_buckets.spec.ts",
+        "line": 91,
+        "column": 27
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-41ba408aec73157",
+      "title": "POST anomaly_detectors results overall_buckets should get overall buckets with correct structure for multiple jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 52,
+        "column": 25
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-511dbe522d4df2b",
+      "title": "POST anomaly_detectors results overall_buckets should respect the bucket_span parameter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 77,
+        "column": 23
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-f9b1abddabb8dc1",
+      "title": "POST anomaly_detectors results overall_buckets should filter results based on overall_score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 100,
+        "column": 27
+      }
+    },
+    {
+      "id": "facd02a18ab1bad-9eaa05726f30b9e",
+      "title": "POST anomaly_detectors results overall_buckets should fail with non-existent job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_overall_buckets.spec.ts",
+        "line": 134,
+        "column": 45
+      }
+    },
+    {
+      "id": "b06d258a252508a-dde9595275e0919",
+      "title": "get anomaly detector job stats with spaces GET stats for a non-existing job returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 41,
+        "column": 28
+      }
+    },
+    {
+      "id": "b06d258a252508a-045933947ba1174",
+      "title": "get anomaly detector job stats with spaces GET stats for a non-existing job wildcard returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 48,
+        "column": 47
+      }
+    },
+    {
+      "id": "b06d258a252508a-d53d198109645e4",
+      "title": "get anomaly detector job stats with spaces GET stats by ID from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 60,
+        "column": 42
+      }
+    },
+    {
+      "id": "b06d258a252508a-e370732c1ee3ad6",
+      "title": "get anomaly detector job stats with spaces GET stats by ID from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 72,
+        "column": 6
+      }
+    },
+    {
+      "id": "b06d258a252508a-e955b8c56182fca",
+      "title": "get anomaly detector job stats with spaces GET stats without an ID from correct space returns all job stats in that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 80,
+        "column": 50
+      }
+    },
+    {
+      "id": "b06d258a252508a-78cd0778aed6431",
+      "title": "get anomaly detector job stats with spaces GET stats without an ID from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 92,
+        "column": 15
+      }
+    },
+    {
+      "id": "b06d258a252508a-51589c03ffbe4f5",
+      "title": "get anomaly detector job stats with spaces GET stats by wildcard from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 104,
+        "column": 27
+      }
+    },
+    {
+      "id": "b06d258a252508a-bed97228b8e510e",
+      "title": "get anomaly detector job stats with spaces GET stats by wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 114,
+        "column": 20
+      }
+    },
+    {
+      "id": "b06d258a252508a-9b5e0501fa59835",
+      "title": "get anomaly detector job stats with spaces GET stats by group from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 125,
+        "column": 50
+      }
+    },
+    {
+      "id": "b06d258a252508a-af5279ac1942d05",
+      "title": "get anomaly detector job stats with spaces GET stats by group wildcard from correct space returns the job stats",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 138,
+        "column": 49
+      }
+    },
+    {
+      "id": "b06d258a252508a-b5d270a87b36f55",
+      "title": "get anomaly detector job stats with spaces GET stats by group from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 154,
+        "column": 25
+      }
+    },
+    {
+      "id": "b06d258a252508a-0f39a0e3e5685fc",
+      "title": "get anomaly detector job stats with spaces GET stats by group wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_stats_with_spaces.spec.ts",
+        "line": 159,
+        "column": 25
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-c0ce97cb52ad462",
+      "title": "get anomaly detector jobs with spaces GET a non-existing job returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 39,
+        "column": 28
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-3718d84d6017f36",
+      "title": "get anomaly detector jobs with spaces GET a non-existing job wildcard returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 46,
+        "column": 47
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-1923b46596d92e6",
+      "title": "get anomaly detector jobs with spaces GET job by ID from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 58,
+        "column": 42
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-0142aa0dae36aef",
+      "title": "get anomaly detector jobs with spaces GET job by ID from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 70,
+        "column": 6
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-c7ebd593c4daccb",
+      "title": "get anomaly detector jobs with spaces GET without an ID from correct space returns all jobs in that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 76,
+        "column": 48
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-3ce4d6a74494d41",
+      "title": "get anomaly detector jobs with spaces GET without an ID from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 87,
+        "column": 15
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-cbdd8e8df848f67",
+      "title": "get anomaly detector jobs with spaces GET job by wildcard from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 99,
+        "column": 27
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-f349e1d14c7dcc5",
+      "title": "get anomaly detector jobs with spaces GET job by wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 109,
+        "column": 20
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-67bc379d36276ab",
+      "title": "get anomaly detector jobs with spaces GET jobs by group from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 120,
+        "column": 50
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-6aa41e21e3e8381",
+      "title": "get anomaly detector jobs with spaces GET jobs by group wildcard from correct space returns the job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 133,
+        "column": 49
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-612db0ecdd101b3",
+      "title": "get anomaly detector jobs with spaces GET jobs by group from wrong space returns 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 149,
+        "column": 25
+      }
+    },
+    {
+      "id": "bd1de6fde95ceb7-054fe431d49ed07",
+      "title": "get anomaly detector jobs with spaces GET jobs by group wildcard from wrong space returns an empty list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get_with_spaces.spec.ts",
+        "line": 154,
+        "column": 25
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-a19e8e812964520",
+      "title": "get anomaly detector jobs GET all jobs returns the created jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 20,
+        "column": 26
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-4a96878d5a5c535",
+      "title": "get anomaly detector jobs GET job by ID returns the expected job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 31,
+        "column": 16
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-fa550a70ef37b98",
+      "title": "get anomaly detector jobs GET jobs by comma-separated IDs returns both jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 42,
+        "column": 73
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-0cbf8c2254c8271",
+      "title": "get anomaly detector jobs GET stats for all jobs returns the created jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 56,
+        "column": 82
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-c9d1552170d1852",
+      "title": "get anomaly detector jobs GET stats by job ID returns the expected job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 66,
+        "column": 16
+      }
+    },
+    {
+      "id": "fdf2fbd43067c5e-b9a7568c69606cb",
+      "title": "get anomaly detector jobs GET stats by comma-separated IDs returns both jobs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/get.spec.ts",
+        "line": 81,
+        "column": 30
+      }
+    },
+    {
+      "id": "1469be006bd847d-e764b6a8f4aa725",
+      "title": "open anomaly detector job with spaces ML poweruser can open a job from the correct space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/open_with_spaces.spec.ts",
+        "line": 24,
+        "column": 49
+      }
+    },
+    {
+      "id": "1469be006bd847d-538e28523be92e2",
+      "title": "open anomaly detector job with spaces ML poweruser cannot open a job from the wrong space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/anomaly_detectors/open_with_spaces.spec.ts",
+        "line": 38,
+        "column": 30
+      }
+    },
     {
       "id": "83ee0201f304e1d-f77aa9e072947e6",
       "title": "bm_classification source index document count ft_bank_marketing has exactly 9314 documents",
@@ -469,6 +1131,123 @@
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
         "line": 115,
         "column": 25
+      }
+    },
+    {
+      "id": "c91ed0019c055a5-35fa01c399b9974",
+      "title": "GET notifications count returns default response when no ML entities are present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/count_notifications.spec.ts",
+        "line": 18,
+        "column": 5
+      }
+    },
+    {
+      "id": "c91ed0019c055a5-994724c48e57c03",
+      "title": "GET notifications count returns notifications count by level after creating a job",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/count_notifications.spec.ts",
+        "line": 30,
+        "column": 25
+      }
+    },
+    {
+      "id": "c91ed0019c055a5-2857969ec32437b",
+      "title": "GET notifications count returns 403 for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/count_notifications.spec.ts",
+        "line": 51,
+        "column": 27
+      }
+    },
+    {
+      "id": "cd521395242df6f-7212962e16c4739",
+      "title": "GET notifications returns all notifications for an authorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 49,
+        "column": 26
+      }
+    },
+    {
+      "id": "cd521395242df6f-836ef260b6d6b85",
+      "title": "GET notifications returns notifications for an authorized user when no queryString is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 58,
+        "column": 98
+      }
+    },
+    {
+      "id": "cd521395242df6f-a3b9f58189e5a6b",
+      "title": "GET notifications returns filtered notifications when queryString is provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 80,
+        "column": 64
+      }
+    },
+    {
+      "id": "cd521395242df6f-b4464aa0d8cf703",
+      "title": "GET notifications returns notifications sorted ascending by job_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 98,
+        "column": 21
+      }
+    },
+    {
+      "id": "cd521395242df6f-0bc643cbb3c31a4",
+      "title": "GET notifications returns notifications sorted descending by job_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 109,
+        "column": 47
+      }
+    },
+    {
+      "id": "cd521395242df6f-e2d5ed246ca9645",
+      "title": "GET notifications returns 403 for unauthorized user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/notifications/get_notifications.spec.ts",
+        "line": 121,
+        "column": 4
       }
     }
   ]

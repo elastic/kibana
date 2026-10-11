@@ -1,0 +1,22 @@
+{
+  "sha1": "4c16d3419ea3165c0124c7dff6ac11e7f552a9cf",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "9429c53a075a206-214a72008e497ad",
+      "title": "Serverless service account creation flyout loads roles from Elasticsearch and allows selecting multiple roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/ui/tests/create_service_account.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    }
+  ]
+}

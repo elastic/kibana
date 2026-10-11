@@ -38,6 +38,20 @@ export {
   MANAGED_WORKFLOW_SELECTORS,
   MANAGED_WORKFLOW_SOLUTIONS,
 } from './types';
+export {
+  ACTION_WORKFLOW_INPUT,
+  ACTION_WORKFLOW_TAG,
+  actionApprovalPolicySchema,
+  actionCategorySchema,
+  actionImpactSchema,
+  actionMetadataSchema,
+} from './action_workflow';
+export type {
+  ActionApprovalPolicy,
+  ActionCategory,
+  ActionImpact,
+  ActionMetadata,
+} from './action_workflow';
 export * from './definitions';
 
 type ManagedWorkflowDefinitionById = {

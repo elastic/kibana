@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';
@@ -19,6 +19,12 @@ export const ElasticInferenceService = () => {
   useBreadcrumbs(ELASTIC_INFERENCE_SERVICE_BREADCRUMB);
 
   const [isManageRegionsOpen, setIsManageRegionsOpen] = useState(false);
+  const openManageRegions = useCallback(() => {
+    setIsManageRegionsOpen(true);
+  }, []);
+  const closeManageRegions = useCallback(() => {
+    setIsManageRegionsOpen(false);
+  }, []);
 
   return (
     <KibanaPageTemplate
@@ -27,15 +33,11 @@ export const ElasticInferenceService = () => {
       grow={false}
       data-test-subj="eisModelsPage"
     >
-      <ElasticInferenceServiceModelsHeader onManageRegions={() => setIsManageRegionsOpen(true)} />
-      <EuiPageTemplate.Section
-        className="eui-yScroll"
-        data-test-subj="eisModelsPageMain"
-        paddingSize="none"
-      >
-        <ElasticInferenceServiceModelsPage />
+      <ElasticInferenceServiceModelsHeader onManageRegions={openManageRegions} />
+      <EuiPageTemplate.Section data-test-subj="eisModelsPageMain" paddingSize="none">
+        <ElasticInferenceServiceModelsPage onManageRegions={openManageRegions} />
       </EuiPageTemplate.Section>
-      {isManageRegionsOpen && <ManageRegionsModal onClose={() => setIsManageRegionsOpen(false)} />}
+      {isManageRegionsOpen && <ManageRegionsModal onClose={closeManageRegions} />}
     </KibanaPageTemplate>
   );
 };

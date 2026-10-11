@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/294738
+type: feature
+products:
+- product: cloud-serverless
+- product: kibana
+title: 'Enable template library by default in Workflows'
+description: The Workflow Template Library is now enabled by default where Workflows is available.

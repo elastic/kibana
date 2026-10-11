@@ -20,6 +20,7 @@ import type {
 import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
 import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 import { createCoreUiamService } from './uiam';
+import { WorkloadTypeRegistry } from './workload_type_registry';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
@@ -27,6 +28,7 @@ export class SecurityService
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;
+  private readonly workloadTypes = new WorkloadTypeRegistry();
   private config$: Observable<Config>;
   private configSubscription?: Subscription;
   private config: Config | undefined;
@@ -83,6 +85,10 @@ export class SecurityService
       fips: {
         isEnabled: () => isFipsEnabled(securityConfig),
       },
+      serviceAccounts: {
+        registerWorkloadType: (pluginId, registration) =>
+          this.workloadTypes.register(pluginId, registration),
+      },
       uiam: securityConfig?.uiam?.enabled
         ? createCoreUiamService(securityConfig.uiam.sharedSecret)
         : null,
@@ -94,7 +100,7 @@ export class SecurityService
       this.log.warn('Security API was not registered, using default implementation');
     }
     const apiContract = this.securityApi ?? getDefaultSecurityImplementation();
-    return convertSecurityApi(apiContract);
+    return convertSecurityApi(apiContract, this.workloadTypes);
   }
 
   public stop() {

@@ -53,7 +53,17 @@ spec:
           env:
             IMAGES_CONFIG: kibana/image_cache.tpl.yml
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml'
+            KIBANA_BRANCH: main
+            KIBANA_YARN_CACHE_BRANCH: '9.5'
+
           message: '[24.04] Daily build of Kibana cache-warmed VM image'
+
+        "[ubuntu26.04] 6-Hourly Minimal Image Build":
+          branch: main
+          cronline: '0 */6 * * *'
+          env:
+            IMAGES_CONFIG: kibana/minimal.tpl.yml
+          message: '[26.04] 6-hourly build of Kibana minimal VM image'
 
         "[ubuntu24.04] Daily FIPS Image Build":
           branch: main
@@ -62,8 +72,17 @@ spec:
             BASE_IMAGES_CONFIG: 'core/images.yml,kibana/base_image.yml,kibana/packages_layer.yml,kibana/image_cache.tpl.yml'
             IMAGES_CONFIG: kibana/fips.yml
           message: '[24.04] Daily build of Kibana FIPS VM image'
+      # Trigger steps run as the parent build's creator, so those teams need build access.
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
-        everyone:
+        kibana-release-operators:
           access_level: BUILD_AND_READ
+        artifact-management:
+          access_level: BUILD_AND_READ
+        appex-qa:
+          access_level: BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY

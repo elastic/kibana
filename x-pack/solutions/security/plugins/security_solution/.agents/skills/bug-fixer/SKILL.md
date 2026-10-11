@@ -28,7 +28,7 @@ Step 2 (after reviewing the reproduction report): `/bug-fix`
 ## Prerequisites
 
 - `gh` CLI authenticated (`gh auth login`)
-- `elastic/kibana` clone with `yarn kbn bootstrap` done
+- `elastic/kibana` clone with `pnpm kbn bootstrap` done
 - Browser MCP:
   - **Cursor** — built in, no setup needed
   - **Claude Code** — add to `~/.claude/mcp.json` and restart:

@@ -8,7 +8,6 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { monaco, type MonacoMessage } from '@kbn/code-editor';
@@ -204,6 +203,8 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
 export const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 export const DATA_SOURCES_CACHE_KEY = 'dataSources';
 export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
+export const JOIN_INDICES_CACHE_KEY = 'joinIndices';
+export const TIMESERIES_INDICES_CACHE_KEY = 'timeseriesIndices';
 
 export const clearCacheWhenOld = (cache: MapCache, key: string) => {
   if (cache.has(key)) {
@@ -278,6 +279,11 @@ export const onKeyDownResizeHandler = (
 
 export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
+    .monaco-editor {
+      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.inline};
+      --vscode-shadow-lg: ${theme.euiTheme.shadows.l.down};
+    }
+
     .monaco-editor .suggest-details .scrollbar {
       display: none !important;
     }
@@ -344,8 +350,6 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
 
     .suggest-widget,
     .suggest-details-container {
-      border-radius: ${theme.euiTheme.border.radius.medium};
-      ${euiShadow(theme, 'l')}
       // Suggestions must be rendered above flyouts
       z-index: ${theme.euiTheme.levels.toast} !important;
     }
@@ -468,16 +472,7 @@ export const trackSuggestionPopupState = (
   editor: monaco.editor.IStandaloneCodeEditor,
   isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
 ): monaco.IDisposable => {
-  const suggestionController = editor.getContribution('editor.contrib.suggestController') as
-    | (monaco.editor.IEditorContribution & {
-        widget?: {
-          value?: {
-            onDidShow?: (cb: () => void) => monaco.IDisposable;
-            onDidHide?: (cb: () => void) => monaco.IDisposable;
-          };
-        };
-      })
-    | undefined;
+  const suggestionController = editor.getContribution('editor.contrib.suggestController');
   const suggestionWidget = suggestionController?.widget?.value;
 
   const disposables: monaco.IDisposable[] = [];

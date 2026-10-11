@@ -53,6 +53,7 @@ export const convertTool = ({
       summarizeToolReturn: tool.summarizeToolReturn,
       maxResultTokens: tool.maxResultTokens,
       annotations: tool.annotations,
+      excludeFromMcp: tool.excludeFromMcp,
     };
   }
   if (!isBuiltinDefinition(definition)) {
@@ -119,7 +120,7 @@ const DESTRUCTIVE_DEFAULTS: Omit<McpToolAnnotations, 'title'> = {
   readOnlyHint: false,
   destructiveHint: true,
   idempotentHint: false,
-  openWorldHint: false,
+  openWorldHint: true,
 };
 
 const getDefaultAnnotationsForToolType = (tool: StaticToolRegistration): McpToolAnnotations => {

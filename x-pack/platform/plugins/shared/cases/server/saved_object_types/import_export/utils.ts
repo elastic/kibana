@@ -28,6 +28,7 @@ import {
   MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
 import { defaultSortField } from '../../common/utils';
+import { stripLegacyKeyForExport } from '../../common/utils/field_definitions';
 import type { CasePersistedAttributes } from '../../common/types/case';
 
 export async function getAttachmentsAndUserActionsForCases(
@@ -193,10 +194,12 @@ export async function getTemplatesAndFieldDefinitionsForCases(
     referencedNames.has(`${fd.attributes.owner}:${fd.attributes.name}`)
   );
 
-  // 5. Dedupe field defs by SO id (a def could be both global and $ref'd).
+  // 5. Dedupe field defs by SO id (a def could be both global and $ref'd) and strip the
+  //    server-managed legacyKey — see stripLegacyKeyForExport for why an exported copy must
+  //    not carry it.
   const fieldDefById = new Map<string, SavedObject<FieldDefinition>>();
   for (const fd of [...globalFieldDefs, ...referencedFieldDefs]) {
-    fieldDefById.set(fd.id, fd);
+    fieldDefById.set(fd.id, stripLegacyKeyForExport(fd));
   }
 
   return [...templateSOs, ...fieldDefById.values()];

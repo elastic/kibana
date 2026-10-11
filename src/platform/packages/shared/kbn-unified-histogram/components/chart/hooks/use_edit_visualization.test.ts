@@ -10,6 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { waitFor, renderHook } from '@testing-library/react';
+import { DataViewSource } from '@kbn/data-source';
 import { dataViewMock } from '../../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../../../__mocks__/services';
@@ -37,7 +38,7 @@ describe('useEditVisualization', () => {
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new DataViewSource(dataViewWithTimefieldMock),
         relativeTimeRange,
         lensAttributes,
       })
@@ -51,25 +52,28 @@ describe('useEditVisualization', () => {
     });
   });
 
-  it('should return undefined if the data view has no ID', async () => {
+  it('should return undefined if the data source has no ID', async () => {
     getTriggerCompatibleActions.mockReturnValue(Promise.resolve([{ id: 'test' }]));
+    const dataView = { ...dataViewWithTimefieldMock, id: undefined } as DataView;
+    // DataViewSource requires id, so use undefined dataSource instead
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataView: { ...dataViewWithTimefieldMock, id: undefined } as DataView,
+        dataSource: undefined,
         relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
     );
     await waitFor(() => expect(hook.result.current).toBeUndefined());
+    void dataView; // suppress unused var warning
   });
 
-  it('should return undefined if the data view is not time based', async () => {
+  it('should return undefined if the data source is not time based', async () => {
     getTriggerCompatibleActions.mockReturnValue(Promise.resolve([{ id: 'test' }]));
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataView: dataViewMock,
+        dataSource: new DataViewSource(dataViewMock),
         relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
@@ -82,7 +86,7 @@ describe('useEditVisualization', () => {
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new DataViewSource(dataViewWithTimefieldMock),
         relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
         isPlainRecord: true,
@@ -99,10 +103,12 @@ describe('useEditVisualization', () => {
         return { ...dataViewWithTimefieldMock.getTimeField(), visualizable: false };
       },
     } as DataView;
+    // Wrap in DataViewSource using a modified dataView that reports non-visualizable time field
+    const dvs = new DataViewSource(dataView);
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataView,
+        dataSource: dvs,
         relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })
@@ -115,7 +121,7 @@ describe('useEditVisualization', () => {
     const hook = renderHook(() =>
       useEditVisualization({
         services: unifiedHistogramServicesMock,
-        dataView: dataViewWithTimefieldMock,
+        dataSource: new DataViewSource(dataViewWithTimefieldMock),
         relativeTimeRange: { from: 'now-15m', to: 'now' },
         lensAttributes: {} as unknown as TypedLensByValueInput['attributes'],
       })

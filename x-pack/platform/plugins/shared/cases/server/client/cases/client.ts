@@ -27,6 +27,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   BulkAddObservablesRequest,
+  BulkDeleteObservablesRequest,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -42,6 +43,7 @@ import { get, resolve, getCasesByAlertID, getReporters, getTags, getCategories }
 import type { PushParams } from './push';
 import { push } from './push';
 import { bulkUpdate } from './bulk_update';
+import type { BulkCreateCasesClientOptions } from './bulk_create';
 import { bulkCreate } from './bulk_create';
 import type { ReplaceCustomFieldArgs } from './replace_custom_field';
 import { replaceCustomField } from './replace_custom_field';
@@ -49,6 +51,7 @@ import { similar } from './similar';
 import {
   addObservable,
   bulkAddObservables,
+  bulkDeleteObservables,
   deleteObservable,
   updateObservable,
 } from './observables';
@@ -66,9 +69,13 @@ export interface CasesSubClient {
    */
   create(data: CasePostRequest): Promise<Case>;
   /**
-   * Bulk create cases.
+   * Bulk create cases. `options` is internal-only (bulkCreate has no HTTP route) — see
+   * {@link BulkCreateCasesClientOptions}.
    */
-  bulkCreate(data: BulkCreateCasesRequest): Promise<BulkCreateCasesResponse>;
+  bulkCreate(
+    data: BulkCreateCasesRequest,
+    options?: BulkCreateCasesClientOptions
+  ): Promise<BulkCreateCasesResponse>;
   /**
    * Returns cases using Saved Objects find API (uses Kuery queries).
    *
@@ -153,6 +160,10 @@ export interface CasesSubClient {
    */
   bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
   /**
+   * Bulk deletes observables from the case
+   */
+  bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
+  /**
    * Returns the fully-formed `extended_fields` a caller may apply — the owner's global field-library
    * fields plus, when a template is in scope, that template's fields. Pass `caseId` to derive owner +
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
@@ -182,6 +193,7 @@ const usageCounterByMethod = {
   updateObservable: 'update_observable',
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
+  bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
@@ -202,7 +214,8 @@ export const createCasesSubClient = (
     bulkCreate: withUsageCounter(
       usageCounterByMethod.bulkCreate,
       clientArgs,
-      (data: BulkCreateCasesRequest) => bulkCreate(data, clientArgs, casesClient)
+      (data: BulkCreateCasesRequest, options?: BulkCreateCasesClientOptions) =>
+        bulkCreate(data, clientArgs, casesClient, options)
     ),
     find: (params: CasesFindRequestWithCustomFields) => find(params, clientArgs, casesClient),
     search: (params: CasesSearchRequest) => search(params, clientArgs, casesClient),
@@ -253,6 +266,11 @@ export const createCasesSubClient = (
       usageCounterByMethod.bulkAddObservables,
       clientArgs,
       (params: BulkAddObservablesRequest) => bulkAddObservables(params, clientArgs, casesClient)
+    ),
+    bulkDeleteObservables: withUsageCounter(
+      usageCounterByMethod.bulkDeleteObservables,
+      clientArgs,
+      (params: BulkDeleteObservablesRequest) => bulkDeleteObservables(params, clientArgs)
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),

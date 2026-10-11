@@ -26,8 +26,20 @@ describe('createAutomaticTroubleshootingSkill', () => {
       expect(skill.id).toBe('automatic_troubleshooting');
       expect(skill.name).toBe('elastic-defend-configuration-troubleshooting');
       expect(skill.basePath).toBe('skills/security/endpoint');
-      expect(skill.description).toContain('Troubleshoot Elastic Defend endpoint health');
+      expect(skill.description).toContain(
+        'observed Elastic Defend endpoint behavior and operational outcomes'
+      );
       expect(skill.content).toContain('Elastic Defend Configuration Troubleshooting');
+    });
+
+    it('claims endpoint diagnosis intents near the start of the description', () => {
+      const skill = createAutomaticTroubleshootingSkill(mockEndpointAppContextService);
+      const description = skill.description ?? '';
+
+      expect(description.slice(0, 400)).toMatch(/offline.*unhealthy|unhealthy.*offline/is);
+      expect(description).toMatch(/missing or not reporting/i);
+      expect(description).toMatch(/isolation or release failed|response action .* failed/is);
+      expect(description.length).toBeLessThanOrEqual(1024);
     });
 
     it('includes available indices in referenced content', () => {

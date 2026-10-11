@@ -35,6 +35,7 @@ export interface NewAgentPolicy {
   data_output_id?: string | null;
   monitoring_output_id?: string | null;
   download_source_id?: string | null;
+  download_source_ids?: string[];
   fleet_server_host_id?: string | null;
   schema_version?: string;
   agent_features?: Array<{ name: string; enabled: boolean }>;
@@ -170,12 +171,15 @@ export interface FullAgentPolicyAddFields {
 
 export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescriptor>;
 
-export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
+export interface FullAgentPolicyOutput {
+  type: Output['type'];
+  hosts?: string[];
+  ca_sha256?: string | null;
   proxy_url?: string;
   proxy_headers?: any;
   ssl?: BaseSSLConfig;
   [key: string]: any;
-};
+}
 
 export interface FullAgentPolicyMonitoring {
   namespace?: string;
@@ -225,6 +229,7 @@ export interface FullAgentPolicyDownloadSecrets extends BaseSSLSecrets {
 
 export interface FullAgentPolicyDownload {
   sourceURI: string;
+  sources?: string[];
   ssl?: BaseSSLConfig;
   auth?: FullAgentPolicyDownloadAuth;
   secrets?: FullAgentPolicyDownloadSecrets;

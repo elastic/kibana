@@ -11,6 +11,8 @@ import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
 import type { CoreSecurityDelegateContract } from './api_provider';
 import type { CoreAuditService } from './audit';
+import type { CoreServiceAccountsService } from './service_accounts';
+import type { CoreServiceAccountsSetup } from './service_account_workloads';
 /**
  * Setup contract for Core's security service.
  *
@@ -44,6 +46,12 @@ export interface SecurityServiceSetup {
    * The {@link CoreFipsService | FIPS service}
    */
   fips: CoreFipsService;
+
+  /**
+   * The {@link CoreServiceAccountsSetup | service accounts service}, through which a plugin registers
+   * the workload types it runs as service accounts.
+   */
+  serviceAccounts: CoreServiceAccountsSetup;
 }
 
 /**
@@ -60,4 +68,8 @@ export interface SecurityServiceStart {
    * The {@link CoreAuditService | audit service}
    */
   audit: CoreAuditService;
+  /**
+   * The {@link CoreServiceAccountsService | service accounts service}
+   */
+  serviceAccounts: CoreServiceAccountsService;
 }

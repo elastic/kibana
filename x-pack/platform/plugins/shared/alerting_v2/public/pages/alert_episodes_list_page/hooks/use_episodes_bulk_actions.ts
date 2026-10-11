@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { getEpisodesFromDocIds } from '@kbn/alerting-v2-episodes-ui/utils/bulk_selection';
 
@@ -22,21 +22,23 @@ export const useEpisodesBulkActions = ({
   episodesData,
   onSuccess,
 }: UseEpisodesBulkActionsParams): CustomBulkActions =>
-  useMemo(
-    () =>
-      actions.map((action) => ({
+  useMemo(() => {
+    const allEpisodes = episodesData ?? [];
+
+    return actions
+      .filter((action) => action.supportsBulk !== false)
+      .map((action) => ({
         key: action.id,
         label: action.displayName,
         icon: action.iconType,
         isAvailable: ({ selectedDocIds }) =>
           action.isCompatible({
-            episodes: getEpisodesFromDocIds(selectedDocIds, episodesData ?? []),
+            episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
           }),
         onClick: ({ selectedDocIds }) =>
           action.execute({
-            episodes: getEpisodesFromDocIds(selectedDocIds, episodesData ?? []),
+            episodes: getEpisodesFromDocIds(selectedDocIds, allEpisodes),
             onSuccess,
           }),
-      })),
-    [actions, episodesData, onSuccess]
-  );
+      }));
+  }, [actions, episodesData, onSuccess]);

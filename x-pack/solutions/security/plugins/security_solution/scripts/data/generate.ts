@@ -14,6 +14,7 @@ import datemath from '@kbn/datemath';
 import type { Client } from '@elastic/elasticsearch';
 import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { KbnClient } from '@kbn/test';
+import { COMMENT_ATTACHMENT_TYPE, buildAlertCaseAttachment } from '@kbn/cases-plugin/common';
 
 import { createEsClient, createKbnClient } from './lib/clients';
 import type { EpisodeDocs, EpisodeFileSet, ScaledDoc } from './lib/episodes';
@@ -302,15 +303,16 @@ const createCasesFromAttackDiscoveries = async ({
     const caseId = created.data.id;
     const attachments = [
       {
-        comment: buildAttackDiscoveryCaseComment(d),
-        type: 'user',
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: buildAttackDiscoveryCaseComment(d) },
         owner: 'securitySolution',
       },
       ...d.alertIds.map((alertId) => ({
-        alertId,
-        index: alertsIndex,
-        rule: { id: null, name: null },
-        type: 'alert',
+        ...buildAlertCaseAttachment('securitySolution', {
+          alertId,
+          index: alertsIndex,
+          rule: { id: null, name: null },
+        }),
         owner: 'securitySolution',
       })),
     ];
@@ -1353,7 +1355,7 @@ export const cli = () => {
         --rule-from                      Rule lookback window for installed custom/pack rules (Default: now-30d)
         --fp-count                       Max false-positive event templates per hunt that defines them (0-3, Default: 0). FP events/alerts are tagged data-generator-fp (plus data-generator / pack:<id>).
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
-        --threat-intel                   Seed per-pack RSS sources (+ digest subscription) for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
+        --threat-intel                   Seed per-pack RSS sources for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
         --threat-intel-reports           Also seed historic Hub reports into .kibana-threat-reports from --start-date through --end-date minus 24h (implies --threat-intel). Leaves the last day empty for real workflow ingest. RSS stays current-only.
         --threat-intel-report-count      Historic reports per pack when --threat-intel-reports is set (Default: 12)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)

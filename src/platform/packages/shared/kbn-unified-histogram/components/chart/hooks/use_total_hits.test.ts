@@ -17,9 +17,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of, throwError } from 'rxjs';
 import { waitFor, renderHook } from '@testing-library/react';
+import { EsqlSource } from '@kbn/data-source';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SearchSourceSearchOptions } from '@kbn/data-plugin/common';
 import { DataViewType } from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewSource } from '@kbn/data-source';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { getFetchParamsMock, getFetch$Mock } from '../../../__mocks__/fetch_params';
 
@@ -100,8 +103,8 @@ describe('useTotalHits', () => {
     );
     fetch$.next({ fetchParams, lensVisServiceState: undefined });
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(1);
-    expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(1);
+    expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('index', dataViewWithTimefieldMock);
     expect(setFieldSpy).toHaveBeenCalledWith('query', fetchParams.query);
     expect(setFieldSpy).toHaveBeenCalledWith('size', 0);
@@ -116,15 +119,20 @@ describe('useTotalHits', () => {
     expect(fetchOptions?.abortSignal).toBeInstanceOf(AbortSignal);
     expect(fetchOptions?.executionContext?.description).toBe('fetch total hits');
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.complete, 42);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(2);
+      expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.complete, 42);
     });
   });
 
   it('should not fetch total hits if isPlainRecord is true', async () => {
     const onTotalHitsChange = jest.fn();
+    EsqlSource.clearCache();
     const fetchParams = getFetchParamsMock({
       query: { esql: 'from test' },
+      dataSource: await EsqlSource.create({
+        query: 'from test',
+        timeFieldName: '@timestamp',
+      }),
     });
     const deps = {
       ...getDeps(),
@@ -141,7 +149,7 @@ describe('useTotalHits', () => {
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), chartVisible: true, onTotalHitsChange }));
-    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -151,7 +159,7 @@ describe('useTotalHits', () => {
     const fetchSpy = jest.spyOn(searchSourceInstanceMock, 'fetch$').mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
     renderHook(() => useTotalHits({ ...getDeps(), hits: undefined, onTotalHitsChange }));
-    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
   });
@@ -163,7 +171,7 @@ describe('useTotalHits', () => {
     const options = { ...getDeps(), onTotalHitsChange };
     const { rerender } = renderHook(() => useTotalHits(options));
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(0);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(0);
     expect(setFieldSpy).toHaveBeenCalledTimes(0);
     expect(fetchSpy).toHaveBeenCalledTimes(0);
   });
@@ -177,20 +185,20 @@ describe('useTotalHits', () => {
     const { rerender } = renderHook(() => useTotalHits(options));
     fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
     rerender();
-    expect(onTotalHitsChange).toBeCalledTimes(1);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(1);
     expect(setFieldSpy).toHaveBeenCalled();
     expect(fetchSpy).toHaveBeenCalled();
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(2);
     });
     fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
     rerender();
     expect(abortSpy).toHaveBeenCalled();
-    expect(onTotalHitsChange).toBeCalledTimes(3);
+    expect(onTotalHitsChange).toHaveBeenCalledTimes(3);
     expect(setFieldSpy).toHaveBeenCalledTimes(10);
     expect(fetchSpy).toHaveBeenCalledTimes(2);
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(4);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(4);
     });
   });
 
@@ -206,8 +214,8 @@ describe('useTotalHits', () => {
     fetch$.next({ fetchParams: getFetchParamsMock(), lensVisServiceState: undefined });
     rerender();
     await waitFor(() => {
-      expect(onTotalHitsChange).toBeCalledTimes(2);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.error, error);
+      expect(onTotalHitsChange).toHaveBeenCalledTimes(2);
+      expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.error, error);
     });
   });
 
@@ -216,12 +224,13 @@ describe('useTotalHits', () => {
       .spyOn(searchSourceInstanceMock, 'setOverwriteDataViewType')
       .mockClear();
     const setFieldSpy = jest.spyOn(searchSourceInstanceMock, 'setField').mockClear();
+    const rollupDataView = {
+      ...dataViewWithTimefieldMock,
+      type: DataViewType.ROLLUP,
+    } as DataView;
     const fetchParams = getFetchParamsMock({
       filters: [{ meta: { index: 'test' }, query: { match_all: {} } }],
-      dataView: {
-        ...dataViewWithTimefieldMock,
-        type: DataViewType.ROLLUP,
-      } as any,
+      dataSource: new DataViewSource(rollupDataView),
     });
     const data = dataPluginMock.createStartContract();
     jest

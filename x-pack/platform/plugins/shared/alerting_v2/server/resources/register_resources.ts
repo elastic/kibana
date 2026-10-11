@@ -19,18 +19,18 @@ import { registerEsqlViews } from './esql_views/register';
 export interface InitializeResourcesOptions {
   resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
-  logger: Logger;
+  coreLogger: Logger;
   changeHistoryClient: ChangeHistoryClient;
 }
 
 export function initializeResources({
   resourceManager,
   esClient,
-  logger,
+  coreLogger,
   changeHistoryClient,
 }: InitializeResourcesOptions): void {
-  registerDatastreams({ resourceManager, esClient, logger });
-  registerEsqlViews({ resourceManager, esClient, logger });
+  registerDatastreams({ resourceManager, esClient, logger: coreLogger });
+  registerEsqlViews({ resourceManager, esClient, logger: coreLogger });
 
   resourceManager.registerResource(
     RULE_CHANGES_HISTORY_RESOURCE_KEY,

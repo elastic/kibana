@@ -7,6 +7,7 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { ACTION_POLICY_KI_TYPE, RULE_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { registerFeaturePrivileges } from './privileges';
 import { ALERTING_V2_FEATURES, getFeatureManagementApps } from '../../../common/feature_privileges';
@@ -44,6 +45,36 @@ describe('registerFeaturePrivileges', () => {
     );
   });
 
+  it('groups features under the Alerting V2 privilege section', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.category).toEqual({
+      id: 'alerting',
+      label: 'Alerting V2',
+      order: 1000,
+      euiIconType: 'watchesApp',
+    });
+  });
+
+  it('describes access for every experimental feature', () => {
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.rules.id).description).toBe(
+      'Experimental. Controls access to rules in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id).description).toBe(
+      'Experimental. Controls access to alerts in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id).description).toBe(
+      'Experimental. Controls access to action policies in the experimental alerting system.'
+    );
+    expect(getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id).description).toBe(
+      'Experimental. Controls access to execution history in the experimental alerting system.'
+    );
+
+    for (const feature of Object.values(ALERTING_V2_FEATURES)) {
+      expect(getRegisteredFeature(feature.id).privilegesTooltip).toBeUndefined();
+    }
+  });
+
   it('forwards the `alerts` privilege to the `all` and `read` privileges of the alerts feature', () => {
     const alertsFeature = getRegisteredFeature(ALERTING_V2_FEATURES.alerts.id);
 
@@ -71,6 +102,31 @@ describe('registerFeaturePrivileges', () => {
     });
   });
 
+  it('forwards the `aiIndex` privilege to the `all` and `read` privileges of the rules feature', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.privileges?.all.aiIndex).toEqual({ read: [RULE_KI_TYPE] });
+    expect(rulesFeature.privileges?.read.aiIndex).toEqual({ read: [RULE_KI_TYPE] });
+  });
+
+  it('forwards the `aiIndex` privilege to the `all` and `read` privileges of the action policies feature', () => {
+    const actionPoliciesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.actionPolicies.id);
+
+    expect(actionPoliciesFeature.privileges?.all.aiIndex).toEqual({
+      read: [ACTION_POLICY_KI_TYPE],
+    });
+    expect(actionPoliciesFeature.privileges?.read.aiIndex).toEqual({
+      read: [ACTION_POLICY_KI_TYPE],
+    });
+  });
+
+  it('does not set the `aiIndex` privilege for features that do not request it', () => {
+    const executionHistoryFeature = getRegisteredFeature(ALERTING_V2_FEATURES.executionHistory.id);
+
+    expect(executionHistoryFeature.privileges?.all.aiIndex).toBeUndefined();
+    expect(executionHistoryFeature.privileges?.read.aiIndex).toBeUndefined();
+  });
+
   describe('management app gating', () => {
     // Regression: without these declarations Kibana Core treats each
     // alerting_v2 management app as unowned/public within Management, which
@@ -83,11 +139,12 @@ describe('registerFeaturePrivileges', () => {
       [ALERTING_V2_FEATURES.executionHistory.id, [ALERTING_V2_EXECUTION_HISTORY_APP_ID]],
     ])('gates the "%s" feature behind the %j management app(s)', (featureId, expectedApps) => {
       const registered = getRegisteredFeature(featureId);
-      const expectedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const ownedManagement = { [ALERTING_V2_SECTION_ID]: expectedApps };
+      const readManagement = { [ALERTING_V2_SECTION_ID]: [expectedApps[0]] };
 
-      expect(registered.management).toEqual(expectedManagement);
-      expect(registered.privileges?.all.management).toEqual(expectedManagement);
-      expect(registered.privileges?.read.management).toEqual(expectedManagement);
+      expect(registered.management).toEqual(ownedManagement);
+      expect(registered.privileges?.all.management).toEqual(ownedManagement);
+      expect(registered.privileges?.read.management).toEqual(readManagement);
     });
 
     it.each(Object.values(ALERTING_V2_FEATURES).map((f) => [f.id, f.managementApp]))(

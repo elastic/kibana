@@ -34,11 +34,11 @@ export const setSidebarServices = (coreStart: CoreStart, services: AgentBuilderI
  */
 export interface SidebarRuntimeContext {
   options: OpenConversationSidebarOptions;
-  onClose?: () => void;
   onRegisterCallbacks?: (callbacks: {
     updateProps: (props: EmbeddableConversationProps) => void;
     resetBrowserApiTools: () => void;
     addAttachment: (attachment: AttachmentInput) => void;
+    removeAttachmentById: (attachmentId: string) => void;
   }) => void;
 }
 

@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/286656
+type: enhancement
+products:
+- product: cloud-serverless
+- product: kibana
+title: Add conversational guided anomaly detection creation flow inside Elastic AI Agent

@@ -9,9 +9,11 @@
 
 import React, { useMemo } from 'react';
 import { useIsWithinMaxBreakpoint } from '@elastic/eui';
+import { CHARTS_TOOLBAR_EBT_ELEMENT, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import { METRICS_EBT_CLICK_ACTIONS } from '../../../analytics/ebt_constants';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { SortSelector } from '../sort_selector';
@@ -21,6 +23,7 @@ import {
   FEATURE_FLAG_DEFAULTS,
 } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks';
+import { useSearchAction } from '../right_side_actions/use_search_action';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allDimensions: Dimension[];
@@ -50,8 +53,16 @@ export const useToolbarActions = ({
     onToggleFullscreen,
     metricsSort,
     onMetricsSortChange,
+    searchTerm,
+    onSearchTermChange,
   } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
+
+  const { searchButton, searchInput } = useSearchAction({
+    value: searchTerm,
+    isFullscreen,
+    onSearchTermChange,
+  });
 
   const isEditGridEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
@@ -118,6 +129,7 @@ export const useToolbarActions = ({
         });
 
     return [
+      ...(searchButton ? [searchButton] : []),
       ...(isEditGridEnabled
         ? [
             {
@@ -126,6 +138,10 @@ export const useToolbarActions = ({
               toolTipContent: editGridLabel,
               onClick: onOpenGridSettings,
               'data-test-subj': 'metricsExperienceEditGridButton',
+              ...getEbtProps({
+                action: METRICS_EBT_CLICK_ACTIONS.EDIT_GRID_SETTINGS,
+                element: CHARTS_TOOLBAR_EBT_ELEMENT,
+              }),
             },
           ]
         : []),
@@ -143,11 +159,13 @@ export const useToolbarActions = ({
     onToggleFullscreen,
     onOpenGridSettings,
     isEditGridEnabled,
+    searchButton,
   ]);
 
   return {
     toggleActions,
     leftSideActions,
     rightSideActions,
+    searchInput: hideRightSideActions ? undefined : searchInput,
   };
 };

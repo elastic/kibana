@@ -96,7 +96,11 @@ describe('RelatedEpisodesRuleSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('alertingV2RelatedEpisodesRuleLoading')).toBeInTheDocument();
+    expect(
+      screen
+        .getByTestId('alertingV2RelatedEpisodesRuleLoading')
+        .querySelector('.euiSkeletonRectangle')
+    ).not.toBeNull();
   });
 
   it('shows the empty state when there are no episodes', () => {
@@ -113,8 +117,29 @@ describe('RelatedEpisodesRuleSubsection', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByText('Other episodes for this rule')).toBeInTheDocument();
+    expect(screen.getByText('Other alerts for this rule')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2RelatedEpisodesRuleEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No other related episodes for this rule.')).toBeInTheDocument();
+    expect(screen.getByText('No other related alerts for this rule.')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['a heading when not compressed', false, 'H4'],
+    ['a heading when compressed', true, 'H4'],
+  ])('renders the subsection label as %s', (_name, compressed, tagName) => {
+    mockUseFetch.mockReturnValue({ data: [], isLoading: false } as any);
+
+    render(
+      <I18nProvider>
+        <RelatedEpisodesRuleSubsection
+          currentEpisodeId="ep-1"
+          currentGroupHash="gh-1"
+          {...mockRuleProps}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+          compressed={compressed}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Other groups for this rule').tagName).toBe(tagName);
   });
 });

@@ -83,7 +83,7 @@ const PERSISTED_TABLE_CONFIG = JSON.stringify({
 // Uses an admin session to match the FTR superuser so all row actions render.
 test.describe(
   'Observability alerts - table configuration',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);
@@ -128,8 +128,7 @@ test.describe(
       await pageObjects.alertsTablePage.waitForTableToLoad();
       await pageObjects.alertsTablePage.openActionsMenuForRow(0);
       for (const action of [
-        'add-to-existing-case-action',
-        'add-to-new-case-action',
+        'add-to-case-action',
         'viewRuleDetails',
         'viewAlertDetailsPage',
         'untrackAlert',

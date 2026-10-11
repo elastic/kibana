@@ -19,6 +19,7 @@ import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
+import { formatMatcher } from '../common/format_matcher';
 
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
@@ -36,8 +37,8 @@ const formatActionPolicyDescription = (
     workflowIds.length > 0
       ? `${workflowIds.length} workflow(s): ${workflowIds.join(', ')}`
       : 'none';
-  const matcherSnippet = data.matcher ? `"${data.matcher}"` : 'match all (catch-all)';
-  const grouping = data.grouping_mode ?? 'per_episode';
+  const matcherSnippet = data.matcher ? formatMatcher(data.matcher) : 'match all (catch-all)';
+  const grouping = data.grouping_mode ?? 'per_alert';
   const throttle = data.throttle?.strategy ?? 'none';
 
   return `Action Policy "${data.name}" (actionPolicyAttachment.id: "${attachmentId}")
@@ -46,8 +47,7 @@ Destinations: ${destinationSummary}
 Matcher: ${matcherSnippet}
 Grouping: ${grouping}
 Throttle: ${throttle}
-${data.description ? `Description: ${data.description}` : ''}
-${data.tags?.length ? `Tags: ${data.tags.join(', ')}` : ''}`.trim();
+${data.description ? `Description: ${data.description}` : ''}`.trim();
 };
 
 export const createActionPolicyAttachmentType = ({
@@ -130,7 +130,7 @@ export const createActionPolicyAttachmentType = ({
   }),
 
   getAgentDescription: () =>
-    `An action policy attachment represents an Alerting v2 notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alert episodes are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the action-policy-management skill.`,
+    `An action policy attachment represents an Alerting v2 notification policy — either a proposed policy (not yet saved) or a saved policy linked via its ID. Action policies define how alerts are matched, grouped, and dispatched to workflow destinations. To create, inspect, or modify action policies, load the action-policy-management skill.`,
 
   getTools: () => [],
 });
