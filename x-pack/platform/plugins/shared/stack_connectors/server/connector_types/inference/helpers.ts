@@ -156,6 +156,104 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
  */
 export const detectandThrowUserError = (error: string) => {
   if (error.includes('status [429]') && error.includes('quota')) {
-    throw createTaskRunError(new Error(error), TaskErrorSource.USER);
+    throw createTaskRunError(new Error(truncateUpstreamBody(error)), TaskErrorSource.USER);
+  }
+};
+
+export const MAX_UPSTREAM_BODY_LENGTH = 1000;
+
+const redactUpstreamSecrets = (text: string): string =>
+  text
+    .replace(/(\b[a-z][a-z0-9+.-]*:\/\/[^\s:@\/"']+:)[^\s@/"']+@/gi, '$1[redacted]@')
+    .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
+    .replace(/sk-[A-Za-z0-9_-]{8,}/g, '[redacted]')
+    .replace(
+      /(authorization["']?\s*[:=]\s*["']?)(?:[A-Za-z][\w-]*\s+)?[^\s"',}]+/gi,
+      '$1[redacted]'
+    )
+    .replace(
+      /(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|"[^"\n]*|'[^'\n]*|[^\s"',}]+)/gim,
+      '$1$2[redacted]'
+    )
+    .replace(
+      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|"[^"\n]*|'[^'\n]*|[^\s"',}]+)/gi,
+      '$1[redacted]'
+    )
+    .replace(
+      /([A-Z][A-Z0-9_]{0,63}(?:_API_KEY|_TOKEN|_SECRET|_PASSWORD)\s*=\s*["']?)[^\s"',}]+/g,
+      '$1[redacted]'
+    );
+
+const stringifyUpstreamBody = (body: unknown): string => {
+  if (body === undefined || body === null) return '';
+  if (typeof body === 'string') return body;
+  if (Buffer.isBuffer(body)) return body.toString('utf8');
+  try {
+    return JSON.stringify(body) ?? '';
+  } catch (e) {
+    return String(body);
+  }
+};
+
+/**
+ * Stringifies an upstream response body and caps its length so that it can safely be
+ * included in an error message.
+ */
+export const truncateUpstreamBody = (
+  body: unknown,
+  maxLength: number = MAX_UPSTREAM_BODY_LENGTH
+): string => {
+  const text = redactUpstreamSecrets(stringifyUpstreamBody(body));
+  const marker = '... [truncated]';
+  return text.length > maxLength ? `${text.slice(0, maxLength - marker.length)}${marker}` : text;
+};
+
+/**
+ * Builds a human readable message out of an error thrown while calling the inference endpoint.
+ * Handles AxiosError-shaped (response.status / response.data) and Elasticsearch client
+ * ResponseError-shaped (statusCode / body / meta) errors, as well as plain errors. Never throws.
+ */
+interface ErrorLike {
+  message?: unknown;
+  response?: { status?: unknown; data?: unknown };
+  statusCode?: unknown;
+  status?: unknown;
+  body?: unknown;
+  data?: unknown;
+  meta?: { statusCode?: unknown; body?: unknown };
+}
+
+export const buildInferenceErrorMessage = (error: unknown): string => {
+  try {
+    if (error === undefined || error === null) return 'Unknown error';
+    if (typeof error === 'string') return truncateUpstreamBody(error);
+
+    const err = error as ErrorLike;
+    const baseMessage = typeof err.message === 'string' ? err.message : '';
+    const statusCode = err.response?.status ?? err.statusCode ?? err.status ?? err.meta?.statusCode;
+    const rawBody = err.response?.data ?? err.body ?? err.data ?? err.meta?.body;
+    // redact before assembling the prefixed message: the token pattern is
+    // anchored to line starts / structural delimiters, which the
+    // `Upstream response: ` prefix would otherwise break
+    const body = redactUpstreamSecrets(stringifyUpstreamBody(rawBody));
+
+    const parts: string[] = [];
+    if (baseMessage) parts.push(baseMessage);
+    if (
+      statusCode !== undefined &&
+      statusCode !== null &&
+      !baseMessage.includes(`status code ${statusCode}`)
+    ) {
+      parts.push(`Status code: ${statusCode}`);
+    }
+    if (body && !baseMessage.includes(body)) {
+      parts.push(`Upstream response: ${body}`);
+    }
+    if (parts.length > 0) return truncateUpstreamBody(parts.join('. '));
+
+    const fallback = truncateUpstreamBody(err);
+    return fallback && fallback !== '{}' ? fallback : 'Unknown error';
+  } catch (e) {
+    return 'Unknown error';
   }
 };
