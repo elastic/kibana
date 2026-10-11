@@ -308,8 +308,9 @@ steps:
                   - tool_ids:
                       - security.alertzero.actions.list
               message: >
-                I have an alert on {{ steps.resolve_host.output.host_name }}.
-                Perform forensic analysis and extract all IoCs.
+                Perform forensic analysis on the host {{ steps.resolve_host.output.host_name }} and extract all IoCs.
+                Reach your conclusion from the telemetry alone. Benign activity is as valid an outcome as a
+                real incident, and either can be the right answer.
                 Write the reconstruction to `timeline.events` and the indicators to `iocs`,
                 matching this step's schema. Use `rationale` only for the assessment:
                 - Whether this is a real incident, which other hosts are affected, what the
@@ -317,14 +318,15 @@ steps:
                   Do not restate `timeline` or `iocs` there.
 
                 After the forensic reconstruction,
-                - Assess whether this represents a real incident that warrants containment.
+                - Assess from the evidence whether this is a real incident or benign activity.
                 - Call `security.alertzero.actions.list` with categories `["respond"]` before proposing anything.
                   Use the returned catalog as the only allowed actions. Set each `actionId` to a catalog
                   `workflowId`. Do not invent workflow ids and do not recommend an action that is not in the
                   catalog. If the catalog is empty, set propose=false and return an empty `recommendedActions` list.
-                - If this reconstruction justifies containment, recommend specific containment actions in
-                  `recommendedActions` from that catalog. Recommend only what you can tie to the timeline
-                  and indicators you returned.
+                - Recommend containment actions in `recommendedActions` from that catalog only if the
+                  reconstruction shows malicious activity that containment would stop, and only what you
+                  can tie to the timeline and indicators you returned. If the activity is benign or the
+                  evidence is inconclusive, set propose=false and return an empty `recommendedActions` list.
 
                 Each catalog entry carries an `inputSchema`: the JSON Schema of that action's manual
                 trigger. The proposal checks `actionInput` against `inputSchema.properties.actionInput`,

@@ -998,6 +998,27 @@ describe('Endpoint analysis run', () => {
       );
     });
 
+    // The same prompt runs for every indicator, benign or not. Telling the model it was
+    // handed "an alert" that "warrants containment" presumes the verdict, and a model
+    // reasonably proposes isolate/kill on a plain Office -> print-spooler tree. The prompt
+    // must frame the host neutrally and give "benign, propose nothing" as a stated outcome.
+    it('frames the analysis neutrally instead of presuming an alert that warrants containment', () => {
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+
+      expect(message).not.toMatch(/I have an alert/i);
+      expect(message).not.toMatch(/warrants? containment/i);
+      expect(message).not.toMatch(/justifies containment/i);
+      expect(message).toContain('Benign activity is as valid an outcome as a');
+      expect(message).toContain('If the activity is benign or the');
+      expect(message).toContain('set propose=false');
+    });
+
+    it('still renders the host into the neutral prompt', () => {
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+
+      expect(message).toContain('{{ steps.resolve_host.output.host_name }}');
+    });
+
     it('leaves the action input shape to the catalog instead of restating it', () => {
       const actionInput = recommendation?.properties?.actionInput;
       expect(actionInput?.type).toBe('object');
