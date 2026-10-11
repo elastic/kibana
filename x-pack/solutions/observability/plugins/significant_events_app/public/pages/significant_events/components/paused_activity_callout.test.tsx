@@ -13,7 +13,7 @@ import { PausedActivityCallout } from './paused_activity_callout';
 
 const status: SignificantEventsMaintenanceStatus = {
   state: 'paused',
-  updatedBy: 'elastic',
+  updatedBy: 'Elastic',
   lastSummary: {
     state: 'paused',
     executionsCancelled: 0,
@@ -36,7 +36,7 @@ describe('PausedActivityCallout', () => {
     );
 
     expect(screen.getByTestId('significantEventsPausedBanner')).toHaveTextContent(
-      'Detection is paused by elastic'
+      'Detection is paused by Elastic'
     );
     expect(screen.getByRole('link', { name: 'Open settings' })).toHaveAttribute(
       'href',
