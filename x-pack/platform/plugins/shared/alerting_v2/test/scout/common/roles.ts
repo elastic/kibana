@@ -9,7 +9,7 @@ import type { KibanaRole } from '@kbn/scout';
 
 type ElasticsearchPrivileges = KibanaRole['elasticsearch'];
 
-const NO_ACCESS_ES_PRIVILEGES: ElasticsearchPrivileges = {
+const EMPTY_ES_PRIVILEGES: ElasticsearchPrivileges = {
   cluster: [],
   indices: [],
 };
@@ -20,7 +20,7 @@ const NO_ACCESS_ES_PRIVILEGES: ElasticsearchPrivileges = {
  * lifecycle without needing the `admin` privilege set.
  */
 export const ALL_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -41,7 +41,7 @@ export const ALL_ROLE: KibanaRole = {
  * Use for tests that only render the UI or read state without mutating.
  */
 export const READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -64,7 +64,7 @@ export const READ_ROLE: KibanaRole = {
  * from the alerting_v2 management pages.
  */
 export const NO_ACCESS_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -85,7 +85,7 @@ export const NO_ACCESS_ROLE: KibanaRole = {
  */
 
 export const ALERTING_V2_RULES_ALL_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -99,7 +99,7 @@ export const ALERTING_V2_RULES_ALL_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -113,7 +113,7 @@ export const ALERTING_V2_RULES_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -127,7 +127,7 @@ export const ALERTING_V2_ALERTS_ALL_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -141,7 +141,7 @@ export const ALERTING_V2_ALERTS_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ALERTS_AND_RULES_READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -156,7 +156,7 @@ export const ALERTING_V2_ALERTS_AND_RULES_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ACTION_POLICIES_ALL_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -170,7 +170,7 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -184,7 +184,7 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -199,7 +199,7 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
@@ -213,7 +213,7 @@ export const ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE: KibanaRole = {
 };
 
 export const ALERTING_V2_EXECUTION_HISTORY_READ_ROLE: KibanaRole = {
-  elasticsearch: NO_ACCESS_ES_PRIVILEGES,
+  elasticsearch: EMPTY_ES_PRIVILEGES,
   kibana: [
     {
       base: [],
