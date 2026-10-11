@@ -810,6 +810,7 @@ const BaseActionsConfig: ActionsConfig = {
     maxEmitted: 25,
     ...defaultInboundEventsLimitConfigs,
   },
+  connectorSigningKeys: { enabled: false },
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {

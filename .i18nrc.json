@@ -21,6 +21,7 @@
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/platform/plugins/shared/charts",
     "console": "src/platform/plugins/shared/console",
+    "connectorSpecs.ssf": "src/platform/packages/shared/kbn-connector-specs/src/specs/ssf",
     "contentManagement": "src/platform/packages/shared/content-management",
     "core": [
       "src/core"

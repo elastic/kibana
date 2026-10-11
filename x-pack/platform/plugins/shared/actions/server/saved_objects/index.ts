@@ -14,8 +14,10 @@ import type {
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { getOldestIdleActionTask } from '@kbn/task-manager-plugin/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import {
   connectorIngressCredentialMappings,
+  connectorSigningKeyMappings,
   actionMappings,
   actionTaskParamsMappings,
   connectorTokenMappings,
@@ -35,6 +37,7 @@ import { transformConnectorsForExport } from './transform_connectors_for_export'
 import type { ActionTypeRegistry } from '../action_type_registry';
 import {
   CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
@@ -43,6 +46,7 @@ import {
 } from '../constants/saved_objects';
 import {
   connectorIngressCredentialModelVersions,
+  connectorSigningKeyModelVersions,
   actionTaskParamsModelVersions,
   connectorTokenModelVersions,
   oauthStateModelVersions,
@@ -75,6 +79,9 @@ export function setupSavedObjects(
       displayName: 'connector',
       defaultSearchField: 'name',
       importableAndExportable: true,
+      // An import cannot create the signing key, so these connectors must be created again.
+      isExportable: (savedObject: SavedObject<RawAction>) =>
+        !connectorTypePublishesKeys(savedObject.attributes.actionTypeId),
       getTitle(savedObject: SavedObject<RawAction>) {
         return `Connector: [${savedObject.attributes.name}]`;
       },
@@ -145,6 +152,32 @@ export function setupSavedObjects(
       importableAndExportable: false,
     },
     modelVersions: connectorIngressCredentialModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'agnostic',
+    mappings: connectorSigningKeyMappings,
+    management: {
+      importableAndExportable: false,
+    },
+    modelVersions: connectorSigningKeyModelVersions,
+  });
+
+  encryptedSavedObjects.registerType({
+    type: CONNECTOR_SIGNING_KEY_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['privateKey']),
+    attributesToIncludeInAAD: new Set([
+      'connectorId',
+      'spaceId',
+      'issuer',
+      'publicKey',
+      'createdAt',
+    ]),
+    // The key record ID is the connector ID, which can be a custom value.
+    enforceRandomId: false,
   });
 
   savedObjects.registerType({

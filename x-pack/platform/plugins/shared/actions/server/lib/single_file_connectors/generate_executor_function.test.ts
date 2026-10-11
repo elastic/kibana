@@ -176,6 +176,41 @@ describe('generateExecutorFunction', () => {
       expect(mockHandler.mock.calls[0][0]).toHaveProperty('relay', undefined);
     });
 
+    it('passes the connector JWT signer, and returns a signer failure as an action error', async () => {
+      const signJwt = jest.fn().mockRejectedValue(new Error('This connector has no signing key.'));
+      const getJwtSigner = jest.fn().mockReturnValue(signJwt);
+      const handler = jest.fn(async (ctx) => ctx.signJwt({ aud: 'receiver' }));
+      const executor = generateExecutorFunction({
+        actions: makeActions(handler),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+        getCredential: mockGetCredential,
+        getClientLeasePool: () => fakeLeasePool,
+        networkSettings: mockNetwork,
+        platform: mockPlatform,
+        getJwtSigner,
+      });
+
+      const result = await executor(
+        makeExecOptions({ subAction: 'testAction', subActionParams: {} })
+      );
+
+      expect(getJwtSigner).toHaveBeenCalledWith(connectorId);
+      expect(signJwt).toHaveBeenCalledWith({ aud: 'receiver' });
+      expect(result).toMatchObject({
+        status: 'error',
+        message: 'This connector has no signing key.',
+        actionId: connectorId,
+      });
+    });
+
+    it('leaves the JWT signer undefined when the spec does not publish keys', async () => {
+      const executor = makeExecutor();
+
+      await executor(makeExecOptions({ subAction: 'testAction', subActionParams: {} }));
+
+      expect(mockHandler.mock.calls[0][0]).toHaveProperty('signJwt', undefined);
+    });
+
     it('leaves the Relay client undefined when no Relay is configured', async () => {
       const executor = makeExecutor();
 
