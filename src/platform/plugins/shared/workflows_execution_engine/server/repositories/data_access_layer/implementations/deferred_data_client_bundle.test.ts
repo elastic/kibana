@@ -45,7 +45,11 @@ describe('DeferredDataClientBundle', () => {
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
 
-    bundle = new DeferredDataClientBundle({ source: 'system_index', logger: loggerMock.create() });
+    bundle = new DeferredDataClientBundle({
+      source: 'plain_index',
+      dataRetention: '90d',
+      logger: loggerMock.create(),
+    });
   });
 
   describe('initSetup', () => {
@@ -108,11 +112,11 @@ describe('DeferredDataClientBundle', () => {
       );
     });
 
-    it('returns the same singleton instance on repeated calls', async () => {
+    it('returns a new instance on each call so version cache is not shared across executions', async () => {
       await bundle.initSetup(coreSetup);
       void bundle.initStart(coreStart);
 
-      expect(bundle.createWorkflowDataClient()).toBe(bundle.createWorkflowDataClient());
+      expect(bundle.createWorkflowDataClient()).not.toBe(bundle.createWorkflowDataClient());
     });
 
     it('queues operations until initStart completes', async () => {
@@ -156,6 +160,22 @@ describe('DeferredDataClientBundle', () => {
       expect(innerBundle.createWorkflowDataClient).toHaveBeenCalledTimes(1);
     });
 
+    it('creates a distinct inner client for each returned instance', async () => {
+      innerBundle.createWorkflowDataClient
+        .mockReturnValueOnce(createMockWorkflowDataClient())
+        .mockReturnValueOnce(createMockWorkflowDataClient());
+
+      await bundle.initSetup(coreSetup);
+      await bundle.initStart(coreStart);
+
+      const first = bundle.createWorkflowDataClient();
+      const second = bundle.createWorkflowDataClient();
+      await first.search({ query: { match_all: {} } });
+      await second.search({ query: { match_all: {} } });
+
+      expect(innerBundle.createWorkflowDataClient).toHaveBeenCalledTimes(2);
+    });
+
     it('delegates all methods to the inner client', async () => {
       const innerClient = createMockWorkflowDataClient();
       innerClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
@@ -186,11 +206,11 @@ describe('DeferredDataClientBundle', () => {
       );
     });
 
-    it('returns the same singleton instance on repeated calls', async () => {
+    it('returns a new instance on each call so version cache is not shared across executions', async () => {
       await bundle.initSetup(coreSetup);
       void bundle.initStart(coreStart);
 
-      expect(bundle.createStepDataClient()).toBe(bundle.createStepDataClient());
+      expect(bundle.createStepDataClient()).not.toBe(bundle.createStepDataClient());
     });
 
     it('queues operations until initStart completes', async () => {

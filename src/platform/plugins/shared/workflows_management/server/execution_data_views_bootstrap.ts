@@ -8,8 +8,12 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../common';
+import {
+  WORKFLOWS_EXECUTIONS_DATA_VIEW_TITLE,
+  WORKFLOWS_STEP_EXECUTIONS_DATA_VIEW_TITLE,
+} from '../common';
 
 const BOOTSTRAP_CACHE_TTL_MS = 60 * 1_000;
 
@@ -76,12 +80,12 @@ export class ExecutionDataViewsBootstrap {
     const views: Array<{ id: string; title: string; name: string }> = [
       {
         id: `workflows-executions-managed-${spaceId}`,
-        title: WORKFLOWS_EXECUTIONS_INDEX,
+        title: WORKFLOWS_EXECUTIONS_DATA_VIEW_TITLE,
         name: 'Workflow executions',
       },
       {
         id: `workflows-step-executions-managed-${spaceId}`,
-        title: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        title: WORKFLOWS_STEP_EXECUTIONS_DATA_VIEW_TITLE,
         name: 'Workflow step executions',
       },
     ];
@@ -90,7 +94,7 @@ export class ExecutionDataViewsBootstrap {
       try {
         const existing = await this.getDataViewIfExists(dvService, id);
         if (existing !== null) {
-          this.logger.debug(`ExecutionDataViewsBootstrap: data view ${id} already exists`);
+          await this.alignExistingDataView(dvService, existing, title);
         } else {
           const dataView = await dvService.create(
             {
@@ -99,6 +103,7 @@ export class ExecutionDataViewsBootstrap {
               name,
               timeFieldName: 'startedAt',
               allowNoIndex: true,
+              allowHidden: true,
               managed: true,
               namespaces: [spaceId],
             },
@@ -117,15 +122,38 @@ export class ExecutionDataViewsBootstrap {
         if (existing === null) {
           throw err;
         }
-        this.logger.debug(`ExecutionDataViewsBootstrap: data view ${id} already exists`);
+        await this.alignExistingDataView(dvService, existing, title);
       }
     }
+  }
+
+  private async alignExistingDataView(
+    dataViewsService: Awaited<ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>>,
+    dataView: DataView,
+    title: string
+  ): Promise<void> {
+    const needsTitle = dataView.getIndexPattern() !== title;
+    const needsAllowHidden = !dataView.getAllowHidden();
+    if (!needsTitle && !needsAllowHidden) {
+      this.logger.debug(`ExecutionDataViewsBootstrap: data view ${dataView.id} already exists`);
+      return;
+    }
+    if (needsTitle) {
+      dataView.setIndexPattern(title);
+    }
+    if (needsAllowHidden) {
+      dataView.setAllowHidden(true);
+    }
+    await dataViewsService.updateSavedObject(dataView);
+    this.logger.debug(
+      `ExecutionDataViewsBootstrap: updated data view ${dataView.id} for hidden queryable indexes`
+    );
   }
 
   private async getDataViewIfExists(
     dataViewsService: Awaited<ReturnType<DataViewsServerPluginStart['dataViewsServiceFactory']>>,
     id: string
-  ) {
+  ): Promise<DataView | null> {
     try {
       return await dataViewsService.get(id);
     } catch (err) {

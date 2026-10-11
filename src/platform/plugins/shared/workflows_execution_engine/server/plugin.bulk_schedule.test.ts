@@ -122,6 +122,7 @@ describe('bulkScheduleWorkflow', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
 

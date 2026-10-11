@@ -266,7 +266,8 @@ export class WorkflowsExecutionEnginePlugin
     initializeTriggerEventsDataStream(core.dataStreams);
 
     this.dataClientBundle = createDataClientBundle({
-      source: 'system_index',
+      source: config.storage.source,
+      dataRetention: config.storage.dataRetention,
       logger: this.logger,
     });
     void this.dataClientBundle.initSetup(core);
@@ -317,6 +318,7 @@ export class WorkflowsExecutionEnginePlugin
               const queueDelayMs = scheduledAt ? now - scheduledAt : null;
 
               const { default: apm } = await import('elastic-apm-node');
+
               const currentTransaction = apm.currentTransaction;
               if (currentTransaction) {
                 if (queueDelayMs !== null) {

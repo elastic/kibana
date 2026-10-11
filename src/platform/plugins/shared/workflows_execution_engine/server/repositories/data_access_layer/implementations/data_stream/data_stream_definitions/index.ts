@@ -7,11 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExecutionStorageSource } from '../types';
-
-export const createUnsupportedStorageSourceError = (
-  entity: 'WorkflowExecutionsDataClient' | 'StepExecutionsDataClient' | 'DataClient',
-  source: ExecutionStorageSource
-): Error => {
-  return new Error(`${entity} for source "${source}" is not implemented yet`);
-};
+export { WORKFLOW_EXECUTIONS_DATA_STREAM_DEFINITION } from './workflow_executions';
+export { STEP_EXECUTIONS_DATA_STREAM_DEFINITION } from './step_executions';

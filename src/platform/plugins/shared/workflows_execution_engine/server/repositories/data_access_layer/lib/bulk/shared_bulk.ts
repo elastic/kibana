@@ -120,7 +120,8 @@ const refreshWrittenIndexes = async (
 const mgetUpdaterSources = async <TExecution extends { id: string }>(
   esClient: ElasticsearchClient,
   updaterBatch: Array<QueueItem<TExecution> & { item: BulkUpdaterItem<TExecution> }>,
-  fallbackIndexes: string[]
+  fallbackIndexes: string[],
+  searchFallbackIndexes: string[]
 ): Promise<Map<string, UpdaterSource<TExecution>>> => {
   const foundById = new Map<string, UpdaterSource<TExecution>>();
   const errorById = new Map<string, estypes.ErrorCause>();
@@ -150,7 +151,8 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
     fallbackIndexes.map((index) => ({
       _id: documentId,
       _index: index,
-      ...(fields ? { _source: { includes: Array.from(fields) } } : {}),
+      // `deleted` is always read so soft-deleted documents can be treated as missing.
+      ...(fields ? { _source: { includes: [...Array.from(fields), 'deleted'] } } : {}),
     }))
   );
 
@@ -164,7 +166,8 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
       doc._id &&
       doc._seq_no !== undefined &&
       doc._primary_term !== undefined &&
-      !foundById.has(doc._id)
+      !foundById.has(doc._id) &&
+      !isSoftDeleted(doc._source)
     ) {
       // `_source.includes` can omit `id`; updaters and callers key by document.id.
       foundById.set(doc._id, {
@@ -178,16 +181,58 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
     }
   }
 
+  // Documents may have rolled out of the indexes mget covered (e.g. older data stream backing
+  // indexes), so look the remaining ids up with a search across the whole target.
+  const missingIds = Array.from(projectionById.keys()).filter((id) => !foundById.has(id));
+  if (searchFallbackIndexes.length > 0 && missingIds.length > 0) {
+    const missingProjections = missingIds.map((id) => projectionById.get(id));
+    // One search for all ids, so use the full source unless every projection is narrow.
+    const includes = missingProjections.some((fields) => !fields)
+      ? undefined
+      : Array.from(new Set(missingProjections.flatMap((fields) => Array.from(fields ?? []))));
+
+    const searchResponse = await esClient.search<TExecution>({
+      index: searchFallbackIndexes,
+      query: { ids: { values: missingIds } },
+      size: missingIds.length,
+      seq_no_primary_term: true,
+      ignore_unavailable: true,
+      ...(includes ? { _source: { includes: [...includes, 'deleted'] } } : {}),
+    });
+
+    for (const hit of searchResponse.hits.hits) {
+      if (
+        hit._id &&
+        hit._source &&
+        hit._seq_no !== undefined &&
+        hit._primary_term !== undefined &&
+        !foundById.has(hit._id) &&
+        !isSoftDeleted(hit._source)
+      ) {
+        foundById.set(hit._id, {
+          source: { ...hit._source, id: hit._id } as TExecution,
+          seqNo: hit._seq_no,
+          primaryTerm: hit._primary_term,
+          index: hit._index,
+        });
+      }
+    }
+  }
+
   // A per-document MGET error is a storage failure, not a missing document. Only surface it
-  // when no other index returned the document.
+  // when no other index or the search fallback returned the document. A missing index (e.g. the
+  // legacy index in data stream mode) just means the document is not there.
   for (const [id, error] of errorById) {
-    if (!foundById.has(id)) {
+    if (!foundById.has(id) && error.type !== 'index_not_found_exception') {
       throw new Error(`Bulk updater source read failed for ${id}: ${JSON.stringify(error)}`);
     }
   }
 
   return foundById;
 };
+
+const isSoftDeleted = (source: object): boolean =>
+  (source as { deleted?: unknown }).deleted === true;
 
 const resolveBatchToSend = <TExecution extends { id: string }>(
   batch: Array<QueueItem<TExecution>>,
@@ -311,9 +356,12 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
   request: BulkRequestOptions<TExecution>;
   logger: Logger;
   fallbackIndexes: string[];
+  /** When set, updater sources missing from the mget are searched for across these indexes. */
+  searchFallbackIndexes?: string[];
 }): Promise<BulkResponse> {
   const { esClient, request, logger } = params;
   const fallbackIndexes: string[] = params.fallbackIndexes ?? [];
+  const searchFallbackIndexes: string[] = params.searchFallbackIndexes ?? [];
 
   if (request.items.length === 0) {
     return { items: [], errors: false };
@@ -335,7 +383,12 @@ export async function sharedBulk<TExecution extends { id: string }>(params: {
       (qi): qi is QueueItem<TExecution> & { item: BulkUpdaterItem<TExecution> } =>
         isBulkUpdaterItem(qi.item)
     );
-    const foundById = await mgetUpdaterSources(esClient, updaterBatch, fallbackIndexes);
+    const foundById = await mgetUpdaterSources(
+      esClient,
+      updaterBatch,
+      fallbackIndexes,
+      searchFallbackIndexes
+    );
     const { toSend, settled: resolvedSettled } = resolveBatchToSend(
       batch,
       foundById,
