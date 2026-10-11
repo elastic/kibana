@@ -23,11 +23,117 @@ import { hardCases } from '../datasets/hard_cases';
 const ENDPOINT_INDEX = 'logs-endpoint.events.process-default';
 const POWERSHELL_INDEX = 'logs-windows.powershell_operational-default';
 const CLOUDTRAIL_INDEX = 'logs-aws.cloudtrail-default';
+/**
+ * Linux auth log (`/var/log/auth.log` via the system integration). The T1078.001 gap is about
+ * su/sudo failures with default usernames, and that evidence lives in the auth log: a fixture
+ * with only process-start events lets the agent defensibly decline the gap for a missing data
+ * source, which scores the fixture rather than the model.
+ */
+export const AUTH_INDEX = 'logs-system.auth-default';
 
 /** Index patterns a reference query may legitimately target. Derived from the constants above so a new fixture index cannot drift out of sync with the hygiene guard. */
-export const SEEDED_INDEX_PATTERNS = [ENDPOINT_INDEX, POWERSHELL_INDEX, CLOUDTRAIL_INDEX].map(
-  (index) => index.replace(/-default$/, '')
-);
+export const SEEDED_INDEX_PATTERNS = [
+  ENDPOINT_INDEX,
+  POWERSHELL_INDEX,
+  CLOUDTRAIL_INDEX,
+  AUTH_INDEX,
+].map((index) => index.replace(/-default$/, ''));
+
+/** The three Linux endpoints the T1078.001 gap evidence names; shared with the process fixtures. */
+const LINUX_AUTH_HOSTS = [
+  { id: 'host-1', name: 'linux-web-01' },
+  { id: 'host-4', name: 'linux-build-02' },
+  { id: 'host-5', name: 'linux-cron-01' },
+] as const;
+
+/** Default usernames the gap evidence names (admin, root, administrator) plus guest. */
+const DEFAULT_USERNAMES = ['admin', 'root', 'administrator', 'guest'] as const;
+
+const authDoc = ({
+  host,
+  user,
+  process,
+  outcome,
+  message,
+  sourceIp,
+}: {
+  host: (typeof LINUX_AUTH_HOSTS)[number];
+  user: string;
+  process: 'su' | 'sudo' | 'sshd';
+  outcome: 'success' | 'failure';
+  message: string;
+  sourceIp?: string;
+}): Record<string, unknown> => ({
+  '@timestamp': nowIso(),
+  event: {
+    action: process === 'sshd' ? 'ssh_login' : process === 'sudo' ? 'sudo' : 'su',
+    category: ['authentication'],
+    type: ['start'],
+    outcome,
+    dataset: 'system.auth',
+    module: 'system',
+    kind: 'event',
+  },
+  message,
+  log: { file: { path: '/var/log/auth.log' } },
+  process: { name: process },
+  host: { id: host.id, name: host.name, os: { type: 'linux', family: 'debian' } },
+  user: { name: user },
+  ...(sourceIp ? { source: { ip: sourceIp } } : {}),
+});
+
+/**
+ * Auth-log documents for the T1078.001 gap: repeated su/sudo failures with default usernames on
+ * three Linux endpoints (2 per host, so no host clears a per-host threshold on one burst alone),
+ * plus benign controls — a named admin's successful sudo, a successful key-based ssh login and a
+ * mistyped password for a real user — so an over-broad rule is distinguishable from the right one.
+ */
+const buildAuthDocs = (): Array<Record<string, unknown>> => [
+  ...LINUX_AUTH_HOSTS.flatMap((host, hostIndex) => [
+    authDoc({
+      host,
+      user: DEFAULT_USERNAMES[hostIndex],
+      process: 'su',
+      outcome: 'failure',
+      message: `pam_unix(su:auth): authentication failure; logname=deploy uid=1001 euid=0 tty=/dev/pts/0 ruser=deploy rhost=  user=${DEFAULT_USERNAMES[hostIndex]}`,
+    }),
+    authDoc({
+      host,
+      user: DEFAULT_USERNAMES[hostIndex + 1],
+      process: 'sudo',
+      outcome: 'failure',
+      message: `${
+        DEFAULT_USERNAMES[hostIndex + 1]
+      } : 3 incorrect password attempts ; TTY=pts/1 ; PWD=/home/${
+        DEFAULT_USERNAMES[hostIndex + 1]
+      } ; USER=root ; COMMAND=/bin/bash`,
+    }),
+  ]),
+  // Benign controls: none of these may match a default-username su/sudo failure predicate.
+  authDoc({
+    host: LINUX_AUTH_HOSTS[0],
+    user: 'jdoe',
+    process: 'sudo',
+    outcome: 'success',
+    message: 'jdoe : TTY=pts/0 ; PWD=/home/jdoe ; USER=root ; COMMAND=/usr/bin/apt update',
+  }),
+  authDoc({
+    host: LINUX_AUTH_HOSTS[1],
+    user: 'svc-ssh',
+    process: 'sshd',
+    outcome: 'success',
+    message: 'Accepted publickey for svc-ssh from 10.0.4.17 port 52114 ssh2: RSA SHA256:xxxx',
+    sourceIp: '10.0.4.17',
+  }),
+  authDoc({
+    host: LINUX_AUTH_HOSTS[2],
+    user: 'asmith',
+    process: 'sudo',
+    outcome: 'failure',
+    message:
+      'asmith : 1 incorrect password attempt ; TTY=pts/2 ; PWD=/home/asmith ; USER=root ; COMMAND=/bin/ls',
+  }),
+];
 
 // No explicit mappings: these are `logs-*` data streams and the built-in `logs` template already
 // maps the ECS fields the datasets query. A second mapping would drift from what the product uses.
@@ -427,6 +533,7 @@ export const buildFixtures = (): SeededIndex[] => [
       },
     ],
   },
+  { index: AUTH_INDEX, docs: buildAuthDocs() },
 ];
 
 // Asserts every reference query matches at least one seeded row. Static guards check query shape
