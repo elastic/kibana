@@ -8,10 +8,11 @@
 import type { HttpStart } from '@kbn/core/public';
 import {
   SECURITY_SERVICE_ACCOUNT_URL,
+  SECURITY_ROLE_API_VERSION,
+  WORKER_ROLE_DEFINITIONS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
 } from '@kbn/alertzero-common';
-import { SECURITY_ROLE_API_VERSION, WORKER_ROLE_DEFINITIONS } from '../../common/worker_roles';
 import {
   ensureWorkerServiceAccounts,
   type CoreServiceAccounts,
