@@ -214,6 +214,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         RULE_FLYOUT_METADATA_ADD_BUTTON: 'searchQueryRulesQueryRuleMetadataEditorAddCriteriaButton',
         RULE_FLYOUT_DOCUMENT_DRAGGABLE_ID: 'editableResultDocumentId',
         RULE_FLYOUT_DOCUMENT_INDEX: 'editableResultIndexSelector',
+        RULE_FLYOUT_DOCUMENT_COUNT: 'searchQueryRulesQueryRuleFlyoutDocumentCount',
         RULE_FLYOUT_ACTION_TYPE_EXCLUDE: 'searchQueryRulesQueryRuleActionTypeExclude',
         RULE_FLYOUT_ACTION_TYPE_PINNED: 'searchQueryRulesQueryRuleActionTypePinned',
         RULE_FLYOUT_CRITERIA_CUSTOM: 'searchQueryRulesQueryRuleCriteriaCustom',
@@ -229,10 +230,10 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         await testSubjects.missingOrFail(this.TEST_IDS.RULE_FLYOUT);
       },
       async expectUpdateButtonIsEnabled() {
-        await testSubjects.isEnabled(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
+        await testSubjects.waitForEnabled(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
       },
       async clickUpdateButton() {
-        await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
+        await testSubjects.clickWhenNotDisabled(this.TEST_IDS.RULE_FLYOUT_UPDATE_BUTTON);
         await this.expectRuleFlyoutNotToExist();
       },
       async clickActionTypeExclude() {
@@ -255,6 +256,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
           const targetField = documentFields[id];
           await targetField.click();
           await targetField.type(newValue);
+          await targetField.pressKeys(Key.TAB);
         } else {
           await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_PIN_MORE_BUTTON);
           await this.changeDocumentIdField(id);
@@ -265,9 +267,14 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         if (comboBoxes[id]) {
           const targetComboBox = comboBoxes[id];
           await targetComboBox.click();
-          await comboBox.setCustom(this.TEST_IDS.RULE_FLYOUT_DOCUMENT_INDEX, newValue);
+          await comboBox.setElement(targetComboBox, newValue);
           // Press tab to ensure the value is set correctly
           await browser.pressKeys(Key.TAB);
+          // The debounced index change must commit before editing the document ID.
+          await retry.waitFor('query-rule document index change to commit', async () => {
+            const rows = await testSubjects.findAll(this.TEST_IDS.RULE_FLYOUT_DOCUMENT_COUNT);
+            return rows[id] && (await rows[id].getAttribute('data-test-index')) === newValue;
+          });
         }
       },
       async changeMetadataField(id: number, newValue: string = '') {
@@ -281,6 +288,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
           );
           await targetField.click();
           await targetField.type(newValue);
+          await targetField.pressKeys(Key.TAB);
         } else {
           await testSubjects.click(this.TEST_IDS.RULE_FLYOUT_METADATA_ADD_BUTTON);
           await this.changeMetadataField(id);
