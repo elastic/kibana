@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/licensing-types'
   - '@kbn/lazy-object'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

@@ -18,6 +18,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
@@ -117,7 +118,7 @@ export interface ConstructorOptions {
   /**
    * Optional space override. When set, connector operations and executions will be scoped to this spaceId
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   auditLogger?: AuditLogger;
   usageCounter?: UsageCounter;
@@ -145,7 +146,7 @@ export interface ActionsClientContext {
   inMemoryConnectors: InMemoryConnector[];
   actionExecutor: ActionExecutorContract;
   request: KibanaRequest;
-  spaceId?: string;
+  spaceId?: SpaceId;
   authorization: ActionsAuthorization;
   bulkExecutionEnqueuer: BulkExecutionEnqueuer<ExecutionResponse>;
   auditLogger?: AuditLogger;

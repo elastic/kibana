@@ -20,6 +20,7 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type * as z4 from '@kbn/zod/v4';
 import type { AuthMode } from '@kbn/connector-specs';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { ConnectorTokenClient } from './lib/connector_token_client';
 import type { ActionTypeExecutorResult, SubFeature, ActionTypeSource } from '../common';
 import type { ActionTypeRegistry } from './action_type_registry';
@@ -350,7 +351,7 @@ export interface ActionTaskParams extends SavedObjectAttributes {
 }
 
 export interface ActionTaskExecutorParams {
-  spaceId: string;
+  spaceId: SpaceId;
   actionTaskParamsId: string;
 }
 

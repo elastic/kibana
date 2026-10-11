@@ -17,6 +17,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -94,7 +95,7 @@ export interface ExecuteOptions<Source = unknown> {
   /**
    * Optional space override. When provided, Action execution will be scoped to this spaceId.
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
@@ -109,14 +110,14 @@ type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'requ
   namespace: { namespace?: string };
   request?: KibanaRequest;
   services: Services | UnsecuredServices;
-  spaceId?: string;
+  spaceId?: SpaceId;
 };
 
 type UnsecuredExecuteOptions<Source = unknown> = Pick<
   ExecuteOptions<Source>,
   'actionExecutionId' | 'actionId' | 'params' | 'relatedSavedObjects' | 'source'
 > & {
-  spaceId: string;
+  spaceId: SpaceId;
 };
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -276,7 +277,7 @@ export class ActionExecutor {
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
-    spaceId?: string;
+    spaceId?: SpaceId;
   }) {
     const { spaces, eventLogger } = this.actionExecutorContext!;
 

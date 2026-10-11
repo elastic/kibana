@@ -11,6 +11,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import {
   connectorTypeIsDual,
   getConnectorSpec,
@@ -52,7 +53,7 @@ export type IngestInboundEventResult =
 export interface IngestInboundEventInput {
   connectorTypeId: string;
   connectorId: string;
-  spaceId: string;
+  spaceId: SpaceId;
   requestId?: string;
   headers: Record<string, string | string[] | undefined>;
   query: IngestEventsRequestQuery;

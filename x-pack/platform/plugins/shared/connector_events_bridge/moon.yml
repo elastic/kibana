@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/actions-plugin'
   - '@kbn/workflows-extensions'
   - '@kbn/core-http-server-mocks'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

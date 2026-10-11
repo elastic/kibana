@@ -9,6 +9,7 @@ import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ExecutionResponseItem } from '@kbn/actions-plugin/server/create_execute_function';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 import type { Logger } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { EmailService, PlainTextEmail, HTMLEmail, AttachmentEmail } from './types';
 
 export class ConnectorsEmailService implements EmailService {
@@ -67,7 +68,7 @@ export class ConnectorsEmailService implements EmailService {
         attachments: params.attachments,
       },
       relatedSavedObjects: params.context?.relatedObjects,
-      spaceId: params.spaceId,
+      spaceId: brandSpaceId(params.spaceId),
     };
 
     const response = await this.actionsClient.execute(action);
