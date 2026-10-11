@@ -201,6 +201,36 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
     );
   });
 
+  it.each([[['attachments.add']], [['attachments.read', 'write_todos']]])(
+    'ignores runtime-injected harness tools %j: trajectory scores 1',
+    async (ids) => {
+      const client = traceClient({
+        columns: [{ name: 'tool_id' }],
+        values: ids.map((id) => [id]),
+      });
+
+      const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), client);
+
+      expect(verdict.toolCallIds).toEqual(ids);
+      expect(await evaluateTrajectory(verdict)).toEqual(
+        expect.objectContaining({ score: 1, label: 'match' })
+      );
+    }
+  );
+
+  it('still fails trajectory when a domain tool is called alongside a harness tool', async () => {
+    const client = traceClient({
+      columns: [{ name: 'tool_id' }],
+      values: [['attachments.add'], ['security.get_alerts']],
+    });
+
+    const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), client);
+
+    expect(await evaluateTrajectory(verdict)).toEqual(
+      expect.objectContaining({ score: 0, label: 'unexpected-tools' })
+    );
+  });
+
   it('negative control: N/A when the trace client is unreachable', async () => {
     const verdict = await run(mockFetch(verdictOutput({ conversation_id: 'conv-1' })), undefined);
 

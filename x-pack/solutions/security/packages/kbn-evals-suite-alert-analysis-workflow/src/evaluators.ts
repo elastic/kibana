@@ -7,7 +7,7 @@
 
 import type { Evaluator } from '@kbn/evals';
 import { createTrajectoryEvaluator } from '@kbn/evals';
-import { CLASSIFICATIONS, type Classification } from './constants';
+import { CLASSIFICATIONS, HARNESS_TOOL_IDS, type Classification } from './constants';
 import type { AlertAnalysisVerdict } from './workflow_task';
 
 interface ExpectedVerdict {
@@ -80,11 +80,13 @@ export const validVerdict: Evaluator = {
 
 /**
  * L2 guardrail: the workflow pre-builds context, so the `ai.agent` step should not call tools.
- * Golden path is empty; any tool call fails trajectory.
+ * Golden path is empty; any domain tool call fails trajectory. Runtime-injected harness tools
+ * (`attachments.*`, `write_todos`) are not exposed by the workflow and are ignored.
  */
 export const createAlertAnalysisTrajectoryEvaluator = (): Evaluator => {
   const inner = createTrajectoryEvaluator({
-    extractToolCalls: (output) => asVerdict(output).toolCallIds ?? [],
+    extractToolCalls: (output) =>
+      (asVerdict(output).toolCallIds ?? []).filter((id) => !HARNESS_TOOL_IDS.includes(id)),
     goldenPathExtractor: () => [],
     orderWeight: 1,
     coverageWeight: 0,
