@@ -139,6 +139,26 @@ const extractEvidenceSummary = (
   };
 };
 
+/** Min `from` / max `to` across every SSE that carried a `hunt_result.time_range`. */
+const extractHuntWindow = (
+  currentRun: Array<ReturnType<typeof significantSecurityEventAttachmentDataSchema.parse>>
+): CurrentRunState['huntWindow'] => {
+  let window: { from: string; to: string } | undefined;
+  for (const sse of currentRun) {
+    const range = sse.hunt_result?.time_range;
+    if (!range) {
+      continue;
+    }
+    window = window
+      ? {
+          from: Date.parse(range.from) < Date.parse(window.from) ? range.from : window.from,
+          to: Date.parse(range.to) > Date.parse(window.to) ? range.to : window.to,
+        }
+      : { from: range.from, to: range.to };
+  }
+  return window;
+};
+
 /**
  * Reads current-run SSE attachments from a conversation and builds packaging state.
  * Returns undefined when no current-run SSE is present (run_incomplete).
@@ -234,9 +254,14 @@ export const readCurrentRunState = async ({
   for (const name of hostNames) {
     const enrollment = await resolveHostEnrollment(name);
     if (enrollment.enrolled) {
-      hosts.push({ name, enrolled: true, agentId: enrollment.agentId });
+      hosts.push({
+        name,
+        enrolled: true,
+        agentId: enrollment.agentId,
+        capabilities: enrollment.capabilities,
+      });
     } else {
-      hosts.push({ name, enrolled: false });
+      hosts.push({ name, enrolled: false, capabilities: [] });
     }
   }
 
@@ -244,11 +269,17 @@ export const readCurrentRunState = async ({
   const eventRefs = currentRun.flatMap((sse) => sse.events ?? []);
   const processSelectors = await rehydrateProcessSelectors({
     alerts: alertRefs.map((a) => ({ alert_id: a.alert_id, index: a.index })),
-    events: eventRefs.map((e) => ({
-      event_id: e.event_id,
-      source_index: e.source_index,
-      ...(e.matched?.technique_id ? { matched: { technique_id: e.matched.technique_id } } : {}),
-    })),
+    events: eventRefs.map((e) => {
+      const matched = {
+        ...(e.matched?.technique_id ? { technique_id: e.matched.technique_id } : {}),
+        ...(e.matched?.ioc ? { ioc: true as const } : {}),
+      };
+      return {
+        event_id: e.event_id,
+        source_index: e.source_index,
+        ...(Object.keys(matched).length > 0 ? { matched } : {}),
+      };
+    }),
   });
 
   const hasIocIndicator = currentRun.some((sse) =>
@@ -273,6 +304,8 @@ export const readCurrentRunState = async ({
     reportId,
     sseCount: currentRun.length,
     hasConfirmedHit,
+    confidence: Math.max(...currentRun.map((sse) => sse.confidence)),
+    huntWindow: extractHuntWindow(currentRun),
     titles,
     evidenceLines,
     techniques,

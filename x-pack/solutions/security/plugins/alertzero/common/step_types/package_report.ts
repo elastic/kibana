@@ -247,8 +247,8 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     details: i18n.translate('xpack.alertzero.workflows.steps.packageReport.documentation.details', {
       defaultMessage:
         'Reads current-run SSE state from the Investigation, owns the mint-versus-dismiss decision table, ' +
-        'writes pending security.coverage KIs (no-reset), resolves every fillable category:respond catalog ' +
-        'action, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
+        'writes pending security.coverage KIs (no-reset), selects one primary response per process from the ' +
+        'fillable respond and investigate catalog actions, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
         'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
         'dismissal off huntStatus and hasConfirmedHit. A hunt that did not complete returns run_incomplete ' +
