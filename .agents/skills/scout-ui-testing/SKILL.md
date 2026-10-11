@@ -24,7 +24,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 
 ## Non-negotiable conventions
 
-- **Tags are required**: Scout validates UI test tags at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`, e.g. `tags.deploymentAgnostic`, `tags.stateful.classic`, or `tags.performance`).
+- **Tags are required**: Scout validates UI test tags at runtime. Ensure each test has at least one supported tag (typically by tagging the top-level `test.describe(...)` / `spaceTest.describe(...)`, e.g. `tags.deploymentAgnostic`, `tags.stateful.classic`, or `tags.performance`). In `x-pack/solutions/observability/**`, `@kbn/eslint/scout_prefer_both_arch_tags` nudges toward tagging both stateful and serverless — see the oblt-specific tiering guidance in `x-pack/solutions/observability/packages/kbn-scout-oblt/README.md`.
 - **No `@` in test titles**: Playwright treats `@word` in test/describe titles as tags. Do not use `@` followed by word characters in titles (e.g., `@timestamp`, `@elastic`). This causes Scout tag validation to fail with "Unsupported tag(s) found". Rephrase the title instead (e.g., use `timestamp field` instead of `@timestamp`).
 - **Prefer one suite per file**: keep a single top-level `test.describe(...)` (sequential) or `spaceTest.describe(...)` (parallel) and avoid nested `describe` blocks where possible.
 - **One role + one flow per file**: skip one flake should not drop a large suite. Aim for a spec that finishes in about a minute.
