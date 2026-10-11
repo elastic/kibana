@@ -6,13 +6,12 @@
  */
 
 import type { EsClient } from '@kbn/scout';
-import { apiTest } from '@kbn/scout';
+import { apiTest, getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
-  ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
 import { FF_DUAL_PROCESS_ENABLED, FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
@@ -167,7 +166,14 @@ const bulkIndex = async (esClient: EsClient, docs: Array<Record<string, unknown>
   expect(response.errors).toBe(false);
 };
 
-apiTest.describe('Entity Store dual-process union equivalence', { tag: ENTITY_STORE_TAGS }, () => {
+// Local-only: comparing both architectures in one deployment needs a mid-suite flag flip, and a
+// dynamic config override only reaches a Cloud project's other Kibana instances on their 10s poll.
+const LOCAL_ONLY_TAGS = [
+  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+  ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
+];
+
+apiTest.describe('Entity Store dual-process union equivalence', { tag: LOCAL_ONLY_TAGS }, () => {
   let publicHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
