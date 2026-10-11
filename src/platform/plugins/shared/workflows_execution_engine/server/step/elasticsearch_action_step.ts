@@ -222,11 +222,25 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
         bulkBody,
       } = buildElasticsearchRequest(stepType, params);
 
-      // Build query string manually if needed
+      // Build query string manually if needed. A value may be a single string or an array
+      // (sent as repeated keys); buildElasticsearchRequest() currently always joins arrays
+      // into a single comma-separated string, but the shared RequestOptions['query'] type
+      // also allows string[] (used by the kibana.request step), so handle both here rather
+      // than relying on `new URLSearchParams(queryParams)`, which would comma-join an array
+      // value instead of emitting repeated keys.
       let finalPath = path;
       if (queryParams && Object.keys(queryParams).length > 0) {
-        const queryString = new URLSearchParams(queryParams).toString();
-        finalPath = `${path}?${queryString}`;
+        const searchParams = new URLSearchParams();
+        for (const [key, value] of Object.entries(queryParams)) {
+          if (Array.isArray(value)) {
+            for (const entry of value) {
+              searchParams.append(key, entry);
+            }
+          } else {
+            searchParams.append(key, value);
+          }
+        }
+        finalPath = `${path}?${searchParams.toString()}`;
       }
 
       const requestOptions = {
