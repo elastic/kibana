@@ -18,7 +18,6 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
-import { SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED } from '@kbn/management-settings-ids';
 import {
   ALERTZERO_ENABLED_SETTING_ID,
   TEMPLATE_ID_ESCALATION,
@@ -380,13 +379,6 @@ export class AlertZeroPlugin
           this.alertTriageAttachmentServiceProvider
             ? this.alertTriageAttachmentServiceProvider(request, workflowId)
             : Promise.resolve(undefined),
-        // Read per request: the setting is space-scoped, so a Worker enabled in one space
-        // says nothing about another. Resolved here rather than in WorkersService because
-        // the setting belongs to security_solution.
-        isAlertAnalysisRuntimeEnabled: async (request) =>
-          core.uiSettings
-            .asScopedToClient(core.savedObjects.getScopedClient(request))
-            .get<boolean>(SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED),
       },
       async (request, registration, options) => {
         const client = await plugins.workflowsExtensions.getClient(request);

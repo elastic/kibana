@@ -66,10 +66,10 @@ consts:
 steps:
   # ---------------------------------------------------------------------------
   # 1. Abort before opening an Investigation when Alert Analysis is off in this
-  #    space. Enablement is checked at Worker turn-on; this is the runtime
-  #    complement for the case where the operator later turns analysis off and
-  #    leaves the Worker running. Empty verdicts are not a substitute — the
-  #    sub-workflow also returns [] when no connector resolves for the model tier.
+  #    space. Turning the Worker on does not require Alert Analysis (the Watch
+  #    page only warns about it), so this is the only place it is enforced.
+  #    Empty verdicts are not a substitute — the sub-workflow also returns []
+  #    when no connector resolves for the model tier.
   #
   #    Same runtime_config endpoint the analysis workflow reads. Fail-closed: a
   #    failed fetch after retries fails the run rather than creating a hollow
