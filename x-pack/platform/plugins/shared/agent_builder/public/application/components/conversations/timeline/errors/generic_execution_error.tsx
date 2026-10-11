@@ -16,7 +16,7 @@ const getErrorDetails = (error: unknown): string => {
   if (!(error instanceof Error)) {
     return formatAgentBuilderErrorMessage(error);
   }
-  const lines = [error.message];
+  const lines = [formatAgentBuilderErrorMessage(error)];
   let cause: unknown = error.cause;
   while (cause instanceof Error) {
     lines.push(

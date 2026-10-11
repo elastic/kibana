@@ -126,7 +126,6 @@ export const useUnifiedHistogram = (props: UseUnifiedHistogramProps): UseUnified
   const isChartAvailable = checkChartAvailability({
     chart,
     dataSource: fetchParams?.dataSource,
-    isPlainRecord: fetchParams?.isESQLQuery,
   });
 
   useEffect(() => {
