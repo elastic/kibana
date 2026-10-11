@@ -291,7 +291,13 @@ export function discoverJestConfig(
 
   // Start searching from either the common test files directory or current working directory
   const searchStartPath = testFilesProvided ? commonTestFiles : currentWorkingDirectory;
-  const configPath = findConfigInDirectoryTree(searchStartPath, ['jest.config.dev.js', configName]);
+  // The `.cjs` variant covers packages such as `.buildkite` that ship `jest.config.cjs`, which
+  // `run_check` and the Moon runner already accept.
+  const configPath = findConfigInDirectoryTree(searchStartPath, [
+    'jest.config.dev.js',
+    configName,
+    configName.replace(/\.js$/, '.cjs'),
+  ]);
 
   if (!configPath) {
     if (testFilesProvided) {
