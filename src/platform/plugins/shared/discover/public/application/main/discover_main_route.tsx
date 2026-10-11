@@ -47,6 +47,7 @@ import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { setBreadcrumbs } from '../../utils/breadcrumbs';
 import { useUnsavedChanges } from './state_management/hooks/use_unsaved_changes';
 import { DiscoverTopNavMenuProvider } from './components/top_nav/discover_topnav_menu';
+import type { DiscoverServices } from '../../build_services';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -55,9 +56,8 @@ export interface MainRouteProps {
   onAppLeave?: AppMountParameters['onAppLeave'];
 }
 
-type InitializeMainRoute = (
-  rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>
-) => Promise<DiscoverInternalState['initializationState']>;
+type LoadedRootProfileState = Extract<RootProfileState, { rootProfileLoading: false }>;
+type DataAvailability = DiscoverInternalState['initializationState'];
 
 const defaultCustomizationCallbacks: CustomizationCallback[] = [];
 
@@ -107,7 +107,7 @@ export const DiscoverMainRoute = ({
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const { customizationContext, runtimeStateManager } = props;
   const services = useDiscoverServices();
-  const { core, dataViews, chrome, data } = services;
+  const { core, chrome, data } = services;
   const history = useHistory();
   const dispatch = useInternalStateDispatch();
   const rootProfileState = useRootProfile();
@@ -116,31 +116,27 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     customizationContext.displayMode === 'standalone';
 
   const { initializeProfileDataViews } = useDefaultAdHocDataViews();
-  const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
-    async (loadedRootProfileState) => {
-      const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] = await Promise.all([
-        dataViews.hasData.hasESData().catch(() => false),
-        dataViews.hasData.hasDataView().catch(() => false),
-        dataViews.defaultDataViewExists().catch(() => false),
-        core.http
-          .get<EsqlDatasetsResult>(DATASETS_ROUTE)
-          .then((res) => res.datasets.length > 0)
-          .catch(() => false),
-        dispatch(internalStateActions.loadDataViewList()).catch(() => {}),
-        initializeProfileDataViews(loadedRootProfileState).catch(() => {}),
-      ]);
-      const initializationState: DiscoverInternalState['initializationState'] = {
-        hasESData: hasESData || hasESQLDatasets,
-        hasDataView: (hasDataView && defaultDataViewExists) || hasESQLDatasets,
-      };
+  const [profileInitializationState, initializeProfile] = useAsyncFunction(
+    async (loadedRootProfileState: LoadedRootProfileState) => {
+      try {
+        await initializeProfileDataViews(loadedRootProfileState);
+      } catch {
+        // The tab can still open without the profile's inline data views.
+      }
+
       const defaultProfileEsqlQuery = loadedRootProfileState.getDefaultEsqlQuery();
 
       dispatch(internalStateActions.setDefaultProfileEsqlQuery(defaultProfileEsqlQuery));
-      dispatch(internalStateActions.setInitializationState(initializationState));
-
-      return initializationState;
     }
   );
+
+  const [dataAvailabilityState, loadDataAvailability] = useAsyncFunction(async () => {
+    const dataAvailability = await fetchDataAvailability(services);
+
+    dispatch(internalStateActions.setInitializationState(dataAvailability));
+
+    return dataAvailability;
+  });
 
   const [tabsInitializationState, initializeTabs] = useAsyncFunction(
     async ({
@@ -181,10 +177,15 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   );
 
   useEffect(() => {
+    loadDataAvailability();
+    dispatch(internalStateActions.loadInitialDataViewList());
+  }, [dispatch, loadDataAvailability]);
+
+  useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {
-      initializeMainRoute(rootProfileState);
+      initializeProfile(rootProfileState);
     }
-  }, [initializeMainRoute, rootProfileState]);
+  }, [initializeProfile, rootProfileState]);
 
   useEffect(() => {
     initializeDiscoverSession.current({ nextDiscoverSessionId: currentDiscoverSessionId });
@@ -238,7 +239,8 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const areTabsInitializing = useInternalStateSelector((state) => state.tabs.areInitializing);
   const isLoading =
     rootProfileState.rootProfileLoading ||
-    mainRouteInitializationState.loading ||
+    profileInitializationState.loading ||
+    dataAvailabilityState.loading ||
     tabsInitializationState.loading ||
     areTabsInitializing;
 
@@ -246,19 +248,21 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     return <BrandedLoadingIndicator />;
   }
 
-  const error = mainRouteInitializationState.error || tabsInitializationState.error;
+  const error =
+    profileInitializationState.error ||
+    dataAvailabilityState.error ||
+    tabsInitializationState.error;
 
   if (error) {
     return <InitializationError error={error} />;
   }
 
-  if (
-    !mainRouteInitializationState.value.hasESData &&
-    !mainRouteInitializationState.value.hasDataView
-  ) {
+  const { hasESData, hasDataView } = dataAvailabilityState.value;
+
+  if (!hasESData && !hasDataView) {
     return (
       <NoDataPage
-        {...mainRouteInitializationState.value}
+        {...dataAvailabilityState.value}
         onDataViewCreated={() => {
           // This is unused if there is no ES data
         }}
@@ -301,4 +305,35 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       </DiscoverTopNavMenuProvider>
     </ChartPortalsRenderer>
   );
+};
+
+const isAvailable = async (check: () => Promise<boolean>) => {
+  try {
+    return await check();
+  } catch {
+    return false;
+  }
+};
+
+const hasEsqlDatasets = async (http: DiscoverServices['core']['http']) => {
+  const { datasets } = await http.get<EsqlDatasetsResult>(DATASETS_ROUTE);
+
+  return datasets.length > 0;
+};
+
+const fetchDataAvailability = async ({
+  core,
+  dataViews,
+}: DiscoverServices): Promise<DataAvailability> => {
+  const [hasESData, hasDataView, defaultDataViewExists, hasESQLDatasets] = await Promise.all([
+    isAvailable(() => dataViews.hasData.hasESData()),
+    isAvailable(() => dataViews.hasData.hasDataView()),
+    isAvailable(() => dataViews.defaultDataViewExists()),
+    isAvailable(() => hasEsqlDatasets(core.http)),
+  ]);
+
+  return {
+    hasESData: hasESData || hasESQLDatasets,
+    hasDataView: hasDataView && defaultDataViewExists,
+  };
 };
