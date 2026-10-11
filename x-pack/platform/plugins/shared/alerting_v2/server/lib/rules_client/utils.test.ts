@@ -94,6 +94,22 @@ describe('utils', () => {
       expect(result.metadata.routing_tags).toEqual(['sre']);
     });
 
+    it('stores the server-provided template in metadata', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        template: { id: 'template-1' },
+      });
+
+      expect(result.metadata.template).toEqual({ id: 'template-1' });
+      expect(result).not.toHaveProperty('template');
+    });
+
+    it('stores no template when the server does not provide one', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.metadata.template).toBeUndefined();
+    });
+
     it('sets metadata.builder_type to undefined when not provided', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
 
@@ -157,8 +173,8 @@ describe('utils', () => {
       expect(result).not.toHaveProperty('no_data');
     });
 
-    it('normalises a null state_transition to an absent one', () => {
-      const data: CreateRuleData = { ...baseCreateData, state_transition: null };
+    it('stores an omitted state_transition as absent', () => {
+      const data: CreateRuleData = { ...baseCreateData, state_transition: undefined };
 
       const result = transformCreateRuleBodyToRuleSoAttributes(data, serverFields);
 
@@ -212,6 +228,35 @@ describe('utils', () => {
 
       expect(result.metadata.name).toBe('renamed');
       expect(result.metadata.description).toBe('Existing desc');
+    });
+
+    it('clears the description when update sends null', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', description: 'Existing desc' },
+      });
+      const updateData: UpdateRuleData = { metadata: { description: null } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.description).toBeUndefined();
+    });
+
+    it('patches a rule whose description is a legacy empty string on disk', () => {
+      const existing = createRuleSoAttributes({ metadata: { name: 'original', description: '' } });
+      const updateData: UpdateRuleData = { metadata: { name: 'renamed' } };
+
+      const result = buildUpdateRuleAttributes(existing, updateData, {
+        updatedBy: { profile_uid: 'user-2' },
+        updatedAt: '2025-01-02T00:00:00.000Z',
+        version: 2,
+      });
+
+      expect(result.metadata.name).toBe('renamed');
+      expect(result.metadata.description).toBeUndefined();
     });
 
     it('clears tags when update sends null', () => {
@@ -306,6 +351,20 @@ describe('utils', () => {
 
       expect(result.metadata.routing_tags).toEqual(['sre', 'payments']);
       expect(result.metadata.tags).toEqual(['prod']);
+    });
+
+    it('keeps the existing template when metadata is updated', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', template: { id: 'template-1' } },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.template).toEqual({ id: 'template-1' });
     });
 
     it('clears state_transition when update sends null (immediate mode)', () => {
@@ -580,12 +639,12 @@ describe('utils', () => {
       expect(result.query).toEqual({ base: 'FROM metrics-*' });
     });
 
-    it('replaces the query wholesale, dropping a breach block the update omits', () => {
+    it('keeps a breach block the update omits, merging query leaf by leaf', () => {
       const existing = createRuleSoAttributes({
         query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
       });
       const updateData: UpdateRuleData = {
-        query: { base: 'FROM logs-*' },
+        query: { base: 'FROM metrics-*' },
       };
 
       const result = buildUpdateRuleAttributes(existing, updateData, {
@@ -593,6 +652,23 @@ describe('utils', () => {
         updatedAt: '2025-01-02T00:00:00.000Z',
         version: 2,
       });
+
+      expect(result.query).toEqual({
+        base: 'FROM metrics-*',
+        breach: { segment: 'WHERE error' },
+      });
+    });
+
+    it('drops a breach block only when the update clears it explicitly', () => {
+      const existing = createRuleSoAttributes({
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { query: { breach: null } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
 
       expect(result.query).toEqual({ base: 'FROM logs-*' });
     });
@@ -675,6 +751,38 @@ describe('utils', () => {
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
     });
+
+    it('clears artifacts by removing the key, never by storing an empty list', () => {
+      const existing = createRuleSoAttributesWithArtifacts();
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { artifacts: null },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.artifacts).toBeUndefined();
+    });
+
+    it('drops a legacy empty artifacts list rather than writing it back', () => {
+      const existing = createRuleSoAttributes({ artifacts: [] });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        {
+          updatedBy: { profile_uid: 'user-2' },
+          updatedAt: '2025-01-02T00:00:00.000Z',
+          version: 2,
+        }
+      );
+
+      expect(result.artifacts).toBeUndefined();
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
@@ -689,6 +797,17 @@ describe('utils', () => {
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
+    it('returns metadata.template in a response that satisfies the schema', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'test-rule', template: { id: 'template-1' } },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.template).toEqual({ id: 'template-1' });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
     it('returns artifacts that satisfy the strict response schema', () => {
       const attrs = createRuleSoAttributesWithArtifacts();
 
@@ -698,6 +817,24 @@ describe('utils', () => {
         { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
         { id: 'dashboard-1', type: 'dashboard', data: { dashboard_id: 'dash-1' } },
       ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('projects a legacy empty artifacts list as an absent key', () => {
+      const attrs = createRuleSoAttributes({ artifacts: [] });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toBeUndefined();
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('projects a legacy empty description as an absent key', () => {
+      const attrs = createRuleSoAttributes({ metadata: { name: 'test-rule', description: '' } });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.description).toBeUndefined();
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 

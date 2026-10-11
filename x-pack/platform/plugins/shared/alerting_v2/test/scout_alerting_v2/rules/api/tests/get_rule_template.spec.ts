@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { DEPLOYMENTS_WITH_ALERTING_V2 } from '../../../common/constants';
 import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
@@ -18,7 +18,7 @@ import {
   testData,
 } from '../fixtures';
 
-apiTest.describe('Get rule template API', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('Get rule template API', { tag: DEPLOYMENTS_WITH_ALERTING_V2 }, () => {
   let adminHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth }) => {

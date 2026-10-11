@@ -11,7 +11,6 @@ import {
 } from './constants';
 import {
   getRuleChangeHistoryEventParamsSchema,
-  getRuleChangeHistoryEventQuerySchema,
   listRuleChangeHistoryRequestSchema,
   listRuleChangeHistoryResponseSchema,
   ruleChangeHistoryDetailSchema,
@@ -67,18 +66,6 @@ describe('getRuleChangeHistoryEventParamsSchema', () => {
         change_id: 'event-1',
         foo: 'bar',
       }).success
-    ).toBe(false);
-  });
-});
-
-describe('getRuleChangeHistoryEventQuerySchema', () => {
-  it('requires rule_id and rejects unknown keys', () => {
-    expect(getRuleChangeHistoryEventQuerySchema.parse({ rule_id: 'rule-1' })).toEqual({
-      rule_id: 'rule-1',
-    });
-    expect(getRuleChangeHistoryEventQuerySchema.safeParse({}).success).toBe(false);
-    expect(
-      getRuleChangeHistoryEventQuerySchema.safeParse({ rule_id: 'rule-1', foo: 'bar' }).success
     ).toBe(false);
   });
 });

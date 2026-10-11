@@ -8,13 +8,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { AsyncStatus } from '../hooks/use_async';
 import { PROFILING_PATHNAMES } from '../routing/pathnames';
 import { useProfilingRouter } from '../hooks/use_profiling_router';
-import { AddDataTabs } from '../views/add_data_view/types';
 import { useLicenseContext } from './contexts/license/use_license_context';
-import { hasProfilingData } from '../utils/has_profiling_data';
 import { useProfilingStatus } from './contexts/profiling_status/use_profiling_status';
+import { hasUsableProfilingData } from '../utils/has_usable_profiling_data';
 import { LicensePrompt } from './license_prompt';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 import { ProfilingStatusErrorPrompt } from './profiling_status_error_prompt';
@@ -78,27 +78,21 @@ export function CheckStatus({ children }: { children: React.ReactElement }) {
 
   if (data.universalProfiling.hasLegacyData) {
     if (pathname !== PROFILING_PATHNAMES.addDataInstructions) {
-      // If the cluster still has data from before 8.9.1, redirect to the add data page,
-      // which shows the instructions to delete it
+      // If the cluster still has data from before 8.9.1, redirect to the Universal Profiling add
+      // data instructions, which show how to delete it
       router.push(PROFILING_PATHNAMES.addDataInstructions, {
         path: {},
-        query: { selectedTab: AddDataTabs.Kubernetes },
+        query: { schema: ProfilingSchema.ECS },
       });
       return null;
     }
     return children;
   }
 
-  if (
-    (hasProfilingData(data) && data.universalProfiling.hasSetup) ||
-    UTILITY_PATHNAMES.includes(pathname)
-  ) {
+  if (hasUsableProfilingData(data) || UTILITY_PATHNAMES.includes(pathname)) {
     return children;
   }
 
-  router.push(PROFILING_PATHNAMES.addDataInstructions, {
-    path: {},
-    query: { selectedTab: AddDataTabs.Kubernetes },
-  });
+  router.push(PROFILING_PATHNAMES.addDataInstructions, { path: {}, query: {} });
   return null;
 }

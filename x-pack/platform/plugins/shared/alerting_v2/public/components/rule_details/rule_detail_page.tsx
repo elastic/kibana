@@ -46,6 +46,13 @@ import type { RuleApiResponse } from '../../services/rules_api';
 const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [
     {
+      label: i18n.translate('xpack.alertingV2.ruleDetails.universalRulesBadge', {
+        defaultMessage: 'Universal rules',
+      }),
+      color: 'hollow',
+      'data-test-subj': 'universalRulesBadge',
+    },
+    {
       label: RULE_KIND_LABELS[rule.kind] ?? rule.kind,
       renderCustomBadge: () => <RuleKindBadge kind={rule.kind} />,
     },
