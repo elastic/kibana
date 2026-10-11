@@ -36,7 +36,7 @@ describe('PausedActivityCallout', () => {
     );
 
     expect(screen.getByTestId('significantEventsPausedBanner')).toHaveTextContent(
-      'Detection is paused by elastic.'
+      'Detection is paused by elastic'
     );
     expect(screen.getByRole('link', { name: 'Open settings' })).toHaveAttribute(
       'href',

@@ -293,6 +293,7 @@ export function SignificantEventsPage() {
             <>
               <KbnInfoCallout
                 announceOnMount
+                size="s"
                 data-test-subj="significantEventsStatusLoadingBanner"
                 title={i18n.translate('xpack.significantEventsApp.statusLoadingBannerTitle', {
                   defaultMessage: 'Checking Significant Events activity status',
@@ -308,6 +309,7 @@ export function SignificantEventsPage() {
             <>
               <KbnDangerCallout
                 announceOnMount
+                size="s"
                 data-test-subj="significantEventsStatusErrorBanner"
                 title={i18n.translate('xpack.significantEventsApp.statusErrorBannerTitle', {
                   defaultMessage: 'Could not load Significant Events activity status',

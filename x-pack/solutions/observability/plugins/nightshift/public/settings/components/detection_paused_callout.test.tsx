@@ -46,7 +46,7 @@ describe('DetectionPausedCallout', () => {
     renderCallout();
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
-    expect(callout).toHaveTextContent('Detection is paused by achyut@elastic.co.');
+    expect(callout).toHaveTextContent('Detection is paused by achyut@elastic.co');
     expect(callout).toHaveTextContent('Nightshift activity is stopped across the deployment');
     expect(callout).toHaveTextContent(
       'Manual triggers are blocked until you resume from Settings.'
