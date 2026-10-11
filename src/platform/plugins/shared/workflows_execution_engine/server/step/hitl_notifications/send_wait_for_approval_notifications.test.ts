@@ -42,6 +42,14 @@ describe('send_wait_for_approval_notifications', () => {
         })
       ).toBe(true);
     });
+
+    it('returns true when a Teams channel is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+        })
+      ).toBe(true);
+    });
   });
 
   describe('buildWaitForApprovalResumeLinks', () => {
@@ -194,6 +202,34 @@ describe('send_wait_for_approval_notifications', () => {
         })
       );
       expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('posts a Teams channel message with approve and decline links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledWith({
+        connectorType: 'microsoft-teams',
+        connectorNameOrId: 'teams-1',
+        input: {
+          subAction: 'sendChannelMessage',
+          subActionParams: {
+            teamId: 'team-1',
+            channelId: 'channel-1',
+            contentType: 'text',
+            content:
+              'Approve change?\n\nApprove: https://kibana.example/approve\nDecline: https://kibana.example/reject',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
     });
 
     it('throws when a configured connector fails', async () => {

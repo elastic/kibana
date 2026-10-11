@@ -132,6 +132,20 @@ describe('resolveConnectorIdStepType', () => {
       )
     ).toBe('slack2.sendMessage');
   });
+
+  it('maps waitForApproval teams channel connector-id to microsoft-teams.sendChannelMessage', () => {
+    const focusedYamlPair = {
+      path: ['with', 'channels', 'teams', 'connector-id'],
+    } as StepPropInfo;
+
+    expect(
+      resolveConnectorIdStepType(
+        waitForApprovalStep,
+        ['steps', 0, ...focusedYamlPair.path],
+        focusedYamlPair
+      )
+    ).toBe('microsoft-teams.sendChannelMessage');
+  });
 });
 
 describe('resolveConnectorIdTriggerType', () => {

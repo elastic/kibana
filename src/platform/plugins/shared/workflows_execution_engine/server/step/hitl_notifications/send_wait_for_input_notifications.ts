@@ -16,7 +16,11 @@ import { hasExternalHitlChannels } from './has_external_hitl_channels';
 import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
+  buildTeamsSendChannelMessageInput,
+  fitHitlRenderedTextPreservingLink,
+  fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -24,6 +28,20 @@ type WaitForInputChannels = NonNullable<NonNullable<WaitForInputStep['with']>['c
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildDefaultInputTeamsMessage({
+  stepMessage,
+  formUrl,
+}: {
+  stepMessage: string;
+  formUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    stepMessage,
+    `Open form: ${formUrl}`,
+    TEAMS_CONTENT_MAX_LENGTH
+  );
 }
 
 function buildDefaultInputSlackMessage({
@@ -200,5 +218,33 @@ export async function sendWaitForInputNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const teamsConfig = channels.teams;
+  const teamsConnectorId = teamsConfig?.['connector-id'];
+  const teamId = teamsConfig?.['team-id'];
+  const channelId = teamsConfig?.['channel-id'];
+  if (teamsConnectorId && teamId && channelId) {
+    const content =
+      teamsConfig.message != null
+        ? fitHitlRenderedTextPreservingLink(
+            resolveWaitForInputChannelMessage({
+              channelMessageTemplate: teamsConfig.message,
+              stepMessage,
+              formUrl,
+              renderTemplate,
+            }),
+            formUrl,
+            TEAMS_CONTENT_MAX_LENGTH
+          )
+        : buildDefaultInputTeamsMessage({ stepMessage, formUrl });
+
+    const result = await connectorExecutor.execute({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: teamsConnectorId,
+      input: buildTeamsSendChannelMessageInput(teamId, channelId, content),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

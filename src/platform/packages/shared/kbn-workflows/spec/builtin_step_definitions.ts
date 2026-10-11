@@ -331,6 +331,15 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
       slack2:
         connector-id: my-slack2-connector
         channels: ['C0123456789']`,
+        `- name: ask_in_teams
+  type: waitForInput
+  with:
+    message: "Choose how to proceed"
+    channels:
+      teams:
+        connector-id: my-teams-connector
+        team-id: team-id
+        channel-id: channel-id`,
       ],
     },
   },
@@ -362,7 +371,11 @@ export const builtInStepDefinitions: BaseStepDefinition[] = [
         channels: ['C0123456789', '#alerts']
       slack2:
         connector-id: my-slack2-connector
-        channels: ['C0123456789']`,
+        channels: ['C0123456789']
+      teams:
+        connector-id: my-teams-connector
+        team-id: team-id
+        channel-id: channel-id`,
       ],
     },
   },

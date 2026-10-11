@@ -12,7 +12,10 @@ import { buildExternalResumeUrl } from '@kbn/workflows/server';
 import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
+  buildTeamsSendChannelMessageInput,
+  fitHitlTextPreservingSuffix,
   slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -46,6 +49,26 @@ export function buildWaitForApprovalResumeLinks({
 
 function escapeSlackMrkdwnUrl(url: string): string {
   return url.replace(/&/g, '&amp;');
+}
+
+function buildTeamsApprovalMessage({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    message,
+    `${approveLabel}: ${approveUrl}\n${rejectLabel}: ${rejectUrl}`,
+    TEAMS_CONTENT_MAX_LENGTH
+  );
 }
 
 function buildSlackMessage({
@@ -196,5 +219,23 @@ export async function sendWaitForApprovalNotifications({
       });
       assertConnectorSucceeded(result);
     }
+  }
+
+  const teamsConfig = channels.teams;
+  const teamsConnectorId = teamsConfig?.['connector-id'];
+  const teamId = teamsConfig?.['team-id'];
+  const channelId = teamsConfig?.['channel-id'];
+  if (teamsConnectorId && teamId && channelId) {
+    const result = await connectorExecutor.execute({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: teamsConnectorId,
+      input: buildTeamsSendChannelMessageInput(
+        teamId,
+        channelId,
+        buildTeamsApprovalMessage(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
   }
 }

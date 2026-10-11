@@ -85,6 +85,7 @@ export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack: 'slack',
   slack_api: 'slack_api',
   slack2: 'slack2.sendMessage',
+  teams: 'microsoft-teams.sendChannelMessage',
 } as const satisfies Record<string, string>;
 
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;
