@@ -235,4 +235,81 @@ describe('assessChange', () => {
         ?.eligibility
     ).toEqual({ eligible: true });
   });
+
+  it.each([
+    [
+      { linuxRansomwareProtection: false, perOsPolicySettings: true },
+      { eligible: false, reason: 'linux_ransomware_protection_experimental_disabled' },
+    ],
+    [
+      { linuxRansomwareProtection: true, perOsPolicySettings: false },
+      { eligible: false, reason: 'linux_ransomware_protection_experimental_disabled' },
+    ],
+    [{ linuxRansomwareProtection: true, perOsPolicySettings: true }, { eligible: true }],
+  ])('threads experimental flags %o into Linux ransomware eligibility', async (flags, expected) => {
+    const { access, endpointAppContextService, getById, getAgentStatusForAgentPolicy } =
+      await createCountAccess();
+    jest.replaceProperty(endpointAppContextService, 'experimentalFeatures', {
+      ...endpointAppContextService.experimentalFeatures,
+      ...flags,
+    });
+    const policy = createEndpointPolicy({
+      id: 'policy-id-1',
+      policy_ids: ['agent-policy-a'],
+    });
+    getById.mockResolvedValue(policy);
+    getAgentStatusForAgentPolicy.mockResolvedValue(asFleetAgentStatus(MIXED_STATUS_ABOVE_PAGE));
+
+    const result = await assessChange(access, endpointAppContextService, {
+      idOrName: 'policy-id-1',
+      changes: [{ op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.off }],
+    });
+
+    expect(
+      result.assessment.changes.find((change) => change.path === 'linux.ransomware.mode')
+        ?.eligibility
+    ).toEqual(expected);
+  });
+
+  it('assesses a targeted Linux ransomware mode on a legacy policy without changing Windows or macOS', async () => {
+    const { access, endpointAppContextService, getById, getAgentStatusForAgentPolicy } =
+      await createCountAccess();
+    jest.replaceProperty(endpointAppContextService, 'experimentalFeatures', {
+      ...endpointAppContextService.experimentalFeatures,
+      linuxRansomwareProtection: true,
+      perOsPolicySettings: true,
+    });
+    const policy = createEndpointPolicy({
+      id: 'policy-id-1',
+      policy_ids: ['agent-policy-a'],
+    });
+    const storedPolicy = requireStoredPolicy(policy);
+    delete storedPolicy.linux.ransomware;
+    delete storedPolicy.linux.popup.ransomware;
+    storedPolicy.windows.ransomware.mode = ProtectionModes.detect;
+    storedPolicy.mac.ransomware.mode = ProtectionModes.detect;
+    getById.mockResolvedValue(policy);
+    getAgentStatusForAgentPolicy.mockResolvedValue(asFleetAgentStatus(MIXED_STATUS_ABOVE_PAGE));
+
+    const result = await assessChange(access, endpointAppContextService, {
+      idOrName: 'policy-id-1',
+      changes: [{ op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.prevent }],
+    });
+
+    const { changes, proposedConfig, globalBlockers } = result.assessment;
+    expect(changes.find((change) => change.path === 'linux.ransomware.mode')).toEqual(
+      expect.objectContaining({ to: ProtectionModes.prevent, eligibility: { eligible: true } })
+    );
+    expect(proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: true,
+    });
+    expect(proposedConfig.linux.popup.ransomware).toEqual({ message: '', enabled: true });
+    expect(proposedConfig.windows.ransomware.mode).toBe(ProtectionModes.detect);
+    expect(proposedConfig.mac.ransomware.mode).toBe(ProtectionModes.detect);
+    expect(
+      changes.some((change) => change.path.startsWith('windows.') || change.path.startsWith('mac.'))
+    ).toBe(false);
+    expect(globalBlockers).not.toContainEqual({ reason: 'license_invalid_policy' });
+  });
 });

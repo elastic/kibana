@@ -7,8 +7,10 @@
 
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import type { ILicense } from '@kbn/licensing-types';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../common/endpoint/types';
+import { isAtLeast } from '../../../../../../common/license/license';
 import {
   getPolicyProtectionsReference,
   POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS,
@@ -44,11 +46,103 @@ interface Evidence {
   readonly target: ClassifiedSetFieldValue | undefined;
   readonly patch: Array<{ path: string; from: unknown; to: unknown }>;
   readonly primary: readonly string[];
+  readonly defaulted: readonly string[];
   readonly semantic: string | undefined;
+}
+
+export interface RansomwareLinuxContext {
+  readonly linuxRansomwareProtection: boolean;
+  readonly licenseInformation: ILicense | null;
 }
 
 const protectionReference = (protection: PolicyCouplingProtection) =>
   getPolicyProtectionsReference().find(({ keyPath }) => keyPath === `${protection}.mode`);
+
+/**
+ * Card-level operations (`set_protection_level`/`set_protection_enabled`) and coupled popup writes
+ * otherwise apply to every OS a protection supports. Linux ransomware and its notification must
+ * stay untouched while `linuxRansomwareProtection` is off, so those broad writes drop Linux from
+ * the protection's OS list before dispatch runs.
+ */
+const restrictBroadOsList = (
+  protection: PolicyCouplingProtection,
+  osList: readonly PolicyOperatingSystem[],
+  linuxRansomwareProtection: boolean
+): readonly PolicyOperatingSystem[] =>
+  protection === 'ransomware' && !linuxRansomwareProtection
+    ? osList.filter((os) => os !== PolicyOperatingSystem.linux)
+    : osList;
+
+interface LinuxRansomwareBranches {
+  readonly protection: boolean;
+  readonly popup: boolean;
+}
+
+const linuxRansomwareBranches = (policy: PolicyConfig): LinuxRansomwareBranches => ({
+  protection: policy.linux.ransomware !== undefined,
+  popup: policy.linux.popup.ransomware !== undefined,
+});
+
+/**
+ * Linux ransomware and its notification are optional, paired branches. Dispatch writes their
+ * leaves with a plain `set()`, which creates `{ mode }` with no `supported` key, `{ enabled }`
+ * with no `message` key, and (for a targeted write) only one of the two branches. Any dispatch
+ * that could have materialized either branch must be followed by this backfill, which completes
+ * the branch (`supported` from the license, `message: ''`) and creates the missing partner the
+ * way the per-OS UI would: notification on only for `prevent`, protection `off` for a
+ * notification-only write. Returns the leaves it filled in; they are defaults, not intents.
+ */
+const backfillLinuxRansomware = (
+  policy: PolicyConfig,
+  existedBefore: LinuxRansomwareBranches,
+  licenseInformation: ILicense | null
+): readonly string[] => {
+  const { linux } = policy;
+  const supported = isAtLeast(licenseInformation, 'platinum');
+  const defaulted: string[] = [];
+  if (linux.ransomware !== undefined && linux.ransomware.supported === undefined) {
+    linux.ransomware.supported = supported;
+    defaulted.push('linux.ransomware.supported');
+  }
+  if (linux.popup.ransomware !== undefined && linux.popup.ransomware.message === undefined) {
+    linux.popup.ransomware.message = '';
+    defaulted.push('linux.popup.ransomware.message');
+  }
+  if (
+    !existedBefore.protection &&
+    linux.ransomware !== undefined &&
+    linux.popup.ransomware === undefined
+  ) {
+    linux.popup.ransomware = {
+      message: '',
+      enabled: linux.ransomware.mode === ProtectionModes.prevent,
+    };
+    defaulted.push('linux.popup.ransomware.message', 'linux.popup.ransomware.enabled');
+  }
+  if (
+    !existedBefore.popup &&
+    linux.popup.ransomware !== undefined &&
+    linux.ransomware === undefined
+  ) {
+    linux.ransomware = { mode: ProtectionModes.off, supported };
+    defaulted.push('linux.ransomware.mode', 'linux.ransomware.supported');
+  }
+  return defaulted;
+};
+
+/**
+ * Linux ransomware is absent on legacy policies, so a targeted Linux ransomware write has no
+ * current value. While `linuxRansomwareProtection` is on, its mode and notification switch may
+ * still be set; dispatch materializes the complete paired branches.
+ */
+const isMaterializableLinuxRansomwarePath = (
+  path: string,
+  current: PolicyConfig,
+  { linuxRansomwareProtection }: RansomwareLinuxContext
+): boolean =>
+  linuxRansomwareProtection &&
+  ((path === 'linux.ransomware.mode' && current.linux.ransomware === undefined) ||
+    (path === 'linux.popup.ransomware.enabled' && current.linux.popup.ransomware === undefined));
 
 const pathProtection = (path: string): string | undefined => {
   const reference = getPolicyProtectionsReference().find(({ keyPath, osList }) =>
@@ -129,8 +223,11 @@ const involvesDeviceControl = (evidence: Evidence): boolean =>
 const dispatch = (
   policy: PolicyConfig,
   operation: PolicyChangeOperation,
-  classified?: ClassifiedSetFieldValue
-): void => {
+  classified: ClassifiedSetFieldValue | undefined,
+  ransomwareLinuxContext: RansomwareLinuxContext
+): readonly string[] => {
+  const { linuxRansomwareProtection, licenseInformation } = ransomwareLinuxContext;
+  const existedBefore = linuxRansomwareBranches(policy);
   if (operation.op === 'set_protection_enabled' || operation.op === 'set_protection_level') {
     const protection = operation.protection;
     const reference = protectionReference(protection);
@@ -148,7 +245,7 @@ const dispatch = (
     helpers.setProtectionModeAndPopup({
       policy,
       protection,
-      osList: reference.osList,
+      osList: restrictBroadOsList(protection, reference.osList, linuxRansomwareProtection),
       mode,
       syncPopupEnabled: true,
       popupEnabled: mode === ProtectionModes.prevent,
@@ -159,7 +256,7 @@ const dispatch = (
     }
     if (operation.op === 'set_protection_enabled' && protection === 'behavior_protection')
       helpers.setBehaviorReputationService(policy, mode !== ProtectionModes.off);
-    return;
+    return backfillLinuxRansomware(policy, existedBefore, licenseInformation);
   }
   const target = classified ?? classifySetFieldValue(operation.path, operation.value);
   switch (target.kind) {
@@ -202,7 +299,12 @@ const dispatch = (
     case 'popup_enabled': {
       const reference = protectionReference(target.protection);
       if (reference)
-        helpers.setPopupEnabled(policy, target.protection, reference.osList, target.value);
+        helpers.setPopupEnabled(
+          policy,
+          target.protection,
+          restrictBroadOsList(target.protection, reference.osList, linuxRansomwareProtection),
+          target.value
+        );
       break;
     }
     case 'malware_boolean': {
@@ -217,11 +319,13 @@ const dispatch = (
     default:
       set(policy, operation.path, operation.value);
   }
+  return backfillLinuxRansomware(policy, existedBefore, licenseInformation);
 };
 
 const validateOperation = (
   operation: PolicyChangeOperation,
-  current: PolicyConfig
+  current: PolicyConfig,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): ClassifiedSetFieldValue | undefined => {
   if (operation.op !== 'set_field') return undefined;
   if (isDevicePopupEnabledPath(operation.path))
@@ -230,7 +334,10 @@ const validateOperation = (
       DEVICE_POPUP_ENABLED_UNSUPPORTED_MESSAGE
     );
   assertWritable(operation.path);
-  if (get(current, operation.path) === undefined)
+  if (
+    get(current, operation.path) === undefined &&
+    !isMaterializableLinuxRansomwarePath(operation.path, current, ransomwareLinuxContext)
+  )
     throw new PolicyChangePreparationError(
       POLICY_CHANGE_PREPARATION_ERROR_CODE.unknown_current_value,
       unknownCurrentValueMessage(operation.path)
@@ -274,7 +381,8 @@ const assertPairHasNoCoupledConflict = (
   for (const a of first.patch)
     for (const b of second.patch) {
       const bothCoupled = !first.primary.includes(a.path) && !second.primary.includes(b.path);
-      if (a.path === b.path && bothCoupled && !Object.is(a.to, b.to))
+      const eitherDefaulted = first.defaulted.includes(a.path) || second.defaulted.includes(b.path);
+      if (a.path === b.path && bothCoupled && !eitherDefaulted && !Object.is(a.to, b.to))
         throw coupledFieldConflict(a.path);
     }
 };
@@ -295,11 +403,12 @@ const assertFinalState = (proposal: PolicyConfig): void => {
 
 export const expandChangeSet = (
   operations: readonly PolicyChangeOperation[],
-  currentConfig: PolicyConfig
+  currentConfig: PolicyConfig,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): PreparedPolicyChangeSet => {
   const classified = operations.map((operation) => ({
     operation,
-    target: validateOperation(operation, currentConfig),
+    target: validateOperation(operation, currentConfig, ransomwareLinuxContext),
   }));
 
   const proposal = structuredClone(currentConfig);
@@ -321,11 +430,19 @@ export const expandChangeSet = (
 
   const evidence: Evidence[] = classified.map(({ operation, target }, index) => {
     const before = structuredClone(proposal);
-    dispatch(proposal, operation, target);
+    const defaulted = dispatch(proposal, operation, target, ransomwareLinuxContext);
     const patch = leaves(before, proposal);
     const primary = primaryTargets(operation);
     recordOrigins(operation, index, primary, patch);
-    return { operation, index, target, patch, primary, semantic: semanticIdentity(operation) };
+    return {
+      operation,
+      index,
+      target,
+      patch,
+      primary,
+      defaulted,
+      semantic: semanticIdentity(operation),
+    };
   });
 
   const latestExactPathIndex = new Map<string, number>();
@@ -362,7 +479,7 @@ export const expandChangeSet = (
       if (!satisfied) {
         converged = false;
         const before = structuredClone(proposal);
-        dispatch(proposal, intent.operation, intent.target);
+        dispatch(proposal, intent.operation, intent.target, ransomwareLinuxContext);
         recordOrigins(
           intent.operation,
           intent.index,

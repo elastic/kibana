@@ -9,6 +9,7 @@ import type { PolicyConfig } from '../../../../../../common/endpoint/types';
 import { diffPolicyConfig } from '../diff_policy_config';
 import * as fieldRegistry from '../field_registry';
 import { normalize } from '../normalize_policy_config';
+import type { RansomwareLinuxContext } from './expand_change_set';
 import { expandChangeSet } from './expand_change_set';
 import type {
   AssessPolicyChangeParams,
@@ -47,9 +48,10 @@ const toDerivedSideEffect = (path: string, from: unknown, to: unknown): PolicyCh
 
 export const prepareChangeSet = (
   params: AssessPolicyChangeParams,
-  currentConfig: PolicyConfig
+  currentConfig: PolicyConfig,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): PreparedPolicyChangeAssessment => {
-  const prepared = expandChangeSet(params.changes, currentConfig);
+  const prepared = expandChangeSet(params.changes, currentConfig, ransomwareLinuxContext);
   const normalizedDiff = diffPolicyConfig(
     normalize(currentConfig),
     normalize(prepared.proposedConfig)

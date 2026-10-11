@@ -79,7 +79,10 @@ export const NotifyUserOption = React.memo(
           } else if (os === PolicyOperatingSystem.mac) {
             newPayload[os].popup[protection as MacPolicyProtection].message = event.target.value;
           } else if (os === PolicyOperatingSystem.linux) {
-            newPayload[os].popup[protection as LinuxPolicyProtection].message = event.target.value;
+            const linuxPopup = newPayload[os].popup[protection as LinuxPolicyProtection];
+            if (linuxPopup) {
+              linuxPopup.message = event.target.value;
+            }
           }
         }
 

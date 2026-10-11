@@ -32,6 +32,7 @@ export const UI_POLICY_SECTIONS = {
   },
   linux: {
     malware: true,
+    ransomware: true,
     events: true,
     popup: true,
     advanced: true,

@@ -259,6 +259,63 @@ describe('Policy-Changing license watcher', () => {
     });
   });
 
+  describe('Linux ransomware license downgrade', () => {
+    it('turns linux.ransomware and its popup off when downgrading from platinum to gold', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+            pc.linux.popup.ransomware = { message: 'custom', enabled: true };
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      await pw.watch(Gold);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalled();
+
+      const updatedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(updatedPolicy.linux.ransomware).toEqual({ mode: 'off', supported: false });
+      expect(updatedPolicy.linux.popup.ransomware).toEqual({ message: '', enabled: false });
+    });
+
+    it('does not materialize linux ransomware branches for a policy that never had them', async () => {
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            delete pc.linux.ransomware;
+            delete pc.linux.popup.ransomware;
+            return pc;
+          }),
+        ],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      // Device Control (on by default in `policyFactory()`) is what actually makes this policy
+      // non-compliant with Gold and triggers the update; that keeps this case representative of
+      // a real legacy policy rather than depending on linux.ransomware to force the update.
+      await pw.watch(Gold);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalled();
+
+      const updatedPolicy = packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy
+        .value as PolicyConfig;
+
+      expect(updatedPolicy.linux).not.toHaveProperty('ransomware');
+      expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
+    });
+  });
+
   describe('retry logic', () => {
     beforeEach(() => {
       pRetryMock.mockClear();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isPlainObject } from 'lodash';
 import type { ILicense } from '@kbn/licensing-types';
 import { isAtLeast } from './license';
 import type { PolicyConfig } from '../endpoint/types';
@@ -48,13 +49,27 @@ function isEndpointMalwarePolicyValidForLicense(policy: PolicyConfig, license: I
 }
 
 function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license: ILicense | null) {
+  // Linux ransomware is optional: a policy that predates it, or where it is gated off, has none.
+  const linuxRansomware = policy.linux?.ransomware;
+  const linuxRansomwarePopup = policy.linux?.popup?.ransomware;
+
+  // A present but malformed Linux ransomware value cannot be validated, so fail closed.
+  if (
+    (linuxRansomware !== undefined && !isPlainObject(linuxRansomware)) ||
+    (linuxRansomwarePopup !== undefined && !isPlainObject(linuxRansomwarePopup))
+  ) {
+    return false;
+  }
+
   if (isAtLeast(license, 'platinum')) {
     const defaults = policyFactoryWithSupportedFeatures();
 
     // only platinum or higher may enable ransomware protection
     if (
       policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported ||
+      (linuxRansomware !== undefined &&
+        linuxRansomware.supported !== defaults.linux.ransomware?.supported)
     ) {
       return false;
     }
@@ -68,21 +83,26 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
 
   if (
     policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
-    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported ||
+    (linuxRansomware !== undefined &&
+      linuxRansomware.supported !== defaults.linux.ransomware?.supported)
   ) {
     return false;
   }
 
   if (
     policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
-    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode
+    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode ||
+    (linuxRansomware !== undefined && linuxRansomware.mode !== defaults.linux.ransomware?.mode)
   ) {
     return false;
   }
 
   if (
     policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled ||
-    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled
+    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled ||
+    (linuxRansomwarePopup !== undefined &&
+      linuxRansomwarePopup.enabled !== defaults.linux.popup.ransomware?.enabled)
   ) {
     return false;
   }
@@ -91,7 +111,10 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
     (policy.windows.popup.ransomware.message !== '' &&
       policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
     (policy.mac.popup.ransomware.message !== '' &&
-      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage)
+      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
+    (linuxRansomwarePopup !== undefined &&
+      linuxRansomwarePopup.message !== '' &&
+      linuxRansomwarePopup.message !== DefaultPolicyNotificationMessage)
   ) {
     return false;
   }

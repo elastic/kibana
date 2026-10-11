@@ -14,6 +14,7 @@ import {
   DefaultPolicyRuleNotificationMessage,
   DefaultPolicyDeviceNotificationMessage,
   policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
   policyFactoryWithoutPaidFeatures,
   policyFactoryWithSupportedFeatures,
 } from '../endpoint/models/policy_config';
@@ -109,6 +110,7 @@ describe('policy_config and licenses', () => {
       policy.windows.ransomware.supported = true;
       policy.mac.ransomware.mode = ProtectionModes.prevent;
       policy.mac.ransomware.supported = true;
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
       // memory protection
       policy.windows.memory_protection.mode = ProtectionModes.prevent;
       policy.windows.memory_protection.supported = true;
@@ -135,6 +137,7 @@ describe('policy_config and licenses', () => {
       policy.windows.ransomware.supported = true;
       policy.mac.popup.ransomware.enabled = true;
       policy.mac.ransomware.supported = true;
+      policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
       // memory protection
       policy.windows.popup.memory_protection.enabled = true;
       policy.windows.memory_protection.supported = true;
@@ -231,6 +234,21 @@ describe('policy_config and licenses', () => {
         expect(valid).toBeFalsy();
       });
 
+      it('blocks the Linux ransomware notification to be turned on for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.linux.popup.ransomware = { message: '', enabled: true };
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeFalsy();
+        expect(isEndpointPolicyValidForLicense(policy, Basic)).toBeFalsy();
+      });
+
+      it('allows a policy without a Linux ransomware notification for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        delete policy.linux.popup.ransomware;
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeTruthy();
+      });
+
       it('allows ransomware notification message changes with a Platinum license', () => {
         const policy = policyFactory();
         disableEnterpriseFeatures(policy);
@@ -249,6 +267,14 @@ describe('policy_config and licenses', () => {
 
         valid = isEndpointPolicyValidForLicense(policy, Basic);
         expect(valid).toBeFalsy();
+      });
+
+      it('blocks Linux ransomware notification message changes for Gold and below licenses', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.linux.popup.ransomware = { message: 'BOOM', enabled: false };
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBeFalsy();
+        expect(isEndpointPolicyValidForLicense(policy, Basic)).toBeFalsy();
       });
     });
 
@@ -490,6 +516,7 @@ describe('policy_config and licenses', () => {
       const popupMessage = 'WOOP WOOP';
       policy.windows.popup.ransomware.message = popupMessage;
       policy.mac.popup.ransomware.message = popupMessage;
+      policy.linux.popup.ransomware = { message: popupMessage, enabled: true };
 
       const retPolicy = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Gold);
 
@@ -501,6 +528,7 @@ describe('policy_config and licenses', () => {
       expect(retPolicy.mac.ransomware.mode).toEqual(defaults.mac.ransomware.mode);
       expect(retPolicy.mac.popup.ransomware.enabled).toEqual(defaults.mac.popup.ransomware.enabled);
       expect(retPolicy.mac.popup.ransomware.message).not.toEqual(popupMessage);
+      expect(retPolicy.linux.popup.ransomware).toEqual(defaults.linux.popup.ransomware);
 
       // need to invert the test, since it could be either value
       expect(['', DefaultPolicyNotificationMessage]).toContain(
@@ -1097,6 +1125,153 @@ describe('policy_config and licenses', () => {
           expect(stripped[os].advanced).not.toHaveProperty('memory_protection');
         }
       });
+    });
+  });
+
+  describe('Linux ransomware', () => {
+    const omitLinuxRansomware = (policy: PolicyConfig) => {
+      delete policy.linux.ransomware;
+    };
+
+    it('blocks Linux ransomware turned on below Platinum', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: false };
+
+      expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      expect(isEndpointPolicyValidForLicense(policy, Basic)).toBe(false);
+    });
+
+    it('blocks Linux ransomware marked supported below Platinum', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+      expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+    });
+
+    it('blocks Linux ransomware marked unsupported with a Platinum license', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: false };
+
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(false);
+    });
+
+    it('allows a policy without Linux ransomware at every license tier', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitLinuxRansomware(platinumPolicy);
+      const goldPolicy = policyFactoryWithoutPaidFeatures();
+      omitLinuxRansomware(goldPolicy);
+
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(goldPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(goldPolicy, Basic)).toBe(true);
+    });
+
+    it('turns Linux ransomware off and unsupported on downgrade so license_watch converges', () => {
+      for (const license of [Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+
+        expect(stripped.linux.ransomware).toEqual({ mode: ProtectionModes.off, supported: false });
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    it('marks Linux ransomware supported on upgrade to Platinum and keeps its mode', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.detect, supported: false };
+
+      const upgraded = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(upgraded.linux.ransomware).toEqual({ mode: ProtectionModes.detect, supported: true });
+    });
+
+    it('leaves an absent Linux ransomware absent on every license change', () => {
+      for (const license of [Enterprise, Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitLinuxRansomware(policy);
+
+        const result = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        expect(result.linux).not.toHaveProperty('ransomware');
+      }
+    });
+
+    describe('with a malformed or missing Linux branch', () => {
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])('blocks a null Linux ransomware with a %s license', (_, license, createPolicy) => {
+        const policy = createPolicy();
+        Reflect.set(policy.linux, 'ransomware', null);
+
+        expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+      });
+
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])(
+        'blocks a null Linux ransomware notification with a %s license',
+        (_, license, createPolicy) => {
+          const policy = createPolicy();
+          Reflect.set(policy.linux.popup, 'ransomware', null);
+
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(false);
+        }
+      );
+
+      it('blocks memory protection for Gold when the Linux popup is missing', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        policy.windows.memory_protection.mode = ProtectionModes.prevent;
+        policy.windows.memory_protection.supported = true;
+        Reflect.deleteProperty(policy.linux, 'popup');
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it('allows a Platinum-valid policy without Linux ransomware or a Linux popup', () => {
+        const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+        omitLinuxRansomware(policy);
+        Reflect.deleteProperty(policy.linux, 'popup');
+
+        expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+      });
+
+      it('blocks a Linux ransomware without `supported` with a Platinum license', () => {
+        const policy = policyFactoryWithoutPaidEnterpriseFeatures();
+        Reflect.set(policy.linux, 'ransomware', { mode: ProtectionModes.prevent });
+
+        expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(false);
+      });
+
+      it('blocks a Linux ransomware without `supported` with a Gold license', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        Reflect.set(policy.linux, 'ransomware', { mode: ProtectionModes.off });
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it('blocks a Linux ransomware notification without `message` with a Gold license', () => {
+        const policy = policyFactoryWithoutPaidFeatures();
+        Reflect.set(policy.linux.popup, 'ransomware', { enabled: false });
+
+        expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      });
+
+      it.each([
+        ['Platinum', Platinum, policyFactoryWithoutPaidEnterpriseFeatures],
+        ['Gold', Gold, policyFactoryWithoutPaidFeatures],
+      ])(
+        'allows a legacy policy without Linux ransomware or its notification with a %s license',
+        (_, license, createPolicy) => {
+          const policy = createPolicy();
+          omitLinuxRansomware(policy);
+          delete policy.linux.popup.ransomware;
+
+          expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
+        }
+      );
     });
   });
 });

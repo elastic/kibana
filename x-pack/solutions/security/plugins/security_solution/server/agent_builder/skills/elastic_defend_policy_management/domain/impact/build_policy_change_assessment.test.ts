@@ -8,7 +8,10 @@
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { FleetPackagePolicyGenerator } from '../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
+import {
+  policyFactory,
+  policyFactoryWithoutPaidFeatures,
+} from '../../../../../../common/endpoint/models/policy_config';
 import {
   ProtectionModes,
   DeviceControlAccessLevel,
@@ -30,6 +33,7 @@ const capabilities = (
   trustedDevicesExperimental: true,
   endpointCustomYaraSignatures: true,
   customYaraSignaturesExperimental: true,
+  linuxRansomwareProtection: true,
   endpointProtectionUpdates: true,
   endpointCustomNotification: true,
   serverless: false,
@@ -153,6 +157,108 @@ describe('buildPolicyChangeAssessment', () => {
     expect(assessment.changes[0]?.eligibility).toEqual({
       eligible: false,
       reason: 'custom_yara_signatures_experimental_disabled',
+    });
+  });
+
+  it('applies set_protection_level ransomware to Linux and backfills a license-valid supported flag and notification when the flag is on', () => {
+    const stored = policyFactory();
+    delete stored.linux.ransomware;
+    delete stored.linux.popup.ransomware;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      capabilities()
+    );
+
+    const linuxChange = assessment.changes.find(
+      (change) => change.path === 'linux.ransomware.mode'
+    );
+    expect(linuxChange?.to).toBe(ProtectionModes.prevent);
+    expect(linuxChange?.eligibility).toEqual({ eligible: true });
+    expect(assessment.proposed.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: true,
+    });
+    expect(assessment.proposed.linux.popup.ransomware?.enabled).toBe(true);
+    expect(
+      assessment.changes.find((change) => change.path === 'linux.popup.ransomware.enabled')
+        ?.eligibility
+    ).toEqual({ eligible: true });
+    expect(assessment.globalBlockers).toEqual([]);
+  });
+
+  it('backfills a complete Linux ransomware branch below Platinum but reports the prevent level as license-ineligible', () => {
+    const stored = policyFactoryWithoutPaidFeatures();
+    delete stored.linux.ransomware;
+    delete stored.linux.popup.ransomware;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      {
+        ...capabilities(licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } })),
+        linuxRansomwareProtection: true,
+      }
+    );
+
+    expect(assessment.proposedConfig.linux.ransomware).toEqual({
+      mode: ProtectionModes.prevent,
+      supported: false,
+    });
+    expect(assessment.proposedConfig.linux.popup.ransomware).toEqual({
+      enabled: true,
+      message: '',
+    });
+    expect(
+      assessment.changes.find((change) => change.path === 'linux.ransomware.mode')?.eligibility
+    ).toEqual({ eligible: false, reason: 'license_below_platinum' });
+    expect(
+      assessment.changes.find((change) => change.path === 'linux.popup.ransomware.enabled')
+        ?.eligibility
+    ).toEqual({ eligible: false, reason: 'license_below_platinum' });
+    expect(assessment.globalBlockers).toEqual([{ reason: 'license_invalid_policy' }]);
+  });
+
+  it('never touches Linux ransomware for a protection-level operation while the flag is off', () => {
+    const stored = policyFactory();
+    stored.windows.ransomware.mode = ProtectionModes.off;
+    stored.mac.ransomware.mode = ProtectionModes.off;
+    delete stored.linux.ransomware;
+    delete stored.linux.popup.ransomware;
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_protection_level', protection: 'ransomware', mode: ProtectionModes.prevent }],
+      { ...capabilities(), linuxRansomwareProtection: false }
+    );
+
+    expect(
+      assessment.changes.some(
+        (change) =>
+          change.path.startsWith('linux.ransomware') ||
+          change.path.startsWith('linux.popup.ransomware')
+      )
+    ).toBe(false);
+    expect(assessment.proposed.linux.ransomware).toBeUndefined();
+    const windowsChange = assessment.changes.find(
+      (change) => change.path === 'windows.ransomware.mode'
+    );
+    expect(windowsChange?.to).toBe(ProtectionModes.prevent);
+  });
+
+  it('marks an explicit Linux ransomware set_field ineligible while the flag is off', () => {
+    const stored = policyFactory();
+
+    const assessment = buildPolicyChangeAssessment(
+      createPolicy(stored),
+      [{ op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.off }],
+      { ...capabilities(), linuxRansomwareProtection: false }
+    );
+
+    expect(assessment.changes[0]?.eligibility).toEqual({
+      eligible: false,
+      reason: 'linux_ransomware_protection_experimental_disabled',
     });
   });
 
