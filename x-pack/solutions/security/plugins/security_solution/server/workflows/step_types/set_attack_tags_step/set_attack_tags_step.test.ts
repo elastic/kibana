@@ -7,6 +7,7 @@
 
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
+import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { setAttackTagsStepDefinition } from './set_attack_tags_step';
 import { DETECTION_ENGINE_ATTACKS_TAGS_URL } from '../../../../common/constants';
 
@@ -111,21 +112,31 @@ describe('setAttackTagsStepDefinition', () => {
     });
   });
 
-  it('throws ExecutionError on API failure', async () => {
+  it('persists only status (not the raw body/headers) when callKibanaApi throws on a non-2xx', async () => {
     const mockContext = createMockContext({
       ids: 'attack-1',
       tags_to_add: ['tag1'],
     });
-    (mockContext.contextManager.callKibanaApi as jest.Mock).mockResolvedValue({
-      status: 400,
-      body: { error: 'Bad Request' },
-    });
+    (mockContext.contextManager.callKibanaApi as jest.Mock).mockRejectedValue(
+      new KibanaApiCallError({
+        status: 500,
+        headers: { 'x-leaky-header': 'header-value' },
+        body: { sensitive: 'partial-success-payload', items: [{ id: 'attack-1' }] },
+        message: 'HTTP 500: bulk action partially failed',
+      })
+    );
 
-    await expect(
-      setAttackTagsStepDefinition.handler(
-        mockContext as unknown as Parameters<typeof setAttackTagsStepDefinition.handler>[0]
-      )
-    ).rejects.toThrow(ExecutionError);
+    const error = await setAttackTagsStepDefinition
+      .handler(mockContext as unknown as Parameters<typeof setAttackTagsStepDefinition.handler>[0])
+      .then(() => undefined)
+      .catch((e) => e);
+
+    expect(error).toBeInstanceOf(ExecutionError);
+    const serialized = (error as ExecutionError).toSerializableObject();
+    expect(serialized.type).toBe('ApiError');
+    expect(serialized.details).toEqual({ status: 500 });
+    expect(JSON.stringify(serialized.details)).not.toContain('partial-success-payload');
+    expect(JSON.stringify(serialized.details)).not.toContain('x-leaky-header');
   });
 
   it('throws ExecutionError on network failure', async () => {
