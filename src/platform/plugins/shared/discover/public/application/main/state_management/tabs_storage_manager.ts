@@ -15,12 +15,19 @@ import {
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import {
   LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
   type ProfileStateRegistry,
 } from '../../../../common/context_awareness';
-import { NEW_TAB_ID, TAB_STATE_URL_KEY } from '../../../../common/constants';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  NEW_TAB_ID,
+  PROFILE_STATE_URL_KEY,
+  TAB_STATE_URL_KEY,
+} from '../../../../common/constants';
 import {
   createTabItem,
   extractEsqlVariables,
@@ -50,6 +57,7 @@ interface TabsStateInLocalStorage {
   userId: string;
   spaceId: string;
   discoverSessionId: string | undefined;
+  discoverSessionVersion: string | undefined;
   draftSessionTitle: string | undefined;
   openTabs: TabStateInLocalStorage[];
   closedTabs: RecentlyClosedTabStateInLocalStorage[];
@@ -59,6 +67,7 @@ const defaultTabsStateInLocalStorage: TabsStateInLocalStorage = {
   userId: '',
   spaceId: '',
   discoverSessionId: undefined,
+  discoverSessionVersion: undefined,
   draftSessionTitle: undefined,
   openTabs: [],
   closedTabs: [],
@@ -80,6 +89,7 @@ export interface TabsStorageManager {
     props: Omit<TabsInternalStatePayload, 'selectedTabId'>,
     getInternalState: (tabId: string) => TabState['initialInternalState'] | undefined,
     discoverSessionId: string | undefined,
+    discoverSessionVersion?: string,
     draftSessionTitle?: string
   ) => Promise<void>;
   updateTabStateLocally: (
@@ -125,9 +135,13 @@ export const createTabsStorageManager = ({
   enabled?: boolean;
 }): TabsStorageManager => {
   const urlStateContainer = createStateContainer<TabsUrlState>({});
-  const sessionInfo: Pick<TabsStateInLocalStorage, 'userId' | 'spaceId'> = {
+  const sessionInfo: Pick<
+    TabsStateInLocalStorage,
+    'userId' | 'spaceId' | 'discoverSessionVersion'
+  > = {
     userId: '',
     spaceId: '',
+    discoverSessionVersion: undefined,
   };
 
   // Used to avoid triggering onChanged during programmatic tab ID URL updates
@@ -182,6 +196,9 @@ export const createTabsStorageManager = ({
   ) => {
     const nextState: TabsUrlState = {
       tabId: selectedTabId,
+      ...(sessionInfo.discoverSessionVersion && {
+        sessionVersion: sessionInfo.discoverSessionVersion,
+      }),
     };
     const previousState = getTabsStateFromURL();
     // If the previous tab was a "new" (unsaved) tab, we replace the URL state instead of pushing a new history entry.
@@ -194,6 +211,39 @@ export const createTabsStorageManager = ({
     } finally {
       isPushingTabIdToUrl = false;
     }
+  };
+
+  const updateUrlSessionVersion = async (discoverSessionVersion: string | undefined) => {
+    if (discoverSessionVersion === sessionInfo.discoverSessionVersion) {
+      return;
+    }
+
+    sessionInfo.discoverSessionVersion = discoverSessionVersion;
+
+    // No tab in the URL means we already left Discover
+    const selectedTabId = getTabsStateFromURL()?.tabId;
+    if (selectedTabId) {
+      await pushSelectedTabIdToUrl(selectedTabId, { replace: true });
+    }
+  };
+
+  const discardOutdatedUrlState = (
+    persistedDiscoverSession: DiscoverSession,
+    selectedTabId: string | undefined
+  ) => {
+    // Drop the URL time only if the saved tab brings its own. Global filters belong to other apps
+    // too, so they stay. If the selected tab is gone, the first saved tab takes its place.
+    const persistedSelectedTab =
+      persistedDiscoverSession.tabs.find((tab) => tab.id === selectedTabId) ??
+      persistedDiscoverSession.tabs[0];
+
+    const urlGlobalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+    if (urlGlobalState && persistedSelectedTab?.timeRestore) {
+      const urlGlobalFilters = omit(urlGlobalState, 'time', 'refreshInterval');
+      urlStateStorage.set(GLOBAL_STATE_URL_KEY, urlGlobalFilters, { replace: true });
+    }
+    urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true });
+    urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true });
   };
 
   const toTabStateInStorage = (
@@ -317,6 +367,7 @@ export const createTabsStorageManager = ({
       userId: storedTabsState?.userId || '',
       spaceId: storedTabsState?.spaceId || '',
       discoverSessionId: storedTabsState?.discoverSessionId || undefined,
+      discoverSessionVersion: storedTabsState?.discoverSessionVersion || undefined,
       draftSessionTitle: storedTabsState?.draftSessionTitle || undefined,
       openTabs: storedTabsState?.openTabs || [],
       closedTabs: storedTabsState?.closedTabs || [],
@@ -369,8 +420,12 @@ export const createTabsStorageManager = ({
     { allTabs, recentlyClosedTabs },
     getInternalState,
     discoverSessionId,
+    discoverSessionVersion,
     draftSessionTitle
   ) => {
+    // Every save bumps the version, keep the URL in sync
+    await updateUrlSessionVersion(discoverSessionVersion);
+
     if (!enabled) {
       return;
     }
@@ -386,6 +441,7 @@ export const createTabsStorageManager = ({
       userId: sessionInfo.userId,
       spaceId: sessionInfo.spaceId,
       discoverSessionId,
+      discoverSessionVersion,
       draftSessionTitle,
       openTabs,
       closedTabs, // wil be used for "Recently closed tabs" feature
@@ -455,6 +511,7 @@ export const createTabsStorageManager = ({
 
     sessionInfo.userId = userId;
     sessionInfo.spaceId = spaceId;
+    sessionInfo.discoverSessionVersion = persistedDiscoverSession?.version;
 
     const previousOpenTabs = storedTabsState.openTabs.map((tab) =>
       toTabState(tab, defaultTabState)
@@ -462,11 +519,23 @@ export const createTabsStorageManager = ({
     let openTabs = shouldClearAllTabs ? [] : previousOpenTabs;
     let updatedDiscoverSession = persistedDiscoverSession;
 
+    // Local tabs or URL state from an older version (e.g. the session was saved via the API) would
+    // hide the newer saved state, so we drop them. No version means a link or old local tabs: keep.
+    const persistedVersion = persistedDiscoverSession?.version;
+    const isOutdatedVersion = (version: string | undefined) =>
+      Boolean(version && persistedVersion && version !== persistedVersion);
+    const hasStoredSessionChanged =
+      persistedDiscoverSession?.id !== storedTabsState.discoverSessionId ||
+      isOutdatedVersion(storedTabsState.discoverSessionVersion);
+
+    if (persistedDiscoverSession && isOutdatedVersion(tabsStateFromURL?.sessionVersion)) {
+      discardOutdatedUrlState(persistedDiscoverSession, selectedTabId);
+    }
+
     // Prepare before mapping tabs so inline views can reuse matching local IDs. Return the same
     // prepared session below so restored tabs and the unsaved-changes baseline use consistent IDs.
     if (persistedDiscoverSession && prepareSession) {
-      const localTabs =
-        persistedDiscoverSession.id === storedTabsState.discoverSessionId ? openTabs : [];
+      const localTabs = hasStoredSessionChanged ? [] : openTabs;
       updatedDiscoverSession = prepareSession(persistedDiscoverSession, localTabs, selectedTabId);
     }
 
@@ -474,7 +543,7 @@ export const createTabsStorageManager = ({
       fromSavedObjectTabToTabState({ tab, profileStateRegistry })
     );
 
-    if (updatedDiscoverSession?.id !== storedTabsState.discoverSessionId) {
+    if (hasStoredSessionChanged) {
       // if the discover session has changed, use the tabs from the session
       openTabs = persistedTabs ?? [];
     }

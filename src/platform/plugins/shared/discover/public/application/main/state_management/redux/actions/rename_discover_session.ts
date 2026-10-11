@@ -37,7 +37,7 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
     // Rename the latest saved version, so changes saved elsewhere since this session was opened
     // are kept and the unsaved changes of the current tabs stay unsaved
     const {
-      session: { description, tabs, tags },
+      session: { description, tabs, tags, version: latestVersion },
     } = await services.discoverSessionService.get(id);
     const discoverSession = await services.discoverSessionService.save(
       { id, title: newTitle, description, tabs, tags },
@@ -52,10 +52,14 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
       rememberDiscoverSession(services.core.http, services.chrome, discoverSession);
     }
 
+    // If someone else saved in the meantime, keep the old version so a reload picks up their tabs
+    const isSavedElsewhere = latestVersion !== persistedDiscoverSession.version;
+
     dispatch(
       internalStateSlice.actions.setPersistedDiscoverSession({
         ...persistedDiscoverSession,
         title: newTitle,
+        version: isSavedElsewhere ? persistedDiscoverSession.version : discoverSession.version,
       })
     );
   }

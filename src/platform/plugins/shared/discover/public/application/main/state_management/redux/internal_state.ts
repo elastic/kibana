@@ -663,7 +663,8 @@ const createMiddleware = (options: InternalStateDependencies) => {
   startListening({
     matcher: isAnyOf(
       internalStateSlice.actions.setTabs,
-      internalStateSlice.actions.setDraftSessionTitle
+      internalStateSlice.actions.setDraftSessionTitle,
+      internalStateSlice.actions.setPersistedDiscoverSession
     ),
     effect: throttle<
       ListenerEffect<
@@ -686,6 +687,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
           { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
           getTabInternalState,
           state.persistedDiscoverSession?.id,
+          state.persistedDiscoverSession?.version,
           state.draftSessionTitle
         );
       },
