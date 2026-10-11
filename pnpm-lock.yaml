@@ -4570,6 +4570,9 @@ importers:
       isbinaryfile:
         specifier: 4.0.2
         version: 4.0.2
+      isolated-vm:
+        specifier: 6.1.2
+        version: 6.1.2
       jest-diff:
         specifier: 29.7.0
         version: 29.7.0
@@ -20514,6 +20517,10 @@ packages:
   isobject@3.0.1:
     resolution: {integrity: sha512-WhB9zCku7EGTj/HQQRz5aUQEUeoQZH2bWcltRErOpymJ4boYE6wL9Tbr23krRPSZ+C5zqNSrSw+Cc7sZZ4b7vg==}
     engines: {node: '>=0.10.0'}
+
+  isolated-vm@6.1.2:
+    resolution: {integrity: sha512-GGfsHqtlZiiurZaxB/3kY7LLAXR3sgzDul0fom4cSyBjx6ZbjpTrFWiH3z/nUfLJGJ8PIq9LQmQFiAxu24+I7A==}
+    engines: {node: '>=22.0.0'}
 
   isomorphic-timers-promises@1.0.1:
     resolution: {integrity: sha512-u4sej9B1LPSxTGKB/HiuzvEQnXH0ECYkSVQU39koSwmFAxhlEAFl9RdTvLv4TOTQUgBS5O3O5fwUxk6byBZ+IQ==}
@@ -39021,6 +39028,10 @@ snapshots:
 
   isobject@3.0.1: {}
 
+  isolated-vm@6.1.2:
+    dependencies:
+      node-gyp-build: 4.8.4
+
   isomorphic-timers-promises@1.0.1: {}
 
   isstream@0.1.2: {}
@@ -41102,8 +41113,7 @@ snapshots:
     dependencies:
       detect-libc: 2.1.2
 
-  node-gyp-build@4.8.4:
-    optional: true
+  node-gyp-build@4.8.4: {}
 
   node-int64@0.4.0: {}
 

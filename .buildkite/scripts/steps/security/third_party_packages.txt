@@ -54,6 +54,7 @@ jszip
 @opentelemetry/exporter-logs-otlp-grpc
 @opentelemetry/exporter-logs-otlp-proto
 @opentelemetry/otlp-transformer
+isolated-vm
 just-bash
 jsondiffpatch
 typescript-7

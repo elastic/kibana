@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './data';
-export * from './javascript';
+export interface ScriptLogger {
+  debug(message: string, meta?: object): void;
+  info(message: string, meta?: object): void;
+  warn(message: string, meta?: object): void;
+  error(message: string, error?: Error): void;
+}
