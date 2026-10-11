@@ -14,6 +14,30 @@ import { readCliArgs } from './args';
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
+it('targets Linux FIPS archives and RPMs with --fips', () => {
+  const { buildOptions } = readCliArgs(['node', 'scripts/build', '--fips']);
+  expect(buildOptions).toMatchObject({
+    skipFips: false,
+    targetFipsPlatforms: true,
+    createArchives: true,
+    createRpmPackage: true,
+    createDebPackage: false,
+    createDockerFIPS: false,
+    createDockerCloudFIPS: false,
+    createDockerContexts: false,
+  });
+});
+
+it('can omit FIPS dependencies and artifacts from an all-platforms build', () => {
+  expect(
+    readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-fips']).buildOptions
+  ).toMatchObject({ skipFips: true, targetFipsPlatforms: false });
+});
+
+it.each(['--skip-fips', '--serverless'])('rejects --fips combined with %s', (flag) => {
+  expect(readCliArgs(['node', 'scripts/build', '--fips', flag]).showHelp).toBe(true);
+});
+
 it('renders help if `--help` passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--help'])).toMatchInlineSnapshot(`
     Object {
@@ -52,9 +76,11 @@ it('build default and oss dist for current platform, without packages, by defaul
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": false,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -95,9 +121,11 @@ it('builds packages if --all-platforms is passed', () => {
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -138,9 +166,11 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -181,9 +211,11 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -225,9 +257,11 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -276,9 +310,11 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -320,9 +356,11 @@ it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,
@@ -364,9 +402,11 @@ it('limits packages if --all-platforms passed with --skip-docker-cloud-fips', ()
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
+        "skipFips": false,
         "skipServerless": false,
         "tarZstd": false,
         "targetAllPlatforms": true,
+        "targetFipsPlatforms": false,
         "targetServerlessPlatforms": false,
         "versionQualifier": "",
         "withExamplePlugins": false,

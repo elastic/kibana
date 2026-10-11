@@ -28,6 +28,8 @@ export interface BuildOptions {
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
+  skipFips: boolean;
+  targetFipsPlatforms: boolean;
   createCdnAssets: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
@@ -119,6 +121,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
+    await globalRun(Tasks.BundleFipsProvider);
+    await globalRun(Tasks.CreateDistributionDefaults);
 
     await globalRun(Tasks.AssertFileTime);
     await globalRun(Tasks.AssertPathLength);
@@ -156,8 +160,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'x64')));
-      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'arm64')));
+      for (const platform of config.getTargetPlatforms()) {
+        if (platform.isLinux() && !platform.isServerless()) {
+          artifactTasks.push(Tasks.CreateRpmPackage(platform));
+        }
+      }
     }
   }
 

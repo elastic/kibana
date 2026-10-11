@@ -17,7 +17,7 @@ export const InstallChromium: Task = {
   async run(config, log, build) {
     const preInstalledPackages = paths.packages.filter((p) => p.isPreInstalled);
 
-    for (const platform of config.getNodePlatforms()) {
+    for (const platform of config.getTargetPlatforms()) {
       const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
       const target = `${
         platform.getVariant() || 'default'

@@ -30,9 +30,18 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 const setup = async ({
   targetAllPlatforms = true,
   isRelease = true,
-}: { targetAllPlatforms?: boolean; isRelease?: boolean } = {}) => {
+  skipFips = false,
+  targetFipsPlatforms = false,
+}: {
+  targetAllPlatforms?: boolean;
+  isRelease?: boolean;
+  skipFips?: boolean;
+  targetFipsPlatforms?: boolean;
+} = {}) => {
   return await Config.create({
     isRelease,
+    skipFips,
+    targetFipsPlatforms,
     targetAllPlatforms,
     targetServerlessPlatforms: false,
     skipServerless: false,
@@ -52,6 +61,25 @@ describe('#getKibanaPkg()', () => {
   it('returns the parsed package.json from the Kibana repo', async () => {
     const config = await setup();
     expect(config.getKibanaPkg()).toEqual(kibanaPackageJson);
+  });
+});
+
+describe('FIPS platforms', () => {
+  it('adds both Linux FIPS architectures without duplicating Node downloads', async () => {
+    const config = await setup({ skipFips: false });
+    expect(
+      config
+        .getTargetPlatforms()
+        .filter((platform) => platform.isFips())
+        .map(String)
+    ).toEqual(['linux-x64-fips', 'linux-arm64-fips']);
+    expect(config.getNodePlatforms().some((platform) => platform.isFips())).toBe(false);
+  });
+
+  it('targets only Linux when building FIPS distributions', async () => {
+    const config = await setup({ skipFips: false, targetFipsPlatforms: true });
+    expect(config.getTargetPlatforms().map(String)).toEqual(['linux-x64-fips', 'linux-arm64-fips']);
+    expect(config.getNodePlatforms().map(String)).toEqual(['linux-x64', 'linux-arm64']);
   });
 });
 
@@ -127,6 +155,8 @@ describe('#getTargetPlatforms()', () => {
         "darwin-x64",
         "linux-arm64",
         "linux-arm64",
+        "linux-arm64",
+        "linux-x64",
         "linux-x64",
         "linux-x64",
         "win32-arm64",
@@ -149,7 +179,7 @@ describe('#getNodePlatforms()', () => {
     const config = await setup();
     expect(
       config
-        .getTargetPlatforms()
+        .getNodePlatforms()
         .map((p) => p.getNodeArch())
         .sort()
     ).toEqual([

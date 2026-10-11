@@ -54,7 +54,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    'kibana',
+    platform.isFips() ? 'kibana-fips' : 'kibana',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -122,6 +122,11 @@ export async function runFpm(
 
     // flags specific to the package we are building, supplied by tasks below
     ...pkgSpecificFlags,
+    ...(platform.isFips()
+      ? ['--conflicts', 'kibana', '--depends', 'glibc >= 2.34', '--depends', 'libstdc++']
+      : type === 'rpm'
+      ? ['--conflicts', 'kibana-fips']
+      : []),
 
     // copy the build output to /usr/share/kibana/, config and data dirs
     // are excluded with `--exclude` flag above

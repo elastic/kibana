@@ -36,6 +36,8 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-serverless',
       'skip-docker-fips',
       'skip-serverless',
+      'skip-fips',
+      'fips',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
@@ -92,13 +94,25 @@ export function readCliArgs(argv: string[]) {
     };
   }
 
+  if (flags.fips && (flags.serverless || flags['skip-fips'])) {
+    log.error('--fips cannot be combined with --serverless or --skip-fips');
+    return { log, showHelp: true, unknownFlags: [] };
+  }
+
   // In order to build a docker image we always need
   // to generate all the platforms
   if (flags['docker-images']) {
     flags['all-platforms'] = true;
   }
 
+  if (flags.fips) {
+    flags['all-platforms'] = true;
+  }
+
   function isOsPackageDesired(name: string) {
+    if (flags.fips && name !== 'rpm') {
+      return false;
+    }
     if (flags['skip-os-packages'] || !flags['all-platforms']) {
       return false;
     }
@@ -138,6 +152,8 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
+    skipFips: Boolean(flags['skip-fips']),
+    targetFipsPlatforms: Boolean(flags.fips),
     createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
@@ -150,7 +166,7 @@ export function readCliArgs(argv: string[]) {
       ((isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
         Boolean(flags.serverless)),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
-    createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerContexts: !Boolean(flags['skip-docker-contexts']) && !Boolean(flags.fips),
     createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     targetServerlessPlatforms: Boolean(flags.serverless),

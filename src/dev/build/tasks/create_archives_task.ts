@@ -30,7 +30,7 @@ export const CreateArchives: Task = {
   async run(config, log, build) {
     const archives: Archive[] = [];
 
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       config.getTargetPlatforms().map(async (platform) => {
         const source = build.resolvePathForPlatform(platform, '.');
         const destination = build.getPlatformArchivePath(platform);
@@ -110,6 +110,12 @@ export const CreateArchives: Task = {
     );
 
     const metrics: CiStatsMetric[] = [];
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        throw result.reason;
+      }
+    }
+
     for (const { format, path, fileCount } of archives) {
       metrics.push({
         group: `distributable size`,

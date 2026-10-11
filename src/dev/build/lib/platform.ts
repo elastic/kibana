@@ -11,7 +11,7 @@ import { dashSuffix } from './util';
 
 export type PlatformName = 'win32' | 'darwin' | 'linux';
 export type PlatformArchitecture = 'x64' | 'arm64';
-export type Variant = 'serverless';
+export type Variant = 'serverless' | 'fips';
 
 export class Platform {
   constructor(
@@ -57,6 +57,10 @@ export class Platform {
     return this.variant === 'serverless';
   }
 
+  isFips() {
+    return this.variant === 'fips';
+  }
+
   toString() {
     return `${this.name}-${this.architecture}${dashSuffix(this.getVariant())}`;
   }
@@ -76,4 +80,9 @@ export const SERVERLESS_PLATFORMS = [
   new Platform('linux', 'arm64', 'linux-aarch64', 'serverless'),
 ];
 
-export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS];
+export const FIPS_PLATFORMS = [
+  new Platform('linux', 'x64', 'linux-x86_64', 'fips'),
+  new Platform('linux', 'arm64', 'linux-aarch64', 'fips'),
+];
+
+export const ALL_PLATFORMS = [...DOWNLOAD_PLATFORMS, ...SERVERLESS_PLATFORMS, ...FIPS_PLATFORMS];

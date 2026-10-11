@@ -48,6 +48,7 @@ if (showHelp) {
         --no-debug                           {dim Turn off debug logging}
         --release                            {dim Produce a release-ready distributable}
         --rpm                                {dim Only build the rpm packages}
+        --fips                               {dim Only build Linux FIPS archives and rpm packages}
         --serverless                         {dim Only build the serverless packages}
         --skip-archives                      {dim Don't produce tar/zip archives}
         --skip-cloud-dependencies-download   {dim Don't download cloud dependencies (beats)}
@@ -64,6 +65,7 @@ if (showHelp) {
         --skip-platform-folders              {dim Skip platform specific folder creation and operations}
         --skip-node-download                 {dim Reuse existing downloads of node.js}
         --skip-serverless                    {dim Don't build serverless platforms or docker images}
+        --skip-fips                          {dim Don't bundle the FIPS provider or build FIPS archives/rpms}
         --skip-os-packages                   {dim Don't produce rpm/deb/docker packages}
         --verbose,-v                         {dim Turn on verbose logging}
         --version-qualifier                  {dim Suffix version with a qualifier}

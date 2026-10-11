@@ -20,7 +20,7 @@ if [[ "$TEST_PACKAGE" == "deb" ]]; then
   download_artifact 'kibana-*-amd64.deb' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.5"
 elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
-  download_artifact 'kibana-*-x86_64.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "kibana-$KIBANA_PKG_VERSION*-x86_64.rpm" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
   download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image-amd64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"

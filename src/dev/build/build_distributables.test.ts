@@ -12,6 +12,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { BuildOptions } from './build_distributables';
 import { buildDistributables } from './build_distributables';
 import * as Tasks from './tasks';
+import { runFpm } from './tasks/os_packages/run_fpm';
+
+jest.mock('./tasks/os_packages/run_fpm', () => ({ runFpm: jest.fn() }));
 
 jest.mock('./lib/version_info', () => ({
   getVersionInfo: () => ({
@@ -24,7 +27,6 @@ jest.mock('./lib/version_info', () => ({
 
 jest.mock('./tasks', () => {
   const actual = jest.requireActual('./tasks') as Record<string, unknown>;
-  const noopTaskRun = jest.fn().mockResolvedValue(undefined);
   const mockBundleTaskRun = jest.fn().mockResolvedValue(undefined);
 
   const result: Record<string, unknown> = {};
@@ -39,7 +41,7 @@ jest.mock('./tasks', () => {
     ) {
       result[key] = {
         ...(value as object),
-        run: key === 'BuildBundles' ? mockBundleTaskRun : noopTaskRun,
+        run: key === 'BuildBundles' ? mockBundleTaskRun : jest.fn().mockResolvedValue(undefined),
       };
     } else {
       result[key] = value;
@@ -69,6 +71,8 @@ const minimalGenericFoldersOptions: BuildOptions = {
   createGenericFolders: true,
   createPlatformFolders: false,
   createArchives: false,
+  skipFips: false,
+  targetFipsPlatforms: false,
   createCdnAssets: false,
   createRpmPackage: false,
   createDebPackage: false,
@@ -91,7 +95,7 @@ const minimalGenericFoldersOptions: BuildOptions = {
 
 describe('buildDistributables', () => {
   beforeEach(() => {
-    mockBundleTaskRun.mockClear();
+    jest.clearAllMocks();
   });
 
   it('runs BuildBundles once when creating generic folders', async () => {
@@ -99,4 +103,43 @@ describe('buildDistributables', () => {
 
     expect(mockBundleTaskRun).toHaveBeenCalledTimes(1);
   });
+
+  it.each([
+    {
+      name: 'all Linux distributions',
+      skipFips: false,
+      targetFipsPlatforms: false,
+      expected: ['linux-x64', 'linux-arm64', 'linux-x64-fips', 'linux-arm64-fips'],
+    },
+    {
+      name: 'regular Linux distributions',
+      skipFips: true,
+      targetFipsPlatforms: false,
+      expected: ['linux-x64', 'linux-arm64'],
+    },
+    {
+      name: 'FIPS distributions only',
+      skipFips: false,
+      targetFipsPlatforms: true,
+      expected: ['linux-x64-fips', 'linux-arm64-fips'],
+    },
+  ])(
+    'packages the selected platforms for $name',
+    async ({ skipFips, targetFipsPlatforms, expected }) => {
+      await buildDistributables(log, {
+        ...minimalGenericFoldersOptions,
+        createGenericFolders: false,
+        createPlatformFolders: true,
+        createRpmPackage: true,
+        targetAllPlatforms: true,
+        skipFips,
+        targetFipsPlatforms,
+      });
+
+      expect(
+        jest.mocked(runFpm).mock.calls.map(([, , , , platform]) => platform.toString())
+      ).toEqual(expected);
+      expect(Tasks.BundleFipsProvider.run).toHaveBeenCalledTimes(1);
+    }
+  );
 });
