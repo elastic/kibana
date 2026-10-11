@@ -71,7 +71,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               validations: [
                 {
                   validator: ({ value }) => {
-                    if (typeof value === 'string' && /^https?:\/\/.+/.test(value)) {
+                    if (typeof value === 'string' && /^https?:\/\/.+/i.test(value)) {
                       return;
                     }
 
