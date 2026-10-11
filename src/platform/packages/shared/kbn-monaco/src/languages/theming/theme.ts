@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import type { monaco } from '../..';
+import type { monaco } from '../../monaco_imports';
 
 export function createTheme(
   { colorMode, euiTheme }: UseEuiTheme,

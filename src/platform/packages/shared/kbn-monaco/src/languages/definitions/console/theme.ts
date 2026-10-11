@@ -8,8 +8,8 @@
  */
 
 import { makeHighContrastColor, type UseEuiTheme } from '@elastic/eui';
-import { defaultThemesResolvers, CODE_EDITOR_DEFAULT_THEME_ID } from '../../../code_editor';
-import { themeRuleGroupBuilderFactory } from '../../../common/theme';
+import { defaultThemesResolvers, CODE_EDITOR_DEFAULT_THEME_ID } from '../../theming';
+import { themeRuleGroupBuilderFactory } from '../../theming/helpers';
 
 const buildRuleGroup = themeRuleGroupBuilderFactory();
 

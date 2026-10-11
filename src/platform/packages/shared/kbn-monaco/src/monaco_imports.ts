@@ -67,6 +67,16 @@ export {
   language as yamlLanguage,
 } from 'monaco-editor/languages/definitions/yaml/yaml.js';
 export { jsonDefaults } from 'monaco-editor/languages/features/json/register.js';
+
+export {
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  CODE_EDITOR_TRANSPARENT_THEME_ID,
+  initializeRegisteredLanguagesTheme,
+  // TODO: Exposed only for `@kbn/workflows-ui`, which builds its own global theme on top of the shared
+  // palette — the pattern language-scoped theming replaces. Unexport once that is migrated.
+  defaultThemesResolvers,
+} from './languages/theming';
+
 export {
   MenuId,
   MenuRegistry,

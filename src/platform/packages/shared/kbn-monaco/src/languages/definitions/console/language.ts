@@ -187,12 +187,6 @@ export const ConsoleOutputLang: LangModuleType = {
   foldingRangeProvider,
 };
 
-// Theme id is the same as lang id, as we register only one theme resolver that's color mode aware
-export const CONSOLE_THEME_ID = CONSOLE_LANG_ID;
-
-// console output theme is the same as console theme
-export const CONSOLE_OUTPUT_THEME_ID = CONSOLE_THEME_ID;
-
 export const getParsedRequestsProvider = (model: monaco.editor.ITextModel | null) => {
   return new ConsoleParsedRequestsProvider(workerProxyService, model);
 };

@@ -25,6 +25,7 @@ export {
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
   defaultThemesResolvers,
+  initializeRegisteredLanguagesTheme,
   // language definitions
   XJsonLang,
   PainlessLang,
@@ -44,8 +45,6 @@ export {
   ESQL_LIGHT_THEME_ID,
   ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
   // console
-  CONSOLE_THEME_ID,
-  CONSOLE_OUTPUT_THEME_ID,
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
   ConsoleWorkerProxyService,

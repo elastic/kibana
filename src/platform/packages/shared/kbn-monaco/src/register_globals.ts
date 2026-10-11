@@ -8,8 +8,8 @@
  */
 
 import { monaco } from './monaco_imports';
-import type { CustomLangModuleType } from './types';
 import { getWorker } from './languages/worker_factory';
+import type { KbnMonacoTheming } from './languages/theming';
 
 declare module 'monaco-editor/editor/editor.api' {
   export interface Environment {
@@ -76,19 +76,13 @@ declare module 'monaco-editor/editor/editor.api' {
     }
 
     /**
-     * @description Registers language theme definition for a language
+     * @description Registers a theme resolver definition for a language
      */
-    function registerLanguageThemeResolver(
-      langId: string,
-      languageThemeResolver: CustomLangModuleType['languageThemeResolver'],
-      forceOverride?: boolean
-    ): void;
+    const registerLanguageThemeResolver: KbnMonacoTheming['registerLanguageThemeResolver'];
     /**
-     * @description Returns the registered language theme definition for the provided id
+     * @description Returns the resolved registered language theme definition for the provided id
      */
-    function getLanguageThemeResolver(
-      langId: string
-    ): CustomLangModuleType['languageThemeResolver'];
+    const getLanguageThemeResolver: KbnMonacoTheming['getLanguageThemeResolver'];
   }
 }
 
@@ -98,36 +92,3 @@ window.MonacoEnvironment = {
     return getWorker(languageId);
   },
 } satisfies typeof MonacoEnvironment;
-
-const languageThemeResolverDefinitions = new Map<
-  string,
-  CustomLangModuleType['languageThemeResolver']
->();
-
-// add custom methods to monaco editor
-Object.defineProperties(monaco.editor, {
-  /**
-   * @description Registration for implementation of {@link monaco.editor.registerLanguageThemeResolver}
-   */
-  registerLanguageThemeResolver: {
-    value: ((langId, languageThemeDefinition, forceOverride) => {
-      if (!forceOverride && languageThemeResolverDefinitions.has(langId)) {
-        throw new Error(`Language theme resolver for ${langId} is already registered`);
-      }
-      languageThemeResolverDefinitions.set(langId, languageThemeDefinition);
-    }) satisfies typeof monaco.editor.registerLanguageThemeResolver,
-    enumerable: true,
-    configurable: false,
-  },
-  /**
-   * @description Registration for implementation of {@link monaco.editor.getLanguageThemeResolver}
-   */
-  getLanguageThemeResolver: {
-    value: ((langId) =>
-      languageThemeResolverDefinitions.get(
-        langId
-      )) satisfies typeof monaco.editor.getLanguageThemeResolver,
-    enumerable: true,
-    configurable: false,
-  },
-});
