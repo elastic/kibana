@@ -23,10 +23,14 @@ interface YamlStep {
   steps?: YamlStep[];
   else?: YamlStep[];
   if?: string;
+  foreach?: string;
   condition?: string;
   mode?: string;
   concurrency?: { max?: number };
-  'on-failure'?: { continue?: boolean };
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string; strategy?: string };
+  };
 }
 
 const definition = parse(ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW.yaml) as {
@@ -252,6 +256,7 @@ describe('Endpoint analysis run', () => {
     expect(mark?.if).toContain('steps.resolve_request.output.has_request == true');
     expect(mark?.if).toContain('steps.verify_investigation.output.metadata != null');
     expect(mark?.if).toContain('steps.resolve_run_outcome.output.settled == true');
+    expect(mark?.if).toContain('steps.resolve_run_outcome.output.outcome_unrecorded != true');
     expect(mark?.with).toEqual(
       expect.objectContaining({
         ai_index_id: '{{ inputs.ai_index_id }}',
@@ -284,6 +289,7 @@ describe('Endpoint analysis run', () => {
 
       const attached = String(stepByName('resolve_run_outcome')?.with?.attached);
       expect(attached).not.toContain('host_name');
+      expect(attached).not.toContain('telemetry');
     });
 
     it('leaves no valid request on a status the sweep still selects', () => {
@@ -406,13 +412,18 @@ describe('Endpoint analysis run', () => {
     };
     const outcome = (
       field: 'attached' | 'settled',
-      found: { ids?: string[]; hostName?: string }
+      found: {
+        ids?: string[];
+        hostName?: string;
+        telemetry?: { checked: boolean; present: boolean };
+      }
     ): unknown =>
       evaluate(String(stepByName('resolve_run_outcome')?.with?.[field]), {
         steps: {
           finding_ids: { output: thisIndicator },
           resolve_written_findings: { output: { ids: found.ids } },
           resolve_host: { output: { host_name: found.hostName } },
+          resolve_endpoint_telemetry: { output: found.telemetry ?? {} },
         },
       });
 
@@ -467,6 +478,24 @@ describe('Endpoint analysis run', () => {
     it('settles a run that had no host to analyze without claiming it attached anything', () => {
       expect(outcome('settled', { ids: [] })).toBe(true);
       expect(outcome('attached', { ids: [] })).toBe(false);
+    });
+
+    // Same shape as no host: the agent never ran because there was nothing for it to
+    // read, and no retry ships telemetry the host never sent.
+    it('settles a run whose host has no Defend telemetry without claiming it attached anything', () => {
+      const none = { checked: true, present: false };
+      expect(outcome('settled', { ids: [], hostName: 'host-a', telemetry: none })).toBe(true);
+      expect(outcome('attached', { ids: [], hostName: 'host-a', telemetry: none })).toBe(false);
+    });
+
+    // A run that skipped the check (findings already attached, or a recorded attempt)
+    // has no telemetry answer, and must not be settled by the absence of one.
+    it('does not read a telemetry check it skipped as no telemetry', () => {
+      const skipped = { checked: false, present: false };
+      expect(outcome('settled', { ids: [], hostName: 'host-a', telemetry: skipped })).toBe(false);
+      expect(outcome('settled', { ids: [], hostName: 'host-a' })).toBe(false);
+      const some = { checked: true, present: true };
+      expect(outcome('settled', { ids: [], hostName: 'host-a', telemetry: some })).toBe(false);
     });
   });
 
@@ -570,6 +599,8 @@ describe('Endpoint analysis run', () => {
         'journal_invalid_request',
         'journal_iocs',
         'journal_no_host',
+        'journal_no_telemetry',
+        'journal_outcome_unrecorded',
         'journal_proposals_lost',
         'journal_proposals_queued',
         'journal_rationale',
@@ -642,13 +673,14 @@ describe('Endpoint analysis run', () => {
       expect(message).toContain('steps.forensic_analysis.output.structured_output.propose == true');
     });
 
-    // The two notes before the agent are the only record of why this run stopped.
+    // The three notes before the agent are the only record of why this run stopped.
     // A failed note fails the run and leaves the indicator pending for a cheap retry.
     // Notes beside a retirement still continue, so a rejected note cannot block the
     // write that stops the sweep.
     it('fails the run when a note before the agent is lost', () => {
       expect(stepByName('journal_fetch_alert_problem')?.['on-failure']).toBeUndefined();
       expect(stepByName('journal_no_host')?.['on-failure']).toBeUndefined();
+      expect(stepByName('journal_no_telemetry')?.['on-failure']).toBeUndefined();
       expect(stepByName('journal_invalid_request')?.['on-failure']).toEqual({ continue: true });
       expect(stepByName('journal_analysis_problem')?.['on-failure']).toEqual({ continue: true });
       // Before the agent, but a rejected note must not skip the 15m run.
@@ -834,13 +866,97 @@ describe('Endpoint analysis run', () => {
         'mark_attempted',
         'mark_failed',
         'mark_invalid',
+        'mark_outcome_unrecorded',
         'mark_processed',
         'mark_proposals_failed',
         'mark_unreachable',
       ]);
       for (const step of writes) {
-        expect(step['on-failure']).toBeUndefined();
+        expect(step['on-failure']?.continue).toBeUndefined();
       }
+    });
+
+    // The verdict after the agent exists only in this run's output. A retry skips the
+    // agent and cannot reconstruct it, so losing the write to a short blip in the
+    // context engine loses the verdict. These writes try again in place before the run
+    // gives up; the pre-agent writes do not need to, since their retry is the next sweep.
+    it('retries the writes that record a verdict before failing the run', () => {
+      const retry = { 'max-attempts': 3, delay: '5s', strategy: 'exponential' };
+
+      for (const name of [
+        'mark_processed',
+        'mark_failed',
+        'mark_proposals_failed',
+        'mark_outcome_unrecorded',
+      ]) {
+        expect(stepByName(name)?.['on-failure']).toEqual({ retry });
+      }
+      expect(stepByName('mark_attempted')?.['on-failure']).toBeUndefined();
+      expect(stepByName('mark_invalid')?.['on-failure']).toBeUndefined();
+      expect(stepByName('mark_unreachable')?.['on-failure']).toBeUndefined();
+    });
+
+    // A retry finds both findings already attached and skips the agent. Without the
+    // agent's output it cannot tell whether the earlier run's assessment note landed or
+    // its proposals were queued, so claiming `processed` would turn a lost proposal
+    // into a success. It says what it knows and retires the indicator as failed.
+    it('does not claim processed for an earlier run whose verdict was never recorded', () => {
+      const thisIndicator = { timeline: 'forensic-timeline-ki-1', iocs: 'forensic-iocs-ki-1' };
+      const unrecorded = String(stepByName('resolve_run_outcome')?.with?.outcome_unrecorded);
+      const unrecordedWhen = (ids: string[], agentOutput?: Record<string, unknown>): unknown =>
+        evaluate(unrecorded, {
+          steps: {
+            finding_ids: { output: thisIndicator },
+            resolve_written_findings: { output: { ids } },
+            forensic_analysis: agentOutput === undefined ? {} : { output: agentOutput },
+          },
+        });
+      const both = [thisIndicator.timeline, thisIndicator.iocs];
+
+      // Both attached, agent skipped this run: the retry case.
+      expect(unrecordedWhen(both)).toBe(true);
+      // Both attached by this run's agent: the normal case.
+      expect(unrecordedWhen(both, { structured_output: { rationale: 'ok' } })).toBe(false);
+      // Partial or no attachments: `settled != true` already handles it.
+      expect(unrecordedWhen([thisIndicator.timeline])).toBe(false);
+      expect(unrecordedWhen([])).toBe(false);
+
+      const terminal = (outcomeUnrecorded: boolean) => ({
+        steps: {
+          resolve_request: { output: { has_request: true, investigation_id: 'inv-1' } },
+          verify_investigation: { output: { metadata: { id: 'inv-1' } } },
+          resolve_run_outcome: {
+            output: { settled: true, outcome_unrecorded: outcomeUnrecorded },
+          },
+          resolve_proposals: { output: { proposals_lost: false } },
+        },
+      });
+      const fires = (name: string, ctx: Record<string, unknown>): unknown =>
+        evaluate(String(stepByName(name)?.if), ctx);
+
+      expect(fires('mark_processed', terminal(false))).toBe(true);
+      expect(fires('mark_outcome_unrecorded', terminal(false))).toBe(false);
+      expect(fires('mark_processed', terminal(true))).toBe(false);
+      expect(fires('mark_outcome_unrecorded', terminal(true))).toBe(true);
+      // Exactly one verdict on that path: the other failure writes stay quiet.
+      expect(fires('mark_failed', terminal(true))).toBe(false);
+      expect(fires('mark_proposals_failed', terminal(true))).toBe(false);
+
+      const mark = stepByName('mark_outcome_unrecorded');
+      expect(mark?.type).toBe('context-engine.updateKi');
+      expect((mark?.with?.ki as { attributes: { status: string } }).attributes.status).toBe(
+        'failed'
+      );
+      expect(
+        (mark?.with?.ki as { attributes: { failure_reason: string } }).attributes.failure_reason
+      ).toContain('did not record its outcome');
+
+      const names = allSteps.map(({ name }) => name);
+      expect(names.indexOf('journal_outcome_unrecorded')).toBeLessThan(
+        names.indexOf('mark_outcome_unrecorded')
+      );
+      expect(stepByName('journal_outcome_unrecorded')?.if).toBe(mark?.if);
+      expect(stepByName('journal_outcome_unrecorded')?.['on-failure']).toEqual({ continue: true });
     });
 
     // The case this exists for is a re-dispatch after a failed retirement: the findings
@@ -899,11 +1015,12 @@ describe('Endpoint analysis run', () => {
         },
       });
 
-      const runsAgent = (count: number, attemptedAt: string): unknown =>
+      const runsAgent = (count: number, attemptedAt: string, present = true): unknown =>
         evaluate(String(stepByName('forensic_analysis')?.if), {
           steps: {
             resolve_prior_assessment: { output: { count } },
             resolve_request: { output: { forensic_attempted_at: attemptedAt } },
+            resolve_endpoint_telemetry: { output: { checked: true, present } },
           },
         });
 
@@ -912,6 +1029,69 @@ describe('Endpoint analysis run', () => {
       expect(runsAgent(2, '')).toBe(false);
       expect(runsAgent(0, '2026-09-23T14:00:00.000Z')).toBe(false);
       expect(runsAgent(1, '2026-09-23T14:00:00.000Z')).toBe(false);
+      expect(runsAgent(0, '', false)).toBe(false);
+      // The attempt marker is gated the same way, so a host with nothing to analyze
+      // does not use up the indicator's one attempt on a run that never started.
+      expect(mark?.if).toBe(stepByName('forensic_analysis')?.if);
+    });
+
+    // The forensic skill resolves `logs-endpoint.events.*` only inside the agent, so
+    // without a check first a host with no Defend telemetry would spend its one attempt
+    // on a 15m run that can only report nothing. The Hunt Watch worker makes the same
+    // check (`check_index_scope`) before it selects a report.
+    it('checks for Defend telemetry before the agent, and fails the run rather than guess', () => {
+      const names = allSteps.map(({ name }) => name);
+      const check = stepByName('check_endpoint_telemetry');
+
+      expect(names.indexOf('check_endpoint_telemetry')).toBeLessThan(
+        names.indexOf('mark_attempted')
+      );
+      expect(names.indexOf('journal_no_telemetry')).toBeLessThan(names.indexOf('mark_attempted'));
+      expect(check?.type).toBe('elasticsearch.search');
+      expect(check?.with).toEqual({
+        index: 'logs-endpoint.events.*',
+        ignore_unavailable: true,
+        size: 1,
+        _source: false,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'host.name': '{{ steps.resolve_host.output.host_name }}' } },
+              { range: { '@timestamp': { gte: 'now-72h' } } },
+            ],
+          },
+        },
+      });
+      // A read error is a gap, not "no telemetry": the run fails and the indicator stays
+      // pending for a cheap retry, like the alert lookups.
+      expect(check?.['on-failure']).toBeUndefined();
+      // Only looked up on the path where the agent would run, so a retry of a finished
+      // analysis does not depend on the telemetry still being there.
+      expect(check?.if).toContain('steps.resolve_prior_assessment.output.count != 2');
+      expect(check?.if).toContain('steps.resolve_request.output.forensic_attempted_at == blank');
+
+      const resolved = stepByName('resolve_endpoint_telemetry')?.with ?? {};
+      const telemetry = (
+        field: 'checked' | 'present',
+        output?: { hits: { hits: Array<{ _id: string }> } }
+      ): unknown =>
+        evaluate(String(resolved[field]), {
+          steps: { check_endpoint_telemetry: output === undefined ? {} : { output } },
+        });
+      expect(telemetry('checked', { hits: { hits: [] } })).toBe(true);
+      expect(telemetry('present', { hits: { hits: [] } })).toBe(false);
+      expect(telemetry('present', { hits: { hits: [{ _id: 'evt-1' }] } })).toBe(true);
+      // A skipped check has no output, and that must not read as an empty index.
+      expect(telemetry('checked')).toBe(false);
+      expect(telemetry('present')).toBe(false);
+
+      const notes = (checked: boolean, present: boolean): unknown =>
+        evaluate(String(stepByName('journal_no_telemetry')?.if), {
+          steps: { resolve_endpoint_telemetry: { output: { checked, present } } },
+        });
+      expect(notes(true, false)).toBe(true);
+      expect(notes(true, true)).toBe(false);
+      expect(notes(false, false)).toBe(false);
     });
 
     // `ai.attachment.read` cannot answer this question: it catches every error and
@@ -946,11 +1126,18 @@ describe('Endpoint analysis run', () => {
     it('retires an indicator whose analysis failed instead of re-running it every minute', () => {
       expect(stepByName('forensic_analysis')?.['on-failure']).toEqual({ continue: true });
 
-      // Both of these read the agent's error, which only exists downstream of a step that
-      // continued past it. They were unreachable while the agent failed the run outright.
-      expect(stepByName('journal_analysis_problem')?.with).toMatchObject({
-        inputs: { message: expect.stringContaining('steps.forensic_analysis.error') },
-      });
+      // The journal still branches on the agent's error, which only exists downstream of a
+      // step that continued past it. The message itself stays a stable reason plus the
+      // execution link: the error body would land in the investigation, where a later
+      // agent round reads it as user input.
+      const problemMessage = String(
+        (stepByName('journal_analysis_problem')?.with?.inputs as { message?: string } | undefined)
+          ?.message
+      );
+      expect(problemMessage).toContain('steps.forensic_analysis.error');
+      expect(problemMessage).not.toContain('error.message');
+      expect(problemMessage).toContain('execution.id');
+      expect(problemMessage).toContain('execution.url');
       expect(stepByName('journal_rationale')?.if).toContain(
         'steps.forensic_analysis.error == null'
       );
@@ -965,6 +1152,28 @@ describe('Endpoint analysis run', () => {
       expect(journal?.if).toBe(stepByName('mark_failed')?.if);
       expect(journal?.['on-failure']).toEqual({ continue: true });
       expect(names.indexOf('journal_analysis_problem')).toBeLessThan(names.indexOf('mark_failed'));
+
+      // Each case renders one sentence about what happened, and never the error body.
+      const message = String((journal?.with?.inputs as { message?: string } | undefined)?.message);
+      const render = (agentError: string | null, attemptedAt: string): string =>
+        liquid.parseAndRenderSync(message, {
+          execution: { id: 'exec-1', url: 'https://kibana/exec-1' },
+          steps: {
+            resolve_host: { output: { host_name: 'host-a' } },
+            resolve_request: { output: { forensic_attempted_at: attemptedAt } },
+            forensic_analysis: agentError === null ? {} : { error: { message: agentError } },
+          },
+        });
+
+      expect(render('boom', '')).toContain('left no findings');
+      expect(render('boom', '')).toContain('The forensic agent failed.');
+      expect(render('boom', '')).not.toContain('boom');
+      expect(render(null, '2026-09-23T14:00:00.000Z')).toContain(
+        'A previous attempt did not finish'
+      );
+      expect(render(null, '')).toContain('none of its findings could be attached');
+      expect(render(null, '')).toContain('exec-1');
+      expect(render(null, '')).toContain('https://kibana/exec-1');
     });
   });
 
@@ -987,10 +1196,10 @@ describe('Endpoint analysis run', () => {
     };
     const recommendation = schema?.properties?.recommendedActions?.items;
 
-    // Without this, `propose: true` and no list at all is valid output. `propose_actions`
-    // defaults the missing list to `[]`, so the run fans out to nothing, attaches its
-    // findings, and retires the indicator as processed — the containment the analysis
-    // just spent 15m justifying disappears with no failure anywhere to show for it.
+    // Without this, `propose: true` and no list at all is valid output. The dispatch
+    // step runs only when that list has items, so a missing list attaches the findings
+    // and retires the indicator as processed — the containment the analysis just spent
+    // 15m justifying disappears with no failure anywhere to show for it.
     it('makes the model state that it proposes nothing rather than stay silent', () => {
       expect(schema?.required).toContain('recommendedActions');
       expect(String(stepByName('forensic_analysis')?.with?.message)).toContain(
@@ -1016,8 +1225,21 @@ describe('Endpoint analysis run', () => {
         'actionInput',
         'comment',
         'confidence',
+        'title',
       ]);
-      expect(recommendation?.required).toEqual(['actionId', 'actionInput', 'confidence']);
+      expect(recommendation?.required).toEqual([
+        'actionId',
+        'actionInput',
+        'title',
+        'comment',
+        'confidence',
+      ]);
+      // 256 is the proposal step's title limit. The dispatch truncates to the same bound.
+      expect(recommendation?.properties?.title).toMatchObject({
+        type: 'string',
+        minLength: 1,
+        maxLength: 256,
+      });
       // A blank id is schema-valid without this, and the proposal workflow treats a
       // blank actionWorkflowId as a no-action card an analyst can approve.
       expect(recommendation?.properties?.actionId).toMatchObject({
@@ -1052,8 +1274,53 @@ describe('Endpoint analysis run', () => {
       // land in the queue AlertZero actually reads.
       expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
+      // A missing title stores the action's own name, so two isolates of different
+      // hosts share one queue label. The prompt tells the model to name the target.
+      expect(inputs?.title).toBe('{{ foreach.item.title | truncate: 256, "" }}');
+      expect(
+        evaluate(String(inputs?.title), {
+          foreach: { item: { title: 'Isolate host WIN-ANALYST01' } },
+        })
+      ).toBe('Isolate host WIN-ANALYST01');
+      expect(String(stepByName('forensic_analysis')?.with?.message)).toContain('`title`');
       expect(inputs?.impact).toBeUndefined();
       expect(inputs?.category).toBeUndefined();
+    });
+
+    // The comment is the body of the approval card. `rationale` is the whole assessment,
+    // up to 7900 characters, and is journaled once on the investigation; a card that
+    // repeats it on every action is too long to review. So each recommendation carries
+    // its own short comment, required by the schema, and the dispatch never reaches for
+    // the rationale.
+    it('puts a short per-action comment on each card instead of the full rationale', () => {
+      const comment = recommendation?.properties?.comment as {
+        type?: string;
+        minLength?: number;
+        maxLength?: number;
+      };
+      expect(comment).toMatchObject({ type: 'string', minLength: 1, maxLength: 500 });
+
+      const message = String(stepByName('forensic_analysis')?.with?.message);
+      expect(message).toContain('Set `comment` on every recommendation');
+      expect(message).toContain('Do not restate the assessment from `rationale`');
+
+      const inputs = (stepByName('propose_action')?.with as { inputs?: Record<string, string> })
+        ?.inputs;
+      expect(inputs?.comment).not.toContain('rationale');
+      expect(
+        liquid.parseAndRenderSync(String(inputs?.comment), {
+          foreach: {
+            item: { title: 'Kill powershell.exe (PID 4212)', comment: 'Encrypting C:\\Users.' },
+          },
+        })
+      ).toBe('Encrypting C:\\Users.');
+      // A blank comment would be rejected by the bridge, which requires one. The label
+      // keeps the card readable rather than failing the dispatch.
+      expect(
+        liquid.parseAndRenderSync(String(inputs?.comment), {
+          foreach: { item: { title: 'Kill powershell.exe (PID 4212)', comment: '' } },
+        })
+      ).toBe('Kill powershell.exe (PID 4212)');
     });
 
     // One gate — the containment proposals — so the dial is the same two levels as
@@ -1111,15 +1378,28 @@ describe('Endpoint analysis run', () => {
 
       const gate = String(stepByName('propose_actions')?.if);
       expect(gate).toContain('steps.resolve_run_outcome.output.attached == true');
+      expect(gate).toContain('recommendedActions.size > 0');
       expect(gate).not.toContain('settled');
+      // `| default: []` is not an array in this engine, so `foreach` hard-fails on it.
+      expect(stepByName('propose_actions')?.foreach).toBe(
+        '${{ steps.forensic_analysis.output.structured_output.recommendedActions }}'
+      );
 
-      const when = (attached: boolean, propose: boolean) => ({
+      const when = (attached: boolean, propose: boolean, recommended = 1) => ({
         steps: {
           resolve_run_outcome: { output: { attached } },
-          forensic_analysis: { output: { structured_output: { propose } } },
+          forensic_analysis: {
+            output: {
+              structured_output: {
+                propose,
+                recommendedActions: Array.from({ length: recommended }, () => ({})),
+              },
+            },
+          },
         },
       });
       expect(evaluate(gate, when(true, true))).toBe(true);
+      expect(evaluate(gate, when(true, true, 0))).toBe(false);
       expect(evaluate(gate, when(false, true))).toBe(false);
       expect(evaluate(gate, when(true, false))).toBe(false);
     });
@@ -1131,7 +1411,7 @@ describe('Endpoint analysis run', () => {
       const dispatch = stepByName('propose_actions');
       expect(dispatch?.type).toBe('parallel');
       expect(dispatch?.mode).toBe('settled');
-      expect(dispatch?.concurrency?.max).toBe('{{ consts.max_recommended_actions }}');
+      expect(dispatch?.concurrency?.max).toBe(8);
       const recommendedActions = schema?.properties?.recommendedActions as { maxItems?: unknown };
       // Typed expression: `{{ }}` would leave maxItems a string, which Claude rejects.
       expect(recommendedActions?.maxItems).toBe('${{ consts.max_recommended_actions }}');
