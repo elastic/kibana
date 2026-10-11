@@ -7,8 +7,7 @@
 
 import type { WithRequiredProperty } from '@kbn/utility-types';
 import type { ApiTarget } from '../apis';
-import { apiTargets } from '../apis';
-import { matchesApiSelector } from '../apis/known_apis';
+import { apiTargets, matchesApiSelector } from '../apis';
 import { AgentExecutionMode } from './execution_mode';
 
 export interface AutoApprovedApi {

@@ -16,6 +16,7 @@ export const createPublicEventsContract = ({
   return {
     chat$: eventsService.obs$,
     getChatEvents$: (conversationId: string) => eventsService.getChatEvents$(conversationId),
+    getApiStateChanges$: (options) => eventsService.getApiStateChanges$(options),
     ui: {
       activeConversation$: eventsService.activeConversation$,
     },

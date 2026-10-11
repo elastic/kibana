@@ -6,7 +6,17 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
-export { apiTargets, type ApiTarget } from './apis';
+export {
+  apiTargets,
+  type ApiTarget,
+  allApisSelector,
+  toApiNamespace,
+  toNamespaceSelector,
+  isApiWildcardSelector,
+  matchesApiSelector,
+  matchesAnyApiSelector,
+  type ApiReference,
+} from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
@@ -367,6 +377,9 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  type ApiStateChangedEventData,
   type AskUserQuestionStep,
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
