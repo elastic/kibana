@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { KiTypeCount } from './http_api/ai_indices';
+import { i18n } from '@kbn/i18n';
 
-export const MAX_KI_TYPE_FILTER_COUNT = 5;
+export const noneValueLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.listKi.noneValue', {
+  defaultMessage: 'None',
+});
 
-export const takeTopKiTypeCounts = (counts: KiTypeCount[]): KiTypeCount[] =>
-  counts.slice(0, MAX_KI_TYPE_FILTER_COUNT);
+export const formatKiTypeLabel = (type: string): string => type.replace(/[._]/g, ' ');

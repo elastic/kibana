@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KiLifecycleStatus } from '../step_types/ki';
 import type { KiTypeCount } from './ai_indices';
 
 export interface KiListItem {
@@ -12,6 +13,9 @@ export interface KiListItem {
   index: string;
   type?: string;
   title?: string;
+  updated_at?: string;
+  expires_at?: string;
+  lifecycle_status?: KiLifecycleStatus;
 }
 
 /** Unfiltered store stats. */
@@ -30,7 +34,15 @@ export type KiJsonPrimitive = string | number | boolean | null;
 export type KiJsonValue = KiJsonPrimitive | KiJsonValue[] | { [key: string]: KiJsonValue };
 
 export interface KiDocument {
-  [key: string]: KiJsonValue;
+  content?: string;
+  description?: string;
+  '@timestamp'?: string;
+  updated_at?: string;
+  expires_at?: string;
+  tags?: string[];
+  attributes?: KiJsonValue;
+  governance?: KiJsonValue;
+  [key: string]: KiJsonValue | undefined;
 }
 
 export interface GetKiResponse {

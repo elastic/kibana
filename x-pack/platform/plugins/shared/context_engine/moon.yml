@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-agent-builder'
   - '@kbn/deeplinks-analytics'
   - '@kbn/dev-cli-runner'
   - '@kbn/index-management-shared-types'
