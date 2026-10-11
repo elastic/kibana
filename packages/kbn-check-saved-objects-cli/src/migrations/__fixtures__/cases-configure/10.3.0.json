@@ -1,0 +1,152 @@
+{
+  "10.2.0": [
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "cases",
+      "created_at": "2022-10-13T15:55:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2022-10-13T15:55:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "workflowTags": [
+        "triage",
+        "enrichment"
+      ],
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "observability",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": false
+    }
+  ],
+  "10.3.0": [
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "cases",
+      "created_at": "2022-10-13T15:55:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2022-10-13T15:55:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "securitySolution",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "workflowTags": [
+        "triage",
+        "enrichment"
+      ],
+      "extractObservables": true
+    },
+    {
+      "connector": {
+        "id": "none",
+        "name": "none",
+        "type": ".none",
+        "fields": null
+      },
+      "closure_type": "close-by-user",
+      "owner": "observability",
+      "created_at": "2026-09-01T00:00:00.000Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "updated_at": "2026-09-01T00:00:00.000Z",
+      "updated_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic"
+      },
+      "extractObservables": false
+    }
+  ]
+}
