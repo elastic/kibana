@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "integration_tests/**/*", "../../../../../typings/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/security-plugin-types-server",
@@ -70,6 +70,7 @@
     "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/context-engine-plugin"
+    "@kbn/context-engine-plugin",
+    "@kbn/workflows-execution-engine"
   ]
 }

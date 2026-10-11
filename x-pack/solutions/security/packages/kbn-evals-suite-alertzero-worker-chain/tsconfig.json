@@ -1,0 +1,27 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/alertzero-common",
+    "@kbn/alertzero-plugin",
+    "@kbn/core",
+    "@kbn/evals",
+    "@kbn/evals-suite-attack-discovery-fp-tp",
+    "@kbn/security-evals-chain-safety",
+    "@kbn/tooling-log",
+    "@kbn/workflows",
+    "@kbn/scout"
+  ]
+}
