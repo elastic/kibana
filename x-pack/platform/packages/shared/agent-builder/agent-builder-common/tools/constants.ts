@@ -182,10 +182,12 @@ const internalToolKindById = new Map<string, InternalToolKind>(
 
 /**
  * Returns the kind of an internal tool, or `undefined` when the id is not an internal tool.
- * Tools in the attachments namespace are runtime tools; legacy filestore tools access data.
+ * Known attachment tools are runtime tools; legacy filestore tools access data. Any other id,
+ * including an unknown `attachments.*` id, is unclassified so callers surface it instead of
+ * silently dropping it.
  */
 export const getInternalToolKind = (toolName: string): InternalToolKind | undefined => {
-  if (toolName.startsWith(`${internalNamespaces.attachments}.`)) {
+  if (isAttachmentTool(toolName)) {
     return 'runtime';
   }
   if (isLegacyFilestoreTool(toolName)) {

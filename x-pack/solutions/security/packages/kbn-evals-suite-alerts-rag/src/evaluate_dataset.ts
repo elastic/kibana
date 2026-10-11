@@ -191,6 +191,8 @@ export const buildAlertsRagEvaluators = ({
     createAlertsRagTrajectoryEvaluator(),
     createUnclassifiedToolsEvaluator({
       extractToolCalls: getAgentBuilderToolCalls,
+      goldenPathExtractor: (expected) =>
+        (expected as AlertsRagDatasetExpected | undefined)?.tool_sequence ?? [],
       classifyTool,
     }) as Evaluator<AlertsRagDatasetExample, TaskOutput>,
   ];

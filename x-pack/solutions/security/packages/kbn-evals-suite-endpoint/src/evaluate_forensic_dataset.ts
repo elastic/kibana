@@ -143,6 +143,8 @@ export const buildForensicEvaluators = ({
     createForensicTrajectoryEvaluator(),
     createUnclassifiedToolsEvaluator({
       extractToolCalls: getAgentBuilderToolCalls,
+      goldenPathExtractor: (expected) =>
+        (expected as ForensicDatasetExample['output'] | undefined)?.tool_sequence ?? [],
       classifyTool,
     }) as Evaluator<ForensicDatasetExample, TaskOutput>,
   ];
