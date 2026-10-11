@@ -57,7 +57,7 @@ test.describe('Alerts page - read/write privileges', { tag: testData.UI_TAG }, (
   };
 
   test.beforeAll(async ({ apiServices }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(testData.MULTI_ROLE_TEST_TIMEOUT_MS);
     await deletePrivilegesRule(apiServices.alertingV2.rules);
     await apiServices.alertingV2.sourceIndex.create({
       index: SOURCE_INDEX,

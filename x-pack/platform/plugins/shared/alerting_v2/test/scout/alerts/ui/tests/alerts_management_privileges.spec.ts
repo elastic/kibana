@@ -35,11 +35,15 @@ const assertEpisodesManagementHappyPath = async ({
 
   await test.step('histogram chart renders successfully', async () => {
     await expect(alertEpisodesList.histogramPanel).toBeVisible();
-    await expect(alertEpisodesList.histogramChart).toBeVisible({ timeout: 30_000 });
+    await expect(alertEpisodesList.histogramChart).toBeVisible({
+      timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+    });
   });
 
   await test.step('episodes table renders with item count', async () => {
-    await expect(alertEpisodesList.tableToolbar).toBeVisible({ timeout: 60_000 });
+    await expect(alertEpisodesList.tableToolbar).toBeVisible({
+      timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+    });
     await expect(alertEpisodesList.itemCount).toHaveText(/^Showing(?: first)? \d[\d,]* alerts?$/);
   });
 
@@ -49,7 +53,7 @@ const assertEpisodesManagementHappyPath = async ({
     await expect(alertEpisodesList.tagsFilterSearch).toBeVisible();
     await alertEpisodesList.searchTagsFilter(SEEDED_TAG);
     await expect(alertEpisodesList.tagFilterOption(SEEDED_TAG)).toBeVisible({
-      timeout: 30_000,
+      timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
     });
   });
 };
@@ -61,7 +65,7 @@ const assertEpisodesManagementHappyPath = async ({
  */
 test.describe('Alerts management page - privilege-based access', { tag: testData.UI_TAG }, () => {
   test.beforeAll(async ({ apiServices }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(testData.MULTI_ROLE_TEST_TIMEOUT_MS);
     await apiServices.alertingV2.ruleEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
     await apiServices.alertingV2.alertActionsEvents.cleanUp({ ruleId: SEEDED_RULE_ID });
     const now = new Date().toISOString();
@@ -94,14 +98,14 @@ test.describe('Alerts management page - privilege-based access', { tag: testData
   });
 
   test('alerting_v2_alerts all user sees the full page', async ({ browserAuth, pageObjects }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(testData.MULTI_ROLE_TEST_TIMEOUT_MS);
     await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
     await pageObjects.alertEpisodesList.goto();
     await assertEpisodesManagementHappyPath(pageObjects);
   });
 
   test('alerting_v2_alerts read user sees the full page', async ({ browserAuth, pageObjects }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(testData.MULTI_ROLE_TEST_TIMEOUT_MS);
     await browserAuth.loginWithCustomRole(ALERTING_V2_ALERTS_READ_ROLE);
     await pageObjects.alertEpisodesList.goto();
     await assertEpisodesManagementHappyPath(pageObjects);

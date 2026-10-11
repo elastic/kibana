@@ -109,7 +109,9 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
       await pageObjects.composeDiscover.clickNext();
       await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('capture created rule for teardown', async () => {
@@ -124,7 +126,7 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
             }
             return items.length;
           },
-          { timeout: 30_000 }
+          { timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS }
         )
         .toBeGreaterThanOrEqual(1);
     });
@@ -155,7 +157,9 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
 
     await test.step('refresh rules list', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('open edit flyout', async () => {
@@ -178,13 +182,15 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
       await pageObjects.composeDiscover.clickNext();
       await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('verify rule updated', async () => {
       await expect
         .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.name, {
-          timeout: 30_000,
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
         })
         .toBe(EDITED_RULE_NAME);
     });
@@ -250,7 +256,9 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
     });
 
     await test.step('verify flyout opens in ES|QL mode (no builder switch button)', async () => {
-      await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
     });
   });
@@ -285,13 +293,15 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
 
     await test.step('confirmation modal appears', async () => {
       await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible({
-        timeout: 30_000,
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
       });
     });
 
     await test.step('confirm opens flyout in ES|QL mode', async () => {
       await pageObjects.composeDiscover.confirmBuilderToEsql();
-      await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
     });
   });
@@ -322,7 +332,9 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
       await pageObjects.rulesList.goto();
       await expect(page.testSubj.locator('rulesListLoading')).toBeHidden({ timeout: 60_000 });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
-      await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('click ES|QL switch button', async () => {
@@ -330,9 +342,7 @@ test.describe('Rule Builder — threshold create and edit flows', { tag: testDat
     });
 
     await test.step('confirmation modal appears', async () => {
-      await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible({
-        timeout: 10_000,
-      });
+      await expect(pageObjects.composeDiscover.confirmBuilderToEsqlModal).toBeVisible();
     });
 
     await test.step('confirm switches to ES|QL mode', async () => {

@@ -58,7 +58,7 @@ test.describe('Rules list bulk actions respect active filters', { tag: testData.
       // Initial filter application can be slow on a freshly-booted Kibana
       // before the rules list re-renders with the filtered set.
       await expect(pageObjects.rulesList.rowCheckbox(ruleIdsA[0])).toBeVisible({
-        timeout: 60_000,
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
       });
       await expect(pageObjects.rulesList.rowCheckbox(ruleIdsA[1])).toBeVisible();
       await expect(page.testSubj.locator(`checkboxSelectRow-${ruleIdsB[0]}`)).toHaveCount(0);
@@ -79,7 +79,7 @@ test.describe('Rules list bulk actions respect active filters', { tag: testData.
       // up to 60s for the rule SOs to reflect the new enabled state.
       await expect
         .poll(async () => (await apiServices.alertingV2.rules.get(ruleIdsA[0])).enabled, {
-          timeout: 60_000,
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
         })
         .toBe(false);
       await expect

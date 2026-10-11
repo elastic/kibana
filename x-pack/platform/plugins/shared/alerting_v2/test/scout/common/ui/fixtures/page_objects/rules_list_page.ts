@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { UI_SLOW_RENDER_TIMEOUT_MS } from '../../../constants';
 import type { AlertingMountConfig } from './alerting_mount_config';
 
 export class RulesListPage {
@@ -65,15 +66,13 @@ export class RulesListPage {
 
   /**
    * Opens the Tags filter popover, selects one tag, and closes the popover.
-   * The first appearance of the option after opening can be slow on initial
-   * load while RBAC + tag aggregation runs server-side, hence the longer wait.
+   * Tag aggregation runs server-side under RBAC, so the option can take longer
+   * than the default assertion budget to appear the first time.
    */
   async filterBySingleTag(tag: string) {
     await this.tagsFilterButton.click();
-    // Initial tag aggregation can be slow on a freshly-booted Kibana before
-    // the alerting indexes are warm; default 5s is too tight in CI.
     const option = this.tagsFilterOption(tag);
-    await option.waitFor({ state: 'visible', timeout: 60_000 });
+    await option.waitFor({ state: 'visible', timeout: UI_SLOW_RENDER_TIMEOUT_MS });
     await option.click();
     await this.tagsFilterButton.click();
   }

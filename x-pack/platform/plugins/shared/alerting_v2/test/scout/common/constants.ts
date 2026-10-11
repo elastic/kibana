@@ -25,6 +25,16 @@ export const LOOKBACK_WINDOW = '1m';
 export const POLL_TIMEOUT_MS = 45_000;
 export const POLL_INTERVAL_MS = 1_000;
 
+/**
+ * For UI waits that outlast Scout's 10s default assertion timeout. It stays well under the 60s
+ * per-test budget so a slow render fails as the assertion that timed out rather than as a bare
+ * test timeout.
+ */
+export const UI_SLOW_RENDER_TIMEOUT_MS = 30_000;
+
+/** `test.setTimeout` budget for tests that re-authenticate as several custom roles in sequence. */
+export const MULTI_ROLE_TEST_TIMEOUT_MS = 180_000;
+
 export const ACTION_POLICY_SEARCH_MAX_LENGTH = 256;
 
 export {

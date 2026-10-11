@@ -78,7 +78,9 @@ test.describe(
      */
     const gotoRulesListWithRule = async (pageObjects: AlertingPageObjects) => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     };
 
     test.afterAll(async ({ esClient, apiServices }) => {
@@ -139,9 +141,7 @@ test.describe(
       });
 
       await test.step('the recovery tab appears', async () => {
-        await expect(pageObjects.composeDiscover.sandboxTab('recovery')).toBeVisible({
-          timeout: 10_000,
-        });
+        await expect(pageObjects.composeDiscover.sandboxTab('recovery')).toBeVisible();
       });
     });
 
@@ -244,9 +244,7 @@ test.describe(
       });
 
       await test.step('the recovery tab disappears and the sandbox falls back to base', async () => {
-        await expect(pageObjects.composeDiscover.sandboxTab('recovery')).toBeHidden({
-          timeout: 10_000,
-        });
+        await expect(pageObjects.composeDiscover.sandboxTab('recovery')).toBeHidden();
         await expect(pageObjects.composeDiscover.sandboxTab('base')).toHaveAttribute(
           'aria-selected',
           'true'
@@ -314,13 +312,15 @@ test.describe(
 
       await test.step('save from YAML mode', async () => {
         await pageObjects.composeDiscover.clickYamlSubmit();
-        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+        });
       });
 
       await test.step('verify the recovery edit persisted via API', async () => {
         await expect
           .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).recovery?.strategy, {
-            timeout: 30_000,
+            timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
           })
           .toBe('condition');
         await expect
@@ -329,7 +329,7 @@ test.describe(
               const { recovery } = await apiServices.alertingV2.rules.get(ruleId!);
               return recovery?.strategy === 'condition' ? recovery.segment : undefined;
             },
-            { timeout: 30_000 }
+            { timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS }
           )
           .toBe(RECOVERY_SEGMENT);
       });

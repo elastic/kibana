@@ -81,12 +81,16 @@ test.describe('Rule tags — edit via ES|QL form', { tag: testData.UI_TAG }, () 
 
     await test.step('refresh rules list', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('open the edit flyout in ES|QL mode', async () => {
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
-      await expect(pageObjects.composeDiscover.flyout).toBeVisible({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       // A rule without builder metadata opens directly in ES|QL mode (no builder switch).
       await expect(pageObjects.composeDiscover.switchToEsqlToggle).toBeHidden();
     });
@@ -102,13 +106,15 @@ test.describe('Rule tags — edit via ES|QL form', { tag: testData.UI_TAG }, () 
       await pageObjects.composeDiscover.clickNext();
       await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('the rule has no tags after saving', async () => {
       await expect
         .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.tags, {
-          timeout: 30_000,
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
         })
         .toBeUndefined();
     });

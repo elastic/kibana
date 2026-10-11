@@ -7,6 +7,9 @@
 
 import { AppMenu, type Locator, type ScoutPage } from '@kbn/scout';
 
+/** Short on purpose: the sandbox may legitimately be closed, and absence is the common case. */
+const OPTIONAL_ELEMENT_TIMEOUT_MS = 5_000;
+
 /**
  * Page object for the alerting_v2 entries inside Discover's app-menu.
  *
@@ -66,7 +69,7 @@ export class DiscoverAppMenu {
   async dismissQuerySandboxIfOpen() {
     const applyButton = this.page.testSubj.locator('querySandboxApply');
     try {
-      await applyButton.waitFor({ state: 'visible', timeout: 5_000 });
+      await applyButton.waitFor({ state: 'visible', timeout: OPTIONAL_ELEMENT_TIMEOUT_MS });
       await applyButton.click();
       await applyButton.waitFor({ state: 'hidden' });
     } catch {

@@ -198,7 +198,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('submit and capture rule for teardown', async () => {
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
 
       await expect
         .poll(
@@ -211,7 +213,7 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
             }
             return items.length;
           },
-          { timeout: 30_000 }
+          { timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS }
         )
         .toBeGreaterThanOrEqual(1);
     });
@@ -257,7 +259,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('refresh the rules list', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('click pencil icon to open edit flyout', async () => {
@@ -280,13 +284,15 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
       await pageObjects.composeDiscover.ruleNameInput.clear();
       await pageObjects.composeDiscover.setRuleName(EDITED_RULE_NAME);
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('verify rule updated via API', async () => {
       await expect
         .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.name, {
-          timeout: 30_000,
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
         })
         .toBe(EDITED_RULE_NAME);
     });
@@ -315,7 +321,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('refresh the rules list', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('open the edit flyout', async () => {
@@ -375,7 +383,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('refresh the rules list and open the edit flyout', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
       await expect(pageObjects.composeDiscover.flyout).toBeVisible();
     });
@@ -396,11 +406,13 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
       await pageObjects.composeDiscover.clickNext(); // Details
       await pageObjects.composeDiscover.clickNext(); // Actions
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
 
       await expect
         .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).time_field, {
-          timeout: 30_000,
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
         })
         .toBe('timestamp');
     });
@@ -429,7 +441,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('refresh the rules list and open the edit flyout', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
       await expect(pageObjects.composeDiscover.flyout).toBeVisible();
     });
@@ -464,7 +478,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('open the edit flyout in YAML-only mode', async () => {
       await pageObjects.rulesList.goto();
-      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({ timeout: 60_000 });
+      await expect(pageObjects.rulesList.rulesListTable).toBeVisible({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       await pageObjects.composeDiscover.openEditFlyout(ruleId!);
       await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       await expect(pageObjects.composeDiscover.yamlSubmitButton).toBeVisible();
@@ -482,10 +498,12 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
 
     await test.step('save via YAML and verify the rule has no tags', async () => {
       await pageObjects.composeDiscover.clickYamlSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
       await expect
         .poll(async () => (await apiServices.alertingV2.rules.get(ruleId!)).metadata.tags, {
-          timeout: 30_000,
+          timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
         })
         .toBeUndefined();
     });
@@ -524,7 +542,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
       await pageObjects.composeDiscover.setRuleName(TWO_DATE_FIELDS_RULE_NAME);
       await pageObjects.composeDiscover.clickNext(); // Actions
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('the created rule persists event.ingested, not @timestamp', async () => {
@@ -539,7 +559,7 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
             }
             return items[0]?.time_field;
           },
-          { timeout: 30_000 }
+          { timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS }
         )
         .toBe('event.ingested');
     });
@@ -571,7 +591,9 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
       await pageObjects.composeDiscover.clickNext(); // Details
       await pageObjects.composeDiscover.setRuleName(CREATE_SIGNAL_TIMESTAMP_RULE_NAME);
       await pageObjects.composeDiscover.clickSubmit();
-      await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      await expect(pageObjects.composeDiscover.flyout).toBeHidden({
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
+      });
     });
 
     await test.step('created rule persists the selected timestamp field', async () => {
@@ -586,7 +608,7 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
             }
             return items[0]?.time_field;
           },
-          { timeout: 30_000 }
+          { timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS }
         )
         .toBe('timestamp');
     });

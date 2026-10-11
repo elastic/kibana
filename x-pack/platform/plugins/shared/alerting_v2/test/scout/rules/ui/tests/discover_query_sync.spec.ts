@@ -70,10 +70,10 @@ test.describe('Discover query sync — Rule flyout', { tag: testData.UI_TAG }, (
 
     await test.step('verify flyout reflects the updated query', async () => {
       await expect(pageObjects.ruleForm.flyout).toContainText(`FROM ${TEST_INDEX}`, {
-        timeout: 30_000,
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
       });
       await expect(pageObjects.ruleForm.flyout).toContainText(UPDATED_ALERT_CONDITION, {
-        timeout: 30_000,
+        timeout: testData.UI_SLOW_RENDER_TIMEOUT_MS,
       });
     });
   });

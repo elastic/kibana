@@ -7,6 +7,7 @@
 
 import type { EuiSuperSelectObject, Locator, ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { UI_SLOW_RENDER_TIMEOUT_MS } from '../../../constants';
 
 // Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
 // which Playwright's test-listing phase cannot handle (see compose_discover_flyout.spec.ts).
@@ -145,7 +146,7 @@ export class ComposeDiscoverPage {
     // beforeEach's rulesListLoading check already passed, so allow a long wait.
     await this.createRuleSplitDropdownButton
       .or(this.createEsqlRuleCard)
-      .waitFor({ state: 'visible', timeout: 60_000 });
+      .waitFor({ state: 'visible', timeout: UI_SLOW_RENDER_TIMEOUT_MS });
     if (await this.createRuleSplitDropdownButton.isVisible()) {
       await this.createRuleSplitDropdownButton.click();
       await this.createEsqlRuleButton.click();
