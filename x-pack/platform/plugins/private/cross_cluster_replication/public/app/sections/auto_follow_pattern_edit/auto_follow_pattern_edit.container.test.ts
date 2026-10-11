@@ -49,6 +49,7 @@ describe('auto_follow_pattern_edit.container mapDispatchToProps', () => {
         active: true,
         remoteCluster: 'cluster-a',
         leaderIndexPatterns: ['logs-*'],
+        leaderIndexExclusionPatterns: ['logs-private-*'],
         followIndexPattern: 'replica-{{leader_index}}',
         name: 'should-not-leak',
         errors: ['should-not-leak'],
@@ -64,6 +65,7 @@ describe('auto_follow_pattern_edit.container mapDispatchToProps', () => {
         active: true,
         remoteCluster: 'cluster-a',
         leaderIndexPatterns: ['logs-*'],
+        leaderIndexExclusionPatterns: ['logs-private-*'],
         followIndexPattern: 'replica-{{leader_index}}',
       });
     });
