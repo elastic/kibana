@@ -21,6 +21,7 @@ import {
   MAX_KEYWORD_LENGTH,
 } from '../../common';
 import type { InvestigationAttributes } from '../storage/types';
+import { MAX_THREAD_SEEN_EVENTS } from '../storage/types';
 
 export const NIGHTSHIFT_INVESTIGATION_SO_TYPE = 'nightshift-investigation';
 
@@ -99,7 +100,8 @@ const investigationAttributesSchemaV3 = investigationAttributesSchemaBase.extend
 });
 
 // Adds the impact summary and evidence, makes impact entities optional, and drops blind spots.
-// None of these are queried beyond the existing flattened `impact` mapping.
+// Also adds the run that owns the investigation and the chat thread it belongs to. Records are
+// only looked up by id, so none of these are queried beyond the existing flattened `impact` mapping.
 const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends({
   blind_spots: undefined,
   impact: schema.maybe(
@@ -109,6 +111,23 @@ const investigationAttributesSchemaV4 = investigationAttributesSchemaV3.extends(
       entities: schema.maybe(
         schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
           maxSize: MAX_IMPACT_ENTITIES,
+        })
+      ),
+    })
+  ),
+  execution_id: optionalKeyword,
+  // Every write sets the thread's surface, workspace, channel and thread_ts. They are optional here
+  // only because an existing model version cannot gain required fields.
+  thread: schema.maybe(
+    schema.object({
+      surface: schema.maybe(enumOf(['slack'] as const)),
+      workspace: optionalKeyword,
+      channel: optionalKeyword,
+      thread_ts: optionalKeyword,
+      status_message_ts: optionalKeyword,
+      seen_events: schema.maybe(
+        schema.arrayOf(schema.object({ event_id: keyword, execution_id: keyword }), {
+          maxSize: MAX_THREAD_SEEN_EVENTS,
         })
       ),
     })

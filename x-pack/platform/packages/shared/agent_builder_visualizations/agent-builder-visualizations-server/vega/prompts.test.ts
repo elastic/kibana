@@ -98,6 +98,10 @@ describe('vegaEsqlAdditionalInstructions', () => {
     );
   });
 
+  it('sizes @timestamp buckets with time-picker bounds', () => {
+    expect(vegaEsqlAdditionalInstructions).toContain('TBUCKET(100, ?_tstart, ?_tend)');
+  });
+
   it('asks to RENAME dotted columns to dotless aliases, except the time field', () => {
     expect(vegaEsqlAdditionalInstructions).toContain('Field names for Vega');
     expect(vegaEsqlAdditionalInstructions).toContain('RENAME host.name AS host');

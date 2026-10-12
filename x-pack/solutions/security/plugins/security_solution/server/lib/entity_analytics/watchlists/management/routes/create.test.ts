@@ -19,7 +19,6 @@ import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 const mockWatchlistCreate = jest.fn();
 const mockWatchlistDelete = jest.fn();
 const mockAddEntitySourceReference = jest.fn();
-const mockSyncWatchlist = jest.fn();
 
 jest.mock('../watchlist_config', () => ({
   WatchlistConfigClient: jest.fn().mockImplementation(() => ({
@@ -31,10 +30,12 @@ jest.mock('../watchlist_config', () => ({
 
 jest.mock('../../entity_sources/infra/entity_source_client');
 jest.mock('../../entity_sources/entity_sources_service', () => ({
-  createEntitySourcesService: jest.fn(() => ({
-    syncWatchlist: mockSyncWatchlist,
-  })),
+  syncWatchlistInBackground: jest.fn(),
 }));
+
+const { syncWatchlistInBackground: mockSyncWatchlistInBackground } = jest.requireMock(
+  '../../entity_sources/entity_sources_service'
+) as { syncWatchlistInBackground: jest.Mock };
 
 const mockValidateIndexPermissions = jest.fn();
 
@@ -70,7 +71,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
     mockWatchlistDelete.mockReset();
     mockAddEntitySourceReference.mockReset();
     mockCreateEntitySource.mockReset();
-    mockSyncWatchlist.mockReset();
+    mockSyncWatchlistInBackground.mockReset().mockResolvedValue(undefined);
     mockValidateIndexPermissions.mockReset().mockResolvedValue(undefined);
 
     const mockSecurity = { authc: { apiKeys: { grantAsInternalUser: jest.fn() } } };
@@ -329,34 +330,14 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       mockWatchlistCreate.mockResolvedValue(watchlistResult);
       mockCreateEntitySource.mockResolvedValue(entitySourceResult);
       mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockResolvedValue(undefined);
 
       const request = buildRequest({ entitySources: [entitySourceInputA] });
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).toHaveBeenCalledWith('wl-1');
-    });
-
-    it('logs warning when background sync fails', async () => {
-      const watchlistResult = {
-        id: 'wl-1',
-        name: 'test-watchlist',
-        description: 'A test watchlist',
-        riskModifier: 10,
-      };
-      const entitySourceResult = { id: 'es-1', ...entitySourceInputA };
-
-      mockWatchlistCreate.mockResolvedValue(watchlistResult);
-      mockCreateEntitySource.mockResolvedValue(entitySourceResult);
-      mockAddEntitySourceReference.mockResolvedValue(undefined);
-      mockSyncWatchlist.mockRejectedValue(new Error('sync failed'));
-
-      const request = buildRequest({ entitySources: [entitySourceInputA] });
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).toHaveBeenCalledWith('wl-1');
+      expect(mockSyncWatchlistInBackground).toHaveBeenCalledWith(
+        expect.objectContaining({ watchlistId: 'wl-1', logContext: 'WatchlistCreate' })
+      );
     });
 
     it('does not trigger sync when no entity sources created', async () => {
@@ -373,7 +354,7 @@ describe('POST /api/entity_analytics/watchlists - createWatchlistRoute', () => {
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
-      expect(mockSyncWatchlist).not.toHaveBeenCalled();
+      expect(mockSyncWatchlistInBackground).not.toHaveBeenCalled();
     });
 
     it('does not create watchlist when index permission validation fails', async () => {

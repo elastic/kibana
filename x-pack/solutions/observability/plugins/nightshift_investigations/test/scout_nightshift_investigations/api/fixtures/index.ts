@@ -31,3 +31,17 @@ export {
   putSandboxSecrets,
   replaceSandboxSecrets,
 } from './sandbox_secrets';
+export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
+export {
+  archiveMemoryPage,
+  deleteMemories,
+  deleteMemoryPage,
+  getMemoryPage,
+  MEMORY_CONFIGURE_ROLE,
+  MEMORY_INDEX,
+  MEMORY_MANAGER_ROLE,
+  MEMORY_READER_ROLE,
+  seedMemory,
+  storedMemoryId,
+} from './memory';
+export type { SeededMemory } from './memory';

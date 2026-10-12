@@ -101,14 +101,14 @@ describe('use_automations', () => {
       name: 'Triage',
       trigger: { rows: [{ kind: 'alert' as const }] },
       execution: {},
-      completion: {},
+      completions: [],
       runtime: {},
     };
 
     act(() => result.current.mutate(body));
 
     await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation "Triage" created' })
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation created', text: 'Triage' })
     );
     expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/automations', {
       params: { body },
@@ -122,8 +122,10 @@ describe('use_automations', () => {
     const toggle = renderWithClient(() => useToggleAutomation());
     const remove = renderWithClient(() => useDeleteAutomation());
 
-    act(() => toggle.result.current.mutate({ id: 'automation-1', isEnabled: false }));
-    act(() => remove.result.current.mutate('automation-1'));
+    act(() =>
+      toggle.result.current.mutate({ id: 'automation-1', name: 'Triage', isEnabled: false })
+    );
+    act(() => remove.result.current.mutate({ id: 'automation-1', name: 'Triage' }));
 
     await waitFor(() => expect(investigationsFetch).toHaveBeenCalledTimes(2));
     expect(investigationsFetch).toHaveBeenCalledWith('PUT /internal/nightshift/automations/{id}', {
@@ -134,13 +136,16 @@ describe('use_automations', () => {
       'DELETE /internal/nightshift/automations/{id}',
       { params: { path: { id: 'automation-1' } }, signal: null }
     );
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation deleted', text: 'Triage' })
+    );
   });
 
   it('shows an error toast when a mutation fails', async () => {
     investigationsFetch.mockRejectedValue(new Error('boom'));
     const { result } = renderWithClient(() => useDeleteAutomation());
 
-    act(() => result.current.mutate('automation-1'));
+    act(() => result.current.mutate({ id: 'automation-1', name: 'Triage' }));
 
     await waitFor(() =>
       expect(addError).toHaveBeenCalledWith(expect.any(Error), {

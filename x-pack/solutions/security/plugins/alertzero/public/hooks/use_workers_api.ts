@@ -18,6 +18,7 @@ import type {
   Worker,
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from './retry_on_transient_error';
+import { invalidateHuntThreatIntelSupplyStatus } from './use_hunt_threat_intel_supply';
 import { queryKeys } from '../query_keys';
 
 export const useWorkers = () => {
@@ -59,7 +60,13 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
     return;
   }
   const cause = error instanceof Error ? error : new Error(String(error));
-  toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
+  const body = isHttpFetchError(error)
+    ? (error.body as { message?: unknown } | undefined)
+    : undefined;
+  toasts.addError(cause, {
+    title: WORKER_UPDATE_ERROR_TITLE,
+    ...(typeof body?.message === 'string' ? { toastMessage: body.message } : {}),
+  });
 };
 
 export const notifyWorkerRulesSkipped = (toasts: IToasts, skippedRuleCount: number): void => {
@@ -144,6 +151,8 @@ export const useUpdateWorker = () => {
     // workers query error, which the Watch page uses to block Save.
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey });
+      // Hunt enable/disable/settings can change TI supply; refresh when present.
+      await invalidateHuntThreatIntelSupplyStatus(queryClient);
     },
   });
 };

@@ -44,6 +44,7 @@ import {
 } from './actions';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { hasRejectedJoinTarget } from './join_errors';
+import { withPromqlKeyword } from './promql_keyword';
 
 export const requestDocumentationSchema = z
   .object({
@@ -138,10 +139,15 @@ export const createNlToEsqlGraph = ({
         nlQuery: state.nlQuery,
         documentation,
         resource: state.resource,
+        additionalContext: state.additionalContext,
       })
     );
 
-    const requestedKeywords = [...commands, ...functions];
+    const requestedKeywords = withPromqlKeyword(
+      [...commands, ...functions],
+      state.nlQuery,
+      state.additionalContext
+    );
     const fetchedDoc = docBase.getDocumentation(requestedKeywords);
 
     const action: RequestDocumentationAction = {
