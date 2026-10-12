@@ -3566,6 +3566,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_alerting_v2 @elastic/rna-project-team
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_endpoint @elastic/security-defend-workflows
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_entity_analytics @elastic/security-entity-analytics
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/entity_analytics_executive_brief @elastic/security-entity-analytics
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_security_persona_matrix @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_attack_discovery_agent_builder @elastic/security-generative-ai
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations @elastic/nightshift
@@ -3590,6 +3591,7 @@ x-pack/solutions/security/plugins/security_solution/public/entity_analytics @ela
 x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolved_latest_entities_index_name.ts @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/common/hooks/use_resolved_latest_entities_index_name.test.ts @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/test/scout_entity_analytics_executive_brief/ @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/explore @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @elastic/security-entity-analytics
