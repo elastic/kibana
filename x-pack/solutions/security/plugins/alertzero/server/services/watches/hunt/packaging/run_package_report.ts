@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { ActionCatalogEntry } from '@kbn/alertzero-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type {
@@ -14,10 +15,17 @@ import type {
 import type { ResolveHostEnrollment } from '../../../fleet/resolve_host_enrollment';
 import { buildHuntInvestigationConversationId } from '../common/hunt_investigation_id';
 import { buildProposalSummaryBullets, decidePackageReport } from './decide_package_report';
+import {
+  buildCleanInvestigationSummary,
+  buildInvestigationSummary,
+} from './build_investigation_summary';
+import { deriveCleanCoverageSubjects } from './derive_clean_coverage_subjects';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
+import type { EsReportContextClient } from './load_report_hunt_context';
+import { loadReportHuntContext } from './load_report_hunt_context';
 import { readCurrentRunState } from './read_current_run_state';
 import type { RehydrateProcessSelectors } from './rehydrate_process_selectors';
-import type { CoverageSubject, CoverageWriteResult } from './types';
+import type { CoordinatorInputs, CoverageSubject, CoverageWriteResult } from './types';
 
 export class PackageReportIdentityError extends Error {
   constructor(message: string) {
@@ -63,6 +71,18 @@ export interface RunPackageReportDeps {
   resolveHostEnrollment: ResolveHostEnrollment;
   rehydrateProcessSelectors: RehydrateProcessSelectors;
   countExistingProposals: CountExistingProposals;
+  /**
+   * *Internal*-user ES client for the no-hit coverage `threat_summary` / severity preference
+   * (`loadReportHuntContext`). Only read on the no-hit branch, which has no current-run SSE to
+   * fall back to from this helper's own failure; a thin synthetic string stands in instead.
+   * Optional so a caller without the threat-reports index wired up still packages. Must not be
+   * the step's scoped client: the hunt worker's service-account role has no grant at all on
+   * `.kibana-threat-reports`, so a scoped search there silently returns zero hits rather than
+   * erroring (see `loadReportHuntContext`'s doc comment).
+   */
+  getEsReportContextClient?: () => EsReportContextClient;
+  /** Logs a threat report load failure; absent, the failure is silent. */
+  logger?: Logger;
   hasOpenProposal: HasOpenProposal;
 }
 
@@ -135,6 +155,7 @@ export const runPackageReport = async ({
   huntStatus,
   hasConfirmedHit,
   expectedSseCount,
+  coordinator = {},
   attachments,
   deps,
 }: {
@@ -158,6 +179,12 @@ export const runPackageReport = async ({
    * changed out from under it -- that would turn a staleness gap into an outage.
    */
   expectedSseCount: number | undefined;
+  /**
+   * The coordinator result the hunt child passed along. A clean run leaves no SSE, so this is
+   * the only place its Tier 2 targets and executed queries exist; absent (an older Worker) it
+   * degrades the coverage KI's `data_sources` / `validated_esql`, never fails packaging.
+   */
+  coordinator?: CoordinatorInputs;
   attachments: VersionedAttachment[] | undefined;
   deps: RunPackageReportDeps;
 }): Promise<PackageReportOutput> => {
@@ -190,19 +217,36 @@ export const runPackageReport = async ({
     // later sweep hunts it again. Closing here would have that sweep write its findings --
     // a real hit included -- into an Investigation this run had already closed.
     if (!hasConfirmedHit && huntStatus === 'success') {
-      // No SSE means no technique-level detail either, so this writes the same report-scoped
-      // fallback subject `deriveCoverageSubjects` already emits when a run's SSE names no
-      // techniques -- the one piece of "we looked" this run can honestly claim is the reportId.
-      const subjects = deriveCoverageSubjects({
-        spaceId,
-        state: { reportId, techniques: [], hasConfirmedHit: false, corroboratedTechniques: [] },
-        investigationConversationId,
-      });
-      const coverage = await deps.writeCoverageKis(subjects);
+      // No SSE exists here, so the coordinator result the hunt child passed along is the only
+      // source for the executed Tier 2 queries and the dataset hint. The report supplies the
+      // threat story; a failed or missing load degrades to what the inputs alone can say
+      // instead of failing packaging.
+      const reportContext = deps.getEsReportContextClient
+        ? await loadReportHuntContext({
+            esClient: deps.getEsReportContextClient(),
+            spaceId,
+            reportId,
+            logger: deps.logger,
+          })
+        : undefined;
       const dismissHold = await resolveDismissHold(
         deps.hasOpenProposal,
         investigationConversationId
       );
+      const subjects = deriveCleanCoverageSubjects({
+        spaceId,
+        reportId,
+        inputs: coordinator,
+        reportContext,
+        severity: reportContext?.severity,
+        investigationSummary: buildCleanInvestigationSummary({
+          inputs: coordinator,
+          reportContext,
+          dismissHold,
+        }),
+        investigationConversationId,
+      });
+      const coverage = await deps.writeCoverageKis(subjects);
       return {
         status: 'packaged',
         coverage,
@@ -249,13 +293,19 @@ export const runPackageReport = async ({
     catalog,
   });
 
-  const subjects = deriveCoverageSubjects({
-    spaceId,
-    state,
-    investigationConversationId,
-  });
-  const coverage = await deps.writeCoverageKis(subjects);
-
+  // Hit path: the threat story is the finding's own hypothesis. The report is loaded only as a
+  // fallback, when a finding carries no hypothesis (the mapper's generic sentence counts as
+  // none). Severity always comes from the SSE, so it does not depend on whether that load ran.
+  const needsReport = state.findings.some((finding) => finding.hypothesis === undefined);
+  const reportContext =
+    needsReport && deps.getEsReportContextClient
+      ? await loadReportHuntContext({
+          esClient: deps.getEsReportContextClient(),
+          spaceId,
+          reportId,
+          logger: deps.logger,
+        })
+      : undefined;
   const dismissHold: DismissHold = decided.dismiss
     ? await resolveDismissHold(deps.hasOpenProposal, investigationConversationId)
     : 'none';
@@ -278,6 +328,26 @@ export const runPackageReport = async ({
     }
   }
   const proposals = mintSuppression === 'none' ? decided.proposals : [];
+
+  // Written once the proposal outcome is known, so the summary describes what was minted: a run
+  // the existing-Proposal guard suppressed proposed nothing, and one held open was not dismissed.
+  const subjects = deriveCoverageSubjects({
+    spaceId,
+    state: {
+      ...state,
+      severity: state.severity ?? reportContext?.severity,
+      investigationSummary: buildInvestigationSummary({
+        state,
+        decided: { dismiss: decided.dismiss, proposals },
+        mintSuppression,
+        dismissHold,
+      }),
+      coordinator,
+      reportContext,
+    },
+    investigationConversationId,
+  });
+  const coverage = await deps.writeCoverageKis(subjects);
 
   // Threaded through to the packaging workflow's per-Proposal gate fan-out as a plain
   // workflow input (`hunt_package_report.yaml`'s `dispatch_gate` step) — the settlement

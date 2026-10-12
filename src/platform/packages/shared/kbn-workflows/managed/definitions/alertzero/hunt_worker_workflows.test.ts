@@ -47,6 +47,9 @@ interface YamlStep {
   name: string;
   type?: string;
   with?: {
+    result_report_intent_targets?: string;
+    result_behaviors?: string;
+    report_intent_targets?: string;
     'workflow-id'?: string;
     inputs?: Record<string, unknown>;
     path?: string;
@@ -60,6 +63,7 @@ interface YamlStep {
 
 interface YamlWorkflow {
   tags?: string[];
+  outputs?: { properties?: Record<string, { type?: string }> };
   triggers?: Array<{ type: string; inputs?: TriggerInputSchema }>;
   steps: YamlStep[];
   settings?: { concurrency?: { key?: string; strategy?: string; max?: number } };
@@ -280,6 +284,115 @@ describe('Hunt Watch worker chain', () => {
         "${{ steps.check_index_scope.output.status != 'ok' and steps.check_index_scope.output.status != 'degraded' }}"
       );
       expect(stepIn(workerSteps, 'count_index_scope_statuses')).toBeUndefined();
+    });
+  });
+
+  // A clean run attaches no SSE, so the coordinator's Tier 2 targets and executed behaviors
+  // reach packaging only as inputs threaded hunt -> Worker -> packaging child -> step.
+  describe('the coordinator result handed to packaging', () => {
+    const resultVariables = () =>
+      huntSteps.find((step) => step.with?.result_report_intent_targets !== undefined)?.with ?? {};
+    const workerInputs = () => stepIn(workerSteps, 'package_report')?.with?.inputs ?? {};
+    const decideInputs = () => stepIn(packageReportSteps, 'decide_and_package')?.with ?? {};
+
+    it('declares the coordinator results as hunt outputs', () => {
+      expect(Object.keys(hunt.outputs?.properties ?? {})).toEqual(
+        expect.arrayContaining(['report_intent_targets', 'behaviors'])
+      );
+    });
+
+    it('declares behaviors as an array', () => {
+      expect(hunt.outputs?.properties?.behaviors?.type).toBe('array');
+    });
+
+    it.each([
+      ['a report match', ['logs-aws.cloudtrail-*'], ['logs-aws.cloudtrail-*']],
+      ['no coordinator output', undefined, []],
+    ])('reads report_intent_targets as an array for %s (%p)', (_name, value, expected) => {
+      expect(
+        evaluateExpression(resultVariables().result_report_intent_targets as string, {
+          steps: {
+            run_hunt_coordinator: { output: value ? { report_intent_targets: value } : undefined },
+          },
+        })
+      ).toEqual(expected);
+    });
+
+    it('reads behaviors as an empty array when Tier 2 never ran', () => {
+      expect(
+        evaluateExpression(resultVariables().result_behaviors as string, {
+          steps: { run_hunt_coordinator: { output: { report_intent_targets: [] } } },
+        })
+      ).toEqual([]);
+    });
+
+    const behaviorsOutput = (behaviors: unknown[]) =>
+      evaluateExpression(resultVariables().result_behaviors as string, {
+        steps: { run_hunt_coordinator: { output: { tier2: { behaviors } } } },
+      });
+    const executedBehavior = (technique_id: string) => ({
+      technique_id,
+      execution: { executed: true, row_count: 0, hit: false },
+    });
+
+    it('reads the executed behaviors from the coordinator Tier 2 result', () => {
+      expect(behaviorsOutput([executedBehavior('T1110')])).toEqual([executedBehavior('T1110')]);
+    });
+
+    it('leaves out behaviors that did not execute', () => {
+      expect(
+        behaviorsOutput([
+          { technique_id: 'T1078' },
+          { technique_id: 'T1059', execution: { executed: false, row_count: 0, hit: false } },
+          executedBehavior('T1110'),
+        ])
+      ).toEqual([executedBehavior('T1110')]);
+    });
+
+    it('keeps an executed behavior that follows more than 20 unexecuted ones', () => {
+      const unexecuted = Array.from({ length: 25 }, (_, i) => ({ technique_id: `T${i}` }));
+
+      expect(behaviorsOutput([...unexecuted, executedBehavior('T1110')])).toEqual([
+        executedBehavior('T1110'),
+      ]);
+    });
+
+    it('caps the executed behaviors at the 20 packaging accepts', () => {
+      const executed = Array.from({ length: 25 }, (_, i) => executedBehavior(`T${i}`));
+
+      expect((behaviorsOutput(executed) as unknown[]).length).toBe(20);
+    });
+
+    it('forwards the report-intent targets and behaviors from the hunt output into the packaging call', () => {
+      expect(['reportIntentTargets', 'behaviors'].map((key) => key in workerInputs())).toEqual([
+        true,
+        true,
+      ]);
+    });
+
+    it('reads the packaging call inputs as empty arrays when the hunt output is missing', () => {
+      expect(
+        evaluateExpression(workerInputs().reportIntentTargets as string, {
+          steps: { hunt: { output: undefined } },
+        })
+      ).toEqual([]);
+    });
+
+    it('declares the two inputs on the packaging child without requiring them', () => {
+      const inputs = packageReport.triggers?.[0]?.inputs;
+
+      expect(
+        ['reportIntentTargets', 'behaviors'].map(
+          (key) => key in (inputs?.properties ?? {}) && !(inputs?.required ?? []).includes(key)
+        )
+      ).toEqual([true, true]);
+    });
+
+    it('forwards the two inputs from the packaging child into the step', () => {
+      expect(['reportIntentTargets', 'behaviors'].map((key) => key in decideInputs())).toEqual([
+        true,
+        true,
+      ]);
     });
   });
 

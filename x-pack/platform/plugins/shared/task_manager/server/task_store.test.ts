@@ -27,8 +27,12 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes, SavedObjectsServiceStart } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type {
+  SavedObjectAttributes,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, SPACES_EXTENSION_ID } from '@kbn/core/server';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -125,7 +129,20 @@ taskDefinitions.registerTaskDefinitions({
     title: 'yawn',
     createTaskRunner: jest.fn(),
   },
+  serviceAccountTask: {
+    title: 'serviceAccountTask',
+    runAs: { workloadTypes: ['workflow'], withScopedRequest: jest.fn() },
+    createTaskRunner: jest.fn(),
+  },
 });
+
+const runAs = {
+  workloadType: 'workflow',
+  workloadId: 'workflow-1',
+  spaceId: 'default',
+  expectedServiceAccountId: 'service-account-1',
+};
+const serviceAccountCredential = { type: 'service_account', ...runAs };
 
 describe('TaskStore', () => {
   describe('schedule', () => {
@@ -607,6 +624,127 @@ describe('TaskStore', () => {
 
       await testSchedule(task);
       expect(adHocTaskCounter.count).toEqual(0);
+    });
+
+    describe('with runAs', () => {
+      const serviceAccountSoClient = savedObjectsClientMock.create();
+      const task: TaskInstance = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'serviceAccountTask',
+        runAs,
+      };
+
+      beforeEach(() => {
+        (coreStart.security.serviceAccounts.isEnabled as jest.Mock).mockReturnValue(true);
+        coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(serviceAccountSoClient);
+        serviceAccountSoClient.create.mockImplementation(
+          async (type: string, attributes: unknown) => ({
+            id: 'id',
+            type,
+            attributes,
+            references: [],
+            version: '123',
+          })
+        );
+      });
+
+      test('stores runAs as the credential through the internal client without granting an API key', async () => {
+        const request = httpServerMock.createKibanaRequest();
+
+        await store.schedule(task, { request });
+
+        expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
+          includedHiddenTypes: ['task'],
+          excludedExtensions: [SPACES_EXTENSION_ID],
+        });
+        expect(serviceAccountSoClient.create).toHaveBeenCalledWith(
+          'task',
+          {
+            attempts: 0,
+            params: '{"hello":"world"}',
+            retryAt: null,
+            runAt: '2019-02-12T21:01:22.479Z',
+            scheduledAt: '2019-02-12T21:01:22.479Z',
+            startedAt: null,
+            state: '{"foo":"bar"}',
+            status: 'idle',
+            taskType: 'serviceAccountTask',
+            partition: 225,
+            credential: serviceAccountCredential,
+            encryptedCredential: expect.any(String),
+          },
+          { id: 'id', refresh: false }
+        );
+        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
+        expect(savedObjectsClient.create).not.toHaveBeenCalled();
+      });
+
+      test.each([
+        [
+          'service accounts are disabled',
+          task,
+          false,
+          'Unable to schedule task(s) with runAs because service accounts are disabled.',
+        ],
+        [
+          'the task type does not define runAs',
+          { ...task, taskType: 'report' },
+          true,
+          'Task type "report" does not allow runAs with workload type "workflow".',
+        ],
+        [
+          'the task type does not allow the workload type',
+          { ...task, runAs: { ...runAs, workloadType: 'other' } },
+          true,
+          'Task type "serviceAccountTask" does not allow runAs with workload type "other".',
+        ],
+        [
+          'runAs is invalid',
+          { ...task, runAs: { ...runAs, workloadId: '' } },
+          true,
+          '[runAs.workloadId]',
+        ],
+      ])(
+        'errors when %s',
+        async (description, taskInstance, serviceAccountsEnabled, expectedError) => {
+          (coreStart.security.serviceAccounts.isEnabled as jest.Mock).mockReturnValue(
+            serviceAccountsEnabled
+          );
+
+          await expect(store.schedule(taskInstance)).rejects.toThrow(expectedError);
+
+          expect(serviceAccountSoClient.create).not.toHaveBeenCalled();
+          expect(savedObjectsClient.create).not.toHaveBeenCalled();
+        }
+      );
+
+      test('errors when unable to encrypt SO', async () => {
+        store = new TaskStore({
+          logger: mockLogger(),
+          index: 'tasky',
+          taskManagerId: '',
+          serializer,
+          esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+          definitions: taskDefinitions,
+          savedObjectsRepository: savedObjectsClient,
+          adHocTaskCounter,
+          allowReadingInvalidState: false,
+          savedObjectsService: coreStart.savedObjects,
+          security: coreStart.security,
+          canEncryptSavedObjects: false,
+          getIsSecurityEnabled: () => true,
+          executionContext: mockExecutionContextStart,
+          apiKeyStrategy: new EsApiKeyStrategy(),
+        });
+
+        await expect(store.schedule(task)).rejects.toThrow(
+          'Unable to schedule task(s) with runAs because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+        );
+        expect(serviceAccountSoClient.create).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -2540,6 +2678,21 @@ describe('TaskStore', () => {
           expect(result).toEqual([]);
         }
       );
+
+      test('does not regenerate an API key for a task with a service account credential', async () => {
+        const credentialTaskWithApiKey = { ...apiKeyTask, ...credentialFields };
+        mockGetScopedClient.mockReturnValue({
+          bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }),
+        });
+
+        await store.bulkUpdate([credentialTaskWithApiKey], {
+          validate: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        });
+
+        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -3673,6 +3826,72 @@ describe('TaskStore', () => {
     });
   });
 
+  describe('getCredential', () => {
+    let store: TaskStore;
+
+    beforeAll(() => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        getIsSecurityEnabled: () => true,
+        executionContext: mockExecutionContextStart,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
+    });
+
+    test.each([
+      ['the stored credential', { credential: serviceAccountCredential }, serviceAccountCredential],
+      ['undefined for a task without a credential', {}, undefined],
+    ])('returns %s without decrypting the task', async (description, attributes, expected) => {
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'id',
+        type: 'task',
+        attributes,
+        references: [],
+        version: '123',
+      });
+
+      await expect(store.getCredential('id')).resolves.toEqual(expected);
+
+      expect(savedObjectsClient.get).toHaveBeenCalledWith('task', 'id');
+      expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('throws a not found error without pushing it to errors$', async () => {
+      const errors = jest.fn();
+      const subscription = store.errors$.subscribe(errors);
+      savedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'id')
+      );
+
+      await expect(store.getCredential('id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      subscription.unsubscribe();
+      expect(errors).not.toHaveBeenCalled();
+    });
+
+    test('pushes any other error from saved objects client to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      savedObjectsClient.get.mockRejectedValueOnce(new Error('Failure'));
+
+      await expect(store.getCredential('id')).rejects.toThrow('Failure');
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
   describe('bulkGet', () => {
     let store: TaskStore;
 
@@ -4015,6 +4234,15 @@ describe('TaskStore', () => {
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
+      savedObjectsClient.bulkGet.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, id }) => ({
+          type,
+          id,
+          attributes: {},
+          references: [],
+          error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+        })),
+      }));
     });
 
     afterEach(() => {
@@ -4085,7 +4313,7 @@ describe('TaskStore', () => {
           },
         ],
         {
-          overwrite: true,
+          overwrite: false,
           refresh: false,
         }
       );
@@ -4532,7 +4760,7 @@ describe('TaskStore', () => {
 
       expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         [expect.objectContaining({ id: 'task1' })],
-        { overwrite: true, refresh: false }
+        { overwrite: false, refresh: false }
       );
 
       // The omitted task has no entry in the bulk response, but the key granted for it never
@@ -4855,10 +5083,276 @@ describe('TaskStore', () => {
           },
         ],
         {
-          overwrite: true,
+          overwrite: false,
           refresh: false,
         }
       );
+    });
+
+    describe('with runAs and existing tasks', () => {
+      const serviceAccountSoClient = savedObjectsClientMock.create();
+      const reportApiKeyFields = {
+        apiKey: Buffer.from('reportApiKeyId:apiKey').toString('base64'),
+        userScope: { apiKeyId: 'reportApiKeyId', apiKeyCreatedByUser: false },
+      };
+      const notFound = (id: string) => ({
+        type: 'task',
+        id,
+        attributes: {},
+        references: [],
+        error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+      });
+      const echoBulkCreate = async (objects: Array<SavedObjectsBulkCreateObject<unknown>>) => ({
+        saved_objects: objects.map(({ id = '', type, attributes }) => ({
+          id,
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })),
+      });
+
+      beforeEach(() => {
+        (coreStart.security.serviceAccounts.isEnabled as jest.Mock).mockReturnValue(true);
+        coreStart.savedObjects.getUnsafeInternalClient.mockImplementation(
+          ({ includedHiddenTypes } = {}) =>
+            includedHiddenTypes?.includes('task')
+              ? serviceAccountSoClient
+              : invalidationSoClientMock
+        );
+        coreStart.savedObjects.getScopedClient.mockReturnValue(scopedSavedObjectsClient);
+        serviceAccountSoClient.bulkCreate.mockImplementation(echoBulkCreate);
+        scopedSavedObjectsClient.bulkCreate.mockImplementation(echoBulkCreate);
+        savedObjectsClient.bulkCreate.mockImplementation(echoBulkCreate);
+      });
+
+      test('grants API keys only to the tasks without runAs and keeps the order of the input', async () => {
+        const apiKeyTask = { id: 'task1', params: {}, state: {}, taskType: 'report' };
+        const serviceAccountTask = {
+          id: 'task2',
+          params: {},
+          state: {},
+          taskType: 'serviceAccountTask',
+          runAs,
+        };
+        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+          new Map([['task1', reportApiKeyFields]])
+        );
+        const request = httpServerMock.createKibanaRequest();
+
+        const result = await store.bulkSchedule([apiKeyTask, serviceAccountTask], { request });
+
+        expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([{ type: 'task', id: 'task1' }]);
+        expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+          [apiKeyTask],
+          request,
+          coreStart.security,
+          expect.anything()
+        );
+        expect(serviceAccountSoClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              type: 'task',
+              id: 'task2',
+              attributes: expect.objectContaining({
+                credential: serviceAccountCredential,
+                encryptedCredential: expect.any(String),
+              }),
+            },
+          ],
+          { refresh: false, overwrite: false }
+        );
+        expect(serviceAccountSoClient.bulkCreate.mock.calls[0][0][0].attributes).not.toHaveProperty(
+          'apiKey'
+        );
+        expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [
+            {
+              type: 'task',
+              id: 'task1',
+              attributes: expect.objectContaining(reportApiKeyFields),
+            },
+          ],
+          { refresh: false, overwrite: false }
+        );
+        expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+        expect(result.map(({ id }) => id)).toEqual(['task1', 'task2']);
+      });
+
+      test('does not read the tasks with generated ids', async () => {
+        await store.bulkSchedule([{ params: {}, state: {}, taskType: 'report' }]);
+
+        expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+        expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+          [expect.objectContaining({ id: expect.any(String) })],
+          { refresh: false, overwrite: false }
+        );
+      });
+
+      test('overwrites an existing task without a credential at the version that was read', async () => {
+        const newTask = { id: 'task1', params: {}, state: {}, taskType: 'report' };
+        const existingTask = { id: 'task2', params: {}, state: {}, taskType: 'report' };
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            notFound('task1'),
+            {
+              type: 'task',
+              id: 'task2',
+              attributes: { taskType: 'report', apiKey: 'encrypted-api-key' },
+              references: [],
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+
+        const result = await store.bulkSchedule([newTask, existingTask]);
+
+        expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(2);
+        expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+          1,
+          [{ type: 'task', id: 'task2', version: 'WzEsMV0=', attributes: expect.any(Object) }],
+          { refresh: false, overwrite: true }
+        );
+        expect(savedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+          2,
+          [{ type: 'task', id: 'task1', attributes: expect.any(Object) }],
+          { refresh: false, overwrite: false }
+        );
+        expect(result.map(({ id }) => id)).toEqual(['task1', 'task2']);
+      });
+
+      test.each([
+        ['credential', { credential: serviceAccountCredential }],
+        ['encryptedCredential', { encryptedCredential: 'encrypted-credential' }],
+      ])(
+        'returns a conflict without granting an API key for an existing task with %s',
+        async (description, credentialFields) => {
+          const existingTask = { id: 'task1', params: {}, state: {}, taskType: 'report' };
+          const newTask = { id: 'task2', params: {}, state: {}, taskType: 'report' };
+          savedObjectsClient.bulkGet.mockResolvedValueOnce({
+            saved_objects: [
+              {
+                type: 'task',
+                id: 'task1',
+                attributes: { taskType: 'report', ...credentialFields },
+                references: [],
+                version: 'WzEsMV0=',
+              },
+              notFound('task2'),
+            ],
+          });
+          (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+            new Map([['task2', reportApiKeyFields]])
+          );
+          const request = httpServerMock.createKibanaRequest();
+
+          await expect(store.bulkSchedule([existingTask, newTask], { request })).rejects.toEqual({
+            statusCode: 409,
+            error: 'Conflict',
+            message: `Task "task1" has a credential and can't be overwritten. Remove it and schedule it again.`,
+          });
+
+          expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+            [newTask],
+            request,
+            coreStart.security,
+            expect.anything()
+          );
+          expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+          expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
+            [expect.objectContaining({ id: 'task2' })],
+            { refresh: false, overwrite: false }
+          );
+          expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+        }
+      );
+
+      test('invalidates only the API keys of the write that failed', async () => {
+        const newTask = { id: 'task1', params: {}, state: {}, taskType: 'report' };
+        const existingTask = { id: 'task2', params: {}, state: {}, taskType: 'yawn' };
+        savedObjectsClient.bulkGet.mockResolvedValueOnce({
+          saved_objects: [
+            notFound('task1'),
+            {
+              type: 'task',
+              id: 'task2',
+              attributes: { taskType: 'yawn' },
+              references: [],
+              version: 'WzEsMV0=',
+            },
+          ],
+        });
+        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+          new Map([
+            ['task1', reportApiKeyFields],
+            [
+              'task2',
+              {
+                apiKey: Buffer.from('yawnApiKeyId:apiKey').toString('base64'),
+                userScope: { apiKeyId: 'yawnApiKeyId', apiKeyCreatedByUser: false },
+              },
+            ],
+          ])
+        );
+        scopedSavedObjectsClient.bulkCreate
+          .mockImplementationOnce(echoBulkCreate)
+          .mockRejectedValueOnce(new Error('Failure'));
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(store.bulkSchedule([newTask, existingTask], { request })).rejects.toThrow(
+          'Failure'
+        );
+
+        expect(scopedSavedObjectsClient.bulkCreate).toHaveBeenNthCalledWith(
+          1,
+          [expect.objectContaining({ id: 'task2' })],
+          { refresh: false, overwrite: true }
+        );
+        expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+          {
+            attributes: { apiKeyId: 'reportApiKeyId', createdAt: expect.any(String) },
+            type: 'api_key_to_invalidate',
+          },
+        ]);
+        expect(adHocTaskCounter.count).toEqual(0);
+      });
+
+      test('grants no API key when reading the existing tasks fails', async () => {
+        const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+        savedObjectsClient.bulkGet.mockRejectedValueOnce(new Error('Failure'));
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(
+          store.bulkSchedule([{ id: 'task1', params: {}, state: {}, taskType: 'report' }], {
+            request,
+          })
+        ).rejects.toThrow('Failure');
+
+        expect(await firstErrorPromise).toEqual(new Error('Failure'));
+        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      });
+
+      test('errors before granting any API key when runAs is not allowed', async () => {
+        (coreStart.security.serviceAccounts.isEnabled as jest.Mock).mockReturnValue(false);
+        const request = httpServerMock.createKibanaRequest();
+
+        await expect(
+          store.bulkSchedule(
+            [
+              { id: 'task1', params: {}, state: {}, taskType: 'report' },
+              { id: 'task2', params: {}, state: {}, taskType: 'serviceAccountTask', runAs },
+            ],
+            { request }
+          )
+        ).rejects.toThrow(
+          'Unable to schedule task(s) with runAs because service accounts are disabled.'
+        );
+
+        expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
+        expect(serviceAccountSoClient.bulkCreate).not.toHaveBeenCalled();
+        expect(scopedSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      });
     });
   });
 

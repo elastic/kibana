@@ -82,6 +82,21 @@ triggers:
         expectedSseCount:
           type: number
           description: Number of significant security event attachments the hunt child prepared for this run (its `sse_count` output). Omit to skip the shortfall check.
+        # The coordinator result a clean run cannot leave on an attachment (an SSE exists only
+        # for a confirmed hit). Not required, for the same reason as `expectedSseCount`: an
+        # already-installed Worker does not send them until its own `version` bumps, and the
+        # step treats absent values as "no dataset hint / no query", never as an error.
+        reportIntentTargets:
+          type: array
+          items:
+            type: string
+          description: The coordinator's `report_intent_targets` (the hunt child's `report_intent_targets` output).
+        behaviors:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: The coordinator's `tier2.behaviors` (the hunt child's `behaviors` output).
       required:
         - reportId
         - investigationConversationId
@@ -119,6 +134,8 @@ steps:
       # renders it as the string "false", which fails input validation.
       hasConfirmedHit: "${{ inputs.hasConfirmedHit }}"
       expectedSseCount: "${{ inputs.expectedSseCount }}"
+      reportIntentTargets: "${{ inputs.reportIntentTargets }}"
+      behaviors: "${{ inputs.behaviors }}"
     on-failure:
       fallback:
         - name: emit_package_failed

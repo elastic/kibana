@@ -84,6 +84,7 @@ export function validateNoStructuralModelVersionChanges(
       delete comparable.schemas.create;
       // @ts-ignore we're simulating an older version of the type without the new properties
       comparable.schemas.forwardCompatibility = Boolean(comparable.schemas.forwardCompatibility);
+      delete comparable.schemas?.update;
       if (!equal(summaryBefore, comparable)) {
         structuralMutations.push(versionLabel);
       }
@@ -133,7 +134,8 @@ function schemasChanged(before: ModelVersionSummary, after: ModelVersionSummary)
     !schemasEqual(
       before.schemas.forwardCompatibility as SchemasValue,
       after.schemas.forwardCompatibility as SchemasValue
-    )
+    ) ||
+    !schemasEqual(before.schemas.update ?? false, after.schemas.update ?? false)
   );
 }
 
@@ -248,11 +250,15 @@ function canDiffSchemas(before: ModelVersionSummary, after: ModelVersionSummary)
   const aCreate = after.schemas.create as SchemasValue;
   const bFwd = before.schemas.forwardCompatibility as SchemasValue;
   const aFwd = after.schemas.forwardCompatibility as SchemasValue;
+  const bUpdate: SchemasValue = before.schemas.update ?? false;
+  const aUpdate: SchemasValue = after.schemas.update ?? false;
   return (
     (bCreate === false || isObject(bCreate)) &&
     (aCreate === false || isObject(aCreate)) &&
     (bFwd === false || isObject(bFwd)) &&
-    (aFwd === false || isObject(aFwd))
+    (aFwd === false || isObject(aFwd)) &&
+    (bUpdate === false || isObject(bUpdate)) &&
+    (aUpdate === false || isObject(aUpdate))
   );
 }
 
@@ -275,9 +281,14 @@ function diffModelVersionSchemas(
     after.schemas.forwardCompatibility as false | Record<string, unknown>,
     'forwardCompatibility'
   );
+  const updateDiff = diffSchemas(
+    before.schemas.update ?? false,
+    after.schemas.update ?? false,
+    'update'
+  );
   return {
-    breaking: [...createDiff.breaking, ...fwdDiff.breaking],
-    warnings: [...createDiff.warnings, ...fwdDiff.warnings],
+    breaking: [...createDiff.breaking, ...fwdDiff.breaking, ...updateDiff.breaking],
+    warnings: [...createDiff.warnings, ...fwdDiff.warnings, ...updateDiff.warnings],
   };
 }
 
@@ -299,7 +310,7 @@ function diffModelVersionSchemas(
 function diffSchemas(
   before: false | Record<string, unknown>,
   after: false | Record<string, unknown>,
-  schemaType: 'create' | 'forwardCompatibility'
+  schemaType: 'create' | 'forwardCompatibility' | 'update'
 ): SchemaDiffResult {
   if (before === false) {
     // Schema absent in the baseline: either still absent (false/false = no change) or newly added

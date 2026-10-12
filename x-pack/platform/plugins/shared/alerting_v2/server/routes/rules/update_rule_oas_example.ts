@@ -22,6 +22,7 @@ export const UPDATE_RULE_REQUEST: UpdateRuleData = {
   metadata: {
     name: UPDATED_RULE_NAME,
     description: UPDATED_RULE_DESCRIPTION,
+    tags: null,
   },
 };
 
@@ -35,7 +36,7 @@ export const updateRuleOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
       name: 'updateRuleRequest',
-      summary: 'Update a rule name and description',
+      summary: 'Rename a rule and clear its tags, leaving the rest of the metadata intact',
       value: UPDATE_RULE_REQUEST,
     },
     responses: {

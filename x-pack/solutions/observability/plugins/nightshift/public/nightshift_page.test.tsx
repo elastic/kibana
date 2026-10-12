@@ -242,11 +242,12 @@ describe('NightshiftPage', () => {
       expect(screen.queryByTestId('nightshiftSandboxSecretsLink')).not.toBeInTheDocument();
     });
 
-    it('opens the sandbox secrets flyout for users who can manage Nightshift', async () => {
+    it('opens sandbox secrets without duplicating custom context in the app menu', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
       await openAppMenuOverflow();
 
+      expect(screen.queryByTestId('nightshiftCustomContextLink')).not.toBeInTheDocument();
       const link = await screen.findByTestId('nightshiftSandboxSecretsLink');
       await act(async () => fireEvent.click(link));
 
