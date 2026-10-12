@@ -626,6 +626,41 @@ describe('withRemovedKafkaOAuth2Settings', () => {
     });
   });
 
+  it('keeps and removes the names that every object inherits, as any other name', () => {
+    // own properties, as the ones of a parsed JSON body or of a saved object
+    const withNames = (names: string[]) => ({
+      client_id: 'my-client',
+      token_url: 'https://idp',
+      endpoint_params: JSON.parse(
+        `{${names.map((name) => `"${name}": ["${name} value"]`).join(',')}}`
+      ),
+    });
+    const own = (object: object, key: string) =>
+      Object.getOwnPropertyDescriptor(object, key)?.value;
+    const savedWithScopes = {
+      type: 'kafka',
+      oauth2: { ...withNames(['constructor', '__proto__']), scopes: ['read'] },
+    };
+
+    // a setting is removed (the scopes) while the names are kept
+    const kept = withNames(['constructor', '__proto__']);
+    const merged: any = withRemovedKafkaOAuth2Settings(savedWithScopes, kept);
+    expect(merged.scopes).toBeNull();
+    expect(own(merged.endpoint_params, '__proto__')).toEqual(['__proto__ value']);
+    expect(own(merged.endpoint_params, 'constructor')).toEqual(['constructor value']);
+
+    // a name is removed, and another one is added
+    const changed: any = withRemovedKafkaOAuth2Settings(
+      savedWithScopes,
+      withNames(['__proto__', 'audience'])
+    );
+    expect(own(changed.endpoint_params, 'constructor')).toBeNull();
+    expect(own(changed.endpoint_params, '__proto__')).toEqual(['__proto__ value']);
+    expect(own(changed.endpoint_params, 'audience')).toEqual(['audience value']);
+    // the objects were not given another prototype
+    expect(Object.getPrototypeOf(changed.endpoint_params)).toBe(Object.prototype);
+  });
+
   it('keeps what is sent, and does not touch an update that removes nothing', () => {
     const update = { ...saved.oauth2, scopes: ['write'] };
 

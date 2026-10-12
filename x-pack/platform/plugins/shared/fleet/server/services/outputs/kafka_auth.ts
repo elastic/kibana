@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isEqual, isPlainObject, merge } from 'lodash';
+import { isEmpty, isEqual, isPlainObject } from 'lodash';
 
 import { KAFKA_OAUTHBEARER_SASL_MECHANISM, kafkaAuthType } from '../../../common/constants';
 import type { KafkaOutput, ValueOf } from '../../../common/types';
@@ -176,28 +176,58 @@ export function keepsKafkaOAuth2(
   );
 }
 
+// The names of some settings, e.g. an endpoint parameter, are chosen by the user. Everything below
+// reads and writes own properties only: a name such as `__proto__` or `constructor` is a name like
+// any other, not the property every object inherits.
+const hasOwn = (object: object, key: string) => Object.prototype.hasOwnProperty.call(object, key);
+
+const getOwn = (object: object, key: string): unknown =>
+  hasOwn(object, key) ? (object as Record<string, unknown>)[key] : undefined;
+
 const nullsForRemovedSettings = (original: unknown, updated: unknown) => {
   if (!isPlainObject(original)) {
     return undefined;
   }
-  const kept = isPlainObject(updated) ? (updated as Record<string, unknown>) : {};
-  const removed: Record<string, unknown> = {};
+  const kept = isPlainObject(updated) ? (updated as object) : {};
+  const removed: Array<[string, unknown]> = [];
 
   Object.entries(original as Record<string, unknown>).forEach(([key, value]) => {
     if (value === null || value === undefined) {
       return;
     }
-    if (kept[key] === undefined) {
-      removed[key] = null;
-    } else if (isPlainObject(value) && isPlainObject(kept[key])) {
-      const nested = nullsForRemovedSettings(value, kept[key]);
+    const keptValue = getOwn(kept, key);
+    if (keptValue === undefined) {
+      removed.push([key, null]);
+    } else if (isPlainObject(value) && isPlainObject(keptValue)) {
+      const nested = nullsForRemovedSettings(value, keptValue);
       if (nested) {
-        removed[key] = nested;
+        removed.push([key, nested]);
       }
     }
   });
 
-  return isEmpty(removed) ? undefined : removed;
+  return removed.length ? Object.fromEntries(removed) : undefined;
+};
+
+/** Deep merge of plain objects in which `override` wins, that keeps every own property. */
+const mergeSettings = (base: object, override: object): Record<string, unknown> => {
+  const keys = new Set([...Object.keys(base), ...Object.keys(override)]);
+
+  return Object.fromEntries(
+    [...keys].map((key) => {
+      const baseValue = getOwn(base, key);
+      const overrideValue = getOwn(override, key);
+
+      return [
+        key,
+        isPlainObject(baseValue) && isPlainObject(overrideValue)
+          ? mergeSettings(baseValue as object, overrideValue as object)
+          : overrideValue !== undefined
+          ? overrideValue
+          : baseValue,
+      ];
+    })
+  );
 };
 
 /**
@@ -212,7 +242,7 @@ export function withRemovedKafkaOAuth2Settings<T extends object>(
   const removed =
     original.type === 'kafka' ? nullsForRemovedSettings(original.oauth2, oauth2) : undefined;
 
-  return removed ? (merge({}, removed, oauth2) as T) : oauth2;
+  return removed ? (mergeSettings(removed, oauth2) as T) : oauth2;
 }
 
 const withoutNulls = (value: unknown): unknown => {
