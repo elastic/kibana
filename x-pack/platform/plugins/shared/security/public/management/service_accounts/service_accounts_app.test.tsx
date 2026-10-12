@@ -26,6 +26,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import * as roleSelector from './service_account_role_selector';
 import { ServiceAccountsApp } from './service_accounts_app';
 import type { Role } from '../../../common';
+import type { ServiceAccountDirectoryEntry } from '../../service_accounts';
 
 const availableRoles: Role[] = [
   {
@@ -49,12 +50,17 @@ const renderApp = async ({
   canCreateRole = true,
   isServerless = false,
   roleOptions = availableRoles,
+  serviceAccounts = [] as ServiceAccountDirectoryEntry[],
 } = {}) => {
   const history = createMemoryHistory({ initialEntries: [pathname] });
-  const list = jest.fn().mockResolvedValue({ serviceAccounts: [] });
+  const list = jest.fn().mockResolvedValue({ serviceAccounts });
   const create = jest.fn().mockResolvedValue(account);
+  const listWorkloads = jest.fn().mockResolvedValue({ workloads: [] });
+  const deleteAccount = jest.fn().mockResolvedValue({ warnings: [] });
   const getRoles = jest.fn().mockResolvedValue(roleOptions);
   const onCreated = jest.fn();
+  const onDeleted = jest.fn();
+  const onDeleteError = jest.fn();
   const view = renderWithI18n(
     <EuiProvider>
       <MockAppHeaderProvider>
@@ -62,17 +68,30 @@ const renderApp = async ({
           <ServiceAccountsApp
             isServerless={isServerless}
             canCreate={canCreate}
-            serviceAccountsAPIClient={{ list, create }}
+            serviceAccountsAPIClient={{ list, create, listWorkloads, delete: deleteAccount }}
             rolesAPIClient={{ getRoles }}
             createRoleUrl={canCreateRole ? '/app/management/security/roles/edit' : undefined}
             onCreated={onCreated}
+            onDeleted={onDeleted}
+            onDeleteError={onDeleteError}
           />
         </Router>
       </MockAppHeaderProvider>
     </EuiProvider>
   );
   await waitForElementToBeRemoved(() => screen.queryByTestId('serviceAccountsLoading'));
-  return { history, list, create, getRoles, onCreated, unmount: view.unmount };
+  return {
+    history,
+    list,
+    create,
+    listWorkloads,
+    deleteAccount,
+    getRoles,
+    onCreated,
+    onDeleted,
+    onDeleteError,
+    unmount: view.unmount,
+  };
 };
 
 const fillForm = async () => {
@@ -432,5 +451,65 @@ describe('ServiceAccountsApp', () => {
 
     await screen.findByText('Custom roles');
     expect(screen.queryByTestId('createServiceAccountRoleLink')).not.toBeInTheDocument();
+  });
+
+  describe('deleting an account', () => {
+    const directoryEntry: ServiceAccountDirectoryEntry = {
+      id: 'kibana/workflow-runner',
+      name: 'workflow-runner',
+      roles: ['workflow_reader'],
+      enabled: true,
+      assumable: true,
+    };
+
+    it('deletes the account from its row and refreshes the directory', async () => {
+      const { list, listWorkloads, deleteAccount, onDeleted } = await renderApp({
+        pathname: '/',
+        serviceAccounts: [directoryEntry],
+      });
+
+      fireEvent.click(await screen.findByTestId('serviceAccountsDeleteAction'));
+      fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() =>
+        expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'deleted', warnings: [] })
+      );
+      expect(listWorkloads).toHaveBeenCalledWith(directoryEntry.id);
+      expect(deleteAccount).toHaveBeenCalledWith(directoryEntry.id, { force: false });
+      expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    });
+
+    it('refreshes the directory when the account was already deleted elsewhere', async () => {
+      const { list, deleteAccount, onDeleted, onDeleteError } = await renderApp({
+        pathname: '/',
+        serviceAccounts: [directoryEntry],
+      });
+      deleteAccount.mockRejectedValueOnce(
+        Object.assign(new Error('Not Found'), {
+          name: 'HttpFetchError',
+          request: {},
+          response: { status: 404 },
+          body: { message: 'Not Found' },
+        })
+      );
+
+      fireEvent.click(await screen.findByTestId('serviceAccountsDeleteAction'));
+      fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+      await waitFor(() =>
+        expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'already_deleted' })
+      );
+      expect(onDeleteError).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
+      await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
+    });
+
+    it('offers no delete action without the save capability', async () => {
+      await renderApp({ pathname: '/', canCreate: false, serviceAccounts: [directoryEntry] });
+
+      expect(await screen.findByTestId('serviceAccountsTable')).toBeVisible();
+      expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    });
   });
 });

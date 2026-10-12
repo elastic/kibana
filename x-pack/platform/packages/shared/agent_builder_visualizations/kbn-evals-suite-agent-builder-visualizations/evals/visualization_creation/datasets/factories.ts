@@ -99,7 +99,17 @@ ${timeWindow(timeField)}
 | SORT \`${metrics[0].alias}\` DESC
 | LIMIT ${limit}`;
 
-/** Time series in the agent's idiom: auto-bucket count over the bind-param window. */
+/**
+ * `@timestamp` time series use `TBUCKET(100, ?_tstart, ?_tend)`. The bounds size the
+ * buckets, and Kibana binds them at render time, so the query omits a timestamp `WHERE`.
+ * Any other date field stays on `BUCKET` with `?_tstart` / `?_tend`, because `TBUCKET` only reads `@timestamp`.
+ */
+const timeBucketExpression = (timeField: string): string =>
+  timeField === '@timestamp'
+    ? 'TBUCKET(100, ?_tstart, ?_tend)'
+    : `BUCKET(${timeField}, 100, ?_tstart, ?_tend)`;
+
+/** Time series in the agent's idiom: auto-bucket count over the time-picker window. */
 export const timeSeriesQuery = ({
   index,
   metrics,
@@ -107,7 +117,7 @@ export const timeSeriesQuery = ({
   splitBy,
 }: QuerySource & { splitBy?: string }): string =>
   `FROM ${index}
-| STATS ${statsList(metrics)} BY \`Time Bucket\` = BUCKET(${timeField}, 75, ?_tstart, ?_tend)${
+| STATS ${statsList(metrics)} BY \`Time Bucket\` = ${timeBucketExpression(timeField)}${
     splitBy === undefined ? '' : `, ${splitBy}`
   }`;
 

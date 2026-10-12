@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { UnifiedFieldListItem, type UnifiedFieldListItemProps } from './field_list_item';
+export {
+  UnifiedFieldListItem,
+  type UnifiedFieldListItemProps,
+  type UnifiedFieldListItemReorderGroup,
+} from './field_list_item';

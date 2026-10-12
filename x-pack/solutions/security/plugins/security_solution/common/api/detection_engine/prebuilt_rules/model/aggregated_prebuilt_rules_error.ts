@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { RuleName, RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';
 
 export type AggregatedPrebuiltRuleError = z.infer<typeof AggregatedPrebuiltRuleError>;
-export const AggregatedPrebuiltRuleError = z.object({
-  message: z.string(),
-  status_code: z.number().optional(),
-  rules: z.array(
-    z.object({
-      rule_id: RuleSignatureId,
-      name: RuleName.optional(),
-    })
-  ),
-});
+export const AggregatedPrebuiltRuleError = lazySchema(() =>
+  z.object({
+    message: z.string(),
+    status_code: z.number().optional(),
+    rules: z.array(
+      z.object({
+        rule_id: RuleSignatureId,
+        name: RuleName.optional(),
+      })
+    ),
+  })
+);

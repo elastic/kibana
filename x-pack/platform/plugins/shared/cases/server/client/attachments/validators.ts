@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import type { z } from '@kbn/zod/v4';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
+import { isTypeAllowedForOwner } from '../../../common/utils/attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 
 /** Throws `Boom.badRequest` with a `path: message` summary of every zod issue. */
@@ -36,6 +37,14 @@ export const validateUnifiedAttachments = ({
   if (!unifiedAttachmentTypeRegistry.has(query.type)) {
     throw Boom.badRequest(
       `Attachment type ${query.type} is not registered in unified attachment type registry.`
+    );
+  }
+
+  // A solution-scoped type renders with that solution's providers; under another owner it
+  // passes schema validation but crashes the case view.
+  if (!isTypeAllowedForOwner(query.type, query.owner)) {
+    throw Boom.badRequest(
+      `Attachment type ${query.type} cannot be attached to a case with owner ${query.owner}.`
     );
   }
 

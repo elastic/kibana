@@ -37,6 +37,7 @@ export function getTabRuntimeStateMock(
     ),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     currentDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
+    cascadedLeafDataSource$: new BehaviorSubject<DataSource | undefined>(undefined),
     unsubscribeFn$: new BehaviorSubject<(() => void) | undefined>(undefined),
     ...attrs,
   };

@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
+import { useProfilingSchema } from '../../../components/contexts/profiling_schema/use_profiling_schema';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
@@ -30,6 +31,7 @@ export function DifferentialTopNSearchPanel() {
   } = useProfilingParams('/functions/differential');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();
+  const { selectedSchema } = useProfilingSchema();
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -79,7 +81,7 @@ export function DifferentialTopNSearchPanel() {
 
   return (
     <EuiFlexGroup direction="column">
-      <PrimaryAndComparisonSearchBar />
+      <PrimaryAndComparisonSearchBar schema={selectedSchema} />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
           <EuiFlexItem grow={false}>

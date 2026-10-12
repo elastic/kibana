@@ -12,6 +12,7 @@ import {
   RULE_MANAGEMENT_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
+import { createAlertingV2Availability } from './alerting_v2_experimental_availability';
 import { createRuleManagementSkill } from './rule_management_skill';
 
 const createDeps = () => ({
@@ -22,6 +23,9 @@ const createDeps = () => ({
     error: jest.fn(),
     forSubsystem: jest.fn(),
   } as unknown as LoggerServiceContract,
+  availability: createAlertingV2Availability({
+    getActiveSpace: jest.fn().mockResolvedValue({}),
+  }),
 });
 
 describe('createRuleManagementSkill', () => {

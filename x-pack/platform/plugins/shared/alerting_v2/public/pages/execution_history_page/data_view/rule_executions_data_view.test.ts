@@ -11,14 +11,13 @@ import { RULE_EXECUTION_FIELDS, ruleExecutionToDataTableRecord } from './rule_ex
 
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
-  rule: { id: 'rule-1', version: null },
+  rule: { id: 'rule-1' },
   space_id: 'default',
   started_at: '2026-05-05T10:00:00.000Z',
   ended_at: '2026-05-05T10:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 0 },
   outcome: 'success',
   reason: 'Completed successfully',
-  error: null,
   ...overrides,
 });
 
@@ -52,7 +51,7 @@ describe('ruleExecutionToDataTableRecord', () => {
       buildItem({
         outcome: 'failure',
         reason: 'ignored when error is present',
-        error: { message: 'Index not found', stack_trace: null },
+        error: { message: 'Index not found' },
       })
     );
 
@@ -61,7 +60,7 @@ describe('ruleExecutionToDataTableRecord', () => {
 
   it('resolves the flattened message to the generic success text for a success with no error/reason', () => {
     const record = ruleExecutionToDataTableRecord(
-      buildItem({ outcome: 'success', reason: null, error: null })
+      buildItem({ outcome: 'success', reason: undefined, error: undefined })
     );
 
     // The message column carries the final displayed text so it is what gets copied.
@@ -70,7 +69,7 @@ describe('ruleExecutionToDataTableRecord', () => {
 
   it('resolves the flattened message to the placeholder for a non-success with no error/reason', () => {
     const record = ruleExecutionToDataTableRecord(
-      buildItem({ outcome: 'failure', reason: null, error: null })
+      buildItem({ outcome: 'failure', reason: undefined, error: undefined })
     );
 
     expect(record.flattened[RULE_EXECUTION_FIELDS.message]).toBe(RULES_MESSAGE_PLACEHOLDER);

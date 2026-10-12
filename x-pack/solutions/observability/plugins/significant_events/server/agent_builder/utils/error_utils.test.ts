@@ -48,7 +48,7 @@ describe('classifyError', () => {
 
   it('returns pause remediation for SignificantEventsPausedError before generic 409', () => {
     expect(classifyError(new SignificantEventsPausedError())).toContain(
-      'Significant Events activity is paused'
+      'Significant events activity is paused'
     );
   });
 
