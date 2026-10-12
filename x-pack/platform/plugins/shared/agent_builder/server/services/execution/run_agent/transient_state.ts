@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { CompactionSummary, CompactionTrigger, ConversationRoundStep } from '@kbn/agent-builder-common';
+import type {
+  CompactionSummary,
+  CompactionTrigger,
+  ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import type { ToolCallWithReasoning } from '@kbn/agent-builder-genai-utils/langchain';
