@@ -12242,6 +12242,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertAlreadyAcknowledged:
+                  summary: The alert is already acknowledged, so the request would change nothing
+                  value:
+                    code: INVALID_ALERT_STATE_TRANSITION
+                    details:
+                      action_type: ack
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] is already acknowledged.'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert is already acknowledged.
         '500':
           content:
             application/json:
@@ -12520,6 +12537,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertAssigneeUnchanged:
+                  summary: The alert is already assigned to the requested user
+                  value:
+                    code: ALERT_ACTION_NO_OP
+                    details:
+                      action_type: assign
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] is already assigned to [u_abc123].'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert already carries the requested assignee.
         '500':
           content:
             application/json:
@@ -12800,6 +12834,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertTagsUnchanged:
+                  summary: The alert already carries exactly the requested tags
+                  value:
+                    code: ALERT_ACTION_NO_OP
+                    details:
+                      action_type: tag
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] already has these tags.'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert already carries exactly the requested tags.
         '500':
           content:
             application/json:
@@ -12930,6 +12981,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertNotAcknowledged:
+                  summary: The alert is not acknowledged, so the request would change nothing
+                  value:
+                    code: INVALID_ALERT_STATE_TRANSITION
+                    details:
+                      action_type: unack
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] must be acknowledged first before it can be unacknowledged.'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert is not acknowledged.
         '500':
           content:
             application/json:
@@ -15311,6 +15379,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -152186,7 +152256,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 ack actions to create.
+          description: List of 1 to 100 ack actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item'
           maxItems: 100
@@ -152216,7 +152286,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 activate actions to create.
+          description: List of 1 to 100 activate actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item'
           maxItems: 100
@@ -152247,7 +152317,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 assign actions to create.
+          description: List of 1 to 100 assign actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item'
           maxItems: 100
@@ -152426,7 +152496,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 deactivate actions to create.
+          description: List of 1 to 100 deactivate actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item'
           maxItems: 100
@@ -152552,7 +152622,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 tag actions to create.
+          description: List of 1 to 100 tag actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item'
           maxItems: 100
@@ -152576,7 +152646,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 unack actions to create.
+          description: List of 1 to 100 unack actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item'
           maxItems: 100
@@ -153457,7 +153527,62 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+          additionalProperties: false
+          description: Rule metadata.
+          type: object
+          properties:
+            builder:
+              additionalProperties: false
+              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
+              type: object
+              properties:
+                type:
+                  description: Rule builder type.
+                  maxLength: 64
+                  minLength: 1
+                  type: string
+              required:
+                - type
+            description:
+              description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
+              maxLength: 1024
+              minLength: 1
+              type: string
+            name:
+              description: Rule name (must be unique within the space).
+              maxLength: 256
+              minLength: 1
+              type: string
+            routing_tags:
+              description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              type: array
+            tags:
+              description: Tags for categorization, e.g. ["production", "infra"].
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              type: array
+            template:
+              additionalProperties: false
+              description: The rule template this rule was created from.
+              type: object
+              properties:
+                id:
+                  description: Id of the rule template.
+                  type: string
+              required:
+                - id
+          required:
+            - name
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:

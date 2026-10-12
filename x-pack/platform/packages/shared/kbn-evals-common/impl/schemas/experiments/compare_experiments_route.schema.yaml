@@ -8,7 +8,9 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: CompareExperiments
-      description: Compare two evaluation experiments using paired t-tests
+      description: >-
+        Compare two evaluation experiments with a paired statistical test per
+        dataset and evaluator.
       summary: Compare two evaluation experiments
       tags:
         - Evals API
@@ -46,7 +48,7 @@ paths:
                   results:
                     type: array
                     items:
-                      $ref: '#/components/schemas/PairedTTestResult'
+                      $ref: '#/components/schemas/ComparisonResult'
                   pairing:
                     type: object
                     properties:
@@ -74,7 +76,68 @@ paths:
 
 components:
   schemas:
-    PairedTTestResult:
+    StatisticalTestId:
+      type: string
+      enum:
+        - paired_t
+        - wilcoxon_signed_rank
+        - mcnemar
+      description: >-
+        Paired hypothesis test applied to one (dataset, evaluator) slice.
+        `paired_t` compares mean differences, `wilcoxon_signed_rank` is its
+        rank-based alternative, `mcnemar` compares paired binary outcomes.
+
+    MetricType:
+      type: string
+      enum:
+        - binary
+        - continuous_bounded
+        - continuous_unbounded
+        - count
+        - ordinal_k
+      description: >-
+        Shape of the observed scores: every score is 0 or 1 (`binary`), a
+        fraction within [0, 1] (`continuous_bounded`), any real number
+        (`continuous_unbounded`), a non-negative integer (`count`) or a level
+        on a dense 1..k scale (`ordinal_k`).
+
+    HypothesisTest:
+      type: object
+      description: The paired hypothesis test run on one (dataset, evaluator) slice.
+      properties:
+        id:
+          $ref: '#/components/schemas/StatisticalTestId'
+        method:
+          type: string
+          maxLength: 64
+          description: >-
+            Variant of the test that produced the p-value, when the test has
+            more than one (for example `mid-p`, `exact`, `asymptotic`).
+        statistic:
+          type: number
+          nullable: true
+          description: Test statistic, null when the test could not run
+        discordantPairs:
+          type: object
+          description: >-
+            Only for binary metrics: the pairs on which the two arms disagree,
+            the counts behind the McNemar statistic. Combine with `direction`
+            to read them as improvements or regressions.
+          properties:
+            targetOnly:
+              type: integer
+              description: Pairs where the target scored 1 and the baseline 0
+            baselineOnly:
+              type: integer
+              description: Pairs where the baseline scored 1 and the target 0
+          required:
+            - targetOnly
+            - baselineOnly
+      required:
+        - id
+        - statistic
+
+    ComparisonResult:
       type: object
       properties:
         datasetId:
@@ -88,6 +151,7 @@ components:
           maxLength: 256
         sampleSize:
           type: integer
+          description: Number of paired scores in this slice
         meanBaseline:
           type: number
           description: Mean score of the baseline experiment
@@ -97,6 +161,7 @@ components:
         pValue:
           type: number
           nullable: true
+          description: Two-sided p-value of `hypothesisTest`, null when the test could not run
         direction:
           type: string
           enum:
@@ -107,6 +172,10 @@ components:
             Whether a higher score is an improvement (`maximize`), a lower
             score is an improvement (`minimize`), or the score cannot be
             compared across arms at all (`neutral`) for this evaluator.
+        metricType:
+          $ref: '#/components/schemas/MetricType'
+        hypothesisTest:
+          $ref: '#/components/schemas/HypothesisTest'
       required:
         - datasetId
         - datasetName
@@ -116,3 +185,5 @@ components:
         - meanTarget
         - pValue
         - direction
+        - metricType
+        - hypothesisTest
