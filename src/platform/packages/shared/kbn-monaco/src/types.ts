@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { monaco } from './monaco_imports';
-import type { KbnMonacoThemingLanguageThemeResolver } from './languages/theming';
+import type { KbnMonacoLanguageThemeResolver } from './languages/theming';
 
 export interface LangModuleType {
   ID: string;
@@ -18,7 +18,7 @@ export interface LangModuleType {
   foldingRangeProvider?: monaco.languages.FoldingRangeProvider;
   getSuggestionProvider?: Function;
   onLanguage?: () => void | Promise<void>;
-  languageThemeResolver?: KbnMonacoThemingLanguageThemeResolver;
+  languageThemeResolver?: KbnMonacoLanguageThemeResolver;
 }
 
 export interface CompleteLangModuleType extends LangModuleType {

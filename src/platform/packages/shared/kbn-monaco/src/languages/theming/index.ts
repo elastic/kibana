@@ -37,11 +37,25 @@ import { TokenTheme } from 'monaco-editor/editor/common/languages/supports/token
 import type { UseEuiTheme } from '@elastic/eui';
 import memoize from 'lodash/memoize';
 import { CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID } from './constants';
-import { buildTheme, buildTransparentTheme } from './theme';
+import { buildTheme } from './theme';
 
-export type KbnMonacoThemingLanguageThemeResolver = (
+/**
+ * A language's own token rules, authored against its tokenizer's token names; the namespace is
+ * applied at registration. Only `rules` are read — colours are editor chrome, which Monaco keeps
+ * global, and belong to a theme variant instead.
+ */
+export type KbnMonacoLanguageThemeResolver = (
   args: UseEuiTheme
-) => monaco.editor.IStandaloneThemeData;
+) => Pick<monaco.editor.IStandaloneThemeData, 'rules'>;
+
+/**
+ * Colours layered over the Kibana theme's own, producing a theme variant under a new id. The
+ * variant inherits everything else: the shared rules, every language namespace, and the
+ * registration lifecycle.
+ */
+export type KbnMonacoThemeColorsOverride = (
+  args: UseEuiTheme
+) => monaco.editor.IStandaloneThemeData['colors'];
 
 export interface KbnMonacoTheming {
   /**
@@ -49,16 +63,33 @@ export interface KbnMonacoTheming {
    */
   registerLanguageThemeResolver(
     langId: string,
-    languageThemeResolver: KbnMonacoThemingLanguageThemeResolver,
+    languageThemeResolver: KbnMonacoLanguageThemeResolver,
     forceOverride?: boolean
   ): void;
   /**
    * @description Returns the registered language theme definition for the provided id
    */
-  getLanguageThemeResolver(langId: string): KbnMonacoThemingLanguageThemeResolver | undefined;
+  getLanguageThemeResolver(langId: string): KbnMonacoLanguageThemeResolver | undefined;
+  /**
+   * @description Registers a color variant of the code editor theme under its own theme id, for
+   * use with `CodeEditor`'s `themeOverride` or a direct `monaco.editor.create*` `theme` option.
+   */
+  registerKbnCodeEditorThemeVariant(
+    themeId: string,
+    colors: KbnMonacoThemeColorsOverride,
+    forceOverride?: boolean
+  ): void;
 }
 
-const languageThemeResolverDefinitions = new Map<string, KbnMonacoThemingLanguageThemeResolver>();
+const languageThemeResolverDefinitions = new Map<string, KbnMonacoLanguageThemeResolver>();
+
+/**
+ * Color variants of the code editor theme, by theme id. The transparent theme is the built-in
+ * one: the editor background is painted by the container instead.
+ */
+const themeVariants = new Map<string, KbnMonacoThemeColorsOverride>([
+  [CODE_EDITOR_TRANSPARENT_THEME_ID, () => ({ 'editor.background': '#00000000' })],
+]);
 
 /**
  * Monaco reserves 0 for the Null language and 1 for
@@ -178,6 +209,19 @@ Object.defineProperties(monaco.editor, {
     enumerable: true,
     configurable: false,
   },
+  /**
+   * @description Registration of implementation for {@link monaco.editor.registerKbnCodeEditorThemeVariant}
+   */
+  registerKbnCodeEditorThemeVariant: {
+    value: ((themeId, colors, forceOverride) => {
+      if (!forceOverride && themeVariants.has(themeId)) {
+        throw new Error(`Code editor theme variant "${themeId}" is already registered`);
+      }
+      themeVariants.set(themeId, colors);
+    }) satisfies typeof monaco.editor.registerKbnCodeEditorThemeVariant,
+    enumerable: true,
+    configurable: false,
+  },
 });
 
 /**
@@ -214,52 +258,50 @@ const paletteKey = ({ euiTheme: { colors } }: UseEuiTheme): string =>
   `${colors.backgroundBasePlain}:${colors.textParagraph}:${colors.borderBasePlain}`;
 
 /**
- * Shared theme builders, memoised per palette so a given EUI theme is computed once for the life
- * of the page. Consumers that build on top of these (Console's resolver, `@kbn/workflows-ui`) get
- * the same win for free. The returned object is shared between callers — spread it before changing
- * anything.
+ * The shared theme builder, memoised per palette so a given EUI theme is computed once for the life
+ * of the page. Consumers that build on top of it (`@kbn/workflows-ui`) get the same win for free.
+ * The returned object is shared between callers — spread it before changing anything.
  */
 const defaultThemesResolvers = {
   [CODE_EDITOR_DEFAULT_THEME_ID]: memoize(
     (euiTheme: UseEuiTheme) => buildTheme(euiTheme),
     paletteKey
   ),
-  [CODE_EDITOR_TRANSPARENT_THEME_ID]: memoize(
-    (euiTheme: UseEuiTheme) => buildTransparentTheme(euiTheme),
-    paletteKey
-  ),
 };
 
 /**
- * The palette (plus language set) whose themes Monaco currently holds. A single slot, deliberately
- * not a cache: Monaco keeps one theme per id, so the question is "what is registered now", and a
- * cache answering "what was computed before" drifts from it as soon as the slot is overwritten.
+ * The palette (plus language and variant sets) whose themes Monaco currently holds. A single slot,
+ * deliberately not a cache: Monaco keeps one theme per id, so the question is "what is registered
+ * now", and a cache answering "what was computed before" drifts from it as soon as the slot is
+ * overwritten.
  */
 let registeredThemesKey: string | undefined;
 
 /**
- * Registers every configured code editor theme with Monaco for the given EUI theme.
+ * Registers the code editor theme and every variant of it with Monaco for the given EUI theme.
  *
- * A no-op when Monaco already holds themes for this palette and language set — which is every
- * editor mount after the first, and that matters beyond saving the computation: `defineTheme` on
- * the active theme makes Monaco regenerate its colour stylesheet and re-tokenise every live model.
- * Because the key is the palette, the one render per live switch where EUI's `colorMode` has
- * flipped ahead of its colours is also a no-op, so a switch registers exactly once. The theme data
- * comes from the memoised builders, so a light → dark → light round-trip re-registers (one slot
- * per theme id) but never recomputes. A language registering a theme later changes the key.
+ * A no-op when Monaco already holds themes for this palette, language set and variant set — which
+ * is every editor mount after the first, and that matters beyond saving the computation:
+ * `defineTheme` on the active theme makes Monaco regenerate its colour stylesheet and re-tokenise
+ * every live model. Because the key is the palette, the one render per live switch where EUI's
+ * `colorMode` has flipped ahead of its colours is also a no-op, so a switch registers exactly once.
+ * The theme data comes from the memoised builder, so a light → dark → light round-trip
+ * re-registers (one slot per theme id) but never recomputes. A language or variant registered
+ * later changes the key.
  */
 const initializeRegisteredLanguagesTheme = Object.assign(
   (euiTheme: UseEuiTheme): void => {
-    const key = `${paletteKey(euiTheme)}|${[...languageThemeResolverDefinitions.keys()]
-      .sort()
-      .join(',')}`;
+    const key = [
+      paletteKey(euiTheme),
+      [...languageThemeResolverDefinitions.keys()].sort().join(','),
+      [...themeVariants.keys()].sort().join(','),
+    ].join('|');
 
     if (key === registeredThemesKey) {
       return;
     }
 
-    // Only the default theme contributes the shared rules; the transparent one differs in `colors`.
-    const sharedRules = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](euiTheme).rules;
+    const base = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](euiTheme);
 
     const languageThemes = monaco.languages.getLanguages().flatMap(({ id: languageId }) => {
       const languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId);
@@ -269,14 +311,18 @@ const initializeRegisteredLanguagesTheme = Object.assign(
     // A scoped language no longer prefix-matches the shared rules — `esql.string` doesn't match a
     // `string` rule — so seed each namespace with the shared palette and let the language override it.
     const scopedRules = languageThemes.flatMap(([languageId, languageTheme]) =>
-      [...sharedRules, ...languageTheme.rules].map((rule) => scopeRule(languageId, rule))
+      [...base.rules, ...languageTheme.rules].map((rule) => scopeRule(languageId, rule))
     );
+    const rules = [...base.rules, ...scopedRules];
 
-    Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
-      const themeData = themeResolver(euiTheme);
+    // Every theme shares one rule set, so no theme can repaint another language's tokens; variants
+    // differ from the default only in `colors`.
+    monaco.editor.defineTheme(CODE_EDITOR_DEFAULT_THEME_ID, { ...base, rules });
+    themeVariants.forEach((colors, themeId) => {
       monaco.editor.defineTheme(themeId, {
-        ...themeData,
-        rules: [...themeData.rules, ...scopedRules],
+        ...base,
+        rules,
+        colors: { ...base.colors, ...colors(euiTheme) },
       });
     });
 

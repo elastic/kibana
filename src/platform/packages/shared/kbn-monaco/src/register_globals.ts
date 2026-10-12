@@ -83,6 +83,11 @@ declare module 'monaco-editor/editor/editor.api' {
      * @description Returns the resolved registered language theme definition for the provided id
      */
     const getLanguageThemeResolver: KbnMonacoTheming['getLanguageThemeResolver'];
+    /**
+     * @description Registers a color variant of the code editor theme under its own theme id,
+     * without replacing the original theme and the already configured languages themes.
+     */
+    const registerKbnCodeEditorThemeVariant: KbnMonacoTheming['registerKbnCodeEditorThemeVariant'];
   }
 }
 
