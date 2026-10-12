@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -236,6 +237,20 @@ export interface LoadedAlerts {
   missingAlertIds: string[];
 }
 
+/**
+ * The alerts index stores `kibana.*` as flat dotted keys next to nested ECS objects. Alert
+ * Analysis requires the nested `kibana.alert.rule.uuid` shape, so dotted keys are expanded.
+ */
+const expandDottedKeys = (source: Record<string, unknown>): Record<string, unknown> =>
+  Object.entries(source).reduce<Record<string, unknown>>((expanded, [key, value]) => {
+    if (key.includes('.')) {
+      set(expanded, key, value);
+    } else {
+      expanded[key] = value;
+    }
+    return expanded;
+  }, {});
+
 /** Loads a batch's alert documents by id, as `{ _id, _index, ...source }` for Alert Analysis. */
 export const loadAlertsByIds = async (
   { callKibanaApi }: KibanaApi,
@@ -251,7 +266,11 @@ export const loadAlertsByIds = async (
   const hits = body.hits?.hits ?? [];
   const found = new Set(hits.map(({ _id }) => _id));
   return {
-    alerts: hits.map(({ _id, _index, _source = {} }) => ({ ..._source, _id, _index })),
+    alerts: hits.map(({ _id, _index, _source = {} }) => ({
+      ...expandDottedKeys(_source),
+      _id,
+      _index,
+    })),
     missingAlertIds: alertIds.filter((id) => !found.has(id)),
   };
 };

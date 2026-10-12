@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { listLiveExecutionIds, tagAlerts } from './ports';
+import { listLiveExecutionIds, loadAlertsByIds, tagAlerts } from './ports';
 
 const tagWith = (body: Record<string, unknown>) => {
   const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
@@ -70,5 +70,51 @@ describe('listLiveExecutionIds', () => {
     await expect(listLiveExecutionIds({ callKibanaApi }, 'batch', logger)).resolves.toBeUndefined();
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP 403: Forbidden'));
+  });
+});
+
+describe('loadAlertsByIds', () => {
+  const loadWith = (hits: unknown[]) =>
+    loadAlertsByIds(
+      {
+        callKibanaApi: jest
+          .fn()
+          .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits } } }),
+      },
+      ['a1', 'gone']
+    );
+
+  // Alert Analysis rejects an alert without a nested `kibana` object, and the alerts index
+  // stores `kibana.*` as flat dotted keys, so every batch failed at classification.
+  it('nests the dotted kibana keys Alert Analysis reads and keeps the nested ECS fields', async () => {
+    const { alerts } = await loadWith([
+      {
+        _id: 'a1',
+        _index: '.internal.alerts-security.alerts-default-000001',
+        _source: {
+          '@timestamp': '2026-10-12T12:00:00.000Z',
+          'kibana.alert.rule.uuid': 'rule-1',
+          'kibana.alert.rule.name': 'Rule one',
+          'kibana.alert.severity': 'high',
+          event: { code: '4688' },
+        },
+      },
+    ]);
+
+    expect(alerts).toEqual([
+      {
+        _id: 'a1',
+        _index: '.internal.alerts-security.alerts-default-000001',
+        '@timestamp': '2026-10-12T12:00:00.000Z',
+        kibana: { alert: { rule: { uuid: 'rule-1', name: 'Rule one' }, severity: 'high' } },
+        event: { code: '4688' },
+      },
+    ]);
+  });
+
+  it('reports the ids that could not be loaded', async () => {
+    const { missingAlertIds } = await loadWith([{ _id: 'a1', _index: 'i', _source: {} }]);
+
+    expect(missingAlertIds).toEqual(['gone']);
   });
 });

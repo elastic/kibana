@@ -213,7 +213,8 @@ describe('triage load alerts step', () => {
       alerts: [
         {
           '@timestamp': 't',
-          'kibana.alert.rule.uuid': 'rule-a',
+          // Alert Analysis requires the nested shape, not the index's flat dotted keys.
+          kibana: { alert: { rule: { uuid: 'rule-a' } } },
           _id: 'a-1',
           _index: '.alerts-security.alerts-default',
         },
