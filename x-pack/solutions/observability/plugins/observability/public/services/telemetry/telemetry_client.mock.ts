@@ -13,4 +13,6 @@ export const createTelemetryClientMock = (): jest.Mocked<ITelemetryClient> => ({
   reportAlertAddedToCase: jest.fn(),
   reportLinkedDashboardViewed: jest.fn(),
   reportSuggestedDashboardAdded: jest.fn(),
+  reportUnifiedAlertingPromoTakeTour: jest.fn(),
+  reportUnifiedAlertingPromoDismiss: jest.fn(),
 });
