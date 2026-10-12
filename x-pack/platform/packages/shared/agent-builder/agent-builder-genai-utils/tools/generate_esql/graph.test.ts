@@ -56,11 +56,16 @@ const createMockModel = (generateResponse = GENERATE_RESPONSE) => {
   return { chatModel, docModelInvoke };
 };
 
-const buildGraph = (chatModel: ReturnType<typeof createMockModel>['chatModel']) =>
+const createDocBase = () => ({ getDocumentation: jest.fn().mockReturnValue({}) });
+
+const buildGraph = (
+  chatModel: ReturnType<typeof createMockModel>['chatModel'],
+  docBase = createDocBase()
+) =>
   createNlToEsqlGraph({
     model: { chatModel } as unknown as ScopedModel,
     esClient: {} as ElasticsearchClient,
-    docBase: { getDocumentation: jest.fn().mockReturnValue({}) } as any,
+    docBase: docBase as any,
     documentation: {
       getDocContent: jest.fn().mockReturnValue(''),
     } as unknown as EsqlLoadedDocumentation,
@@ -107,6 +112,19 @@ describe('createNlToEsqlGraph — requestDocumentation node', () => {
     await graph.invoke({ ...BASE_INPUT, actions: [] }, { recursionLimit: 25 });
 
     expect(docModelInvoke).toHaveBeenCalledTimes(1);
+  });
+
+  it('fetches the PROMQL documentation when the query mentions PromQL, even if the LLM did not request it', async () => {
+    const { chatModel } = createMockModel();
+    const docBase = createDocBase();
+    const graph = buildGraph(chatModel, docBase);
+
+    await graph.invoke(
+      { ...BASE_INPUT, nlQuery: 'cpu utilization using PromQL', actions: [] },
+      { recursionLimit: 25 }
+    );
+
+    expect(docBase.getDocumentation).toHaveBeenCalledWith(['LIMIT', 'PROMQL']);
   });
 });
 

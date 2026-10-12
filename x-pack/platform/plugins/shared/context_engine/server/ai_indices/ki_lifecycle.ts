@@ -45,18 +45,22 @@ const globToRegExp = (pattern: string): RegExp =>
 const overlaps = (source: string, dest: string): boolean =>
   globToRegExp(source).test(dest) || globToRegExp(dest).test(source);
 
-/** Lifecycle fields the query names itself; each one switches off the matching default. */
+/** Which defaults the query already handles: a top-level `WHERE` per filter, any `governance.*` for the drop. */
 const namedLifecycleFields = (root: ESQLAstQueryExpression) => {
   const named = { status: false, expiry: false, governance: false };
   Walker.walk(root, {
     visitColumn: ({ parts }) => {
-      if (parts[0] === GOVERNANCE_FIELD) {
-        named.governance = true;
-        named.status ||= parts.join('.') === KI_LIFECYCLE_STATUS_FIELD;
-      }
-      named.expiry ||= parts[0] === KI_EXPIRES_AT_FIELD;
+      named.governance ||= parts[0] === GOVERNANCE_FIELD;
     },
   });
+  for (const command of mutate.commands.where.list(root)) {
+    Walker.walk(command, {
+      visitColumn: ({ parts }) => {
+        named.status ||= parts.join('.') === KI_LIFECYCLE_STATUS_FIELD;
+        named.expiry ||= parts[0] === KI_EXPIRES_AT_FIELD;
+      },
+    });
+  }
   return named;
 };
 
@@ -80,8 +84,8 @@ const latestRevisionByTarget = (streams: string[]): string[] => [
 
 /**
  * Inserts the lifecycle pipeline after `FROM` when the query reads a registered AI index dest.
- * Each lifecycle field the query names switches off its own default; a data stream dest always
- * gets the revision collapse. A query the parser rejects is returned unchanged.
+ * A top-level `WHERE` on a lifecycle field replaces that filter. Data streams always get the
+ * revision collapse. A query the parser rejects is returned unchanged.
  */
 export const applyKiLifecycle = (query: string, dests: AiIndexDest[]): string => {
   const { root, errors } = Parser.parse(query);

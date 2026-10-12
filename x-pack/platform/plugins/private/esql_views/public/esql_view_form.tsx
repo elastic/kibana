@@ -40,6 +40,7 @@ import {
 } from '@kbn/esql-utils';
 import { EsqlViewPreviewResults } from './esql_view_preview_results';
 import { getEsqlViewQuerySyntaxError } from './esql_view_validation';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import { translations } from './translations';
 import { useEsqlViewPreview, type EsqlViewPreviewDependencies } from './use_esql_view_preview';
 
@@ -47,6 +48,7 @@ interface EsqlViewFormProps {
   client: EsqlViewsClient;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
   previewDependencies: EsqlViewPreviewDependencies;
+  telemetryClient?: EsqlViewsTelemetryClient;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -75,6 +77,7 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   client,
   EsqlEditor,
   previewDependencies,
+  telemetryClient,
   view,
   onClose,
   onSave,
@@ -165,8 +168,13 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
       };
       if (isEditing) {
         await client.updateView(request);
+        telemetryClient?.trackViewEdited();
       } else {
         await client.createView(request);
+        telemetryClient?.trackViewCreated({
+          hasDescription: request.description !== undefined,
+          queryLength: query.length,
+        });
       }
 
       await onSave();

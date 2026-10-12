@@ -1,0 +1,44 @@
+# FILTER AND PREDICATE FUNCTIONS
+
+Filter and predicate functions return boolean values based on the properties of a multi-value. They provide optimized shorthand expressions for common operations.
+
+- `MV_CONTAINS` checks if one multi-value field contains all values from another.
+- `MV_GREATER` checks whether a multi-value field has any value greater than a bound.
+- `MV_INTERSECTS` checks if any value from one multi-value exists in another.
+- `MV_LESS` checks whether a multi-value field has any value less than a bound.
+
+## Syntax
+
+`MV_CONTAINS(multi_value, values)`
+
+`MV_GREATER(multi_value, bound)`
+
+`MV_INTERSECTS(multi_value, values)`
+
+`MV_LESS(multi_value, bound)`
+
+### Parameters
+
+#### multi_value
+
+The multi-value field to test.
+
+#### values
+
+The values to compare with `multi_value`. `MV_CONTAINS` checks whether all values are present. `MV_INTERSECTS` checks whether at least one value is present.
+
+#### bound
+
+The comparison bound. `MV_GREATER` checks for any value greater than this bound. `MV_LESS` checks for any value less than this bound.
+
+## Examples
+
+Reject null or absent values before checking whether `field1` contains all values from `field2`.
+
+```esql
+WHERE field2 IS NOT null AND MV_CONTAINS(field1, field2)
+```
+
+## Limitations
+
+`null` is interpreted as an empty set. To reject unknown or absent values, check for `null` before calling the function.

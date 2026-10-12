@@ -295,6 +295,47 @@ agentBuilder.agents.register({
 Refer to [`AgentConfiguration`](https://github.com/elastic/kibana/blob/main/x-pack/platform/packages/shared/agent-builder/agent-builder-common/agents/definition.ts)
 for the full list of available configuration options.
 
+### Choosing the agent's model
+
+By default, agents run on the model selected by the user in the Chat UI, or on the first model of the
+Agent Builder inference feature. A built-in agent can instead run on a model of its own, by declaring an
+inference feature in its configuration.
+
+First, register a `chat_completion` inference feature with the `searchInferenceEndpoints` plugin, during setup.
+Admins can then pick the models of that feature from the model settings page, and `recommendedEndpoints`
+is used until they do:
+
+```ts
+const result = searchInferenceEndpoints.features.register({
+  featureId: 'my_solution_agent',
+  parentFeatureId: 'my_solution', // optional, groups the feature under a parent in the UI
+  featureName: 'My solution agent',
+  featureDescription: 'Models used by the My solution agent',
+  taskType: 'chat_completion',
+  recommendedEndpoints: ['.anthropic-claude-5-sonnet-chat_completion'],
+});
+if (!result.ok) {
+  logger.warn(`Failed to register the inference feature: ${result.error}`);
+}
+```
+
+Then reference the feature from the agent's configuration:
+
+```ts
+agentBuilder.agents.register({
+  id: 'platform.my_solution.agent',
+  name: 'My solution agent',
+  description: 'Agent specialized in my solution',
+  configuration: {
+    instructions: 'You are a specialist [...]',
+    tools: [{ tool_ids: ['[...]'] }],
+    inference_feature_id: 'my_solution_agent',
+  },
+});
+```
+
+`inference_feature_id` is only supported for built-in agents, and cannot be set by agent types.
+
 ## Registering attachment types
 
 Attachments are used to provide additional context when conversing with an agent.
@@ -379,6 +420,25 @@ const myAttachmentType: AttachmentTypeDefinition = {
 
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
+
+#### `toSurfaceComposition` — rendering outside Kibana
+
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
+  id: 'my_type',
+  validate: ...,
+  format: ...,
+  toSurfaceComposition: (data) => ({
+    type: 'view',
+    title: data.name,
+    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+  }),
+};
+```
+
+GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws leaves the attachment out. See the `text` type for an example.
 
 #### Real example: the built-in image attachment
 

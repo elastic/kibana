@@ -114,16 +114,21 @@ steps:
         slack_api:
           connector-id: my-slack-api
           channels: ["C0123"]
+        slack2:
+          connector-id: my-slack2
+          channels: ["C0123"]
 `;
     const lineCounter = new LineCounter();
     const yamlDocument = parseDocument(yaml, { lineCounter });
     const result = collectAllConnectorIds(yamlDocument, lineCounter);
 
-    expect(result).toHaveLength(2);
+    expect(result).toHaveLength(3);
     expect(result[0].key).toBe('my-slack');
     expect(result[0].connectorType).toBe('slack');
     expect(result[1].key).toBe('my-slack-api');
     expect(result[1].connectorType).toBe('slack_api');
+    expect(result[2].key).toBe('my-slack2');
+    expect(result[2].connectorType).toBe('slack2.sendMessage');
   });
 
   it('should resolve connector type for waitForInput notification channel connector-id', () => {

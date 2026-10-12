@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { logStageUsage } from '../lib/cost_tracker';
 import { MAX_URL_LENGTH } from '../../../common/threat_intel';
 import {
@@ -17,6 +17,7 @@ import {
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -29,17 +30,19 @@ const RELEVANCE_REASON_CHAR_LIMIT = 2_000;
 /** A handful of links; the model is asked for the primary sources, not a crawl. */
 const MAX_PRIMARY_LINKS = 20;
 
-export const relevanceOutputSchema = z.object({
-  is_intelligence: z.boolean(),
-  quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
-  evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
-  needs_render: z.boolean(),
-  primary_links: z
-    .array(z.string())
-    .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
-  has_original_commentary: z.boolean(),
-  reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
-});
+export const relevanceOutputSchema = lazySchema(() =>
+  z.object({
+    is_intelligence: z.boolean(),
+    quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
+    evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
+    needs_render: z.boolean(),
+    primary_links: z
+      .array(z.string())
+      .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
+    has_original_commentary: z.boolean(),
+    reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
+  })
+);
 
 export type RelevanceOutput = z.infer<typeof relevanceOutputSchema>;
 export type RelevanceResult = RelevanceOutput & { context: Omit<ArticleContext, 'text'> };
@@ -130,17 +133,14 @@ export const assessRelevance = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText/link truncation
-  // actually runs instead of letting unbounded model output through.
   const invokeRelevance = async (
     text: string
   ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: RelevanceOutput }> => {
     const invoked = (await structured.invoke(buildRelevancePrompt(params, text))) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
+      parsed: RelevanceOutput | null;
     };
-    return { raw: invoked.raw, parsed: relevanceOutputSchema.parse(invoked.parsed) };
+    return requireParsedStructuredOutput(invoked, 'assess_relevance');
   };
 
   let context = fullArticleContext(params.text);
