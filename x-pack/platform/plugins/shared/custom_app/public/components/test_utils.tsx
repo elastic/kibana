@@ -6,10 +6,14 @@
  */
 
 import React, { type ReactElement } from 'react';
-import { render } from '@testing-library/react';
+import { act, render, type RenderResult } from '@testing-library/react';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
+import { createDataLayer, type DataLayer, type RunQuery } from '../data/data_layer';
+import { DataLayerContext } from '../data/data_layer_context';
 import { createAppRuntime, type AppRuntime } from '../runtime/app_runtime';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
+import { NodeRenderer } from './node_renderer';
 
 export const emptyDocument = (state: unknown = {}): AppDocument =>
   appDocumentSchema.parse({ state, root: { type: 'text', id: 'unused', text: '' } });
@@ -24,4 +28,36 @@ export const renderWithRuntime = (
     runtime,
     ...render(<AppRuntimeContext.Provider value={runtime}>{ui}</AppRuntimeContext.Provider>),
   };
+};
+
+/** The fetch context every test panel is refreshed with. */
+const TEST_CONTEXT = { timeRange: { from: 'now-15m', to: 'now' } } as FetchContext;
+
+/** Stands in for the ES|QL parser: finds `?name` and `??name`. */
+const getParameterNames = (query: string) =>
+  Array.from(query.matchAll(/\?\??([A-Za-z_]\w*)/g), ([, name]) => name);
+
+/**
+ * Renders a whole document the way the embeddable does: a runtime, a data layer fed by that
+ * runtime's state, and the first fetch.
+ */
+export const renderApp = async (
+  document: AppDocument,
+  runQuery: RunQuery
+): Promise<{ runtime: AppRuntime; layer: DataLayer } & RenderResult> => {
+  const runtime = createAppRuntime(document);
+  const layer = createDataLayer({ runQuery, getParameterNames });
+  layer.setSources(document.dataSources);
+  runtime.state$.subscribe(layer.setState);
+
+  const view = render(
+    <AppRuntimeContext.Provider value={runtime}>
+      <DataLayerContext.Provider value={layer}>
+        <NodeRenderer node={document.root} />
+      </DataLayerContext.Provider>
+    </AppRuntimeContext.Provider>
+  );
+  await act(async () => layer.refresh(TEST_CONTEXT));
+
+  return { runtime, layer, ...view };
 };

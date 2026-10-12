@@ -115,6 +115,8 @@ const tableNodeSchema = z.object({
   type: z.literal('table'),
   id: nodeIdSchema,
   source: dataSourceIdSchema,
+  /** Names the table for screen readers. */
+  caption: z.string().max(MAX_HEADING_LENGTH).optional(),
   /** Defaults to every column of the result, shown as text. */
   columns: z
     .array(

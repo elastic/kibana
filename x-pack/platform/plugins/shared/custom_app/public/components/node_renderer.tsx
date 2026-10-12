@@ -16,7 +16,10 @@ import {
   KbnWarningCallout,
 } from '@kbn/ui-callout';
 import { useStateValues } from '../runtime/app_runtime_context';
+import { FlyoutNode } from './flyout_node';
+import { KeyValueNode } from './key_value_node';
 import { StatNode } from './stat_node';
+import { TableNode } from './table_node';
 
 const GUTTER_SIZES = { s: 's', m: 'm', l: 'l' } as const;
 
@@ -63,6 +66,22 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
     }
     case 'stat':
       return <StatNode node={node} />;
+    case 'table':
+      return <TableNode node={node} />;
+    case 'key_value':
+      return <KeyValueNode node={node} />;
+    case 'flyout':
+      return (
+        <FlyoutNode node={node}>
+          <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+            {node.children.map((child) => (
+              <EuiFlexItem key={child.id} grow={false}>
+                <NodeRenderer node={child} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </FlyoutNode>
+      );
     case 'stack':
       return (
         <EuiFlexGroup
@@ -72,11 +91,16 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
           wrap={node.direction === 'horizontal'}
           data-node-id={node.id}
         >
-          {node.children.map((child) => (
-            <EuiFlexItem key={child.id} grow={node.direction === 'horizontal'}>
-              <NodeRenderer node={child} />
-            </EuiFlexItem>
-          ))}
+          {node.children.map((child) =>
+            // A flyout draws nothing in place, so it gets no item, which would only add a gap.
+            child.type === 'flyout' ? (
+              <NodeRenderer key={child.id} node={child} />
+            ) : (
+              <EuiFlexItem key={child.id} grow={node.direction === 'horizontal'}>
+                <NodeRenderer node={child} />
+              </EuiFlexItem>
+            )
+          )}
         </EuiFlexGroup>
       );
     default:

@@ -8,11 +8,29 @@
 import { i18n } from '@kbn/i18n';
 import type { AppDocument } from '@kbn/custom-app-common';
 
+// Temporary demo data that needs no index, so a new panel works on any cluster. Replaced by
+// templates once the start flow exists.
+const SERVICES = `ROW data = ["checkout:12", "cart:3", "search:27", "payments:5"]
+| MV_EXPAND data
+| DISSECT data "%{service}:%{errors}"
+| EVAL errors = TO_INTEGER(errors)`;
+
+export const SERVICES_QUERY = `${SERVICES}
+| KEEP service, errors
+| SORT errors DESC`;
+
+export const SERVICE_DETAIL_QUERY = `${SERVICES}
+| WHERE service == ?service
+| EVAL owner = CONCAT(service, "-team")
+| KEEP service, errors, owner`;
+
 /** The starter content of a newly added panel. */
 export const createDefaultDocument = (): AppDocument => ({
-  state: {},
-  // Temporary demo source that needs no data; replaced by templates once the start flow exists.
-  dataSources: { activeUsers: { type: 'esql', query: 'ROW active_users = 1284' } },
+  state: { service: { type: 'string', default: '' } },
+  dataSources: {
+    services: { type: 'esql', query: SERVICES_QUERY },
+    serviceDetail: { type: 'esql', query: SERVICE_DETAIL_QUERY },
+  },
   root: {
     type: 'stack',
     id: 'root',
@@ -31,17 +49,36 @@ export const createDefaultDocument = (): AppDocument => ({
         type: 'text',
         id: 'intro',
         text: i18n.translate('xpack.customApp.defaultDocument.intro', {
-          defaultMessage: 'This panel is built from components. Editing is coming soon.',
+          defaultMessage: 'Select a service to see its details. Editing is coming soon.',
         }),
       },
       {
-        type: 'stat',
-        id: 'active-users',
-        title: i18n.translate('xpack.customApp.defaultDocument.statTitle', {
-          defaultMessage: 'Active users',
+        type: 'table',
+        id: 'services-table',
+        source: 'services',
+        caption: i18n.translate('xpack.customApp.defaultDocument.tableCaption', {
+          defaultMessage: 'Services and their error counts',
         }),
-        source: 'activeUsers',
-        format: 'number',
+        columns: [
+          { field: 'service', label: 'Service', format: 'text' },
+          { field: 'errors', label: 'Errors', format: 'number' },
+        ],
+        onRowClick: [
+          { type: 'setState', key: 'service', value: { fromColumn: 'service' } },
+          { type: 'openFlyout', flyout: 'service-flyout' },
+        ],
+      },
+      {
+        type: 'flyout',
+        id: 'service-flyout',
+        title: i18n.translate('xpack.customApp.defaultDocument.flyoutTitle', {
+          defaultMessage: 'Service {service}',
+          // The reference is data, not translatable text; i18n would read the braces as a
+          // placeholder.
+          values: { service: '{{state.service}}' },
+        }),
+        size: 'm',
+        children: [{ type: 'key_value', id: 'service-detail', source: 'serviceDetail' }],
       },
     ],
   },

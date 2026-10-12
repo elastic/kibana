@@ -8,13 +8,13 @@
 import React from 'react';
 import { EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import { interpolate, type AppNodeOfType } from '@kbn/custom-app-common';
 import type { SourceData } from '../data/data_layer';
 import { useDataLayer } from '../data/data_layer_context';
 import { useSource } from '../data/use_source';
 import { useStateValues } from '../runtime/app_runtime_context';
 import { DataState } from './data_state';
+import { MissingColumn } from './missing_column';
 
 const formatValue = (value: unknown, format: 'number' | 'compact'): string => {
   if (typeof value !== 'number') return String(value);
@@ -30,18 +30,7 @@ const StatValue = ({ node, data }: { node: AppNodeOfType<'stat'>; data: SourceDa
     : 0;
   const value = columnIndex === -1 ? undefined : data.rows[0][columnIndex];
 
-  if (columnIndex === -1) {
-    return (
-      <KbnDangerCallout
-        announceOnMount={false}
-        size="s"
-        title={i18n.translate('xpack.customApp.statNode.missingColumn', {
-          defaultMessage: 'The query has no column named "{column}"',
-          values: { column: node.valueField },
-        })}
-      />
-    );
-  }
+  if (columnIndex === -1) return <MissingColumn columns={[node.valueField ?? '']} />;
 
   return (
     <EuiStat
