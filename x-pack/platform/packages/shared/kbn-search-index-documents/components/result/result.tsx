@@ -43,22 +43,22 @@ const getExpandTooltipText = (isExpanded: boolean, hiddenFieldCount: number): st
   if (hiddenFieldCount > 0) {
     return isExpanded
       ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showFewer', {
-        defaultMessage: 'Show {amount} fewer fields',
-        values: { amount: hiddenFieldCount },
-      })
+          defaultMessage: 'Show {amount} fewer fields',
+          values: { amount: hiddenFieldCount },
+        })
       : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.showMore', {
-        defaultMessage: 'Show {amount} more fields',
-        values: { amount: hiddenFieldCount },
-      });
+          defaultMessage: 'Show {amount} more fields',
+          values: { amount: hiddenFieldCount },
+        });
   }
 
   return isExpanded
     ? i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.collapse', {
-      defaultMessage: 'Collapse fields',
-    })
+        defaultMessage: 'Collapse fields',
+      })
     : i18n.translate('xpack.searchIndexDocuments.result.expandTooltip.expand', {
-      defaultMessage: 'Expand fields',
-    });
+        defaultMessage: 'Expand fields',
+      });
 };
 
 export const Result: React.FC<ResultProps> = ({
@@ -116,7 +116,12 @@ export const Result: React.FC<ResultProps> = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiToolTip position="left" content={tooltipText} ref={tooltipRef}>
+              <EuiToolTip
+                position="left"
+                content={tooltipText}
+                ref={tooltipRef}
+                disableScreenReaderOutput
+              >
                 <EuiButtonIcon
                   size="xs"
                   iconType={isExpanded ? 'fold' : 'unfold'}
