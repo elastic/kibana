@@ -164027,6 +164027,8 @@ components:
               - error
           maxItems: 10
           type: array
+        logsdb_columnar_enabled:
+          type: boolean
         name:
           type: string
         namespaces:
@@ -164362,6 +164364,9 @@ components:
           maxItems: 100
           type: array
         fips_compatible:
+          type: boolean
+        logsdb_columnar:
+          description: Enable or disable the logsdb_columnar index mode for the log data streams of the integration. The choice is stored on the installation, not on the package policy.
           type: boolean
         name:
           description: Package name
