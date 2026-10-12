@@ -382,6 +382,26 @@ export const ConfigSchema = schema.object({
         schema.string(),
         schema.maybe(schema.string())
       ),
+      unsafe: schema.maybe(
+        schema.object({
+          grantedApiKeyDefaultExpiration: schema.maybe(
+            schema.string({
+              validate(value) {
+                if (/^\d+$/.test(value)) {
+                  return 'the value must include a time unit, e.g. "4h".';
+                }
+                try {
+                  if (schema.duration().validate(value).asMilliseconds() <= 0) {
+                    return 'the value must be a positive duration.';
+                  }
+                } catch (err) {
+                  return err.message;
+                }
+              },
+            })
+          ),
+        })
+      ),
     }),
   }),
   // OAuth 2.0 Protected Resource Metadata for MCP authorization.
