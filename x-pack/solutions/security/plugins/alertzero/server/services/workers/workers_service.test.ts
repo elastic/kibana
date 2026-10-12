@@ -1911,6 +1911,28 @@ describe('WorkersService', () => {
       ).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
     });
 
+    it('returns huntSupplyReportsIndexUnmanaged when the hard-gate names a template-free reports index', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['reports_index_unmanaged'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyReportsIndexUnmanaged' });
+    });
+
     it('does not ensure supply when the hard-gate fails', async () => {
       const harness = createPersistentHarness();
       const threatIntelSupply = makeThreatIntelSupply();
