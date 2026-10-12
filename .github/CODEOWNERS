@@ -1436,6 +1436,7 @@ x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunt
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-evals-suite-alertzero-worker-chain @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-agent-builder @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp @elastic/security-generative-ai
@@ -1453,6 +1454,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/conte
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
+x-pack/solutions/security/packages/kbn-security-evals-chain-safety @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-matrix @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-security-evals-workflow-traces @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-securitysolution-autocomplete @elastic/security-detection-engineering

@@ -40,6 +40,12 @@ export const servers: ScoutServerConfig = {
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      // Defaults to false; without it the batched-generation step throws "Attack Discovery
+      // workflows are not enabled for this space" and the run completes with zero discoveries.
+      // Shared with `security-attack-discovery-fp-tp` (same `serverConfigSet`); that suite seeds
+      // its discoveries directly and runs only the analysis workflow, whose steps never reach
+      // the generation gate, so the flag is inert for it.
+      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
     ],
   },
 };
