@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { TestProviders } from '../../../../../../common/mock';
 import type { Row } from '../../common';
@@ -18,6 +18,7 @@ import { EntityNameCell } from './entity_name_cell';
 import { EntityTypeCell } from './entity_type_cell';
 import { GroupSizeCell } from './group_size_cell';
 import { RiskScoreChangeCell } from './risk_score_change_cell';
+import { RowActionsCell } from './row_actions_cell';
 
 const renderInProviders = (cell: React.ReactElement) =>
   render(<TestProviders>{cell}</TestProviders>);
@@ -149,5 +150,40 @@ describe('cells with a click handler', () => {
       <AnomalyCountCell value={0} row={ROW} onAnomalyCountClick={jest.fn()} />
     );
     expect(container.textContent).toBe('—');
+  });
+});
+
+describe('RowActionsCell', () => {
+  const renderActions = () => {
+    const onInvestigateInTimeline = jest.fn();
+    const onOpenEntityGraph = jest.fn();
+    renderInProviders(
+      <RowActionsCell
+        onInvestigateInTimeline={onInvestigateInTimeline}
+        onOpenEntityGraph={onOpenEntityGraph}
+      />
+    );
+    return { onInvestigateInTimeline, onOpenEntityGraph };
+  };
+
+  it.each([
+    ['Investigate in timeline', 'onInvestigateInTimeline'],
+    ['Open entity graph', 'onOpenEntityGraph'],
+  ] as const)('%s calls its handler', (label, handler) => {
+    const handlers = renderActions();
+    fireEvent.click(screen.getByRole('button', { name: label }));
+    expect(handlers[handler]).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens and closes the more actions menu', async () => {
+    renderActions();
+    const moreActions = screen.getByRole('button', { name: 'More actions' });
+    expect(screen.queryByText('Add to chat')).not.toBeInTheDocument();
+
+    fireEvent.click(moreActions);
+    expect(await screen.findByText('Add to chat')).toBeInTheDocument();
+
+    fireEvent.click(moreActions);
+    await waitFor(() => expect(screen.queryByText('Add to chat')).not.toBeInTheDocument());
   });
 });
