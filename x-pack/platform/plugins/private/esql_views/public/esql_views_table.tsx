@@ -13,6 +13,7 @@ import type {
   EuiTableSelectionType,
 } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
   EuiCallOut,
@@ -21,6 +22,10 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiPopover,
   EuiSpacer,
@@ -30,6 +35,19 @@ import type { EsqlView } from '@kbn/esql-types';
 import { translations } from './translations';
 
 const MAX_QUERY_PREVIEW_LENGTH = 200;
+
+const ViewName: FunctionComponent<{ view: EsqlView }> = ({ view }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+    <EuiFlexItem grow={false}>{view.name}</EuiFlexItem>
+    {view.reserved && (
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow" data-test-subj="esqlViewsReservedBadge">
+          {translations.reservedBadgeLabel}
+        </EuiBadge>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
 
 export const getQueryPreview = (query: string): string => {
   const normalizedQuery = query.replace(/\s+/g, ' ').trim();
@@ -200,12 +218,18 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   onOpenInDiscover,
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const [showReservedViews, setShowReservedViews] = useState(true);
   const hasRowActionsMenu = onEdit !== undefined || onDelete !== undefined;
+  const visibleViews = useMemo(
+    () => (showReservedViews ? views : views.filter(({ reserved }) => !reserved)),
+    [showReservedViews, views]
+  );
   const columns = useMemo<Array<EuiBasicTableColumn<EsqlView>>>(
     () => [
       {
         field: 'name',
         name: translations.nameColumn,
+        render: (_name: string, view: EsqlView) => <ViewName view={view} />,
         sortable: true,
         width: '20em',
         'data-test-subj': 'esqlViewsNameColumn',
@@ -242,6 +266,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
           ...(hasRowActionsMenu
             ? [
                 {
+                  enabled: (view: EsqlView) => !view.reserved,
                   render: (view: EsqlView, isEnabled: boolean) => (
                     <ViewActions
                       view={view}
@@ -268,7 +293,9 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         ? {
             selected: selectedViews,
             onSelectionChange,
-            selectableMessage: () => translations.selectRowAriaLabel,
+            selectable: ({ reserved }) => !reserved,
+            selectableMessage: (selectable) =>
+              selectable ? translations.selectRowAriaLabel : translations.reservedViewNotSelectable,
           }
         : undefined,
     [onDelete, onSelectionChange, selectedViews]
@@ -296,6 +323,24 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
           },
         },
       },
+      filters: [
+        {
+          type: 'custom_component',
+          component: () => (
+            <EuiFilterGroup>
+              <EuiFilterButton
+                data-test-subj="esqlViewsReservedFilter"
+                hasActiveFilters={showReservedViews}
+                isSelected={showReservedViews}
+                isToggle
+                onClick={() => setShowReservedViews((isVisible) => !isVisible)}
+              >
+                {translations.reservedViewsFilterLabel}
+              </EuiFilterButton>
+            </EuiFilterGroup>
+          ),
+        },
+      ],
       toolsLeft:
         onDelete && selectedViews.length > 0 ? (
           <EuiButton
@@ -318,7 +363,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         </EuiButton>
       ),
     }),
-    [isLoading, onDelete, onReload, selectedViews]
+    [isLoading, onDelete, onReload, selectedViews, showReservedViews]
   );
 
   return (
@@ -338,7 +383,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         </>
       )}
       <EuiInMemoryTable<EsqlView>
-        items={views}
+        items={visibleViews}
         itemId="name"
         columns={columns}
         loading={isLoading}

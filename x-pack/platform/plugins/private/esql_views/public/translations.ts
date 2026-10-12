@@ -73,6 +73,15 @@ export const translations = {
   queryColumn: i18n.translate('xpack.esqlViews.managementPage.queryColumn', {
     defaultMessage: 'Query',
   }),
+  reservedBadgeLabel: i18n.translate('xpack.esqlViews.managementPage.reservedBadgeLabel', {
+    defaultMessage: 'Reserved',
+  }),
+  reservedViewsFilterLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewsFilterLabel',
+    {
+      defaultMessage: 'Reserved views',
+    }
+  ),
   showFullQueryForView: (viewName: string) =>
     i18n.translate('xpack.esqlViews.managementPage.showFullQueryForView', {
       defaultMessage: 'Show full query for {viewName}',
@@ -242,6 +251,12 @@ export const translations = {
   selectRowAriaLabel: i18n.translate('xpack.esqlViews.managementPage.selectRowAriaLabel', {
     defaultMessage: 'Select this row',
   }),
+  reservedViewNotSelectable: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewNotSelectable',
+    {
+      defaultMessage: 'Reserved views cannot be deleted.',
+    }
+  ),
   openInDiscoverButtonLabel: i18n.translate(
     'xpack.esqlViews.managementPage.openInDiscoverButtonLabel',
     {
