@@ -27,6 +27,9 @@ describe('getHitlChannelConnectorTypeFromPath', () => {
     expect(
       getHitlChannelConnectorTypeFromPath(['with', 'channels', 'slack2', 'connector-id'])
     ).toBe('slack2.sendMessage');
+    expect(getHitlChannelConnectorTypeFromPath(['with', 'channels', 'http', 'connector-id'])).toBe(
+      'http'
+    );
   });
 
   it('returns null outside a HITL channel connector-id path', () => {

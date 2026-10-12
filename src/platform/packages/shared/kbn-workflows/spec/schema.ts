@@ -379,13 +379,34 @@ export const HitlSlack2ChannelSchema = z.object({
 const MAX_HITL_HTTP_HEADER_COUNT = 20;
 const MAX_HITL_HTTP_HEADER_NAME_LENGTH = 256;
 
+export const HITL_HTTP_DESTINATION_ERROR = 'Set connector-id or url. Either one is enough.';
+
 export const HitlHttpChannelSchema = z
   .object({
+    'connector-id': z
+      .string()
+      .min(1)
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .optional()
+      .describe(
+        'Saved HTTP connector id or name. When set, that connector supplies authentication. When omitted, the workflow HTTP system connector sends the request.'
+      ),
     url: z
       .string()
       .min(1)
       .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
-      .describe('HTTP request URL. Rendered as a Liquid template before the request is sent.'),
+      .optional()
+      .describe(
+        'Full request URL. Required when connector-id is omitted. When connector-id is set, this replaces the connector URL. Rendered as a Liquid template.'
+      ),
+    path: z
+      .string()
+      .min(1)
+      .max(MAX_HITL_EXTERNAL_LINK_LENGTH)
+      .optional()
+      .describe(
+        'Path appended to the connector URL, or to url when url is set. Rendered as a Liquid template.'
+      ),
     method: z
       .enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
       .optional()
@@ -404,11 +425,19 @@ export const HitlHttpChannelSchema = z
       .string()
       .min(1)
       .max(MAX_HITL_MESSAGE_LENGTH)
+      .optional()
       .describe(
-        'Request body template. For waitForInput use {{context.hitl.externalFormLink}}. For waitForApproval use {{context.hitl.externalApproveLink}} and {{context.hitl.externalRejectLink}}.'
+        'Optional request body template. For waitForInput use {{context.hitl.externalFormLink}}. For waitForApproval use {{context.hitl.externalApproveLink}} and {{context.hitl.externalRejectLink}}.'
       ),
   })
-  .strict();
+  .strict()
+  .refine((channel) => Boolean(channel['connector-id'] || channel.url), {
+    message: HITL_HTTP_DESTINATION_ERROR,
+    path: ['url'],
+  })
+  .meta({
+    anyOf: [{ required: ['connector-id'] }, { required: ['url'] }],
+  });
 
 const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
@@ -416,7 +445,7 @@ const hitlChannelDescriptions = {
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
-  http: 'Send the response links in an HTTP request. Set url and a body template. Uses the workflow HTTP connector, including its destination controls.',
+  http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
 } as const;
 
 export const WaitForInputChannelsSchema = z

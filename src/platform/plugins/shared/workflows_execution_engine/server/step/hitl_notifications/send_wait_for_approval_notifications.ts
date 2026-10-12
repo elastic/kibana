@@ -12,7 +12,7 @@ import { buildExternalResumeUrl } from '@kbn/workflows/server';
 import {
   assertConnectorSucceeded,
   buildSlack2SendMessageInput,
-  renderHitlHttpConnectorInput,
+  executeHitlHttpChannel,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
@@ -202,15 +202,15 @@ export async function sendWaitForApprovalNotifications({
   }
 
   const httpConfig = channels.http;
-  if (httpConfig?.url && httpConfig.body) {
+  if (httpConfig && (httpConfig['connector-id'] || httpConfig.url)) {
     if (!renderTemplate) {
       throw new Error('HTTP HITL delivery requires a template renderer');
     }
-    const result = await connectorExecutor.executeSystemConnector({
-      connectorType: '.http-system',
-      input: renderHitlHttpConnectorInput(httpConfig, renderTemplate),
+    await executeHitlHttpChannel({
+      channel: httpConfig,
+      renderTemplate,
+      connectorExecutor,
       abortController,
     });
-    assertConnectorSucceeded(result);
   }
 }

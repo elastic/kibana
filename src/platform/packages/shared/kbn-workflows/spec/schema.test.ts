@@ -20,6 +20,7 @@ import {
   DynamicTimeoutSchema,
   ElasticsearchStepSchema,
   EventTimestampSchema,
+  HITL_HTTP_DESTINATION_ERROR,
   IfStepSchema,
   KibanaStepSchema,
   LIQUID_MEMORY_LIMIT_MAX,
@@ -1370,7 +1371,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id', 'message'],
       slack_api: ['connector-id', 'channels', 'message'],
       slack2: ['connector-id', 'channels', 'message'],
-      http: ['url', 'method', 'headers', 'body'],
+      http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
   });
 
@@ -1386,7 +1387,7 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id'],
       slack_api: ['connector-id', 'channels'],
       slack2: ['connector-id', 'channels'],
-      http: ['url', 'method', 'headers', 'body'],
+      http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
   });
 
@@ -1402,6 +1403,67 @@ describe('HITL external channel schemas', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('accepts a saved HTTP connector with a path and no body', () => {
+    const result = WaitForInputStepSchema.safeParse({
+      name: 's',
+      type: 'waitForInput',
+      with: {
+        channels: {
+          http: {
+            'connector-id': 'http-1',
+            path: '/hitl?form={{context.hitl.externalFormLink}}',
+            method: 'GET',
+          },
+        },
+      },
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it('exposes connector-id or url as anyOf without splitting the HTTP channel properties', () => {
+    const json = z.toJSONSchema(WaitForInputChannelsSchema.unwrap(), {
+      target: 'draft-07',
+      unrepresentable: 'any',
+    }) as {
+      properties?: {
+        http?: { anyOf?: Array<{ required?: string[] }>; properties?: Record<string, unknown> };
+      };
+    };
+
+    expect(json.properties?.http?.anyOf).toEqual([
+      { required: ['connector-id'] },
+      { required: ['url'] },
+    ]);
+    expect(Object.keys(json.properties?.http?.properties ?? {})).toEqual([
+      'connector-id',
+      'url',
+      'path',
+      'method',
+      'headers',
+      'body',
+    ]);
+  });
+
+  it('rejects an HTTP channel with neither connector-id nor url', () => {
+    const result = WaitForApprovalStepSchema.safeParse({
+      name: 's',
+      type: 'waitForApproval',
+      with: {
+        channels: {
+          http: { path: '/hitl', method: 'GET' },
+        },
+      },
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues.map((issue) => issue.message)).toContain(
+        HITL_HTTP_DESTINATION_ERROR
+      );
+    }
   });
 });
 
