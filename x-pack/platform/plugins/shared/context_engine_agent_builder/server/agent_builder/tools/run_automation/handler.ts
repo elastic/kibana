@@ -11,7 +11,11 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ExecutionStatus, isTerminalStatus, type WorkflowDetailDto } from '@kbn/workflows';
 import { CREATE_KI_STEP_ID } from '@kbn/context-engine-plugin/common/step_types/create_ki';
-import { runSavedAutomation, type RunAutomationResult } from '../save_automation/handler';
+import {
+  collectWorkflowValidationErrors,
+  runSavedAutomation,
+  type RunAutomationResult,
+} from '../save_automation/handler';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
 export type { RunAutomationResult };
@@ -107,24 +111,42 @@ export const runAutomationHandler = async ({
   const workflowsManagement = getWorkflowsManagement();
   const { workflowId, pilotSize } = params;
 
+  // Read the saved workflow up front: an invalid definition cannot run on either path, and the
+  // pilot-input check below reads the parsed definition, which is null for an invalid workflow.
+  const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
+  if (!workflow) {
+    return {
+      started: false,
+      reason: `Workflow '${workflowId}' was not found in this space.`,
+    };
+  }
+
+  // An invalid definition parses to `null`, so the pilot-input check would misreport it as missing
+  // the input. Diagnose the real cause — the invalid definition — and surface its diagnostics.
+  if (!workflow.valid || !workflow.definition) {
+    const errors = await collectWorkflowValidationErrors({
+      yaml: workflow.yaml,
+      workflowsManagement,
+      spaceId,
+      request,
+      logger,
+    });
+    const details = errors.length > 0 ? ` ${errors.join('; ')}` : '';
+    return {
+      started: false,
+      reason: `Workflow '${workflowId}' has an invalid definition, so it cannot run.${details}`,
+    };
+  }
+
   // A workflow without the input would ignore it and run over the full corpus.
-  if (pilotSize !== undefined) {
-    const workflow = await workflowsManagement.getWorkflow(workflowId, spaceId, request);
-    if (!workflow) {
-      return {
-        started: false,
-        reason: `Workflow '${workflowId}' was not found in this space.`,
-      };
-    }
-    if (!declaresPilotInput(workflow)) {
-      return {
-        started: false,
-        reason:
-          `Workflow '${workflowId}' does not declare the ${PILOT_SIZE_INPUT} input, so it cannot ` +
-          `run as a pilot. Document, unit-profile and index-metadata automations can. ` +
-          `A Targeted KI writer has no pilot: run it with platform.core.execute_workflow.`,
-      };
-    }
+  if (pilotSize !== undefined && !declaresPilotInput(workflow)) {
+    return {
+      started: false,
+      reason:
+        `Workflow '${workflowId}' does not declare the ${PILOT_SIZE_INPUT} input, so it cannot ` +
+        `run as a pilot. Document, unit-profile and index-metadata automations can. ` +
+        `A Targeted KI writer has no pilot: run it with platform.core.execute_workflow.`,
+    };
   }
 
   const runResult = await runSavedAutomation({

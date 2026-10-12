@@ -255,6 +255,26 @@ export const createSaveAutomationTool = ({
         getWorkflowsManagement,
       });
 
+      // The save stores an invalid definition rather than rejecting it, so an invalid result is a
+      // failed save from the caller's point of view: report it as an error with the diagnostics.
+      if (result.valid === false) {
+        const details = result.validationErrors?.length
+          ? ` ${result.validationErrors.join('; ')}`
+          : '';
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `Workflow "${result.workflowId}" was saved but its definition is invalid, so it ` +
+                  `cannot be enabled or run. Fix the definition and save again.${details}`,
+              },
+            },
+          ],
+        };
+      }
+
       return {
         results: [
           {
