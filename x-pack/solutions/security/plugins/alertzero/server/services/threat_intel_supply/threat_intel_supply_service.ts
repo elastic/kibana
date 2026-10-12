@@ -72,8 +72,9 @@ export class ThreatIntelSupplyService {
 
   /**
    * Turns on ingest, enrich and the space's attribute workflow. If any step throws,
-   * the flips this call made are undone (globals only when no other space hunts) so a
-   * failed enable leaves supply as it was, then the original error is rethrown.
+   * the flips this call made are undone (globals only when no other space hunts, and nothing
+   * when Hunt is already on in this space) so a failed enable leaves supply as it was, then the
+   * original error is rethrown.
    */
   async ensureSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
     const targets = [
@@ -113,6 +114,26 @@ export class ThreatIntelSupplyService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
+    if (flipped.length === 0) {
+      return;
+    }
+
+    // A concurrent request may have finished enabling Hunt in this space while this one
+    // was stalled, and reverting would strip supply from a live Hunt. When that can't be
+    // ruled out, leaving supply on is the safer failure, so the undo is skipped.
+    try {
+      if (await this.isHuntEnabledInSpace(spaceId)) {
+        return;
+      }
+    } catch (checkError) {
+      this.deps.logger.error(
+        `Skipping threat intel supply undo for space '${spaceId}', could not check whether Hunt is enabled: ${
+          checkError instanceof Error ? checkError.message : String(checkError)
+        }`
+      );
+      return;
+    }
+
     for (const { workflowId, workflowSpaceId } of [...flipped].reverse()) {
       try {
         const isGlobal = workflowSpaceId === GLOBAL_WORKFLOW_SPACE_ID;

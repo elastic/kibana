@@ -197,6 +197,18 @@ describe('ThreatIntelSupplyService', () => {
       expect(workflows.get(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID)?.enabled).toBe(false);
     });
 
+    it('leaves ingest on when a concurrent request enabled Hunt in this space', async () => {
+      huntEnabledBySpace.set(SPACE_A, true);
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+    });
+
+    it('leaves ingest on when the Hunt status check fails', async () => {
+      getWorkflowStatus.mockRejectedValueOnce(new Error('status unavailable'));
+      await ensureWithMissingAttribute();
+      expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+    });
+
     it('keeps globals on when this call flipped them but another space has Hunt on', async () => {
       huntEnabledBySpace.set(SPACE_B, true);
       await ensureWithMissingAttribute();
@@ -204,9 +216,12 @@ describe('ThreatIntelSupplyService', () => {
     });
 
     describe('when an undo step fails', () => {
-      // Undo runs in reverse, so enrich is undone first; its other-space Hunt check fails.
+      // The first status call is the this-space check. Undo then runs in reverse, so enrich
+      // is undone first and its other-space Hunt check is the call that fails.
       beforeEach(() => {
-        getWorkflowStatus.mockRejectedValueOnce(new Error('status unavailable'));
+        getWorkflowStatus
+          .mockResolvedValueOnce({ installed: true, enabled: false, workflowId: 'hunt-a' })
+          .mockRejectedValueOnce(new Error('status unavailable'));
       });
 
       it('still rethrows the original error', async () => {
