@@ -46,9 +46,14 @@ export function getEsqlDocumentScopeQuery(esql: string): string {
   return BasicPrettyPrinter.print({ ...root, commands: scopedCommands }).trim();
 }
 
+/** The most buckets ES|QL SPARKLINE accepts. */
+export const MAX_SPARKLINE_BUCKETS = 100;
+
 /**
  * Aligns the sparkline range to multiples of the interval, matching the bucket keys of a
- * date_histogram (which rounds down to the interval since the epoch).
+ * date_histogram (which rounds down to the interval since the epoch). The bucket count is limited
+ * to `MAX_SPARKLINE_BUCKETS`; callers should choose an interval that avoids hitting the limit,
+ * otherwise the end of the range is not covered.
  */
 export function getAlignedSparklineRange({
   earliest,
@@ -60,7 +65,10 @@ export function getAlignedSparklineRange({
   intervalMs: number;
 }): { start: number; end: number; bucketCount: number } {
   const start = Math.floor(earliest / intervalMs) * intervalMs;
-  const bucketCount = Math.max(1, Math.ceil((latest - start) / intervalMs));
+  const bucketCount = Math.min(
+    MAX_SPARKLINE_BUCKETS,
+    Math.max(1, Math.ceil((latest - start) / intervalMs))
+  );
   return { start, end: start + bucketCount * intervalMs, bucketCount };
 }
 

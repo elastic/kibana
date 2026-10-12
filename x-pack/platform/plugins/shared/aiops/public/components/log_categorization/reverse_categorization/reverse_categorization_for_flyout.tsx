@@ -65,6 +65,7 @@ import { useDocsForCategory } from './use_docs_for_category';
 import { useCreateFormattedExample } from '../format_category';
 import { PatternCellRenderer } from './pattern_cell_renderer';
 import {
+  MAX_SPARKLINE_BUCKETS,
   addWhereToEsqlQuery,
   buildMatchFilterExpression,
   findCategoryMatchingFieldValue,
@@ -99,6 +100,9 @@ export interface ReverseCategorizationPageProps {
 }
 
 const BAR_TARGET = 60;
+// Keep the histogram within what SPARKLINE accepts. Aligning the range to the interval can add
+// one extra bucket to the count, so leave room for it.
+const MAX_HISTOGRAM_BARS = MAX_SPARKLINE_BUCKETS - 2;
 
 const isEmptyBoolQuery = ({ bool }: ReturnType<typeof buildEsQuery>): boolean =>
   bool !== undefined &&
@@ -266,7 +270,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     undefined,
     panelTimeRange,
     undefined,
-    esqlDocumentScope
+    esqlDocumentScope,
+    MAX_HISTOGRAM_BARS
   );
 
   const onAddFilter = useCallback(

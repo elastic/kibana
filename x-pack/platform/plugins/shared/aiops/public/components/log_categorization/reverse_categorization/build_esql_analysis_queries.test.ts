@@ -72,6 +72,27 @@ describe('build_esql_analysis_queries', () => {
       });
     });
 
+    it('limits the bucket count to what SPARKLINE accepts', () => {
+      const earliest = Date.parse('2024-01-01T00:00:00.000Z');
+      const latest = Date.parse('2024-01-01T10:00:00.000Z');
+      const oneMinute = 60 * 1000;
+
+      expect(getAlignedSparklineRange({ earliest, latest, intervalMs: oneMinute })).toEqual({
+        start: earliest,
+        end: earliest + 100 * oneMinute,
+        bucketCount: 100,
+      });
+    });
+
+    it('stays within the limit when aligning adds a bucket to a range of 98 intervals', () => {
+      const earliest = Date.parse('2024-01-01T00:12:00.000Z');
+      const latest = earliest + 98 * interval;
+
+      expect(
+        getAlignedSparklineRange({ earliest, latest, intervalMs: interval }).bucketCount
+      ).toBeLessThanOrEqual(100);
+    });
+
     it('leaves an already aligned range unchanged', () => {
       const earliest = Date.parse('2024-01-01T10:00:00.000Z');
       const latest = Date.parse('2024-01-01T11:00:00.000Z');
