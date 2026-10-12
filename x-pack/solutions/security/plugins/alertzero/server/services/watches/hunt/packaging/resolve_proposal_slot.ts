@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get, isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
@@ -18,6 +19,35 @@ type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
  * a finding recurring. Fails closed rather than minting a fifty-first.
  */
 const MAX_GENERATIONS = 50;
+
+/**
+ * Where an action's input says what it acts on: the agent, the process, or the user or service.
+ * Everything else in the input (a reason, a comment, a criticality level) can be revised freely
+ * without the Proposal being about something else.
+ */
+const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id', 'id_field', 'id_value'] as const;
+
+/**
+ * Whether a live Proposal still acts on what a finding wants to act on. `revise()` merges new
+ * action input over the old without touching the chain, so a Proposal created for host A can be
+ * revised to target host B and still sit under host A's id. Converging a new finding on A onto
+ * it would drop that finding silently. Only the target fields the finding itself carries are
+ * compared, so a finding without an action input (the recommendation) always matches.
+ */
+const holdsSameTarget = (
+  wanted: Record<string, unknown> | undefined,
+  live: Record<string, unknown> | undefined
+): boolean =>
+  TARGET_PATHS.every((path) => {
+    const wantedValue = get(wanted, path);
+    return wantedValue === undefined || isEqual(get(live, path), wantedValue);
+  });
+
+/** What a finding wants to propose, as far as finding its slot needs to know it. */
+export interface WantedProposal {
+  subjectKey: string;
+  actionInput?: Record<string, unknown>;
+}
 
 /** The live Proposal a subject already has, as far as packaging needs to know it. */
 export interface LiveProposal {
@@ -44,7 +74,7 @@ export type ProposalSlot =
  * Where a subject's next Proposal goes: a new id, or the live Proposal it should converge onto.
  * Throws if it cannot tell, so the caller can fail closed.
  */
-export type ResolveProposalSlot = (subjectKey: string) => Promise<ProposalSlot>;
+export type ResolveProposalSlot = (wanted: WantedProposal) => Promise<ProposalSlot>;
 
 /**
  * Implements {@link ResolveProposalSlot} over the Proposals service.
@@ -60,7 +90,9 @@ export type ResolveProposalSlot = (subjectKey: string) => Promise<ProposalSlot>;
  * tell the analyst, and `create()` is what guarantees correctness, refusing a duplicate id.
  *
  * A `pending` Proposal past its deadline counts as settled even if its gate has not recorded the
- * expiry yet: converging a new finding onto something about to expire would lose it.
+ * expiry yet: converging a new finding onto something about to expire would lose it. A live one
+ * that has been revised to act on something else no longer holds the subject either: see
+ * {@link holdsSameTarget}.
  */
 export const createProposalSlotResolver = ({
   proposalsService,
@@ -75,7 +107,7 @@ export const createProposalSlotResolver = ({
   logger?: Logger;
   now?: () => number;
 }): ResolveProposalSlot => {
-  return async (subjectKey) => {
+  return async ({ subjectKey, actionInput }) => {
     try {
       for (let generation = 0; generation < MAX_GENERATIONS; generation++) {
         const rootId = buildHuntProposalId({ spaceId, subjectKey, generation });
@@ -91,6 +123,9 @@ export const createProposalSlotResolver = ({
         }
 
         if (head.status !== 'pending' && head.status !== 'executing') {
+          continue;
+        }
+        if (!holdsSameTarget(actionInput, head.actionInput)) {
           continue;
         }
 

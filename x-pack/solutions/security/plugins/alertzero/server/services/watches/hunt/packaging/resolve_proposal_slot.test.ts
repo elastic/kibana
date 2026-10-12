@@ -26,6 +26,8 @@ interface Chain {
   conversationId?: string;
   /** Set when the chain was revised: the live head is this row, not the root. */
   headId?: string;
+  /** What the live revision acts on. */
+  actionInput?: Record<string, unknown>;
 }
 
 /** A Proposals service fake: chains keyed by the id of their root, one per generation. */
@@ -45,7 +47,7 @@ const createService = (chains: Record<string, Chain> = {}) => {
         revision: entry.headId ? 2 : 1,
         status: entry.status,
         decision: entry.decision,
-        actionInput: undefined,
+        actionInput: entry.actionInput,
       };
     }),
     get: jest.fn(async (id: string) => {
@@ -84,7 +86,10 @@ describe('createProposalSlotResolver', () => {
   it('mints at generation zero when nothing holds the subject', async () => {
     const { resolve } = resolver(createService());
 
-    await expect(resolve(SUBJECT)).resolves.toEqual({ kind: 'mint', proposalId: idAt(0) });
+    await expect(resolve({ subjectKey: SUBJECT })).resolves.toEqual({
+      kind: 'mint',
+      proposalId: idAt(0),
+    });
   });
 
   describe('a live proposal holds the subject', () => {
@@ -92,7 +97,7 @@ describe('createProposalSlotResolver', () => {
       const service = createService({ [idAt(0)]: { status: 'pending', conversationId: 'conv-1' } });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toEqual({
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toEqual({
         kind: 'converge',
         live: {
           proposalId: idAt(0),
@@ -108,7 +113,7 @@ describe('createProposalSlotResolver', () => {
       const service = createService({ [idAt(0)]: { status: 'pending', decision: 'approved' } });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toMatchObject({
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({
         kind: 'converge',
         live: { revisable: false },
       });
@@ -118,7 +123,7 @@ describe('createProposalSlotResolver', () => {
       const service = createService({ [idAt(0)]: { status: 'executing', decision: 'approved' } });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toMatchObject({
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({
         kind: 'converge',
         live: { proposalId: idAt(0), revisable: false },
       });
@@ -128,7 +133,7 @@ describe('createProposalSlotResolver', () => {
       const service = createService({ [idAt(0)]: { status: 'pending', headId: 'revision-2' } });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toMatchObject({
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({
         kind: 'converge',
         live: { proposalId: 'revision-2', comment: 'Comment of revision-2' },
       });
@@ -140,7 +145,7 @@ describe('createProposalSlotResolver', () => {
       });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toMatchObject({ kind: 'converge' });
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
     });
   });
 
@@ -150,7 +155,10 @@ describe('createProposalSlotResolver', () => {
       async (status) => {
         const { resolve } = resolver(createService({ [idAt(0)]: { status } }));
 
-        await expect(resolve(SUBJECT)).resolves.toEqual({ kind: 'mint', proposalId: idAt(1) });
+        await expect(resolve({ subjectKey: SUBJECT })).resolves.toEqual({
+          kind: 'mint',
+          proposalId: idAt(1),
+        });
       }
     );
 
@@ -162,7 +170,7 @@ describe('createProposalSlotResolver', () => {
       });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toMatchObject({
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({
         kind: 'converge',
         live: { proposalId: idAt(2), conversationId: 'conv-3' },
       });
@@ -175,7 +183,10 @@ describe('createProposalSlotResolver', () => {
       });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toEqual({ kind: 'mint', proposalId: idAt(1) });
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toEqual({
+        kind: 'mint',
+        proposalId: idAt(1),
+      });
     });
 
     it('does not apply the deadline to an executing proposal, which keeps running past it', async () => {
@@ -184,7 +195,100 @@ describe('createProposalSlotResolver', () => {
       });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toMatchObject({ kind: 'converge' });
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
+    });
+  });
+
+  describe('a live proposal revised to act on something else', () => {
+    // `revise()` merges new action input over the old without touching the chain, so a proposal
+    // created for one host can be revised to target another and still sit under the first's id.
+    const forHost = (agent: string) => ({ endpoint_ids: [agent], comment: 'original' });
+
+    it('does not hold the subject once its target has changed: the finding gets its own proposal', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'pending', headId: 'revision-2', actionInput: forHost('agent-b') },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: forHost('agent-a') })
+      ).resolves.toEqual({ kind: 'mint', proposalId: idAt(1) });
+    });
+
+    it('still holds it when only something other than the target was revised', async () => {
+      const service = createService({
+        [idAt(0)]: {
+          status: 'pending',
+          headId: 'revision-2',
+          actionInput: { endpoint_ids: ['agent-a'], comment: 'revised by an analyst' },
+        },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: forHost('agent-a') })
+      ).resolves.toMatchObject({ kind: 'converge', live: { proposalId: 'revision-2' } });
+    });
+
+    it('converges onto a later generation that does match, past the revised-away one', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'pending', actionInput: forHost('agent-b') },
+        [idAt(1)]: { status: 'pending', actionInput: forHost('agent-a'), conversationId: 'conv-2' },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: forHost('agent-a') })
+      ).resolves.toMatchObject({
+        kind: 'converge',
+        live: { proposalId: idAt(1), conversationId: 'conv-2' },
+      });
+    });
+
+    it.each([
+      [
+        'a process',
+        { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-1' } },
+        { endpoint_ids: ['agent-a'], parameters: { entity_id: 'ent-2' } },
+      ],
+      [
+        'a user',
+        { id_field: 'user.name', id_value: 'dev-user', criticality_level: 'high_impact' },
+        { id_field: 'user.name', id_value: 'other-user', criticality_level: 'high_impact' },
+      ],
+    ])('compares what %s is identified by', async (_label, wanted, revisedTo) => {
+      const service = createService({ [idAt(0)]: { status: 'pending', actionInput: revisedTo } });
+      const { resolve } = resolver(service);
+
+      await expect(resolve({ subjectKey: SUBJECT, actionInput: wanted })).resolves.toEqual({
+        kind: 'mint',
+        proposalId: idAt(1),
+      });
+      // And the same input is the same target.
+      const same = createService({ [idAt(0)]: { status: 'pending', actionInput: wanted } });
+      await expect(
+        resolver(same).resolve({ subjectKey: SUBJECT, actionInput: wanted })
+      ).resolves.toMatchObject({ kind: 'converge' });
+    });
+
+    it('holds a finding that carries no action input, like the recommendation', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'pending', actionInput: forHost('agent-b') },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
+    });
+
+    it('does not read the proposal itself for one it has already ruled out', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'pending', actionInput: forHost('agent-b') },
+      });
+      const { resolve } = resolver(service);
+
+      await resolve({ subjectKey: SUBJECT, actionInput: forHost('agent-a') });
+
+      expect(service.get).not.toHaveBeenCalled();
     });
   });
 
@@ -193,7 +297,10 @@ describe('createProposalSlotResolver', () => {
       const service = createService({ [idAt(0, 'other')]: { status: 'pending' } });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).resolves.toEqual({ kind: 'mint', proposalId: idAt(0) });
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toEqual({
+        kind: 'mint',
+        proposalId: idAt(0),
+      });
       expect(service.getLatestRevision).toHaveBeenCalledWith(idAt(0), SPACE);
     });
   });
@@ -204,7 +311,7 @@ describe('createProposalSlotResolver', () => {
       service.getLatestRevision.mockRejectedValue(new Error('cluster unavailable'));
       const { resolve, logger } = resolver(service);
 
-      await expect(resolve(SUBJECT)).rejects.toThrow('cluster unavailable');
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('cluster unavailable');
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
     });
 
@@ -213,7 +320,7 @@ describe('createProposalSlotResolver', () => {
       service.get.mockRejectedValue(new Error('read failed'));
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).rejects.toThrow('read failed');
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('read failed');
     });
 
     it('gives up rather than mint without bound once every generation has settled', async () => {
@@ -227,7 +334,9 @@ describe('createProposalSlotResolver', () => {
       });
       const { resolve } = resolver(service);
 
-      await expect(resolve(SUBJECT)).rejects.toThrow(/settled proposals under one subject/);
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow(
+        /settled proposals under one subject/
+      );
       expect(service.getLatestRevision).toHaveBeenCalledTimes(50);
     });
   });

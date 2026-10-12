@@ -95,6 +95,7 @@ const packagingLine = ({
   dismissHold,
   proposalTitles,
   convergedTitles,
+  alreadyOpen,
 }: {
   decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
   mintSuppression: 'none' | 'check_failed';
@@ -102,6 +103,8 @@ const packagingLine = ({
   proposalTitles: string[];
   /** Titles of the proposals another Investigation already holds, which this run did not repeat. */
   convergedTitles: Array<string | undefined>;
+  /** Findings a live Proposal this Investigation already holds covers, so none was created. */
+  alreadyOpen: number;
 }): string => {
   const converged = convergedTitles.length;
   const convergedNote =
@@ -110,6 +113,9 @@ const packagingLine = ({
           convergedTitles.some(Boolean) ? ` (${convergedTitles.filter(Boolean).join('; ')})` : ''
         }`
       : undefined;
+  const alreadyOpenNote =
+    alreadyOpen > 0 ? `${alreadyOpen} already open on this Investigation` : undefined;
+  const covered = [convergedNote, alreadyOpenNote].filter(Boolean).join('; ');
   if (mintSuppression === 'check_failed') {
     return 'Packaging: no new proposals, existing proposals could not be checked';
   }
@@ -121,14 +127,14 @@ const packagingLine = ({
   }
   if (decided.dismiss) return 'Packaging: dismissed, no proposals';
   if (decided.proposals.length === 0) {
-    return convergedNote
-      ? `Packaging: no new proposals, ${convergedNote}`
+    return covered
+      ? `Packaging: no new proposals, ${covered}`
       : 'Packaging: dismissed, no proposals';
   }
   const count = decided.proposals.length;
   return `Packaging: proposed ${count} ${count === 1 ? 'action' : 'actions'}${
     proposalTitles.length > 0 ? `: ${proposalTitles.join('; ')}` : ''
-  }${convergedNote ? `; ${convergedNote}` : ''}`;
+  }${covered ? `; ${covered}` : ''}`;
 };
 
 /**
@@ -141,6 +147,7 @@ export const buildInvestigationSummary = ({
   mintSuppression = 'none',
   dismissHold = 'none',
   converged = [],
+  alreadyOpen = 0,
 }: {
   state: CurrentRunState;
   decided: Pick<DecidePackageReportResult, 'dismiss' | 'proposals'>;
@@ -148,6 +155,8 @@ export const buildInvestigationSummary = ({
   mintSuppression?: 'none' | 'check_failed';
   /** What this run found that another Investigation's live Proposal already covers. */
   converged?: Array<{ title?: string }>;
+  /** What a live Proposal this Investigation already holds covers, so none was created. */
+  alreadyOpen?: number;
   /** Why a run that would dismiss left the Investigation open instead. */
   dismissHold?: 'none' | 'open_proposal' | 'check_failed';
 }): string => {
@@ -180,6 +189,7 @@ export const buildInvestigationSummary = ({
       dismissHold,
       proposalTitles,
       convergedTitles: converged.map((entry) => entry.title),
+      alreadyOpen,
     }),
   ];
   // Evidence sits after the entity sections and before the packaging line.
@@ -224,6 +234,7 @@ export const buildCleanInvestigationSummary = ({
       dismissHold,
       proposalTitles: [],
       convergedTitles: [],
+      alreadyOpen: 0,
     }),
   ];
   return assembleSummary({ sections, evidenceLines: [], evidenceIndex: sections.length });

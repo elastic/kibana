@@ -140,6 +140,7 @@ export const getPackageReportStepDefinition = ({
         });
         const appendAlsoRaisedBy = createAlsoRaisedByAppender({
           proposalsService: getHuntServices().getProposalsService(),
+          privileges: getHuntServices().getProposalPrivileges(),
           spaceId,
           request,
           logger,

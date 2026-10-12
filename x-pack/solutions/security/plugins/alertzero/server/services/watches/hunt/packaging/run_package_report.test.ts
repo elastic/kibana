@@ -16,7 +16,7 @@ import {
 } from './run_package_report';
 import type { RunPackageReportDeps } from './run_package_report';
 import { buildProposalSubjectKey } from './decide_package_report';
-import type { LiveProposal, ProposalSlot } from './resolve_proposal_slot';
+import type { LiveProposal, ProposalSlot, WantedProposal } from './resolve_proposal_slot';
 import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
@@ -202,7 +202,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
   // Every subject is free by default, at the first generation, as it is in an empty space.
-  resolveProposalSlot: async (subjectKey) => ({
+  resolveProposalSlot: async ({ subjectKey }) => ({
     kind: 'mint',
     proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
   }),
@@ -769,9 +769,9 @@ describe('runPackageReport', () => {
       return result;
     };
 
-    it('asks for each finding’s slot by its subject key, once', async () => {
+    it('asks for each finding’s slot by its subject key and the action input it wants to run, once', async () => {
       const resolveProposalSlot = jest.fn(
-        async (subjectKey: string): Promise<ProposalSlot> => ({
+        async ({ subjectKey }: WantedProposal): Promise<ProposalSlot> => ({
           kind: 'mint',
           proposalId: buildHuntProposalId({ spaceId: 'default', subjectKey, generation: 0 }),
         })
@@ -779,8 +779,13 @@ describe('runPackageReport', () => {
 
       const result = await packaged({ resolveProposalSlot });
 
-      expect(resolveProposalSlot.mock.calls.map(([key]) => key)).toEqual(
+      expect(resolveProposalSlot.mock.calls.map(([wanted]) => wanted.subjectKey)).toEqual(
         result.proposals.map((proposal) => proposal.subjectKey)
+      );
+      // The input is what lets the resolver tell a proposal revised to act on something else from
+      // one that still covers this finding.
+      expect(resolveProposalSlot.mock.calls.map(([wanted]) => wanted.actionInput)).toEqual(
+        result.proposals.map((proposal) => proposal.actionInput)
       );
     });
 
@@ -835,7 +840,7 @@ describe('runPackageReport', () => {
             ok: true,
             actions: [isolateHost, setAssetCriticality],
           }),
-          resolveProposalSlot: async (subjectKey) =>
+          resolveProposalSlot: async ({ subjectKey }) =>
             subjectKey === isolateKey
               ? { kind: 'converge', live }
               : {
@@ -870,6 +875,40 @@ describe('runPackageReport', () => {
 
       expect(result.proposals).toEqual([]);
       expect(result.converged).toEqual([]);
+      // Reported by count instead, so the run's summary does not read as a dismissal while the
+      // Investigation stays open on its own pending proposal.
+      expect(result.alreadyOpenCount).toBe(1);
+    });
+
+    it('writes a summary that says the finding is already open here, not that the run was dismissed', async () => {
+      const writeCoverageKis = jest.fn(async (subjects: CoverageSubject[]) => ({
+        written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
+        skipped: [],
+      }));
+
+      await packaged({
+        writeCoverageKis,
+        resolveProposalSlot: async () => ({
+          kind: 'converge',
+          live: liveProposal({ conversationId }),
+        }),
+        appendAlsoRaisedBy: async () => 'same_investigation',
+      });
+
+      const summary = writeCoverageKis.mock.calls[0][0][0].investigationSummary;
+      expect(summary).toContain(
+        'Packaging: no new proposals, 1 already open on this Investigation'
+      );
+      expect(summary).not.toContain('dismissed');
+    });
+
+    it('does not count what converged onto another Investigation as already open here', async () => {
+      const result = await packaged({
+        resolveProposalSlot: async () => ({ kind: 'converge', live: liveProposal() }),
+      });
+
+      expect(result.converged).toHaveLength(1);
+      expect(result.alreadyOpenCount).toBe(0);
     });
 
     it('still converges when the revision fails, and does not claim it was added', async () => {
@@ -894,7 +933,7 @@ describe('runPackageReport', () => {
             actions: [isolateHost, setAssetCriticality],
           }),
           countExistingProposals: async () => 2,
-          resolveProposalSlot: async (subjectKey) =>
+          resolveProposalSlot: async ({ subjectKey }) =>
             subjectKey === isolateKey
               ? { kind: 'converge', live: liveProposal() }
               : {
@@ -965,6 +1004,7 @@ describe('runPackageReport', () => {
         expect(result.mintSuppression).toBe('check_failed');
         expect(result.proposals).toEqual([]);
         expect(result.converged).toEqual([]);
+        expect(result.alreadyOpenCount).toBe(0);
       });
     });
 

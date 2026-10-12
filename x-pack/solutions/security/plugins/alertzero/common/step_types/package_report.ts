@@ -212,6 +212,14 @@ export const packageReportOutputSchema = z.discriminatedUnion('status', [
      */
     converged: z.array(convergedProposalSchema),
     /**
+     * Findings this run minted nothing for because a live Proposal this Investigation already
+     * holds covers them: a rerun landing on its own pending or executing Proposal. Not in
+     * `converged`, which is for what another Investigation holds and is what the journal reports,
+     * but it still means "this run created nothing", and the Investigation stays open for it, so
+     * the run's summary has to be able to say so.
+     */
+    alreadyOpenCount: z.number().int().min(0),
+    /**
      * Bounded markdown bullets, one per proposal up to `MAX_SUMMARY_PROPOSAL_BULLETS`, for the run
      * conclusion's prose. `proposals` itself stays complete because it drives the gate fan-out; this
      * is only what gets embedded in the journal note, whose `message` is capped at 8,000 characters.

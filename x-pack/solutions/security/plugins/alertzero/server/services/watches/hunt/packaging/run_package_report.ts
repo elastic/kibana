@@ -139,12 +139,20 @@ const settleProposals = async ({
   investigationConversationId: string;
   spaceId: string;
   deps: Pick<RunPackageReportDeps, 'resolveProposalSlot' | 'appendAlsoRaisedBy'>;
-}): Promise<{ proposals: PackageReportMintPayload[]; converged: ConvergedProposal[] }> => {
+}): Promise<{
+  proposals: PackageReportMintPayload[];
+  converged: ConvergedProposal[];
+  alreadyOpenCount: number;
+}> => {
   const proposals: PackageReportMintPayload[] = [];
   const converged: ConvergedProposal[] = [];
+  let alreadyOpenCount = 0;
 
   for (const proposal of wanted) {
-    const slot = await deps.resolveProposalSlot(proposal.subjectKey);
+    const slot = await deps.resolveProposalSlot({
+      subjectKey: proposal.subjectKey,
+      actionInput: proposal.actionInput,
+    });
     if (slot.kind === 'mint') {
       proposals.push({ ...proposal, proposalId: slot.proposalId });
       continue;
@@ -154,8 +162,11 @@ const settleProposals = async ({
       live: slot.live,
       investigationConversationId,
     });
-    // This Investigation's own Proposal, found again by a rerun: nothing to add and nothing to say.
+    // This Investigation's own Proposal, found again by a rerun: nothing to add to it and no
+    // journal line to write, but the run still created nothing for this finding, which its
+    // summary has to be able to say.
     if (outcome === 'same_investigation') {
+      alreadyOpenCount += 1;
       continue;
     }
     converged.push({
@@ -167,7 +178,7 @@ const settleProposals = async ({
     });
   }
 
-  return { proposals, converged };
+  return { proposals, converged, alreadyOpenCount };
 };
 
 /**
@@ -312,6 +323,7 @@ export const runPackageReport = async ({
         coverage,
         proposals: [],
         converged: [],
+        alreadyOpenCount: 0,
         proposalBullets: [],
         omittedProposalCount: 0,
         dismiss: dismissHold === 'none',
@@ -378,10 +390,11 @@ export const runPackageReport = async ({
   let existingProposalCount = 0;
   let proposals: PackageReportMintPayload[] = [];
   let converged: ConvergedProposal[] = [];
+  let alreadyOpenCount = 0;
   if (!decided.dismiss) {
     try {
       existingProposalCount = await deps.countExistingProposals(investigationConversationId);
-      ({ proposals, converged } = await settleProposals({
+      ({ proposals, converged, alreadyOpenCount } = await settleProposals({
         wanted: decided.proposals,
         investigationConversationId,
         spaceId,
@@ -393,6 +406,7 @@ export const runPackageReport = async ({
       mintSuppression = 'check_failed';
       proposals = [];
       converged = [];
+      alreadyOpenCount = 0;
     }
   }
 
@@ -407,6 +421,7 @@ export const runPackageReport = async ({
         mintSuppression,
         dismissHold,
         converged,
+        alreadyOpen: alreadyOpenCount,
       }),
       coordinator,
       reportContext,
@@ -434,6 +449,7 @@ export const runPackageReport = async ({
     coverage,
     proposals,
     converged,
+    alreadyOpenCount,
     proposalBullets,
     omittedProposalCount,
     // Not forced to `true`: a confirmed hit is not benign, even when this run mints nothing for

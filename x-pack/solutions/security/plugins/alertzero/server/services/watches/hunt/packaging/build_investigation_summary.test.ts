@@ -171,6 +171,55 @@ describe('buildInvestigationSummary packaging outcome', () => {
     expect(summary).toContain('1 already raised by another Investigation (Isolate host A)');
   });
 
+  describe('a rerun that finds its own live proposals', () => {
+    // The Investigation stays open with a pending or executing proposal, so the summary must not
+    // say it was dismissed: this run created nothing, but nothing was closed either.
+    it('says the findings are already open here, and not that the run was dismissed', () => {
+      const summary = buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        alreadyOpen: 2,
+      });
+
+      expect(summary).toContain(
+        'Packaging: no new proposals, 2 already open on this Investigation'
+      );
+      expect(summary).not.toContain('dismissed');
+    });
+
+    it('still says dismissed for a run that really had nothing to propose', () => {
+      expect(
+        buildInvestigationSummary({
+          state: state(),
+          decided: { dismiss: false, proposals: [] },
+        })
+      ).toContain('Packaging: dismissed, no proposals');
+    });
+
+    it('lists what converged elsewhere and what is already open here, together', () => {
+      expect(
+        buildInvestigationSummary({
+          state: state(),
+          decided: { dismiss: false, proposals: [] },
+          converged: [{ title: 'Isolate host A' }],
+          alreadyOpen: 1,
+        })
+      ).toContain(
+        'Packaging: no new proposals, 1 already raised by another Investigation (Isolate host A); 1 already open on this Investigation'
+      );
+    });
+
+    it('counts them beside the ones it proposed', () => {
+      expect(
+        buildInvestigationSummary({
+          state: state(),
+          decided: { dismiss: false, proposals: [{ title: 'Isolate host B' }] as never },
+          alreadyOpen: 1,
+        })
+      ).toContain('proposed 1 action: Isolate host B; 1 already open on this Investigation');
+    });
+  });
+
   it('names no titles when the converged proposals have none', () => {
     expect(
       buildInvestigationSummary({

@@ -851,6 +851,7 @@ describe('Hunt Watch worker chain', () => {
                   mintSuppression: 'none',
                   proposals: [],
                   converged: [],
+                  alreadyOpenCount: 0,
                   proposalBullets: [],
                   omittedProposalCount: 0,
                   coverage: { written: [], skipped: [] },
@@ -867,13 +868,47 @@ describe('Hunt Watch worker chain', () => {
       it('says every proposal already exists when every finding converged, instead of claiming any were prepared', () => {
         const text = render({ converged: converged(2) });
 
-        expect(text).toContain('2 Proposals already exist for it, so none was created');
-        expect(text).toContain('The journal says where each one is');
+        expect(text).toContain(
+          'every proposal it would have raised already exists, so none was created: 2 were raised by another Investigation (the journal says where).'
+        );
         expect(text).not.toContain('Packaging prepared');
       });
 
       it('uses the singular for one', () => {
-        expect(render({ converged: converged(1) })).toContain('1 Proposal already exists for it');
+        expect(render({ converged: converged(1) })).toContain(
+          'none was created: 1 was raised by another Investigation'
+        );
+      });
+
+      // A rerun landing on its own pending or executing proposal creates nothing and closes
+      // nothing. Without its own branch this fell through to "prepared 0 proposals ... launched an
+      // approval gate for each".
+      it('says the findings are already open on this Investigation when a rerun finds its own', () => {
+        const text = render({ alreadyOpenCount: 2 });
+
+        expect(text).toContain(
+          'every proposal it would have raised already exists, so none was created: 2 are already open on this Investigation.'
+        );
+        expect(text).not.toContain('Packaging prepared');
+        expect(text).not.toContain('raised by another Investigation');
+      });
+
+      it('uses the singular for one of its own', () => {
+        expect(render({ alreadyOpenCount: 1 })).toContain(
+          'none was created: 1 is already open on this Investigation.'
+        );
+      });
+
+      it('names both when some converged elsewhere and some are already open here', () => {
+        expect(render({ converged: converged(1), alreadyOpenCount: 2 })).toContain(
+          'none was created: 1 was raised by another Investigation (the journal says where) and 2 are already open on this Investigation.'
+        );
+      });
+
+      it('keeps the coverage clause after either', () => {
+        expect(
+          render({ alreadyOpenCount: 1, coverage: { written: [{ kiId: 'k' }], skipped: [] } })
+        ).toContain('already open on this Investigation; also recorded 1 coverage knowledge item');
       });
 
       it('counts converged findings beside the ones it prepared', () => {
@@ -885,6 +920,19 @@ describe('Hunt Watch worker chain', () => {
 
         expect(text).toContain('Packaging prepared 1 proposal');
         expect(text).toContain('1 more finding already has a Proposal, so none was created for it');
+      });
+
+      it('counts findings already open here beside the ones it prepared', () => {
+        const text = render({
+          proposals: [{ proposalId: 'p-new' }],
+          proposalBullets: ['- Isolate host B'],
+          alreadyOpenCount: 2,
+        });
+
+        expect(text).toContain('Packaging prepared 1 proposal');
+        expect(text).toContain(
+          '2 more findings already have a Proposal, so none was created for them'
+        );
       });
 
       it('is unchanged when nothing converged', () => {

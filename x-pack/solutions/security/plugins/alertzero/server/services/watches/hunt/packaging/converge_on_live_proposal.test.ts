@@ -35,12 +35,19 @@ const createService = () => ({
   get: jest.fn(),
 });
 
-const appender = (service: ReturnType<typeof createService>, spaceId = SPACE) => {
+const appender = (
+  service: ReturnType<typeof createService>,
+  spaceId = SPACE,
+  canManage: () => Promise<boolean> = async () => true
+) => {
   const logger = loggerMock.create();
+  const privileges = { canManage: jest.fn(canManage) };
   return {
     logger,
+    privileges,
     append: createAlsoRaisedByAppender({
       proposalsService: service as never,
+      privileges,
       spaceId,
       request,
       logger,
@@ -97,6 +104,58 @@ describe('createAlsoRaisedByAppender', () => {
     expect(service.revise.mock.calls[0][0].comment).toContain(
       '(/s/sec/app/alertzero?selectedConversationId=conv-this)'
     );
+  });
+
+  describe('the privilege to manage proposals', () => {
+    it('is checked for the request before anything is written', async () => {
+      const service = createService();
+      const { append, privileges } = appender(service);
+
+      await append({ live: live(), investigationConversationId: THIS_RUN });
+
+      expect(privileges.canManage).toHaveBeenCalledWith(request);
+    });
+
+    it('leaves another Investigation’s proposal alone when the request lacks it, and says so', async () => {
+      // The service writes with its own credentials and does not check who is asking, so
+      // without this a run that may package could edit any Investigation's pending proposal.
+      const service = createService();
+      const { append, logger } = appender(service, SPACE, async () => false);
+
+      const outcome = await append({ live: live(), investigationConversationId: THIS_RUN });
+
+      expect(outcome).toBe('failed');
+      expect(service.revise).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('lacks the privilege to manage proposals')
+      );
+    });
+
+    it('is not asked when a guard already shows there is nothing to write', async () => {
+      const service = createService();
+      const { append, privileges } = appender(service);
+
+      await append({
+        live: live({ conversationId: THIS_RUN }),
+        investigationConversationId: THIS_RUN,
+      });
+      await append({ live: live({ revisable: false }), investigationConversationId: THIS_RUN });
+
+      expect(privileges.canManage).not.toHaveBeenCalled();
+    });
+
+    it('treats a failure to check it as a failed revision, not a crash', async () => {
+      const service = createService();
+      const { append, logger } = appender(service, SPACE, async () => {
+        throw new Error('security unavailable');
+      });
+
+      const outcome = await append({ live: live(), investigationConversationId: THIS_RUN });
+
+      expect(outcome).toBe('failed');
+      expect(service.revise).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security unavailable'));
+    });
   });
 
   describe('skips, without failing, when there is nothing to add', () => {

@@ -12,6 +12,10 @@ import { ProposalConflictError } from '@kbn/proposals-plugin/server';
 import type { LiveProposal } from './resolve_proposal_slot';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
+type ProposalPrivileges = Pick<
+  ReturnType<ProposalsPluginStart['getProposalPrivileges']>,
+  'canManage'
+>;
 
 /**
  * What happened to the live Proposal's comment when this run converged onto it.
@@ -22,8 +26,9 @@ type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
  * - `already_mentioned`: the comment already names this Investigation.
  * - `not_revisable`: an analyst has already decided it, and `revise()` refuses a decided one.
  * - `too_long`: the line would push the comment past the length the service allows.
- * - `failed`: the revision was refused or errored. Never fatal: the duplicate was avoided either
- *   way, and the line is a courtesy to the analyst.
+ * - `failed`: the revision was refused (including for want of the privilege to manage proposals)
+ *   or errored. Never fatal: the duplicate was avoided either way, and the line is a courtesy to
+ *   the analyst.
  */
 export type ConvergeOutcome =
   | 'revised'
@@ -54,6 +59,12 @@ const buildAlsoRaisedByLine = (link: string): string => `Also raised by [Investi
  * Guards, each of which skips rather than fails: the Proposal is this Investigation's own; the
  * comment already names it; it was decided since the look-up; the line would not fit. A 409 (a
  * concurrent revision or decision won) reloads the live revision and tries once more.
+ *
+ * Revising is a write, and the Proposals service does not check who is asking: it writes with its
+ * own credentials and relies on its callers, as the revise tool and the workflow steps do. So the
+ * privilege to manage proposals is checked here, last, once the guards have shown there is
+ * something to write. A run that may package but may not manage proposals still converges, since
+ * minting nothing is always safe, but leaves another Investigation's Proposal as it found it.
  */
 export type AppendAlsoRaisedBy = (args: {
   live: LiveProposal;
@@ -62,11 +73,13 @@ export type AppendAlsoRaisedBy = (args: {
 
 export const createAlsoRaisedByAppender = ({
   proposalsService,
+  privileges,
   spaceId,
   request,
   logger,
 }: {
   proposalsService: ProposalsService;
+  privileges: ProposalPrivileges;
   spaceId: string;
   request: KibanaRequest;
   logger?: Logger;
@@ -90,6 +103,12 @@ export const createAlsoRaisedByAppender = ({
     const comment = `${live.comment}\n\n${line}`;
     if (comment.length > MAX_COMMENT_LENGTH) {
       return 'too_long';
+    }
+    if (!(await privileges.canManage(request))) {
+      logger?.warn(
+        `package_report: not adding this Investigation to proposal ${live.proposalId}: the request lacks the privilege to manage proposals`
+      );
+      return 'failed';
     }
     await proposalsService.revise({ id: live.proposalId, comment }, spaceId, request);
     return 'revised';
