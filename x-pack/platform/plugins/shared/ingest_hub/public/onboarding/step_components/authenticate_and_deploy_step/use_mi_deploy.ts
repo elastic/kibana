@@ -534,6 +534,8 @@ export function useMiDeploy({
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
+            // Already stored by an earlier update this run: nothing is typed any more.
+            hasTypedSecrets: hasTypedSecrets && !storedSharedRefs,
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
@@ -635,6 +637,8 @@ export function useMiDeploy({
             // A dirty update may have just stored new keys for the policies this updates: keep
             // them instead of storing the typed ones again, which would orphan the shared refs.
             authenticateAndDeployStep: withSharedRefs(storedSharedRefs),
+            // Already stored by an earlier update this run: nothing is typed any more.
+            hasTypedSecrets: hasTypedSecrets && !storedSharedRefs,
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,

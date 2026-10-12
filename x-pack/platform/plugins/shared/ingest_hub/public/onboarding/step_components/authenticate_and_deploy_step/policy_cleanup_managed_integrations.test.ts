@@ -386,6 +386,7 @@ describe('cleanupManagedIntegrationsPolicies — typed keys', () => {
       authenticateAndDeployStep: {
         staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
       } as never,
+      hasTypedSecrets: true,
       instances: [makeInstance('inst-b', 'vpcflow'), makeInstance('inst-d', 'vpcflow')],
       servicesMap: new Map([['vpcflow', vpcflow]]),
       pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-c': 'policy-2' },
@@ -400,6 +401,35 @@ describe('cleanupManagedIntegrationsPolicies — typed keys', () => {
     expect(mockUpdateAgentless.mock.calls[1][1].vars).toEqual(refs);
     expect(ops.toUpdate).toHaveLength(2);
     expect(ops.sharedRefs?.get('secret_access_key')).toEqual(refs.secret_access_key);
+  });
+
+  it('sends the typed keys to every policy when the caller does not ask to share them', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    const ops = await cleanupManagedIntegrationsPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        staticKeys: { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+      } as never,
+      instances: [makeInstance('inst-b', 'vpcflow'), makeInstance('inst-d', 'vpcflow')],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1', 'inst-c': 'policy-2' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1', 'inst-d': 'policy-2' },
+    });
+
+    // Without `hasTypedSecrets` the cleanup does not read refs back or hand them on.
+    expect(mockUpdateAgentless.mock.calls.map(([, body]) => body.vars)).toEqual([
+      { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+      { access_key_id: 'AKID', secret_access_key: 'SECRET' },
+    ]);
+    expect(ops.sharedRefs).toBeUndefined();
   });
 
   it('does not read refs back when no keys were typed', async () => {

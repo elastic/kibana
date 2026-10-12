@@ -27,6 +27,11 @@ import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 export interface CleanupManagedIntegrationsOpts extends BuildPolicyBodyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
+  /**
+   * True when the typed credentials will be stored as new Fleet secrets. They are then stored once
+   * (on the first updated policy) and the other updates use that secret.
+   */
+  hasTypedSecrets?: boolean;
   /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
   addedInstanceIdsByPolicy?: Record<string, string[]>;
   /** Policies already written this run with the surviving members: counted as updated, not PUT again. */
@@ -46,6 +51,7 @@ export async function cleanupManagedIntegrationsPolicies(
     pendingCleanupPolicyIds,
     currentPolicyIdsByInstance,
     authenticateAndDeployStep,
+    hasTypedSecrets,
     addedInstanceIdsByPolicy,
     alreadyUpdatedPolicyIds,
   } = opts;
@@ -58,13 +64,7 @@ export async function cleanupManagedIntegrationsPolicies(
   );
   const toRun = planned.toUpdate.filter(({ policyId }) => !alreadyUpdatedPolicyIds?.has(policyId));
 
-  const { connectorId, staticKeys, existingSecretRefs } = authenticateAndDeployStep;
-  // Typed keys become a new Fleet secret on every policy they are sent to: store them once and
-  // have the remaining updates (and the caller's later ones) use that secret.
-  const hasTypedSecrets =
-    !connectorId &&
-    !existingSecretRefs?.size &&
-    Boolean(staticKeys?.access_key_id || staticKeys?.secret_access_key);
+  const { staticKeys } = authenticateAndDeployStep;
 
   const deletes = Promise.allSettled(
     planned.toDelete.map((policyId) =>
@@ -80,7 +80,7 @@ export async function cleanupManagedIntegrationsPolicies(
   );
   const updates = runWithSharedSecrets({
     items: toRun,
-    hasTypedSecrets,
+    hasTypedSecrets: Boolean(hasTypedSecrets),
     // An update can delete the secret it replaced: finish one before starting the next.
     sequential: true,
     run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
