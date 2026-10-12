@@ -17,9 +17,9 @@ describe('transformCustomScheduleToRRule', () => {
         bymonth: undefined,
         bymonthday: undefined,
         byweekday: undefined,
-        count: undefined,
+        count: 1,
         dtstart: '2021-05-10T00:00:00.000Z',
-        freq: undefined,
+        freq: 0,
         interval: undefined,
         tzid: 'UTC',
         until: undefined,
@@ -40,11 +40,34 @@ describe('transformCustomScheduleToRRule', () => {
         bymonth: undefined,
         bymonthday: undefined,
         byweekday: undefined,
-        count: undefined,
+        count: 1,
         dtstart: '2025-02-10T21:30.00.000Z',
-        freq: undefined,
+        freq: 0,
         interval: undefined,
         tzid: 'America/New_York',
+        until: undefined,
+      },
+    });
+  });
+
+  it('transforms a one-off schedule with occurrences ignored', () => {
+    expect(
+      transformCustomScheduleToRRule({
+        duration: '1h',
+        start: '2026-10-12T00:00:00.000Z',
+        recurring: { occurrences: 5 },
+      })
+    ).toEqual({
+      duration: 3600000,
+      rRule: {
+        bymonth: undefined,
+        bymonthday: undefined,
+        byweekday: undefined,
+        count: 1,
+        dtstart: '2026-10-12T00:00:00.000Z',
+        freq: 0,
+        interval: undefined,
+        tzid: 'UTC',
         until: undefined,
       },
     });
