@@ -258,9 +258,10 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      // Significant Events refuses to render its tabs at all until the
-      // availability route says so, and that route needs the plugin's managed
-      // index. The alert spec in this suite stubs the same thing.
+      // The Nightshift shell renders nothing and navigates away unless the
+      // Significant Events availability route says it is available, and that route
+      // needs the plugin's managed index. The alert spec in this suite stubs the
+      // same thing.
       await mockInvestigationApi(page);
       await browserAuth.loginWithCustomRole(MEMORY_CONFIGURE_ROLE);
     });
@@ -275,10 +276,10 @@ test.describe(
      * Opens the Memory page by loading its route, the way a bookmark or a pasted
      * link does.
      *
-     * That used to bounce to Streams: the page builds its tab list from an
-     * availability query that is still pending on the first render, so `memory` was
-     * briefly not one of its tabs and an unknown tab is redirected to the first
-     * one. Loading the route directly and staying on it is the assertion.
+     * The Knowledge page holds a spinner while the Memory availability query is
+     * pending, and redirects to its first visible tab once that gate has settled on
+     * anything it does not serve. Landing on Memory and staying there is therefore
+     * the assertion that Memory is one of its tabs.
      */
     const gotoMemory = async (
       page: ScoutPage,
