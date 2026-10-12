@@ -172,6 +172,9 @@ const onboardingExecuteRoute = createServerRoute({
       sourceSlug: source.slug,
       request,
     });
+    // The sub-workflows wind down after the parent stops. Answering only once they are gone lets
+    // the caller schedule a new run right away without a step being dropped on a held slot.
+    await streamsKIsOnboardingClient.waitForSourceRunsToStop({ sourceId: source.id, request });
 
     return streamsKIsOnboardingClient.getStatus({
       sourceId: source.id,

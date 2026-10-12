@@ -244,4 +244,43 @@ describe('onboardingExecuteRoute', () => {
     });
     expect(run).not.toHaveBeenCalled();
   });
+
+  it('answers a cancel only after the source runs have stopped', async () => {
+    const order: string[] = [];
+    const cancel = jest.fn(async () => {
+      order.push('cancel');
+    });
+    const waitForSourceRunsToStop = jest.fn(async () => {
+      order.push('wait');
+      return true;
+    });
+    const getStatus = jest.fn(async () => {
+      order.push('status');
+      return { status: 'canceled', executionId: 'exec-1' };
+    });
+    const handlerParams = {
+      params: { path: { sourceId: 'source-a' }, body: { action: 'cancel' } },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        sourcesClient: {
+          get: jest.fn().mockResolvedValue({
+            source: { id: 'source-a', slug: 'a', enabled: true, esql_updated_at: '2026-01-01' },
+          }),
+        },
+      }),
+      server: {},
+      workflowClients: {
+        streamsKIsOnboardingClient: { cancel, waitForSourceRunsToStop, getStatus },
+      },
+      maintenanceService: { getState: jest.fn() },
+    } as unknown as HandlerParams;
+
+    await route.handler(handlerParams);
+
+    expect(order).toEqual(['cancel', 'wait', 'status']);
+    expect(waitForSourceRunsToStop).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceId: 'source-a' })
+    );
+  });
 });

@@ -719,6 +719,61 @@ describe('SignificantEventsKIsOnboardingClient', () => {
     });
   });
 
+  describe('waitForSourceRunsToStop', () => {
+    const runningChild = {
+      id: 'child-exec',
+      status: ExecutionStatus.RUNNING,
+      concurrencyGroupKey: 'nightshift-source-features-identification-logs:source-1',
+    };
+
+    it('waits until the sub-workflow of the source has stopped', async () => {
+      const getWorkflowExecutions = jest
+        .fn()
+        .mockResolvedValueOnce({ results: [runningChild] })
+        .mockResolvedValue({ results: [] });
+      const { client } = createClient({ getWorkflowExecutions });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        client.waitForSourceRunsToStop({ sourceId: 'source-1', request, pollIntervalMs: 1 })
+      ).resolves.toBe(true);
+      // Three workflows are listed per poll, so a second poll means the child was seen running.
+      expect(getWorkflowExecutions.mock.calls.length).toBeGreaterThan(3);
+    });
+
+    it('ignores the runs of other sources', async () => {
+      const getWorkflowExecutions = jest.fn().mockResolvedValue({
+        results: [
+          {
+            ...runningChild,
+            concurrencyGroupKey: 'nightshift-source-features-identification-other:source-2',
+          },
+        ],
+      });
+      const { client } = createClient({ getWorkflowExecutions });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        client.waitForSourceRunsToStop({ sourceId: 'source-1', request, pollIntervalMs: 1 })
+      ).resolves.toBe(true);
+    });
+
+    it('gives up after the timeout while a run is still going', async () => {
+      const getWorkflowExecutions = jest.fn().mockResolvedValue({ results: [runningChild] });
+      const { client } = createClient({ getWorkflowExecutions });
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(
+        client.waitForSourceRunsToStop({
+          sourceId: 'source-1',
+          request,
+          timeoutMs: 20,
+          pollIntervalMs: 5,
+        })
+      ).resolves.toBe(false);
+    });
+  });
+
   describe('cancelAllRunning', () => {
     it('cancels all non-terminal onboarding executions', async () => {
       const { client, managementApi } = createClient({

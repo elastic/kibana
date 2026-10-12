@@ -109,7 +109,11 @@ const isRemoteIndex = (source: ESQLSource): boolean => {
   const raw =
     source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
   const unquoted = raw?.replace(BACKTICK_QUOTES, '$1') ?? '';
-  return source.prefix !== undefined || CLUSTER_PREFIX.test(unquoted);
+  // Date math can hold colons (`+01:00`), which are not a cluster prefix.
+  const withoutDateMath = unquoted.startsWith('<')
+    ? unquoted.replace(DATE_MATH_BRACES, '*')
+    : unquoted;
+  return source.prefix !== undefined || CLUSTER_PREFIX.test(withoutDateMath);
 };
 
 const isIndexSource = (node: { type: string; sourceType?: string }): node is ESQLSource =>
@@ -285,6 +289,18 @@ export const hasMultipleSourceIndices = (esql: string): boolean => {
   return targetedIndices(firstCommand).length > 1;
 };
 
+/**
+ * The name to ask for privileges on. A date-math name (`<logs-{now/d}>`) stands for the indices it
+ * resolves to, so it is checked as the wildcard of its variable part (`logs-*`). Angle brackets
+ * are not part of an index name, and a selector is not either.
+ */
+const toPrivilegeName = (pattern: string): string => {
+  const withoutSelector = pattern.replace(/::.*$/, '');
+  return withoutSelector.startsWith('<') && withoutSelector.endsWith('>')
+    ? withoutSelector.slice(1, -1)
+    : withoutSelector;
+};
+
 export interface ISourceReadTargets {
   /** Local index patterns the source reads, without selectors. */
   indexPatterns: string[];
@@ -312,7 +328,7 @@ export const getSourceReadTargets = (esql: string): ISourceReadTargets => {
   return {
     indexPatterns: [
       ...new Set(
-        targets.filter(({ remote }) => !remote).map(({ pattern }) => pattern.replace(/::.*$/, ''))
+        targets.filter(({ remote }) => !remote).map(({ pattern }) => toPrivilegeName(pattern))
       ),
     ],
     hasRemote: targets.some(({ remote }) => remote),

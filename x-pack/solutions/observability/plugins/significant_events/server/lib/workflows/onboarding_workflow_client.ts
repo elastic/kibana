@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { setTimeout as delay } from 'timers/promises';
 import type { KibanaRequest } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
@@ -247,6 +248,10 @@ export const parseSourceFromKiConcurrencyKey = (key: string): ISourceRunIdentity
 };
 
 export const MAX_SOURCES_PER_QUERY = 10000;
+
+/** How long a cancel waits for the source's runs to stop. */
+const CANCEL_WAIT_TIMEOUT_MS = 30_000;
+const CANCEL_WAIT_POLL_INTERVAL_MS = 1_000;
 /**
  * Client that wraps the workflows management API to provide a source-centric
  * interface for running, querying, and canceling KI onboarding workflows.
@@ -500,6 +505,41 @@ export class SignificantEventsKIsOnboardingClient {
       )
     );
     return executionId;
+  }
+
+  /**
+   * Waits until no onboarding or sub-workflow execution of the source is running, and returns
+   * whether it got there before the timeout. Cancelling asks the sub-workflows to stop, but they
+   * wind down on their own and keep holding their `drop` concurrency slot meanwhile, so a run
+   * scheduled right after a cancel would have that step skipped.
+   */
+  async waitForSourceRunsToStop({
+    sourceId,
+    request,
+    timeoutMs = CANCEL_WAIT_TIMEOUT_MS,
+    pollIntervalMs = CANCEL_WAIT_POLL_INTERVAL_MS,
+  }: {
+    sourceId: string;
+    request: KibanaRequest;
+    timeoutMs?: number;
+    pollIntervalMs?: number;
+  }): Promise<boolean> {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+      const executions = await this.getNonTerminalExecutions({ request });
+      const stillRunning = executions.some(
+        ({ concurrencyGroupKey }) =>
+          concurrencyGroupKey !== undefined &&
+          parseSourceFromKiConcurrencyKey(concurrencyGroupKey)?.sourceId === sourceId
+      );
+      if (!stillRunning) {
+        return true;
+      }
+      if (Date.now() >= deadline) {
+        return false;
+      }
+      await delay(pollIntervalMs);
+    }
   }
 
   /**

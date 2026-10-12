@@ -230,6 +230,24 @@ describe('getSourceReadTargets', () => {
     });
   });
 
+  it('checks a date-math name as the wildcard of its variable part', () => {
+    expect(getSourceReadTargets('FROM <logs-{now/d}>')).toEqual({
+      indexPatterns: ['logs-*'],
+      hasRemote: false,
+    });
+  });
+
+  it('does not read the colon of a date-math timezone as a cluster prefix', () => {
+    expect(getSourceReadTargets('FROM "<logs-{now/d{yyyy.MM.dd|+01:00}}>"')).toEqual({
+      indexPatterns: ['logs-*'],
+      hasRemote: false,
+    });
+  });
+
+  it('still reports a remote date-math target', () => {
+    expect(getSourceReadTargets('FROM remote:<logs-{now/d}>')).toMatchObject({ hasRemote: true });
+  });
+
   it('throws on a query that does not parse', () => {
     expect(() => getSourceReadTargets('FROM')).toThrow('Invalid ES|QL query');
   });
