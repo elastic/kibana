@@ -1,0 +1,150 @@
+{
+  "operations": {
+    "getCluster": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}",
+        "source": "aks"
+      }
+    ],
+    "getClusterCredentials": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/listClusterUserCredential",
+        "source": "aks"
+      }
+    ],
+    "getNodePool": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
+        "source": "aks"
+      }
+    ],
+    "listClusters": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters",
+        "source": "aks"
+      }
+    ],
+    "listNodePools": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools",
+        "source": "aks"
+      }
+    ],
+    "listResourceGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions/{subscriptionId}/resourcegroups",
+        "source": "resources"
+      }
+    ],
+    "listSubscriptions": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "nextLink"
+          },
+          "style": "next_url"
+        },
+        "path": "/subscriptions",
+        "source": "subscriptions"
+      }
+    ],
+    "runCommand": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/runCommand",
+        "source": "aks"
+      }
+    ],
+    "scaleNodePool": [
+      {
+        "method": "get",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
+        "source": "aks"
+      },
+      {
+        "method": "put",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/agentPools/{agentPoolName}",
+        "source": "aks"
+      }
+    ],
+    "startCluster": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/start",
+        "source": "aks"
+      }
+    ],
+    "stopCluster": [
+      {
+        "method": "post",
+        "path": "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerService/managedClusters/{resourceName}/stop",
+        "source": "aks"
+      }
+    ]
+  },
+  "sources": {
+    "aks": {
+      "apiVersion": "2024-02-01",
+      "fetchedAt": "2026-10-07T20:18:57.184Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/containerservice/resource-manager/Microsoft.ContainerService/aks/stable/2024-02-01/managedClusters.json"
+    },
+    "resources": {
+      "apiVersion": "2021-04-01",
+      "fetchedAt": "2026-10-07T20:18:57.185Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/resources/resource-manager/Microsoft.Resources/resources/stable/2021-04-01/resources.json"
+    },
+    "subscriptions": {
+      "apiVersion": "2022-12-01",
+      "fetchedAt": "2026-10-07T20:18:57.185Z",
+      "format": "swagger",
+      "url": "https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/specification/resources/resource-manager/Microsoft.Resources/subscriptions/stable/2022-12-01/subscriptions.json"
+    }
+  }
+}

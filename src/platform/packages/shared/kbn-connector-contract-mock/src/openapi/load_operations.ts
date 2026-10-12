@@ -13,11 +13,13 @@ import { isRecord } from './schema_walk';
 import type {
   ContractOperation,
   ContractSpec,
+  Credential,
   MediaTypeContent,
   OpenApiDocument,
   OperationParameter,
   OperationServer,
   ParameterLocation,
+  SecurityRequirement,
   SpecSchema,
 } from './types';
 
@@ -50,13 +52,33 @@ const toSchema = (owner: Record<string, unknown>, pointer: string): SpecSchema |
     : undefined;
 };
 
-const toContents = (owner: Record<string, unknown>, pointer: string): MediaTypeContent[] =>
-  entriesOf(owner.content).map(([mediaType, content]) => ({
-    mediaType,
-    schema: isRecord(content)
-      ? toSchema(content, appendPointer(pointer, 'content', mediaType))
-      : undefined,
-  }));
+type Resolve = (node: unknown, pointer: string) => ReturnType<typeof resolveObject>;
+
+// `example` and the values of `examples`, which may be refs to `components/examples`.
+const toExamples = (content: Record<string, unknown>, pointer: string, resolve: Resolve) => [
+  ...(content.example === undefined ? [] : [content.example]),
+  ...entriesOf(content.examples).flatMap(([name, example]) => {
+    if (!isRecord(example)) {
+      return [];
+    }
+    const { value } = resolve(example, appendPointer(pointer, 'examples', name)).value;
+    return value === undefined ? [] : [value];
+  }),
+];
+
+const toContents = (
+  owner: Record<string, unknown>,
+  pointer: string,
+  resolve: Resolve
+): MediaTypeContent[] =>
+  entriesOf(owner.content).map(([mediaType, content]) => {
+    const contentPointer = appendPointer(pointer, 'content', mediaType);
+    return {
+      mediaType,
+      schema: isRecord(content) ? toSchema(content, contentPointer) : undefined,
+      examples: isRecord(content) ? toExamples(content, contentPointer, resolve) : [],
+    };
+  });
 
 const toServers = (servers: unknown): OperationServer[] | undefined => {
   if (!Array.isArray(servers) || servers.length === 0) {
@@ -79,6 +101,22 @@ const toServers = (servers: unknown): OperationServer[] | undefined => {
   }));
 };
 
+const toCredential = (scheme: Record<string, unknown>): Credential | undefined => {
+  const { type, in: location, name } = scheme;
+  if (type === 'apiKey' && typeof name === 'string') {
+    return location === 'header' || location === 'query' || location === 'cookie'
+      ? { in: location, name }
+      : undefined;
+  }
+  if (type === 'http' && typeof scheme.scheme === 'string') {
+    return { in: 'authorization', scheme: scheme.scheme.toLowerCase() };
+  }
+  if (type === 'oauth2' || type === 'openIdConnect') {
+    return { in: 'authorization', scheme: 'bearer' };
+  }
+  return undefined;
+};
+
 const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
   const version = typeof openapi === 'string' ? openapi : '';
   if (version.startsWith('3.0.')) {
@@ -98,12 +136,31 @@ const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
  * in a copy of the document, so their refs keep resolving against it and large specs such as
  * Microsoft Graph load quickly.
  */
-export const loadOperations = (source: OpenApiDocument): ContractOperation[] => {
-  const openApi = source.swagger === '2.0' ? convertSwagger2(source) : structuredClone(source);
-  const spec: ContractSpec = { document: openApi, dialect: getDialect(openApi) };
+export const loadOperations = (input: OpenApiDocument, source?: string): ContractOperation[] => {
+  const openApi = input.swagger === '2.0' ? convertSwagger2(input) : structuredClone(input);
+  const spec: ContractSpec = {
+    document: openApi,
+    dialect: getDialect(openApi),
+    ...(source === undefined ? {} : { source }),
+  };
   const { document } = spec;
   const resolve = (node: unknown, pointer: string) => resolveObject(document, node, pointer);
   const rootServers = toServers(document.servers) ?? [];
+  const { securitySchemes } = isRecord(document.components) ? document.components : {};
+  const schemes = new Map(
+    entriesOf(securitySchemes).map(([name, scheme]) => {
+      const pointer = appendPointer('/components/securitySchemes', name);
+      return [name, isRecord(scheme) ? toCredential(resolve(scheme, pointer).value) : undefined];
+    })
+  );
+  // Operation `security` replaces the document's, and `[]` removes it.
+  const toSecurity = (requirements: unknown): SecurityRequirement[] =>
+    (Array.isArray(requirements) ? requirements : [])
+      .filter(isRecord)
+      .map((requirement) =>
+        Object.keys(requirement).map((name) => ({ name, credential: schemes.get(name) }))
+      );
+  const rootSecurity = toSecurity(document.security);
 
   const toParameters = (parameters: unknown, pointer: string): OperationParameter[] =>
     (Array.isArray(parameters) ? parameters : []).flatMap((node, index) => {
@@ -114,7 +171,7 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
       const style = typeof value.style === 'string' ? value.style : DEFAULT_STYLES[value.in];
       const explode = typeof value.explode === 'boolean' ? value.explode : style === 'form';
       const required = value.in === 'path' || value.required === true;
-      const [content] = toContents(value, resolved);
+      const [content] = toContents(value, resolved, resolve);
       return [
         {
           name: String(value.name),
@@ -124,6 +181,9 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
           explode,
           schema: toSchema(value, resolved),
           content,
+          ...(value.in === 'path' && value['x-ms-skip-url-encoding'] === true
+            ? { multiSegment: true as const }
+            : {}),
         },
       ];
     });
@@ -183,7 +243,7 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
           parameters: [...inherited, ...ownParameters],
           requestBody: body && {
             required: body.value.required === true,
-            contents: toContents(body.value, body.pointer),
+            contents: toContents(body.value, body.pointer, resolve),
           },
           responses: extensibleEntriesOf(operation.responses).map(([code, response]) => {
             const { value, pointer: resolved } = resolve(
@@ -192,7 +252,7 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
             );
             return {
               code,
-              contents: toContents(value, resolved),
+              contents: toContents(value, resolved, resolve),
               headers: entriesOf(value.headers).map(([name, header]) => {
                 const target = resolve(header, appendPointer(resolved, 'headers', name));
                 return {
@@ -203,6 +263,9 @@ export const loadOperations = (source: OpenApiDocument): ContractOperation[] => 
               }),
             };
           }),
+          security: Array.isArray(operation.security)
+            ? toSecurity(operation.security)
+            : rootSecurity,
           spec,
         },
       ];

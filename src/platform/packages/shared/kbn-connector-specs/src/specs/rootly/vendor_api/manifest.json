@@ -1,0 +1,234 @@
+{
+  "operations": {
+    "acknowledgeAlert": [
+      {
+        "method": "post",
+        "path": "/v1/alerts/{id}/acknowledge",
+        "source": "v1"
+      }
+    ],
+    "addIncidentSubscribers": [
+      {
+        "method": "post",
+        "path": "/v1/incidents/{id}/add_subscribers",
+        "source": "v1"
+      }
+    ],
+    "assignIncidentUser": [
+      {
+        "method": "post",
+        "path": "/v1/incidents/{id}/assign_role_to_user",
+        "source": "v1"
+      }
+    ],
+    "cancelIncident": [
+      {
+        "method": "put",
+        "path": "/v1/incidents/{id}/cancel",
+        "source": "v1"
+      }
+    ],
+    "createActionItem": [
+      {
+        "method": "post",
+        "path": "/v1/incidents/{incident_id}/action_items",
+        "source": "v1"
+      }
+    ],
+    "createIncident": [
+      {
+        "method": "post",
+        "path": "/v1/incidents",
+        "source": "v1"
+      }
+    ],
+    "createTimelineEvent": [
+      {
+        "method": "post",
+        "path": "/v1/incidents/{incident_id}/events",
+        "source": "v1"
+      }
+    ],
+    "getAlert": [
+      {
+        "method": "get",
+        "path": "/v1/alerts/{id}",
+        "source": "v1"
+      }
+    ],
+    "getIncident": [
+      {
+        "method": "get",
+        "path": "/v1/incidents/{id}",
+        "source": "v1"
+      }
+    ],
+    "listActionItems": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/action_items",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/incidents/{incident_id}/action_items",
+        "source": "v1"
+      }
+    ],
+    "listAlerts": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/alerts",
+        "source": "v1"
+      }
+    ],
+    "listIncidents": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/incidents",
+        "source": "v1"
+      }
+    ],
+    "listServices": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/services",
+        "source": "v1"
+      }
+    ],
+    "listSeverities": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/severities",
+        "source": "v1"
+      }
+    ],
+    "listTeams": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "pageParam": "page[number]",
+            "sizeParam": "page[size]"
+          },
+          "response": {
+            "itemsPath": "data",
+            "totalPath": "meta.total_count"
+          },
+          "style": "page"
+        },
+        "path": "/v1/teams",
+        "source": "v1"
+      }
+    ],
+    "mitigateIncident": [
+      {
+        "method": "put",
+        "path": "/v1/incidents/{id}/mitigate",
+        "source": "v1"
+      }
+    ],
+    "resolveAlert": [
+      {
+        "method": "post",
+        "path": "/v1/alerts/{id}/resolve",
+        "source": "v1"
+      }
+    ],
+    "resolveIncident": [
+      {
+        "method": "put",
+        "path": "/v1/incidents/{id}/resolve",
+        "source": "v1"
+      }
+    ],
+    "triageIncident": [
+      {
+        "method": "put",
+        "path": "/v1/incidents/{id}/in_triage",
+        "source": "v1"
+      }
+    ],
+    "updateIncident": [
+      {
+        "method": "put",
+        "path": "/v1/incidents/{id}",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1",
+      "fetchedAt": "2026-10-07T20:20:04.256Z",
+      "format": "openapi",
+      "url": "https://rootly-heroku.s3.amazonaws.com/swagger/v1/swagger.json"
+    }
+  }
+}
