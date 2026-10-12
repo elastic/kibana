@@ -19,6 +19,12 @@ set -euo pipefail
 #   3. Fires the workflow against that conversation, so the proposal lands on
 #      the same card.
 #
+# Eight of the eleven proposals also get an Impact document (`attach_impact`), which
+# is what the Impact pills above the queue and on the escalations page are built
+# from. Ids repeat across proposals on purpose (FIN-DC-01 x3, Sales-NAS x2, ...), so
+# the pills show counts above one. Needs the agenticInvestigations plugin and the
+# investigations manage privilege (the elastic superuser has it).
+#
 # Attachments are seeded by value, never by reference: `security.rule` and
 # `security.attack_discovery` resolve an `origin` against the rules client and
 # the attack-discovery index respectively, and reject ids that do not exist.
@@ -59,6 +65,8 @@ ES_URL="${ES_URL:-http://localhost:9200}"
 
 # Shared by the workflows, conversations and attachments APIs.
 KIBANA_API_VERSION="2023-10-31"
+# The investigations impact route is versioned separately.
+IMPACT_API_VERSION="1"
 WORKFLOW_ID="alertzero-seed-create-proposed-action"
 
 usage() {
@@ -342,6 +350,31 @@ attach_entity() {
   local identifier_type="$1" identifier="$2"
   attach security.entity "$(jq -n --arg t "$identifier_type" --arg i "$identifier" \
     '{ identifierType: $t, identifier: $i, attachmentLabel: ($t + ": " + $i) }')"
+}
+
+# Impact is not an Agent Builder attachment the caller builds: this route writes the
+# document the Impact pills read, and stamps the `investigation_impact` attachment on
+# the conversation itself. Entity ids are the pill labels, so the same id on two
+# conversations is one pill with a count of two. Takes ids as plain arguments.
+# It has its own API version, so it cannot go through `kibana_curl`. It is an internal
+# route, so it also needs the internal-origin header: where `server.restrictInternalApis`
+# is on, a request without it gets a 400 "exists but is not available with the current
+# configuration".
+attach_impact() {
+  local response
+  if ! response=$(
+    curl --silent --fail-with-body \
+      -u "${KIBANA_USER}:${KIBANA_PASSWORD}" \
+      -H "kbn-xsrf: true" \
+      -H "x-elastic-internal-origin: kibana" \
+      -H "Content-Type: application/json" \
+      -H "elastic-api-version: ${IMPACT_API_VERSION}" \
+      -X POST "${KIBANA_API_BASE}/internal/investigations/impact" \
+      -d "$(printf '%s\n' "$@" | jq -R '{ id: . }' \
+        | jq -s --arg cid "$CONVERSATION_ID" '{ conversationId: $cid, entities: . }')" 2>&1
+  ); then
+    echo "      ! impact not attached: ${response}" >&2
+  fi
 }
 
 attach_alert_group() {
@@ -684,6 +717,7 @@ attach_alert_group \
   "Second sign-in from bulletproof hosting ASN" medium
 attach_entity user "cfo@corp"
 attach_entity service "okta-sso"
+attach_impact "okta-sso" "okta-login[.]co"
 
 fire respond \
   "Kerberoasting against service accounts — fin-dc-01" \
@@ -694,6 +728,7 @@ attach_alerts 19 "Kerberoasting SPN request" high
 attach_entity host "fin-dc-01"
 attach_entity host "fin-ws-31"
 attach_entity user "svc-helpdesk"
+attach_impact "FIN-DC-01" "svc-helpdesk" "svc-backup"
 
 fire respond \
   "[seed] Batch alert rows — 7 clickable" \
@@ -705,6 +740,7 @@ attach_rule "Detect RC4 downgrade in Kerberos tickets"
 attach_entity host "fin-dc-01"
 attach_entity host "fin-ws-31"
 attach_entity user "svc-helpdesk"
+attach_impact "FIN-DC-01" "FIN-WS-22"
 
 fire respond \
   "Suspicious OAuth consent — hr-admin" \
@@ -712,6 +748,7 @@ fire respond \
   "hr-admin granted finance-sync Mail.ReadWrite and offline_access on the payroll mailbox — no ticket, publisher verified this morning."
 attach_alert "OAuth consent granted to newly verified publisher" medium
 attach_entity user "hr-admin"
+attach_impact "m365-exchange"
 
 fire respond \
   "Backup retention rewritten — svc-backup" \
@@ -719,6 +756,7 @@ fire respond \
   "Finance backup retention cut 35 days → 1 by svc-backup, no change ticket. Two restore points already aged out."
 attach_alert "Backup retention policy reduced 35d → 1d" high
 attach_entity user "svc-backup"
+attach_impact "svc-backup" "Sales-NAS"
 
 fire respond \
   "Data staging detected — FIN-DB-02" \
@@ -727,12 +765,14 @@ fire respond \
 attach_attack "Data staging detected — FIN-DB-02"
 attach_alert "Large archive assembled from finance exports" high
 attach_entity host "FIN-DB-02"
+attach_impact "FIN-WS-04" "Sales-NAS"
 
 fire investigate \
   "KRBTGT password age — fin-dc-01" \
   "KRBTGT was last rotated 412 days ago, so a golden ticket forged tonight would still validate against the domain. Nothing indicates one has been, which is exactly why this is worth proving before it matters." \
   "KRBTGT last rotated 412 days ago — a forged ticket from tonight would still validate. Worth proving before it matters."
 attach_entity host "fin-dc-01"
+attach_impact "FIN-DC-01"
 
 fire investigate \
   "Suspicious OAuth consent grant" \
@@ -741,6 +781,7 @@ fire investigate \
 attach_alert "Installer delivered by consented OAuth app" medium
 attach_entity host "jdoe-ws-17"
 attach_entity user "jdoe"
+attach_impact "m365-exchange"
 
 fire configure \
   "Suspicious OAuth consent — hr-admin" \
@@ -842,6 +883,12 @@ echo "documents in ${ALERT_INDEX}. Clicking any alert row opens the Security"
 echo "alert flyout for that document. If rows stayed read-only, check that ES"
 echo "is reachable at ${ES_URL} and that no '! ES indexing failed' warnings"
 echo "appeared above."
+echo ""
+echo "Impact pills: eight proposals carry an Impact document. Expect pills such as"
+echo "FIN-DC-01 (3), Sales-NAS (2), svc-backup (2) and m365-exchange (2) above the"
+echo "queue; clicking one narrows every section to the matching cards. To see them"
+echo "on the Escalations page, escalate one of those investigations (the escalation's"
+echo "impact is the union of its linked investigations')."
 echo ""
 echo "To see the attachment summary, open a card's investigation flyout:"
 echo "  • \"[seed] Batch alert rows — 7 clickable\" — the focused drill-down"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -16,32 +16,41 @@ import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../../../../common/constants';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_IDENTIFICATION_START_TOOL_ID =
   'platform.sig_events.ki_identification_start';
 
-const onboardingStartSchema = z.object({
-  stream_name: z.string().max(MAX_ID_LENGTH).describe('Target stream name, e.g. "logs.ecs.nginx".'),
-  steps: z
-    .array(z.enum(KIsOnboardingStep))
-    .optional()
-    .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
-    .describe('Optional ordered KI identification steps for the background task.'),
-  connectors: z
-    .object({
-      features: z.string().max(MAX_ID_LENGTH).optional(),
-      queries: z.string().max(MAX_ID_LENGTH).optional(),
-    })
-    .optional(),
-});
+const onboardingStartSchema = lazySchema(() =>
+  z.object({
+    stream_name: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('Target stream name, e.g. "logs.ecs.nginx".'),
+    steps: z
+      .array(z.enum(KIsOnboardingStep))
+      .optional()
+      .default([KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration])
+      .describe('Optional ordered KI identification steps for the background task.'),
+    connectors: z
+      .object({
+        features: z.string().max(MAX_ID_LENGTH).optional(),
+        queries: z.string().max(MAX_ID_LENGTH).optional(),
+      })
+      .optional(),
+  })
+);
 
 export const createKiIdentificationStartTool = ({
+  server,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
@@ -66,6 +75,7 @@ export const createKiIdentificationStartTool = ({
   schema: onboardingStartSchema,
   handler: async ({ stream_name: streamName, steps, connectors }, { request }) => {
     try {
+      await assertCanManageSignificantEvents({ request, server });
       const resolvedSteps = steps ?? [
         KIsOnboardingStep.FeaturesIdentification,
         KIsOnboardingStep.QueriesGeneration,

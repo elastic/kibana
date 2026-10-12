@@ -120,7 +120,13 @@ export type ListEscalationsQuery = z.infer<typeof listEscalationsQuerySchema>;
 /**
  * An escalation as returned by the **list** endpoint.
  */
-export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions;
+export type EscalationConversationSummary = ConversationWithoutRoundsWithPermissions & {
+  /**
+   * Union of the entity ids from the Impact of the linked investigations. Absent when none of
+   * them has an Impact document or the impact could not be read.
+   */
+  entity_ids?: string[];
+};
 
 export interface ListEscalationsResponse {
   pagination: { total: number; page: number; per_page: number };
@@ -141,8 +147,21 @@ export interface LinkedInvestigationSummary {
   status: 'open' | 'closed';
   /** Agent Builder agent id, used for deep-linking to the conversation. */
   agent_id: string;
+  /**
+   * Proposals awaiting a decision (pending, not superseded, not expired). Omitted when the caller
+   * may not read proposals; always 0 for a closed investigation.
+   */
+  pending_proposal_count?: number;
 }
 
 export interface ListLinkedInvestigationsResponse {
   results: LinkedInvestigationSummary[];
+}
+
+/** Response of the `POST /{id}/_sync_attachments` endpoint. Both counts are 0 when nothing needed syncing. */
+export interface SyncEscalationResponse {
+  /** Attachments newly copied from linked investigations into the escalation. */
+  copied: number;
+  /** Attachments that needed copying but could not be written. */
+  failed: number;
 }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { OBSERVABILITY_ALERTING_HOST } from '../observability_alerting_host';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -85,7 +85,7 @@ const defaultData = {
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { tags: ['abc'] },
-  groupingMode: 'per_episode' as const,
+  groupingMode: 'per_alert' as const,
   throttle: { strategy: 'on_status_change' as const },
 };
 
