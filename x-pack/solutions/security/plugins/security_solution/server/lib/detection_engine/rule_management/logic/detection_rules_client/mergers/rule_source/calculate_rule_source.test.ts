@@ -144,9 +144,9 @@ describe('calculateRuleSource', () => {
       const rule = getRuleWithRequiredFields();
       rule.required_fields = [...rule.required_fields].reverse();
 
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
-        assets: [getRuleAssetWithRequiredFields()],
-      });
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([
+        getRuleAssetWithRequiredFields(),
+      ]);
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -167,9 +167,9 @@ describe('calculateRuleSource', () => {
       const rule = getRuleWithRequiredFields();
       rule.required_fields = baseRequiredFields.map((field) => ({ ...field, ecs: true }));
 
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
-        assets: [getRuleAssetWithRequiredFields()],
-      });
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([
+        getRuleAssetWithRequiredFields(),
+      ]);
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
@@ -193,9 +193,9 @@ describe('calculateRuleSource', () => {
         { name: 'user.name', type: 'keyword', ecs: true },
       ];
 
-      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce({
-        assets: [getRuleAssetWithRequiredFields()],
-      });
+      prebuiltRuleAssetClient.fetchAssetsByVersion.mockResolvedValueOnce([
+        getRuleAssetWithRequiredFields(),
+      ]);
 
       const result = await calculateRuleSource({
         prebuiltRuleAssetClient,
