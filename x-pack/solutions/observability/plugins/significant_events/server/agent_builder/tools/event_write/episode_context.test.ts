@@ -120,7 +120,7 @@ describe('mergeSignalsLatestPerRule', () => {
   });
 
   it('carries forward a non-blocking signal unchanged', () => {
-    const nonBlocking = { ...makeSignal('rule-1'), verdict: 'refutes' as const };
+    const nonBlocking: SignalEntry = { ...makeSignal('rule-1'), verdict: 'refutes' };
     const result = mergeSignalsLatestPerRule(
       [{ '@timestamp': TS_EARLIER, signals: [nonBlocking] }],
       [makeSignal('rule-2')],
@@ -179,6 +179,18 @@ describe('mergeEpisodeContext', () => {
       TS_SUBMITTED
     );
     expect(streamNames).toEqual(['logs.a', 'logs.b']);
+  });
+
+  it('averages confidence over contexts that define it, ignoring missing values', () => {
+    const { confidence } = mergeEpisodeContext(
+      [
+        { '@timestamp': TS_EARLIER, stream_names: [], confidence: 0.8 },
+        { '@timestamp': TS_EARLIER, stream_names: [] },
+      ],
+      { stream_names: [], causal_features: [], blast_radius: [], confidence: 0.6 },
+      TS_SUBMITTED
+    );
+    expect(confidence).toBeCloseTo(0.7);
   });
 
   it('causal classification beats blast for the same feature_id', () => {
@@ -318,8 +330,8 @@ describe('preserveStableNarrative', () => {
     const latest = {
       '@timestamp': TS_EARLIER,
       event_id: 'event-id',
-      status: 'active' as const,
-      severity: 'high' as const,
+      status: 'active',
+      severity: 'high',
       stream_names: ['logs.app'],
       signals: [makeDetection('rule-1')],
       title: 'Stored title',

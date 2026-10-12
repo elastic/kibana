@@ -9,7 +9,7 @@ import { createHash } from 'node:crypto';
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   THREAT_CATEGORIES,
   THREAT_REGIONS,
@@ -35,6 +35,7 @@ import {
   selectOverflowRetryArticleContext,
   type ArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 const closedSet = <T extends string>(allowed: readonly T[], max: number) =>
   z
@@ -52,14 +53,16 @@ const normalizeAttackTechniqueId = (value: string): string => {
   return ATTACK_TECHNIQUE_ID_PATTERN.test(normalized) ? normalized : '';
 };
 
-const behaviorSchema = z.object({
-  technique_id: z.string().transform(normalizeAttackTechniqueId),
-  description: z.string().transform((value) => value.slice(0, 2_000)),
-  telemetry_targets: z
-    .array(z.string())
-    .transform((values) => [...new Set(values.map((value) => value.slice(0, 256)))].slice(0, 20)),
-  confidence: z.number().min(0).max(1),
-});
+const behaviorSchema = lazySchema(() =>
+  z.object({
+    technique_id: z.string().transform(normalizeAttackTechniqueId),
+    description: z.string().transform((value) => value.slice(0, 2_000)),
+    telemetry_targets: z
+      .array(z.string())
+      .transform((values) => [...new Set(values.map((value) => value.slice(0, 256)))].slice(0, 20)),
+    confidence: z.number().min(0).max(1),
+  })
+);
 
 const ARTIFACT_TYPES = [
   'campaign_id',
@@ -85,32 +88,38 @@ const ARTIFACT_TYPES = [
   'other',
 ] as const;
 
-const artifactSchema = z.object({
-  type: z.enum(ARTIFACT_TYPES),
-  value: z.string().transform((value) => value.slice(0, 2_048)),
-  context: z.string().transform((value) => value.slice(0, 1_000)),
-});
+const artifactSchema = lazySchema(() =>
+  z.object({
+    type: z.enum(ARTIFACT_TYPES),
+    value: z.string().transform((value) => value.slice(0, 2_048)),
+    context: z.string().transform((value) => value.slice(0, 1_000)),
+  })
+);
 
-export const reportCoreModelOutputSchema = z.object({
-  categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
-  regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
-  relevance: z.number().min(0).max(1),
-  diamond_suitable: z.boolean(),
-  severity: z.object({
-    level: z.enum(['low', 'medium', 'high', 'critical']),
-    rationale: z
-      .string()
-      .transform((value) => value.slice(0, 2_000))
-      .optional(),
-  }),
-  approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
-  behaviors: z.array(behaviorSchema).max(100),
-  artifacts: z.array(artifactSchema).max(200),
-});
+export const reportCoreModelOutputSchema = lazySchema(() =>
+  z.object({
+    categories: closedSet(THREAT_CATEGORIES, THREAT_CATEGORIES.length),
+    regions: closedSet(THREAT_REGIONS, THREAT_REGIONS.length),
+    relevance: z.number().min(0).max(1),
+    diamond_suitable: z.boolean(),
+    severity: z.object({
+      level: z.enum(['low', 'medium', 'high', 'critical']),
+      rationale: z
+        .string()
+        .transform((value) => value.slice(0, 2_000))
+        .optional(),
+    }),
+    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
+    behaviors: z.array(behaviorSchema).max(100),
+    artifacts: z.array(artifactSchema).max(200),
+  })
+);
 
-const iocAdjudicationOnlySchema = z.object({
-  approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
-});
+const iocAdjudicationOnlySchema = lazySchema(() =>
+  z.object({
+    approved_ioc_candidate_ids: z.array(z.number().int().min(0).max(4_999)).max(300),
+  })
+);
 
 export type ReportCoreModelOutput = z.infer<typeof reportCoreModelOutputSchema>;
 
@@ -346,16 +355,12 @@ export const enrichReportCore = async (
 
   const coreStartedAt = Date.now();
   const coreCall = await invokeWithOverflowBounds({
-    // withStructuredOutput casts the raw tool-call args to the schema's inferred
-    // type without validating them; re-parse so technique_id normalization,
-    // description/artifact truncation, and the categories/regions closed sets
-    // actually run, instead of letting unbounded model output reach persistence.
     invoke: async (prompt) => {
       const invoked = (await coreStructured.invoke(prompt)) as {
         raw: { response_metadata: Record<string, unknown> };
-        parsed: unknown;
+        parsed: ReportCoreModelOutput | null;
       };
-      return { raw: invoked.raw, parsed: reportCoreModelOutputSchema.parse(invoked.parsed) };
+      return requireParsedStructuredOutput(invoked, 'enrich_report_core');
     },
     build: (text, candidates) => buildPrompt(params, text, candidates),
     articleText: params.text,
@@ -385,9 +390,9 @@ export const enrichReportCore = async (
         invoke: async (prompt) => {
           const invoked = (await adjudicationStructured.invoke(prompt)) as {
             raw: { response_metadata: Record<string, unknown> };
-            parsed: unknown;
+            parsed: z.infer<typeof iocAdjudicationOnlySchema> | null;
           };
-          return { raw: invoked.raw, parsed: iocAdjudicationOnlySchema.parse(invoked.parsed) };
+          return requireParsedStructuredOutput(invoked, 'enrich_report_core_ioc_batch');
         },
         build: (candidates) => buildAdjudicationOnlyPrompt(params, candidates),
         prepared: withBatchPrepared(prepared, batch),

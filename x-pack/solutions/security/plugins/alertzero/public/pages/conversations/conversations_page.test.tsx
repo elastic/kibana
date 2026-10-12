@@ -36,6 +36,7 @@ import {
 } from '../../hooks/use_proposals_api';
 import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
+import { useRunningSummary } from '../../hooks/use_running_summary';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
@@ -125,6 +126,7 @@ jest.mock('@kbn/agentic-investigations-common', () => {
 });
 jest.mock('../../hooks/use_proposals_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
+jest.mock('../../hooks/use_running_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
@@ -134,6 +136,7 @@ const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock
 const mockUseClosedProposals = useClosedProposals as jest.Mock;
 const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
+const mockUseRunningSummary = useRunningSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
 const mockUseDismissProposal = useDismissProposal as jest.Mock;
 const mockUseIsApprovingProposal = useIsApprovingProposal as jest.Mock;
@@ -203,8 +206,14 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
   );
 };
 
-/** The Closed accordion starts collapsed, so its rows need an expand first. */
-const expandClosed = () => fireEvent.click(screen.getByRole('button', { name: /^Closed/ }));
+/**
+ * The Closed accordion starts collapsed, so its rows need an expand first. Awaiting flushes the
+ * badge's MutationObserver update, which would otherwise land outside `act`.
+ */
+const expandClosed = async () => {
+  fireEvent.click(screen.getByRole('button', { name: /^Closed Actions/ }));
+  await act(async () => {});
+};
 
 /** The header count comes from the charts-summary scalar, not from the pages above. */
 const mockOpenCount = (currentOpen: number) =>
@@ -257,6 +266,10 @@ const renderPage = (
     (appId, options) => `/app/${appId}${options?.path ?? ''}`
   );
   (core.application.capabilities as Record<string, unknown>).agenticInvestigations = capabilities;
+  // The real hooks behind the details flyout and the assignee picker read these services, and
+  // react-query rejects a query function that resolves to undefined.
+  core.http.get.mockResolvedValue(proposal);
+  core.userProfile.suggest.mockResolvedValue([]);
   const agentBuilder = agentBuilderMocks.createStart();
   const closeFlyout = jest.fn();
   (agentBuilder.openConversationDetails as jest.Mock).mockResolvedValue(closeFlyout);
@@ -308,6 +321,7 @@ beforeEach(() => {
     refetch: jest.fn(),
   });
   mockOpenCount(0);
+  mockUseRunningSummary.mockReturnValue({ watchCount: 4, enabledWorkerCount: 6, workerCount: 6 });
 });
 
 describe('ConversationsPage proposals access', () => {
@@ -377,11 +391,11 @@ describe('ConversationsPage details flyout', () => {
   it("puts the card's conversation in the URL rather than the proposal id", async () => {
     const { agentBuilder, history } = renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Impossible travel — exec account' }));
+    fireEvent.click(screen.getByRole('button', { name: proposal.title }));
 
-    // Cards are keyed by proposal id, so the click has to resolve through the proposal's
-    // conversation: the URL must carry `inv-1`, never the `prop-1` that was clicked.
-    expect(history.location.search).toBe('?selectedConversationId=inv-1');
+    // The flyout addresses the conversation, so `selectedConversationId` is `inv-1`, never the
+    // `prop-1` that was clicked; the clicked proposal rides along only to mark its card.
+    expect(history.location.search).toBe('?selectedConversationId=inv-1&selectedProposalId=prop-1');
     await waitFor(() => {
       expect(agentBuilder.openConversationDetails).toHaveBeenCalledWith(
         expect.objectContaining({ conversationId: 'inv-1' })
@@ -410,21 +424,42 @@ describe('ConversationsPage details flyout', () => {
     expect(history.location.search).toBe('');
   });
 
-  it('marks the cards of the open conversation, not just the clicked one', async () => {
+  it('marks only the clicked card, not its siblings in the same conversation', async () => {
     const sibling: ProposalItem = { ...proposal, id: 'prop-2', comment: 'Second proposal.' };
     mockProposals({ investigate: [proposal, sibling] });
 
+    renderPage('/');
+
+    const [first, second] = screen.getAllByRole('button', { name: proposal.title });
+    fireEvent.click(second);
+
+    expect(second).toHaveAttribute('aria-current', 'true');
+    expect(first).not.toHaveAttribute('aria-current');
+  });
+
+  it('ignores a proposal id that belongs to a different conversation', async () => {
+    mockProposals({ investigate: [proposal] });
+
+    renderPage('/?selectedConversationId=inv-2&selectedProposalId=prop-1');
+
+    expect(screen.getByRole('button', { name: proposal.title })).not.toHaveAttribute(
+      'aria-current'
+    );
+  });
+
+  it('marks no card when the link names only the conversation', async () => {
+    mockProposals({ investigate: [proposal] });
+
     renderPage('/?selectedConversationId=inv-1');
 
-    // Both rows belong to the conversation the flyout is showing.
-    const cards = screen.getAllByRole('button', { name: 'Impossible travel — exec account' });
-    expect(cards).toHaveLength(2);
-    cards.forEach((card) => expect(card).toHaveAttribute('aria-current', 'true'));
+    expect(screen.getByRole('button', { name: proposal.title })).not.toHaveAttribute(
+      'aria-current'
+    );
   });
 
   it('stops marking the card as current once the conversation leaves the URL', async () => {
     const { history } = renderPage('/');
-    const card = screen.getByRole('button', { name: 'Impossible travel — exec account' });
+    const card = screen.getByRole('button', { name: proposal.title });
 
     fireEvent.click(card);
     expect(card).toHaveAttribute('aria-current', 'true');
@@ -524,16 +559,18 @@ describe('ConversationsPage decisions', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
-  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', () => {
+  it('allows Proposals Manage to approve without AlertZero Write and submits the displayed input', async () => {
     renderPage('/', { alertZeroWrite: false });
     openApproval();
 
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Approve' }));
 
-    expect(approveMutateAsync).toHaveBeenCalledWith({
-      id: 'prop-1',
-      body: { actionInput: { user: 'cfo@corp' } },
-    });
+    await waitFor(() =>
+      expect(approveMutateAsync).toHaveBeenCalledWith({
+        id: 'prop-1',
+        body: { actionInput: { user: 'cfo@corp' } },
+      })
+    );
   });
 
   it('does not offer proposal decisions without Proposals Manage even with AlertZero All', () => {
@@ -573,7 +610,7 @@ describe('ConversationsPage decisions', () => {
     expect(approvalDialog().getByRole('radio', { name: 'Decline without a reason' })).toBeChecked();
   });
 
-  it('submits the selected reason and rationale, and returns to the read-only decided state', () => {
+  it('submits the selected reason and rationale, and returns to the read-only decided state', async () => {
     renderPage('/');
     openApproval();
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
@@ -588,10 +625,16 @@ describe('ConversationsPage decisions', () => {
     });
     fireEvent.click(approvalDialog().getByRole('button', { name: 'Decline' }));
 
-    expect(dismissMutateAsync).toHaveBeenCalledWith({
-      id: 'prop-1',
-      body: { dismissReason: 'risk_accepted', rationale: 'Not worth chasing.' },
-    });
+    await waitFor(() =>
+      expect(dismissMutateAsync).toHaveBeenCalledWith({
+        id: 'prop-1',
+        body: { dismissReason: 'risk_accepted', rationale: 'Not worth chasing.' },
+      })
+    );
+    // The modal resets its form once the decision resolves; wait for that before the test ends.
+    await waitFor(() =>
+      expect(approvalDialog().getByRole('button', { name: 'Approve' })).toBeInTheDocument()
+    );
   });
 
   it('returns to the approval view without declining when Cancel is clicked', () => {
@@ -621,12 +664,12 @@ describe('ConversationsPage decisions', () => {
     });
   });
 
-  it('offers only Copy link for a decided proposal when escalation is not available', () => {
+  it('offers only Copy link for a decided proposal when escalation is not available', async () => {
     // A decided investigation without `canManageEscalations` keeps just the read-only item.
     mockProposals({ closed: [{ ...actionProposal, decidedAt: '2024-01-02T00:00:00Z' }] });
 
     renderPage('/');
-    expandClosed();
+    await expandClosed();
 
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
     expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['Copy link']);
@@ -672,6 +715,103 @@ describe('ConversationsPage decisions', () => {
   });
 });
 
+describe('ConversationsPage idle state', () => {
+  it('shows the workers-running panel and idle header when nothing is open or closed', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toContain(
+      'Your Watches are running. No actions need you'
+    );
+    expect(screen.getByTestId('alertZeroPageHeaderSubtitle')).toHaveTextContent(
+      '4 Watches are running right now · 6 of 6 Workers are enabled'
+    );
+  });
+
+  it('does not render the queue sections when idle', () => {
+    mockProposals({});
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    ['Investigate', 'Respond', 'Closed Actions'].forEach((name) =>
+      expect(screen.queryByRole('button', { name: new RegExp(`^${name}`) })).not.toBeInTheDocument()
+    );
+  });
+
+  it('renders the queue sections when not idle', () => {
+    mockProposals({ respond: [{ ...proposal, category: 'respond' }] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Closed Actions/ })).toBeInTheDocument();
+  });
+
+  it('does not claim Workers are running when none is enabled', () => {
+    mockProposals({});
+    mockOpenCount(0);
+    mockUseRunningSummary.mockReturnValue({ watchCount: 0, enabledWorkerCount: 0, workerCount: 5 });
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1 }).textContent).not.toContain(
+      'Your Watches are running'
+    );
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
+  });
+
+  it('keeps the queue sections and their retry control when a section failed to load', () => {
+    mockProposals({});
+    mockOpenCount(0);
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) => ({
+      data: category === 'investigate' ? undefined : { proposals: [], total: 0 },
+      isLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
+    mockUseProposalsByCategory.mockImplementation((category: string) => ({
+      data:
+        category === 'investigate'
+          ? undefined
+          : { pages: [{ proposals: [], total: 0 }], pageParams: [undefined] },
+      fetchNextPage: jest.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      isInitialLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByTestId('conversationQueueError-investigate')).toBeInTheDocument();
+  });
+
+  it('hides the panel while proposals are open', () => {
+    mockProposals({ investigate: [proposal] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+  });
+
+  it('hides the panel when the window holds only closed proposals', () => {
+    mockProposals({ closed: [{ ...proposal, decidedAt: '2024-01-02T00:00:00Z' }] });
+    mockOpenCount(0);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+  });
+});
+
 describe('ConversationsPage queue sections', () => {
   const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
   const bucketOf = (size: number, overrides: Partial<ProposalItem> = {}) =>
@@ -693,14 +833,14 @@ describe('ConversationsPage queue sections', () => {
 
     renderPage('/');
 
-    expect(screen.getByRole('button', { name: /^Closed/ })).toHaveTextContent('2');
+    expect(screen.getByRole('button', { name: /^Closed Actions/ })).toHaveTextContent('2');
   });
 
-  it('fetches rows once Closed is expanded', () => {
+  it('fetches rows once Closed is expanded', async () => {
     mockProposals({ closed: [closedProposal] });
 
     renderPage('/');
-    expandClosed();
+    await expandClosed();
 
     expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true, firstPageSize: CLOSED_PAGE_SIZE })
@@ -708,12 +848,12 @@ describe('ConversationsPage queue sections', () => {
     expect(screen.getByText(closedProposal.conversationTitle!)).toBeInTheDocument();
   });
 
-  it('stops the rows query again when Closed is collapsed', () => {
+  it('stops the rows query again when Closed is collapsed', async () => {
     mockProposals({ closed: [closedProposal] });
 
     renderPage('/');
-    expandClosed();
-    expandClosed();
+    await expandClosed();
+    await expandClosed();
 
     expect(mockUseClosedProposals).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: false })
@@ -771,7 +911,7 @@ describe('ConversationsPage queue sections', () => {
       expect(fetchNextPage.respond).toHaveBeenCalled();
     });
 
-    it('is offered on Closed too, once expanded', () => {
+    it('is offered on Closed too, once expanded', async () => {
       mockProposals({
         closed: bucketOf(CLOSED_PAGE_SIZE + 7).map((p) => ({
           ...p,
@@ -780,7 +920,7 @@ describe('ConversationsPage queue sections', () => {
       });
 
       renderPage('/');
-      expandClosed();
+      await expandClosed();
 
       expect(screen.getByTestId('conversationQueueShowMore-closed')).toHaveTextContent(
         'Show more (7)'
@@ -792,6 +932,11 @@ describe('ConversationsPage queue sections', () => {
     // The review this fixes: an aggregate across all four queries let a healthy
     // `respond` suppress a broken `investigate`, which then read as simply empty.
     mockProposals({ respond: [proposal] });
+    mockUseProposalsByCategoryCount.mockImplementation((category: string) => ({
+      data: category === 'investigate' ? undefined : { proposals: [], total: 1 },
+      isLoading: false,
+      error: category === 'investigate' ? new Error('boom') : undefined,
+    }));
     mockUseProposalsByCategory.mockImplementation((category: string) =>
       category === 'investigate'
         ? {
@@ -823,7 +968,7 @@ describe('ConversationsPage queue sections', () => {
     expect(screen.queryByTestId('conversationQueueError-respond')).not.toBeInTheDocument();
   });
 
-  it('scaffolds only as many rows as the bucket holds, not a whole page', () => {
+  it('scaffolds only as many rows as the bucket holds, not a whole page', async () => {
     // The count read already said the bucket holds 3, so a 25-row scaffold would
     // promise rows that are never coming.
     mockProposals({});
@@ -842,7 +987,7 @@ describe('ConversationsPage queue sections', () => {
     });
 
     renderPage('/');
-    expandClosed();
+    await expandClosed();
 
     const scaffold = screen.getByLabelText('Loading events…');
     expect(within(scaffold).getAllByRole('progressbar')).toHaveLength(6);
@@ -867,25 +1012,32 @@ describe('ConversationsPage impact pills', () => {
     mockProposals({ investigate: [hostProposal, userProposal] });
   });
 
+  // Toggling a pill changes the section badges' text; awaiting flushes the resulting
+  // MutationObserver update, which would otherwise land outside `act`.
+  const togglePill = async (name: string) => {
+    fireEvent.click(screen.getByRole('button', { name }));
+    await act(async () => {});
+  };
+
   afterEach(() => jest.clearAllMocks());
 
-  it('filters the queue to conversations whose entity ids include the selected pill', () => {
+  it('filters the queue to conversations whose entity ids include the selected pill', async () => {
     renderPage('/');
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.getByText('User investigation')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
   });
 
-  it('clears the filter when the selected pill is clicked again', () => {
+  it('clears the filter when the selected pill is clicked again', async () => {
     renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
+    await togglePill('host-1');
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.getByText('User investigation')).toBeInTheDocument();
@@ -899,10 +1051,10 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.getByText('No impact')).toBeInTheDocument();
   });
 
-  it('clears the filter when the selected entity disappears from the loaded proposals', () => {
+  it('clears the filter when the selected entity disappears from the loaded proposals', async () => {
     const { rerender } = renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
     expect(screen.queryByText('User investigation')).not.toBeInTheDocument();
 
     mockProposals({ investigate: [userProposal] });
@@ -913,7 +1065,7 @@ describe('ConversationsPage impact pills', () => {
     expect(screen.queryByText('No events match the current filter.')).not.toBeInTheDocument();
   });
 
-  it('shows the filtered empty state in a section whose rows do not carry the selected entity', () => {
+  it('shows the filtered empty state in a section whose rows do not carry the selected entity', async () => {
     mockProposals({
       investigate: [hostProposal],
       respond: [
@@ -928,7 +1080,7 @@ describe('ConversationsPage impact pills', () => {
     });
     renderPage('/');
 
-    fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+    await togglePill('host-1');
 
     expect(screen.getByText('Host investigation')).toBeInTheDocument();
     expect(screen.queryByText('Respond investigation')).not.toBeInTheDocument();

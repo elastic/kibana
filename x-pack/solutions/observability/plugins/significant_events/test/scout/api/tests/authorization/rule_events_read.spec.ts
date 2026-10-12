@@ -9,17 +9,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { KibanaRole } from '@kbn/scout-oblt';
-import {
-  NIGHTSHIFT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ,
-} from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 const EVENTS_ENDPOINT = 'internal/significant_events/events';
 const RULE_EVENTS_INDEX = '.rule-events';
-// On Cloud, a flag override reaches every node on its next ~10s config poll.
 const POLL_OPTIONS = { timeout: 30_000, intervals: [1_000] };
 
 // No Alerting v2 feature privilege and no index privileges: `.rule-events` read must come from the
@@ -35,7 +31,7 @@ apiTest.describe(
   () => {
     const eventId = `rule-events-read-${uuidv4()}`;
 
-    apiTest.beforeAll(async ({ apiServices, esClient }) => {
+    apiTest.beforeAll(async ({ esClient }) => {
       const now = new Date().toISOString();
       await esClient.index({
         index: RULE_EVENTS_INDEX,
@@ -55,15 +51,9 @@ apiTest.describe(
           data: { event_id: eventId, title: 'Rule events read check', stream_names: [] },
         },
       });
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ]: true },
-      });
     });
 
-    apiTest.afterAll(async ({ apiServices, esClient }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ]: null },
-      });
+    apiTest.afterAll(async ({ esClient }) => {
       await esClient.deleteByQuery({
         index: RULE_EVENTS_INDEX,
         query: { term: { group_hash: eventId } },

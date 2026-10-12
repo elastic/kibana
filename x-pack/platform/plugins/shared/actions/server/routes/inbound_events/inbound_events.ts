@@ -97,6 +97,10 @@ export function inboundEventsRoute({
               description:
                 'Connector, connector type, or ingest token was not found or failed verification.',
             },
+            429: {
+              description:
+                'Inbound rate limit exceeded. Retry-After is the seconds until a request is allowed again.',
+            },
             500: {
               description: 'The connector failed to handle or validate the event.',
             },
@@ -113,6 +117,7 @@ export function inboundEventsRoute({
           headers: request.headers,
           query: request.query,
           body: request.body,
+          remoteAddress: request.socket.remoteAddress,
         });
         return mapIngestResultToResponse(result, response);
       }

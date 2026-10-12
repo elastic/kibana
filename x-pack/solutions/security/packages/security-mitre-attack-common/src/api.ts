@@ -50,7 +50,7 @@ export interface GetMitreEntitiesRequestParams {
 // Response type
 // -------------------------------------------------------------------------
 
-/** Response body for GET /internal/mitre/entities. */
+/** Response body for GET /internal/mitre/entities. Bucket order is guaranteed: tactics ascending by position, techniques and subtechniques ascending by name. */
 export interface GetMitreEntitiesResponse extends MitreEntitySummaryBuckets {
   framework: MitreFramework;
   /**

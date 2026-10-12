@@ -20,8 +20,8 @@ jest.mock('../../../hooks/use_fetch_matching_rules', () => ({
   useFetchMatchingRules: (params: unknown) => mockUseFetchMatchingRules(params),
 }));
 
-const createRule = (id: string, name: string, tags?: string[]): RuleApiResponse =>
-  ({ id, metadata: { name, tags } } as RuleApiResponse);
+const createRule = (id: string, name: string, routingTags?: string[]): RuleApiResponse =>
+  ({ id, metadata: { name, routing_tags: routingTags } } as RuleApiResponse);
 
 const renderFlyout = (matcher?: PolicyMatcher | null) => {
   const locators = createMockLocators();
@@ -67,7 +67,7 @@ describe('AffectedRulesFlyout', () => {
     expect(within(policyScope).getByText('data.severity : "critical"')).toBeInTheDocument();
   });
 
-  it('lists the rules matching the policy tags', () => {
+  it('lists the rules matching the policy tags with their routing tags', () => {
     const matcher = { tags: ['cpu', 'prod'] };
     renderFlyout(matcher);
 
@@ -86,7 +86,7 @@ describe('AffectedRulesFlyout', () => {
     renderFlyout(matcher);
 
     expect(screen.getByTestId('actionPolicyAffectedRulesMatchingQueryCallout')).toHaveTextContent(
-      'These rules have at least one of the policy tags. The matching query decides which of their alerts this policy handles.'
+      'These rules have at least one of the policy routing tags. The matching query decides which of their alerts this policy handles.'
     );
     expect(mockUseFetchMatchingRules).toHaveBeenCalledWith({ matcher, page: 1, perPage: 10 });
     expect(screen.getByTestId('actionPolicyAffectedRulesTable')).toBeInTheDocument();
@@ -154,7 +154,7 @@ describe('AffectedRulesFlyout', () => {
 
     expect(
       within(screen.getByTestId('actionPolicyAffectedRulesTable')).getByText(
-        'No rules that create alerts have any of the tags in this policy scope.'
+        'No rules that create alerts have any of the routing tags in this policy scope.'
       )
     ).toBeInTheDocument();
   });
