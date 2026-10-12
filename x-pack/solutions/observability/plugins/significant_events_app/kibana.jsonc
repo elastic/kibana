@@ -19,7 +19,7 @@
       "streams",
       "unifiedSearch",
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
+    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
     "requiredBundles": ["kibanaReact", "stackConnectors"],
     "extraPublicDirs": ["common"],
   },

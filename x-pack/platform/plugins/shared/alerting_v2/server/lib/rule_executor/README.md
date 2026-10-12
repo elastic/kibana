@@ -517,3 +517,11 @@ Useful coverage points:
 - Prefer `requireState(...)` and explicit halts over assuming a field exists.
 - Keep rule execution focused on event production. If a change is really about lifecycle transitions, move toward the director. If it is really about notifications, move toward the dispatcher.
 - If you change stored event shape, verify the resources schema and downstream readers together.
+
+## Migration from v1
+
+### `minimumScheduleInterval.enforce` removed
+
+Alerting v1 exposed `xpack.alerting.rules.minimumScheduleInterval.enforce` (defaulted to `false`). With `enforce: false`, rules with intervals shorter than `minimumScheduleInterval` produced a warning but were allowed to run. Alerting v2 always enforces the minimum — the `enforce` field does not exist and rules with shorter intervals are rejected at create/update/enable time.
+
+Deployments migrating from a v1 configuration that relied on `enforce: false` (or never set the field, picking up the lenient default) will encounter stricter validation. Rules with short intervals must be updated to a compliant schedule before enabling alerting v2.

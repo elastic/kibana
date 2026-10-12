@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
@@ -43,34 +43,38 @@ const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
   'logs-endpoint.events.registry-*',
 ] as const;
 
-const discoverTelemetrySchema = z.object({
-  hosts: z
-    .array(z.string())
-    .optional()
-    .describe('Named host.name values extracted from the analyst question'),
-  time_window_hours: z
-    .number()
-    .int()
-    .min(1)
-    .max(720)
-    .optional()
-    .default(72)
-    .describe('Lookback window in hours for forensic reconstruction'),
-});
+const discoverTelemetrySchema = lazySchema(() =>
+  z.object({
+    hosts: z
+      .array(z.string())
+      .optional()
+      .describe('Named host.name values extracted from the analyst question'),
+    time_window_hours: z
+      .number()
+      .int()
+      .min(1)
+      .max(720)
+      .optional()
+      .default(72)
+      .describe('Lookback window in hours for forensic reconstruction'),
+  })
+);
 
-const extractIocsSchema = z.object({
-  hosts: z
-    .array(z.string())
-    .describe('Named host.name values to extract IoCs from (at least one required)'),
-  time_window_hours: z
-    .number()
-    .int()
-    .min(1)
-    .max(720)
-    .optional()
-    .default(72)
-    .describe('Lookback window in hours for IoC extraction'),
-});
+const extractIocsSchema = lazySchema(() =>
+  z.object({
+    hosts: z
+      .array(z.string())
+      .describe('Named host.name values to extract IoCs from (at least one required)'),
+    time_window_hours: z
+      .number()
+      .int()
+      .min(1)
+      .max(720)
+      .optional()
+      .default(72)
+      .describe('Lookback window in hours for IoC extraction'),
+  })
+);
 
 export const endpointForensicAnalysisSkill = defineSkillType({
   id: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,

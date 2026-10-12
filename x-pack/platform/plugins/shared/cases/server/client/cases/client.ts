@@ -27,6 +27,7 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   BulkAddObservablesRequest,
+  BulkDeleteObservablesRequest,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -50,6 +51,7 @@ import { similar } from './similar';
 import {
   addObservable,
   bulkAddObservables,
+  bulkDeleteObservables,
   deleteObservable,
   updateObservable,
 } from './observables';
@@ -158,6 +160,10 @@ export interface CasesSubClient {
    */
   bulkAddObservables(params: BulkAddObservablesRequest): Promise<Case>;
   /**
+   * Bulk deletes observables from the case
+   */
+  bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
+  /**
    * Returns the fully-formed `extended_fields` a caller may apply — the owner's global field-library
    * fields plus, when a template is in scope, that template's fields. Pass `caseId` to derive owner +
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
@@ -187,6 +193,7 @@ const usageCounterByMethod = {
   updateObservable: 'update_observable',
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
+  bulkDeleteObservables: 'bulk_delete_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
@@ -259,6 +266,11 @@ export const createCasesSubClient = (
       usageCounterByMethod.bulkAddObservables,
       clientArgs,
       (params: BulkAddObservablesRequest) => bulkAddObservables(params, clientArgs, casesClient)
+    ),
+    bulkDeleteObservables: withUsageCounter(
+      usageCounterByMethod.bulkDeleteObservables,
+      clientArgs,
+      (params: BulkDeleteObservablesRequest) => bulkDeleteObservables(params, clientArgs)
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),

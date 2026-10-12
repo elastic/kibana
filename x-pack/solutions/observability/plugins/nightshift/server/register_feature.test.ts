@@ -23,16 +23,21 @@ describe('registerNightshiftFeature', () => {
     expect(privileges?.all.api).toEqual([
       NIGHTSHIFT_API_PRIVILEGES.read,
       NIGHTSHIFT_API_PRIVILEGES.manage,
+      'read_investigations',
       'manage_investigations',
       'read_proposals',
       'manage_proposals',
     ]);
   });
 
-  it('grants only the proposals read API privilege with `read`', () => {
+  it('grants only the investigations and proposals read API privileges with `read`', () => {
     const { privileges } = getRegisteredFeature();
 
-    expect(privileges?.read.api).toEqual([NIGHTSHIFT_API_PRIVILEGES.read, 'read_proposals']);
+    expect(privileges?.read.api).toEqual([
+      NIGHTSHIFT_API_PRIVILEGES.read,
+      'read_investigations',
+      'read_proposals',
+    ]);
   });
 
   it('grants alerts read with both `all` and `read`', () => {
