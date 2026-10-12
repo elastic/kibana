@@ -1807,12 +1807,20 @@
       "groupName": "security investigations deps",
       "matchDepNames": [
         "copy-to-clipboard",
+        "css-box-model",
         "dom-to-image-more",
+        "i18n-iso-countries",
+        "node-diff3",
         "pdf-lib",
+        "react-diff-view",
         "reduce-reducers",
+        "snakecase-keys",
         "suricata-sid-db",
         "ts-easing",
-        "type-fest"
+        "type-fest",
+        "typescript-fsa",
+        "typescript-fsa-reducers",
+        "unidiff"
       ],
       "reviewers": ["team:security-investigations"],
       "matchBaseBranches": ["main"],
