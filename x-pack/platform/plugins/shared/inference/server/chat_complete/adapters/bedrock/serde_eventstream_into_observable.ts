@@ -12,9 +12,7 @@ import { Observable } from 'rxjs';
 import type { Readable } from 'stream';
 import {
   createInferenceInternalError,
-  createInferenceProviderError,
   createInferenceRequestError,
-  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
   MAX_STREAM_DURATION_MS,
 } from '@kbn/inference-common';
 import type { ConverseBedrockChunkMember } from './converse_type';
@@ -39,15 +37,7 @@ export type BedrockStreamMember = BedrockStreamChunkMember | ModelStreamErrorExc
 
 export function serdeEventstreamIntoObservable(
   readable: Readable,
-  {
-    maxDurationMs = MAX_STREAM_DURATION_MS,
-    idleTimeoutMs = DEFAULT_STREAM_IDLE_TIMEOUT_MS,
-  }: {
-    /** Total backstop for the whole stream. Expiry is NOT retryable (408). */
-    maxDurationMs?: number;
-    /** Max silence between chunks, counted from subscription. Expiry is retryable (504). */
-    idleTimeoutMs?: number;
-  } = {}
+  { maxDurationMs = MAX_STREAM_DURATION_MS }: { maxDurationMs?: number } = {}
 ): Observable<BedrockStreamMember> {
   return new Observable<BedrockStreamMember>((subscriber) => {
     const marshaller = new EventStreamMarshaller({
@@ -71,7 +61,6 @@ export function serdeEventstreamIntoObservable(
 
     async function processStream() {
       for await (const chunk of marshaller.deserialize<BedrockStreamMember>(readable, identity)) {
-        armIdleTimer();
         if (Date.now() > deadline) {
           throw createTimeoutError();
         }
@@ -82,20 +71,6 @@ export function serdeEventstreamIntoObservable(
         await new Promise<void>((resolve) => setImmediate(resolve));
       }
     }
-
-    // a stalled endpoint is worth retrying, unlike the total-duration cap above
-    let idleTimer: ReturnType<typeof setTimeout>;
-    const armIdleTimer = () => {
-      clearTimeout(idleTimer);
-      idleTimer = setTimeout(() => {
-        readable.destroy(
-          createInferenceProviderError(`Inference stream idle for ${idleTimeoutMs}ms`, {
-            status: 504,
-          })
-        );
-      }, idleTimeoutMs);
-    };
-    armIdleTimer();
 
     processStream().then(
       () => {
@@ -128,7 +103,6 @@ export function serdeEventstreamIntoObservable(
     return () => {
       tornDown = true;
       clearTimeout(maxDurationTimer);
-      clearTimeout(idleTimer);
       readable.destroy();
     };
   });

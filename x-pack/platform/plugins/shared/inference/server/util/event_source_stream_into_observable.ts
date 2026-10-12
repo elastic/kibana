@@ -11,7 +11,6 @@ import { Observable } from 'rxjs';
 import {
   createInferenceProviderError,
   createInferenceRequestError,
-  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
   MAX_STREAM_DURATION_MS,
 } from '@kbn/inference-common';
 
@@ -19,11 +18,14 @@ export function eventSourceStreamIntoObservable(
   readable: Readable,
   {
     maxDurationMs = MAX_STREAM_DURATION_MS,
-    idleTimeoutMs = DEFAULT_STREAM_IDLE_TIMEOUT_MS,
+    idleTimeoutMs,
   }: {
     /** Total backstop for the whole stream. Expiry is NOT retryable (408). */
     maxDurationMs?: number;
-    /** Max silence between chunks, counted from subscription. Expiry is retryable (504). */
+    /**
+     * Max silence between chunks, counted from subscription. Expiry is retryable (504).
+     * Opt-in: no idle guard is armed when omitted.
+     */
     idleTimeoutMs?: number;
   } = {}
 ) {
@@ -61,8 +63,11 @@ export function eventSourceStreamIntoObservable(
     }
 
     // a stalled endpoint is worth retrying, unlike the total-duration cap above
-    let idleTimer: ReturnType<typeof setTimeout>;
+    let idleTimer: ReturnType<typeof setTimeout> | undefined;
     const armIdleTimer = () => {
+      if (idleTimeoutMs === undefined) {
+        return;
+      }
       clearTimeout(idleTimer);
       idleTimer = setTimeout(() => {
         readable.destroy(

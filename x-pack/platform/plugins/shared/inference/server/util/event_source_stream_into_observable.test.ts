@@ -7,7 +7,11 @@
 
 import { Readable } from 'node:stream';
 import { toArray, firstValueFrom } from 'rxjs';
-import { isInferenceProviderError, isInferenceRequestError } from '@kbn/inference-common';
+import {
+  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
+  isInferenceProviderError,
+  isInferenceRequestError,
+} from '@kbn/inference-common';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { eventSourceStreamIntoObservable } from './event_source_stream_into_observable';
 
@@ -243,6 +247,20 @@ describe('eventSourceStreamIntoObservable', () => {
 
       await jest.advanceTimersByTimeAsync(1_000);
       expect(isInferenceProviderError(failure)).toBe(true);
+    });
+
+    it('arms no idle guard when idleTimeoutMs is omitted (connector streams)', async () => {
+      const stream = new Readable({ read: () => {} });
+      let failure: unknown;
+      eventSourceStreamIntoObservable(stream).subscribe({ error: (err) => (failure = err) });
+
+      // well past the endpoint default, still under the 300s total cap
+      await jest.advanceTimersByTimeAsync(DEFAULT_STREAM_IDLE_TIMEOUT_MS * 2);
+
+      expect(failure).toBeUndefined();
+      expect(stream.destroyed).toBe(false);
+      // only the total-duration cap timer is pending
+      expect(jest.getTimerCount()).toBe(1);
     });
 
     it('fires the idle error before the total-duration cap', async () => {

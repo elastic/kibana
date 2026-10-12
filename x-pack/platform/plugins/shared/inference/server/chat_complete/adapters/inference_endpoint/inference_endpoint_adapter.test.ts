@@ -18,6 +18,7 @@ import {
   isChatCompletionTokenCountEvent,
   InferenceEndpointProvider,
   isInferenceProviderError,
+  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
 } from '@kbn/inference-common';
 import { getRetryFilter } from '../../../../common/utils/error_retry_filter';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
@@ -638,6 +639,28 @@ describe('inferenceEndpointAdapter', () => {
       expect(isInferenceProviderError(error)).toBe(true);
       expect(error.meta.status).toBe(504);
       expect(getRetryFilter('auto')(error)).toBe(true);
+    });
+
+    it('applies the default idle timeout to inference endpoint streams', async () => {
+      jest.useFakeTimers();
+      try {
+        executorMock.invoke.mockResolvedValue(new Readable({ read: () => {} }));
+
+        const error$ = lastValueFrom(
+          inferenceEndpointAdapter.chatComplete({
+            ...defaultArgs,
+            messages: [{ role: MessageRole.User, content: 'question' }],
+          })
+        ).catch((e) => e);
+
+        await jest.advanceTimersByTimeAsync(DEFAULT_STREAM_IDLE_TIMEOUT_MS + 1);
+
+        const error = await error$;
+        expect(error.message).toBe(`Inference stream idle for ${DEFAULT_STREAM_IDLE_TIMEOUT_MS}ms`);
+        expect(getRetryFilter('auto')(error)).toBe(true);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('propagates the abort signal', () => {

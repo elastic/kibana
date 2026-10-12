@@ -18,7 +18,7 @@ import type {
   ChatCompletionReasoning,
   ChatCompleteCacheControl,
 } from '@kbn/inference-common';
-import { InferenceEndpointProvider } from '@kbn/inference-common';
+import { DEFAULT_STREAM_IDLE_TIMEOUT_MS, InferenceEndpointProvider } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import {
   processOpenAIStream,
@@ -121,7 +121,7 @@ export const inferenceEndpointAdapter = {
     ).pipe(
       switchMap((stream) =>
         eventSourceStreamIntoObservable(stream, {
-          ...(idleTimeoutMs !== undefined ? { idleTimeoutMs } : {}),
+          idleTimeoutMs: idleTimeoutMs ?? DEFAULT_STREAM_IDLE_TIMEOUT_MS,
         })
       ),
       // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.

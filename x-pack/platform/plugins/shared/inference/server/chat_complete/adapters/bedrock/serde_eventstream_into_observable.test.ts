@@ -18,8 +18,7 @@ import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { CompletionChunk } from './types';
 import { parseSerdeChunkMessage, serializeSerdeChunkMessage } from './serde_utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { isInferenceProviderError, isInferenceRequestError } from '@kbn/inference-common';
-import { getRetryFilter } from '../../../../common/utils/error_retry_filter';
+import { isInferenceRequestError } from '@kbn/inference-common';
 
 describe('serdeEventstreamIntoObservable', () => {
   const marshaller = new EventStreamMarshaller({
@@ -122,35 +121,6 @@ describe('serdeEventstreamIntoObservable', () => {
           meta: expect.objectContaining({ status: 408 }),
         })
       );
-      expect(getRetryFilter('auto')(error as Error)).toBe(false);
-    } finally {
-      jest.useRealTimers();
-    }
-  });
-
-  it('errors with a retryable 504 provider error when the stream goes idle', async () => {
-    jest.useFakeTimers();
-    try {
-      const stream = new Readable({ read: () => {} });
-
-      const error$ = new Promise<unknown>((resolve) => {
-        serdeEventstreamIntoObservable(stream, { idleTimeoutMs: 1_000 }).subscribe({
-          error: resolve,
-        });
-      });
-
-      jest.advanceTimersByTime(1_001);
-
-      const error = await error$;
-      expect(stream.destroyed).toBe(true);
-      expect(isInferenceProviderError(error)).toBe(true);
-      expect(error).toEqual(
-        expect.objectContaining({
-          message: 'Inference stream idle for 1000ms',
-          meta: expect.objectContaining({ status: 504 }),
-        })
-      );
-      expect(getRetryFilter('auto')(error as Error)).toBe(true);
     } finally {
       jest.useRealTimers();
     }

@@ -164,7 +164,8 @@ export type ChatCompleteOptions = {
   firstByteTimeoutMs?: number;
   /**
    * Inference endpoints only: the longest silence tolerated between two chunks of the response
-   * stream before failing the attempt with a retryable error. Defaults to 120s.
+   * stream before failing the attempt with a retryable error. Defaults to 120s. Connector-backed
+   * streams (OpenAI, Gemini, Bedrock, `.inference`) are not idle-guarded.
    */
   idleTimeoutMs?: number;
   /**
