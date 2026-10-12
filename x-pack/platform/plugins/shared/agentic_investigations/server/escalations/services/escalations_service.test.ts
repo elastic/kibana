@@ -96,7 +96,10 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   ...overrides,
 });
 
-const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
+const makeService = (
+  clientOverrides: Record<string, jest.Mock> = {},
+  countPendingProposals: jest.Mock = jest.fn().mockResolvedValue(undefined)
+) => {
   const client = makeClient(clientOverrides);
   const getConversationClient = jest.fn().mockResolvedValue(client);
   const conversationTemplates = {
@@ -133,6 +136,7 @@ const makeService = (clientOverrides: Record<string, jest.Mock> = {}) => {
     getAttachmentsClient,
     conversationTemplates,
     getInvestigationStatusService: () => investigationStatusService as never,
+    countPendingProposals,
   });
 
   return {
@@ -1180,6 +1184,61 @@ describe('EscalationsService.listLinkedInvestigations', () => {
     const result = await service.listLinkedInvestigations(request, 'escalation-1');
 
     expect(result.results.map((r) => r.id)).toEqual(['inv-a']);
+  });
+
+  describe('pending proposal counts', () => {
+    const bothLinked = () => ({
+      get: jest.fn().mockResolvedValue(makeEscalation(['inv-a', 'inv-b'])),
+      bulkGet: jest.fn().mockResolvedValue(
+        new Map([
+          ['inv-a', INV_A],
+          ['inv-b', INV_B],
+        ])
+      ),
+    });
+
+    it('counts only the open investigations, and reports 0 for closed ones', async () => {
+      const count = jest.fn().mockResolvedValue(new Map([['inv-a', 2]]));
+      const { service } = makeService(bothLinked(), count);
+
+      const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+      expect(count).toHaveBeenCalledWith(request, ['inv-a']);
+      expect(result.results.map((r) => r.pending_proposal_count)).toEqual([2, 0]);
+    });
+
+    it('reports 0 for an open investigation absent from the counts', async () => {
+      const count = jest.fn().mockResolvedValue(new Map());
+      const { service } = makeService(bothLinked(), count);
+
+      const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+      expect(result.results[0].pending_proposal_count).toBe(0);
+    });
+
+    it('omits the count when proposals are unavailable', async () => {
+      const count = jest.fn().mockResolvedValue(undefined);
+      const { service } = makeService(bothLinked(), count);
+
+      const result = await service.listLinkedInvestigations(request, 'escalation-1');
+
+      expect(result.results.every((r) => !('pending_proposal_count' in r))).toBe(true);
+    });
+
+    it('skips the count when every linked investigation is closed', async () => {
+      const count = jest.fn();
+      const { service } = makeService(
+        {
+          get: jest.fn().mockResolvedValue(makeEscalation(['inv-b'])),
+          bulkGet: jest.fn().mockResolvedValue(new Map([['inv-b', INV_B]])),
+        },
+        count
+      );
+
+      await service.listLinkedInvestigations(request, 'escalation-1');
+
+      expect(count).not.toHaveBeenCalled();
+    });
   });
 
   it('throws NotAnEscalationError when the target is not an escalation', async () => {
