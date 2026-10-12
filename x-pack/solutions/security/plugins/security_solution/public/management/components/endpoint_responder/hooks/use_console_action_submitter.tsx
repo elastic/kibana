@@ -23,6 +23,7 @@ import type {
   ResponseActionApiResponse,
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
+  ImmutableObject,
 } from '../../../../../common/endpoint/types';
 import type { CommandExecutionComponentProps } from '../../console';
 
@@ -168,6 +169,7 @@ export const useConsoleActionSubmitter = <
         ).request,
         sent: true,
       };
+      let createdAction: ImmutableObject<ActionDetails<TOutputContent, TParameters>> | undefined;
 
       setStatus('creating');
 
@@ -181,6 +183,7 @@ export const useConsoleActionSubmitter = <
       actionCreator
         .mutateAsync(actionRequestBody)
         .then((response) => {
+          createdAction = response.data as typeof createdAction;
           updatedRequestState.actionId = response.data.id;
 
           if (isMounted()) {
@@ -202,6 +205,7 @@ export const useConsoleActionSubmitter = <
                 ...prevState,
                 actionApiState: {
                   ...(prevState.actionApiState ?? currentActionState),
+                  actionDetails: createdAction,
                   request: { ...updatedRequestState },
                 },
               };
@@ -388,7 +392,7 @@ export const useConsoleActionSubmitter = <
       );
     }
 
-    return <></>;
+    return <ResultComponent showAs="pending" data-test-subj={getTestId('pending')} />;
   }, [
     isPending,
     isCreating,
