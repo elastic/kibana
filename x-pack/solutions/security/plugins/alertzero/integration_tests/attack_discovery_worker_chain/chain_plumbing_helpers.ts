@@ -17,6 +17,9 @@ export const CHAIN_WORKFLOW_IDS = {
   review: 'system-security-attack-discovery-review',
   fpTpAnalysis: 'system-security-attack-discovery-fp-tp-analysis',
   journalNote: 'system-alertzero-journal-note',
+  // The review raises its escalation through AlertZero's bridge, which reopens the
+  // Investigation and forwards to the shared gate (`gate`) with `origin: alertzero`.
+  alertzeroProposal: 'system-create-alertzero-proposal',
   gate: 'system-create-proposal',
   handoffAction: 'system-alertzero-action-handoff-to-forensics',
 } as const;
