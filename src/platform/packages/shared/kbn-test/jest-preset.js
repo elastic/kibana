@@ -91,6 +91,9 @@ module.exports = {
     printBasicPrototype: true,
   },
 
+  // Formats test files with oxfmt when inline snapshots are written
+  prettierPath: '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/oxfmt_prettier.js',
+
   // A list of paths to snapshot serializer modules Jest should use for snapshot testing
   snapshotSerializers: [
     '<rootDir>/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',

@@ -47,11 +47,11 @@ using the exported `agents` & `skills`
 - **Agent instructions**: edit `.elasticsearch-agent/agents/<agent-name>/AGENTS.md`
 - **Skill content**: edit the relevant `SKILL.md` under `.elasticsearch-agent/skills/recipes/<skill-name>/`
 - All files under `src/` are generated — **do not edit them directly**
-- Run `./build` to regenerate the TypeScript exports from the markdown sources and reformat with Prettier
+- Run `./build` to regenerate the TypeScript exports from the markdown sources and reformat with oxfmt
 - Updated allow list of agents & skills in `x-pack/platform/packages/shared/agent-builder/agent-builder-server/allow_lists.ts`
 
 
 ## `build` script
 
 1. `node scripts/generate.js` — parses content from each `AGENTS.md` and `SKILL.md`, writes `src/agents/*.ts` and `src/skills/*.ts`, and generates barrel `index.ts` files in each directory
-2. `prettier --write src/agents src/skills` — formats the generated files
+2. `node scripts/oxfmt src/skills` — formats the generated files

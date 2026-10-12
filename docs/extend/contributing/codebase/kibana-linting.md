@@ -43,5 +43,18 @@ Although, starting with [ESLint v2.0.4](https://github.com/microsoft/vscode-esli
 }
 ```
 
-Avoid using the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the {{kib}} project. Formatting and styling roles are set in the multiple `.eslintrc.js` files across the project and some of them use the [NPM version of Prettier](https://www.npmjs.com/package/prettier). Using the IDE extension might cause conflicts, applying the formatting to too many files that shouldn’t be prettier-ized or highlighting errors that are actually OK.
+## Formatting [_formatting]
+
+Code formatting is handled by [oxfmt](https://oxc.rs/docs/guide/usage/formatter), not by ESLint. The configuration lives in [`.oxfmtrc.json`](https://github.com/elastic/kibana/blob/main/.oxfmtrc.json) and applies to JavaScript and TypeScript files only. Run `node scripts/oxfmt [paths...]` to format files, or `node scripts/oxfmt --check` to report unformatted files without changing them; CI runs the latter.
+
+For format-on-save, install the [Oxc VS Code extension](https://marketplace.visualstudio.com/items?itemName=oxc.oxc-vscode) (other editors are covered in the [oxfmt editor guide](https://oxc.rs/docs/guide/usage/formatter/editors)) and set it as the default formatter for JavaScript and TypeScript:
+
+```json
+"[javascript][javascriptreact][typescript][typescriptreact]": {
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true
+}
+```
+
+Avoid using the [`Prettier` extension/IDE plugin](https://prettier.io/) while maintaining the {{kib}} project. Its output differs from oxfmt's in places and it would format files that the project deliberately leaves untouched.
 

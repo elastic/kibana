@@ -133,15 +133,12 @@ export const generate = async (config: GeneratorConfig) => {
     );
   }
 
-  // Format the output folder using prettier as the generator produces
-  // unformatted code and fix any eslint errors
+  // The generator produces unformatted code. Format it before running eslint --fix so its
+  // autofixes (e.g. removing unused imports) operate on normalized code, then format again
+  // because eslint fixes are not formatting-aware.
   console.log(`💅  Formatting output`);
-  if (bundle) {
-    await formatOutput(bundle.outFile);
-    await fixEslint(bundle.outFile);
-  } else {
-    const generatedArtifactsGlob = resolve(rootDir, './**/*.gen.ts');
-    await formatOutput(generatedArtifactsGlob);
-    await fixEslint(generatedArtifactsGlob);
-  }
+  const target = bundle ? bundle.outFile : resolve(rootDir, './**/*.gen.ts');
+  await formatOutput(target);
+  await fixEslint(target);
+  await formatOutput(target);
 };

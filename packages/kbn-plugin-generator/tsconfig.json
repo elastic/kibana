@@ -16,6 +16,7 @@
   ],
   "kbn_references": [
     "@kbn/dev-utils",
+    "@kbn/oxfmt",
     "@kbn/repo-info",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",

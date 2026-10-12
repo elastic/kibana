@@ -142,7 +142,7 @@ describe('Processor: Append', () => {
     const processors = getProcessorValue(onUpdate);
     expect(processors[0].append).toEqual({
       field: 'field_1',
-      // eslint-disable-next-line prettier/prettier
+      // prettier-ignore
       value: { value_1: 'aaa\"bbb', value_2: 'aaa(bbb' },
     });
   });
