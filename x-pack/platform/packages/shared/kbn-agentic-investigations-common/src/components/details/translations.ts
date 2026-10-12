@@ -20,6 +20,10 @@ export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
   statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
     defaultMessage: 'Closed',
   }),
+  actionRequired: i18n.translate(
+    'xpack.alertzero.detailsFlyout.linkedInvestigations.actionRequired',
+    { defaultMessage: 'Action required' }
+  ),
   empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
     defaultMessage: 'No linked investigations',
   }),

@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293784
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: Add RESTART agent action in Fleet
-description: Adds an action to restart Elastic Agents directly from Fleet, available from the agent details page, agent list table, and bulk actions menu, with API support.
