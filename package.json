@@ -2174,7 +2174,7 @@
     "source-map": "0.7.6",
     "storybook": "8.6.17",
     "style-loader": "4.0.0",
-    "stylelint": "17.14.1",
+    "stylelint": "17.15.0",
     "stylelint-scss": "7.2.0",
     "superagent": "10.3.0",
     "supertest": "7.2.2",
