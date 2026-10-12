@@ -4762,7 +4762,7 @@ describe('xy_visualization', () => {
         expect(state.areaFill).toBeUndefined();
         const newState = xyVisualization.switchVisualizationType!('area', state);
         expect((newState.layers[0] as XYDataLayerConfig).seriesType).toEqual('area');
-        expect(newState.areaFill).toEqual('gradient');
+        expect(newState.areaFill).toEqual('solid');
       });
 
       it('preserves an existing areaFill when switching area subtypes', () => {

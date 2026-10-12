@@ -623,14 +623,14 @@ describe('areaFill handling', () => {
     yAxis: [{ label: 'test', value: 'count' }],
   });
 
-  it('defaults area charts to a gradient fill', async () => {
+  it('defaults area charts to a solid fill', async () => {
     const xyState = await buildWithLayers([seriesLayer('area')]);
-    expect(xyState.areaFill).toBe('gradient');
+    expect(xyState.areaFill).toBe('solid');
   });
 
   it('preserves an explicitly configured fill', async () => {
-    const xyState = await buildWithLayers([seriesLayer('area')], 'solid');
-    expect(xyState.areaFill).toBe('solid');
+    const xyState = await buildWithLayers([seriesLayer('area')], 'gradient');
+    expect(xyState.areaFill).toBe('gradient');
   });
 
   it('omits areaFill entirely for charts without area layers', async () => {

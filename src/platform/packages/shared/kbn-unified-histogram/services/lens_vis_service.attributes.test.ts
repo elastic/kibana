@@ -193,7 +193,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
-          "version": 3,
+          "version": 2,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -369,7 +369,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
-          "version": 3,
+          "version": 2,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -525,7 +525,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
-          "version": 3,
+          "version": 2,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -707,7 +707,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Heat map",
-          "version": 3,
+          "version": 2,
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
@@ -741,7 +741,7 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
-      version: 3,
+      version: 2,
       references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',

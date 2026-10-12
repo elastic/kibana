@@ -63,7 +63,7 @@ Object {
             "visualization": Object {},
           },
           "title": "An extremely cool default document!",
-          "version": 3,
+          "version": 2,
           "visualizationType": "testVis",
         },
         "sharingSavedObjectProps": Object {

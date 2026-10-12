@@ -37,10 +37,10 @@ describe('XY Appearances Transforms', () => {
     });
   });
 
-  it('should default areaFill when omitted to gradient', () => {
+  it('should default areaFill when omitted to solid', () => {
     expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area'])).toEqual({
       fillOpacity: 0.5,
-      areaFill: 'gradient' as const,
+      areaFill: 'solid' as const,
       curveType: 'LINEAR',
       pointVisibility: 'auto',
     });

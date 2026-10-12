@@ -1720,11 +1720,11 @@ describe('xy_suggestions', () => {
       }).find(({ state }) => getVisualizationSubtypeId(state) === 'area');
 
     test('applies the default areaFill when suggesting area from a chart without one', () => {
-      expect(getAreaSuggestion()?.state.areaFill).toBe('gradient');
+      expect(getAreaSuggestion()?.state.areaFill).toBe('solid');
     });
 
     test('keeps the current chart areaFill when suggesting area', () => {
-      expect(getAreaSuggestion('solid')?.state.areaFill).toBe('solid');
+      expect(getAreaSuggestion('gradient')?.state.areaFill).toBe('gradient');
     });
 
     test('does not add an areaFill to non-area suggestions', () => {
