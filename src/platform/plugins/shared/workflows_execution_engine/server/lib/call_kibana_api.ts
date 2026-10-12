@@ -80,7 +80,11 @@ export interface CallKibanaApiParams {
   body?: unknown;
   /** Buffered non-JSON body, mutually exclusive with `body` (used for FormData uploads). */
   rawBody?: BufferedRawBody | null;
-  query?: Record<string, string | number | boolean | undefined>;
+  /**
+   * A value may be a single string/number/boolean, or an array (sent as repeated
+   * query-string keys) — the self client's `HttpSelfFetchQuery` already supports this.
+   */
+  query?: Record<string, string | number | boolean | string[] | undefined>;
   /**
    * Caller-supplied headers. Authentication, internal-origin, and event-chain headers are managed
    * by the helper. JSON requests default to `application/json`, while an explicit caller content

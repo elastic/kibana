@@ -124,9 +124,21 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
 };
 
 function generateConsoleFormat(requestInfo: RequestOptions): string {
-  // Handle query params - could be either 'query' or 'params' depending on the builder
+  // Handle query params - could be either 'query' or 'params' depending on the builder.
+  // A value may be a single string or an array, sent as repeated query-string keys, so
+  // build the string manually instead of letting `new URLSearchParams()` comma-join arrays.
   const queryParams = requestInfo.query;
-  const queryString = queryParams ? `?${new URLSearchParams(queryParams).toString()}` : '';
+  const searchParams = new URLSearchParams();
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (Array.isArray(value)) {
+        value.forEach((entry) => searchParams.append(key, entry));
+      } else {
+        searchParams.append(key, value);
+      }
+    }
+  }
+  const queryString = queryParams ? `?${searchParams.toString()}` : '';
 
   const lines = [`${requestInfo.method} ${decodeURIComponent(requestInfo.path)}${queryString}`];
 

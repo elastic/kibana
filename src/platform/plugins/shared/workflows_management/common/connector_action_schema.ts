@@ -521,7 +521,12 @@ export const staticConnectors: BaseConnectorContract[] = [
       path: z.string(),
       body: z.any().optional(),
       headers: z.any().optional(),
-      query: z.record(z.string(), z.any()).optional(),
+      query: z
+        .record(z.string(), z.union([z.string(), z.array(z.string())]))
+        .optional()
+        .describe(
+          'URL query parameters. A value may be a single string or an array of strings, sent as repeated keys (e.g. status=running&status=upcoming).'
+        ),
       form_data: z
         .record(
           z.string(),

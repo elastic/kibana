@@ -177,6 +177,36 @@ describe('buildKibanaRequest', () => {
       expect(result.path).toBe('/api/status');
       expect(result.headers).toEqual({ 'custom-header': 'value' });
     });
+
+    it('should pass through both single and array query values unchanged', () => {
+      const result = buildKibanaRequest(
+        'kibana.request',
+        {
+          method: 'GET',
+          path: '/api/cases',
+          query: { status: ['running', 'upcoming'], page: '1' },
+        },
+        'my-space'
+      );
+
+      expect(result.query).toEqual({ status: ['running', 'upcoming'], page: '1' });
+    });
+
+    it('should pass through array query values from the request parameter format', () => {
+      const result = buildKibanaRequest(
+        'kibana.request',
+        {
+          request: {
+            method: 'GET',
+            path: '/api/cases',
+            query: { status: ['running', 'upcoming'] },
+          },
+        },
+        'my-space'
+      );
+
+      expect(result.query).toEqual({ status: ['running', 'upcoming'] });
+    });
   });
 
   describe('Request structure', () => {

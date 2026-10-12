@@ -132,4 +132,34 @@ describe('staticConnectors', () => {
     const result = kibanaReq.paramsSchema.safeParse({ method: 'POSTs', path: '/api/status' });
     expect(result.success).toBe(false);
   });
+
+  it('kibana.request paramsSchema accepts a single string query value', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({
+      method: 'GET',
+      path: '/api/cases',
+      query: { page: '1' },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('kibana.request paramsSchema accepts an array query value', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({
+      method: 'GET',
+      path: '/api/cases',
+      query: { status: ['running', 'upcoming'] },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('kibana.request paramsSchema rejects a non-string, non-array query value', () => {
+    const kibanaReq = staticConnectors.find((c) => c.type === 'kibana.request')!;
+    const result = kibanaReq.paramsSchema.safeParse({
+      method: 'GET',
+      path: '/api/cases',
+      query: { page: 1 },
+    });
+    expect(result.success).toBe(false);
+  });
 });

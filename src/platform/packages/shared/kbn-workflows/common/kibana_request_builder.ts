@@ -37,7 +37,7 @@ export function buildKibanaRequest(
       method: method as string,
       path: path as string,
       body: body as Record<string, unknown>,
-      query: query as Record<string, string>,
+      query: query as Record<string, string | string[]>,
       headers: headers as Record<string, string>,
     };
   }
@@ -49,7 +49,7 @@ export function buildKibanaRequest(
       method: method as string,
       path: path as string,
       body: body as Record<string, unknown>,
-      query: query as Record<string, string>,
+      query: query as Record<string, string | string[]>,
       headers: headers as Record<string, string>,
     };
   }
