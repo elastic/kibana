@@ -100,7 +100,11 @@ describe('runDeductiveAgent', () => {
         access: 'owner',
         retryOnConflict: true,
         source: 'execution',
-        activity: { actor: { type: 'agent', id: 'deductive.ai' } },
+        // Stamped with the round's timeline execution id, never the execution record id.
+        activity: {
+          actor: { type: 'agent', id: 'deductive.ai' },
+          execution_id: expect.stringMatching(/^[0-9a-f-]{36}::execution$/),
+        },
       }
     );
 

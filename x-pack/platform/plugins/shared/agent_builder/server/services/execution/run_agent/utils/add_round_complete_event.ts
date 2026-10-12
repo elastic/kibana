@@ -31,7 +31,7 @@ import {
   isPromptRequestEvent,
   isToolCallStep,
   isUserQuestionAnsweredEvent,
-  ROUND_DERIVED_EVENT_ID_SUFFIXES,
+  timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { ConversationInternalState } from '@kbn/agent-builder-common/chat';
 import type { ConversationStateManager, ModelProvider } from '@kbn/agent-builder-server/runner';
@@ -72,7 +72,7 @@ export const buildAttachmentEvents = ({
   agentId: string;
   createdAt: string;
 }) => {
-  const executionId = `${round.id}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`;
+  const executionId = timelineExecutionId(round.id, 0);
   return [
     ...attachmentChangesToEvents(chatInputChanges, {
       source: 'chat_input',

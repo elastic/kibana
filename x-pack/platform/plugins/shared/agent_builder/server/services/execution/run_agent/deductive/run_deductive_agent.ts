@@ -7,7 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ConversationRound, MetadataFieldValue, RoundInput } from '@kbn/agent-builder-common';
-import { ChatEventType, ConversationRoundStatus, EventActorType } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  ConversationRoundStatus,
+  EventActorType,
+  timelineExecutionId,
+} from '@kbn/agent-builder-common';
 import { createMessageEvent, createTextChunkEvent } from '@kbn/agent-builder-genai-utils/langchain';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { ConversationClient } from '../../../conversation';
@@ -166,7 +171,7 @@ export const runDeductiveAgent = async (
     metadata,
     sessionId,
     agentId: params.agentId,
-    executionId: params.executionId,
+    executionId: timelineExecutionId(messageId, 0),
   });
 
   const endTime = new Date();
@@ -257,7 +262,7 @@ const persistDeductiveSessionId = async ({
   metadata: Record<string, MetadataFieldValue>;
   sessionId: string;
   agentId: string | undefined;
-  executionId: string | undefined;
+  executionId: string;
 }): Promise<void> => {
   if (!conversationId) {
     return;
@@ -284,7 +289,7 @@ const persistDeductiveSessionId = async ({
           ? {
               activity: {
                 actor: { type: EventActorType.agent, id: agentId },
-                ...(executionId !== undefined ? { execution_id: executionId } : {}),
+                execution_id: executionId,
               },
             }
           : {}),

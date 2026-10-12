@@ -26,6 +26,7 @@ import {
   ConversationRoundStepType,
   EventActorType,
   carriedOverTodos,
+  timelineExecutionId,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -159,6 +160,15 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   }
 
   const roundId = providedRoundId ?? uuidv4();
+  // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
+  // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
+  const roundExecutionIndex = pendingTurn
+    ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
+    : 0;
+  // The timeline id of this execution, which every event written for it carries. A resume mints
+  // its own round id but is persisted to the paused round. `executionId` names the execution
+  // record and is never persisted on conversation events.
+  const roundExecutionId = timelineExecutionId(pendingTurn?.id ?? roundId, roundExecutionIndex);
 
   // Create background execution service from conversation state
   const backgroundExecutionService = new BackgroundExecutionService({
@@ -232,11 +242,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
     conversationId: conversation?.id,
     conversationAccess,
-    // Use raw persisted executions: the model-context timeline folds multiple resumes into one.
-    // Legacy rounds cannot recover exact history, but a pending turn is at least the first resume.
-    roundExecutionIndex: pendingTurn
-      ? Math.max(1, nextResumeIndex({ events: conversation?.events }, pendingTurn.id))
-      : 0,
+    roundExecutionIndex,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
   // Only the first execution owns the round's workflow context step.
@@ -305,7 +311,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
             // Attribute the change to the agent's run.
             activity: {
               actor: { type: EventActorType.agent, id: agentId ?? conversation.agent_id },
-              ...(executionId !== undefined ? { execution_id: executionId } : {}),
+              execution_id: roundExecutionId,
             },
           })
       : undefined;

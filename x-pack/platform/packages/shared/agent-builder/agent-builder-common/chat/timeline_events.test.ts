@@ -21,7 +21,10 @@ import {
   isExecutionTerminalEvent,
   isTimelineEvent,
   lastExecutionTerminal,
+  parseExecutionId,
   pendingPromptRequest,
+  resumeExecutionId,
+  timelineExecutionId,
 } from './timeline_events';
 import { AgentPromptType } from '../agents/prompts';
 
@@ -274,6 +277,28 @@ describe('interruptionOfTerminal', () => {
     expect(interruptionOfTerminal(aborted('a1', 'r1::execution', 'api') as never)).toEqual({
       type: 'aborted',
       aborted_by: { source: 'api' },
+    });
+  });
+});
+
+describe('timelineExecutionId', () => {
+  it('names the initial run of a round', () => {
+    expect(timelineExecutionId('round-1', 0)).toBe('round-1::execution');
+  });
+
+  it('names a resume the same way resumeExecutionId does', () => {
+    expect(timelineExecutionId('round-1', 2)).toBe(resumeExecutionId('round-1', 2));
+    expect(timelineExecutionId('round-1', 2)).toBe('round-1::execution::2');
+  });
+
+  it('round-trips through parseExecutionId', () => {
+    expect(parseExecutionId(timelineExecutionId('round-1', 0))).toEqual({
+      roundId: 'round-1',
+      index: 0,
+    });
+    expect(parseExecutionId(timelineExecutionId('round-1', 3))).toEqual({
+      roundId: 'round-1',
+      index: 3,
     });
   });
 });

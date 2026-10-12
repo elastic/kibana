@@ -80,7 +80,6 @@ import { userMessageActor } from '../conversation/client/rounds_to_events';
 /** The still-recorded parent execution that spawned a sub-agent execution. */
 interface ParentExecution {
   agentId: string;
-  executionId: string;
 }
 
 export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
@@ -696,7 +695,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * A sub-agent acts as its parent execution's owner: a Task Manager parent's request resolves to
    * the task's API key, which does not match the owner's id. Trusts `parentExecutionId` to name
    * the running parent that spawned it. The same lookup identifies the parent execution, so the
-   * conversations this execution creates can be attributed to it.
+   * conversations this execution creates can be attributed to it. The attribution names the
+   * parent agent only: the record id is not a conversation `execution_id`, and the parent round
+   * already points at the child conversation through its sub-agent entry.
    */
   private async resolveConversationClient({
     request,
@@ -716,9 +717,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const parent = await executionClient.peek(parentExecutionId);
-    const parentExecution = parent?.agentId
-      ? { agentId: parent.agentId, executionId: parentExecutionId }
-      : undefined;
+    const parentExecution = parent?.agentId ? { agentId: parent.agentId } : undefined;
 
     if (!parent?.owner) {
       return { conversationClient: requestClient, parentExecution };
@@ -855,7 +854,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         ? {
             activity: {
               actor: { type: EventActorType.agent, id: parentExecution.agentId },
-              execution_id: parentExecution.executionId,
             },
           }
         : {}),

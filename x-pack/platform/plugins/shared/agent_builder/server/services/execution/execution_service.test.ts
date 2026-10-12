@@ -1422,12 +1422,11 @@ describe('AgentExecutionService', () => {
         parentExecutionId: 'parent-1',
       });
 
+      // The record id only names the parent for `peek`: it is not a conversation `execution_id`.
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('parent-1');
       expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
         source: 'execution',
-        activity: {
-          actor: { type: EventActorType.agent, id: 'parent-agent' },
-          execution_id: 'parent-1',
-        },
+        activity: { actor: { type: EventActorType.agent, id: 'parent-agent' } },
       });
     });
 

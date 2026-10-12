@@ -578,6 +578,16 @@ export const roundStepEventId = (roundId: string, sequence: number): string =>
 export const resumeExecutionId = (roundId: string, executionIndex: number): string =>
   `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}::${executionIndex}`;
 
+/**
+ * The timeline `execution_id` of a round's execution: the initial run (index 0) or a resume.
+ * Every persisted `execution_id` uses this form, so events written outside the round fold
+ * (activity attributed to an agent run) must stamp this rather than the execution record id.
+ */
+export const timelineExecutionId = (roundId: string, executionIndex: number): string =>
+  executionIndex === 0
+    ? `${roundId}${ROUND_DERIVED_EVENT_ID_SUFFIXES.execution}`
+    : resumeExecutionId(roundId, executionIndex);
+
 /** Parses initial and resume execution ids, returning undefined for unrelated ids. */
 export const parseExecutionId = (id: string): { roundId: string; index: number } | undefined => {
   const match = id.match(/^(.*)::execution(?:::(\d+))?$/);
