@@ -4,6 +4,7 @@ Open the guide that matches the component(s) you are writing or refactoring. Rea
 
 | Guide | Topic | EUI components |
 |-------|-------|----------------|
+| `button_links.md` | Buttons that navigate (`href` on the button, external icon, no nested `EuiLink`) | `EuiButton`, `EuiButtonEmpty`, `EuiLink`, `EuiCallOut` / `EuiBanner` / `EuiToast` `actionProps` |
 | `callouts.md` | Callouts (announce when conditional) | `EuiCallOut` |
 | `clickable_cards.md` | Clickable cards (one action per card) | `EuiCard`, `EuiButton` |
 | `copy_tooltip.md` | Copy-to-clipboard tooltip (`beforeMessage`, no nested tooltip) | `EuiCopy`, `EuiToolTip`, `EuiButtonIcon` |

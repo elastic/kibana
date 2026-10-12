@@ -26,8 +26,13 @@ const hasNewConfirmedRule = (
     extractRuleUuids(latestEvent.signals)
   );
 
-/** Preserves an investigated event's current severity unless Discovery supplies an unlock. */
-export const getCalibratedSeverity = ({
+/**
+ * Preserves an investigated event's current severity unless Discovery supplies an unlock —
+ * resolving the event, reactivating it, or confirming a new rule.
+ *
+ * This is a deliberate override of the agent's proposed severity, applied after it is decided.
+ */
+export const lockSeverityForCompletedInvestigation = ({
   source,
   latestEvent,
   proposedSeverity,
@@ -39,7 +44,7 @@ export const getCalibratedSeverity = ({
   proposedSeverity: Severity;
   proposedStatus: SignificantEventStatus;
   proposedSignals?: SignificantEvent['signals'];
-}): SignificantEvent['severity'] => {
+}): Severity => {
   if (
     source !== 'discovery' ||
     latestEvent === undefined ||
