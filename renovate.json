@@ -1900,7 +1900,7 @@
     },
     {
       "groupName": "redux-thunk",
-      "matchDepNames": ["redux-thunk-v2"],
+      "matchDepNames": ["redux-thunk"],
       "reviewers": ["team:kibana-dashboards", "team:kibana-management"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
