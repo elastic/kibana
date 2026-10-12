@@ -202,6 +202,163 @@ describe('makeRehydrateProcessSelectors', () => {
     expect(selectors[0].techniqueId).toBe('T1059.001');
   });
 
+  it('marks a selector iocMatched when its ref carried matched.ioc, and false otherwise', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-ioc', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'ioc.exe' },
+        event: { type: 'start' },
+      }),
+      found('logs-endpoint.events-default', 'ev-plain', {
+        '@timestamp': '2026-09-26T10:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 200, name: 'plain.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        { ...eventRef('logs-endpoint.events-default', 'ev-ioc'), matched: { ioc: true } },
+        eventRef('logs-endpoint.events-default', 'ev-plain'),
+      ],
+    });
+    expect(selectors.find((s) => s.pid === 100)?.iocMatched).toBe(true);
+    expect(selectors.find((s) => s.pid === 200)?.iocMatched).toBe(false);
+  });
+
+  it('ORs iocMatched across refs for the same process even when a technique-attributed ref wins the slot', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-ioc', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+      found('logs-endpoint.events-default', 'ev-technique', {
+        '@timestamp': '2026-09-26T12:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        { ...eventRef('logs-endpoint.events-default', 'ev-ioc'), matched: { ioc: true } },
+        eventRef('logs-endpoint.events-default', 'ev-technique', 'T1059.001'),
+      ],
+    });
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({ techniqueId: 'T1059.001', iocMatched: true });
+  });
+
+  it('keeps the newest observation timestamp when an older technique-attributed ref wins the slot', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-old-technique', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+      found('logs-endpoint.events-default', 'ev-new-plain', {
+        '@timestamp': '2026-09-27T12:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'a.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        eventRef('logs-endpoint.events-default', 'ev-old-technique', 'T1059.001'),
+        eventRef('logs-endpoint.events-default', 'ev-new-plain'),
+      ],
+    });
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0]).toMatchObject({
+      techniqueId: 'T1059.001',
+      observedAt: '2026-09-27T12:00:00.000Z',
+    });
+  });
+
+  it('keeps every attributed technique, so a destructive one survives another winning the slot', async () => {
+    const proc = {
+      host: { name: 'h1' },
+      process: { pid: 100, name: 'a.exe' },
+      event: { type: 'start' },
+    };
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        ...proc,
+      }),
+      found('logs-endpoint.events-default', 'ev-2', {
+        '@timestamp': '2026-09-26T12:00:00.000Z',
+        ...proc,
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        eventRef('logs-endpoint.events-default', 'ev-1', 'T1486'),
+        eventRef('logs-endpoint.events-default', 'ev-2', 'T1059.001'),
+      ],
+    });
+    expect(selectors).toHaveLength(1);
+    expect(selectors[0].techniqueId).toBe('T1059.001');
+    expect([...(selectors[0].techniqueIds ?? [])].sort()).toEqual(['T1059.001', 'T1486']);
+  });
+
+  it('picks the same representative regardless of an interleaved newer unattributed ref', async () => {
+    const proc = {
+      host: { name: 'h1' },
+      process: { pid: 100, name: 'a.exe' },
+      event: { type: 'start' },
+    };
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        ...proc,
+      }),
+      found('logs-endpoint.events-default', 'ev-plain', {
+        '@timestamp': '2026-09-27T09:00:00.000Z',
+        ...proc,
+      }),
+      found('logs-endpoint.events-default', 'ev-2', {
+        '@timestamp': '2026-09-26T12:00:00.000Z',
+        ...proc,
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [
+        eventRef('logs-endpoint.events-default', 'ev-1', 'T1486'),
+        eventRef('logs-endpoint.events-default', 'ev-plain'),
+        eventRef('logs-endpoint.events-default', 'ev-2', 'T1059.001'),
+      ],
+    });
+    expect(selectors[0].techniqueId).toBe('T1059.001');
+    expect(selectors[0].observedAt).toBe('2026-09-27T09:00:00.000Z');
+  });
+
+  it('carries the executable path onto the selector', async () => {
+    const esClient = esClientWith([
+      found('logs-endpoint.events-default', 'ev-1', {
+        '@timestamp': '2026-09-26T09:00:00.000Z',
+        host: { name: 'h1' },
+        process: { pid: 100, name: 'lsass.exe', executable: 'C:\\Windows\\System32\\lsass.exe' },
+        event: { type: 'start' },
+      }),
+    ]);
+    const selectors = await makeRehydrateProcessSelectors(esClient)({
+      alerts: [],
+      events: [eventRef('logs-endpoint.events-default', 'ev-1')],
+    });
+    expect(selectors[0].processExecutable).toBe('C:\\Windows\\System32\\lsass.exe');
+  });
+
   it('leaves techniqueId undefined for a plain sample ref with no technique match', async () => {
     const esClient = esClientWith([
       found('logs-endpoint.events-default', 'ev-1', {

@@ -16,6 +16,7 @@ import { indexPanelsById, updatePanelInDashboard } from '../dashboard_state';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import {
   buildConfigPanelContent,
+  CONFIG_PANEL_TYPE_LIST,
   editPanelItemSchema,
   findConfigPanelType,
   findPanelRenderer,
@@ -97,7 +98,7 @@ export const editPanelsOperation = defineOperation({
       panels: z.array(editPanelItemSchema).min(1),
     })
     .describe(
-      'Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega panels and custom content panels (source: "request" with the panel\'s renderer), and by-value panels (source: "config" with the panel\'s type: "markdown", "ml_anomaly_charts", "ml_anomaly_swimlane", or "ml_single_metric_viewer"). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing. Report this limitation and only replace them when the user explicitly approves.'
+      `Edit existing panels in place by panelId. Supports ES|QL-backed Lens and Vega panels and custom content panels (source: "request" with the panel's renderer), and by-value panels (source: "config" with the panel's type: ${CONFIG_PANEL_TYPE_LIST}). DSL, form-based, and other non-ES|QL visualization panels are not supported for direct editing. Report this limitation and only replace them when the user explicitly approves.`
     ),
   handler: async ({ dashboardData, operation, context }) => {
     const { resolvePanelContent } = context;
