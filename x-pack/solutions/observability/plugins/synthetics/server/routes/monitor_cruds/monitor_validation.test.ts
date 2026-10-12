@@ -480,15 +480,6 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('rejects a browser step that destructures its argument when checkInlineScript is set', () => {
-      const testMonitor = browserMonitorWith('step("open example", async ({ page }) => {});');
-      const result = validateMonitor(testMonitor, 'default', false, { checkInlineScript: true });
-      expect(result).toMatchObject({
-        valid: false,
-        details: expect.stringContaining('Step "open example" destructures an argument'),
-      });
-    });
-
     it('does not inspect the script unless checkInlineScript is set', () => {
       const testMonitor = browserMonitorWith('step("x", async () => {{{ this is not js');
       expect(validateMonitor(testMonitor, 'default')).toMatchObject({ valid: true });

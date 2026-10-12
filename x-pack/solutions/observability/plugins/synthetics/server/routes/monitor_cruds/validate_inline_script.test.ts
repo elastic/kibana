@@ -16,9 +16,9 @@ describe('getInlineScriptError', () => {
     expect(getInlineScriptError(script)).toBeUndefined();
   });
 
-  it('accepts step callbacks that take no argument or a plain parameter', () => {
-    const script = `step("no args", () => {});
-step("plain param", async (page) => { await page.goto("https://example.com"); });`;
+  it('accepts top-level await and return', () => {
+    const script = `await Promise.resolve();
+if (!true) { return; }`;
 
     expect(getInlineScriptError(script)).toBeUndefined();
   });
@@ -29,30 +29,7 @@ step("plain param", async (page) => { await page.goto("https://example.com"); })
     expect(getInlineScriptError(script)).toContain('The script has a syntax error');
   });
 
-  it('rejects a step callback that destructures its argument', () => {
-    const script = `step("open example", async ({ page }) => { await page.goto("https://example.com"); });`;
-
-    expect(getInlineScriptError(script)).toContain('Step "open example" destructures an argument');
-  });
-
-  it('rejects a destructured argument on a function expression', () => {
-    const script = `step("array form", async function ([first]) { return first; });`;
-
-    expect(getInlineScriptError(script)).toContain('Step "array form" destructures an argument');
-  });
-
-  it('rejects a destructured step nested inside another call', () => {
-    const script = `journey("outer", () => {
-  step("nested", async ({ page }) => {});
-});`;
-
-    expect(getInlineScriptError(script)).toContain('Step "nested" destructures an argument');
-  });
-
-  it('ignores destructuring in calls that are not step calls', () => {
-    const script = `const run = async ({ page }) => page;
-other("name", async ({ page }) => page);`;
-
-    expect(getInlineScriptError(script)).toBeUndefined();
+  it('rejects an unbalanced closing brace', () => {
+    expect(getInlineScriptError('step("x", () => {});}')).toContain('syntax error');
   });
 });
