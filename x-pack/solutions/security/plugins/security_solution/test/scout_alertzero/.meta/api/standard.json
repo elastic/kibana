@@ -1,0 +1,50 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "26bcf457ec08656-580a9004c15ab21",
+      "title": "AlertZero managed detection-rule workflows rule_preview: is installed and valid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/managed_alertzero_rule_workflows.spec.ts",
+        "line": 108,
+        "column": 80
+      }
+    },
+    {
+      "id": "26bcf457ec08656-ea4c474294d739a",
+      "title": "AlertZero managed detection-rule workflows rule_preview: succeeds and reports a zero alert count for a query that matches nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/managed_alertzero_rule_workflows.spec.ts",
+        "line": 122,
+        "column": 11
+      }
+    },
+    {
+      "id": "26bcf457ec08656-90db5b5f3b47f4b",
+      "title": "AlertZero managed detection-rule workflows continuous_threat_hunt worker: installs as a console stub until real coverage exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/managed_alertzero_rule_workflows.spec.ts",
+        "line": 138,
+        "column": 16
+      }
+    }
+  ]
+}
