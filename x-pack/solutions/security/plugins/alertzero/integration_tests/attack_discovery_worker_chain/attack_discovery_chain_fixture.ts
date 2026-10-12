@@ -60,6 +60,20 @@ const deriveInvestigationId = (attackDiscoveryId: string): string =>
     attackDiscoveryId.slice(18, 30),
   ].join('-');
 export const FAKE_INVESTIGATION_ID = deriveInvestigationId(FAKE_ATTACK_DISCOVERY_ID);
+/**
+ * What the persisted Attack Discovery document says its title and summary are,
+ * i.e. what `GET /api/attack_discovery/_find` returns to the review's
+ * `resolve_display_text` step. Deliberately NOT the strings `runReview` passes as
+ * `inputs.title` / `inputs.summary_markdown`: the review falls back to the inputs
+ * when the read yields nothing, so identical values would let a dead `_find` pass
+ * for a working one.
+ */
+export const FAKE_DISCOVERY_DISPLAY_TITLE = 'Lateral movement from host-a to host-b over SMB';
+export const FAKE_DISCOVERY_DISPLAY_SUMMARY =
+  'host-a authenticated to host-b with a stolen ticket.';
+/** The persisted review inputs the display text is expected to win over. */
+export const FAKE_REVIEW_INPUT_TITLE = 'Suspicious lateral movement';
+export const FAKE_REVIEW_INPUT_SUMMARY = 'Correlated alerts across two hosts.';
 export const FAKE_REVIEW_EXECUTION_ID = 'fake_workflow_execution_id';
 
 /** The gate's literal `timeout` (`system-create-proposal`'s `settings.timeout`
@@ -403,8 +417,8 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
     seedAttackDiscoveryDocument: (overrides = {}) => {
       attackDiscoveryDocuments.set(FAKE_ATTACK_DISCOVERY_ID, {
         'kibana.alert.uuid': FAKE_ATTACK_DISCOVERY_ID,
-        'kibana.alert.attack_discovery.title': 'Suspicious lateral movement',
-        'kibana.alert.attack_discovery.summary_markdown': 'Correlated alerts across two hosts.',
+        'kibana.alert.attack_discovery.title': FAKE_DISCOVERY_DISPLAY_TITLE,
+        'kibana.alert.attack_discovery.summary_markdown': FAKE_DISCOVERY_DISPLAY_SUMMARY,
         'kibana.alert.attack_discovery.entity_summary_markdown': 'host-a, host-b',
         'kibana.alert.attack_discovery.alert_ids': ['alert-1', 'alert-2'],
         ...overrides,
@@ -415,9 +429,9 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
         workflowYaml: managedWorkflowYaml(CHAIN_WORKFLOW_IDS.review),
         inputs: {
           attack_discovery_id: FAKE_ATTACK_DISCOVERY_ID,
-          title: 'Suspicious lateral movement',
+          title: FAKE_REVIEW_INPUT_TITLE,
           alert_ids: ['alert-1', 'alert-2'],
-          summary_markdown: 'Correlated alerts across two hosts.',
+          summary_markdown: FAKE_REVIEW_INPUT_SUMMARY,
           autonomy: 'manual',
           ...inputs,
         },

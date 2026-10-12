@@ -53,6 +53,8 @@ const setAttackStatusStepCommonDefinition = {
  */
 export interface FakeConversation {
   id: string;
+  /** The conversation's display title, as `ai.conversation.create` stored it. */
+  title: string;
   templateId?: string;
   metadata: Record<string, unknown>;
   attachments: Map<string, { type: string; data: unknown; version: number }>;
@@ -64,6 +66,13 @@ export interface FakeAlertZeroBackend {
   attackStatusCalls: Array<{ ids: string[]; status: string; reason?: string }>;
   /** Every knowledge indicator `context-engine.createKi` wrote, keyed by ki_id. */
   knowledgeIndicators: Map<string, { ai_index_id: string; ki: unknown }>;
+  /**
+   * Plants an Investigation before the review runs, as an earlier review of the same
+   * attack would have left it. `ai.conversation.create` then conflicts on it the way
+   * the real one does on a re-review, and the review carries on against the planted
+   * record.
+   */
+  seedInvestigation: (seed: { id: string; status: 'open' | 'closed'; title: string }) => void;
   /**
    * Queue of canned `ai.agent` responses for the FP/TP `analyze` step, consumed
    * one per call in order. Throws if the queue runs dry, so a suite that forgot
@@ -84,6 +93,9 @@ export interface FakeAlertZeroBackend {
   }) => void;
   agentCallCount: () => number;
 }
+
+/** The title prefix the shipped `investigations.reopen` handler applies (once). */
+const REOPEN_TITLE_PREFIX = '[Reopen] ';
 
 const CONVERSATION_TEMPLATE_DEFAULT_METADATA: Record<string, Record<string, unknown>> = {
   investigation: { status: 'open' },
@@ -135,11 +147,17 @@ export const createFakeAlertZeroBackend = (): {
         metadata?: Record<string, unknown>;
       };
       const id = input.conversation_id ?? `fake-conversation-${conversations.size + 1}`;
+      if (conversations.has(id)) {
+        // The real create indexes with `op_type: 'create'`, so a second review of the
+        // same attack conflicts and emits nothing; the review tolerates exactly that.
+        return { error: new Error(`Conversation ${id} already exists (409 conflict)`) };
+      }
       const templateDefaults = input.template_id
         ? CONVERSATION_TEMPLATE_DEFAULT_METADATA[input.template_id] ?? {}
         : {};
       conversations.set(id, {
         id,
+        title: input.title ?? '',
         templateId: input.template_id,
         metadata: { ...templateDefaults, ...(input.metadata ?? {}) },
         attachments: new Map(),
@@ -284,10 +302,14 @@ export const createFakeAlertZeroBackend = (): {
       const { conversationId } = context.input as { conversationId: string };
       const conversation = getConversation(conversationId);
       if (conversation.metadata.status !== 'closed') {
-        return { output: { reopened: false, title: '' } };
+        return { output: { reopened: false, title: conversation.title } };
       }
+      // Same title rule as the shipped handler: prefix once, never twice.
+      conversation.title = conversation.title.startsWith(REOPEN_TITLE_PREFIX)
+        ? conversation.title
+        : `${REOPEN_TITLE_PREFIX}${conversation.title}`;
       conversation.metadata = { ...conversation.metadata, status: 'open' };
-      return { output: { reopened: true, title: '' } };
+      return { output: { reopened: true, title: conversation.title } };
     },
   });
 
@@ -333,6 +355,15 @@ export const createFakeAlertZeroBackend = (): {
     conversations,
     attackStatusCalls,
     knowledgeIndicators,
+    seedInvestigation: ({ id, status, title }) => {
+      conversations.set(id, {
+        id,
+        title,
+        templateId: 'investigation',
+        metadata: { ...CONVERSATION_TEMPLATE_DEFAULT_METADATA.investigation, status },
+        attachments: new Map(),
+      });
+    },
     queueAgentVerdict: (verdict) => agentVerdictQueue.push(verdict),
     agentCallCount: () => agentCalls,
   };
