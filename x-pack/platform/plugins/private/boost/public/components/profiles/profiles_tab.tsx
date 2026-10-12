@@ -11,14 +11,7 @@ import type {
   EuiSearchBarProps,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiButton,
-  EuiConfirmModal,
-  EuiInMemoryTable,
-  EuiScreenReaderOnly,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiInMemoryTable, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { countDataSourcesByProfile, countRulesByProfile } from '../../../common/resolution';
 import type {
@@ -27,9 +20,8 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
-import { useBoostServices } from '../../hooks/use_boost_services';
-import { useDeleteProfile } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
+import { DeleteProfileModal } from './delete_profile_modal';
 import { ProfileFlyout } from './profile_flyout';
 
 interface ProfilesTabProps {
@@ -72,11 +64,8 @@ const USED_BY_DEFAULT_RULE_DESCRIPTIONS: Record<BoostProfileType, string> = {
 };
 
 export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesTabProps) => {
-  const { notifications } = useBoostServices();
-  const deleteModalTitleId = useGeneratedHtmlId();
   const [flyout, setFlyout] = useState<FlyoutState>();
   const [profileToDelete, setProfileToDelete] = useState<BoostProfile>();
-  const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfile();
 
   const rows = useMemo<ProfileRow[]>(() => {
     const dataSourceCounts = countDataSourcesByProfile(dataSources, rules, profiles);
@@ -271,41 +260,13 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       )}
 
       {profileToDelete && (
-        <EuiConfirmModal
-          aria-labelledby={deleteModalTitleId}
-          titleProps={{ id: deleteModalTitleId }}
-          title={i18n.translate('xpack.boost.profilesTab.deleteModalTitle', {
-            defaultMessage: 'Delete boost profile "{name}"?',
-            values: { name: profileToDelete.name },
-          })}
-          onCancel={() => setProfileToDelete(undefined)}
-          onConfirm={() =>
-            deleteProfile(profileToDelete.name, {
-              onSuccess: () =>
-                notifications.toasts.addSuccess(
-                  i18n.translate('xpack.boost.profilesTab.deletedToast', {
-                    defaultMessage: 'Deleted boost profile "{name}"',
-                    values: { name: profileToDelete.name },
-                  })
-                ),
-              onSettled: () => setProfileToDelete(undefined),
-            })
-          }
-          cancelButtonText={i18n.translate('xpack.boost.profilesTab.deleteModalCancel', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('xpack.boost.profilesTab.deleteModalConfirm', {
-            defaultMessage: 'Delete profile',
-          })}
-          buttonColor="danger"
-          isLoading={isDeleting}
-        >
-          <p>
-            {i18n.translate('xpack.boost.profilesTab.deleteModalBody', {
-              defaultMessage: "This permanently deletes the profile. You can't undo this action.",
-            })}
-          </p>
-        </EuiConfirmModal>
+        <DeleteProfileModal
+          profile={profileToDelete}
+          rules={rules}
+          profiles={profiles}
+          dataSources={dataSources}
+          onClose={() => setProfileToDelete(undefined)}
+        />
       )}
     </>
   );

@@ -11,6 +11,7 @@ import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
   BOOST_MODE_API_PATH,
   BOOST_PROFILES_API_PATH,
+  BOOST_RULES_API_PATH,
   BOOST_SIMPLE_DEFAULTS_API_PATH,
   BOOST_STATE_API_PATH,
 } from '../../common/constants';
@@ -92,5 +93,14 @@ export const useDeleteProfile = () =>
       http.delete<BoostState>(`${BOOST_PROFILES_API_PATH}/${encodeURIComponent(name)}`),
     i18n.translate('xpack.boost.deleteProfileErrorTitle', {
       defaultMessage: 'Unable to delete boost profile',
+    })
+  );
+
+export const useDeleteRule = () =>
+  useBoostMutation(
+    (http, name: string) =>
+      http.delete<BoostState>(`${BOOST_RULES_API_PATH}/${encodeURIComponent(name)}`),
+    i18n.translate('xpack.boost.deleteRuleErrorTitle', {
+      defaultMessage: 'Unable to delete boost rule',
     })
   );

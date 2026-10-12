@@ -23,6 +23,8 @@ import type {
   BoostProfile,
   BoostProfileInput,
   BoostProfileType,
+  BoostRule,
+  BoostRuleInput,
   BoostSettings,
   BoostState,
   CustomDefaults,
@@ -39,10 +41,16 @@ type SettingsAttributes = Pick<BoostSettings, 'mode' | 'simple'> & {
 
 type ProfileAttributes = BoostProfileInput & { kind: 'profile' };
 
+type RuleAttributes = BoostRuleInput & { kind: 'rule' };
+
 const PROTOTYPE_KIND_FILTER = (kind: 'profile' | 'rule') =>
   `${BOOST_SAVED_OBJECT_TYPE}.attributes.kind: ${kind}`;
 
 const profileId = (name: string) => `profile-${name}`;
+
+const ruleId = (name: string) => `rule-${name}`;
+
+const DEFAULT_RULE_NAMES = [DEFAULT_INDICES_RULE_NAME, DEFAULT_DATA_STREAMS_RULE_NAME];
 
 const BUILTIN_PROFILE_NAMES = BUILTIN_PROFILES.map(({ name }) => name);
 
@@ -100,21 +108,39 @@ const getCustomProfiles = async (client: SavedObjectsClientContract): Promise<Bo
     .sort((a, b) => a.name.localeCompare(b.name));
 };
 
-/** Returns the settings, the profiles and rules they currently imply, and the project's data sources. */
+/** Custom rules, highest priority first. */
+const getCustomRules = async (client: SavedObjectsClientContract): Promise<BoostRule[]> => {
+  const { saved_objects: savedObjects } = await client.find<RuleAttributes>({
+    type: BOOST_SAVED_OBJECT_TYPE,
+    filter: PROTOTYPE_KIND_FILTER('rule'),
+    perPage: 1000,
+  });
+
+  return savedObjects
+    .map(({ attributes: { kind, ...rule } }) => ({ ...rule, is_builtin: false }))
+    .sort((a, b) => b.priority - a.priority || a.name.localeCompare(b.name));
+};
+
+/**
+ * Returns the settings, the profiles and rules in effect, and the project's data sources. Custom
+ * rules only apply in advanced mode; simple mode suspends them.
+ */
 export const getState = async (
   client: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<BoostState> => {
-  const [settings, customProfiles, dataSources] = await Promise.all([
+  const [settings, customProfiles, customRules, dataSources] = await Promise.all([
     getSettings(client),
     getCustomProfiles(client),
+    getCustomRules(client),
     getDataSources(esClient),
   ]);
+  const defaultRules = createDefaultRules(getEffectiveDefaults(settings));
 
   return {
     settings,
     profiles: [...BUILTIN_PROFILES, ...customProfiles],
-    rules: createDefaultRules(getEffectiveDefaults(settings)),
+    rules: settings.mode === 'advanced' ? [...customRules, ...defaultRules] : defaultRules,
     data_sources: dataSources,
   };
 };
@@ -186,6 +212,10 @@ export const updateProfile = async (
   await saveProfile(client, profile, true);
 };
 
+/**
+ * Deletes a custom profile along with the custom rules that use it. A profile that a default rule
+ * uses can't be deleted, since the default rules always need a profile.
+ */
 export const deleteProfile = async (
   client: SavedObjectsClientContract,
   name: string
@@ -193,20 +223,32 @@ export const deleteProfile = async (
   assertNotBuiltin(name, 'deleted');
   await getCustomProfile(client, name);
 
-  const { custom_defaults: customDefaults } = await getSettings(client);
-  const ruleName =
+  const [{ custom_defaults: customDefaults }, customRules] = await Promise.all([
+    getSettings(client),
+    getCustomRules(client),
+  ]);
+  const defaultRuleName =
     customDefaults.indices_profile === name
       ? DEFAULT_INDICES_RULE_NAME
       : customDefaults.data_streams_profile === name
       ? DEFAULT_DATA_STREAMS_RULE_NAME
       : undefined;
-  if (ruleName) {
+  if (defaultRuleName) {
     throw new BoostRequestError(
       409,
-      `Boost profile [${name}] is used by boost rule [${ruleName}].`
+      `Boost profile [${name}] is used by boost rule [${defaultRuleName}].`
     );
   }
 
+  // Elasticsearch won't delete a profile that rules still reference, so the rules go first.
+  const attachedRules = customRules.filter(
+    ({ boost_profile: profileName }) => profileName === name
+  );
+  if (attachedRules.length > 0) {
+    await client.bulkDelete(
+      attachedRules.map((rule) => ({ type: BOOST_SAVED_OBJECT_TYPE, id: ruleId(rule.name) }))
+    );
+  }
   await client.delete(BOOST_SAVED_OBJECT_TYPE, profileId(name));
 };
 
@@ -215,6 +257,89 @@ export const updateSimpleDefaults = async (
   simple: SimpleModeDefaults
 ): Promise<void> => {
   await saveSettings(client, { ...(await getSettings(client)), simple });
+};
+
+const assertProfileExists = async (client: SavedObjectsClientContract, name: string) => {
+  if (BUILTIN_PROFILE_NAMES.includes(name)) {
+    return;
+  }
+  try {
+    await client.get(BOOST_SAVED_OBJECT_TYPE, profileId(name));
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      throw new BoostRequestError(400, `Boost rule references unknown boost profile [${name}].`);
+    }
+    throw error;
+  }
+};
+
+const saveRule = async (
+  client: SavedObjectsClientContract,
+  rule: BoostRuleInput,
+  overwrite: boolean
+) => {
+  const attributes: RuleAttributes = { kind: 'rule', ...rule };
+  await client.create(BOOST_SAVED_OBJECT_TYPE, attributes, { id: ruleId(rule.name), overwrite });
+};
+
+const assertCustomRuleExists = async (client: SavedObjectsClientContract, name: string) => {
+  if (DEFAULT_RULE_NAMES.includes(name)) {
+    throw new BoostRequestError(
+      400,
+      `Default boost rule [${name}] can only change its boost profile.`
+    );
+  }
+  try {
+    await client.get(BOOST_SAVED_OBJECT_TYPE, ruleId(name));
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      throw new BoostRequestError(404, `Boost rule [${name}] not found.`);
+    }
+    throw error;
+  }
+};
+
+export const createRule = async (
+  client: SavedObjectsClientContract,
+  rule: BoostRuleInput
+): Promise<void> => {
+  if (DEFAULT_RULE_NAMES.includes(rule.name)) {
+    throw new BoostRequestError(409, `Boost rule [${rule.name}] already exists.`);
+  }
+  await assertProfileExists(client, rule.boost_profile);
+  try {
+    await saveRule(client, rule, false);
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isConflictError(error)) {
+      throw new BoostRequestError(409, `Boost rule [${rule.name}] already exists.`);
+    }
+    throw error;
+  }
+};
+
+/**
+ * Replaces a custom rule. The name can't change, pending a decision on renaming rules. Elasticsearch
+ * is adding a rule update endpoint in elastic/elasticsearch-serverless#7904.
+ */
+export const updateRule = async (
+  client: SavedObjectsClientContract,
+  name: string,
+  rule: BoostRuleInput
+): Promise<void> => {
+  if (rule.name !== name) {
+    throw new BoostRequestError(400, 'A boost rule cannot be renamed.');
+  }
+  await assertCustomRuleExists(client, name);
+  await assertProfileExists(client, rule.boost_profile);
+  await saveRule(client, rule, true);
+};
+
+export const deleteRule = async (
+  client: SavedObjectsClientContract,
+  name: string
+): Promise<void> => {
+  await assertCustomRuleExists(client, name);
+  await client.delete(BOOST_SAVED_OBJECT_TYPE, ruleId(name));
 };
 
 /** Points the default rule for a profile type at an Elastic-managed or custom profile of that type. */
@@ -240,13 +365,21 @@ export const updateMode = async (
   await saveSettings(client, { ...(await getSettings(client)), mode });
 };
 
-/** Deletes the settings and all custom profiles, returning the project to its out-of-the-box state. */
+/**
+ * Deletes the settings and all custom profiles and rules, returning the project to its
+ * out-of-the-box state.
+ */
 export const resetState = async (client: SavedObjectsClientContract): Promise<void> => {
-  const customProfiles = await getCustomProfiles(client);
-  if (customProfiles.length > 0) {
-    await client.bulkDelete(
-      customProfiles.map(({ name }) => ({ type: BOOST_SAVED_OBJECT_TYPE, id: profileId(name) }))
-    );
+  const [customProfiles, customRules] = await Promise.all([
+    getCustomProfiles(client),
+    getCustomRules(client),
+  ]);
+  const ids = [
+    ...customRules.map(({ name }) => ruleId(name)),
+    ...customProfiles.map(({ name }) => profileId(name)),
+  ];
+  if (ids.length > 0) {
+    await client.bulkDelete(ids.map((id) => ({ type: BOOST_SAVED_OBJECT_TYPE, id })));
   }
 
   try {

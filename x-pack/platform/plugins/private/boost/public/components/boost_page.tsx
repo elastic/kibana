@@ -15,7 +15,7 @@ import { useBoostServices } from '../hooks/use_boost_services';
 import { useBoostState, useUpdateMode } from '../hooks/use_boost_state';
 import { BOOST_APP_TITLE } from '../translations';
 import { ProfilesTab } from './profiles/profiles_tab';
-import { RulesTable } from './rules_table';
+import { RulesTab } from './rules/rules_tab';
 import { SimpleModeSettings } from './simple_mode_settings';
 
 type AdvancedTab = 'profiles' | 'rules';
@@ -142,7 +142,12 @@ export const BoostPage = () => {
           />
         )}
         {isAdvanced && selectedTab === 'rules' && (
-          <RulesTable rules={state.rules} profiles={state.profiles} />
+          <RulesTab
+            rules={state.rules}
+            profiles={state.profiles}
+            dataSources={state.data_sources}
+            canEdit={canEdit}
+          />
         )}
       </EuiPageSection>
     </>

@@ -120,7 +120,7 @@ export const PrototypeMenu = ({ http, notifications, onRestored }: PrototypeMenu
           <p>
             {i18n.translate('xpack.boost.prototype.restoreModalBody', {
               defaultMessage:
-                'This discards all boost changes and re-creates any missing sample indices and data streams, returning the prototype to its out-of-the-box state for everyone using this deployment. The page reloads afterward.',
+                'This discards all boost changes, restores the sample boost profiles and rules, and re-creates any missing sample indices and data streams. It affects everyone using this deployment. The page reloads afterward.',
             })}
           </p>
         </EuiConfirmModal>

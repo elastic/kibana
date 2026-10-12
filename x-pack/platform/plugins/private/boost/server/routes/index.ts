@@ -20,6 +20,7 @@ import { getState, updateDefaultRule, updateMode, updateSimpleDefaults } from '.
 import { toErrorResponse } from '../lib/errors';
 import { getRequestClients } from './request_clients';
 import { registerProfileRoutes } from './profiles';
+import { registerRuleRoutes } from './rules';
 import { registerPrototypeRoutes } from './prototype';
 
 const simpleDefaultsSchema = schema.object({
@@ -106,5 +107,6 @@ export const registerRoutes = (router: IRouter) => {
   );
 
   registerProfileRoutes(router);
+  registerRuleRoutes(router);
   registerPrototypeRoutes(router);
 };

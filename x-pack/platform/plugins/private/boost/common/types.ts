@@ -53,6 +53,9 @@ export interface BoostRule {
   is_builtin: boolean;
 }
 
+/** Rule payload for create and update requests; the server sets `is_builtin`. */
+export type BoostRuleInput = Omit<BoostRule, 'is_builtin'>;
+
 export type BoostMode = 'simple' | 'advanced';
 
 export type IndicesPresetId = 'on_demand' | 'performant' | 'high_availability';

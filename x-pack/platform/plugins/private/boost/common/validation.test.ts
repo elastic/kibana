@@ -8,8 +8,10 @@
 import {
   getBoostRangeError,
   formatMaxAge,
+  getIndexPatternError,
   getMaxAgeError,
   getProfileNameError,
+  getRulePriorityError,
   parseMaxAge,
 } from './validation';
 
@@ -88,5 +90,31 @@ describe('parseMaxAge', () => {
   it('round-trips through formatMaxAge', () => {
     expect(formatMaxAge({ value: 12, unit: 'h' })).toBe('12h');
     expect(parseMaxAge(formatMaxAge({ value: 3, unit: 'd' }))).toEqual({ value: 3, unit: 'd' });
+  });
+});
+
+describe('getIndexPatternError', () => {
+  it('accepts a single name or wildcard pattern', () => {
+    expect(getIndexPatternError('logs-checkout-default')).toBeUndefined();
+    expect(getIndexPatternError('logs-*')).toBeUndefined();
+  });
+
+  it('rejects empty patterns and lists', () => {
+    expect(getIndexPatternError('')).toBe('required');
+    expect(getIndexPatternError('logs-a,logs-b')).toBe('invalid_characters');
+    expect(getIndexPatternError('logs a')).toBe('invalid_characters');
+  });
+});
+
+describe('getRulePriorityError', () => {
+  it('accepts whole numbers of 0 or more', () => {
+    expect(getRulePriorityError(0)).toBeUndefined();
+    expect(getRulePriorityError(100000)).toBeUndefined();
+  });
+
+  it('rejects missing, negative, and fractional priorities', () => {
+    expect(getRulePriorityError(undefined)).toBe('required');
+    expect(getRulePriorityError(-1)).toBe('out_of_range');
+    expect(getRulePriorityError(1.5)).toBe('out_of_range');
   });
 });

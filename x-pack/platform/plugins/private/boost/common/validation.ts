@@ -12,6 +12,9 @@ import { MAX_BOOST, MIN_BOOST } from './constants';
 
 export const PROFILE_NAME_MAX_LENGTH = 255;
 export const MAX_AGE_MAX_DAYS = 3650;
+export const INDEX_PATTERN_MAX_LENGTH = 255;
+// Elasticsearch stores rule priorities as 32-bit integers.
+export const MAX_RULE_PRIORITY = 2_147_483_647;
 
 export type ProfileNameError = 'required' | 'too_long' | 'invalid_characters' | 'already_exists';
 
@@ -24,6 +27,10 @@ export type BoostRangeError =
   | 'max_below_min';
 
 export type MaxAgeError = 'required' | 'out_of_range' | 'below_previous_period';
+
+export type IndexPatternError = 'required' | 'too_long' | 'invalid_characters';
+
+export type RulePriorityError = 'required' | 'out_of_range';
 
 /** Units a period's max age can use, matching the Elasticsearch time unit suffixes. */
 export type MaxAgeUnit = 'd' | 'h';
@@ -53,6 +60,36 @@ export const getProfileNameError = (
     return 'invalid_characters';
   }
   return existingNames.includes(name) ? 'already_exists' : undefined;
+};
+
+/**
+ * Rule names follow the same rules as profile names. Elasticsearch also allows uppercase letters in
+ * rule names, but one naming scheme for both is simpler to explain.
+ */
+export const getRuleNameError = getProfileNameError;
+
+/** Validates a rule's index pattern: a single data source name or `*` pattern. */
+export const getIndexPatternError = (pattern: string): IndexPatternError | undefined => {
+  if (pattern.length === 0) {
+    return 'required';
+  }
+  if (pattern.length > INDEX_PATTERN_MAX_LENGTH) {
+    return 'too_long';
+  }
+  // A rule holds one pattern, so Elasticsearch rejects comma-separated lists.
+  return /[,\s]/.test(pattern) ? 'invalid_characters' : undefined;
+};
+
+/** Validates a rule priority: a whole number of 0 or more. */
+export const getRulePriorityError = (
+  priority: number | undefined
+): RulePriorityError | undefined => {
+  if (priority === undefined) {
+    return 'required';
+  }
+  return Number.isInteger(priority) && priority >= 0 && priority <= MAX_RULE_PRIORITY
+    ? undefined
+    : 'out_of_range';
 };
 
 const isInBoostRange = (value: number) => value >= MIN_BOOST && value <= MAX_BOOST;

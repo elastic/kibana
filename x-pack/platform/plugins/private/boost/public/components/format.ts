@@ -18,3 +18,15 @@ export const PROFILE_TYPE_LABELS: Readonly<Record<BoostProfileType, string>> = {
     defaultMessage: 'Data streams',
   }),
 };
+
+/** Formats a count of data sources of a profile type, such as "3 indices" or "1 data stream". */
+export const formatDataSourceCount = (type: BoostProfileType | undefined, count: number): string =>
+  type === 'data_streams'
+    ? i18n.translate('xpack.boost.format.dataStreamCount', {
+        defaultMessage: '{count, plural, one {# data stream} other {# data streams}}',
+        values: { count },
+      })
+    : i18n.translate('xpack.boost.format.indexCount', {
+        defaultMessage: '{count, plural, one {# index} other {# indices}}',
+        values: { count },
+      });

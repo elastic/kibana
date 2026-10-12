@@ -15,6 +15,7 @@ import {
   MANAGE_BOOST_PRIVILEGE,
 } from '../../common/constants';
 import { getState, resetState } from '../lib/boost_store';
+import { ensureSampleConfig } from '../prototype/sample_config';
 import { ensureSampleData } from '../prototype/sample_data';
 import { getRequestClients } from './request_clients';
 
@@ -55,12 +56,14 @@ export const registerPrototypeRoutes = (router: IRouter) => {
       }
 
       const created = await ensureSampleData(esClient);
+      await ensureSampleConfig(savedObjectsClient);
       await markSampleDataSeeded(savedObjectsClient);
       return response.ok({ body: { created } });
     }
   );
 
-  // Resets the boost configuration and re-creates any missing sample data.
+  // Resets the boost configuration to the sample profiles and rules, and re-creates any missing
+  // sample data.
   router.post(
     {
       path: BOOST_RESTORE_API_PATH,
@@ -72,6 +75,7 @@ export const registerPrototypeRoutes = (router: IRouter) => {
 
       await resetState(savedObjectsClient);
       const created = await ensureSampleData(esClient);
+      await ensureSampleConfig(savedObjectsClient);
       await markSampleDataSeeded(savedObjectsClient);
       return response.ok({
         body: { state: await getState(savedObjectsClient, esClient), created },

@@ -14,8 +14,10 @@ import {
 import {
   countDataSourcesByProfile,
   countRulesByProfile,
+  getRuleCoverage,
   matchesIndexPattern,
   resolveRule,
+  sortRules,
 } from './resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from './types';
 
@@ -109,5 +111,36 @@ describe('profile counts', () => {
 
   it('counts rules by profile', () => {
     expect(countRulesByProfile([rule('a', 'x'), rule('b', 'y')]).get('products-fast')).toBe(2);
+  });
+});
+
+describe('sortRules', () => {
+  it('lists rules in evaluation order, with the default rules last', () => {
+    const rules = [
+      ...defaultRules,
+      rule('wildcard', 'prod*'),
+      rule('exact', 'products'),
+      rule('priority', 'x-*', 10),
+    ];
+    expect(sortRules(rules).map(({ name }) => name)).toEqual([
+      'priority',
+      'exact',
+      'wildcard',
+      'elastic-default-data-streams',
+      'elastic-default-indices',
+    ]);
+  });
+});
+
+describe('getRuleCoverage', () => {
+  it('separates the data sources a rule matches from the ones it applies to', () => {
+    const coverage = getRuleCoverage(
+      [index('products'), index('products-2'), index('users')],
+      [...defaultRules, rule('wildcard', 'products*'), rule('exact', 'products')],
+      profiles
+    );
+    expect(coverage.get('wildcard')).toEqual({ matches: 2, appliesTo: 1 });
+    expect(coverage.get('exact')).toEqual({ matches: 1, appliesTo: 1 });
+    expect(coverage.get('elastic-default-indices')).toEqual({ matches: 3, appliesTo: 1 });
   });
 });
