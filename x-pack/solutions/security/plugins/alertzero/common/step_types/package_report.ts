@@ -138,7 +138,7 @@ const coverageSkippedSchema = z.object({
 });
 
 export const packageReportMintPayloadSchema = z.object({
-  /** Idempotency key: uuidv5(conversationId, endpointId, actionWorkflowId[, processKey]). */
+  /** Idempotency key: uuidv5(conversationId, subjectId, actionWorkflowId[, processKey]). */
   subjectKey: z.string(),
   conversationId: z.string(),
   /** Short plain-text label naming what is proposed; omitting it falls back to the action's own name. */
@@ -148,8 +148,20 @@ export const packageReportMintPayloadSchema = z.object({
   impact: z.string().optional(),
   actionWorkflowId: z.string().optional(),
   actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on a hostless analyst recommendation. */
+  /** Host name when the mint is host-scoped; absent on identity mints and the analyst recommendation. */
   hostName: z.string().optional(),
+  /** What the proposal acts on; absent on the analyst recommendation. `hostName` stays for host and process mints. */
+  subject: z
+    .object({
+      kind: z.enum(['host', 'process', 'user', 'service']),
+      // Matches the SSE entity value cap (`entityRefSchema.value` in
+      // significant_security_event_schema.ts): a user/service subject's value is read
+      // straight from an SSE entity, which allows up to 2048 (ARN-shaped service names
+      // run long). A tighter cap here would throw on mint and fail the whole package
+      // result, including the host/process proposals bundled in the same array.
+      value: z.string().max(2048),
+    })
+    .optional(),
   confidence: z.enum(['low', 'medium', 'high']).optional(),
 });
 
@@ -235,8 +247,8 @@ export const packageReportStepCommonDefinition: CommonStepDefinition<
     details: i18n.translate('xpack.alertzero.workflows.steps.packageReport.documentation.details', {
       defaultMessage:
         'Reads current-run SSE state from the Investigation, owns the mint-versus-dismiss decision table, ' +
-        'writes pending security.coverage KIs (no-reset), resolves every fillable category:respond catalog ' +
-        'action, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
+        'writes pending security.coverage KIs (no-reset), selects one primary response per process from the ' +
+        'fillable respond and investigate catalog actions, and returns mint payloads (including expectedProposalCount, the settlement barrier the ' +
         'packaging child threads into each gate) for the packaging child to dispatch as gate executions. ' +
         'A completed hunt that confirmed no hit leaves no current-run SSE attachment, so it packages as a ' +
         'dismissal off huntStatus and hasConfirmedHit. A hunt that did not complete returns run_incomplete ' +
