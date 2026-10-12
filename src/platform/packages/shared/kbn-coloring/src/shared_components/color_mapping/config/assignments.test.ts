@@ -204,20 +204,25 @@ describe('Color mapping assignments', () => {
   });
 
   describe('updateColorModePalette', () => {
-    it('resets gradient steps to the new palette without a touched flag when not preserving changes', () => {
-      const colorMode = gradientConfig([{ type: 'colorCode', colorCode: '#ff0000' }]).colorMode;
-      expect(updateColorModePalette(colorMode, KbnPalette.Kibana7, false)).toEqual({
+    it('resets gradient steps to the new palette when not preserving changes', () => {
+      const config = gradientConfig([{ type: 'colorCode', colorCode: '#ff0000' }]);
+      expect(updateColorModePalette(config, KbnPalette.Kibana7, false, palettes)).toEqual({
         type: 'gradient',
         steps: [{ type: 'categorical', paletteId: KbnPalette.Kibana7, colorIndex: 0 }],
         sort: 'desc',
       });
     });
 
-    it('keeps gradient steps when preserving changes', () => {
-      const colorMode = gradientConfig([{ type: 'colorCode', colorCode: '#ff0000' }]).colorMode;
-      expect(updateColorModePalette(colorMode, KbnPalette.Kibana7, true)).toEqual({
+    it('keeps a custom step and remaps non-custom steps to the new palette when preserving', () => {
+      // Only genuinely custom steps survive a palette switch: untouched steps follow the new palette
+      // instead of staying pinned to the old one (which would keep `hasCustomColors` true forever).
+      const config = gradientConfig([gradientStep(0), { type: 'colorCode', colorCode: '#ff0000' }]);
+      expect(updateColorModePalette(config, KbnPalette.Kibana7, true, palettes)).toEqual({
         type: 'gradient',
-        steps: [{ type: 'colorCode', colorCode: '#ff0000' }],
+        steps: [
+          { type: 'categorical', paletteId: KbnPalette.Kibana7, colorIndex: 0 },
+          { type: 'colorCode', colorCode: '#ff0000' },
+        ],
         sort: 'desc',
       });
     });

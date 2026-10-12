@@ -88,19 +88,23 @@ export function updateAssignmentsPalette(
 }
 
 export function updateColorModePalette(
-  colorMode: ColorMapping.Config['colorMode'],
+  config: ColorMapping.Config,
   paletteId: KbnPaletteId,
-  preserveColorChanges: boolean
+  preserveColorChanges: boolean,
+  palettes: KbnPalettes
 ): ColorMapping.Config['colorMode'] {
+  const { colorMode } = config;
   return colorMode.type === 'categorical'
     ? colorMode
     : {
         type: 'gradient',
-        steps: colorMode.steps.map((step, stepIndex) => {
-          return preserveColorChanges
+        // Mirror the assignment path: on "preserve", keep only genuinely-custom steps (judged against
+        // the current palette) and remap the rest to the new palette.
+        steps: colorMode.steps.map((step, stepIndex) =>
+          preserveColorChanges && isColorCustomized(step, config.paletteId, palettes)
             ? step
-            : { type: 'categorical', paletteId, colorIndex: stepIndex };
-        }),
+            : { type: 'categorical', paletteId, colorIndex: stepIndex }
+        ),
         sort: colorMode.sort,
       };
 }

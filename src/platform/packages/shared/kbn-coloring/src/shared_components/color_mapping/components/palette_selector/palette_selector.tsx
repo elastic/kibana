@@ -44,9 +44,10 @@ export function PaletteSelector({ palettes }: { palettes: KbnPalettes }) {
             preserveColorChanges
           ),
           colorMode: updateColorModePalette(
-            model.colorMode,
+            model,
             selectedPaletteId,
-            preserveColorChanges
+            preserveColorChanges,
+            palettes
           ),
         })
       );
