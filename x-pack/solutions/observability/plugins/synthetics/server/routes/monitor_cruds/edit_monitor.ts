@@ -137,12 +137,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
         maintenanceWindows
       );
 
-      const validationResult = validateMonitor(
-        editedMonitor as MonitorFields,
-        spaceId,
-        undefined,
-        { checkInlineScript: true }
-      );
+      const validationResult = validateMonitor(editedMonitor as MonitorFields, spaceId, undefined, {
+        checkInlineScript: true,
+      });
 
       if (!validationResult.valid || !validationResult.decodedMonitor) {
         const { reason: message, details, payload } = validationResult;
