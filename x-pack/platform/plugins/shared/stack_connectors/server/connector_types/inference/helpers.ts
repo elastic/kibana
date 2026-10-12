@@ -178,6 +178,8 @@ const SENSITIVE_KEYS_EXACT = new Set([
   'credentials',
 ]);
 const SENSITIVE_KEY_SUFFIXES = [
+  'authorization', // http_authorization, x-forwarded-authorization
+  'cookie', // http_cookie
   'password',
   'passwd',
   'token',

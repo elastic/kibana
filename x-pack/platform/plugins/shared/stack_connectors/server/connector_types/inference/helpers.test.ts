@@ -397,6 +397,18 @@ describe('redaction of JSON embedded in error strings', () => {
         ['987654321'],
       ],
       ['numeric hf_token', 'hf_token: 12345678', ['12345678']],
+      ['HTTP_AUTHORIZATION env key', 'HTTP_AUTHORIZATION=Basic dXNlcjpwYXNz', ['dXNlcjpwYXNz']],
+      [
+        'x-forwarded-authorization header',
+        'X-Forwarded-Authorization: Basic dXNlcjpwYXNz',
+        ['dXNlcjpwYXNz'],
+      ],
+      [
+        'quoted HTTP_AUTHORIZATION key',
+        '{"HTTP_AUTHORIZATION":"Basic dXNlcjpwYXNz"}',
+        ['dXNlcjpwYXNz'],
+      ],
+      ['HTTP_COOKIE env key', 'HTTP_COOKIE=sid=zzsecret9', ['zzsecret9']],
       [
         'quoted credentials object',
         '{"credentials":{"user":"alice","pass":"hunter2"}}',
@@ -457,6 +469,30 @@ describe('redaction of JSON embedded in error strings', () => {
     expect(output).toContain('"session_token":[redacted]');
     expect(output).toContain('"refresh_token":[redacted]');
     expect(output).not.toContain('12345');
+  });
+
+  it('keeps non-secret token diagnostics in a structured body', () => {
+    const body = {
+      num_token: 5,
+      eos_token: '</s>',
+      stop_token: '<|end|>',
+      pad_token: '<pad>',
+      usage: { input_token: 3, total_token: 8 },
+    };
+    expect(truncateUpstreamBody(body)).toBe(JSON.stringify(body));
+    expect(truncateUpstreamBody(JSON.stringify(body))).toBe(JSON.stringify(body));
+  });
+
+  it('redacts a numeric credential under a bare token key', () => {
+    expect(truncateUpstreamBody({ token: 123456 })).toBe('{"token":[redacted]}');
+    expect(truncateUpstreamBody('{"refresh_token": 12345}')).not.toContain('12345');
+    expect(truncateUpstreamBody('token: 123456')).not.toContain('123456');
+  });
+
+  it('redacts prefixed authorization keys in a structured body', () => {
+    const output = truncateUpstreamBody({ HTTP_AUTHORIZATION: 'Basic dXNlcjpwYXNz' });
+    expect(output).not.toContain('dXNlcjpwYXNz');
+    expect(output).toContain('[redacted]');
   });
 
   it('still redacts string tokens', () => {
