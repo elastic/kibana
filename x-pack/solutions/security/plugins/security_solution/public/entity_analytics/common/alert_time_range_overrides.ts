@@ -10,6 +10,14 @@ import {
   ENTITY_ANALYTICS_ALERTS_FROM,
   ENTITY_ANALYTICS_ALERTS_TO,
 } from '../components/home/constants';
+import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_grid/common';
+
+/**
+ * Scope of the new entities table for the selected time range. Each range has its own
+ * scope, so flyouts opened from the table query alerts over the range the table shows.
+ */
+export const getEntityAnalyticsNewHomeScopeId = (timeRange: TimeRange): string =>
+  `entity-analytics-new-entities-table-${timeRange}`;
 
 /**
  * Maps a scope ID to the alert query time range that should be used when an
@@ -26,4 +34,10 @@ export const SCOPE_ALERT_TIME_RANGE_OVERRIDES: Readonly<
     from: ENTITY_ANALYTICS_ALERTS_FROM,
     to: ENTITY_ANALYTICS_ALERTS_TO,
   },
+  ...Object.fromEntries(
+    TIME_RANGE_OPTIONS.map((timeRange) => [
+      getEntityAnalyticsNewHomeScopeId(timeRange),
+      { from: `now-${timeRange}`, to: ENTITY_ANALYTICS_ALERTS_TO },
+    ])
+  ),
 };
