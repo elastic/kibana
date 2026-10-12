@@ -142,7 +142,7 @@ function indexByInstanceId<AlertData extends RuleAlertData>(
   alertHit: Alert & AlertData,
   allAlerts: Record<string, Alert & AlertData>
 ): void {
-  if (!instanceId || !alertUuid) {
+  if (instanceId === undefined || alertUuid === undefined) {
     return;
   }
   const existingUuid = index[instanceId];

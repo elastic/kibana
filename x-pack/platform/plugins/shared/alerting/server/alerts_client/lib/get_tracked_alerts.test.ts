@@ -188,6 +188,22 @@ describe('get_tracked_alerts', () => {
       );
       expect(tracked.getById('id-1')).toBe(tracked.all['uuid-first']);
     });
+
+    it('getById finds an alert whose instance id is an empty string', () => {
+      const tracked = createEmptyTrackedAlerts<{}>();
+      populateTrackedAlerts(
+        tracked,
+        toHits([
+          makeHit({
+            uuid: 'uuid-empty',
+            instanceId: '',
+            status: ALERT_STATUS_ACTIVE,
+            executionUuid: 'exec-1',
+          }),
+        ])
+      );
+      expect(tracked.getById('')).toBe(tracked.all['uuid-empty']);
+    });
   });
 
   describe('populateTrackedAlerts', () => {
