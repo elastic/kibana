@@ -103,6 +103,7 @@ describe('buildServerESQLCallbacks.getSources', () => {
       logger,
     });
 
+    // Intentionally call getSources twice, to test that nodes.info is only hit once
     await getSources?.();
     await getSources?.();
 
