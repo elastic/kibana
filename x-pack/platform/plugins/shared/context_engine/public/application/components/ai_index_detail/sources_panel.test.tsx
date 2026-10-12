@@ -54,6 +54,7 @@ jest.mock('../../hooks/use_data_connectors', () => ({
 const baseAiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],

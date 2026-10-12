@@ -24,7 +24,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
-import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '../aws_service_matrix';
 import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_method_card';
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
@@ -36,6 +36,7 @@ import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_se
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
 import { useEcfDeployment, EcfDeploymentSection } from './ecf_deployment_section';
 import { useAwsIdentityFederationEnabled } from '../use_aws_identity_federation_enabled';
+import { useIsSelfManaged } from '../use_is_self_managed';
 import {
   ECF_UNIFIED_STACK_NAME,
   ECF_OTEL_STACK_NAME,
@@ -56,8 +57,15 @@ interface AuthenticateAndDeployStepProps {
   onBack?: () => void;
 }
 
+/** Stable module-level array so the prop identity doesn't change on every render. */
+const SELF_MANAGED_DEPLOYMENT_METHODS: DeploymentMethod[] = ['agent_based'];
+
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudStart }>();
+  // Self-managed offers agent-based only — the agentless (managed_integration) and ECF paths
+  // depend on cloud-only infrastructure. The MI and ECF sections below already gate on
+  // isAgentBased, so pinning the method here is enough to hide them.
+  const isSelfManaged = useIsSelfManaged();
   const {
     servicesStep,
     awsServicesMap,
@@ -114,9 +122,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       setDeploymentMethod('agent_based');
     } else if (!allAgentBasedOnly && wasAutoForced.current && !isMethodLocked) {
       wasAutoForced.current = false;
-      setDeploymentMethod('managed_integration');
+      // Self-managed has no agentless path, so deselecting the last agent-only service must not
+      // push the session back to 'managed_integration'.
+      setDeploymentMethod(isSelfManaged ? 'agent_based' : 'managed_integration');
     }
-  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod, isMethodLocked]);
+  }, [allAgentBasedOnly, deploymentMethod, setDeploymentMethod, isMethodLocked, isSelfManaged]);
 
   // ── Service settings (region + vars) ─────────────────────────────────────────
   // Read from session storage so ECF URLs can be pre-filled without re-entering data.
@@ -212,6 +222,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isAlreadyDeployed,
     deployGroups,
     isCleanupOnly,
+    storedSecretFields,
+    isStoredSecretsLoading,
   } = useDeploy({
     onContinue: () => {},
   });
@@ -259,6 +271,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isAlreadyDeployed: isAgentAlreadyDeployed,
     handleDeploy: handleAgentDeploy,
     setAgentCredentials,
+    secretSourcePolicyId,
   } = useAgentBasedDeploy();
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
@@ -616,7 +629,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       <DeploymentMethodCard
         selectedMethod={deploymentMethod}
         onChange={setDeploymentMethod}
-        locked={allAgentBasedOnly && !isMethodLocked}
+        availableMethods={isSelfManaged ? SELF_MANAGED_DEPLOYMENT_METHODS : undefined}
+        locked={isSelfManaged || (allAgentBasedOnly && !isMethodLocked)}
         disabled={isMethodLocked}
       />
 
@@ -742,7 +756,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
       {driftCheckError && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -750,27 +764,26 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
                 defaultMessage="Could not check for settings changes"
               />
             }
-            color="warning"
-            iconType="warning"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
+                  defaultMessage="Unable to reach the deployment record. Check your connection and try again."
+                />
+              </p>
+            }
+            actionProps={{
+              primary: {
+                children: i18n.translate(
+                  'xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton',
+                  { defaultMessage: 'Retry' }
+                ),
+                onClick: retryDriftCheck,
+                'data-test-subj': 'authenticateAndDeployStep-driftCheckRetryButton',
+              },
+            }}
             data-test-subj="authenticateAndDeployStep-driftCheckErrorCallout"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.body"
-              defaultMessage="Unable to reach the deployment record. Check your connection and try again."
-            />
-            <EuiSpacer size="s" />
-            <EuiButton
-              size="s"
-              color="warning"
-              onClick={retryDriftCheck}
-              data-test-subj="authenticateAndDeployStep-driftCheckRetryButton"
-            >
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.driftCheckErrorCallout.retryButton"
-                defaultMessage="Retry"
-              />
-            </EuiButton>
-          </EuiCallOut>
+          />
           <EuiSpacer size="m" />
         </>
       )}
@@ -817,6 +830,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isDone={isMiDone}
           hasFailed={hasFailed}
           isCleanupOnly={isCleanupOnly}
+          storedSecretFields={storedSecretFields}
+          isStoredSecretsLoading={isStoredSecretsLoading}
           isDirty={isDirty}
           onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
         />
@@ -829,6 +844,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           serviceCount={agentTargets.reduce((sum, g) => sum + g.instanceIds.length, 0)}
           onDeploy={handleAgentDeployClick}
           onCredentialsChange={setAgentCredentials}
+          secretSourcePolicyId={secretSourcePolicyId}
+          onStoredCredentialsReplacedChange={handleReplaceFormDirtyChange}
           onNextReadyChange={setIsAgentNextReady}
           isDeploying={isAgentDeploying}
           isDone={isAgentDone}

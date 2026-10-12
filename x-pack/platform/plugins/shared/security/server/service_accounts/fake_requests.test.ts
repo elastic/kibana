@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
 
+import type { ServiceAccountMintOptions } from './fake_requests';
 import {
   SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS,
   ServiceAccountFakeRequests,
@@ -23,7 +24,7 @@ const REQUEST_LIFETIME_MS = 10 * 60 * 1000;
 
 describe('ServiceAccountFakeRequests', () => {
   let logger: Logger;
-  let mintToken: jest.Mock<Promise<string>, [string]>;
+  let mintToken: jest.Mock<Promise<string>, [string, ServiceAccountMintOptions]>;
   let fakeRequests: ServiceAccountFakeRequests;
 
   beforeEach(() => {
@@ -45,7 +46,7 @@ describe('ServiceAccountFakeRequests', () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
 
       expect(mintToken).toHaveBeenCalledTimes(1);
-      expect(mintToken).toHaveBeenCalledWith('sa-id');
+      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined });
       expect(request.isFakeRequest).toBe(true);
       // The exact lowercase key is load-bearing for the ES client's fake-request header filtering.
       expect(Object.keys(request.headers)).toEqual(['authorization']);
@@ -188,8 +189,20 @@ describe('ServiceAccountFakeRequests', () => {
       );
 
       expect(mintToken).toHaveBeenCalledTimes(1);
-      expect(mintToken).toHaveBeenCalledWith('sa-id');
+      expect(mintToken).toHaveBeenCalledWith('sa-id', { boundAt: undefined });
       expect(request.headers.authorization).toBe('Bearer essu_token_2');
+    });
+
+    it('tells every mint when the workload was bound', async () => {
+      const boundAt = '2026-10-01T00:00:00.000Z';
+      const request = await fakeRequests.create({ serviceAccountId: 'sa-id', boundAt });
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt });
+
+      jest.advanceTimersByTime(MAX_AGE_MS);
+      await fakeRequests.ensureFreshToken(request, MAX_AGE_MS);
+
+      expect(mintToken).toHaveBeenCalledTimes(2);
+      expect(mintToken).toHaveBeenLastCalledWith('sa-id', { boundAt });
     });
 
     it('deduplicates concurrent refreshes into a single mint', async () => {

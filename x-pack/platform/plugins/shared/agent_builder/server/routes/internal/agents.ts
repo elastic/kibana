@@ -14,6 +14,7 @@ import { getHandlerWrapper } from '../wrap_handler';
 import type {
   AgentAiIndicesWarning,
   GetAgentAiIndicesResponse,
+  GetAgentModelResponse,
   ListAgentAiIndicesResponse,
 } from '../../../common/http_api/agents';
 import { internalApiPath } from '../../../common/constants';
@@ -21,6 +22,7 @@ import { AGENT_BUILDER_READ_SECURITY } from '../route_security';
 import { isContextEngineEnabled } from '../agents';
 import { buildEffectiveAgentAiIndices } from '../../services/agents/build_effective_agent_ai_indices';
 import type { AgentsServiceStart } from '../../services/agents/types';
+import { resolveExecutionConnectorId } from '../../services/execution/utils';
 
 interface InheritedAiIndicesResolveResult {
   inherited: string[];
@@ -51,6 +53,7 @@ const resolveInheritedAiIndicesForType = async ({
 
 export function registerInternalAgentRoutes({
   router,
+  coreSetup,
   getInternalServices,
   logger,
 }: RouteDependencies) {
@@ -160,6 +163,41 @@ export function registerInternalAgentRoutes({
             assigned: agent.configuration.ai_indices ?? [],
           }),
           ...(warnings.length > 0 ? { warnings } : {}),
+        },
+      });
+    })
+  );
+
+  // Model an agent runs on when the caller does not pass a connector.
+  router.get(
+    {
+      path: `${internalApiPath}/agents/{id}/_model`,
+      validate: {
+        params: schema.object({
+          id: schema.string({ maxLength: agentIdMaxLength }),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_READ_SECURITY,
+    },
+    wrapHandler(async (_ctx, request, response) => {
+      const [, { searchInferenceEndpoints }] = await coreSetup.getStartServices();
+      const { agents: agentsService } = getInternalServices();
+      const registry = await agentsService.getRegistry({ request });
+      const agent = await registry.get(request.params.id);
+      const inferenceFeatureId = agent.configuration.inference_feature_id;
+
+      const { connector, source } = await resolveExecutionConnectorId({
+        inferenceFeatureId,
+        request,
+        searchInferenceEndpoints,
+      });
+
+      return response.ok<GetAgentModelResponse>({
+        body: {
+          ...(inferenceFeatureId !== undefined ? { inference_feature_id: inferenceFeatureId } : {}),
+          ...(connector ? { connector: { id: connector.connectorId, name: connector.name } } : {}),
+          source: source === 'agent_feature' ? 'agent_feature' : 'default',
         },
       });
     })

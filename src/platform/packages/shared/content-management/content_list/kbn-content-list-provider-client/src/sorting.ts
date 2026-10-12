@@ -21,12 +21,23 @@ export interface ContentListSortField<
   id: string;
   /** Display label shown in the sort dropdown. */
   title: string;
-  /** Extracts the sortable value from an item for client-side sorting. When omitted, falls back to the built-in field resolver. */
+  /**
+   * Extracts the sortable value from an item for client-side sorting.
+   * - Returning `null` means "no value": the item sorts last, regardless of direction.
+   * - Returning `undefined`, or omitting `getValue`, falls back to the built-in lookup
+   *   for this field (known fields, then top-level and `attributes` properties).
+   */
   getValue?: (item: TItem) => string | number | null | undefined;
   /** Label for ascending direction (e.g. "A → Z"). */
   ascLabel?: string;
   /** Label for descending direction (e.g. "Z → A"). */
   descLabel?: string;
+  /** Restricts the directions offered in the sort dropdown. Omit to offer both. */
+  allowedDirections?: SortField['allowedDirections'];
+  /** When set, the field's dropdown options show a "?" icon with this help text as a tooltip. */
+  description?: string;
+  /** Secondary sort applied when this field gives two items the same position: equal values, or both without a value. */
+  fallbackSort?: { field: string; direction: 'asc' | 'desc' };
 }
 
 /** All sort fields available on a provider, keyed by field id. */
@@ -56,6 +67,8 @@ export const toSortField = (field: ContentListSortField): SortField => ({
   name: field.title,
   ...(field.ascLabel && { ascLabel: field.ascLabel }),
   ...(field.descLabel && { descLabel: field.descLabel }),
+  ...(field.allowedDirections && { allowedDirections: field.allowedDirections }),
+  ...(field.description && { description: field.description }),
 });
 
 export const DEFAULT_CLIENT_SORT_FIELDS: ContentListSortFieldMap = {
@@ -87,6 +100,8 @@ export const resolveSortFieldMap = (
           title: field.name,
           ascLabel: field.ascLabel,
           descLabel: field.descLabel,
+          allowedDirections: field.allowedDirections,
+          description: field.description,
         },
       ])
     );

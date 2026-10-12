@@ -12,11 +12,17 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { Column } from './types';
 
-export function columnToFieldBase(column: Column): DataViewFieldBase {
+/** A column as a field; ES|QL counter types (`counter_long`, …) become their base type plus `timeSeriesMetric`. */
+export function columnToFieldBase(
+  column: Column
+): DataViewFieldBase & { timeSeriesMetric?: 'counter' } {
+  const isCounter = column.esType?.startsWith('counter_') ?? false;
+  const esType = isCounter ? column.esType?.replace('counter_', '') : column.esType;
   return {
     name: column.name,
     type: column.type,
-    esTypes: column.esType ? [column.esType] : undefined,
+    esTypes: esType ? [esType] : undefined,
+    ...(isCounter ? { timeSeriesMetric: 'counter' as const } : {}),
   };
 }
 

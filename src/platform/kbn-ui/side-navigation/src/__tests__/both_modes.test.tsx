@@ -19,6 +19,7 @@ import { mockClientHeight } from './mock_client_height';
 import { observabilityMock } from '../mocks/observability';
 import { resizeWindow } from './resize_window';
 import { securityMock } from '../mocks/security';
+import type { MenuItem, NavigationStructure } from '../../types';
 
 const mockMenuItemHeight = 51;
 
@@ -279,7 +280,7 @@ describe('Both modes', () => {
 
         const sidePanel = screen.getByTestId(sidePanelId);
 
-        let overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
+        const overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
 
         const tlsCertificatesLink = within(sidePanel).getByTestId(
           sidePanelItemId('tls_certificates')
@@ -296,9 +297,8 @@ describe('Both modes', () => {
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
         expect(appsLink).toHaveAttribute('aria-current', 'page');
 
-        // "Overview" becomes stale and leads to incorrect assertions, we need to re-query the link
-        overviewLink = within(sidePanel).getByTestId(sidePanelItemId('apps_overview'));
-
+        // The same element is updated in place; a remount would restart the label slide.
+        expect(overviewLink).toBe(within(sidePanel).getByTestId(sidePanelItemId('apps_overview')));
         expect(overviewLink).toHaveAttribute('aria-current', 'page');
         expect(overviewLink).toHaveAttribute('data-highlighted', 'true');
       });
@@ -344,6 +344,126 @@ describe('Both modes', () => {
 
         const analyticsPopover = await screen.findByTestId(popoverId('Analytics'));
         expect(analyticsPopover).toBeInTheDocument();
+      });
+    });
+
+    describe('Show more', () => {
+      const listItems = (count: number) =>
+        Array.from({ length: count }, (_, index) => ({
+          id: `recent-${index + 1}`,
+          label: `Recent ${index + 1}`,
+          href: `/recent/${index + 1}`,
+        }));
+
+      const withDashboardsSections = (
+        sections: Pick<MenuItem, 'popoverSections' | 'sections'>
+      ): NavigationStructure => ({
+        ...basicMock.navItems,
+        primaryItems: basicMock.navItems.primaryItems.map((item) =>
+          item.id === dashboardsItemId ? { ...item, ...sections } : item
+        ),
+      });
+
+      const openDashboardsPopover = async () => {
+        await user.hover(screen.getByTestId(primaryItemId(dashboardsItemId)));
+        flushPopoverTimers();
+        return screen.findByTestId(popoverId('Dashboards'));
+      };
+
+      const visibleItemCount = (popover: HTMLElement) =>
+        within(popover).queryAllByRole('link', { name: /^Recent \d+$/ }).length;
+
+      const showMoreButton = (popover: HTMLElement) =>
+        within(popover).queryByRole('button', { name: 'Show more' });
+
+      /**
+       * GIVEN a hover list longer than the first page
+       * WHEN "Show more" is clicked until the list is exhausted
+       * THEN the list grows 5 → 15 → all and the button disappears
+       */
+      it('should page hover lists by 5, then 10 more per click', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              popoverSections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(22) },
+              ],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        expect(visibleItemCount(popover)).toBe(5);
+
+        await user.click(showMoreButton(popover)!);
+        expect(visibleItemCount(popover)).toBe(15);
+
+        await user.click(showMoreButton(popover)!);
+        expect(visibleItemCount(popover)).toBe(22);
+        expect(showMoreButton(popover)).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a hover list with no more items than the first page
+       * WHEN the popover opens
+       * THEN all items show and there is no "Show more"
+       */
+      it('should not show "Show more" when the list fits the first page', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              popoverSections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(5) },
+              ],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        expect(visibleItemCount(popover)).toBe(5);
+        expect(showMoreButton(popover)).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN a long section without `isPaginated` shown in the hover popover
+       * WHEN the popover opens
+       * THEN the section is not paged
+       */
+      it('should not page sections without `isPaginated`', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              sections: [{ id: 'recent', label: 'Recent', items: listItems(12) }],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        expect(visibleItemCount(popover)).toBe(12);
+        expect(showMoreButton(popover)).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN keyboard focus on "Show more"
+       * WHEN it is activated with Enter
+       * THEN focus moves to the first revealed item
+       */
+      it('should move keyboard focus to the first revealed item', async () => {
+        render(
+          <TestComponent
+            items={withDashboardsSections({
+              popoverSections: [
+                { id: 'recent', label: 'Recent', isPaginated: true, items: listItems(8) },
+              ],
+            })}
+          />
+        );
+
+        const popover = await openDashboardsPopover();
+        act(() => showMoreButton(popover)!.focus());
+        await user.keyboard('{Enter}');
+
+        expect(within(popover).getByRole('link', { name: 'Recent 6' })).toHaveFocus();
       });
     });
 
