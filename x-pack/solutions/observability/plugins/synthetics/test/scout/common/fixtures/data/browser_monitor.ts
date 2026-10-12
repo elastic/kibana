@@ -36,7 +36,7 @@ export const browserMonitorFixture: Record<string, unknown> = {
     is_tls_enabled: false,
   },
   'source.inline.script':
-    'step("Visit /users api route", async () => {\\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\\n  expect(response.status()).toEqual(200);\\n});',
+    'step("Visit /users api route", async () => {\n  const response = await page.goto(\'https://nextjs-test-synthetics.vercel.app/api/users\');\n  expect(response.status()).toEqual(200);\n});',
   'source.project.content': '',
   params: '',
   screenshots: 'on',
