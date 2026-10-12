@@ -26,6 +26,29 @@ These API privileges are not scoped to Nightshift: they cover every agentic inve
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
 
+## Running investigations as a service account (POC)
+
+By default the investigation workflow (`system-nightshift-investigation`) is installed once in the global space and runs as whoever starts it. An admin can bind a space to the `kibana/nightshift_investigator` service account instead:
+
+```yaml
+xpack.security.serviceAccounts.enabled: true
+xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
+```
+
+```
+POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
+GET  /internal/nightshift/investigations/service_account
+POST /internal/nightshift/investigations/service_account/_disable
+```
+
+`_enable` runs with the caller's privileges. It creates the `nightshift_investigator` role and service account when missing (existing ones are reused unchanged), then installs `system-nightshift-investigation-bound-<spaceId>` in the caller's space with `settings.run_as` set to the account. The bound copy shares its YAML with the global workflow. The workflow's binding to the account can only be created with an authenticated `manage_security` request, so it cannot happen at startup. On later boots the dynamic-workflow upgrade reuses the existing binding without a request.
+
+While the bound workflow is installed and enabled, `POST /internal/nightshift/investigations` starts it instead of the global one. The investigation, its Agent Builder conversation, and every `kibana.request` step run as the service account; `executed_by` still records the user who started it.
+
+**Known gap:** the Agent Builder hook workflows on the investigation agent (`system-nightshift-sandbox-materialize-workspace`, `system-nightshift-agent-optimize`, `system-nightshift-decision-tree-hydrate`) do not run as the account. Agent Builder starts them with the service account's scoped request, and the workflows engine unwraps that to the original caller's request (`getWorkflowOriginalRequest`) unless the run inherits through a `workflow.execute` step with `run-as-mode: inherit`. Hooks are not steps, so they run as the user who started the investigation.
+
+The role is deliberately broad for the POC (Kibana `all` on every space, read on observability data). Bindings are per space, so the account only acts where an admin bound it.
+
 ## Notifications
 
 Investigation starts can include up to 5 `notificationDestinations`. Each uses the generic envelope `{ type, connector_id, params }`, with optional `automation_id` and `automation_name` provenance. `params` is a JSON object limited to 4096 serialized characters, three container levels including the root, and 20 entries per object or array; keys are limited to 128 characters. Workflow YAML validates the envelope; notification handlers validate connector-specific params before execution starts, when recovering workflow inputs, and when preparing delivery. Unsupported types are rejected at runtime. Delivery fields are server-owned and rejected in destination input.

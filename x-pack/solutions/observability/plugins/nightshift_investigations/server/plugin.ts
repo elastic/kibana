@@ -31,6 +31,10 @@ import { installInvestigationWorkflow } from './lib/managed_workflows/install_in
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
+import {
+  createInvestigatorServiceAccountService,
+  type InvestigatorServiceAccountService,
+} from './lib/service_account/investigator_service_account';
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
@@ -127,6 +131,7 @@ export class NightshiftInvestigationsPlugin
   private encryptedSavedObjectsStart?: NightshiftInvestigationsStartDeps['encryptedSavedObjects'];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
+  private coreStart?: CoreStart;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
   private cortexEnabled = false;
@@ -475,6 +480,9 @@ export class NightshiftInvestigationsPlugin
             });
           },
           isMemoryEnabled: () => this.memoryEnabled,
+          getInvestigatorServiceAccountService: this.getInvestigatorServiceAccountService,
+          getSpaceId: (request: KibanaRequest) =>
+            this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
           getMemoryPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
@@ -518,6 +526,7 @@ export class NightshiftInvestigationsPlugin
     this.inference = plugins.inference;
     this.sandboxStart = plugins.sandbox;
     this.ruleRegistry = plugins.ruleRegistry;
+    this.coreStart = coreStart;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
     this.uiSettings = coreStart.uiSettings;
@@ -645,6 +654,17 @@ export class NightshiftInvestigationsPlugin
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
         }),
+    });
+  };
+
+  private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {
+    if (!this.coreStart || !this.workflowsExtensionsStart) {
+      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    }
+    return createInvestigatorServiceAccountService({
+      core: this.coreStart,
+      workflowsExtensions: this.workflowsExtensionsStart,
+      logger: this.logger.get('service_account'),
     });
   };
 

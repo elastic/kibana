@@ -28,6 +28,7 @@ import { validateNotificationDestination } from '../lib/notifications/notificati
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
+import { getBoundInvestigationWorkflowId } from '../lib/service_account/constants';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -541,12 +542,20 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
-    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-    const workflow = await this.workflowsManagement.management.getWorkflow(
-      workflowId,
+    // A space bound to a service account runs its own per-space copy; otherwise the global one,
+    // which runs as the caller.
+    const boundWorkflow = await this.workflowsManagement.management.getWorkflow(
+      getBoundInvestigationWorkflowId(spaceId),
       spaceId,
       this.request
     );
+    const useBound = Boolean(boundWorkflow?.definition && boundWorkflow.enabled);
+    const workflowId = useBound
+      ? getBoundInvestigationWorkflowId(spaceId)
+      : NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+    const workflow = useBound
+      ? boundWorkflow
+      : await this.workflowsManagement.management.getWorkflow(workflowId, spaceId, this.request);
 
     if (!workflow?.definition) {
       this.logger.error(
