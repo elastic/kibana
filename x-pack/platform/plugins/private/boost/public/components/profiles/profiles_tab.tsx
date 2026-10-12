@@ -20,7 +20,7 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
-import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount } from '../format';
+import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
 import { DeleteProfileModal } from './delete_profile_modal';
 import { ProfileFlyout } from './profile_flyout';
 
@@ -166,21 +166,27 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       render: (type: BoostProfile['type']) => PROFILE_TYPE_LABELS[type],
     },
     {
-      field: 'ruleCount',
-      name: i18n.translate('xpack.boost.profilesTab.rulesColumn', { defaultMessage: 'Rules' }),
+      // Sits next to Type, which tells whether the count is of indices or data streams.
+      field: 'dataSourceCount',
+      name: i18n.translate('xpack.boost.profilesTab.targetsColumn', {
+        defaultMessage: 'Targets',
+      }),
+      nameTooltip: {
+        content: i18n.translate('xpack.boost.profilesTab.targetsColumnTooltip', {
+          defaultMessage:
+            'Indices or data streams this profile currently applies to, through its rules.',
+        }),
+      },
       width: '12%',
       sortable: true,
       dataType: 'number',
     },
     {
-      // Spelled out ("3 indices") so the count reads on its own; it still sorts numerically.
-      field: 'dataSourceCount',
-      name: i18n.translate('xpack.boost.profilesTab.appliesToColumn', {
-        defaultMessage: 'Applies to',
-      }),
+      field: 'ruleCount',
+      name: i18n.translate('xpack.boost.profilesTab.rulesColumn', { defaultMessage: 'Rules' }),
       width: '12%',
       sortable: true,
-      render: (count: number, { type }: ProfileRow) => formatDataSourceCount(type, count),
+      dataType: 'number',
     },
     {
       field: 'minBoost',

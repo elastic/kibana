@@ -180,9 +180,15 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     },
     {
       field: 'appliesTo',
-      name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
-        defaultMessage: 'Applies to',
+      name: i18n.translate('xpack.boost.rulesTab.targetsColumn', {
+        defaultMessage: 'Targets',
       }),
+      nameTooltip: {
+        content: i18n.translate('xpack.boost.rulesTab.targetsColumnTooltip', {
+          defaultMessage:
+            'Indices or data streams this rule currently applies to. Where several rules match, the highest-ranked one applies.',
+        }),
+      },
       width: '12%',
       sortable: true,
       dataType: 'number',
