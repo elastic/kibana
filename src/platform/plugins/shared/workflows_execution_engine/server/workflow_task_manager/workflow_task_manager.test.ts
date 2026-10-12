@@ -92,6 +92,8 @@ describe('WorkflowTaskManager', () => {
       fetch: jest.fn(),
       runSoon: jest.fn().mockResolvedValue({ id: 'resume-task', forced: false }),
       removeIfExists: jest.fn().mockResolvedValue(undefined),
+      bulkGet: jest.fn(),
+      bulkRemove: jest.fn().mockResolvedValue({ statuses: [] }),
       get: jest
         .fn()
         .mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'missing')),
@@ -558,47 +560,90 @@ describe('WorkflowTaskManager', () => {
     });
   });
 
-  describe('removeParkedImmediateResume', () => {
-    const executionId = 'exec-parked';
-    const stableId = getWorkflowImmediateResumeTaskId(executionId);
+  describe('removeTasksForExecution', () => {
+    const executionId = 'exec-finished';
+    const runnerId = getWorkflowImmediateResumeTaskId(executionId);
+    const wakeId = getWorkflowWakeTaskId(executionId);
+    const timerId = getWorkflowGlobalTimeoutResumeTaskId(executionId);
+    const task = (id: string, status: TaskStatus, attempts = 0) =>
+      ({ id, status, attempts } as any);
+    const mockSearch = (...docs: any[]) =>
+      mockTaskManager.fetch.mockResolvedValue({ docs, versionMap: new Map() } as any);
+    const mockFreshRead = (...docs: any[]) =>
+      mockTaskManager.bulkGet.mockImplementation(async (ids: string[]) =>
+        docs.filter(({ id }) => ids.includes(id)).map((value) => ({ tag: 'ok', value }))
+      );
 
-    it('removes an idle parked runner', async () => {
-      mockTaskManager.get.mockResolvedValue({ id: stableId, status: TaskStatus.Idle } as any);
+    it('removes every idle task scoped to the execution in one call', async () => {
+      const docs = [task(runnerId, TaskStatus.Idle), task(timerId, TaskStatus.Idle)];
+      mockSearch(...docs);
+      mockFreshRead(...docs);
 
-      await workflowTaskManager.removeParkedImmediateResume(executionId);
+      await workflowTaskManager.removeTasksForExecution(executionId);
 
-      expect(mockTaskManager.get).toHaveBeenCalledWith(stableId);
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalledWith(stableId);
+      expect(mockTaskManager.fetch).toHaveBeenCalledWith({
+        size: 100,
+        query: {
+          bool: {
+            filter: [{ term: { 'task.scope': `workflow:execution:${executionId}` } }],
+            must_not: [{ terms: { 'task.status': [TaskStatus.Running, TaskStatus.Claiming] } }],
+          },
+        },
+      });
+      expect(mockTaskManager.bulkRemove).toHaveBeenCalledWith([runnerId, timerId]);
+    });
+
+    it('skips the excepted task', async () => {
+      const docs = [task(wakeId, TaskStatus.Idle), task(timerId, TaskStatus.Idle)];
+      mockSearch(...docs);
+      mockFreshRead(...docs);
+
+      await workflowTaskManager.removeTasksForExecution(executionId, { exceptTaskId: wakeId });
+
+      expect(mockTaskManager.bulkGet).toHaveBeenCalledWith([timerId]);
+      expect(mockTaskManager.bulkRemove).toHaveBeenCalledWith([timerId]);
     });
 
     it.each([TaskStatus.Claiming, TaskStatus.Running])(
-      'does not remove a runner whose claim is %s',
+      'does not remove a task the search reports idle but is %s on a fresh read',
       async (status) => {
-        mockTaskManager.get.mockResolvedValue({ id: stableId, status } as any);
+        mockSearch(task(runnerId, TaskStatus.Idle), task(timerId, TaskStatus.Idle));
+        mockFreshRead(task(runnerId, status), task(timerId, TaskStatus.Idle));
 
-        await workflowTaskManager.removeParkedImmediateResume(executionId);
+        await workflowTaskManager.removeTasksForExecution(executionId);
 
-        expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+        expect(mockTaskManager.bulkRemove).toHaveBeenCalledWith([timerId]);
       }
     );
 
-    it('is a no-op when no runner exists', async () => {
-      mockTaskManager.get.mockRejectedValue(
-        SavedObjectsErrorHelpers.createGenericNotFoundError('task', stableId)
-      );
+    it('does not remove a task awaiting a retry of a failed attempt', async () => {
+      const docs = [task(runnerId, TaskStatus.Idle, 1), task(timerId, TaskStatus.Idle)];
+      mockSearch(...docs);
+      mockFreshRead(...docs);
 
-      await workflowTaskManager.removeParkedImmediateResume(executionId);
+      await workflowTaskManager.removeTasksForExecution(executionId);
 
-      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockTaskManager.bulkRemove).toHaveBeenCalledWith([timerId]);
     });
 
-    it('propagates unexpected lookup errors', async () => {
-      mockTaskManager.get.mockRejectedValue(new Error('Task manager unavailable'));
+    it('ignores tasks deleted between the search and the fresh read', async () => {
+      mockSearch(task(runnerId, TaskStatus.Idle));
+      mockTaskManager.bulkGet.mockResolvedValue([
+        { tag: 'err', error: { type: 'task', id: runnerId, error: {} } },
+      ] as any);
 
-      await expect(workflowTaskManager.removeParkedImmediateResume(executionId)).rejects.toThrow(
-        'Task manager unavailable'
-      );
-      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+      await workflowTaskManager.removeTasksForExecution(executionId);
+
+      expect(mockTaskManager.bulkRemove).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when no task is scoped to the execution', async () => {
+      mockSearch();
+
+      await workflowTaskManager.removeTasksForExecution(executionId);
+
+      expect(mockTaskManager.bulkGet).not.toHaveBeenCalled();
+      expect(mockTaskManager.bulkRemove).not.toHaveBeenCalled();
     });
   });
 

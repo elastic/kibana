@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { DEFAULT_NAMESPACE } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getCategoryTitle } from '../../service_categories';
 import {
   AWS_REGION_OPTIONS,
@@ -74,8 +75,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
-  const { awsServicesMap, detectAndReviewStep, servicesStep, refetchAwsServiceMatrix } =
-    useOnboardingFlow();
+  const {
+    awsServicesMap,
+    detectAndReviewStep,
+    servicesStep,
+    refetchAwsServiceMatrix,
+    deploymentMethod,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   // Gate Next on optional package manifests that are still in-flight or have errored.
@@ -621,6 +627,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           globalRegion={globalRegion}
           isNamespaceLocked={
             !!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]
+          }
+          // Managed integrations put an empty namespace on `default`.
+          resolvedEmptyNamespace={
+            deploymentMethod === 'managed_integration' ? DEFAULT_NAMESPACE : undefined
           }
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}

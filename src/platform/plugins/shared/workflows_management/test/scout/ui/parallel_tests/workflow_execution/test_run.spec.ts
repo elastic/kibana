@@ -67,7 +67,7 @@ test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic
 
     await expect(page.getByRole('heading', { name: 'Test Workflow', exact: true })).toBeVisible();
 
-    const eventTriggerTab = page.testSubj.locator('workflowExecuteModalTrigger-event');
+    const eventTriggerTab = page.getByRole('radio', { name: 'Event', exact: true });
     await expect(eventTriggerTab).toBeEnabled();
     await eventTriggerTab.click();
 

@@ -13,13 +13,14 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
-/* eslint-disable-next-line @typescript-eslint/no-empty-interface */
-export interface NightshiftSetupDependencies {}
+export interface NightshiftSetupDependencies {
+  share: SharePluginSetup;
+}
 
 export interface NightshiftStartDependencies {
   charts: ChartsPluginStart;
