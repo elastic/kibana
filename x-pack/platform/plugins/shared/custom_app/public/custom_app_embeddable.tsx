@@ -6,9 +6,9 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skip } from 'rxjs';
-import deepEqual from 'fast-deep-equal';
+import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { getESQLQueryVariables } from '@kbn/esql-utils';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
@@ -34,6 +34,8 @@ import type { CustomAppEmbeddableState } from '../server';
 import { NodeRenderer } from './components/node_renderer';
 import { createDataLayer } from './data/data_layer';
 import { DataLayerContext } from './data/data_layer_context';
+import { createAppRuntime } from './runtime/app_runtime';
+import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { createRunEsqlQuery } from './data/run_esql_query';
 import { getServices } from './services';
 
@@ -55,8 +57,12 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
 
     const dataLayer = createDataLayer({
       runQuery: createRunEsqlQuery({ search, http: core.http }),
+      getParameterNames: (query) => getESQLQueryVariables(query),
     });
     dataLayer.setSources(initialState.document.dataSources);
+    const runtime = createAppRuntime(initialState.document);
+    // Emits the defaults straight away, then every change a user makes.
+    const stateSubscription = runtime.state$.subscribe(dataLayer.setState);
 
     const serializeState = (): CustomAppEmbeddableState => ({
       ...titleManager.getLatestState(),
@@ -102,35 +108,41 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
         }),
     });
 
-    // The dashboard's time range, filters and reloads reach every node through this one
-    // subscription; nodes only ever read their source's state.
-    const fetchSubscription = fetch$(api).subscribe(dataLayer.refresh);
-    const sourcesSubscription = document$
-      .pipe(
-        map(({ dataSources }) => dataSources),
-        distinctUntilChanged(deepEqual),
-        skip(1)
-      )
-      .subscribe(dataLayer.setSources);
+    // Discarding unsaved changes swaps the document; the runtime and the sources follow it.
+    const documentSubscription = document$.pipe(skip(1)).subscribe((document) => {
+      runtime.setDocument(document);
+      dataLayer.setSources(document.dataSources);
+    });
 
     return {
       api,
       Component: function CustomAppEmbeddableComponent() {
         const [document] = useBatchedPublishingSubjects(document$);
 
+        // Subscribed here rather than when the panel is built so that the nodes below, whose
+        // effects run first, have already declared the sources they read when the first fetch
+        // arrives. The dashboard's time range, filters and reloads reach every node through
+        // this one subscription.
+        useEffect(() => {
+          const fetchSubscription = fetch$(api).subscribe(dataLayer.refresh);
+          return () => fetchSubscription.unsubscribe();
+        }, []);
+
         useEffect(
           () => () => {
-            fetchSubscription.unsubscribe();
-            sourcesSubscription.unsubscribe();
+            stateSubscription.unsubscribe();
+            documentSubscription.unsubscribe();
             dataLayer.destroy();
           },
           []
         );
 
         return (
-          <DataLayerContext.Provider value={dataLayer}>
-            <NodeRenderer node={document.root} />
-          </DataLayerContext.Provider>
+          <AppRuntimeContext.Provider value={runtime}>
+            <DataLayerContext.Provider value={dataLayer}>
+              <NodeRenderer node={document.root} />
+            </DataLayerContext.Provider>
+          </AppRuntimeContext.Provider>
         );
       },
     };

@@ -8,15 +8,19 @@
 import { z } from '@kbn/zod/v4';
 import {
   CUSTOM_APP_STATE_VERSION,
+  MAX_ACTIONS_PER_EVENT,
   MAX_CHILDREN_PER_NODE,
-  MAX_DATA_SOURCES,
   MAX_HEADING_LENGTH,
-  MAX_NODE_COUNT,
-  MAX_NODE_DEPTH,
+  MAX_KEY_VALUE_FIELDS,
   MAX_NODE_ID_LENGTH,
   MAX_QUERY_LENGTH,
+  MAX_STATE_KEY_LENGTH,
+  MAX_STATE_STRING_LENGTH,
+  MAX_TABLE_COLUMNS,
   MAX_TEXT_LENGTH,
+  RESERVED_STATE_KEYS,
 } from './constants';
+import { validateDocument } from './validate_document';
 
 const nodeIdSchema = z
   .string()
@@ -26,10 +30,54 @@ const nodeIdSchema = z
 
 const dataSourceIdSchema = nodeIdSchema;
 
+/** A valid ES|QL parameter name, so a state key can be used as `?key` in a query. */
+export const stateKeySchema = z
+  .string()
+  .max(MAX_STATE_KEY_LENGTH)
+  .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
+  .refine((key) => !RESERVED_STATE_KEYS.includes(key.toLowerCase()), {
+    message: `Reserved by ES|QL for the time range: ${RESERVED_STATE_KEYS.join(', ')}`,
+  });
+
+const stateValueSchema = z.union([
+  z.string().max(MAX_STATE_STRING_LENGTH),
+  z.number().finite(),
+  z.boolean(),
+]);
+
+/** Every state key needs a default so a query that uses it always has a value. */
+export const stateDeclarationSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('string'), default: z.string().max(MAX_STATE_STRING_LENGTH) }),
+  z.object({ type: z.literal('number'), default: z.number().finite() }),
+  z.object({ type: z.literal('boolean'), default: z.boolean() }),
+]);
+
 export const esqlDataSourceSchema = z.object({
   type: z.literal('esql'),
   query: z.string().min(1).max(MAX_QUERY_LENGTH),
 });
+
+/** The closed set of things a user interaction can do. */
+const setStateActionSchema = z.object({
+  type: z.literal('setState'),
+  key: stateKeySchema,
+  value: z.union([
+    stateValueSchema,
+    z.object({ fromColumn: z.string().min(1).max(MAX_HEADING_LENGTH) }),
+    z.object({ fromInput: z.literal(true) }),
+  ]),
+});
+
+const openFlyoutActionSchema = z.object({ type: z.literal('openFlyout'), flyout: nodeIdSchema });
+const closeFlyoutActionSchema = z.object({ type: z.literal('closeFlyout') });
+
+export const actionSchema = z.discriminatedUnion('type', [
+  setStateActionSchema,
+  openFlyoutActionSchema,
+  closeFlyoutActionSchema,
+]);
+
+const actionsSchema = z.array(actionSchema).max(MAX_ACTIONS_PER_EVENT);
 
 const spacingSchema = z.enum(['s', 'm', 'l']);
 
@@ -63,6 +111,32 @@ const statNodeSchema = z.object({
   format: z.enum(['number', 'compact']).default('number'),
 });
 
+const tableNodeSchema = z.object({
+  type: z.literal('table'),
+  id: nodeIdSchema,
+  source: dataSourceIdSchema,
+  /** Defaults to every column of the result, shown as text. */
+  columns: z
+    .array(
+      z.object({
+        field: z.string().min(1).max(MAX_HEADING_LENGTH),
+        label: z.string().max(MAX_HEADING_LENGTH).optional(),
+        format: z.enum(['text', 'number', 'date']).default('text'),
+      })
+    )
+    .max(MAX_TABLE_COLUMNS)
+    .optional(),
+  onRowClick: actionsSchema.default([]),
+});
+
+const keyValueNodeSchema = z.object({
+  type: z.literal('key_value'),
+  id: nodeIdSchema,
+  source: dataSourceIdSchema,
+  /** Defaults to every column of the first row. */
+  fields: z.array(z.string().min(1).max(MAX_HEADING_LENGTH)).max(MAX_KEY_VALUE_FIELDS).optional(),
+});
+
 const stackFields = {
   type: z.literal('stack'),
   id: nodeIdSchema,
@@ -70,24 +144,42 @@ const stackFields = {
   gap: spacingSchema.default('m'),
 };
 
+const flyoutFields = {
+  type: z.literal('flyout'),
+  id: nodeIdSchema,
+  title: z.string().max(MAX_HEADING_LENGTH),
+  size: z.enum(['s', 'm', 'l']).default('m'),
+};
+
 type LeafNode =
   | z.output<typeof headingNodeSchema>
   | z.output<typeof textNodeSchema>
   | z.output<typeof calloutNodeSchema>
-  | z.output<typeof statNodeSchema>;
+  | z.output<typeof statNodeSchema>
+  | z.output<typeof tableNodeSchema>
+  | z.output<typeof keyValueNodeSchema>;
 
 type StackNode = z.output<z.ZodObject<typeof stackFields>> & { children: AppNode[] };
+type FlyoutNode = z.output<z.ZodObject<typeof flyoutFields>> & { children: AppNode[] };
 
 /**
  * Written out by hand because TypeScript cannot infer a union that contains itself. The
- * \`satisfies\` on \`nodeSchema\` fails to compile if the schemas stop producing this type.
+ * `satisfies` on `nodeSchema` fails to compile if the schemas stop producing this type.
  */
-export type AppNode = LeafNode | StackNode;
+export type AppNode = LeafNode | StackNode | FlyoutNode;
 export type AppNodeType = AppNode['type'];
 export type AppNodeOfType<T extends AppNodeType> = Extract<AppNode, { type: T }>;
+export type Action = z.output<typeof actionSchema>;
 
 const stackNodeSchema = z.object({
   ...stackFields,
+  get children(): z.ZodArray<z.ZodType<AppNode>> {
+    return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
+  },
+});
+
+const flyoutNodeSchema = z.object({
+  ...flyoutFields,
   get children(): z.ZodArray<z.ZodType<AppNode>> {
     return z.array(nodeSchema).max(MAX_CHILDREN_PER_NODE);
   },
@@ -98,76 +190,26 @@ export const nodeSchema = z.discriminatedUnion('type', [
   textNodeSchema,
   calloutNodeSchema,
   statNodeSchema,
+  tableNodeSchema,
+  keyValueNodeSchema,
   stackNodeSchema,
+  flyoutNodeSchema,
 ]) satisfies z.ZodType<AppNode>;
 
 /** Returns the direct children of a node, empty for leaf nodes. */
 export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
-  node.type === 'stack' ? node.children : [];
-
-/**
- * Enforces what a recursive schema cannot express: total size, depth, unique ids and that every
- * node refers to a data source that exists. Without the bounds a single saved panel could carry
- * an arbitrarily large tree.
- */
-const validateDocument = (
-  document: { root: AppNode; dataSources: Record<string, unknown> },
-  ctx: z.RefinementCtx
-): void => {
-  if (Object.keys(document.dataSources).length > MAX_DATA_SOURCES) {
-    ctx.addIssue({
-      code: 'custom',
-      message: `A document may hold at most ${MAX_DATA_SOURCES} data sources`,
-    });
-  }
-
-  const seenIds = new Set<string>();
-  let nodeCount = 0;
-  const pending: Array<{ node: AppNode; depth: number }> = [{ node: document.root, depth: 1 }];
-
-  for (let current = pending.pop(); current; current = pending.pop()) {
-    const { node, depth } = current;
-    nodeCount++;
-
-    if (seenIds.has(node.id)) {
-      ctx.addIssue({ code: 'custom', message: `Duplicate node id "${node.id}"` });
-    }
-    seenIds.add(node.id);
-
-    if (node.type === 'stat' && !(node.source in document.dataSources)) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `Node "${node.id}" refers to unknown data source "${node.source}"`,
-      });
-    }
-
-    if (depth > MAX_NODE_DEPTH) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `Nodes may be nested at most ${MAX_NODE_DEPTH} deep`,
-      });
-      return;
-    }
-    if (nodeCount > MAX_NODE_COUNT) {
-      ctx.addIssue({
-        code: 'custom',
-        message: `A document may hold at most ${MAX_NODE_COUNT} nodes`,
-      });
-      return;
-    }
-
-    getNodeChildren(node).forEach((child) => pending.push({ node: child, depth: depth + 1 }));
-  }
-};
+  node.type === 'stack' || node.type === 'flyout' ? node.children : [];
 
 export const appDocumentSchema = z
   .object({
+    state: z.record(stateKeySchema, stateDeclarationSchema).default({}),
     dataSources: z.record(dataSourceIdSchema, esqlDataSourceSchema).default({}),
     root: nodeSchema,
   })
   .superRefine(validateDocument);
 
 export type EsqlDataSource = z.output<typeof esqlDataSourceSchema>;
+export type StateDeclaration = z.output<typeof stateDeclarationSchema>;
 export type AppDocument = z.output<typeof appDocumentSchema>;
 
 /** The panel's own state, without the titles and time range every panel shares. */

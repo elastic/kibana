@@ -8,13 +8,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AppNode } from '@kbn/custom-app-common';
+import { interpolate, type AppNode } from '@kbn/custom-app-common';
 import {
   KbnDangerCallout,
   KbnInfoCallout,
   KbnSuccessCallout,
   KbnWarningCallout,
 } from '@kbn/ui-callout';
+import { useStateValues } from '../runtime/app_runtime_context';
 import { StatNode } from './stat_node';
 
 const GUTTER_SIZES = { s: 's', m: 'm', l: 'l' } as const;
@@ -36,24 +37,27 @@ interface NodeRendererProps {
  * instead of failing the whole panel.
  */
 export const NodeRenderer = ({ node }: NodeRendererProps) => {
+  const state = useStateValues();
+  const text = (value: string) => interpolate(value, state);
+
   switch (node.type) {
     case 'heading':
       return (
         <EuiTitle size={node.size} data-node-id={node.id}>
-          <h3>{node.text}</h3>
+          <h3>{text(node.text)}</h3>
         </EuiTitle>
       );
     case 'text':
       return (
         <EuiText size="s" data-node-id={node.id}>
-          <p>{node.text}</p>
+          <p>{text(node.text)}</p>
         </EuiText>
       );
     case 'callout': {
       const Callout = CALLOUTS[node.color];
       return (
-        <Callout announceOnMount={false} title={node.title} size="s" data-node-id={node.id}>
-          {node.text ? <p>{node.text}</p> : null}
+        <Callout announceOnMount={false} title={text(node.title)} size="s" data-node-id={node.id}>
+          {node.text ? <p>{text(node.text)}</p> : null}
         </Callout>
       );
     }

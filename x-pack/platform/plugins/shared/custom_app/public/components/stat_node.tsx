@@ -8,11 +8,12 @@
 import React from 'react';
 import { EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { AppNodeOfType } from '@kbn/custom-app-common';
+import { interpolate, type AppNodeOfType } from '@kbn/custom-app-common';
 import type { SourceData } from '../data/data_layer';
 import { useDataLayer } from '../data/data_layer_context';
+import { useSource } from '../data/use_source';
+import { useStateValues } from '../runtime/app_runtime_context';
 import { DataState } from './data_state';
 
 const formatValue = (value: unknown, format: 'number' | 'compact'): string => {
@@ -23,6 +24,7 @@ const formatValue = (value: unknown, format: 'number' | 'compact'): string => {
 };
 
 const StatValue = ({ node, data }: { node: AppNodeOfType<'stat'>; data: SourceData }) => {
+  const state = useStateValues();
   const columnIndex = node.valueField
     ? data.columns.findIndex(({ name }) => name === node.valueField)
     : 0;
@@ -44,7 +46,7 @@ const StatValue = ({ node, data }: { node: AppNodeOfType<'stat'>; data: SourceDa
   return (
     <EuiStat
       title={value === null || value === undefined ? '—' : formatValue(value, node.format)}
-      description={node.title}
+      description={interpolate(node.title, state)}
       titleSize="l"
       data-test-subj="customAppStat"
     />
@@ -53,7 +55,7 @@ const StatValue = ({ node, data }: { node: AppNodeOfType<'stat'>; data: SourceDa
 
 export const StatNode = ({ node }: { node: AppNodeOfType<'stat'> }) => {
   const layer = useDataLayer();
-  const state = useStateFromPublishingSubject(layer.getSource$(node.source));
+  const state = useSource(node.source);
 
   return (
     <div data-node-id={node.id}>

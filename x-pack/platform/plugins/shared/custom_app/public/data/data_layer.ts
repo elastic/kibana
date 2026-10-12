@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import type { EsqlDataSource } from '@kbn/custom-app-common';
+import type { EsqlDataSource, StateValue } from '@kbn/custom-app-common';
 
 export interface SourceData {
   columns: ReadonlyArray<{ name: string; type: string }>;
@@ -19,39 +19,72 @@ export type SourceState =
   | { status: 'success'; data: SourceData }
   | { status: 'error'; message: string };
 
+export type StateValues = Readonly<Record<string, StateValue>>;
+
+export interface SourceRequest {
+  context: FetchContext;
+  /** The panel's state, offered to the query as named parameters. */
+  state: StateValues;
+}
+
 export type RunQuery = (
   source: EsqlDataSource,
-  context: FetchContext,
+  request: SourceRequest,
   signal: AbortSignal
 ) => Promise<SourceData>;
 
 export interface DataLayer {
   /** The live state of one data source. The same subject is returned for the same id. */
   getSource$: (id: string) => BehaviorSubject<SourceState>;
-  /** True until the first run settles, and while any source is running. */
+  /**
+   * Declares that a mounted node reads a source, which makes it run. Returns the function that
+   * ends the declaration; a source nobody reads is neither run nor refreshed.
+   */
+  acquire: (id: string) => () => void;
+  /** True until the first fetch has settled, and while any source is running. */
   loading$: BehaviorSubject<boolean | undefined>;
   setSources: (sources: Record<string, EsqlDataSource>) => void;
-  /** Runs every source with the given context, superseding any run in flight. */
+  /** Replaces the state. Only the sources that use a changed value run again. */
+  setState: (state: StateValues) => void;
+  /** Runs every source that is being read, superseding any run in flight. */
   refresh: (context: FetchContext) => void;
-  /** Runs every source again with the last context. */
+  /** Runs every source that is being read again, with the last context. */
   retry: () => void;
   destroy: () => void;
+}
+
+interface SourceEntry {
+  readers: number;
+  controller?: AbortController;
+  /** The values of the parameters the source used the last time it ran. */
+  appliedValues: Record<string, StateValue | undefined>;
 }
 
 const toMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 /**
- * Owns the data of a panel. Nodes read a source by id, so any number of nodes sharing a source
- * cost one request, and a source that fails does not affect the others.
+ * Owns the data of a panel. A source runs while a node reads it, however many nodes do, and a
+ * source that fails does not affect the others. State changes re-run only the sources whose query
+ * uses a parameter whose value changed.
  */
-export const createDataLayer = ({ runQuery }: { runQuery: RunQuery }): DataLayer => {
+export const createDataLayer = ({
+  runQuery,
+  getParameterNames,
+}: {
+  runQuery: RunQuery;
+  /** The names of the `?param` and `??param` parameters a query uses. */
+  getParameterNames: (query: string) => string[];
+}): DataLayer => {
   const states = new Map<string, BehaviorSubject<SourceState>>();
-  // Starts true so the panel is not reported as rendered before its first fetch has settled.
+  const entries = new Map<string, SourceEntry>();
+  const running = new Set<string>();
+  const parameterNames = new Map<string, { query: string; names: string[] }>();
   const loading$ = new BehaviorSubject<boolean | undefined>(true);
+
   let sources: Record<string, EsqlDataSource> = {};
+  let state: StateValues = {};
   let context: FetchContext | undefined;
-  let controller: AbortController | undefined;
 
   const getSource$ = (id: string) => {
     let state$ = states.get(id);
@@ -62,50 +95,110 @@ export const createDataLayer = ({ runQuery }: { runQuery: RunQuery }): DataLayer
     return state$;
   };
 
-  const run = () => {
-    controller?.abort();
-    if (!context) return;
+  // Starts true so the panel is not reported as rendered before its first fetch has settled.
+  const publishLoading = () => loading$.next(context === undefined || running.size > 0);
 
-    const currentController = new AbortController();
-    controller = currentController;
-    const currentContext = context;
-    const entries = Object.entries(sources);
-
-    loading$.next(entries.length > 0);
-
-    const runs = entries.map(async ([id, source]) => {
-      const state$ = getSource$(id);
-      state$.next({ status: 'loading' });
-      try {
-        const data = await runQuery(source, currentContext, currentController.signal);
-        if (!currentController.signal.aborted) state$.next({ status: 'success', data });
-      } catch (error) {
-        if (!currentController.signal.aborted) {
-          state$.next({ status: 'error', message: toMessage(error) });
-        }
-      }
-    });
-
-    Promise.all(runs).then(() => {
-      if (controller === currentController) loading$.next(false);
-    });
+  const namesUsedBy = (id: string, query: string): string[] => {
+    const cached = parameterNames.get(id);
+    if (cached?.query === query) return cached.names;
+    const names = getParameterNames(query);
+    parameterNames.set(id, { query, names });
+    return names;
   };
+
+  const stop = (id: string, entry: SourceEntry) => {
+    entry.controller?.abort();
+    entry.controller = undefined;
+    running.delete(id);
+  };
+
+  const start = (id: string) => {
+    const entry = entries.get(id);
+    if (!entry || entry.readers === 0 || !context) return;
+
+    stop(id, entry);
+    const state$ = getSource$(id);
+    const source = sources[id];
+    if (!source) {
+      state$.next({ status: 'error', message: `Unknown data source "${id}"` });
+      publishLoading();
+      return;
+    }
+
+    const controller = new AbortController();
+    entry.controller = controller;
+    entry.appliedValues = Object.fromEntries(
+      namesUsedBy(id, source.query).map((name) => [name, state[name]])
+    );
+    running.add(id);
+    state$.next({ status: 'loading' });
+    publishLoading();
+
+    runQuery(source, { context, state }, controller.signal)
+      .then((data) => {
+        if (!controller.signal.aborted) state$.next({ status: 'success', data });
+      })
+      .catch((error) => {
+        if (!controller.signal.aborted) state$.next({ status: 'error', message: toMessage(error) });
+      })
+      .finally(() => {
+        if (entry.controller !== controller) return;
+        entry.controller = undefined;
+        running.delete(id);
+        publishLoading();
+      });
+  };
+
+  const startAll = () => entries.forEach((_entry, id) => start(id));
 
   return {
     getSource$,
     loading$,
+    acquire: (id) => {
+      const entry = entries.get(id) ?? { readers: 0, appliedValues: {} };
+      entries.set(id, entry);
+      entry.readers++;
+      if (entry.readers === 1) start(id);
+
+      let released = false;
+      return () => {
+        if (released) return;
+        released = true;
+        entry.readers--;
+        if (entry.readers > 0) return;
+        stop(id, entry);
+        getSource$(id).next({ status: 'loading' });
+        publishLoading();
+      };
+    },
     setSources: (next) => {
+      const previous = sources;
       sources = next;
-      run();
+      entries.forEach((_entry, id) => {
+        const before = previous[id];
+        const after = next[id];
+        if (before?.query !== after?.query) start(id);
+      });
+    },
+    setState: (next) => {
+      state = next;
+      entries.forEach((entry, id) => {
+        const source = sources[id];
+        if (!source || entry.readers === 0) return;
+        const changed = namesUsedBy(id, source.query).some(
+          (name) => state[name] !== entry.appliedValues[name]
+        );
+        if (changed) start(id);
+      });
     },
     refresh: (next) => {
       context = next;
-      run();
+      startAll();
+      publishLoading();
     },
-    retry: run,
+    retry: startAll,
     destroy: () => {
-      controller?.abort();
-      controller = undefined;
+      entries.forEach((entry, id) => stop(id, entry));
     },
   };
 };

@@ -10,6 +10,7 @@ import type { AppDocument } from '@kbn/custom-app-common';
 
 /** The starter content of a newly added panel. */
 export const createDefaultDocument = (): AppDocument => ({
+  state: {},
   // Temporary demo source that needs no data; replaced by templates once the start flow exists.
   dataSources: { activeUsers: { type: 'esql', query: 'ROW active_users = 1284' } },
   root: {

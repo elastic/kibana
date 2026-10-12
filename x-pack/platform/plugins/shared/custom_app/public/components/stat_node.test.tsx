@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { act, render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { appDocumentSchema, type AppNode } from '@kbn/custom-app-common';
 import { createDataLayer, type RunQuery, type SourceData } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
 import { NodeRenderer } from './node_renderer';
+import { renderWithRuntime } from './test_utils';
 
 const context = { timeRange: { from: 'now-15m', to: 'now' } } as FetchContext;
 
@@ -28,9 +29,9 @@ const data = (columns: string[], row: unknown[] | undefined): SourceData => ({
 });
 
 const renderStat = async (node: AppNode, runQuery: RunQuery) => {
-  const layer = createDataLayer({ runQuery });
+  const layer = createDataLayer({ runQuery, getParameterNames: () => [] });
   layer.setSources({ users: { type: 'esql', query: 'ROW users = 1' } });
-  render(
+  renderWithRuntime(
     <DataLayerContext.Provider value={layer}>
       <NodeRenderer node={node} />
     </DataLayerContext.Provider>

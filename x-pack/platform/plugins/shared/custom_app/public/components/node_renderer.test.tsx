@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import { appDocumentSchema, type AppNode } from '@kbn/custom-app-common';
 import { NodeRenderer } from './node_renderer';
+import { renderWithRuntime } from './test_utils';
 
 const parseRoot = (root: unknown): AppNode => appDocumentSchema.parse({ root }).root;
 
@@ -24,7 +25,7 @@ describe('NodeRenderer', () => {
       ],
     });
 
-    render(<NodeRenderer node={root} />);
+    renderWithRuntime(<NodeRenderer node={root} />);
 
     expect(screen.getByRole('heading', { name: 'Service health' })).toBeInTheDocument();
     expect(screen.getByText('All systems nominal')).toBeInTheDocument();
@@ -39,7 +40,7 @@ describe('NodeRenderer', () => {
       children: [{ type: 'text', id: 'body', text: 'hi' }],
     });
 
-    const { container } = render(<NodeRenderer node={root} />);
+    const { container } = renderWithRuntime(<NodeRenderer node={root} />);
 
     expect(container.querySelector('[data-node-id="root"]')).not.toBeNull();
     expect(container.querySelector('[data-node-id="body"]')).not.toBeNull();
@@ -48,9 +49,63 @@ describe('NodeRenderer', () => {
   it('shows a placeholder for a node type it cannot render instead of failing', () => {
     const unknownNode = { type: 'sparkles', id: 'x' } as unknown as AppNode;
 
-    render(<NodeRenderer node={unknownNode} />);
+    renderWithRuntime(<NodeRenderer node={unknownNode} />);
 
     expect(screen.getByText('This component is not supported')).toBeInTheDocument();
     expect(screen.getByText(/"sparkles" is unknown/)).toBeInTheDocument();
+  });
+
+  describe('interpolation', () => {
+    const document = appDocumentSchema.parse({
+      state: { service: { type: 'string', default: 'checkout' } },
+      root: {
+        type: 'stack',
+        id: 'root',
+        children: [
+          { type: 'heading', id: 'h', text: 'Service {{state.service}}' },
+          { type: 'text', id: 't', text: 'Showing {{state.service}} errors' },
+          {
+            type: 'callout',
+            id: 'c',
+            title: 'About {{state.service}}',
+            text: 'See {{state.service}}',
+          },
+        ],
+      },
+    });
+
+    it('fills state values into every text prop', () => {
+      renderWithRuntime(<NodeRenderer node={document.root} />, document);
+
+      expect(screen.getByRole('heading', { name: 'Service checkout' })).toBeInTheDocument();
+      expect(screen.getByText('Showing checkout errors')).toBeInTheDocument();
+      expect(screen.getByText('About checkout')).toBeInTheDocument();
+      expect(screen.getByText('See checkout')).toBeInTheDocument();
+    });
+
+    it('updates the text when the state changes', () => {
+      const { runtime } = renderWithRuntime(<NodeRenderer node={document.root} />, document);
+
+      act(() => {
+        runtime.run([{ type: 'setState', key: 'service', value: 'cart' }]);
+      });
+
+      expect(screen.getByRole('heading', { name: 'Service cart' })).toBeInTheDocument();
+    });
+
+    it('shows a state value that contains markup as plain text', () => {
+      const { runtime, container } = renderWithRuntime(
+        <NodeRenderer node={document.root} />,
+        document
+      );
+      const hostile = '<img src=x onerror=alert(1)><b>bold</b>';
+
+      act(() => {
+        runtime.run([{ type: 'setState', key: 'service', value: hostile }]);
+      });
+
+      expect(screen.getByText(`Showing ${hostile} errors`)).toBeInTheDocument();
+      expect(container.querySelector('img, b')).toBeNull();
+    });
   });
 });

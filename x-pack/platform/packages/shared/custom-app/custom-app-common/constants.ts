@@ -18,3 +18,12 @@ export const MAX_HEADING_LENGTH = 200;
 export const MAX_TEXT_LENGTH = 5_000;
 export const MAX_DATA_SOURCES = 20;
 export const MAX_QUERY_LENGTH = 10_000;
+export const MAX_STATE_KEYS = 20;
+export const MAX_STATE_KEY_LENGTH = 64;
+export const MAX_STATE_STRING_LENGTH = 1_000;
+export const MAX_ACTIONS_PER_EVENT = 5;
+export const MAX_TABLE_COLUMNS = 50;
+export const MAX_KEY_VALUE_FIELDS = 50;
+
+/** ES|QL reserves these parameter names for the query's time range. */
+export const RESERVED_STATE_KEYS: readonly string[] = ['_tstart', '_tend'];
