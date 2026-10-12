@@ -40,4 +40,3 @@ describe('UnifiedAlertingPromoCard', () => {
     expect(screen.queryByTestId(ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID)).not.toBeInTheDocument();
   });
 });
-
