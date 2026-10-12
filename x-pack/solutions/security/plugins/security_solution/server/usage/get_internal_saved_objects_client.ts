@@ -10,6 +10,7 @@ import { getSavedObjectsTypes } from '@kbn/cases-plugin/common';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyRuleActionsSavedObjectType } from '../lib/detection_engine/rule_actions_legacy';
+import { watchlistEntitySourceTypeName } from '../lib/entity_analytics/watchlists/entity_sources/infra/entity_source_type';
 
 export async function getInternalSavedObjectsClient(
   core: CoreSetup
@@ -19,6 +20,7 @@ export async function getInternalSavedObjectsClient(
     return coreStart.savedObjects.createInternalRepository([
       'alert',
       legacyRuleActionsSavedObjectType,
+      watchlistEntitySourceTypeName,
       ...getSavedObjectsTypes(),
     ]) as unknown as SavedObjectsClientContract;
   });
