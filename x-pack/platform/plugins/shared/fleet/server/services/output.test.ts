@@ -232,6 +232,20 @@ function getMockedSoClient(
           secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
         });
       }
+      case outputIdToUuid('existing-kafka-oauth2-tls-output'): {
+        return mockOutputSO('existing-kafka-oauth2-tls-output', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'oauth2',
+          oauth2: {
+            client_id: 'my-client',
+            token_url: 'https://idp.example.com/oauth2/token',
+            scopes: ['read'],
+            tls: { ca_file: '/ca.pem', insecure_skip_verify: true },
+          },
+          secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
+        });
+      }
 
       case outputIdToUuid('existing-es-output'): {
         return mockOutputSO('existing-es-output', {
@@ -420,6 +434,20 @@ function getMockedEncryptedSoClient() {
           is_default: false,
           auth_type: 'oauth2',
           oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+          secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
+        });
+      }
+      case outputIdToUuid('existing-kafka-oauth2-tls-output'): {
+        return mockOutputSO('existing-kafka-oauth2-tls-output', {
+          type: 'kafka',
+          is_default: false,
+          auth_type: 'oauth2',
+          oauth2: {
+            client_id: 'my-client',
+            token_url: 'https://idp.example.com/oauth2/token',
+            scopes: ['read'],
+            tls: { ca_file: '/ca.pem', insecure_skip_verify: true },
+          },
           secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
         });
       }
@@ -3116,6 +3144,142 @@ describe('Output Service', () => {
             expect.anything(),
             expect.objectContaining({ secrets: { oauth2: { client_secret: null } } })
           );
+        });
+
+        it('should keep the OAuth2 settings and the secret when the update does not name an auth type', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, savedOAuth2Output, {
+            type: 'kafka',
+            name: 'renamed',
+          } as any);
+
+          const [, , attributes] = soClient.update.mock.calls[0] as any;
+          expect(attributes.name).toEqual('renamed');
+          expect(attributes.oauth2).toEqual(oauth2);
+          expect(attributes.secrets.oauth2.client_secret).toEqual({ id: 'saved-secret-id' });
+          expect(attributes.auth_type).toBeUndefined();
+          // the secret is not deleted
+          expect(mockedExtractAndUpdateOutputSecrets.mock.calls[0][0].outputUpdate.secrets).toEqual(
+            { oauth2: { client_secret: { id: 'saved-secret-id' } } }
+          );
+        });
+
+        it('should remove the OAuth2 settings that are no longer sent, as the update merges objects', async () => {
+          const soClient = getMockedSoClient({});
+
+          // the verification is not skipped anymore, there are no scopes anymore
+          await outputService.update(soClient, esClientMock, 'existing-kafka-oauth2-tls-output', {
+            auth_type: 'oauth2',
+            oauth2: { ...oauth2, tls: { ca_file: '/ca.pem' } },
+            secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
+          } as any);
+
+          const [, , attributes] = soClient.update.mock.calls[0] as any;
+          expect(attributes.oauth2).toEqual({
+            ...oauth2,
+            scopes: null,
+            tls: { ca_file: '/ca.pem', insecure_skip_verify: null },
+          });
+        });
+
+        it('should not add nulls to the OAuth2 settings when nothing is removed', async () => {
+          const soClient = getMockedSoClient({});
+
+          await outputService.update(soClient, esClientMock, savedOAuth2Output, {
+            auth_type: 'oauth2',
+            oauth2: { ...oauth2, scopes: ['read'] },
+            secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
+          } as any);
+
+          const [, , attributes] = soClient.update.mock.calls[0] as any;
+          expect(attributes.oauth2).toEqual({ ...oauth2, scopes: ['read'] });
+        });
+
+        describe('when OAuth2 is not allowed, e.g. the feature flag is off', () => {
+          beforeEach(() => {
+            mockedCheckKafkaOAuth2Allowed.mockResolvedValue({
+              result: false,
+              error: 'OAuth2 authentication of Kafka outputs is not enabled',
+            });
+          });
+
+          it('should allow an ordinary edit of an output that uses OAuth2', async () => {
+            const soClient = getMockedSoClient({});
+
+            // what the form sends: the saved settings and the saved secret reference
+            await outputService.update(soClient, esClientMock, savedOAuth2Output, {
+              name: 'renamed',
+              type: 'kafka',
+              auth_type: 'oauth2',
+              oauth2,
+              secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
+            } as any);
+
+            expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+            expect(soClient.update).toHaveBeenCalled();
+          });
+
+          it('should allow an update that does not touch the authentication', async () => {
+            const soClient = getMockedSoClient({});
+
+            await outputService.update(soClient, esClientMock, savedOAuth2Output, {
+              type: 'kafka',
+              name: 'renamed',
+            } as any);
+
+            expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+            expect(soClient.update).toHaveBeenCalled();
+          });
+
+          it('should not allow to change the OAuth2 settings', async () => {
+            const soClient = getMockedSoClient({});
+
+            await expect(
+              outputService.update(soClient, esClientMock, savedOAuth2Output, {
+                auth_type: 'oauth2',
+                oauth2: { ...oauth2, client_id: 'another-client' },
+                secrets: { oauth2: { client_secret: { id: 'saved-secret-id' } } },
+              } as any)
+            ).rejects.toThrow('OAuth2 authentication of Kafka outputs is not enabled');
+            expect(soClient.update).not.toHaveBeenCalled();
+          });
+
+          it('should not allow to replace the secret', async () => {
+            const soClient = getMockedSoClient({});
+
+            await expect(
+              outputService.update(soClient, esClientMock, savedOAuth2Output, {
+                auth_type: 'oauth2',
+                oauth2,
+                secrets: { oauth2: { client_secret: 'a new secret' } },
+              } as any)
+            ).rejects.toThrow('OAuth2 authentication of Kafka outputs is not enabled');
+          });
+
+          it('should not allow to switch another output to OAuth2', async () => {
+            const soClient = getMockedSoClient({});
+
+            await expect(
+              outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+                auth_type: 'oauth2',
+                oauth2,
+                secrets: { oauth2: { client_secret: 'a secret' } },
+              } as any)
+            ).rejects.toThrow('OAuth2 authentication of Kafka outputs is not enabled');
+          });
+
+          it('should still allow an output to stop using OAuth2', async () => {
+            const soClient = getMockedSoClient({});
+
+            await outputService.update(soClient, esClientMock, savedOAuth2Output, {
+              type: 'kafka',
+              name: 'kafka',
+              auth_type: 'ssl',
+            } as any);
+
+            expect(soClient.update).toHaveBeenCalled();
+          });
         });
 
         it('should not add secrets to the update of an output that has none', async () => {

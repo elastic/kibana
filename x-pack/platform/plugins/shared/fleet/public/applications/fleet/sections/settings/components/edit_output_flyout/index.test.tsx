@@ -790,6 +790,59 @@ describe('EditOutputFlyout', () => {
         });
       });
 
+      it('should accept names of endpoint parameters that are also properties of every object', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2EndpointParamName0', 'constructor');
+        change(utils, 'kafkaOAuth2EndpointParamValue0', 'first');
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2AddEndpointParam'));
+        change(utils, 'kafkaOAuth2EndpointParamName1', 'constructor');
+        change(utils, 'kafkaOAuth2EndpointParamValue1', 'second');
+        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2AddEndpointParam'));
+        change(utils, 'kafkaOAuth2EndpointParamName2', '__proto__');
+        change(utils, 'kafkaOAuth2EndpointParamValue2', 'value');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const { endpoint_params: endpointParams } = (mockSendPutOutput.mock.calls[0][1] as any)
+          .oauth2;
+        // own properties, not inherited ones
+        expect(Object.keys(endpointParams).sort()).toEqual(['__proto__', 'constructor']);
+        expect(endpointParams.constructor).toEqual(['first', 'second']);
+        expect(Object.getOwnPropertyDescriptor(endpointParams, '__proto__')?.value).toEqual([
+          'value',
+        ]);
+      });
+
+      it('should not parse claims left in the form after switching to client credentials', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: { ...oauth2Fields, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer' },
+          secrets: { oauth2: { client_certificate_key: { id: 'key-secret-id' } } },
+        });
+
+        // invalid claims under the JWT bearer grant, then another grant: the claims do not apply
+        change(utils, 'kafkaOAuth2ClaimsInput', 'not json');
+        fireEvent.click(utils.getByRole('radio', { name: 'Client credentials' }));
+        change(utils, 'kafkaOAuth2ClientSecretInput', 'my-secret');
+        save(utils);
+
+        await waitFor(() => {
+          expect(mockSendPutOutput).toHaveBeenCalled();
+        });
+        const payload = mockSendPutOutput.mock.calls[0][1] as any;
+        expect(payload.oauth2.claims).toBeUndefined();
+        expect(payload.secrets).toEqual({ oauth2: { client_secret: 'my-secret' } });
+      });
+
       it('should drop the settings of the JWT bearer grant when the output goes back to client credentials', async () => {
         const { utils } = renderFlyout({
           ...kafkaOutput,

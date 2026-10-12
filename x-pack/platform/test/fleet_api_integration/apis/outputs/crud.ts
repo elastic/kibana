@@ -2727,6 +2727,66 @@ export default function (providerContext: FtrProviderContext) {
           expect((secret._source as any).value).to.equal('my-secret');
         });
 
+        it('should keep the OAuth2 settings and the secret when the update does not touch the authentication', async () => {
+          const created = await createOutput(oauth2Output());
+          const secretId = created.item.secrets.oauth2.client_secret.id;
+
+          const updated = await updateOutput(created.item.id, {
+            type: 'kafka',
+            name: 'Kafka OAuth2 output renamed',
+          });
+
+          expect(updated.item.name).to.eql('Kafka OAuth2 output renamed');
+          expect(updated.item.auth_type).to.eql('oauth2');
+          expect(updated.item.oauth2).to.eql({ client_id: 'my-client', token_url: TOKEN_URL });
+          expect(updated.item.secrets.oauth2.client_secret.id).to.eql(secretId);
+          const secret = await getSecretById(secretId);
+          expect((secret._source as any).value).to.equal('my-secret');
+        });
+
+        it('should remove the OAuth2 settings that are not sent anymore', async () => {
+          const created = await createOutput(
+            oauth2Output({
+              oauth2: {
+                client_id: 'my-client',
+                token_url: TOKEN_URL,
+                scopes: ['read'],
+                tls: { ca_file: '/etc/ca.pem', insecure_skip_verify: true },
+              },
+            })
+          );
+
+          // the verification is not skipped anymore and there are no scopes anymore
+          const updated = await updateOutput(created.item.id, {
+            name: created.item.name,
+            type: 'kafka',
+            hosts: ['test.fr:2000'],
+            auth_type: 'oauth2',
+            topic: 'topic1',
+            oauth2: {
+              client_id: 'my-client',
+              token_url: TOKEN_URL,
+              tls: { ca_file: '/etc/ca.pem' },
+            },
+            secrets: {
+              oauth2: { client_secret: { id: created.item.secrets.oauth2.client_secret.id } },
+            },
+          });
+
+          const expectedOAuth2 = {
+            client_id: 'my-client',
+            token_url: TOKEN_URL,
+            tls: { ca_file: '/etc/ca.pem' },
+          };
+          expect(updated.item.oauth2).to.eql(expectedOAuth2);
+          // what is saved
+          const { body } = await supertest.get(`/api/fleet/outputs/${created.item.id}`).expect(200);
+          expect(body.item.oauth2).to.eql(expectedOAuth2);
+          // what the agent gets
+          const { fullPolicy } = await getFullAgentPolicy(created.item.id);
+          expect(fullPolicy.outputs[created.item.id].auth.oauth2client).to.eql(expectedOAuth2);
+        });
+
         it('should replace the secret when a new value is sent', async () => {
           const created = await createOutput(oauth2Output());
 

@@ -113,8 +113,12 @@ import {
   clearKafkaAuthFieldsForType,
   getRemovedKafkaOAuth2Secrets,
   omitKafkaSecretsOfOtherAuthTypes,
+  keepsKafkaOAuth2,
   omitRemovedKafkaOAuth2Secrets,
+  omitRemovedKafkaOAuth2Settings,
   usesKafkaOAuth2,
+  withRemovedKafkaOAuth2Settings,
+  withSavedKafkaOAuth2,
 } from './outputs/kafka_auth';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 import {
@@ -169,7 +173,7 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
       ssl,
       proxy_id: proxyId,
       ...attributes
-    } = omitRemovedKafkaOAuth2Secrets(so.attributes);
+    } = omitRemovedKafkaOAuth2Settings(omitRemovedKafkaOAuth2Secrets(so.attributes));
     let parsedSsl;
     try {
       parsedSsl = typeof ssl === 'string' ? JSON.parse(ssl) : undefined;
@@ -1223,7 +1227,14 @@ class OutputService {
     const isTypeChanged = mergedType !== originalOutput.type;
 
     await this.assertOtlpOutputAllowed({ type: mergedType }, esClient, soClient);
-    if (!fromPreconfiguration) {
+
+    if (mergedType === outputType.Kafka) {
+      // an update that does not touch the authentication keeps the OAuth2 settings and secrets
+      data = withSavedKafkaOAuth2(originalOutput, data);
+    }
+
+    // an edit that keeps the OAuth2 authentication as it is does not need OAuth2 to be allowed
+    if (!fromPreconfiguration && !keepsKafkaOAuth2(originalOutput, { ...data, type: mergedType })) {
       await this.assertKafkaOAuth2Allowed({ ...data, type: mergedType }, esClient, soClient);
     }
 
@@ -1522,6 +1533,11 @@ class OutputService {
         updateData.sasl = null;
       } else if (typedFullUpdateData.auth_type || !typedFullUpdateData.oauth2) {
         updateData.oauth2 = null;
+      }
+      if (updateData.oauth2) {
+        // the saved object update merges objects: the settings that are no longer sent have to be
+        // removed explicitly
+        updateData.oauth2 = withRemovedKafkaOAuth2Settings(originalOutput, updateData.oauth2);
       }
       if (!typedFullUpdateData.ssl) {
         updateData.ssl = null;

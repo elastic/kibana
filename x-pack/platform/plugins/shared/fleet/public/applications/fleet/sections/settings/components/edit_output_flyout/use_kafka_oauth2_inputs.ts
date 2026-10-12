@@ -251,13 +251,15 @@ export function buildKafkaOAuth2Config(
 
   const scopes = inputs.kafkaOAuth2ScopesInput.value.map((scope) => scope.trim()).filter(Boolean);
 
-  // every parameter of the token endpoint takes a list of values
-  const endpointParams: Record<string, string[]> = {};
+  // every parameter of the token endpoint takes a list of values. A Map, not an object: a name
+  // such as `constructor` or `__proto__` must not be taken for an inherited property.
+  const endpointParamValues = new Map<string, string[]>();
   inputs.kafkaOAuth2EndpointParamsInput.value.forEach(({ key, value }) => {
     if (key && value) {
-      endpointParams[key] = [...(endpointParams[key] ?? []), value];
+      endpointParamValues.set(key, [...(endpointParamValues.get(key) ?? []), value]);
     }
   });
+  const endpointParams: Record<string, string[]> = Object.fromEntries(endpointParamValues);
 
   const tls = defined({
     ca_file: text(inputs.kafkaOAuth2TlsCaFileInput),
@@ -275,7 +277,9 @@ export function buildKafkaOAuth2Config(
     return value === undefined ? undefined : Number(value);
   };
 
-  const claimsText = text(inputs.kafkaOAuth2ClaimsInput);
+  // only the JWT bearer grant has claims, and only then are they validated: text left in the
+  // input after switching to another grant must not be parsed
+  const claimsText = isJwtBearer ? text(inputs.kafkaOAuth2ClaimsInput) : undefined;
   const claims = claimsText ? JSON.parse(claimsText) : undefined;
   const signatureAlgorithm = inputs.kafkaOAuth2SignatureAlgorithmInput.value;
 
