@@ -34,17 +34,17 @@ apiTest.describe(
     });
 
     apiTest(
-      'acknowledges without side effects when the investigation is already running',
+      'rejects a running investigation without a matching workflow execution',
       async ({ apiClient, kbnClient }) => {
         await seedInvestigation(kbnClient, { id: TEST_ID, status: 'running' });
 
         const response = await ensureInvestigation(apiClient, cookieHeader, TEST_ID);
-        expect(response).toHaveStatusCode(200);
-        expect(response.body.acknowledged).toBe(true);
+        expect(response).toHaveStatusCode(404);
 
         const investigationRequest = await getInvestigation(apiClient, cookieHeader, TEST_ID);
         expect(investigationRequest).toHaveStatusCode(200);
         expect(investigationRequest.body.status).toBe('running');
+        expect(investigationRequest.body.conversation_id).toBeUndefined();
       }
     );
 

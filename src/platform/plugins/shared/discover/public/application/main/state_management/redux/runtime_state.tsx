@@ -49,6 +49,8 @@ interface TabRuntimeState {
   cascadedDocumentsFetcher: CascadedDocumentsFetcher;
   currentDataView: DataView;
   currentDataSource: DataSource;
+  /** Source of the cascade leaf rows; keeps the parent id, so never publish it as the current source. */
+  cascadedLeafDataSource: DataSource;
   unsubscribeFn: (() => void) | undefined;
 }
 
@@ -60,7 +62,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
 
 export type ReactiveTabRuntimeState = ReactiveRuntimeState<
   TabRuntimeState,
-  'currentDataView' | 'currentDataSource'
+  'currentDataView' | 'currentDataSource' | 'cascadedLeafDataSource'
 >;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
@@ -103,11 +105,13 @@ export const createTabRuntimeState = ({
     toolkit,
   });
   const currentDataSource$ = new BehaviorSubject<DataSource | undefined>(undefined);
+  const cascadedLeafDataSource$ = new BehaviorSubject<DataSource | undefined>(undefined);
   const cascadedDocumentsFetcher = new CascadedDocumentsFetcher(
     services,
     scopedProfilesManager,
     cascadedDocumentsStateManager,
-    currentDataSource$
+    currentDataSource$,
+    cascadedLeafDataSource$
   );
 
   return {
@@ -124,6 +128,7 @@ export const createTabRuntimeState = ({
     cascadedDocumentsFetcher$: new BehaviorSubject(cascadedDocumentsFetcher),
     currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
     currentDataSource$,
+    cascadedLeafDataSource$,
     unsubscribeFn$: new BehaviorSubject<TabRuntimeState['unsubscribeFn']>(undefined),
   };
 };

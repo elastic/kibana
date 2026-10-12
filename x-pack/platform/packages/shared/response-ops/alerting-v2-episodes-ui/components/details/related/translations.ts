@@ -18,14 +18,14 @@ export const RELATED_TITLE = i18n.translate(
 export const RELATED_EPISODES_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.title',
   {
-    defaultMessage: 'Related alert episodes',
+    defaultMessage: 'Related alerts',
   }
 );
 
 export const RELATED_EPISODES_EMPTY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.empty',
   {
-    defaultMessage: 'No related episodes found.',
+    defaultMessage: 'No related alerts found.',
   }
 );
 
@@ -39,14 +39,14 @@ export const RELATED_SAME_GROUP_TITLE = i18n.translate(
 export const RELATED_SAME_GROUP_DESCRIPTION = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.sameGroupDescription',
   {
-    defaultMessage: 'Other episodes for this rule that share the same group as this alert.',
+    defaultMessage: 'Other alerts for this rule that share the same group as this alert.',
   }
 );
 
 export const RELATED_SAME_GROUP_EMPTY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.sameGroupEmpty',
   {
-    defaultMessage: 'No other episodes in this group.',
+    defaultMessage: 'No other alerts in this group.',
   }
 );
 
@@ -61,28 +61,28 @@ export const RELATED_OTHER_GROUPS_DESCRIPTION = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.otherGroupsDescription',
   {
     defaultMessage:
-      'Other episodes for this rule that belong to a different group than the current alert.',
+      'Other alerts for this rule that belong to a different group than the current alert.',
   }
 );
 
 export const RELATED_RULE_ONLY_LIST_TITLE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.ruleOnlyListTitle',
   {
-    defaultMessage: 'Other episodes for this rule',
+    defaultMessage: 'Other alerts for this rule',
   }
 );
 
 export const RELATED_RULE_ONLY_LIST_DESCRIPTION = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.ruleOnlyListDescription',
   {
-    defaultMessage: 'Other episodes for this rule, excluding the current one.',
+    defaultMessage: 'Other alerts for this rule, excluding the current one.',
   }
 );
 
 export const RELATED_OTHER_GROUPS_EMPTY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.otherGroupsEmpty',
   {
-    defaultMessage: 'No other related episodes for this rule.',
+    defaultMessage: 'No other related alerts for this rule.',
   }
 );
 
@@ -90,19 +90,19 @@ export const RELATED_OTHER_GROUPS_EMPTY = i18n.translate(
 export const RELATED_EPISODE_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.episodeLabel',
   {
-    defaultMessage: 'Episode',
+    defaultMessage: 'Alert',
   }
 );
 
 export const getCopyEpisodeIdTooltip = (episodeId: string) =>
   i18n.translate('xpack.alertingV2EpisodesUi.details.related.copyEpisodeIdTooltip', {
-    defaultMessage: 'Full episode ID: {episodeId}',
+    defaultMessage: 'Full alert ID: {episodeId}',
     values: { episodeId },
   });
 
 export const EPISODE_ID_COPIED = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.related.episodeIdCopied',
   {
-    defaultMessage: 'Episode ID copied',
+    defaultMessage: 'Alert ID copied',
   }
 );

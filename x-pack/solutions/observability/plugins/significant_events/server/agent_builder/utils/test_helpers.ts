@@ -12,11 +12,14 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 import type { ZodObject } from '@kbn/zod/v4';
 import type { z } from '@kbn/zod/v4';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { KnowledgeIndicatorClient } from '../../lib/knowledge_indicators';
 import type { RouteHandlerScopedClients, GetScopedClients } from '../../routes/types';
+import type { SignificantEventsServer } from '../../types';
 
 /**
  * Subset of RouteHandlerScopedClients that tools actually use.
@@ -94,4 +97,39 @@ export const createMockToolContext = (): ToolHandlerContext => {
 
   toolHandlerContext.modelProvider = modelProvider;
   return toolHandlerContext;
+};
+
+/** Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes without read. */
+export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all';
+
+const API_PRIVILEGES_BY_FEATURE_PRIVILEGE: Record<NightshiftFeaturePrivilege, readonly string[]> = {
+  none: [],
+  read: [NIGHTSHIFT_API_PRIVILEGES.read],
+  all: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
+};
+
+/**
+ * A server whose Kibana privilege check behaves like a user with `featurePrivilege` on Nightshift:
+ * a check passes only when every requested API privilege is granted by it. Only `security` is
+ * real, so mock any other server dependency (e.g. `assertSignificantEventsAccess`).
+ */
+export const createSignificantEventsServer = ({
+  featurePrivilege,
+}: {
+  featurePrivilege: NightshiftFeaturePrivilege;
+}): SignificantEventsServer => {
+  const security = securityMock.createStart();
+  const toApiAction = (privilege: string) => `api:${privilege}`;
+  jest.spyOn(security.authz.actions.api, 'get').mockImplementation(toApiAction);
+
+  const grantedActions = new Set(
+    API_PRIVILEGES_BY_FEATURE_PRIVILEGE[featurePrivilege].map(toApiAction)
+  );
+  security.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+    jest.fn(async ({ kibana = [] }: { kibana?: string | string[] }) => ({
+      hasAllRequested: [kibana].flat().every((action) => grantedActions.has(action)),
+    }))
+  );
+  const server: Pick<SignificantEventsServer, 'security'> = { security };
+  return server as SignificantEventsServer;
 };
