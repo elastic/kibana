@@ -63,4 +63,3 @@ reselect-v4
 @swc/plugin-emotion
 graphql
 bump-cli
-meow
