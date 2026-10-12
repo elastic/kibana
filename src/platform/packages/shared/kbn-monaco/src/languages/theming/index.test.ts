@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'crypto';
 import { create as monarchCreate } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { UseEuiTheme } from '@elastic/eui';
 import { monaco } from '../../monaco_imports';
-import { scopeLanguageTheme, CODE_EDITOR_DEFAULT_THEME_ID, initializeCodeEditorThemes } from '.';
+import {
+  CODE_EDITOR_DEFAULT_THEME_ID,
+  CODE_EDITOR_TRANSPARENT_THEME_ID,
+  defaultThemesResolvers,
+  initializeRegisteredLanguagesTheme,
+} from '.';
 import { buildEsqlTheme } from '../definitions/esql/lib/theme';
 import { ESQL_LANG_ID } from '../definitions/esql/lib/constants';
 import { buildConsoleTheme } from '../definitions/console/theme';
@@ -27,30 +33,52 @@ const ESQL_QUERY = 'FROM idx | EVAL x = "s" | WHERE n > 1 AND p == ?param';
 const JSON_DOCUMENT = '{"a": "s", "b": 1, "c": true}';
 const CONSOLE_REQUEST = 'GET _search?size=1\n{\n  "query": { "match_all": {} }\n}';
 
+const keyByColor = new Map<string, string>();
+
 /**
- * Hands every `euiTheme.colors.*` lookup its own colour, so two theme rules collide in the
- * resulting colour map only when they genuinely resolve to the same EUI token.
+ * Derives a colour from the token *name*, so every mock instance maps `textSuccess` to the same
+ * hex and two rules collide in the colour map only when they resolve to the same EUI token.
+ * Access-order assignment would not survive memoisation: the shared rules may come from an earlier
+ * mock instance than the language rules, and the 4th key each happened to touch would share a hex.
  */
-const createMockEuiTheme = (): UseEuiTheme => {
-  const assignedColors = new Map<string, string>();
+const colorFor = (key: string) => {
+  // Backgrounds stay near-white / near-black, as EUI's are. Console runs its token colours through
+  // `makeHighContrastColor` against the background, and a random mid-tone background makes that
+  // collapse most of them to the same output, which would hide real colour differences.
+  const [palette, token] = key.split(':');
+  if (token.startsWith('background')) {
+    return palette === 'dark' ? '#111111' : '#ffffff';
+  }
 
-  const colorFor = (key: string) => {
-    if (!assignedColors.has(key)) {
-      assignedColors.set(key, `#${(assignedColors.size + 1).toString(16).padStart(6, '0')}`);
-    }
-    return assignedColors.get(key)!;
-  };
+  // First 24 bits of a digest: stable across runs and instances, no hand-rolled hashing.
+  const color = `#${createHash('sha256').update(key).digest('hex').slice(0, 6)}`;
 
+  const owner = keyByColor.get(color);
+  if (owner !== undefined && owner !== key) {
+    throw new Error(`Mock colour collision: "${key}" and "${owner}" both hash to ${color}`);
+  }
+  keyByColor.set(color, key);
+  return color;
+};
+
+/**
+ * Hands every `euiTheme.colors.*` lookup a colour unique to that token. `palette` namespaces the
+ * colours, so a dark mock's values genuinely differ from a light mock's, as EUI's do.
+ */
+const createMockEuiTheme = ({
+  colorMode = 'LIGHT',
+  palette = 'light',
+}: { colorMode?: UseEuiTheme['colorMode']; palette?: string } = {}): UseEuiTheme => {
   const colors = new Proxy(
-    { vis: new Proxy({}, { get: (_target, key: string) => colorFor(`vis.${key}`) }) },
+    { vis: new Proxy({}, { get: (_target, key: string) => colorFor(`${palette}:vis.${key}`) }) },
     {
       get: (target, key: string) =>
-        key === 'vis' ? Reflect.get(target, key) : colorFor(key as string),
+        key === 'vis' ? Reflect.get(target, key) : colorFor(`${palette}:${key as string}`),
     }
   );
 
   return {
-    colorMode: 'LIGHT',
+    colorMode,
     highContrastMode: false,
     modifications: {},
     euiTheme: { colors } as unknown as UseEuiTheme['euiTheme'],
@@ -95,14 +123,20 @@ describe('language scoped editor themes', () => {
     monaco.languages.setMonarchTokensProvider(CONSOLE_LANG_ID, consoleLexerRules);
     monaco.editor.registerLanguageThemeResolver(CONSOLE_LANG_ID, buildConsoleTheme, true);
 
-    initializeCodeEditorThemes(createMockEuiTheme());
+    initializeRegisteredLanguagesTheme(createMockEuiTheme());
   });
 
-  describe('initializeCodeEditorThemes', () => {
+  describe('initializeRegisteredLanguagesTheme', () => {
+    // The initializer is memoised per palette; these tests spy on `defineTheme`, so each needs a
+    // fresh cache or the call under test is a no-op.
+    beforeEach(() => {
+      initializeRegisteredLanguagesTheme.reset();
+    });
+
     it('namespaces a language theme to its own tokens and leaves shared rules alone', () => {
       const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
 
-      initializeCodeEditorThemes(createMockEuiTheme());
+      initializeRegisteredLanguagesTheme(createMockEuiTheme());
 
       const [, themeData] = defineTheme.mock.calls.find(
         ([themeId]) => themeId === CODE_EDITOR_DEFAULT_THEME_ID
@@ -129,7 +163,7 @@ describe('language scoped editor themes', () => {
     it('gives every registered theme the same rule set, so only colors differ', () => {
       const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
 
-      initializeCodeEditorThemes(createMockEuiTheme());
+      initializeRegisteredLanguagesTheme(createMockEuiTheme());
 
       const ruleSets = defineTheme.mock.calls.map(([, themeData]) =>
         themeData.rules.map(({ token }) => token).join()
@@ -142,25 +176,9 @@ describe('language scoped editor themes', () => {
   });
 
   describe('rendered colors', () => {
-    it('keeps JSON colors stable when the ES|QL theme becomes the active theme', async () => {
-      monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);
-      const underDefaultTheme = await colorizedClassesOf(JSON_DOCUMENT, XJsonLang.ID);
-
-      monaco.editor.setTheme(ESQL_LANG_ID);
-      const underEsqlTheme = await colorizedClassesOf(JSON_DOCUMENT, XJsonLang.ID);
-
-      expect(underEsqlTheme).toBe(underDefaultTheme);
-    });
-
-    it('keeps ES|QL colors stable when the default theme becomes the active theme', async () => {
-      monaco.editor.setTheme(ESQL_LANG_ID);
-      const underEsqlTheme = await colorizedClassesOf(ESQL_QUERY, ESQL_LANG_ID);
-
-      monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);
-      const underDefaultTheme = await colorizedClassesOf(ESQL_QUERY, ESQL_LANG_ID);
-
-      expect(underDefaultTheme).toBe(underEsqlTheme);
-    });
+    // Only Kibana's two themes exist; language-named ids are no longer registered, and Monaco
+    // silently falls back to `vs` for an unknown id, so asserting against one would be meaningless.
+    const REGISTERED_THEMES = [CODE_EDITOR_DEFAULT_THEME_ID, CODE_EDITOR_TRANSPARENT_THEME_ID];
 
     it.each([
       ['JSON', JSON_DOCUMENT, XJsonLang.ID],
@@ -169,7 +187,7 @@ describe('language scoped editor themes', () => {
     ])('renders %s identically under every registered theme', async (_name, text, languageId) => {
       const renderedPerTheme = [];
 
-      for (const activeTheme of [CODE_EDITOR_DEFAULT_THEME_ID, ESQL_LANG_ID, CONSOLE_LANG_ID]) {
+      for (const activeTheme of REGISTERED_THEMES) {
         monaco.editor.setTheme(activeTheme);
         renderedPerTheme.push(await colorizedClassesOf(text, languageId));
       }
@@ -177,6 +195,21 @@ describe('language scoped editor themes', () => {
       expect(new Set(renderedPerTheme).size).toBe(1);
       // Guards against the matrix passing because every token collapsed to one default colour.
       expect(new Set(renderedPerTheme[0].split(' | ')).size).toBeGreaterThan(3);
+    });
+
+    it('keeps the ES|QL palette off JSON object keys while both share one theme (#258514)', async () => {
+      monaco.editor.setTheme(CODE_EDITOR_DEFAULT_THEME_ID);
+
+      // xjson tokenizes object keys as `variable`; ES|QL colours `variable` with `textSuccess`.
+      // Before scoping, the active ES|QL rules repainted JSON keys green. The second JSON span is
+      // the key `"a"`; the last ES|QL span is the `?param` variable.
+      const jsonKeyClass = (await colorizedClassesOf(JSON_DOCUMENT, XJsonLang.ID)).split(' | ')[1];
+      const esqlVariableClass = (await colorizedClassesOf(ESQL_QUERY, ESQL_LANG_ID))
+        .split(' | ')
+        .at(-1);
+
+      expect(jsonKeyClass).toBeDefined();
+      expect(jsonKeyClass).not.toBe(esqlVariableClass);
     });
 
     it('still colors ES|QL distinctly from JSON', async () => {
@@ -191,11 +224,150 @@ describe('language scoped editor themes', () => {
     });
   });
 
-  describe('scopeLanguageTheme', () => {
+  describe('memoization', () => {
+    const lightTheme = (): UseEuiTheme => createMockEuiTheme();
+    const darkTheme = (): UseEuiTheme => createMockEuiTheme({ colorMode: 'DARK', palette: 'dark' });
+
+    beforeEach(() => {
+      initializeRegisteredLanguagesTheme.reset();
+    });
+
+    it('computes a shared theme once per palette, keyed on colours rather than identity', () => {
+      const resolve = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID];
+
+      const light = resolve(lightTheme());
+      // A different object for the same palette — what EUI hands out after a mode round-trip.
+      expect(resolve(lightTheme())).toBe(light);
+
+      const dark = resolve(darkTheme());
+      expect(dark).not.toBe(light);
+      expect(dark.base).toBe('vs-dark');
+
+      // Back to light: still the original computation.
+      expect(resolve(lightTheme())).toBe(light);
+    });
+
+    // EUI's provider updates `colorMode` and the computed theme in separate commits, so a live
+    // mode switch has one render where the mode has flipped but the colours haven't. The palette,
+    // not the flag, decides both the key and the theme's `base`, so that render can't produce a
+    // mismatched theme — it resolves to the palette that is already registered.
+    it('treats a transitional render (new mode, previous colours) as the previous palette', () => {
+      const resolve = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID];
+      const light = lightTheme();
+      const dark = darkTheme();
+      const transitional: UseEuiTheme = { ...light, euiTheme: dark.euiTheme };
+
+      const fromDark = resolve(dark);
+      expect(resolve(transitional)).toBe(fromDark);
+      expect(fromDark.base).toBe('vs-dark');
+
+      const fromLight = resolve(light);
+      expect(fromLight).not.toBe(fromDark);
+      expect(fromLight.base).toBe('vs');
+      expect(fromLight.colors['editor.background']).toBe(light.euiTheme.colors.backgroundBasePlain);
+    });
+
+    it('registers exactly once per live switch: the transitional render is a no-op', () => {
+      const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
+      const light = lightTheme();
+      const dark = darkTheme();
+      const transitional: UseEuiTheme = { ...light, euiTheme: dark.euiTheme };
+
+      initializeRegisteredLanguagesTheme(dark);
+      const perRegistration = defineTheme.mock.calls.length;
+      expect(perRegistration).toBeGreaterThan(0);
+
+      // The render where EUI has flipped `colorMode` but not yet the colours: nothing to do.
+      initializeRegisteredLanguagesTheme(transitional);
+      expect(defineTheme).toHaveBeenCalledTimes(perRegistration);
+
+      // The consistent render that follows registers the new palette.
+      initializeRegisteredLanguagesTheme(light);
+      expect(defineTheme).toHaveBeenCalledTimes(perRegistration * 2);
+
+      const [, registered] = [...defineTheme.mock.calls]
+        .reverse()
+        .find(([themeId]) => themeId === CODE_EDITOR_DEFAULT_THEME_ID)!;
+      expect(registered.base).toBe('vs');
+      expect(registered.colors['editor.background']).toBe(
+        light.euiTheme.colors.backgroundBasePlain
+      );
+
+      defineTheme.mockRestore();
+    });
+
+    it('re-registers on a high-contrast switch, which only changes border colours', () => {
+      const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
+      const light = lightTheme();
+      // EUI's high-contrast overrides touch `border*` tokens only; everything else is identical.
+      const highContrast: UseEuiTheme = {
+        ...light,
+        highContrastMode: 'preferred',
+        euiTheme: {
+          colors: new Proxy(light.euiTheme.colors, {
+            get: (target, key: string) =>
+              key === 'borderBasePlain' ? '#000000' : Reflect.get(target, key),
+          }),
+        } as unknown as UseEuiTheme['euiTheme'],
+      };
+
+      initializeRegisteredLanguagesTheme(light);
+      const perRegistration = defineTheme.mock.calls.length;
+
+      initializeRegisteredLanguagesTheme(highContrast);
+      expect(defineTheme).toHaveBeenCalledTimes(perRegistration * 2);
+
+      defineTheme.mockRestore();
+    });
+
+    it('registers once per palette change: repeats are no-ops, a round-trip re-registers', () => {
+      const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
+
+      initializeRegisteredLanguagesTheme(lightTheme());
+      const perInitialisation = defineTheme.mock.calls.length;
+      expect(perInitialisation).toBeGreaterThan(0);
+
+      // Same palette again, fresh object: a no-op. This is every subsequent editor mount.
+      initializeRegisteredLanguagesTheme(lightTheme());
+      expect(defineTheme).toHaveBeenCalledTimes(perInitialisation);
+
+      initializeRegisteredLanguagesTheme(darkTheme());
+      expect(defineTheme).toHaveBeenCalledTimes(perInitialisation * 2);
+
+      // Back to light re-registers — Monaco holds one theme per id, and dark overwrote it — but
+      // does not recompute: the builders are memoised, so the light data is the cached object.
+      const lightData = defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](lightTheme());
+      initializeRegisteredLanguagesTheme(lightTheme());
+      expect(defineTheme).toHaveBeenCalledTimes(perInitialisation * 3);
+      expect(defaultThemesResolvers[CODE_EDITOR_DEFAULT_THEME_ID](lightTheme())).toBe(lightData);
+
+      defineTheme.mockRestore();
+    });
+
+    it('re-registers when a language theme is registered after the first initialisation', () => {
+      const defineTheme = jest.spyOn(monaco.editor, 'defineTheme');
+
+      initializeRegisteredLanguagesTheme(lightTheme());
+      const perInitialisation = defineTheme.mock.calls.length;
+
+      monaco.editor.registerLanguageThemeResolver('late-registered', buildEsqlTheme, true);
+
+      initializeRegisteredLanguagesTheme(lightTheme());
+      expect(defineTheme).toHaveBeenCalledTimes(perInitialisation * 2);
+
+      defineTheme.mockRestore();
+    });
+  });
+
+  describe('registerLanguageThemeResolver', () => {
     it.each(['comment', 'my-string-lang', 'regexp'])(
-      'rejects "%s" because Monaco reads token types out of the token string',
+      'rejects language id "%s" because Monaco reads token types out of the token string',
       (languageId) => {
-        expect(() => scopeLanguageTheme(languageId)).toThrow(/StandardTokenType/);
+        expect(() =>
+          monaco.editor.registerLanguageThemeResolver(languageId, buildEsqlTheme, true)
+        ).toThrow(/StandardTokenType/);
+        // A rejected id must not linger as a registered resolver.
+        expect(monaco.editor.getLanguageThemeResolver(languageId)).toBeUndefined();
       }
     );
   });
