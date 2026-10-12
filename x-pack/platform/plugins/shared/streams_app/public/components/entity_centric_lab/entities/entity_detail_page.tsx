@@ -535,6 +535,8 @@ const EntityDetailPageInner = () => {
 
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     try {
+      const fromUrl = new URLSearchParams(history.location.search).get('tab');
+      if (fromUrl) return fromUrl as TabId;
       const stored = sessionStorage.getItem(PREFERRED_TAB_KEY);
       if (stored) return stored as TabId;
     } catch {
@@ -543,15 +545,37 @@ const EntityDetailPageInner = () => {
     return 'overview';
   });
 
+  const syncDetailTabParam = useCallback(
+    (tab: string) => {
+      const params = new URLSearchParams(history.location.search);
+      if (params.get('tab') === tab) return;
+      params.set('tab', tab);
+      history.replace({ ...history.location, search: params.toString() });
+    },
+    [history]
+  );
+
+  const selectDetailTab = useCallback(
+    (tab: TabId) => {
+      setActiveTab(tab);
+      rememberTab(tab);
+      syncDetailTabParam(tab);
+    },
+    [rememberTab, syncDetailTabParam]
+  );
+
+  // Ensure a shared/opened detail URL always carries `tab` once we know it.
+  useEffect(() => {
+    syncDetailTabParam(activeTab);
+  }, [activeTab, syncDetailTabParam]);
+
   // Fall back when active tab disappears (and remember the fallback).
   useEffect(() => {
     if (visibleTabs.length === 0) return;
     if (!visibleTabs.some((tab) => tab.id === activeTab)) {
-      const fallback = visibleTabs[0].id;
-      setActiveTab(fallback);
-      rememberTab(fallback);
+      selectDetailTab(visibleTabs[0].id);
     }
-  }, [visibleTabs, activeTab, rememberTab]);
+  }, [visibleTabs, activeTab, selectDetailTab]);
 
   // Child entity flyout (opened from Relationships tab)
   const [childEntityName, setChildEntityName] = useState<string | null>(null);
@@ -706,7 +730,10 @@ const EntityDetailPageInner = () => {
       return;
     }
     const basePath = entity?.category ? `/entities/${entity.category}` : '/entities';
-    history.push(`${basePath}?entity=${encodeURIComponent(entityName)}`);
+    const params = new URLSearchParams(history.location.search);
+    params.set('entity', entityName);
+    params.set('tab', activeTab);
+    history.push({ pathname: basePath, search: `?${params.toString()}` });
   }, [entity, entityName, detailVariation, history, activeTab, rememberTab]);
 
   // "Add to filter" — stashes the entity's K8s context in sessionStorage
@@ -1038,8 +1065,7 @@ const EntityDetailPageInner = () => {
             label: tab.label,
             isSelected: tab.id === activeTab,
             onClick: () => {
-              setActiveTab(tab.id);
-              rememberTab(tab.id);
+              selectDetailTab(tab.id);
               setDashboardPreview(null);
             },
             'data-test-subj': `entityDetailPageTab-${tab.id}`,

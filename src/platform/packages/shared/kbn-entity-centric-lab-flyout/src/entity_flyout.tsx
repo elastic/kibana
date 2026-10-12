@@ -226,6 +226,19 @@ interface EntityFlyoutProps {
   readonly onAddToFilter?: () => void;
   /** Page time range copied into the flyout date picker on open. */
   readonly timeRange?: { readonly from: string; readonly to: string };
+  /**
+   * One-shot intent to open (or switch to) a specific tab. Bump
+   * `requestId` on each request so repeating the same tab still applies
+   * when the flyout is already open for this entity.
+   */
+  readonly tabIntent?: { readonly tab: string; readonly requestId: number } | null;
+  /** Fired whenever the active tab changes (user click, deep-link, entity swap). */
+  readonly onTabChange?: (tab: string) => void;
+  /**
+   * Fired when the flyout date picker changes. Hosts typically write this
+   * into shareable URL params (`rangeFrom` / `rangeTo`).
+   */
+  readonly onTimeRangeChange?: (range: { from: string; to: string }) => void;
 }
 
 type BuiltInTabId =
@@ -447,6 +460,9 @@ export const EntityFlyout = ({
   showDashboardThumbnails = false,
   onAddToFilter,
   timeRange,
+  tabIntent,
+  onTabChange,
+  onTimeRangeChange,
 }: EntityFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'entityCentricLabFlyoutTitle' });
   // Restore the last tab immediately so clicking another inventory row
@@ -474,10 +490,20 @@ export const EntityFlyout = ({
   }, [onClose]);
   const [dateStart, setDateStart] = useState(timeRange?.from ?? 'now-15m');
   const [dateEnd, setDateEnd] = useState(timeRange?.to ?? 'now');
-  const handleTimeChange = useCallback(({ start, end }: { start: string; end: string }) => {
-    setDateStart(start);
-    setDateEnd(end);
-  }, []);
+  // Keep the picker aligned when the host updates shareable URL time params.
+  useEffect(() => {
+    if (!timeRange) return;
+    setDateStart(timeRange.from);
+    setDateEnd(timeRange.to);
+  }, [timeRange?.from, timeRange?.to]);
+  const handleTimeChange = useCallback(
+    ({ start, end }: { start: string; end: string }) => {
+      setDateStart(start);
+      setDateEnd(end);
+      onTimeRangeChange?.({ from: start, to: end });
+    },
+    [onTimeRangeChange]
+  );
   const {
     agentBuilder,
     notifications,
@@ -965,17 +991,24 @@ export const EntityFlyout = ({
     }
   }, []);
 
+  const selectTab = useCallback(
+    (tab: TabId) => {
+      setActiveTab(tab);
+      rememberTab(tab);
+      onTabChange?.(tab);
+    },
+    [rememberTab, onTabChange]
+  );
+
   // If the active tab disappears (override toggled it off, or the user
   // reordered everything and the previously-selected tab is gone), fall
   // back to the first tab so the body doesn't render an empty switch.
   useEffect(() => {
     if (visibleTabs.length === 0) return;
     if (!visibleTabs.some((tab) => tab.id === activeTab)) {
-      const fallback = visibleTabs[0].id;
-      setActiveTab(fallback);
-      rememberTab(fallback);
+      selectTab(visibleTabs[0].id);
     }
-  }, [visibleTabs, activeTab, rememberTab]);
+  }, [visibleTabs, activeTab, selectTab]);
 
   // On entity swap (or first mount), restore the preferred tab when it's
   // still available for this resource. Keeps Logs → Logs when the user
@@ -1005,20 +1038,40 @@ export const EntityFlyout = ({
       // sessionStorage unavailable
     }
     if (preferred && visibleTabs.some((tab) => tab.id === preferred)) {
-      setActiveTab(preferred as TabId);
+      selectTab(preferred as TabId);
       return;
     }
 
     if (isFirstMount) {
-      setActiveTab(visibleTabs[0].id);
+      selectTab(visibleTabs[0].id);
       return;
     }
 
     // Prefer keeping the in-memory tab across an in-session entity swap.
-    setActiveTab((current) =>
-      visibleTabs.some((tab) => tab.id === current) ? current : visibleTabs[0].id
-    );
-  }, [entityName, entityType, visibleTabs]);
+    setActiveTab((current) => {
+      const next = visibleTabs.some((tab) => tab.id === current) ? current : visibleTabs[0].id;
+      if (next !== current) {
+        rememberTab(next);
+        onTabChange?.(next);
+      } else {
+        // Still publish so the host can put `tab` on a shareable URL.
+        onTabChange?.(next);
+      }
+      return next;
+    });
+  }, [entityName, entityType, visibleTabs, selectTab, rememberTab, onTabChange]);
+
+  // Explicit tab intent from the host (e.g. inventory Alerts badge click).
+  // Runs after the entity-swap restore so it wins when both fire together.
+  const lastTabIntentIdRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (!tabIntent) return;
+    if (lastTabIntentIdRef.current === tabIntent.requestId) return;
+    if (visibleTabs.length === 0) return;
+    if (!visibleTabs.some((tab) => tab.id === tabIntent.tab)) return;
+    lastTabIntentIdRef.current = tabIntent.requestId;
+    selectTab(tabIntent.tab as TabId);
+  }, [tabIntent, visibleTabs, selectTab]);
 
   return (
     <EuiFlyoutResizable
@@ -1213,8 +1266,7 @@ export const EntityFlyout = ({
               key={tab.id}
               isSelected={tab.id === activeTab}
               onClick={() => {
-                setActiveTab(tab.id);
-                rememberTab(tab.id);
+                selectTab(tab.id);
                 updateDashboardPreview(null);
               }}
               data-test-subj={`entityCentricLabFlyoutTab-${tab.id}`}

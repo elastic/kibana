@@ -238,7 +238,12 @@ export interface Entity {
   readonly provider?: CloudProviderId;
   readonly health: EntityHealth;
   readonly lastHealthChange: string;
+  /** How long the resource has been up (display string, e.g. "5 hours"). */
   readonly age: string;
+  /** When the resource was first observed (display timestamp). */
+  readonly firstSeen: string;
+  /** When the resource was last observed (display timestamp). */
+  readonly lastSeen: string;
   readonly anomalyDetection: string;
   readonly tags: EntityTags;
   /**
@@ -326,6 +331,19 @@ const AGE_SAMPLES: readonly string[] = [
   '14 days',
   '38 days',
 ];
+
+/** Paired with {@link AGE_SAMPLES} — first/last seen timestamps for the table. */
+const SEEN_SAMPLES: readonly { firstSeen: string; lastSeen: string }[] = [
+  { firstSeen: '2026-04-14 09:20', lastSeen: '2026-04-14 14:18' },
+  { firstSeen: '2026-04-14 14:02', lastSeen: '2026-04-14 14:14' },
+  { firstSeen: '2026-04-14 14:09', lastSeen: '2026-04-14 14:14' },
+  { firstSeen: '2026-04-12 11:05', lastSeen: '2026-04-14 14:10' },
+  { firstSeen: '2026-03-31 08:40', lastSeen: '2026-04-14 13:55' },
+  { firstSeen: '2026-03-07 16:22', lastSeen: '2026-04-14 12:40' },
+];
+
+const seenSampleAt = (index: number): { firstSeen: string; lastSeen: string } =>
+  SEEN_SAMPLES[index % SEEN_SAMPLES.length];
 
 // Tag pools — tightened to match the PayFlow demo storyline. Sofia's chain
 // only meaningfully exercises payments / checkout / fraud applications in
@@ -620,8 +638,12 @@ const OTHER_SEED_ROWS: readonly SeedRow[] = [
 const NON_KUBERNETES_SPECS: readonly CategorySpec[] = [
   {
     category: 'hosts',
+    // Bare-metal + VM — matches `fake_entity_types.ts` and the multi-type
+    // Category → Type layout (Hosts nests like Kubernetes when both types
+    // are present). With 2 seed Bare-metal rows over 24 entities this yields
+    // 13 Bare-metal + 11 VM; the overflow/full multipliers keep the cycle.
     total: 24,
-    typeCycle: ['Bare-metal'],
+    typeCycle: ['Bare-metal', 'VM'],
     seedRows: HOST_SEED_ROWS,
     fallbackName: (index) => `host-${padIndex(index, 3)}`,
   },
@@ -806,33 +828,42 @@ const sortByHealth = (entities: Entity[]): Entity[] =>
  * the single source of truth. Every entity carries `provider` (aws / gcp
  * / azure) and `subType` (the service label, e.g. "EC2") so the nav,
  * routes, and grid/list grouping can all key off the same fields.
+ *
+ * `multiplier` (full / overflow) duplicates each seed instance so cloud
+ * types (EC2, Compute Engine, …) stay visible when the 10k cap truncates
+ * the dataset — otherwise a handful of cloud rows would vanish behind
+ * the scaled Kubernetes blob.
  */
-const buildCloudEntities = (): Entity[] => {
+const buildCloudEntities = (multiplier = 1): Entity[] => {
   const entities: Entity[] = [];
   let index = 0;
-  for (const provider of CLOUD_PROVIDERS) {
-    for (const service of provider.services) {
-      const serviceEntities: Entity[] = [];
-      for (const instance of service.instances) {
-        const tags = buildTags(`cloud-${provider.id}`, index);
-        const health = regionAdjustedHealth(instance.health, tags.region);
-        serviceEntities.push({
-          id: `cloud-${provider.id}-${service.id}-${index + 1}`,
-          name: instance.name,
-          category: service.targetCategory,
-          provider: provider.id,
-          subType: service.label,
-          type: service.entityType,
-          health,
-          lastHealthChange: '2026-04-14 12:34',
-          age: AGE_SAMPLES[index % AGE_SAMPLES.length],
-          anomalyDetection: ANOMALY_SAMPLES[index % ANOMALY_SAMPLES.length],
-          tags,
-          alerts: buildAlerts(instance.name, health),
-        });
-        index += 1;
+  for (let copy = 0; copy < multiplier; copy++) {
+    for (const provider of CLOUD_PROVIDERS) {
+      for (const service of provider.services) {
+        const serviceEntities: Entity[] = [];
+        for (const instance of service.instances) {
+          const name = copy === 0 ? instance.name : `${instance.name}-${padIndex(copy, 2)}`;
+          const tags = buildTags(`cloud-${provider.id}`, index);
+          const health = regionAdjustedHealth(instance.health, tags.region);
+          serviceEntities.push({
+            id: `cloud-${provider.id}-${service.id}-${index + 1}`,
+            name,
+            category: service.targetCategory,
+            provider: provider.id,
+            subType: service.label,
+            type: service.entityType,
+            health,
+            lastHealthChange: '2026-04-14 12:34',
+            age: AGE_SAMPLES[index % AGE_SAMPLES.length],
+            ...seenSampleAt(index),
+            anomalyDetection: ANOMALY_SAMPLES[index % ANOMALY_SAMPLES.length],
+            tags,
+            alerts: buildAlerts(name, health),
+          });
+          index += 1;
+        }
+        entities.push(...sortByHealth(serviceEntities));
       }
-      entities.push(...sortByHealth(serviceEntities));
     }
   }
   return entities;
@@ -933,6 +964,7 @@ const buildCategoryEntitiesWithScenario = (
       health,
       lastHealthChange: '2026-04-14 12:34',
       age: AGE_SAMPLES[i % AGE_SAMPLES.length],
+      ...seenSampleAt(i),
       anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
       tags,
       attributes: buildExtraAttributes(spec.category, spec.category, i),
@@ -1034,6 +1066,7 @@ const buildKubernetesEntitiesWithScenario = (
         health,
         lastHealthChange: '2026-04-14 12:34',
         age: AGE_SAMPLES[i % AGE_SAMPLES.length],
+        ...seenSampleAt(i),
         anomalyDetection: ANOMALY_SAMPLES[i % ANOMALY_SAMPLES.length],
         tags,
         attributes: buildK8sAttributes(sub.label, name, i, clusterNames, namespaceNames, deploymentNames, nodeNames),
@@ -1072,12 +1105,16 @@ export const buildFakeEntities = (
   const effectiveKubeSpecs =
     multiplier > 1 ? scaleKubernetesSpecs(multiplier) : KUBERNETES_SUB_SPECS;
 
+  // Non-Kubernetes categories first, then Kubernetes last. The overflow
+  // profile truncates to {@link MAX_VISIBLE}; if K8s came first it would
+  // alone fill the 10k cap and drop cloud hosts (EC2 / GCE / Azure VM),
+  // databases, storage, etc. from the All-resources view.
   const entities: Entity[] = withKubernetesHierarchy([
     ...buildCategoryEntitiesWithScenario(
       multiplier > 1 ? scaleSpec(findSpec('hosts'), multiplier) : findSpec('hosts'),
       healthFn
     ),
-    ...buildKubernetesEntitiesWithScenario(effectiveKubeSpecs, healthFn),
+    ...buildCloudEntities(multiplier),
     ...buildCategoryEntitiesWithScenario(
       multiplier > 1 ? scaleSpec(findSpec('databases'), multiplier) : findSpec('databases'),
       healthFn
@@ -1086,7 +1123,6 @@ export const buildFakeEntities = (
       multiplier > 1 ? scaleSpec(findSpec('services'), multiplier) : findSpec('services'),
       healthFn
     ),
-    ...buildCloudEntities(),
     ...buildCategoryEntitiesWithScenario(
       multiplier > 1
         ? scaleSpec(findSpec('networking'), multiplier)
@@ -1109,6 +1145,7 @@ export const buildFakeEntities = (
       multiplier > 1 ? scaleSpec(findSpec('other'), multiplier) : findSpec('other'),
       healthFn
     ),
+    ...buildKubernetesEntitiesWithScenario(effectiveKubeSpecs, healthFn),
   ]);
 
   // Count entities per category from the actual entity list so that
@@ -1136,15 +1173,36 @@ export const buildFakeEntities = (
     };
   });
 
+  // Cap the *visible* inventory (ElasticOn hides APM Services from the
+  // inventory). Truncating the raw array first used to keep ~144 services
+  // inside the 10k window; after ElasticOn filtered them out the UI sat at
+  // 9 856 and the truncation banner never fired — even though the raw
+  // overflow profile is well above 10k. Slice the inventoriable pool, and
+  // keep hidden-category rows only for name lookup outside the cap.
   const MAX_VISIBLE = 10_000;
+  const inventoryEntities = entities.filter(
+    (entity) => !ELASTICON_HIDDEN_CATEGORY_IDS.has(entity.category)
+  );
+  const hiddenEntities = entities.filter((entity) =>
+    ELASTICON_HIDDEN_CATEGORY_IDS.has(entity.category)
+  );
   const rawTotal = entities.length;
-  const truncated = rawTotal > MAX_VISIBLE;
-  const visibleEntities = truncated ? entities.slice(0, MAX_VISIBLE) : entities;
+  const truncated = inventoryEntities.length > MAX_VISIBLE;
+  const visibleInventory = truncated
+    ? inventoryEntities.slice(0, MAX_VISIBLE)
+    : inventoryEntities;
+  const visibleEntities = truncated
+    ? [...visibleInventory, ...hiddenEntities]
+    : entities;
 
   return {
     entities: visibleEntities,
     categoryCounts,
-    totalEntities: visibleEntities.length,
+    // When truncated, report the inventoriable cap (excludes ElasticOn-
+    // hidden categories still appended for name lookup) so the
+    // All-resources banner condition `filtered >= totalEntities` holds
+    // after the services filter. Untruncated profiles keep the full count.
+    totalEntities: truncated ? visibleInventory.length : visibleEntities.length,
     totalGroups: categoryCounts.length,
     ...(truncated ? { totalBeforeTruncation: rawTotal } : {}),
   };

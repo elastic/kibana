@@ -1114,6 +1114,9 @@ interface BucketMetricLegendProps {
   /** Palette config + range when palette coloring is active; else null. */
   readonly coloring?: ColoringConfig | null;
   readonly paletteRange?: { readonly min: number; readonly max: number } | null;
+  /** Bucket entities — used to append (N) counts on categorical legend labels. */
+  readonly entities?: readonly Entity[];
+  readonly statId?: StatId;
 }
 
 /**
@@ -1128,9 +1131,34 @@ const BucketMetricLegend = ({
   metric,
   coloring = null,
   paletteRange = null,
+  entities,
+  statId = 'last',
 }: BucketMetricLegendProps) => {
   const { euiTheme } = useEuiTheme();
   const entries = useMemo(() => getMetricLegend(metric), [metric]);
+  const effectiveStat = effectiveStatForMetric(metric, statId);
+  const categoryCounts = useMemo(() => {
+    if (!entities || metric.kind !== 'categorical') return null;
+    const counts = new Map<string, number>();
+    for (const value of metric.values) {
+      counts.set(value.id, 0);
+    }
+    for (const entity of entities) {
+      const reading = resolveMetricReading(
+        entity.name,
+        metric,
+        effectiveStat,
+        entity.health,
+        alertHintFromEntity(entity.alerts),
+        entity.alerts?.active
+      );
+      const id = reading.categoryId;
+      if (id && counts.has(id)) {
+        counts.set(id, (counts.get(id) ?? 0) + 1);
+      }
+    }
+    return counts;
+  }, [entities, metric, effectiveStat]);
   const swatchClass = useMemo(
     () => css`
       width: 10px;
@@ -1179,24 +1207,35 @@ const BucketMetricLegend = ({
           </strong>
         </EuiText>
       </EuiFlexItem>
-      {entries.map((entry) => (
-        <EuiFlexItem grow={false} key={`${entry.label}-${entry.tone}`}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <span
-                aria-hidden
-                className={swatchClass}
-                style={{ backgroundColor: toneColor(entry.tone, euiTheme) }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                {entry.label}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      ))}
+      {entries.map((entry) => {
+        const count =
+          categoryCounts && entry.id != null ? categoryCounts.get(entry.id) ?? 0 : null;
+        const label =
+          count != null
+            ? i18n.translate('xpack.streams.entityCentricLab.entities.bucket.legend.entryWithCount', {
+                defaultMessage: '{label} ({count})',
+                values: { label: entry.label, count },
+              })
+            : entry.label;
+        return (
+          <EuiFlexItem grow={false} key={`${entry.label}-${entry.tone}`}>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <span
+                  aria-hidden
+                  className={swatchClass}
+                  style={{ backgroundColor: toneColor(entry.tone, euiTheme) }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {label}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };
@@ -2587,6 +2626,8 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
         metric={metric}
         coloring={coloringForRender}
         paletteRange={paletteRange}
+        entities={entities}
+        statId={selection.statId}
       />
       <EuiSpacer size="s" />
       {/* Row 3: tiles span the full card width — no indentation. */}
@@ -3298,6 +3339,8 @@ const CategoryCardInner = ({
         metric={metric}
         coloring={coloringForRender}
         paletteRange={paletteRange}
+        entities={entities}
+        statId={selection.statId}
       />
       <EuiSpacer size="s" />
       <BucketTileRow
@@ -3470,7 +3513,7 @@ const CustomGroupBucketContent = ({
       <>
         <GroupBucketHeader label={label} total={entities.length} size={isTopLevel ? 'xs' : 'xxs'} />
         <EuiSpacer size="xs" />
-        <BucketMetricLegend metric={fallbackMetric} />
+        <BucketMetricLegend metric={fallbackMetric} entities={entities} />
         <EuiSpacer size="s" />
         <CustomGroupTiles entities={entities} onSelectEntity={onSelectEntity} />
       </>
@@ -3576,6 +3619,8 @@ const CustomGroupBucketWithControls = ({
         metric={metric}
         coloring={coloringForRender}
         paletteRange={paletteRange}
+        entities={entities}
+        statId={effectiveStat}
       />
       <EuiSpacer size="xs" />
       <BucketTileRow

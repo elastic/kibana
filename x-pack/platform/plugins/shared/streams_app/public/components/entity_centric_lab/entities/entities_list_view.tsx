@@ -59,6 +59,8 @@ import {
 interface Props {
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
+  /** When set, Alerts badges open the flyout on the Alerts tab. */
+  readonly onSelectEntityAlerts?: (entityName: string) => void;
   /**
    * When true, Cloud entities are grouped by provider (AWS / GCP /
    * Azure) then by service; when false, Cloud groups flat by type.
@@ -111,7 +113,8 @@ const HEALTH_LABEL: Record<EntityHealth, string> = {
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 const useColumns = (
-  onSelectEntity: (entityName: string) => void
+  onSelectEntity: (entityName: string) => void,
+  onSelectEntityAlerts?: (entityName: string) => void
 ): Array<EuiBasicTableColumn<Entity>> =>
   useMemo(
     () => [
@@ -150,12 +153,35 @@ const useColumns = (
           return row.alerts.active > 0 ? 0 : 1;
         },
         render: (row: Entity) => {
-          if (!row.alerts) return <EuiBadge color="hollow">N/A</EuiBadge>;
+          const openAlerts = () =>
+            (onSelectEntityAlerts ?? onSelectEntity)(row.name);
+          const ariaLabel = i18n.translate(
+            'xpack.streams.entityCentricLab.entities.list.alertsBadge.ariaLabel',
+            {
+              defaultMessage: 'Open alerts for {name}',
+              values: { name: row.name },
+            }
+          );
+          if (!row.alerts) {
+            return (
+              <EuiBadge color="hollow" onClick={openAlerts} onClickAriaLabel={ariaLabel}>
+                N/A
+              </EuiBadge>
+            );
+          }
           const { total, active } = row.alerts;
           if (active > 0) {
-            return <EuiBadge color="danger">{`Alerting (${active}/${total})`}</EuiBadge>;
+            return (
+              <EuiBadge color="danger" onClick={openAlerts} onClickAriaLabel={ariaLabel}>
+                {`Alerting (${active}/${total})`}
+              </EuiBadge>
+            );
           }
-          return <EuiBadge color="success">{`OK (${total}/${total})`}</EuiBadge>;
+          return (
+            <EuiBadge color="success" onClick={openAlerts} onClickAriaLabel={ariaLabel}>
+              {`OK (${total}/${total})`}
+            </EuiBadge>
+          );
         },
       },
       {
@@ -201,8 +227,8 @@ const useColumns = (
       },
       {
         field: 'age',
-        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.age', {
-          defaultMessage: 'Age',
+        name: i18n.translate('xpack.streams.entityCentricLab.entities.list.columns.uptime', {
+          defaultMessage: 'Up time',
         }),
         width: '120px',
       },
@@ -214,7 +240,7 @@ const useColumns = (
         ),
       },
     ],
-    [onSelectEntity]
+    [onSelectEntity, onSelectEntityAlerts]
   );
 
 /**
@@ -653,13 +679,14 @@ const KubernetesSectionHeader = ({
 export const EntitiesListView = ({
   entities,
   onSelectEntity,
+  onSelectEntityAlerts,
   groupCloudByProvider = false,
   enableColumnSettings = false,
   refreshTick,
   customGroupBy,
   hideCategoryHeader = false,
 }: Props) => {
-  const columns = useColumns(onSelectEntity);
+  const columns = useColumns(onSelectEntity, onSelectEntityAlerts);
   // `undefined` keeps the built-in Category → Type layout; an empty array means
   // "no grouping" (one flat "All entities" table); 1–2 fields drive grouping.
   const useCustomGrouping = customGroupBy !== undefined;
@@ -1029,6 +1056,7 @@ export const EntitiesListView = ({
                 nested={item.nested}
                 rows={item.rows}
                 onSelectEntity={onSelectEntity}
+                onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
               />
             ) : (

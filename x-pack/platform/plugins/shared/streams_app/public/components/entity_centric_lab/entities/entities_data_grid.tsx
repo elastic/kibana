@@ -143,14 +143,26 @@ const BASE_VISIBLE_COLUMNS: readonly CatalogColumn[] = [
   },
   {
     id: 'age',
-    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.age', {
-      defaultMessage: 'Age',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.uptime', {
+      defaultMessage: 'Up time',
     }),
   },
 ];
 
 // Extra identity columns — available via "Add columns", hidden by default.
 const BASE_HIDDEN_COLUMNS: readonly CatalogColumn[] = [
+  {
+    id: 'firstSeen',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.firstSeen', {
+      defaultMessage: 'First seen',
+    }),
+  },
+  {
+    id: 'lastSeen',
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.lastSeen', {
+      defaultMessage: 'Last seen',
+    }),
+  },
   {
     id: 'environment',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.environment', {
@@ -570,6 +582,10 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
       return entity.lastHealthChange;
     case 'age':
       return entity.age;
+    case 'firstSeen':
+      return entity.firstSeen;
+    case 'lastSeen':
+      return entity.lastSeen;
     case 'type':
       return entity.type;
     case 'subType':
@@ -609,6 +625,8 @@ interface Props {
   readonly nested?: boolean;
   readonly rows: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
+  /** When set, Alerts badges open the flyout on the Alerts tab. */
+  readonly onSelectEntityAlerts?: (entityName: string) => void;
   /** Bumped by the auto-refresh tick so live metric cells re-roll. */
   readonly refreshTick?: number;
   /** When true, renders without the surrounding EuiPanel border. */
@@ -681,6 +699,7 @@ export const EntityDataGridSection = ({
   nested,
   rows,
   onSelectEntity,
+  onSelectEntityAlerts,
   refreshTick,
   borderless = false,
 }: Props) => {
@@ -810,7 +829,19 @@ export const EntityDataGridSection = ({
           );
         case 'alerts':
           return (
-            <EuiBadge color={ALERT_BADGE_COLOR[alertStatusId(entity)] ?? 'hollow'}>
+            <EuiBadge
+              color={ALERT_BADGE_COLOR[alertStatusId(entity)] ?? 'hollow'}
+              onClick={() =>
+                (onSelectEntityAlerts ?? onSelectEntity)(entity.name)
+              }
+              onClickAriaLabel={i18n.translate(
+                'xpack.streams.entityCentricLab.entities.datagrid.alertsBadge.ariaLabel',
+                {
+                  defaultMessage: 'Open alerts for {name}',
+                  values: { name: entity.name },
+                }
+              )}
+            >
               {alertBadgeLabel(entity)}
             </EuiBadge>
           );
@@ -823,6 +854,10 @@ export const EntityDataGridSection = ({
           return entity.lastHealthChange;
         case 'age':
           return entity.age;
+        case 'firstSeen':
+          return entity.firstSeen;
+        case 'lastSeen':
+          return entity.lastSeen;
         case 'type':
           return entity.type;
         case 'subType':
@@ -861,7 +896,7 @@ export const EntityDataGridSection = ({
       }
       return null;
     },
-    [sortedRows, onSelectEntity, bucketKey, euiTheme]
+    [sortedRows, onSelectEntity, onSelectEntityAlerts, bucketKey, euiTheme]
   );
 
   const descriptor = getCategoryDescriptor(category);

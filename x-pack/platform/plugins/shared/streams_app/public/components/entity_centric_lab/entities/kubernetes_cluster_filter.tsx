@@ -768,13 +768,14 @@ export const CATEGORY_RESOURCE_TYPE_ALL = '__all__';
 
 /**
  * Extract the sorted, unique type labels from a list of entities.
- * Uses `subType` when present (Cloud, K8s) and falls back to `type`.
+ * Uses `entity.type` (e.g. "AWS Lambda function") so the filter matches
+ * Category → Type group headers — not the short cloud `subType` labels
+ * ("Lambda", "Cloud Functions") which are ambiguous across providers.
  */
 export const getEntityTypeLabels = (entities: readonly Entity[]): string[] => {
   const types = new Set<string>();
   for (const entity of entities) {
-    const label = entity.subType ?? entity.type;
-    if (label) types.add(label);
+    if (entity.type) types.add(entity.type);
   }
   return [...types].sort();
 };
@@ -787,7 +788,7 @@ export const filterEntitiesByCategoryType = (
   typeFilter: string
 ): readonly Entity[] => {
   if (typeFilter === CATEGORY_RESOURCE_TYPE_ALL) return entities;
-  return entities.filter((e) => (e.subType ?? e.type) === typeFilter);
+  return entities.filter((e) => e.type === typeFilter);
 };
 
 interface CategoryResourceTypeFilterProps {
@@ -840,7 +841,7 @@ export const CategoryResourceTypeFilter = ({
         { defaultMessage: 'Filter resources by type' }
       )}
       data-test-subj="entityCentricLabCategoryResourceTypeFilter"
-      style={{ minWidth: 180 }}
+      style={{ minWidth: 240 }}
     />
   );
 };

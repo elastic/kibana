@@ -1793,6 +1793,8 @@ const numericTone = (metric: NumericMetric, value: number): MetricTone => {
 export interface LegendEntry {
   readonly tone: MetricTone;
   readonly label: string;
+  /** Categorical value id — used to count matching tiles in the legend. */
+  readonly id?: string;
 }
 
 const formatThresholdNumber = (metric: NumericMetric, value: number): string => {
@@ -1867,7 +1869,11 @@ const numericLegend = (metric: NumericMetric): readonly LegendEntry[] => {
  */
 export const getMetricLegend = (metric: MetricDescriptor): readonly LegendEntry[] => {
   if (metric.kind === 'categorical') {
-    return metric.values.map((value) => ({ tone: value.tone, label: value.label }));
+    return metric.values.map((value) => ({
+      tone: value.tone,
+      label: value.label,
+      id: value.id,
+    }));
   }
   return numericLegend(metric);
 };

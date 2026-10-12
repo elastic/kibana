@@ -22,6 +22,7 @@ import {
   EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiPanel,
   EuiPopover,
@@ -569,6 +570,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         existingIds={new Set(customDashboards.map((d) => d.id))}
         onAdd={handleAddCustom}
         entityName={entityName}
+        entityType={entityType}
       />
 
       {customDashboards.length > 0 ? (
@@ -639,14 +641,14 @@ const RemoveDashboardButton: React.FC<{
           <p>
             <strong>
               {i18n.translate('entityCentricLabFlyout.dashboardsList.custom.removeConfirmTitle', {
-                defaultMessage: 'Remove for all similar entities?',
+                defaultMessage: 'Remove for all resources of this type?',
               })}
             </strong>
           </p>
           <p>
             {i18n.translate('entityCentricLabFlyout.dashboardsList.custom.removeConfirmBody', {
               defaultMessage:
-                'This dashboard is shared across all entities of this type. Removing it will remove it for everyone.',
+                'This dashboard is shared across every resource of the same type. Removing it removes it from all of them.',
             })}
           </p>
         </EuiText>
@@ -687,7 +689,8 @@ const AddDashboardPicker: React.FC<{
   existingIds: Set<string>;
   onAdd: (dashboards: StoredCustomDashboard[]) => void;
   entityName: string;
-}> = ({ existingIds, onAdd, entityName }) => {
+  entityType?: string;
+}> = ({ existingIds, onAdd, entityName, entityType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showForSimilar, setShowForSimilar] = useState(true);
 
@@ -770,16 +773,38 @@ const AddDashboardPicker: React.FC<{
           )}
         </EuiSelectable>
         <EuiSpacer size="s" />
-        <EuiCheckbox
-          id="show-for-similar-entities"
-          label={i18n.translate(
-            'entityCentricLabFlyout.dashboardsList.custom.showForSimilar',
-            { defaultMessage: 'Show for similar entities' }
-          )}
-          checked={showForSimilar}
-          onChange={(e) => setShowForSimilar(e.target.checked)}
-          compressed
-        />
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id="show-for-similar-entities"
+              label={i18n.translate(
+                'entityCentricLabFlyout.dashboardsList.custom.showForSimilar',
+                { defaultMessage: 'Also show on other resources of this type' }
+              )}
+              checked={showForSimilar}
+              onChange={(e) => setShowForSimilar(e.target.checked)}
+              compressed
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              position="top"
+              content={i18n.translate(
+                'entityCentricLabFlyout.dashboardsList.custom.showForSimilarHelp',
+                {
+                  defaultMessage:
+                    'When on, the dashboard appears for every resource of the same type (for example, all pods). Turn off to keep it only on this resource ({resourceType} {resourceName}).',
+                  values: {
+                    resourceType: entityType ?? 'resource',
+                    resourceName: entityName,
+                  },
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiButtonEmpty
           size="s"

@@ -242,12 +242,12 @@ const isViewMode = (value: unknown): value is ViewMode =>
   value === 'grid' || value === 'list' || value === 'geomap';
 
 /**
- * Phase 1 inventory landing: list view, grouped by Type.
+ * Phase 1 inventory landing: list view, grouped by Category → Type.
  * Applied once per full page load so a stale localStorage choice (hex
- * map, Category → Type) does not stick, while changing the view and
+ * map, other groupings) does not stick, while changing the view and
  * walking the left nav still persists until the next reload.
  */
-const PHASE1_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = ['type'];
+const PHASE1_DEFAULT_GROUP_BY: readonly GroupByFieldId[] = DEFAULT_GROUP_BY;
 
 let phase1InventoryDefaultsApplied = false;
 let phase1InventoryDefaultsNeedStateSync = false;
@@ -1452,7 +1452,7 @@ const AllEntitiesViewInner = ({
   // walking the left nav from Kubernetes → Hosts → Databases doesn't
   // silently drop the user back to Overview each time.
   const [categoryTab, setCategoryTab] = useCategoryTab();
-  // Phase 1 landing: list view, every category, grouped by Type.
+  // Phase 1 landing: list view, every category, grouped by Category → Type.
   // The storage write above covers the first mount; this also catches a
   // phase switch to Phase 1 after the persisted hooks have already hydrated.
   useEffect(() => {
@@ -1720,7 +1720,14 @@ const AllEntitiesViewInner = ({
 
   const entityCountLabel = useMemo(() => {
     const count = filteredEntities.length.toLocaleString();
-    if (dataset.totalBeforeTruncation && filteredEntities.length >= dataset.totalEntities) {
+    // Truncation banner / "out of N": show when the overflow profile
+    // produced more than the visible cap and the user hasn't filtered
+    // below that cap (filtered === full scoped inventory).
+    if (
+      dataset.totalBeforeTruncation &&
+      filteredEntities.length >= dataset.totalEntities &&
+      filteredEntities.length > 0
+    ) {
       return `${count} (out of ${dataset.totalBeforeTruncation.toLocaleString()})`;
     }
     return count;
@@ -1807,6 +1814,89 @@ const AllEntitiesViewInner = ({
     [entityByName]
   );
 
+  // One-shot tab intent for EntityFlyout (e.g. Alerts badge → Alerts tab).
+  // Seed from the shareable `?tab=` param so a pasted link lands on the
+  // same tab the sharer was viewing.
+  const [flyoutTabIntent, setFlyoutTabIntent] = useState<{
+    tab: string;
+    requestId: number;
+  } | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const entity = params.get('entity') ?? params.get('flyoutEntity');
+      const tab = params.get('tab');
+      if (entity && tab) return { tab, requestId: Date.now() };
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+
+  const readPreferredFlyoutTab = useCallback((): string | null => {
+    try {
+      return sessionStorage.getItem('entityCentricLab_activeTab');
+    } catch {
+      return null;
+    }
+  }, []);
+
+  const writePreferredFlyoutTab = useCallback((tab: string) => {
+    try {
+      sessionStorage.setItem('entityCentricLab_activeTab', tab);
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  /**
+   * Keep flyout share params in the URL without touching the page inventory
+   * time range (`rangeFrom` / `rangeTo`). Flyout time uses `flyoutFrom` /
+   * `flyoutTo` so the two pickers stay independent and both are shareable.
+   */
+  const syncFlyoutShareParams = useCallback(
+    (next: {
+      entity?: string | null;
+      tab?: string | null;
+      flyoutFrom?: string | null;
+      flyoutTo?: string | null;
+    }) => {
+      const params = new URLSearchParams(location.search);
+      let changed = false;
+      const apply = (key: string, value: string | null | undefined) => {
+        if (value === undefined) return;
+        if (value === null) {
+          if (params.has(key)) {
+            params.delete(key);
+            changed = true;
+          }
+          return;
+        }
+        if (params.get(key) !== value) {
+          params.set(key, value);
+          changed = true;
+        }
+      };
+      apply('entity', next.entity);
+      apply('tab', next.tab);
+      apply('flyoutFrom', next.flyoutFrom);
+      apply('flyoutTo', next.flyoutTo);
+      if (!changed) return;
+      history.replace({ ...location, search: params.toString() });
+    },
+    [location, history]
+  );
+
+  // Flyout-only time range from the URL. Falls back to the page range for
+  // display until the user changes the flyout picker (which writes
+  // `flyoutFrom` / `flyoutTo`).
+  const flyoutTimeRange = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return {
+      from: params.get('flyoutFrom') ?? rangeFrom,
+      to: params.get('flyoutTo') ?? rangeTo,
+    };
+  }, [location.search, rangeFrom, rangeTo]);
+
   /**
    * Single funnel for every entity-name click on the page surface (grid
    * tile, list row, geomap donut, service-map node). These have no
@@ -1816,12 +1906,30 @@ const AllEntitiesViewInner = ({
    * {@link openChildEntity}.
    */
   const openEntity = useCallback(
-    (entityName: string) => {
+    (entityName: string, options?: { tab?: string }) => {
       if (!isEntityOpenable(entityName)) return;
+      const params = new URLSearchParams(location.search);
+      const tab =
+        options?.tab ?? params.get('tab') ?? readPreferredFlyoutTab() ?? undefined;
+      if (tab) {
+        writePreferredFlyoutTab(tab);
+        if (options?.tab) {
+          setFlyoutTabIntent({ tab, requestId: Date.now() });
+        }
+      }
+      // Seed flyout time from existing flyout params, else copy the page
+      // range so a shared link always carries an explicit flyout window.
+      const nextFlyoutFrom = params.get('flyoutFrom') ?? rangeFrom;
+      const nextFlyoutTo = params.get('flyoutTo') ?? rangeTo;
       if (detailVariation === 'fullPage') {
-        router.push('/entities/detail/{entityName}', {
-          path: { entityName: encodeURIComponent(entityName) },
-          query: {},
+        const detailParams = new URLSearchParams();
+        // Full-page detail uses the page time params as its only picker.
+        detailParams.set('rangeFrom', nextFlyoutFrom);
+        detailParams.set('rangeTo', nextFlyoutTo);
+        if (tab) detailParams.set('tab', tab);
+        history.push({
+          pathname: `/entities/detail/${encodeURIComponent(entityName)}`,
+          search: `?${detailParams.toString()}`,
         });
         return;
       }
@@ -1830,12 +1938,46 @@ const AllEntitiesViewInner = ({
       setChildEntityContext(null);
       setAlertDetailRequest(null);
       setRuleDetailRequest(null);
-      // Sync to URL so the deep-link is shareable.
-      const params = new URLSearchParams(location.search);
-      params.set('entity', entityName);
-      history.replace({ ...location, search: params.toString() });
+      syncFlyoutShareParams({
+        entity: entityName,
+        tab: tab ?? null,
+        flyoutFrom: nextFlyoutFrom,
+        flyoutTo: nextFlyoutTo,
+      });
     },
-    [isEntityOpenable, detailVariation, router, location, history]
+    [
+      isEntityOpenable,
+      detailVariation,
+      location.search,
+      readPreferredFlyoutTab,
+      writePreferredFlyoutTab,
+      rangeFrom,
+      rangeTo,
+      history,
+      syncFlyoutShareParams,
+    ]
+  );
+
+  /** Table Alerts badge — open the flyout parked on the Alerts tab. */
+  const openEntityOnAlertsTab = useCallback(
+    (entityName: string) => openEntity(entityName, { tab: 'alerts' }),
+    [openEntity]
+  );
+
+  const handleFlyoutTabChange = useCallback(
+    (tab: string) => {
+      writePreferredFlyoutTab(tab);
+      syncFlyoutShareParams({ tab });
+    },
+    [writePreferredFlyoutTab, syncFlyoutShareParams]
+  );
+
+  const handleFlyoutTimeRangeChange = useCallback(
+    (range: { from: string; to: string }) => {
+      // Page inventory time (`rangeFrom` / `rangeTo`) stays untouched.
+      syncFlyoutShareParams({ flyoutFrom: range.from, flyoutTo: range.to });
+    },
+    [syncFlyoutShareParams]
   );
 
   // Selecting an entity from *inside* a flyout (Dependencies row, etc.)
@@ -1863,29 +2005,38 @@ const AllEntitiesViewInner = ({
       if (!selectedEntityName) return;
       // Stamp the current URL so the flyout re-opens on back-navigation.
       // Remove the deep-link `entity` param — `flyoutEntity` takes over.
-      const params = new URLSearchParams(location.search);
-      params.delete('entity');
-      params.set('flyoutEntity', selectedEntityName);
-      history.replace({ ...location, search: params.toString() });
-
-      // Persist the active tab so the detail page can restore it.
+      const listParams = new URLSearchParams(location.search);
+      listParams.delete('entity');
+      listParams.set('flyoutEntity', selectedEntityName);
       if (currentTab) {
-        try {
-          sessionStorage.setItem('entityCentricLab_activeTab', currentTab);
-        } catch {
-          // ignore
-        }
+        listParams.set('tab', currentTab);
+        writePreferredFlyoutTab(currentTab);
       }
+      history.replace({ ...location, search: listParams.toString() });
 
       setSelectedEntityName(null);
       setChildEntityName(null);
       setChildEntityContext(null);
-      router.push('/entities/detail/{entityName}', {
-        path: { entityName: encodeURIComponent(selectedEntityName) },
-        query: {},
+
+      // Carry tab + the flyout time window into the full-page detail URL
+      // (detail page only has one picker, mapped to rangeFrom/rangeTo).
+      const detailParams = new URLSearchParams();
+      detailParams.set('rangeFrom', flyoutTimeRange.from);
+      detailParams.set('rangeTo', flyoutTimeRange.to);
+      if (currentTab) detailParams.set('tab', currentTab);
+      history.push({
+        pathname: `/entities/detail/${encodeURIComponent(selectedEntityName)}`,
+        search: `?${detailParams.toString()}`,
       });
     },
-    [selectedEntityName, router, location, history]
+    [
+      selectedEntityName,
+      location,
+      history,
+      flyoutTimeRange.from,
+      flyoutTimeRange.to,
+      writePreferredFlyoutTab,
+    ]
   );
 
   // Closing the parent tears the whole session down (the child can't
@@ -1896,13 +2047,15 @@ const AllEntitiesViewInner = ({
     setChildEntityContext(null);
     setAlertDetailRequest(null);
     setRuleDetailRequest(null);
-    // Remove the deep-link param so the flyout doesn't re-open on refresh.
-    const params = new URLSearchParams(location.search);
-    if (params.has('entity')) {
-      params.delete('entity');
-      history.replace({ ...location, search: params.toString() });
-    }
-  }, [location, history]);
+    setFlyoutTabIntent(null);
+    // Drop shareable flyout params so refresh doesn't reopen the flyout.
+    syncFlyoutShareParams({
+      entity: null,
+      tab: null,
+      flyoutFrom: null,
+      flyoutTo: null,
+    });
+  }, [syncFlyoutShareParams]);
   const closeChildEntity = useCallback(() => {
     setChildEntityName(null);
     setChildEntityContext(null);
@@ -1940,14 +2093,16 @@ const AllEntitiesViewInner = ({
       setSelectedEntityName(null);
       setChildEntityName(null);
       setChildEntityContext(null);
-      // Clean up the deep-link param when closing via "Add to filter".
-      const params = new URLSearchParams(location.search);
-      if (params.has('entity')) {
-        params.delete('entity');
-        history.replace({ ...location, search: params.toString() });
-      }
+      setFlyoutTabIntent(null);
+      // Clean up shareable flyout params when closing via "Add to filter".
+      syncFlyoutShareParams({
+        entity: null,
+        tab: null,
+        flyoutFrom: null,
+        flyoutTo: null,
+      });
     },
-    [k8sClusterNames, location, history]
+    [k8sClusterNames, syncFlyoutShareParams]
   );
 
   // Clicking a region on the Geomap toggles that region into the shared
@@ -2633,8 +2788,8 @@ const AllEntitiesViewInner = ({
                                       ? 'cloud.provider:aws'
                                       : 'cloud.provider:aws AND health:unhealthy'
                                     : isPhase1
-                                    ? 'team:platform'
-                                    : 'health:unhealthy AND team:platform',
+                                    ? 'environment:production'
+                                    : 'health:unhealthy AND environment:production',
                               },
                             }
                           )}
@@ -2938,6 +3093,7 @@ const AllEntitiesViewInner = ({
                     key={`${groupBy.join(',')}-${phaseVariation}`}
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
+                    onSelectEntityAlerts={openEntityOnAlertsTab}
                     groupByFields={groupByFields}
                     activeGroupBy={groupBy}
                     refreshTick={refreshTick}
@@ -2947,6 +3103,7 @@ const AllEntitiesViewInner = ({
                   <EntitiesListView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
+                    onSelectEntityAlerts={openEntityOnAlertsTab}
                     groupCloudByProvider={false}
                     enableColumnSettings={isElasticOn}
                     refreshTick={refreshTick}
@@ -3144,6 +3301,7 @@ const AllEntitiesViewInner = ({
                   <EntitiesListView
                     entities={filteredEntities}
                     onSelectEntity={openEntity}
+                    onSelectEntityAlerts={openEntityOnAlertsTab}
                     groupCloudByProvider={false}
                   />
                 )}
@@ -3179,13 +3337,16 @@ const AllEntitiesViewInner = ({
               isPhase1 ? inventoryAlertsActiveOverride(selectedEntity) : undefined
             }
             podPhaseBadge={podPhaseBadgeForEntity(selectedEntity)}
-            timeRange={{ from: rangeFrom, to: rangeTo }}
+            timeRange={flyoutTimeRange}
             hideAiSummary={isPhase1}
             hideOwnership={isPhase1}
             hideEvents={isPhase1}
             hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
             dashboardStyle={dashboardStyleVariation}
             showDashboardThumbnails={showDashboardThumbnails}
+            tabIntent={flyoutTabIntent}
+            onTabChange={handleFlyoutTabChange}
+            onTimeRangeChange={handleFlyoutTimeRangeChange}
             onAddToFilter={
               showK8sFilters && selectedEntity?.category === 'kubernetes'
                 ? () => handleAddToK8sFilter(selectedEntity)
@@ -3213,7 +3374,8 @@ const AllEntitiesViewInner = ({
                 isPhase1 ? inventoryAlertsActiveOverride(childEntity) : undefined
               }
               podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
-              timeRange={{ from: rangeFrom, to: rangeTo }}
+              timeRange={flyoutTimeRange}
+              onTimeRangeChange={handleFlyoutTimeRangeChange}
               hideAiSummary={isPhase1}
               hideOwnership={isPhase1}
               hideEvents={isPhase1}

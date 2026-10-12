@@ -233,12 +233,14 @@ const ChildAccordion = ({
   parentIndex,
   childIndex,
   onSelectEntity,
+  onSelectEntityAlerts,
   refreshTick,
 }: {
   bucket: GroupBucket;
   parentIndex: number;
   childIndex: number;
   onSelectEntity: (entityName: string) => void;
+  onSelectEntityAlerts?: (entityName: string) => void;
   refreshTick?: number;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -278,6 +280,7 @@ const ChildAccordion = ({
                 parentIndex={parentIndex}
                 childIndex={gcIndex}
                 onSelectEntity={onSelectEntity}
+                onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
               />
             </React.Fragment>
@@ -290,6 +293,7 @@ const ChildAccordion = ({
           borderless
           rows={bucket.entities}
           onSelectEntity={onSelectEntity}
+          onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
         />
       )}
@@ -305,12 +309,14 @@ const GroupAccordion = ({
   bucket,
   index,
   onSelectEntity,
+  onSelectEntityAlerts,
   refreshTick,
   categoryScope,
 }: {
   bucket: GroupBucket;
   index: number;
   onSelectEntity: (entityName: string) => void;
+  onSelectEntityAlerts?: (entityName: string) => void;
   refreshTick?: number;
   categoryScope?: EntityCategoryId;
 }) => {
@@ -443,6 +449,7 @@ const GroupAccordion = ({
                 parentIndex={index}
                 childIndex={childIndex}
                 onSelectEntity={onSelectEntity}
+                onSelectEntityAlerts={onSelectEntityAlerts}
                 refreshTick={refreshTick}
               />
             </React.Fragment>
@@ -454,6 +461,7 @@ const GroupAccordion = ({
           nested
           rows={visibleEntities}
           onSelectEntity={onSelectEntity}
+          onSelectEntityAlerts={onSelectEntityAlerts}
           refreshTick={refreshTick}
         />
       )}
@@ -468,6 +476,8 @@ const GroupAccordion = ({
 interface Props {
   readonly entities: readonly Entity[];
   readonly onSelectEntity: (entityName: string) => void;
+  /** When set, Alerts badges open the flyout on the Alerts tab. */
+  readonly onSelectEntityAlerts?: (entityName: string) => void;
   readonly groupByFields: readonly GroupByFieldDef[];
   readonly activeGroupBy: readonly string[];
   readonly refreshTick?: number;
@@ -480,6 +490,7 @@ interface Props {
 export const SecurityGroupingView = ({
   entities,
   onSelectEntity,
+  onSelectEntityAlerts,
   groupByFields,
   activeGroupBy,
   refreshTick,
@@ -518,6 +529,7 @@ export const SecurityGroupingView = ({
         nested
         rows={entities}
         onSelectEntity={handleSelectEntity}
+        onSelectEntityAlerts={onSelectEntityAlerts}
         refreshTick={refreshTick}
       />
     );
@@ -531,6 +543,7 @@ export const SecurityGroupingView = ({
             bucket={bucket}
             index={index}
             onSelectEntity={handleSelectEntity}
+            onSelectEntityAlerts={onSelectEntityAlerts}
             refreshTick={refreshTick}
             categoryScope={categoryScope}
           />
