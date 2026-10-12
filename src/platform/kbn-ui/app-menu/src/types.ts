@@ -171,6 +171,11 @@ interface AppMenuItemBase {
    * Ignored for items with sub-items — those already reflect popover-open state.
    */
   isSelected?: boolean;
+  /**
+   * PoC: when set to `'ai'`, a top-level inline item renders as an `AiButton` (the AI Agent chrome
+   * button style) instead of a header link. Ignored in the overflow popover.
+   */
+  appearance?: 'ai';
 }
 
 type AppMenuLinkItem = AppMenuItemBase & {

@@ -142,8 +142,16 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
     USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG,
     false
   );
+  // PoC branch only (do not merge): the executive brief lives on the new page, so it forces the new
+  // page on. On Cloud the feature flag comes from LaunchDarkly, so a code fallback isn't enough.
+  const isExecutiveBriefEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsExecutiveBriefEnabled'
+  );
 
-  const PageComponent = isNewHomePageEnabled ? EntityAnalyticsNewHomePage : EntityAnalyticsHomePage;
+  const PageComponent =
+    isNewHomePageEnabled || isExecutiveBriefEnabled
+      ? EntityAnalyticsNewHomePage
+      : EntityAnalyticsHomePage;
 
   return (
     <Routes>

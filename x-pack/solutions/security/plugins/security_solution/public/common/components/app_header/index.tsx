@@ -28,7 +28,10 @@ export const SecurityAppHeader = React.memo<AppHeaderProps>((props) => {
     if (isDetectionsPath(pathname) && mlJobSettingsMenuItem) {
       menuItems.push(mlJobSettingsMenuItem);
     }
-    if (addIntegrationsMenuItem) {
+    const pageProvidesAddIntegrations = props.menu?.items?.some(
+      ({ id }) => id === addIntegrationsMenuItem?.id
+    );
+    if (addIntegrationsMenuItem && !pageProvidesAddIntegrations) {
       menuItems.push(addIntegrationsMenuItem);
     }
 

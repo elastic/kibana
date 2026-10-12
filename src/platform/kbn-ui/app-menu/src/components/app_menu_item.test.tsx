@@ -96,4 +96,23 @@ describe('AppMenuItem', () => {
 
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
+
+  it('renders an AI button and runs the action when appearance is "ai"', async () => {
+    const run = jest.fn();
+    render(
+      <AppMenuItem
+        {...buttonProps}
+        run={run}
+        iconType="productAgent"
+        appearance="ai"
+        label="brief"
+      />
+    );
+
+    const button = screen.getByTestId('test-button');
+    expect(button).toHaveTextContent('Brief');
+    expect(button.className).not.toContain('euiHeaderLink');
+    await userEvent.click(button);
+    expect(run).toHaveBeenCalledTimes(1);
+  });
 });

@@ -31,12 +31,13 @@ import {
 } from '../components/home/use_entity_filters_param';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
-  useAlertBasedTiles,
-  useEntitiesWithAnomaliesCount,
-  useNewEntityCount,
-  useRiskMoversCount,
-  useNewlyHighCriticalCount,
+  useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
+  useNewEntityCountWithDelta as useNewEntityCount,
+  useRiskMoversCountWithDelta as useRiskMoversCount,
+  useNewlyHighCriticalCountWithDelta as useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
+// Switch to useAlertBasedTiles to disable deltas, useAlertBasedTilesWithDelta to enable them.
+import { useAlertBasedTilesWithDelta as useAlertBasedTiles } from '../components/home/needs_attention_tiles/hooks/use_entities_with_alerts_tiles';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import {
   EMPTY_ENTITY_IDS,
@@ -131,9 +132,15 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const {
     alertsCount,
+    alertsDelta,
     alertsEntityIds,
     watchlistedCount,
+    watchlistedDelta,
     watchlistedEntityIds,
+    isDeltaLoading,
+    alertsTrend,
+    watchlistedTrend,
+    isTrendLoading: alertsTrendLoading,
     isLoading: alertBasedLoading,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -143,8 +150,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: anomaliesCount,
+    delta: anomaliesDelta,
     entityIds: anomaliesEntityIds,
     isLoading: anomaliesLoading,
+    isDeltaLoading: anomaliesDeltaLoading,
+    trend: anomaliesTrend,
+    isTrendLoading: anomaliesTrendLoading,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -153,8 +164,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: newEntityCount,
+    delta: newEntityDelta,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
+    isDeltaLoading: newEntityDeltaLoading,
+    trend: newEntityTrend,
+    isTrendLoading: newEntityTrendLoading,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -163,9 +178,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: riskMoversCount,
+    delta: riskMoversDelta,
     entityIds: riskMoversEntityIds,
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
+    isDeltaLoading: riskMoversDeltaLoading,
+    trend: riskMoversTrend,
+    isTrendLoading: riskMoversTrendLoading,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -174,9 +193,13 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: newlyHCCount,
+    delta: newlyHCDelta,
     entityIds: newlyHCEntityIds,
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
+    isDeltaLoading: newlyHCDeltaLoading,
+    trend: newlyHCTrend,
+    isTrendLoading: newlyHCTrendLoading,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -265,6 +288,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: alertsCount,
+        delta: alertsDelta,
+        isDeltaLoading,
+        trend: alertsTrend,
+        isTrendLoading: alertsTrendLoading,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -290,6 +317,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: anomaliesCount,
+        delta: anomaliesDelta,
+        isDeltaLoading: anomaliesDeltaLoading,
+        trend: anomaliesTrend,
+        isTrendLoading: anomaliesTrendLoading,
         isLoading: anomaliesLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
@@ -315,6 +346,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: riskMoversCount,
+        delta: riskMoversDelta,
+        isDeltaLoading: riskMoversDeltaLoading,
+        trend: riskMoversTrend,
+        isTrendLoading: riskMoversTrendLoading,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
@@ -353,6 +388,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: newlyHCCount,
+        delta: newlyHCDelta,
+        isDeltaLoading: newlyHCDeltaLoading,
+        trend: newlyHCTrend,
+        isTrendLoading: newlyHCTrendLoading,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
@@ -395,6 +434,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: watchlistedCount,
+        delta: watchlistedDelta,
+        isDeltaLoading,
+        trend: watchlistedTrend,
+        isTrendLoading: alertsTrendLoading,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -417,6 +460,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           defaultMessage: 'New entity',
         }),
         value: newEntityCount,
+        delta: newEntityDelta,
+        isDeltaLoading: newEntityDeltaLoading,
+        trend: newEntityTrend,
+        isTrendLoading: newEntityTrendLoading,
         isLoading: newEntityLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -437,16 +484,38 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ],
     [
       alertsCount,
+      alertsDelta,
+      alertsTrend,
+      watchlistedTrend,
+      alertsTrendLoading,
       alertBasedLoading,
+      isDeltaLoading,
       anomaliesCount,
+      anomaliesDelta,
+      anomaliesDeltaLoading,
+      anomaliesTrend,
+      anomaliesTrendLoading,
       anomaliesLoading,
       riskMoversCount,
+      riskMoversDelta,
+      riskMoversDeltaLoading,
+      riskMoversTrend,
+      riskMoversTrendLoading,
       riskMoversLoading,
       newlyHCCount,
+      newlyHCDelta,
+      newlyHCDeltaLoading,
+      newlyHCTrend,
+      newlyHCTrendLoading,
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
+      watchlistedDelta,
       newEntityCount,
+      newEntityDelta,
+      newEntityDeltaLoading,
+      newEntityTrend,
+      newEntityTrendLoading,
       newEntityLoading,
       riskMoversMissingIndex,
       timeRange,
@@ -466,7 +535,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   return (
     <>
-      <EntityAnalyticsHomeHeader />
+      <EntityAnalyticsHomeHeader timeRange={timeRange} />
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
           css={css`

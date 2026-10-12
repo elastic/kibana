@@ -86,6 +86,29 @@ describe('SecurityAppHeader', () => {
     expect(screen.getByTestId('securityAppHeaderAddIntegrations')).toBeInTheDocument();
   });
 
+  it('does not duplicate "Add integrations" when the page already provides it', async () => {
+    const addIntegrations = {
+      id: 'addIntegrations',
+      label: 'Add integrations',
+      iconType: 'indexOpen',
+      href: '/app/integrations/browse',
+      overflow: true,
+      testId: 'securityAppHeaderAddIntegrations',
+    };
+    (useAddIntegrationsMenuItem as jest.Mock).mockReturnValue(addIntegrations);
+
+    renderWithProvider(
+      <SecurityAppHeader
+        title="My page"
+        menu={{ items: [{ ...addIntegrations, overflow: false }] }}
+      />
+    );
+
+    await openAppMenuOverflow();
+
+    expect(screen.getAllByTestId('securityAppHeaderAddIntegrations')).toHaveLength(1);
+  });
+
   it('does not add an integrations item when the hook returns undefined', async () => {
     (useAddIntegrationsMenuItem as jest.Mock).mockReturnValue(undefined);
 

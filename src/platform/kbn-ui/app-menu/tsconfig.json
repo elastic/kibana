@@ -18,6 +18,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/ui-chrome-layout"
+    "@kbn/ui-chrome-layout",
+    "@kbn/ui-ai-components"
   ]
 }
