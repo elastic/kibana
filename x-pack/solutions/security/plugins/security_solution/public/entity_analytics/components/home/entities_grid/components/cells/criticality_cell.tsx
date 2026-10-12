@@ -10,9 +10,8 @@ import { ValidCriticalityLevels } from '../../../../../../../common/entity_analy
 import type { CriticalityLevelWithUnassigned } from '../../../../../../../common/entity_analytics/asset_criticality/types';
 import { AssetCriticalityBadge } from '../../../../asset_criticality';
 
-const CRITICALITY_VALUES: readonly string[] = ValidCriticalityLevels;
 const isCriticalityLevel = (value: unknown): value is CriticalityLevelWithUnassigned =>
-  typeof value === 'string' && CRITICALITY_VALUES.includes(value);
+  ValidCriticalityLevels.some((level) => level === value);
 
 export const CriticalityCell = memo(({ value }: { value: unknown }) => (
   <AssetCriticalityBadge criticalityLevel={isCriticalityLevel(value) ? value : 'unassigned'} />
