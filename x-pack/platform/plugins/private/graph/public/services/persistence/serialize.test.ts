@@ -8,19 +8,16 @@
 import { reduxStateToSavedWorkspace } from './serialize';
 import type {
   GraphWorkspaceSavedObject,
-  Workspace,
-  WorkspaceEdge,
-  WorkspaceNode,
   UrlTemplate,
   AdvancedSettings,
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import { createWorkspaceState, type IndexpatternDatasource } from '../../state_management';
+import type { IndexpatternDatasource, WorkspaceState } from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
-    workspace: Workspace;
+    workspace: WorkspaceState;
     urlTemplates: UrlTemplate[];
     advancedSettings: AdvancedSettings;
     selectedIndex: IndexpatternDatasource;
@@ -68,126 +65,100 @@ describe('serialize', () => {
         },
       ],
       workspace: {
-        nodes: [
-          {
+        isInitialized: true,
+        nodesById: {
+          'node-0': {
+            id: 'node-0',
             color: 'black',
             data: { field: 'field1', term: 'A' },
-            icon: { id: 'a', package: 'eui' },
             label: 'A',
             x: 1,
             y: 2,
             scaledSize: 10,
-            parent: null,
           },
-          {
+          'node-1': {
+            id: 'node-1',
+            parentId: 'node-2',
             color: 'black',
             data: { field: 'field1', term: 'B' },
-            icon: { id: 'a', package: 'eui' },
             label: 'B',
             x: 3,
             y: 4,
             scaledSize: 10,
-            parent: null,
           },
-          {
+          'node-2': {
+            id: 'node-2',
             color: 'black',
             data: { field: 'field1', term: 'C' },
-            icon: { id: 'a', package: 'eui' },
             label: 'B',
             x: 5,
             y: 6,
             scaledSize: 10,
-            parent: null,
           },
-          {
+          'node-3': {
+            id: 'node-3',
+            parentId: 'node-2',
             color: 'black',
             data: { field: 'field2', term: 'D' },
-            icon: { id: 'a', package: 'eui' },
             label: 'D',
             x: 7,
             y: 8,
             scaledSize: 10,
-            parent: null,
           },
-          {
+          'node-4': {
+            id: 'node-4',
             color: 'black',
             data: { field: 'field2', term: 'E' },
-            icon: { id: 'a', package: 'eui' },
             label: 'E',
             x: 9,
             y: 10,
             scaledSize: 10,
-            parent: null,
           },
-        ],
-        blocklistedNodes: [
-          {
+        },
+        nodeIds: ['node-0', 'node-1', 'node-2', 'node-3', 'node-4'],
+        edgesById: {
+          'edge-0': {
+            id: 'edge-0',
+            sourceId: 'node-2',
+            targetId: 'node-0',
+            topSourceId: 'node-2',
+            topTargetId: 'node-0',
+            label: '',
+            weight: 5,
+            width: 5,
+          },
+          'edge-1': {
+            id: 'edge-1',
+            sourceId: 'node-2',
+            targetId: 'node-4',
+            topSourceId: 'node-2',
+            topTargetId: 'node-4',
+            label: '',
+            weight: 5,
+            width: 5,
+          },
+        },
+        edgeIds: ['edge-0', 'edge-1'],
+        blocklistedNodesById: {
+          'blocked-0': {
+            id: 'blocked-0',
             color: 'black',
             data: { field: 'field1', term: 'Z' },
-            icon: { id: 'a', package: 'eui' },
             label: 'Z',
             x: 1,
             y: 2,
             scaledSize: 10,
-            parent: null,
           },
-        ],
-        edges: [] as WorkspaceEdge[],
-      } as Workspace,
+        },
+        blocklistedNodeIds: ['blocked-0'],
+      },
     };
-
-    // C is parent of B and D
-    appState.workspace.nodes[3].parent = appState.workspace.nodes[2];
-    appState.workspace.nodes[1].parent = appState.workspace.nodes[2];
-
-    // A <-> C
-    appState.workspace.edges.push({
-      label: '',
-      source: appState.workspace.nodes[2],
-      target: appState.workspace.nodes[0],
-      weight: 5,
-      width: 5,
-    } as WorkspaceEdge);
-
-    // C <-> E
-    appState.workspace.edges.push({
-      label: '',
-      source: appState.workspace.nodes[2],
-      target: appState.workspace.nodes[4],
-      weight: 5,
-      width: 5,
-    } as WorkspaceEdge);
   });
-
-  const serializeWorkspace = (
-    savedWorkspace: GraphWorkspaceSavedObject,
-    canSaveData: boolean
-  ): void => {
-    appState.workspace.nodes.forEach((node, index) => {
-      node.id = `node-${index}`;
-    });
-    appState.workspace.blocklistedNodes.forEach((node, index) => {
-      (node as WorkspaceNode).id = `blocked-${index}`;
-    });
-    appState.workspace.edges.forEach((edge, index) => {
-      edge.id = `edge-${index}`;
-      edge.topSrc = edge.source;
-      edge.topTarget = edge.target;
-    });
-    appState.workspace.selectedNodes = [];
-    appState.workspace.getEdgeSelection = () => [];
-
-    reduxStateToSavedWorkspace(
-      savedWorkspace,
-      { ...appState, workspace: createWorkspaceState(appState.workspace) },
-      canSaveData
-    );
-  };
 
   it('should serialize normalized Redux workspace state', () => {
     const savedWorkspace = {} as GraphWorkspaceSavedObject;
 
-    serializeWorkspace(savedWorkspace, true);
+    reduxStateToSavedWorkspace(savedWorkspace, appState, true);
 
     const workspaceState = JSON.parse(savedWorkspace.wsState);
     expect(workspaceState).toMatchInlineSnapshot(`
@@ -311,7 +282,7 @@ describe('serialize', () => {
   it('should not save data if set to false', () => {
     const savedWorkspace = {} as unknown as GraphWorkspaceSavedObject;
 
-    serializeWorkspace(savedWorkspace, false);
+    reduxStateToSavedWorkspace(savedWorkspace, appState, false);
 
     const workspaceState = JSON.parse(savedWorkspace.wsState);
     expect(workspaceState.vertices).toHaveLength(0);
