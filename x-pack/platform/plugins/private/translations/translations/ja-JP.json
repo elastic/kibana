@@ -39114,8 +39114,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "プレビュー",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "クラウド使用状況を表示",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "Elastic Inference Serviceのモデルとエンドポイントを管理",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.body": "モデルデータの取得中にエラーが発生しました。",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.title": "モデルを読み込めません",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "埋め込み",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "再ランク付け",

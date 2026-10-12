@@ -16,8 +16,17 @@ import { DetectionsSettingsTab } from './detections_settings_tab';
 import { useDeveloperMode } from './hooks/use_developer_mode';
 
 const mockContinuousSave = jest.fn();
+const mockRunLimitsRequestSave = jest.fn();
+const mockRunLimitsConfirmAndSave = jest.fn();
+const mockRunLimitsCancel = jest.fn();
+const mockTokenTrackingSave = jest.fn();
+const mockTokenTrackingCancel = jest.fn();
 let mockContinuousHasChanged = false;
 let mockScheduledEnabled = false;
+let mockRunLimitsIsDirty = false;
+let mockTokenTrackingIsDirty = false;
+let mockBlocksActivity = false;
+let mockRunLimitGroups: readonly string[] = [];
 
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
@@ -26,11 +35,14 @@ jest.mock('../hooks/use_kibana');
 jest.mock('./hooks/use_developer_mode');
 jest.mock('./hooks/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({
-    blocksActivity: false,
-    isBlocked: false,
+    blocksActivity: mockBlocksActivity,
+    isBlocked: mockBlocksActivity,
     status: undefined,
-    activityBlockTooltip: undefined,
+    activityBlockTooltip: mockBlocksActivity
+      ? 'Resume activity to save these settings.'
+      : undefined,
   }),
+  useMaintenanceStatus: () => ({ data: undefined }),
 }));
 jest.mock('./components/use_continuous_extraction_settings', () => ({
   useContinuousExtractionSettings: () => ({
@@ -66,19 +78,40 @@ jest.mock('./components/stale_event_cleanup_section', () => ({
 jest.mock('./components/cost_estimate', () => ({
   CostEstimate: () => <div data-test-subj="cost-estimate" />,
 }));
+jest.mock('./components/use_token_tracking_form', () => ({
+  useTokenTrackingForm: () => ({
+    enabled: true,
+    savedEnabled: true,
+    canEdit: true,
+    isDirty: mockTokenTrackingIsDirty,
+    isSaving: false,
+    updateEnabled: jest.fn(),
+    save: mockTokenTrackingSave,
+    cancel: mockTokenTrackingCancel,
+  }),
+}));
 jest.mock('./components/run_limits_section', () => ({
-  RunLimitsSection: ({
-    onUnsavedChangesChange,
-  }: {
-    onUnsavedChangesChange: (hasUnsavedChanges: boolean) => void;
-  }) => (
-    <button
-      data-test-subj="runLimitsUnsavedChangesStub"
-      onClick={() => onUnsavedChangesChange(true)}
-    >
-      Change run limits
-    </button>
+  RunLimitsSection: ({ onConfirmSave }: { onConfirmSave: () => Promise<void> }) => (
+    <>
+      <button data-test-subj="runLimitsConfirmStub" onClick={() => void onConfirmSave()}>
+        Confirm run limits
+      </button>
+    </>
   ),
+}));
+jest.mock('./components/use_run_limits_form', () => ({
+  useRunLimitsForm: ({ groups }: { groups: readonly string[] }) => {
+    mockRunLimitGroups = groups;
+    return {
+      isDirty: mockRunLimitsIsDirty,
+      isSaving: false,
+      canManage: true,
+      update: mockRunLimitsIsDirty ? { limits: { detection: 10 } } : undefined,
+      requestSave: mockRunLimitsRequestSave,
+      confirmAndSave: mockRunLimitsConfirmAndSave,
+      cancel: mockRunLimitsCancel,
+    };
+  },
 }));
 jest.mock('./components/significant_events_tuning_config_editor', () => ({
   configToAnnotatedYaml: (config: unknown) => JSON.stringify(config),
@@ -174,30 +207,116 @@ const setup = ({
   );
 };
 
-describe('DetectionsSettingsTab developer mode', () => {
+describe('DetectionsSettingsTab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockContinuousHasChanged = false;
     mockScheduledEnabled = false;
+    mockRunLimitsIsDirty = false;
+    mockTokenTrackingIsDirty = false;
+    mockBlocksActivity = false;
+    mockRunLimitGroups = [];
     mockContinuousSave.mockResolvedValue(undefined);
+    mockRunLimitsRequestSave.mockResolvedValue('saved');
+    mockRunLimitsConfirmAndSave.mockResolvedValue('saved');
+    mockTokenTrackingSave.mockResolvedValue('saved');
     settingsGlobalClientSet.mockResolvedValue(true);
   });
 
-  it('persists the developer mode switch immediately', () => {
-    setup({ isDeveloperMode: false });
-
-    fireEvent.click(screen.getByTestId('nightshiftDeveloperModeSwitch'));
-
-    expect(setDeveloperMode).toHaveBeenCalledWith(true);
-  });
-
   it('includes run-limit drafts in the unsaved-changes prompt', () => {
+    mockRunLimitsIsDirty = true;
     setup();
-
-    fireEvent.click(screen.getByTestId('runLimitsUnsavedChangesStub'));
 
     expect(mockUseUnsavedChangesPrompt).toHaveBeenLastCalledWith(
       expect.objectContaining({ hasUnsavedChanges: true })
+    );
+  });
+
+  it('renders detection run limits in the detection process section', () => {
+    setup();
+
+    expect(screen.getByTestId('nightshiftDetectionProcessSection')).toHaveTextContent(
+      'Detection process'
+    );
+    expect(mockRunLimitGroups).toEqual(['detection', 'ki_extraction']);
+  });
+
+  it('saves run limits, activity settings, and token tracking through one bottom bar', async () => {
+    mockRunLimitsIsDirty = true;
+    mockContinuousHasChanged = true;
+    mockTokenTrackingIsDirty = true;
+    setup({ isDeveloperMode: true });
+
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+
+    await waitFor(() => {
+      expect(mockRunLimitsRequestSave).toHaveBeenCalledTimes(1);
+      expect(mockContinuousSave).toHaveBeenCalledTimes(1);
+      expect(mockTokenTrackingSave).toHaveBeenCalledTimes(1);
+    });
+    expect(mockRunLimitsRequestSave.mock.invocationCallOrder[0]).toBeLessThan(
+      mockContinuousSave.mock.invocationCallOrder[0]
+    );
+    expect(mockContinuousSave.mock.invocationCallOrder[0]).toBeLessThan(
+      mockTokenTrackingSave.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('stops the save sequence when activity settings fail', async () => {
+    mockRunLimitsIsDirty = true;
+    mockContinuousHasChanged = true;
+    mockTokenTrackingIsDirty = true;
+    mockContinuousSave.mockRejectedValue(new Error('activity save failed'));
+    setup({ isDeveloperMode: true });
+
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+
+    await waitFor(() => {
+      expect(mockRunLimitsRequestSave).toHaveBeenCalledTimes(1);
+      expect(mockContinuousSave).toHaveBeenCalledTimes(1);
+    });
+    expect(mockTokenTrackingSave).not.toHaveBeenCalled();
+  });
+
+  it('waits for run-limit confirmation before saving the remaining settings', async () => {
+    mockRunLimitsIsDirty = true;
+    mockContinuousHasChanged = true;
+    mockTokenTrackingIsDirty = true;
+    mockRunLimitsRequestSave.mockResolvedValue('needs-confirmation');
+    setup({ isDeveloperMode: true });
+
+    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
+
+    await waitFor(() => expect(mockRunLimitsRequestSave).toHaveBeenCalledTimes(1));
+    expect(mockContinuousSave).not.toHaveBeenCalled();
+    expect(mockTokenTrackingSave).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('runLimitsConfirmStub'));
+
+    await waitFor(() => {
+      expect(mockRunLimitsConfirmAndSave).toHaveBeenCalledTimes(1);
+      expect(mockContinuousSave).toHaveBeenCalledTimes(1);
+      expect(mockTokenTrackingSave).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  it('allows a run-limit-only save while detection activity is paused', () => {
+    mockRunLimitsIsDirty = true;
+    mockBlocksActivity = true;
+    setup();
+
+    expect(screen.getByTestId('streams-settings-save-button')).toBeEnabled();
+  });
+
+  it('blocks a combined save while dirty activity settings are paused', () => {
+    mockRunLimitsIsDirty = true;
+    mockContinuousHasChanged = true;
+    mockBlocksActivity = true;
+    setup();
+
+    expect(screen.getByTestId('streams-settings-save-button')).toHaveAttribute(
+      'aria-disabled',
+      'true'
     );
   });
 
@@ -286,18 +405,6 @@ describe('DetectionsSettingsTab developer mode', () => {
     expect(screen.queryByTestId('nightshiftSettingsTuningFlyout')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftSettingsTuningEditButton'));
     expect(screen.getByTestId('streams-settings-tuning-editor')).toHaveValue(savedYaml);
-  });
-
-  it('disables the switch without advancedSettings.save', () => {
-    setup({ canSaveAdvancedSettings: false });
-
-    expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
-  });
-
-  it('disables the switch while a save is in flight', () => {
-    setup({ isSaving: true });
-
-    expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
   });
 
   it('reverts a dirty YAML draft when developer mode turns off', () => {
@@ -416,28 +523,5 @@ describe('DetectionsSettingsTab developer mode', () => {
 
     expect(screen.queryByTestId('nightshiftSettingsTuningPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('streams-settings-save-button')).toBeDisabled();
-  });
-
-  it('disables the developer mode switch while settings are saving', async () => {
-    mockContinuousHasChanged = true;
-    setup({ isDeveloperMode: true });
-
-    let resolveSet: () => void = () => undefined;
-    mockContinuousSave.mockReturnValue(
-      new Promise<void>((resolve) => {
-        resolveSet = resolve;
-      })
-    );
-
-    fireEvent.click(screen.getByTestId('streams-settings-save-button'));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
-    });
-
-    resolveSet();
-    await waitFor(() => {
-      expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeEnabled();
-    });
   });
 });
