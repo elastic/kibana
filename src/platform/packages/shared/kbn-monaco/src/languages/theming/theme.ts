@@ -10,10 +10,10 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import type { monaco } from '../../monaco_imports';
 
-export function createTheme(
-  { colorMode, euiTheme }: UseEuiTheme,
-  backgroundColor?: string
-): monaco.editor.IStandaloneThemeData {
+export function createTheme({
+  colorMode,
+  euiTheme,
+}: UseEuiTheme): monaco.editor.IStandaloneThemeData {
   return {
     base: colorMode === 'DARK' ? 'vs-dark' : 'vs',
     inherit: true,
@@ -85,7 +85,7 @@ export function createTheme(
     ],
     colors: {
       'editor.foreground': euiTheme.colors.textParagraph,
-      'editor.background': backgroundColor ?? euiTheme.colors.backgroundBasePlain,
+      'editor.background': euiTheme.colors.backgroundBasePlain,
       'editorLineNumber.foreground': euiTheme.colors.textSubdued,
       'editorLineNumber.activeForeground': euiTheme.colors.textSubdued,
       'editorIndentGuide.background1': euiTheme.colors.lightShade,
@@ -110,4 +110,3 @@ export function createTheme(
 }
 
 export const buildTheme = createTheme;
-export const buildTransparentTheme = (euiTheme: UseEuiTheme) => createTheme(euiTheme, '#00000000');
