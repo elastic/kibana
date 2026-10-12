@@ -437,6 +437,8 @@ export class CasePlugin
         //    so deleting a data view in space `analytics-1` from a `/reset`
         //    request that arrived in `default` 404s on the existence check
         //    (even with `force: true`).
+        //  - The reconciliation task lists the hidden `space` SOs to delete
+        //    analytics documents of deleted spaces.
         // The cases SO types are hidden, so they must be opted in
         // explicitly. `index-pattern` is a globally-registered SO type
         // (data-views plugin); opting it in here grants the internal client
@@ -454,6 +456,7 @@ export class CasePlugin
           CASE_TEMPLATE_SAVED_OBJECT,
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
+          'space',
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
         void this.casesAnalyticsV2Service.start({

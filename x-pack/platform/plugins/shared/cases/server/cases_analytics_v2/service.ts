@@ -263,10 +263,11 @@ export class CasesAnalyticsV2Service {
         // `start()` has populated `internalSavedObjectsClient`
         // (unlikely; Task Manager waits for start), throwing here gets
         // logged and retried on the next tick.
-        if (this.internalSavedObjectsClient == null) {
+        if (this.internalSavedObjectsClient == null || this.esClient == null) {
           throw new Error('cases-analyticsV2: reconciliation fired before service start completed');
         }
         return {
+          esClient: this.esClient,
           savedObjectsClient: this.internalSavedObjectsClient,
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
