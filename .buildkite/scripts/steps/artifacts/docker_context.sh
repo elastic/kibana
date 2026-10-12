@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-# Skip the moon-cache download; release artifacts must not hydrate it.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 source "$(dirname "$0")/../../common/util.sh"

@@ -47,8 +47,6 @@ else
 fi
 
 echo "--- Bootstrap Kibana"
-# Node scripts only; skip the moon-cache download.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Download flaky test report"

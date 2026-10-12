@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-# Node scripts and `playwright --list` only; skip the moon-cache download.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 

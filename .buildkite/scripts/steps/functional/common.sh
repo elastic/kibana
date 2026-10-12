@@ -6,9 +6,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Functional tests run Kibana from the distributable, so skip the moon-cache download.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 # Bootstrap and artifact download are independent — run them in parallel.
 # Bootstrap installs node_modules; the download fetches the pre-built Kibana distributable.
 # To keep logs readable, the download runs in the background with its output captured

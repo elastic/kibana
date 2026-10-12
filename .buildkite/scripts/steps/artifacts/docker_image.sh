@@ -2,9 +2,6 @@
 
 set -euo pipefail
 
-# Skip the moon-cache download; the distributable build does not use it.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh

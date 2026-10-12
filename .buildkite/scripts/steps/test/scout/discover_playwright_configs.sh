@@ -4,9 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Node scripts and `playwright --list` only; skip the moon-cache download.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 echo '--- Update Scout Test Config Manifests'

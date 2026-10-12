@@ -28,8 +28,6 @@ REPORT_DIR="target/flaky_tests"
 REPORT_PATH="$REPORT_DIR/flaky_tests.json"
 
 echo "--- Bootstrap Kibana"
-# Node scripts only; skip the moon-cache download.
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 # `+++` expands this group by default so the log opens on the summary table
