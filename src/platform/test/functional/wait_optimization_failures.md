@@ -69,6 +69,12 @@ These are useful failure patterns, but were not discovered in CI.
 | A temporary delayed-network wrapper could not load the Markdown provider | The wrapper assumed each config loads its directory index; Markdown loads `_markdown_vis` directly. Read `testFiles` from the original config when wrapping a suite, and verify provider resolution before starting the stack. **Wrapper corrected to the config’s actual provider.** See the PR for delayed-network verification. |
 | Local bundle compression tests received gzip when requesting Brotli | Source-built assets lacked the distributable's `.br` sidecars. Validate the build artifact/environment before changing a compression assertion. **Environment prepared; all four bundle tests passed with the existing assertions.** |
 
+## Polling cadence versus delayed emissions
+
+The group1 visual audit exposed a local shared-helper defect, not a CI test failure: [browser log polling](../../packages/shared/kbn-ftr-common-functional-ui-services/services/remote/poll_for_log_entry.ts) used `repeat()` followed by `delay(ms)`, which delayed emissions but immediately restarted each request. Empty/filtered responses made this especially easy to miss. During Mocha execution, the full traced run made 73,138 log requests at 358.4/sec despite the configured 100 ms interval.
+
+Use the retry/repetition operator's delay to space subscriptions: `repeat({ delay: ms })`. Test empty and fully filtered responses, bound request counts under virtual time, verify slow requests do not overlap, preserve recovery timing, and unsubscribe cleanly. Six [regressions](../../packages/shared/kbn-ftr-common-functional-ui-services/services/remote/poll_for_log_entry.test.ts) and the full 41-test group1 rerun passed. Log requests fell to 1,023 at 5.8/sec. The runtime change is not a controlled benchmark because temporary tracing overhead scales with request volume.
+
 ## Browser-recording validation
 
 These observations are local recording checks, not CI failures or evidence of avoidable waits.
