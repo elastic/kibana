@@ -35,7 +35,7 @@
  * builder_type_registry tests.
  */
 
-import type { CreateRuleData, ReplaceRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, PutRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import type {
@@ -134,7 +134,7 @@ const baseCreateData = {
 // CreateRuleData that carries builder fields instead of a query.
 const builderCreateData = {
   kind: 'alert',
-  metadata: { name: 'test-rule', builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+  metadata: { name: 'test-rule', builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
   time_field: '@timestamp',
   schedule: { every: '5m' },
 } as unknown as CreateRuleData;
@@ -432,18 +432,18 @@ describe('resolveUpdateRuleBuilder', () => {
   describe('clearing the builder (builder_type: null)', () => {
     it('sets both builder_type and builder_fields to null when builder_type: null', () => {
       const registry = createMockRegistry();
-      const data: UpdateRuleData = { metadata: { builder_type: null } };
+      const data: UpdateRuleData = { metadata: { builder: null } };
 
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting);
 
-      expect(result.metadata?.builder_type).toBeNull();
+      expect(result.metadata?.builder).toBeNull();
       expect(result.metadata?.builder_fields).toBeNull();
     });
 
     it('does not call registry.generate when builder_type: null', () => {
       const generate = jest.fn();
       const registry = createMockRegistry(generate);
-      const data: UpdateRuleData = { metadata: { builder_type: null } };
+      const data: UpdateRuleData = { metadata: { builder: null } };
 
       resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting);
 
@@ -453,7 +453,7 @@ describe('resolveUpdateRuleBuilder', () => {
     it('throws INVALID_BUILDER_FIELDS when builder_type: null but builder_fields is also set', () => {
       const registry = createMockRegistry();
       const data: UpdateRuleData = {
-        metadata: { builder_type: null, builder_fields: RAW_FIELDS },
+        metadata: { builder: null, builder_fields: RAW_FIELDS },
       };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
@@ -485,7 +485,7 @@ describe('resolveUpdateRuleBuilder', () => {
     it('throws INVALID_BUILDER_FIELDS when builder_fields: null and requestedType locks in an effective type', () => {
       const registry = createMockRegistry();
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE, builder_fields: null },
+        metadata: { builder: { type: BUILDER_TYPE }, builder_fields: null },
       };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting)).toThrow(
@@ -716,7 +716,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const generate = jest.fn().mockReturnValue(standaloneGenerated);
       const registry = createMockRegistry(generate);
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+        metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
       };
 
       resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting);
@@ -738,7 +738,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const generate = jest.fn().mockReturnValue(standaloneGenerated);
       const registry = createMockRegistry(generate);
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+        metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
         schedule: { every: '10m' },
       };
 
@@ -762,7 +762,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const generate = jest.fn().mockReturnValue(standaloneGenerated);
       const registry = createMockRegistry(generate);
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+        metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
         time_field: 'event.created',
       };
 
@@ -809,7 +809,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const generate = jest.fn().mockReturnValue(standaloneGenerated);
       const registry = createMockRegistry(generate);
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+        metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
       };
 
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting);
@@ -825,7 +825,7 @@ describe('resolveUpdateRuleBuilder', () => {
 
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting);
 
-      expect(result.metadata?.builder_type).toBe(BUILDER_TYPE);
+      expect(result.metadata?.builder?.type).toBe(BUILDER_TYPE);
     });
 
     // -----------------------------------------------------------------------
@@ -837,7 +837,7 @@ describe('resolveUpdateRuleBuilder', () => {
         const generated: GeneratedQuery = { ...standaloneGenerated, time_field: 'event.created' };
         const registry = createMockRegistry(jest.fn().mockReturnValue(generated));
         const data: UpdateRuleData = {
-          metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+          metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
           time_field: '@timestamp',
         };
 
@@ -849,7 +849,7 @@ describe('resolveUpdateRuleBuilder', () => {
       it('keeps the caller time_field when generated.time_field is undefined', () => {
         const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneGenerated));
         const data: UpdateRuleData = {
-          metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+          metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
           time_field: '@timestamp',
         };
 
@@ -865,7 +865,7 @@ describe('resolveUpdateRuleBuilder', () => {
         };
         const registry = createMockRegistry(jest.fn().mockReturnValue(generated));
         const data: UpdateRuleData = {
-          metadata: { builder_type: BUILDER_TYPE, builder_fields: RAW_FIELDS },
+          metadata: { builder: { type: BUILDER_TYPE }, builder_fields: RAW_FIELDS },
         };
 
         const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting);
@@ -884,7 +884,7 @@ describe('resolveUpdateRuleBuilder', () => {
         const generate = jest.fn().mockReturnValue(standaloneGenerated);
         const registry = createMockRegistry(generate);
         const data: UpdateRuleData = {
-          metadata: { builder_type: BUILDER_TYPE, builder_fields: rawFields },
+          metadata: { builder: { type: BUILDER_TYPE }, builder_fields: rawFields },
         };
 
         const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting);
@@ -976,7 +976,7 @@ describe('resolveUpdateRuleBuilder', () => {
       // change it as long as the builder_type is restated rather than dropped.
       const registry = createMockRegistry();
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE },
+        metadata: { builder: { type: BUILDER_TYPE } },
         query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
@@ -988,7 +988,7 @@ describe('resolveUpdateRuleBuilder', () => {
     it('throws on a query change when the restated builder_type is registered', () => {
       const registry = createRegistryWithBuilderType();
       const data: UpdateRuleData = {
-        metadata: { builder_type: BUILDER_TYPE },
+        metadata: { builder: { type: BUILDER_TYPE } },
         query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
@@ -1039,7 +1039,7 @@ describe('resolveUpdateRuleBuilder', () => {
   describe('builder type change without new fields', () => {
     it('throws INVALID_BUILDER_FIELDS when switching from one builder type to another without supplying new fields', () => {
       const registry = createMockRegistry();
-      const data: UpdateRuleData = { metadata: { builder_type: OTHER_BUILDER_TYPE } };
+      const data: UpdateRuleData = { metadata: { builder: { type: OTHER_BUILDER_TYPE } } };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
         expect.objectContaining({
@@ -1057,7 +1057,7 @@ describe('resolveUpdateRuleBuilder', () => {
 
     it('throws INVALID_BUILDER_FIELDS when adopting a builder type on a plain rule without supplying fields', () => {
       const registry = createMockRegistry();
-      const data: UpdateRuleData = { metadata: { builder_type: BUILDER_TYPE } };
+      const data: UpdateRuleData = { metadata: { builder: { type: BUILDER_TYPE } } };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting)).toThrow(
         expect.objectContaining({
@@ -1179,10 +1179,10 @@ describe('resolveReplaceRuleBuilder', () => {
 
       it('succeeds and returns the body query when builder_type is null', () => {
         const registry = createRegistryWithBuilderType();
-        // ReplaceRuleData accepts builder_type: null as the explicit escape hatch.
-        const data: ReplaceRuleData = {
+        // PutRuleData accepts builder_type: null as the explicit escape hatch.
+        const data: PutRuleData = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: null },
+          metadata: { ...baseCreateData.metadata, builder: null },
         };
 
         // Should not throw.
@@ -1193,24 +1193,24 @@ describe('resolveReplaceRuleBuilder', () => {
 
       it('produces a result whose metadata.builder_type is not null (normalised away)', () => {
         const registry = createRegistryWithBuilderType();
-        const data: ReplaceRuleData = {
+        const data: PutRuleData = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: null },
+          metadata: { ...baseCreateData.metadata, builder: null },
         };
 
         const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
 
         // null must not propagate to storage. resolveCreateRuleBuilder receives
         // the data with builder_type: undefined, so the result has no null.
-        expect(result.metadata.builder_type).not.toBe(null);
+        expect(result.metadata.builder?.type).not.toBe(null);
       });
 
       it('does not call registry.generate when builder_type is null (explicit clear path)', () => {
         const generate = jest.fn();
         const registry = createRegistryWithBuilderType(generate);
-        const data: ReplaceRuleData = {
+        const data: PutRuleData = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: null },
+          metadata: { ...baseCreateData.metadata, builder: null },
         };
 
         resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
@@ -1296,15 +1296,19 @@ describe('resolveReplaceRuleBuilder', () => {
         // Carry the same builder_type and the same query as in builderExisting.
         const data = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE, name: 'renamed' },
+          metadata: {
+            ...baseCreateData.metadata,
+            builder: { type: BUILDER_TYPE },
+            name: 'renamed',
+          },
           query: { base: 'FROM logs-* | LIMIT 10' },
-        } as ReplaceRuleData;
+        } as PutRuleData;
 
         let result: ReturnType<typeof resolveReplaceRuleBuilder>;
         expect(
           () => (result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting))
         ).not.toThrow();
-        expect(result!.metadata.builder_type).toBe(BUILDER_TYPE);
+        expect(result!.metadata.builder?.type).toBe(BUILDER_TYPE);
         expect(result!.query).toEqual(data.query);
       });
 
@@ -1312,9 +1316,9 @@ describe('resolveReplaceRuleBuilder', () => {
         const registry = createRegistryWithBuilderType();
         const data = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
+          metadata: { ...baseCreateData.metadata, builder: { type: BUILDER_TYPE } },
           query: { base: 'FROM metrics-* | LIMIT 1' }, // different
-        } as ReplaceRuleData;
+        } as PutRuleData;
 
         expect(() => resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
           expect.objectContaining({
@@ -1355,35 +1359,35 @@ describe('resolveReplaceRuleBuilder', () => {
 
         const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
 
-        expect(result.metadata.builder_type).toBeUndefined();
+        expect(result.metadata.builder?.type).toBeUndefined();
       });
 
       it('accepts a changed query when the body restates the unregistered builder_type', () => {
         const registry = createMockRegistry();
         const data = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
+          metadata: { ...baseCreateData.metadata, builder: { type: BUILDER_TYPE } },
           query: { base: 'FROM metrics-* | LIMIT 1' },
-        } as ReplaceRuleData;
+        } as PutRuleData;
 
         let result: ReturnType<typeof resolveReplaceRuleBuilder>;
         expect(
           () => (result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting))
         ).not.toThrow();
-        expect(result!.metadata.builder_type).toBe(BUILDER_TYPE);
+        expect(result!.metadata.builder?.type).toBe(BUILDER_TYPE);
         expect(result!.query).toEqual(data.query);
       });
 
       it('normalises an explicit builder_type: null away (no null in storage)', () => {
         const registry = createMockRegistry();
-        const data: ReplaceRuleData = {
+        const data: PutRuleData = {
           ...baseCreateData,
-          metadata: { ...baseCreateData.metadata, builder_type: null },
+          metadata: { ...baseCreateData.metadata, builder: null },
         };
 
         const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
 
-        expect(result.metadata.builder_type).not.toBe(null);
+        expect(result.metadata.builder?.type).not.toBe(null);
       });
     });
 
@@ -1556,7 +1560,7 @@ describe('execution-time builder types', () => {
     kind: 'signal',
     metadata: {
       name: 'detection-rule',
-      builder_type: EXECUTION_TYPE,
+      builder: { type: EXECUTION_TYPE },
       builder_fields: RAW_EXECUTION_FIELDS,
     },
     time_field: '@timestamp',
@@ -1704,7 +1708,7 @@ describe('execution-time builder types', () => {
       const typeMap = new Map([[EXECUTION_TYPE, makeExecutionDefinition()]]);
       const registry = createMockRegistryWithTypes(typeMap, generate);
       const data: UpdateRuleData = {
-        metadata: { builder_type: EXECUTION_TYPE, builder_fields: RAW_EXECUTION_FIELDS },
+        metadata: { builder: { type: EXECUTION_TYPE }, builder_fields: RAW_EXECUTION_FIELDS },
       };
 
       resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
@@ -1754,7 +1758,7 @@ describe('execution-time builder types', () => {
       });
 
       const data: UpdateRuleData = {
-        metadata: { builder_type: EXECUTION_TYPE, builder_fields: RAW_EXECUTION_FIELDS },
+        metadata: { builder: { type: EXECUTION_TYPE }, builder_fields: RAW_EXECUTION_FIELDS },
       };
 
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, writeTimeExisting);
@@ -1802,7 +1806,7 @@ describe('execution-time builder types', () => {
 
       const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, executionExisting);
 
-      expect(result.metadata?.builder_type).toBe(EXECUTION_TYPE);
+      expect(result.metadata?.builder?.type).toBe(EXECUTION_TYPE);
     });
 
     it('skips derivation under the validation opt-out when fields do not parse', () => {

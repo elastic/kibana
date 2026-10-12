@@ -175,6 +175,7 @@
     "xpack.serverlessSearch": "solutions/search/plugins/serverless_search",
     "xpack.serverlessObservability": "solutions/observability/plugins/serverless_observability",
     "xpack.serverlessVectordb": "solutions/vectordb/plugins/serverless_vectordb",
+    "xpack.securityDetections": "solutions/security/plugins/security_detections",
     "xpack.securitySolution": [
       "solutions/security/plugins/security_solution",
       "solutions/security/packages/kbn-securitysolution-exceptions-common"

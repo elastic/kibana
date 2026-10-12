@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { normalizeJsonSchemaTypeArrays, z } from '@kbn/zod/v4';
 import { MAX_BUILDER_FIELDS_KEYS } from '@kbn/alerting-v2-schemas';
 
 type JsonSchemaNode = Record<string, unknown>;
@@ -72,17 +72,39 @@ export function computeWorstCaseBytes(
   }
 
   let json: JsonSchemaNode;
+  let usesIntersection = false;
   try {
     // `input` io bounds what a client may send, and is the only mode that tells a
     // stripping `z.object()` (no `additionalProperties`) apart from a closed
     // `.strict()` one (`additionalProperties: false`). Under `output` io both emit
     // `false`, so a stripping object would register while silently accepting — and
     // persisting, since the raw value is stored — undeclared fields.
-    json = z.toJSONSchema(schema, { io: 'input' }) as JsonSchemaNode;
+    json = z.toJSONSchema(schema, {
+      io: 'input',
+      // zod >= 4.5 folds intersections into a single object instead of emitting `allOf`.
+      override: ({ zodSchema }) => {
+        if (zodSchema._zod.def.type === 'intersection') {
+          usesIntersection = true;
+        }
+      },
+    }) as JsonSchemaNode;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`${prefix(ctx)} cannot be converted to JSON Schema: ${message}`);
   }
+
+  if (usesIntersection) {
+    throw new Error(
+      `${prefix(
+        ctx
+      )} uses allOf/not; supported constructs are strict objects, bounded strings/arrays, numbers, booleans, enums/literals, and unions`
+    );
+  }
+
+  // zod >= 4.5 emits a nullable scalar with no other keywords as a type array
+  // (`type: ['boolean', 'null']`), which the walk below would reject as an
+  // unsupported type.
+  json = normalizeJsonSchemaTypeArrays(json) as JsonSchemaNode;
 
   return assertBoundedNode(json, ctx.rootPath, ctx, new Set());
 }

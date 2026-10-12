@@ -121,6 +121,14 @@ describe('assertBoundedSchema acceptance', () => {
     passes(z.string().max(100).nullable());
   });
 
+  it('accepts a nullable boolean field', () => {
+    passes(z.object({ enabled: z.boolean().nullable() }).strict());
+  });
+
+  it('accepts a nullable number field', () => {
+    passes(z.object({ score: z.number().nullable() }).strict());
+  });
+
   it('accepts a union of bounded types', () => {
     passes(z.union([z.string().max(50), z.number()]));
   });
@@ -262,6 +270,32 @@ describe('assertBoundedSchema rejection: disallowed constructs', () => {
       z.object({ b: z.number() }).strict()
     );
     rejects(intersected, /uses allOf\/not/);
+  });
+
+  // zod >= 4.5 folds an intersection into one object instead of emitting allOf,
+  // so the rejection has to find it wherever it sits in the tree.
+  const intersection = () =>
+    z.intersection(
+      z.object({ a: z.string().max(8) }).strict(),
+      z.object({ b: z.string().max(8) }).strict()
+    );
+
+  it('rejects an intersection nested inside an object property', () => {
+    rejects(
+      z.object({ nested: z.object({ value: intersection() }).strict() }).strict(),
+      /uses allOf\/not/
+    );
+  });
+
+  it('rejects an intersection nested inside an array element', () => {
+    rejects(z.object({ items: z.array(intersection()).max(2) }).strict(), /uses allOf\/not/);
+  });
+
+  it('rejects an intersection nested inside a union branch', () => {
+    rejects(
+      z.object({ value: z.union([z.string().max(8), intersection()]) }).strict(),
+      /uses allOf\/not/
+    );
   });
 });
 

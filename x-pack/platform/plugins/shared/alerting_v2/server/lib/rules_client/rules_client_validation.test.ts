@@ -117,7 +117,7 @@ const baseCreateData = {
   kind: 'signal' as const,
   metadata: {
     name: 'detection-rule',
-    builder_type: EXECUTION_TYPE_ID,
+    builder: { type: EXECUTION_TYPE_ID },
     builder_fields: VALID_FIELDS,
   },
   time_field: '@timestamp',
@@ -217,6 +217,10 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -240,6 +244,8 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
       ruleEventPublisher,
       createLoggerService().loggerService,
       artifactTypeRegistry,
+      'user',
+      {},
       builderTypeRegistry,
       callerIdentity
     );

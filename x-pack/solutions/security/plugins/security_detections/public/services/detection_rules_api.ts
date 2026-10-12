@@ -14,6 +14,7 @@
  * Ref: rule-fetch-api.md, rule-crud-api.md, rule-actions-api.md
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import type { HttpStart } from '@kbn/core/public';
 import type {
   DetectionRuleResponse,
@@ -101,7 +102,7 @@ export class DetectionRulesApi {
    * `POST /api/detection_engine/v2/rules/{id}/_enable`
    */
   public async enableRule(id: string): Promise<DetectionRuleResponse> {
-    return this.http.post<DetectionRuleResponse>(`${rulePath(id)}/_enable`);
+    return this.http.post<DetectionRuleResponse>(buildPath(`${RULES_PATH}/{id}/_enable`, { id }));
   }
 
   /**
@@ -110,7 +111,7 @@ export class DetectionRulesApi {
    * `POST /api/detection_engine/v2/rules/{id}/_disable`
    */
   public async disableRule(id: string): Promise<DetectionRuleResponse> {
-    return this.http.post<DetectionRuleResponse>(`${rulePath(id)}/_disable`);
+    return this.http.post<DetectionRuleResponse>(buildPath(`${RULES_PATH}/{id}/_disable`, { id }));
   }
 
   /**

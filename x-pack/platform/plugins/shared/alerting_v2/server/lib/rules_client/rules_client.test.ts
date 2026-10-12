@@ -1806,46 +1806,6 @@ describe('RulesClient', () => {
       );
     });
 
-    it('falls back to the server-read version when client omits version', async () => {
-      const client = createClient();
-
-      rulesSavedObjectService.get.mockResolvedValueOnce({
-        id: 'rule-id-fallback',
-        attributes: baseSoAttrs,
-        version: 'WzSERVER=',
-      });
-
-      await client.updateRule({
-        id: 'rule-id-fallback',
-        data: { metadata: { name: 'fallback name' } },
-      });
-
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'rule-id-fallback', version: 'WzSERVER=' })
-      );
-    });
-
-    it('returns the new version from the SO update in the response', async () => {
-      const client = createClient();
-
-      rulesSavedObjectService.get.mockResolvedValueOnce({
-        id: 'rule-id-new-ver',
-        attributes: baseSoAttrs,
-        version: 'WzOLD=',
-      });
-      rulesSavedObjectService.update.mockResolvedValueOnce({
-        id: 'rule-id-new-ver',
-        version: 'WzNEW=',
-      });
-
-      const res = await client.updateRule({
-        id: 'rule-id-new-ver',
-        data: { metadata: { name: 'whatever' } },
-      });
-
-      expect(res.version).toBe('WzNEW=');
-    });
-
     describe('signature_id immutability (step 4.1)', () => {
       const storedAttrs = createRuleSoAttributes({
         metadata: { name: 'rule-1', signature_id: 'stored-sig-id' },
@@ -5555,7 +5515,7 @@ describe('RulesClient', () => {
   //   1. No-op update does not bump revision.
   //   2. enable/disable never run the diff at all.
   //   3. The bulk API-key path never runs the diff.
-  //   4. metadata.version keeps its every-mutation contract (asserted, not assumed).
+  //   4. The root `version` keeps its every-mutation contract (asserted, not assumed).
   // ---------------------------------------------------------------------------
 
   describe('metadata.revision (step 4.2)', () => {
@@ -5575,7 +5535,7 @@ describe('RulesClient', () => {
         expect(attrs.metadata.revision).toBe(0);
       });
 
-      it('metadata.version is 1 on create (every-mutation contract)', async () => {
+      it('version is 1 on create (every-mutation contract)', async () => {
         const client = createClient();
         rulesSavedObjectService.find.mockResolvedValueOnce({
           saved_objects: [],
@@ -5587,7 +5547,7 @@ describe('RulesClient', () => {
         await client.createRule({ data: baseCreateData });
 
         const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
-        expect(attrs.metadata.version).toBe(1);
+        expect(attrs.version).toBe(1);
       });
     });
 
@@ -5596,7 +5556,8 @@ describe('RulesClient', () => {
         const client = createClient();
         // Stored rule: revision=5, name='rule-1'. Update sends same name → no change.
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 4, revision: 5, signature_id: 'sig-1' },
+          version: 4,
+          metadata: { name: 'rule-1', revision: 5, signature_id: 'sig-1' },
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
           id: 'rule-rev-noop',
@@ -5612,13 +5573,14 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(5); // unchanged
-        expect(attrs.metadata.version).toBe(5); // version still bumped
+        expect(attrs.version).toBe(5); // version still bumped
       });
 
       it('bumps revision by one when a meaningful field changes', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 2, revision: 3, signature_id: 'sig-1' },
+          version: 2,
+          metadata: { name: 'rule-1', revision: 3, signature_id: 'sig-1' },
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
           id: 'rule-rev-bump',
@@ -5634,7 +5596,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(4); // bumped
-        expect(attrs.metadata.version).toBe(3); // also bumped (every-mutation)
+        expect(attrs.version).toBe(3); // also bumped (every-mutation)
       });
     });
 
@@ -5644,14 +5606,14 @@ describe('RulesClient', () => {
         // Build a stored rule whose meaningful fields exactly match what
         // transformCreateRuleBodyToRuleSoAttributes produces from baseCreateData,
         // so the revision diff on the replace branch finds no change.
-        // Fields excluded from the diff (updatedAt, updatedBy, metadata.version,
+        // Fields excluded from the diff (updatedAt, updatedBy, version,
         // metadata.revision) are set to distinct values so a regression that
         // accidentally includes them in the comparison would still be caught.
         const stored = createRuleSoAttributes({
+          version: 3,
           metadata: {
             name: 'rule-1',
             signature_id: 'rev-noop-replace-sig',
-            version: 3,
             revision: 7,
             source: { type: 'internal', version: 1 },
             ownership: { managed: false },
@@ -5677,7 +5639,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(7); // unchanged — body matches stored rule exactly
-        expect(attrs.metadata.version).toBe(4); // version still bumps on every mutation
+        expect(attrs.version).toBe(4); // version still bumps on every mutation
       });
     });
 
@@ -5685,7 +5647,8 @@ describe('RulesClient', () => {
       it('does not change revision on enable', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 2, revision: 7, signature_id: 'sig-1' },
+          version: 2,
+          metadata: { name: 'rule-1', revision: 7, signature_id: 'sig-1' },
           enabled: false,
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -5699,7 +5662,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(7); // unchanged — enable is not a meaningful edit
-        expect(attrs.metadata.version).toBe(3); // still bumped (every-mutation contract)
+        expect(attrs.version).toBe(3); // still bumped (every-mutation contract)
       });
     });
 
@@ -5707,7 +5670,8 @@ describe('RulesClient', () => {
       it('does not change revision on disable', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 5, revision: 2, signature_id: 'sig-1' },
+          version: 5,
+          metadata: { name: 'rule-1', revision: 2, signature_id: 'sig-1' },
           enabled: true,
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -5721,7 +5685,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(2); // unchanged — disable is not a meaningful edit
-        expect(attrs.metadata.version).toBe(6); // still bumped (every-mutation contract)
+        expect(attrs.version).toBe(6); // still bumped (every-mutation contract)
       });
     });
 
@@ -5729,7 +5693,8 @@ describe('RulesClient', () => {
       it('does not change revision on API-key rotation', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 3, revision: 9, signature_id: 'sig-1' },
+          version: 3,
+          metadata: { name: 'rule-1', revision: 9, signature_id: 'sig-1' },
           enabled: true,
         });
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -5750,9 +5715,9 @@ describe('RulesClient', () => {
         // The bulk-API-key path only stamps updatedAt/updatedBy — revision must
         // not be touched (the key rotation did not change any rule data).
         expect(updateCall.attrs.metadata.revision).toBe(9); // unchanged
-        // metadata.version is also NOT bumped by the bulk-API-key path — that is
+        // The root `version` is also NOT bumped by the bulk-API-key path — that is
         // the existing, documented behavior (api key no bump).
-        expect(updateCall.attrs.metadata.version).toBe(3); // unchanged
+        expect(updateCall.attrs.version).toBe(3); // unchanged
       });
     });
   });
@@ -5795,7 +5760,7 @@ describe('RulesClient', () => {
         // Step 5.2: the gate now requires a matching solution identity to create
         // a managed-type rule. Use a client with { solution: 'security' } so this
         // test stays focused on ownership derivation, not the gate.
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
 
         // Spy on registry.get so that deriveOwnership reads the managed declaration
         // without needing a full valid registration. builder_type is set but
@@ -5819,7 +5784,7 @@ describe('RulesClient', () => {
         const res = await client.createRule({
           data: {
             ...baseCreateData,
-            metadata: { name: 'detection-rule', builder_type: 'security.detection.query' },
+            metadata: { name: 'detection-rule', builder: { type: 'security.detection.query' } },
             // No builder_fields → resolveCreateRuleBuilder uses baseCreateData.query directly.
           },
           options: { id: 'rule-own-managed' },
@@ -5864,7 +5829,7 @@ describe('RulesClient', () => {
         // Step 5.2: the gate requires a matching solution identity to replace a
         // managed rule. Use a client with { solution: 'security' } so this test
         // stays focused on ownership carry-forward, not the gate.
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
 
         const storedOwnership = { managed: true, solution: 'security', domain: 'detection' };
         const existing = createRuleSoAttributes({
@@ -5951,7 +5916,7 @@ describe('RulesClient', () => {
         rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-frozen-app' });
 
         // Client carries a different app than the stored rule.
-        const client = createClient(undefined, { app: 'differentApp' });
+        const client = createClient(undefined, { callerIdentity: { app: 'differentApp' } });
 
         await client.updateRule({
           id: 'rule-frozen-app',
@@ -5966,7 +5931,7 @@ describe('RulesClient', () => {
 
     describe('createRule — ownership.app', () => {
       it('stamps ownership.app when the client carries an app identity', async () => {
-        const client = createClient(undefined, { app: 'significantEvents' });
+        const client = createClient(undefined, { callerIdentity: { app: 'significantEvents' } });
         rulesSavedObjectService.find.mockResolvedValueOnce({
           saved_objects: [],
           total: 0,
@@ -5988,7 +5953,7 @@ describe('RulesClient', () => {
       });
 
       it('leaves ownership.app absent when the client has no identity', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.find.mockResolvedValueOnce({
           saved_objects: [],
           total: 0,
@@ -6013,7 +5978,7 @@ describe('RulesClient', () => {
         // A security-side client carries onBehalfOf.solution but no app; the
         // managed path copies ownership from the registration anyway, so app
         // is never relevant there. For an unmanaged create it should still be absent.
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.find.mockResolvedValueOnce({
           saved_objects: [],
           total: 0,
@@ -6031,7 +5996,9 @@ describe('RulesClient', () => {
       });
 
       it('does not stamp app on managed-type creates — managed ownership wins', async () => {
-        const client = createClient(undefined, { app: 'someApp', solution: 'security' });
+        const client = createClient(undefined, {
+          callerIdentity: { app: 'someApp', solution: 'security' },
+        });
 
         jest.spyOn(builderTypeRegistry, 'get').mockReturnValue({
           type: 'security.detection.query',
@@ -6051,7 +6018,7 @@ describe('RulesClient', () => {
         const res = await client.createRule({
           data: {
             ...baseCreateData,
-            metadata: { name: 'detection-rule', builder_type: 'security.detection.query' },
+            metadata: { name: 'detection-rule', builder: { type: 'security.detection.query' } },
           },
           options: { id: 'rule-managed-no-app' },
         });
@@ -6135,12 +6102,12 @@ describe('RulesClient', () => {
 
       it('refuses an identity-less client when the type is managed', async () => {
         useManagedType();
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         await expect(
           client.createRule({
             data: {
               ...baseCreateData,
-              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+              metadata: { name: 'rule-1', builder: { type: 'security.detection.query' } },
             },
           })
         ).rejects.toMatchObject({
@@ -6155,12 +6122,12 @@ describe('RulesClient', () => {
 
       it('allows a matching-solution client to create a managed-type rule', async () => {
         useManagedType();
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         await expect(
           client.createRule({
             data: {
               ...baseCreateData,
-              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+              metadata: { name: 'rule-1', builder: { type: 'security.detection.query' } },
             },
           })
         ).resolves.toBeDefined();
@@ -6169,12 +6136,12 @@ describe('RulesClient', () => {
 
       it('refuses a mismatched-solution client when the type is managed', async () => {
         useManagedType();
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         await expect(
           client.createRule({
             data: {
               ...baseCreateData,
-              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+              metadata: { name: 'rule-1', builder: { type: 'security.detection.query' } },
             },
           })
         ).rejects.toMatchObject({
@@ -6189,7 +6156,7 @@ describe('RulesClient', () => {
 
       it('allows any caller to create an unmanaged-type rule', async () => {
         useUnregisteredType();
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         await expect(client.createRule({ data: baseCreateData })).resolves.toBeDefined();
         expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalled();
       });
@@ -6197,7 +6164,7 @@ describe('RulesClient', () => {
 
     describe('updateRule', () => {
       it('refuses an identity-less client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-1'));
         await expect(
           client.updateRule({ id: 'rule-upd-1', data: { metadata: { name: 'changed' } } })
@@ -6209,7 +6176,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to update a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-2'));
         rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-upd-2' });
         await expect(
@@ -6219,7 +6186,7 @@ describe('RulesClient', () => {
       });
 
       it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-3'));
         await expect(
           client.updateRule({ id: 'rule-upd-3', data: { metadata: { name: 'changed' } } })
@@ -6245,7 +6212,7 @@ describe('RulesClient', () => {
           schedule: { every: '1m', lookback: '1m' },
           query: { base: 'FROM logs-* | LIMIT 1' },
         });
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce({
           id: 'rule-upd-hmig',
           attributes: attrsWithUnmanagedOwnership,
@@ -6266,12 +6233,12 @@ describe('RulesClient', () => {
         // A matching-solution client that attempts to change a managed rule's
         // builder_type still receives BUILDER_TYPE_IS_MANAGED.
         // Ref: rule-ownership.md "The write gate" (second clause)
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-bt-1'));
         await expect(
           client.updateRule({
             id: 'rule-upd-bt-1',
-            data: { metadata: { name: 'changed', builder_type: null } },
+            data: { metadata: { name: 'changed', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6286,12 +6253,12 @@ describe('RulesClient', () => {
         // An identity-less caller whose body also changes builder_type receives
         // RULE_IS_MANAGED from the earlier gate, not BUILDER_TYPE_IS_MANAGED.
         // Ref: rule-ownership.md "The write gate" flowchart (identity clause first)
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-upd-bt-2'));
         await expect(
           client.updateRule({
             id: 'rule-upd-bt-2',
-            data: { metadata: { name: 'changed', builder_type: null } },
+            data: { metadata: { name: 'changed', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6303,7 +6270,7 @@ describe('RulesClient', () => {
 
     describe('upsertRule replace branch', () => {
       it('refuses an identity-less client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-1'));
         await expect(
           client.upsertRule({
@@ -6318,7 +6285,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to replace a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         // ruleExists calls get, then the replace branch calls get again.
         rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-2'));
         rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-upsert-2' });
@@ -6332,7 +6299,7 @@ describe('RulesClient', () => {
       });
 
       it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-3'));
         await expect(
           client.upsertRule({
@@ -6350,12 +6317,12 @@ describe('RulesClient', () => {
         // Caller identity does not bypass the builder-type transition clause
         // on the replace branch either.
         // Ref: rule-ownership.md "The write gate" (second clause)
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-bt-1'));
         await expect(
           client.upsertRule({
             id: 'rule-upsert-bt-1',
-            data: { ...baseCreateData, metadata: { name: 'replaced', builder_type: null } },
+            data: { ...baseCreateData, metadata: { name: 'replaced', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6368,12 +6335,12 @@ describe('RulesClient', () => {
         // Identity clause runs before the builder-type transition clause on the
         // replace branch: identity-less caller gets RULE_IS_MANAGED.
         // Ref: rule-ownership.md "The write gate" flowchart (identity clause first)
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValue(managedDoc('rule-upsert-bt-2'));
         await expect(
           client.upsertRule({
             id: 'rule-upsert-bt-2',
-            data: { ...baseCreateData, metadata: { name: 'replaced', builder_type: null } },
+            data: { ...baseCreateData, metadata: { name: 'replaced', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6385,7 +6352,7 @@ describe('RulesClient', () => {
 
     describe('deleteRule', () => {
       it('refuses an identity-less client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-del-1'));
         await expect(client.deleteRule({ id: 'rule-del-1' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6395,14 +6362,14 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to delete a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-del-2'));
         await expect(client.deleteRule({ id: 'rule-del-2' })).resolves.toBeUndefined();
         expect(rulesSavedObjectService.delete).toHaveBeenCalled();
       });
 
       it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-del-3'));
         await expect(client.deleteRule({ id: 'rule-del-3' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6414,7 +6381,7 @@ describe('RulesClient', () => {
 
     describe('enableRule', () => {
       it('refuses an identity-less client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-en-1'));
         await expect(client.enableRule({ id: 'rule-en-1' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6424,7 +6391,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to enable a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-en-2'));
         rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-en-2' });
         await expect(client.enableRule({ id: 'rule-en-2' })).resolves.toBeDefined();
@@ -6432,7 +6399,7 @@ describe('RulesClient', () => {
       });
 
       it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-en-3'));
         await expect(client.enableRule({ id: 'rule-en-3' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6444,7 +6411,7 @@ describe('RulesClient', () => {
 
     describe('disableRule', () => {
       it('refuses an identity-less client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-dis-1'));
         await expect(client.disableRule({ id: 'rule-dis-1' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6454,7 +6421,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to disable a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-dis-2'));
         rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-dis-2' });
         await expect(client.disableRule({ id: 'rule-dis-2' })).resolves.toBeDefined();
@@ -6462,7 +6429,7 @@ describe('RulesClient', () => {
       });
 
       it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(managedDoc('rule-dis-3'));
         await expect(client.disableRule({ id: 'rule-dis-3' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6481,7 +6448,7 @@ describe('RulesClient', () => {
       });
 
       it('refuses an identity-less client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-1'));
         await expect(client.runRuleNow({ id: 'rule-run-1' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6491,7 +6458,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to trigger a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-2'));
         taskManager.runSoon.mockResolvedValueOnce({
           id: 'task-id',
@@ -6503,7 +6470,7 @@ describe('RulesClient', () => {
       });
 
       it('refuses a mismatched-solution client when the stored ownership is managed', async () => {
-        const client = createClient(undefined, { solution: 'other' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'other' } });
         rulesSavedObjectService.get.mockResolvedValueOnce(enabledManagedDoc('rule-run-3'));
         await expect(client.runRuleNow({ id: 'rule-run-3' })).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -6570,7 +6537,7 @@ describe('RulesClient', () => {
 
     describe('bulkDeleteRules', () => {
       it('refuses a managed rule per-item for an identity-less client', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([managedDoc('rule-m')]);
 
         const res = await client.bulkDeleteRules({ ids: ['rule-m'] });
@@ -6588,7 +6555,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to delete a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([managedDoc('rule-m')]);
         getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-m');
         rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([{ id: 'rule-m', success: true }]);
@@ -6601,7 +6568,7 @@ describe('RulesClient', () => {
       });
 
       it('rejects exactly the managed rules and succeeds for the unmanaged ones in a mixed batch', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
           managedDoc('rule-managed'),
           unmanagedDoc('rule-plain'),
@@ -6626,7 +6593,7 @@ describe('RulesClient', () => {
 
     describe('bulkEnableRules', () => {
       it('refuses a managed rule per-item for an identity-less client', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([managedDoc('rule-m')]);
 
         const res = await client.bulkEnableRules({ ids: ['rule-m'] });
@@ -6642,7 +6609,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to enable a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         const disabledManagedAttrs = { ...managedSoAttrs, enabled: false };
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
           { id: 'rule-m', attributes: disabledManagedAttrs, version: 'WzEsMV0=', references: [] },
@@ -6658,7 +6625,7 @@ describe('RulesClient', () => {
       });
 
       it('rejects exactly the managed rules and succeeds for the unmanaged ones in a mixed batch', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
           managedDoc('rule-managed'),
           unmanagedDoc('rule-plain', false),
@@ -6681,7 +6648,7 @@ describe('RulesClient', () => {
 
     describe('bulkDisableRules', () => {
       it('refuses a managed rule per-item for an identity-less client', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         // Managed rule is enabled so the gate runs before the "already disabled" shortcut.
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -6700,7 +6667,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to disable a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
           { id: 'rule-m', attributes: enabledManagedAttrs, version: 'WzEsMV0=', references: [] },
@@ -6716,7 +6683,7 @@ describe('RulesClient', () => {
       });
 
       it('rejects exactly the managed rules and succeeds for the unmanaged ones in a mixed batch', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         const enabledUnmanagedAttrs = { ...unmanagedSoAttrs, enabled: true };
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -6758,7 +6725,7 @@ describe('RulesClient', () => {
         >);
 
       it('refuses a managed rule per-item for an identity-less client', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         // Must be enabled — the gate runs before the disabled check.
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -6777,7 +6744,7 @@ describe('RulesClient', () => {
       });
 
       it('allows a matching-solution client to rotate the key on a managed rule', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         const taskId = 'task:rule-m';
         getRuleExecutorTaskIdMock.mockReturnValue(taskId);
@@ -6795,7 +6762,7 @@ describe('RulesClient', () => {
       });
 
       it('rejects exactly the managed rules and succeeds for the unmanaged ones in a mixed batch', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         const enabledManagedAttrs = { ...managedSoAttrs, enabled: true };
         const enabledUnmanagedAttrs = { ...unmanagedSoAttrs, enabled: true };
         const taskId = 'task:rule-plain';
@@ -6832,7 +6799,7 @@ describe('RulesClient', () => {
 
     describe('by-query ownership exclusion', () => {
       it('excludes all managed rules from the query for an identity-less client (no filter)', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.countByQuery.mockResolvedValueOnce(0);
 
         await client.deleteRulesByQuery({ match_all: true });
@@ -6845,7 +6812,7 @@ describe('RulesClient', () => {
       });
 
       it('narrows the exclusion to other solutions when the caller has an identity', async () => {
-        const client = createClient(undefined, { solution: 'security' });
+        const client = createClient(undefined, { callerIdentity: { solution: 'security' } });
         rulesSavedObjectService.countByQuery.mockResolvedValueOnce(0);
 
         await client.deleteRulesByQuery({ match_all: true });
@@ -6858,7 +6825,7 @@ describe('RulesClient', () => {
       });
 
       it('combines the caller filter with the ownership exclusion', async () => {
-        const client = createClient(undefined, undefined);
+        const client = createClient();
         rulesSavedObjectService.countByQuery.mockResolvedValueOnce(0);
 
         await client.enableRulesByQuery({ filter: 'enabled: false' });

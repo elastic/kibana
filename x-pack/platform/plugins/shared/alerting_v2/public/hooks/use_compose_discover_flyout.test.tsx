@@ -345,6 +345,7 @@ describe('useComposeDiscoverFlyout — create-from-template source stamping (ste
             source: { type: 'template', id: templateId, version: 1 },
           },
         },
+        templateId,
       },
       expect.objectContaining({ onSuccess: expect.any(Function) })
     );

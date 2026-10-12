@@ -112,7 +112,7 @@ describe('CompileRuleQueryStep', () => {
 
       const rule = createRuleResponse({
         schedule: { every: '1m' },
-        metadata: { builder_type: 'test.write', builder_fields: { q: 'hello' } },
+        metadata: { builder: { type: 'test.write' }, builder_fields: { q: 'hello' } },
       });
       const state = createRulePipelineState({ rule });
       const [result] = await collectStreamResults(
@@ -138,7 +138,7 @@ describe('CompileRuleQueryStep', () => {
       const rule = createRuleResponse({
         kind: 'signal',
         schedule: { every: '5m', lookback: '10m' },
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'test' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'test' } },
       });
       const state = createRulePipelineState({ rule });
       const [result] = await collectStreamResults(
@@ -160,7 +160,7 @@ describe('CompileRuleQueryStep', () => {
         kind: 'signal',
         schedule: { every: '5m', lookback: '10m' },
         time_field: '@timestamp',
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'hello' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'hello' } },
       });
       const state = createRulePipelineState({ rule });
       await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -186,7 +186,7 @@ describe('CompileRuleQueryStep', () => {
       // Ref: RulePipelineState.parsedBuilderFields (types.ts)
       const rule = createRuleResponse({
         kind: 'signal',
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'hello' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'hello' } },
       });
       const state = createRulePipelineState({ rule });
       const [result] = await collectStreamResults(
@@ -210,7 +210,7 @@ describe('CompileRuleQueryStep', () => {
 
       const rule = createRuleResponse({
         kind: 'signal',
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'async' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'async' } },
       });
       const state = createRulePipelineState({ rule });
       const [result] = await collectStreamResults(
@@ -285,7 +285,7 @@ describe('CompileRuleQueryStep', () => {
     it('fails the run when the builder type is not in the registry', async () => {
       // registry is empty — no types registered
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.missing', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.missing' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -322,7 +322,7 @@ describe('CompileRuleQueryStep', () => {
 
       const rule = createRuleResponse({
         query: undefined,
-        metadata: { builder_type: 'test.write', builder_fields: { q: 'hello' } },
+        metadata: { builder: { type: 'test.write' }, builder_fields: { q: 'hello' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -345,7 +345,7 @@ describe('CompileRuleQueryStep', () => {
     it('fails the run when builder_fields do not parse against the type schema', async () => {
       const rule = createRuleResponse({
         metadata: {
-          builder_type: 'test.exec',
+          builder: { type: 'test.exec' },
           // wrong shape: `q` must be a string, not a number
           builder_fields: { q: 42 },
         },
@@ -362,7 +362,7 @@ describe('CompileRuleQueryStep', () => {
     it('fails the run when builder_fields are null (missing for an execution-time type)', async () => {
       const rule = createRuleResponse({
         metadata: {
-          builder_type: 'test.exec',
+          builder: { type: 'test.exec' },
           builder_fields: undefined,
         },
       });
@@ -389,7 +389,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -410,7 +410,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -431,7 +431,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -465,7 +465,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -492,7 +492,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -514,7 +514,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -541,7 +541,7 @@ describe('CompileRuleQueryStep', () => {
         kind: 'alert',
         recovery: { strategy: 'condition', segment: 'WHERE false' },
         no_data: { strategy: 'ignore' },
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 
@@ -571,7 +571,7 @@ describe('CompileRuleQueryStep', () => {
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
+        metadata: { builder: { type: 'test.exec' }, builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
 

@@ -167,7 +167,7 @@ function buildFrameworkResponse(
       ownership: { managed: true, solution: 'security', domain: 'detection' },
       version: 1, // mutation sequence — not exposed publicly
       revision: 0,
-      builder_type: builderTypeId,
+      builder: { type: builderTypeId },
       builder_fields: builderFields,
       ...(metadataTags !== undefined ? { tags: metadataTags } : {}),
     },
@@ -186,7 +186,7 @@ describe('toFrameworkCreate + toPublicResponse — Custom Query round-trip', () 
   const publicResponse = toPublicResponse(frameworkResponse);
 
   it('maps type via the alias: "query" ↔ "security.detection.query"', () => {
-    expect(frameworkData.metadata.builder_type).toBe('security.detection.query');
+    expect(frameworkData.metadata.builder?.type).toBe('security.detection.query');
     expect(publicResponse.type).toBe('query');
   });
 
@@ -281,7 +281,7 @@ describe('toFrameworkCreate + toPublicResponse — Threshold round-trip', () => 
   const publicResponse = toPublicResponse(frameworkResponse);
 
   it('maps type via the alias: "threshold" ↔ "security.detection.threshold"', () => {
-    expect(frameworkData.metadata.builder_type).toBe('security.detection.threshold');
+    expect(frameworkData.metadata.builder?.type).toBe('security.detection.threshold');
     expect(publicResponse.type).toBe('threshold');
   });
 
@@ -653,7 +653,7 @@ describe('toPublicResponse — unknown builder type', () => {
       ...buildFrameworkResponse(QUERY_CREATE_INPUT),
       metadata: {
         ...buildFrameworkResponse(QUERY_CREATE_INPUT).metadata,
-        builder_type: 'security.detection.eql', // not in the alias map
+        builder: { type: 'security.detection.eql' }, // not in the alias map
       },
     };
     expect(() => toPublicResponse(response)).toThrow(/unknown or missing builder type/i);

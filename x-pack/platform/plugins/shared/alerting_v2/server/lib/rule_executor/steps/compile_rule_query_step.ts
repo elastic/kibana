@@ -62,7 +62,7 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
       const startIso = new Date(now - parseDurationToMs(lookbackWindow)).toISOString();
       const executionWindow = { start: startIso, end: nowIso } as const;
 
-      const builderType = rule.metadata.builder_type;
+      const builderType = rule.metadata.builder?.type;
 
       // 2a. No builder type: plain ES|QL rule. Pass through the stored query.
       if (!builderType) {
