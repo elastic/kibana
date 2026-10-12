@@ -59,6 +59,18 @@ describe('BuiltInPatternsTable', () => {
     expect(await screen.findAllByText(LONG_PATTERN)).toHaveLength(2);
   });
 
+  it('widens the regex tooltip beyond the default so a long pattern does not run off the screen', async () => {
+    renderTable();
+
+    await userEvent.hover(screen.getByText(LONG_PATTERN));
+
+    // Emotion serializes the value without the space after the comma.
+    expect(await screen.findByRole('tooltip')).toHaveStyleRule(
+      'max-inline-size',
+      'min(90vw,1000px)'
+    );
+  });
+
   it('truncates the example output token and reveals the whole token on hover', async () => {
     renderTable();
     const token = 'HOST_NAME_c149b11fb2b78fc39be80c6f5612b8a6219a4d75';

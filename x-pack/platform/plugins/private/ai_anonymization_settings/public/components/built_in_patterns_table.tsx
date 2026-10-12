@@ -41,6 +41,12 @@ const truncatedTextStyles = css`
   white-space: nowrap;
 `;
 
+// EuiToolTip caps its width at 256px, which wraps a long regex into a tall column that runs off the
+// screen. The `css` prop is its supported way to widen it; it still shrinks to fit short patterns.
+const patternTooltipStyles = css`
+  max-inline-size: min(90vw, 1000px);
+`;
+
 const fullTextStyles = css`
   font-family: monospace;
   overflow-wrap: anywhere;
@@ -128,6 +134,7 @@ export const BuiltInPatternsTable: React.FC<BuiltInPatternsTableProps> = ({
       truncateText: true,
       render: (pattern: string, item: RegexAnonymizationRule) => (
         <EuiToolTip
+          css={patternTooltipStyles}
           content={<span css={fullTextStyles}>{pattern}</span>}
           display="block"
           data-test-subj={`aiAnonymizationSettingsBuiltInPatternTooltip-${item.id}`}
