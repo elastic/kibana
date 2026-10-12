@@ -822,7 +822,8 @@ export const waitForDualProcessFlag = async (
   {
     stableForMs = 12_000,
     intervalMs = 1_000,
-    timeoutMs = 60_000,
+    // Stays under Scout's 60s test timeout so this error surfaces instead of a bare timeout.
+    timeoutMs = 40_000,
   }: { stableForMs?: number; intervalMs?: number; timeoutMs?: number } = {}
 ): Promise<void> => {
   let stableSince: number | null = null;
