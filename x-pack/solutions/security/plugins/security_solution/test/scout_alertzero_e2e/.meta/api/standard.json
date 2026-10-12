@@ -1,0 +1,64 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "bc423226340514e-fed40caaf10d9e8",
+      "title": "AlertZero e2e - attack discovery to host isolation turns a seeded attack chain into an approved host isolation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/attack_discovery_to_isolate.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "60c2dd36291ff72-83d619f856d1450",
+      "title": "AlertZero e2e - worker control lists the managed security workers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "line": 35,
+        "column": 50
+      }
+    },
+    {
+      "id": "60c2dd36291ff72-0ad915243afad21",
+      "title": "AlertZero e2e - worker control refuses to enable a worker that has no service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "line": 43,
+        "column": 24
+      }
+    },
+    {
+      "id": "60c2dd36291ff72-9e1a0a3f30d75e1",
+      "title": "AlertZero e2e - worker control enables a worker once a service account is selected, then disables it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
+        "line": 58,
+        "column": 14
+      }
+    }
+  ]
+}

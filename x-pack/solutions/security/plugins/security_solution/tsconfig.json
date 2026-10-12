@@ -15,6 +15,7 @@
     "test/scout_es_max_response_size/**/*",
     "test/scout_security_attacks_alignment/**/*",
     "test/scout_alertzero/**/*",
+    "test/scout_alertzero_e2e/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
     "server/**/*.json",
@@ -248,6 +249,8 @@
     "@kbn/inference-langchain",
     "@kbn/scout-security",
     "@kbn/ftr-llm-proxy",
+    "@kbn/proposals-common",
+    "@kbn/evals-suite-attack-discovery-agent-builder",
     "@kbn/custom-icons",
     "@kbn/security-plugin-types-common",
     "@kbn/management-settings-ids",
