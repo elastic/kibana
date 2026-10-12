@@ -8,7 +8,11 @@
 import React from 'react';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { QueryClientProvider } from '@kbn/react-query';
-import { entityStoreIdType, type ImpactEntityTarget } from '@kbn/agentic-investigations-common';
+import {
+  entityStoreIdType,
+  impactEntityFlyoutType,
+  type ImpactEntityTarget,
+} from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
@@ -22,12 +26,10 @@ import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
 import { entityAttachmentQueryClient } from './entity_attachment/query_client';
 
-const flyoutType = (entity: ImpactEntityTarget): 'host' | 'user' | 'service' | undefined =>
-  entityStoreIdType(entity.id);
-
 /**
  * Opens the entity overview as a child of the investigation details flyout. The current app stays
- * put; Back on the entity flyout returns to the conversation.
+ * put; Back on the entity flyout returns to the conversation. An Entity Store id resolves the
+ * record directly; an entity recorded by name resolves through its type's identity field.
  */
 export const openImpactEntityFlyout = ({
   entity,
@@ -48,12 +50,13 @@ export const openImpactEntityFlyout = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
 }): void => {
-  const identifierType = flyoutType(entity);
+  const identifierType = impactEntityFlyoutType(entity);
   if (!identifierType) {
     return;
   }
 
   const title = entity.name ?? entity.id;
+  const entityStoreId = entityStoreIdType(entity.id) ? entity.id : undefined;
 
   overlays.openFlyoutTemplate(
     {
@@ -84,7 +87,7 @@ export const openImpactEntityFlyout = ({
                   identifier={{
                     identifierType,
                     identifier: title,
-                    entityStoreId: entity.id,
+                    entityStoreId,
                   }}
                 />
               </QueryClientProvider>

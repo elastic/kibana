@@ -27,9 +27,13 @@ jest.mock('../components/security_redux_embedded_provider', () => ({
 }));
 
 jest.mock('../components/entity_card_flyout_overview_canvas', () => ({
-  EntityCardFlyoutOverviewCanvas: () => {
+  EntityCardFlyoutOverviewCanvas: ({ identifier }: { identifier: unknown }) => {
     const { canNavigate } = useEntityAnalyticsAgentNavigation();
-    return <div data-test-subj="entityOverview">{canNavigate ? 'can-navigate' : 'no-nav'}</div>;
+    return (
+      <div data-test-subj="entityOverview" data-identifier={JSON.stringify(identifier)}>
+        {canNavigate ? 'can-navigate' : 'no-nav'}
+      </div>
+    );
   },
 }));
 
@@ -75,13 +79,40 @@ describe('openImpactEntityFlyout', () => {
     expect(screen.getByTestId('entityOverview')).toHaveTextContent('can-navigate');
   });
 
-  it('does nothing for a named entity that is not an entity-store id', () => {
+  it('resolves an entity-store id directly', () => {
     openImpactEntityFlyout({
-      entity: { id: 'checkout-service', name: 'checkout-service', type: 'service' },
+      entity: { id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' },
       ...base,
     });
 
-    expect(overlays.openFlyoutTemplate).not.toHaveBeenCalled();
+    const Content = overlays.openFlyoutTemplate.mock.calls[0][1];
+    render(<Content onClose={jest.fn()} />);
+
+    expect(JSON.parse(screen.getByTestId('entityOverview').dataset.identifier ?? '')).toEqual({
+      identifierType: 'user',
+      identifier: 'cfo@corp',
+      entityStoreId: 'user:cfo@corp',
+    });
+  });
+
+  it('resolves a named host, user, or service through its type, without an entity-store id', () => {
+    openImpactEntityFlyout({
+      entity: { id: 'ws-finance-04', name: 'ws-finance-04', type: 'host' },
+      ...base,
+    });
+
+    expect(overlays.openFlyoutTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ flyoutMenuProps: { title: 'ws-finance-04' } }),
+      expect.any(Function)
+    );
+
+    const Content = overlays.openFlyoutTemplate.mock.calls[0][1];
+    render(<Content onClose={jest.fn()} />);
+
+    expect(JSON.parse(screen.getByTestId('entityOverview').dataset.identifier ?? '')).toEqual({
+      identifierType: 'host',
+      identifier: 'ws-finance-04',
+    });
   });
 
   it('does nothing when the entity has no flyout type', () => {

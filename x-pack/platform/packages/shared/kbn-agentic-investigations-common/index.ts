@@ -132,6 +132,8 @@ export {
 } from './src/components/impact/impact_details_renderer';
 export {
   entityStoreIdType,
+  impactEntityFlyoutType,
+  type ImpactEntityFlyoutType,
   type ImpactEntityTarget,
 } from './src/components/impact/open_impact_entity';
 export {

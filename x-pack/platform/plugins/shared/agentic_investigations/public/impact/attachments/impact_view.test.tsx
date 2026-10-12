@@ -128,20 +128,37 @@ describe('ImpactView', () => {
     );
   });
 
-  it('leaves a named entity as text when it is not an entity-store id', () => {
+  it('opens the flyout for an entity recorded by name when its type is a host, user, or service', () => {
     const open = jest.fn();
 
     renderView(
       {
         ...base,
-        entities: [{ id: 'checkout-service', name: 'checkout-service', type: 'service' }],
+        entities: [{ id: 'ws-finance-04', name: 'ws-finance-04', type: 'host' }],
+      },
+      'details',
+      open
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /ws-finance-04/ }));
+
+    expect(open).toHaveBeenCalledWith({ id: 'ws-finance-04', name: 'ws-finance-04', type: 'host' });
+  });
+
+  it('leaves a named entity as text when nothing says which flyout could open it', () => {
+    const open = jest.fn();
+
+    renderView(
+      {
+        ...base,
+        entities: [{ id: 'checkout-service', name: 'checkout-service', type: 'generic' }],
       },
       'details',
       open
     );
 
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(screen.getByText('service')).toBeInTheDocument();
+    expect(screen.getByText('generic')).toBeInTheDocument();
     expect(open).not.toHaveBeenCalled();
   });
 

@@ -22,7 +22,7 @@ import type { IconType } from '@elastic/eui';
 import {
   GroupedAttachmentList,
   GroupedAttachmentRow,
-  entityStoreIdType,
+  impactEntityFlyoutType,
   type GroupedAttachmentRowAction,
   type ImpactEntityTarget,
 } from '@kbn/agentic-investigations-common';
@@ -66,12 +66,13 @@ const ENTITY_ICON_BY_TYPE: Record<string, IconType> = {
 };
 
 const entityIconType = (entity: ImpactContentEntity): IconType =>
-  ENTITY_ICON_BY_TYPE[entity.type ?? entityStoreIdType(entity.id) ?? ''] ?? 'globe';
+  ENTITY_ICON_BY_TYPE[impactEntityFlyoutType(entity) ?? ''] ?? 'globe';
 
 /**
- * One impacted entity, styled like a "What's happened" row. An entity-store id opens the entity
- * flyout; a plain name does not. Evidence stays collapsed behind the row, matching the Nightshift
- * impact section; when an entity has both, the row expands and the flyout opens from the body.
+ * One impacted entity, styled like a "What's happened" row. A host, user, or service opens the
+ * entity flyout, whether recorded by Entity Store id or by name; anything else is a label.
+ * Evidence stays collapsed behind the row, matching the Nightshift impact section; when an entity
+ * has both, the row expands and the flyout opens from the body.
  */
 const ImpactEntityRow = ({
   entity,
@@ -82,7 +83,7 @@ const ImpactEntityRow = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isExpanded, setExpanded] = useState(false);
-  const opensFlyout = onOpenEntity !== undefined && entityStoreIdType(entity.id) !== undefined;
+  const opensFlyout = onOpenEntity !== undefined && impactEntityFlyoutType(entity) !== undefined;
   const openEntity = () => onOpenEntity?.({ id: entity.id, name: entity.name, type: entity.type });
 
   let action: GroupedAttachmentRowAction | undefined;
