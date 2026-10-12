@@ -187,6 +187,32 @@ describe('Alert Triage batch workflow', () => {
       expect(tagsOf(name).tags_to_remove).toEqual(RELEASE);
     });
 
+    // A `{% if %}` around `${{ }}` renders to text ("$"), and the foreach over it then fails with
+    // "must evaluate to an array", leaving the batch's claims held with no tag to say why.
+    it('keeps every typed `${{ }}` value in a data.set free of Liquid tags', () => {
+      const mixed = batchSteps
+        .filter(({ type }) => type === 'data.set')
+        .flatMap(({ name, with: values = {} }) =>
+          Object.entries(values)
+            .filter(([, value]) => typeof value === 'string')
+            .filter(([, value]) => (value as string).includes('${{') && /{%/.test(value as string))
+            .map(([key]) => `${name}.${key}`)
+        );
+
+      expect(mixed).toEqual([]);
+    });
+
+    it('sets the unverdicted ids to an array expression whether or not any verdict came back', () => {
+      const setters = batchSteps.filter(
+        ({ with: values }) => values && 'unverdicted_ids' in values
+      );
+
+      expect(setters.map(({ with: values }) => values?.unverdicted_ids)).toEqual([
+        '${{ inputs.alert_ids }}',
+        '${{ steps.classify_alerts.output.missing_alert_ids }}',
+      ]);
+    });
+
     it('bounds the analysis hop to one retry before it marks the alerts failed', () => {
       const onFailure = (
         stepByName('classify_alerts') as unknown as {

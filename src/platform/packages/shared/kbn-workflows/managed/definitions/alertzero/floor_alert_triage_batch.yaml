@@ -405,11 +405,21 @@ steps:
   # Alerts that came back without a verdict (the model dropped them, or the whole batch returned
   # none) would otherwise stay claimed with no tag to say why, and be planned again by every
   # sweep. Mark them failed and release the claim; the verdict tags below release the rest.
+  # Each branch holds one typed expression. A `{% if %}` around `${{ }}` renders to text, and the
+  # foreach below rejects text.
   - name: compute_unverdicted_ids
-    type: data.set
-    with:
-      unverdicted_ids: >-
-        {% if variables.verdict_count == 0 %}${{ inputs.alert_ids }}{% else %}${{ steps.classify_alerts.output.missing_alert_ids }}{% endif %}
+    type: if
+    condition: "${{ variables.verdict_count == 0 }}"
+    steps:
+      - name: unverdicted_ids_whole_batch
+        type: data.set
+        with:
+          unverdicted_ids: "${{ inputs.alert_ids }}"
+    else:
+      - name: unverdicted_ids_missing_only
+        type: data.set
+        with:
+          unverdicted_ids: "${{ steps.classify_alerts.output.missing_alert_ids }}"
 
   - name: release_unverdicted_claims
     type: foreach
