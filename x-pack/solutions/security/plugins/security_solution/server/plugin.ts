@@ -150,6 +150,11 @@ import {
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
+import {
+  registerExecutiveBriefTaskTypes,
+  scheduleExecutiveBriefCleanup,
+} from './lib/entity_analytics/executive_brief/register';
+import { EXECUTIVE_BRIEF_INFERENCE_FEATURE_ID } from '../common/entity_analytics/executive_brief/constants';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
@@ -464,6 +469,13 @@ export class Plugin implements ISecuritySolutionPlugin {
       ml: plugins.ml,
     });
 
+    registerExecutiveBriefTaskTypes({
+      taskManager: plugins.taskManager,
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      experimentalFeatures,
+    });
+
     if (plugins.searchInferenceEndpoints) {
       // The `SECURITY_INFERENCE_PARENT_FEATURE_ID` parent is registered by
       // `elastic_assistant`, which `security_solution` depends on (so it sets up
@@ -512,6 +524,17 @@ export class Plugin implements ISecuritySolutionPlugin {
           featureId: 'lead_generation',
           featureName: 'Threat Hunting Lead Generation',
           featureDescription: 'Lead generation inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
+
+      if (experimentalFeatures.entityAnalyticsExecutiveBriefEnabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+          featureId: EXECUTIVE_BRIEF_INFERENCE_FEATURE_ID,
+          featureName: 'Entity Analytics Executive Brief',
+          featureDescription: 'Entity Analytics executive brief inference endpoint configuration',
           taskType: 'chat_completion',
           recommendedEndpoints: [],
         });
@@ -1115,6 +1138,12 @@ export class Plugin implements ISecuritySolutionPlugin {
       );
       this.telemetryWatcher.start(this.telemetryConfigProvider);
     }
+
+    scheduleExecutiveBriefCleanup({
+      taskManager: plugins.taskManager,
+      logger: this.logger,
+      experimentalFeatures: config.experimentalFeatures,
+    });
 
     if (plugins.taskManager) {
       this.completeExternalResponseActionsTask
