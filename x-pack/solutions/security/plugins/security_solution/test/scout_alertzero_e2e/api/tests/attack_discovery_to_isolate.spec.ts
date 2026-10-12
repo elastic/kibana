@@ -104,15 +104,29 @@ apiTest.describe(
         cleanupHosts = hosts.cleanup;
 
         serviceAccountId = await createServiceAccount(api);
-        const worker = await getWorker(api, WORKER_ID);
+        // Save settings BEFORE reading the workflow id: the settings write is what installs the
+        // worker's managed workflow, so on a space where the worker has never been configured the
+        // read below would otherwise race an install that this spec itself has not triggered yet.
+        const beforeSave = await getWorker(api, WORKER_ID);
+        await updateWorker(api, WORKER_ID, {
+          settingsRevision: beforeSave.settingsRevision ?? null,
+          settings: { serviceAccountId },
+        });
+        // The install is confirmed by the settings write, but it surfaces through the SML indexer
+        // asynchronously, so the catalog read can still lag it. Poll (bounded) for a workflow
+        // carrying record instead of failing on that race.
+        const worker = await pollUntil(
+          `worker ${WORKER_ID} to have a workflow installed`,
+          async () => {
+            const candidate = await getWorker(api, WORKER_ID);
+            return candidate.workflowId ? candidate : undefined;
+          },
+          { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+        );
         const workerWorkflowId = worker.workflowId;
         if (!workerWorkflowId) {
           throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
         }
-        await updateWorker(api, WORKER_ID, {
-          settingsRevision: worker.settingsRevision ?? null,
-          settings: { serviceAccountId },
-        });
 
         // 1. Run Attack Discovery over the seeded window. Enabling the worker makes Task Manager
         // run it at once, as its service account; that scheduled run is the one under test. The
