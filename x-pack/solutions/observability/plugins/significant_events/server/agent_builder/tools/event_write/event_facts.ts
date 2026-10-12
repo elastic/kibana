@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Severity, SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import type { CompactBulkError } from '../bulk_write';
 import {
@@ -51,7 +51,34 @@ export const shouldSkipAsNoOp = ({
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
   return (
-    latestEvent.status === candidate.input.status && latestEvent.severity === severity && !addsRule
+    latestEvent.status === candidate.input.status &&
+    latestEvent.severity === severity &&
+    !addsRule &&
+    !changesMemberVerdict([...priorDocs, latestEvent], candidate.input.signals)
+  );
+};
+
+/**
+ * True when a submitted detection signal carries a different verdict than the latest one stored
+ * for its rule (across the event's versions). A member turning healthy, or breaching again, is
+ * evidence the status derives from, so it must be stored even when status and severity do not move.
+ */
+const changesMemberVerdict = (
+  priorDocs: SignificantEvent[],
+  submitted: SignalEntry[] | undefined
+): boolean => {
+  const stored = new Map(
+    mergeSignalsLatestPerRule(priorDocs, [], '').flatMap((signal) =>
+      signal.type === 'detection' && signal.metadata?.rule_uuid
+        ? [[signal.metadata.rule_uuid, signal.verdict] as const]
+        : []
+    )
+  );
+  return (submitted ?? []).some(
+    (signal) =>
+      signal.type === 'detection' &&
+      signal.metadata?.rule_uuid !== undefined &&
+      stored.get(signal.metadata.rule_uuid) !== signal.verdict
   );
 };
 
@@ -146,7 +173,7 @@ export const computeEventFacts = ({
         confidence: rest.confidence ?? 0,
       };
 
-  // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
+  // The status was resolved before the facts (`resolveLifecycle`), or is the caller's own.
   const status = candidate.input.status;
 
   const severity = lockSeverityForCompletedInvestigation({

@@ -38,7 +38,7 @@ import { continuationSeverityStabilityEvaluator } from './continuation/continuat
 import { confirmedEvidencesEvaluator } from './evidences/confirmed_evidences';
 import { confirmationAlignmentEvaluator } from './evidences/confirmation_alignment';
 import { severityExactEvaluator } from './severity/severity_exact';
-import { createStatusCorrectnessEvaluator } from './status/status_correctness';
+import { createMechanismPresentCorrectnessEvaluator } from './mechanism/mechanism_present_correctness';
 
 /**
  * Factory that creates the full set of evaluators for the discovery agent eval suite.
@@ -68,7 +68,7 @@ export const createDiscoveryEvaluators = (
 
   return [
     ...base,
-    createStatusCorrectnessEvaluator(criteriaFn),
+    createMechanismPresentCorrectnessEvaluator(criteriaFn),
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
     createNarrativeFieldsEvaluator({ criteriaFn }),

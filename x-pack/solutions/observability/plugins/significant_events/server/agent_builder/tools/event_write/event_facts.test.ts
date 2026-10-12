@@ -128,6 +128,15 @@ describe('shouldSkipAsNoOp', () => {
     ).toBe(false);
   });
 
+  it('does not skip when a stored rule changes verdict, even if status and severity hold', () => {
+    expect(
+      skip({
+        stored: [makeSignal({ verdict: 'confirms' })],
+        submitted: [makeSignal({ verdict: 'refutes' })],
+      })
+    ).toBe(false);
+  });
+
   it('never skips when there is no stored version', () => {
     expect(
       shouldSkipAsNoOp({

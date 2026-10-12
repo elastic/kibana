@@ -6,6 +6,7 @@
  */
 
 import { eventsWriteBulkHandler, eventsWriteHandler } from './handler';
+import { agentLifecycle } from './agent_lifecycle';
 import type { EventsWriteInput } from './types';
 import type {
   SignificantEvent,
@@ -553,6 +554,256 @@ describe('eventsWriteBulkHandler — continuation status', () => {
       expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
     }
   );
+});
+
+describe('eventsWriteBulkHandler — lifecycle resolution', () => {
+  describe('a continuation onto a recovering event', () => {
+    const eventId = 'checkout-recovering';
+    const recovering = () => makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
+    const clientFor = (stored: SignificantEvent) =>
+      makeEventSearchClient({ findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }) });
+
+    it('returns the event to active when a new member breaches', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientFor(recovering()),
+        inputs: [
+          {
+            ...baseInput,
+            event_id: eventId,
+            status: 'active',
+            severity: 'high',
+            signals: [
+              {
+                type: 'detection',
+                source_id: 'logs.checkout',
+                description: 'A new rule joined',
+                verdict: 'confirms',
+                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+                metadata: {
+                  detection_id: 'det-rule-new-member',
+                  rule_uuid: 'rule-new-member',
+                  change_point_type: 'spike',
+                  p_value: 0.01,
+                },
+              },
+            ],
+          },
+        ],
+        resolveLifecycle: agentLifecycle,
+      });
+
+      expect(results[0]).toMatchObject({ written: true, status: 'active', event_id: eventId });
+      expect(writtenDocs()[0].status).toBe('active');
+    });
+
+    it('keeps the event recovering when it carries healthy evidence', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientFor(recovering()),
+        inputs: [
+          {
+            ...baseInput,
+            event_id: eventId,
+            status: 'active',
+            severity: 'high',
+            signals: [
+              {
+                type: 'detection',
+                source_id: 'logs.checkout',
+                description: 'A new rule joined, healthy',
+                verdict: 'refutes',
+                evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+                metadata: {
+                  detection_id: 'det-rule-healthy-member',
+                  rule_uuid: 'rule-healthy-member',
+                  change_point_type: 'dip',
+                  p_value: 0.01,
+                },
+              },
+            ],
+          },
+        ],
+        resolveLifecycle: agentLifecycle,
+      });
+
+      expect(results[0]).toMatchObject({ written: true, status: 'recovering' });
+      expect(writtenDocs()[0]).toMatchObject({ status: 'recovering' });
+    });
+
+    it('skips a write that adds nothing new, as it would on an active event', async () => {
+      const results = await eventsWriteBulkHandler({
+        eventSearchClient: clientFor(recovering()),
+        inputs: [{ ...baseInput, event_id: eventId, status: 'active', severity: 'high' }],
+        resolveLifecycle: agentLifecycle,
+      });
+
+      expect(results[0]).toMatchObject({
+        written: false,
+        skipped: true,
+        reason: 'unchanged_outcome',
+        status: 'recovering',
+      });
+      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  it('reports a resolver refusal as a skip and writes nothing', async () => {
+    const stored = makeStoredEvent('checkout-held', { status: 'active' });
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...baseInput, event_id: 'checkout-held', status: 'active', severity: 'high' }],
+      resolveLifecycle: () => ({ write: false, reason: 'already_in_state' }),
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'unchanged_outcome',
+      status: 'active',
+    });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it('writes the status the resolver chose, not the one on the item', async () => {
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: makeEventSearchClient(),
+      inputs: [
+        {
+          ...baseInput,
+          status: 'inactive',
+          signals: [
+            {
+              type: 'detection',
+              source_id: 'logs.checkout',
+              description: 'Confirmed',
+              verdict: 'confirms',
+              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+              metadata: {
+                detection_id: 'det-rule-1',
+                rule_uuid: 'rule-1',
+                change_point_type: 'spike',
+                p_value: 0.01,
+              },
+            },
+          ],
+        },
+      ],
+      resolveLifecycle: agentLifecycle,
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'active' });
+    expect(writtenDocs()[0].status).toBe('active');
+  });
+
+  it('holds no lifecycle policy itself: without a resolver the status on the item is written', async () => {
+    const eventId = 'checkout-recovering';
+    const stored = makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...baseInput, event_id: eventId, status: 'active', severity: 'high' }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'active' });
+  });
+
+  it('still lets an operator-style write set a recovering event to inactive', async () => {
+    const eventId = 'checkout-recovering';
+    const stored = makeStoredEvent(eventId, { status: 'recovering', severity: 'high' });
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [{ ...baseInput, event_id: eventId, status: 'inactive', severity: 'high' }],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'inactive' });
+  });
+
+  it('drops a write when another writer appended a version after the lineage was read', async () => {
+    const eventId = 'known-canonical-event';
+    const readVersion = makeStoredEvent(eventId);
+    const movedHead = makeStoredEvent(eventId, {
+      '@timestamp': '2099-01-01T00:00:00.000Z',
+      status: 'inactive',
+    });
+    const eventSearchClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [readVersion] }),
+      findLatestByEventId: jest.fn().mockResolvedValue(movedHead),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventSearchClient,
+      rejectUnknownEventIds: true,
+      inputs: [{ ...baseInput, event_id: eventId, severity: 'critical' }],
+    });
+
+    expect(result).toMatchObject({ written: false, error: { type: 'superseded_write' } });
+    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+  });
+
+  it('does not flag a refuting verdict as unchanged when the stored verdict was confirming', async () => {
+    const eventId = 'checkout-verdict-flip';
+    const stored = makeStoredEvent(eventId, {
+      status: 'active',
+      severity: 'high',
+      signals: [
+        {
+          type: 'detection',
+          source_id: 'logs.checkout',
+          description: 'Was breaching',
+          verdict: 'confirms',
+          evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+          metadata: {
+            detection_id: 'det-rule-flip',
+            rule_uuid: 'rule-flip',
+            change_point_type: 'spike',
+            p_value: 0.01,
+          },
+        },
+      ],
+    });
+    const eventClient = makeEventSearchClient({
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+    });
+
+    const results = await eventsWriteBulkHandler({
+      eventSearchClient: eventClient,
+      inputs: [
+        {
+          ...baseInput,
+          event_id: eventId,
+          status: 'active',
+          severity: 'high',
+          signals: [
+            {
+              type: 'detection',
+              source_id: 'logs.checkout',
+              description: 'Now healthy',
+              verdict: 'refutes',
+              evidence: { esql_query: 'FROM logs.checkout', result: 'found' },
+              metadata: {
+                detection_id: 'det-rule-flip',
+                rule_uuid: 'rule-flip',
+                change_point_type: 'spike',
+                p_value: 0.01,
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ written: true });
+  });
 });
 
 describe('eventsWriteBulkHandler — agent-proposed severity', () => {

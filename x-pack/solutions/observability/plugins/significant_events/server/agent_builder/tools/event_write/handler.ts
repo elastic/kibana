@@ -14,6 +14,7 @@ import {
   createBulkWriteOutcomeUnknownError,
 } from '../bulk_write';
 import type { CompactBulkError } from '../bulk_write';
+import { mergeSignalsLatestPerRule } from './episode_context';
 import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
@@ -36,9 +37,16 @@ import {
   type EventsWriteInput,
   type EventsWriteNoOpResult,
   type EventsWriteResult,
+  type LifecycleResolver,
+  type WriteCandidate,
 } from './types';
 
-export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
+export type {
+  EventsWriteBulkResult,
+  EventsWriteInput,
+  EventsWriteResult,
+  LifecycleResolver,
+} from './types';
 
 const WRITE_CONCURRENCY = 10;
 
@@ -67,6 +75,7 @@ export async function eventsWriteBulkHandler({
   inputs,
   source,
   rejectUnknownEventIds,
+  resolveLifecycle,
   logger,
 }: {
   /** Reads prior versions and active events from `.rule-events`, and writes each new version. */
@@ -75,6 +84,8 @@ export async function eventsWriteBulkHandler({
   source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
+  /** Resolves the status each write carries; see {@link LifecycleResolver}. */
+  resolveLifecycle?: LifecycleResolver;
   logger?: Logger;
 }): Promise<EventsWriteBulkResult[]> {
   const timestamp = new Date().toISOString();
@@ -118,9 +129,38 @@ export async function eventsWriteBulkHandler({
     }
     return true;
   });
+  // The writer holds no lifecycle policy: a caller that must not choose its own status supplies a
+  // resolver (the agent's is `agentLifecycle`), and a refusal is reported as a skip.
+  const writable = knownCandidates.flatMap((candidate): WriteCandidate[] => {
+    if (resolveLifecycle === undefined) {
+      return [candidate];
+    }
+    const latest = latestByEventId.get(candidate.eventId);
+    const signals =
+      candidate.input.event_id === undefined
+        ? candidate.input.signals ?? []
+        : mergeSignalsLatestPerRule(
+            priorDocsByEventId.get(candidate.eventId) ?? [],
+            candidate.input.signals ?? [],
+            timestamp
+          );
+    const decision = resolveLifecycle({ latest, signals });
+    if (decision.write) {
+      return [{ ...candidate, input: { ...candidate.input, status: decision.status } }];
+    }
+    results[candidate.index] = {
+      index: candidate.index,
+      event_id: candidate.eventId,
+      status: latest?.status ?? candidate.input.status,
+      written: false,
+      skipped: true,
+      reason: 'unchanged_outcome',
+    };
+    return [];
+  });
   // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate
   // here, so the no-op check below and the final document agree on the same severity.
-  const factsByCandidate = knownCandidates.map((candidate) =>
+  const factsByCandidate = writable.map((candidate) =>
     computeEventFacts({ candidate, timestamp, latestByEventId, priorDocsByEventId, source })
   );
   const remaining = factsByCandidate.filter((facts) => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { Severity, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Severity, SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
+import type { LifecycleDecision } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 import { createBulkWriteOutcomeUnknownError, type CompactBulkError } from '../bulk_write';
 
 export type EventsWriteInput = Pick<
@@ -26,6 +27,17 @@ export type EventsWriteInput = Pick<
     event_id?: string;
     conversation_id?: string;
   };
+
+/**
+ * Decides the status a caller's write carries, from the event's latest version (undefined for a
+ * new event): the status to write, or a refusal. Lifecycle rules live in the state machine; the
+ * writer only applies the answer, so it holds no policy of its own.
+ */
+export type LifecycleResolver = (args: {
+  latest: SignificantEvent | undefined;
+  /** The event's signals once this write is merged: the latest verdict per rule. */
+  signals: SignalEntry[];
+}) => LifecycleDecision;
 
 export interface EventsWriteResult {
   index: number;
