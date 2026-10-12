@@ -61,6 +61,8 @@ export const useNlGeneration = ({
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(hasInferenceConnector);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Prompt behind the result under review; the input is cleared meanwhile
+  const submittedNlPromptRef = useRef('');
 
   useEffect(() => {
     if (!isNlToEsqlEnabled) return;
@@ -102,6 +104,10 @@ export const useNlGeneration = ({
     setNlValue('');
   }, []);
 
+  const restoreNlPrompt = useCallback(() => {
+    setNlValue((current) => (current.trim() ? current : submittedNlPromptRef.current));
+  }, []);
+
   const onNlSubmit = useCallback(async () => {
     const trimmed = nlValue.trim();
     if (!trimmed || isNlLoading) return;
@@ -127,6 +133,7 @@ export const useNlGeneration = ({
           result.content.length
         );
         if (onNlResult) {
+          submittedNlPromptRef.current = trimmed;
           onNlResult(result.content);
         } else {
           onUpdateAndSubmitQuery(result.content);
@@ -161,5 +168,13 @@ export const useNlGeneration = ({
     trackNlResult,
   ]);
 
-  return { nlValue, setNlValue, isNlLoading, hasConnector, onNlSubmit, onStopGeneration };
+  return {
+    nlValue,
+    setNlValue,
+    restoreNlPrompt,
+    isNlLoading,
+    hasConnector,
+    onNlSubmit,
+    onStopGeneration,
+  };
 };

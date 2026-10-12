@@ -31,6 +31,7 @@ interface UseReplaceReviewParams {
   editSourceId: string;
   onAfterAccept?: (state: ReviewState) => void;
   onAfterReject?: (state: ReviewState) => void;
+  focusEditorOnReject?: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ export const useReplaceReview = ({
   editSourceId,
   onAfterAccept,
   onAfterReject,
+  focusEditorOnReject = true,
 }: UseReplaceReviewParams) => {
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
   const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
@@ -59,11 +61,11 @@ export const useReplaceReview = ({
   const contextKeyRef = useRef<monaco.editor.IContextKey<boolean> | undefined>(undefined);
   const reviewStateRef = useRef<ReviewState | null>(null);
 
-  const cleanup = useCallback(() => {
+  const cleanup = useCallback((options?: { focusEditor?: boolean }) => {
     decorationsRef.current?.clear();
     decorationsRef.current = undefined;
 
-    widgetRef.current?.dispose();
+    widgetRef.current?.dispose(options);
     widgetRef.current = undefined;
 
     actionDisposablesRef.current.forEach((d) => d.dispose());
@@ -104,7 +106,7 @@ export const useReplaceReview = ({
     const model = editorModel.current;
     const state = reviewStateRef.current;
 
-    cleanup();
+    cleanup({ focusEditor: focusEditorOnReject });
 
     if (!editor || !model || !state) return;
 
@@ -121,7 +123,7 @@ export const useReplaceReview = ({
     ]);
 
     onAfterReject?.(state);
-  }, [editorRef, editorModel, cleanup, editSourceId, onAfterReject]);
+  }, [editorRef, editorModel, cleanup, editSourceId, onAfterReject, focusEditorOnReject]);
 
   const showReview = useCallback(
     (state: ReviewState) => {

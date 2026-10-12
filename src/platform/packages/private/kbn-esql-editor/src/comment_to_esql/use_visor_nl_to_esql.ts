@@ -22,6 +22,7 @@ interface UseVisorNlToEsqlParams {
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   onSubmit: (query: string) => void;
   onAfterInsert?: () => void;
+  onReject?: () => void;
   telemetryService?: ESQLEditorTelemetryService;
 }
 
@@ -30,6 +31,7 @@ export const useVisorNlToEsql = ({
   editorModel,
   onSubmit,
   onAfterInsert,
+  onReject,
   telemetryService,
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
@@ -54,8 +56,9 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
+      onReject?.();
     },
-    [telemetryService]
+    [telemetryService, onReject]
   );
 
   const acceptAction = useMemo(
@@ -88,6 +91,8 @@ export const useVisorNlToEsql = ({
     editSourceId: 'nl-to-esql-visor',
     onAfterAccept,
     onAfterReject,
+    // Undo moves focus to the visor input instead
+    focusEditorOnReject: false,
   });
 
   const showVisorReview = useCallback(

@@ -104,6 +104,8 @@ export interface ESQLEditorProps {
    * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
    */
   onVisorNlResultReady?: (handler: (generatedQuery: string) => void) => void;
+  /** Called when the user undoes a generated query; see QuickSearchVisor's `restoreNlPrompt` */
+  onVisorNlResultRejected?: () => void;
 }
 
 interface ESQLVariableService {

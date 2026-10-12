@@ -18,7 +18,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
-import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
+import { QuickSearchVisor, type QuickSearchVisorApi, type QuickSearchVisorProps } from '.';
 import { NL_TEXTAREA_MAX_HEIGHT, visorStyles } from './visor.styles';
 import { clearInferenceConnectorCache } from './use_nl_generation';
 import { clearNlToEsqlLicenseCache } from '../hooks/use_nl_to_esql_check';
@@ -420,6 +420,32 @@ describe('Quick search visor', () => {
         );
       });
       await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+    });
+
+    it('restoreNlPrompt restores the submitted prompt and focuses the input', async () => {
+      (corePluginMock.http.post as jest.Mock).mockResolvedValue({
+        content: 'FROM logs | LIMIT 10',
+      });
+      const onNlResult = jest.fn();
+      const visorRef = React.createRef<QuickSearchVisorApi>();
+      const { getByTestId } = renderWithI18n(
+        <KibanaContextProvider services={enterpriseServices}>
+          <QuickSearchVisor ref={visorRef} {...props} onNlResult={onNlResult} />
+        </KibanaContextProvider>
+      );
+
+      await waitFor(() => expect(getByTestId('esqlVisorNLQueryInput')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.type(getByTestId('esqlVisorNLQueryInput'), 'show me logs{enter}');
+      });
+      await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('');
+      act(() => getByTestId('esqlVisorNLQueryInput').blur());
+
+      act(() => visorRef.current?.restoreNlPrompt());
+
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('show me logs');
+      expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus();
     });
 
     it.each([

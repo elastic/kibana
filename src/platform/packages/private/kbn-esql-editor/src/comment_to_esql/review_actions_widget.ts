@@ -90,7 +90,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     this.buttons[0]?.focus({ preventScroll: true });
   }
 
-  public dispose(): void {
+  public dispose({ focusEditor = true }: { focusEditor?: boolean } = {}): void {
     const ownsFocus = this.domNode?.contains(document.activeElement) ?? false;
     this.isFocusPending = false;
     this.editor.removeContentWidget(this);
@@ -106,7 +106,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
     this.domNode = undefined;
     this.buttons = [];
 
-    if (ownsFocus) {
+    if (ownsFocus && focusEditor) {
       this.editor.focus();
     }
   }

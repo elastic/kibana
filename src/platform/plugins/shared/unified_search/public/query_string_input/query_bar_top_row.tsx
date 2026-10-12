@@ -30,6 +30,7 @@ import {
   QuickSearchVisor,
   type ESQLEditorProps,
   type ESQLEditorApi,
+  type QuickSearchVisorApi,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -715,6 +716,8 @@ export const QueryBarTopRow = React.memo(
     const onVisorNlResult = useCallback((generatedQuery: string) => {
       visorNlResultHandlerRef.current?.(generatedQuery);
     }, []);
+    const visorRef = useRef<QuickSearchVisorApi>(null);
+    const onVisorNlResultRejected = useCallback(() => visorRef.current?.restoreNlPrompt(), []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
 
@@ -1402,6 +1405,7 @@ export const QueryBarTopRow = React.memo(
             enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
+            onVisorNlResultRejected={onVisorNlResultRejected}
           />
         )
       );
@@ -1441,6 +1445,7 @@ export const QueryBarTopRow = React.memo(
                 {props.dataViewPickerOverride || renderDataViewsPicker()}
                 <EuiFlexItem>
                   <QuickSearchVisor
+                    ref={visorRef}
                     query={
                       props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
                     }

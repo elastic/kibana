@@ -6,9 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { Suspense } from 'react';
+import React, { Suspense, forwardRef } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { QuickSearchVisorProps } from '@kbn/esql-editor';
+import type { QuickSearchVisorApi, QuickSearchVisorProps } from '@kbn/esql-editor';
 import { useKibanaServices } from './kibana_services';
 
 const LazyQuickSearchVisor = React.lazy(async () => {
@@ -16,18 +16,20 @@ const LazyQuickSearchVisor = React.lazy(async () => {
   return { default: module.QuickSearchVisor };
 });
 
-export const QuickSearchVisor: React.FC<QuickSearchVisorProps> = (props) => {
-  const deps = useKibanaServices();
+export const QuickSearchVisor = forwardRef<QuickSearchVisorApi, QuickSearchVisorProps>(
+  function QuickSearchVisor(props, ref) {
+    const deps = useKibanaServices();
 
-  if (!deps) {
-    return null;
+    if (!deps) {
+      return null;
+    }
+
+    return (
+      <KibanaContextProvider services={{ ...deps }}>
+        <Suspense fallback={null}>
+          <LazyQuickSearchVisor ref={ref} {...props} />
+        </Suspense>
+      </KibanaContextProvider>
+    );
   }
-
-  return (
-    <KibanaContextProvider services={{ ...deps }}>
-      <Suspense fallback={null}>
-        <LazyQuickSearchVisor {...props} />
-      </Suspense>
-    </KibanaContextProvider>
-  );
-};
+);

@@ -18,6 +18,7 @@ export type {
   ESQLEditorProps,
   ESQLEditorApi,
   DataErrorsControl,
+  QuickSearchVisorApi,
   QuickSearchVisorProps,
   RestorableStateProviderApi,
 } from '@kbn/esql-editor';

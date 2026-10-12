@@ -156,6 +156,17 @@ describe('ReviewActionsWidget', () => {
       dom.remove();
     });
 
+    it('does not focus the editor when disposed with focusEditor false', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom, undoButton } = setup(editorFocus);
+
+      undoButton.focus();
+      widget.dispose({ focusEditor: false });
+
+      expect(editorFocus).not.toHaveBeenCalled();
+      dom.remove();
+    });
+
     it('does not move focus to the editor when disposed while focus is elsewhere', () => {
       const editorFocus = jest.fn();
       const { widget, dom } = setup(editorFocus);

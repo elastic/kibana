@@ -6,7 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ReactNode } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
@@ -32,7 +40,7 @@ import {
   enterHintFilterLabel,
   enterHintGenerateLabel,
 } from './visor_i18n';
-import { NLInput } from './nl_input';
+import { NLInput, type NLInputApi } from './nl_input';
 import { visorStyles } from './visor.styles';
 import { SparklesIcon } from './sparkles_icon';
 import type { ESQLEditorDeps } from '../types';
@@ -189,6 +197,11 @@ function NlVisorActions({
   );
 }
 
+export interface QuickSearchVisorApi {
+  // Restores the prompt behind the last generated query and focuses the input
+  restoreNlPrompt: () => void;
+}
+
 export interface QuickSearchVisorProps {
   // Current ESQL query
   query: string;
@@ -208,203 +221,224 @@ export interface QuickSearchVisorProps {
   onKqlSubmitted?: () => void;
 }
 
-export function QuickSearchVisor({
-  query,
-  isInline,
-  isVisible = true,
-  onNlResult,
-  onUpdateAndSubmitQuery,
-  isDisabled = false,
-  disableSubmitAction = false,
-  onKqlSubmitted,
-}: QuickSearchVisorProps) {
-  const kibana = useKibana<ESQLEditorDeps>();
-  const { kql, data, core } = kibana.services;
-  const isNlToEsqlEnabled = useNlToEsqlCheck();
-  const euiThemeContext = useEuiTheme();
-  const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState(VisorMode.KQL);
-  const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
-  const [isKqlFocused, setIsKqlFocused] = useState(false);
-  const wasVisibleRef = useRef(isVisible);
-  const telemetryService = useMemo(
-    () => new ESQLEditorTelemetryService(core.analytics),
-    [core.analytics]
-  );
-
-  const {
-    nlValue,
-    setNlValue,
-    isNlLoading,
-    hasConnector,
-    onNlSubmit: submitNl,
-    onStopGeneration,
-  } = useNlGeneration({ query, onNlResult, onUpdateAndSubmitQuery, telemetryService });
-  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
-  const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
-
-  const pickerProjectRouting = usePickerProjectRouting();
-
-  const onKqlValueChange = useCallback((kqlQuery: string) => {
-    setSearchValue(kqlQuery);
-  }, []);
-
-  const onKqlSubmit = useCallback(
-    (kqlQuery: string) => {
-      if (isDisabled || disableSubmitAction) return;
-      const sourcesKey = getIndexPatternFromESQLQuery(query);
-      if (sourcesKey && kqlQuery.trim()) {
-        const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
-        const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
-        onUpdateAndSubmitQuery(newQuery);
-        setSearchValue('');
-        onKqlSubmitted?.();
-      }
+export const QuickSearchVisor = forwardRef<QuickSearchVisorApi, QuickSearchVisorProps>(
+  function QuickSearchVisor(
+    {
+      query,
+      isInline,
+      isVisible = true,
+      onNlResult,
+      onUpdateAndSubmitQuery,
+      isDisabled = false,
+      disableSubmitAction = false,
+      onKqlSubmitted,
     },
-    [isDisabled, disableSubmitAction, query, onUpdateAndSubmitQuery, onKqlSubmitted]
-  );
+    ref
+  ) {
+    const kibana = useKibana<ESQLEditorDeps>();
+    const { kql, data, core } = kibana.services;
+    const isNlToEsqlEnabled = useNlToEsqlCheck();
+    const euiThemeContext = useEuiTheme();
+    const [searchValue, setSearchValue] = useState('');
+    const [visorMode, setVisorMode] = useState(VisorMode.KQL);
+    const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
+    const [isKqlFocused, setIsKqlFocused] = useState(false);
+    const wasVisibleRef = useRef(isVisible);
+    const nlInputRef = useRef<NLInputApi>(null);
+    const telemetryService = useMemo(
+      () => new ESQLEditorTelemetryService(core.analytics),
+      [core.analytics]
+    );
 
-  const onNlSubmit = useCallback(() => {
-    if (isDisabled) return;
-    // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
-    if (disableSubmitAction && query.trim()) return;
-    submitNl();
-  }, [isDisabled, disableSubmitAction, query, submitNl]);
+    const {
+      nlValue,
+      setNlValue,
+      restoreNlPrompt,
+      isNlLoading,
+      hasConnector,
+      onNlSubmit: submitNl,
+      onStopGeneration,
+    } = useNlGeneration({ query, onNlResult, onUpdateAndSubmitQuery, telemetryService });
+    const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
 
-  const onVisorModeChange = useCallback(
-    (id: VisorMode) => {
-      setVisorMode(id);
-      if (id === VisorMode.KQL) {
-        onStopGeneration();
+    useImperativeHandle(
+      ref,
+      () => ({
+        restoreNlPrompt: () => {
+          restoreNlPrompt();
+          nlInputRef.current?.focus();
+        },
+      }),
+      [restoreNlPrompt]
+    );
+    const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery')
+      ? kql.QueryStringInput
+      : null;
+
+    const pickerProjectRouting = usePickerProjectRouting();
+
+    const onKqlValueChange = useCallback((kqlQuery: string) => {
+      setSearchValue(kqlQuery);
+    }, []);
+
+    const onKqlSubmit = useCallback(
+      (kqlQuery: string) => {
+        if (isDisabled || disableSubmitAction) return;
+        const sourcesKey = getIndexPatternFromESQLQuery(query);
+        if (sourcesKey && kqlQuery.trim()) {
+          const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
+          const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
+          onUpdateAndSubmitQuery(newQuery);
+          setSearchValue('');
+          onKqlSubmitted?.();
+        }
+      },
+      [isDisabled, disableSubmitAction, query, onUpdateAndSubmitQuery, onKqlSubmitted]
+    );
+
+    const onNlSubmit = useCallback(() => {
+      if (isDisabled) return;
+      // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
+      if (disableSubmitAction && query.trim()) return;
+      submitNl();
+    }, [isDisabled, disableSubmitAction, query, submitNl]);
+
+    const onVisorModeChange = useCallback(
+      (id: VisorMode) => {
+        setVisorMode(id);
+        if (id === VisorMode.KQL) {
+          onStopGeneration();
+        }
+      },
+      [onStopGeneration]
+    );
+
+    // License and connector are known only after the first render. Start in natural language once they are.
+    useEffect(() => {
+      if (showAskAiButton) {
+        setVisorMode(VisorMode.NaturalLanguage);
       }
-    },
-    [onStopGeneration]
-  );
+    }, [showAskAiButton]);
 
-  // License and connector are known only after the first render. Start in natural language once they are.
-  useEffect(() => {
-    if (showAskAiButton) {
-      setVisorMode(VisorMode.NaturalLanguage);
-    }
-  }, [showAskAiButton]);
+    useEffect(() => {
+      const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
+      wasVisibleRef.current = isVisible;
+      if (!becameVisible) return;
+      document
+        .querySelector<HTMLTextAreaElement>(
+          '[data-test-subj="ESQLEditor-quick-search-visor"] textarea'
+        )
+        ?.focus();
+    }, [isInline, isVisible]);
 
-  useEffect(() => {
-    const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
-    wasVisibleRef.current = isVisible;
-    if (!becameVisible) return;
-    document
-      .querySelector<HTMLTextAreaElement>(
-        '[data-test-subj="ESQLEditor-quick-search-visor"] textarea'
-      )
-      ?.focus();
-  }, [isInline, isVisible]);
+    useEffect(() => {
+      if (!isVisible) {
+        setKqlDataView(undefined);
+        return;
+      }
+      // The fields only serve KQL suggestions, shown while the KQL input is focused: derive the
+      // source and look it up only then, never while the ES|QL query is typed. They are kept after
+      // blur and reused for the same source.
+      if (!isKqlFocused) {
+        return;
+      }
+      const sourceQuery = getSourceCommandQueryFromESQLQuery(query);
+      if (!sourceQuery) {
+        setKqlDataView(undefined);
+        return;
+      }
+      // Fields loaded for another source are stale.
+      setKqlDataView((current) => (current?.sourceQuery === sourceQuery ? current : undefined));
+      let cancelled = false;
+      // Only the fields are needed, as before: skip the time field request.
+      EsqlSource.create({
+        query: sourceQuery,
+        http: core.http,
+        projectRouting: getEffectiveProjectRouting(query, pickerProjectRouting),
+        resolveTimeField: false,
+      })
+        .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
+        .then(
+          (dataView) => !cancelled && setKqlDataView({ sourceQuery, dataView }),
+          () => !cancelled && setKqlDataView(undefined)
+        );
+      return () => {
+        cancelled = true;
+      };
+    }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
-  useEffect(() => {
-    if (!isVisible) {
-      setKqlDataView(undefined);
-      return;
+    const isKqlMode = visorMode === VisorMode.KQL;
+    const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
+
+    if (!KQLComponent) {
+      return null;
     }
-    // The fields only serve KQL suggestions, shown while the KQL input is focused: derive the
-    // source and look it up only then, never while the ES|QL query is typed. They are kept after
-    // blur and reused for the same source.
-    if (!isKqlFocused) {
-      return;
-    }
-    const sourceQuery = getSourceCommandQueryFromESQLQuery(query);
-    if (!sourceQuery) {
-      setKqlDataView(undefined);
-      return;
-    }
-    // Fields loaded for another source are stale.
-    setKqlDataView((current) => (current?.sourceQuery === sourceQuery ? current : undefined));
-    let cancelled = false;
-    // Only the fields are needed, as before: skip the time field request.
-    EsqlSource.create({
-      query: sourceQuery,
-      http: core.http,
-      projectRouting: getEffectiveProjectRouting(query, pickerProjectRouting),
-      resolveTimeField: false,
-    })
-      .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
-      .then(
-        (dataView) => !cancelled && setKqlDataView({ sourceQuery, dataView }),
-        () => !cancelled && setKqlDataView(undefined)
+
+    if (isKqlMode) {
+      return (
+        <VisorLayout
+          showModeToggle={showAskAiButton}
+          isKqlMode
+          onModeChange={onVisorModeChange}
+          styles={styles}
+          isVisible={isVisible}
+        >
+          <div css={[styles.inputSlot, styles.searchWrapper]}>
+            <KQLComponent
+              iconType=""
+              disableLanguageSwitcher={true}
+              indexPatterns={kqlDataView ? [kqlDataView.dataView] : []}
+              bubbleSubmitEvent={false}
+              query={{ query: searchValue, language: 'kuery' }}
+              disableAutoFocus={true}
+              placeholder={searchPlaceholder}
+              onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
+              onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
+              appName="esqlEditorVisor"
+              dataTestSubj="esqlVisorKQLQueryInput"
+              onChangeQueryInputFocus={setIsKqlFocused}
+              size={isInline ? 's' : undefined}
+              isClearable={false}
+            />
+          </div>
+          {searchValue.trim() && (
+            <SubmitButton
+              tooltip={enterHintFilterLabel}
+              onClick={() => onKqlSubmit(searchValue)}
+              data-test-subj="esqlVisorKQLSubmit"
+            />
+          )}
+        </VisorLayout>
       );
-    return () => {
-      cancelled = true;
-    };
-  }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
+    }
 
-  const isKqlMode = visorMode === VisorMode.KQL;
-  const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
-
-  if (!KQLComponent) {
-    return null;
-  }
-
-  if (isKqlMode) {
     return (
       <VisorLayout
         showModeToggle={showAskAiButton}
-        isKqlMode
+        isKqlMode={false}
         onModeChange={onVisorModeChange}
         styles={styles}
         isVisible={isVisible}
       >
-        <div css={[styles.inputSlot, styles.searchWrapper]}>
-          <KQLComponent
-            iconType=""
-            disableLanguageSwitcher={true}
-            indexPatterns={kqlDataView ? [kqlDataView.dataView] : []}
-            bubbleSubmitEvent={false}
-            query={{ query: searchValue, language: 'kuery' }}
-            disableAutoFocus={true}
-            placeholder={searchPlaceholder}
-            onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
-            onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
-            appName="esqlEditorVisor"
-            dataTestSubj="esqlVisorKQLQueryInput"
-            onChangeQueryInputFocus={setIsKqlFocused}
-            size={isInline ? 's' : undefined}
-            isClearable={false}
+        <div css={styles.inputSlot}>
+          <NLInput
+            ref={nlInputRef}
+            value={nlValue}
+            placeholder={nlPlaceholder}
+            disabled={isNlLoading}
+            onChange={setNlValue}
+            onSubmit={onNlSubmit}
+            inputStyles={styles.nlInput}
           />
         </div>
-        {searchValue.trim() && (
-          <SubmitButton
-            tooltip={enterHintFilterLabel}
-            onClick={() => onKqlSubmit(searchValue)}
-            data-test-subj="esqlVisorKQLSubmit"
-          />
-        )}
+        <NlVisorActions
+          isLoading={isNlLoading}
+          value={nlValue}
+          onSubmit={onNlSubmit}
+          onStop={onStopGeneration}
+          styles={styles}
+        />
       </VisorLayout>
     );
   }
-
-  return (
-    <VisorLayout
-      showModeToggle={showAskAiButton}
-      isKqlMode={false}
-      onModeChange={onVisorModeChange}
-      styles={styles}
-      isVisible={isVisible}
-    >
-      <div css={styles.inputSlot}>
-        <NLInput
-          value={nlValue}
-          placeholder={nlPlaceholder}
-          disabled={isNlLoading}
-          onChange={setNlValue}
-          onSubmit={onNlSubmit}
-          inputStyles={styles.nlInput}
-        />
-      </div>
-      <NlVisorActions
-        isLoading={isNlLoading}
-        value={nlValue}
-        onSubmit={onNlSubmit}
-        onStop={onStopGeneration}
-        styles={styles}
-      />
-    </VisorLayout>
-  );
-}
+);

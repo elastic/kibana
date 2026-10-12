@@ -66,6 +66,25 @@ describe('useNlGeneration', () => {
     expect(result.current.nlValue).toBe('');
   });
 
+  it('restoreNlPrompt keeps a newer prompt', async () => {
+    (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
+
+    const { result } = renderHook(
+      () => useNlGeneration({ ...defaultParams, onNlResult: jest.fn() }),
+      { wrapper: createWrapper() }
+    );
+
+    act(() => result.current.setNlValue('show me logs'));
+    await act(async () => {
+      await result.current.onNlSubmit();
+    });
+    act(() => result.current.setNlValue('newer prompt'));
+
+    act(() => result.current.restoreNlPrompt());
+
+    expect(result.current.nlValue).toBe('newer prompt');
+  });
+
   it('onNlSubmit falls back to onUpdateAndSubmitQuery when onNlResult is not provided', async () => {
     (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
 
