@@ -367,6 +367,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   // hasAnyEcf=false so the section is hidden and Next is not gated on ECF completion.
   const {
     hasAnyEcf,
+    hasRemovedFamiliesWithArn,
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
     currentServiceIdsByFamily,
@@ -909,9 +910,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         />
       )}
 
-      {hasAnyEcf && !isAgentBased && <EuiHorizontalRule margin="l" />}
+      {(hasAnyEcf || hasRemovedFamiliesWithArn) && !isAgentBased && (
+        <EuiHorizontalRule margin="l" />
+      )}
 
-      {hasAnyEcf && !isAgentBased && <EcfDeploymentSection {...ecfSectionProps} />}
+      {(hasAnyEcf || hasRemovedFamiliesWithArn) && !isAgentBased && (
+        <EcfDeploymentSection {...ecfSectionProps} />
+      )}
 
       <EuiSpacer size="l" />
 

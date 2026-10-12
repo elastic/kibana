@@ -106,6 +106,8 @@ interface UseEcfDeploymentOpts {
 interface UseEcfDeploymentResult {
   /** True when at least one ECF template family is relevant to the selected services. */
   hasAnyEcf: boolean;
+  /** True when a previously-launched family (with a valid ARN) has no active services — the AWS stack may still be running. */
+  hasRemovedFamiliesWithArn: boolean;
   /** Service IDs handled by ECF — used by the parent to exclude them from managed-integration chips. */
   ecfServiceIds: Set<string>;
   /** True when all relevant ECF template families have had their Launch button clicked. */
@@ -385,8 +387,21 @@ export const useEcfDeployment = ({
     return buildEcfStackUpdateUrl(arn, templateUrl);
   }, [stackArns.crowdstrike, stackVersions.crowdstrike, templateVersion]);
 
+  // Families that were launched with a valid ARN but now have no active services.
+  // The CloudFormation stack may still be running in AWS — surface a warning even when
+  // hasAnyEcf is false so the parent can keep the section visible.
+  const removedFamiliesWithArn = (['unified', 'otel', 'crowdstrike'] as const).filter((family) => {
+    if (!launchedFamilies.includes(family)) return false;
+    const arn = stackArns[family];
+    if (!arn || !isEcfStackArnValid(arn.trim())) return false;
+    if (family === 'unified') return !hasEcfUnified;
+    if (family === 'otel') return !hasEcfOtel;
+    return !hasEcfCrowdstrike;
+  });
+
   return {
     hasAnyEcf,
+    hasRemovedFamiliesWithArn: removedFamiliesWithArn.length > 0,
     ecfServiceIds,
     isDone,
     stackArns,
@@ -884,15 +899,17 @@ export const EcfDeploymentSection = ({
               </EuiBadge>
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.serviceCount"
-                defaultMessage="{count, plural, one {# service} other {# services}}"
-                values={{ count: totalServiceCount }}
-              />
-            </EuiText>
-          </EuiFlexItem>
+          {totalServiceCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.ingestHub.authenticateAndDeployStep.ecfSection.serviceCount"
+                  defaultMessage="{count, plural, one {# service} other {# services}}"
+                  values={{ count: totalServiceCount }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </button>
 

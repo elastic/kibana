@@ -1073,4 +1073,40 @@ describe('useEcfDeployment staleness', () => {
     // isDone should also not be blocked by this case
     expect(result.current.isDone).toBe(true);
   });
+
+  it('hasRemovedFamiliesWithArn is true when a launched family has a valid ARN but no active services', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+      stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+    });
+    // No unified configs — the family has no active services
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.hasRemovedFamiliesWithArn).toBe(true);
+  });
+
+  it('hasRemovedFamiliesWithArn is false when a launched family has no ARN', () => {
+    makeSessionStorageMock({
+      launchedFamilies: ['unified'],
+    });
+    mockGetEcfServiceConfigs.mockReturnValue([]);
+    const { result } = renderHook(() =>
+      useEcfDeployment({
+        instances: [],
+        serviceVars: {},
+        globalRegion: 'us-east-1',
+        otlpEndpoint: undefined,
+        dataFormat: 'ecs' as const,
+      })
+    );
+    expect(result.current.hasRemovedFamiliesWithArn).toBe(false);
+  });
 });

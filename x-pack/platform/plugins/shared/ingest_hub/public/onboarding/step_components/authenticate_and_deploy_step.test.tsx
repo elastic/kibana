@@ -166,6 +166,7 @@ function makeEcfReturn(
 ): ReturnType<typeof useEcfDeployment> {
   return {
     hasAnyEcf: overrides.hasAnyEcf ?? false,
+    hasRemovedFamiliesWithArn: false,
     isDone: overrides.isDone ?? false,
     ecfServiceIds: new Set(),
     stackArns: overrides.stackArns ?? {},
