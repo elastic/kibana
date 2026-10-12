@@ -379,6 +379,9 @@ test.describe(
         page,
         log,
       }) => {
+        // Failing: See https://github.com/elastic/kibana/issues/261213
+        test.skip(name.startsWith('large_perf'), 'https://github.com/elastic/kibana/issues/261213');
+
         // Seed via API — same reason as the cascade test (R2).
         const yaml = getYaml();
         const { id } = await apiServices.workflows.create(yaml);
