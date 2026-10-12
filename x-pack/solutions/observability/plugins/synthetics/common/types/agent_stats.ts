@@ -55,7 +55,7 @@ export interface LocationAgentStats {
   agentPolicyId: string;
   /** Agent policy display name, or the id when the policy can't be resolved. */
   agentPolicyName: string;
-  /** Whether this location opts into condition-based monitor distribution. */
-  isAgentSharding: boolean;
+  /** Whether condition-based monitor distribution is currently active. */
+  isShardingActive: boolean;
   agents: AgentStat[];
 }

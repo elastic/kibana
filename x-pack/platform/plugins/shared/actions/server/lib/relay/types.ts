@@ -22,7 +22,14 @@ export interface RelayInstallResponse {
 
 export type RelayClaimResponse =
   | { status: 'pending' }
-  | { status: 'complete'; tenant_key: string | undefined };
+  | {
+      status: 'complete';
+      tenant_key: string | undefined;
+      /** Slack workspace name. Chosen by the workspace owner, so a display label only. */
+      tenant_name?: string;
+      /** Slack workspace URL from `auth.test` (https://api.slack.com/methods/auth.test); the field to trust when identifying the workspace. */
+      tenant_url?: string;
+    };
 
 export interface RelayCallbackResponse {
   status: number;

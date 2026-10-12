@@ -62,6 +62,15 @@ export type AlertTriageAttachmentServiceProvider = (
 ) => Promise<AlertTriageAttachmentService | undefined>;
 
 /**
+ * Installs threat-intel supply managed workflows owned by security_solution
+ * (global ingest/enrich plus the per-space attribute workflow) for the given
+ * space. Pushed from security_solution's `start()` so AlertZero can call it when
+ * Hunt enable finds a required TI document missing, without owning TI YAML or
+ * declaring a reverse plugin dependency.
+ */
+export type ThreatIntelSupplyWorkflowInstaller = (params: { spaceId: string }) => Promise<void>;
+
+/**
  * Soft-enable contract. Always returned from `setup()` so optional consumers
  * (e.g. security_solution threat-intel supply) can gate on `isEnabled` without
  * reading `xpack.alertzero` config themselves.
@@ -86,6 +95,14 @@ export interface AlertZeroPluginStart {
    */
   registerAlertTriageAttachmentServiceProvider: (
     provider: AlertTriageAttachmentServiceProvider
+  ) => void;
+  /**
+   * Same push pattern as {@link registerAlertTriageAttachmentServiceProvider}: security_solution
+   * registers the TI owner installer from its `start()` so Hunt ensure can install missing
+   * supply workflows without AlertZero owning those definitions.
+   */
+  registerThreatIntelSupplyWorkflowInstaller: (
+    installer: ThreatIntelSupplyWorkflowInstaller
   ) => void;
 }
 

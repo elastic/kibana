@@ -5,32 +5,39 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useKibana } from '../hooks/use_kibana';
 import { ContinuousOnboardingSection } from './components/continuous_onboarding_section';
 import { CostEstimate } from './components/cost_estimate';
-import { DetectionSettingsSaveBar } from './components/detection_settings_save_bar';
+import { DetectionPausedCallout } from './components/detection_paused_callout';
 import { DeveloperModeBadge } from './components/developer_mode_badge';
-import { DeveloperModeSection } from './components/developer_mode_section';
 import { MaintenanceSection } from './components/maintenance_section';
 import { RunLimitsSection } from './components/run_limits_section';
 import { ScheduledDiscoverySection } from './components/scheduled_discovery_section';
+import { SettingsSaveBar } from './components/settings_save_bar';
 import { SettingsSection } from './components/settings_section';
 import { SettingsNoPermissionCallout } from './components/settings_no_permission_callout';
 import { StaleEventCleanupSection } from './components/stale_event_cleanup_section';
 import { TuningSection } from './components/tuning_section';
 import { useDetectionSettingsForm } from './components/use_detection_settings_form';
+import { useRunLimitsForm } from './components/use_run_limits_form';
+import { useTokenTrackingForm } from './components/use_token_tracking_form';
+
+const DETECTION_RUN_LIMIT_GROUPS = ['detection', 'ki_extraction'] as const;
 
 export const DetectionsSettingsTab = () => {
   const { appParams, application, http, overlays } = useKibana().services;
   const form = useDetectionSettingsForm();
-  const [hasRunLimitChanges, setHasRunLimitChanges] = useState(false);
+  const runLimits = useRunLimitsForm({ groups: DETECTION_RUN_LIMIT_GROUPS });
+  const tokenTracking = useTokenTrackingForm({
+    isEnabled: form.isDeveloperMode && !form.isDeveloperModeSaving && runLimits.canManage,
+  });
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: form.hasChanges || hasRunLimitChanges,
+    hasUnsavedChanges: form.hasChanges || runLimits.isDirty || tokenTracking.isDirty,
     http,
     openConfirm: overlays.openConfirm,
     navigateToUrl: application.navigateToUrl,
@@ -38,8 +45,54 @@ export const DetectionsSettingsTab = () => {
     shouldPromptOnReplace: false,
   });
 
+  const saveRemainingSettings = async () => {
+    if (form.hasActivitySettingsChanges) {
+      const result = await form.handleSave();
+      if (result === 'failed') {
+        return;
+      }
+    }
+    if (tokenTracking.isDirty) {
+      await tokenTracking.save();
+    }
+  };
+
+  const saveSettings = async () => {
+    if (runLimits.isDirty) {
+      const result = await runLimits.requestSave();
+      if (result === 'needs-confirmation' || result === 'failed') {
+        return;
+      }
+    }
+
+    await saveRemainingSettings();
+  };
+
+  const confirmRunLimitsAndSaveSettings = async () => {
+    const result = await runLimits.confirmAndSave();
+    if (result === 'saved') {
+      await saveRemainingSettings();
+    }
+  };
+
+  const cancelSettings = () => {
+    runLimits.cancel();
+    form.handleCancel();
+    tokenTracking.cancel();
+  };
+
+  const hasSaveBarChanges =
+    form.hasActivitySettingsChanges || runLimits.isDirty || tokenTracking.isDirty;
+  const activitySaveBlockedByPause = form.hasActivitySettingsChanges && form.saveBlockedByPause;
+  const isSaveDisabled =
+    form.isDeveloperModeSaving ||
+    activitySaveBlockedByPause ||
+    (runLimits.isDirty && (!runLimits.canManage || !runLimits.update)) ||
+    (tokenTracking.isDirty && !tokenTracking.canEdit);
+
   return (
     <>
+      <DetectionPausedCallout />
       {!form.canEditSettings && <SettingsNoPermissionCallout />}
       <SettingsSection
         title={i18n.translate('xpack.nightshift.settings.detectionProcessTitle', {
@@ -62,8 +115,14 @@ export const DetectionsSettingsTab = () => {
         <EuiHorizontalRule margin="l" />
 
         <RunLimitsSection
-          groups={['detection', 'ki_extraction']}
-          onUnsavedChangesChange={setHasRunLimitChanges}
+          groups={DETECTION_RUN_LIMIT_GROUPS}
+          form={runLimits}
+          description={i18n.translate('xpack.nightshift.settings.detectionRunLimitsDescription', {
+            defaultMessage:
+              'These limits apply only to scheduled detection, manual runs are not limited. When a limit is reached, new scheduled runs are blocked until it resets.',
+          })}
+          onSave={saveSettings}
+          onConfirmSave={confirmRunLimitsAndSaveSettings}
         />
       </SettingsSection>
 
@@ -79,17 +138,8 @@ export const DetectionsSettingsTab = () => {
 
       <EuiSpacer />
 
-      <DeveloperModeSection
-        isDeveloperMode={form.isDeveloperMode}
-        setDeveloperMode={form.setDeveloperMode}
-        isDeveloperModeSaving={form.isDeveloperModeSaving}
-        canSaveAdvancedSettings={form.canSaveAdvancedSettings}
-        isSaving={form.isSaving || form.isSavingTuningConfig}
-      />
-
-      {form.isDeveloperMode && (
+      {form.isDeveloperMode ? (
         <>
-          <EuiSpacer />
           <SettingsSection
             title={i18n.translate('xpack.nightshift.settings.advancedDeveloperSettingsTitle', {
               defaultMessage: 'Advanced developer settings',
@@ -101,7 +151,7 @@ export const DetectionsSettingsTab = () => {
 
             <EuiHorizontalRule margin="l" />
 
-            <CostEstimate />
+            <CostEstimate tokenTracking={tokenTracking} />
 
             {!form.isDeveloperModeSaving && (
               <>
@@ -122,19 +172,17 @@ export const DetectionsSettingsTab = () => {
             )}
           </SettingsSection>
         </>
-      )}
+      ) : null}
 
-      <EuiSpacer />
-
-      <DetectionSettingsSaveBar
-        hasChanges={form.hasActivitySettingsChanges}
-        isSaving={form.isSaving || form.isSavingTuningConfig}
-        handleCancel={form.handleCancel}
-        handleSave={form.handleSave}
-        canEditSettings={form.canEditSettings}
-        isDeveloperModeSaving={form.isDeveloperModeSaving}
-        saveBlockedByPause={form.saveBlockedByPause}
-        activityBlockTooltip={form.activityBlockTooltip}
+      <SettingsSaveBar
+        hasChanges={hasSaveBarChanges}
+        isSaving={
+          form.isSaving || form.isSavingTuningConfig || runLimits.isSaving || tokenTracking.isSaving
+        }
+        onCancel={cancelSettings}
+        onSave={saveSettings}
+        isSaveDisabled={isSaveDisabled}
+        disabledTooltip={activitySaveBlockedByPause ? form.activityBlockTooltip : undefined}
       />
     </>
   );
