@@ -415,6 +415,33 @@ describe('retainMonitors', () => {
     ['a server error', 500, { status: 500, reason: 'failed to sync monitors' }],
     ['a rate limit', 429, { status: 429, reason: 'rate limit exceeded' }],
     ['a bad request', 400, { status: 400, reason: 'output is required' }],
+    [
+      'a bad request that rejected the whole batch',
+      400,
+      {
+        status: 400,
+        reason: 'failed to sync monitors',
+        failed_monitors: [{ message: 'invalid monitor configuration' }],
+      },
+    ],
+    [
+      'a bad request that names a monitor, as it retained none of them',
+      400,
+      {
+        status: 400,
+        reason: 'failed to sync monitors',
+        failed_monitors: [{ id: 'http-monitor', message: 'invalid monitor configuration' }],
+      },
+    ],
+    [
+      'a not found that lists a failure without a monitor',
+      404,
+      {
+        status: 404,
+        reason: 'failed to sync monitors',
+        failed_monitors: [{ message: 'monitor not found' }],
+      },
+    ],
   ])('returns every monitor and logs an error for %s', async (_, status, data) => {
     const logger = loggerMock.create();
     rejectWith(status, data);

@@ -66,7 +66,8 @@ export type RetainPayload = Omit<ServicePayload, 'monitors' | 'is_edit'> & {
 };
 
 interface RetainErrorBody {
-  failed_monitors?: Array<{ id: string; message: string }> | null;
+  // A failure that is not about one monitor, such as a batch the service could not read, has no id.
+  failed_monitors?: Array<{ id?: string; message: string }> | null;
 }
 
 export interface RetainData {
@@ -252,11 +253,18 @@ export class SyntheticsServiceHttpClient {
       const status = axiosError.response?.status;
       const failedMonitors = axiosError.response?.data?.failed_monitors;
 
-      // The rest of the batch was retained. The service lists failures on a 404 when monitors were
-      // not cached, and on a 500 when any of them failed for another reason.
-      if (Array.isArray(failedMonitors)) {
+      // On a 404 the service lists the monitors it had not cached, and on a 5xx those it failed to
+      // retain for another reason; it kept the rest of the batch. Any other status, such as a 400 for
+      // a batch it could not read, retained none of them, and its failures need not name a monitor.
+      if (
+        Array.isArray(failedMonitors) &&
+        (status === 404 || (status ?? 0) >= 500) &&
+        failedMonitors.every((failure): failure is { id: string; message: string } =>
+          Boolean(failure.id)
+        )
+      ) {
         if (status !== 404) {
-          this.logServiceError(axiosError, location.url, 'PUT', failedMonitors.length);
+          this.logServiceError(axiosError, location.url, 'PUT', ids.length);
         }
         this.retainUnsupportedSince.delete(location.id);
         this.logger.debug(
@@ -265,8 +273,9 @@ export class SyntheticsServiceHttpClient {
         return failedMonitors.map(({ id }) => id);
       }
 
-      // The route is not served at all: an older service that only knows the full sync.
-      if (status === 404 || status === 405) {
+      // The route is not served at all: an older service that only knows the full sync. A 404 that
+      // lists failures comes from the endpoint itself.
+      if (!Array.isArray(failedMonitors) && (status === 404 || status === 405)) {
         this.retainUnsupportedSince.set(location.id, Date.now());
         this.logger.debug(
           `Service location ${location.id} does not support retaining monitors, falling back to full sync`

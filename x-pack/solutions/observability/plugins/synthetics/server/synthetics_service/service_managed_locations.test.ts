@@ -776,6 +776,26 @@ describe('ServiceManagedLocations', () => {
         expect(idsOf(requests().synced)).toEqual(['corrupt']);
       });
 
+      it('sends every monitor in full when the service rejected the whole batch', async () => {
+        const service = getService();
+        const state = await syncOnce(service);
+        mockStores({
+          unchanged: [monitorSO('a'), monitorSO('b')],
+          byId: { 'so-a': monitorSO('a'), 'so-b': monitorSO('b') },
+        });
+        mockServiceResponses({
+          retain: failure(400, {
+            status: 400,
+            reason: 'failed to sync monitors',
+            failed_monitors: [{ message: 'invalid monitor configuration' }],
+          }),
+        });
+
+        await service.syncAllMonitors(ALL_SPACES_ID, state);
+
+        expect(idsOf(requests().synced)).toEqual(['a', 'b']);
+      });
+
       it('reads each not retained legacy monitor sharing an id with one in another space', async () => {
         const service = getService();
         const state = await syncOnce(service);
