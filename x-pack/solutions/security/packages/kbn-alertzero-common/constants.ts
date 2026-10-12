@@ -86,6 +86,38 @@ export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_e
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
 
+/** Read-only Hunt Watch threat-intel supply status for the current space. */
+export const HUNT_THREAT_INTEL_SUPPLY_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/threat_intel_supply` as const;
+
+/** Re-enable drifted TI supply while Continuous Threat Hunt is on. */
+export const HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL =
+  `${HUNT_THREAT_INTEL_SUPPLY_URL}/restore` as const;
+
+export type HuntThreatIntelSupplyScope = 'deployment' | 'space';
+export type HuntThreatIntelSupplyWorkflowKey = 'ingest' | 'enrich' | 'attribute';
+
+export interface HuntThreatIntelSupplyWorkflowStatus {
+  key: HuntThreatIntelSupplyWorkflowKey;
+  workflowId: string;
+  enabled: boolean;
+  installed: boolean;
+  scope: HuntThreatIntelSupplyScope;
+  inUseElsewhere?: boolean;
+}
+
+export interface HuntThreatIntelSupplyHardGate {
+  ok: boolean;
+  reasonCodes: string[];
+}
+
+export interface HuntThreatIntelSupplyStatus {
+  workflows: HuntThreatIntelSupplyWorkflowStatus[];
+  hardGate: HuntThreatIntelSupplyHardGate;
+  drift: boolean;
+  huntEnabled: boolean;
+}
+
 export interface ScanFailureWorker {
   workerId: string;
   watchId: string;

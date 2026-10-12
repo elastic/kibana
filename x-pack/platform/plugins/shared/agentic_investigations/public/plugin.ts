@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
@@ -25,6 +26,22 @@ import type {
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
 } from './types';
+
+const LazyInvestigationCardComponent = React.lazy(async () => {
+  const { InvestigationCard } = await import(
+    './conversation_templates/templates/investigation/card'
+  );
+  return { default: InvestigationCard };
+});
+
+const LazyInvestigationCard: AgenticInvestigationsPublicPluginStart['InvestigationCard'] = (
+  props
+) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyInvestigationCardComponent, props)
+  );
 
 /**
  * Registers Impact workflow steps, the impact, subject, and hypotheses attachment UI, and the
@@ -81,6 +98,7 @@ export class AgenticInvestigationsPublicPlugin
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
+        getImpactEntityOpener: () => this.impactEntityOpener,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -90,6 +108,7 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactEntityOpener: (opener) => {
         this.impactEntityOpener = opener;
       },
+      InvestigationCard: LazyInvestigationCard,
     };
   }
 

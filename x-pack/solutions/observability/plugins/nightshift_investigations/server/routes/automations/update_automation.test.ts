@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { parse } from 'yaml';
 import { updateAutomationRoute } from './update_automation';
 import { createRouteContext } from './test_helpers';
 
@@ -33,7 +34,7 @@ const existing = {
 const call = (body: Record<string, unknown>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
-    params: { path: { id: 'automation-1' }, body },
+    params: params.parse({ path: { id: 'automation-1' }, body }),
     getAutomationsSoClient,
     getWorkflowsManagement,
     context: createRouteContext(),
@@ -84,10 +85,21 @@ it('merges partial nested updates', async () => {
 });
 
 it('clears managed nested values when the request sends null', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#oncall',
+        connectorId: 'saved-slack',
+      },
+    },
+  });
   const result = await call({
     description: null,
     execution: { promptTemplate: null },
-    completion: { action: null, targetMode: null, destination: null },
+    completion: { action: null, targetMode: null, destination: null, connectorId: null },
     runtime: { dailyDispatchLimit: null },
   });
 
@@ -122,5 +134,101 @@ describe('request validation', () => {
 
   it('rejects Slack events other than message', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
+  });
+
+  it('accepts the action removal payload sent by the edit form', () => {
+    const completion = { action: null, targetMode: null, destination: null };
+    expect(
+      params.parse({ path: { id: 'automation-1' }, body: { completion } }).body.completion
+    ).toEqual(completion);
+  });
+
+  it('keeps notification connector bounds on partial updates', () => {
+    for (const connectorId of ['', 'x'.repeat(501)]) {
+      expect(() =>
+        params.parse({ path: { id: 'automation-1' }, body: { completion: { connectorId } } })
+      ).toThrow();
+    }
+  });
+});
+
+it('rejects a partial change to channel mode without a merged destination before writes', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: { action: 'post_to_slack', targetMode: 'thread', connectorId: 'slack' },
+    },
+  });
+  await expect(call({ completion: { targetMode: 'channel' } })).rejects.toThrow(
+    'Slack channel destination'
+  );
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});
+
+it('validates merged completion and preserves omitted connector and action fields', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: { action: 'post_to_slack', targetMode: 'thread', connectorId: 'slack' },
+    },
+  });
+  await call({ completion: { targetMode: 'channel', destination: '#alerts' } });
+  expect(soClient.update).toHaveBeenCalledWith(
+    expect.any(String),
+    'automation-1',
+    expect.objectContaining({
+      completion: {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#alerts',
+        connectorId: 'slack',
+      },
+    }),
+    { mergeAttributes: false }
+  );
+  expect(updateWorkflow).toHaveBeenCalledWith(
+    'workflow-1',
+    { yaml: expect.stringContaining('notificationDestinations:') },
+    'default',
+    expect.anything()
+  );
+});
+
+it('removes notification destinations when the Slack action is removed in the UI', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#oncall',
+        connectorId: 'saved-slack',
+      },
+    },
+  });
+  const result = await call({ completion: { action: null, targetMode: null, destination: null } });
+  expect(result.completion).toEqual({ connectorId: 'saved-slack' });
+  const workflow = parse(updateWorkflow.mock.calls[0][1].yaml);
+  expect(workflow.steps[0].with.notificationDestinations).toBeUndefined();
+});
+
+it('returns to the Elastic Slack app when the saved connector is explicitly cleared', async () => {
+  soClient.get.mockResolvedValue({
+    attributes: {
+      ...existing,
+      completion: {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#oncall',
+        connectorId: 'saved-slack',
+      },
+    },
+  });
+  await call({ completion: { connectorId: null } });
+  const workflow = parse(updateWorkflow.mock.calls[0][1].yaml);
+  expect(workflow.steps[0].with.notificationDestinations[0]).toMatchObject({
+    connector_id: 'elastic-apps-slack',
+    params: { channel: '#oncall' },
   });
 });
