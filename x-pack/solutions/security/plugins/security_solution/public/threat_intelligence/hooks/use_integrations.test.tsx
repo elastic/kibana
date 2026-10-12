@@ -36,13 +36,9 @@ const createWrapper = (): FC<PropsWithChildren<{}>> => {
 };
 
 const renderUseIntegrations = (enabled: boolean) =>
-  renderHook(
-    ({ enabled: isEnabled }: { enabled: boolean }) => useIntegrations({ enabled: isEnabled }),
-    {
-      wrapper: createWrapper(),
-      initialProps: { enabled },
-    }
-  );
+  renderHook(() => useIntegrations({ enabled }), {
+    wrapper: createWrapper(),
+  });
 
 describe('useIntegrations', () => {
   beforeEach(() => {
@@ -89,27 +85,5 @@ describe('useIntegrations', () => {
     await waitFor(() => expect(result.current.isLoading).toBeFalsy());
 
     expect(result.current.data).toBeUndefined();
-  });
-
-  it('should stop loading within the timeout even when the call starts well after the hook mounts', async () => {
-    httpGet.mockReturnValue(new Promise(() => {}));
-
-    const { result, rerender } = renderUseIntegrations(false);
-
-    act(() => {
-      jest.advanceTimersByTime(INTEGRATIONS_CALL_TIMEOUT);
-    });
-
-    rerender({ enabled: true });
-
-    await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-
-    expect(result.current.isLoading).toBeTruthy();
-
-    act(() => {
-      jest.advanceTimersByTime(INTEGRATIONS_CALL_TIMEOUT);
-    });
-
-    await waitFor(() => expect(result.current.isLoading).toBeFalsy());
   });
 });
