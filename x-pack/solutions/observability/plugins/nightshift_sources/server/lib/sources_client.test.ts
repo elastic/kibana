@@ -167,16 +167,41 @@ describe('SourcesClient', () => {
       await expect(client.assertReadable('source-1')).rejects.toThrow('security unavailable');
     });
 
-    it('rejects with 403 for a source that reads another cluster', async () => {
+    it('trusts a source that only reads another cluster', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(
         makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-nginx-*' }))
       );
 
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('checks only the local part of a source that also reads another cluster', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-*, logs-local' }))
+      );
+      hasPrivileges(dataEsClient, true);
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-local'], privileges: ['read'] }],
+      });
+    });
+
+    it('rejects with 403 when the local part of a mixed source is not readable', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-*, logs-local' }))
+      );
+      hasPrivileges(dataEsClient, false);
+
       await expect(client.assertReadable('source-1')).rejects.toMatchObject({
         output: { statusCode: 403 },
       });
-      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
     });
 
     it('rejects with 403 when the stored query cannot be parsed', async () => {

@@ -202,10 +202,16 @@ export class SourcesClient {
    * is read through the internal user, so this is the only place a caller's own index
    * privileges are checked before that data is returned.
    *
-   * It asks Elasticsearch for `read` on the index patterns of the stored query. An ES|QL probe
-   * is not a test: it passes for a user who can read the view but not the data behind a wildcard,
-   * and a missing view looks the same as a denied one. The check fails closed, so a query that
-   * cannot be parsed, a source that reads another cluster and a failed privilege request all deny.
+   * It asks Elasticsearch for `read` on the local index patterns of the stored query. An ES|QL
+   * probe is not a test: it passes for a user who can read the view but not the data behind a
+   * wildcard, and a missing view looks the same as a denied one. The check fails closed, so a
+   * query that cannot be parsed and a failed privilege request deny.
+   *
+   * Remote cluster targets (`cluster:index`) are not checked: `has_privileges` only covers local
+   * indices and no probe can tell a denied remote index from an absent one. They are trusted,
+   * because only a user who could run the query against the remote cluster can create the source.
+   * A source that reads a remote cluster therefore lets any Nightshift reader of the space read
+   * its stored knowledge.
    */
   async assertReadable(id: string): Promise<void> {
     const { attributes } = await this.getSavedObject(id);
@@ -215,7 +221,10 @@ export class SourcesClient {
     } catch {
       throw forbidden(`Cannot read source ${id}: its query cannot be checked`);
     }
-    if (targets.hasRemote || targets.indexPatterns.length === 0) {
+    if (targets.indexPatterns.length === 0) {
+      if (targets.hasRemote) {
+        return;
+      }
       throw forbidden(`Cannot read source ${id}: its data cannot be checked for this user`);
     }
 
