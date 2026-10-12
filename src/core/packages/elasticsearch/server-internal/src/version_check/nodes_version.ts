@@ -144,7 +144,7 @@ export const nodesVersionMachine = (
   initialState: initialState(config),
   next: () => action,
   model: (state, result) => model(config, state, result),
-  interval: (state) => pollingInterval(config, state.controlState),
+  delay: (state) => pollingInterval(config, state.controlState),
 });
 
 export interface CheckEsNodesVersionOptions {
@@ -159,26 +159,18 @@ export const checkEsNodesVersion = async ({
   kibanaVersion,
   ignoreVersionMismatch,
 }: CheckEsNodesVersionOptions): Promise<NodesVersionCompatibility> => {
-  const action = fetchNodesInfo(internalClient);
-  const machine = nodesVersionMachine(action, {
-    kibanaVersion,
-    ignoreVersionMismatch,
-    healthCheckInterval: 0,
-    healthCheckFailureInterval: 0,
-    healthCheckStartupInterval: 0,
-    healthCheckRetry: 1,
-  });
-  // Done once a compatibility settles, which the single retry bounds to two requests.
-  const steps = run({ ...machine, next: (state) => (state.compatibility ? null : action) });
-
-  let settled: NodesVersionCompatibility | undefined;
-  for await (const { state } of steps) {
-    settled = state.compatibility;
-  }
-  if (settled === undefined) {
-    throw new Error('The version check stopped without a compatibility');
-  }
-  return settled;
+  const fetch = fetchNodesInfo(internalClient);
+  const check = () =>
+    fetch().then(
+      (nodes) => compatibilityFromNodesInfo(nodes, kibanaVersion, ignoreVersionMismatch),
+      (error) =>
+        compatibilityFromRequestError(
+          error instanceof Error ? error : new Error(String(error)),
+          kibanaVersion
+        )
+    );
+  const first = await check();
+  return first.nodesInfoRequestError ? check() : first;
 };
 
 export interface PollEsNodesVersionOptions extends NodesVersionConfig {

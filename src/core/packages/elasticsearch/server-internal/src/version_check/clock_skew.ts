@@ -87,7 +87,8 @@ export const classifyClockSkew = ({
   respondedAt,
   timestamps,
 }: ClockSkewSample): ClockSkewClassification => {
-  if (timestamps.length === 0) {
+  // A wall clock stepped back during the request leaves a round trip that brackets nothing.
+  if (timestamps.length === 0 || respondedAt < requestedAt) {
     return { type: 'unmeasured' };
   }
   const elasticsearchTime = timestamps.find(
@@ -184,7 +185,7 @@ export const pollEsNodesClockSkew = async (
     initialState: { controlState: 'healthy' },
     next: () => action,
     model,
-    interval: () => CLOCK_SKEW_CHECK_INTERVAL_MS,
+    delay: () => CLOCK_SKEW_CHECK_INTERVAL_MS,
   };
   for await (const { event } of run(machine, clock, signal)) {
     logClockSkewEvent(log, event);

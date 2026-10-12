@@ -67,6 +67,14 @@ describe('classifyClockSkew', () => {
     });
   });
 
+  it('measures nothing when the wall clock stepped back during the request', () => {
+    // Stepped back 5 minutes: no node time could fall within the inverted round trip.
+    const stepped = { requestedAt: kibanaTime, respondedAt: kibanaTime - 300_000 };
+    expect(classifyClockSkew({ ...stepped, timestamps: [kibanaTime - 150_000] })).toEqual({
+      type: 'unmeasured',
+    });
+  });
+
   it('measures nothing when no node reported a timestamp', () => {
     expect(classifyClockSkew({ ...inSync, timestamps: [] })).toEqual({ type: 'unmeasured' });
   });
