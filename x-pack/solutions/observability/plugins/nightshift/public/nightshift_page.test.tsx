@@ -137,6 +137,7 @@ describe('NightshiftPage', () => {
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: false, isLoading: false });
     renderPage();
     expect(navigateToApp).toHaveBeenCalledWith(OBSERVABILITY_OVERVIEW_APP_ID);
+    expect(mockUseKnowledgeTabsAvailability).toHaveBeenCalledWith({ enabled: false });
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 

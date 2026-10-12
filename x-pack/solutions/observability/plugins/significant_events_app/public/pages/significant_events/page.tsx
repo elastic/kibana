@@ -52,6 +52,7 @@ const significantEventsTabs = [
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
+// Keep this redirect compatibility list local to avoid depending on Nightshift UI internals.
 const legacyKnowledgeTabs = ['cortex', 'memory', 'decision_trees'] as const;
 type LegacyKnowledgeTabId = (typeof legacyKnowledgeTabs)[number];
 

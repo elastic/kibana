@@ -98,7 +98,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const closeCustomContextFlyout = useCallback(() => setIsCustomContextFlyoutOpen(false), []);
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const knowledgeTabsAvailability = useKnowledgeTabsAvailability();
+  const knowledgeTabsAvailability = useKnowledgeTabsAvailability({ enabled: isAvailable });
   const isKnowledgeMenuVisible = isKnowledgeMenuItemVisible(knowledgeTabsAvailability);
 
   useBreadcrumbs(

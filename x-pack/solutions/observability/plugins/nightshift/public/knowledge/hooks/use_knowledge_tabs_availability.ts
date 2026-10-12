@@ -14,35 +14,47 @@ const cortexAvailabilityKey = ['cortex', 'availability'] as const;
 const memoryAvailabilityKey = ['nightshift', 'memory', 'availability'] as const;
 const decisionTreesAvailabilityKey = ['decision_trees', 'availability'] as const;
 
-export const useCortexEnabled = (): FeatureAvailability => {
+export const useCortexEnabled = (enabled = true): FeatureAvailability => {
   const client = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   return toFeatureAvailability(
     useQuery({
       queryKey: cortexAvailabilityKey,
-      queryFn: ({ signal }) =>
-        client!.fetch('GET /internal/nightshift/cortex/availability', { signal: signal ?? null }),
-      enabled: client !== undefined,
+      queryFn: ({ signal }) => {
+        if (client === undefined) {
+          return { enabled: false };
+        }
+        return client.fetch('GET /internal/nightshift/cortex/availability', {
+          signal: signal ?? null,
+        });
+      },
+      enabled: enabled && client !== undefined,
       retry: false,
     })
   );
 };
 
-export const useMemoryEnabled = (): FeatureAvailability => {
+export const useMemoryEnabled = (enabled = true): FeatureAvailability => {
   const client = useKibana().services.nightshiftInvestigations?.investigationsClient;
 
   return toFeatureAvailability(
     useQuery({
       queryKey: memoryAvailabilityKey,
-      queryFn: ({ signal }) =>
-        client!.fetch('GET /internal/nightshift/memory/availability', { signal: signal ?? null }),
-      enabled: client !== undefined,
+      queryFn: ({ signal }) => {
+        if (client === undefined) {
+          return { enabled: false };
+        }
+        return client.fetch('GET /internal/nightshift/memory/availability', {
+          signal: signal ?? null,
+        });
+      },
+      enabled: enabled && client !== undefined,
       retry: false,
     })
   );
 };
 
-export const useDecisionTreesEnabled = (): FeatureAvailability => {
+export const useDecisionTreesEnabled = (enabled = true): FeatureAvailability => {
   const { http } = useKibana().services;
 
   return toFeatureAvailability(
@@ -52,13 +64,20 @@ export const useDecisionTreesEnabled = (): FeatureAvailability => {
         http.get<{ enabled: boolean }>('/internal/nightshift/decision_trees/availability', {
           signal,
         }),
+      enabled,
       retry: false,
     })
   );
 };
 
-export const useKnowledgeTabsAvailability = (): KnowledgeTabsAvailability => ({
-  cortex: useCortexEnabled(),
-  memory: useMemoryEnabled(),
-  decision_trees: useDecisionTreesEnabled(),
+interface UseKnowledgeTabsAvailabilityOptions {
+  enabled?: boolean;
+}
+
+export const useKnowledgeTabsAvailability = ({
+  enabled = true,
+}: UseKnowledgeTabsAvailabilityOptions = {}): KnowledgeTabsAvailability => ({
+  cortex: useCortexEnabled(enabled),
+  memory: useMemoryEnabled(enabled),
+  decision_trees: useDecisionTreesEnabled(enabled),
 });
