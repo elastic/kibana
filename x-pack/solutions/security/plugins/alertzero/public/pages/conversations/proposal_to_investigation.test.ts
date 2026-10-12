@@ -83,6 +83,24 @@ describe('proposalToInvestigation', () => {
     });
   });
 
+  describe('title after a decision', () => {
+    // The adapter must stay action-agnostic: a worker that needs a specific label sets the
+    // proposal title, and the card shows that title before and after the decision.
+    it.each(['succeeded', 'failed', 'expired', 'no_action'] as const)(
+      'keeps the supplied title once the proposal is %s',
+      (status) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          decidedAt: '2026-09-10T11:00:00.000Z',
+          status,
+          title: 'Closure of 2 alerts as false positive',
+          actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
+        });
+        expect(result.title).toBe('Closure of 2 alerts as false positive');
+      }
+    );
+  });
+
   describe('closed detection', () => {
     it('sets recommendedAction to "closed" when decidedAt is present, regardless of category', () => {
       const result = proposalToInvestigation({
