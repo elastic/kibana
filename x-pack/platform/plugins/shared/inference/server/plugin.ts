@@ -113,6 +113,11 @@ export class InferencePlugin
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
     coreSetup.uiSettings.register(getAnonymizationUiSettings());
+    // The settings page's pattern tester runs caller-supplied regexes, which is only safe on worker
+    // threads, so it follows whether this plugin runs anonymization on them.
+    pluginsSetup.aiAnonymizationSettings?.configurePatternTester({
+      enabled: this.config.workers.anonymization.enabled,
+    });
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
