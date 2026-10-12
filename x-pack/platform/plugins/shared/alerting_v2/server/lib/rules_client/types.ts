@@ -17,7 +17,6 @@ import type {
   FindRulesResponse,
   FindRulesSortField,
   PolicyMatcher,
-  Query,
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
@@ -98,7 +97,9 @@ export type ResolvedCreateRuleData = CreateRuleData;
  *
  * Ref: rule-execution-logic.md "A rule without a persisted query"
  */
-export type ResolvedUpdateRuleData = Omit<UpdateRuleData, 'query'> & { query?: Query | null };
+export type ResolvedUpdateRuleData = Omit<UpdateRuleData, 'query'> & {
+  query?: NonNullable<UpdateRuleData['query']> | null;
+};
 
 /** An enabled rule whose executor task API key is a candidate for rotation. */
 export interface RotationCandidate {

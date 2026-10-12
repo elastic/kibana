@@ -1010,8 +1010,13 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'metadata' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'recovery' | 'no_data' | 'state_transition'
 > & {
+  // Nullable `builder` because the PUT body accepts `null` to clear a stored
+  // builder relationship.
+  metadata: Omit<z.infer<typeof metadataSchema>, 'builder'> & {
+    builder?: z.infer<typeof metadataBuilderSchema> | null;
+  };
   // Optional because a builder-authored body carries its parameters instead of
   // a query; the builder refinements below keep exactly one of the two present.
   query?: z.infer<typeof querySchema>;
@@ -1146,7 +1151,7 @@ export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 // ---------------------------------------------------------------------------
 // PUT (upsert replace) body schema
 //
-// Identical to `createRuleDataSchema` except that `metadata.builder_type`
+// Identical to `createRuleDataSchema` except that `metadata.builder`
 // accepts `null` as an explicit escape hatch: the PUT caller sends null to
 // confirm they want to clear a stored builder relationship and switch the rule
 // to direct ES|QL editing. The replace branch of `upsertRule` normalises null
@@ -1164,14 +1169,14 @@ export const replaceRuleMetadataSchema = lazySchema(() =>
   metadataSchema
     .extend({
       // Override: accept null on PUT to clear a stored builder relationship.
-      builder_type: builderTypeSchema
+      builder: metadataBuilderSchema
         .optional()
         .nullable()
         .describe(
           'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
             'Absent for rules authored directly in ES|QL. ' +
             'Send null on a PUT replace to explicitly clear the builder relationship ' +
-            'and switch the rule to ES|QL mode. (min length: 1, max length: 64)'
+            'and switch the rule to ES|QL mode.'
         ),
     })
     .meta({ id: 'alerting_replace_rule_metadata' })
@@ -1314,6 +1319,12 @@ export const ruleResponseMetadataSchema = lazySchema(() =>
        * Ref: rule-ownership.md "The ownership object"
        */
       ownership: ruleOwnershipSchema,
+      // `template` is server-managed: it is returned but not accepted on write.
+      template: z
+        .object({ id: z.string().describe('Id of the rule template.') })
+        .strict()
+        .optional()
+        .describe('The rule template this rule was created from.'),
     })
     .meta({ id: 'alerting_rule_response_metadata' })
 );
@@ -1330,17 +1341,8 @@ export const ruleResponseSchema = lazySchema(() =>
        * (rule-execution-logic.md "A rule without a persisted query").
        */
       query: querySchema.optional(),
-      // `template` is server-managed: it is returned but not accepted on write.
-      metadata: metadataSchema
-        .extend({
-          template: z
-            .object({ id: z.string().describe('Id of the rule template.') })
-            .strict()
-            .optional()
-            .describe('The rule template this rule was created from.'),
-        })
-        .describe('Rule metadata.'),
       id: z.string().describe('Unique rule identifier.'),
+      metadata: ruleResponseMetadataSchema,
       version: z
         .number()
         .int()

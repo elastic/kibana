@@ -67,7 +67,7 @@ export class CreateAlertEventsStep implements RuleExecutionStep {
         // Ref: rule-event-generation-logic.md "The hook contract"
         //      rule-event-generation-logic.md "Where the hook runs"
         let enrichRuleEvent: BuildAlertEventsBaseOpts['enrichRuleEvent'];
-        const builderType = state.rule.metadata.builder_type;
+        const builderType = state.rule.metadata.builder?.type;
         if (builderType) {
           const definition = step.registry.get(builderType);
           if (definition?.enrichRuleEvent) {

@@ -1698,46 +1698,6 @@ describe('RulesClient', () => {
       );
     });
 
-    it('falls back to the server-read version when client omits version', async () => {
-      const client = createClient();
-
-      rulesSavedObjectService.get.mockResolvedValueOnce({
-        id: 'rule-id-fallback',
-        attributes: baseSoAttrs,
-        version: 'WzSERVER=',
-      });
-
-      await client.updateRule({
-        id: 'rule-id-fallback',
-        data: { metadata: { name: 'fallback name' } },
-      });
-
-      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'rule-id-fallback', version: 'WzSERVER=' })
-      );
-    });
-
-    it('returns the new version from the SO update in the response', async () => {
-      const client = createClient();
-
-      rulesSavedObjectService.get.mockResolvedValueOnce({
-        id: 'rule-id-new-ver',
-        attributes: baseSoAttrs,
-        version: 'WzOLD=',
-      });
-      rulesSavedObjectService.update.mockResolvedValueOnce({
-        id: 'rule-id-new-ver',
-        version: 'WzNEW=',
-      });
-
-      const res = await client.updateRule({
-        id: 'rule-id-new-ver',
-        data: { metadata: { name: 'whatever' } },
-      });
-
-      expect(res.version).toBe('WzNEW=');
-    });
-
     describe('signature_id immutability (step 4.1)', () => {
       const storedAttrs = createRuleSoAttributes({
         metadata: { name: 'rule-1', signature_id: 'stored-sig-id' },
@@ -5093,7 +5053,7 @@ describe('RulesClient', () => {
   //   1. No-op update does not bump revision.
   //   2. enable/disable never run the diff at all.
   //   3. The bulk API-key path never runs the diff.
-  //   4. metadata.version keeps its every-mutation contract (asserted, not assumed).
+  //   4. The root `version` keeps its every-mutation contract (asserted, not assumed).
   // ---------------------------------------------------------------------------
 
   describe('metadata.revision (step 4.2)', () => {
@@ -5113,7 +5073,7 @@ describe('RulesClient', () => {
         expect(attrs.metadata.revision).toBe(0);
       });
 
-      it('metadata.version is 1 on create (every-mutation contract)', async () => {
+      it('version is 1 on create (every-mutation contract)', async () => {
         const client = createClient();
         rulesSavedObjectService.find.mockResolvedValueOnce({
           saved_objects: [],
@@ -5125,7 +5085,7 @@ describe('RulesClient', () => {
         await client.createRule({ data: baseCreateData });
 
         const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
-        expect(attrs.metadata.version).toBe(1);
+        expect(attrs.version).toBe(1);
       });
     });
 
@@ -5134,7 +5094,8 @@ describe('RulesClient', () => {
         const client = createClient();
         // Stored rule: revision=5, name='rule-1'. Update sends same name → no change.
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 4, revision: 5, signature_id: 'sig-1' },
+          version: 4,
+          metadata: { name: 'rule-1', revision: 5, signature_id: 'sig-1' },
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
           id: 'rule-rev-noop',
@@ -5150,13 +5111,14 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(5); // unchanged
-        expect(attrs.metadata.version).toBe(5); // version still bumped
+        expect(attrs.version).toBe(5); // version still bumped
       });
 
       it('bumps revision by one when a meaningful field changes', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 2, revision: 3, signature_id: 'sig-1' },
+          version: 2,
+          metadata: { name: 'rule-1', revision: 3, signature_id: 'sig-1' },
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
           id: 'rule-rev-bump',
@@ -5172,7 +5134,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(4); // bumped
-        expect(attrs.metadata.version).toBe(3); // also bumped (every-mutation)
+        expect(attrs.version).toBe(3); // also bumped (every-mutation)
       });
     });
 
@@ -5182,14 +5144,14 @@ describe('RulesClient', () => {
         // Build a stored rule whose meaningful fields exactly match what
         // transformCreateRuleBodyToRuleSoAttributes produces from baseCreateData,
         // so the revision diff on the replace branch finds no change.
-        // Fields excluded from the diff (updatedAt, updatedBy, metadata.version,
+        // Fields excluded from the diff (updatedAt, updatedBy, version,
         // metadata.revision) are set to distinct values so a regression that
         // accidentally includes them in the comparison would still be caught.
         const stored = createRuleSoAttributes({
+          version: 3,
           metadata: {
             name: 'rule-1',
             signature_id: 'rev-noop-replace-sig',
-            version: 3,
             revision: 7,
             source: { type: 'internal', version: 1 },
             ownership: { managed: false },
@@ -5215,7 +5177,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(7); // unchanged — body matches stored rule exactly
-        expect(attrs.metadata.version).toBe(4); // version still bumps on every mutation
+        expect(attrs.version).toBe(4); // version still bumps on every mutation
       });
     });
 
@@ -5223,7 +5185,8 @@ describe('RulesClient', () => {
       it('does not change revision on enable', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 2, revision: 7, signature_id: 'sig-1' },
+          version: 2,
+          metadata: { name: 'rule-1', revision: 7, signature_id: 'sig-1' },
           enabled: false,
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -5237,7 +5200,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(7); // unchanged — enable is not a meaningful edit
-        expect(attrs.metadata.version).toBe(3); // still bumped (every-mutation contract)
+        expect(attrs.version).toBe(3); // still bumped (every-mutation contract)
       });
     });
 
@@ -5245,7 +5208,8 @@ describe('RulesClient', () => {
       it('does not change revision on disable', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 5, revision: 2, signature_id: 'sig-1' },
+          version: 5,
+          metadata: { name: 'rule-1', revision: 2, signature_id: 'sig-1' },
           enabled: true,
         });
         rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -5259,7 +5223,7 @@ describe('RulesClient', () => {
 
         const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
         expect(attrs.metadata.revision).toBe(2); // unchanged — disable is not a meaningful edit
-        expect(attrs.metadata.version).toBe(6); // still bumped (every-mutation contract)
+        expect(attrs.version).toBe(6); // still bumped (every-mutation contract)
       });
     });
 
@@ -5267,7 +5231,8 @@ describe('RulesClient', () => {
       it('does not change revision on API-key rotation', async () => {
         const client = createClient();
         const stored = createRuleSoAttributes({
-          metadata: { name: 'rule-1', version: 3, revision: 9, signature_id: 'sig-1' },
+          version: 3,
+          metadata: { name: 'rule-1', revision: 9, signature_id: 'sig-1' },
           enabled: true,
         });
         rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -5288,9 +5253,9 @@ describe('RulesClient', () => {
         // The bulk-API-key path only stamps updatedAt/updatedBy — revision must
         // not be touched (the key rotation did not change any rule data).
         expect(updateCall.attrs.metadata.revision).toBe(9); // unchanged
-        // metadata.version is also NOT bumped by the bulk-API-key path — that is
+        // The root `version` is also NOT bumped by the bulk-API-key path — that is
         // the existing, documented behavior (api key no bump).
-        expect(updateCall.attrs.metadata.version).toBe(3); // unchanged
+        expect(updateCall.attrs.version).toBe(3); // unchanged
       });
     });
   });
@@ -5357,7 +5322,7 @@ describe('RulesClient', () => {
         const res = await client.createRule({
           data: {
             ...baseCreateData,
-            metadata: { name: 'detection-rule', builder_type: 'security.detection.query' },
+            metadata: { name: 'detection-rule', builder: { type: 'security.detection.query' } },
             // No builder_fields → resolveCreateRuleBuilder uses baseCreateData.query directly.
           },
           options: { id: 'rule-own-managed' },
@@ -5589,7 +5554,7 @@ describe('RulesClient', () => {
         const res = await client.createRule({
           data: {
             ...baseCreateData,
-            metadata: { name: 'detection-rule', builder_type: 'security.detection.query' },
+            metadata: { name: 'detection-rule', builder: { type: 'security.detection.query' } },
           },
           options: { id: 'rule-managed-no-app' },
         });
@@ -5678,7 +5643,7 @@ describe('RulesClient', () => {
           client.createRule({
             data: {
               ...baseCreateData,
-              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+              metadata: { name: 'rule-1', builder: { type: 'security.detection.query' } },
             },
           })
         ).rejects.toMatchObject({
@@ -5698,7 +5663,7 @@ describe('RulesClient', () => {
           client.createRule({
             data: {
               ...baseCreateData,
-              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+              metadata: { name: 'rule-1', builder: { type: 'security.detection.query' } },
             },
           })
         ).resolves.toBeDefined();
@@ -5712,7 +5677,7 @@ describe('RulesClient', () => {
           client.createRule({
             data: {
               ...baseCreateData,
-              metadata: { name: 'rule-1', builder_type: 'security.detection.query' },
+              metadata: { name: 'rule-1', builder: { type: 'security.detection.query' } },
             },
           })
         ).rejects.toMatchObject({
@@ -5809,7 +5774,7 @@ describe('RulesClient', () => {
         await expect(
           client.updateRule({
             id: 'rule-upd-bt-1',
-            data: { metadata: { name: 'changed', builder_type: null } },
+            data: { metadata: { name: 'changed', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -5829,7 +5794,7 @@ describe('RulesClient', () => {
         await expect(
           client.updateRule({
             id: 'rule-upd-bt-2',
-            data: { metadata: { name: 'changed', builder_type: null } },
+            data: { metadata: { name: 'changed', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -5893,7 +5858,7 @@ describe('RulesClient', () => {
         await expect(
           client.upsertRule({
             id: 'rule-upsert-bt-1',
-            data: { ...baseCreateData, metadata: { name: 'replaced', builder_type: null } },
+            data: { ...baseCreateData, metadata: { name: 'replaced', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
@@ -5911,7 +5876,7 @@ describe('RulesClient', () => {
         await expect(
           client.upsertRule({
             id: 'rule-upsert-bt-2',
-            data: { ...baseCreateData, metadata: { name: 'replaced', builder_type: null } },
+            data: { ...baseCreateData, metadata: { name: 'replaced', builder: null } },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 400 },
