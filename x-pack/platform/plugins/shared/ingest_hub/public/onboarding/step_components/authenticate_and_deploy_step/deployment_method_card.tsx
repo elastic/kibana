@@ -223,6 +223,7 @@ export function DeploymentMethodCard({
             </EuiText>
             <EuiSpacer size="m" />
             <EuiSelect
+              fullWidth
               options={options}
               value={draftMethod}
               onChange={(e) => setDraftMethod(e.target.value as DeploymentMethod)}
