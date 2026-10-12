@@ -138,6 +138,7 @@ describe('events_write tool', () => {
 
   describe('open high-severity confirms invariant', () => {
     const highInput = { ...input, severity: 'high' as const };
+    const { event_id: _omittedEventId, ...newEventHigh } = highInput;
     const signalWith = (verdict: string) => ({
       type: 'detection' as const,
       stream_name: 'logs.test',
@@ -174,7 +175,7 @@ describe('events_write tool', () => {
     it('accepts an active high item backed by a confirms signal', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [{ ...highInput, signals: [signalWith('confirms')] }],
+          items: [{ ...newEventHigh, signals: [signalWith('confirms')] }],
         }).success
       ).toBe(true);
     });
@@ -192,7 +193,7 @@ describe('events_write tool', () => {
     it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
       expect(
         eventsWriteSchema.safeParse({
-          items: [{ ...highInput, signals: [signalWith('off_topic')] }],
+          items: [{ ...newEventHigh, signals: [signalWith('off_topic')] }],
         }).success
       ).toBe(true);
     });
@@ -211,7 +212,7 @@ describe('events_write tool', () => {
         },
       };
       expect(
-        eventsWriteSchema.safeParse({ items: [{ ...highInput, signals: [quiet] }] }).success
+        eventsWriteSchema.safeParse({ items: [{ ...newEventHigh, signals: [quiet] }] }).success
       ).toBe(true);
     });
   });
