@@ -11,11 +11,11 @@ import {
   CONNECTORS_INDEX,
   createConnectorSecret,
   updateConnectorSecret,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import { generateApiKey } from './generate_api_key';
 
-jest.mock('@kbn/search-connectors', () => ({
+jest.mock('@kbn/search-connectors/server', () => ({
   CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX: '.search-acl-filter-',
   CONNECTORS_INDEX: '.elastic-connectors',
   createConnectorSecret: jest.fn(),

@@ -7,14 +7,14 @@
 
 import { mockLogger } from '../../__mocks__';
 
-import { collectConnectorStats } from '@kbn/search-connectors';
+import { collectConnectorStats } from '@kbn/search-connectors/server';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 import type { ConnectorStats } from '../../../common/types';
 
 import { registerTelemetryUsageCollector } from './telemetry';
 
-jest.mock('@kbn/search-connectors', () => ({
+jest.mock('@kbn/search-connectors/server', () => ({
   collectConnectorStats: jest.fn(),
 }));
 

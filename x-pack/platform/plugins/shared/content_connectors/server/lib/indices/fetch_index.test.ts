@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-jest.mock('@kbn/search-connectors', () => ({
+jest.mock('@kbn/search-connectors/server', () => ({
   fetchConnectorByIndexName: jest.fn(),
 }));
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { fetchConnectorByIndexName } from '@kbn/search-connectors';
+import { fetchConnectorByIndexName } from '@kbn/search-connectors/server';
 
 import { fetchIndex } from './fetch_index';
 
