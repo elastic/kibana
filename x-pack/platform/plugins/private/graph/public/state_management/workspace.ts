@@ -128,7 +128,10 @@ const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
   label: node.label,
   color: node.color,
   scaledSize: node.scaledSize,
-  data: node.data,
+  data: {
+    field: node.data.field,
+    term: node.data.term,
+  },
 });
 
 const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>

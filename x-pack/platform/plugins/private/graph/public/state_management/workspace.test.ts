@@ -99,7 +99,9 @@ describe('workspace state', () => {
       getEdgeSelection: () => [edge],
     } as unknown as Workspace;
 
-    expect(createWorkspaceState(workspace)).toEqual({
+    const snapshot = createWorkspaceState(workspace);
+
+    expect(snapshot).toEqual({
       nodesById: {
         parent: {
           id: 'parent',
@@ -139,6 +141,9 @@ describe('workspace state', () => {
       blocklistedNodesById: {},
       blocklistedNodeIds: [],
     });
+
+    parent.data.term = 'mutated';
+    expect(snapshot.nodesById.parent.data.term).toBe('parent');
   });
 
   it('stores normalized workspace snapshots', () => {
