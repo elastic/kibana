@@ -72,7 +72,10 @@ interface YamlStep {
   else?: YamlStep[];
   cases?: Array<{ match: string; steps: YamlStep[] }>;
   default?: YamlStep[];
-  'on-failure'?: { continue?: boolean };
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string; condition?: string };
+  };
 }
 
 interface YamlWorkflow {
@@ -681,6 +684,38 @@ describe('Detection Coverage review', () => {
       'mark_processed',
     ])('%s continues on failure so the run still reports', (name) => {
       expect(stepByName(name)?.['on-failure']?.continue).toBe(true);
+    });
+
+    // The check can still fail after its one retry: the 300s stream cap, or a second 180s
+    // stall. The review must not complete with no verdict and a blank message. It ends
+    // failed and carries the check's own error, the only record of why there is no verdict.
+    it('ends the review failed with the check error when the coverage check errored', () => {
+      expect(stepByName('fail_coverage_check')?.type).toBe('workflow.fail');
+      expect(routeOf('fail_coverage_check')).toBe('${{ steps.coverage_check.error != null }}');
+      const message = String(
+        (stepByName('fail_coverage_check')?.with as { message?: string })?.message
+      );
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(message, {
+        steps: { coverage_check: { error: { message: 'Request timed out' } } },
+      });
+      expect(rendered).toContain('Request timed out');
+    });
+
+    // One retry, and only for a transport stall. A retried 300s cap would spend the whole
+    // 10m step timeout, so the step would fail with a timeout message instead of the cap.
+    it('retries a transport timeout once and nothing else', () => {
+      const retry = stepByName('coverage_check')?.['on-failure']?.retry;
+      expect(retry?.['max-attempts']).toBe(1);
+      const condition = String(retry?.condition ?? '');
+      expect(condition.startsWith('${{') && condition.endsWith('}}')).toBe(true);
+      const engine = createWorkflowLiquidEngine();
+      const retries = (message: string) =>
+        engine.evalValueSync(condition.trim().slice(3, -2).trim(), { error: { message } });
+      expect(retries('Request timed out')).toBe(true);
+      expect(retries('Inference stream exceeded the maximum allowed duration of 300000ms')).toBe(
+        false
+      );
+      expect(retries('connector not found')).toBe(false);
     });
 
     // The indicator leaves the queue only after an applied decision. No verdict means no
