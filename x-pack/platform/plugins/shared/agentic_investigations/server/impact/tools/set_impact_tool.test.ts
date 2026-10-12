@@ -20,8 +20,8 @@ import { SET_IMPACT_TOOL_ID } from '../../../common/impact/constants';
 import type { InvestigationEvidence } from '../../../common/evidence';
 import { createInMemoryStorage } from '../../investigation_attachments/in_memory_storage.mock';
 import { registerImpactAttachment } from '../attachments';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
-import { ImpactForbiddenError } from '../services/errors';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { InvestigationsForbiddenError } from '../../investigations/services/investigations_forbidden_error';
 import { impactDocumentId, ImpactService } from '../services/impact_service';
 import type { ImpactDocument, ImpactStorageClient } from '../storage/impact_storage';
 import {
@@ -56,14 +56,19 @@ const setup = ({
   const registerType = jest.fn();
   registerImpactAttachment(
     { attachments: { registerType } } as unknown as AgentBuilderPluginSetup,
-    { getImpactService: () => service, logger: loggerMock.create() }
+    {
+      getImpactService: () => service,
+      privileges: { assertCanManage: jest.fn(), assertCanRead: jest.fn() },
+      assertCanReadConversation: jest.fn().mockResolvedValue(undefined),
+      logger: loggerMock.create(),
+    }
   );
   const definition = registerType.mock.calls[0][0] as AttachmentTypeDefinition;
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) => (type === IMPACT_ATTACHMENT_TYPE ? definition : undefined),
   });
 
-  const privileges: ImpactPrivilegesChecker = {
+  const privileges: InvestigationsPrivilegesChecker = {
     assertCanManage,
     assertCanRead: jest.fn(),
   };
@@ -255,7 +260,9 @@ describe('agentic_investigations.set_impact', () => {
     const { storage, call } = setup({
       assertCanManage: jest
         .fn()
-        .mockRejectedValue(new ImpactForbiddenError('Missing privilege manage_investigations')),
+        .mockRejectedValue(
+          new InvestigationsForbiddenError('Missing privilege manage_investigations')
+        ),
     });
 
     const result = await call({ summary: 'Checkout failed' });

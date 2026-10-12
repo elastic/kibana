@@ -54,7 +54,7 @@ const getFormWrapperCss = (euiTheme: EuiThemeComputed) => css`
 
 type LegacyFlyoutType = 'customField' | 'template';
 
-export const ConfigureCasesRedesign: React.FC = React.memo(() => {
+export const ConfigureCases: React.FC = React.memo(() => {
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const { euiTheme } = useEuiTheme();
   const { permissions } = useCasesContext();
@@ -291,7 +291,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
   );
 });
 
-ConfigureCasesRedesign.displayName = 'ConfigureCasesRedesign';
+ConfigureCases.displayName = 'ConfigureCases';
 
 // eslint-disable-next-line import/no-default-export
-export { ConfigureCasesRedesign as default };
+export { ConfigureCases as default };

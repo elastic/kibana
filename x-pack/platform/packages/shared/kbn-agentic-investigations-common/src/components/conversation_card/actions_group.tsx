@@ -56,8 +56,10 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
     const { euiTheme } = useEuiTheme();
     const handleChatClick = useMemo(() => createCardLinkClickHandler(onOpenChat), [onOpenChat]);
 
+    // A fixed control cluster, not page layout: it must stay on one line at every
+    // width, so EUI's responsive stacking is off.
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive direction="row">
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} direction="row">
         <span
           aria-hidden="true"
           css={css({
@@ -66,9 +68,6 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
             background: euiTheme.colors.backgroundLightText,
             marginLeft: euiTheme.size.s,
             marginRight: euiTheme.size.xs,
-            [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
-              display: 'none',
-            },
           })}
         />
         <EuiFlexItem grow={false}>

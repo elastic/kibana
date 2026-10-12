@@ -114,7 +114,10 @@ export type ListPolicyExecutionHistoryRequest = z.infer<
 
 export const namedRefSchema = z.object({
   id: z.string(),
-  name: z.string().nullable().optional(),
+  name: z
+    .string()
+    .optional()
+    .describe('Omitted when the referenced resource could not be resolved.'),
 });
 
 // Defensive upper bounds to keep response payloads sane.
@@ -157,9 +160,10 @@ export const policyExecutionHistoryItemSchema = z
     error: z
       .object({
         message: z.string(),
-        stack_trace: z.string().nullable(),
+        stack_trace: z.string().optional().describe('Omitted when the source recorded no trace.'),
       })
-      .nullable(),
+      .optional()
+      .describe('Failure details. Omitted when the dispatch did not fail.'),
   })
   .meta({ id: 'alerting_policy_execution_history_item' });
 
@@ -185,9 +189,9 @@ export const listPolicyExecutionHistoryResponseSchema = z
       .nonnegative()
       .describe(`The number of action policy events matching the query. ${ESTIMATED_COUNT_NOTE}`),
     search_matches: searchMatchCountsSchema
-      .nullable()
+      .optional()
       .describe(
-        'Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
+        'Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
       ),
   })
   .meta({ id: 'alerting_policy_execution_history_response' });
