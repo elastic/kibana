@@ -117,36 +117,76 @@ const setup = ({ spaceId = SPACE_ID }: { spaceId?: string } = {}) => {
 
 describe('SourcesClient', () => {
   describe('assertReadable', () => {
-    it('probes the source view as the current user', async () => {
+    const hasPrivileges = (client: ReturnType<typeof setup>['dataEsClient'], granted: boolean) =>
+      client.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: granted,
+      } as never);
+
+    it('asks for read on the index patterns of the stored query as the current user', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
+      hasPrivileges(dataEsClient, true);
+
+      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-nginx-*'], privileges: ['read'] }],
+      });
+      expect(dataEsClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('checks every index of a multi-index source and drops selectors and exclusions', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM logs-a-*::data, logs-b, -logs-a-old' }))
+      );
+      hasPrivileges(dataEsClient, true);
 
       await client.assertReadable('source-1');
 
-      expect(dataEsClient.esql.query).toHaveBeenCalledWith({
-        query: `FROM ${NGINX_VIEW_NAME} | LIMIT 0`,
-        format: 'json',
+      expect(dataEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['logs-a-*', 'logs-b'], privileges: ['read'] }],
       });
     });
 
-    it('rejects with 403 when the user cannot read the view', async () => {
+    it('rejects with 403 when the user lacks read on the data', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
-      dataEsClient.esql.query.mockRejectedValue(
-        createEsResponseError(403, 'security_exception', 'action denied')
-      );
+      hasPrivileges(dataEsClient, false);
 
       await expect(client.assertReadable('source-1')).rejects.toMatchObject({
         output: { statusCode: 403 },
       });
     });
 
-    it('passes when the failure is not a denial', async () => {
+    it('fails closed when the privilege check itself fails', async () => {
       const { client, soClient, dataEsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
-      dataEsClient.esql.query.mockRejectedValue(new Error('view not found'));
+      dataEsClient.security.hasPrivileges.mockRejectedValue(new Error('security unavailable'));
 
-      await expect(client.assertReadable('source-1')).resolves.toBeUndefined();
+      await expect(client.assertReadable('source-1')).rejects.toThrow('security unavailable');
+    });
+
+    it('rejects with 403 for a source that reads another cluster', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(
+        makeSavedObject(makeAttributes({ esql: 'FROM remote:logs-nginx-*' }))
+      );
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    it('rejects with 403 when the stored query cannot be parsed', async () => {
+      const { client, soClient, dataEsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject(makeAttributes({ esql: 'FROM' })));
+
+      await expect(client.assertReadable('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(dataEsClient.security.hasPrivileges).not.toHaveBeenCalled();
     });
   });
 

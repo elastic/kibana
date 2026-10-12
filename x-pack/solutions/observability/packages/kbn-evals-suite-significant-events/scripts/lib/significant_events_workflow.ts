@@ -14,7 +14,10 @@ import type {
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
-import { KIsOnboardingStep } from '@kbn/significant-events-schema';
+import {
+  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  KIsOnboardingStep,
+} from '@kbn/significant-events-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
 import { withTempSuperuser } from './user_utils';
@@ -93,7 +96,74 @@ export async function enableSignificantEvents(
   throw new Error(`Failed to enable significant events: ${status} ${JSON.stringify(data)}`);
 }
 
-/** Creates the source used by the capture's onboarding and discovery runs. */
+const CAPTURE_FENCE_TIMEOUT_MS = 120_000;
+const CAPTURE_FENCE_POLL_INTERVAL_MS = 1_000;
+
+/**
+ * Creating a source queues a reconcile that holds the source's write lease and then starts a
+ * one-time onboarding run. The capture runs its own extraction right after, and a run left going
+ * would drop it (the onboarding concurrency key drops a second run) or mix its output into the
+ * snapshot. So the reconcile is applied here first, then the run it started is cancelled and
+ * waited out.
+ */
+async function fenceAutomaticOnboarding(
+  config: ConnectionConfig,
+  source: { id: string; slug: string }
+): Promise<void> {
+  const deadline = Date.now() + CAPTURE_FENCE_TIMEOUT_MS;
+  const wait = () => new Promise((resolve) => setTimeout(resolve, CAPTURE_FENCE_POLL_INTERVAL_MS));
+
+  for (;;) {
+    const { status, data } = await kibanaRequest(
+      config,
+      'POST',
+      `/internal/streams/${source.id}/_reconcile_source`,
+      { sourceSlug: source.slug }
+    );
+    if (status >= 200 && status < 300) {
+      break;
+    }
+    // A 409 means the queued reconcile holds the source's write lease. Retry until it lets go.
+    if (status !== 409 || Date.now() >= deadline) {
+      throw new Error(`Failed to reconcile capture source: ${status} ${JSON.stringify(data)}`);
+    }
+    await wait();
+  }
+
+  const cancel = await kibanaRequest(
+    config,
+    'POST',
+    `/internal/streams/${source.id}/onboarding/_execute`,
+    { action: 'cancel' }
+  );
+  if (cancel.status < 200 || cancel.status >= 300) {
+    throw new Error(
+      `Failed to cancel the automatic onboarding: ${cancel.status} ${JSON.stringify(cancel.data)}`
+    );
+  }
+
+  while (Date.now() < deadline) {
+    const { data } = await kibanaRequest(
+      config,
+      'GET',
+      `/internal/streams/${source.id}/onboarding/_status`
+    );
+    const taskStatus = (data as Record<string, unknown>)?.status;
+    if (
+      typeof taskStatus !== 'string' ||
+      !(KIS_ONBOARDING_IN_PROGRESS_STATUSES as ReadonlySet<string>).has(taskStatus)
+    ) {
+      return;
+    }
+    await wait();
+  }
+  throw new Error(`Onboarding of source ${source.id} is still running after being cancelled`);
+}
+
+/**
+ * Creates the source used by the capture's onboarding and discovery runs. Create it right before
+ * the extraction: the source is returned once its automatic onboarding is out of the way.
+ */
 export async function createCaptureSource(
   config: ConnectionConfig,
   logsIndex: string
@@ -105,11 +175,23 @@ export async function createCaptureSource(
   if (status < 200 || status >= 300) {
     throw new Error(`Failed to create capture source: ${status} ${JSON.stringify(data)}`);
   }
-  return z
+  const { source } = z
     .object({
-      source: z.object({ id: z.string().min(1).max(255), view_name: z.string().min(1).max(1024) }),
+      source: z.object({
+        id: z.string().min(1).max(255),
+        slug: z.string().min(1).max(255),
+        view_name: z.string().min(1).max(1024),
+      }),
     })
-    .parse(data).source;
+    .parse(data);
+  try {
+    await fenceAutomaticOnboarding(config, source);
+  } catch (error) {
+    // The caller only receives the source on success, so nothing else can delete it.
+    await deleteCaptureSource(config, source.id).catch(() => undefined);
+    throw error;
+  }
+  return { id: source.id, view_name: source.view_name };
 }
 
 /** Removes the capture source and its ES|QL view. */

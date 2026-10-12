@@ -8,6 +8,7 @@
 import {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
 } from './validate_source_query';
@@ -211,5 +212,25 @@ describe('hasMultipleSourceIndices', () => {
 
   it('ignores an exclusion when counting targets', () => {
     expect(hasMultipleSourceIndices('FROM logs-*, -remote:*')).toBe(false);
+  });
+});
+
+describe('getSourceReadTargets', () => {
+  it('lists the local index patterns without selectors, exclusions and duplicates', () => {
+    expect(getSourceReadTargets('FROM logs-a-*::data, logs-b, logs-b, -logs-a-old')).toEqual({
+      indexPatterns: ['logs-a-*', 'logs-b'],
+      hasRemote: false,
+    });
+  });
+
+  it('reports a source that reads another cluster and keeps its local patterns', () => {
+    expect(getSourceReadTargets('FROM remote:logs-*, logs-local')).toEqual({
+      indexPatterns: ['logs-local'],
+      hasRemote: true,
+    });
+  });
+
+  it('throws on a query that does not parse', () => {
+    expect(() => getSourceReadTargets('FROM')).toThrow('Invalid ES|QL query');
   });
 });

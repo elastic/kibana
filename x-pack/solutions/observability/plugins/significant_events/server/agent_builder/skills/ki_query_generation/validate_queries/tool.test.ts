@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { forbidden } from '@hapi/boom';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   createQueryValidationContext,
@@ -291,6 +292,37 @@ describe('ki_queries_validate tool', () => {
       createMockToolContext()
     );
 
+    expect(result).toMatchObject({ results: [{ type: 'error' }] });
+  });
+
+  it('does not read stored state for a source the caller cannot read', async () => {
+    const sourcesClient = mockSourcesClient(['logs.test']);
+    sourcesClient.assertReadable.mockRejectedValue(forbidden('Cannot read source'));
+    const getScopedClientsDenied = jest.fn(async () => {
+      return {
+        sourcesClient,
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
+          getFeatures,
+          getSourceToQueryLinksMap,
+        }),
+        streamDataEsClient,
+        tuningConfig: { query_validation_timeout_ms: 12_000 },
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const tool = createValidateQueriesTool({
+      getScopedClients: getScopedClientsDenied,
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
+      logger,
+    });
+
+    const result = await invokeHandler(
+      tool,
+      { slug: 'logs.test', queries: [candidate] },
+      createMockToolContext()
+    );
+
+    expect(getFeatures).not.toHaveBeenCalled();
+    expect(getSourceToQueryLinksMap).not.toHaveBeenCalled();
     expect(result).toMatchObject({ results: [{ type: 'error' }] });
   });
 });

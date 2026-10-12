@@ -101,7 +101,16 @@ interface TargetedIndex {
   name: string;
   /** Index pattern used for type checks. */
   pattern: string;
+  /** Whether the target names another cluster (`cluster:index`). */
+  remote: boolean;
 }
+
+const isRemoteIndex = (source: ESQLSource): boolean => {
+  const raw =
+    source.index?.valueUnquoted ?? (typeof source.name === 'string' ? source.name : undefined);
+  const unquoted = raw?.replace(BACKTICK_QUOTES, '$1') ?? '';
+  return source.prefix !== undefined || CLUSTER_PREFIX.test(unquoted);
+};
 
 const isIndexSource = (node: { type: string; sourceType?: string }): node is ESQLSource =>
   node.type === 'source' && node.sourceType === 'index';
@@ -115,7 +124,7 @@ const targetedIndices = (command: ESQLCommand): TargetedIndex[] =>
     if (pattern === undefined || typeof node.name !== 'string') {
       return [];
     }
-    return [{ name: node.name, pattern }];
+    return [{ name: node.name, pattern, remote: isRemoteIndex(node) }];
   });
 
 /**
@@ -274,4 +283,38 @@ export const hasMultipleSourceIndices = (esql: string): boolean => {
     return false;
   }
   return targetedIndices(firstCommand).length > 1;
+};
+
+export interface ISourceReadTargets {
+  /** Local index patterns the source reads, without selectors. */
+  indexPatterns: string[];
+  /** True when the source also reads another cluster, which a local privilege check cannot cover. */
+  hasRemote: boolean;
+}
+
+/**
+ * The index patterns a stored source query reads, for checking a caller's own privileges. Excluded
+ * indices (`-logs-*`) are not targets. Throws when the query does not parse, so a caller can fail
+ * closed instead of treating an unreadable query as readable.
+ */
+export const getSourceReadTargets = (esql: string): ISourceReadTargets => {
+  const parsed = Parser.parse(esql);
+  if (parsed.errors.length > 0) {
+    throw new Error(
+      `Invalid ES|QL query: ${parsed.errors.map(({ message }) => message).join('; ')}`
+    );
+  }
+  const [firstCommand] = parsed.root.commands;
+  if (!firstCommand) {
+    return { indexPatterns: [], hasRemote: false };
+  }
+  const targets = targetedIndices(firstCommand);
+  return {
+    indexPatterns: [
+      ...new Set(
+        targets.filter(({ remote }) => !remote).map(({ pattern }) => pattern.replace(/::.*$/, ''))
+      ),
+    ],
+    hasRemote: targets.some(({ remote }) => remote),
+  };
 };

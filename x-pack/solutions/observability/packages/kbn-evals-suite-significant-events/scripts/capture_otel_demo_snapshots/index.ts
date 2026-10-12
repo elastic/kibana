@@ -310,8 +310,6 @@ async function processScenario(
     // deployDemo (Step 2) which enables Kibana Streams and its settings APIs.
     log.info('[3/8] Configuring significant events...');
     await enableSignificantEvents(config, log);
-    captureSource = await createCaptureSource(config, logsIndex);
-    const sourceId = captureSource.id;
 
     // Step 4 — Accumulate baseline traffic
     log.info('[4/8] Accumulating baseline traffic...');
@@ -328,7 +326,12 @@ async function processScenario(
       log.info('[5/8] Skipped failure data accumulation (healthy baseline)');
     }
 
-    // Step 6 — Run KI onboarding (persists features for the snapshot)
+    // Step 6 — Run KI onboarding (persists features for the snapshot). The source is created here,
+    // after the data exists: a source created earlier would run its own automatic onboarding on the
+    // baseline data and leave KIs in the snapshot that the capture did not extract.
+    log.info('[6/8] Creating the capture source...');
+    captureSource = await createCaptureSource(config, logsIndex);
+    const sourceId = captureSource.id;
     log.info(`[6/8] Running KI onboarding (${onboardingSteps.join(', ')})...`);
     await triggerKIExtraction(config, log, connectorId, sourceId, onboardingSteps);
     await waitForKIExtraction(config, log, sourceId, extractionTimeoutMs);

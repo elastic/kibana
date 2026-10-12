@@ -8,15 +8,16 @@
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
-import { isResponseError } from '@kbn/es-errors';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   createSourceRequestSchema,
   getNightshiftSourceViewName,
+  getSourceReadTargets,
   getSourceSlugCandidate,
   hasMultipleSourceIndices,
   updateSourceRequestSchema,
   type CreateSourceRequest,
+  type ISourceReadTargets,
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
@@ -24,14 +25,14 @@ import {
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { badRequest, boomify, notFound } from '@hapi/boom';
+import { badRequest, boomify, forbidden, notFound } from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
   type NightshiftSourceAttributes,
 } from '../saved_objects/nightshift_source_saved_object';
 import { assertSourceQueryExecutes, hasNoIndicesBehind } from './assert_source_query_executes';
-import { isEsqlUnknownIndexError, isEsqlVerificationError, toBoom } from './es_errors';
+import { isEsqlUnknownIndexError, isEsqlVerificationError } from './es_errors';
 import type { EsqlViewsClient } from './esql_views_client';
 import type { SourceChange } from './source_change_emitter';
 import { validateSourceQuery } from './validate_source_query';
@@ -199,20 +200,30 @@ export class SourcesClient {
   /**
    * Rejects with 403 when the current user cannot read the source's data. Stored knowledge
    * is read through the internal user, so this is the only place a caller's own index
-   * privileges are checked before that data is returned. Failures that are not a denial
-   * (missing view, no data yet) pass: they say nothing about the caller's access.
+   * privileges are checked before that data is returned.
+   *
+   * It asks Elasticsearch for `read` on the index patterns of the stored query. An ES|QL probe
+   * is not a test: it passes for a user who can read the view but not the data behind a wildcard,
+   * and a missing view looks the same as a denied one. The check fails closed, so a query that
+   * cannot be parsed, a source that reads another cluster and a failed privilege request all deny.
    */
   async assertReadable(id: string): Promise<void> {
     const { attributes } = await this.getSavedObject(id);
+    let targets: ISourceReadTargets;
     try {
-      await this.deps.dataEsClient.esql.query({
-        query: `FROM ${attributes.view_name} | LIMIT 0`,
-        format: 'json',
-      });
-    } catch (error) {
-      if (isResponseError(error) && error.statusCode === 403) {
-        throw toBoom(error, `Cannot read source ${id}`);
-      }
+      targets = getSourceReadTargets(attributes.esql);
+    } catch {
+      throw forbidden(`Cannot read source ${id}: its query cannot be checked`);
+    }
+    if (targets.hasRemote || targets.indexPatterns.length === 0) {
+      throw forbidden(`Cannot read source ${id}: its data cannot be checked for this user`);
+    }
+
+    const response = await this.deps.dataEsClient.security.hasPrivileges({
+      index: [{ names: targets.indexPatterns, privileges: ['read'] }],
+    });
+    if (!response.has_all_requested) {
+      throw forbidden(`Cannot read source ${id}`);
     }
   }
 

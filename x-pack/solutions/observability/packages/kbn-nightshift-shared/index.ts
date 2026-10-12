@@ -108,8 +108,10 @@ export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/s
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
+  type ISourceReadTargets,
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
 

@@ -130,6 +130,9 @@ export const createValidateQueriesTool = ({
         const scopedClients = await getScopedClients({ request: context.request });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
         const [source] = resolveSourcesBySlug(catalog, [slug]);
+        // Stored features and queries are read as the internal user, and the results tell whether a
+        // feature or a query exists, so check the caller's own data access first.
+        await scopedClients.sourcesClient.assertReadable(source.id);
 
         // Resolved even for an empty batch: the caller checks the finalized
         // slug, and the model may have passed a source id or an unknown slug.
