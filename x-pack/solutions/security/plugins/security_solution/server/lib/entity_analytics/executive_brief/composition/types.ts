@@ -12,6 +12,7 @@ import type {
   VerificationSummary,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { BriefTelemetry } from '../telemetry/types';
 
 export interface ComposeVerifiedBriefParams {
   /** Bound to the resolved connector. */
@@ -22,6 +23,8 @@ export interface ComposeVerifiedBriefParams {
   logger: Logger;
   /** Called when moving from compose to verify, so the job doc can show the stage. */
   onStage?: (stage: 'compose' | 'verify') => Promise<void>;
+  /** Wraps verification in its own span; defaults to no telemetry. */
+  telemetry?: BriefTelemetry;
 }
 
 export interface ComposeVerifiedBriefResult {
@@ -33,7 +36,12 @@ export interface ComposeVerifiedBriefResult {
 
 /** Thrown when the AI output can't be turned into a valid brief, even after one repair. */
 export class BriefCompositionError extends Error {
-  constructor(public readonly code: 'llm_error' | 'llm_output', message: string) {
+  constructor(
+    public readonly code: 'llm_error' | 'llm_output',
+    message: string,
+    /** Usage of the attempts made before failing, so failed runs still report tokens. */
+    public readonly tokens?: ComposeVerifiedBriefResult['tokens']
+  ) {
     super(message);
     this.name = 'BriefCompositionError';
   }

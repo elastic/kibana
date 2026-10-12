@@ -8,7 +8,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { BRIEF_RANGES } from './constants';
 
-// PoC: hand-written zod schemas; production generates these from OpenAPI.
+/** Request body for generating a brief; the time window is computed server-side from `range`. */
 export const generateBriefRequestBodySchema = lazySchema(() =>
   z.object({
     range: z.enum(BRIEF_RANGES),
