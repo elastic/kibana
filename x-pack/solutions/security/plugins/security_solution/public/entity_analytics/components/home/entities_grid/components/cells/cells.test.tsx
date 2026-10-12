@@ -19,6 +19,7 @@ import { EntityTypeCell } from './entity_type_cell';
 import { GroupSizeCell } from './group_size_cell';
 import { RiskScoreChangeCell } from './risk_score_change_cell';
 import { RowActionsCell } from './row_actions_cell';
+import { WatchlistsCell } from './watchlists_cell';
 
 const renderInProviders = (cell: React.ReactElement) =>
   render(<TestProviders>{cell}</TestProviders>);
@@ -185,5 +186,29 @@ describe('RowActionsCell', () => {
 
     fireEvent.click(moreActions);
     await waitFor(() => expect(screen.queryByText('Add to chat')).not.toBeInTheDocument());
+  });
+});
+
+describe('WatchlistsCell', () => {
+  const WATCHLIST_NAMES = new Map([
+    ['wl-1', 'Insider threat'],
+    ['wl-2', 'VIP'],
+  ]);
+
+  it('shows the name of a known watchlist', () => {
+    renderInProviders(<WatchlistsCell value="wl-1" watchlistNames={WATCHLIST_NAMES} />);
+    expect(screen.getByText('Insider threat')).toBeInTheDocument();
+  });
+
+  it('shows the first watchlist and the resolved rest in the overflow tooltip', async () => {
+    renderInProviders(
+      <WatchlistsCell value={['wl-1', 'wl-unknown', 'wl-2']} watchlistNames={WATCHLIST_NAMES} />
+    );
+    expect(screen.getByText('Insider threat')).toBeInTheDocument();
+    const overflow = screen.getByText('+2');
+
+    fireEvent.mouseOver(overflow);
+    // An unknown id stays as it is; a known one shows its name.
+    expect(await screen.findByText('wl-unknown, VIP')).toBeInTheDocument();
   });
 });
