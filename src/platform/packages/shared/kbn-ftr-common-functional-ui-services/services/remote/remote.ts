@@ -56,6 +56,49 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
   };
 
   const { driver, consoleLog$ } = await initWebDriver(log, browserType, lifecycle, browserConfig);
+  if (lifecycle.waitRecorder) {
+    driver.wait = new Proxy(driver.wait, {
+      apply(target, thisArg, args) {
+        const finish = lifecycle.waitRecorder?.beginWait('webdriverWait', 'driver.wait');
+        try {
+          const result = Reflect.apply(target, thisArg, args);
+          Promise.resolve(result).then(
+            () => finish?.(),
+            () => finish?.()
+          );
+          return result;
+        } catch (error) {
+          finish?.();
+          throw error;
+        }
+      },
+    });
+    driver.execute = new Proxy(driver.execute, {
+      apply(target, thisArg, args) {
+        const [command] = args;
+        const name: string = command.getName();
+        if (
+          !['findElement', 'findElements', 'findChildElement', 'findChildElements'].includes(name)
+        ) {
+          return Reflect.apply(target, thisArg, args);
+        }
+        const selector = command.getParameters().value;
+        const label = typeof selector === 'string' ? `${name}(${selector})` : name;
+        const finish = lifecycle.waitRecorder?.beginWait('lookup', label);
+        try {
+          const result = Reflect.apply(target, thisArg, args);
+          Promise.resolve(result).then(
+            () => finish?.(),
+            () => finish?.()
+          );
+          return result;
+        } catch (error) {
+          finish?.();
+          throw error;
+        }
+      },
+    });
+  }
   const caps = await driver.getCapabilities();
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${caps.get('browserVersion')}}`);

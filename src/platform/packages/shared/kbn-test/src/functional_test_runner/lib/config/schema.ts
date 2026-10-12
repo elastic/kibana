@@ -11,6 +11,7 @@ import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
 import type { CustomHelpers } from 'joi';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { SCOUT_REPORTER_ENABLED, ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 // valid pattern for ID
@@ -185,6 +186,13 @@ export const schema = Joi.object()
             afterAll: Joi.function().optional(),
           })
           .optional(),
+      })
+      .default(),
+
+    waitRecording: Joi.object()
+      .keys({
+        enabled: Joi.boolean().default(false),
+        directory: Joi.string().default(resolve(REPO_ROOT, 'target/ftr-wait-recordings')),
       })
       .default(),
 
