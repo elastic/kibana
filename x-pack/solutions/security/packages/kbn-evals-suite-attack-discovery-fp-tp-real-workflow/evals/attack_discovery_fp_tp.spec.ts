@@ -33,13 +33,13 @@ import {
   type EvalConnector,
 } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
-import { CORPUS_NAMES, type CorpusName } from '../src/constants';
+import type { CorpusName } from '../src/constants';
 import {
   capExamples,
   corporaForCohort,
   effectiveMaxExamples,
-  partitionByEvidence,
   resolveCohort,
+  selectGradedRows,
 } from '../src/cohort';
 import { loadCorpusExamples } from '../src/corpus_loader';
 import {
@@ -49,6 +49,8 @@ import {
   VERDICT_QUALITY_CRITERIA,
 } from '../src/evaluators';
 import { withJudgeTransportRetry } from '../src/judge_retry';
+import { SeedLedger } from '../src/seed_ledger';
+import { teardownSeededData } from '../src/seed_teardown';
 import { routeSubjectModel } from '../src/subject_model_routing';
 import { runAttackDiscoveryWorkflow } from '../src/workflow_task';
 
@@ -69,22 +71,18 @@ interface AttackDiscoveryExample extends Example {
 }
 
 const corpusDataset = (name: CorpusName): EvaluationDataset => {
-  const loaded = loadCorpusExamples(name) as AttackDiscoveryExample[];
-  // The `evidenced` cohort scores only rows whose raw events can be seeded; rows
-  // without events are excluded (not scored, not counted as abstentions), and the
-  // count is printed so the exclusion is never silent.
-  const evidencedOnly = resolveCohort(process.env.FP_TP_COHORT) === 'evidenced';
-  const { scored } = partitionByEvidence(loaded);
-  const all = evidencedOnly ? scored : loaded;
+  const cohort = resolveCohort(process.env.FP_TP_COHORT);
+  // Rows the run cannot grade honestly are excluded, never scored as failures: rows with
+  // no raw events (`evidenced` cohort; the workflow abstains on them by design) and
+  // adversarial rows whose gold label the corpus review contests (every cohort). The
+  // counts are printed in `evalDatasets` so the exclusion is never silent.
+  const { graded } = selectGradedRows(loadCorpusExamples(name) as AttackDiscoveryExample[], cohort);
   // Live-run cap: live LLM verdicts run ~28s/case (run9), so 7 corpora × 20
   // cases ≈ 66min of grading. Cap at 15 per corpus (105 cases ≈ 50min) inside
   // the 120-min Playwright test timeout; raise (or unset) for a full sweep.
   const examples = capExamples(
-    all,
-    effectiveMaxExamples(
-      resolveCohort(process.env.FP_TP_COHORT),
-      process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS
-    )
+    graded,
+    effectiveMaxExamples(cohort, process.env.FP_TP_MAX_EXAMPLES_PER_CORPUS)
   );
   return {
     name: `security: attack-discovery-fp-tp ${name}`,
@@ -94,22 +92,22 @@ const corpusDataset = (name: CorpusName): EvaluationDataset => {
 };
 
 /**
- * Datasets for the resolved cohort. Under `evidenced`, corpora with no event-bearing
- * rows are dropped and the scored/excluded totals over the whole 1,017-row corpus
- * are printed, so the exclusion is never silent.
+ * Datasets for the resolved cohort, with the scored/excluded totals over the corpora the
+ * cohort covers printed so the exclusions are never silent.
  */
 const evalDatasets = (): EvaluationDataset[] => {
   const cohort = resolveCohort(process.env.FP_TP_COHORT);
-  const datasets = corporaForCohort(cohort).map(corpusDataset);
-  if (cohort !== 'evidenced') {
-    return datasets;
-  }
-  const total = CORPUS_NAMES.reduce((sum, name) => sum + loadCorpusExamples(name).length, 0);
-  const scoredCount = datasets.reduce((sum, dataset) => sum + dataset.examples.length, 0);
+  const names = corporaForCohort(cohort);
+  const datasets = names.map(corpusDataset);
+  const selections = names.map((name) => selectGradedRows(loadCorpusExamples(name), cohort));
+  const total = names.reduce((sum, name) => sum + loadCorpusExamples(name).length, 0);
+  const gradedCount = selections.reduce((sum, s) => sum + s.graded.length, 0);
+  const contested = selections.reduce((sum, s) => sum + s.excludedContested, 0);
+  const noEvidence = selections.reduce((sum, s) => sum + s.excludedNoEvidence, 0);
   // eslint-disable-next-line no-console
   console.log(
-    `[fp-tp] evidenced cohort: ${scoredCount} scored (carry raw events), ` +
-      `${total - scoredCount} excluded (no raw events) of ${total} corpus rows`
+    `[fp-tp] ${cohort} cohort: ${gradedCount} graded of ${total} corpus rows; excluded ` +
+      `${contested} contested-label adversarial row(s) and ${noEvidence} row(s) with no raw events`
   );
   return datasets.filter((dataset) => dataset.examples.length > 0);
 };
@@ -119,6 +117,8 @@ evaluate.describe(
   { tag: tags.stateful.classic },
   () => {
     let restoreInferenceSettings: (() => Promise<void>) | undefined;
+    // Everything the tasks seed, recorded so afterAll can remove exactly that.
+    const seedLedger = new SeedLedger();
 
     // The workflow's ai.agent step resolves its model from the `alertzero_reasoning`
     // inference feature, so route it to this project's connector or every model column
@@ -129,11 +129,31 @@ evaluate.describe(
       }
     );
 
-    evaluate.afterAll(async ({ log }: { fetch: HttpHandler; log: ToolingLog }) => {
-      await restoreInferenceSettings?.().catch((error: Error) =>
-        log.warning(`Could not restore inference settings: ${error.message}`)
-      );
-    });
+    evaluate.afterAll(
+      async ({
+        esClient,
+        fetch,
+        log,
+      }: {
+        esClient: EsClient;
+        fetch: HttpHandler;
+        log: ToolingLog;
+      }) => {
+        // Teardown first and unconditionally: a failure restoring settings must not leave
+        // the seeded security data and the broad endpoint-events template on the cluster.
+        await teardownSeededData({
+          esClient: esClient as unknown as Parameters<typeof teardownSeededData>[0]['esClient'],
+          fetch,
+          log,
+          ledger: seedLedger,
+        }).catch((error: Error) =>
+          log.warning(`Could not tear down seeded fixtures: ${error.message}`)
+        );
+        await restoreInferenceSettings?.().catch((error: Error) =>
+          log.warning(`Could not restore inference settings: ${error.message}`)
+        );
+      }
+    );
 
     evaluate(
       'runs the attack-discovery review workflow per corpus case and grades the verdict',
@@ -169,7 +189,14 @@ evaluate.describe(
               // which does not carry the payload (run8's crash source).
               const { caseId, payload } = example.input;
               log.info(`Running attack-discovery workflow for case ${caseId}`);
-              return runAttackDiscoveryWorkflow({ fetch, log, esClient, payload, caseId });
+              return runAttackDiscoveryWorkflow({
+                fetch,
+                log,
+                esClient,
+                ledger: seedLedger,
+                payload,
+                caseId,
+              });
             },
           },
           selectedEvaluators

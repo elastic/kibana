@@ -14,6 +14,9 @@ import {
   resolveCohort,
   hasEvidence,
   partitionByEvidence,
+  selectGradedRows,
+  hasContestedLabel,
+  CONTESTED_MUTATION_TYPES,
 } from './cohort';
 import { loadCorpusExamples } from './corpus_loader';
 
@@ -21,9 +24,10 @@ const total = (names: readonly (keyof typeof CORPUS_CASE_COUNTS)[]) =>
   names.reduce((sum, name) => sum + CORPUS_CASE_COUNTS[name], 0);
 
 describe('resolveCohort', () => {
-  it('defaults to all when unset or blank', () => {
-    expect(resolveCohort(undefined)).toBe('all');
-    expect(resolveCohort('  ')).toBe('all');
+  it('defaults to evidenced (the only cohort the workflow can decide on) when unset or blank', () => {
+    expect(resolveCohort(undefined)).toBe('evidenced');
+    expect(resolveCohort('  ')).toBe('evidenced');
+    expect(resolveCohort('all')).toBe('all');
   });
 
   it('accepts the known cohorts case-insensitively', () => {
@@ -110,24 +114,70 @@ describe('evidenced cohort', () => {
     expect(hasEvidence({ events: 'x' })).toBe(false);
   });
 
-  it('grades all 39 evidenced rows by default; the 15/corpus cap would drop 6 twins', () => {
+  it('grades all 21 uncontested evidenced rows by default; the 15/corpus cap would drop eligible rows', () => {
     const graded = (rawMax: string | undefined) =>
       corporaForCohort('evidenced').reduce(
         (sum, name) =>
           sum +
           capExamples(
-            partitionByEvidence(loadCorpusExamples(name)).scored,
+            selectGradedRows(loadCorpusExamples(name), 'evidenced').graded,
             effectiveMaxExamples('evidenced', rawMax)
           ).length,
         0
       );
-    expect(graded(undefined)).toBe(39);
-    expect(graded('10')).toBe(10 + 10 + 3);
+    expect(graded(undefined)).toBe(21);
+    expect(graded('2')).toBe(2 + 2 + 2);
   });
 
   it('only lifts the default cap for the evidenced cohort', () => {
     expect(effectiveMaxExamples('evidenced', '5')).toBe('5');
     expect(effectiveMaxExamples('scored', undefined)).toBeUndefined();
     expect(effectiveMaxExamples('all', undefined)).toBeUndefined();
+  });
+});
+
+describe('contested adversarial labels', () => {
+  const twins = loadCorpusExamples('adversarial-twins');
+  const typeOf = (e: (typeof twins)[number]) => e.metadata.mutationSpec?.type;
+
+  it('flags every domain-swap / entity-role-swap / parent-process-spoof / chain-reorder twin', () => {
+    const contested = twins.filter(hasContestedLabel);
+    expect(contested).toHaveLength(18);
+    expect(new Set(contested.map(typeOf))).toEqual(new Set(CONTESTED_MUTATION_TYPES));
+  });
+
+  it('keeps drop-link (a genuinely incomplete chain) gradable', () => {
+    const gradable = twins.filter((e) => !hasContestedLabel(e));
+    expect(gradable.map(typeOf)).toEqual(['drop-link', 'drop-link', 'drop-link']);
+  });
+
+  it('never flags a non-adversarial row, whatever its mutation type', () => {
+    const row = {
+      input: { payload: {} },
+      metadata: { labelProvenance: 'replay', mutationSpec: { type: 'domain-swap' } },
+    };
+    expect(hasContestedLabel(row)).toBe(false);
+  });
+
+  it('drops contested rows from EVERY cohort and reports the counts', () => {
+    for (const cohort of ['all', 'scored', 'evidenced', 'sanity'] as const) {
+      const sel = selectGradedRows(twins, cohort);
+      expect(sel.graded.filter(hasContestedLabel)).toEqual([]);
+      expect(sel.excludedContested).toBe(18);
+    }
+  });
+
+  it('evidenced additionally drops event-less rows; other cohorts keep them', () => {
+    const rows = [
+      { input: { payload: { events: [{}] } }, metadata: { labelProvenance: 'replay' } },
+      { input: { payload: {} }, metadata: { labelProvenance: 'replay' } },
+    ];
+    expect(selectGradedRows(rows, 'evidenced')).toMatchObject({
+      excludedNoEvidence: 1,
+      excludedContested: 0,
+    });
+    expect(selectGradedRows(rows, 'evidenced').graded).toHaveLength(1);
+    expect(selectGradedRows(rows, 'scored').graded).toHaveLength(2);
+    expect(selectGradedRows(rows, 'scored').excludedNoEvidence).toBe(0);
   });
 });

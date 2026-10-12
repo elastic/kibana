@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { CORPUS_CASE_COUNTS } from './constants';
 import {
   corporaForCohort,
   DEFAULT_MAX_EXAMPLES_PER_CORPUS,
   effectiveMaxExamples,
-  partitionByEvidence,
   resolveCohort,
+  selectGradedRows,
 } from './cohort';
 import { loadCorpusExamples } from './corpus_loader';
 
@@ -38,11 +37,9 @@ export const countCohortCases = (env: NodeJS.ProcessEnv): number => {
   );
   const cap = Number.isFinite(max) && max > 0 ? max : Infinity;
   return corporaForCohort(cohort).reduce((sum, name) => {
-    // `evidenced` grades only rows carrying raw events, so count those, not the corpus size.
-    const available =
-      cohort === 'evidenced'
-        ? partitionByEvidence(loadCorpusExamples(name)).scored.length
-        : CORPUS_CASE_COUNTS[name];
+    // Count what the suite actually grades (contested-label rows are dropped from every
+    // cohort, event-less rows from `evidenced`), not the vendored corpus size.
+    const available = selectGradedRows(loadCorpusExamples(name), cohort).graded.length;
     return sum + Math.min(cap, available);
   }, 0);
 };

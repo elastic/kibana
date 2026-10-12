@@ -63,20 +63,29 @@ is intentionally **not** vendored — see the external
 
 | value | corpora | cases |
 | --- | --- | --- |
-| `all` (default) | all 7 | 1,017 |
-| `scored` | everything except `guide-sanity` | 267 |
+| `evidenced` (default) | non-sanity rows that carry raw `events`, minus contested-label rows | 21 of 1,017 |
+| `scored` | everything except `guide-sanity`, minus contested-label rows (exploratory) | 249 |
+| `all` | all 7 corpora, minus contested-label rows (exploratory) | 999 |
 | `sanity` | `guide-sanity` only | 750 |
-| `evidenced` | non-sanity rows that carry raw `events` | 39 of 1,017 |
 
-`evidenced` is the only cohort whose rows the workflow can decide on. The
-analysis workflow reads `entities-latest-<space>` and `logs-endpoint.events.*`
-and cannot clear an alert without them, so rows with no evidence abstain by
-design. Under `evidenced` the 978 rows without events are excluded (neither
-scored nor counted as abstention failures); the scored/excluded counts are
-printed at startup. Report results as n=39 with confidence intervals; do not
-extrapolate to the full corpus.
+`evidenced` is the only cohort whose rows the workflow can decide on, which is why
+it is the default: with `FP_TP_COHORT` unset, VerdictAccuracy measures model
+correctness rather than missing harness evidence. The analysis workflow reads
+`entities-latest-<space>` and `logs-endpoint.events.*` and cannot clear an alert
+without them, so rows with no evidence abstain by design. Under `evidenced` the
+rows without events are excluded (neither scored nor counted as abstention
+failures). `scored` and `all` still grade those rows and are for exploratory
+sweeps only; do not read their accuracy as a model number.
 
-For those 39 rows the seeder indexes the corpus events into
+Contested-label rows are excluded from **every** cohort. 18 of the 21
+`adversarial-twins` rows (`domain-swap`, `entity-role-swap`, `parent-process-spoof`,
+`chain-reorder`) carry a gold label their own evidence contradicts; see
+`docs/label_integrity_findings.md` and `CONTESTED_MUTATION_TYPES` in `src/cohort.ts`.
+The three `drop-link` twins stay. The scored/excluded counts are printed at startup.
+Report results as n=21 with confidence intervals; do not extrapolate to the full
+corpus.
+
+For those 21 rows the seeder indexes the corpus events into
 `logs-endpoint.events.<category>-default` and projects identity-only host and
 user entity docs into `entities-latest-<space>` from the events' observed
 `host.name` / `user.name`, tagged `labels.provenance: derived-from-raw-events`.
@@ -85,9 +94,18 @@ No role, ownership, criticality, reputation, allowlist or asset tier is added.
 name) so each attack discovery joins only its own events. A seeding failure for
 a row that carries events fails the case as a `seedingError`.
 
-A scored/gating run uses `FP_TP_COHORT=scored`. An unknown value throws rather
-than falling back to `all`. `FP_TP_MAX_EXAMPLES_PER_CORPUS` (default 15; `0` or
-non-numeric means no cap) applies per corpus on top of the cohort.
+Cited alert ids are unique per task invocation, and only the verdict emitted by a
+`completed` execution is graded; an intermediate agent verdict from a failed or
+timed-out run is kept on the task output for diagnostics but never scored.
+
+After the run, `afterAll` removes exactly what the run seeded (discoveries in both AD
+indices, cited alerts, derived entities, tagged raw events, investigation
+conversations, and the `fp-tp-corpus-endpoint-events` index template), driven by an
+id ledger recorded at seed time. Foreign documents in the same indices survive.
+
+A scored/gating run uses the default `evidenced` cohort. An unknown value throws rather
+than falling back. `FP_TP_MAX_EXAMPLES_PER_CORPUS` (default 15, no cap under
+`evidenced`; `0` or non-numeric means no cap) applies per corpus on top of the cohort.
 
 ## Subject-model routing and Playwright budget
 

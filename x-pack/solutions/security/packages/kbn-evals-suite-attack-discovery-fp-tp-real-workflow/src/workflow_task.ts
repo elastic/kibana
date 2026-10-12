@@ -60,16 +60,18 @@
  * and is never skipped.
  */
 
+import { randomUUID } from 'crypto';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import {
+  ExecutionStatus,
   TerminalExecutionStatuses,
-  type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import { FP_TP_ANALYSIS_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 import { buildEvidence } from './evidence';
+import type { SeedLedger } from './seed_ledger';
 
 /**
  * The seeder→reader contract this module must honor: the workflow's
@@ -144,7 +146,13 @@ interface StructuredOutput {
  * that as incorrect/non-conformant rather than throwing.
  */
 export interface AttackDiscoveryTaskOutput {
+  /**
+   * The graded verdict: the emitted `workflow.output` payload of a COMPLETED execution,
+   * else undefined. Never the intermediate agent verdict.
+   */
   verdict?: AgentVerdict;
+  /** The agent step's structured verdict. Diagnostics only; the evaluators never read it. */
+  intermediateVerdict?: AgentVerdict;
   workflowOutput?: WorkflowOutput;
   executionId: string;
   executionStatus: ExecutionStatus;
@@ -723,10 +731,7 @@ const hasGuideShape = (payload: Record<string, unknown>): boolean =>
  * The gold label / gold_rationale are NEVER rendered into the document — the
  * workflow must classify from evidence alone.
  */
-export const buildAttackDiscoveryFromPayload = (
-  caseId: string,
-  payload: Record<string, unknown>
-): AdDocumentFields => {
+const renderPayload = (caseId: string, payload: Record<string, unknown>): AdDocumentFields => {
   const p = payload ?? {};
   if (Object.keys(p).length === 0) {
     // Degenerate/empty payload (real corpora never ship one): render the GUIDE
@@ -754,6 +759,24 @@ export const buildAttackDiscoveryFromPayload = (
   );
 };
 
+/**
+ * Renders a corpus payload into the AD document fields. When `invocationId` is given,
+ * the cited alert ids are scoped to that task invocation: they are `_id`s in the shared
+ * `.alerts-security.alerts-<space>` index, and repetitions / model columns of one corpus
+ * case would otherwise overwrite each other's alert identity (`seedCitedAlerts` writes
+ * the latest run's host identity under the shared id) and load another run's raw events.
+ */
+export const buildAttackDiscoveryFromPayload = (
+  caseId: string,
+  payload: Record<string, unknown>,
+  invocationId?: string
+): AdDocumentFields => {
+  const doc = renderPayload(caseId, payload);
+  return invocationId === undefined
+    ? doc
+    : { ...doc, alertIds: alertIdsFor(`${caseId}-${invocationId}`) };
+};
+
 // ---------------------------------------------------------------------------
 // Seeding: persisted AD doc + investigation conversation
 // ---------------------------------------------------------------------------
@@ -769,6 +792,11 @@ export interface SeedingClients {
    * back to trusting the route's write index (the pre-contract behavior).
    */
   esClient?: EsClientLike;
+  /**
+   * Records every id this run seeds (before the write that can fail) so the suite can
+   * tear down exactly its own data afterwards. See `seed_teardown.ts`.
+   */
+  ledger?: SeedLedger;
 }
 
 /**
@@ -792,6 +820,7 @@ export interface EsClientLike {
       data_stream: Record<string, never>;
       template: { mappings: Record<string, unknown> };
     }): Promise<unknown>;
+    deleteIndexTemplate(params: { name: string }): Promise<unknown>;
   };
   deleteByQuery(params: {
     index: string;
@@ -804,7 +833,7 @@ export interface EsClientLike {
 /** Space the seeder writes into: the run's first `--space-ids` entry, or the
  * default space (mirrors getSpaceIdsFromEnv in @kbn/evals, which is not
  * exported for package use). */
-const seedSpaceId = (): string => {
+export const seedSpaceId = (): string => {
   const first = (process.env.EVAL_SPACE_IDS ?? '')
     .split(',')
     .map((s) => s.trim())
@@ -859,7 +888,7 @@ export const copyAttackDiscoveryToAdhocIndex = async (
  * at the incident level, so the entities are synthetic).
  */
 export const seedCitedAlerts = async (
-  { esClient, log }: SeedingClients,
+  { esClient, log, ledger }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
   attackDiscoveryId: string,
   evidence?: ReturnType<typeof buildEvidence>
@@ -883,6 +912,7 @@ export const seedCitedAlerts = async (
   const severity = 'medium';
   const body: unknown[] = [];
   for (const alertId of doc.alertIds) {
+    ledger?.alertIds.add(alertId);
     body.push({ index: { _index: index, _id: alertId } });
     body.push({
       '@timestamp': timestamp,
@@ -940,16 +970,24 @@ const ensureEntityIndex = async (esClient: EsClientLike, index: string): Promise
   }
 };
 
-const RAW_EVENTS_TEMPLATE = 'fp-tp-corpus-endpoint-events';
+export const RAW_EVENTS_TEMPLATE = 'fp-tp-corpus-endpoint-events';
+export const RAW_EVENTS_INDEX_PATTERN = 'logs-endpoint.events.*-default';
 
 /** Installs the data-stream template (idempotent PUT) before the first `create` op. */
-const ensureRawEventsTemplate = async (esClient: EsClientLike): Promise<void> => {
+const ensureRawEventsTemplate = async (
+  esClient: EsClientLike,
+  ledger?: SeedLedger
+): Promise<void> => {
   if (!esClient.indices) {
     throw new Error('esClient.indices is required to provision logs-endpoint.events.*');
   }
+  // Recorded before the PUT: a PUT that fails after applying must still be torn down.
+  if (ledger) {
+    ledger.rawEventsTemplateInstalled = true;
+  }
   await esClient.indices.putIndexTemplate({
     name: RAW_EVENTS_TEMPLATE,
-    index_patterns: ['logs-endpoint.events.*-default'],
+    index_patterns: [RAW_EVENTS_INDEX_PATTERN],
     priority: 500,
     data_stream: {},
     template: { mappings: EVIDENCE_MAPPINGS },
@@ -974,7 +1012,7 @@ const rawEventIndexFor = (event: Record<string, unknown>): string => {
  * instead of silently grading as an abstention.
  */
 export const seedRawEvidence = async (
-  { esClient, log }: SeedingClients,
+  { esClient, log, ledger }: SeedingClients,
   evidence: ReturnType<typeof buildEvidence>,
   attackDiscoveryId: string
 ): Promise<void> => {
@@ -984,9 +1022,12 @@ export const seedRawEvidence = async (
   if (!esClient) {
     throw new Error(`No esClient: cannot seed raw evidence for AD ${attackDiscoveryId}`);
   }
+  // Recorded before any write so a half-seeded case is still torn down.
+  ledger?.eventOwnerIds.add(attackDiscoveryId);
+  evidence.entities.forEach((entity) => ledger?.entityIds.add(entity.entity.id));
   // `logs-endpoint.events.*` is a data stream: it takes `create` ops only and
   // auto-creates on first write from the template installed here.
-  await ensureRawEventsTemplate(esClient);
+  await ensureRawEventsTemplate(esClient, ledger);
   const eventOps = evidence.events.flatMap((event) => [
     { create: { _index: rawEventIndexFor(event) } },
     event,
@@ -1021,7 +1062,7 @@ export const seedRawEvidence = async (
  * it: this is the seeder→reader contract.
  */
 export const seedAttackDiscovery = async (
-  { fetch, log, esClient }: SeedingClients,
+  { fetch, log, esClient, ledger }: SeedingClients,
   doc: ReturnType<typeof buildAttackDiscoveryFromPayload>,
   caseId: string,
   payload: Record<string, unknown> = {}
@@ -1071,6 +1112,7 @@ export const seedAttackDiscovery = async (
     );
   }
   log.info(`Seeded attack discovery document ${persisted.id} (title: ${doc.title})`);
+  ledger?.attackDiscoveryIds.add(persisted.id);
   // The route persisted into the SCHEDULED index; the workflow reads the
   // ad-hoc one. Copy the doc across (same _id) and seed the alerts it cites.
   await copyAttackDiscoveryToAdhocIndex({ fetch: noopFetch, log, esClient }, persisted.id);
@@ -1081,8 +1123,8 @@ export const seedAttackDiscovery = async (
         'cited-alert projection supports exactly one'
     );
   }
-  await seedRawEvidence({ fetch: noopFetch, log, esClient }, evidence, persisted.id);
-  await seedCitedAlerts({ fetch: noopFetch, log, esClient }, doc, persisted.id, evidence);
+  await seedRawEvidence({ fetch: noopFetch, log, esClient, ledger }, evidence, persisted.id);
+  await seedCitedAlerts({ fetch: noopFetch, log, esClient, ledger }, doc, persisted.id, evidence);
   return persisted;
 };
 
@@ -1095,12 +1137,13 @@ export const seedAttackDiscovery = async (
  * contract).
  */
 export const seedInvestigation = async (
-  { fetch, log }: SeedingClients,
+  { fetch, log, ledger }: SeedingClients,
   attackDiscoveryId: string,
   title: string,
   retry: SeedRetryOptions = {}
 ): Promise<string> => {
   const conversationId = deriveInvestigationId(attackDiscoveryId) ?? randomUuid();
+  ledger?.conversationIds.add(conversationId);
   await withTransientRetry(
     () =>
       fetch('/api/agent_builder/conversations', {
@@ -1138,6 +1181,7 @@ export const runAttackDiscoveryWorkflow = async ({
   fetch,
   log,
   esClient,
+  ledger,
   payload,
   caseId,
   maxWaitMs = 12 * 60_000,
@@ -1147,6 +1191,8 @@ export const runAttackDiscoveryWorkflow = async ({
   log: ToolingLog;
   /** Direct ES client for the ad-hoc copy + cited-alert seeding (see SeedingClients). */
   esClient?: EsClientLike;
+  /** Records everything this run seeds so the suite can tear down exactly that. */
+  ledger?: SeedLedger;
   /** The corpus case payload — rendered into the seeded AD document. */
   payload: Record<string, unknown>;
   /** Corpus case id, used for synthetic alert ids and logging. */
@@ -1158,12 +1204,16 @@ export const runAttackDiscoveryWorkflow = async ({
   let investigationId: string;
   try {
     seeded = await seedAttackDiscovery(
-      { fetch, log, esClient },
-      buildAttackDiscoveryFromPayload(caseId, payload),
+      { fetch, log, esClient, ledger },
+      buildAttackDiscoveryFromPayload(caseId, payload, randomUUID()),
       caseId,
       payload
     );
-    investigationId = await seedInvestigation({ fetch, log }, seeded.id, seeded.title ?? caseId);
+    investigationId = await seedInvestigation(
+      { fetch, log, ledger },
+      seeded.id,
+      seeded.title ?? caseId
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     log.error(`Seeding failed for case ${caseId}: ${message}`);
@@ -1223,24 +1273,30 @@ export const runAttackDiscoveryWorkflow = async ({
   }
 
   const workflowOutput = readWorkflowOutput(execution);
-  const agentVerdict = readAgentVerdict(execution.stepExecutions);
+  const intermediateVerdict = readAgentVerdict(execution.stepExecutions);
 
-  // GRADED SHAPE: evaluators receive a verdict that always carries the label
-  // (string or {verdict,label,...}) — plus, when the emit_result
-  // (workflow.output) step carries the full output object, that object
-  // (label + summary_markdown + rationale) so PayloadConformance can grade
-  // summary passthrough from the actual emitted payload, not just the agent
-  // step's structured output. String fallback when neither source exists.
+  // GRADED SHAPE: only a COMPLETED execution's emitted payload (the `emit_result`
+  // workflow.output object: label + summary_markdown + rationale) is graded, so
+  // PayloadConformance grades summary passthrough from the real payload. The agent
+  // step's structured output is an intermediate artifact: a failed / timed-out /
+  // cancelled run can carry one without ever emitting a result, and grading it would
+  // hand a failed run full VerdictAccuracy and bypass summary validation. It stays on
+  // `intermediateVerdict` for diagnostics and is never read by the evaluators.
   const verdict: AgentVerdict | undefined =
-    workflowOutput?.verdict != null ? workflowOutput : agentVerdict;
+    execution.status === ExecutionStatus.COMPLETED && workflowOutput?.verdict != null
+      ? workflowOutput
+      : undefined;
   if (!verdict) {
     log.warning(
-      `Workflow execution ${workflowExecutionId} produced no verdict (status: ${execution.status})`
+      `Workflow execution ${workflowExecutionId} produced no gradable verdict (status: ${
+        execution.status
+      }${intermediateVerdict ? '; an intermediate agent verdict exists but is not graded' : ''})`
     );
   }
 
   return {
     verdict,
+    intermediateVerdict,
     workflowOutput,
     executionId: workflowExecutionId,
     executionStatus: execution.status,

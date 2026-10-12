@@ -328,6 +328,48 @@ describe('readAgentToolCallsFromTraces', () => {
       expect(request).toHaveBeenCalledTimes(4);
     }, 20000);
 
+    it('re-checks the optional columns on every indexing-lag retry, so a column that becomes mapped is queried again', async () => {
+      // Fresh trace index: attempt 1 sees the conversation's spans but no TOOL span
+      // yet (failure column unmapped, probe finds nothing -> indexing-lag retry).
+      // By attempt 2 the pending tool span has been indexed and the column is mapped.
+      let failedColumnMapped = false;
+      const request = jest.fn(async ({ body }: { body: { query: string } }) => {
+        if (isProbe(body.query)) {
+          failedColumnMapped = true; // the span lands while the probe/backoff runs
+          return { columns: [{ name: 'span_count' }], values: [[0]] };
+        }
+        if (!failedColumnMapped && isMapped(body.query, 'attributes.gen_ai.tool.call.failed')) {
+          throw unknownColumnError(
+            'attributes.gen_ai.tool.call.failed',
+            'attributes.gen_ai.conversation.id'
+          );
+        }
+        if (!failedColumnMapped) {
+          return { columns: [{ name: '@timestamp' }, { name: 'tool_id' }], values: [] };
+        }
+        return isMapped(body.query, 'attributes.gen_ai.tool.call.failed')
+          ? {
+              columns: [{ name: 'tool_id' }, { name: 'attributes.gen_ai.tool.call.failed' }],
+              values: [['platform.core.esql', true]],
+            }
+          : { columns: [{ name: 'tool_id' }], values: [['platform.core.esql']] };
+      });
+      const client = { transport: { request } } as unknown as EsClient;
+
+      const result = await readAgentToolCallsFromTraces({
+        traceEsClient: client,
+        conversationIds: 'conv-1',
+        log: silentLog,
+        includeFailures: true,
+      });
+
+      expect(result).toEqual({
+        toolCallIds: ['platform.core.esql'],
+        failedToolCallIds: ['platform.core.esql'],
+        unavailable: false,
+      });
+    }, 20000);
+
     it('stays unavailable when the unknown column is not an optional tool attribute', async () => {
       const request = jest.fn(async () => {
         throw unknownColumnError(

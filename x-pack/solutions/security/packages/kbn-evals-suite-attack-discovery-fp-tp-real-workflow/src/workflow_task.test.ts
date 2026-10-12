@@ -278,6 +278,16 @@ describe('buildAttackDiscoveryFromPayload', () => {
     expect(doc.timestamp).toBe('2024-06-12T13:22:38.000Z');
   });
 
+  it('keeps the case-derived alert id by default and scopes it to an invocation when given one', () => {
+    expect(buildAttackDiscoveryFromPayload('c1', GUIDE_PAYLOAD).alertIds).toEqual([
+      'case-c1-alert-1',
+    ]);
+    const a = buildAttackDiscoveryFromPayload('c1', GUIDE_PAYLOAD, 'inv-a').alertIds;
+    const b = buildAttackDiscoveryFromPayload('c1', GUIDE_PAYLOAD, 'inv-b').alertIds;
+    expect(a).toEqual(['case-c1-inv-a-alert-1']);
+    expect(a).not.toEqual(b);
+  });
+
   it('never leaks the gold label or rationale into the seeded document', () => {
     const doc = buildAttackDiscoveryFromPayload('c1', {
       ...GUIDE_PAYLOAD,
@@ -735,6 +745,67 @@ describe('runAttackDiscoveryWorkflow (corpus → ids bridge)', () => {
     expect(result.verdict).toBeUndefined();
     expect(result.workflowOutput).toBeUndefined();
     expect(result.executionStatus).toBe('failed');
+  });
+
+  it.each(['failed', 'timed_out', 'cancelled'])(
+    'does not grade an intermediate agent verdict when the execution %s before emit_result',
+    async (status) => {
+      const fetch = bridgeFetch({
+        execution: {
+          status,
+          // no workflow.output: the run never reached emit_result
+          stepExecutions: [
+            agentStep({ output: { structured_output: { verdict: 'false_positive' } } }),
+          ],
+        },
+      });
+      const result = await runAttackDiscoveryWorkflow({
+        fetch,
+        log: mockLog(),
+        payload: GUIDE_PAYLOAD,
+        caseId: 'c1',
+      });
+      expect(result.verdict).toBeUndefined();
+      expect(result.executionStatus).toBe(status);
+      // kept for diagnostics only
+      expect(result.intermediateVerdict).toBe('false_positive');
+    }
+  );
+
+  it('does not grade a workflow.output payload from an execution that did not complete', async () => {
+    const fetch = bridgeFetch({
+      execution: {
+        status: 'failed',
+        output: { verdict: 'true_positive', summary_markdown: 's' },
+        stepExecutions: [],
+      },
+    });
+    const result = await runAttackDiscoveryWorkflow({
+      fetch,
+      log: mockLog(),
+      payload: GUIDE_PAYLOAD,
+      caseId: 'c1',
+    });
+    expect(result.verdict).toBeUndefined();
+  });
+
+  it('gives every task invocation its own cited alert ids (repetitions / model columns)', async () => {
+    const run = async () => {
+      const calls: CallRecord[] = [];
+      await runAttackDiscoveryWorkflow({
+        fetch: bridgeFetch({ calls, execution: completedExecution }),
+        log: mockLog(),
+        payload: GUIDE_PAYLOAD,
+        caseId: 'same-case',
+      });
+      const create = calls.find((c) => c.url.endsWith('/attack_discoveries/_create'));
+      return (create?.body.attackDiscoveries as Array<{ alertIds: string[] }>)[0].alertIds;
+    };
+    const first = await run();
+    const second = await run();
+    expect(first).toHaveLength(1);
+    expect(first[0]).toContain('same-case');
+    expect(first[0]).not.toBe(second[0]);
   });
 
   it('warns (no throw) when polling exceeds the deadline', async () => {

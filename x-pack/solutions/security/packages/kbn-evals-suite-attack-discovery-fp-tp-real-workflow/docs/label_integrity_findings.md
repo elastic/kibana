@@ -33,9 +33,20 @@ Specific contradictions:
   (AMSI patch, loader download, etc.).
 
 Implication: a classifier that reads the evidence has direct grounds to answer
-true_positive, so a "wrong" verdict on these cases may be correct. Their FP gold should be
-treated as contested and kept out of gated metrics until the corpus builder scrubs the
+true_positive, so a "wrong" verdict on these cases may be correct. Their FP gold is
+treated as contested and the suite excludes these rows from every cohort
+(`CONTESTED_MUTATION_TYPES` in `src/cohort.ts`) until the corpus builder scrubs the
 residual messages and indicators (or the cases are relabelled).
+
+## Finding: `chain-reorder` reverses only array order
+
+The three `chain-reorder` cases (gold `inconclusive`) reverse the `events` array and nothing
+else. `@timestamp`, `event.sequence` and `process.parent.pid` still describe the original
+TP chain (measured: `mut-mimicrat-clickfix-reorder` has array sequence `[8..1]` and
+ascending timestamps once sorted; sorting by timestamp restores the original order up to
+same-minute ties). The analysis workflow sorts raw events chronologically before judging,
+so it sees an intact attack and `inconclusive` marks a correct verdict as wrong. These rows
+are excluded from every cohort for the same reason as the FP rows above.
 
 Not done here: relabelling or regenerating cases (outside this PR's remit per the review).
 

@@ -20,8 +20,13 @@ exactly (a/b and mdm/sccm variants are distinguished in `description` only).
 
 > **Label integrity:** the FP labels above are known-contested — mutations rewrite the
 > entity/parent/domain fields but retain the base chain's free-text event messages,
-> which still describe the malicious behavior. See `docs/label_integrity_findings.md`
-> before relying on adversarial_twins FP cases in gated metrics.
+> which still describe the malicious behavior. `chain-reorder` only reverses array order
+> (timestamps, sequence numbers and parent pids still describe the intact chain; the
+> workflow sorts chronologically before judging). The suite therefore does NOT grade the
+> `domain-swap`, `entity-role-swap`, `parent-process-spoof` and `chain-reorder` rows (18 of
+> 21) in any cohort; only the 3 `drop-link` rows are graded. See
+> `docs/label_integrity_findings.md`. The rows stay vendored for the corpus owner to
+> regenerate.
 
 ## Discarded mutations (unbroken invariants) — 3
 

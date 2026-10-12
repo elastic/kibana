@@ -236,9 +236,7 @@ export const readAgentToolCallsFromTraces = async ({
     const queryParams = { conversationIds: ids, indexPattern, excludeToolIds, includeFailures };
     buildOrderedToolQuery(queryParams); // validates ids; throws before any request
     const spanProbeQuery = buildSpanProbeQuery({ conversationIds: ids, indexPattern });
-    const unmappedColumns = new Set<string>();
-
-    const runOrderedToolQuery = async (): Promise<EsqlResponse> => {
+    const runOrderedToolQuery = async (unmappedColumns: Set<string>): Promise<EsqlResponse> => {
       for (;;) {
         try {
           return await traceEsClient.transport.request<EsqlResponse>({
@@ -260,7 +258,14 @@ export const readAgentToolCallsFromTraces = async ({
 
     const response = await pRetry(
       async () => {
-        const result = await runOrderedToolQuery();
+        // Fresh per attempt, deliberately: an unmapped column is a property of
+        // the index AT THIS MOMENT. `attributes.gen_ai.tool.call.failed` is
+        // unmapped only until the first TOOL span is indexed, and this retry
+        // loop exists precisely because that span may still be in flight — so a
+        // set cached across attempts would keep dropping the failure column on
+        // the attempt that finally had it mapped, and `includeFailures` would
+        // report no failed tools for a span that does carry the flag.
+        const result = await runOrderedToolQuery(new Set<string>());
 
         const toolCallIds = parseToolIds(result);
         if (toolCallIds.length > 0) {
