@@ -12,7 +12,7 @@ import { expect } from '@kbn/scout/ui';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { spaceTest as test } from '../../fixtures';
 import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
-import { LONG_EXECUTION_TIMEOUT } from '../../fixtures/constants';
+import { EXECUTION_TIMEOUT, LONG_EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getLongRunningCancellationWorkflowYaml } from '../../fixtures/workflows';
 
 test.describe('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
@@ -37,7 +37,10 @@ test.describe('Workflow execution - Cancellation', { tag: [...tags.stateful.clas
 
     await pageObjects.workflowEditor.clickRunButton();
 
-    await pageObjects.workflowExecution.waitForExecutionStatus(ExecutionStatus.RUNNING, 5000);
+    await pageObjects.workflowExecution.waitForExecutionStatus(
+      ExecutionStatus.RUNNING,
+      EXECUTION_TIMEOUT
+    );
 
     await pageObjects.workflowExecution.cancelExecution();
 
