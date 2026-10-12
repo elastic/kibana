@@ -278,6 +278,7 @@ const persistDeductiveSessionId = async ({
       {
         access: 'owner',
         retryOnConflict: true,
+        source: 'execution',
         // Attribute the change to the agent's run.
         ...(agentId
           ? {

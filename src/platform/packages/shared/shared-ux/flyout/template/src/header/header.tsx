@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiFlyoutProps, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBadgeGroup,
@@ -20,8 +20,8 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiMemoizedStyles,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -59,27 +59,10 @@ export const Header = Object.assign(BaseHeader, {
   MetaBlock: MetaBlockPart,
 });
 
-/** Maps `paddingSize` to the header's horizontal padding; `undefined` follows EuiFlyout's `'l'` default. */
-const resolveHorizontalPadding = (
-  euiTheme: UseEuiTheme['euiTheme'],
-  paddingSize: EuiFlyoutProps['paddingSize']
-): string => {
-  switch (paddingSize) {
-    case 'none':
-      return '0';
-    case 's':
-      return euiTheme.size.s;
-    case 'm':
-      return euiTheme.size.base;
-    case 'l':
-    default:
-      return euiTheme.size.l;
-  }
-};
-
 const dividerStyles = ({ euiTheme }: UseEuiTheme) => ({
   divider: css`
     border-block-end: ${euiTheme.border.thin};
+    margin-inline: -${euiTheme.size.base};
   `,
 });
 
@@ -138,19 +121,13 @@ const collapsibleRegionStyles = ({ euiTheme }: UseEuiTheme) => {
   };
 };
 
-/** Full-width divider: negative horizontal margins bleed it past the header padding to the flyout edges. */
-const FullBleedDivider = ({ horizontalPadding }: { horizontalPadding: string }) => {
+/**
+ * Full-width divider: negative horizontal margins bleed it past the header padding to the flyout
+ * edges. `size.base` is the padding `EuiFlyout` applies for the template's `paddingSize="m"`.
+ */
+const FullBleedDivider = () => {
   const styles = useEuiMemoizedStyles(dividerStyles);
-  return (
-    <div
-      aria-hidden
-      css={styles.divider}
-      style={{
-        marginInlineStart: `-${horizontalPadding}`,
-        marginInlineEnd: `-${horizontalPadding}`,
-      }}
-    />
-  );
+  return <div aria-hidden css={styles.divider} />;
 };
 
 /** Badge counts above `MAX_VISIBLE_BADGES` collapse to `MAX_BADGES_BEFORE_OVERFLOW` plus an overflow badge. */
@@ -214,12 +191,27 @@ const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: bo
   );
 };
 
-/** Renders a resolved `Header.Badge` descriptor. */
-const renderBadge = ({ label, ...badgeProps }: HeaderBadgeDescriptor, key: string): ReactNode => (
-  <EuiBadge key={key} {...badgeProps}>
-    {label}
-  </EuiBadge>
-);
+/** Renders a resolved `Header.Badge` descriptor, wrapping in a tooltip when one is provided. */
+const renderBadge = (
+  { label, toolTipContent, toolTipPosition, ...badgeProps }: HeaderBadgeDescriptor,
+  key: string
+): ReactNode => {
+  // Tooltips open from keyboard focus, so a tooltipped non-interactive badge needs a tab stop.
+  const needsTabStop = Boolean(toolTipContent) && !badgeProps.onClick && !badgeProps.href;
+  const badge = (
+    <EuiBadge key={key} tabIndex={needsTabStop ? 0 : undefined} {...badgeProps}>
+      {label}
+    </EuiBadge>
+  );
+  if (!toolTipContent) {
+    return badge;
+  }
+  return (
+    <EuiToolTip key={key} content={toolTipContent} position={toolTipPosition}>
+      {badge}
+    </EuiToolTip>
+  );
+};
 
 type HeaderZoneProps = FlyoutHeaderProps & {
   flyoutTitleId?: string;
@@ -228,6 +220,7 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 /** Internal renderer for the header zone; dividers are template-owned for full bleed. */
 export const HeaderZone = ({
   title,
+  titleText,
   titleIcon,
   titleTooltip,
   description,
@@ -236,11 +229,10 @@ export const HeaderZone = ({
   flyoutTitleId,
   'data-test-subj': dataTestSubj,
 }: HeaderZoneProps) => {
-  const { euiTheme } = useEuiTheme();
   const badgeStyles = useEuiMemoizedStyles(badgeGroupStyles);
   const collapseStyles = useEuiMemoizedStyles(collapsibleRegionStyles);
   const { title: titleCss } = useEuiMemoizedStyles(titleStyles);
-  const { dataTestSubj: rootTestSubj, paddingSize } = useFlyoutTemplateConfig();
+  const { dataTestSubj: rootTestSubj } = useFlyoutTemplateConfig();
   const { tabs, tabBarProps, selectedTabId, selectTab } = useFlyoutTabs();
   const items = useMemo(() => headerAssembly.parseChildren(children), [children]);
   const {
@@ -251,8 +243,10 @@ export const HeaderZone = ({
     headerRef,
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
-  const horizontalPadding = resolveHorizontalPadding(euiTheme, paddingSize);
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
+  // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
+  const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
   const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
@@ -318,7 +312,7 @@ export const HeaderZone = ({
                       <h3
                         id={flyoutTitleId}
                         css={[titleCss, collapseStyles.collapsedTitle]}
-                        title={typeof title === 'string' ? title : undefined}
+                        title={collapsedTitleText}
                       >
                         {title}
                       </h3>
@@ -427,7 +421,7 @@ export const HeaderZone = ({
               </EuiTabs>
             )}
 
-            <FullBleedDivider horizontalPadding={horizontalPadding} />
+            <FullBleedDivider />
           </div>
         </KibanaErrorBoundary>
       </EuiFlyoutHeader>

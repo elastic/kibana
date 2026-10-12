@@ -61,12 +61,18 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
-export { applyMissingWorkerSettingDefaults } from './apply_missing_defaults';
+/** True when the Worker declares a schedule interval that operators cannot change. */
+export const isWorkerScheduleIntervalReadOnly = (workerId: string): boolean =>
+  getContract(workerId).declaration.scheduleInterval?.readOnly === true;
+
+export {
+  nearestLowerAutonomyLevel,
+  upgradeStoredWorkerSettings,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
   formatWorkerSettingsIssues,
-  projectStoredAutonomyLevel,
   touchesWorkerSettings,
 } from './contract';
 export {

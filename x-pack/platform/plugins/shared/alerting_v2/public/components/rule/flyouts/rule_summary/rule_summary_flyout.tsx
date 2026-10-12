@@ -221,6 +221,7 @@ export const RuleSummaryFlyout = ({
               defaultMessage: 'Take action',
             })}
             iconType={isTakeActionOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+            iconSide="right"
             onClick={() => setIsTakeActionOpen((open) => !open)}
             data-test-subj="ruleSummaryFlyoutTakeActionButton"
           />

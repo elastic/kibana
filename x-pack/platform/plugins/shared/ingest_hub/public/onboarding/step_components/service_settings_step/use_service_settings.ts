@@ -13,7 +13,12 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getRequiredTextFields, resolveFieldMeta, toTyped } from './field_config';
+import {
+  getMissingSourceGroup,
+  getRequiredTextFields,
+  resolveFieldMeta,
+  toTyped,
+} from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
 export interface ServiceDataStreamVars {
@@ -134,8 +139,76 @@ function mergeVarsByDataStream(
   return result;
 }
 
+/**
+ * Instances missing a required text field for any active input. `awsServicesMap` should already
+ * reflect the selected deployment method (see the flow context), so the required set is
+ * ARN-only under ECF and the full manifest set under agent-based.
+ */
+export function isServiceConfigIncomplete(
+  service: AwsServiceMatrixEntry,
+  config: ServiceVars
+): boolean {
+  if (!isValidNamespace(config.namespace ?? '', true).valid) return true;
+  return config.enabledDataStreams.some((dsId) => {
+    const dsInfo = service.varDefsByDataStream?.[dsId];
+    const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
+    const isSingleDs = service.dataStreams.length === 1;
+    let activeInputs = dsVars.enabledInputs.length
+      ? dsVars.enabledInputs
+      : isSingleDs
+      ? service.inputs ?? dsInfo?.inputs ?? []
+      : dsInfo?.defaultEnabledInputs?.length
+      ? dsInfo.defaultEnabledInputs
+      : dsInfo?.inputs?.slice(0, 1) ?? [];
+    const dsView = makeDsView(service, dsId);
+    // Stored input selections outlive a method switch. Under ECF only the inputs ECF can route
+    // count (WAF: S3 only); a selection left over from agent-based (e.g. CloudWatch only) would
+    // otherwise pass with no supported source, and the ECF launch would carry none for the service.
+    if (service.settingsScope === 'ecf' && dsVars.enabledInputs.length > 0) {
+      const supportedInputs = dsView.inputs ?? [];
+      activeInputs = activeInputs.filter((input) => supportedInputs.includes(input));
+      if (activeInputs.length === 0) return true;
+    }
+    return activeInputs.some(
+      (inp) =>
+        getMissingSourceGroup(dsView, inp, dsVars.varsByInput?.[inp]) !== undefined ||
+        getRequiredTextFields(dsView, inp).some((f) => {
+          const meta = resolveFieldMeta(dsView, inp, f);
+          const raw = dsVars.varsByInput?.[inp]?.[f];
+          const effective = meta ? toTyped(raw, meta) : raw ?? '';
+          if (Array.isArray(effective)) return effective.length === 0;
+          return typeof effective === 'string' && effective.trim() === '';
+        })
+    );
+  });
+}
+
+export function getIncompleteInstances(
+  instances: ServiceInstance[],
+  serviceVars: Record<string, ServiceVars>,
+  awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined
+): ServiceInstance[] {
+  return instances.filter((inst) => {
+    const service = awsServicesMap?.get(inst.serviceId);
+    if (!service) return false;
+    // An absent key means never configured: default to every data stream. An explicitly stored
+    // empty array means the user disabled all inputs — respect it.
+    const config: ServiceVars = serviceVars[inst.instanceId] ?? {
+      enabledDataStreams: service.dataStreams,
+      varsByDataStream: {},
+    };
+    return isServiceConfigIncomplete(service, config);
+  });
+}
+
 export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
-  const { servicesStep, removeDeployInstance, awsServicesMap } = useOnboardingFlow();
+  const {
+    servicesStep,
+    removeDeployInstance,
+    awsServicesMap,
+    deploymentMethod,
+    setServiceSettingsMethod,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -300,39 +373,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   }, [instances, searchQuery, signalFilter, awsServicesMap]);
 
   const incompleteInstances = useMemo(
-    () =>
-      instances.filter((inst) => {
-        const service = awsServicesMap?.get(inst.serviceId);
-        if (!service) return false;
-        const config = getServiceVars(inst.instanceId);
-        if (!isValidNamespace(config.namespace ?? '', true).valid) return true;
-        // getServiceVars returns service.dataStreams when the key is absent (never configured).
-        // An explicitly stored empty array means the user disabled all inputs — respect it.
-        const activeDataStreams = config.enabledDataStreams;
-        return activeDataStreams.some((dsId) => {
-          const dsInfo = service.varDefsByDataStream?.[dsId];
-          const dsVars = config.varsByDataStream[dsId] ?? { enabledInputs: [], varsByInput: {} };
-          const isSingleDs = service.dataStreams.length === 1;
-          const activeInputs = dsVars.enabledInputs.length
-            ? dsVars.enabledInputs
-            : isSingleDs
-            ? dsInfo?.inputs ?? []
-            : dsInfo?.defaultEnabledInputs?.length
-            ? dsInfo.defaultEnabledInputs
-            : dsInfo?.inputs?.slice(0, 1) ?? [];
-          const dsView = makeDsView(service, dsId);
-          return activeInputs.some((inp) =>
-            getRequiredTextFields(dsView, inp).some((f) => {
-              const meta = resolveFieldMeta(dsView, inp, f);
-              const raw = dsVars.varsByInput?.[inp]?.[f];
-              const effective = meta ? toTyped(raw, meta) : raw ?? '';
-              if (Array.isArray(effective)) return effective.length === 0;
-              return typeof effective === 'string' && effective.trim() === '';
-            })
-          );
-        });
-      }),
-    [instances, getServiceVars, awsServicesMap]
+    () => getIncompleteInstances(instances, persisted?.serviceVars ?? {}, awsServicesMap),
+    [instances, persisted?.serviceVars, awsServicesMap]
   );
 
   const incompleteInstanceIds = useMemo(
@@ -353,8 +395,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       ...(persisted ?? { globalRegion: '', serviceVars: {} }),
       instances,
     });
+    setServiceSettingsMethod(deploymentMethod);
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances]);
+  }, [onContinue, persisted, setPersisted, instances, deploymentMethod, setServiceSettingsMethod]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);

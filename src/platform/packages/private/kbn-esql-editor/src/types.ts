@@ -90,6 +90,10 @@ export interface ESQLEditorProps {
   mergeExternalMessages?: boolean;
   /** Enable data source browser suggestion & command integration */
   enableResourceBrowser?: boolean;
+  /**
+   * Shows the action to create an ES|QL view from the current query.
+   */
+  enableCreateView?: boolean;
   /** Stats about the last request made */
   queryStats?: ESQLQueryStats;
   /** Callback invoked when the ES|QL docs flyout (opened from the help menu) toggles visibility */

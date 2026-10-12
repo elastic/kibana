@@ -70,6 +70,7 @@ const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock =>
     getAttackDiscoveryGenerationById: jest.fn(),
     getReader: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
+    isServiceAccountGeneration: jest.fn().mockResolvedValue(false),
     refreshEventLogIndex: jest.fn(),
     // Properties from AIAssistantDataClient
     spaceId: 'default',

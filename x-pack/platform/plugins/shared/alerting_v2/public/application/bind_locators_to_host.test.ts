@@ -6,12 +6,8 @@
  */
 
 import { bindLocatorToHost, bindLocatorsToHost } from './bind_locators_to_host';
-import {
-  createAlertingV2HostApp,
-  MANAGEMENT_HOST,
-  type AlertingV2RulesLocatorParams,
-} from '../locators';
-import type { AlertingV2Locators } from './locator_context';
+import { createAlertingV2HostApp, type AlertingV2RulesLocatorParams } from '../locators';
+import type { RawAlertingV2Locators } from './locator_context';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 
 const createMockLocator = (): LocatorPublic<AlertingV2RulesLocatorParams> =>
@@ -95,7 +91,7 @@ describe('bindLocatorsToHost', () => {
       episodesLocators: createMockLocator(),
       actionPolicyLocators: createMockLocator(),
       executionHistoryLocators: createMockLocator(),
-    } as unknown as AlertingV2Locators;
+    } as unknown as RawAlertingV2Locators;
 
     const bound = bindLocatorsToHost(locators, SEARCH_HOST);
     bound.rulesLocators.navigateSync({});
@@ -118,7 +114,7 @@ describe('bindLocatorsToHost', () => {
       episodesLocators: createMockLocator(),
       actionPolicyLocators: createMockLocator(),
       executionHistoryLocators: createMockLocator(),
-    } as unknown as AlertingV2Locators;
+    } as unknown as RawAlertingV2Locators;
 
     const obsBound = bindLocatorsToHost(locators, OBSERVABILITY_HOST);
     const searchBound = bindLocatorsToHost(locators, SEARCH_HOST);
@@ -134,23 +130,6 @@ describe('bindLocatorsToHost', () => {
     expect(locators.rulesLocators.navigateSync).toHaveBeenNthCalledWith(
       2,
       { ruleId: 'r-1', host: SEARCH_HOST.rules },
-      undefined
-    );
-  });
-
-  it('management host binding injects MANAGEMENT_HOST page paths', () => {
-    const locators = {
-      rulesLocators: createMockLocator(),
-      ruleLibraryLocators: createMockLocator(),
-      episodesLocators: createMockLocator(),
-      actionPolicyLocators: createMockLocator(),
-      executionHistoryLocators: createMockLocator(),
-    } as unknown as AlertingV2Locators;
-
-    bindLocatorsToHost(locators, MANAGEMENT_HOST).rulesLocators.navigateSync({});
-
-    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith(
-      { host: MANAGEMENT_HOST.rules },
       undefined
     );
   });

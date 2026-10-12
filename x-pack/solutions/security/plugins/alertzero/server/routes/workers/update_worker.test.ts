@@ -115,6 +115,34 @@ describe('registerUpdateWorkerRoute', () => {
     });
   });
 
+  it('maps a no-model block to 400 naming the Worker and Feature settings', async () => {
+    const update = jest.fn().mockResolvedValue({ outcome: 'blocked', reason: 'noModel' });
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { enabled: true },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: {
+        message:
+          'Alert Triage cannot be turned on because no AI model is available to you in this space. Configure one in Feature settings, or ask an administrator for access to connectors.',
+      },
+    });
+  });
+
   it('returns 403 when enabling a worker without managed-update privileges', async () => {
     const update = jest.fn();
     const { handler } = setupRoute(update);
@@ -133,6 +161,34 @@ describe('registerUpdateWorkerRoute', () => {
     expect(response.forbidden).toHaveBeenCalledWith({
       body: {
         message: 'Enabling or disabling a worker requires update access to managed workflows',
+      },
+    });
+  });
+
+  it('returns 403 when the caller lacks manage_security', async () => {
+    const update = jest.fn();
+    const { handler } = setupRoute(update);
+    const response = httpServerMock.createResponseFactory();
+
+    await handler(
+      createRouteContextMock({ manageSecurity: false }),
+      httpServerMock.createKibanaRequest({
+        params: { workerId: TRIAGE },
+        body: { settingsRevision: 1, settings: { autonomy: 'manual' } },
+        kibanaRequestState: {
+          requestId: '123',
+          requestUuid: '123e4567-e89b-12d3-a456-426614174000',
+          startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
+          authzResult: managedUpdateAuthzResult,
+        },
+      }),
+      response
+    );
+
+    expect(update).not.toHaveBeenCalled();
+    expect(response.forbidden).toHaveBeenCalledWith({
+      body: {
+        message: 'Modifying a worker requires the manage_security cluster privilege',
       },
     });
   });

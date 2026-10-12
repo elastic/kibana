@@ -529,6 +529,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         api: isServerless
           ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-entity-analytics-api`
           : `${KIBANA_APIS}group/endpoint-security-entity-analytics-api`,
+        explore: {
+          landing: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/explore`,
+          hostsPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/hosts-page`,
+          networkPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/network-page`,
+          usersPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/users-page`,
+        },
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
         assetCriticality: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/asset-criticality`,
@@ -976,6 +982,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       secureLogstash: `${ELASTIC_DOCS}reference/fleet/secure-logstash-connections`,
       agentPolicy: `${ELASTIC_DOCS}reference/fleet/agent-policy`,
       agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
+      cloudConnectorDeployment: `${ELASTIC_DOCS}manage-data/ingest/managed-integrations/cloud-connector-deployment`,
       api: `${ELASTIC_DOCS}reference/fleet/fleet-api-docs`,
       managedOtlp: `${ELASTIC_DOCS}reference/opentelemetry/motlp`,
       uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,
@@ -1130,6 +1137,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     contextEngine: {
       overview: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine`,
+      aiIndices: `${ELASTIC_DOCS}explore-analyze/ai-features/context-engine/concepts#ai-indices`,
     },
     agentBuilder: {
       agentBuilder: `${ELASTIC_DOCS}explore-analyze/ai-features/elastic-agent-builder`,

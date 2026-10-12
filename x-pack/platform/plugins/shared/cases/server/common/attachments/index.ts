@@ -61,8 +61,8 @@ const UNIFIED_EXTERNAL_REFERENCE_TYPES = new Set(Object.values(EXTERNAL_REFERENC
 
 /**
  * Returns the persisted transformer for the routing key from {@link getAttachmentTypeFromAttributes}.
- * For comment/user types returns the comment transformer; for migrated persistable
- * types (e.g. Lens) returns the persistable-state transformer; for migrated external
+ * For comment/user types returns the comment transformer; for mapped persistable
+ * types (e.g. Lens) returns the persistable-state transformer; for mapped external
  * reference subtypes (e.g. endpoint) returns the external reference transformer;
  * otherwise pass-through.
  */

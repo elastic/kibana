@@ -11,11 +11,11 @@ import { expect } from '@kbn/scout/ui';
 import { VIEW_MODE } from '@kbn/discover-session-constants';
 import type { StoredDiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionInternalData } from '../../../../../server/api/internal_schema';
-import { spaceTest, tags } from '../fixtures';
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'Internal Discover session on Dashboard',
-  { tag: [...tags.deploymentAgnostic, ...tags.serverless.observability.logs_essentials] },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();

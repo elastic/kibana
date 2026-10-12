@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const inspect = z
-  .union([
-    z
-      .object({
-        dsl: z.array(z.string()),
-      })
-      .nullable(),
-    z.boolean(),
-  ])
-  .optional();
+export const inspect = lazySchema(() =>
+  z
+    .union([
+      z
+        .object({
+          dsl: z.array(z.string()),
+        })
+        .nullable(),
+      z.boolean(),
+    ])
+    .optional()
+);

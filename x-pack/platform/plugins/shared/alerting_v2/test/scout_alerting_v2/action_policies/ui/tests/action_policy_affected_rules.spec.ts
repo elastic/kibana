@@ -31,10 +31,11 @@ test.describe('Action Policies - affected rules', { tag: '@local-stateful-classi
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: MATCHING_RULE_NAME, tags: [POLICY_TAG] } })
+      buildCreateRuleData({ metadata: { name: MATCHING_RULE_NAME, routing_tags: [POLICY_TAG] } })
     );
     await apiServices.alertingV2.rules.create(
-      buildCreateRuleData({ metadata: { name: OTHER_RULE_NAME, tags: ['scout-other-tag'] } })
+      // Same value as a rule tag only: policies match on routing tags, so this rule is not affected.
+      buildCreateRuleData({ metadata: { name: OTHER_RULE_NAME, tags: [POLICY_TAG] } })
     );
     await apiServices.alertingV2.actionPolicies.create(
       buildCreateActionPolicyData({ name: POLICY_NAME, matcher: { tags: [POLICY_TAG] } })

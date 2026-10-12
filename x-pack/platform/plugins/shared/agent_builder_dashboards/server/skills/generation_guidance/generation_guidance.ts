@@ -13,7 +13,7 @@ import {
 import { dashboardTools } from '../../../common';
 import type { DashboardGuidanceModule } from '../guidance_module';
 import { dashboardDesignGuidancePrompt } from './design';
-import { enhanceGuidancePrompt } from './enhance_guidance';
+import { ENHANCE_GUIDANCE_PATH, enhanceGuidanceReference } from './enhance_guidance';
 
 const chartTypeSelectionGuidance = getChartTypeSelectionPromptContent();
 
@@ -21,7 +21,9 @@ const guidance = `## Dashboard Operations
 
 The ${dashboardTools.generateDashboard} tool builds the resulting dashboard from the current dashboard (if any) plus an ordered \`operations\` array. This section describes the \`operations\` vocabulary; see the environment workflow below for how the current dashboard is referenced and how the result is surfaced.
 
-${enhanceGuidancePrompt}
+## Improving an Existing Dashboard (Enhance)
+
+When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHANCE_GUIDANCE_PATH}\` with \`read_file\` before inspecting the dashboard or calling any other tool. Follow that file. It takes precedence over the create-dashboard guidance in this skill. Do not enhance without reading it.
 
 ## Using Dashboard Operations
 
@@ -97,7 +99,7 @@ ${dashboardDesignGuidancePrompt}
 
 ## ES|QL
 
-Omit the \`esql\` field on Lens and Vega panels unless you received a validated query from a prior tool result or the user pasted one explicitly. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
+Omit the \`esql\` field on visualization panels unless the query came from \`${platformCoreTools.generateEsql}\` or the user pasted it. Do not write or derive ES|QL yourself — the tool generates it from the natural language \`query\`. A query you wrote yourself doesn't qualify, even after running it with \`${platformCoreTools.executeEsql}\`: running a query only shows that it works, so use \`${platformCoreTools.executeEsql}\` to inspect results, not to approve your own queries. Custom content is the exception: the tool does not generate its query, so pass \`esql\` whenever the panel needs data (see Custom content panels).
 
 ## Controls
 
@@ -145,4 +147,5 @@ Controls query the index directly, so columns created in ES|QL (\`DISSECT\`, \`G
  */
 export const dashboardGeneration: DashboardGuidanceModule = {
   guidance,
+  referencedContent: [enhanceGuidanceReference],
 };

@@ -273,6 +273,7 @@ Run a suite on any branch without a PR:
 | `EVAL_INCLUDE_EIS_MODELS`         | for `eis/*` models | Set to `1` when using EIS models or an EIS judge                                                             |
 | `EVAL_CONNECTOR_ID`               | no                 | LLM-as-judge connector override                                                                              |
 | `EVAL_SERVER_CONFIG_SET`          | some suites        | From `serverConfigSet` in `evals.suites.json`                                                                |
+| `EVAL_SCOUT_ARCH` / `EVAL_SCOUT_DOMAIN` | some suites  | From `scoutArch` / `scoutDomain` in `evals.suites.json` (default `stateful` / `classic`)                     |
 | `KIBANA_BUILD_ID`                 | no                 | Reuse a Kibana build from another job (skips build step)                                                     |
 | `EVAL_GREP`                       | no                 | Playwright test name filter (same as `node scripts/evals run --grep`)                                        |
 | `EVAL_REPETITIONS`                | no                 | Repeat each example N times (same as `--repetitions`)                                                        |
@@ -336,6 +337,23 @@ A suite whose Scout server needs secrets from the evals config can map them into
 ```
 
 The hook reads the evals config JSON (the `--profile` config locally, `KBN_EVALS_CONFIG_B64` in CI) on stdin and prints `{ "env"?: Record<string, string> }`. `node scripts/evals start`/`run` and `run_suite.sh` export that env to Scout and the Playwright run, so the suite's server config set can read it. Kibana also resolves `${VAR}` references in YAML config files from its environment, so a config set can pass a suite-owned YAML file with `--config` and keep secrets out of files and process arguments. Scout restarts when the hook output changes. Keep suite-specific keys in the evals config; the shared schema allows unknown blocks. See [the Nightshift investigations hook](../../../../solutions/observability/packages/kbn-evals-suite-nightshift-investigations/scout/scout_hook.sh) for an example.
+
+### Serverless suites (`scoutArch` / `scoutDomain`)
+
+Suites run on a stateful/classic Scout cluster unless their `evals.suites.json` entry says otherwise:
+
+```json
+{
+  "id": "my-suite",
+  "serverConfigSet": "evals_my_suite",
+  "scoutArch": "serverless",
+  "scoutDomain": "observability_complete"
+}
+```
+
+Scout then starts with that arch and domain, locally and in CI, so the config set needs a matching `serverless/observability_complete.serverless.config.ts` (start from the serverless `evals_tracing` config). Serverless Elasticsearch runs in Docker, and GCS snapshot restores work as on stateful.
+
+To run a suite on a different arch or domain locally, pass `--scout-arch` / `--scout-domain` to `node scripts/evals start`, for example `--scout-arch stateful`. Switching restarts Scout.
 
 ### Playwright config
 
@@ -629,11 +647,28 @@ Update all model + judge labels:
 
 Update Vault config:
 
+| `--vault` | Path                                        | Read by                 |
+| --------- | ------------------------------------------- | ----------------------- |
+| `ci-prod` | `kv/ci-shared/kbn-evals/golden` (KV v2)     | CI (`setup_job_env.sh`) |
+| `dev`     | `secret/kibana-issues/dev/kbn-evals/golden` | `--profile dev-vault`   |
+
+Log in to the matching Vault first; the scripts print the login command if your token is missing or expired. `--vault ci-prod` ignores `VAULT_ADDR`; set `KBN_EVALS_CI_PROD_VAULT_ADDR` to override its address.
+
 ```bash
-# Edit scripts/vault/config.json, then generate a vault write command:
-node scripts/vault/get_command.js --vault ci-prod
-# Sync from Vault:
+# Sync scripts/vault/config.json from Vault, edit it, then upload it:
 node scripts/vault/retrieve_secrets.js --vault ci-prod
+node scripts/vault/upload_secrets.js --vault ci-prod
+
+# Or print the vault command instead of running it. The command holds the whole config inline,
+# so running it puts the secret in your shell history; prefer upload_secrets.js.
+node scripts/vault/get_command.js --vault ci-prod
+```
+
+Upload writes the whole secret, so always retrieve first. The ci-prod path is KV v2 and keeps previous versions (numbered up by one per upload). To undo a bad upload, retrieve an earlier version and upload it again. Retrieve validates the config and fails before touching `config.json` if the version can't be read:
+
+```bash
+node scripts/vault/retrieve_secrets.js --vault ci-prod --version <n>
+node scripts/vault/upload_secrets.js --vault ci-prod
 ```
 
 ### CI telemetry

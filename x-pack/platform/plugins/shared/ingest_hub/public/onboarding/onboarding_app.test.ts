@@ -114,6 +114,26 @@ describe('hydrateOnboardingSession', () => {
     expect(auth).not.toHaveProperty('agentPolicyId');
   });
 
+  it('agent-based resume records that the settings were confirmed under agent-based', async () => {
+    mockSendGet.mockResolvedValue({
+      item: makeItem({ connectorId: undefined, mechanisms: ['agent_based'], agentPolicyIds: [] }),
+    });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).toMatchObject({ serviceSettingsMethod: 'agent_based' });
+  });
+
+  it('managed resume does not set serviceSettingsMethod, so switching to agent-based still warns', async () => {
+    mockSendGet.mockResolvedValue({ item: makeItem({ mechanisms: ['managed_integration'] }) });
+    await hydrateOnboardingSession(INTEGRATION_ID, DEPLOYMENT_ID);
+    const auth = JSON.parse(
+      sessionStorage.getItem(`onboarding.${INTEGRATION_ID}.authenticateAndDeployStep`) ?? 'null'
+    );
+    expect(auth).not.toHaveProperty('serviceSettingsMethod');
+  });
+
   it('agent-based resume with no policies: sets agentHostsMode:new', async () => {
     mockSendGet.mockResolvedValue({
       item: makeItem({

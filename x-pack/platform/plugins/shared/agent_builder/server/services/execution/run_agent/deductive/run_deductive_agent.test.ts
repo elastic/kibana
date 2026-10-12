@@ -99,6 +99,7 @@ describe('runDeductiveAgent', () => {
       {
         access: 'owner',
         retryOnConflict: true,
+        source: 'execution',
         activity: { actor: { type: 'agent', id: 'deductive.ai' } },
       }
     );
@@ -159,7 +160,7 @@ describe('runDeductiveAgent', () => {
     // persisted session id should now point at the fresh session
     expect(ctx.conversationClient.update).toHaveBeenCalledWith(
       { id: 'conv-1', metadata: { deductive_session_id: 'sess-1' } },
-      expect.objectContaining({ access: 'owner', retryOnConflict: true })
+      expect.objectContaining({ access: 'owner', retryOnConflict: true, source: 'execution' })
     );
   });
 

@@ -7,15 +7,16 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
-import { EventService } from '../../lib/significant_events/events/event_service';
+import { RuleEventsClient } from '../../lib/significant_events/events/rule_events_client';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
-jest.mock('../../lib/significant_events/events/event_service', () => ({
-  EventService: jest.fn(),
+jest.mock('../../lib/significant_events/events/rule_events_client', () => ({
+  RuleEventsClient: jest.fn(),
 }));
 
 const event: SignificantEvent = {
@@ -33,48 +34,34 @@ const event: SignificantEvent = {
 
 const findLatestPaginated = jest.fn();
 const findLatestByEventId = jest.fn();
-const getDataStreams = jest.fn().mockResolvedValue({
-  initializeClient: jest.fn().mockResolvedValue({}),
-});
 const isAvailable = jest.fn().mockResolvedValue(true);
-const getUseRuleEventsRead = jest.fn().mockResolvedValue(false);
+
+const asCurrentUser = {} as never;
 
 const createGetScopedClients = (
-  events: SignificantEvent[]
-): jest.MockedFunction<GetScopedClients> => {
-  const getEventSearchClient = jest.fn(() => ({
-    findLatestByEventId: jest.fn().mockResolvedValue(events.at(-1)),
-  }));
-
-  return jest.fn().mockResolvedValue({
-    getEventSearchClient,
+  _events: SignificantEvent[]
+): jest.MockedFunction<GetScopedClients> =>
+  jest.fn().mockResolvedValue({
+    scopedClusterClient: { asCurrentUser },
   } as unknown as RouteHandlerScopedClients) as jest.MockedFunction<GetScopedClients>;
-};
 
 describe('createSignificantEventSmlType', () => {
   beforeEach(() => {
     findLatestPaginated.mockReset();
     findLatestByEventId.mockReset();
-    getDataStreams.mockClear();
+    jest.mocked(RuleEventsClient).mockClear();
     isAvailable.mockReset().mockResolvedValue(true);
-    getUseRuleEventsRead.mockReset().mockResolvedValue(false);
-    jest.mocked(EventService).mockImplementation(
-      () =>
-        ({
-          getClient: jest.fn(() => ({
-            findLatestPaginated,
-            findLatestByEventId,
-          })),
-        } as unknown as EventService)
-    );
+    jest
+      .mocked(RuleEventsClient)
+      .mockImplementation(
+        () => ({ findLatestPaginated, findLatestByEventId } as unknown as RuleEventsClient)
+      );
   });
 
   it('equals SIGNIFICANT_EVENT_KI_TYPE', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
-      getUseRuleEventsRead,
     });
 
     expect(smlType.id).toBe(SIGNIFICANT_EVENT_KI_TYPE);
@@ -84,13 +71,12 @@ describe('createSignificantEventSmlType', () => {
     findLatestPaginated.mockResolvedValue({ hits: [event] });
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
-      getUseRuleEventsRead,
     });
 
+    const esClient = {} as never;
     const iterator = smlType.list({
-      esClient: {} as never,
+      esClient,
       savedObjectsClient: {} as never,
       logger: loggingSystemMock.createLogger(),
     });
@@ -105,16 +91,15 @@ describe('createSignificantEventSmlType', () => {
         },
       ],
     });
+    expect(RuleEventsClient).toHaveBeenCalledWith({ esClient, space: DEFAULT_SPACE_ID });
     expect(findLatestPaginated).toHaveBeenCalledWith({ page: 1, perPage: 100 });
   });
 
-  it('does not initialize the data stream when significant events are unavailable', async () => {
+  it('does not create a client when significant events are unavailable', async () => {
     isAvailable.mockResolvedValue(false);
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
-      getUseRuleEventsRead,
     });
 
     const iterator = smlType.list({
@@ -127,16 +112,14 @@ describe('createSignificantEventSmlType', () => {
       done: true,
       value: undefined,
     });
-    expect(getDataStreams).not.toHaveBeenCalled();
+    expect(RuleEventsClient).not.toHaveBeenCalled();
   });
 
   it('indexes a significant event chunk', async () => {
     findLatestByEventId.mockResolvedValue(event);
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
-      getUseRuleEventsRead,
     });
 
     const result = await smlType.getSmlEntry('payment-outage', {
@@ -156,37 +139,10 @@ describe('createSignificantEventSmlType', () => {
     expect(findLatestByEventId).toHaveBeenCalledWith('payment-outage');
   });
 
-  it('forwards getUseRuleEventsRead() to EventService.getClient() when listing', async () => {
-    const getClient = jest.fn(() => ({ findLatestPaginated, findLatestByEventId }));
-    jest.mocked(EventService).mockImplementation(() => ({ getClient } as unknown as EventService));
-    getUseRuleEventsRead.mockResolvedValue(true);
-    findLatestPaginated.mockResolvedValue({ hits: [] });
-
-    const smlType = createSignificantEventSmlType({
-      getScopedClients: createGetScopedClients([]),
-      getDataStreams,
-      isAvailable,
-      getUseRuleEventsRead,
-    });
-
-    await smlType
-      .list({
-        esClient: {} as never,
-        savedObjectsClient: {} as never,
-        logger: loggingSystemMock.createLogger(),
-      })
-      [Symbol.asyncIterator]()
-      .next();
-
-    expect(getClient).toHaveBeenCalledWith(expect.objectContaining({ useRuleEventsRead: true }));
-  });
-
   it('getPermissions returns the streams read API privilege', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
-      getDataStreams,
       isAvailable,
-      getUseRuleEventsRead,
     });
     const permissions = smlType.getPermissions!('payment-outage', {
       esClient: {} as never,
@@ -199,11 +155,10 @@ describe('createSignificantEventSmlType', () => {
   });
 
   it('converts an SML document into an attachment', async () => {
+    findLatestByEventId.mockResolvedValue(event);
     const smlType = createSignificantEventSmlType({
-      getScopedClients: createGetScopedClients([event]),
-      getDataStreams,
+      getScopedClients: createGetScopedClients([]),
       isAvailable,
-      getUseRuleEventsRead,
     });
 
     await expect(
@@ -239,13 +194,17 @@ describe('createSignificantEventSmlType', () => {
         {
           request: {} as KibanaRequest,
           savedObjectsClient: {} as never,
-          spaceId: 'default',
+          spaceId: 'other-space',
         }
       )
     ).resolves.toEqual({
       type: SIGNIFICANT_EVENT_ATTACHMENT_TYPE,
       origin: 'payment-outage',
       data: event,
+    });
+    expect(RuleEventsClient).toHaveBeenCalledWith({
+      esClient: asCurrentUser,
+      space: 'other-space',
     });
   });
 });
