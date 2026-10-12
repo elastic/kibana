@@ -12,11 +12,13 @@ jest.mock('@opentelemetry/api', () => {
   const actual = jest.requireActual('@opentelemetry/api');
   const counters = new Map<string, { add: jest.Mock }>();
   const histograms = new Map<string, { record: jest.Mock }>();
+  const histogramOptions = new Map<string, import('@opentelemetry/api').MetricOptions>();
 
   return {
     ...actual,
     __counters: counters,
     __histograms: histograms,
+    __histogramOptions: histogramOptions,
     metrics: {
       getMeter: jest.fn(() => ({
         createCounter: (name: string) => {
@@ -24,9 +26,10 @@ jest.mock('@opentelemetry/api', () => {
           counters.set(name, instrument);
           return instrument;
         },
-        createHistogram: (name: string) => {
+        createHistogram: (name: string, options: import('@opentelemetry/api').MetricOptions) => {
           const instrument = { record: jest.fn() };
           histograms.set(name, instrument);
+          histogramOptions.set(name, options);
           return instrument;
         },
       })),
@@ -34,12 +37,18 @@ jest.mock('@opentelemetry/api', () => {
   };
 });
 
+import type { MetricOptions } from '@opentelemetry/api';
 import * as otel from '@opentelemetry/api';
 import { entityStoreMetrics } from './metrics';
 
-const { __counters: counters, __histograms: histograms } = otel as unknown as {
+const {
+  __counters: counters,
+  __histograms: histograms,
+  __histogramOptions: histogramOptions,
+} = otel as unknown as {
   __counters: Map<string, { add: jest.Mock }>;
   __histograms: Map<string, { record: jest.Mock }>;
+  __histogramOptions: Map<string, MetricOptions>;
 };
 
 const registeredNames = () => [...counters.keys(), ...histograms.keys()];
@@ -105,5 +114,61 @@ describe('entityStoreMetrics', () => {
       4200,
       attributes
     );
+  });
+
+  describe('explicit bucket boundaries', () => {
+    // Without these, every histogram falls back to the SDK's generic default
+    // boundaries (~0-10000), which silently clips any real value above that
+    // (e.g. extraction.lag_ms, which must be able to represent hours of
+    // backlog) and is far too coarse for fraction metrics in [0, 1].
+    const boundariesFor = (name: string) =>
+      histogramOptions.get(name)?.advice?.explicitBucketBoundaries;
+
+    it('gives duration histograms boundaries beyond the SDK default ceiling', () => {
+      const durationMetricNames = [
+        'kibana.entity_store.extraction.task.duration_ms',
+        'kibana.entity_store.extraction.query.duration_ms',
+        'kibana.entity_store.extraction.ingest.duration_ms',
+        'kibana.entity_store.extraction.probe_query.duration_ms',
+      ];
+
+      for (const name of durationMetricNames) {
+        const boundaries = boundariesFor(name);
+        expect(boundaries?.length).toBeGreaterThan(0);
+        expect(Math.max(...boundaries!)).toBeGreaterThan(10000);
+      }
+    });
+
+    it('gives extraction.lag_ms boundaries spanning hours, not just seconds', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.lag_ms');
+
+      expect(boundaries?.length).toBeGreaterThan(0);
+      // Must be able to distinguish a stalled process (hours of lag) from a
+      // healthy one, not clip both to the same ceiling value.
+      expect(Math.max(...boundaries!)).toBeGreaterThanOrEqual(3600000);
+    });
+
+    it('gives fraction-valued histograms boundaries bounded to [0, 1]', () => {
+      const fractionMetricNames = [
+        'kibana.entity_store.extraction.logs_cap.utilization',
+        'kibana.entity_store.extraction.sample.probability',
+      ];
+
+      for (const name of fractionMetricNames) {
+        const boundaries = boundariesFor(name);
+        expect(boundaries?.length).toBeGreaterThan(0);
+        for (const boundary of boundaries!) {
+          expect(boundary).toBeGreaterThanOrEqual(0);
+          expect(boundary).toBeLessThanOrEqual(1);
+        }
+      }
+    });
+
+    it('gives extraction.logs.processed count-shaped boundaries, not duration-shaped ones', () => {
+      const boundaries = boundariesFor('kibana.entity_store.extraction.logs.processed');
+
+      expect(boundaries?.length).toBeGreaterThan(0);
+      expect(Math.max(...boundaries!)).toBeGreaterThanOrEqual(100000);
+    });
   });
 });

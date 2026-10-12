@@ -61,14 +61,32 @@ const suspendProcess: ActionCatalogEntry = {
   },
 };
 
+const setAssetCriticality: ActionCatalogEntry = {
+  workflowId: 'system-alertzero-action-set-asset-criticality',
+  name: 'Set asset criticality',
+  category: 'respond',
+  subjects: ['user', 'service'],
+  inputSchema: {
+    type: 'object',
+    properties: {
+      id_field: { type: 'string' },
+      id_value: { type: 'string' },
+      criticality_level: { type: 'string' },
+    },
+    required: ['id_field', 'id_value'],
+  },
+};
+
 const sseAttachment = ({
   hit,
   hostName,
   hypothesis = 'test',
+  userName,
 }: {
   hit: boolean;
   hostName?: string;
   hypothesis?: string;
+  userName?: string;
 }): VersionedAttachment => ({
   id: 'sse-1',
   type: 'security.significant_security_event',
@@ -90,7 +108,10 @@ const sseAttachment = ({
         security_knowledge_indicators: hit
           ? [{ type: 'technique', value: 'T1078.004', technique_id: 'T1078.004' }]
           : [],
-        entities: hostName ? [{ field: 'host.name', value: hostName }] : [],
+        entities: [
+          ...(hostName ? [{ field: 'host.name', value: hostName }] : []),
+          ...(userName ? [{ field: 'user.name', value: userName }] : []),
+        ],
         timeline: [],
         hypothesis_tested: hypothesis,
         evidence_for: hit ? ['Tier 1 hit'] : [],
@@ -158,7 +179,7 @@ const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDe
     written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
     skipped: [],
   }),
-  resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1' }),
+  resolveHostEnrollment: async () => ({ enrolled: true, agentId: 'agent-1', capabilities: [] }),
   rehydrateProcessSelectors: async () => [],
   countExistingProposals: async () => 0,
   hasOpenProposal: async () => false,
@@ -550,6 +571,7 @@ describe('runPackageReport', () => {
             hostName: 'host-a',
             processName: 'powershell.exe',
             observedAt: '2026-09-26T10:00:00.000Z',
+            iocMatched: false,
           },
         ],
       }),
@@ -567,6 +589,46 @@ describe('runPackageReport', () => {
       expect(proposal.actionInput?.parameters).toEqual({ entity_id: 'ent-abc' });
       expect(proposal.actionInput?.endpoint_ids).toEqual(['agent-1']);
     }
+  });
+
+  it('mints an asset-criticality proposal for an implicated user alongside the host action', async () => {
+    const result = await runPackageReport({
+      spaceId: 'default',
+      reportId,
+      investigationConversationId: conversationId,
+      runId,
+      huntStatus: 'success',
+      hasConfirmedHit: true,
+      expectedSseCount: 1,
+      attachments: [sseAttachment({ hit: true, hostName: 'host-a', userName: 'dev-user' })],
+      deps: deps({
+        listRespondActions: async () => ({ ok: true, actions: [isolateHost, setAssetCriticality] }),
+      }),
+    });
+    expect(result.status).toBe('packaged');
+    if (result.status !== 'packaged') {
+      return;
+    }
+    // Host action, identity action, then the recommendation that says credential
+    // revocation is still manual.
+    expect(result.proposals.map((p) => p.actionWorkflowId)).toEqual([
+      isolateHost.workflowId,
+      setAssetCriticality.workflowId,
+      undefined,
+    ]);
+    expect(result.proposals[2].title).toBe('Analyst recommendation');
+    expect(result.proposals[2].comment).toContain(
+      'Asset criticality is proposed for dev-user (user)'
+    );
+    expect(result.expectedProposalCount).toBe(3);
+    const identity = result.proposals[1];
+    expect(identity.hostName).toBeUndefined();
+    expect(identity.subject).toEqual({ kind: 'user', value: 'dev-user' });
+    expect(identity.actionInput).toEqual({
+      id_field: 'user.name',
+      id_value: 'dev-user',
+      criticality_level: 'high_impact',
+    });
   });
 
   describe('open-Proposal dismiss guard', () => {
