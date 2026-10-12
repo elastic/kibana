@@ -98,7 +98,15 @@ export const PresentationPanelHoverActions = ({
   actionPredicate,
   className,
   viewMode,
-}: PresentationPanelHoverActionsProps) => {
+  selectedPanelIds,
+}: PresentationPanelHoverActionsProps & {
+  /**
+   * Owned by the wrapper (which also toggles the `--selectionMode` anchor class) so that the class
+   * and the rendered actions change in the same render; separate subscriptions would commit in
+   * separate frames and briefly show every action while leaving selection mode.
+   */
+  selectedPanelIds: string[];
+}) => {
   const [quickActions, setQuickActions] = useState<Action<EmbeddableApiContext>[]>([]);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
@@ -115,15 +123,13 @@ export const PresentationPanelHoverActions = ({
     hasLockedHoverActions,
     parentHideTitle,
     disabledActionIds,
-    selectedPanelIds,
   ] = useBatchedPublishingSubjects(
     api.title$ ?? new BehaviorSubject(undefined),
     api.description$ ?? new BehaviorSubject(undefined),
     api.hideTitle$ ?? new BehaviorSubject(false),
     api.hasLockedHoverActions$ ?? new BehaviorSubject(false),
     (api.parentApi as Partial<PublishesTitle>)?.hideTitle$ ?? new BehaviorSubject(false),
-    api.disabledActionIds$ ?? new BehaviorSubject(undefined),
-    selectionApi?.selectedPanelIds$ ?? new BehaviorSubject<string[]>([])
+    api.disabledActionIds$ ?? new BehaviorSubject(undefined)
   );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
@@ -385,7 +391,7 @@ export const PresentationPanelHoverActions = ({
       </EuiToolTip>
     ) : null;
 
-  // Group the drag handle and the select checkbox in a single floating pill so they sit side by side
+  // Group the select checkbox and the drag handle in a single floating pill so they sit side by side
   const leftActions = selectCheckbox ? (
     <span
       css={css`
@@ -399,8 +405,8 @@ export const PresentationPanelHoverActions = ({
         }
       `}
     >
-      {dragHandle}
       {selectCheckbox}
+      {dragHandle}
     </span>
   ) : (
     dragHandle

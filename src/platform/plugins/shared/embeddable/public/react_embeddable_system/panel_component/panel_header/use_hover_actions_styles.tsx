@@ -82,25 +82,6 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           top: -${euiTheme.size.s} !important;
         }
       }
-
-      // in selection mode the bar only holds the select checkbox, pinned to the panel's top right corner
-      &.embPanel__hoverActionsAnchor--selectionMode .embPanel__hoverActions {
-        top: ${euiTheme.size
-          .xs} !important; // the breakpoint and fullscreen rules above use !important
-        right: ${euiTheme.size.xs};
-        width: auto;
-        height: auto;
-        padding: 0;
-        justify-content: flex-end;
-
-        & > * {
-          height: auto;
-          padding: 0;
-          border: none;
-          box-shadow: none;
-          background-color: transparent;
-        }
-      }
     `;
   }, [euiTheme, euiThemeContext]);
 

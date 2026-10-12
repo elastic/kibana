@@ -75,7 +75,9 @@ export const PresentationPanelHoverActionsWrapper = (
         </div>
       )}
       {props.children}
-      {!OverriddenHoverActionsComponent && <PresentationPanelHoverActions {...props} />}
+      {!OverriddenHoverActionsComponent && (
+        <PresentationPanelHoverActions {...props} selectedPanelIds={selectedPanelIds} />
+      )}
     </div>
   );
 };

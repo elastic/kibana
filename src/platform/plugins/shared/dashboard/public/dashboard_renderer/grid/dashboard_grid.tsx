@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { getScrollContainer, getScrollPosition } from '@kbn/core-chrome-layout-utils';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
@@ -57,6 +58,22 @@ export const DashboardGrid = () => {
       dashboardContainerRef?.getBoundingClientRect().top ?? DEFAULT_DASHBOARD_DRAG_TOP_OFFSET;
     if (newTopOffset !== topOffset) setTopOffset(newTopOffset);
   }, [dashboardContainerRef, topOffset]);
+
+  /**
+   * The hover actions of the top row are raised above the sticky top nav so they are not cut off
+   * when the page is at the top; once the page scrolls, the top row slides under the nav and its
+   * hover actions must stay below it instead of floating over the query bar and controls.
+   */
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const scrollContainer = getScrollContainer();
+    const eventTarget: EventTarget =
+      scrollContainer === document.documentElement ? window : scrollContainer;
+    const onScroll = () => setIsScrolled(getScrollPosition(scrollContainer) > 0);
+    onScroll();
+    eventTarget.addEventListener('scroll', onScroll, { passive: true });
+    return () => eventTarget.removeEventListener('scroll', onScroll);
+  }, []);
 
   const appFixedViewport = useAppFixedViewport();
 
@@ -218,6 +235,7 @@ export const DashboardGrid = () => {
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
         'dshLayout--selectionMode': viewMode === 'edit' && selectedPanelIds.length > 0,
+        'dshLayout--scrolled': isScrolled,
       })}
       css={styles.dashboard}
     >
@@ -240,9 +258,9 @@ const dashboardGridStyles = {
   dashboard: ({ euiTheme }: UseEuiTheme) =>
     css({
       position: 'relative',
-      // for dashboards with no controls, increase the z-index of the hover actions in the
-      // top row so that they overlap the sticky nav in Dashboard
-      ".dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls)) & .dshDashboardGrid__item[data-grid-row='0'] .embPanel__hoverActions":
+      // while the page is not scrolled, increase the z-index of the hover actions in the top row so
+      // that they overlap the sticky nav in Dashboard instead of being cut off by it
+      "&:not(.dshLayout--scrolled) .dshDashboardGrid__item[data-grid-row='0'] .embPanel__hoverActions":
         {
           zIndex: euiTheme.levels.toast,
         },
