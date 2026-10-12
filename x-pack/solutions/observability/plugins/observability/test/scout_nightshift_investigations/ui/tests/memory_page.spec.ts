@@ -117,8 +117,7 @@ const KEYWORD_DOCS_WITH_BOTH = KEYWORD_DOCS.filter(
   (doc) => doc.tags.includes(INVOKE_AGENT_KEYWORD) && doc.tags.includes(CHECKOUT_KEYWORD)
 ).map((doc) => doc.key);
 
-// Failing: See https://github.com/elastic/kibana/issues/297192
-test.describe.skip(
+test.describe(
   'Semantic Memory page',
   {
     // Stateful classic only. Semantic Memory needs its own Kibana flag, which the
