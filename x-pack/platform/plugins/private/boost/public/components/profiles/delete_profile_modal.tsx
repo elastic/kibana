@@ -5,23 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import React, { Fragment, useMemo } from 'react';
 import {
-  EuiBasicTable,
-  EuiCode,
+  EuiAccordion,
   EuiConfirmModal,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiNotificationBadge,
   EuiPanel,
+  EuiScreenReaderOnly,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getRuleCoverage, resolveRule, sortRules } from '../../../common/resolution';
+import { resolveRule, sortRules } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
@@ -35,18 +34,15 @@ interface DeleteProfileModalProps {
   onClose: () => void;
 }
 
-type ListTab = 'rules' | 'dataSources';
-
-interface DeletedRuleRow {
+interface AffectedDataSource {
   name: string;
-  indexPattern: string;
-  appliesTo: number;
+  /** The rule that applies once the deleted rules are gone. */
+  nextRule?: string;
 }
 
-interface AffectedDataSourceRow {
+interface DeletedRule {
   name: string;
-  /** The profile the data source falls back to once the rules are gone. */
-  nextProfile?: string;
+  affected: AffectedDataSource[];
 }
 
 /**
@@ -63,111 +59,49 @@ export const DeleteProfileModal = ({
   const { euiTheme } = useEuiTheme();
   const { notifications } = useBoostServices();
   const titleId = useGeneratedHtmlId();
-  const tabIdPrefix = useGeneratedHtmlId({ prefix: 'deleteProfileTab' });
-  const [selectedTab, setSelectedTab] = useState<ListTab>('rules');
+  const accordionIdPrefix = useGeneratedHtmlId({ prefix: 'deletedRule' });
   const { mutate: deleteProfile, isLoading: isDeleting } = useDeleteProfile();
   const { name, type } = profile;
 
-  const { deletedRules, affectedDataSources } = useMemo(() => {
+  const deletedRules = useMemo<DeletedRule[]>(() => {
     const profilesByName = new Map(profiles.map((item) => [item.name, item]));
-    const coverage = getRuleCoverage(dataSources, rules, profiles);
     const attached = sortRules(rules).filter(
       ({ is_builtin: isBuiltin, boost_profile: profileName }) => !isBuiltin && profileName === name
     );
     const attachedNames = new Set(attached.map((rule) => rule.name));
     const remainingRules = rules.filter((rule) => !attachedNames.has(rule.name));
 
-    return {
-      deletedRules: attached.map(
-        (rule): DeletedRuleRow => ({
-          name: rule.name,
-          indexPattern: rule.index_pattern,
-          appliesTo: coverage.get(rule.name)?.appliesTo ?? 0,
-        })
-      ),
-      affectedDataSources: dataSources
-        .filter(
-          (dataSource) => resolveRule(dataSource, rules, profilesByName)?.boost_profile === name
-        )
-        .map(
-          (dataSource): AffectedDataSourceRow => ({
-            name: dataSource.name,
-            nextProfile: resolveRule(dataSource, remainingRules, profilesByName)?.boost_profile,
-          })
-        )
+    return attached.map((rule) => ({
+      name: rule.name,
+      affected: dataSources
+        .filter((dataSource) => resolveRule(dataSource, rules, profilesByName)?.name === rule.name)
+        .map((dataSource) => ({
+          name: dataSource.name,
+          nextRule: resolveRule(dataSource, remainingRules, profilesByName)?.name,
+        }))
         .sort((a, b) => a.name.localeCompare(b.name)),
-    };
+    }));
   }, [name, rules, profiles, dataSources]);
 
-  const rulesLabel = i18n.translate('xpack.boost.deleteProfileModal.rulesTab', {
+  const affectedCount = deletedRules.reduce((total, { affected }) => total + affected.length, 0);
+  // A lone rule with affected data sources starts open, so the common case needs no click.
+  const rulesWithAffected = deletedRules.filter(({ affected }) => affected.length > 0);
+  const openRuleName = rulesWithAffected.length === 1 ? rulesWithAffected[0].name : undefined;
+
+  const rulesLabel = i18n.translate('xpack.boost.deleteProfileModal.rulesListLabel', {
     defaultMessage: 'Boost rules to delete',
   });
-  const dataSourcesLabel =
-    type === 'indices'
-      ? i18n.translate('xpack.boost.deleteProfileModal.affectedIndicesTab', {
-          defaultMessage: 'Affected indices',
-        })
-      : i18n.translate('xpack.boost.deleteProfileModal.affectedDataStreamsTab', {
-          defaultMessage: 'Affected data streams',
-        });
 
-  const ruleColumns: Array<EuiBasicTableColumn<DeletedRuleRow>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.boost.deleteProfileModal.ruleNameColumn', {
-        defaultMessage: 'Name',
-      }),
-    },
-    {
-      field: 'indexPattern',
-      name: i18n.translate('xpack.boost.deleteProfileModal.indexPatternColumn', {
-        defaultMessage: 'Index pattern',
-      }),
-      render: (pattern: string) => <EuiCode>{pattern}</EuiCode>,
-    },
-    {
-      field: 'appliesTo',
-      name: i18n.translate('xpack.boost.deleteProfileModal.appliesToColumn', {
-        defaultMessage: 'Applies to',
-      }),
-      render: (appliesTo: number) => formatDataSourceCount(type, appliesTo),
-    },
-  ];
-
-  const dataSourceColumns: Array<EuiBasicTableColumn<AffectedDataSourceRow>> = [
-    {
-      field: 'name',
-      name: i18n.translate('xpack.boost.deleteProfileModal.dataSourceNameColumn', {
-        defaultMessage: 'Name',
-      }),
-    },
-    {
-      field: 'nextProfile',
-      name: i18n.translate('xpack.boost.deleteProfileModal.nextProfileColumn', {
-        defaultMessage: 'Will use boost profile',
-      }),
-    },
-  ];
-
-  const hasTabs = affectedDataSources.length > 0;
-  const showsRules = !hasTabs || selectedTab === 'rules';
-  const tabs: ReadonlyArray<{ id: ListTab; label: string; count: number }> = [
-    { id: 'rules', label: rulesLabel, count: deletedRules.length },
-    { id: 'dataSources', label: dataSourcesLabel, count: affectedDataSources.length },
-  ];
-
-  // Both consequences are stated up front, so nothing important hides behind a tab.
+  // Both consequences are stated up front, ahead of the per-rule details.
   const summary = [
     i18n.translate('xpack.boost.deleteProfileModal.rulesDeleted', {
-      defaultMessage:
-        'Deleting this profile also deletes {ruleCount, plural, one {the boost rule that uses it} other {the # boost rules that use it}}.',
-      values: { ruleCount: deletedRules.length },
+      defaultMessage: 'Deleting this profile also deletes any boost rule that uses it.',
     }),
-    ...(hasTabs
+    ...(affectedCount > 0
       ? [
           i18n.translate('xpack.boost.deleteProfileModal.fallBack', {
             defaultMessage: '{dataSources} will fall back to the next matching rule.',
-            values: { dataSources: formatDataSourceCount(type, affectedDataSources.length) },
+            values: { dataSources: formatDataSourceCount(type, affectedCount) },
           }),
         ]
       : []),
@@ -225,56 +159,91 @@ export const DeleteProfileModal = ({
             <p>{summary}</p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiPanel hasBorder hasShadow={false} paddingSize="none">
-            {hasTabs && (
-              <EuiTabs size="s" css={{ paddingInline: euiTheme.size.s }}>
-                {tabs.map(({ id, label, count }) => (
-                  <EuiTab
-                    key={id}
-                    id={`${tabIdPrefix}-${id}`}
-                    isSelected={selectedTab === id}
-                    onClick={() => setSelectedTab(id)}
-                    append={
-                      <EuiNotificationBadge color="subdued" size="s">
-                        {count}
-                      </EuiNotificationBadge>
-                    }
-                    data-test-subj={`deleteProfileModalTab-${id}`}
-                  >
-                    {label}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
-            )}
-            {/* Long lists scroll inside the panel, keeping the modal's buttons in view. */}
-            <div
-              role={hasTabs ? 'tabpanel' : 'region'}
-              aria-labelledby={hasTabs ? `${tabIdPrefix}-${selectedTab}` : undefined}
-              aria-label={hasTabs ? undefined : rulesLabel}
-              tabIndex={0}
-              css={{ maxBlockSize: euiTheme.base * 15, overflowY: 'auto' }}
-            >
-              {showsRules ? (
-                <EuiBasicTable
-                  compressed
-                  items={deletedRules}
-                  itemId="name"
-                  columns={ruleColumns}
-                  tableCaption={rulesLabel}
-                />
-              ) : (
-                <EuiBasicTable
-                  compressed
-                  items={affectedDataSources}
-                  itemId="name"
-                  columns={dataSourceColumns}
-                  tableCaption={dataSourcesLabel}
-                />
-              )}
-            </div>
+          {/* Long lists scroll inside the panel, keeping the modal's buttons in view. */}
+          <EuiPanel
+            hasBorder
+            hasShadow={false}
+            paddingSize="none"
+            role="region"
+            aria-label={rulesLabel}
+            tabIndex={0}
+            css={{ maxBlockSize: euiTheme.base * 20, overflowY: 'auto' }}
+          >
+            {deletedRules.map(({ name: ruleName, affected }, index) => (
+              <Fragment key={ruleName}>
+                {index > 0 && <EuiHorizontalRule margin="none" />}
+                <EuiAccordion
+                  id={`${accordionIdPrefix}-${ruleName}`}
+                  initialIsOpen={ruleName === openRuleName}
+                  buttonContent={<EuiText size="s">{ruleName}</EuiText>}
+                  buttonProps={{ paddingSize: 's' }}
+                  extraAction={
+                    <EuiNotificationBadge
+                      color="subdued"
+                      aria-label={formatDataSourceCount(type, affected.length)}
+                    >
+                      {affected.length}
+                    </EuiNotificationBadge>
+                  }
+                  paddingSize="s"
+                  css={{ paddingInline: euiTheme.size.s }}
+                  data-test-subj={`deletedRule-${ruleName}`}
+                >
+                  <AffectedList affected={affected} type={type} />
+                </EuiAccordion>
+              </Fragment>
+            ))}
           </EuiPanel>
         </>
       )}
     </EuiConfirmModal>
+  );
+};
+
+interface AffectedListProps {
+  affected: AffectedDataSource[];
+  type: BoostProfile['type'];
+}
+
+/** Each affected data source and the rule it falls back to, such as `logs-app → elastic-default`. */
+const AffectedList = ({ affected, type }: AffectedListProps) => {
+  if (affected.length === 0) {
+    return (
+      <EuiText size="s" color="subdued">
+        <p>
+          {type === 'indices'
+            ? i18n.translate('xpack.boost.deleteProfileModal.noAffectedIndices', {
+                defaultMessage: "This rule doesn't apply to any indices right now.",
+              })
+            : i18n.translate('xpack.boost.deleteProfileModal.noAffectedDataStreams', {
+                defaultMessage: "This rule doesn't apply to any data streams right now.",
+              })}
+        </p>
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiText size="s">
+      <ul css={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        {affected.map(({ name, nextRule }) => (
+          <li key={name}>
+            {/* The arrow reads well visually; screen readers get the full sentence instead. */}
+            <span aria-hidden={true}>
+              {name} <EuiIcon type="sortRight" size="s" color="subdued" aria-hidden={true} />{' '}
+              {nextRule}
+            </span>
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate('xpack.boost.deleteProfileModal.fallsBackTo', {
+                  defaultMessage: '{dataSource} will use {rule}',
+                  values: { dataSource: name, rule: nextRule },
+                })}
+              </span>
+            </EuiScreenReaderOnly>
+          </li>
+        ))}
+      </ul>
+    </EuiText>
   );
 };
