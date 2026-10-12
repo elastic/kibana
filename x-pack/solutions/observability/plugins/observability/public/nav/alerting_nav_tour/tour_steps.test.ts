@@ -5,11 +5,39 @@
  * 2.0.
  */
 
+import type { Capabilities, CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getAlertingNavTourSteps } from './tour_steps';
+
+const FULL_CAPABILITIES = {
+  alerting_v2_alerts: { read: true },
+  alerting_v2_rules: { all: true, read: true },
+  alerting_v2_action_policies: { read: true },
+  alerting_v2_execution_history: { read: true },
+  observabilityAlerts: { show: true },
+  management: {
+    insightsAndAlerting: {
+      triggersActionsRules: true,
+      maintenanceWindows: true,
+    },
+  },
+};
+
+const createCore = (capabilities: Record<string, unknown>): CoreStart => {
+  const core = coreMock.createStart();
+  core.application.capabilities = {
+    ...core.application.capabilities,
+    ...capabilities,
+  } as Capabilities;
+  return core;
+};
+
+const getStepIds = (capabilities: Record<string, unknown>) =>
+  getAlertingNavTourSteps(createCore(capabilities)).map(({ stepId }) => stepId);
 
 describe('getAlertingNavTourSteps', () => {
   it('defines the Alerts-through-create tour with safe anchors and navigation targets', () => {
-    const steps = getAlertingNavTourSteps();
+    const steps = getAlertingNavTourSteps(createCore(FULL_CAPABILITIES));
 
     expect(steps.map((step) => step.stepId)).toEqual([
       'alerts',
@@ -23,7 +51,10 @@ describe('getAlertingNavTourSteps', () => {
 
     const byId = Object.fromEntries(steps.map((step) => [step.stepId, step]));
 
-    expect(byId.rules.anchor).toContain('nav-item-deepLinkId-observabilityAlerting:rules');
+    expect(byId.rules.anchor).toBe(
+      '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v2"]'
+    );
+    expect(byId.rules.path).toBe('/rules/v2');
     expect(byId.rulesTabs.anchor).toBe('[data-test-subj="v2RulesTab"]');
 
     expect(byId.maintenanceWindows.appId).toBe('management');
@@ -44,5 +75,48 @@ describe('getAlertingNavTourSteps', () => {
         expect(step.appId).toBe('observabilityAlerting');
       }
     }
+  });
+
+  it('targets Classic rules and omits Universal-only steps for a Classic-only user', () => {
+    const core = createCore({
+      observabilityAlerts: { show: true },
+      management: { insightsAndAlerting: { triggersActionsRules: true } },
+    });
+    const steps = getAlertingNavTourSteps(core);
+
+    expect(steps.map(({ stepId }) => stepId)).toEqual(['alerts', 'rules']);
+    const rules = steps.find(({ stepId }) => stepId === 'rules');
+    expect(rules?.anchor).toBe(
+      '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v1"]'
+    );
+    expect(rules?.path).toBe('/rules/v1');
+  });
+
+  it('omits the rules tabs step when only Universal rules are visible', () => {
+    expect(
+      getStepIds({
+        alerting_v2_alerts: { read: true },
+        alerting_v2_rules: { all: true, read: true },
+      })
+    ).toEqual(['alerts', 'rules', 'createFirstRule']);
+  });
+
+  it('omits the create rule step for read-only Universal rules users', () => {
+    expect(
+      getStepIds({ ...FULL_CAPABILITIES, alerting_v2_rules: { all: false, read: true } })
+    ).not.toContain('createFirstRule');
+  });
+
+  it('omits steps whose nav item is hidden by missing capabilities', () => {
+    const stepIds = getStepIds({
+      ...FULL_CAPABILITIES,
+      alerting_v2_action_policies: { read: false },
+      alerting_v2_execution_history: { read: false },
+      management: { insightsAndAlerting: { triggersActionsRules: true } },
+    });
+
+    expect(stepIds).not.toContain('actionPolicies');
+    expect(stepIds).not.toContain('executionHistory');
+    expect(stepIds).not.toContain('maintenanceWindows');
   });
 });

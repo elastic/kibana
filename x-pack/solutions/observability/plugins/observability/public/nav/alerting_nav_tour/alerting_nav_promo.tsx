@@ -21,9 +21,12 @@ import {
 import { canOfferAlertingNavTour } from './can_offer_alerting_nav_tour';
 import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
 
-const PROMO_REGION_LABEL = i18n.translate('xpack.observability.alertingNavTour.promo.regionLabel', {
-  defaultMessage: 'Unified Alerting app',
-});
+const PROMO_REGION_LABEL = i18n.translate(
+  'xpack.observability.alertingNavTour.promoRegionAriaLabel',
+  {
+    defaultMessage: 'Unified Alerting app',
+  }
+);
 
 /**
  * Floating Unified Alerting promo for the Alerts landing route.

@@ -20,6 +20,10 @@ jest.mock('./guided_tour', () => ({
     ) : null,
 }));
 
+jest.mock('./tour_steps', () => ({
+  getAlertingNavTourSteps: () => [],
+}));
+
 jest.mock('@kbn/alerting-v2-utils', () => ({
   isAlertingV2Enabled: jest.fn(() => true),
 }));

@@ -28,20 +28,20 @@ export const ALERTING_NAV_PROMO_DISMISS_TEST_ID = 'alertingNavPromoDismiss';
 /** Promo webp intrinsic size (448×240). */
 const PROMO_IMAGE_ASPECT_RATIO = '448 / 240';
 
-const PROMO_TITLE = i18n.translate('xpack.observability.alertingNavTour.promo.title', {
+const PROMO_TITLE = i18n.translate('xpack.observability.alertingNavTour.promoTitle', {
   defaultMessage: 'Unified Alerting app',
 });
-const PROMO_DESCRIPTION = i18n.translate('xpack.observability.alertingNavTour.promo.description', {
+const PROMO_DESCRIPTION = i18n.translate('xpack.observability.alertingNavTour.promoDescription', {
   defaultMessage:
     'All your alerting features in one app. A unified experience to triage alerts, manage Universal and Classic rules, and control action policies and maintenance windows.',
 });
-const PROMO_IMAGE_ALT = i18n.translate('xpack.observability.alertingNavTour.promo.imageAlt', {
+const PROMO_IMAGE_ALT = i18n.translate('xpack.observability.alertingNavTour.promoImageAltText', {
   defaultMessage: 'Preview of the unified Alerting app',
 });
-const PROMO_TAKE_TOUR = i18n.translate('xpack.observability.alertingNavTour.promo.takeTour', {
+const PROMO_TAKE_TOUR = i18n.translate('xpack.observability.alertingNavTour.takeTourButtonLabel', {
   defaultMessage: 'Take tour',
 });
-const PROMO_DISMISS = i18n.translate('xpack.observability.alertingNavTour.promo.dismiss', {
+const PROMO_DISMISS = i18n.translate('xpack.observability.alertingNavTour.dismissPromoAriaLabel', {
   defaultMessage: 'Dismiss',
 });
 

@@ -8,14 +8,22 @@
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import type { EuiTourStepProps } from '@elastic/eui';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { hasAlertingV2Capability } from '@kbn/alerting-v2-utils';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+  OBSERVABILITY_ALERTING_RULES_V1_PATH,
   OBSERVABILITY_ALERTING_RULES_V2_PATH,
 } from '@kbn/deeplinks-observability';
+import {
+  canReadMaintenanceWindows,
+  canReadV1Alerts,
+  canReadV1Rules,
+} from '../get_alerts_nav_panel';
 
 export type AlertingNavTourStepId =
   | 'alerts'
@@ -45,121 +53,145 @@ const wrap = (text: string) => (
 
 const navAnchor = (deepLinkId: string) => `[data-test-subj~="nav-item-deepLinkId-${deepLinkId}"]`;
 
-export const getAlertingNavTourSteps = (): AlertingNavTourStep[] => [
-  {
-    stepId: 'alerts',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.alerts.title', {
-      defaultMessage: 'New alerts experience',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.alerts.description', {
-        defaultMessage: 'Triage Universal, Classic, and external alerts in one list.',
-      })
-    ),
-    anchor: navAnchor('observabilityAlerting:alerts'),
-    anchorPosition: 'rightCenter',
-    appId: OBSERVABILITY_ALERTING_APP_ID,
-    path: OBSERVABILITY_ALERTING_ALERTS_PATH,
-  },
-  {
-    stepId: 'rules',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.rules.title', {
-      defaultMessage: 'Rules',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.rules.description', {
-        defaultMessage: 'Create and manage all your alerting rules from this page.',
-      })
-    ),
-    anchor:
-      '[data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules"], [data-test-subj~="nav-item-deepLinkId-observabilityAlerting:rules-v2"]',
-    anchorPosition: 'rightCenter',
-    appId: OBSERVABILITY_ALERTING_APP_ID,
-    path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-  },
-  {
-    stepId: 'rulesTabs',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.rulesTabs.title', {
-      defaultMessage: 'Universal and Classic rules',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.rulesTabs.description', {
-        defaultMessage: 'Switch between Universal and Classic rule management from one Rules page.',
-      })
-    ),
-    anchor: '[data-test-subj="v2RulesTab"]',
-    anchorPosition: 'downLeft',
-    appId: OBSERVABILITY_ALERTING_APP_ID,
-    path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-  },
-  {
-    stepId: 'actionPolicies',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.actionPolicies.title', {
-      defaultMessage: 'Action policies',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.actionPolicies.description', {
-        defaultMessage:
-          'Decide when alerts from Universal rules are sent, and reuse a policy across those rules. Classic rules keep actions on the rule.',
-      })
-    ),
-    anchor: navAnchor('observabilityAlerting:action-policies'),
-    anchorPosition: 'rightCenter',
-    appId: OBSERVABILITY_ALERTING_APP_ID,
-    path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-  },
-  {
-    stepId: 'maintenanceWindows',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.maintenanceWindows.title', {
-      defaultMessage: 'Maintenance windows',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.maintenanceWindows.description', {
-        defaultMessage:
-          'Schedule a quiet period that applies to both Universal and Classic alerts.',
-      })
-    ),
-    // Prefer the Alerting side-nav item; fall back to page content when the panel is closed.
-    // Do not use mw-create-button — EuiWrappingPopover relocates AppMenu nodes and crashes the header.
-    anchor:
-      '[data-test-subj~="nav-item-id-management:maintenanceWindows"], [data-test-subj="maintenance-windows-table"], [data-test-subj="mw-empty-prompt"], [data-test-subj="mw-license-prompt"], [data-test-subj="license-prompt-title"]',
-    anchorPosition: 'rightCenter',
-    appId: 'management',
-    path: '/insightsAndAlerting/maintenanceWindows',
-  },
-  {
-    stepId: 'executionHistory',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.executionHistory.title', {
-      defaultMessage: 'Execution history',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.executionHistory.description', {
-        defaultMessage:
-          'Review recent Universal rule runs and outcomes. Classic rules keep their existing logs.',
-      })
-    ),
-    anchor: navAnchor('observabilityAlerting:execution-history'),
-    anchorPosition: 'rightCenter',
-    appId: OBSERVABILITY_ALERTING_APP_ID,
-    path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-  },
-  {
-    stepId: 'createFirstRule',
-    title: i18n.translate('xpack.observability.alertingNavTour.steps.createFirstRule.title', {
-      defaultMessage: 'Try it out',
-    }),
-    content: wrap(
-      i18n.translate('xpack.observability.alertingNavTour.steps.createFirstRule.description', {
-        defaultMessage:
-          'You’re ready to go. Create a Universal rule to get started with Universal Alerting.',
-      })
-    ),
-    // Header Create rule is hidden when empty; fall back to the empty-state heading (not a card —
-    // EuiTourStep wrapping shrinks full-width cards).
-    anchor:
-      '[data-test-subj="createRuleButton"], [data-test-subj="ruleCreateOptionsEmptyStateTitle"]',
-    anchorPosition: 'downCenter',
-    appId: OBSERVABILITY_ALERTING_APP_ID,
-    path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-  },
-];
+/**
+ * Tour steps the current user can reach. Each gate mirrors what renders the step's anchor
+ * (Alerting side-nav panel, Rules page tabs, Create rule button) so no step targets a hidden page.
+ */
+export const getAlertingNavTourSteps = (core: CoreStart): AlertingNavTourStep[] => {
+  const canReadV2Rules = hasAlertingV2Capability(core, 'rules');
+  const canReadClassicRules = canReadV1Rules(core);
+  const rulesPath = canReadV2Rules
+    ? OBSERVABILITY_ALERTING_RULES_V2_PATH
+    : OBSERVABILITY_ALERTING_RULES_V1_PATH;
+  const rulesDeepLinkId = canReadV2Rules ? 'rules-v2' : 'rules-v1';
+
+  const steps: Array<AlertingNavTourStep & { isAvailable: boolean }> = [
+    {
+      isAvailable: hasAlertingV2Capability(core, 'alerts') || canReadV1Alerts(core),
+      stepId: 'alerts',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.alertsTitle', {
+        defaultMessage: 'New alerts experience',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.alertsDescription', {
+          defaultMessage: 'Triage Universal, Classic, and external alerts in one list.',
+        })
+      ),
+      anchor: navAnchor('observabilityAlerting:alerts'),
+      anchorPosition: 'rightCenter',
+      appId: OBSERVABILITY_ALERTING_APP_ID,
+      path: OBSERVABILITY_ALERTING_ALERTS_PATH,
+    },
+    {
+      isAvailable: canReadV2Rules || canReadClassicRules,
+      stepId: 'rules',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.rulesTitle', {
+        defaultMessage: 'Rules',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.rulesDescription', {
+          defaultMessage: 'Create and manage all your alerting rules from this page.',
+        })
+      ),
+      anchor: navAnchor(`${OBSERVABILITY_ALERTING_APP_ID}:${rulesDeepLinkId}`),
+      anchorPosition: 'rightCenter',
+      appId: OBSERVABILITY_ALERTING_APP_ID,
+      path: rulesPath,
+    },
+    {
+      // Universal/Classic tabs render only when both rule surfaces are visible.
+      isAvailable: canReadV2Rules && canReadClassicRules,
+      stepId: 'rulesTabs',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.rulesTabsTitle', {
+        defaultMessage: 'Universal and Classic rules',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.rulesTabsDescription', {
+          defaultMessage:
+            'Switch between Universal and Classic rule management from one Rules page.',
+        })
+      ),
+      anchor: '[data-test-subj="v2RulesTab"]',
+      anchorPosition: 'downLeft',
+      appId: OBSERVABILITY_ALERTING_APP_ID,
+      path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
+    },
+    {
+      isAvailable: hasAlertingV2Capability(core, 'actionPolicies'),
+      stepId: 'actionPolicies',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.actionPoliciesTitle', {
+        defaultMessage: 'Action policies',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.actionPoliciesDescription', {
+          defaultMessage:
+            'Decide when alerts from Universal rules are sent, and reuse a policy across those rules. Classic rules keep actions on the rule.',
+        })
+      ),
+      anchor: navAnchor('observabilityAlerting:action-policies'),
+      anchorPosition: 'rightCenter',
+      appId: OBSERVABILITY_ALERTING_APP_ID,
+      path: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
+    },
+    {
+      isAvailable: canReadMaintenanceWindows(core),
+      stepId: 'maintenanceWindows',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.maintenanceWindowsTitle', {
+        defaultMessage: 'Maintenance windows',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.maintenanceWindowsDescription', {
+          defaultMessage:
+            'Schedule a quiet period that applies to both Universal and Classic alerts.',
+        })
+      ),
+      // Prefer the Alerting side-nav item; fall back to page content when the panel is closed.
+      // Do not use mw-create-button — EuiWrappingPopover relocates AppMenu nodes and crashes the header.
+      anchor:
+        '[data-test-subj~="nav-item-id-management:maintenanceWindows"], [data-test-subj="maintenance-windows-table"], [data-test-subj="mw-empty-prompt"], [data-test-subj="mw-license-prompt"], [data-test-subj="license-prompt-title"]',
+      anchorPosition: 'rightCenter',
+      appId: 'management',
+      path: '/insightsAndAlerting/maintenanceWindows',
+    },
+    {
+      isAvailable: hasAlertingV2Capability(core, 'executionHistory'),
+      stepId: 'executionHistory',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.executionHistoryTitle', {
+        defaultMessage: 'Execution history',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.executionHistoryDescription', {
+          defaultMessage:
+            'Review recent Universal rule runs and outcomes. Classic rules keep their existing logs.',
+        })
+      ),
+      anchor: navAnchor('observabilityAlerting:execution-history'),
+      anchorPosition: 'rightCenter',
+      appId: OBSERVABILITY_ALERTING_APP_ID,
+      path: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
+    },
+    {
+      // Both create anchors render only for users who can write Universal rules.
+      isAvailable: hasAlertingV2Capability(core, 'rules', 'all'),
+      stepId: 'createFirstRule',
+      title: i18n.translate('xpack.observability.alertingNavTour.steps.createFirstRuleTitle', {
+        defaultMessage: 'Try it out',
+      }),
+      content: wrap(
+        i18n.translate('xpack.observability.alertingNavTour.steps.createFirstRuleDescription', {
+          defaultMessage:
+            'You’re ready to go. Create a Universal rule to get started with Universal Alerting.',
+        })
+      ),
+      // Header Create rule is hidden when empty; fall back to the empty-state heading (not a card —
+      // EuiTourStep wrapping shrinks full-width cards).
+      anchor:
+        '[data-test-subj="createRuleButton"], [data-test-subj="ruleCreateOptionsEmptyStateTitle"]',
+      anchorPosition: 'downCenter',
+      appId: OBSERVABILITY_ALERTING_APP_ID,
+      path: OBSERVABILITY_ALERTING_RULES_V2_PATH,
+    },
+  ];
+
+  return steps.filter(({ isAvailable }) => isAvailable).map(({ isAvailable, ...step }) => step);
+};

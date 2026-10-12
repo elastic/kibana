@@ -53,7 +53,7 @@ export const AlertingNavTour: React.FC<{ coreStart: CoreStart }> = ({ coreStart 
 
   return (
     <AlertingNavGuidedTour
-      steps={getAlertingNavTourSteps()}
+      steps={getAlertingNavTourSteps(coreStart)}
       isActive={isTourActive}
       onFinish={finishTour}
       application={coreStart.application}

@@ -18,13 +18,13 @@ const ANCHOR_TIMEOUT_MS = 8000;
 /** Tour popover width as a multiple of `euiTheme.base` (16 → 320px). */
 const TOUR_POPOVER_WIDTH_BASE_MULTIPLIER = 20;
 
-const TOUR_NEXT = i18n.translate('xpack.observability.alertingNavTour.next', {
+const TOUR_NEXT = i18n.translate('xpack.observability.alertingNavTour.nextButtonLabel', {
   defaultMessage: 'Next',
 });
-const TOUR_SKIP = i18n.translate('xpack.observability.alertingNavTour.skip', {
+const TOUR_SKIP = i18n.translate('xpack.observability.alertingNavTour.skipButtonLabel', {
   defaultMessage: 'Skip tour',
 });
-const TOUR_FINISH = i18n.translate('xpack.observability.alertingNavTour.finish', {
+const TOUR_FINISH = i18n.translate('xpack.observability.alertingNavTour.finishButtonLabel', {
   defaultMessage: 'Finish',
 });
 
@@ -74,17 +74,24 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
 
   const stepsTotal = steps.length;
   const currentStepConfig = steps[currentStep - 1];
-  const isCurrentAnchorMounted = useIsAnchorMounted(currentStepConfig?.anchor ?? 'body');
+  /*
+   * Effects key on step fields rather than the step object, so a parent re-render that rebuilds
+   * `steps` does not re-navigate or restart the anchor timeout mid-step.
+   */
+  const hasCurrentStep = currentStepConfig !== undefined;
+  const stepId = currentStepConfig?.stepId;
+  const anchor = currentStepConfig?.anchor ?? 'body';
+  const appId = currentStepConfig?.appId;
+  const path = currentStepConfig?.path;
+  const deepLinkId = currentStepConfig?.deepLinkId;
+  const isCurrentAnchorMounted = useIsAnchorMounted(anchor);
 
   useEffect(() => {
-    if (!isActive || !currentStepConfig?.appId) {
+    if (!isActive || !appId) {
       return;
     }
-    void application.navigateToApp(currentStepConfig.appId, {
-      path: currentStepConfig.path,
-      deepLinkId: currentStepConfig.deepLinkId,
-    });
-  }, [isActive, currentStepConfig, application]);
+    void application.navigateToApp(appId, { path, deepLinkId });
+  }, [isActive, stepId, appId, path, deepLinkId, application]);
 
   const finishTour = useCallback(() => {
     onFinish();
@@ -96,7 +103,7 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
     if (!isActive) {
       return;
     }
-    if (!currentStepConfig) {
+    if (!hasCurrentStep) {
       finishTour();
       return;
     }
@@ -105,17 +112,17 @@ export const AlertingNavGuidedTour: React.FC<AlertingNavGuidedTourProps> = ({
     }
     const timer = setTimeout(() => setCurrentStep((prev) => prev + 1), ANCHOR_TIMEOUT_MS);
     return () => clearTimeout(timer);
-  }, [isActive, currentStepConfig, isCurrentAnchorMounted, finishTour]);
+  }, [isActive, hasCurrentStep, stepId, isCurrentAnchorMounted, finishTour]);
 
   useEffect(() => {
-    if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
+    if (!isActive || !hasCurrentStep || !isCurrentAnchorMounted) {
       return;
     }
-    const anchorEl = document.querySelector(currentStepConfig.anchor);
+    const anchorEl = document.querySelector(anchor);
     if (anchorEl && typeof anchorEl.scrollIntoView === 'function') {
       anchorEl.scrollIntoView({ behavior: 'auto', block: 'nearest' });
     }
-  }, [isActive, currentStepConfig, isCurrentAnchorMounted]);
+  }, [isActive, hasCurrentStep, anchor, isCurrentAnchorMounted]);
 
   if (!isActive || !currentStepConfig || !isCurrentAnchorMounted) {
     return null;

@@ -122,6 +122,47 @@ describe('AlertingNavGuidedTour', () => {
     await waitFor(() => expect(onFinish).toHaveBeenCalled());
   });
 
+  it('does not re-navigate or restart the anchor timeout when steps are rebuilt mid-step', () => {
+    jest.useFakeTimers();
+    const navigateToApp = jest.fn().mockResolvedValue(undefined);
+    const onFinish = jest.fn();
+    const application = { navigateToApp } as unknown as ApplicationStart;
+    const buildSteps = (): AlertingNavTourStep[] => [
+      {
+        stepId: 'alerts',
+        title: 'Missing',
+        anchor: '[data-test-subj="never-mounted"]',
+        anchorPosition: 'rightCenter',
+        content: <span>{'Missing'}</span>,
+        appId: 'observabilityAlerting',
+        path: '/alerts',
+      },
+    ];
+    const renderTour = () => (
+      <EuiThemeProvider>
+        <AlertingNavGuidedTour
+          steps={buildSteps()}
+          isActive
+          onFinish={onFinish}
+          application={application}
+        />
+      </EuiThemeProvider>
+    );
+
+    const { rerender } = render(renderTour());
+    act(() => {
+      jest.advanceTimersByTime(ANCHOR_TIMEOUT_MS / 2);
+    });
+    rerender(renderTour());
+    act(() => {
+      jest.advanceTimersByTime(ANCHOR_TIMEOUT_MS / 2);
+    });
+
+    expect(navigateToApp).toHaveBeenCalledTimes(1);
+    expect(onFinish).toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
   it('skips a missing anchor after the timeout, then finishes', () => {
     jest.useFakeTimers();
     const onFinish = jest.fn();
