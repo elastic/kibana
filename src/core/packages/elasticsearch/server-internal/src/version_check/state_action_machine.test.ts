@@ -8,7 +8,7 @@
  */
 
 import {
-  nextOnGrid,
+  realClock,
   run,
   type Action,
   type AugmentedState,
@@ -17,15 +17,9 @@ import {
 } from './state_action_machine';
 import { take, virtualClock } from './state_action_machine.test_helpers';
 
-// Overruns and skipped points are covered through the machines' timelines; these are the edges.
-describe('nextOnGrid', () => {
-  it.each([
-    ['a completion at the due time', 1_000, 100, 1_100],
-    ['a completion exactly on a grid point', 1_100, 100, 1_200],
-    ['a completion before the due time, as after an early wake', 995, 100, 1_100],
-    ['a zero interval, which is due at the completion', 1_040, 0, 1_040],
-  ])('schedules after %s', (_, completedAt, interval, expected) => {
-    expect(nextOnGrid(1_000, completedAt, interval)).toBe(expected);
+describe('realClock', () => {
+  it('resolves a sleep early, rather than rejecting, once the signal aborts', async () => {
+    await expect(realClock.sleep(60_000, AbortSignal.abort())).resolves.toBeUndefined();
   });
 });
 
@@ -39,7 +33,7 @@ describe('run turns every failure of an action into an ok: false result', () => 
     action: Action<R>,
     interval = 0
   ): StateActionMachine<null, R, Recorded<R>> => ({
-    initialState: () => null,
+    initialState: null,
     next: () => action,
     interval: () => interval,
     model: (_state, result) => ({ state: null, event: { type: 'performed', result } }),
@@ -84,20 +78,20 @@ describe('run turns every failure of an action into an ok: false result', () => 
     }
   });
 
-  it('waits until the action is due and stamps the completion', async () => {
+  it('makes the next action due the interval after the last one completed, and stamps each completion', async () => {
     const clock = virtualClock(10);
     const action = async () => {
       clock.advance(5);
       return 'value';
     };
-    // The first action is due at once (10) and completes at 15. Interval 90 puts the
-    // next one at 100, so the second action is the one that waits.
+    // The first action is due at once (10) and completes at 15, so with interval 90 the
+    // second is due at 105, not 100: the 5ms the request took adds to the period.
     const [initial, first, second] = await take(run(recorder(action, 90), clock), 3);
 
-    expect([initial.dueAt, first.dueAt]).toEqual([10, 100]);
+    expect([initial.dueAt, first.dueAt, second.dueAt]).toEqual([10, 105, 200]);
     expect(second.event).toEqual({
       type: 'performed',
-      result: { ok: true, value: 'value', completedAt: 105 },
+      result: { ok: true, value: 'value', completedAt: 110 },
     });
   });
 });
@@ -113,7 +107,7 @@ describe('run', () => {
     request: Action<number>,
     until = Infinity
   ): StateActionMachine<Counter, number, Counted> => ({
-    initialState: () => ({ count: 0 }),
+    initialState: { count: 0 },
     // The next-action predicate: the one request, until the count is reached.
     next: (state) => (state.count >= until ? null : request),
     interval: () => 100,
@@ -214,9 +208,7 @@ describe('run', () => {
   it('returns the last state once aborted during a wait', async () => {
     const controller = new AbortController();
     const sleepUntilAborted = (_: number, signal?: AbortSignal) =>
-      new Promise<void>((_resolve, reject) =>
-        signal?.addEventListener('abort', () => reject(new Error('aborted')), { once: true })
-      );
+      new Promise<void>((resolve) => signal?.addEventListener('abort', () => resolve()));
     const clock = { now: () => 0, sleep: sleepUntilAborted };
 
     const steps = run(

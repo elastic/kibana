@@ -9,20 +9,18 @@
 
 import { firstValueFrom, lastValueFrom, toArray } from 'rxjs';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   checkEsNodesVersion,
   fetchNodesInfo,
   initialState,
   model,
-  nodesVersionMachine,
   pollEsNodesVersion,
+  pollingInterval,
   type NodesVersionResult,
   type NodesVersionConfig,
-  type NodesVersionControlState,
   type NodesVersionState,
 } from './nodes_version';
-import { mapNodesVersionCompatibility, type NodesInfo } from './nodes_version_compatibility';
+import { compatibilityFromNodesInfo, type NodesInfo } from './nodes_version_compatibility';
 import { virtualClock } from './state_action_machine.test_helpers';
 
 // `satisfies` keeps the optional intervals as `number` where the tests read them.
@@ -44,45 +42,14 @@ const requestError = new Error('boom');
 const ok = (nodes: NodesInfo): NodesVersionResult => ({ ok: true, value: nodes, completedAt: 0 });
 const fail = (error: Error): NodesVersionResult => ({ ok: false, error, completedAt: 0 });
 
-/** The request outcome a settled result presents to the compatibility mapping. */
-type RequestOutcome = NodesInfo & { nodesInfoRequestError?: Error };
+const compatibilityOf = (nodes: NodesInfo) =>
+  compatibilityFromNodesInfo(nodes, config.kibanaVersion, config.ignoreVersionMismatch);
 
-const compatibilityOf = (outcome: RequestOutcome) =>
-  mapNodesVersionCompatibility(outcome, config.kibanaVersion, config.ignoreVersionMismatch);
-
-describe('the polling interval', () => {
-  const state = (controlState: NodesVersionControlState): NodesVersionState => ({
-    controlState,
-    compatibility: undefined,
-    attemptsLeft: 0,
-  });
-
+describe('pollingInterval', () => {
   it('follows the control state', () => {
-    const machine = nodesVersionMachine(async () => compatible, config);
-    expect(machine.interval(state('STARTUP'))).toBe(config.healthCheckStartupInterval);
-    expect(machine.interval(state('FAILING'))).toBe(config.healthCheckFailureInterval);
-    expect(machine.interval(state('NORMAL'))).toBe(config.healthCheckInterval);
-  });
-
-  it('falls back to the normal interval when a configured interval is zero', () => {
-    const zeroFailure = nodesVersionMachine(async () => compatible, {
-      ...config,
-      healthCheckFailureInterval: 0,
-    });
-    const zeroStartup = nodesVersionMachine(async () => compatible, {
-      ...config,
-      healthCheckStartupInterval: 0,
-    });
-    expect(zeroFailure.interval(state('FAILING'))).toBe(config.healthCheckInterval);
-    expect(zeroStartup.interval(state('STARTUP'))).toBe(config.healthCheckInterval);
-  });
-
-  it('uses the normal interval during startup when no startup interval is configured', () => {
-    const machine = nodesVersionMachine(async () => compatible, {
-      ...config,
-      healthCheckStartupInterval: undefined,
-    });
-    expect(machine.interval(state('STARTUP'))).toBe(config.healthCheckInterval);
+    expect(pollingInterval(config, 'STARTUP')).toBe(config.healthCheckStartupInterval);
+    expect(pollingInterval(config, 'FAILING')).toBe(config.healthCheckFailureInterval);
+    expect(pollingInterval(config, 'NORMAL')).toBe(config.healthCheckInterval);
   });
 });
 
@@ -209,9 +176,6 @@ describe('fetchNodesInfo', () => {
 });
 
 describe('pollEsNodesVersion', () => {
-  const log = loggingSystemMock.createLogger();
-  beforeEach(() => jest.clearAllMocks());
-
   /** Answers each request from `responses`; the request after the last response aborts the poll. */
   const poll = async (responses: NodesInfo[]) => {
     const internalClient = elasticsearchClientMock.createInternalClient();
@@ -224,7 +188,7 @@ describe('pollEsNodesVersion', () => {
       return responses[Math.min(calls++, responses.length - 1)];
     }) as never);
     const compatibility$ = pollEsNodesVersion(
-      { ...config, internalClient, log, signal: controller.signal },
+      { ...config, internalClient, signal: controller.signal },
       virtualClock()
     );
     const emitted = await lastValueFrom(compatibility$.pipe(toArray()));
@@ -239,21 +203,6 @@ describe('pollEsNodesVersion', () => {
   it('replays the latest compatibility to a late subscriber', async () => {
     const { compatibility$ } = await poll([compatible]);
     expect((await firstValueFrom(compatibility$)).isCompatible).toBe(true);
-  });
-
-  it('logs an incompatible cluster once per change', async () => {
-    await poll([incompatible, incompatible]);
-    expect(log.error).toHaveBeenCalledTimes(1);
-    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('7.0.0'));
-  });
-
-  it('does not log a compatible cluster that only differs by patch version', async () => {
-    const patchAhead: NodesInfo = {
-      nodes: { a: { version: '8.10.1', ip: '1.1.1.1', name: 'a' } },
-    };
-    const { emitted } = await poll([patchAhead]);
-    expect(emitted[0].warningNodes).toHaveLength(1);
-    expect(log.error).not.toHaveBeenCalled();
   });
 });
 
