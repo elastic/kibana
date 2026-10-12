@@ -94,9 +94,9 @@ describe('UniversalRulesIntroCallout', () => {
     fireEvent.click(screen.getByRole('button', { name: /dismiss/i }));
 
     expect(screen.queryByTestId('universalRulesIntroCallout')).not.toBeInTheDocument();
-    expect(
-      window.localStorage.getItem(UNIVERSAL_RULES_INTRO_CALLOUT_DISMISSED_STORAGE_KEY)
-    ).toBe('true');
+    expect(window.localStorage.getItem(UNIVERSAL_RULES_INTRO_CALLOUT_DISMISSED_STORAGE_KEY)).toBe(
+      'true'
+    );
   });
 
   it('is hidden when already dismissed', () => {

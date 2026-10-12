@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import {
-  ALERTING_V2_RULES_BASE_PATH,
-  ALERTING_V2_RULES_TAB_ID,
-} from '@kbn/alerting-v2-constants';
+import { ALERTING_V2_RULES_BASE_PATH, ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -49,9 +46,12 @@ export const UniversalRulesIntroCallout = () => {
         iconType="info"
         size="s"
         data-test-subj="universalRulesIntroCallout"
-        title={i18n.translate('xpack.triggersActionsUI.rulesList.universalRulesIntroCallout.title', {
-          defaultMessage: 'Introducing Universal rules',
-        })}
+        title={i18n.translate(
+          'xpack.triggersActionsUI.rulesList.universalRulesIntroCallout.title',
+          {
+            defaultMessage: 'Introducing Universal rules',
+          }
+        )}
         onDismiss={() => setIsDismissed(true)}
       >
         <FormattedMessage
