@@ -30,6 +30,12 @@ const DEFAULT_SETTINGS: AnonymizationSettings = {
 const isRegexRule = (rule: AnonymizationRule): rule is RegexAnonymizationRule =>
   rule.type === 'RegExp';
 
+// Rules saved by earlier releases may have no `id`, and every mutator below addresses a rule by it,
+// so without one such a rule could not be toggled, edited or deleted (an edit would add a second
+// rule). Ids are generated on load and become permanent with the next save.
+const withRuleIds = (rules: AnonymizationRule[]): AnonymizationRule[] =>
+  rules.map((rule) => (isRegexRule(rule) && !rule.id ? { ...rule, id: uuidv4() } : rule));
+
 const parseSettings = (raw: unknown): AnonymizationSettings => {
   // The `type: 'json'` uiSetting is already parsed into an object by IUiSettingsClient#get,
   // but be defensive in case a caller ever hands us the raw stored string.
@@ -52,7 +58,7 @@ const parseSettings = (raw: unknown): AnonymizationSettings => {
     // Same resolution the server uses, so the switch shows what is actually being applied for
     // settings saved before the master switch existed (which have no `maskingEnabled`).
     maskingEnabled: isAnonymizationMaskingEnabled(settings),
-    rules: refreshBuiltInAnonymizationRules(settings.rules),
+    rules: withRuleIds(refreshBuiltInAnonymizationRules(settings.rules)),
   };
 };
 

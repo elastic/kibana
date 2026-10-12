@@ -170,4 +170,79 @@ describe('useAnonymizationSettings', () => {
     expect(result.current.builtInPatterns).toHaveLength(DEFAULT_BUILTIN_REGEX_RULES.length);
     expect(result.current.builtInPatterns.filter(({ enabled }) => enabled)).toEqual([]);
   });
+
+  describe('rules saved before rules had ids', () => {
+    const legacyRule = {
+      type: 'RegExp',
+      entityClass: 'MISC',
+      pattern: 'EMP-\\d+',
+      enabled: true,
+    };
+
+    const loadLegacySettings = async () => {
+      client = new FakeJsonUiSettingsClient(JSON.stringify({ rules: [legacyRule] }));
+      (useKibana as jest.Mock).mockReturnValue({
+        services: {
+          settings: { client },
+          notifications: { toasts: { addDanger } },
+        },
+      });
+      const hook = renderHook(() => useAnonymizationSettings());
+      await waitFor(() => expect(hook.result.current.isLoading).toBe(false));
+      return hook;
+    };
+
+    const persistedRules = () => JSON.parse((client.set as jest.Mock).mock.calls[0][1]).rules;
+
+    it('gives the rule an id so it can be toggled, which persists the id', async () => {
+      const { result } = await loadLegacySettings();
+      const [custom] = result.current.customPatterns;
+      expect(custom.id).toEqual(expect.any(String));
+
+      await act(async () => {
+        await result.current.setRuleEnabled(custom.id as string, false);
+      });
+
+      expect(result.current.customPatterns).toEqual([
+        expect.objectContaining({ id: custom.id, enabled: false }),
+      ]);
+      expect(
+        persistedRules().find(({ pattern }: { pattern: string }) => pattern === 'EMP-\\d+')
+      ).toEqual(expect.objectContaining({ id: custom.id, enabled: false }));
+    });
+
+    it('updates the rule in place instead of adding a second one', async () => {
+      const { result } = await loadLegacySettings();
+      const [custom] = result.current.customPatterns;
+
+      await act(async () => {
+        await result.current.updateCustomPattern(custom.id as string, {
+          name: 'Employee ID',
+          entityClass: 'URL',
+          pattern: 'EMP-\\d{4}',
+          enabled: true,
+        });
+      });
+
+      expect(result.current.customPatterns).toHaveLength(1);
+      expect(result.current.customPatterns[0]).toEqual(
+        expect.objectContaining({ id: custom.id, name: 'Employee ID', pattern: 'EMP-\\d{4}' })
+      );
+    });
+
+    it('deletes the rule', async () => {
+      const { result } = await loadLegacySettings();
+      const [custom] = result.current.customPatterns;
+      expect(custom.id).toEqual(expect.any(String));
+
+      await act(async () => {
+        await result.current.deleteCustomPattern(custom.id as string);
+      });
+
+      expect(result.current.customPatterns).toEqual([]);
+      expect(
+        persistedRules().some(({ pattern }: { pattern: string }) => pattern === 'EMP-\\d+')
+      ).toBe(false);
+    });
+  });
 });
