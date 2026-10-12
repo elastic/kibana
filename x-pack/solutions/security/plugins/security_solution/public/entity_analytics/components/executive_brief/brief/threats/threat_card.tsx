@@ -43,6 +43,7 @@ import { TRIAGE_LABEL } from '../actions/labels';
 import { buildThreatTriageRequest } from '../triage_requests';
 import { CONFIDENCE_LABEL, SEVERITY_LABEL, STATUS_LABEL } from './labels';
 import { ThreatResponse } from './threat_response';
+import { BriefText } from '../../evidence/brief_text';
 
 const SHOW_DETAILS = 'Show threat details';
 const HIDE_DETAILS = 'Hide threat details';
@@ -122,7 +123,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({ threat, rank, brief, evi
                       aria-controls={bodyId}
                       data-test-subj={`executiveBriefThreatTitle-${rank}`}
                     >
-                      {threat.title}
+                      <BriefText text={threat.title} evidence={evidence} />
                     </EuiLink>
                   </h4>
                 </EuiTitle>
@@ -170,7 +171,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({ threat, rank, brief, evi
             <EuiSpacer size="s" />
             <EuiText size="s" data-test-subj={`executiveBriefThreatNextStep-${rank}`}>
               <strong>{NEXT_STEP}</strong>
-              {threat.nextStep.action}
+              <BriefText text={threat.nextStep.action} evidence={evidence} />
             </EuiText>
             {!isOpen && (
               <>
@@ -186,7 +187,7 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({ threat, rank, brief, evi
                     overflow: hidden;
                   `}
                 >
-                  {threat.narrative}
+                  <BriefText text={threat.narrative} evidence={evidence} />
                 </EuiText>
               </>
             )}
@@ -195,10 +196,12 @@ export const ThreatCard: React.FC<ThreatCardProps> = ({ threat, rank, brief, evi
             <div id={bodyId} data-test-subj={`executiveBriefThreatBody-${rank}`}>
               <EuiSpacer size="m" />
               <EuiText size="s">
-                <p>{threat.narrative}</p>
+                <p>
+                  <BriefText text={threat.narrative} evidence={evidence} />
+                </p>
                 <p>
                   <strong>{WHY_IT_MATTERS}</strong>
-                  {threat.whyItMatters}
+                  <BriefText text={threat.whyItMatters} evidence={evidence} />
                 </p>
               </EuiText>
               <EuiSpacer size="m" />

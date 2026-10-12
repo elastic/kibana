@@ -536,7 +536,8 @@ export class Plugin implements ISecuritySolutionPlugin {
           featureName: 'Entity Analytics Executive Brief',
           featureDescription: 'Entity Analytics executive brief inference endpoint configuration',
           taskType: 'chat_completion',
-          recommendedEndpoints: [],
+          // PoC: Sonnet 5 writes a full brief in ~30 s; the inference default (Sonnet 4.6) takes ~2 min.
+          recommendedEndpoints: ['.anthropic-claude-5-sonnet-chat_completion'],
         });
       }
 

@@ -183,7 +183,7 @@ describe('triage requests', () => {
     expect(evidenceMarkdown).toContain(
       'Credential access to lateral movement (F-1; critical; 2026-10-08T10:00:00.000Z): alerts 12, tactics: Credential Access, Lateral Movement. Entities: a.rodriguez, jump-box-01'
     );
-    expect(evidenceMarkdown).toContain('a.rodriguez logged on to (rarely) jump-box-01 (L-1)');
+    expect(evidenceMarkdown).toContain('a.rodriguez logged on to (rarely) jump-box-01');
     expect(evidenceMarkdown).toContain(
       'Isolate jump-box-01 and reset the credentials (owner SOC; now)'
     );

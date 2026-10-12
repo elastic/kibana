@@ -30,6 +30,7 @@ import { useBriefActions } from '../../actions/brief_actions_context';
 import { AREA_LABELS, EXECUTIVE_BRIEF_TEST_IDS } from '../../constants';
 import type { TriagePeriod } from './triage_requests';
 import { buildAreaTriageRequest } from './triage_requests';
+import { BriefText } from '../../evidence/brief_text';
 
 /** Rows are grouped under the section they summarise, using the same name as its heading. */
 export const AREA_GROUP_TITLE = 'Priority threats';
@@ -156,7 +157,7 @@ const AttentionAreaRow: React.FC<AttentionAreaRowProps> = ({ area, brief, eviden
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s" data-test-subj={`executiveBriefAreaSummary-${area.id}`}>
-            {area.summary}
+            <BriefText text={area.summary} evidence={evidence} />
           </EuiText>
         </EuiFlexItem>
         {showActions ? (

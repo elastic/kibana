@@ -10,7 +10,7 @@ import type { BoundInferenceClient, ToolMessage } from '@kbn/inference-common';
 import { ChatCompletionErrorCode, InferenceTaskError, MessageRole } from '@kbn/inference-common';
 import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { buildValidBrief, FIXTURE_EVIDENCE } from '../verification/__fixtures__/evidence';
-import { normalizeBriefOutput } from './compose_brief';
+import { normalizeBriefOutput, parseBrief } from './compose_brief';
 import { composeVerifiedBrief } from './compose_verified_brief';
 import { REPAIR_INSTRUCTIONS } from './repair';
 import { BriefCompositionError } from './types';
@@ -216,5 +216,16 @@ describe('normalizeBriefOutput', () => {
         actions: [expect.not.objectContaining({ threat: null })],
       })
     );
+  });
+  it('trims over-long prose at a word boundary instead of failing validation', () => {
+    const brief = buildValidBrief();
+    const headline = `${'Privileged user reached production '.repeat(8)}hosts`;
+    const normalized = normalizeBriefOutput({
+      ...brief,
+      verdict: { ...brief.verdict, headline },
+    }) as { verdict: { headline: string } };
+    expect(normalized.verdict.headline.length).toBeLessThanOrEqual(160);
+    expect(normalized.verdict.headline.endsWith('…')).toBe(true);
+    expect(parseBrief(normalized).ok).toBe(true);
   });
 });

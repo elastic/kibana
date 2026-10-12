@@ -29,6 +29,7 @@ import { useBriefActions } from '../../actions/brief_actions_context';
 import { ATTENTION_LEVEL_LABELS, EXECUTIVE_BRIEF_TEST_IDS, OWNER_LABELS } from '../../constants';
 import type { TriagePeriod } from './triage_requests';
 import { buildVerdictTriageRequest } from './triage_requests';
+import { BriefText } from '../../evidence/brief_text';
 
 type AccentColor = 'danger' | 'warning' | 'primary' | 'success';
 
@@ -97,9 +98,11 @@ export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({ brief, evide
           `}
           data-test-subj="executiveBriefVerdictHeadline"
         >
-          {verdict.headline}
+          <BriefText text={verdict.headline} evidence={evidence} />
         </p>
-        <p data-test-subj="executiveBriefVerdictSummary">{verdict.summary}</p>
+        <p data-test-subj="executiveBriefVerdictSummary">
+          <BriefText text={verdict.summary} evidence={evidence} />
+        </p>
       </EuiText>
       {showNextStep ? (
         <>
@@ -108,7 +111,7 @@ export const AttentionVerdict: React.FC<AttentionVerdictProps> = ({ brief, evide
             <EuiFlexItem grow={false}>
               <EuiText size="s" data-test-subj={EXECUTIVE_BRIEF_TEST_IDS.verdictNextStep}>
                 <strong>{NEXT_STEP_LABEL}</strong>
-                {topThreat.nextStep.action}{' '}
+                <BriefText text={topThreat.nextStep.action} evidence={evidence} />{' '}
                 <EuiText size="xs" color="subdued" component="span">
                   {`(${OWNER_LABELS[topThreat.nextStep.owner]})`}
                 </EuiText>

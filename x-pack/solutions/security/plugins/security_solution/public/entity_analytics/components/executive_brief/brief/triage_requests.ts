@@ -30,6 +30,7 @@ import {
   getThreatLinks,
 } from '../evidence/resolve';
 import { OWNER_LABEL, URGENCY_LABEL } from './actions/labels';
+import { resolveTriageRequest } from '../evidence/brief_text';
 
 /**
  * Triage requests for the Agent Builder. Pure and deterministic. The text is sent as-is and stays
@@ -128,7 +129,7 @@ const responseLine = (threat: BriefThreat, evidence: Evidence): string => {
 };
 
 /** Triage request for one priority threat. `rank` is its 1-based position in the brief. */
-export const buildThreatTriageRequest = ({
+const buildThreatTriageRequestRaw = ({
   threat,
   rank,
   evidence,
@@ -169,7 +170,7 @@ export const buildThreatTriageRequest = ({
 };
 
 /** Triage request for one recommended action, with the threat it relates to when there is one. */
-export const buildActionTriageRequest = ({
+const buildActionTriageRequestRaw = ({
   action,
   brief,
   evidence,
@@ -220,3 +221,13 @@ export const buildActionTriageRequest = ({
     ].join('\n'),
   };
 };
+
+/** Triage request for one priority threat. `rank` is its 1-based position in the brief. */
+export const buildThreatTriageRequest = (
+  params: Parameters<typeof buildThreatTriageRequestRaw>[0]
+): TriageRequest => resolveTriageRequest(buildThreatTriageRequestRaw(params), params.evidence);
+
+/** Triage request for one recommended action. */
+export const buildActionTriageRequest = (
+  params: Parameters<typeof buildActionTriageRequestRaw>[0]
+): TriageRequest => resolveTriageRequest(buildActionTriageRequestRaw(params), params.evidence);

@@ -14,6 +14,7 @@ import type {
 import { isToolValidationError } from '@kbn/inference-common';
 import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
 import {
+  BRIEF_TEXT_LIMITS,
   AREA_IDS,
   briefSchema,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
@@ -60,6 +61,22 @@ const mapItems = (value: unknown, max: number, map: (item: JsonRecord) => JsonRe
     ? value.slice(0, max).map((item) => (isRecord(item) ? map(item) : item))
     : value;
 
+/** Trims over-long prose at a word boundary, so a long headline doesn't cost a repair round-trip. */
+const clampText = (value: unknown, max: number): unknown => {
+  if (typeof value !== 'string' || value.length <= max) {
+    return value;
+  }
+  const cut = value.slice(0, max - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.-]+$/, '')}…`;
+};
+
+const clampFields = (record: JsonRecord, limits: Record<string, number>): JsonRecord =>
+  Object.entries(limits).reduce<JsonRecord>(
+    (acc, [key, max]) => (key in acc ? { ...acc, [key]: clampText(acc[key], max) } : acc),
+    record
+  );
+
 const withoutNull = (record: JsonRecord, key: string): JsonRecord =>
   record[key] === null
     ? Object.fromEntries(Object.entries(record).filter(([name]) => name !== key))
@@ -79,15 +96,32 @@ export const normalizeBriefOutput = (output: unknown): unknown => {
   });
   return {
     ...output,
-    verdict: isRecord(output.verdict) ? evidence(output.verdict) : output.verdict,
-    areas: mapItems(output.areas, AREA_IDS.length, evidence),
+    verdict: isRecord(output.verdict)
+      ? clampFields(evidence(output.verdict), {
+          headline: BRIEF_TEXT_LIMITS.verdictHeadline,
+          summary: BRIEF_TEXT_LIMITS.verdictSummary,
+        })
+      : output.verdict,
+    areas: mapItems(output.areas, AREA_IDS.length, (area) =>
+      clampFields(evidence(area), { summary: BRIEF_TEXT_LIMITS.areaSummary })
+    ),
     threats: mapItems(output.threats, BRIEF_LIMITS.maxThreats, (threat) => ({
-      ...evidence(threat),
+      ...clampFields(evidence(threat), {
+        title: BRIEF_TEXT_LIMITS.threatTitle,
+        narrative: BRIEF_TEXT_LIMITS.narrative,
+        whyItMatters: BRIEF_TEXT_LIMITS.whyItMatters,
+      }),
       entities: cap(threat.entities, BRIEF_LIMITS.maxEntitiesPerThreat),
       keyEvents: cap(threat.keyEvents, BRIEF_LIMITS.maxKeyEventsPerThreat),
+      nextStep: isRecord(threat.nextStep)
+        ? clampFields(threat.nextStep, { action: BRIEF_TEXT_LIMITS.nextStepAction })
+        : threat.nextStep,
     })),
     actions: mapItems(output.actions, BRIEF_LIMITS.maxActions, (action) => ({
-      ...withoutNull(evidence(action), 'threat'),
+      ...clampFields(withoutNull(evidence(action), 'threat'), {
+        action: BRIEF_TEXT_LIMITS.actionText,
+        rationale: BRIEF_TEXT_LIMITS.rationale,
+      }),
       targets: cap(action.targets, BRIEF_LIMITS.maxEntitiesPerThreat),
     })),
   };

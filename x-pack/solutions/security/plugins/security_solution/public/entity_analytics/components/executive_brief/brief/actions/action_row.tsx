@@ -28,6 +28,7 @@ import { useBriefActions } from '../../actions/brief_actions_context';
 import { EntityChip } from '../../evidence/entity_chip';
 import { buildActionTriageRequest } from '../triage_requests';
 import { OWNER_LABEL, TRIAGE_LABEL, URGENCY_LABEL } from './labels';
+import { BriefText } from '../../evidence/brief_text';
 
 const threatLabel = (rank: number): string => `Threat ${rank}`;
 const goToThreatLabel = (rank: number): string => `Go to threat ${rank}`;
@@ -98,7 +99,9 @@ export const ActionRow: React.FC<ActionRowProps> = ({
         paddingSize="none"
         buttonContent={
           <div>
-            <EuiText size="s">{action.action}</EuiText>
+            <EuiText size="s">
+              <BriefText text={action.action} evidence={evidence} />
+            </EuiText>
             <EuiText size="xs" color="subdued" data-test-subj="executiveBriefActionMeta">
               {metaItems.map((item, itemIndex) => (
                 <React.Fragment key={itemIndex}>
@@ -130,7 +133,9 @@ export const ActionRow: React.FC<ActionRowProps> = ({
           `}
         >
           <EuiText size="s" color="subdued">
-            <p data-test-subj="executiveBriefActionRationale">{action.rationale}</p>
+            <p data-test-subj="executiveBriefActionRationale">
+              <BriefText text={action.rationale} evidence={evidence} />
+            </p>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">

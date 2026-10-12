@@ -20,6 +20,7 @@ import type {
 import { LINK_VERBS } from '../../../../../../common/entity_analytics/executive_brief/evidence';
 import type { TriageRequest } from '../../actions/brief_actions_context';
 import { AREA_LABELS, ATTENTION_LEVEL_LABELS, OWNER_LABELS, URGENCY_LABELS } from '../../constants';
+import { resolveTriageRequest } from '../../evidence/brief_text';
 
 /**
  * Triage prompts for the verdict and area rows. Pure and deterministic. The text is sent to the
@@ -126,7 +127,7 @@ const nextStepLine = ({ nextStep }: BriefThreat): string =>
   ].toLowerCase()})`;
 
 /** Triage request for the verdict: the overall assessment and the top threat's next step. */
-export const buildVerdictTriageRequest = (
+const buildVerdictTriageRequestRaw = (
   brief: Brief,
   evidence: Evidence,
   period?: TriagePeriod
@@ -222,7 +223,7 @@ const responseAreaRequest = (
 });
 
 /** Triage request for an area row. */
-export const buildAreaTriageRequest = (
+const buildAreaTriageRequestRaw = (
   area: BriefArea,
   brief: Brief,
   evidence: Evidence,
@@ -231,3 +232,20 @@ export const buildAreaTriageRequest = (
   area.id === 'threats'
     ? threatsAreaRequest(area, brief, evidence, period)
     : responseAreaRequest(area, brief, evidence, period);
+
+/** Triage request for the verdict: the overall assessment and the top threat's next step. */
+export const buildVerdictTriageRequest = (
+  brief: Brief,
+  evidence: Evidence,
+  period?: TriagePeriod
+): TriageRequest =>
+  resolveTriageRequest(buildVerdictTriageRequestRaw(brief, evidence, period), evidence);
+
+/** Triage request for an area row. */
+export const buildAreaTriageRequest = (
+  area: BriefArea,
+  brief: Brief,
+  evidence: Evidence,
+  period?: TriagePeriod
+): TriageRequest =>
+  resolveTriageRequest(buildAreaTriageRequestRaw(area, brief, evidence, period), evidence);

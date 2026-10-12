@@ -26,6 +26,19 @@ export type Urgency = (typeof URGENCIES)[number];
 export const OWNERS = ['soc', 'it', 'iam', 'cloud', 'detection_engineering', 'leadership'] as const;
 export type Owner = (typeof OWNERS)[number];
 
+/** Maximum lengths of the brief's prose fields; longer AI output is trimmed server-side. */
+export const BRIEF_TEXT_LIMITS = {
+  verdictHeadline: 160,
+  verdictSummary: 700,
+  areaSummary: 200,
+  threatTitle: 120,
+  narrative: 900,
+  whyItMatters: 500,
+  nextStepAction: 240,
+  actionText: 240,
+  rationale: 500,
+} as const;
+
 const evidenceIds = z.array(z.string().max(16)).max(24);
 const shortText = (max: number) => z.string().min(1).max(max);
 
@@ -33,8 +46,8 @@ export const briefSchema = lazySchema(() =>
   z.object({
     verdict: z.object({
       level: z.enum(ATTENTION_LEVELS),
-      headline: shortText(160),
-      summary: shortText(700),
+      headline: shortText(BRIEF_TEXT_LIMITS.verdictHeadline),
+      summary: shortText(BRIEF_TEXT_LIMITS.verdictSummary),
       evidence: evidenceIds,
     }),
     areas: z
@@ -42,7 +55,7 @@ export const briefSchema = lazySchema(() =>
         z.object({
           id: z.enum(AREA_IDS),
           level: z.enum(ATTENTION_LEVELS),
-          summary: shortText(200),
+          summary: shortText(BRIEF_TEXT_LIMITS.areaSummary),
           evidence: evidenceIds,
         })
       )
@@ -50,19 +63,19 @@ export const briefSchema = lazySchema(() =>
     threats: z
       .array(
         z.object({
-          title: shortText(120),
+          title: shortText(BRIEF_TEXT_LIMITS.threatTitle),
           severity: z.enum(['critical', 'high', 'medium', 'low']),
           status: z.enum(['unaddressed', 'in_progress', 'contained']),
           confidence: z.enum(['high', 'medium', 'low']),
           /** ENT ids; must be connected through cited links or shared facts. */
           entities: z.array(z.string().max(16)).min(1).max(BRIEF_LIMITS.maxEntitiesPerThreat),
-          narrative: shortText(900),
-          whyItMatters: shortText(500),
+          narrative: shortText(BRIEF_TEXT_LIMITS.narrative),
+          whyItMatters: shortText(BRIEF_TEXT_LIMITS.whyItMatters),
           /** F ids of facts with a time, in time order. */
           keyEvents: z.array(z.string().max(16)).max(BRIEF_LIMITS.maxKeyEventsPerThreat),
           evidence: evidenceIds,
           nextStep: z.object({
-            action: shortText(240),
+            action: shortText(BRIEF_TEXT_LIMITS.nextStepAction),
             owner: z.enum(OWNERS),
             urgency: z.enum(URGENCIES),
           }),
@@ -72,8 +85,8 @@ export const briefSchema = lazySchema(() =>
     actions: z
       .array(
         z.object({
-          action: shortText(240),
-          rationale: shortText(500),
+          action: shortText(BRIEF_TEXT_LIMITS.actionText),
+          rationale: shortText(BRIEF_TEXT_LIMITS.rationale),
           urgency: z.enum(URGENCIES),
           owner: z.enum(OWNERS),
           /** 1-based index into threats, when the action relates to one. */
