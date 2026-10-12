@@ -277,14 +277,15 @@ export const waitForExecution = async (
 };
 
 // Newest first, and without the index's step-run docs, so a new execution is on page 1 even
-// past ~100 matching docs. Without sortField the query emits no sort and the order is
-// arbitrary, which makes waitForNewExecution time out.
+// past ~100 matching docs. Without a sort the query emits no sort and the order is arbitrary,
+// which makes waitForNewExecution time out. The per-workflow route only accepts createdAt /
+// finishedAt as sort fields, so "newest" means the latest createdAt here.
 export const listExecutionIds = async (api: AlertZeroApi, workflowId: string): Promise<string[]> =>
   ok(
     await api.public<{ results: Array<{ id: string }> }>(
       'GET',
-      `${EXECUTIONS_URL}?workflowId=${encodeURIComponent(workflowId)}` +
-        `&size=100&sortField=startedAt&sortOrder=desc&omitStepRuns=true`
+      `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions` +
+        `?size=100&sortField=createdAt&sortOrder=desc&omitStepRuns=true`
     ),
     `list executions of ${workflowId}`
   ).results.map((run) => run.id);
