@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, useMemo } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiAccordion,
   EuiCode,
@@ -18,7 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
+  useEuiOverflowScroll,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -60,6 +61,7 @@ export const DeleteProfileModal = ({
   onClose,
 }: DeleteProfileModalProps) => {
   const { euiTheme } = useEuiTheme();
+  const scrollStyles = useEuiOverflowScroll('y', true);
   const { notifications } = useBoostServices();
   const titleId = useGeneratedHtmlId();
   const accordionIdPrefix = useGeneratedHtmlId({ prefix: 'deletedRule' });
@@ -87,6 +89,8 @@ export const DeleteProfileModal = ({
   }, [name, rules, profiles, dataSources]);
 
   const affectedCount = deletedRules.reduce((total, { affected }) => total + affected.length, 0);
+  // Only one rule is open at a time, so the list stays short.
+  const [openRuleName, setOpenRuleName] = useState<string>();
 
   const listTitleId = useGeneratedHtmlId({ prefix: 'deletedRulesTitle' });
 
@@ -139,8 +143,8 @@ export const DeleteProfileModal = ({
         deletedRules.length > 0
           ? i18n.translate('xpack.boost.deleteProfileModal.confirmWithRules', {
               defaultMessage:
-                'Delete profile and {ruleCount, plural, one {# rule} other {# rules}}',
-              values: { ruleCount: deletedRules.length },
+                'Delete {profileCount, plural, one {# profile} other {# profiles}} and {ruleCount, plural, one {# rule} other {# rules}}',
+              values: { profileCount: 1, ruleCount: deletedRules.length },
             })
           : i18n.translate('xpack.boost.profilesTab.deleteModalConfirm', {
               defaultMessage: 'Delete profile',
@@ -168,75 +172,73 @@ export const DeleteProfileModal = ({
             })}
           </EuiFormLabel>
           <EuiSpacer size="xs" />
-          {/* Long lists scroll inside the panel, keeping the modal's buttons in view. */}
-          <EuiPanel
-            hasBorder
-            hasShadow={false}
-            paddingSize="none"
-            role="region"
-            aria-labelledby={listTitleId}
-            tabIndex={0}
-            css={{ maxBlockSize: euiTheme.base * 20, overflowY: 'auto' }}
-          >
-            {deletedRules.map(({ name: ruleName, affected }, index) => (
-              <Fragment key={ruleName}>
-                {index > 0 && <EuiHorizontalRule margin="none" />}
-                {affected.length > 0 ? (
-                  <EuiAccordion
-                    id={`${accordionIdPrefix}-${ruleName}`}
-                    buttonContent={<EuiText size="s">{ruleName}</EuiText>}
-                    buttonProps={{ paddingSize: 's' }}
-                    extraAction={<AffectedCountBadge count={affected.length} type={type} />}
-                    css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.base }}
-                    data-test-subj={`deletedRule-${ruleName}`}
-                  >
-                    {/* Indented by the accordion arrow's width and gap, so the content lines up
-                        with the rule name above it. */}
-                    <div
+          <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+            {/* Long lists scroll inside the panel, keeping the modal's buttons in view. The panel
+                draws its border with a pseudo-element, so an inner element scrolls instead, or the
+                border would scroll away with the content. */}
+            <div
+              role="region"
+              aria-labelledby={listTitleId}
+              tabIndex={0}
+              css={css`
+                ${scrollStyles}
+                max-block-size: ${euiTheme.base * 20}px;
+              `}
+            >
+              {deletedRules.map(({ name: ruleName, affected }, index) => (
+                <Fragment key={ruleName}>
+                  {index > 0 && <EuiHorizontalRule margin="none" />}
+                  {affected.length > 0 ? (
+                    <EuiAccordion
+                      id={`${accordionIdPrefix}-${ruleName}`}
+                      forceState={openRuleName === ruleName ? 'open' : 'closed'}
+                      onToggle={(isOpen) => setOpenRuleName(isOpen ? ruleName : undefined)}
+                      buttonContent={<EuiText size="s">{ruleName}</EuiText>}
+                      buttonProps={{ paddingSize: 's' }}
+                      extraAction={<AffectedCountBadge count={affected.length} type={type} />}
                       css={{
                         paddingBlock: euiTheme.size.s,
-                        paddingInlineStart: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
+                        paddingInlineStart: euiTheme.size.s,
+                        paddingInlineEnd: euiTheme.size.base,
                       }}
+                      data-test-subj={`deletedRule-${ruleName}`}
                     >
-                      <AffectedTable ruleName={ruleName} affected={affected} type={type} />
-                    </div>
-                  </EuiAccordion>
-                ) : (
-                  // Matches an accordion's padding, line height, and chevron indent, so rule
-                  // names line up whether or not the rule expands.
-                  <EuiText
-                    size="s"
-                    css={{
-                      paddingBlock: `calc(${euiTheme.size.s} * 2)`,
-                      paddingInlineStart: `calc(${euiTheme.size.base} + ${euiTheme.size.l} + ${euiTheme.size.xs})`,
-                      paddingInlineEnd: euiTheme.size.base,
-                      lineHeight: euiTheme.size.l,
-                    }}
-                    data-test-subj={`deletedRule-${ruleName}`}
-                  >
-                    {ruleName}
-                  </EuiText>
-                )}
-              </Fragment>
-            ))}
+                      {/* Indented by the accordion arrow's width and gap, so the content lines up
+                        with the rule name above it. */}
+                      <div
+                        css={{
+                          paddingBlock: euiTheme.size.s,
+                          paddingInlineStart: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
+                        }}
+                      >
+                        <AffectedTable ruleName={ruleName} affected={affected} type={type} />
+                      </div>
+                    </EuiAccordion>
+                  ) : (
+                    // Matches an accordion's padding, line height, and chevron indent, so rule
+                    // names line up whether or not the rule expands.
+                    <EuiText
+                      size="s"
+                      css={{
+                        paddingBlock: `calc(${euiTheme.size.s} * 2)`,
+                        paddingInlineStart: `calc(${euiTheme.size.s} + ${euiTheme.size.l} + ${euiTheme.size.xs})`,
+                        paddingInlineEnd: euiTheme.size.base,
+                        lineHeight: euiTheme.size.l,
+                      }}
+                      data-test-subj={`deletedRule-${ruleName}`}
+                    >
+                      {ruleName}
+                    </EuiText>
+                  )}
+                </Fragment>
+              ))}
+            </div>
           </EuiPanel>
         </>
       )}
     </EuiConfirmModal>
   );
 };
-
-const formatAffectedCount = (type: BoostProfile['type'], count: number): string =>
-  type === 'indices'
-    ? i18n.translate('xpack.boost.deleteProfileModal.affectedIndexCount', {
-        defaultMessage: '{count, plural, one {# affected index} other {# affected indices}}',
-        values: { count },
-      })
-    : i18n.translate('xpack.boost.deleteProfileModal.affectedDataStreamCount', {
-        defaultMessage:
-          '{count, plural, one {# affected data stream} other {# affected data streams}}',
-        values: { count },
-      });
 
 interface AffectedCountBadgeProps {
   count: number;
@@ -245,11 +247,9 @@ interface AffectedCountBadgeProps {
 
 const AffectedCountBadge = ({ count, type }: AffectedCountBadgeProps) => {
   return (
-    <EuiToolTip content={formatAffectedCount(type, count)} display="flex">
-      <EuiNotificationBadge color="subdued">
-        {formatDataSourceCount(type, count)}
-      </EuiNotificationBadge>
-    </EuiToolTip>
+    <EuiNotificationBadge color="subdued">
+      {formatDataSourceCount(type, count)}
+    </EuiNotificationBadge>
   );
 };
 
@@ -278,7 +278,7 @@ const AffectedTable = ({ ruleName, affected, type }: AffectedTableProps) => {
         role="row"
         gutterSize="s"
         responsive={false}
-        css={{ paddingBlockEnd: euiTheme.size.xs, borderBlockEnd: euiTheme.border.thin }}
+        css={{ paddingBlockEnd: euiTheme.size.xs }}
       >
         <EuiFlexItem role="columnheader">
           <EuiFormLabel>
