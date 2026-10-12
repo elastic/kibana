@@ -9,7 +9,8 @@
 
 /**
  * The version machine on a virtual clock: each test asserts the timeline of
- * when requests completed and what state and event they led to.
+ * when requests completed, what state and event they led to, and when the
+ * next request is due.
  */
 
 import {
@@ -37,6 +38,8 @@ const requestError = new Error('boom');
 interface Tick {
   /** The virtual instant this state was produced. */
   at: number;
+  /** When the next request is due. */
+  dueAt: number;
   controlState: NodesVersionState['controlState'];
   isCompatible: boolean | undefined;
   event: (NodesVersionEvent | InitialEvent)['type'];
@@ -44,6 +47,7 @@ interface Tick {
 
 const initialTick: Tick = {
   at: 0,
+  dueAt: 0,
   controlState: 'STARTUP',
   isCompatible: undefined,
   event: 'initial',
@@ -70,9 +74,10 @@ const runTimeline = async (
   };
 
   const timeline: Tick[] = [];
-  for await (const { state, event } of run(nodesVersionMachine(request, config), clock)) {
+  for await (const { state, event, dueAt } of run(nodesVersionMachine(request, config), clock)) {
     timeline.push({
       at: clock.now(),
+      dueAt,
       controlState: state.controlState,
       isCompatible: state.compatibility?.isCompatible,
       event: event.type,
@@ -90,8 +95,20 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 0, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 100, controlState: 'NORMAL', isCompatible: false, event: 'compatibilityChanged' },
+      {
+        at: 0,
+        dueAt: 100,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 100,
+        dueAt: 200,
+        controlState: 'NORMAL',
+        isCompatible: false,
+        event: 'compatibilityChanged',
+      },
     ]);
   });
 
@@ -105,9 +122,27 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 30, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 130, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
-      { at: 230, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
+      {
+        at: 30,
+        dueAt: 100,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 130,
+        dueAt: 200,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
+      {
+        at: 230,
+        dueAt: 300,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
     ]);
   });
 
@@ -121,9 +156,27 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 30, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 350, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
-      { at: 400, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
+      {
+        at: 30,
+        dueAt: 100,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 350,
+        dueAt: 400,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
+      {
+        at: 400,
+        dueAt: 500,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
     ]);
   });
 
@@ -137,9 +190,27 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 0, controlState: 'STARTUP', isCompatible: false, event: 'compatibilityChanged' },
-      { at: 50, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 150, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
+      {
+        at: 0,
+        dueAt: 50,
+        controlState: 'STARTUP',
+        isCompatible: false,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 50,
+        dueAt: 150,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 150,
+        dueAt: 250,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
     ]);
   });
 
@@ -155,8 +226,20 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 130, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 200, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
+      {
+        at: 130,
+        dueAt: 200,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 200,
+        dueAt: 300,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
     ]);
   });
 
@@ -170,10 +253,28 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 0, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 100, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
-      { at: 200, controlState: 'FAILING', isCompatible: false, event: 'compatibilityChanged' },
-      { at: 230, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
+      {
+        at: 0,
+        dueAt: 100,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      { at: 100, dueAt: 200, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
+      {
+        at: 200,
+        dueAt: 230,
+        controlState: 'FAILING',
+        isCompatible: false,
+        event: 'compatibilityChanged',
+      },
+      {
+        at: 230,
+        dueAt: 330,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
     ]);
   });
 
@@ -189,9 +290,21 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      { at: 0, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityChanged' },
-      { at: 150, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
-      { at: 200, controlState: 'NORMAL', isCompatible: true, event: 'compatibilityUnchanged' },
+      {
+        at: 0,
+        dueAt: 100,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityChanged',
+      },
+      { at: 150, dueAt: 200, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
+      {
+        at: 200,
+        dueAt: 300,
+        controlState: 'NORMAL',
+        isCompatible: true,
+        event: 'compatibilityUnchanged',
+      },
     ]);
   });
 });

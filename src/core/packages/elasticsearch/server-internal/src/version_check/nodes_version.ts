@@ -9,7 +9,7 @@
 
 /**
  * The Elasticsearch version check as a state-action machine. The control state
- * picks the polling interval: STARTUP until the cluster is first compatible,
+ * names the polling interval: STARTUP until the cluster is first compatible,
  * FAILING while the request fails, NORMAL otherwise.
  */
 
@@ -24,14 +24,12 @@ import {
   type NodesVersionCompatibility,
 } from './nodes_version_compatibility';
 import {
-  nextOnGrid,
   realClock,
   run,
   type Action,
   type ActionResult,
   type AugmentedState,
   type Clock,
-  type Scheduled,
   type StateActionMachine,
 } from './state_action_machine';
 
@@ -48,13 +46,12 @@ export type NodesVersionResult = ActionResult<NodesInfo>;
 
 export type NodesVersionControlState = 'STARTUP' | 'NORMAL' | 'FAILING';
 
-export interface NodesVersionState extends Scheduled {
+export interface NodesVersionState {
   readonly controlState: NodesVersionControlState;
   /** `undefined` until the first compatibility settles. */
   readonly compatibility: NodesVersionCompatibility | undefined;
   /** Retries left before a request error settles as the compatibility. */
   readonly attemptsLeft: number;
-  readonly nextActionAt: number;
 }
 
 export type NodesVersionEvent =
@@ -62,14 +59,10 @@ export type NodesVersionEvent =
   | { readonly type: 'compatibilityChanged'; readonly compatibility: NodesVersionCompatibility }
   | { readonly type: 'compatibilityUnchanged' };
 
-export const initialState = (
-  config: NodesVersionConfig,
-  nextActionAt: number
-): NodesVersionState => ({
+export const initialState = (config: NodesVersionConfig): NodesVersionState => ({
   controlState: 'STARTUP',
   compatibility: undefined,
   attemptsLeft: config.healthCheckRetry,
-  nextActionAt,
 });
 
 const pollingInterval = (
@@ -117,15 +110,11 @@ export const model = (
   state: NodesVersionState,
   result: NodesVersionResult
 ): AugmentedState<NodesVersionState, NodesVersionEvent> => {
-  const schedule = (controlState: NodesVersionControlState): number =>
-    nextOnGrid(state.nextActionAt, result.completedAt, pollingInterval(config, controlState));
-
   if (!result.ok && state.attemptsLeft > 0) {
     return {
       state: {
         ...state,
         attemptsLeft: state.attemptsLeft - 1,
-        nextActionAt: schedule(state.controlState),
       },
       event: { type: 'retried' },
     };
@@ -144,7 +133,6 @@ export const model = (
       controlState,
       compatibility,
       attemptsLeft: config.healthCheckRetry,
-      nextActionAt: schedule(controlState),
     },
     event: changed
       ? { type: 'compatibilityChanged', compatibility }
@@ -156,9 +144,10 @@ export const nodesVersionMachine = (
   action: Action<NodesInfo>,
   config: NodesVersionConfig
 ): StateActionMachine<NodesVersionState, NodesInfo, NodesVersionEvent> => ({
-  initialState: (start) => initialState(config, start),
+  initialState: () => initialState(config),
   next: () => action,
   model: (state, result) => model(config, state, result),
+  interval: (state) => pollingInterval(config, state.controlState),
 });
 
 export interface CheckEsNodesVersionOptions {
