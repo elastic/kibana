@@ -259,7 +259,7 @@ test.describe.skip(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      // Significant Events refuses to render its tabs at all until the
+      // Nightshift refuses to render at all until the Significant Events
       // availability route says so, and that route needs the plugin's managed
       // index. The alert spec in this suite stubs the same thing.
       await mockInvestigationApi(page);
@@ -276,7 +276,7 @@ test.describe.skip(
      * Opens the Memory page by loading its route, the way a bookmark or a pasted
      * link does.
      *
-     * That used to bounce to Streams: the page builds its tab list from an
+     * That used to bounce to the first tab: the page builds its tab list from an
      * availability query that is still pending on the first render, so `memory` was
      * briefly not one of its tabs and an unknown tab is redirected to the first
      * one. Loading the route directly and staying on it is the assertion.
