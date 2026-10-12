@@ -178,6 +178,95 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.steps[0].with.message).toBeUndefined();
     });
 
+    it('copies a Slack channel destination onto the investigation with the default connector', () => {
+      const automation = baseAutomation();
+      automation.completions = [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: '#prod-alerts',
+        },
+      ];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations).toEqual([
+        {
+          type: 'slack',
+          connector_id: 'elastic-apps-slack',
+          params: { channel: '#prod-alerts' },
+          automation_id: 'auto-123',
+          automation_name: 'Test automation',
+        },
+      ]);
+    });
+
+    it('uses an explicit Slack connector when the automation names one', () => {
+      const automation = baseAutomation();
+      automation.completions = [
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: 'C0123456789',
+          connectorId: 'my-slack-bot',
+        },
+      ];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations[0]).toEqual(
+        expect.objectContaining({
+          connector_id: 'my-slack-bot',
+          params: { channel: 'C0123456789' },
+        })
+      );
+    });
+
+    it('copies every channel completion and skips other actions and target modes', () => {
+      const automation = baseAutomation();
+      automation.completions = [
+        { action: 'post_to_slack', targetMode: 'channel', destination: '#oncall' },
+        { action: 'silent' },
+        { action: 'post_to_slack', targetMode: 'thread' },
+        {
+          action: 'post_to_slack',
+          targetMode: 'channel',
+          destination: 'C123',
+          connectorId: 'slack',
+        },
+      ];
+
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations).toEqual([
+        {
+          type: 'slack',
+          connector_id: 'elastic-apps-slack',
+          params: { channel: '#oncall' },
+          automation_id: 'auto-123',
+          automation_name: 'Test automation',
+        },
+        {
+          type: 'slack',
+          connector_id: 'slack',
+          params: { channel: 'C123' },
+          automation_id: 'auto-123',
+          automation_name: 'Test automation',
+        },
+      ]);
+    });
+
+    it.each([
+      ['no completion', {}],
+      ['a silent completion', { action: 'silent', targetMode: 'channel', destination: '#x' }],
+      ['create_investigation', { action: 'create_investigation', destination: '#x' }],
+      [
+        'thread mode, which needs the Slack source',
+        { action: 'post_to_slack', targetMode: 'thread' },
+      ],
+      ['channel mode without a destination', { action: 'post_to_slack', targetMode: 'channel' }],
+    ] as const)('omits notificationDestinations for %s', (_label, completion) => {
+      const automation = baseAutomation();
+      automation.completions = [{ ...completion }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations).toBeUndefined();
+    });
+
     it('does not include execution.id anywhere in the output', () => {
       const raw = generateWorkflowYaml('auto-123', baseAutomation());
       expect(raw).not.toContain('execution.id');

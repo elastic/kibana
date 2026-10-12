@@ -163,6 +163,18 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  // `description` is optional: omit it to leave it unset rather than sending a sentinel.
+  apiTest('validation: rejects an empty or blank metadata.description', async ({ apiClient }) => {
+    for (const description of ['', '   ']) {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: buildCreateRuleData({ metadata: { name: 'blank-description', description } }),
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  });
+
   apiTest('validation: rejects body with an unknown kind value', async ({ apiClient }) => {
     const body = { ...buildCreateRuleData(), kind: 'unknown' };
     const response = await apiClient.post(testData.RULE_API_PATH, {
