@@ -27,6 +27,9 @@ interface RenderPanelProps {
   onPresetSave?: DateRangePickerProps['onPresetSave'];
   /** Renders a button that hands the provider a new `presets` array identity. */
   withPresetsBump?: boolean;
+  /** Label of the preset the bump button hands the provider. */
+  presetsBumpLabel?: string;
+  presetsBumpStart?: string;
 }
 
 const OpenCustomPanelButton = () => {
@@ -66,6 +69,8 @@ const TestHarness = ({
   onChange = () => {},
   onPresetSave,
   withPresetsBump = false,
+  presetsBumpLabel = 'Today',
+  presetsBumpStart = 'now/d',
 }: RenderPanelProps) => {
   // Same content as the provider's default presets, so only the identity differs.
   const [presets, setPresets] = useState<DateRangePickerProps['presets']>(undefined);
@@ -86,7 +91,15 @@ const TestHarness = ({
           <button
             type="button"
             data-test-subj="bumpPresetsButton"
-            onClick={() => setPresets([{ start: 'now/d', end: 'now/d', label: 'Today' }])}
+            onClick={() =>
+              setPresets([
+                {
+                  start: presetsBumpStart,
+                  end: presetsBumpStart === 'now/d' ? 'now/d' : 'now',
+                  label: presetsBumpLabel,
+                },
+              ])
+            }
           >
             Bump presets
           </button>
@@ -306,6 +319,25 @@ describe('CustomTimeRangePanel', () => {
       // That recompute still carries the pre-switch `end: 'now'`, so re-deriving
       // from it would snap End back to Now and unmount the field mid-edit.
       expect(within(getEndFieldset()).getByLabelText('End date absolute date')).toBeInTheDocument();
+    });
+
+    it('adopts the bounds when the same text starts resolving to a preset', () => {
+      // 'Incident' is unparseable until the async presets source delivers a preset with that label.
+      renderCustomTimeRangePanel({
+        defaultValue: 'Incident',
+        withPresetsBump: true,
+        presetsBumpLabel: 'Incident',
+        presetsBumpStart: 'now-1h',
+      });
+      openCustomPanel();
+
+      act(() => {
+        screen
+          .getByTestId('bumpPresetsButton')
+          .dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+
+      expect(within(getStartFieldset()).getByLabelText('Count')).toHaveValue(1);
     });
   });
 
