@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import type { DownsampledEventsIndex } from './downsampling';
 import { getSampledTraceEventsIndex } from './downsampling';
 
 describe('Using down-sampled indexes', () => {
+  const targetSampleSize = 20000;
+  const initialExp = 6;
+
   test('getSampledTraceEventsIndex', () => {
-    const targetSampleSize = 20000;
-    const initialExp = 6;
     const tests: Array<{
       sampleCountFromPow6: number;
       expected: DownsampledEventsIndex;
@@ -51,7 +53,42 @@ describe('Using down-sampled indexes', () => {
     for (const t of tests) {
       expect(
         getSampledTraceEventsIndex(
-          'profiling-events-all',
+          ProfilingSchema.ECS,
+          targetSampleSize,
+          t.sampleCountFromPow6,
+          initialExp
+        )
+      ).toEqual(t.expected);
+    }
+  });
+
+  test('getSampledTraceEventsIndex with the OTel schema', () => {
+    const tests: Array<{
+      sampleCountFromPow6: number;
+      expected: DownsampledEventsIndex;
+    }> = [
+      {
+        sampleCountFromPow6: targetSampleSize,
+        expected: { name: 'profiling-events-5pow06.otel-*', sampleRate: 1 / 5 ** 6 },
+      },
+      {
+        sampleCountFromPow6: targetSampleSize - 1,
+        expected: { name: 'profiling-events-5pow05.otel-*', sampleRate: 1 / 5 ** 5 },
+      },
+      {
+        sampleCountFromPow6: 0,
+        expected: { name: 'profiling-events-all.otel-*', sampleRate: 1 },
+      },
+      {
+        sampleCountFromPow6: targetSampleSize * 5 ** 8,
+        expected: { name: 'profiling-events-5pow11.otel-*', sampleRate: 1 / 5 ** 11 },
+      },
+    ];
+
+    for (const t of tests) {
+      expect(
+        getSampledTraceEventsIndex(
+          ProfilingSchema.OTEL,
           targetSampleSize,
           t.sampleCountFromPow6,
           initialExp

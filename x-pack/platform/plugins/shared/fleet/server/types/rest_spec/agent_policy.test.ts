@@ -8,6 +8,20 @@
 import { GetAgentPoliciesRequestSchema } from './agent_policy';
 
 describe('GetAgentPoliciesRequestSchema.query', () => {
+  it('should default showAgentless to true', () => {
+    expect(GetAgentPoliciesRequestSchema.query.validate({}).showAgentless).toBe(true);
+  });
+
+  it('should accept showAgentless being false', () => {
+    expect(
+      GetAgentPoliciesRequestSchema.query.validate({ showAgentless: false }).showAgentless
+    ).toBe(false);
+  });
+
+  it('should reject a non boolean showAgentless', () => {
+    expect(() => GetAgentPoliciesRequestSchema.query.validate({ showAgentless: 'no' })).toThrow();
+  });
+
   it('should work without query parameters', () => {
     expect(() => GetAgentPoliciesRequestSchema.query.validate({})).not.toThrow();
   });

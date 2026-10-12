@@ -25,20 +25,16 @@ export const stopLabel = i18n.translate('esqlEditor.visor.stopLabel', {
   defaultMessage: 'Stop',
 });
 
-export const aiModeLabel = i18n.translate('esqlEditor.visor.aiModeLabel', {
-  defaultMessage: 'Query with AI',
-});
-
 export const aiModeTooltip = i18n.translate('esqlEditor.visor.aiModeTooltip', {
   defaultMessage: 'Query using natural language',
 });
 
 export const kqlModeLabel = i18n.translate('esqlEditor.visor.kqlModeLabel', {
-  defaultMessage: 'Filter using KQL',
+  defaultMessage: 'Filter your data',
 });
 
 export const visorModeLegend = i18n.translate('esqlEditor.visor.modeLegend', {
-  defaultMessage: 'Switch between KQL and Query with AI',
+  defaultMessage: 'Switch between filter and natural language',
 });
 
 export const enterHintFilterLabel = i18n.translate('esqlEditor.visor.enterHintFilter', {

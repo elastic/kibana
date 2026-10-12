@@ -29,6 +29,7 @@ import {
 } from '../src/constants';
 import { evaluate, selectEvaluators, tags } from '../src/evaluate';
 import {
+  claimGrounding,
   createFpTpTrajectoryEvaluator,
   outcomeAccuracy,
   payloadConformance,
@@ -243,6 +244,7 @@ evaluate.describe('Attack Discovery FP/TP analysis', { tag: tags.stateful.classi
           outcomeAccuracy,
           unsafeClose,
           payloadConformance,
+          skipFailedRuns(claimGrounding),
           createFpTpTrajectoryEvaluator(),
           skipFailedRuns(evaluators.criteria(SUMMARY_CRITERIA)),
         ])
