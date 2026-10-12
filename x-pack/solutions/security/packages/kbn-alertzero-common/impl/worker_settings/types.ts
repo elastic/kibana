@@ -22,8 +22,11 @@ export interface WorkerSettingsDeclaration<
    * rejects any other. Manual is the default for a fresh install when allowed, otherwise the first.
    */
   allowedAutonomyLevels: readonly [WatchAutonomyLevel, ...WatchAutonomyLevel[]];
-  /** Present only for schedule-driven Workers; its presence is what renders the interval control. */
-  scheduleInterval?: { defaultValue: WorkerScheduleInterval };
+  /**
+   * Present only for schedule-driven Workers; its presence is what renders the interval control.
+   * When `readOnly` is true the UI locks the control and the server rejects schedule patches.
+   */
+  scheduleInterval?: { defaultValue: WorkerScheduleInterval; readOnly?: boolean };
   /**
    * Worker-specific settings, owned by the Worker's Watch team. The schema is the closed, complete
    * `extras` object: it is validated whole on every write and every read.

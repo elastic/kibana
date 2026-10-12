@@ -30,12 +30,19 @@ interface InstanceNamespaceFieldProps {
   onChange: (namespace: string) => void;
   /** True once the instance has a deployed policy; the namespace is then read-only. */
   isLocked?: boolean;
+  /**
+   * The namespace an empty value resolves to, when it is known. Managed integrations deploy an
+   * empty namespace as `default`; agent-based policies inherit it from their agent policy, which
+   * is not known here, so it stays undefined.
+   */
+  resolvedEmptyNamespace?: string;
 }
 
 export const InstanceNamespaceField = ({
   namespace,
   onChange,
   isLocked = false,
+  resolvedEmptyNamespace,
 }: InstanceNamespaceFieldProps) => {
   const { services } = useKibana<CoreStart>();
 
@@ -50,7 +57,7 @@ export const InstanceNamespaceField = ({
         })}
       >
         <EuiFieldText
-          value={namespace}
+          value={namespace || resolvedEmptyNamespace || ''}
           // The deployed policy may sit on an existing agent policy, whose namespace is not always `default`.
           placeholder={i18n.translate(
             'xpack.ingestHub.serviceSettingsStep.namespace.lockedInheritedPlaceholder',

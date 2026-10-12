@@ -25,6 +25,7 @@ export const completionCommand = {
   name: 'completion',
   methods: completionCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.completionDoc', {
       defaultMessage:

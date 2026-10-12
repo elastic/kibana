@@ -44,7 +44,6 @@ jest.mock('../app_context', () => ({
   appContextService: {
     getExperimentalFeatures: jest.fn().mockReturnValue({
       useSpaceAwareness: false,
-      enableOtlpOutput: true,
     }),
     getInternalUserSOClient: jest.fn(),
     getInternalUserSOClientWithoutSpaceExtension: jest.fn(),
