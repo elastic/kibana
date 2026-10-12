@@ -248,17 +248,17 @@ const eventsAttachInvestigationRoute = createServerRoute({
     body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, getEventSearchClient, getAlertEventsClient, licensing } =
+    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
       await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     return attachInvestigationToEvent({
-      eventClient: await getEventClient(),
       eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
       investigation: params.body,
       alertEventsClient: await getAlertEventsClient(),
+      emitTrigger,
       logger,
     });
   },
@@ -374,33 +374,24 @@ const eventsUpdateRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: z
-      .object({
-        status: significantEventStatusSchema,
-        assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
-      })
-      .superRefine((val, ctx) => {
-        if (val.status === 'dismissed' && !val.assessment_note?.trim()) {
-          ctx.addIssue({
-            code: 'custom',
-            path: ['assessment_note'],
-            message: 'assessment_note is required when dismissing an event',
-          });
-        }
-      }),
+    body: z.object({
+      status: significantEventStatusSchema,
+      assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });
+    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
+      await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     return updateSignificantEventStatus({
-      eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       eventId: params.path.id,
       status: params.body.status,
       assessmentNote: params.body.assessment_note,
       alertEventsClient: await getAlertEventsClient(),
-      logger,
+      emitTrigger,
     });
   },
 });
@@ -432,18 +423,18 @@ const cleanupStaleEventsRoute = createServerRoute({
     logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventClient, getAlertEventsClient, licensing } = scopedClients;
+    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { rulesClient } = await scopedClients.getSignificantEventsAlertingContext();
 
     return cleanupStaleEvents({
-      eventClient: await getEventClient(),
+      eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
       alertEventsClient: await getAlertEventsClient(),
-      logger,
+      emitTrigger,
     });
   },
 });

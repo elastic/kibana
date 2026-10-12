@@ -48,6 +48,7 @@
     "@kbn/alerting-plugin",
     "@kbn/alerting-v2-plugin",
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
     "@kbn/logging",
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",
@@ -71,13 +72,13 @@
     "@kbn/security-plugin",
     "@kbn/cloud-plugin",
     "@kbn/scout-oblt",
-    "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
     "@kbn/datemath",
     "@kbn/core-http-server-utils",
     "@kbn/cps",
     "@kbn/cps-server-utils",
     "@kbn/esql-utils",
-    "@kbn/nightshift-investigations-plugin"
+    "@kbn/nightshift-investigations-plugin",
+    "@kbn/core-elasticsearch-server-mocks"
   ]
 }

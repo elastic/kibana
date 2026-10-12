@@ -15,15 +15,15 @@ import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_contex
 import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
 
 function tryParseDate(
-  date: string | string[] | null | undefined,
+  date: string | Array<string | null> | null | undefined,
   options?: { roundUp?: boolean }
 ): Moment | undefined {
   return typeof date === 'string' ? datemath.parse(date, options) : undefined;
 }
 
 function isValidDateRange(
-  from: string | string[] | null | undefined,
-  to: string | string[] | null | undefined
+  from: string | Array<string | null> | null | undefined,
+  to: string | Array<string | null> | null | undefined
 ): boolean {
   const start = tryParseDate(from);
   const end = tryParseDate(to, { roundUp: true });

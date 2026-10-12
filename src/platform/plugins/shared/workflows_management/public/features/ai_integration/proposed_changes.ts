@@ -104,6 +104,7 @@ export class ProposalManager {
   private isBulkOperation = false;
   private undoRedoService: UndoRedoService | undefined;
   private isDisposing = false;
+  private isSuspended = false;
 
   initialize(editor: monaco.editor.IStandaloneCodeEditor, options?: ProposalManagerOptions): void {
     this.editor = editor;
@@ -169,7 +170,7 @@ export class ProposalManager {
       this.originalModel = monaco.editor.createModel(model.getValue(), model.getLanguageId());
 
       this.contentChangeDisposable = model.onDidChangeContent(() => {
-        if (this.isInternalEdit) return;
+        if (this.isInternalEdit || this.isSuspended) return;
 
         if (this.hasPendingProposals()) {
           this.recomputeDiff();
@@ -347,6 +348,30 @@ export class ProposalManager {
     }
     this.isBulkOperation = false;
     this.options.onReject?.({ proposalId: 'all', isBulkAction: true });
+  }
+
+  /**
+   * Hides pending proposals while the editor shows other content, such as a
+   * past execution. Keeps the original content so `resume` can show them again.
+   */
+  suspend(): void {
+    if (!this.hasPendingProposals()) return;
+    this.isSuspended = true;
+    this.diffHunks = [];
+    this.clearAllHunkUI();
+    this.removeBulkBar();
+  }
+
+  /** Shows suspended proposals again, against the current editor content. */
+  resume(): void {
+    if (!this.isSuspended) return;
+    this.isSuspended = false;
+    this.recomputeDiff();
+    this.renderDiffUI();
+  }
+
+  hasSuspendedProposals(): boolean {
+    return this.isSuspended;
   }
 
   getDiffHunks(): DiffHunk[] {

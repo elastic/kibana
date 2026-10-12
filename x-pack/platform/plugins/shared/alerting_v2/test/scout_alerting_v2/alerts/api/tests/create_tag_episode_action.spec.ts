@@ -51,7 +51,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
       buildAlertEvent({
         rule: { id: ruleId, version: 1 },
         group_hash: groupHash,
-        episode: { id: episodeId, status: 'active' },
+        alert: { id: episodeId, status: 'active' },
       }),
     ]);
     const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
@@ -68,7 +68,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
     expect(actions[0]).toMatchObject({
       action_type: 'tag',
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
       rule_id: ruleId,
       space_id: 'default',
       tags,
@@ -76,11 +76,10 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
   });
 
   apiTest(
-    'tag: accepts an empty tags array and returns 204',
+    'tag: an empty tags array clears the tags and returns 204',
     async ({ apiClient, apiServices }) => {
       // The tag schema doesn't enforce a minimum array length, so `tags: []`
-      // must be accepted. Persisting an empty tags action is a documented way
-      // to record "tags were touched" without listing any.
+      // is how a client drops every tag from an alert.
       const ruleId = 'tag-empty-rule';
       const groupHash = 'tag-empty-group';
       const episodeId = 'tag-empty-episode';
@@ -88,9 +87,15 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
         buildAlertEvent({
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: episodeId, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         }),
       ]);
+      const tagResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { tags: ['production'] },
+      });
+      expect(tagResponse).toHaveStatusCode(204);
+
       const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
         headers: writerHeaders,
         body: { tags: [] },
@@ -100,15 +105,88 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
         ruleId,
         actionTypes: ['tag'],
       });
-      expect(actions).toHaveLength(1);
-      expect(actions[0]).toMatchObject({
+      expect(actions).toHaveLength(2);
+      expect(actions[1]).toMatchObject({
         action_type: 'tag',
         group_hash: groupHash,
-        episode_id: episodeId,
+        alert_id: episodeId,
         rule_id: ruleId,
       });
     }
   );
+
+  apiTest(
+    'tag: repeating the current set returns 409 regardless of order',
+    async ({ apiClient, apiServices }) => {
+      const ruleId = 'tag-no-op-rule';
+      const groupHash = 'tag-no-op-group';
+      const episodeId = 'tag-no-op-episode';
+      await apiServices.alertingV2.ruleEvents.seed([
+        buildAlertEvent({
+          rule: { id: ruleId, version: 1 },
+          group_hash: groupHash,
+          alert: { id: episodeId, status: 'active' },
+        }),
+      ]);
+      const firstResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { tags: ['production', 'reviewed'] },
+      });
+      expect(firstResponse).toHaveStatusCode(204);
+
+      const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { tags: ['reviewed', 'production'] },
+      });
+      expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('ALERT_ACTION_NO_OP');
+      expect(response.body.details).toMatchObject({
+        alert_id: episodeId,
+        group_hash: groupHash,
+        action_type: 'tag',
+      });
+
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
+        ruleId,
+        actionTypes: ['tag'],
+      });
+      expect(actions).toHaveLength(1);
+    }
+  );
+
+  apiTest('tag: re-applying a cleared set returns 204', async ({ apiClient, apiServices }) => {
+    const ruleId = 'tag-reapply-rule';
+    const groupHash = 'tag-reapply-group';
+    const episodeId = 'tag-reapply-episode';
+    await apiServices.alertingV2.ruleEvents.seed([
+      buildAlertEvent({
+        rule: { id: ruleId, version: 1 },
+        group_hash: groupHash,
+        alert: { id: episodeId, status: 'active' },
+      }),
+    ]);
+
+    for (const tags of [['production'], []]) {
+      const setupResponse = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+        headers: writerHeaders,
+        body: { tags },
+      });
+      expect(setupResponse).toHaveStatusCode(204);
+    }
+
+    const response = await apiClient.post(getTagEpisodeActionUrl(episodeId), {
+      headers: writerHeaders,
+      body: { tags: ['production'] },
+    });
+    expect(response).toHaveStatusCode(204);
+
+    const actions = await apiServices.alertingV2.alertActionsEvents.find({
+      ruleId,
+      actionTypes: ['tag'],
+    });
+    expect(actions).toHaveLength(3);
+    expect(actions[2]).toMatchObject({ tags: ['production'] });
+  });
 
   apiTest(
     'tag: audit actions work on old (superseded) episodes',
@@ -128,13 +206,13 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
           status: 'recovered',
-          episode: { id: olderEpisodeId, status: 'inactive' },
+          alert: { id: olderEpisodeId, status: 'inactive' },
         }),
         buildAlertEvent({
           '@timestamp': new Date(now).toISOString(),
           rule: { id: ruleId, version: 1 },
           group_hash: groupHash,
-          episode: { id: newerEpisodeId, status: 'active' },
+          alert: { id: newerEpisodeId, status: 'active' },
         }),
       ]);
 
@@ -152,7 +230,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
       expect(actions[0]).toMatchObject({
         action_type: 'tag',
         group_hash: groupHash,
-        episode_id: olderEpisodeId,
+        alert_id: olderEpisodeId,
         tags: ['archived'],
       });
     }
@@ -212,7 +290,7 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
+  apiTest('schema: rejects alert_id over 150 chars with 400', async ({ apiClient }) => {
     const response = await apiClient.post(getTagEpisodeActionUrl('a'.repeat(151)), {
       headers: writerHeaders,
       body: { tags: ['production'] },
@@ -221,14 +299,14 @@ apiTest.describe('Create tag episode action API', { tag: '@local-stateful-classi
     expect(response.body.code).toBe('BAD_REQUEST');
   });
 
-  apiTest('returns 404 when episode_id matches no events', async ({ apiClient }) => {
+  apiTest('returns 404 when alert_id matches no events', async ({ apiClient }) => {
     const response = await apiClient.post(getTagEpisodeActionUrl('unknown-episode'), {
       headers: writerHeaders,
       body: { tags: ['production'] },
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body.code).toBe('ALERT_EPISODE_NOT_FOUND');
-    expect(response.body.details).toMatchObject({ episode_id: 'unknown-episode' });
+    expect(response.body.code).toBe('ALERT_NOT_FOUND');
+    expect(response.body.details).toMatchObject({ alert_id: 'unknown-episode' });
   });
 
   apiTest(

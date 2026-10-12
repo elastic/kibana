@@ -24,6 +24,7 @@ import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getActionsConfigurationUtilities } from '../actions_config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
@@ -559,6 +560,7 @@ describe('create()', () => {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
+        ...defaultInboundEventsLimitConfigs,
       },
     });
 

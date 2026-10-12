@@ -616,7 +616,7 @@ export function registerAttachmentRoutes({
         // Save the updated conversation
         await client.update(
           { id: conversationId, attachments: stateManager.getAll() },
-          { access: 'converse' }
+          { access: 'converse', source: 'http_api' }
         );
 
         return response.ok<RestoreAttachmentResponse>({
@@ -706,7 +706,7 @@ export function registerAttachmentRoutes({
         // Save the updated conversation
         await client.update(
           { id: conversationId, attachments: stateManager.getAll() },
-          { access: 'converse' }
+          { access: 'converse', source: 'http_api' }
         );
 
         return response.ok<RenameAttachmentResponse>({
@@ -820,7 +820,7 @@ export function registerAttachmentRoutes({
         // Save the updated conversation
         await client.update(
           { id: conversationId, attachments: stateManager.getAll() },
-          { access: 'converse' }
+          { access: 'converse', source: 'http_api' }
         );
 
         return response.ok<UpdateOriginResponse>({

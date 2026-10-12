@@ -11,6 +11,10 @@ applies_to:
 
 The Ansible Control Server connector calls the [Ansible Automation Controller / AWX API](https://docs.ansible.com/automation-controller/latest/html/controllerapi/index.html) to list job templates, launch jobs, and diagnose failures via stdout and job events. It authenticates with a long-lived API bearer token and can verify the server TLS certificate against a pasted PEM CA.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ::::{warning}
 This connector can perform any operation the configured token is authorized for, including launching jobs that mutate real infrastructure. There are no additional restrictions in {{kib}}: access is governed entirely by the token's Controller / AWX permissions. Prefer a least-privilege automation user scoped to specific templates and organizations.
 ::::

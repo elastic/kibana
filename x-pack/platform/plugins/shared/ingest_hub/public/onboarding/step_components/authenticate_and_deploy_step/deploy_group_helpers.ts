@@ -6,7 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { ServiceInstance } from '../service_settings_step/use_service_settings';
+import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
 
@@ -39,35 +39,79 @@ export function reconcileInstances(
   return [...kept, ...added];
 }
 
+const sanitizeGroupId = (groupId: string): string =>
+  groupId.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+
+export const buildGroupPolicyNameStem = (group: DeployGroup): string =>
+  group.policyNameStem ?? sanitizeGroupId(group.groupId);
+
+export const DEFAULT_NAMESPACE = 'default';
+
+function instanceNamespace(
+  instance: ServiceInstance,
+  storedServiceVars: Record<string, ServiceVars>
+): string {
+  return storedServiceVars[instance.instanceId]?.namespace ?? '';
+}
+
 /**
- * Group originals by packageName and make each duplicate its own group.
+ * Group originals by packageName and namespace, and make each duplicate its own group.
  *
- * - Originals (isDuplicate: false): bundled one-per-package into a DeployGroup so that all
- *   services of the same package share a single agentless policy call.
+ * - Originals (isDuplicate: false): bundled per package and namespace into a DeployGroup so that
+ *   all services of the same package sharing a namespace use a single policy call. A policy has
+ *   one namespace, so instances with different namespaces cannot share one.
  * - Duplicates (isDuplicate: true): one DeployGroup each, because duplicate instances share the
  *   same stream key inside buildPackageInputs and would silently overwrite each other if bundled.
  */
 export function groupByPackage(
   originals: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>,
-  duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>
+  duplicates: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>,
+  storedServiceVars: Record<string, ServiceVars> = {},
+  /**
+   * The namespace the deploy gives an instance that has none. When set, an empty namespace and an
+   * explicit one equal to it are the same namespace and share a group (and so a policy);
+   * otherwise they stay apart, as for agent-based, where an empty namespace means the namespace
+   * of the agent policy.
+   */
+  defaultNamespace?: string
 ): DeployGroup[] {
-  const bundledByPackage = new Map<
+  const resolveNamespace = (instance: ServiceInstance) => {
+    const namespace = instanceNamespace(instance, storedServiceVars);
+    return namespace || defaultNamespace || '';
+  };
+  const bundled = new Map<
     string,
-    Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>
+    {
+      namespace: string;
+      members: Array<{ instance: ServiceInstance; service: AwsServiceMatrixEntry }>;
+    }
   >();
   for (const member of originals) {
     const pkg = member.service.packageName;
-    if (!bundledByPackage.has(pkg)) bundledByPackage.set(pkg, []);
-    bundledByPackage.get(pkg)!.push(member);
+    const namespace = resolveNamespace(member.instance);
+    // The default namespace keeps the plain package id, so policy names do not change.
+    const groupId = namespace && namespace !== defaultNamespace ? `${pkg}__${namespace}` : pkg;
+    const group = bundled.get(groupId) ?? { namespace, members: [] };
+    group.members.push(member);
+    bundled.set(groupId, group);
   }
 
   const groups: DeployGroup[] = [];
-  for (const [pkg, members] of bundledByPackage) {
+  // Sanitizing is lossy (`prod.eu` and `prod_eu` both become `prod_eu`) and groups deploy in the
+  // same millisecond, so a counter keeps the name stems of one deploy distinct.
+  const usedStems = new Set<string>();
+  for (const [groupId, { namespace, members }] of bundled) {
+    const baseStem = sanitizeGroupId(groupId);
+    let policyNameStem = baseStem;
+    for (let n = 2; usedStems.has(policyNameStem); n++) policyNameStem = `${baseStem}_${n}`;
+    usedStems.add(policyNameStem);
     groups.push({
-      groupId: pkg,
+      groupId,
       instanceIds: members.map(({ instance }) => instance.instanceId),
       members,
       isDuplicateGroup: false,
+      namespace,
+      policyNameStem,
     });
   }
   for (const member of duplicates) {
@@ -76,6 +120,7 @@ export function groupByPackage(
       instanceIds: [member.instance.instanceId],
       members: [member],
       isDuplicateGroup: true,
+      namespace: resolveNamespace(member.instance),
     });
   }
 

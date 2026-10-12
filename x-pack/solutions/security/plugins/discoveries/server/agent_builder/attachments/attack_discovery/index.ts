@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import type { IClusterClient, Logger } from '@kbn/core/server';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
@@ -15,10 +14,14 @@ import type {
 } from '@kbn/agent-builder-server/attachments';
 import { getTacticMetadata } from '@kbn/elastic-assistant-common';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ATTACK_DISCOVERY_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { transformSearchResponseToAlerts } from '../../../routes/post/validate/helpers/transform_search_response_to_alerts';
+import {
+  attachmentReplacementsSchema,
+  getAttachmentReplacements,
+} from '../../../lib/attachment_replacements';
 import { getPlainText } from './get_plain_text';
 import { getResolveSearchRequest } from './get_resolve_search_request';
 
@@ -42,10 +45,6 @@ const MAX_TITLE_LENGTH = 1024;
 const MAX_SUMMARY_LENGTH = 8000;
 const MAX_DETAILS_LENGTH = 50_000;
 const MAX_ENTITY_SUMMARY_LENGTH = 8000;
-const MAX_REPLACEMENTS = 1000;
-
-/** Anonymized values are UUIDs, which keeps the replacements' keys, and their count, bounded. */
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * The resolved content of an Attack Discovery attachment.
@@ -57,23 +56,23 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * The title and markdown are the persisted, anonymized text. When `replacements` is present,
  * the attachment's view and the agent both insert the original values from it, one source.
  */
-export const attackDiscoveryAttachmentDataSchema = z.object({
-  // `format` lists each id on its own line, so an id may not contain whitespace, which would
-  // let it add lines of its own to what the agent reads.
-  alert_ids: z.array(z.string().max(512).regex(/^\S+$/)).max(1000),
-  details_markdown: z.string().max(MAX_DETAILS_LENGTH),
-  entity_summary_markdown: z.string().max(MAX_ENTITY_SUMMARY_LENGTH).optional(),
-  id: z.string().max(512),
-  mitre_attack_tactics: z.array(z.string().max(256)).max(64).optional(),
-  replacements: z
-    .record(z.string().regex(UUID), z.string().max(1024))
-    .refine((replacements) => Object.keys(replacements).length <= MAX_REPLACEMENTS, {
-      message: `Too many replacements; at most ${MAX_REPLACEMENTS} are allowed`,
-    })
-    .optional(),
-  summary_markdown: z.string().max(MAX_SUMMARY_LENGTH),
-  title: z.string().max(MAX_TITLE_LENGTH),
-});
+export const attackDiscoveryAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    // `format` lists each id on its own line, so an id may not contain whitespace, which would
+    // let it add lines of its own to what the agent reads.
+    alert_ids: z.array(z.string().max(512).regex(/^\S+$/)).max(1000),
+    details_markdown: z.string().max(MAX_DETAILS_LENGTH),
+    entity_summary_markdown: z.string().max(MAX_ENTITY_SUMMARY_LENGTH).optional(),
+    id: z.string().max(512),
+    mitre_attack_tactics: z.array(z.string().max(256)).max(64).optional(),
+    replacements: attachmentReplacementsSchema.optional(),
+    summary_markdown: z.string().max(MAX_SUMMARY_LENGTH),
+    // The discovery's `@timestamp`, so its "Open in Attacks" link can set the Attacks page's time
+    // range to include it.
+    timestamp: z.string().datetime({ offset: true }).optional(),
+    title: z.string().max(MAX_TITLE_LENGTH),
+  })
+);
 
 export type AttackDiscoveryAttachmentData = z.infer<typeof attackDiscoveryAttachmentDataSchema>;
 
@@ -129,8 +128,8 @@ const formatAttackDiscovery = (data: AttackDiscoveryAttachmentData): string => {
  * - By value: Security Solution's "Add to chat" sends the data it already holds, so `resolve`
  *   is not called.
  *
- * Both store the persisted, anonymized text. Only "Add to chat" also sends the discovery's
- * `replacements`, so its attachment shows the original values to the analyst and the agent.
+ * Both store the persisted, anonymized text with the `replacements` that text uses, so the
+ * attachment shows the original values to the analyst and the agent.
  */
 export const createAttackDiscoveryAttachmentType = ({
   adhocAttackDiscoveryDataClient,
@@ -182,7 +181,7 @@ export const createAttackDiscoveryAttachmentType = ({
     // discoveries share one document shape, so both indices are searched.
     const response = await esClient
       .asScoped(request)
-      .asCurrentUser.search(
+      .asCurrentUser.search<Record<string, unknown>>(
         getResolveSearchRequest({
           adhocIndex: adhocAttackDiscoveryDataClient.indexNameWithNamespace(spaceId),
           origin,
@@ -199,10 +198,11 @@ export const createAttackDiscoveryAttachmentType = ({
     const [discovery] = transformSearchResponseToAlerts({
       // Field rendering on, so the markdown keeps the `{{ field value }}` syntax the
       // renderer draws as pills. Replacements off: the markdown stays anonymized, as the
-      // review workflow's inputs are.
+      // review workflow's inputs are, and the replacements below restore the original
+      // values for display.
       enableFieldRendering: true,
       logger,
-      response: response as unknown as estypes.SearchResponse<Record<string, unknown>>,
+      response,
       withReplacements: false,
     });
 
@@ -215,13 +215,32 @@ export const createAttackDiscoveryAttachmentType = ({
       );
     }
 
+    // The persisted `@timestamp`, which the Attacks page filters on. The API's `timestamp` falls
+    // back to the current time when a discovery has no `kibana.alert.start`.
+    const timestamp = response.hits.hits.find((hit) => hit._id === discovery.id)?._source?.[
+      '@timestamp'
+    ];
+
     return {
       alert_ids: discovery.alert_ids,
       details_markdown: discovery.details_markdown,
       entity_summary_markdown: discovery.entity_summary_markdown,
       id: discovery.id,
       mitre_attack_tactics: discovery.mitre_attack_tactics,
+      // So the Investigation's analysts, and its agent, read the original values. Only the
+      // ones this discovery's text uses, as "Add to chat" sends: the generation's
+      // replacements also cover the other discoveries it produced.
+      replacements: getAttachmentReplacements({
+        replacements: discovery.replacements,
+        texts: [
+          discovery.title,
+          discovery.summary_markdown,
+          discovery.details_markdown,
+          discovery.entity_summary_markdown ?? '',
+        ],
+      }),
       summary_markdown: discovery.summary_markdown,
+      ...(typeof timestamp === 'string' ? { timestamp } : {}),
       title: discovery.title,
     };
   },
@@ -235,6 +254,6 @@ export const createAttackDiscoveryAttachmentType = ({
     `Represents an Attack Discovery: a correlated set of detection alerts that Attack ` +
     `Discovery identified as a single attack. Rendering this attachment inline displays the ` +
     `attack's title, then its summary and its detailed narrative as formatted markdown in ` +
-    `the conversation UI, with the referenced detection alert fields rendered as interactive ` +
-    `pills the user can open.`,
+    `the conversation UI, with the referenced detection alert fields rendered as ` +
+    `non-interactive field pills.`,
 });

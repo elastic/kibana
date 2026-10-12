@@ -27,6 +27,8 @@ interface ParsedInvestigationWorkflow {
   steps: Array<{ name: string; with?: { schema?: object } }>;
 }
 
+const ORDER_INSENSITIVE_KEYS = ['enum', 'required'];
+
 /**
  * Strips keys that intentionally differ between the hand-authored YAML schema and
  * `z.toJSONSchema(investigationStateSchema)`:
@@ -45,7 +47,15 @@ const normalizeSchema = (value: unknown): unknown => {
     return Object.fromEntries(
       Object.entries(value)
         .filter(([key]) => !['$schema', 'description', 'additionalProperties'].includes(key))
-        .map(([key, entry]) => [key, normalizeSchema(entry)])
+        .map(([key, entry]) => {
+          const normalized = normalizeSchema(entry);
+          return [
+            key,
+            ORDER_INSENSITIVE_KEYS.includes(key) && Array.isArray(normalized)
+              ? [...normalized].sort()
+              : normalized,
+          ];
+        })
     );
   }
   return value;
@@ -110,7 +120,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
-    severity: '80-critical',
+    severity: 'critical',
     recommendations: [
       {
         title: 'Revert the pool-size config change',
@@ -337,7 +347,7 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
   });
 
   it('rejects an investigation severity outside the canonical tiers under both schemas', () => {
-    const invalidSeverity = { ...validPayload, severity: 'critical' };
+    const invalidSeverity = { ...validPayload, severity: '80-critical' };
 
     expect(validate(invalidSeverity)).toBe(false);
     expect(investigationStateSchema.safeParse(invalidSeverity).success).toBe(false);

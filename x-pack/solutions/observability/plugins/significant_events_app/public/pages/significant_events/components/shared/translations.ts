@@ -11,7 +11,7 @@ import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   'xpack.significantEventsApp.findSignificantEventsLabel',
   {
-    defaultMessage: 'Find Significant Events',
+    defaultMessage: 'Find significant events',
   }
 );
 
@@ -19,7 +19,7 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
 export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.activityPausedTooltip',
   {
-    defaultMessage: 'Significant Events activity is paused. Resume it in Settings.',
+    defaultMessage: 'Significant events activity is paused. Resume it in settings.',
   }
 );
 
@@ -27,7 +27,7 @@ export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
 export const ACTIVITY_STATUS_LOADING_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.activityStatusLoadingTooltip',
   {
-    defaultMessage: 'Checking Significant Events activity status…',
+    defaultMessage: 'Checking significant events activity status…',
   }
 );
 
@@ -36,7 +36,7 @@ export const ACTIVITY_STATUS_ERROR_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.activityStatusErrorTooltip',
   {
     defaultMessage:
-      'Could not load Significant Events activity status. New activity stays blocked until status is available.',
+      'Could not load significant events activity status. New activity stays blocked until status is available.',
   }
 );
 
@@ -233,13 +233,10 @@ export const changeTypeLabel = (type?: string): string =>
   (type ? CHANGE_TYPE_LABELS[type] : undefined) ?? type ?? '-';
 
 export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  open: i18n.translate('xpack.significantEventsApp.significantEvent.status.open', {
-    defaultMessage: 'Open',
+  active: i18n.translate('xpack.significantEventsApp.significantEvent.status.active', {
+    defaultMessage: 'Active',
   }),
-  dismissed: i18n.translate('xpack.significantEventsApp.significantEvent.status.dismissed', {
-    defaultMessage: 'Dismissed',
-  }),
-  closed: i18n.translate('xpack.significantEventsApp.significantEvent.status.closed', {
-    defaultMessage: 'Closed',
+  inactive: i18n.translate('xpack.significantEventsApp.significantEvent.status.inactive', {
+    defaultMessage: 'Inactive',
   }),
 };

@@ -34,7 +34,6 @@ import {
   DISCOVERIES_TEMP_INDEX_PATTERN,
   DETECTIONS_TEMP_INDEX_PATTERN,
   DETECTIONS_DATA_STREAM,
-  EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
 } from '../../src/data_generators/snapshot_indices';
 
@@ -266,7 +265,7 @@ export async function persistDiscoveriesForSnapshot(
 ): Promise<{ index: string; count: number }> {
   const discoveries = await fetchAllPaginated<SignificantEvent>(
     config,
-    '/internal/significant_events/events?status=pending',
+    '/internal/significant_events/events?status=active',
     'events'
   );
   return persistDocsForSnapshot(
@@ -274,7 +273,7 @@ export async function persistDiscoveriesForSnapshot(
     log,
     getSnapshotDiscoveriesIndex(snapshotName),
     discoveries as unknown as Array<Record<string, unknown>>,
-    'event_uuid',
+    'event_id',
     'discovery(s)'
   );
 }
@@ -282,12 +281,7 @@ export async function persistDiscoveriesForSnapshot(
 export async function cleanupExtractedData(esClient: Client, log: ToolingLog): Promise<void> {
   log.info('Cleaning up ES data...');
 
-  const dataStreamTargets = [
-    'logs*',
-    KNOWLEDGE_INDICATORS_DATA_STREAM,
-    DETECTIONS_DATA_STREAM,
-    EVENTS_DATA_STREAM,
-  ];
+  const dataStreamTargets = ['logs*', KNOWLEDGE_INDICATORS_DATA_STREAM, DETECTIONS_DATA_STREAM];
   const indexTargets = [
     FEATURES_TEMP_INDEX_PATTERN,
     DISCOVERIES_TEMP_INDEX_PATTERN,

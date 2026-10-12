@@ -14,12 +14,15 @@ import {
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   type Worker,
 } from '@kbn/alertzero-common';
+import { ensureWorkerServiceAccounts } from '../service_accounts/ensure_worker_service_accounts';
 import { useWatchSettingsDraft } from './use_watch_settings_draft';
 import { useUpdateWorker } from './use_workers_api';
 
 jest.mock('./use_workers_api');
+jest.mock('../service_accounts/ensure_worker_service_accounts');
 
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
+const mockEnsureWorkerServiceAccounts = jest.mocked(ensureWorkerServiceAccounts);
 
 const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>): Worker => ({
   watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
@@ -28,6 +31,7 @@ const createWorker = (overrides: Partial<Worker> & Pick<Worker, 'id' | 'name'>):
   state: 'paused',
   settingsRevision: 1,
   workflowId: null,
+  blockingReasons: [],
   settings: {
     workerId: overrides.id,
     autonomy: 'manual',
@@ -46,6 +50,7 @@ const ruleTuning = createWorker({
     autonomy: 'manual',
     scheduleInterval: '2h',
     extras: RULE_TUNING_EXTRAS,
+    serviceAccountId: 'kibana/alertzero_rule_tuning',
   },
 });
 
@@ -57,8 +62,14 @@ const ruleCoverage = createWorker({
     autonomy: 'manual',
     scheduleInterval: '1h',
     extras: RULE_COVERAGE_DEFAULT_EXTRAS,
+    serviceAccountId: 'kibana/alertzero_rule_coverage',
   },
 });
+
+const { serviceAccountId: _coverageAccount, ...coverageSettingsWithoutAccount } =
+  ruleCoverage.settings;
+/** A Worker that has never been bound to a service account. */
+const unboundRuleCoverage: Worker = { ...ruleCoverage, settings: coverageSettingsWithoutAccount };
 
 describe('useWatchSettingsDraft', () => {
   const mutateAsync = jest.fn();
@@ -66,6 +77,117 @@ describe('useWatchSettingsDraft', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseUpdateWorker.mockReturnValue({ mutateAsync } as never);
+    mockEnsureWorkerServiceAccounts.mockImplementation(
+      async (_http, _serviceAccounts, workerIds) =>
+        new Map(
+          workerIds.map((id) => [id, { ok: true as const, serviceAccountId: `kibana/sa-${id}` }])
+        )
+    );
+  });
+
+  describe('prebuilt service account', () => {
+    it('binds the prebuilt account when a Worker without one is turned on', async () => {
+      mutateAsync.mockResolvedValue({ worker: unboundRuleCoverage });
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, [
+        SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+      ]);
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+        patch: {
+          enabled: true,
+          settings: {
+            serviceAccountId: `kibana/sa-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`,
+          },
+          settingsRevision: 1,
+        },
+      });
+    });
+
+    it('binds it alongside settings edits, against the revision the edit started from', async () => {
+      mutateAsync.mockResolvedValue({ worker: unboundRuleCoverage });
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+        result.current.updateSettings(unboundRuleCoverage, { autonomy: 'assisted' });
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+        patch: {
+          enabled: true,
+          settings: {
+            autonomy: 'assisted',
+            serviceAccountId: `kibana/sa-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`,
+          },
+          settingsRevision: 1,
+        },
+      });
+    });
+
+    it('keeps the Worker off with an error when its account cannot be set up', async () => {
+      mockEnsureWorkerServiceAccounts.mockResolvedValueOnce(
+        new Map([
+          [
+            SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+            { ok: false as const, error: 'Forbidden' },
+          ],
+        ])
+      );
+      const { result } = renderHook(() => useWatchSettingsDraft([unboundRuleCoverage]));
+
+      act(() => {
+        result.current.updateEnabled(unboundRuleCoverage, true);
+      });
+      let savedWorkers: Worker[] = [];
+      await act(async () => {
+        savedWorkers = await result.current.save();
+      });
+
+      expect(savedWorkers).toEqual([]);
+      expect(mutateAsync).not.toHaveBeenCalled();
+      expect(result.current.resolve(unboundRuleCoverage)).toMatchObject({
+        enabled: true,
+        dirty: true,
+        error: 'Forbidden',
+      });
+    });
+
+    it('does not set up an account for a Worker that keeps its binding or is turned off', async () => {
+      const enabledUnbound: Worker = { ...unboundRuleCoverage, enabled: true };
+      mutateAsync.mockResolvedValue({ worker: ruleTuning });
+      const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, enabledUnbound]));
+
+      act(() => {
+        result.current.updateEnabled(ruleTuning, true);
+        result.current.updateEnabled(enabledUnbound, false);
+      });
+      await act(async () => {
+        await result.current.save();
+      });
+
+      expect(mockEnsureWorkerServiceAccounts).toHaveBeenCalledWith(undefined, undefined, []);
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
+        patch: { enabled: true },
+      });
+      expect(mutateAsync).toHaveBeenCalledWith({
+        workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+        patch: { enabled: false },
+      });
+    });
   });
 
   it('does not write on edit and discards unsaved drafts', () => {
@@ -165,6 +287,52 @@ describe('useWatchSettingsDraft', () => {
         settingsRevision: 1,
       },
     });
+  });
+
+  it('resolves with only the Workers that were written, as the server returned them', async () => {
+    const written: Worker = { ...ruleCoverage, enabled: true, blockingReasons: ['no_model'] };
+    mutateAsync
+      .mockRejectedValueOnce(new Error('patch failed'))
+      .mockResolvedValueOnce({ worker: written });
+    const { result } = renderHook(() => useWatchSettingsDraft([ruleTuning, ruleCoverage]));
+
+    act(() => {
+      result.current.updateEnabled(ruleTuning, true);
+      result.current.updateEnabled(ruleCoverage, true);
+    });
+    let savedWorkers: Worker[] = [];
+    await act(async () => {
+      savedWorkers = await result.current.save();
+    });
+
+    expect(savedWorkers).toEqual([written]);
+  });
+
+  it('drops a pending switch-on once the Worker can no longer be switched on', async () => {
+    const { result, rerender } = renderHook(
+      ({ workers }: { workers: Worker[] }) => useWatchSettingsDraft(workers),
+      { initialProps: { workers: [ruleTuning] } }
+    );
+
+    act(() => {
+      result.current.updateEnabled(ruleTuning, true);
+    });
+    expect(result.current.isDirty).toBe(true);
+
+    const blocked: Worker = { ...ruleTuning, blockingReasons: ['no_model'] };
+    rerender({ workers: [blocked] });
+
+    expect(result.current.resolve(blocked)).toMatchObject({ enabled: false, dirty: false });
+    expect(result.current.isDirty).toBe(false);
+
+    rerender({ workers: [ruleTuning] });
+
+    expect(result.current.resolve(ruleTuning)).toMatchObject({ enabled: false, dirty: false });
+    expect(result.current.isDirty).toBe(false);
+    await act(async () => {
+      await result.current.save();
+    });
+    expect(mutateAsync).not.toHaveBeenCalled();
   });
 
   it('sends a null revision for a Worker that has not been installed yet', async () => {
