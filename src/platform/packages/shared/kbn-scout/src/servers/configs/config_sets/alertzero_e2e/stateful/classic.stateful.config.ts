@@ -23,12 +23,23 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *   which default off; without them Kibana cascade-disables alertzero.
  * - service accounts: alertzero installs no managed workflows without them, and a Worker
  *   cannot be enabled without a service account to run as.
+ * - the `securitySolution:enableAlertZero` advanced setting. Every AlertZero route sits behind it
+ *   and answers 404 while it is off, which is the default. The setting is `scope: 'namespace'`;
+ *   `uiSettings.overrides` is applied by the UI settings client of every space, so the override
+ *   turns it on for the test space.
  * - the Workflows UI, `ai.agent` workflow steps and Agent Builder experimental features the
  *   Attack Discovery review and forensics workflows rely on.
  *
+ * Model selection: the specs use the stack's default AI connector. Set
+ * `ALERTZERO_E2E_AI_CONNECTOR` to the id of a preconfigured connector (for EIS models,
+ * `eis-<modelId>`, e.g. `eis-gpt-5-6-sol`) to pin `genAiSettings:defaultAIConnector` to it.
+ *
  * Usage:
+ *   ALERTZERO_E2E_AI_CONNECTOR=eis-gpt-5-6-sol \
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet alertzero_e2e
  */
+const pinnedConnectorId = process.env.ALERTZERO_E2E_AI_CONNECTOR?.trim();
+
 export const servers: ScoutServerConfig = {
   ...eisConfig,
   kbnTestServer: {
@@ -39,9 +50,13 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
+      '--uiSettings.overrides.securitySolution:enableAlertZero=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      ...(pinnedConnectorId
+        ? [`--uiSettings.overrides.genAiSettings:defaultAIConnector=${pinnedConnectorId}`]
+        : []),
     ],
   },
 };

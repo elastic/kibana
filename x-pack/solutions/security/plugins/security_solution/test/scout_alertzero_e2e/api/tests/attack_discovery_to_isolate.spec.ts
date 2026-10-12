@@ -52,13 +52,35 @@ apiTest.describe(
     let cleanupHosts: (() => Promise<void>) | undefined;
 
     apiTest.afterAll(async ({ apiClient, samlAuth }) => {
-      const api = await getAdminApi(apiClient, samlAuth);
-      await patchWorker(api, WORKER_ID, { enabled: false });
-      await cleanupHosts?.();
-      if (serviceAccountId) {
-        await deleteServiceAccount(api, serviceAccountId);
+      // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
+      // host, the service account or the scenario alerts. Failures are reported together.
+      const errors: unknown[] = [];
+      const attempt = async (step: () => Promise<unknown>) => {
+        try {
+          await step();
+        } catch (error) {
+          errors.push(error);
+        }
+      };
+      let api: Awaited<ReturnType<typeof getAdminApi>> | undefined;
+      await attempt(async () => {
+        api = await getAdminApi(apiClient, samlAuth);
+      });
+      await attempt(async () => {
+        if (api) ok(await patchWorker(api, WORKER_ID, { enabled: false }), 'disable the worker');
+      });
+      await attempt(async () => cleanupHosts?.());
+      await attempt(async () => {
+        if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
+      });
+      await attempt(async () => scenario?.cleanup());
+      if (errors.length > 0) {
+        throw new Error(
+          `AlertZero e2e cleanup failed: ${errors
+            .map((error) => (error instanceof Error ? error.message : String(error)))
+            .join('; ')}`
+        );
       }
-      await scenario?.cleanup();
     });
 
     apiTest(

@@ -29,4 +29,44 @@ describe('alertzero_e2e config set', () => {
   it('keeps the EIS preconfigured connectors from the agent_builder_smoke base', () => {
     expect(args.some((arg) => arg.startsWith('--xpack.actions.preconfigured='))).toBe(true);
   });
+
+  it('turns the AlertZero advanced setting on, or every AlertZero route answers 404', () => {
+    expect(args).toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
+  });
+
+  describe('default AI connector', () => {
+    const ENV = 'ALERTZERO_E2E_AI_CONNECTOR';
+    const original = process.env[ENV];
+
+    const loadArgs = (): string[] => {
+      let loaded: string[] = [];
+      jest.isolateModules(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        loaded = require('./classic.stateful.config').servers.kbnTestServer.serverArgs;
+      });
+      return loaded;
+    };
+
+    afterEach(() => {
+      if (original === undefined) {
+        delete process.env[ENV];
+      } else {
+        process.env[ENV] = original;
+      }
+    });
+
+    it('is left to the stack default when ALERTZERO_E2E_AI_CONNECTOR is unset', () => {
+      delete process.env[ENV];
+      expect(loadArgs().some((arg) => arg.includes('genAiSettings:defaultAIConnector'))).toBe(
+        false
+      );
+    });
+
+    it('is pinned from ALERTZERO_E2E_AI_CONNECTOR', () => {
+      process.env[ENV] = ' eis-gpt-5-6-sol ';
+      expect(loadArgs()).toContain(
+        '--uiSettings.overrides.genAiSettings:defaultAIConnector=eis-gpt-5-6-sol'
+      );
+    });
+  });
 });
