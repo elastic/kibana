@@ -40,12 +40,12 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     const response = await apiClient.patch(
       `internal/alertzero/workers/${FLOOR_ALERT_TRIAGE_WORKER_ID}`,
       {
-        headers: { ...INTERNAL_API_HEADERS, ...cookieHeader },
+        headers: { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader },
         body: { enabled: true },
         responseType: 'json',
       }
     );
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
   });
 
   for (const workflowId of [DETECTION_COVERAGE_WORKFLOW_ID, FLOOR_ALERT_TRIAGE_WORKFLOW_ID]) {
