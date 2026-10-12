@@ -29,13 +29,10 @@ describe('run turns every failure of an action into an ok: false result', () => 
     readonly type: 'performed';
     readonly result: ActionResult<R>;
   }
-  const recorder = <R>(
-    action: Action<R>,
-    interval = 0
-  ): StateActionMachine<null, R, Recorded<R>> => ({
+  const recorder = <R>(action: Action<R>, delay = 0): StateActionMachine<null, R, Recorded<R>> => ({
     initialState: null,
     next: () => action,
-    interval: () => interval,
+    delay: () => delay,
     model: (_state, result) => ({ state: null, event: { type: 'performed', result } }),
   });
 
@@ -78,13 +75,13 @@ describe('run turns every failure of an action into an ok: false result', () => 
     }
   });
 
-  it('makes the next action due the interval after the last one completed, and stamps each completion', async () => {
+  it('makes the next action due the delay after the last one completed, and stamps each completion', async () => {
     const clock = virtualClock(10);
     const action = async () => {
       clock.advance(5);
       return 'value';
     };
-    // The first action is due at once (10) and completes at 15, so with interval 90 the
+    // The first action is due at once (10) and completes at 15, so with delay 90 the
     // second is due at 105, not 100: the 5ms the request took adds to the period.
     const [initial, first, second] = await take(run(recorder(action, 90), clock), 3);
 
@@ -110,7 +107,7 @@ describe('run', () => {
     initialState: { count: 0 },
     // The next-action predicate: the one request, until the count is reached.
     next: (state) => (state.count >= until ? null : request),
-    interval: () => 100,
+    delay: () => 100,
     model: (state, result): AugmentedState<Counter, Counted> => ({
       state: {
         count: result.ok ? state.count + result.value : state.count,

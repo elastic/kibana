@@ -14,11 +14,11 @@
  * (Lamport's augmented state, "Computation and State Machines", 2008).
  * Models never read a clock; time arrives as the result's `completedAt`.
  * The driver owns the timer: it waits until the action is due, makes the next
- * one due the interval of the state just reached after the action completed,
- * and yields that deadline with each step as `dueAt`.
+ * one due the delay of the state just reached after the action completed, and
+ * yields that deadline with each step as `dueAt`.
  */
 
-import { setTimeout as delay } from 'node:timers/promises';
+import { setTimeout as wait } from 'node:timers/promises';
 
 /** Resolves after `duration`, or early once `signal` aborts; never rejects. */
 export type Sleep = (duration: number, signal?: AbortSignal) => Promise<void>;
@@ -54,15 +54,15 @@ export interface StateActionMachine<S, R, E> {
   readonly next: (state: S) => Action<R> | null;
   readonly model: (state: S, result: ActionResult<R>) => AugmentedState<S, E>;
   /** How long after an action completes the next is due, for the state it reached. Zero is due at once. */
-  readonly interval: (state: S) => number;
+  readonly delay: (state: S) => number;
 }
 
 /** Monotonic, so wall-clock adjustments don't move schedules; unref'd, so it never holds the process open. */
 export const realClock: Clock = {
   now: () => performance.now(),
-  // `delay` rejects only when `signal` aborts.
+  // `wait` rejects only when `signal` aborts.
   sleep: (duration, signal) =>
-    delay(duration, undefined, { ref: false, signal }).catch(() => undefined),
+    wait(duration, undefined, { ref: false, signal }).catch(() => undefined),
 };
 
 /** Runs the action; a failure becomes a result, like a success, stamped with its completion. */
@@ -88,7 +88,7 @@ const perform = async <R>(
  * `signal` aborts. Returns the last domain state; its deadline is on the last yielded step.
  */
 export async function* run<S, R, E>(
-  { initialState, next, model, interval }: StateActionMachine<S, R, E>,
+  { initialState, next, model, delay }: StateActionMachine<S, R, E>,
   clock: Clock = realClock,
   signal?: AbortSignal
 ): AsyncGenerator<Step<S, E | InitialEvent>, S> {
@@ -114,7 +114,7 @@ export async function* run<S, R, E>(
       return state;
     }
     const reached = model(state, result);
-    dueAt = result.completedAt + interval(reached.state);
+    dueAt = result.completedAt + delay(reached.state);
     state = reached.state;
     yield { ...reached, dueAt };
   }

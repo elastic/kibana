@@ -200,6 +200,18 @@ describe('pollEsNodesVersion', () => {
     expect(emitted.map((c) => c.isCompatible)).toEqual([true, false]);
   });
 
+  it('publishes each compatibility with its nodes named and a message', async () => {
+    const { emitted } = await poll([incompatible]);
+    expect(emitted).toEqual([
+      expect.objectContaining({
+        isCompatible: false,
+        kibanaVersion: config.kibanaVersion,
+        message: expect.stringContaining('v7.0.0 @ undefined (1.1.1.1)'),
+        incompatibleNodes: [expect.objectContaining({ name: 'v7.0.0 @ undefined (1.1.1.1)' })],
+      }),
+    ]);
+  });
+
   it('replays the latest compatibility to a late subscriber', async () => {
     const { compatibility$ } = await poll([compatible]);
     expect((await firstValueFrom(compatibility$)).isCompatible).toBe(true);
@@ -219,6 +231,14 @@ describe('checkEsNodesVersion', () => {
     internalClient.nodes.info.mockResolvedValue(compatible as never);
 
     expect((await check(internalClient)).isCompatible).toBe(true);
+    expect(internalClient.nodes.info).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry an incompatible cluster, since it answered', async () => {
+    const internalClient = elasticsearchClientMock.createInternalClient();
+    internalClient.nodes.info.mockResolvedValue(incompatible as never);
+
+    expect((await check(internalClient)).isCompatible).toBe(false);
     expect(internalClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 
