@@ -79,7 +79,14 @@ const COMMON_FEATURES: Record<string, string[]> = {
 const COMMON_INDICES: IndexPrivileges[] = [
   {
     names: ['ai-index-idx-security-investigations'],
-    privileges: ['read', 'index', 'auto_configure'],
+    privileges: ['read', 'view_index_metadata', 'index', 'auto_configure'],
+  },
+  // Agent Builder's own AI index. Agents describe AI indices as the worker, which reads their
+  // mappings. Reads come from Elasticsearch's implicit, per-document filtered grant on Elastic AI
+  // indices; an explicit `read` here would bypass that filter.
+  {
+    names: ['.ai-index-idx-elastic-index'],
+    privileges: ['view_index_metadata'],
   },
 ];
 const ENDPOINT_RESPONSE_ACTIONS = [
