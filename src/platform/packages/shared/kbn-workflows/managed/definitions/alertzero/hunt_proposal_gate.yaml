@@ -37,6 +37,12 @@ triggers:
         conversationId:
           type: string
           description: Conversation this Proposal belongs to (create_proposal.yaml's own required field).
+        proposalId:
+          type: string
+          description: >-
+            The id the Proposal is created under, derived by packaging from what is proposed so a
+            second run proposing the same thing meets this one. The service refuses an id that
+            already exists, which is how two racing runs create one Proposal.
         title:
           type: string
           description: Short plain-text label naming what is proposed; absent falls back to the action's own name.
@@ -73,6 +79,7 @@ triggers:
           description: The creation barrier this gate checks (created >= this) before closing the Investigation.
       required:
         - conversationId
+        - proposalId
         - comment
         - category
         - investigationConversationId
@@ -99,6 +106,14 @@ steps:
   # lets the requery/close steps below run their own best-effort cleanup
   # rather than aborting the whole execution if the wrap itself never resolves
   # normally.
+  #
+  # This is also where a lost race lands. Packaging looks up what already exists before it
+  # dispatches this gate, but that look-up reads through search, which lags a write by up to a
+  # refresh interval, so two runs that propose the same thing within it can both get here. The
+  # service creates the Proposal under `proposalId` or refuses with a conflict, so the loser's
+  # create fails before any gate is parked or any Proposal id is held, and `continue` carries it
+  # on to the requery below. Nothing is left pending on its behalf; the Investigation it belongs
+  # to stays open, since it holds one Proposal fewer than packaging expected.
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
@@ -106,6 +121,7 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
+        proposalId: "${{ inputs.proposalId }}"
         title: "${{ inputs.title }}"
         comment: "${{ inputs.comment }}"
         actionWorkflowId: "${{ inputs.actionWorkflowId }}"

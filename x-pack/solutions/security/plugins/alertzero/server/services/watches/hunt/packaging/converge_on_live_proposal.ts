@@ -1,0 +1,166 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import { MAX_COMMENT_LENGTH } from '@kbn/proposals-common';
+import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { ProposalConflictError } from '@kbn/proposals-plugin/server';
+import type { LiveProposal } from './resolve_proposal_slot';
+
+type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
+
+/**
+ * What happened to the live Proposal's comment when this run converged onto it.
+ *
+ * - `revised`: this Investigation was added to the comment.
+ * - `same_investigation`: the Proposal is this Investigation's own (a rerun), so there is nothing
+ *   to add and no note to write.
+ * - `already_mentioned`: the comment already names this Investigation.
+ * - `not_revisable`: an analyst has already decided it, and `revise()` refuses a decided one.
+ * - `too_long`: the line would push the comment past the length the service allows.
+ * - `failed`: the revision was refused or errored. Never fatal: the duplicate was avoided either
+ *   way, and the line is a courtesy to the analyst.
+ */
+export type ConvergeOutcome =
+  | 'revised'
+  | 'same_investigation'
+  | 'already_mentioned'
+  | 'not_revisable'
+  | 'too_long'
+  | 'failed';
+
+/** The link the conversations page already copies, so an analyst lands on that Investigation. */
+export const buildInvestigationLink = ({
+  spaceId,
+  conversationId,
+}: {
+  spaceId: string;
+  conversationId: string;
+}): string =>
+  `${
+    spaceId === 'default' ? '' : `/s/${spaceId}`
+  }/app/alertzero?selectedConversationId=${encodeURIComponent(conversationId)}`;
+
+const buildAlsoRaisedByLine = (link: string): string => `Also raised by [Investigation](${link}).`;
+
+/**
+ * Appends "Also raised by [Investigation]" to the live Proposal's comment through `revise()`, so
+ * the analyst approves the copy that lists every Investigation that converged on the host.
+ *
+ * Guards, each of which skips rather than fails: the Proposal is this Investigation's own; the
+ * comment already names it; it was decided since the look-up; the line would not fit. A 409 (a
+ * concurrent revision or decision won) reloads the live revision and tries once more.
+ */
+export type AppendAlsoRaisedBy = (args: {
+  live: LiveProposal;
+  investigationConversationId: string;
+}) => Promise<ConvergeOutcome>;
+
+export const createAlsoRaisedByAppender = ({
+  proposalsService,
+  spaceId,
+  request,
+  logger,
+}: {
+  proposalsService: ProposalsService;
+  spaceId: string;
+  request: KibanaRequest;
+  logger?: Logger;
+}): AppendAlsoRaisedBy => {
+  const attempt = async (
+    live: LiveProposal,
+    investigationConversationId: string
+  ): Promise<ConvergeOutcome> => {
+    if (live.conversationId === investigationConversationId) {
+      return 'same_investigation';
+    }
+    if (!live.revisable) {
+      return 'not_revisable';
+    }
+    if (live.comment.includes(investigationConversationId)) {
+      return 'already_mentioned';
+    }
+    const line = buildAlsoRaisedByLine(
+      buildInvestigationLink({ spaceId, conversationId: investigationConversationId })
+    );
+    const comment = `${live.comment}\n\n${line}`;
+    if (comment.length > MAX_COMMENT_LENGTH) {
+      return 'too_long';
+    }
+    await proposalsService.revise({ id: live.proposalId, comment }, spaceId, request);
+    return 'revised';
+  };
+
+  return async ({ live, investigationConversationId }) => {
+    try {
+      return await attempt(live, investigationConversationId);
+    } catch (error) {
+      if (!(error instanceof ProposalConflictError)) {
+        logger?.warn(
+          `package_report: could not add this Investigation to proposal ${live.proposalId}: ${
+            (error as Error).message
+          }`
+        );
+        return 'failed';
+      }
+    }
+
+    // A concurrent revision or decision won. Reload the live revision, which is what a 409 means
+    // we were holding a stale one of, and try once more.
+    try {
+      const head = await proposalsService.getLatestRevision(live.proposalId, spaceId);
+      const reloaded = await proposalsService.get(head.proposalId, spaceId, request);
+      return await attempt(
+        {
+          ...live,
+          proposalId: head.proposalId,
+          comment: reloaded.comment,
+          revisable: head.status === 'pending' && head.decision === undefined,
+        },
+        investigationConversationId
+      );
+    } catch (error) {
+      logger?.warn(
+        `package_report: could not add this Investigation to proposal ${
+          live.proposalId
+        } after a conflict: ${(error as Error).message}`
+      );
+      return 'failed';
+    }
+  };
+};
+
+/**
+ * The journal line written on the Investigation that created nothing, saying where its finding
+ * went. `undefined` when there is nothing to say: the Proposal is this Investigation's own, so a
+ * rerun landing on it is not news.
+ *
+ * Says only what is true of the outcome: "added to that Proposal" only when it was.
+ */
+export const buildConvergenceNote = ({
+  spaceId,
+  live,
+  outcome,
+}: {
+  spaceId: string;
+  live: LiveProposal;
+  outcome: ConvergeOutcome;
+}): string | undefined => {
+  if (outcome === 'same_investigation') {
+    return undefined;
+  }
+  const link = buildInvestigationLink({ spaceId, conversationId: live.conversationId });
+  const where = `[another Investigation](${link})`;
+  const lead = live.revisable
+    ? `A Proposal for "${live.title}" is already awaiting a decision, raised by ${where}.`
+    : `A Proposal for "${live.title}" has already been approved and is being carried out, raised by ${where}.`;
+  const added =
+    outcome === 'revised' || outcome === 'already_mentioned'
+      ? ' This Investigation was added to it.'
+      : '';
+  return `${lead} This run found the same thing, so no second Proposal was created.${added}`;
+};

@@ -15,6 +15,7 @@ import {
   ALERTZERO_HUNT_WORKFLOW,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW,
 } from '.';
+import { ALERTZERO_JOURNAL_NOTE_WORKFLOW } from './journal_note';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 // Route-path and cross-package id checks (including the SYSTEM_SECURITY_HUNT_*
@@ -51,6 +52,7 @@ interface YamlStep {
     result_behaviors?: string;
     report_intent_targets?: string;
     'workflow-id'?: string;
+    'run-as-mode'?: string;
     inputs?: Record<string, unknown>;
     path?: string;
     method?: string;
@@ -158,9 +160,9 @@ describe('Hunt Watch worker chain', () => {
     expect(yaml.tags ?? []).not.toContain('watch-hunt');
   });
 
-  // Narrows, but does not close, the existing-Proposals guard's race window (see the YAML's own
-  // concurrency comment for why) — queued, not dropped, so a racing run still packages rather
-  // than being silently lost.
+  // Kept for what it still buys (see the YAML's own concurrency comment for what that is, and for
+  // why it is not what keeps two runs from creating the same Proposal) — queued, not dropped, so a
+  // racing run still packages rather than being silently lost.
   it('hunt_package_report serializes per Investigation via a queued concurrency key', () => {
     expect(packageReport.settings?.concurrency).toEqual({
       key: 'hunt-package-report-{{ inputs.investigationConversationId }}',
@@ -769,6 +771,135 @@ describe('Hunt Watch worker chain', () => {
 
       expect(ctx.variables.dismiss_close_failed).toBe(false);
       expect(render(statusWith.package_status, ctx)).toBe('success');
+    });
+  });
+
+  // A finding is created under an id derived from what it proposes, and a finding a live
+  // proposal already covers creates nothing and says where it went.
+  describe('caller-chosen proposal ids and convergence', () => {
+    const gateTrigger = proposalGate.triggers?.[0]?.inputs;
+
+    it('declares proposalId on the gate and requires it: a payload without one would mint a random id and defeat the dedup', () => {
+      expect(Object.keys(gateTrigger?.properties ?? {})).toContain('proposalId');
+      expect(gateTrigger?.required).toContain('proposalId');
+    });
+
+    it('forwards the id packaging resolved when it dispatches each gate', () => {
+      const dispatch = stepIn(
+        flatten(stepIn(packageReportSteps, 'start_proposal_gates')?.steps ?? []),
+        'dispatch_gate'
+      );
+
+      expect(String(dispatch?.with?.inputs?.proposalId)).toContain('foreach.item.proposalId');
+    });
+
+    it('hands the id to the create step, which is what makes two racing runs create one proposal', () => {
+      const create = stepIn(proposalGateSteps, 'create_and_gate_proposal');
+
+      expect(String(create?.with?.inputs?.proposalId)).toContain('inputs.proposalId');
+    });
+
+    it('lets the gate carry on past a lost race instead of aborting it', () => {
+      // The loser's create fails with a conflict before any gate is parked, and the requery
+      // after it still has to run.
+      expect(stepIn(proposalGateSteps, 'create_and_gate_proposal')?.['on-failure']?.continue).toBe(
+        true
+      );
+    });
+
+    describe('the convergence notes', () => {
+      const notes = stepIn(packageReportSteps, 'write_convergence_notes') as
+        | (YamlStep & { foreach?: string; mode?: string; if?: string })
+        | undefined;
+      const noteCall = stepIn(flatten(notes?.steps ?? []), 'write_convergence_note');
+
+      it('runs one note per converged finding, and only when packaging ran and converged any', () => {
+        expect(notes?.foreach).toContain('decide_and_package.output.converged');
+        expect(notes?.if).toContain("status == 'packaged'");
+        expect(notes?.if).toContain('converged != empty');
+      });
+
+      it('lets one failed note settle without aborting the others', () => {
+        expect(notes?.mode).toBe('settled');
+      });
+
+      it('writes the line packaging composed, on this Investigation, through the journal workflow', () => {
+        expect(noteCall?.with?.['workflow-id']).toBe(ALERTZERO_JOURNAL_NOTE_WORKFLOW.id);
+        expect(noteCall?.with?.['run-as-mode']).toBe('inherit');
+        expect(String(noteCall?.with?.inputs?.conversation_id)).toContain(
+          'inputs.investigationConversationId'
+        );
+        expect(String(noteCall?.with?.inputs?.message)).toContain('foreach.item.note');
+      });
+    });
+
+    describe('the run summary', () => {
+      const summaryWith = stepIn(packageReportSteps, 'resolve_package_summary')?.with as Record<
+        string,
+        string
+      >;
+      const liquid = createWorkflowLiquidEngine();
+      const render = (output: Record<string, unknown>) =>
+        liquid
+          .parseAndRenderSync(summaryWith.package_summary, {
+            steps: {
+              decide_and_package: {
+                output: {
+                  status: 'packaged',
+                  dismiss: false,
+                  dismissHold: 'none',
+                  mintSuppression: 'none',
+                  proposals: [],
+                  converged: [],
+                  proposalBullets: [],
+                  omittedProposalCount: 0,
+                  coverage: { written: [], skipped: [] },
+                  ...output,
+                },
+              },
+            },
+            variables: { package_status: 'success', dispatch_failed_count: 0 },
+          })
+          .trim();
+      const converged = (count: number) =>
+        Array.from({ length: count }, (_, i) => ({ proposalId: `p-${i}`, note: 'n' }));
+
+      it('says every proposal already exists when every finding converged, instead of claiming any were prepared', () => {
+        const text = render({ converged: converged(2) });
+
+        expect(text).toContain('2 Proposals already exist for it, so none was created');
+        expect(text).toContain('The journal says where each one is');
+        expect(text).not.toContain('Packaging prepared');
+      });
+
+      it('uses the singular for one', () => {
+        expect(render({ converged: converged(1) })).toContain('1 Proposal already exists for it');
+      });
+
+      it('counts converged findings beside the ones it prepared', () => {
+        const text = render({
+          proposals: [{ proposalId: 'p-new' }],
+          proposalBullets: ['- Isolate host B'],
+          converged: converged(1),
+        });
+
+        expect(text).toContain('Packaging prepared 1 proposal');
+        expect(text).toContain('1 more finding already has a Proposal, so none was created for it');
+      });
+
+      it('is unchanged when nothing converged', () => {
+        const text = render({ proposals: [{ proposalId: 'p-new' }], proposalBullets: ['- x'] });
+
+        expect(text).toContain('Packaging prepared 1 proposal');
+        expect(text).not.toContain('already');
+      });
+
+      it('no longer mentions an Investigation-wide existing-proposals guard anywhere', () => {
+        expect(summaryWith.package_summary).not.toContain('existing_proposals');
+        expect(summaryWith.package_summary).not.toContain(
+          'already has a Proposal from an earlier run'
+        );
+      });
     });
   });
 });

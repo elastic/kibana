@@ -12,7 +12,6 @@ import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from '../../../../../common/step_types/package_report';
-import type { PackageReportMintPayload } from '../../../../../common/step_types/package_report';
 import {
   buildProposalComment,
   buildProposalTitle,
@@ -33,6 +32,7 @@ import type {
   DecidePackageReportResult,
   Subject,
   SubjectKind,
+  UnresolvedMintPayload,
 } from './types';
 
 const PROCESS_ACTION_LABELS: Record<ProcessActionKind, string> = {
@@ -45,30 +45,33 @@ const PROCESS_ACTION_LABELS: Record<ProcessActionKind, string> = {
 const PACKAGEABLE_CATEGORIES = ['respond', 'investigate'];
 
 /**
- * Fixed namespace for Same-Investigation Proposal subject keys. Frozen: changing
- * it renames every subject and breaks idempotent mint.
+ * Fixed namespace for Proposal subject keys. Frozen: changing it renames every subject, so a
+ * later run would stop recognising the Proposal an earlier one raised and raise a second.
  */
 const HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE = 'a3c7e91f-4b2d-5e68-9c1a-8f0d6b3e5a72';
 
 /**
+ * What is being proposed: the action, and the host, process, user or service it acts on. Not
+ * which Investigation raised it, so two Investigations that reach the same host share a key and
+ * their Proposals converge (see `buildHuntProposalId`). Hashing the Investigation in would let
+ * only a rerun of the same Investigation collide.
+ *
  * `subjectId` is the agent id for host and process subjects (the material is unchanged
  * from when this slot was called `endpointId`) and `<kind>:<value>` for identities, which
  * cannot collide with an agent id.
  */
 export const buildProposalSubjectKey = ({
-  conversationId,
   subjectId,
   actionWorkflowId,
   processKey,
 }: {
-  conversationId: string;
   subjectId: string;
   actionWorkflowId: string;
   processKey?: string;
 }): string => {
   const material = processKey
-    ? `${conversationId}|${subjectId}|${actionWorkflowId}|${processKey}`
-    : `${conversationId}|${subjectId}|${actionWorkflowId}`;
+    ? `${subjectId}|${actionWorkflowId}|${processKey}`
+    : `${subjectId}|${actionWorkflowId}`;
   return uuidv5(material, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 };
 
@@ -127,7 +130,10 @@ const SUPPLIED_KEYS: Record<SubjectKind, readonly string[]> = {
   service: ['id_field', 'id_value', 'criticality_level'],
 };
 
-/** One per run: a rerun of the same report must settle onto the same recommendation, not mint a second one. */
+/**
+ * One per Investigation, unlike the keys above: a recommendation has no host or action to share
+ * with another Investigation, and a rerun of the same report must settle onto the same one.
+ */
 const buildRecommendationSubjectKey = (conversationId: string): string =>
   uuidv5(`${conversationId}|recommendation`, HUNT_PROPOSAL_SUBJECT_UUID_NAMESPACE);
 
@@ -283,7 +289,7 @@ const truncate = (value: string, max: number): string =>
  * fan-out); only this prose view is capped, and everything left out is reported as a count.
  */
 export const buildProposalSummaryBullets = (
-  proposals: PackageReportMintPayload[]
+  proposals: UnresolvedMintPayload[]
 ): { bullets: string[]; omittedCount: number } => {
   const bullets: string[] = [];
   let usedChars = 0;
@@ -427,7 +433,7 @@ const buildRecommendationProposal = ({
   state: CurrentRunState;
   reasonLines: string[];
   heldBackLines: string[];
-}): PackageReportMintPayload => ({
+}): UnresolvedMintPayload => ({
   subjectKey: buildRecommendationSubjectKey(conversationId),
   conversationId,
   // Fixed, not per-host/per-action like buildProposalTitle below: this Proposal isn't scoped
@@ -482,7 +488,7 @@ export const decidePackageReport = ({
     }
   }
 
-  const proposals: PackageReportMintPayload[] = [];
+  const proposals: UnresolvedMintPayload[] = [];
   const seenSubjectKeys = new Set<string>();
   const heldBackLines: string[] = [];
 
@@ -515,7 +521,6 @@ export const decidePackageReport = ({
       return;
     }
     const subjectKey = buildProposalSubjectKey({
-      conversationId,
       subjectId: id,
       actionWorkflowId: entry.workflowId,
       ...(subject.kind === 'process' && { processKey: subject.processSelector.processKey }),

@@ -118,12 +118,12 @@ describe('buildInvestigationSummary', () => {
 describe('buildInvestigationSummary packaging outcome', () => {
   it.each([
     [
-      'the existing-Proposal guard suppressed the mint',
-      { mintSuppression: 'existing_proposals' as const },
-      'Packaging: no new proposals, the Investigation already has proposals from an earlier run',
+      'every finding was already raised by another Investigation',
+      { converged: [{ title: 'Isolate host A' }] },
+      'Packaging: no new proposals, 1 already raised by another Investigation (Isolate host A)',
     ],
     [
-      'the existing-Proposal check failed',
+      'the Proposals look-up failed',
       { mintSuppression: 'check_failed' as const },
       'Packaging: no new proposals, existing proposals could not be checked',
     ],
@@ -137,14 +137,48 @@ describe('buildInvestigationSummary packaging outcome', () => {
     ).toContain(expected);
   });
 
-  it('does not claim actions were proposed when the mint was suppressed', () => {
+  it('does not claim actions were proposed when the look-up failed', () => {
     expect(
       buildInvestigationSummary({
         state: state(),
         decided: { dismiss: false, proposals: [] },
-        mintSuppression: 'existing_proposals',
+        mintSuppression: 'check_failed',
       })
     ).not.toContain('proposed');
+  });
+
+  it('does not claim actions were proposed when every finding converged onto an existing proposal', () => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        converged: [{ title: 'Isolate host A' }, { title: 'Kill process x' }],
+      })
+    ).not.toContain('proposed');
+  });
+
+  it('counts the findings that converged beside the ones it proposed', () => {
+    const summary = buildInvestigationSummary({
+      state: state(),
+      decided: {
+        dismiss: false,
+        proposals: [{ title: 'Isolate host B' }] as never,
+      },
+      converged: [{ title: 'Isolate host A' }],
+    });
+
+    expect(summary).toContain('proposed 1 action: Isolate host B');
+    expect(summary).toContain('1 already raised by another Investigation (Isolate host A)');
+  });
+
+  it('names no titles when the converged proposals have none', () => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        converged: [{}, {}],
+      })
+    ).toContain('Packaging: no new proposals, 2 already raised by another Investigation');
   });
 
   it('says the Investigation was left open when a dismissal was held for a pending proposal', () => {
