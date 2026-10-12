@@ -185,6 +185,15 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/vega-tooltip/build`);
     }
 
+    // We need this "hack" because our current import-resolver doesn't support "exports" in package.json.
+    if (req === 'stylelint') {
+      return Path.resolve(REPO_ROOT, `node_modules/stylelint/lib/index.mjs`);
+    }
+
+    if (req === 'meow') {
+      return Path.resolve(REPO_ROOT, `node_modules/meow/build/index.js`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||
