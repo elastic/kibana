@@ -9,13 +9,13 @@ import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { KbnClient } from '@kbn/kbn-client';
-import { computePairedTTestResults, pairScores } from '@kbn/evals-common';
+import { compareScores, pairScores } from '@kbn/evals-common';
 import type { BaselineExperiment } from '../../utils/evals_client';
 import { EvalsClient } from '../../utils/evals_client';
 import { getEvaluationsKbnClient } from '../../utils/evaluations_kbn_client';
 import { getSpaceIdsFromEnv } from '../../utils/space_ids';
 import { readSpaceIdsFlag } from '../run_helpers';
-import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
+import { formatCompareReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
@@ -23,7 +23,7 @@ const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 export const compareCmd: Command<void> = {
   name: 'compare',
   description: `
-  Compare two evaluation experiments using paired t-tests.
+  Compare two evaluation experiments with a paired statistical test per dataset and evaluator.
 
   Usage modes:
     1. Direct comparison of two experiment IDs (target first, baseline second):
@@ -278,9 +278,9 @@ export const compareCmd: Command<void> = {
       `Paired ${pairs.length} scores (skipped ${skippedMissingPairs} missing pairs, ${skippedNullScores} null scores).`
     );
 
-    const results = computePairedTTestResults(pairs);
+    const results = compareScores(pairs);
     if (results.length === 0) {
-      log.warning('No t-test results returned.');
+      log.warning('No comparison results returned.');
       return;
     }
 
@@ -321,7 +321,7 @@ export const compareCmd: Command<void> = {
         process.stdout.write(markdown + '\n');
       }
     } else {
-      const report = formatPairedTTestReport({
+      const report = formatCompareReport({
         targetExperimentId,
         baselineExperimentId,
         results,
