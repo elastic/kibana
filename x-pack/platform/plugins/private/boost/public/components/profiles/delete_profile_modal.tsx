@@ -155,6 +155,7 @@ export const DeleteProfileModal = ({
       }
       buttonColor="danger"
       isLoading={isDeleting}
+      maxWidth={576}
       data-test-subj="deleteBoostProfileModal"
     >
       {deletedRules.length === 0 ? (
