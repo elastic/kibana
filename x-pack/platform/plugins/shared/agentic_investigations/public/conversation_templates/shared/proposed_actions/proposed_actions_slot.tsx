@@ -67,37 +67,35 @@ const ProposedActionRow = ({
   const isDeclining = useIsDecliningProposal(proposal.id);
 
   return (
-    <EuiFlexItem>
-      <ProposedActionButton
-        proposal={proposal}
-        readOnly={!canDecide}
-        isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
-        onConfirm={async () => {
-          try {
-            await approve.mutateAsync({
-              id: proposal.id,
-              body: { actionInput: proposal.actionInput },
-            });
-          } catch (err) {
-            onDecisionError(err);
-            throw err;
-          }
-        }}
-        onDismiss={async ({ dismissReason, rationale }) => {
-          try {
-            await dismiss.mutateAsync({
-              id: proposal.id,
-              body: { dismissReason, rationale },
-            });
-          } catch (err) {
-            onDecisionError(err);
-            throw err;
-          }
-        }}
-        currentActorName={currentActorName}
-        data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
-      />
-    </EuiFlexItem>
+    <ProposedActionButton
+      proposal={proposal}
+      readOnly={!canDecide}
+      isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
+      onConfirm={async () => {
+        try {
+          await approve.mutateAsync({
+            id: proposal.id,
+            body: { actionInput: proposal.actionInput },
+          });
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      onDismiss={async ({ dismissReason, rationale }) => {
+        try {
+          await dismiss.mutateAsync({
+            id: proposal.id,
+            body: { dismissReason, rationale },
+          });
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      currentActorName={currentActorName}
+      data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
+    />
   );
 };
 
@@ -155,7 +153,7 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {proposals.map((proposal) => (
         <ProposedActionRow
           key={proposal.id}

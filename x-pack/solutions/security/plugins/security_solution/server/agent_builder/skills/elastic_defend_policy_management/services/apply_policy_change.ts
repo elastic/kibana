@@ -8,7 +8,7 @@
 import type { AuthenticatedUser, KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { getPolicyDataForUpdate } from '../../../../../common/endpoint/service/policy';
 import { ENDPOINT_POLICY_WRITE_REQUIRED_AUTHZ } from '../../../../../common/endpoint/service/authz';
 import type { NewPolicyData, PolicyData } from '../../../../../common/endpoint/types';
@@ -86,7 +86,9 @@ export type ApplyPolicyChangeResult = Readonly<{
 const isParamsRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const expectedVersionInputSchema = z.string().min(1).max(POLICY_IDENTIFIER_MAX_LENGTH);
+const expectedVersionInputSchema = lazySchema(() =>
+  z.string().min(1).max(POLICY_IDENTIFIER_MAX_LENGTH)
+);
 
 const parseExpectedVersion = (value: unknown): string => {
   const parsed = expectedVersionInputSchema.safeParse(value);

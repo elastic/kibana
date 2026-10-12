@@ -59,8 +59,11 @@ export async function getActionPolicyStats(
           source: `
             def ap = params._source['${ACTION_POLICY_SAVED_OBJECT_TYPE}'];
             if (ap != null) {
-              def groupBy = ap['groupBy'];
-              if (groupBy != null) emit((long) groupBy.size());
+              def grouping = ap['grouping'];
+              if (grouping != null) {
+                def fields = grouping['fields'];
+                if (fields != null) emit((long) fields.size());
+              }
             }
           `,
         },

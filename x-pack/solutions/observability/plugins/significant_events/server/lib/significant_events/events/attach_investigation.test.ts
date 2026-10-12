@@ -12,7 +12,7 @@ import {
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
-import type { SignificantEvent } from './data_stream';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',

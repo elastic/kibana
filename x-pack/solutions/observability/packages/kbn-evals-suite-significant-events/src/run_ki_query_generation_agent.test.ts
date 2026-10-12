@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '@kbn/significant-events-plugin/server';
+import { SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID } from '@kbn/significant-events-plugin/common';
 import {
   buildKIQueryGenerationEvalUserMessage,
   collectQueryAttempts,

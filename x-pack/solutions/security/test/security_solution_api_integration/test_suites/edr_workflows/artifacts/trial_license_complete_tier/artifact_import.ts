@@ -186,20 +186,7 @@ export default function artifactImportAPIIntegrationTests({ getService }: FtrPro
             let fetchArtifacts: ReturnType<typeof getFetchArtifacts>;
 
             before(async () => {
-              if (artifact.listId === ENDPOINT_ARTIFACT_LISTS.customYaraSignatures.id) {
-                // Custom YARA signatures privileges is not added to pre-defined roles yet
-                fetchArtifacts = getFetchArtifacts(
-                  supertest[artifact.listId].allWithGlobalArtifactManagementPrivilege,
-                  log,
-                  artifact.listId
-                );
-              } else {
-                fetchArtifacts = getFetchArtifacts(
-                  endpointOpsAnalystSupertest,
-                  log,
-                  artifact.listId
-                );
-              }
+              fetchArtifacts = getFetchArtifacts(endpointOpsAnalystSupertest, log, artifact.listId);
 
               await optInForPerPolicyEndpointExceptions(kbnServer);
             });

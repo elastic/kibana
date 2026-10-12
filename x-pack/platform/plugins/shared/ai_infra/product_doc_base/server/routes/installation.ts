@@ -31,6 +31,11 @@ import {
   GET_DEFAULT_INFERENCE_ID_API_PATH,
 } from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
+import { INSTALL_TASK_WAIT_TIMEOUT_MS } from '../tasks/utils';
+
+// Stay open past the task waiter so a slow install can return its body. A socket that
+// expires together with the waiter drops the response and the caller only sees a timeout.
+const INSTALL_ROUTE_IDLE_SOCKET_MS = INSTALL_TASK_WAIT_TIMEOUT_MS + 60_000;
 
 /**
  * Schema for resourceType parameter validation.
@@ -177,7 +182,7 @@ export const registerInstallationRoutes = ({
       },
       options: {
         access: 'internal',
-        timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
+        timeout: { idleSocket: INSTALL_ROUTE_IDLE_SOCKET_MS },
       },
       security: {
         authz: {
@@ -275,7 +280,7 @@ export const registerInstallationRoutes = ({
       },
       options: {
         access: 'internal',
-        timeout: { idleSocket: 20 * 60 * 1000 }, // install can take time.
+        timeout: { idleSocket: INSTALL_ROUTE_IDLE_SOCKET_MS },
       },
       security: {
         authz: {
@@ -315,6 +320,8 @@ export const registerInstallationRoutes = ({
       },
       options: {
         access: 'internal',
+        // Default socket timeout is 120s; uninstall waits on the install lock for up to 10 minutes.
+        timeout: { idleSocket: INSTALL_ROUTE_IDLE_SOCKET_MS },
       },
       security: {
         authz: {

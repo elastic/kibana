@@ -16,9 +16,10 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { DEFAULT_SCHEMA_RESOLUTION } from '../../create_dataset_form_state';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import { useComboBoxSelectionValidity } from '../combo_box_selection_validity';
-import { DEFAULT_SCHEMA_RESOLUTION, SchemaResolutionSelect } from './schema_resolution_select';
+import { SchemaResolutionSelect } from './schema_resolution_select';
 
 export const SchemaResolutionField = React.memo(({ isDisabled }: { isDisabled?: boolean }) => {
   const {

@@ -143,7 +143,7 @@ EOF
   if [[ "${KBN_EVALS:-}" =~ ^(1|true)$ ]]; then
     echo "KBN_EVALS was set - exposing evals connectors and export credentials"
 
-    KBN_EVALS_CONFIG_JSON="$(vault_get kbn-evals config | base64 -d)"
+    KBN_EVALS_CONFIG_JSON="$(retry 5 5 vault kv get -field=config kv/ci-shared/kbn-evals/golden | base64 -d)"
     # Validate config shape. Guarded because lightweight sparse-checkout steps (pipeline upload, Post-Build)
     #don't fetch the validator; eval steps run on a full checkout.
     kbn_evals_validator="x-pack/platform/packages/shared/kbn-evals/scripts/vault/validate_config.js"

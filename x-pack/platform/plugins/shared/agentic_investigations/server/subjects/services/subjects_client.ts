@@ -12,14 +12,16 @@ import type {
   InvestigationSubjectInput,
   InvestigationSubjectKey,
 } from '../../../common/subjects/subject';
-import type { ImpactPrivilegesChecker } from '../../impact/services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
+import { filterReadableConversationIds } from '../../investigations/services/readable_conversation_ids';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { ClaimSubjectsParams, ClaimSubjectsResult } from './subject_claims_service';
 import type { SubjectsService } from './subjects_service';
 
 /**
  * In-process subject reads and writes for the solution that starts investigations. The space,
- * the principal, and the acting user all come from the request.
+ * the principal, and the acting user all come from the request. Reads only return subjects of
+ * conversations the caller can read; the subject index itself is read as the internal user.
  */
 export interface SubjectsClient {
   /** Records subjects on an investigation the caller owns and attaches them by reference. */
@@ -27,7 +29,7 @@ export interface SubjectsClient {
     conversationId: string,
     subjects: InvestigationSubjectInput[]
   ) => Promise<InvestigationSubject[]>;
-  /** Investigations holding any of the subjects, open or closed, unchecked for access. */
+  /** Investigations the caller can read that hold any of the subjects, open or closed. */
   findConversationIdsBySubjects: (subjects: InvestigationSubjectKey[]) => Promise<string[]>;
   listByConversationIds: (conversationIds: string[]) => Promise<InvestigationSubject[]>;
   /** Claims every subject for a new investigation, or returns the investigation holding one. */
@@ -37,8 +39,8 @@ export interface SubjectsClient {
 export interface SubjectsClientDeps {
   getSubjectsService: () => SubjectsService;
   getSpaceId: (request: KibanaRequest) => string;
-  /** Subjects share the investigations manage privilege with impact. */
-  privileges: ImpactPrivilegesChecker;
+  /** Writes need the investigations manage privilege; reads accept read or manage. */
+  privileges: InvestigationsPrivilegesChecker;
   resolveUser: ResolveUser;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
@@ -73,11 +75,22 @@ export const createSubjectsClient =
     },
     findConversationIdsBySubjects: async (subjects) => {
       await privileges.assertCanRead(request);
-      return getSubjectsService().findConversationIdsBySubjects(subjects, getSpaceId(request));
+      const ids = await getSubjectsService().findConversationIdsBySubjects(
+        subjects,
+        getSpaceId(request)
+      );
+      return filterReadableConversationIds(await getConversationClient(request), ids);
     },
     listByConversationIds: async (conversationIds) => {
       await privileges.assertCanRead(request);
-      return getSubjectsService().listByConversationIds(conversationIds, getSpaceId(request));
+      const readableIds = await filterReadableConversationIds(
+        await getConversationClient(request),
+        conversationIds
+      );
+      if (readableIds.length === 0) {
+        return [];
+      }
+      return getSubjectsService().listByConversationIds(readableIds, getSpaceId(request));
     },
     claimSubjects: async (params) => {
       await privileges.assertCanManage(request);
