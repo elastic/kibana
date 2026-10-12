@@ -374,7 +374,7 @@ describe('editSyntheticsMonitorRoute', () => {
       }),
     } as any;
     routeContext.request = {
-      params: { monitorId },
+      params: { id: monitorId },
       query: {},
       body: { [ConfigKey.PARAMS]: '{"password":"********"}' },
     } as any;
@@ -414,7 +414,7 @@ describe('editSyntheticsMonitorRoute', () => {
       badRequest: (value: unknown) => value,
     };
     routeContext.request = {
-      params: { monitorId },
+      params: { id: monitorId },
       query: {},
       body: { [ConfigKey.PARAMS]: '{"token2":"********"}' },
     } as any;
