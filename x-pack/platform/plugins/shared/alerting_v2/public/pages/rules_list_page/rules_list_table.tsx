@@ -95,8 +95,7 @@ export interface RulesListTableProps {
   onBulkUpdateApiKey: () => void;
 
   /** Row action callbacks */
-  onNavigateToDetails: (rule: RuleApiResponse) => void;
-  onExpand: (rule: RuleApiResponse) => void;
+  onOpenSummary: (rule: RuleApiResponse) => void;
   onQuickEdit: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
@@ -141,8 +140,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onBulkUpdateApiKey,
-  onNavigateToDetails,
-  onExpand,
+  onOpenSummary,
   onQuickEdit,
   onEdit,
   onClone,
@@ -210,28 +208,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
           ] as Array<EuiBasicTableColumn<RuleApiResponse>>)
         : []),
       {
-        name: '',
-        width: '32px',
-        render: (rule: RuleApiResponse) => (
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-              defaultMessage: 'Open rule summary',
-            })}
-            disableScreenReaderOutput
-          >
-            <EuiButtonIcon
-              iconType="maximize"
-              color="text"
-              onClick={() => onExpand(rule)}
-              aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
-                defaultMessage: 'Open rule summary',
-              })}
-              data-test-subj={`expandRule-${rule.id}`}
-            />
-          </EuiToolTip>
-        ),
-      },
-      {
         field: 'metadata',
         name: (
           <FormattedMessage id="xpack.alertingV2.rulesList.column.name" defaultMessage="Name" />
@@ -240,10 +216,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
         sortable: true,
         render: (metadata: RuleApiResponse['metadata'], rule: RuleApiResponse) => (
           <div>
-            <EuiLink
-              onClick={() => onNavigateToDetails(rule)}
-              data-test-subj={`ruleNameLink-${rule.id}`}
-            >
+            <EuiLink onClick={() => onOpenSummary(rule)} data-test-subj={`ruleNameLink-${rule.id}`}>
               {metadata?.name ?? rule.id}
             </EuiLink>
             {metadata?.description && (
@@ -441,8 +414,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     isRowSelected,
     onSelectPage,
     onSelectRow,
-    onNavigateToDetails,
-    onExpand,
+    onOpenSummary,
     onQuickEdit,
     onEdit,
     onClone,
