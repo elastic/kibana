@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/zod'
   - '@kbn/streamlang'
+  - '@kbn/utility-types'
 tags:
   - shared-common
   - package

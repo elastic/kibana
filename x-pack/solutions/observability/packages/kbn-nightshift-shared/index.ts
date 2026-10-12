@@ -115,3 +115,9 @@ export {
 } from './src/nightshift_usage_ids';
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  SETTINGS_TAB_IDS,
+  type NightshiftSettingsLocatorParams,
+  type SettingsTabId,
+} from './src/settings';

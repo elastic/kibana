@@ -18,6 +18,7 @@ import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
 import { getOnboardingSessionKey } from './onboarding_session_storage';
+import type { ExistingSecretRefs } from './step_components/authenticate_and_deploy_step/secret_refs';
 import { useIsSelfManaged } from './use_is_self_managed';
 
 /**
@@ -48,6 +49,12 @@ export interface AuthenticateAndDeployStepState {
   staticKeys?: AwsStaticKeyCredentials;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   pendingIacTemplate?: PendingIacTemplate;
+  /**
+   * Secret refs already stored on deployed policies, for credentials the user chose to keep.
+   * Never held in the provider: Deploy reads them fresh from Fleet just before it builds a policy
+   * body, so a ref replaced by an earlier deploy is never reused.
+   */
+  existingSecretRefs?: ExistingSecretRefs;
 }
 
 export type ServiceChipState = 'instantiating' | 'detecting' | 'receiving' | 'error' | 'timeout';
@@ -245,7 +252,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
 
   const clearStagedStaticKeys = useCallback(() => {
     setStaticKeysState(undefined);
-  }, []);
+    // The persisted access key id would seed the keys again after a reload.
+    const next = { ...persistedAuthStepRef.current, accessKeyId: undefined };
+    persistedAuthStepRef.current = next;
+    setPersistedAuthenticateAndDeployStep(next);
+  }, [setPersistedAuthenticateAndDeployStep]);
 
   const setAuthMethod = useCallback(
     (method: CloudOnboardingDeploymentAuthMethod) => {

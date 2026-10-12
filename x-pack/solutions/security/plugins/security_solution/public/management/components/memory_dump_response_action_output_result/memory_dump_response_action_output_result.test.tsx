@@ -117,7 +117,7 @@ describe('MemoryDumpResponseActionOutputResult component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test').textContent).toEqual(
-      'The following error was encountered:Host: Host-agent-aErrors: Error info A'
+      'The following error was encountered:Error info A'
     );
   });
 

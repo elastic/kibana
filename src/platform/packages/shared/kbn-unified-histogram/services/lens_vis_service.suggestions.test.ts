@@ -32,7 +32,6 @@ describe('LensVisService suggestions', () => {
       timeInterval: 'auto',
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: false,
       allSuggestions: [],
     });
 
@@ -58,7 +57,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: allSuggestionsMock,
     });
 
@@ -85,7 +83,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: true,
     });
@@ -114,7 +111,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -153,7 +149,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -192,7 +187,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -231,7 +225,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: true,
     });
@@ -260,7 +253,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -289,7 +281,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -323,7 +314,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -375,7 +365,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: allSuggestionsMock,
       isTransformationalESQL: false,
     });
@@ -406,7 +395,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -480,7 +468,6 @@ describe('LensVisService suggestions', () => {
       },
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
       externalVisContext,
@@ -548,7 +535,6 @@ describe('LensVisService suggestions', () => {
       },
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
       externalVisContext,
@@ -601,7 +587,6 @@ describe('LensVisService suggestions', () => {
       },
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
       externalVisContext,
