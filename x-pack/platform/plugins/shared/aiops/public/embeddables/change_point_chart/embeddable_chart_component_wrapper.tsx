@@ -53,6 +53,7 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
   onRenderComplete,
   onChange,
   emptyState,
+  requestCancellationManager,
 }) => {
   const { filters, query, searchBounds, interval } = useFilterQueryUpdates();
 
@@ -100,7 +101,8 @@ export const ChartGridEmbeddableWrapper: FC<ChangePointDetectionProps> = ({
     fieldConfig,
     requestParams,
     combinedQuery,
-    10000
+    10000,
+    requestCancellationManager
   );
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {

@@ -317,7 +317,8 @@ export const useDataVisualizerGridData = (
     false,
     fieldStatsRequest,
     lastRefresh,
-    dataVisualizerListState.probability
+    dataVisualizerListState.probability,
+    input.requestCancellationManager
   );
   const configsWithoutStats = useMemo(() => {
     if (overallStatsProgress.loaded < 100) return;
@@ -357,7 +358,8 @@ export const useDataVisualizerGridData = (
     fieldStatsRequest,
     configsWithoutStats,
     dataVisualizerListState,
-    probability
+    probability,
+    input.requestCancellationManager
   );
 
   const combinedProgress = useMemo(

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpFetchOptions } from '@kbn/core/public';
@@ -13,15 +13,20 @@ import { getTimeFieldRange } from '@kbn/ml-date-picker';
 import moment from 'moment';
 import { useStorage } from '@kbn/ml-local-storage';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 import { DEFAULT_MINIMUM_TIME_RANGE_OPTION, MINIMUM_TIME_RANGE } from './minimum_time_range';
 import type { AiOpsKey, AiOpsStorageMapped } from '../../../types/storage';
 import { AIOPS_PATTERN_ANALYSIS_MINIMUM_TIME_RANGE_PREFERENCE } from '../../../types/storage';
 import type { MinimumTimeRangeOption } from '../../../../common/embeddables/pattern_analysis/types';
 
-export function useMinimumTimeRange() {
+export function useMinimumTimeRange(requestCancellationManager?: RequestCancellationManager) {
   const { http } = useAiopsAppContext();
-  const abortController = useRef(new AbortController());
+  // Lazily created so rendering doesn't attach a new listener to the manager each time
+  const [initialController] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortController = useRef<AbortController>(initialController);
 
   const getMinimumTimeRange = useCallback(
     async (
@@ -89,8 +94,9 @@ export function useMinimumTimeRange() {
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current = new AbortController();
-  }, []);
+    abortController.current =
+      requestCancellationManager?.createChildController() ?? new AbortController();
+  }, [requestCancellationManager]);
 
   return {
     getMinimumTimeRange,

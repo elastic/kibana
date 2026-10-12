@@ -26,6 +26,7 @@ import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useDocumentCountStats } from './use_document_count_stats';
 
 const DEFAULT_BAR_TARGET = 75;
@@ -39,7 +40,8 @@ export const useData = (
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
-  timeRange?: { min: Moment; max: Moment }
+  timeRange?: { min: Moment; max: Moment },
+  requestCancellationManager?: RequestCancellationManager
 ) => {
   const { executionContext, uiSettings, cps } = useAiopsAppContext();
   const { projectRouting } = useProjectRouting(cps);
@@ -108,7 +110,8 @@ export const useData = (
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
     lastRefresh,
-    changePointsByDefault
+    changePointsByDefault,
+    requestCancellationManager
   );
 
   useEffect(() => {

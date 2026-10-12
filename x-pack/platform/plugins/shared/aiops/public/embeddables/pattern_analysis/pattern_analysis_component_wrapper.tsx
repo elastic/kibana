@@ -40,6 +40,7 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
   onChange,
   emptyState,
   timeRange,
+  requestCancellationManager,
 }) => {
   const { dataView } = useDataSource();
 
@@ -69,6 +70,7 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
         onRenderComplete={onRenderComplete}
         onChange={onChange}
         emptyState={emptyState}
+        requestCancellationManager={requestCancellationManager}
       />
     </div>
   );

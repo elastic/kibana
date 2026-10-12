@@ -27,9 +27,25 @@ export interface UseCancellableSearch {
   isLoading: boolean;
 }
 
+/**
+ * Structural type of `RequestCancellationManager` from `@kbn/presentation-publishing`,
+ * so this package doesn't need to depend on it.
+ */
+export interface RequestCancellationLike {
+  readonly signal: AbortSignal;
+  createChildController(): AbortController;
+}
+
 // Similar to aiops/hooks/use_cancellable_search.ts
-export function useCancellableSearch(data: DataPublicPluginStart) {
-  const abortController = useRef(new AbortController());
+export function useCancellableSearch(
+  data: DataPublicPluginStart,
+  requestCancellationManager?: RequestCancellationLike
+) {
+  // Lazily created so rendering doesn't attach a new listener to the manager each time
+  const [initialController] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const abortController = useRef<AbortController>(initialController);
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
   const runRequest = useCallback(
@@ -37,6 +53,16 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
       requestBody: RequestBody,
       options = {}
     ): Promise<ResponseType | null> => {
+      // A controller aborted by the manager stays aborted until the next load starts,
+      // at which point the manager's signal is replaced and we need a fresh child.
+      if (
+        requestCancellationManager &&
+        abortController.current.signal.aborted &&
+        !requestCancellationManager.signal.aborted
+      ) {
+        abortController.current = requestCancellationManager.createChildController();
+      }
+
       return new Promise((resolve, reject) => {
         data.search
           .search<RequestBody, ResponseType>(requestBody, {
@@ -69,13 +95,14 @@ export function useCancellableSearch(data: DataPublicPluginStart) {
           });
       });
     },
-    [data.search]
+    [data.search, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current = new AbortController();
-  }, []);
+    abortController.current =
+      requestCancellationManager?.createChildController() ?? new AbortController();
+  }, [requestCancellationManager]);
 
   return { runRequest, cancelRequest, isLoading };
 }

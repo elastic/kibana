@@ -14,7 +14,7 @@ import { pick } from 'lodash';
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
-import type { PublishesFilters } from '@kbn/presentation-publishing';
+import type { PublishesFilters, RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { RandomSamplerOption, RandomSamplerProbability } from '@kbn/ml-random-sampler-utils';
 import { PatternAnalysisEmbeddableWrapper } from '../embeddables/pattern_analysis/pattern_analysis_component_wrapper';
 import { AiopsAppContext, type AiopsAppContextValue } from '../hooks/use_aiops_app_context';
@@ -59,6 +59,8 @@ export interface PatternAnalysisProps {
   onRenderComplete: () => void;
   onError: (error: Error) => void;
   filtersApi?: PublishesFilters;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
 }
 
 const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
@@ -79,6 +81,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
   lastReloadRequestTime,
   onChange,
   filtersApi,
+  requestCancellationManager,
 }) => {
   const deps = useMemo(() => {
     const {
@@ -168,6 +171,7 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
                   onRenderComplete={onRenderComplete}
                   onError={onError}
                   onChange={onChange}
+                  requestCancellationManager={requestCancellationManager}
                 />
               </FilterQueryContextProvider>
             </DataSourceContextProvider>

@@ -57,6 +57,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   onRenderComplete,
   timeRange,
   lastReloadRequestTime,
+  requestCancellationManager,
 }) => {
   const {
     notifications: { toasts },
@@ -71,20 +72,23 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
   const { filters, query } = useFilterQueryUpdates();
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
-    useValidateFieldRequest();
-  const { getMinimumTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useMinimumTimeRange();
+    useValidateFieldRequest(requestCancellationManager);
+  const { getMinimumTimeRange, cancelRequest: cancelWiderTimeRangeRequest } = useMinimumTimeRange(requestCancellationManager);
 
   const isMounted = useMountedState();
   const {
     runCategorizeRequest,
     cancelRequest: cancelCategorizationRequest,
     randomSampler,
-  } = useCategorizeRequest({
-    randomSamplerMode,
-    setRandomSamplerMode: () => {},
-    randomSamplerProbability,
-    setRandomSamplerProbability: () => {},
-  });
+  } = useCategorizeRequest(
+    {
+      randomSamplerMode,
+      setRandomSamplerMode: () => {},
+      randomSamplerProbability,
+      setRandomSamplerProbability: () => {},
+    },
+    requestCancellationManager
+  );
 
   const appState = getDefaultLogCategorizationAppState({
     searchQuery: buildEsQuery(
@@ -152,7 +156,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     undefined,
     BAR_TARGET,
     false,
-    timeRangeParsed
+    timeRangeParsed,
+    requestCancellationManager
   );
 
   const onAddFilter = useCallback(
@@ -191,6 +196,12 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
       minimumTimeRangeOption === undefined ||
       isMounted() !== true
     ) {
+      return;
+    }
+
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) {
+      setLoading(false);
       return;
     }
 
@@ -301,6 +312,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     latest,
     loading,
     minimumTimeRangeOption,
+    requestCancellationManager,
     runCategorizeRequest,
     runValidateFieldRequest,
     searchQuery,

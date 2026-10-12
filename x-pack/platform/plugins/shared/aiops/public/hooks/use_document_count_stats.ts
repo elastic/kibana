@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 
@@ -58,7 +59,8 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParams: TParams | undefined,
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
-  changePointsByDefault = true
+  changePointsByDefault = true,
+  requestCancellationManager?: RequestCancellationManager
 ): DocumentStats {
   const {
     data,
@@ -87,8 +89,12 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       return;
     }
 
+    // The panel was cancelled and no new load has started yet, don't start requests.
+    if (requestCancellationManager?.signal.aborted) return;
+
     try {
-      abortCtrl.current = new AbortController();
+      abortCtrl.current =
+        requestCancellationManager?.createChildController() ?? new AbortController();
 
       const projectRouting = cps?.cpsManager?.getDefaultProjectRouting();
       if (projectRouting) {
@@ -184,7 +190,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.search, documentStatsCache, cacheKey]);
+  }, [data?.search, documentStatsCache, cacheKey, requestCancellationManager]);
 
   useEffect(
     function getDocumentCountData() {

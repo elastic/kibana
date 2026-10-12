@@ -7,6 +7,7 @@
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   PublishesDataViews,
   PublishesTimeRange,
@@ -32,6 +33,7 @@ export interface ChangePointComponentApi {
 }
 
 export type ChangePointEmbeddableApi = DefaultEmbeddableApi<ChangePointChartEmbeddableState> &
+  CanCancelRequests &
   HasEditCapabilities &
   PublishesDataViews &
   PublishesTimeRange &

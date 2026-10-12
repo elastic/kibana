@@ -338,7 +338,7 @@ export const useESQLDataVisualizerData = (
     timeFieldName,
     queryHistoryStatus,
     exampleDocs,
-  } = useESQLOverallStatsData(fieldStatsRequest);
+  } = useESQLOverallStatsData(fieldStatsRequest, input.requestCancellationManager);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded] = useState(defaults.metricsLoaded);
@@ -422,6 +422,7 @@ export const useESQLDataVisualizerData = (
     filter: fieldStatsRequest?.filter,
     limit: fieldStatsRequest?.limit ?? DEFAULT_ESQL_LIMIT,
     timeRange: fieldStatsRequest?.timeRange,
+    requestCancellationManager: input.requestCancellationManager,
   });
 
   useEffect(
@@ -678,6 +679,8 @@ export const useESQLDataVisualizerData = (
     (q?: AggregateQuery) => {
       // When user submits a new query
       // resets all current requests and other data
+      // Also lifts a previous cancellation of the panel
+      input.requestCancellationManager?.resumeAfterCancellation();
       if (cancelOverallStatsRequest) {
         cancelOverallStatsRequest();
       }
@@ -689,7 +692,7 @@ export const useESQLDataVisualizerData = (
       setMetricConfigs(defaults.metricConfigs);
       setNonMetricConfigs(defaults.nonMetricConfigs);
     },
-    [cancelFieldStatsRequest, cancelOverallStatsRequest]
+    [cancelFieldStatsRequest, cancelOverallStatsRequest, input.requestCancellationManager]
   );
 
   useEffect(() => {

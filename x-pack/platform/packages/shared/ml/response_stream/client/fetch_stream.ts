@@ -59,7 +59,10 @@ export async function* fetchStream<B extends object, R extends Reducer<any, any>
 
     stream = response.response;
   } catch (error) {
-    yield [error.toString(), undefined];
+    // An aborted request is a cancellation by the caller, not an error.
+    if (error.name !== 'AbortError') {
+      yield [error.toString(), undefined];
+    }
     return;
   }
 

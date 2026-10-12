@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
+import React, { useEffect, useMemo, type FC } from 'react';
 
 import type { TimeRange } from '@kbn/es-query';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -23,10 +25,19 @@ import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_ana
 
 export interface LogRateAnalysisForEmbeddableProps {
   timeRange: TimeRange;
+  /** Reports whether the document count stats or the analysis stream are loading */
+  onLoading?: (isLoading: boolean) => void;
+  /** Called once neither the document count stats nor the analysis stream are loading */
+  onRenderComplete?: () => void;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
 }
 
 export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps> = ({
   timeRange,
+  onLoading,
+  onRenderComplete,
+  requestCancellationManager,
 }) => {
   const { uiSettings } = useAiopsAppContext();
   const { dataView } = useDataSource();
@@ -42,6 +53,22 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
   });
   const { searchQuery } = useSearch({ dataView, savedSearch: null }, appState, true);
 
+  const isStreamRunning = useAppSelector((s) => s.stream.isRunning);
+  const hasDocumentCountStats = useAppSelector(
+    (s) => s.logRateAnalysis.documentStats.documentCountStats !== undefined
+  );
+  const isLoading = isStreamRunning || !hasDocumentCountStats;
+
+  useEffect(
+    function reportLoadingState() {
+      onLoading?.(isLoading);
+      if (!isLoading) {
+        onRenderComplete?.();
+      }
+    },
+    [isLoading, onLoading, onRenderComplete]
+  );
+
   const timeRangeParsed = useMemo(() => {
     if (timeRange) {
       const bounds = calculateBounds(timeRange);
@@ -56,8 +83,12 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
       <LogRateAnalysisDocumentCountChartData
         timeRange={timeRangeParsed}
         esSearchQuery={searchQuery}
+        requestCancellationManager={requestCancellationManager}
       />
-      <LogRateAnalysisContent esSearchQuery={searchQuery} />
+      <LogRateAnalysisContent
+        esSearchQuery={searchQuery}
+        requestCancellationManager={requestCancellationManager}
+      />
     </>
   );
 };
