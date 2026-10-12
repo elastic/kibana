@@ -56,7 +56,6 @@ const toTableFields = (tab: DiscoverSessionApiTab) => ({
   ...(tab.header_row_height !== undefined ? { header_row_height: tab.header_row_height } : {}),
   ...(tab.row_height !== undefined ? { row_height: tab.row_height } : {}),
   ...(tab.rows_per_page !== undefined ? { rows_per_page: tab.rows_per_page } : {}),
-  ...(tab.sample_size !== undefined ? { sample_size: tab.sample_size } : {}),
   ...(tab.documents_display_mode !== undefined
     ? { documents_display_mode: tab.documents_display_mode }
     : {}),
@@ -99,6 +98,7 @@ const toEmbeddableTab = (
     filters: tab.filters ?? [],
     view_mode: tab.view_mode ?? VIEW_MODE.DOCUMENT_LEVEL,
     ...(tab.query !== undefined ? { query: tab.query } : {}),
+    ...(tab.sample_size !== undefined ? { sample_size: tab.sample_size } : {}),
   };
   return classicTab;
 };

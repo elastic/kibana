@@ -156,6 +156,17 @@ describe('toSearchEmbeddableByValueState', () => {
     expect(result.tabs[0].data_source).toEqual(esqlTab.data_source);
   });
 
+  it('copies sample_size from a classic tab', () => {
+    const result = toSearchEmbeddableByValueState(
+      createSession({
+        title: 'Classic sample size',
+        tabs: [{ ...classicTab, sample_size: 500 }],
+      })
+    );
+
+    expect(result.tabs[0]).toMatchObject({ sample_size: 500 });
+  });
+
   it('maps a classic data view tab', () => {
     const result = toSearchEmbeddableByValueState(
       createSession({
