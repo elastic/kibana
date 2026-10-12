@@ -1191,7 +1191,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["stylelint", "stylelint-scss"],
+      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
