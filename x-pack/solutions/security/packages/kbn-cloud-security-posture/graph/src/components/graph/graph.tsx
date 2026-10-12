@@ -15,7 +15,7 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, FitViewOptions, Node, ReactFlowInstance } from '@xyflow/react';
+import type { Edge, FitView, Node, ReactFlowInstance } from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
@@ -91,9 +91,7 @@ const edgeTypes = {
 export const Graph = memo<GraphProps>(
   ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
-    const fitViewRef = useRef<
-      ((fitViewOptions?: FitViewOptions<Node> | undefined) => Promise<boolean>) | null
-    >(null);
+    const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const [isGraphInteractive, _setIsGraphInteractive] = useState(interactive);
