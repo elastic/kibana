@@ -28,6 +28,8 @@ const baseConfig: NodesVersionConfig = {
   kibanaVersion: KIBANA,
   ignoreVersionMismatch: false,
   healthCheckInterval: 100,
+  healthCheckFailureInterval: 100,
+  healthCheckStartupInterval: 100,
   healthCheckRetry: 1,
 };
 
@@ -45,13 +47,16 @@ interface Tick {
   event: (NodesVersionEvent | InitialEvent)['type'];
 }
 
-const initialTick: Tick = {
-  at: 0,
-  dueAt: 0,
-  controlState: 'STARTUP',
-  isCompatible: undefined,
-  event: 'initial',
-};
+/** A row of the timeline: when it happened, when the next request is due, and what it led to. */
+const tick = (
+  at: number,
+  dueAt: number,
+  controlState: Tick['controlState'],
+  isCompatible: boolean | undefined,
+  event: Tick['event']
+): Tick => ({ at, dueAt, controlState, isCompatible, event });
+
+const initialTick = tick(0, 0, 'STARTUP', undefined, 'initial');
 
 /** Runs the machine on a virtual clock and returns the timeline of states. */
 const runTimeline = async (
@@ -75,13 +80,9 @@ const runTimeline = async (
 
   const timeline: Tick[] = [];
   for await (const { state, event, dueAt } of run(nodesVersionMachine(request, config), clock)) {
-    timeline.push({
-      at: clock.now(),
-      dueAt,
-      controlState: state.controlState,
-      isCompatible: state.compatibility?.isCompatible,
-      event: event.type,
-    });
+    timeline.push(
+      tick(clock.now(), dueAt, state.controlState, state.compatibility?.isCompatible, event.type)
+    );
     if (timeline.length === count) {
       break;
     }
@@ -90,29 +91,17 @@ const runTimeline = async (
 };
 
 describe('the version machine on a virtual clock', () => {
-  it('yields the initial state, starts immediately, then requests on a fixed interval', async () => {
+  it('yields the initial state, starts immediately, then waits the interval between requests', async () => {
     const timeline = await runTimeline([compatible, incompatible], baseConfig, 3);
 
     expect(timeline).toEqual([
       initialTick,
-      {
-        at: 0,
-        dueAt: 100,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 100,
-        dueAt: 200,
-        controlState: 'NORMAL',
-        isCompatible: false,
-        event: 'compatibilityChanged',
-      },
+      tick(0, 100, 'NORMAL', true, 'compatibilityChanged'),
+      tick(100, 200, 'NORMAL', false, 'compatibilityChanged'),
     ]);
   });
 
-  it('does not accumulate request duration into the regular interval', async () => {
+  it('waits the interval after each request completes, so request time adds to the period', async () => {
     const timeline = await runTimeline(
       [compatible, compatible, compatible],
       baseConfig,
@@ -122,61 +111,9 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      {
-        at: 30,
-        dueAt: 100,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 130,
-        dueAt: 200,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
-      {
-        at: 230,
-        dueAt: 300,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
-    ]);
-  });
-
-  it('skips ticks missed by a long request without starting requests in parallel', async () => {
-    const timeline = await runTimeline(
-      [compatible, compatible, compatible],
-      baseConfig,
-      4,
-      [30, 250, 0]
-    );
-
-    expect(timeline).toEqual([
-      initialTick,
-      {
-        at: 30,
-        dueAt: 100,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 350,
-        dueAt: 400,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
-      {
-        at: 400,
-        dueAt: 500,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
+      tick(30, 130, 'NORMAL', true, 'compatibilityChanged'),
+      tick(160, 260, 'NORMAL', true, 'compatibilityUnchanged'),
+      tick(290, 390, 'NORMAL', true, 'compatibilityUnchanged'),
     ]);
   });
 
@@ -190,61 +127,14 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      {
-        at: 0,
-        dueAt: 50,
-        controlState: 'STARTUP',
-        isCompatible: false,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 50,
-        dueAt: 150,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 150,
-        dueAt: 250,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
-    ]);
-  });
-
-  it('keeps the fixed grid when a slow request changes the polling interval', async () => {
-    // The request due at 0 takes 130ms and switches to the normal interval. The
-    // next request stays on the grid from 0 (at 200), not 100ms after completion.
-    const timeline = await runTimeline(
-      [compatible, compatible],
-      { ...baseConfig, healthCheckStartupInterval: 50 },
-      3,
-      [130, 0]
-    );
-
-    expect(timeline).toEqual([
-      initialTick,
-      {
-        at: 130,
-        dueAt: 200,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 200,
-        dueAt: 300,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
+      tick(0, 50, 'STARTUP', false, 'compatibilityChanged'),
+      tick(50, 150, 'NORMAL', true, 'compatibilityChanged'),
+      tick(150, 250, 'NORMAL', true, 'compatibilityUnchanged'),
     ]);
   });
 
   it('holds the interval through a retry, then switches to the failure interval on recovery', async () => {
-    // With retry: 1, the first error retries on the normal grid and the second settles FAILING.
+    // With retry: 1, the first error retries after the normal interval and the second settles FAILING.
     const timeline = await runTimeline(
       [compatible, requestError, requestError, compatible],
       { ...baseConfig, healthCheckFailureInterval: 30 },
@@ -253,33 +143,16 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      {
-        at: 0,
-        dueAt: 100,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      { at: 100, dueAt: 200, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
-      {
-        at: 200,
-        dueAt: 230,
-        controlState: 'FAILING',
-        isCompatible: false,
-        event: 'compatibilityChanged',
-      },
-      {
-        at: 230,
-        dueAt: 330,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
+      tick(0, 100, 'NORMAL', true, 'compatibilityChanged'),
+      tick(100, 200, 'NORMAL', true, 'retried'),
+      tick(200, 230, 'FAILING', false, 'compatibilityChanged'),
+      tick(230, 330, 'NORMAL', true, 'compatibilityChanged'),
     ]);
   });
 
-  it('keeps a slow failing request on the grid instead of delaying the retry by its duration', async () => {
-    // The request due at 100 takes 50ms to fail; the retry is due at 200, not 250.
+  it('waits the full interval after a slow failure before retrying', async () => {
+    // The request due at 100 takes 50ms to fail; the retry is due the full interval
+    // later, at 250, so a struggling cluster gets that long before the next request.
     // The retry keeps the last compatibility, so the next success changes nothing.
     const timeline = await runTimeline(
       [compatible, requestError, compatible],
@@ -290,21 +163,9 @@ describe('the version machine on a virtual clock', () => {
 
     expect(timeline).toEqual([
       initialTick,
-      {
-        at: 0,
-        dueAt: 100,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityChanged',
-      },
-      { at: 150, dueAt: 200, controlState: 'NORMAL', isCompatible: true, event: 'retried' },
-      {
-        at: 200,
-        dueAt: 300,
-        controlState: 'NORMAL',
-        isCompatible: true,
-        event: 'compatibilityUnchanged',
-      },
+      tick(0, 100, 'NORMAL', true, 'compatibilityChanged'),
+      tick(150, 250, 'NORMAL', true, 'retried'),
+      tick(250, 350, 'NORMAL', true, 'compatibilityUnchanged'),
     ]);
   });
 });

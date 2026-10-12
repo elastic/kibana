@@ -8,7 +8,11 @@
  */
 
 import type { NodesInfo, NodesVersionCompatibility } from './nodes_version_compatibility';
-import { mapNodesVersionCompatibility, sameCompatibility } from './nodes_version_compatibility';
+import {
+  compatibilityFromNodesInfo,
+  compatibilityFromRequestError,
+  sameCompatibility,
+} from './nodes_version_compatibility';
 
 const KIBANA_VERSION = '5.1.0';
 
@@ -26,9 +30,9 @@ const createNodes = (...versions: string[]): NodesInfo => ({
   ),
 });
 
-describe('mapNodesVersionCompatibility', () => {
+describe('compatibilityFromNodesInfo', () => {
   it('rejects a non-SemVer-compliant node version', () => {
-    const result = mapNodesVersionCompatibility(
+    const result = compatibilityFromNodesInfo(
       createNodes('615c621a8416c444941dc97b142a0122d5c878d0'),
       KIBANA_VERSION,
       false
@@ -40,7 +44,7 @@ describe('mapNodesVersionCompatibility', () => {
   it('reports a node that returned no version as incompatible, rather than throwing', () => {
     const { nodes } = createNodes('5.1.0');
     const withoutVersion = { ip: 'ip', name: 'node-1' } as NodesInfo['nodes'][string];
-    const result = mapNodesVersionCompatibility(
+    const result = compatibilityFromNodesInfo(
       { nodes: { ...nodes, 'node-1': withoutVersion } },
       KIBANA_VERSION,
       false
@@ -51,7 +55,7 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('accepts matching and compatible node versions', () => {
-    const result = mapNodesVersionCompatibility(
+    const result = compatibilityFromNodesInfo(
       createNodes('5.1.0', '5.2.0', '5.1.1-Beta1'),
       KIBANA_VERSION,
       false
@@ -61,7 +65,7 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('reports incompatible nodes', () => {
-    const result = mapNodesVersionCompatibility(
+    const result = compatibilityFromNodesInfo(
       createNodes('5.1.0', '5.2.0', '5.0.0'),
       KIBANA_VERSION,
       false
@@ -77,7 +81,7 @@ describe('mapNodesVersionCompatibility', () => {
     const nodesInfo: NodesInfo = {
       nodes: { node: { version: '6.1.1', ip: 'ip', name: 'node' } },
     };
-    const result = mapNodesVersionCompatibility(nodesInfo, KIBANA_VERSION, false);
+    const result = compatibilityFromNodesInfo(nodesInfo, KIBANA_VERSION, false);
 
     expect(result.isCompatible).toBe(false);
     expect(result.message).toMatchInlineSnapshot(
@@ -86,7 +90,7 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('accepts incompatible nodes when version mismatch is ignored', () => {
-    const result = mapNodesVersionCompatibility(
+    const result = compatibilityFromNodesInfo(
       createNodes('5.1.0', '5.2.0', '5.0.0'),
       KIBANA_VERSION,
       true
@@ -99,7 +103,7 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('warns when a compatible node differs by patch version', () => {
-    const result = mapNodesVersionCompatibility(createNodes('5.1.1'), KIBANA_VERSION, false);
+    const result = compatibilityFromNodesInfo(createNodes('5.1.1'), KIBANA_VERSION, false);
 
     expect(result.isCompatible).toBe(true);
     expect(result.message).toMatchInlineSnapshot(
@@ -108,24 +112,22 @@ describe('mapNodesVersionCompatibility', () => {
   });
 
   it('reports missing node information', () => {
-    const result = mapNodesVersionCompatibility({ nodes: {} }, KIBANA_VERSION, false);
+    const result = compatibilityFromNodesInfo({ nodes: {} }, KIBANA_VERSION, false);
 
     expect(result).toEqual(
       expect.objectContaining({
         isCompatible: false,
         message: 'Unable to retrieve version information from Elasticsearch nodes.',
-        nodesInfoRequestError: undefined,
       })
     );
+    expect(result.nodesInfoRequestError).toBeUndefined();
   });
+});
 
-  it('includes the request error when node information cannot be retrieved', () => {
+describe('compatibilityFromRequestError', () => {
+  it('includes the request error, since node information could not be retrieved', () => {
     const nodesInfoRequestError = new Error('connection refused');
-    const result = mapNodesVersionCompatibility(
-      { nodes: {}, nodesInfoRequestError },
-      KIBANA_VERSION,
-      false
-    );
+    const result = compatibilityFromRequestError(nodesInfoRequestError, KIBANA_VERSION);
 
     expect(result).toEqual(
       expect.objectContaining({
@@ -139,10 +141,10 @@ describe('mapNodesVersionCompatibility', () => {
 });
 
 describe('sameCompatibility', () => {
-  const compatibilityOf = (nodes: NodesInfo & { nodesInfoRequestError?: Error }) =>
-    mapNodesVersionCompatibility(nodes, KIBANA_VERSION, false);
+  const compatibilityOf = (nodes: NodesInfo) =>
+    compatibilityFromNodesInfo(nodes, KIBANA_VERSION, false);
   const withError = (message: string): NodesVersionCompatibility =>
-    compatibilityOf({ nodes: {}, nodesInfoRequestError: new Error(message) });
+    compatibilityFromRequestError(new Error(message), KIBANA_VERSION);
 
   it('treats two compatibilities of the same cluster as equal', () => {
     expect(

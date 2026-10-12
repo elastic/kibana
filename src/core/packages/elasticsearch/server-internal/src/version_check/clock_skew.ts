@@ -9,7 +9,8 @@
 
 /**
  * The Kibana/Elasticsearch clock skew check as a state-action machine: checked
- * every ten minutes, logged on detection, hourly while skewed, and on recovery.
+ * ten minutes after the last check completed, logged on detection, hourly while
+ * skewed, and on recovery.
  */
 
 import type { Logger } from '@kbn/logging';
@@ -23,6 +24,7 @@ import {
   type AugmentedState,
   type Clock,
   type InitialEvent,
+  type StateActionMachine,
 } from './state_action_machine';
 
 const MAX_CLOCK_SKEW_MS = 60_000;
@@ -178,16 +180,13 @@ export const pollEsNodesClockSkew = async (
   clock: Clock = realClock
 ): Promise<void> => {
   const action = sampleClocks(internalClient);
-  for await (const { event } of run(
-    {
-      initialState: (): ClockSkewState => ({ controlState: 'healthy' }),
-      next: () => action,
-      model,
-      interval: () => CLOCK_SKEW_CHECK_INTERVAL_MS,
-    },
-    clock,
-    signal
-  )) {
+  const machine: StateActionMachine<ClockSkewState, ClockSkewSample, ClockSkewEvent> = {
+    initialState: { controlState: 'healthy' },
+    next: () => action,
+    model,
+    interval: () => CLOCK_SKEW_CHECK_INTERVAL_MS,
+  };
+  for await (const { event } of run(machine, clock, signal)) {
     logClockSkewEvent(log, event);
   }
 };
