@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
-import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { extractErrorMessage, extractErrorProperties } from '@kbn/ml-error-utils';
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
@@ -27,6 +27,8 @@ export interface DocumentStats {
   totalCount: number;
   documentCountStats?: DocumentCountStats;
   documentCountStatsCompare?: DocumentCountStats;
+  /** Set when loading the document counts failed. */
+  errorMessage?: string;
 }
 
 function displayError(toastNotifications: ToastsStart, index: string, err: any) {
@@ -207,6 +209,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
       if (error.name !== 'AbortError') {
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
+        setDocumentStats((previous) => ({
+          ...previous,
+          errorMessage: extractErrorMessage(error),
+        }));
       }
     }
     // custom comparison

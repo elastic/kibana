@@ -22,7 +22,8 @@ import {
   EuiSkeletonRectangle,
   EuiSkeletonText,
 } from '@elastic/eui';
-import { KbnInfoCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import moment from 'moment-timezone';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -178,6 +179,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     return min && max ? { min, max } : undefined;
   }, [searchScope?.timeRange]);
   const [matchNotFound, setMatchNotFound] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>();
 
   const mounted = useRef(false);
   const esqlAbortController = useRef(new AbortController());
@@ -388,6 +390,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     setLoading(true);
     setData(null);
     setMatchNotFound(false);
+    setErrorMessage(undefined);
 
     const timeRange = {
       from: earliest,
@@ -500,6 +503,9 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
           defaultMessage: 'Error loading categories',
         }),
       });
+      if (mounted.current === true) {
+        setErrorMessage(extractErrorMessage(error));
+      }
     }
 
     if (mounted.current === true) {
@@ -524,6 +530,13 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   ]);
 
   useEffect(() => {
+    if (documentStats.errorMessage !== undefined) {
+      // Loading the document counts failed, so categories will never load.
+      setErrorMessage(documentStats.errorMessage);
+      setLoading(false);
+      return;
+    }
+
     if (documentStats.documentCountStats?.buckets) {
       randomSampler.setDocCount(documentStats.totalCount);
       setEventRate(
@@ -649,7 +662,17 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
         <EuiSpacer size="l" />
 
-        {matchNotFound === true ? (
+        {errorMessage !== undefined ? (
+          <KbnDangerCallout
+            title={i18n.translate(
+              'xpack.aiops.logCategorization.reverseCategorization.errorLoadingTitle',
+              { defaultMessage: 'Error loading pattern analysis' }
+            )}
+            announceOnMount
+            text={errorMessage}
+            data-test-subj="aiopsReverseCategorizationError"
+          />
+        ) : matchNotFound === true ? (
           <KbnInfoCallout
             title={i18n.translate(
               'xpack.aiops.logCategorization.reverseCategorization.matchNotFoundTitle',
