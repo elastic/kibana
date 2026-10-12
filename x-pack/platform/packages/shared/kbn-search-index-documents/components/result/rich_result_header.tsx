@@ -75,17 +75,17 @@ const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
       content={
         isTextCopied
           ? i18n.translate(
-              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copiedTextToClipboard',
-              {
-                defaultMessage: 'Copied to clipboard',
-              }
-            )
+            'xpack.searchIndexDocuments.result.header.compactCard.metadata.copiedTextToClipboard',
+            {
+              defaultMessage: 'Copied to clipboard',
+            }
+          )
           : i18n.translate(
-              'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
-              {
-                defaultMessage: 'Copy text to clipboard',
-              }
-            )
+            'xpack.searchIndexDocuments.result.header.compactCard.metadata.copyTextToClipboard',
+            {
+              defaultMessage: 'Copy text to clipboard',
+            }
+          )
       }
       data-test-subj="copyTextToClipboardButtonTooltip"
     >
@@ -120,8 +120,6 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
   );
 
   const metaDataIcon = (
-    // The info button stays focused while the popover is open, which would
-    // leave this tooltip stacked on top of the popover.
     <EuiToolTip content={popoverIsOpen ? undefined : metaDataLabel} disableScreenReaderOutput>
       <EuiButtonIcon
         iconType="info"
@@ -181,11 +179,11 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
               hasDeleteDocumentsPrivilege === false
                 ? i18n.translate(
-                    'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
-                    {
-                      defaultMessage: 'You do not have permission to delete documents',
-                    }
-                  )
+                  'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
+                  {
+                    defaultMessage: 'You do not have permission to delete documents',
+                  }
+                )
                 : undefined
             }
             position="bottom"
