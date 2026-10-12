@@ -8,6 +8,7 @@
  */
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { DataViewSource } from '@kbn/data-source';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
 import { calculateBounds } from '@kbn/data-plugin/public';
 import { buildBucketInterval } from './build_bucket_interval';
@@ -60,7 +61,7 @@ describe('buildBucketInterval', () => {
         },
       },
     };
-    const dataView = dataViewWithTimefieldMock;
+    const dataSource = new DataViewSource(dataViewWithTimefieldMock);
     const dataMock = dataPluginMock.createStartContract();
     dataMock.query.timefilter.timefilter.getTime = () => {
       return { from: '1991-03-29T08:04:00.694Z', to: '2021-03-29T07:04:00.695Z' };
@@ -70,7 +71,7 @@ describe('buildBucketInterval', () => {
     };
     return {
       data: dataMock,
-      dataView,
+      dataSource,
       timeInterval: 'auto',
       response,
       timeRange: {

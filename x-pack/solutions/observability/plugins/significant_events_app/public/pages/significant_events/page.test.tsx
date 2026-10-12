@@ -37,7 +37,18 @@ jest.mock('../../hooks/use_kibana', () => ({
       },
     },
     dependencies: {
-      start: {},
+      start: {
+        share: {
+          url: {
+            locators: {
+              get: jest.fn(() => ({
+                getRedirectUrl: ({ tab }: { tab?: string }) =>
+                  `/app/nightshift/settings${tab ? `/${tab}` : ''}`,
+              })),
+            },
+          },
+        },
+      },
     },
   }),
 }));
@@ -65,6 +76,7 @@ jest.mock('../../hooks/use_significant_events_maintenance', () => ({
   }),
 }));
 jest.mock('../../components/page_template', () => ({
+  SignificantEventsAppLoading: () => <div data-test-subj="app-loading" />,
   SignificantEventsAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
     <div data-test-subj="app-header-tabs">
       {tabs.map((tab) => (
@@ -85,12 +97,6 @@ jest.mock('../../components/redirect_to', () => ({
   RedirectTo: ({ params }: { params?: { path?: { tab?: string } } }) => (
     <div data-test-subj="redirect-to">{params?.path?.tab}</div>
   ),
-}));
-jest.mock('./components/cortex/use_cortex', () => ({
-  useCortexEnabled: () => false,
-}));
-jest.mock('./components/decision_trees/use_decision_trees', () => ({
-  useDecisionTreesEnabled: () => false,
 }));
 jest.mock('./components/knowledge_indicators_table', () => ({
   KnowledgeIndicatorsTable: () => null,

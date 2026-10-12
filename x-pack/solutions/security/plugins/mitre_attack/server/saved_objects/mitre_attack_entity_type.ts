@@ -42,12 +42,13 @@ export const mitreAttackEntityType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      framework: { type: 'keyword' },
+      framework: { type: 'keyword', ignore_above: 1024 },
       framework_version: { type: 'version' },
-      id: { type: 'keyword' },
-      type: { type: 'keyword' },
+      id: { type: 'keyword', ignore_above: 1024 },
+      type: { type: 'keyword', ignore_above: 1024 },
       name: {
         type: 'keyword',
+        ignore_above: 1024,
         fields: {
           text: { type: 'text' },
         },
@@ -56,8 +57,8 @@ export const mitreAttackEntityType: SavedObjectsType = {
       revoked: { type: 'boolean' },
       deprecated: { type: 'boolean' },
       position: { type: 'integer' },
-      tactic_ids: { type: 'keyword' },
-      technique_id: { type: 'keyword' },
+      tactic_ids: { type: 'keyword', ignore_above: 1024 },
+      technique_id: { type: 'keyword', ignore_above: 1024 },
     },
   },
   modelVersions: {

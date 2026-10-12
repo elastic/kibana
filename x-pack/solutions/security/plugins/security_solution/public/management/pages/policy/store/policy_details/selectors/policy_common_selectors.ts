@@ -13,6 +13,7 @@ import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_APPS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_EVENT_FILTERS_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+  MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_PROTECTION_UPDATES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_TRUSTED_DEVICES_PATH,
   MANAGEMENT_ROUTING_POLICY_DETAILS_ENDPOINT_EXCEPTIONS_PATH,
@@ -101,6 +102,19 @@ export const isOnBlocklistsView: PolicyDetailsSelector<boolean> = createSelector
     return (
       matchPath(pathname ?? '', {
         path: MANAGEMENT_ROUTING_POLICY_DETAILS_BLOCKLISTS_PATH,
+        exact: true,
+      }) !== null
+    );
+  }
+);
+
+/** Returns a boolean of whether the user is on the custom YARA signatures tab or not */
+export const isOnCustomYaraSignaturesView: PolicyDetailsSelector<boolean> = createSelector(
+  getUrlLocationPathname,
+  (pathname) => {
+    return (
+      matchPath(pathname ?? '', {
+        path: MANAGEMENT_ROUTING_POLICY_DETAILS_CUSTOM_YARA_SIGNATURES_PATH,
         exact: true,
       }) !== null
     );

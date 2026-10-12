@@ -13,6 +13,7 @@ import type { RunToolReturn } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { isArray } from 'lodash';
 import { cleanPrompt } from '../prompts';
+import { sanitizeToolId } from './tools';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -168,7 +169,7 @@ export const createToolCallMessage = (
     tool_calls: toolCalls.map((toolCall) => {
       return {
         id: toolCall.toolCallId,
-        name: toolCall.toolName,
+        name: sanitizeToolId(toolCall.toolName),
         args: toolCall.reasoning
           ? { _reasoning: toolCall.reasoning, ...toolCall.args }
           : toolCall.args,

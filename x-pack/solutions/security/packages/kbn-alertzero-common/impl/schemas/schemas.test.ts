@@ -54,6 +54,7 @@ describe('AlertZero schema smoke tests', () => {
       },
       settingsRevision: null,
       workflowId: null,
+      blockingReasons: [],
     };
     const worker = Worker.parse(workerBody);
 

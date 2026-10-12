@@ -67,7 +67,7 @@ describe('updateInvestigation body schema', () => {
       status: 'completed',
       summary: 'Disk filled up.',
       conclusion: 'Log rotation was disabled.',
-      severity: '60-high',
+      severity: 'high',
       hypotheses: [{ candidate: 'Log rotation disabled', confidence: 0.9, status: 'confirmed' }],
       recommendations: [
         { title: 'Add a disk alert', confidence: 0.7 },

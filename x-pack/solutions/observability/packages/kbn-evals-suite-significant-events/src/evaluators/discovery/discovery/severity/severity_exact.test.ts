@@ -39,16 +39,16 @@ const balanceReaderSignal: SignalEntry = {
 describe('severityExactEvaluator', () => {
   it('is unavailable when no expected open severities are declared', async () => {
     const result = await evaluate(
-      [{ status: 'open', severity: '80-critical', title: 'A' }],
-      [{ status: 'dismissed', severity: '20-low', title: 'A' }]
+      [{ status: 'active', severity: 'critical', title: 'A' }],
+      [{ status: 'inactive', severity: 'low', title: 'A' }]
     );
     expect(result.score).toBeNull();
   });
 
   it('scores 1.0 when actual severity exactly matches the expected tier', async () => {
     const result = await evaluate(
-      [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }],
-      [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }]
+      [{ status: 'active', severity: 'high', title: 'Balance reader connectivity failure' }],
+      [{ status: 'active', severity: 'high', title: 'Balance reader connectivity failure' }]
     );
     expect(result.score).toBe(1);
   });
@@ -57,16 +57,16 @@ describe('severityExactEvaluator', () => {
     const result = await evaluate(
       [
         {
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           title: 'Balance and ledger processing — core transaction submission failures',
           signals: [balanceReaderSignal],
         },
       ],
       [
         {
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           title: 'Balance reader — account balance lookup connectivity failure',
           signals: [balanceReaderSignal],
         },
@@ -79,16 +79,16 @@ describe('severityExactEvaluator', () => {
     const result = await evaluate(
       [
         {
-          status: 'open',
-          severity: '40-medium',
+          status: 'active',
+          severity: 'medium',
           title: 'Different title',
           signals: [balanceReaderSignal],
         },
       ],
       [
         {
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           title: 'Balance reader connectivity failure',
           signals: [balanceReaderSignal],
         },
@@ -100,8 +100,8 @@ describe('severityExactEvaluator', () => {
 
   it('scores 0 when actual severity is above the expected tier (ceiling)', async () => {
     const result = await evaluate(
-      [{ status: 'open', severity: '80-critical', title: 'Ledger failure' }],
-      [{ status: 'open', severity: '60-high', title: 'Ledger failure' }]
+      [{ status: 'active', severity: 'critical', title: 'Ledger failure' }],
+      [{ status: 'active', severity: 'high', title: 'Ledger failure' }]
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('over-severity');
@@ -111,8 +111,8 @@ describe('severityExactEvaluator', () => {
     const result = await evaluate(
       [
         {
-          status: 'open',
-          severity: '80-critical',
+          status: 'active',
+          severity: 'critical',
           title: 'Different event',
           signals: [
             {
@@ -129,8 +129,8 @@ describe('severityExactEvaluator', () => {
       ],
       [
         {
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           title: 'Balance reader connectivity failure',
           signals: [balanceReaderSignal],
         },
@@ -143,12 +143,12 @@ describe('severityExactEvaluator', () => {
 
   it('scores only matched events when some expected events are unmatched', async () => {
     const result = await evaluate(
-      [{ status: 'open', severity: '60-high', title: 'Matched outage' }],
+      [{ status: 'active', severity: 'high', title: 'Matched outage' }],
       [
-        { status: 'open', severity: '60-high', title: 'Matched outage' },
+        { status: 'active', severity: 'high', title: 'Matched outage' },
         {
-          status: 'open',
-          severity: '80-critical',
+          status: 'active',
+          severity: 'critical',
           title: 'Missing cascade',
           signals: [balanceReaderSignal],
         },
@@ -160,8 +160,8 @@ describe('severityExactEvaluator', () => {
 
   it('falls back to title matching when expected event has no rule_uuid signals', async () => {
     const result = await evaluate(
-      [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }],
-      [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }]
+      [{ status: 'active', severity: 'high', title: 'Balance reader connectivity failure' }],
+      [{ status: 'active', severity: 'high', title: 'Balance reader connectivity failure' }]
     );
     expect(result.score).toBe(1);
   });
@@ -170,12 +170,12 @@ describe('severityExactEvaluator', () => {
     const result = await evaluate(
       [
         {
-          status: 'open',
+          status: 'active',
           severity: 'not-a-valid-tier' as unknown as SignificantEvent['severity'],
           title: 'Balance reader connectivity failure',
         },
       ],
-      [{ status: 'open', severity: '60-high', title: 'Balance reader connectivity failure' }]
+      [{ status: 'active', severity: 'high', title: 'Balance reader connectivity failure' }]
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('invalid severity');
@@ -185,21 +185,21 @@ describe('severityExactEvaluator', () => {
     const result = await evaluate(
       [
         {
-          status: 'open',
+          status: 'active',
           severity: 'not-a-valid-tier' as unknown as SignificantEvent['severity'],
           title: 'Balance reader connectivity failure',
           signals: [balanceReaderSignal],
         },
-        { status: 'open', severity: '60-high', title: 'Ledger failure' },
+        { status: 'active', severity: 'high', title: 'Ledger failure' },
       ],
       [
         {
-          status: 'open',
-          severity: '60-high',
+          status: 'active',
+          severity: 'high',
           title: 'Balance reader connectivity failure',
           signals: [balanceReaderSignal],
         },
-        { status: 'open', severity: '60-high', title: 'Ledger failure' },
+        { status: 'active', severity: 'high', title: 'Ledger failure' },
       ]
     );
     expect(result.score).toBe(0.5);

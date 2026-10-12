@@ -127,6 +127,7 @@ export const exportLiveQueryResultsRoute = (
         }
 
         return handler(context, request, response, {
+          actionId,
           baseFilter: `action_id: "${escapeKuery(actionId)}"`,
           metadata: { action_id: actionId, query },
           fileNamePrefix: `osquery-results-${actionId}`,

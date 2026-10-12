@@ -120,7 +120,7 @@ describe('mergeSignalsLatestPerRule', () => {
   });
 
   it('carries forward a non-blocking signal unchanged', () => {
-    const nonBlocking = { ...makeSignal('rule-1'), verdict: 'refutes' as const };
+    const nonBlocking: SignalEntry = { ...makeSignal('rule-1'), verdict: 'refutes' };
     const result = mergeSignalsLatestPerRule(
       [{ '@timestamp': TS_EARLIER, signals: [nonBlocking] }],
       [makeSignal('rule-2')],
@@ -179,6 +179,18 @@ describe('mergeEpisodeContext', () => {
       TS_SUBMITTED
     );
     expect(streamNames).toEqual(['logs.a', 'logs.b']);
+  });
+
+  it('averages confidence over contexts that define it, ignoring missing values', () => {
+    const { confidence } = mergeEpisodeContext(
+      [
+        { '@timestamp': TS_EARLIER, stream_names: [], confidence: 0.8 },
+        { '@timestamp': TS_EARLIER, stream_names: [] },
+      ],
+      { stream_names: [], causal_features: [], blast_radius: [], confidence: 0.6 },
+      TS_SUBMITTED
+    );
+    expect(confidence).toBeCloseTo(0.7);
   });
 
   it('causal classification beats blast for the same feature_id', () => {
@@ -257,17 +269,16 @@ describe('preserveStableNarrative', () => {
   const makeLatest = (ruleUuids: string[]): SignificantEvent =>
     ({
       '@timestamp': TS_EARLIER,
-      event_uuid: 'event-uuid',
       event_id: 'event-id',
-      status: 'open',
-      severity: '60-high',
+      status: 'active',
+      severity: 'high',
       stream_names: ['logs.app'],
       signals: ruleUuids.map(makeDetection),
       title: 'Stored title',
       symptom_hypothesis: 'Stored hypothesis',
       summary: 'Stored summary',
       confidence: 0.8,
-    } as SignificantEvent);
+    } satisfies SignificantEvent);
 
   it('returns undefined when latestEvent is missing', () => {
     expect(preserveStableNarrative(['rule-1'], undefined, ['rule-1'])).toBeUndefined();
@@ -318,16 +329,15 @@ describe('preserveStableNarrative', () => {
   it('omits symptom_hypothesis from freeze when stored event has none', () => {
     const latest = {
       '@timestamp': TS_EARLIER,
-      event_uuid: 'event-uuid',
       event_id: 'event-id',
-      status: 'open' as const,
-      severity: '60-high' as const,
+      status: 'active',
+      severity: 'high',
       stream_names: ['logs.app'],
       signals: [makeDetection('rule-1')],
       title: 'Stored title',
       summary: 'Stored summary',
       confidence: 0.8,
-    } as SignificantEvent;
+    } satisfies SignificantEvent;
 
     const result = preserveStableNarrative(
       ['rule-1'],

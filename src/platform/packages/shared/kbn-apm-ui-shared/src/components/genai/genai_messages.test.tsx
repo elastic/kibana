@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { GenAiMessages } from './genai_messages';
+import type { GenAiMessage } from '@kbn/genai-common';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 jest.mock('@kbn/shared-ux-markdown', () => ({
@@ -20,11 +21,7 @@ jest.mock('@kbn/shared-ux-markdown', () => ({
 }));
 
 function renderMessages(
-  inputMessages: Array<{
-    role: string;
-    content?: string;
-    parts?: Array<{ type: string; content?: string; [key: string]: unknown }>;
-  }>,
+  inputMessages: GenAiMessage[],
   outputMessages: Array<{ role: string; content?: string }> = [],
   systemInstructions?: string
 ) {
@@ -91,6 +88,140 @@ describe('GenAiMessages', () => {
     // GenAiFieldValue detects object and renders EuiCodeBlock — look for code element
     const codeBlocks = document.querySelectorAll('code, pre, [class*="CodeBlock"]');
     expect(codeBlocks.length).toBeGreaterThan(0);
+  });
+
+  it('renders the raw role in each message header', () => {
+    renderMessages([
+      { role: 'user', content: 'Hi' },
+      { role: 'assistant', content: 'Hello' },
+    ]);
+    expect(screen.getByTestId('genAiRoleLabel-user')).toHaveTextContent(/^user$/);
+    expect(screen.getByTestId('genAiRoleLabel-assistant')).toHaveTextContent(/^assistant$/);
+  });
+
+  it('renders assistant tool calls as cards with the tool name, call ID and arguments', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        parts: [
+          { type: 'text', content: 'Let me search' },
+          { type: 'tool_call', id: 'call-1', name: 'search', arguments: '{"query":"errors"}' },
+        ],
+      },
+    ]);
+    const toolCall = screen.getByTestId('genAiToolCallPart');
+    expect(toolCall).toHaveTextContent('search');
+    expect(toolCall).toHaveTextContent('call-1');
+    expect(toolCall).toHaveTextContent('query: errors');
+    expect(screen.getByText('Let me search')).toBeInTheDocument();
+  });
+
+  it('renders a copy button on each tool call and tool result card', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        parts: [{ type: 'tool_call', id: 'call-1', name: 'search', arguments: '{}' }],
+      },
+      {
+        role: 'user',
+        parts: [{ type: 'tool_call_response', id: 'call-1', response: 'done' }],
+      },
+    ]);
+    expect(screen.getByTestId('genAiToolCallPartCopy')).toHaveAttribute(
+      'aria-label',
+      'Copy tool call'
+    );
+    expect(screen.getByTestId('genAiToolResponsePartCopy')).toHaveAttribute(
+      'aria-label',
+      'Copy tool output'
+    );
+  });
+
+  it('omits the arguments body for tool calls without arguments', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        parts: [{ type: 'tool_call', id: 'call-1', name: 'list_indices', arguments: '{}' }],
+      },
+    ]);
+    expect(screen.queryByTestId('genAiStructuredValue')).toBeNull();
+  });
+
+  it('labels tool messages with the name of the tool that produced the output', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        parts: [{ type: 'tool_call', id: 'call-1', name: 'search', arguments: '{}' }],
+      },
+      {
+        role: 'tool',
+        parts: [{ type: 'tool_call_response', id: 'call-1', response: '{"hits":[]}' }],
+      },
+    ]);
+    expect(screen.getByTestId('genAiRoleLabel-tool')).toHaveTextContent(/^tool$/);
+    expect(screen.getByTestId('genAiToolOutputCopy-1')).toHaveAttribute(
+      'aria-label',
+      'Copy tool output'
+    );
+    expect(screen.queryByTestId('genAiToolOutputCopy-0')).toBeNull();
+    expect(screen.getByTestId('genAiToolMessageName-1')).toHaveTextContent('search');
+    expect(screen.getByTestId('genAiToolMessageCallId-1')).toHaveTextContent('call-1');
+    expect(screen.getByTestId('genAiMessage-1')).toHaveTextContent('hits: []');
+    expect(screen.queryByTestId('genAiToolResponsePart')).toBeNull();
+  });
+
+  it('renders legacy OpenAI-style tool calls and tool messages', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        tool_calls: [{ id: 'call-1', function: { name: 'search', arguments: '{"q":"x"}' } }],
+      },
+      { role: 'tool', tool_call_id: 'call-1', content: 'no results' },
+    ]);
+    expect(screen.getByTestId('genAiToolCallPart')).toHaveTextContent('search');
+    expect(screen.getByTestId('genAiToolMessageName-1')).toHaveTextContent('search');
+    expect(screen.getByTestId('genAiMessage-1')).toHaveTextContent('no results');
+  });
+
+  it('unwraps Agent Builder tool result envelopes and shows multi-line text verbatim', () => {
+    const inner = JSON.stringify({
+      results: [{ type: 'other', data: { text: 'line 1\nline 2' } }],
+    });
+    renderMessages([
+      {
+        role: 'tool',
+        parts: [
+          {
+            type: 'tool_call_response',
+            id: 'call-1',
+            response: JSON.stringify({ response: `<tool_result>${inner}</tool_result>` }),
+          },
+        ],
+      },
+    ]);
+    const message = screen.getByTestId('genAiMessage-0');
+    expect(message).not.toHaveTextContent('tool_result');
+    expect(message).not.toHaveTextContent('\\n');
+    expect(message).toHaveTextContent('type: other');
+    expect(screen.getByTestId('genAiStructuredValue').textContent).toContain(
+      'text: |-\n        line 1\n        line 2'
+    );
+  });
+
+  it('renders tool responses inside non-tool messages as tool result cards', () => {
+    renderMessages([
+      {
+        role: 'assistant',
+        parts: [{ type: 'tool_call', id: 'call-1', name: 'search', arguments: '{}' }],
+      },
+      {
+        role: 'user',
+        parts: [{ type: 'tool_call_response', id: 'call-1', response: 'done' }],
+      },
+    ]);
+    const response = screen.getByTestId('genAiToolResponsePart');
+    expect(response).toHaveTextContent('search');
+    expect(response).toHaveTextContent('done');
   });
 
   it('renders output messages after input messages', () => {

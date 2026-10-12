@@ -7,7 +7,7 @@
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { StreamType } from '@kbn/streams-schema';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
@@ -69,7 +69,12 @@ interface AgentToolEventCreateProps {
 
 interface AgentToolEventStatusUpdateProps {
   success: boolean;
-  event_uuid: string;
+  /**
+   * @deprecated Superseded by `event_id`. Kept optional for schema continuity with events sent by
+   * nodes that have not been upgraded yet.
+   */
+  event_uuid?: string;
+  event_id: string;
   status: SignificantEventStatus;
   error_message?: string;
 }
@@ -152,6 +157,8 @@ interface AgentToolEventWriteProps {
   written: boolean;
   stream_names: string[];
   error_message?: string;
+  /** Tier actually stored. Present only when written is true. */
+  severity?: Severity;
 }
 
 interface AgentToolEventSearchProps {
