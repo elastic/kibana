@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../hooks/use_kibana';
 import type {
@@ -15,6 +16,9 @@ import type {
 } from './types';
 
 const DECISION_TREES_PATH = '/internal/nightshift/decision_trees';
+const DECISION_TREE_PATH = `${DECISION_TREES_PATH}/{symptom}`;
+const DECISION_TREE_VERSIONS_PATH = `${DECISION_TREE_PATH}/versions`;
+const DECISION_TREE_VERSION_PATH = `${DECISION_TREE_VERSIONS_PATH}/{version}`;
 
 const decisionTreeKeys = {
   trees: ['decision_trees', 'trees'] as const,
@@ -38,8 +42,15 @@ export const useDecisionTree = (symptom: string | undefined) => {
 
   return useQuery({
     queryKey: decisionTreeKeys.tree(symptom ?? ''),
-    queryFn: ({ signal }) =>
-      http.get<GetDecisionTreeResponse>(`${DECISION_TREES_PATH}/${symptom}`, { signal }),
+    queryFn: ({ signal }) => {
+      if (symptom === undefined) {
+        throw new Error('A symptom is required to fetch a decision tree');
+      }
+
+      return http.get<GetDecisionTreeResponse>(buildPath(DECISION_TREE_PATH, { symptom }), {
+        signal,
+      });
+    },
     enabled: symptom !== undefined,
   });
 };
@@ -49,10 +60,18 @@ export const useDecisionTreeVersions = (symptom: string | undefined) => {
 
   return useQuery({
     queryKey: decisionTreeKeys.versions(symptom ?? ''),
-    queryFn: ({ signal }) =>
-      http.get<ListDecisionTreeVersionsResponse>(`${DECISION_TREES_PATH}/${symptom}/versions`, {
-        signal,
-      }),
+    queryFn: ({ signal }) => {
+      if (symptom === undefined) {
+        throw new Error('A symptom is required to fetch decision tree versions');
+      }
+
+      return http.get<ListDecisionTreeVersionsResponse>(
+        buildPath(DECISION_TREE_VERSIONS_PATH, { symptom }),
+        {
+          signal,
+        }
+      );
+    },
     enabled: symptom !== undefined,
   });
 };
@@ -65,11 +84,18 @@ export const useDecisionTreeVersion = (
 
   return useQuery({
     queryKey: decisionTreeKeys.version(symptom ?? '', version ?? 0),
-    queryFn: ({ signal }) =>
-      http.get<GetDecisionTreeVersionResponse>(
-        `${DECISION_TREES_PATH}/${symptom}/versions/${version}`,
-        { signal }
-      ),
+    queryFn: ({ signal }) => {
+      if (symptom === undefined || version === undefined) {
+        throw new Error('A symptom and version are required to fetch a decision tree version');
+      }
+
+      return http.get<GetDecisionTreeVersionResponse>(
+        buildPath(DECISION_TREE_VERSION_PATH, { symptom, version }),
+        {
+          signal,
+        }
+      );
+    },
     enabled: symptom !== undefined && version !== undefined,
   });
 };
