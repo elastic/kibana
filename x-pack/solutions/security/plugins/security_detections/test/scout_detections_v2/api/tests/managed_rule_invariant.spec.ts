@@ -47,6 +47,7 @@ import {
   apiTest,
   expect,
   DETECTION_HEADERS,
+  INTERNAL_ORIGIN_HEADER,
   DETECTION_V2_RULES,
   getDetectionRuleUrl,
   getDetectionEnableUrl,
@@ -90,10 +91,11 @@ apiTest.describe(
 
       // Enable alerting:v2:enabled via the API so every test in this suite sees the
       // flag on.  The server config no longer uses a globalOverride.
-      await apiClient.post(GLOBAL_SETTINGS_API, {
-        headers: adminHeaders,
+      const settingsResponse = await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: { ...adminHeaders, ...INTERNAL_ORIGIN_HEADER },
         body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
       });
+      expect(settingsResponse).toHaveStatusCode(200);
     });
 
     apiTest.beforeEach(async ({ apiClient }) => {

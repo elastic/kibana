@@ -23,7 +23,7 @@
  *      `alerting_rule` SO documents on the security-wrapped, request-scoped SO
  *      client.  Write access to `alerting_rule` is granted only by the
  *      `alerting_v2_rules` feature privilege (same as the framework's own Scout
- *      roles at alerting_v2/test/scout_alerting_v2/common/roles.ts).
+ *      roles at alerting_v2/test/scout/common/roles.ts).
  *
  *   A role that holds only `securitySolutionRulesV4` passes the route check and
  *   is then denied at the SO layer.  Both grants are required.
@@ -61,6 +61,14 @@ export const DETECTION_HEADERS = {
   'kbn-xsrf': 'scout-test',
   'Content-Type': 'application/json;charset=UTF-8',
 } as const;
+
+/**
+ * Marks a request as coming from Kibana itself. The global settings API that
+ * the suites use to flip `alerting:v2:enabled` is internal, and the Scout
+ * server restricts internal APIs, so a settings write without this header is
+ * rejected. Detection requests never send it, because they test the public API.
+ */
+export const INTERNAL_ORIGIN_HEADER = { 'x-elastic-internal-origin': 'kibana' } as const;
 
 // ---------------------------------------------------------------------------
 // Roles

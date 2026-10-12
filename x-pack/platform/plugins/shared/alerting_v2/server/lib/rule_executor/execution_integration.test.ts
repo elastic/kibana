@@ -25,7 +25,6 @@
  * Ref: rule-event-generation-logic.md "Where the hook runs"
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
@@ -39,6 +38,7 @@ import { ExecuteRuleQueryStep } from './steps/execute_rule_query_step';
 import { CreateAlertEventsStep } from './steps/create_alert_events_step';
 import { StoreAlertEventsStep } from './steps/store_alert_events';
 import type { PluginConfig } from '../../config';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import { createQueryService } from '../services/query_service/query_service.mock';
 import { createEsqlResponseFormatService } from '../services/esql_response_format_service/esql_response_format_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
@@ -126,10 +126,15 @@ function makeRegistry(...definitions: RegisteredBuilderType[]): BuilderTypeRegis
 // Step factory helpers
 // ---------------------------------------------------------------------------
 
-function createPluginConfigAccessor() {
+function createConfigService() {
   const config: PluginConfig = {
     enabled: true,
     invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+    retention: {
+      ruleEvents: { enabled: false, dataRetention: '90d' },
+      alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+    },
+    dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
@@ -140,7 +145,7 @@ function createPluginConfigAccessor() {
       },
     },
   };
-  return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
+  return createConfigServiceMock(config);
 }
 
 interface PipelineSetup {
@@ -153,7 +158,7 @@ interface PipelineSetup {
 }
 
 function createPipeline(registry: BuilderTypeRegistry): PipelineSetup {
-  const pluginConfigAccessor = createPluginConfigAccessor();
+  const configService = createConfigService();
   const { queryService, mockEsClient } = createQueryService();
   const { loggerService } = createLoggerService();
   const mockStorage = createMockStorageServiceContract();
@@ -162,9 +167,9 @@ function createPipeline(registry: BuilderTypeRegistry): PipelineSetup {
   const executeQueryStep = new ExecuteRuleQueryStep(
     queryService,
     createEsqlResponseFormatService(),
-    pluginConfigAccessor
+    configService
   );
-  const createEventsStep = new CreateAlertEventsStep(loggerService, pluginConfigAccessor, registry);
+  const createEventsStep = new CreateAlertEventsStep(loggerService, configService, registry);
   const storeEventsStep = new StoreAlertEventsStep(mockStorage);
 
   return {
@@ -258,7 +263,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
         kind: 'signal',
         schedule: { every: '5m', lookback: '10m' },
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: FIXTURE_FIELDS,
           signature_id: SIGNATURE_ID,
         },
@@ -395,7 +400,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
         grouping: undefined,
         schedule: { every: '5m', lookback: '10m' },
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: ALERT_FIELDS,
           signature_id: ALERT_SIG_ID,
         },
@@ -471,7 +476,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: 'unknown.type.not.registered',
+          builder: { type: 'unknown.type.not.registered' },
           builder_fields: { q: 'foo', severity: 'high', risk_score: 10 },
         },
       });
@@ -491,7 +496,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           // q must be a string; a number simulates fields that predate a schema tightening.
           builder_fields: { q: 12345, severity: 'high', risk_score: 10 },
         },
@@ -521,7 +526,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },
         },
       });
@@ -555,7 +560,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const rule = createRuleResponse({
         kind: 'signal',
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },
         },
       });
@@ -587,7 +592,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
         recovery: { strategy: 'condition', segment: 'WHERE count <= 10' },
         no_data: { strategy: 'ignore' },
         metadata: {
-          builder_type: FIXTURE_TYPE_ID,
+          builder: { type: FIXTURE_TYPE_ID },
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },
         },
       });
@@ -610,7 +615,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
  *
  * What was checked:
  * - The Scout harness under
- *   `alerting_v2/test/scout_alerting_v2/engine_executor/api/` boots a full
+ *   `alerting_v2/test/scout/engine_executor/api/` boots a full
  *   Kibana + Elasticsearch stack and drives the executor through HTTP APIs.
  * - Builder types register server-side during a plugin's `setup()` phase
  *   via `AlertingServerSetup.registerBuilderType`. There is no HTTP API that

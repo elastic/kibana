@@ -27,6 +27,7 @@ import {
   apiTest,
   expect,
   DETECTION_HEADERS,
+  INTERNAL_ORIGIN_HEADER,
   DETECTION_V2_RULES,
   getDetectionRuleUrl,
   DETECTION_RULES_ALL_ROLE,
@@ -55,10 +56,11 @@ apiTest.describe(
       const adminCredentials = await requestAuth.getApiKeyForAdmin();
       adminHeaders = { ...DETECTION_HEADERS, ...adminCredentials.apiKeyHeader };
 
-      await apiClient.post(GLOBAL_SETTINGS_API, {
-        headers: adminHeaders,
+      const settingsResponse = await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: { ...adminHeaders, ...INTERNAL_ORIGIN_HEADER },
         body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
       });
+      expect(settingsResponse).toHaveStatusCode(200);
     });
 
     apiTest.afterEach(async ({ apiClient }) => {

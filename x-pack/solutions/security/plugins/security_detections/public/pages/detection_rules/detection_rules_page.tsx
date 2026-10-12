@@ -492,7 +492,7 @@ export const DetectionRulesPage: React.FC = () => {
             ? [
                 <EuiButton
                   fill
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={handleCreateClick}
                   data-test-subj="createRuleButton"
                 >

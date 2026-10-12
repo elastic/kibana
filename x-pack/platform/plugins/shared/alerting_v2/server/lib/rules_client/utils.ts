@@ -547,24 +547,38 @@ function deepOmitUndefined(value: unknown, opaqueKeys: ReadonlySet<string> = new
 }
 
 /**
- * Strips the four fields excluded from the revision diff so that equal values
- * on those fields never inflate the comparison. The result is a plain object
+ * Strips the fields excluded from the revision diff so that differences in
+ * those fields never inflate the comparison. The result is a plain object
  * safe to pass to `isEqual`.
  *
  * Exclusion list (per rule-versions.md "What moves it and what does not"):
  *   - `updatedAt` / `updatedBy`  — stamped on every write
  *   - `version`                  — incremented on every mutation
  *   - `metadata.revision`        — the field being computed
+ *   - `enabled`                  — run-loop state, not configuration. A PUT
+ *                                  replace may set it, and turning a rule on
+ *                                  or off is not a meaningful edit.
  *
- * `enabled` and the create stamps (`createdAt`, `createdBy`) are excluded by
- * construction — update paths always preserve them from storage, so they are
- * equal before the diff even runs.
+ * The create stamps (`createdAt`, `createdBy`) are excluded by construction —
+ * update paths always preserve them from storage, so they are equal before the
+ * diff even runs.
+ *
+ * Fields an update rewrites into their API shape are compared in that shape on
+ * both sides, so a write that only normalizes a legacy value on disk (an empty
+ * description or grouping, a pre-collapse query) is not a meaningful edit.
  */
 function stripForRevisionDiff(attrs: RuleSavedObjectAttributes): Record<string, unknown> {
-  const { updatedAt, updatedBy, version, metadata, ...rest } = attrs;
+  const { updatedAt, updatedBy, version, enabled, metadata, ...rest } = attrs;
   // `revision` is excluded; all other metadata fields are kept.
   const { revision: _revision, ...restMetadata } = metadata;
-  return { ...rest, metadata: restMetadata };
+  return {
+    ...rest,
+    query: rest.query ? toApiQuery(rest.query) : undefined,
+    state_transition: toApiStateTransition(rest.state_transition),
+    grouping: toApiGrouping(rest.grouping),
+    artifacts: toApiArtifacts(rest.artifacts),
+    metadata: { ...restMetadata, description: toApiDescription(restMetadata.description) },
+  };
 }
 
 /**
@@ -581,7 +595,7 @@ const BUILDER_FIELDS_OPAQUE_KEYS: ReadonlySet<string> = new Set(['builder_fields
 /**
  * Returns the next `metadata.revision` value for an update or upsert-replace
  * write. Compares the computed next attributes against the stored attributes,
- * ignoring the four excluded fields. Bumps the counter by exactly one on the
+ * ignoring the excluded fields. Bumps the counter by exactly one on the
  * first non-excluded difference; a write that changes nothing meaningful returns
  * the current revision unchanged.
  *
@@ -797,9 +811,8 @@ export function buildUpdateRuleAttributes(
         return { ...stored, version: incoming.version };
       })(),
       // `ownership` is immutable for the rule's life — always restore from
-      // storage. No request body ever carries this field; the spread of
-      // `updateData.metadata` above cannot reach it. The explicit assignment
-      // guards against future schema drift and documents the contract clearly.
+      // storage. No request body ever carries this field, and the merged
+      // metadata above is rebuilt field by field, so nothing else sets it.
       ownership: existingAttrs.metadata.ownership,
     },
     time_field: next.time_field,

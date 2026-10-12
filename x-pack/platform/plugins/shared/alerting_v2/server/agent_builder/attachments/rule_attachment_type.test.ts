@@ -29,7 +29,6 @@ const baseRuleData: RuleAttachmentData = {
     tags: ['ops', 'cpu'],
     signature_id: 'high-cpu-sig-id',
     source: { type: 'internal', version: 1 },
-    version: 1,
     revision: 0,
     // Step 4.4: ownership is now required in ruleResponseMetadataSchema.
     ownership: { managed: false },

@@ -39,11 +39,11 @@ import { ruleModelVersions } from './rule_model_versions';
 import { z } from '@kbn/zod/v4';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { defineBuilderType } from '@kbn/alerting-v2-rule-builders';
 
 import type { PluginConfig } from '../../config';
+import { createConfigServiceMock } from '../../lib/services/config_service/config_service.mock';
 import { BuilderTypeRegistry } from '../../lib/builder_types';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../../lib/artifact_types';
 import { RulesClient } from '../../lib/rules_client';
@@ -133,17 +133,17 @@ const syntheticThresholdDefinition = defineBuilderType({
 
 // Sanity: confirm the model version import succeeded (if this is 0 the folds
 // won't be registered and every registry.register() call will throw).
-// The POC's five model versions ('8'–'12') were squashed into a single '8';
+// The POC's five model versions ('12'–'16') were squashed into a single '12';
 // after step B.5, both detection types share a single manifest, so there is
 // exactly one manifest-fold mappings_addition in the squashed entry.
 it('ruleModelVersions carries the detection-type fold contribution in the squashed entry', () => {
-  const v8 = ruleModelVersions['8'] as {
+  const v9 = ruleModelVersions['12'] as {
     changes: Array<{ type: string; addedMappings?: unknown }>;
   };
-  expect(v8).toBeDefined();
+  expect(v9).toBeDefined();
   // One mappings_addition from the shared manifest fold (both query and threshold
   // are covered by a single detectionRuleBuilderFieldsManifest after step B.5).
-  const manifestFoldChanges = v8.changes.filter(
+  const manifestFoldChanges = v9.changes.filter(
     (c) =>
       c.type === 'mappings_addition' &&
       (c.addedMappings as any)?.metadata?.properties?.builder_fields?.properties !== undefined
@@ -196,20 +196,18 @@ function createDetectionClient(builderTypeRegistry: BuilderTypeRegistry) {
   const artifactTypeRegistry = new ArtifactTypeRegistry();
   registerBuiltinArtifactTypes(artifactTypeRegistry);
 
-  const pluginConfigAccessor =
-    coreMock.createPluginInitializerContext<PluginConfig>(detectionConfig).config;
-
   const client = new RulesClient(
     httpServerMock.createKibanaRequest(),
     rulesSavedObjectService,
     taskManager,
     userService,
     'default',
-    pluginConfigAccessor,
+    createConfigServiceMock(detectionConfig),
     rulesSavedObjectService,
     ruleEventPublisher,
     loggerService,
     artifactTypeRegistry,
+    { actor: 'user', options: {} },
     builderTypeRegistry,
     { solution: 'security' } // managed-rule gate requires the Security solution identity
   );
@@ -242,7 +240,7 @@ describe('security.detection.query — create via RulesClient', () => {
         kind: 'alert',
         metadata: {
           name: 'test-query-rule',
-          builder_type: 'security.detection.query',
+          builder: { type: 'security.detection.query' },
           builder_fields: {
             index: ['logs-*'],
             query: 'host.name: *',
@@ -267,7 +265,7 @@ describe('security.detection.query — create via RulesClient', () => {
       solution: 'security',
       domain: 'detection',
     });
-    expect(res.metadata.builder_type).toBe('security.detection.query');
+    expect(res.metadata.builder).toEqual({ type: 'security.detection.query' });
 
     // Execution-time types persist no query on the stored attributes.
     const { attrs } = rulesSavedObjectService.bulkCreate.mock.calls[0][0][0];
@@ -301,7 +299,7 @@ describe('security.detection.threshold — create via RulesClient', () => {
         kind: 'alert',
         metadata: {
           name: 'test-threshold-rule',
-          builder_type: 'security.detection.threshold',
+          builder: { type: 'security.detection.threshold' },
           builder_fields: {
             index: ['logs-*'],
             query: 'event.category: process',
@@ -328,7 +326,7 @@ describe('security.detection.threshold — create via RulesClient', () => {
       solution: 'security',
       domain: 'detection',
     });
-    expect(res.metadata.builder_type).toBe('security.detection.threshold');
+    expect(res.metadata.builder?.type).toBe('security.detection.threshold');
 
     // Execution-time types persist no query on the stored attributes. The
     // threshold type no longer derives grouping.fields (dropped in phase A.1).

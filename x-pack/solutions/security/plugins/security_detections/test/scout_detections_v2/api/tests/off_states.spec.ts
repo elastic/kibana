@@ -43,6 +43,7 @@ import {
   apiTest,
   expect,
   DETECTION_HEADERS,
+  INTERNAL_ORIGIN_HEADER,
   DETECTION_V2_RULES,
   DETECTION_V2_TAGS,
   getDetectionRuleUrl,
@@ -76,20 +77,22 @@ apiTest.describe(
       // Enable alerting:v2:enabled via the API so tests start with the flag on.
       // The server config no longer uses a globalOverride (which would lock the
       // setting and prevent tests from flipping it), so we must write it here.
-      await apiClient.post(GLOBAL_SETTINGS_API, {
-        headers: adminHeaders,
+      const settingsResponse = await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: { ...adminHeaders, ...INTERNAL_ORIGIN_HEADER },
         body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
       });
+      expect(settingsResponse).toHaveStatusCode(200);
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
       // Always restore the uiSettings flag by writing true again.  We POST
       // rather than DELETE because DELETE removes a user-set value but cannot
       // revert to a global-override (the server config no longer sets one).
-      await apiClient.post(GLOBAL_SETTINGS_API, {
-        headers: adminHeaders,
+      const settingsResponse = await apiClient.post(GLOBAL_SETTINGS_API, {
+        headers: { ...adminHeaders, ...INTERNAL_ORIGIN_HEADER },
         body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
       });
+      expect(settingsResponse).toHaveStatusCode(200);
     });
 
     /**
@@ -97,12 +100,13 @@ apiTest.describe(
      * the global-settings API.  The per-suite `afterEach` restores it.
      */
     const disableAlertingV2 = async (apiClient: { post: Function }) => {
-      await apiClient.post(`${GLOBAL_SETTINGS_API}`, {
-        headers: adminHeaders,
+      const settingsResponse = await apiClient.post(`${GLOBAL_SETTINGS_API}`, {
+        headers: { ...adminHeaders, ...INTERNAL_ORIGIN_HEADER },
         body: {
           changes: { [ALERTING_V2_ENABLED_SETTING]: false },
         },
       });
+      expect(settingsResponse).toHaveStatusCode(200);
     };
 
     // -------------------------------------------------------------------------

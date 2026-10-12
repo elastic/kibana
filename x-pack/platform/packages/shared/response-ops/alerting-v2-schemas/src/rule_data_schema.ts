@@ -262,7 +262,7 @@ export const metadataSchema = lazySchema(() =>
       // `builder.type` is stored as `metadata.builder_type`, which is indexed and
       // filterable: the Detections API needs to filter by it. On the PUT (upsert
       // replace) path `null` explicitly clears a stored builder relationship; that
-      // path uses `replaceRuleBodySchema`, which extends this schema with a nullable
+      // path uses `putRuleDataSchema`, which extends this schema with a nullable
       // override. This base schema does not accept null so that POST (create) and
       // the rule response never advertise it.
       // Ref: rule-types.md "The discriminator must be indexed and filterable"
@@ -1010,8 +1010,13 @@ export const isRecoveryTransitionConsistentWithStrategy = (data: RuleLifecycleSh
 /** The create-rule fields the refinements below read. */
 type CreateRuleRefinementFields = Pick<
   z.infer<typeof createRuleDataBaseSchema>,
-  'kind' | 'metadata' | 'recovery' | 'no_data' | 'state_transition'
+  'kind' | 'recovery' | 'no_data' | 'state_transition'
 > & {
+  // Nullable `builder` because the PUT body accepts `null` to clear a stored
+  // builder relationship.
+  metadata: Omit<z.infer<typeof metadataSchema>, 'builder'> & {
+    builder?: z.infer<typeof metadataBuilderSchema> | null;
+  };
   // Optional because a builder-authored body carries its parameters instead of
   // a query; the builder refinements below keep exactly one of the two present.
   query?: z.infer<typeof querySchema>;
@@ -1144,9 +1149,9 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 // ---------------------------------------------------------------------------
-// PUT (upsert replace) body schema
+// PUT (upsert replace) metadata schema
 //
-// Identical to `createRuleDataSchema` except that `metadata.builder_type`
+// Identical to `metadataSchema` except that `metadata.builder`
 // accepts `null` as an explicit escape hatch: the PUT caller sends null to
 // confirm they want to clear a stored builder relationship and switch the rule
 // to direct ES|QL editing. The replace branch of `upsertRule` normalises null
@@ -1164,32 +1169,18 @@ export const replaceRuleMetadataSchema = lazySchema(() =>
   metadataSchema
     .extend({
       // Override: accept null on PUT to clear a stored builder relationship.
-      builder_type: builderTypeSchema
+      builder: metadataBuilderSchema
         .optional()
         .nullable()
         .describe(
           'Identifies the rule builder that authored this rule (e.g. "threshold"). ' +
             'Absent for rules authored directly in ES|QL. ' +
             'Send null on a PUT replace to explicitly clear the builder relationship ' +
-            'and switch the rule to ES|QL mode. (min length: 1, max length: 64)'
+            'and switch the rule to ES|QL mode.'
         ),
     })
     .meta({ id: 'alerting_replace_rule_metadata' })
 );
-
-// The refinement chain is `applyCreateRuleRefinements`, shared with POST and
-// bulk create, so the three write paths cannot drift apart.
-export const replaceRuleBodySchema = lazySchema(() =>
-  applyCreateRuleRefinements(
-    createRuleDataBaseSchema.extend({
-      // Builder-authored rules omit `query`, exactly as single create allows.
-      query: querySchema.optional(),
-      metadata: replaceRuleMetadataSchema,
-    })
-  ).meta({ id: 'alerting_replace_rule' })
-);
-
-export type ReplaceRuleData = z.infer<typeof replaceRuleBodySchema>;
 
 /**
  * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
@@ -1197,9 +1188,15 @@ export type ReplaceRuleData = z.infer<typeof replaceRuleBodySchema>;
  * schema-level default) because the meaning of "omitted" differs by outcome:
  * on create it defaults to `true`, on replace it preserves the existing
  * stored value — both handled in application code, not here.
+ *
+ * The refinement chain is `applyCreateRuleRefinements`, shared with POST and
+ * bulk create, so the three write paths cannot drift apart.
  */
 export const putRuleDataSchema = applyCreateRuleRefinements(
   createRuleDataBaseSchema.extend({
+    // Builder-authored rules omit `query`, exactly as single create allows.
+    query: querySchema.optional(),
+    metadata: replaceRuleMetadataSchema,
     enabled: z
       .boolean()
       .optional()
@@ -1334,6 +1331,10 @@ export const ruleResponseMetadataSchema = lazySchema(() =>
        * Ref: rule-ownership.md "The ownership object"
        */
       ownership: ruleOwnershipSchema,
+      // The rule-template link (`metadata.template` in storage) is deliberately not
+      // returned: its public shape is undecided, and a response-only key inside the
+      // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
+      // events and telemetry still read it from the saved object.
     })
     .meta({ id: 'alerting_rule_response_metadata' })
 );
@@ -1350,12 +1351,8 @@ export const ruleResponseSchema = lazySchema(() =>
        * (rule-execution-logic.md "A rule without a persisted query").
        */
       query: querySchema.optional(),
-      // The rule-template link (`metadata.template` in storage) is deliberately not
-      // returned: its public shape is undecided, and a response-only key inside the
-      // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
-      // events and telemetry still read it from the saved object.
-      metadata: metadataSchema.describe('Rule metadata.'),
       id: z.string().describe('Unique rule identifier.'),
+      metadata: ruleResponseMetadataSchema,
       version: z
         .number()
         .int()

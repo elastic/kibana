@@ -35,13 +35,13 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { z } from '@kbn/zod/v4';
 import type { RegisteredBuilderType } from '../builder_types';
 import { BuilderTypeRegistry } from '../builder_types';
 import { ArtifactTypeRegistry, registerBuiltinArtifactTypes } from '../artifact_types';
 import type { PluginConfig } from '../../config';
+import { createConfigServiceMock } from '../services/config_service/config_service.mock';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { createRulesSavedObjectServiceMock } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
@@ -117,7 +117,7 @@ const baseCreateData = {
   kind: 'signal' as const,
   metadata: {
     name: 'detection-rule',
-    builder_type: EXECUTION_TYPE_ID,
+    builder: { type: EXECUTION_TYPE_ID },
     builder_fields: VALID_FIELDS,
   },
   time_field: '@timestamp',
@@ -217,6 +217,11 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
+      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -227,19 +232,18 @@ describe('RulesClient — builder fields validation switches (step 7.1)', () => 
         },
       },
     };
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
     return new RulesClient(
       request,
       rulesSavedObjectService,
       taskManager,
       userService,
       'space-1',
-      pluginConfigAccessor,
+      createConfigServiceMock(config),
       rulesSavedObjectService,
       ruleEventPublisher,
       createLoggerService().loggerService,
       artifactTypeRegistry,
+      { actor: 'user', options: {} },
       builderTypeRegistry,
       callerIdentity
     );

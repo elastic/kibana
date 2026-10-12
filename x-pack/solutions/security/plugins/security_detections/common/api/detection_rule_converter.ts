@@ -24,7 +24,7 @@
  *   revision          ↔ metadata.revision           (read-only; out only)
  *   version           ↔ metadata.source.version      (writes send full stored source + new version)
  *   source            ↔ metadata.source minus version (out only)
- *   type              ↔ metadata.builder_type         (via alias map)
+ *   type              ↔ metadata.builder.type         (via alias map)
  *   name              ↔ metadata.name
  *   description       ↔ metadata.description
  *   tags              ↔ metadata.tags                (empty array never stored; see off-table rules)
@@ -222,7 +222,7 @@ export function toFrameworkCreate(props: DetectionRuleCreateInput): CreateRuleDa
       description: props.description,
       ...(props.rule_id !== undefined ? { signature_id: props.rule_id } : {}),
       ...(metadataTags !== undefined ? { tags: metadataTags } : {}),
-      builder_type: builderTypeId,
+      builder: { type: builderTypeId },
       builder_fields: extractBuilderFields(props),
       source: { type: 'internal', version: props.version },
     },
@@ -296,7 +296,7 @@ export function toFrameworkReplace(
       description: props.description,
       ...(props.rule_id !== undefined ? { signature_id: props.rule_id } : {}),
       tags: metadataTags,
-      builder_type: builderTypeId,
+      builder: { type: builderTypeId },
       builder_fields: extractBuilderFields(props),
       source: updatedSource,
     },
@@ -399,7 +399,7 @@ export function toFrameworkPatch(merged: DetectionRulePatchedInput): UpdateRuleD
 /**
  * Convert a framework `RuleResponse` to the public `DetectionRuleResponse`.
  *
- * Requires that `rule.metadata.builder_type` resolves to a known public alias.
+ * Requires that `rule.metadata.builder.type` resolves to a known public alias.
  * If it does not (deployment mismatch — API older than the stored rule), the
  * caller must handle the unknown-type case before calling here.
  *
@@ -417,11 +417,11 @@ export function toPublicResponse(rule: RuleResponse): DetectionRuleResponse {
   const { metadata } = rule;
 
   // Resolve the public type alias from the stored builder type id.
-  const publicType = BUILDER_TYPE_ID_TO_ALIAS[metadata.builder_type ?? ''];
+  const publicType = BUILDER_TYPE_ID_TO_ALIAS[metadata.builder?.type ?? ''];
   if (!publicType) {
     throw new Error(
       `Cannot convert rule ${rule.id} to public response: ` +
-        `unknown or missing builder type '${metadata.builder_type ?? '(absent)'}'`
+        `unknown or missing builder type '${metadata.builder?.type ?? '(absent)'}'`
     );
   }
 

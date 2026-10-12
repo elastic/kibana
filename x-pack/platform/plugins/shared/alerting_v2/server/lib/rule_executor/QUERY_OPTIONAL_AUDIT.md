@@ -39,8 +39,8 @@ Design reference: rule-execution-logic.md "A rule without a persisted query".
 | `public/components/rule_details/sidebar/rule_sidebar_preview_tab.tsx` | Returns `EuiEmptyPrompt` when `rule.query == null` instead of running `QuerySandbox` with an empty string. |
 | `packages/response-ops/alerting-v2-utils/src/rule_mappers.ts` | `buildRulePayload` changed `query: data.query!` to a conditional spread. |
 | `server/lib/rule_executor/steps/execute_rule_query_step.test.ts` | Jest fixture uses optional chaining on `rule.query?.format`. |
-| `test/scout_alerting_v2/rules/api/tests/update_rule.spec.ts` | Scout assertion uses `stored.query?.format`. |
-| `test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts` | Scout poll uses `rule.query?.format`. |
+| `test/scout/rules/api/tests/update_rule.spec.ts` | Scout assertion uses `stored.query?.format`. |
+| `test/scout/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts` | Scout poll uses `rule.query?.format`. |
 
 ---
 

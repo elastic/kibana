@@ -236,10 +236,13 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: testData.API_ENGI
           solution: 'security',
           domain: 'detection',
         });
-        // Re-fetch so the baseline version reflects the ES partial update from
-        // setOwnership (which bumps _seq_no). The rotation gate must leave it
-        // at this version — any write by the rotation path would bump it further.
-        const versionAfterStamp = (await apiServices.alertingV2.rules.get(managedRule.id)).version;
+        // Re-fetch to capture the audit stamp the gate has to leave alone.
+        // `version` cannot serve as the write detector here: it counts rule
+        // configuration changes, and a key rotation is not one, so it stays put
+        // whether the gate refuses the write or lets it through. `updated_at`
+        // and `updated_by` are what the rotation path stamps on every rule it
+        // writes, so an unchanged stamp is the signal that no write happened.
+        const beforeRotation = await apiServices.alertingV2.rules.get(managedRule.id);
 
         const response = await apiClient.post(BULK_UPDATE_API_KEY_URL, {
           headers: writerHeaders,
@@ -253,9 +256,12 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: testData.API_ENGI
           id: managedRule.id,
           error: { code: 'RULE_IS_MANAGED' },
         });
-        // Version unchanged from the post-stamp baseline — no write happened.
+        // Audit stamp unchanged from the pre-rotation baseline — no write happened.
         const stored = await apiServices.alertingV2.rules.get(managedRule.id);
-        expect(stored.version).toBe(versionAfterStamp);
+        expect(stored.updated_at).toBe(beforeRotation.updated_at);
+        // `updated_by` is a nullable actor object, so it needs deep equality:
+        // the two fetches return structurally equal objects, not the same one.
+        expect(stored.updated_by).toStrictEqual(beforeRotation.updated_by);
       } finally {
         // Un-manage so the normal cleanup can delete this rule.
         await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {
@@ -280,12 +286,9 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: testData.API_ENGI
           solution: 'security',
           domain: 'detection',
         });
-        // Re-fetch so the baseline version reflects the ES partial update from
-        // setOwnership. Creating the unmanaged rule first advances the shard
-        // seq_no by 1, so the setOwnership write assigns a seq_no two higher
-        // than what managedRule.version captured at create time.
-        const managedVersionAfterStamp = (await apiServices.alertingV2.rules.get(managedRule.id))
-          .version;
+        // Re-fetch to capture the audit stamp the gate has to leave alone, for
+        // the same reason as the single-rule gate test above.
+        const managedBeforeRotation = await apiServices.alertingV2.rules.get(managedRule.id);
 
         const response = await apiClient.post(BULK_UPDATE_API_KEY_URL, {
           headers: writerHeaders,
@@ -299,14 +302,19 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: testData.API_ENGI
           id: managedRule.id,
           error: { code: 'RULE_IS_MANAGED' },
         });
-        // The unmanaged rule's version should have bumped (audit stamp); the
-        // managed one's should be unchanged from the post-stamp baseline.
         const storedManaged = await apiServices.alertingV2.rules.get(managedRule.id);
         const storedUnmanaged = await apiServices.alertingV2.rules.get(unmanagedRule.id);
-        expect(storedManaged.version).toBe(managedVersionAfterStamp);
-        // Version strings are base64-encoded opaque tokens — use not.toBe to
-        // confirm the rotation write changed the token, not toBeGreaterThan.
-        expect(storedUnmanaged.version).not.toBe(unmanagedRule.version);
+        // The managed rule was refused before any write, so its audit stamp is
+        // untouched. That the unmanaged one did rotate is established by
+        // `affected_count: 1` above; its stamp is only a weaker sanity check,
+        // and `updated_at` has millisecond resolution, so create and rotation
+        // can share a millisecond and the comparison has to be non-strict.
+        expect(storedManaged.updated_at).toBe(managedBeforeRotation.updated_at);
+        // Deep equality for the actor object, as in the single-rule gate test.
+        expect(storedManaged.updated_by).toStrictEqual(managedBeforeRotation.updated_by);
+        expect(Date.parse(storedUnmanaged.updated_at)).toBeGreaterThanOrEqual(
+          Date.parse(unmanagedRule.updated_at)
+        );
       } finally {
         // Un-manage so the normal cleanup can delete this rule.
         await apiServices.alertingV2.ruleSavedObject.setOwnership(managedRule.id, {

@@ -453,7 +453,13 @@ apiTest.describe('Upsert rule API', { tag: testData.API_ENGINE_TAG }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata).toStrictEqual({ name: 'replaced' });
+      expect(response.body.metadata).toStrictEqual({
+        name: 'replaced',
+        signature_id: created.metadata.signature_id,
+        revision: created.metadata.revision + 1,
+        source: created.metadata.source,
+        ownership: created.metadata.ownership,
+      });
       expect(response.body.query).toStrictEqual({ base: 'FROM logs-* | LIMIT 10' });
     }
   );
