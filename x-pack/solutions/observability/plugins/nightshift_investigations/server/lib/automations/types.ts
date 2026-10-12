@@ -77,7 +77,7 @@ export interface NightshiftAutomationAttributes {
   workflowId?: string;
   trigger: NightshiftAutomationTrigger;
   execution: NightshiftAutomationExecution;
-  completion: NightshiftAutomationCompletion;
+  completions: NightshiftAutomationCompletion[];
   runtime: NightshiftAutomationRuntime;
   createdAt: string;
   updatedAt: string;

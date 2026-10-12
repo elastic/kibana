@@ -101,7 +101,7 @@ describe('use_automations', () => {
       name: 'Triage',
       trigger: { rows: [{ kind: 'alert' as const }] },
       execution: {},
-      completion: {},
+      completions: [],
       runtime: {},
     };
 

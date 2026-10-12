@@ -98,23 +98,24 @@ function buildNotificationDestinations(
   automationId: string,
   automation: NightshiftAutomationAttributes
 ): InvestigationNotificationDestination[] | undefined {
-  const { completion } = automation;
-  if (
-    completion.action !== 'post_to_slack' ||
-    completion.targetMode !== 'channel' ||
-    !completion.destination
-  ) {
-    return undefined;
-  }
-  return [
-    {
+  const destinations: InvestigationNotificationDestination[] = [];
+  for (const completion of automation.completions) {
+    if (
+      completion.action !== 'post_to_slack' ||
+      completion.targetMode !== 'channel' ||
+      !completion.destination
+    ) {
+      continue;
+    }
+    destinations.push({
       type: 'slack',
       connector_id: completion.connectorId ?? ELASTIC_APPS_SLACK_CONNECTOR_ID,
       params: { channel: completion.destination },
       automation_id: automationId,
       automation_name: automation.name,
-    },
-  ];
+    });
+  }
+  return destinations.length > 0 ? destinations : undefined;
 }
 
 function buildTriggers(
