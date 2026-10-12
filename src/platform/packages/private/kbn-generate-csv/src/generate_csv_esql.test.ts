@@ -587,12 +587,29 @@ describe('CsvESQLGenerator', () => {
       const query = {
         esql: 'FROM kibana_sample_data_logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)',
       };
+      // The event.ingested range must be ignored, proving the job's time field picks the range
       const filters = [
         {
           meta: {},
           query: {
             range: {
-              '@timestamp': { format: 'strict_date_optional_time', gte: 'now-15m', lte: 'now' },
+              'event.ingested': {
+                format: 'strict_date_optional_time',
+                gte: '2025-06-01T00:00:00.000Z',
+                lte: '2025-06-02T00:00:00.000Z',
+              },
+            },
+          },
+        },
+        {
+          meta: {},
+          query: {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2026-01-01T00:00:00.000Z',
+                lte: '2026-01-02T00:00:00.000Z',
+              },
             },
           },
         },
@@ -617,10 +634,10 @@ describe('CsvESQLGenerator', () => {
       expect(mockDataClient.search).toHaveBeenCalledWith(
         {
           params: expect.objectContaining({
-            params: expect.arrayContaining([
-              expect.objectContaining({ _tstart: expect.any(String) }),
-              expect.objectContaining({ _tend: expect.any(String) }),
-            ]),
+            params: [
+              { _tstart: '2026-01-01T00:00:00.000Z' },
+              { _tend: '2026-01-02T00:00:00.000Z' },
+            ],
           }),
         },
         expect.anything()
