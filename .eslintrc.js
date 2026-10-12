@@ -1166,16 +1166,12 @@ module.exports = {
     {
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
-      // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts), except the fixable
-      // warnings below. The plugin stays registered so `eslint-disable` directives naming its rules resolve.
+      // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts). The plugin stays
+      // registered so `eslint-disable` directives naming its rules resolve.
       plugins: ['playwright'],
       rules: {
         // Turned off by `plugin:playwright/recommended`: fixtures are often destructured as `({}, testInfo)`.
         'no-empty-pattern': 'off',
-        // Autofixable warnings kept in ESLint: `--fix` here applies error fixes only, while oxlint
-        // `--fix` also rewrites warnings, which CI's auto-fix pass would commit across the repo.
-        'playwright/no-useless-not': 'warn',
-        'playwright/prefer-native-locators': 'warn',
         // Check all function arguments to catch unused destructured params
         '@typescript-eslint/no-unused-vars': [
           'error',

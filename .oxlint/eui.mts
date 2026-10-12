@@ -15,6 +15,7 @@ export const euiRules: DummyRuleMap = {
   '@elastic/eui/button-group-selection-require-id': 'error',
   '@elastic/eui/href-or-on-click': 'warn',
   '@elastic/eui/no-css-color': 'warn',
+  '@elastic/eui/no-deprecated-icon-aliases': 'warn',
   '@elastic/eui/no-nested-copy-tooltip': 'warn',
   '@elastic/eui/no-nested-interactive-element': 'warn',
   '@elastic/eui/no-static-z-index': 'warn',
