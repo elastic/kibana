@@ -13,7 +13,7 @@ import type { DetectedMatch } from './types';
  * so the pipeline's `onFailure` mode decides what happens: silently dropping the rule would
  * leave data the admin believes is masked going to the model.
  */
-const compileRulePattern = (rule: RegexAnonymizationRule): RegExp => {
+export const compileRulePattern = (rule: RegexAnonymizationRule): RegExp => {
   try {
     return new RegExp(rule.pattern, 'g');
   } catch (error) {

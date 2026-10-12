@@ -15,6 +15,7 @@ import type {
 import { partition } from 'lodash';
 import type { AnonymizationState } from './types';
 import { executeRegexRules } from './execute_regex_rules';
+import { compileRulePattern } from './execute_regex_rule_task';
 import { executeNerRule } from './execute_ner_rule';
 import type { RegexWorkerService } from './regex_worker_service';
 import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
@@ -148,10 +149,29 @@ export async function anonymizeRecords({
     knownReplacements,
   });
 
-  const [regexRules, nerRules] = partition(
+  const [declaredRegexRules, nerRules] = partition(
     anonymizationRules,
     (rule): rule is RegexAnonymizationRule => rule.type === 'RegExp'
   );
+
+  // Under allow_unsafe, a rule that cannot compile is skipped on its own so it cannot disable the
+  // valid rules next to it. Under block it stays in, and the call fails with the compile error.
+  const regexRules =
+    onFailure === 'allow_unsafe'
+      ? declaredRegexRules.filter((rule) => {
+          try {
+            compileRulePattern(rule);
+            return true;
+          } catch (error) {
+            logger?.warn(
+              `Skipping regex rule; proceeding without it because onFailure is "allow_unsafe": ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return false;
+          }
+        })
+      : declaredRegexRules;
 
   try {
     const detectedRegexEntities = await executeRegexRules({

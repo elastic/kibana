@@ -487,7 +487,7 @@ describe('anonymizeRecords', () => {
       ).rejects.toThrow(/"Broken pattern" has an invalid regular expression/);
     });
 
-    it('proceeds unmasked, and says why, under onFailure "allow_unsafe"', async () => {
+    it('skips only the broken rule, and says why, under onFailure "allow_unsafe"', async () => {
       const result = await anonymizeRecords({
         input,
         anonymizationRules: [regexRule, brokenRule],
@@ -497,14 +497,15 @@ describe('anonymizeRecords', () => {
         logger,
       });
 
-      expect(result.records[0].content).toBe('jorge21@gmail.com');
+      expect(result.records[0].content).not.toContain('jorge21@gmail.com');
+      expect(result.anonymizations).toHaveLength(1);
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('invalid regular expression')
       );
     });
   });
 
-  it('skips every regex rule, not just the broken one, when onFailure is "allow_unsafe"', async () => {
+  it('still applies the valid rules when a broken rule comes first and onFailure is "allow_unsafe"', async () => {
     const brokenRule = { ...regexRule, pattern: '(unclosed' };
 
     const result = await anonymizeRecords({
@@ -516,8 +517,8 @@ describe('anonymizeRecords', () => {
       logger,
     });
 
-    expect(result.records[0].content).toBe('jorge21@gmail.com');
-    expect(result.anonymizations).toHaveLength(0);
+    expect(result.records[0].content).not.toContain('jorge21@gmail.com');
+    expect(result.anonymizations).toHaveLength(1);
   });
 
   it('applies known replacements before regex processing', async () => {

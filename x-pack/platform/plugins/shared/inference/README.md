@@ -446,7 +446,7 @@ Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, 
     ```jsonc
     {
       "maskingEnabled": false,   // master switch: no rule runs while this is false
-      "onFailure": "block",      // "block" fails the request when a regex rule cannot run; "allow_unsafe" sends it unmasked
+      "onFailure": "block",      // "block" fails the request when a regex rule cannot run; "allow_unsafe" skips a rule with an invalid pattern and still applies the others (if regex masking cannot run at all, the request is sent unmasked)
       "rules": [
         {
           "entityClass": "EMAIL",
