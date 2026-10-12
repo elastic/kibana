@@ -466,7 +466,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
   }> {
     const sendable: Array<{ item: SharedBulkItem<TExecution>; originalIndex: number }> = [];
     const preFailed: Array<{ id: string; originalIndex: number; error: estypes.ErrorCause }> = [];
-    const pendingIds = new Map<string, number>();
+    const pendingIndexes: number[] = [];
 
     // DataStream requires @timestamp to be set on create and update.
     // We inject the @timestamp into the document from the date field.
@@ -500,18 +500,19 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         }
       } else {
         // update and upsert: version must be resolved before sending.
-        pendingIds.set(item.document.id, i);
+        pendingIndexes.push(i);
       }
     }
 
-    if (pendingIds.size > 0) {
-      const versions = await this.deps.versionManager.bulkGetVersions(
-        Array.from(pendingIds.keys())
-      );
+    if (pendingIndexes.length > 0) {
+      // Several items may target the same id; each keeps its own slot in the response.
+      const uniqueIds = Array.from(new Set(pendingIndexes.map((i) => items[i].document.id)));
+      const versions = await this.deps.versionManager.bulkGetVersions(uniqueIds);
 
-      for (const [id, i] of Array.from(pendingIds.entries())) {
-        const version = versions[id];
+      for (const i of pendingIndexes) {
         const item = items[i];
+        const { id } = item.document;
+        const version = versions[id];
 
         if (version) {
           // upsert with a known version becomes an update (document exists).
