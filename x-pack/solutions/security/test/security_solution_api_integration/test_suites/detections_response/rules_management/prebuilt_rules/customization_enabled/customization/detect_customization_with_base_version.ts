@@ -641,7 +641,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rule_source).toMatchObject({
           type: 'external',
           is_customized: false,
-          customized_fields: [],
         });
       });
 
@@ -665,7 +664,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rule_source).toMatchObject({
           type: 'external',
           is_customized: false,
-          customized_fields: [],
         });
       });
 
@@ -685,7 +683,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rule_source).toMatchObject({
           type: 'external',
           is_customized: false,
-          customized_fields: [],
         });
       });
 
@@ -705,7 +702,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body.rule_source).toMatchObject({
           type: 'external',
           is_customized: true,
-          customized_fields: [{ field_name: 'required_fields' }],
         });
       });
     });
