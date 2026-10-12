@@ -14,6 +14,7 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import {
+  ensureThreatIntelSupplyWorkflowsForSpace,
   installThreatIntelManagedWorkflows,
   reconcileThreatIntelAttributeWorkflows,
   uninstallThreatIntelManagedWorkflows,
@@ -72,6 +73,35 @@ describe('threat intel managed workflow install', () => {
       workflowIdSuffix: 'space-a',
     });
     expect(client.install).toHaveBeenCalledTimes(4);
+  });
+
+  it('ensure for a space installs globals and that space attribute, propagating failures', async () => {
+    const client = createClient();
+
+    await ensureThreatIntelSupplyWorkflowsForSpace({
+      managedWorkflowsClient: client as never,
+      spaceId: 'another',
+    });
+
+    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, {
+      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    });
+    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+      spaceId: 'another',
+      workflowIdSuffix: 'another',
+    });
+    expect(client.install).toHaveBeenCalledTimes(3);
+
+    client.install.mockRejectedValueOnce(new Error('install denied'));
+    await expect(
+      ensureThreatIntelSupplyWorkflowsForSpace({
+        managedWorkflowsClient: client as never,
+        spaceId: 'another',
+      })
+    ).rejects.toThrow('install denied');
   });
 
   it('reconciles attribute installs for the given spaces only', async () => {

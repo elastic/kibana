@@ -177,7 +177,7 @@ const FETCH_ERROR_TITLE = i18n.translate(
 const TABLE_CAPTION = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.tableCaption',
   {
-    defaultMessage: 'Significant Events',
+    defaultMessage: 'Significant events',
   }
 );
 const EVENT_NOT_FOUND_TITLE = i18n.translate(
