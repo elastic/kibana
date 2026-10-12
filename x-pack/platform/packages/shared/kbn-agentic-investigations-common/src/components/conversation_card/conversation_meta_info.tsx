@@ -31,7 +31,7 @@ export const ConversationMetaInfo = memo<{
   const { unit } = selectUnit(new Date(createdAt));
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
       <EuiFlexItem grow={false}>
         <EuiToolTip content={<FormattedDate value={createdAt} dateStyle="full" timeStyle="long" />}>
           {/* Focusable so the exact time is reachable without a pointer. */}

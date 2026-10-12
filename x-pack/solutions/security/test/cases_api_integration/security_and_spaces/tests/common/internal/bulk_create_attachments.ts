@@ -11,10 +11,15 @@ import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 import type { Case } from '@kbn/cases-plugin/common';
-import { COMMENT_ATTACHMENT_TYPE, OSQUERY_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  isUnifiedAlertAttachment,
+  isUnifiedCommentAttachment,
+} from '@kbn/cases-plugin/common';
 import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
 import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
@@ -24,7 +29,6 @@ import {
   fileAttachmentMetadata,
   fileMetadata,
   userActionSourceApi,
-  postCommentAlertReq,
   postCommentAlertMultipleIdsReq,
   postCommentUserReq,
   buildUnifiedAlertReq,
@@ -90,6 +94,26 @@ const unifiedOtherAttachmentReq = {
 const persistableStateAndExternalReferenceLimitMessage =
   'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments.';
 
+// User actions persist the legacy shape, regardless of the unified shape sent on the wire.
+const toLegacyUserActionPayload = (attachment: UnifiedAttachmentPayload) => {
+  if (isUnifiedCommentAttachment(attachment)) {
+    return { type: 'user', comment: attachment.data.content, owner: attachment.owner };
+  }
+
+  if (!isUnifiedAlertAttachment(attachment)) {
+    throw new Error(`No legacy user action mapping for attachment type "${attachment.type}"`);
+  }
+
+  const { attachmentId, metadata, owner } = attachment;
+  return {
+    type: 'alert',
+    alertId: attachmentId,
+    index: metadata?.index,
+    rule: metadata?.rule,
+    owner,
+  };
+};
+
 // `getAllComments` reads through the cases_fixture route, which projects to the legacy shape.
 const legacyAlertCommentOnlyId3 = {
   ...postCommentAlertMultipleIdsReq,
@@ -106,7 +130,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validateCommentsIgnoringOrder = (
     comments: Case['comments'],
-    attachments: BulkCreateAttachmentsRequestV2
+    attachments: AttachmentRequestV2[]
   ) => {
     expect(comments?.length).to.eql(attachments.length);
 
@@ -183,9 +207,7 @@ export default ({ getService }: FtrProviderContext): void => {
             action: 'create',
             created_by: defaultUser,
             payload: {
-              comment: {
-                ...attachments[index],
-              },
+              comment: toLegacyUserActionPayload(attachments[index]),
             },
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
@@ -205,16 +227,15 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [getUnifiedFilesAttachmentReq(), getUnifiedFilesAttachmentReq()],
           });
 
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
-          const secondFileAttachment =
-            caseWithAttachments.comments![1] as ExternalReferenceSOAttachmentPayload;
+          const filesPerAttachment = caseWithAttachments.comments?.map((comment) =>
+            'metadata' in comment ? comment.metadata?.files : undefined
+          );
 
           expect(caseWithAttachments.totalComment).to.be(2);
-          for (const fileAttachment of [firstFileAttachment, secondFileAttachment]) {
-            expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
-            expect(fileAttachment.externalReferenceStorage.soType).to.be(FILE_SO_TYPE);
-          }
+          expect(filesPerAttachment).to.eql([
+            fileAttachmentMetadata.files,
+            fileAttachmentMetadata.files,
+          ]);
         });
 
         it('should bulk create 100 file attachments', async () => {
@@ -485,26 +506,18 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('400s when missing attributes for type alert', async () => {
+      it('400s when an alert is missing attachmentId', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-        // Unified alerts allow a missing `metadata.index`, so the index case uses the legacy shape.
-        const requests = [
-          omit('attachmentId', postUnifiedAlertReq),
-          omit('index', postCommentAlertReq),
-        ];
 
-        for (const requestAttributes of requests) {
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              postUnifiedCommentReq,
-              // @ts-expect-error
-              requestAttributes,
-            ],
-            expectedHttpCode: 400,
-          });
-        }
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postUnifiedCommentReq,
+            omit('attachmentId', postUnifiedAlertReq) as unknown as UnifiedAttachmentPayload,
+          ],
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when adding excess attributes for type alert', async () => {
@@ -677,12 +690,10 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [unifiedOtherAttachmentReq],
           });
 
-          const persistableStateAttachments = Array(100).fill(postUnifiedLensReq);
-
           const error = (await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: persistableStateAttachments,
+            params: Array(100).fill(postUnifiedLensReq),
             expectedHttpCode: 400,
           })) as unknown as Error;
 
@@ -698,12 +709,10 @@ export default ({ getService }: FtrProviderContext): void => {
             params: [postUnifiedLensReq],
           });
 
-          const externalRequestAttachments = Array(100).fill(unifiedOtherAttachmentReq);
-
           const error = (await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: externalRequestAttachments,
+            params: Array(100).fill(unifiedOtherAttachmentReq),
             expectedHttpCode: 400,
           })) as unknown as Error;
 
@@ -1151,10 +1160,9 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alert format', () => {
-      // Unified alerts have no id/index pairing check yet, so these cases use the legacy shape.
       const alertFormatCases: Array<{ alertId: string | string[]; index: string | string[] }> = [
         { alertId: '1', index: ['index1', 'index2'] },
-        { alertId: ['1', '2'], index: 'index' },
+        { alertId: ['1', '2'], index: ['index'] },
       ];
       for (const { alertId, index } of alertFormatCases) {
         it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index}`, async () => {
@@ -1162,7 +1170,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [{ ...postCommentAlertReq, alertId, index }],
+            params: [buildUnifiedAlertReq('securitySolutionFixture', { alertId, index })],
             expectedHttpCode: 400,
           });
         });

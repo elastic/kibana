@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-nightshift-investigations'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/nightshift'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/evals-suite-nightshift-investigations'
   description: Moon project for @kbn/evals-suite-nightshift-investigations
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations
 dependsOn:
   - '@kbn/dev-cli-errors'

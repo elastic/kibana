@@ -258,9 +258,13 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisType(type: string) {
-    // checking for the existence of the control gives the UI more time to bind a click handler
+    // waiting for the existence of the control gives the UI more time to bind a click handler
     // see https://github.com/elastic/kibana/issues/89958
-    if (!(await this.hasVisType(type))) {
+    if (
+      !(await this.testSubjects.waitForExists(`visType-${type}`, {
+        timeout: this.testSubjects.FIND_TIME,
+      }))
+    ) {
       throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
     }
     await this.testSubjects.click(`visType-${type}`);

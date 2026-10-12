@@ -26,7 +26,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { ProposedActionButton } from '@kbn/agentic-investigations-common';
+import { ProposedActionButton, ProposedActionsList } from '@kbn/agentic-investigations-common';
 import { useCurrentUserProfile } from '../../../user_profiles';
 import { decisionErrorMessage } from './decision_errors';
 import {
@@ -67,37 +67,35 @@ const ProposedActionRow = ({
   const isDeclining = useIsDecliningProposal(proposal.id);
 
   return (
-    <EuiFlexItem>
-      <ProposedActionButton
-        proposal={proposal}
-        readOnly={!canDecide}
-        isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
-        onConfirm={async () => {
-          try {
-            await approve.mutateAsync({
-              id: proposal.id,
-              body: { actionInput: proposal.actionInput },
-            });
-          } catch (err) {
-            onDecisionError(err);
-            throw err;
-          }
-        }}
-        onDismiss={async ({ dismissReason, rationale }) => {
-          try {
-            await dismiss.mutateAsync({
-              id: proposal.id,
-              body: { dismissReason, rationale },
-            });
-          } catch (err) {
-            onDecisionError(err);
-            throw err;
-          }
-        }}
-        currentActorName={currentActorName}
-        data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
-      />
-    </EuiFlexItem>
+    <ProposedActionButton
+      proposal={proposal}
+      readOnly={!canDecide}
+      isSubmitting={isApproving ? 'applying' : isDeclining ? 'declining' : undefined}
+      onConfirm={async () => {
+        try {
+          await approve.mutateAsync({
+            id: proposal.id,
+            body: { actionInput: proposal.actionInput },
+          });
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      onDismiss={async ({ dismissReason, rationale }) => {
+        try {
+          await dismiss.mutateAsync({
+            id: proposal.id,
+            body: { dismissReason, rationale },
+          });
+        } catch (err) {
+          onDecisionError(err);
+          throw err;
+        }
+      }}
+      currentActorName={currentActorName}
+      data-test-subj={`investigationFlyoutProposedAction-${proposal.id}`}
+    />
   );
 };
 
@@ -155,17 +153,21 @@ export const ProposedActionsSlot = ({ conversationId }: ProposedActionsSlotProps
   }
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {proposals.map((proposal) => (
-        <ProposedActionRow
-          key={proposal.id}
-          proposal={proposal}
-          currentActorName={currentActorName}
-          onDecisionError={onDecisionError}
-          approve={approve}
-          dismiss={dismiss}
-        />
-      ))}
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem>
+        <ProposedActionsList data-test-subj="investigationFlyoutProposedActionsList">
+          {proposals.map((proposal) => (
+            <ProposedActionRow
+              key={proposal.id}
+              proposal={proposal}
+              currentActorName={currentActorName}
+              onDecisionError={onDecisionError}
+              approve={approve}
+              dismiss={dismiss}
+            />
+          ))}
+        </ProposedActionsList>
+      </EuiFlexItem>
       {hasNextPage && (
         <EuiFlexItem>
           <EuiButtonEmpty

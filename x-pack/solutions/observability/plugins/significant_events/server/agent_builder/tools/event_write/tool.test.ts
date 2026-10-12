@@ -43,7 +43,6 @@ const getFeatures = jest.fn().mockResolvedValue({ hits: [] });
 
 const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
   const getScopedClients = jest.fn().mockResolvedValue({
-    getEventClient: jest.fn().mockReturnValue({}),
     getEventSearchClient: jest.fn().mockReturnValue({}),
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
@@ -340,7 +339,7 @@ describe('events_write tool', () => {
                 stream_name: 'logs.test',
               },
               {
-                feature_id: 'other-feature-uuid',
+                feature_id: 'other-api',
                 name: 'Other API',
                 stream_name: 'logs.test',
               },
@@ -360,21 +359,35 @@ describe('events_write tool', () => {
     );
 
     expect(getFeatures).toHaveBeenCalledWith(['logs.test'], {
-      featureIds: ['checkout-api', 'other-feature-uuid'],
+      featureIds: ['checkout-api', 'other-api'],
       includeExcluded: true,
       includeExpired: true,
     });
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         source: 'discovery',
         inputs: [
           expect.objectContaining({
             causal_features: [
-              expect.objectContaining({ type: 'entity', subtype: 'service' }),
-              expect.objectContaining({ type: 'technology', subtype: 'web_server' }),
+              expect.objectContaining({
+                feature_id: 'checkout-api',
+                type: 'entity',
+                subtype: 'service',
+              }),
+              expect.objectContaining({
+                feature_id: 'other-api',
+                type: 'technology',
+                subtype: 'web_server',
+              }),
             ],
-            blast_radius: [expect.objectContaining({ type: 'entity', subtype: 'service' })],
+            blast_radius: [
+              expect.objectContaining({
+                feature_id: 'checkout-api',
+                type: 'entity',
+                subtype: 'service',
+              }),
+            ],
           }),
         ],
       })
@@ -423,7 +436,7 @@ describe('events_write tool', () => {
 
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         inputs: [
           expect.objectContaining({
             causal_features: [
@@ -450,7 +463,7 @@ describe('events_write tool', () => {
 
     expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
       expect.objectContaining({
-        eventClient: {},
+        eventSearchClient: {},
         inputs: [expect.objectContaining({ causal_features: causalFeatures })],
       })
     );

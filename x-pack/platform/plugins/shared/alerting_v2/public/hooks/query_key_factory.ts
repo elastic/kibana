@@ -26,6 +26,7 @@ export const ruleKeys = {
   detail: (id: string) => [...ruleKeys.details(), id] as const,
   allTags: () => [...ruleKeys.all, 'tags'] as const,
   tags: (search?: string, kind?: string) => [...ruleKeys.allTags(), { search, kind }] as const,
+  routingTags: (search?: string) => [...ruleKeys.allTags(), 'routing', { search }] as const,
 };
 
 export const ruleTemplateKeys = {

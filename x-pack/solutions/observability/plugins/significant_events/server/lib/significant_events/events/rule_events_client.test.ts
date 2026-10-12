@@ -396,6 +396,37 @@ describe('RuleEventsClient', () => {
       const q = lastQuery(query);
       expect(q).not.toContain('group_hash >');
     });
+
+    it('returns the last row group_hash as the next cursor', async () => {
+      const dataJson = JSON.stringify(dataDoc);
+      const { client } = createClient(async () =>
+        sourceResponse([
+          {
+            source: ruleEventSource({ group_hash: 'hash-1' }),
+            dataJson,
+            createdAt: '2026-01-02T00:00:00.000Z',
+          },
+          {
+            source: ruleEventSource({ group_hash: 'hash-2' }),
+            dataJson,
+            createdAt: '2026-01-02T00:00:00.000Z',
+          },
+        ])
+      );
+
+      const result = await client.findLatestByCurrentStateBatch({ batchSize: 2 });
+
+      expect(result.hits).toHaveLength(2);
+      expect(result.lastGroupHash).toBe('hash-2');
+    });
+
+    it('returns an undefined cursor for an empty batch', async () => {
+      const { client } = createClient(async () => sourceResponse([]));
+
+      const result = await client.findLatestByCurrentStateBatch({ batchSize: 10 });
+
+      expect(result.lastGroupHash).toBeUndefined();
+    });
   });
 
   describe('findByEventId', () => {
