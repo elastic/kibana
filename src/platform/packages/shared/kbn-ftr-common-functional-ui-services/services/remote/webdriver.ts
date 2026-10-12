@@ -179,8 +179,8 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   prefs.setLevel(logging.Type.BROWSER, logging.Level.ALL);
   options.setUserPreferences(chromiumUserPrefs);
   options.setLoggingPrefs(prefs);
-  options.set('unexpectedAlertBehaviour', 'accept');
-  options.set('unhandledPromptBehavior', 'accept');
+  // Leave prompts for the caller, including those opened during navigation cleanup.
+  options.set('unhandledPromptBehavior', 'ignore');
   options.setAcceptInsecureCerts(acceptInsecureCerts);
 
   return options;
@@ -288,6 +288,7 @@ async function attemptToCreateCommand(
 
       case 'firefox': {
         const firefoxOptions = new firefox.Options();
+        firefoxOptions.set('unhandledPromptBehavior', 'ignore');
         // Firefox 65+ supports logging console output to stdout
         firefoxOptions.set('moz:firefoxOptions', {
           prefs: { 'devtools.console.stdout.content': true },
