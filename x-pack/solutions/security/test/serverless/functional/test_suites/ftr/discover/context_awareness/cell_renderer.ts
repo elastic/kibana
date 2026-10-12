@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { getDiscoverESQLState } from './utils';
-import { SECURITY_SOLUTION_DATA_VIEW, SECURITY_SOLUTION_INDEX_PATTERN } from '../../../constants';
+import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
@@ -26,12 +26,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL mode', () => {
       it('should render alert workflow status badge', async () => {
         const state = getDiscoverESQLState(
-          `from ${SECURITY_SOLUTION_INDEX_PATTERN} | WHERE host.name == "siem-kibana" and event.kind == "signal"`
+          'from .alerts-security.alerts-default | WHERE host.name == "siem-kibana" and event.kind == "signal"'
         );
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         const alertWorkflowStatus = await testSubjects.findAll('rule-status-badge', 2500);
         expect(alertWorkflowStatus).to.have.length(1);
       });
