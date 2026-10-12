@@ -10,7 +10,8 @@
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { getRecommendedQueriesTemplates } from '@kbn/esql-language';
+import { getRecommendedQueriesTemplates, shouldBeQuotedSource } from '@kbn/esql-language';
+import { splitIndexPatternSources } from '@kbn/esql-utils';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -20,6 +21,15 @@ import {
 } from '../../state_management/redux';
 import { RecommendedQueries } from './recommended_queries';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
+
+const MAX_RECOMMENDED_QUERIES = 6;
+
+// Cluster and selector separators are valid unquoted, so only the other special characters force quotes.
+const quoteSourceIfNeeded = (source: string) =>
+  shouldBeQuotedSource(source.replace(/:/g, '')) ? `"${source}"` : source;
+
+const getFromCommand = (indexPattern: string) =>
+  `FROM ${splitIndexPatternSources(indexPattern).map(quoteSourceIfNeeded).join(',')}`;
 
 interface Props {
   onRefresh: () => void;
@@ -41,7 +51,10 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   const recommendedQueries = useMemo(
     () =>
       indexPattern
-        ? getRecommendedQueriesTemplates({ fromCommand: `FROM ${indexPattern}`, timeField })
+        ? getRecommendedQueriesTemplates({
+            fromCommand: getFromCommand(indexPattern),
+            timeField,
+          }).slice(0, MAX_RECOMMENDED_QUERIES)
         : [],
     [indexPattern, timeField]
   );

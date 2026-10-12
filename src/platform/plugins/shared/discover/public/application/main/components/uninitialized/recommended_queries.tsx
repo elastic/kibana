@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -24,7 +25,23 @@ import {
 } from '@elastic/eui';
 import type { QueryTemplate } from '@kbn/esql-language';
 
-const MAX_RECOMMENDED_QUERIES = 6;
+const RUN_BUTTON_CLASS = 'discoverRecommendedQuery__run';
+
+const cardStyles = css`
+  .${RUN_BUTTON_CLASS} {
+    opacity: 0;
+  }
+
+  &:hover .${RUN_BUTTON_CLASS}, &:focus-within .${RUN_BUTTON_CLASS} {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    .${RUN_BUTTON_CLASS} {
+      opacity: 1;
+    }
+  }
+`;
 
 const runLabel = (label: string) =>
   i18n.translate('discover.recommendedQueries.runQueryAriaLabel', {
@@ -33,9 +50,7 @@ const runLabel = (label: string) =>
   });
 
 export interface RecommendedQueriesProps {
-  // Query templates built from the source of the previous tab
   queries: readonly QueryTemplate[];
-  // Called with the query string of the card the user wants to run
   onRunQuery: (query: string) => void;
 }
 
@@ -46,20 +61,10 @@ const RecommendedQueryCard = ({
   query: QueryTemplate;
   onRunQuery: (query: string) => void;
 }) => {
-  // The run button is revealed on hover, and on focus so keyboard users can reach it.
-  const [isActive, setIsActive] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      onMouseEnter={() => setIsActive(true)}
-      onMouseLeave={() => setIsActive(false)}
-      onFocus={() => setIsActive(true)}
-      onBlur={() => setIsActive(false)}
-    >
+    <EuiPanel hasBorder hasShadow={false} paddingSize="m" css={cardStyles}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -82,7 +87,7 @@ const RecommendedQueryCard = ({
               size="s"
               aria-label={runLabel(label)}
               onClick={() => onRunQuery(queryString)}
-              css={{ opacity: isActive ? 1 : 0 }}
+              className={RUN_BUTTON_CLASS}
               data-test-subj="discoverRecommendedQueryRun"
             />
           </EuiToolTip>
@@ -119,7 +124,7 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
         </h2>
       </EuiTitle>
       <EuiFlexGrid columns={3} gutterSize="m" css={{ marginTop: euiTheme.size.base }}>
-        {queries.slice(0, MAX_RECOMMENDED_QUERIES).map((query) => (
+        {queries.map((query) => (
           <EuiFlexItem key={query.label}>
             <RecommendedQueryCard query={query} onRunQuery={onRunQuery} />
           </EuiFlexItem>

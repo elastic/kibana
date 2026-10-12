@@ -30,6 +30,7 @@ import {
   aiModeTooltip,
   kqlModeLabel,
   kqlModeNoSourceTooltip,
+  kqlNoSourcePlaceholder,
   visorModeLegend,
   enterHintFilterLabel,
   enterHintGenerateLabel,
@@ -350,9 +351,11 @@ export function QuickSearchVisor({
     };
   }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
+  const hasNoSource = useMemo(() => !getIndexPatternFromESQLQuery(query), [query]);
   // KQL needs a source from the editor, so AI is the only usable mode while the editor has none.
-  const hasNoSource = !getIndexPatternFromESQLQuery(query);
   const isKqlDisabled = hasNoSource && showAskAiButton;
+  const isAiUnavailable = !isNlToEsqlEnabled || hasConnector === false;
+  const isVisorInputDisabled = hasNoSource && isAiUnavailable;
   const isKqlMode = !isKqlDisabled && visorMode === VisorMode.KQL;
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
@@ -378,7 +381,8 @@ export function QuickSearchVisor({
             bubbleSubmitEvent={false}
             query={{ query: searchValue, language: 'kuery' }}
             disableAutoFocus={true}
-            placeholder={searchPlaceholder}
+            isDisabled={isVisorInputDisabled}
+            placeholder={isVisorInputDisabled ? kqlNoSourcePlaceholder : searchPlaceholder}
             onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
             onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
             appName="esqlEditorVisor"

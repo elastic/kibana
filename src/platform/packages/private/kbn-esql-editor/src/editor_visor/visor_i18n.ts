@@ -44,6 +44,10 @@ export const kqlModeNoSourceTooltip = i18n.translate('esqlEditor.visor.kqlModeNo
   defaultMessage: 'Add a source with FROM to filter using KQL',
 });
 
+export const kqlNoSourcePlaceholder = i18n.translate('esqlEditor.visor.kqlNoSourcePlaceholder', {
+  defaultMessage: 'Add a source with FROM to start searching',
+});
+
 export const visorModeLegend = i18n.translate('esqlEditor.visor.modeLegend', {
   defaultMessage: 'Switch between filter and natural language',
 });

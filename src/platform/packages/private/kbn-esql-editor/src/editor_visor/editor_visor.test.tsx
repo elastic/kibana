@@ -279,12 +279,28 @@ describe('Quick search visor', () => {
     expect(queryByTestId('esqlVisorKQLSubmit')).not.toBeInTheDocument();
   });
 
-  it('should stay in KQL mode when the editor has no source and AI is unavailable', async () => {
+  it('should disable the input when the editor has no source and AI is unavailable', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props, query: '' }));
     await waitFor(() => {
-      expect(kqlMock.QueryStringInput).toHaveBeenCalled();
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          isDisabled: true,
+          placeholder: 'Add a source with FROM to start searching',
+        }),
+        expect.anything()
+      );
     });
     expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
+  });
+
+  it('should keep the input enabled when the editor has a source and AI is unavailable', async () => {
+    renderWithI18n(renderESQLVisor({ ...props }));
+    await waitFor(() => {
+      expect(kqlMock.QueryStringInput).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isDisabled: false }),
+        expect.anything()
+      );
+    });
   });
 
   it('should not show a mode selector', async () => {

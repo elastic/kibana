@@ -65,7 +65,7 @@ spaceTest.describe(
 
     spaceTest('does not open query history on a new ES|QL tab', async ({ pageObjects }) => {
       const { discover, unifiedTabs, esqlEditor } = pageObjects;
-      const historyPanel = discover.getEsqlHistoryPanel();
+      const historyPanel = esqlEditor.historyPanel;
 
       await discover.goto({ queryMode: 'esql' });
       await discover.waitUntilSearchingHasFinished();

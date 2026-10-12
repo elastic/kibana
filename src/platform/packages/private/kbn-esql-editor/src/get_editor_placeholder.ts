@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
-/** Placeholder shown in an empty editor. */
 export const getEditorPlaceholder = ({
   hasExternalVisor,
   isNlToEsqlEnabled,
