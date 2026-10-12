@@ -14,10 +14,11 @@ import { join } from 'path';
 /** The plugin's Context Engine AI index, under the managed `ai-index-idx-*` prefix. */
 export const MEMORY_INDEX = 'ai-index-idx-nightshift-semantic-memory';
 /**
- * Significant Events registers this route; `/app/nightshift` is the separate
- * investigation console, and its `/{tab}` route does not serve the Memory page.
+ * The Nightshift app's Knowledge page registers this route; `/app/significant_events`
+ * is the separate Nightshift Management console, and its `/{tab}` route no longer
+ * serves the Memory page.
  */
-const SIGNIFICANT_EVENTS_APP_ROUTE = 'significant_events';
+const NIGHTSHIFT_KNOWLEDGE_ROUTE = 'nightshift/knowledge';
 /** Agent Builder conversation the seeded memories claim to have come from. */
 export const SEEDED_AGENT_ID = 'nightshift.investigation';
 /** A second Space, so space isolation is a real second tenancy and not a label. */
@@ -27,21 +28,21 @@ export const OTHER_SPACE_ID = `memory-e2e-${randomUUID().slice(0, 8)}`;
  * The Memory page route, optionally inside a Space.
  *
  * Built from `kbnUrl` rather than a literal, because Scout configures no Playwright
- * `baseURL` and the app is mounted at its registered `appRoute`
- * (`/app/significant_events`) rather than at its id.
+ * `baseURL` and the app is mounted at its registered `appRoute` (`/app/nightshift`)
+ * rather than at its id.
  */
 export const memoryUrl = (kbnUrl: KibanaUrl, spaceId?: string): string =>
   kbnUrl.get(
     spaceId === undefined
-      ? `app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
-      : `s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
+      ? `app/${NIGHTSHIFT_KNOWLEDGE_ROUTE}/memory`
+      : `s/${encodeURIComponent(spaceId)}/app/${NIGHTSHIFT_KNOWLEDGE_ROUTE}/memory`
   );
 
 /** What the Memory page's URL must contain once it has loaded. */
 export const memoryPath = (spaceId?: string): string =>
   spaceId === undefined
-    ? `/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`
-    : `/s/${encodeURIComponent(spaceId)}/app/${SIGNIFICANT_EVENTS_APP_ROUTE}/memory`;
+    ? `/app/${NIGHTSHIFT_KNOWLEDGE_ROUTE}/memory`
+    : `/s/${encodeURIComponent(spaceId)}/app/${NIGHTSHIFT_KNOWLEDGE_ROUTE}/memory`;
 
 /** The header entry that Memory renders once its availability gate has settled on. */
 export const memoryHeaderTab = (page: ScoutPage) => page.getByRole('tab', { name: 'Memory' });
