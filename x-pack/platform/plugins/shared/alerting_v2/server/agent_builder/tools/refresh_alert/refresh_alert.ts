@@ -109,7 +109,7 @@ export const refreshAlertTool = ({
         message: 'Failed to refresh episode',
         code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_REFRESH_FAILED,
         labels: {
-          episode_id: alertId,
+          alert_id: alertId,
           space_id: toolContext.spaceId,
         },
         error,

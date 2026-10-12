@@ -14,14 +14,24 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { EsqlSource } from '@kbn/data-source';
 import DataGrid from './data_grid';
 
 jest.mock('@kbn/unified-data-table', () => {
   const actual = jest.requireActual('@kbn/unified-data-table');
   return {
     ...actual,
-    UnifiedDataTable: (props: { columns: string[] }) => (
-      <div data-test-subj="mockUnifiedDataTable">{props.columns.join(',')}</div>
+    UnifiedDataTable: (props: { columns: string[]; dataSource?: EsqlSource }) => (
+      <div
+        data-test-subj="mockUnifiedDataTable"
+        data-source-query={props.dataSource?.query}
+        data-source-columns={props.dataSource
+          ?.getColumns()
+          .map(({ name }) => name)
+          .join(',')}
+      >
+        {props.columns.join(',')}
+      </div>
     ),
   };
 });
@@ -54,14 +64,21 @@ describe('DataGrid', () => {
       />
     );
 
-  it('renders the columns passed in props', () => {
+  it('renders the columns passed in props', async () => {
     renderGrid([column('a'), column('b')]);
-    expect(screen.getByTestId('mockUnifiedDataTable')).toHaveTextContent('a,b');
+    expect(await screen.findByTestId('mockUnifiedDataTable')).toHaveTextContent('a,b');
   });
 
-  it('updates the rendered columns when props.columns changes', () => {
+  it('gives the grid an ES|QL source of the query with the result columns', async () => {
+    renderGrid([column('a'), column('b')]);
+    const grid = await screen.findByTestId('mockUnifiedDataTable');
+    expect(grid).toHaveAttribute('data-source-query', 'from foo');
+    expect(grid).toHaveAttribute('data-source-columns', 'a,b');
+  });
+
+  it('updates the rendered columns when props.columns changes', async () => {
     const { rerender } = renderGrid([column('a'), column('b')]);
-    expect(screen.getByTestId('mockUnifiedDataTable')).toHaveTextContent('a,b');
+    expect(await screen.findByTestId('mockUnifiedDataTable')).toHaveTextContent('a,b');
 
     rerender(
       <DataGrid
@@ -78,11 +95,16 @@ describe('DataGrid', () => {
     );
 
     expect(screen.getByTestId('mockUnifiedDataTable')).toHaveTextContent('b,c');
+    expect(screen.getByTestId('mockUnifiedDataTable')).toHaveAttribute(
+      'data-source-columns',
+      'b,c'
+    );
   });
 
-  it('keeps the previous column set when props.columns is re-created with the same names', () => {
+  it('keeps the previous column set when props.columns is re-created with the same names', async () => {
     const initialColumns = [column('a'), column('b')];
     const { rerender } = renderGrid(initialColumns);
+    await screen.findByTestId('mockUnifiedDataTable');
 
     rerender(
       <DataGrid

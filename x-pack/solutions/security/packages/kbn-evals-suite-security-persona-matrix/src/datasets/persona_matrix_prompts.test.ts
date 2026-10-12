@@ -129,13 +129,20 @@ describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
       expect(ref('multi-step-b')).toContain('via the case-management tool');
     });
 
-    // Security Labs content is never installed: the tool tells the agent to stop, so the
-    // reference accepts stopping or a rule grounded in the attachment, never fabricated research.
+    // Security Labs content is never installed: the tool tells the agent to stop.
     it('detection-rule-edit-c scores the no-Security-Labs fallback', () => {
       expect(ref('detection-rule-edit-c')).toMatch(/If no Security Labs research is/);
       expect(ref('detection-rule-edit-c')).toMatch(/without fabricating/);
-      expect(ref('detection-rule-edit-c')).toMatch(/stops as the tool instructs/);
-      expect(ref('detection-rule-edit-c')).toMatch(/details from the attachment/);
+      expect(ref('detection-rule-edit-c')).toMatch(
+        /stops as the tool instructs|makes no further tool calls/
+      );
+      expect(ref('detection-rule-edit-c')).not.toMatch(
+        /calls security\.create_detection_rule with a rule grounded in .*attachment/
+      );
+      expect(ref('detection-rule-edit-c')).toMatch(/GenAI Settings/);
+      expect(byId('detection-rule-edit-c').metadata.expectedTools).toEqual([
+        'security.security_labs_search',
+      ]);
     });
   });
 });

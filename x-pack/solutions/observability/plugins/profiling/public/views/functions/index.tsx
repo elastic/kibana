@@ -69,6 +69,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
   return (
     <ProfilingAppPageTemplate
       tabs={tabs}
+      showSchemaSelector
       customSearchBar={isDifferentialView ? <DifferentialTopNSearchPanel /> : undefined}
       pageTitle={i18n.translate('xpack.profiling.functionsView.pageTitle', {
         defaultMessage: 'Functions',
