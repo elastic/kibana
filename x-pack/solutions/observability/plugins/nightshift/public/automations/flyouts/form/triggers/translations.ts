@@ -10,7 +10,7 @@ import type { SlackTriggerKind } from '../automation_form_values';
 
 export const triggerLabels = {
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
-    defaultMessage: 'Triggers',
+    defaultMessage: 'Trigger',
   }),
   changeTrigger: i18n.translate('xpack.nightshift.automations.flyout.changeTriggerTooltip', {
     defaultMessage: 'Change trigger',
@@ -33,10 +33,13 @@ export const triggerLabels = {
   }),
   slackDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.slackDailyLimitHelp', {
     defaultMessage:
-      'When reached, Nightshift replies in Slack that the automation is paused. Resets daily at 12:00 AM UTC.',
+      "When reached, new messages aren't investigated until the limit resets at 12:00 AM UTC. Skipped messages appear in this automation's history.",
   }),
   empty: i18n.translate('xpack.nightshift.automations.flyout.triggersEmpty', {
     defaultMessage: 'Choose what starts this automation.',
+  }),
+  noTrigger: i18n.translate('xpack.nightshift.automations.flyout.noTrigger', {
+    defaultMessage: 'No trigger',
   }),
   addTrigger: i18n.translate('xpack.nightshift.automations.addTriggerButton', {
     defaultMessage: 'Add trigger',
@@ -135,6 +138,63 @@ export const triggerLabels = {
   dailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.dailyLimitHelp', {
     defaultMessage: 'When reached, additional triggers are skipped. Resets daily at 12:00 AM UTC.',
   }),
+  dailyLimitReached: i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReached', {
+    defaultMessage: 'Daily trigger limit reached',
+  }),
+  getDailyLimitReachedBody: (used: number, limit: number) =>
+    used > limit
+      ? i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedOverBody', {
+          defaultMessage:
+            'This automation has handled {used} triggers today (limit of {limit}; {over} above the limit {over, plural, one {was} other {were}} not addressed). Additional triggers are throttled until midnight (UTC).',
+          values: { used, limit, over: used - limit },
+        })
+      : i18n.translate('xpack.nightshift.automations.flyout.dailyLimitReachedBody', {
+          defaultMessage:
+            'This automation has handled {used} triggers today (limit of {limit}). Additional triggers are throttled until midnight (UTC).',
+          values: { used, limit },
+        }),
+  dailyLimitApproaching: i18n.translate(
+    'xpack.nightshift.automations.flyout.dailyLimitApproaching',
+    {
+      defaultMessage: 'Approaching daily trigger limit',
+    }
+  ),
+  getDailyLimitApproachingBody: (used: number, limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.dailyLimitApproachingBody', {
+      defaultMessage:
+        'This automation has handled {used} of {limit} triggers today. Once it reaches the limit, additional triggers are throttled until midnight (UTC).',
+      values: { used, limit },
+    }),
+  highDailyLimit: i18n.translate('xpack.nightshift.automations.flyout.highDailyLimit', {
+    defaultMessage: 'High daily trigger limit',
+  }),
+  getHighDailyLimitBody: (limit: number, softLimit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.highDailyLimitBody', {
+      defaultMessage:
+        'A limit of {limit} allows up to {limit} automation runs per day. Runs can consume investigation credits — consider staying at or below {softLimit} unless you expect sustained high volume.',
+      values: { limit, softLimit },
+    }),
+  getPlanLimitBody: (max: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.planLimitBody', {
+      defaultMessage: 'Your plan allows up to {max} triggers per day for this automation.',
+      values: { max },
+    }),
+  getUnsavedLimitTitle: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.unsavedLimitTitle', {
+      defaultMessage: 'New limit of {limit} applies when you save',
+      values: { limit },
+    }),
+  getUnsavedLimitBody: (saved: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.unsavedLimitBody', {
+      defaultMessage:
+        'The saved limit is still {saved} per day, so triggers above {saved} are throttled until you save.',
+      values: { saved },
+    }),
+  getRaiseLimit: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.flyout.raiseLimit', {
+      defaultMessage: 'Raise limit to {limit}',
+      values: { limit },
+    }),
 };
 
 export const slackTriggerLeads: Record<SlackTriggerKind, string> = {

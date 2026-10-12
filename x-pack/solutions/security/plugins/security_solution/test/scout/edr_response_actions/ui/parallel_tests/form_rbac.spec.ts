@@ -35,9 +35,11 @@ const SEEDED_RESPONSE_ACTIONS: CustomQueryRuleResponseAction[] = [
   },
 ];
 
+// User with 'rule_author' role is not defined for MKI runs yet
+// https://github.com/elastic/kibana/issues/290478
 spaceTest.describe(
   'Automated response actions form RBAC',
-  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-security_complete'] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsSecurityRole('rule_author');

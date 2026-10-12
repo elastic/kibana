@@ -25,4 +25,5 @@ In that case, use `PROMQL` even if the target supports `TS`. Otherwise, prefer `
 ## Guidelines
 
 - **Only use the supported functions and aggregations.** Any function that is not in this list is not supported and fails the query: {{promql_functions}}.
+- **Treat PromQL expressions in the request as the intent, not the final query.** They are often copied from Prometheus or written by the calling agent, so apply the `PROMQL` best practices to them.
 - **When the request needs an unsupported construct**, tell the user, and only fall back to an equivalent `TS` query if the user did not require PromQL.

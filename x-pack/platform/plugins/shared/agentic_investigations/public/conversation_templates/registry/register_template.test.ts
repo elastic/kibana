@@ -10,6 +10,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import {
+  createFlyoutGroupedAttachmentsRegistry,
   registerAgenticInvestigationTemplateUI,
   registerEscalationTemplateUI,
 } from '@kbn/agentic-investigations-common';
@@ -37,15 +38,19 @@ const register = ({
   core?: ReturnType<typeof coreMock.createStart>;
   escalationsEnabled?: boolean;
 } = {}) => {
+  const groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   registerTemplate({
     core,
     startDeps: { agentBuilder: agentBuilderMocks.createStart(), proposals },
     escalationsEnabled,
+    groupedAttachments,
+    getImpactEntityOpener: () => undefined,
     templates: escalationsEnabled
       ? [investigationTemplate, escalationTemplate]
       : [investigationTemplate],
   });
   return {
+    groupedAttachments,
     investigation: mockRegisterInvestigation.mock.calls[0][0],
     escalation: mockRegisterEscalation.mock.calls[0]?.[0],
   };
@@ -55,6 +60,12 @@ describe('registerTemplate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetInvestigationsPrivilegesCache();
+  });
+
+  it('hands the investigation template the registry solutions register their groups on', () => {
+    const { groupedAttachments, investigation } = register();
+
+    expect(investigation.groupedAttachments).toBe(groupedAttachments);
   });
 
   it('registers both templates with the shared names and icons', () => {
@@ -96,6 +107,15 @@ describe('registerTemplate', () => {
     expect(investigation.renderStatus).toEqual(expect.any(Function));
     expect(investigation.renderCloseInvestigationModal).toEqual(expect.any(Function));
     expect(escalation).toBeUndefined();
+  });
+
+  it('registers the overview, the running state, the title, and the brief card from the query API', () => {
+    const { investigation } = register();
+
+    expect(investigation.renderOverview).toEqual(expect.any(Function));
+    expect(investigation.renderLiveState).toEqual(expect.any(Function));
+    expect(investigation.renderTitle).toEqual(expect.any(Function));
+    expect(investigation.briefCard).toEqual(expect.any(Function));
   });
 
   it('renders proposed actions only when the proposals plugin is enabled', () => {

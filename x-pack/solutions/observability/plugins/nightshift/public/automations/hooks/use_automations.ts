@@ -19,6 +19,8 @@ type AutomationsResponse =
 type Automation = AutomationsResponse['automations'][number];
 type CreateAutomationBody =
   NightshiftInvestigationsAPIClientRequestParamsOf<'POST /internal/nightshift/automations'>['params']['body'];
+type UpdateAutomationBody =
+  NightshiftInvestigationsAPIClientRequestParamsOf<'PUT /internal/nightshift/automations/{id}'>['params']['body'];
 
 export const AUTOMATIONS_QUERY_KEY = ['nightshift.automations'] as const;
 
@@ -136,8 +138,8 @@ export const useAutomationsRunsInRange = (
   });
 };
 
-const useAutomationMutation = <TVariables>(
-  mutationFn: (variables: TVariables) => Promise<unknown>,
+const useAutomationMutation = <TVariables, TData = unknown>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
   errorTitle: string,
   onSuccess?: (variables: TVariables) => void
 ) => {
@@ -155,11 +157,11 @@ const useAutomationMutation = <TVariables>(
   });
 };
 
-export const useCreateAutomation = () => {
+export const useCreateAutomation = (isClone = false) => {
   const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
-  return useAutomationMutation<CreateAutomationBody>(
+  return useAutomationMutation<CreateAutomationBody, { id: string }>(
     (body) => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
@@ -172,27 +174,75 @@ export const useCreateAutomation = () => {
     errorToastTitles.create,
     (body) =>
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.nightshift.automations.createSuccess', {
-          defaultMessage: 'Automation "{name}" created',
-          values: { name: body.name },
-        }),
+        title: isClone
+          ? i18n.translate('xpack.nightshift.automations.cloneSuccess', {
+              defaultMessage: "Created ''{name}'' (paused)",
+              values: { name: body.name },
+            })
+          : i18n.translate('xpack.nightshift.automations.createSuccess', {
+              defaultMessage: "Saved ''{name}''",
+              values: { name: body.name },
+            }),
       })
   );
 };
 
 export const useToggleAutomation = () => {
-  const { nightshiftInvestigations } = useKibana().services;
+  const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
-  return useAutomationMutation<{ id: string; isEnabled: boolean }>(({ id, isEnabled }) => {
-    if (!investigationsClient) {
-      throw new Error('Nightshift investigations plugin is unavailable');
-    }
-    return investigationsClient.fetch('PUT /internal/nightshift/automations/{id}', {
-      params: { path: { id }, body: { isEnabled } },
-      signal: null,
-    });
-  }, errorToastTitles.update);
+  return useAutomationMutation<{ id: string; name: string; isEnabled: boolean }>(
+    ({ id, isEnabled }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('PUT /internal/nightshift/automations/{id}', {
+        params: { path: { id }, body: { isEnabled } },
+        signal: null,
+      });
+    },
+    errorToastTitles.update,
+    ({ name, isEnabled }) =>
+      notifications.toasts.addSuccess({
+        title: isEnabled
+          ? i18n.translate('xpack.nightshift.automations.enabledToast', {
+              defaultMessage: "Enabled ''{name}''",
+              values: { name },
+            })
+          : i18n.translate('xpack.nightshift.automations.pausedToast', {
+              defaultMessage: "Paused ''{name}''",
+              values: { name },
+            }),
+      })
+  );
+};
+
+export const useUpdateAutomation = () => {
+  const { nightshiftInvestigations, notifications } = useKibana().services;
+  const investigationsClient = nightshiftInvestigations?.investigationsClient;
+
+  return useAutomationMutation<{
+    id: string;
+    body: UpdateAutomationBody & { name: string };
+  }>(
+    ({ id, body }) => {
+      if (!investigationsClient) {
+        throw new Error('Nightshift investigations plugin is unavailable');
+      }
+      return investigationsClient.fetch('PUT /internal/nightshift/automations/{id}', {
+        params: { path: { id }, body },
+        signal: null,
+      });
+    },
+    errorToastTitles.update,
+    ({ body }) =>
+      notifications.toasts.addSuccess({
+        title: i18n.translate('xpack.nightshift.automations.updateSuccess', {
+          defaultMessage: "Updated ''{name}''",
+          values: { name: body.name },
+        }),
+      })
+  );
 };
 
 export const useDeleteAutomation = () => {
@@ -210,4 +260,4 @@ export const useDeleteAutomation = () => {
   }, errorToastTitles.delete);
 };
 
-export type { Automation, CreateAutomationBody };
+export type { Automation, CreateAutomationBody, UpdateAutomationBody };

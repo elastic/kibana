@@ -92,14 +92,13 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => (
 
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',
-  rule: { id: 'rule-1', version: null },
+  rule: { id: 'rule-1' },
   space_id: 'default',
   started_at: '2026-05-05T10:00:00.000Z',
   ended_at: '2026-05-05T10:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 0 },
   outcome: 'success',
   reason: 'Completed successfully',
-  error: null,
   ...overrides,
 });
 
@@ -204,7 +203,7 @@ describe('RulesTabContent', () => {
       loading: false,
       error: undefined,
     });
-    mockResult(withRows([buildItem({ rule: { id: 'rule-orphan', version: null } })]));
+    mockResult(withRows([buildItem({ rule: { id: 'rule-orphan' } })]));
     renderComponent();
 
     expect(screen.getByText('rule-orphan')).toBeInTheDocument();
@@ -218,8 +217,8 @@ describe('RulesTabContent', () => {
       withRows([
         buildItem({
           outcome: 'failure',
-          reason: null,
-          error: { message: 'Index not found', stack_trace: null },
+          reason: undefined,
+          error: { message: 'Index not found' },
         }),
       ])
     );
@@ -230,14 +229,14 @@ describe('RulesTabContent', () => {
   });
 
   it('shows "Rule executed successfully" when outcome is success and no reason or error', () => {
-    mockResult(withRows([buildItem({ outcome: 'success', reason: null, error: null })]));
+    mockResult(withRows([buildItem({ outcome: 'success', reason: undefined, error: undefined })]));
     renderComponent();
 
     expect(screen.getByText('Rule executed successfully')).toBeInTheDocument();
   });
 
   it('shows em dash when outcome is failure but neither reason nor error.message is present', () => {
-    mockResult(withRows([buildItem({ outcome: 'failure', reason: null, error: null })]));
+    mockResult(withRows([buildItem({ outcome: 'failure', reason: undefined, error: undefined })]));
     renderComponent();
 
     expect(screen.getByText('—')).toBeInTheDocument();

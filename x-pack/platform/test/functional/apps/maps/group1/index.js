@@ -60,7 +60,6 @@ export default function ({ loadTestFile, getService }) {
       );
     });
 
-    loadTestFile(require.resolve('./esql_source'));
     loadTestFile(require.resolve('./documents_source'));
   });
 }

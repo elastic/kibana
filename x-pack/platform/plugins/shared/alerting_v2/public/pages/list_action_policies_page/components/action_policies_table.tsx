@@ -155,22 +155,13 @@ export const ActionPoliciesTable = () => {
 
   const clonePolicy = useCallback(
     (policy: ActionPolicyResponse) => {
-      const {
-        name,
-        description,
-        destinations,
-        matcher,
-        group_by: groupBy,
-        throttle,
-        grouping_mode: groupingMode,
-      } = policy;
+      const { name, description, destinations, matcher, grouping, throttle } = policy;
       const data: CreateActionPolicyData = {
         name: `${name} [clone]`,
         description,
         destinations,
-        grouping_mode: groupingMode ?? 'per_alert',
+        grouping: grouping ?? { mode: 'per_alert' },
         ...(matcher != null && { matcher }),
-        ...(groupBy != null && { group_by: groupBy }),
         ...(throttle != null && { throttle }),
       };
       createActionPolicy(data, { onSuccess: () => refetchRef.current() });

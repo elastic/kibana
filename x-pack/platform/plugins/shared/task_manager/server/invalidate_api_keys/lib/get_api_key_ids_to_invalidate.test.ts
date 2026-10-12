@@ -457,6 +457,134 @@ describe('getApiKeyIdsToInvalidate', () => {
     });
   });
 
+  describe('keys replaced during a task run', () => {
+    const taskStartedAt = '2026-10-05T00:00:00.000Z';
+    const futureRetryAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    const pastRetryAt = new Date(Date.now() - 60 * 1000).toISOString();
+
+    const pendingSO = (id: string, apiKeyId: string, taskId?: string) => ({
+      id,
+      type: 'api_key_to_invalidate',
+      score: 0,
+      attributes: {
+        apiKeyId,
+        createdAt: '2024-04-11T17:08:44.035Z',
+        ...(taskId ? { taskId, taskStartedAt } : {}),
+      },
+      references: [],
+    });
+
+    const runningTaskSO = (
+      id: string,
+      attributes: { status: string; startedAt: string | null; retryAt: string | null }
+    ) => ({ id, type: 'task', attributes, references: [] });
+
+    const getResult = (savedObjects: Array<ReturnType<typeof pendingSO>>) =>
+      getApiKeyIdsToInvalidate({
+        apiKeySOsPendingInvalidation: {
+          saved_objects: savedObjects,
+          total: savedObjects.length,
+          per_page: 10,
+          page: 1,
+        },
+        savedObjectsClient: internalSavedObjectsRepository,
+        savedObjectType: 'api_key_to_invalidate',
+        savedObjectTypesToQuery: [],
+      });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('excludes the key while the same run is still in progress', async () => {
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          runningTaskSO('task-1', {
+            status: 'running',
+            startedAt: taskStartedAt,
+            retryAt: futureRetryAt,
+          }),
+        ],
+      });
+
+      const result = await getResult([pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-2')]);
+
+      expect(internalSavedObjectsRepository.bulkGet).toHaveBeenCalledWith([
+        { type: 'task', id: 'task-1' },
+      ]);
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [{ id: '2', apiKeyId: 'key-2' }],
+        apiKeyIdsToExclude: [{ id: '1', apiKeyId: 'key-1' }],
+      });
+    });
+
+    test('excludes other pending entries for the same key while the run is in progress', async () => {
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          runningTaskSO('task-1', {
+            status: 'running',
+            startedAt: taskStartedAt,
+            retryAt: futureRetryAt,
+          }),
+        ],
+      });
+
+      const result = await getResult([pendingSO('1', 'key-1', 'task-1'), pendingSO('2', 'key-1')]);
+
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [],
+        apiKeyIdsToExclude: [
+          { id: '1', apiKeyId: 'key-1' },
+          { id: '2', apiKeyId: 'key-1' },
+        ],
+      });
+    });
+
+    test.each([
+      ['a new run has started', { status: 'running', startedAt: '2026-10-05T01:00:00.000Z' }],
+      ['the task is idle', { status: 'idle', startedAt: null }],
+      ['retryAt has passed', { status: 'running', startedAt: taskStartedAt, retryAt: pastRetryAt }],
+    ])('invalidates the key when %s', async (_, taskAttributes) => {
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [runningTaskSO('task-1', { retryAt: futureRetryAt, ...taskAttributes })],
+      });
+
+      const result = await getResult([pendingSO('1', 'key-1', 'task-1')]);
+
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [{ id: '1', apiKeyId: 'key-1' }],
+        apiKeyIdsToExclude: [],
+      });
+    });
+
+    test('invalidates the key when the task no longer exists', async () => {
+      internalSavedObjectsRepository.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'task-1',
+            type: 'task',
+            error: { statusCode: 404, error: 'Not Found', message: 'Not found' },
+            attributes: undefined,
+            references: [],
+          },
+        ],
+      });
+
+      const result = await getResult([pendingSO('1', 'key-1', 'task-1')]);
+
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [{ id: '1', apiKeyId: 'key-1' }],
+        apiKeyIdsToExclude: [],
+      });
+    });
+
+    test('does not look up tasks when no key was replaced during a run', async () => {
+      await getResult([pendingSO('1', 'key-1')]);
+
+      expect(internalSavedObjectsRepository.bulkGet).not.toHaveBeenCalled();
+    });
+  });
+
   test('should throw error if encryptedSavedObjectsClient.getDecryptedAsInternalUser throws error', async () => {
     const encryptedSavedObjectsClient = createEncryptedSavedObjectsClientMock();
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(

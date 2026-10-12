@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createAckEpisodeActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createAckEpisodeActionOasExamples } from './create_ack_episode_action_oas_example';
 import { createEpisodeActionRouteForType } from './create_episode_action_route_for_type';
@@ -19,4 +20,10 @@ export const CreateAckEpisodeActionRoute = createEpisodeActionRouteForType({
   bodySchema: createAckEpisodeActionBodySchema,
   oasOperationObject: createAckEpisodeActionOasExamples,
   access: 'public' as const,
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the alert is already acknowledged.',
+    },
+  },
 });
