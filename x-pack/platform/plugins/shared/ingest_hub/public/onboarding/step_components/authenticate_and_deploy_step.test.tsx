@@ -156,6 +156,7 @@ function makeDeployReturn(
 function makeEcfReturn(
   overrides: {
     hasAnyEcf?: boolean;
+    hasRemovedFamiliesWithArn?: boolean;
     isDone?: boolean;
     launchedFamilies?: string[];
     stackNames?: Record<string, string>;
@@ -166,7 +167,7 @@ function makeEcfReturn(
 ): ReturnType<typeof useEcfDeployment> {
   return {
     hasAnyEcf: overrides.hasAnyEcf ?? false,
-    hasRemovedFamiliesWithArn: false,
+    hasRemovedFamiliesWithArn: overrides.hasRemovedFamiliesWithArn ?? false,
     isDone: overrides.isDone ?? false,
     ecfServiceIds: new Set(),
     stackArns: overrides.stackArns ?? {},
@@ -723,6 +724,14 @@ describe('AuthenticateAndDeployStep', () => {
       mockUseEcfDeployment.mockReturnValue(makeEcfReturn({ hasAnyEcf: false }));
       renderStep();
       expect(screen.queryByTestId('mock-ecf-launch-btn')).not.toBeInTheDocument();
+    });
+
+    it('renders EcfDeploymentSection when hasAnyEcf is false but hasRemovedFamiliesWithArn is true', () => {
+      mockUseEcfDeployment.mockReturnValue(
+        makeEcfReturn({ hasAnyEcf: false, hasRemovedFamiliesWithArn: true })
+      );
+      renderStep();
+      expect(screen.getByTestId('mock-ecf-launch-btn')).toBeInTheDocument();
     });
 
     it('merges newly-added services into instances passed to useEcfDeployment', () => {
