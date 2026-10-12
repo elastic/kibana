@@ -168,6 +168,10 @@ steps:
       run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
+        # A noun phrase, not an imperative: the queue card shows this title before and after the
+        # decision, so it has to read correctly once the alerts have actually been closed.
+        title: >-
+          Closure of {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} as false positive
         comment: >-
           {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} from rule "{{ inputs.rule_name }}" {% if variables.fp_candidate_count == 1 %}was{% else %}were{% endif %} classified as false positives at or above the configured confidence floor ({{ inputs.confidence_floor }}).
           Approving this proposal will close them with workflow_reason=false_positive.

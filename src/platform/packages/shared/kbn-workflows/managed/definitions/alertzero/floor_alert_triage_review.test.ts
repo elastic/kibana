@@ -166,6 +166,15 @@ describe('floor_alert_triage_review — proposal comment', () => {
     expect(comment).toContain('(0.85)');
   });
 
+  it('titles the proposal with the alert count, singular or plural, so the queue card needs no action-specific label', () => {
+    expect(renderString(proposalInputs.title, context)).toBe(
+      'Closure of 3 alerts as false positive'
+    );
+    expect(
+      renderString(proposalInputs.title, { ...context, variables: { fp_candidate_count: 1 } })
+    ).toBe('Closure of 1 alert as false positive');
+  });
+
   it('closes exactly the candidate ids it was given', () => {
     expect(proposal?.with?.['workflow-id']).toBe('system-create-alertzero-proposal');
     expect(proposalInputs.actionWorkflowId).toBe('system-alertzero-action-close-alerts-fp');
