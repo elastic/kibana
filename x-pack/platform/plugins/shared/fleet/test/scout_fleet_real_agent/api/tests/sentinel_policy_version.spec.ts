@@ -36,6 +36,10 @@ apiTest.describe(
     let agentPolicyId: string;
     let sentinelPolicyId: string;
     const agents: EnrolledAgent[] = [];
+    // agents of other policies than the one of the tests, only stopped in `afterAll`
+    const otherPolicyAgents: EnrolledAgent[] = [];
+    // policies created by the tests, removed with their agents even when a test or an enrollment fails
+    const createdPolicyIds: string[] = [];
 
     const getAgentDoc = async (esClient: EsClient, agentId: string) =>
       (await esClient.get<FleetAgentDoc>({ index: '.fleet-agents', id: agentId }))._source!;
@@ -70,6 +74,28 @@ apiTest.describe(
         'feature_flags.overrides': { [ENABLE_SENTINEL_POLICY_VERSION_FLAG]: enabled },
       });
 
+    const removePolicyWithAgents = async (
+      kbnClient: { request: (options: any) => Promise<unknown> },
+      policyId: string
+    ) => {
+      await kbnClient
+        .request({
+          method: 'POST',
+          path: '/api/fleet/agents/bulk_unenroll',
+          headers: API_VERSION_HEADER,
+          body: { agents: `policy_base_id:"${policyId}"`, force: true, revoke: true },
+        })
+        .catch(() => undefined);
+      await kbnClient
+        .request({
+          method: 'POST',
+          path: '/api/fleet/agent_policies/delete',
+          headers: API_VERSION_HEADER,
+          body: { agentPolicyId: policyId, force: true },
+        })
+        .catch(() => undefined);
+    };
+
     const expectAgentOnPolicy = async (esClient: EsClient, agentId: string, policyId: string) =>
       expect
         .poll(async () => (await getAgentDoc(esClient, agentId)).policy_id, {
@@ -93,12 +119,18 @@ apiTest.describe(
         },
       });
       agentPolicyId = data.item.id;
+      createdPolicyIds.push(agentPolicyId);
       sentinelPolicyId = `${agentPolicyId}#sentinel`;
       agents.push(await realFleet.enrollAgent(agentPolicyId));
     });
 
-    apiTest.afterAll(async () => {
-      await Promise.all(agents.map((agent) => agent.stop().catch(() => undefined)));
+    apiTest.afterAll(async ({ kbnClient }) => {
+      await Promise.all(
+        [...agents, ...otherPolicyAgents].map((agent) => agent.stop().catch(() => undefined))
+      );
+      for (const policyId of createdPolicyIds) {
+        await removePolicyWithAgents(kbnClient, policyId);
+      }
     });
 
     apiTest(
@@ -229,33 +261,17 @@ apiTest.describe(
           },
         });
         const managedPolicyId = data.item.id;
+        // removed in `afterAll`, also when the enrollment fails
+        createdPolicyIds.push(managedPolicyId);
         const agent = await realFleet.enrollAgent(managedPolicyId);
-        try {
-          // The assignment task runs every 5s, and moves the agent of a policy that is not
-          // managed within a few runs: the agent has to stay on the plain policy id all along.
-          const deadline = Date.now() + MANAGED_POLICY_OBSERVATION_MS;
-          while (Date.now() < deadline) {
-            expect((await getAgentDoc(esClient, agent.agentId)).policy_id).toBe(managedPolicyId);
-            await new Promise((resolve) => setTimeout(resolve, 5000));
-          }
-        } finally {
-          await kbnClient
-            .request({
-              method: 'POST',
-              path: '/api/fleet/agents/bulk_unenroll',
-              headers: API_VERSION_HEADER,
-              body: { agents: [agent.agentId], force: true, revoke: true },
-            })
-            .catch(() => undefined);
-          await agent.stop();
-          await kbnClient
-            .request({
-              method: 'POST',
-              path: '/api/fleet/agent_policies/delete',
-              headers: API_VERSION_HEADER,
-              body: { agentPolicyId: managedPolicyId, force: true },
-            })
-            .catch(() => undefined);
+        otherPolicyAgents.push(agent);
+
+        // The assignment task runs every 5s, and moves the agent of a policy that is not
+        // managed within a few runs: the agent has to stay on the plain policy id all along.
+        const deadline = Date.now() + MANAGED_POLICY_OBSERVATION_MS;
+        while (Date.now() < deadline) {
+          expect((await getAgentDoc(esClient, agent.agentId)).policy_id).toBe(managedPolicyId);
+          await new Promise((resolve) => setTimeout(resolve, 5000));
         }
       }
     );

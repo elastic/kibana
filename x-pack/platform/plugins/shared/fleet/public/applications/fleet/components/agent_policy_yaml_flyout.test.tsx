@@ -45,8 +45,8 @@ describe('AgentPolicyYamlFlyout', () => {
 
     expect(await results.findByText(/'My policy' agent policy - v9\.4/)).toBeInTheDocument();
     expect(
-      results.container.querySelector('[data-euiicon-type="branch"]') ??
-        results.container.querySelector('[type="branch"]')
+      results.baseElement.querySelector('[data-euiicon-type="branch"]') ??
+        results.baseElement.querySelector('[type="branch"]')
     ).not.toBeNull();
   });
 
@@ -56,11 +56,11 @@ describe('AgentPolicyYamlFlyout', () => {
       const results = render(policyId);
 
       expect(await results.findByText(/'My policy' agent policy/)).toBeInTheDocument();
-      expect(results.container.textContent).not.toMatch(/ - v/);
-      expect(results.container.textContent).not.toContain('sentinel');
+      expect(results.baseElement.textContent).not.toMatch(/ - v/);
+      expect(results.baseElement.textContent).not.toContain('sentinel');
       expect(
-        results.container.querySelector('[data-euiicon-type="branch"]') ??
-          results.container.querySelector('[type="branch"]')
+        results.baseElement.querySelector('[data-euiicon-type="branch"]') ??
+          results.baseElement.querySelector('[type="branch"]')
       ).toBeNull();
     }
   );
