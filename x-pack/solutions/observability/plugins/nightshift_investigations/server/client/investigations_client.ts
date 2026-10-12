@@ -24,7 +24,6 @@ import type {
   SlackThreadSubject,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
-  INVESTIGATION_TEMPLATE_ID,
   isInvestigationTitlePending,
   MAX_SLACK_SEEN_EVENTS,
   MAX_EVIDENCE_TEXT_LENGTH,
@@ -1005,7 +1004,6 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
-      origin: { external_conversation_id: threadKey },
     });
     // The first create of the thread records it; a create that continues another reads it back.
     const threadSubject = conversation.created
@@ -1033,6 +1031,10 @@ export class NightshiftInvestigationsClient {
     });
   }
 
+  /**
+   * The thread's investigation, found by its `slack_thread` subject: an open one if there is one,
+   * otherwise a closed one.
+   */
   private async findSlackThreadInvestigation({
     conversations,
     agenticInvestigations,
@@ -1042,16 +1044,6 @@ export class NightshiftInvestigationsClient {
     agenticInvestigations: AgenticInvestigationsPluginStart;
     threadKey: string;
   }): Promise<InvestigationConversation | undefined> {
-    const byOrigin = await conversations.getByOrigin({ external_conversation_id: threadKey });
-    if (byOrigin?.template_id === INVESTIGATION_TEMPLATE_ID) {
-      const [investigation] = await findInvestigationConversations(conversations, [byOrigin.id]);
-      if (investigation) {
-        return investigation;
-      }
-    }
-
-    // The origin can belong to an Agent Builder chat about the same thread (a Slack mention
-    // starts one), so the thread's subject is the fallback.
     const ids = await agenticInvestigations
       .getSubjectsClient(this.request)
       .findConversationIdsBySubjects([{ type: 'slack_thread', id: threadKey }]);

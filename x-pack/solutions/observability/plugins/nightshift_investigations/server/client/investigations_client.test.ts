@@ -68,7 +68,6 @@ const mockWorkflowsManagement = {
 const conversations = {
   bulkGet: jest.fn(),
   create: jest.fn(),
-  getByOrigin: jest.fn(),
   patchMetadata: jest.fn(),
 };
 
@@ -234,7 +233,6 @@ beforeEach(() => {
   conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
     makeConversation({ id, title: title ?? DEFAULT_CONVERSATION_TITLE })
   );
-  conversations.getByOrigin.mockResolvedValue(undefined);
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
   subjectsClient.upsertSubjects.mockResolvedValue([]);
   subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
@@ -1795,8 +1793,8 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     execution_id: executionId,
   });
 
-  it('finds the investigation by the thread conversation origin', async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+  it("finds the investigation by the thread's subject", async () => {
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1', title: 'Checkout is slow' }));
     subjectsClient.listByConversationIds.mockResolvedValue([
       threadSubject({ status_message_ts: '1712345679.000200' }),
@@ -1809,27 +1807,27 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       title: 'Checkout is slow',
       status_message_ts: '1712345679.000200',
     });
-    expect(conversations.getByOrigin).toHaveBeenCalledWith({
-      external_conversation_id: THREAD_KEY,
-    });
+    expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
+      { type: 'slack_thread', id: THREAD_KEY },
+    ]);
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
   });
 
-  it("falls back to the thread's subject when the origin names another conversation", async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'chat-1', template_id: undefined });
-    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
-    withConversations(makeConversation({ id: 'inv-1' }));
+  it('prefers an open investigation of the thread and ignores other conversations', async () => {
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['chat-1', 'inv-old', 'inv-1']);
+    withConversations(
+      makeConversation({ id: 'chat-1', templateId: 'other' }),
+      makeConversation({ id: 'inv-old', status: 'closed' }),
+      makeConversation({ id: 'inv-1', status: 'open' })
+    );
 
     await expect(
       makeClient().findOrCreateSlackThread({ ...THREAD, create: false })
     ).resolves.toMatchObject({ investigation_id: 'inv-1' });
-    expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
-      { type: 'slack_thread', id: THREAD_KEY },
-    ]);
   });
 
   it("headlines an investigation Agent Builder has not titled yet with the thread's question", async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1', title: DEFAULT_CONVERSATION_TITLE }));
     subjectsClient.listByConversationIds.mockResolvedValue([
       { ...threadSubject(), summary: 'why is checkout slow?' },
@@ -1841,7 +1839,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   });
 
   it('records a new status message on the thread subject', async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
     subjectsClient.listByConversationIds.mockResolvedValue([threadSubject()]);
 
@@ -1858,7 +1856,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   });
 
   it('does not write the status message to an investigation another identity owns', async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1', owner: false }));
 
     await makeClient().findOrCreateSlackThread({
@@ -1872,7 +1870,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   });
 
   it('records a delivered event and answers one another execution handled as a duplicate', async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1' }));
     subjectsClient.listByConversationIds.mockResolvedValue([
       threadSubject({ seen_events: [handled('Ev0')] }),
@@ -1913,7 +1911,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   });
 
   it('does not treat the execution that handled an event asking again as a duplicate', async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1' }));
     subjectsClient.listByConversationIds.mockResolvedValue([
       threadSubject({ seen_events: [handled('Ev1')] }),
@@ -1930,7 +1928,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   });
 
   it('gives an event back only for the execution that handled it', async () => {
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1' }));
     subjectsClient.listByConversationIds.mockResolvedValue([
       threadSubject({ seen_events: [handled('Ev0'), handled('Ev1')] }),
@@ -1965,7 +1963,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
 
   it('remembers only the most recent delivered events', async () => {
     const seen = Array.from({ length: MAX_SLACK_SEEN_EVENTS }, (_, index) => handled(`Ev${index}`));
-    conversations.getByOrigin.mockResolvedValue({ id: 'inv-1', template_id: 'investigation' });
+    subjectsClient.findConversationIdsBySubjects.mockResolvedValue(['inv-1']);
     withConversations(makeConversation({ id: 'inv-1' }));
     subjectsClient.listByConversationIds.mockResolvedValue([threadSubject({ seen_events: seen })]);
 
@@ -1989,7 +1987,7 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
-  it('creates the investigation with the thread origin and the thread as its subject', async () => {
+  it('creates the investigation with the thread as its subject', async () => {
     await expect(
       makeClient().findOrCreateSlackThread({
         ...THREAD,
@@ -2011,7 +2009,6 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
-      origin: { external_conversation_id: THREAD_KEY },
     });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [
       {
@@ -2079,9 +2076,9 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
   it('keys a thread by workspace, channel, and thread, since channel ids repeat across workspaces', async () => {
     await makeClient().findOrCreateSlackThread({ ...THREAD, workspace: 'T2', create: false });
 
-    expect(conversations.getByOrigin).toHaveBeenCalledWith({
-      external_conversation_id: 'team:T2/channel:C1/thread:1712345678.000100',
-    });
+    expect(subjectsClient.findConversationIdsBySubjects).toHaveBeenCalledWith([
+      { type: 'slack_thread', id: 'team:T2/channel:C1/thread:1712345678.000100' },
+    ]);
   });
 
   it('throws InvestigationUnavailableError when creating while investigations are unavailable', async () => {

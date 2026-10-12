@@ -53,7 +53,6 @@ export const createWorkflowStepConversationClientMock = (
   overrides: Partial<{
     get: jest.Mock;
     bulkGet: jest.Mock;
-    getByOrigin: jest.Mock;
     list: jest.Mock;
     search: jest.Mock;
     addAccessControlEntries: jest.Mock;
@@ -66,7 +65,6 @@ export const createWorkflowStepConversationClientMock = (
 ) => {
   const get = overrides.get ?? jest.fn();
   const bulkGet = overrides.bulkGet ?? jest.fn().mockResolvedValue(new Map());
-  const getByOrigin = overrides.getByOrigin ?? jest.fn();
   const list = overrides.list ?? jest.fn();
   const search = overrides.search ?? jest.fn();
   const addAccessControlEntries =
@@ -80,7 +78,6 @@ export const createWorkflowStepConversationClientMock = (
   const getConversationClient = jest.fn().mockResolvedValue({
     get,
     bulkGet,
-    getByOrigin,
     list,
     search,
     addAccessControlEntries,
@@ -94,7 +91,6 @@ export const createWorkflowStepConversationClientMock = (
   return {
     get,
     bulkGet,
-    getByOrigin,
     list,
     search,
     addAccessControlEntries,

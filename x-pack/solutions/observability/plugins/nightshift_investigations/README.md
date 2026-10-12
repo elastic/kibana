@@ -80,9 +80,9 @@ The start judges ownership by Agent Builder's owner check. (Agent Builder resolv
 
 ### Slack threads
 
-`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by the conversation origin `team:<T>/channel:<C>/thread:<ts>`, which is the key Agent Builder uses for Slack. If that origin belongs to another conversation, it falls back to the thread's `slack_thread` subject.
+`POST /internal/nightshift/investigations/_slack_thread` finds a thread's investigation by its `slack_thread` subject, keyed `team:<T>/channel:<C>/thread:<ts>`. It does not set or read the Agent Builder conversation origin: Agent Builder sets that when the Slack relay calls its callback converse API, and a relay chat about the same thread may carry it.
 
-With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation gets that origin and has the thread as its subject. The thread's status message is recorded on that subject as `slack.status_message_ts`.
+With `create`, the route creates the investigation as the identity that runs the Slack workflow. The new investigation has the thread as its subject, claimed so that concurrent creates for one thread agree on one investigation. The thread's status message is recorded on that subject as `slack.status_message_ts`.
 
 The Slack connector delivers each event at least once. The workflow passes Slack's event id as `event_id` and its own execution id as `execution_id`, and the route records both on the thread's subject in `slack.seen_events` (the latest 50). An event another execution already recorded is answered with `duplicate: true`, and the workflow skips it; the same execution asking again, for example on a retried step, is not a duplicate. A run whose investigation failed calls the route again with `release_event: true`, which removes the event as recorded for that execution, so a redelivery of the event is handled. The workflow runs one call per thread at a time, so two deliveries of one event cannot race each other.
 

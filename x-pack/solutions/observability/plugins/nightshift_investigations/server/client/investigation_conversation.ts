@@ -9,11 +9,7 @@ import {
   ConversationAccessControlMode,
   isConversationAlreadyExistsError,
 } from '@kbn/agent-builder-common';
-import type {
-  Conversation,
-  ConversationOrigin,
-  ConversationPermissions,
-} from '@kbn/agent-builder-common';
+import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
@@ -102,12 +98,9 @@ export const findInvestigationConversation = async (
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
-  origin,
 }: {
   conversations: ConversationPublicClient;
   id: string;
-  /** External key the conversation can later be found by, such as a Slack thread. */
-  origin?: ConversationOrigin;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -120,7 +113,6 @@ export const getOrCreateInvestigationConversation = async ({
       agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
       templateId: INVESTIGATION_TEMPLATE_ID,
       accessControl: { access_mode: ConversationAccessControlMode.Public },
-      ...(origin ? { origin } : {}),
     });
     return toInvestigationConversation(created, true);
   } catch (error) {
