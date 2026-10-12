@@ -26,11 +26,12 @@ import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
 import { SAMPLE_VALUES_BY_ENTITY_CLASS } from '../lib/entity_classes';
 import { usePatternTester } from '../hooks/use_pattern_tester';
 
-// Wide enough for the entity prefix and a good part of the hash; the full token is in a tooltip.
-// Name and entity type get fixed widths so the Pattern column takes all the remaining space.
+// Name, entity type and example output get fixed shares so the Pattern column takes all the
+// remaining space. The example output is truncated to its column (the full token is in a tooltip),
+// leaving room for the entity prefix and a good part of the hash.
 const NAME_COLUMN_WIDTH = '20%';
 const ENTITY_TYPE_COLUMN_WIDTH = '160px';
-const EXAMPLE_OUTPUT_COLUMN_WIDTH = '52ch';
+const EXAMPLE_OUTPUT_COLUMN_WIDTH = '25%';
 
 const truncatedTextStyles = css`
   display: block;
