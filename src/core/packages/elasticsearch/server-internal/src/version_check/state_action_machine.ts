@@ -8,14 +8,11 @@
  */
 
 /**
- * A state-action machine driver. A machine is an `initialState`, a `next` that
- * picks the action for a state, and a pure `model` that turns a state and its
- * action's result into the next state plus an event describing the step
- * (Lamport's augmented state, "Computation and State Machines", 2008).
- * Models never read a clock; time arrives as the result's `completedAt`.
- * The driver owns the timer: it waits until the action is due, makes the next
- * one due the delay of the state just reached after the action completed, and
- * yields that deadline with each step as `dueAt`.
+ * Runs state-action machines: `next` picks the action for a state, and a pure
+ * `model` turns the state and the action's result into the next state and an
+ * event describing the step (Lamport's augmented state). Models never read a
+ * clock; time arrives as the result's `completedAt`. The driver decides when
+ * each action runs.
  */
 
 import { setTimeout as wait } from 'node:timers/promises';
@@ -65,7 +62,7 @@ export const realClock: Clock = {
     wait(duration, undefined, { ref: false, signal }).catch(() => undefined),
 };
 
-/** Runs the action; a failure becomes a result, like a success, stamped with its completion. */
+/** Runs the action and stamps its completion; a failure becomes a result too. */
 const perform = async <R>(
   action: Action<R>,
   now: Clock['now'],

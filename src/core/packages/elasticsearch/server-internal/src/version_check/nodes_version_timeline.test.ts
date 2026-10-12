@@ -151,9 +151,9 @@ describe('the version machine on a virtual clock', () => {
   });
 
   it('waits the full interval after a slow failure before retrying', async () => {
-    // The request due at 100 takes 50ms to fail; the retry is due the full interval
-    // later, at 250, so a struggling cluster gets that long before the next request.
-    // The retry keeps the last compatibility, so the next success changes nothing.
+    // The request due at 100 takes 50ms to fail, so the retry is due a full interval
+    // later, at 250. The retry keeps the last compatibility, so the next success
+    // changes nothing.
     const timeline = await runTimeline(
       [compatible, requestError, compatible],
       baseConfig,
