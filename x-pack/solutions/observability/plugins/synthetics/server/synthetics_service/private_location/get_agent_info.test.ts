@@ -91,6 +91,41 @@ describe('getAgentInfo', () => {
     expect(isCompleteElasticAgent(undefined)).toBe(false);
   });
 
+  describe('Wolfi agents that predate the complete flag', () => {
+    const wolfi = (version?: string, complete = false) => ({
+      os: { platform: 'wolfi' },
+      elastic: { agent: { complete, ...(version ? { version } : {}) } },
+    });
+
+    it.each(['8.19.23', '9.4.8', '9.5.5', '9.3.4', '8.18.0'])(
+      'treats Wolfi %s as browser-capable',
+      (version) => {
+        expect(isCompleteElasticAgent(wolfi(version))).toBe(true);
+      }
+    );
+
+    it.each(['8.19.24', '9.4.9', '9.5.6', '9.6.0', '9.6.0-SNAPSHOT', '10.0.0'])(
+      'trusts the complete flag on Wolfi %s',
+      (version) => {
+        expect(isCompleteElasticAgent(wolfi(version))).toBe(false);
+        expect(isCompleteElasticAgent(wolfi(version, true))).toBe(true);
+      }
+    );
+
+    it('treats a Wolfi agent with no parsable version as browser-capable', () => {
+      expect(isCompleteElasticAgent(wolfi())).toBe(true);
+    });
+
+    it('does not extend the fallback to other platforms', () => {
+      expect(
+        isCompleteElasticAgent({
+          os: { platform: 'ubuntu' },
+          elastic: { agent: { complete: false, version: '9.4.8' } },
+        })
+      ).toBe(false);
+    });
+  });
+
   it('converts host.memory bytes to MiB, rounding to the nearest MiB', async () => {
     const listAgents = pagedListAgents([
       [
