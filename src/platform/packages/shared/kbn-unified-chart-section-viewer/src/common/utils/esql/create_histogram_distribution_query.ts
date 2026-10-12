@@ -13,7 +13,7 @@ import type { HistogramBounds, ParsedMetricItem } from '../../../types';
 import { firstNonNullable } from '../first_null_nullable';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { createTimeBucketAggregation } from './create_aggregation';
-import { fieldNameToColumn, resolveSource } from './esql_helpers';
+import { fieldNameToColumn, resolveSource } from './helpers';
 
 const HISTOGRAM_FIELD_TYPES: ReadonlySet<ES_FIELD_TYPES> = new Set([
   ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,

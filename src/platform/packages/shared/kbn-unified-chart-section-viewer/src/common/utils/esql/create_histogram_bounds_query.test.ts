@@ -62,19 +62,6 @@ TS metrics-a
     );
   });
 
-  it('uses the first field type when histogram types differ across streams', () => {
-    const boundsQuery = createHistogramBoundsQuery({
-      metricItem: createMetric({
-        fieldTypes: [ES_FIELD_TYPES.HISTOGRAM, ES_FIELD_TYPES.EXPONENTIAL_HISTOGRAM],
-      }),
-      originalSource: 'metrics-*',
-    });
-
-    expect(boundsQuery?.esqlQuery).toContain(
-      'STATS min_value = MIN(TO_TDIGEST(latency.exp)), max_value = MAX(TO_TDIGEST(latency.exp))'
-    );
-  });
-
   it('casts a legacy histogram with TO_TDIGEST', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({

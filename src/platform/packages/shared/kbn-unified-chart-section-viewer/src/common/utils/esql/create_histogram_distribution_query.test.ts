@@ -67,6 +67,21 @@ TS metrics-a
   | EVAL bucket = RANGE_MIN(bucket)`);
   });
 
+  it('applies the user WHERE clauses before STATS', () => {
+    const query = createHistogramDistributionQuery({
+      metricItem: createMetric(),
+      bounds,
+      whereStatements: ['host.name == "a"', '  '],
+      originalSource: 'metrics-*',
+    });
+
+    expect(query).toBe(`SET unmapped_fields = "NULLIFY";
+TS metrics-a
+  | WHERE host.name == "a"
+  | STATS count = COUNT(latency.exp, bucket) BY bucket = BUCKET(latency.exp, 10, 1, 250), TBUCKET(100)
+  | EVAL bucket = RANGE_MIN(bucket)`);
+  });
+
   it('returns undefined for a non-histogram instrument', () => {
     expect(
       createHistogramDistributionQuery({

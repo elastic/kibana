@@ -11,7 +11,7 @@ import { esql } from '@elastic/esql';
 import { getMetricUniqueKey } from '../get_metric_unique_key';
 import type { HistogramBoundsQuery, ParsedMetricItem } from '../../../types';
 import { getHistogramFieldExpression } from './create_histogram_distribution_query';
-import { resolveSource } from './esql_helpers';
+import { resolveSource } from './helpers';
 
 export const HISTOGRAM_BOUNDS_MIN_COLUMN = 'min_value';
 export const HISTOGRAM_BOUNDS_MAX_COLUMN = 'max_value';

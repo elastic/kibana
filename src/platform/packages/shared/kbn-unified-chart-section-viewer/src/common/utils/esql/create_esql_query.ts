@@ -11,7 +11,7 @@ import { esql } from '@elastic/esql';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
-import { resolveSource } from './esql_helpers';
+import { resolveSource } from './helpers';
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 

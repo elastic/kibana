@@ -19,7 +19,7 @@ import {
 } from '@kbn/discover-utils';
 import { isLegacyHistogram } from '../legacy_histogram';
 import { resolveConflictingFieldTypes } from './resolve_conflicting_field_types';
-import { fieldNameToColumn } from './esql_helpers';
+import { fieldNameToColumn } from './helpers';
 import { HISTOGRAM_PERCENTILE_VALUES } from '../../../components/flyout/metrics_grid_settings_flyout/constants';
 
 const GAUGE_OVER_TIME_FN: Record<SimpleAggregation, FunctionNames> = {
