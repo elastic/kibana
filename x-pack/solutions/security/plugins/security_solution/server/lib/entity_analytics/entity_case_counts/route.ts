@@ -48,8 +48,11 @@ export const registerEntityCaseCountsRoute = ({
         const siemResponse = buildSiemResponse(response);
         try {
           const [coreStart, { security }] = await getStartServices();
-          // Without access to Security cases, the user sees no case counts.
-          if (!(await canReadSecurityCases(security, request))) return response.ok({ body: {} });
+          if (!(await canReadSecurityCases(security, request))) {
+            return response.forbidden({
+              body: { message: 'User is not authorized to read Security cases.' },
+            });
+          }
 
           const spaceId = (await context.securitySolution).getSpaceId();
           const repository = coreStart.savedObjects.createInternalRepository([

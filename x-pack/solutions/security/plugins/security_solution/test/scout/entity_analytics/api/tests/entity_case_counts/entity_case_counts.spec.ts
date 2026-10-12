@@ -115,18 +115,14 @@ apiTest.describe(
       expect(response.body).toStrictEqual({ [ENTITY_ID]: 1 });
     });
 
-    apiTest(
-      'returns no counts to a user who cannot read Security cases',
-      async ({ apiClient, samlAuth }) => {
-        const response = await apiClient.post(
-          ENTITY_CASE_COUNTS_INTERNAL_URL,
-          buildRequest(await asUserWith(samlAuth, { siemV5: ['read'] }))
-        );
+    apiTest('is forbidden without Security cases access', async ({ apiClient, samlAuth }) => {
+      const response = await apiClient.post(
+        ENTITY_CASE_COUNTS_INTERNAL_URL,
+        buildRequest(await asUserWith(samlAuth, { siemV5: ['read'] }))
+      );
 
-        expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({});
-      }
-    );
+      expect(response).toHaveStatusCode(403);
+    });
 
     apiTest('is forbidden without entity analytics access', async ({ apiClient, samlAuth }) => {
       const response = await apiClient.post(
