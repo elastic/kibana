@@ -99,6 +99,41 @@ describe('ErrorHandlingMiddleware', () => {
     expect(loggedMessage).not.toContain('secret_field');
   });
 
+  it('logs an error only once when it propagates through multiple middleware layers', async () => {
+    const error = new Error('Step failed');
+    const { loggerService, mockLogger } = createLoggerService();
+    const originLayer = new ErrorHandlingMiddleware(loggerService);
+    const downstreamLayer = new ErrorHandlingMiddleware(loggerService);
+
+    // The origin step's layer is innermost: it catches the error first, then
+    // rethrows it up through the downstream step's layer, mirroring the pipeline.
+    const next = jest.fn().mockReturnValue(
+      (async function* () {
+        throw error;
+      })()
+    );
+    const innerStream = originLayer.execute(
+      createRuleExecutionMiddlewareContext({ name: 'execute_rule_query' }),
+      next,
+      createPipelineStream()
+    );
+    const outerStream = downstreamLayer.execute(
+      createRuleExecutionMiddlewareContext({ name: 'store_alert_events' }),
+      () => innerStream,
+      createPipelineStream()
+    );
+
+    await expect(collectStreamResults(outerStream)).rejects.toBe(error);
+
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Step failed',
+      expect.objectContaining({
+        labels: expect.objectContaining({ step: 'execute_rule_query' }),
+      })
+    );
+  });
+
   it('does not log RULE_EXECUTION_STEP_FAILED for a bare-abort cancellation', async () => {
     const abortController = new AbortController();
     abortController.abort();

@@ -17,6 +17,16 @@ import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlUserError } from '../../errors/esql_user_error';
 
 /**
+ * Tracks errors already logged by an {@link ErrorHandlingMiddleware} layer.
+ *
+ * There is one middleware layer per step, nested so a failure unwinds through
+ * every downstream layer. Without this, each layer would log the same error,
+ * mislabelled with its own (downstream) step. The origin step's layer catches
+ * the error first and records it here; downstream layers skip logging.
+ */
+const loggedErrors = new WeakSet<object>();
+
+/**
  * Middleware that provides centralized error handling for all steps.
  *
  * This middleware catches errors thrown by steps and logs them with
@@ -32,6 +42,10 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
     this.logger = loggerService.forSubsystem('ruleExecutor');
   }
 
+  private isErrorObject(value: unknown): value is object {
+    return value !== null && typeof value === 'object';
+  }
+
   public execute(
     ctx: RuleExecutionMiddlewareContext,
     next: (input: PipelineStateStream) => PipelineStateStream,
@@ -39,6 +53,8 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
   ): PipelineStateStream {
     const stream = next(input);
     const fallbackLogger = this.logger;
+
+    const { isErrorObject } = this;
 
     return (async function* () {
       let latestState: RulePipelineState | undefined;
@@ -49,12 +65,18 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
           yield result;
         }
       } catch (error) {
-        if (!isRuleExecutionCancellationError(error)) {
+        const alreadyLogged = isErrorObject(error) && loggedErrors.has(error);
+
+        if (!isRuleExecutionCancellationError(error) && !alreadyLogged) {
           (latestState?.logger ?? fallbackLogger).withLabels({ step: ctx.step.name }).error({
             message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
             error,
             code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           });
+
+          if (isErrorObject(error)) {
+            loggedErrors.add(error);
+          }
         }
 
         throw error;
