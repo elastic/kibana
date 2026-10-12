@@ -17,16 +17,19 @@ import {
   deleteServiceAccount,
   getAdminApi,
   getWorker,
+  listExecutionIds,
   ok,
-  patchWorker,
   pollUntil,
+  resetWorker,
   seedAttackScenario,
   updateWorker,
+  assertExecutionCompleted,
+  waitForExecution,
+  waitForNewExecution,
 } from '../fixtures';
 import type { SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
-const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
 
 interface EndpointAction {
   id: string;
@@ -67,7 +70,7 @@ apiTest.describe(
         api = await getAdminApi(apiClient, samlAuth);
       });
       await attempt(async () => {
-        if (api) ok(await patchWorker(api, WORKER_ID, { enabled: false }), 'disable the worker');
+        if (api) await resetWorker(api, WORKER_ID);
       });
       await attempt(async () => cleanupHosts?.());
       await attempt(async () => {
@@ -102,37 +105,37 @@ apiTest.describe(
 
         serviceAccountId = await createServiceAccount(api);
         const worker = await getWorker(api, WORKER_ID);
+        const workerWorkflowId = worker.workflowId;
+        if (!workerWorkflowId) {
+          throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
+        }
         await updateWorker(api, WORKER_ID, {
           settingsRevision: worker.settingsRevision ?? null,
           settings: { serviceAccountId },
         });
-        expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
 
-        // 1. Run Attack Discovery over the seeded window.
+        // 1. Run Attack Discovery over the seeded window. Enabling the worker makes Task Manager
+        // run it at once, as its service account; that scheduled run is the one under test. The
+        // shared runner is not started by hand: a hand-started run executes as the caller, so the
+        // runner's `run-as-mode: inherit` steps fail with "Service account inheritance requires a
+        // parent executing as a service account", and it shares a `cancel-in-progress` concurrency
+        // key with the worker's own run, so whichever starts second cancels the other.
+        const knownExecutionIds = await listExecutionIds(api, workerWorkflowId);
         const startedAt = new Date().toISOString();
-        const { workflowExecutionId } = ok(
-          await api.public<{ workflowExecutionId: string }>(
-            'POST',
-            `/api/workflows/workflow/${testData.ATTACK_DISCOVERY_WORKER_WORKFLOW_ID}/run`,
-            { body: { inputs: {} } }
-          ),
-          'run the attack discovery worker'
+        expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
+        const workflowExecutionId = await waitForNewExecution(
+          api,
+          workerWorkflowId,
+          knownExecutionIds,
+          { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
-        const execution = await pollUntil(
+        const execution = await waitForExecution(
+          api,
           'the attack discovery worker execution to finish',
-          async () => {
-            const current = ok(
-              await api.public<{ status: string }>(
-                'GET',
-                `/api/workflows/executions/${workflowExecutionId}`
-              ),
-              'read the worker execution'
-            );
-            return TERMINAL_EXECUTION_STATUSES.includes(current.status) ? current : undefined;
-          },
+          workflowExecutionId,
           { timeoutMs: testData.GENERATION_TIMEOUT_MS }
         );
-        expect(execution.status).toBe('completed');
+        await assertExecutionCompleted(api, 'The attack discovery worker execution', execution);
 
         const findPending = async (actionWorkflowId: string) =>
           ok(

@@ -16,6 +16,7 @@ import {
   getWorker,
   listWorkers,
   patchWorker,
+  resetWorker,
   updateWorker,
 } from '../fixtures';
 
@@ -32,7 +33,9 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
     const api = await getAdminApi(apiClient, samlAuth);
-    await patchWorker(api, WORKER_ID, { enabled: false });
+    // Unbind before deleting the accounts: a worker left pointing at a deleted account leaks into
+    // whatever spec runs next.
+    await resetWorker(api, WORKER_ID);
     for (const id of serviceAccountIds) {
       await deleteServiceAccount(api, id);
     }
@@ -54,6 +57,8 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     'refuses to enable a worker that has no service account',
     async ({ apiClient, samlAuth }) => {
       const api = await getAdminApi(apiClient, samlAuth);
+      // Do not trust spec order: another spec may have left an account bound to this worker.
+      await resetWorker(api, WORKER_ID);
       const before = await getWorker(api, WORKER_ID);
       expect(before.settings.serviceAccountId).toBeUndefined();
 
@@ -61,6 +66,27 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       expect(response.statusCode).toBeGreaterThanOrEqual(400);
       expect(response.statusCode).toBeLessThan(500);
       expect((await getWorker(api, WORKER_ID)).enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'resets a worker that a previous spec left enabled with a service account bound',
+    async ({ apiClient, samlAuth }) => {
+      const api = await getAdminApi(apiClient, samlAuth);
+      const serviceAccountId = await createServiceAccount(api);
+      serviceAccountIds.push(serviceAccountId);
+      const before = await getWorker(api, WORKER_ID);
+      await updateWorker(api, WORKER_ID, {
+        settingsRevision: before.settingsRevision ?? null,
+        settings: { serviceAccountId },
+      });
+      await updateWorker(api, WORKER_ID, { enabled: true });
+
+      await resetWorker(api, WORKER_ID);
+
+      const after = await getWorker(api, WORKER_ID);
+      expect(after.enabled).toBe(false);
+      expect(after.settings.serviceAccountId).toBeUndefined();
     }
   );
 
