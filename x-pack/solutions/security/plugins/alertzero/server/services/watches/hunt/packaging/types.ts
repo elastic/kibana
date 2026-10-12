@@ -17,6 +17,8 @@ export interface CurrentRunHost {
   /** Elastic Defend agent id when enrolled; absent when unenrolled or unknown. */
   agentId?: string;
   enrolled: boolean;
+  /** `Endpoint.capabilities` from the endpoint metadata document; `[]` when unknown. */
+  capabilities: string[];
 }
 
 /** Process selector fillable into kill/suspend `parameters`. */
@@ -33,6 +35,8 @@ export interface ProcessSelector {
   hostName: string;
   /** e.g. `powershell.exe`; drives both the Proposal title and comment. */
   processName: string;
+  /** Full executable path (`process.executable`) when the source document carried one. */
+  processExecutable?: string;
   observedAt?: string;
   /**
    * ATT&CK technique this specific process was matched against (from the source event's
@@ -41,6 +45,13 @@ export interface ProcessSelector {
    * every technique confirmed anywhere on the host.
    */
   techniqueId?: string;
+  /**
+   * Every technique any ref for this process was attributed to (`techniqueId` is the one
+   * representative). Lets rules see a destructive technique the representative did not carry.
+   */
+  techniqueIds?: string[];
+  /** True when a Tier 1 ref that rehydrated to this process carried `matched.ioc`. */
+  iocMatched: boolean;
 }
 
 export type SubjectKind = ActionSubjectKind;
@@ -136,6 +147,10 @@ export interface CurrentRunState {
   sseCount: number;
   /** True when at least one current-run SSE has `hunt_result.has_confirmed_hit`. */
   hasConfirmedHit: boolean;
+  /** Max SSE `confidence` across current-run SSEs. */
+  confidence: number;
+  /** Min `from` / max `to` of `hunt_result.time_range` across current-run SSEs; absent when none carried one. */
+  huntWindow?: { from: string; to: string };
   /** SSE titles for the closure summary. */
   titles: string[];
   /** Short evidence lines for the closure summary. */
