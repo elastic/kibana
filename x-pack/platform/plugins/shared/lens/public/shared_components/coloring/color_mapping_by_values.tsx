@@ -27,7 +27,11 @@ interface ColorMappingByValuesProps {
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
   dataBounds: DataBounds;
-  defaultBandCount?: number;
+  /**
+   * Band count applied when switching to a named palette. Required so every editor surface that
+   * renders this component stays consistent (see the datatable cell vs progress-bar editors).
+   */
+  defaultBandCount: number;
 }
 
 export function ColorMappingByValues<T>({
