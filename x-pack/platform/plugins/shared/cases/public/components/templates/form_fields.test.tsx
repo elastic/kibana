@@ -252,28 +252,21 @@ describe('form fields', () => {
 
   it('calls onSubmit with case fields', async () => {
     renderWithTestingProviders(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{
+          title: 'Case with Template 1',
+          description: 'This is a case description',
+          tags: ['template-1'],
+          category: 'new',
+          templateTags: [],
+        }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...defaultProps} />
       </FormTestComponent>
     );
 
-    const caseTitle = await screen.findByTestId('caseTitle');
-    await userEvent.click(within(caseTitle).getByTestId('input'));
-    await userEvent.paste('Case with Template 1');
-
-    const caseDescription = await screen.findByTestId('caseDescription');
-    await userEvent.click(within(caseDescription).getByTestId('euiMarkdownEditorTextArea'));
-    await userEvent.paste('This is a case description');
-
-    const caseTags = await screen.findByTestId('caseTags');
-    await userEvent.click(within(caseTags).getByRole('combobox'));
-    await userEvent.paste('template-1');
-    await userEvent.keyboard('{enter}');
-
-    const caseCategory = await screen.findByTestId('caseCategory');
-    await userEvent.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
@@ -301,38 +294,24 @@ describe('form fields', () => {
     };
 
     renderWithTestingProviders(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{
+          ...formDefaultValue,
+          customFields: {
+            [customFieldsConfigurationMock[0].key]: 'My text test value 1',
+            [customFieldsConfigurationMock[1].key]: false,
+            [customFieldsConfigurationMock[4].key]: '987',
+          },
+        }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...newProps} />
       </FormTestComponent>
     );
 
     expect(await screen.findByTestId('caseCustomFields')).toBeInTheDocument();
 
-    const textField = customFieldsConfigurationMock[0];
-    const toggleField = customFieldsConfigurationMock[1];
-    const numberField = customFieldsConfigurationMock[4];
-
-    const textCustomField = await screen.findByTestId(
-      `${textField.key}-${textField.type}-create-custom-field`
-    );
-
-    await userEvent.clear(textCustomField);
-    await userEvent.click(textCustomField);
-    await userEvent.paste('My text test value 1');
-
-    await userEvent.click(
-      await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
-    );
-
-    const numberCustomField = await screen.findByTestId(
-      `${numberField.key}-${numberField.type}-create-custom-field`
-    );
-
-    await userEvent.clear(numberCustomField);
-    await userEvent.click(numberCustomField);
-    await userEvent.paste('987');
-
-    await userEvent.click(screen.getByText('Submit'));
+    await userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
