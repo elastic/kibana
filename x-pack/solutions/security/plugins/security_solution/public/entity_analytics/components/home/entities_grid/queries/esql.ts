@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Builder, LeafPrinter } from '@elastic/esql';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -44,13 +45,8 @@ export const buildAnomalyJobFilter = (jobIds: readonly string[]): string =>
 
 // ── primitives ───────────────────────────────────────────────────────────────
 
-export const esc = (s: string) =>
-  `"${s
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')}"`;
+/** An ES|QL string literal of `s`, quoted and escaped. */
+export const esc = (s: string): string => LeafPrinter.string(Builder.expression.literal.string(s));
 
 export const toList = (items: readonly string[]) => items.map(esc).join(', ');
 
