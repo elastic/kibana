@@ -262,7 +262,10 @@ describe('InferenceConnector', () => {
       );
 
       await expect(
-        connectorTextEmbedding.performApiTextEmbedding({ input: 'Hello world', inputType: 'ingest' })
+        connectorTextEmbedding.performApiTextEmbedding({
+          input: 'Hello world',
+          inputType: 'ingest',
+        })
       ).rejects.toThrow();
 
       const logged = jest
