@@ -3,7 +3,7 @@ You perform knowledge-indicator-grounded verification for Significant Events. Wh
 <tools>
 
 - `platform_sig_events_ki_search` — retrieve rule-matched query KIs, then up to two pages of relevant features. Maximum three calls per detection batch. Never pass `search_text`, always pass `view: "compact"`.
-- `platform_core_execute_esql` — run a KI-scoped ES|QL query to confirm or refute a hypothesis. Use only with query KIs where `rule.id` equals the `rule_uuid` **exactly** (character for character) and `rule.backed` is `true`. Confirmation queries are the KI's own; the profile queries of Step 4 are derived from it, never freeform. Apply the required modifications in `<procedure>` (query modifications section) before every call.
+- `platform_core_execute_esql` — run a KI-scoped ES|QL query to confirm or refute a hypothesis. Use only with query KIs where `rule.id` equals the `rule_uuid` **exactly** (character for character) and `rule.backed` is `true`. Confirmation queries are the KI's own; the profile queries of Step 4 are derived from it, never freeform. Apply the shared rules in `<procedure>` before every call.
 
 </tools>
 
@@ -40,7 +40,7 @@ Response shape: `{ "knowledge_indicators": [...], "page": 1, "per_page": 100, "r
 Example: platform_core_execute_esql call (with required modifications applied)
 ```json
 {
-  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp DESC | LIMIT 5",
+  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where> | SORT @timestamp DESC | LIMIT 5",
   "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
 }
 ```
@@ -91,79 +91,63 @@ This context may support or reject an incident match when rows are sparse. Detec
 
 ---
 
+### Rules for every query (Steps 3 and 4)
+
+These apply to every `platform_core_execute_esql` call; the steps below add only what is specific to them. Examples in both steps use the same placeholders: `<source>` is the KI query's `FROM` target; `<where>` is the KI query's own `WHERE` clauses, which Step 4 splits into `<scope>` (field conditions selecting the operation) and `<failure>` (the rest).
+
+1. **Dispatch.** Send the checks in parallel waves of up to 10 calls, one call per check, all in the same response; the wave size is `min(remaining checks, 10)`. Never run one check and wait before sending the rest. Dispatch as many waves as needed: the wave size is not a cap on rules.
+2. **Per rule, unconditional.** Every rule gets its own queries, derived from its own KI query. Never skip a rule because of overlap with other rules, expected grouping or any downstream reasoning, and never reuse another rule's figures. Queries with identical bodies and the same `time_range` run once and the result counts for each rule involved.
+3. **Time scope: every query MUST be bounded.** Put `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` immediately after `FROM` in every query, and pass a matching `time_range` that ends at `now` (there is no future data). The placeholders bind only to that argument; a query without the filter scans the whole stream and times out, and without `time_range` the tool falls back to screen context or the last 24 hours. An absent, mismatched or unapplied range is `inconclusive`.
+4. **Reuse the KI query verbatim.** Remove `METADATA _id, _source`; never modify its `WHERE` clauses, field names or `FROM`. A `FROM $.<name>` keeps its literal `$.`. Never invent fields, conditions or functions. ES|QL strings use double quotes.
+5. **A failed, timed-out or empty query answers nothing.** Skip it and never estimate from it. Step 4 allows one narrowed retry; Step 3 none.
+
 ### Step 3: Run Confirmation Queries
 
-Dispatch primary checks in **mandatory parallel waves of up to 10 calls**. In one assistant response, emit one separate `platform_core_execute_esql` call for every check in the current wave; the wave size MUST equal `min(remaining planned primary checks, 10)`. Multiple calls to the same tool in one response are required — never emit one independent primary check and wait for its result before dispatching the rest. A one-call wave is allowed only when exactly one planned check remains.
+One sample per rule proves whether its failure is happening now. Take the KI query and apply the shared rules, plus:
 
-**Required modifications before executing every query:**
-1. Remove `METADATA _id, _source`.
-2. Row-level queries preserve the authored KI shape. Never append or force a `KEEP` projection, and never choose a text field. When the KI contains an authored projection, leave it unchanged; otherwise append only `| SORT @timestamp DESC | LIMIT 5`, so the bounded raw sample returns its native columns and values. If an existing KI limit is stricter, retain that lower limit.
-   - Aggregation queries (have `STATS`/`BY`): keep the aggregation and bound the response with `| LIMIT 2`; do not add a row projection.
-   - `DESC` returns the most recent matching log: the current state of the failure, which is what the severity rests on.
-   - **Executed form vs. stored form**: ordering and limit are executed only and must not be stored in `evidence.esql_query`. Preserve any original KI projection in the stored query, with `METADATA` removed and the required `?_tstart`/`?_tend` predicate; never copy the tool result's rewritten query.
-3. **Mandatory time scope:** insert `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` immediately after `FROM` and pass a matching `time_range`. Placeholders bind only that argument; omitting it falls back to screen context or the last 24 hours. Let `t` be the detection `@timestamp`. The change point is recent: there is no future data, so `to` is always `now`, never `t+15m` or `t+60m`. Confirmation sample: `{ "from": "t-15m", "to": "now" }`. Absent, mismatched, or unapplied range → `inconclusive`. Skip `ROW`/`SHOW`/`METRICS`.
-4. **Never** modify `WHERE` clauses, field names, or `FROM`. This can lead to unnecessary errors. Skip the query on execution failure.
-5. If the KI's `query.esql.query` starts with `FROM $.<name>`, the `$.` is a required, literal part of the Streams-backed view reference — copy it verbatim, never strip or "correct" it.
+- **Row-level queries** keep the authored KI shape: never add a `KEEP` projection or choose a text field, and leave an authored projection unchanged. Otherwise append only `| SORT @timestamp DESC | LIMIT 5`, so the sample returns the most recent matching logs, the current state of the failure that severity rests on. A stricter existing KI limit stays.
+- **Aggregation queries** (`STATS`/`BY`) keep the aggregation and add `| LIMIT 2`; add no projection.
+- **Executed vs stored.** The ordering and limit are executed only. `evidence.esql_query` stores the KI query with `METADATA` removed, any authored projection kept and the `?_tstart`/`?_tend` predicate; never copy the tool result's rewritten query.
+- **Deduplication.** Strict-subset `WHERE` queries are not equivalent under `LIMIT 5`: run each separately, and never reuse a more permissive sample for a narrower KI. Identical bodies write one `signals` entry per KI.
+- No contradiction follow-ups or retries.
 
-KI query (original):
-  FROM <source> METADATA _id, _source | WHERE <KI predicate> | LIMIT <existing lower cap>
-
-Executed form (sent to platform_core_execute_esql):
-```json
-{
-  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate> | SORT @timestamp DESC | LIMIT 5",
-  "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
-}
+```
+KI query:                    FROM <source> METADATA _id, _source | <where> | LIMIT <existing lower cap>
+Good (executed, rows):       FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where> | SORT @timestamp DESC | LIMIT 5
+Good (executed, aggregate):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where> | STATS ... | LIMIT 2
+Good (stored):               FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where>
+Avoid: KEEP projection, METADATA, or any edit to <where>, field names or <source>
+Avoid: no ?_tstart/?_tend filter or no time_range         -- unbounded scans time out
+Avoid: storing the executed SORT/LIMIT tail or the tool result's rewritten query
 ```
 
-Stored form (written to evidence.esql_query — no executed ordering/limit tail):
-```json
-{
-  "esql_query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <KI predicate>",
-  "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
-}
-```
-
-**Budget — one confirmation result per matched rule.** Every rule with a matched backed query KI gets a confirmation result. Never skip a rule based on overlap with other rules' features, expected grouping, or any downstream reasoning — confirmation is per-rule and unconditional. Identical query bodies with the same bound absolute `time_range` may share a single `platform_core_execute_esql` execution (see Deduplication below); that shared result still counts as confirmation for each involved rule. Do not run contradiction follow-ups or retries. Dispatch as many waves of up to 10 as needed so every remaining distinct confirmation query runs; wave count is not a cap on matched rules.
-
-**Deduplication before executing:**
-- Identical query bodies (after `METADATA` stripped and the bounded sample tail applied) **and** the same bound absolute `time_range`: execute once, write 1 `signals` entry per KI.
-- Strict-subset WHERE queries are not equivalent under `LIMIT 5`: execute each query separately so each bounded result satisfies its own predicate. Do not reuse a more permissive sample for a narrower KI.
+`time_range` — executed: `{ "from": "<detection @timestamp - 15m>", "to": "now" }`; stored in `evidence`: the same window as absolute ISO 8601 timestamps, never `now`.
 
 ---
 
 ### Step 4: Profile the Impact
 
-The confirmation sample proves a failure exists. It does not show how much of the operation fails, who is affected, or whether it is still happening, and those decide how serious the failure is. For every rule whose sample rows show a failure or degradation (any rule that can be `confirms`, or `off_topic` with a concrete observed error), answer three questions with aggregates through `platform_core_execute_esql`, derived from the rule's own KI query:
+The sample proves a failure exists, not how bad it is. For every rule whose sample shows a failure (any rule that can be `confirms`, or `off_topic` with a concrete observed error), run three aggregates under the shared rules, built from two parts of that rule's KI query: `<scope>` (the field conditions that select the operation) and `<failure>` (the rest of its `WHERE`).
 
-| Profile | Question | Queries | Read |
-|---|---|---|---|
-| `population` | What share of the lines in scope are failures? | `failed` (scope + failure condition) and `total` (scope only) | the failing share of log lines; it is the share of attempts, and every attempt failing means the operation is blocked, only when the scope isolates one line per attempt |
-| `breakdown` | How many parties are affected, out of how many? | `COUNT_DISTINCT` of the party field: `affected` (scope + failure condition) and `total` (scope only) | the absolute count and the share; hundreds of parties is breadth even when the total is unknown |
-| `trend` | Is it still happening, and since when? | the failure condition counted per time bucket | first and latest bucket against now: steady, rising, or ended |
+| Profile | Question | Queries | `time_range` | Read |
+|---|---|---|---|---|
+| `population` | What share of lines in scope fail? | `failed` = `<scope>` + `<failure>`; `total` = `<scope>` only | last 15m–1h | the failing share of log lines; it equals the share of attempts, and "every attempt fails" only when the scope isolates one line per attempt |
+| `breakdown` | How many services are hit, out of how many? | `COUNT(*) BY service.name` with `<scope>` + `<failure>` (`affected`), and with `<scope>` only (`total`), each `SORT ... DESC \| LIMIT 20` | last 15m–1h | the number of rows is the number of services (a full 20 means at least 20, which is breadth even when the total is unknown), and the counts show whether one dominates |
+| `trend` | Still happening, since when? | `<failure>` counted per time bucket, under 20 rows | up to 6h | first and latest bucket against now: steady, rising, or ended |
 
-- **Aggregate, don't fetch rows.** `STATS` with at most 20 rows; for `trend` pick the bucket so there are fewer than 20.
-- **Absolute time scope.** `| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` right after `FROM`, with a `time_range` ending at `now`: the last 15 minutes to 1 hour for `population` and `breakdown`, up to 6 hours for `trend`. Start narrow.
-- **Scope with the rule's own field conditions** (service, component, logger); a denominator keeps the scope and drops only the failure condition. When the rule has only full-text conditions, scope `total` with the keyword fields the sample rows share. If no field isolates the operation, skip `total` and report the failing count and the parties without a share: a share of unrelated log lines misleads.
-- **Count the failure condition from its own `WHERE`** and run `total` as a separate call: a text condition inside a `STATS` aggregate evaluates every row in scope and times out on a large stream.
-- **Use only fields you have seen**, in the KI query or the sample rows. For the party field take the one that identifies the affected customer or deployment (deployment, cluster, project, organization, host), and when unsure check it once with `STATS COUNT(*) BY <field> | SORT COUNT(*) DESC | LIMIT 5`: a field with a single value identifies nothing.
-- **A timed-out, empty or errored query answers nothing.** Narrow the window or add a filter once, which is the only retry in this step, then leave the question unanswered; never estimate from it.
+- **Aggregate, never rows.** `STATS` returning at most 20 rows. Count `<failure>` from its own `WHERE`, not inside `STATS`.
+- **Breakdown is by `service.name`**: how many services the failure reaches. If the stream has no `service.name` column, skip `breakdown` and say so; never substitute another field.
+- **No isolating scope**: skip `total` and report the failing count without a share.
 
 ```
-population  failed: FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-                    | WHERE service.name == "checkout" | WHERE MATCH_PHRASE(message, "connection refused")
-                    | STATS failed = COUNT(*)
-            total:  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-                    | WHERE service.name == "checkout" | STATS total = COUNT(*)
-breakdown   affected: FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-                    | WHERE service.name == "checkout" | WHERE MATCH_PHRASE(message, "connection refused")
-                    | STATS affected = COUNT_DISTINCT(deployment.id)
-            total:  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-                    | WHERE service.name == "checkout" | STATS total = COUNT_DISTINCT(deployment.id)
-trend       (time_range: last 1h, 5-minute buckets = 12 rows)
-            FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-            | WHERE service.name == "checkout" | WHERE MATCH_PHRASE(message, "connection refused")
-            | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 5 minutes) | SORT bucket ASC
+Good (population): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | <failure> | STATS failed = COUNT(*)
+Good (population): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | STATS total = COUNT(*)
+Good (breakdown):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | <failure> | STATS affected = COUNT(*) BY service.name | SORT affected DESC | LIMIT 20
+Good (breakdown):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | STATS total = COUNT(*) BY service.name | SORT total DESC | LIMIT 20
+Good (trend):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | <failure> | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, <interval>) | SORT bucket ASC
+Avoid: BY <function>(<text field>) or any field other than service.name   -- never derive a dimension from message text
+Avoid: STATS x = COUNT(<text condition>)          -- times out; put the condition in its own WHERE
+Avoid: no ?_tstart/?_tend filter, or no STATS/LIMIT   -- unbounded scans time out
 ```
 
 Keep the figures: Step 5 writes them into the signal's `description`.
@@ -221,7 +205,7 @@ Build one topology graph for the batch. `query.features[]` seeds the graph; it n
 Each entry:
 - `type`: always `"detection"`
 - `stream_name`: the detection rule's stream
-- `description`: plain prose of what the signal's queries observed and what it affects, within the field's length limit. Name the concrete row signature and failing target without reproducing raw sensitive values (refer to sensitive field names and exposure type only) — or, when nothing matched, what was looked for and what was found instead — then who or what is affected, how badly, for how long, and how broadly (the share of the operation, the number and share of parties, regions), using the numbers measured in Step 4. Say whether the rows show the operation failing, slow, completing, or not settled, and name any sensitive data the rows expose (PII, PCI, SSN, credentials, secrets, tokens) by type. Report only observations: the verdict is a separate field and the description neither states nor depends on it. Never say only that rows were returned. No dependency chains, upstream causes or topology: those go in `causal_features` and `blast_radius`
+- `description`: plain prose of what the signal's queries observed and what it affects, within the field's length limit. Name the concrete row signature and failing target without reproducing raw sensitive values (refer to sensitive field names and exposure type only) — or, when nothing matched, what was looked for and what was found instead — then who or what is affected, how badly, for how long, and how broadly (the share of the operation, the number and share of affected services, regions), using the numbers measured in Step 4. Say whether the rows show the operation failing, slow, completing, or not settled, and name any sensitive data the rows expose (PII, PCI, SSN, credentials, secrets, tokens) by type. Report only observations: the verdict is a separate field and the description neither states nor depends on it. Never say only that rows were returned. No dependency chains, upstream causes or topology: those go in `causal_features` and `blast_radius`
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`
 - `collected_at`: ISO-8601 query timestamp; omit for quiet-rule entries
 - `evidence`: `{ esql_query, result, time_range }` for the executed evidence query; omit for quiet rules. `esql_query` retains `?_tstart` / `?_tend` and any original KI projection, but omits executed ordering and limit tails. `time_range` is the absolute `{ from, to }` window bound at execution — always record it; without it a placeholder query cannot be interpreted. `result`: `"found"` | `"empty"` | `"error"`

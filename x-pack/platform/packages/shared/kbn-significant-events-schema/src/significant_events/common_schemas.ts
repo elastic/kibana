@@ -342,7 +342,8 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails versus only slows.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "medium"; it is never grounds for "low". Weigh scope by what the operations do, not by how many detections fired. A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply. A breadth figure that could not be measured does not lower the tier that the confirmed failure gives.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "medium"; it is never grounds for "low". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate that operation from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply. A breadth figure that could not be measured does not lower the tier that the confirmed failure gives.
 
     Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when the evidence leaves genuinely unresolved whether the operation still completes, and never below "medium" on that ground.
   `;
@@ -406,6 +407,7 @@ export const significantEventBaseSchema = lazySchema(() =>
 
         ${SYMPTOM_HYPOTHESIS_ROLE_RULE}
         Do not restate the title or summary. Do not use generic terms such as "backend unavailability" or "dependency failure" when the evidence identifies a component, resource, endpoint, protocol, or error signature.
+        On a continuation, extend the stored hypothesis: keep its existing wording for the mechanism it already establishes and add only what the new evidence supports; leave it unchanged when nothing new is evidenced. A single healthy or unrelated signal never replaces a mechanism that other signals on the event still confirm.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
       ),
@@ -415,11 +417,12 @@ export const significantEventBaseSchema = lazySchema(() =>
       .describe(
         dedent`
         Objective, self-contained account of the observed state and potential impact. Max ${MAX_SUMMARY_LENGTH} chars.
-        Lead with the normalized observed error signature — including the error type or code, operation, protocol, endpoint, port, and relevant non-sensitive address — and the affected component or dependency path, then state whether impact is confirmed, possible, or not established. When no failure signature is observed, lead with the concise observed success, health, or off-topic signature instead. Include onset, magnitude, and current or recovery state only when known.
+        Lead with the normalized observed error signature — including the error type or code, operation, protocol, endpoint, port, and relevant non-sensitive address — and the affected component or dependency path, then state whether impact is confirmed, possible, or not established. When no failure signature is observed, lead with the concise observed success, health, or off-topic signature instead. Include onset, current or recovery state, and magnitude only when known, stating magnitude in plain words (for example "about half of the operation's log lines"); exact counts and percentages belong in the signal descriptions and assessment_note.
 
         ${SUMMARY_ROLE_RULE}
         Use matched query KI descriptions or resolved feature metadata to name the observed component or dependency path when it clarifies the failure for an operator. Possible impact may come from the same context, but must be conditional and scoped.
 
+        On a continuation, build on the stored summary: keep its existing wording for the signatures and paths it already covers (rephrase only to fit the limit), add new sentences only for what is newly confirmed, and leave it unchanged when nothing new matters to an operator. A single healthy or unrelated signal never replaces what other signals on the event still confirm.
         Do not repeat the title or symptom_hypothesis narrative. Preserve decisive technical details from the canonical error signature when they identify the observed state. Evidence limitations may qualify the conclusion, but do not narrate queries, detections, or analysis steps. Do not include actions, urgency language, detection artifacts (p_value or severity_score), memory-page presence, or unsupported impact claims.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
