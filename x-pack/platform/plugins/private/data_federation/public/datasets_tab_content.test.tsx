@@ -112,7 +112,8 @@ const createServicesMock = ({
   ({
     dataSourcesClient: { get: jest.fn() },
     datasetsClient,
-    toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
+    toasts: { addDanger, addSuccess: jest.fn() },
+    reportUiCounter,
     docLinks: docLinksMock,
   } as unknown as DataFederationKibanaServices);
 

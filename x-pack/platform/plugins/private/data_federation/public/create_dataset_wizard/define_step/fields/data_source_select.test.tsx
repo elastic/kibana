@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { DataSource } from '../../../../common';
 import { DataSourceSelect } from './data_source_select';
 import { docLinksMock } from '../../../doc_links_mock';
+import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 
 const mockDocLinks = {
   ...docLinksMock,
@@ -100,7 +101,7 @@ describe('DataSourceSelect', () => {
     });
 
     expect(getByTestId('createDatasetDataSourceAuthenticationCallout')).toHaveTextContent(
-      'Check authentication for this dataset'
+      createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle
     );
     expect(getByTestId('createDatasetDataSourceAuthenticationLearnMore')).toHaveAttribute(
       'href',

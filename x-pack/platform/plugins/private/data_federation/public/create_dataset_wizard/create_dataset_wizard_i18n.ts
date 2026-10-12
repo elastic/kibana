@@ -294,7 +294,7 @@ export const createDatasetWizardStrings = {
   dataSourceAuthenticationCalloutTitle: i18n.translate(
     'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutTitle',
     {
-      defaultMessage: 'Check authentication for this dataset',
+      defaultMessage: 'Check data source permissions',
     }
   ),
 
@@ -302,7 +302,7 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.dataSourceAuthenticationCalloutDescription',
     {
       defaultMessage:
-        'This connection must already be allowed to read the bucket and files you chose. Update the data source in ES|QL Data Federation if access fails.',
+        'Make sure the selected data source has permission to read the data you want to query. You can update its permissions in your cloud provider.',
     }
   ),
 
