@@ -13,6 +13,7 @@ import {
   buildKeepClause,
   buildLookupJoinClause,
   buildSortSuffix,
+  ESQL_MAX_RESULT_ROWS,
   toList,
 } from './esql';
 import type { PageCursor, QueryArgs, Row } from '../common';
@@ -53,10 +54,11 @@ import type { EsqlRunner, SortPageContext } from './types';
 export const SPLIT_SORT_MIN_VIEW_SIZE = 500_000;
 
 /**
- * Most value rows a split sort reads: ES|QL returns at most 10k rows. Above it, the split
- * sort can't list the value ids to exclude from the empty rows, so the general query runs.
+ * Most value rows a split sort reads. Above it, the split sort can't list the value ids to
+ * exclude from the empty rows, so the general query runs. One below the ES|QL result cap,
+ * so the extra row that signals "more" can come back.
  */
-const MAX_VALUE_ROWS = 10_000;
+const MAX_VALUE_ROWS = ESQL_MAX_RESULT_ROWS - 1;
 
 export interface SplitSortPlan {
   /** Sort value of an entity without foreign data: 0 sorts first ascending, null always last. */

@@ -20,6 +20,7 @@ import {
   buildKeepClause,
   buildFilterClause,
   buildLookupJoinClause,
+  ESQL_MAX_RESULT_ROWS,
   toList,
   buildCursorClause,
   buildJoinedPageSteps,
@@ -58,9 +59,10 @@ const buildUnfilteredGroupSizeSortQuery = (args: QueryArgs): string =>
 /**
  * Upper bound on the groups with aliases that the entity filters keep. Below it, the size-one
  * branch reads enough targets to fill the page after dropping the targets that have aliases.
- * Above it, a page of size-one groups can come back short.
+ * Above it, a page of size-one groups can come back short. The page, its extra row and the
+ * groups are read in one query, so together they stay within the ES|QL result cap.
  */
-const MAX_ALIAS_GROUPS = 10_000;
+const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_ROWS - pageSize - 1;
 
 /**
  * Entity filters without a search: build the groups that have aliases from the alias docs only
@@ -94,7 +96,7 @@ const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
       `| EVAL ${GROUP_SIZE_FIELD} = TO_LONG(1)`,
       ...cursor,
       `| SORT \`entity.id\` ASC`,
-      `| LIMIT ${args.pageSize + 1 + MAX_ALIAS_GROUPS}`,
+      `| LIMIT ${args.pageSize + 1 + getMaxAliasGroups(args.pageSize)}`,
       `| KEEP \`entity.id\`, ${GROUP_SIZE_FIELD}`,
     ]),
     ')',
@@ -148,7 +150,7 @@ const buildAliasGroupsQuery = (args: QueryArgs): string =>
     ...buildFilterClause(args.entityExpression),
     `| EVAL ${GROUP_SIZE_FIELD} = alias_count + 1`,
     `| KEEP \`entity.id\`, ${GROUP_SIZE_FIELD}`,
-    `| LIMIT ${MAX_ALIAS_GROUPS + 1}`,
+    `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,
   ].join('\n');
 
 /**
@@ -188,11 +190,12 @@ const isAfterCursor =
  * Most targets a search page reads directly; above it, it reads the groups with aliases.
  *
  * Why: the direct read costs grow with the matches, the groups read doesn't. ES|QL returns at
- * most 10k rows, so the matches can't be listed past it anyway.
+ * most ESQL_MAX_RESULT_ROWS rows, so the matches can't be listed past it anyway; one below it,
+ * so the extra row that signals "more" can come back.
  * Measured (10M entities, 16GB ECH, Oct 2026): a narrow search 0.6s here vs 2–3s through the
  * groups; a broad search 2.5–4s, where the single search query timed out.
  */
-const MAX_DIRECT_TARGETS = 10_000;
+const MAX_DIRECT_TARGETS = ESQL_MAX_RESULT_ROWS - 1;
 
 /**
  * Ids per IN list.
@@ -309,7 +312,9 @@ const fetchSearchedTargetsPage = async (
  */
 const fetchAliasGroupsPage = async (args: QueryArgs, runQuery: EsqlRunner): Promise<Row[]> => {
   const aliasGroups = await runQuery(buildAliasGroupsQuery(args));
-  if (aliasGroups.length > MAX_ALIAS_GROUPS) return runQuery(buildGroupSizeSortQuery(args));
+  if (aliasGroups.length > getMaxAliasGroups(args.pageSize)) {
+    return runQuery(buildGroupSizeSortQuery(args));
+  }
   const aliasGroupIds = new Set(getEntityIds(aliasGroups));
 
   // KQL can't run after the join in the alias groups query: check their targets separately.

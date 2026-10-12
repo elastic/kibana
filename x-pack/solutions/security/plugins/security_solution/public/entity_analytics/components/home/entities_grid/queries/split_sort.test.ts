@@ -6,8 +6,10 @@
  */
 
 import type { QueryArgs, Row } from '../common';
+import { ESQL_MAX_RESULT_ROWS } from './esql';
 import {
   SPLIT_SORT_MIN_VIEW_SIZE,
+  buildEntityListSortPlan,
   buildEmptyRowsQuery,
   buildValueCursorClause,
   fetchSplitSortPage,
@@ -196,5 +198,39 @@ describe('buildEmptyRowsQuery', () => {
     expect(query).toContain('| SORT entity.id ASC\n| LIMIT 11');
     expect(query).toContain('| EVAL alert_count = TO_LONG(0)');
     expect(query).not.toContain('LOOKUP JOIN');
+  });
+});
+
+describe('buildEntityListSortPlan', () => {
+  const plan = buildEntityListSortPlan({
+    sortField: 'alert_count',
+    emptyValue: 0,
+    buildForeignRows: () => ['FROM alerts'],
+    buildSortQuery: () => 'general',
+    aggregations: ['alert_count = COUNT(*)'],
+    columns: ['alert_count'],
+    emptyColumns: 'alert_count = 0',
+  });
+  const ids = (count: number): Row[] =>
+    Array.from({ length: count }, (_, i) => ({ 'entity.id': `host:${i}` }));
+  /** Answers the value ids query with `valueIds` and records every query and its LIMIT. */
+  const recordingRunner = (valueIds: Row[]) => {
+    const limits: number[] = [];
+    const runQuery = async (query: string): Promise<Row[]> => {
+      limits.push(Number(query.match(/LIMIT (\d+)\s*$/m)?.[1]));
+      return query.includes('NOT entity.id IN') ? [row('empty', 0)] : valueIds;
+    };
+    return { runQuery, limits };
+  };
+
+  it('excludes the value ids from the empty rows', async () => {
+    const { runQuery } = recordingRunner(ids(2));
+    expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toEqual([row('empty', 0)]);
+  });
+
+  it('gives up when ES|QL returns as many value ids as it can', async () => {
+    const { runQuery, limits } = recordingRunner(ids(ESQL_MAX_RESULT_ROWS));
+    expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toBeNull();
+    expect(Math.max(...limits)).toBeLessThanOrEqual(ESQL_MAX_RESULT_ROWS);
   });
 });

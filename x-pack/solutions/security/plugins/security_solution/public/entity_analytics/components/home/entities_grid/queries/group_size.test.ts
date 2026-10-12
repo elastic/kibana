@@ -7,6 +7,7 @@
 
 import type { QueryArgs, Row } from '../common';
 import { groupSizeQuerySpec } from './group_size';
+import { ESQL_MAX_RESULT_ROWS } from './esql';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from './split_sort';
 
 const LARGE_VIEW = SPLIT_SORT_MIN_VIEW_SIZE;
@@ -110,7 +111,7 @@ describe('group size sort page', () => {
 
   it('keeps the groups with aliases whose target a broad search matches', async () => {
     const { runQuery, kinds } = fakeRunner([group('t', 3), group('u', 2)], [single('a')], {
-      targets: Array.from({ length: 10_001 }, (_, i) => ({ 'entity.id': `e${i}` })),
+      targets: Array.from({ length: ESQL_MAX_RESULT_ROWS }, (_, i) => ({ 'entity.id': `e${i}` })),
       searched: [{ 'entity.id': 'u' }],
     });
     const rows = await runPage({ ...baseArgs, searchExpression: SEARCH }, runQuery);
@@ -176,16 +177,37 @@ describe('group size sort page', () => {
     expect(kinds).not.toContain('singles');
   });
 
+  it('asks for no more rows than ES|QL returns', async () => {
+    const limits: number[] = [];
+    const { runQuery } = fakeRunner([group('t', 2)], [single('a')], { targets: [single('a')] });
+    const record = async (query: string) => {
+      limits.push(...[...query.matchAll(/LIMIT (\d+)/g)].map((m) => Number(m[1])));
+      return runQuery(query);
+    };
+    await runPage(baseArgs, record);
+    await runPage({ ...baseArgs, searchExpression: SEARCH }, record);
+    await runPage({ ...baseArgs, entityExpression: 'asset.criticality == "high_impact"' }, record);
+    // The small view query of entity filters, which reads the groups and a page of singles.
+    await runPage(
+      { ...baseArgs, entityExpression: 'asset.criticality == "high_impact"' },
+      record,
+      10
+    );
+    expect(Math.max(...limits)).toBeLessThanOrEqual(ESQL_MAX_RESULT_ROWS);
+  });
+
   it('runs the single query when there are too many groups with aliases', async () => {
-    const groups = Array.from({ length: 10_001 }, (_, i) => group(`g${i}`, 2));
+    const groups = Array.from({ length: ESQL_MAX_RESULT_ROWS }, (_, i) => group(`g${i}`, 2));
     const { runQuery, kinds } = fakeRunner(groups, []);
     await runPage(baseArgs, runQuery);
     expect(kinds).toEqual(['groups', 'general']);
   });
 
   it('keeps the search in the single query when a broad search meets too many groups', async () => {
-    const groups = Array.from({ length: 10_001 }, (_, i) => group(`g${i}`, 2));
-    const targets = Array.from({ length: 10_001 }, (_, i) => ({ 'entity.id': `t${i}` }));
+    const groups = Array.from({ length: ESQL_MAX_RESULT_ROWS }, (_, i) => group(`g${i}`, 2));
+    const targets = Array.from({ length: ESQL_MAX_RESULT_ROWS }, (_, i) => ({
+      'entity.id': `t${i}`,
+    }));
     const { runQuery } = fakeRunner(groups, [], { targets });
     const queries: string[] = [];
     await runPage({ ...baseArgs, searchExpression: SEARCH }, async (query) => {

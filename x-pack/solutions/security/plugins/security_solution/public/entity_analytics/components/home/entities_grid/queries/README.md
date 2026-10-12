@@ -91,10 +91,13 @@ not their values: a row keeps the size of its whole group, so it can still be ex
 
 ## When a plan can't be used
 
+ES|QL returns at most `ESQL_MAX_RESULT_ROWS` (10,000) rows whatever the `LIMIT`, so each limit
+below is one less than what its query can return: the extra row tells that there are more.
+
 | When | What happens |
 |---|---|
 | More than `MAX_VALUE_ROWS` entities have a value | the split sort can't list them in one query, so the small view query runs |
-| More than `MAX_ALIAS_GROUPS` groups have aliases | Records runs its small view query |
+| More than `getMaxAliasGroups(pageSize)` groups have aliases | Records runs its small view query |
 | More than `MAX_DIRECT_TARGETS` entities match a Records search | Records uses the groups and single entities plan |
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | The count fails | the view counts as small, so the small view queries run |

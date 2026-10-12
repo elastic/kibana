@@ -1078,7 +1078,7 @@ exports[`entities grid query builders sort by group_size builds the sort query w
   | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
   | EVAL group_size = TO_LONG(1)
   | SORT \`entity.id\` ASC
-  | LIMIT 10026
+  | LIMIT 10000
   | KEEP \`entity.id\`, group_size
 )
 | STATS group_size = MAX(group_size) BY \`entity.id\`
@@ -1096,7 +1096,7 @@ exports[`entities grid query builders sort by group_size builds the sort query w
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP \`entity.id\`
-| LIMIT 10001"
+| LIMIT 10000"
 `;
 
 exports[`entities grid query builders sort by last_seen_alert builds the sort query 1`] = `
@@ -1670,7 +1670,7 @@ Array [
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1754,7 +1754,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1838,7 +1838,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2063,7 +2063,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2276,7 +2276,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2347,7 +2347,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2476,7 +2476,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2604,7 +2604,7 @@ TRUE, _euid_branch_1_formula, NULL))
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2701,7 +2701,7 @@ Array [
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | EVAL group_size = alias_count + 1
 | KEEP \`entity.id\`, group_size
-| LIMIT 10001",
+| LIMIT 9975",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2726,7 +2726,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL group_size = alias_count + 1
 | KEEP \`entity.id\`, group_size
-| LIMIT 10001",
+| LIMIT 9975",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2748,7 +2748,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL group_size = alias_count + 1
 | KEEP \`entity.id\`, group_size
-| LIMIT 10001",
+| LIMIT 9975",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2772,7 +2772,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL group_size = alias_count + 1
 | KEEP \`entity.id\`, group_size
-| LIMIT 10001",
+| LIMIT 9975",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -2793,7 +2793,7 @@ Array [
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE KQL(\\"\\"\\"entity.name: host-001-payments-db\\"\\"\\")
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IN (\\"host:h-1\\") OR (entity.id IN (\\"host:h-1\\") AND entity.relationships.resolution.resolved_to IS NULL)
@@ -2952,7 +2952,7 @@ Array [
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -3036,7 +3036,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -3191,7 +3191,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -3345,7 +3345,7 @@ Array [
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
 | KEEP \`entity.id\`
-| LIMIT 10001",
+| LIMIT 10000",
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
