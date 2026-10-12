@@ -39,6 +39,56 @@ describe('security issues', () => {
         .withInput({ constructor: { name: 'here we go' } })
         .toCompileTo('here we go');
     });
+
+    it('should not allow constructors to be accessed through prototype objects', () => {
+      expectTemplate('{{lookup (lookup fn "__proto__") "constructor"}}')
+        .withInput({ fn() {} })
+        .toCompileTo('');
+
+      // `Function.prototype.constructor` is an "own property" of the prototype object, but must still be denied
+      expectTemplate('{{lookup proto "constructor"}}')
+        .withInput({ proto: Function.prototype })
+        .toCompileTo('');
+    });
+
+    it('should allow own "constructor" data that is not a function', () => {
+      // Data whose "prototype" points back to its parent is not a constructor.
+      const data: any = {};
+      data.constructor = { name: 'cyclic', prototype: data };
+      expectTemplate('{{constructor.name}}').withInput(data).toCompileTo('cyclic');
+
+      // The "prototype" of data that is not a function is never read.
+      const guarded: any = {};
+      Object.defineProperty(guarded, 'prototype', {
+        get() {
+          throw new Error('prototype was read');
+        },
+      });
+      guarded.name = 'guarded';
+      expectTemplate('{{constructor.name}}')
+        .withInput({ constructor: guarded })
+        .toCompileTo('guarded');
+    });
+  });
+
+  describe('partials', () => {
+    // An AST-shaped object is data, not a template, and must never be compiled
+    const payload = {
+      type: 'Program',
+      body: [{ type: 'ContentStatement', value: 'rendered', original: 'rendered' }],
+    };
+
+    it('should not compile data objects passed via dynamic partial lookup', () => {
+      expectTemplate('{{> (lookup . "payload")}}')
+        .withInput({ payload: { ...payload, call: 1 } })
+        .toThrow(/could not be found/);
+    });
+
+    it('should not compile AST-shaped objects registered as partials', () => {
+      expectTemplate('{{> payload}}')
+        .withPartials({ payload: payload as any })
+        .toThrow(/must be strings or functions/);
+    });
   });
 
   describe('GH-1558: Prevent explicit call of helperMissing-helpers', () => {
