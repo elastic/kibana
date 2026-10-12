@@ -32,7 +32,10 @@ const SPACE_ID = 'default';
 // resolution: on a cluster with no matching index the query fails to resolve and
 // the preview reports `succeeded: false`, so relying on `logs-*` would make this
 // suite's happy path depend on unrelated suites or deployment data.
-const SOURCE_INDEX = 'alertzero-preview-source';
+// The name is suffixed with the Playwright worker index
+// (TEST_PARALLEL_INDEX, set per worker process) so concurrent runs against
+// the same Scout server each own — and only delete — their own index.
+const SOURCE_INDEX = `alertzero-preview-source-${process.env.TEST_PARALLEL_INDEX ?? '0'}`;
 
 const installedWorkflowId = (definitionId: string) => `${definitionId}-${SPACE_ID}`;
 
@@ -104,7 +107,31 @@ apiTest.describe(
       });
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
+    apiTest.afterAll(async ({ esClient, apiClient, samlAuth }) => {
+      // The Continuous Threat Hunt test enables the Worker (a persistent
+      // install-side effect in the shared default space); managed workflows
+      // cannot be deleted, so restore the prior state by disabling it. Runs
+      // even when that test failed midway, which is why the PATCH tolerates a
+      // worker the catalog no longer lists.
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const internalHeaders = { ...cookieHeader, ...testData.INTERNAL_COMMON_HEADERS };
+      const catalogResponse = await apiClient.get('internal/alertzero/workers', {
+        headers: internalHeaders,
+        responseType: 'json',
+      });
+      if (catalogResponse.statusCode === 200) {
+        const workerIds = (
+          (catalogResponse.body as { workers?: Array<{ id: string }> }).workers ?? []
+        ).map((worker) => worker.id);
+        const workerId = CTH_WORKER_IDS.find((id) => workerIds.includes(id));
+        if (workerId) {
+          await apiClient.patch(`internal/alertzero/workers/${workerId}`, {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: { enabled: false },
+          });
+        }
+      }
       await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
     });
 
