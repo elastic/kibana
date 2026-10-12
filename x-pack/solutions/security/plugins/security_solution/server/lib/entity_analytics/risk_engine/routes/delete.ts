@@ -15,6 +15,22 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
 import { deleteSavedObjects } from '../utils/saved_object_configuration';
 
+const isMissingResourceError = (error: unknown): boolean => {
+  if (typeof error !== 'object' || error == null) {
+    return false;
+  }
+  const statusCode = (error as { meta?: { statusCode?: number } }).meta?.statusCode;
+  if (statusCode === 404) {
+    return true;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return (
+    message.includes('resource_not_found_exception') ||
+    message.includes('index_not_found_exception') ||
+    message.includes('not_found')
+  );
+};
+
 export const riskEngineCleanupRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
@@ -41,6 +57,9 @@ export const riskEngineCleanupRoute = (
           const esClient = core.elasticsearch.client.asInternalUser;
           const errors: Error[] = [];
           const addError = (error: unknown) => {
+            if (isMissingResourceError(error)) {
+              return;
+            }
             errors.push(error instanceof Error ? error : new Error(String(error)));
           };
 
