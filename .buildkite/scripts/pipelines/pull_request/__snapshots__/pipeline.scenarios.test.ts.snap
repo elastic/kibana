@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`pull_request pipeline scenarios agent builder path 1`] = `
 [
@@ -243,7 +243,8 @@ exports[`pull_request pipeline scenarios all ui test suites 1`] = `
   "cloud-security-posture",
   "cloud-security-posture-serverless",
   "cspm-agentless-scout",
-  "scout-edr-real-fleet",
+  "scout-edr-real-fleet-ech",
+  "scout-edr-real-fleet-serverless",
   "group:Security Solution Gen AI",
   "> security-solution-gen-ai-evaluations",
   "asset-inventory",
@@ -683,7 +684,8 @@ exports[`pull_request pipeline scenarios edr real fleet path 1`] = `
   "check_api_contracts",
   "defend-workflows",
   "defend-workflows-serverless",
-  "scout-edr-real-fleet",
+  "scout-edr-real-fleet-ech",
+  "scout-edr-real-fleet-serverless",
   "check_saved_objects",
   "warm_start_memory_bench",
   "wait",
@@ -1142,7 +1144,8 @@ exports[`pull_request pipeline scenarios scout edr label 1`] = `
   "check",
   "check_oas_snapshot",
   "check_api_contracts",
-  "scout-edr-real-fleet",
+  "scout-edr-real-fleet-ech",
+  "scout-edr-real-fleet-serverless",
   "check_saved_objects",
   "warm_start_memory_bench",
   "wait",
