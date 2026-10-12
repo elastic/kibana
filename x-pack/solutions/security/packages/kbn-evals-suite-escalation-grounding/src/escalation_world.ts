@@ -267,7 +267,7 @@ export const waitForSettledSummary = async (
       throw new EscalationWorldSetupError(
         hasSummary
           ? `Escalation ${escalationId} summary did not settle after ${timeoutMs}ms (${summaryDiagnostics.unfinishedRuns} summary run(s) in flight); refusing to score a possibly partial summary`
-          : `Escalation ${escalationId} has no metadata.summary after ${timeoutMs}ms; is the investigation-summary workflow enabled?`
+          : `Escalation ${escalationId} has no metadata.summary after ${timeoutMs}ms; is the investigation-summary workflow enabled and the securitySolution:enableAlertZero uiSetting on in this space?`
       );
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));

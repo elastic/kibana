@@ -51,7 +51,11 @@ import { escalationCases, validateCases } from '../src/dataset';
 import { runEscalationCase, SUMMARY_WORKFLOW_ID, withSpace } from '../src/escalation_world';
 import { overrideInferenceFeature, SUMMARY_INFERENCE_FEATURE_ID } from '../src/inference_override';
 import { assertJudgeIsolation } from '../src/judge';
-import { ensureWorkflowEnabled } from '../src/summary_workflow';
+import {
+  ALERTZERO_ENABLED_SETTING_ID,
+  ensureAlertZeroEnabled,
+  ensureWorkflowEnabled,
+} from '../src/summary_workflow';
 import type { EscalationCase } from '../src/types';
 import {
   chatKeyMentionRecall,
@@ -93,6 +97,7 @@ evaluate.describe(
     // under test for the run so summary metrics are per-model, then restore it.
     let restoreInferenceSettings: (() => Promise<void>) | undefined;
     let restoreWorkflow: (() => Promise<void>) | undefined;
+    let restoreAlertZeroSetting: (() => Promise<void>) | undefined;
 
     evaluate.beforeAll(
       async ({
@@ -110,6 +115,9 @@ evaluate.describe(
         const fetch = withSpace(baseFetch, SPACE_ID);
         // The shipped workflow is disabled; without it no summary is ever written.
         restoreWorkflow = await ensureWorkflowEnabled(fetch, SUMMARY_WORKFLOW_ID);
+        // Agent Builder only emits ai.conversation.updated while this opt-in setting is on;
+        // without it the workflow above never triggers.
+        restoreAlertZeroSetting = await ensureAlertZeroEnabled(fetch);
         restoreInferenceSettings = await overrideInferenceFeature({
           fetch,
           featureId: SUMMARY_INFERENCE_FEATURE_ID,
@@ -125,6 +133,9 @@ evaluate.describe(
       );
       await restoreWorkflow?.().catch((error: Error) =>
         log.warning(`Could not restore ${SUMMARY_WORKFLOW_ID}: ${error.message}`)
+      );
+      await restoreAlertZeroSetting?.().catch((error: Error) =>
+        log.warning(`Could not restore ${ALERTZERO_ENABLED_SETTING_ID}: ${error.message}`)
       );
     });
 
