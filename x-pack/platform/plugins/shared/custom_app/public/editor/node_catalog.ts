@@ -85,6 +85,17 @@ const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
     group: 'data',
     isContainer: false,
   },
+  custom_content: {
+    label: i18n.translate('xpack.customApp.catalog.customContent.label', {
+      defaultMessage: 'Custom content',
+    }),
+    description: i18n.translate('xpack.customApp.catalog.customContent.description', {
+      defaultMessage: 'Your own HTML layout, filled with the rows of a query.',
+    }),
+    iconType: 'code',
+    group: 'data',
+    isContainer: false,
+  },
   table: {
     label: i18n.translate('xpack.customApp.catalog.table.label', { defaultMessage: 'Table' }),
     description: i18n.translate('xpack.customApp.catalog.table.description', {

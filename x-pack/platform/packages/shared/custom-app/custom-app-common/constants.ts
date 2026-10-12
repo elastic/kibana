@@ -17,6 +17,10 @@ export const MAX_CHILDREN_PER_NODE = 50;
 export const MAX_HEADING_LENGTH = 200;
 export const MAX_TEXT_LENGTH = 5_000;
 export const MAX_QUERY_LENGTH = 10_000;
+/** A template is markup with Liquid in it; a generated one is a few thousand characters. */
+export const MAX_TEMPLATE_LENGTH = 40_000;
+/** What a template is generated from: an instruction, not a description of the result. */
+export const MAX_PROMPT_LENGTH = 10_000;
 export const MAX_STATE_KEYS = 20;
 export const MAX_STATE_KEY_LENGTH = 64;
 export const MAX_STATE_STRING_LENGTH = 1_000;

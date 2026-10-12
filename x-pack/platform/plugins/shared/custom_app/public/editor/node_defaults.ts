@@ -11,6 +11,22 @@ import type { AppNode, AppNodeType } from '@kbn/custom-app-common';
 /** The query a new data component starts with: it needs no index, so it runs on any cluster. */
 export const DEFAULT_QUERY = 'ROW value = 1';
 
+/**
+ * What a new custom content component shows: the first row of its query, as a labelled value. It
+ * is written with the design tokens the frame provides, so it looks like the rest of the app.
+ */
+const STARTER_TEMPLATE = `<style>
+  body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); }
+  .label { font-size: 0.75rem; }
+  .value { font-size: 1.5rem; font-weight: 600; }
+</style>
+{% for row in rows limit: 1 %}
+  {% for column in row %}
+    <div class="label">{{ column[0] }}</div>
+    <div class="value">{{ column[1].value }}</div>
+  {% endfor %}
+{% endfor %}`;
+
 /** What the editor can offer a new node to connect to. */
 export interface DefaultsContext {
   /** The name of the value a new input sets, which the editor declares for it. */
@@ -67,6 +83,8 @@ export const createDefaultNode = (
       };
     case 'chart':
       return { type, id, query: DEFAULT_QUERY };
+    case 'custom_content':
+      return { type, id, query: DEFAULT_QUERY, template: STARTER_TEMPLATE };
     case 'table':
       return { type, id, query: DEFAULT_QUERY, onRowClick: [] };
     case 'key_value':

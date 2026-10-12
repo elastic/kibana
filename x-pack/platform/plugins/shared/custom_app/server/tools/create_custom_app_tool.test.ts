@@ -12,6 +12,11 @@ import { customAppCreateSchema } from '../../common/create_app_schema';
 import { createCreateCustomAppTool } from './create_custom_app_tool';
 import { CREATE_CUSTOM_APP_TOOL_ID } from './update_custom_app_tool';
 
+const mockResolver = jest.fn();
+jest.mock('@kbn/custom-content-server', () => ({
+  createCustomContentTemplateResolver: () => mockResolver,
+}));
+
 const call = async (
   input: unknown,
   add = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 })
@@ -72,5 +77,53 @@ describe('the create custom app tool', () => {
 
     expect(result.type).toBe(ToolResultType.error);
     expect(JSON.stringify(result.data)).toContain('boom');
+  });
+
+  describe('with custom content', () => {
+    const withBoard = (board: Record<string, unknown>) => ({
+      document: {
+        state: {},
+        root: { type: 'custom_content', id: 'board', query: 'ROW value = 1', ...board },
+      },
+    });
+
+    beforeEach(() =>
+      mockResolver.mockReset().mockResolvedValue({ template: '<p>ok</p>', height: 300 })
+    );
+
+    it('has the server write the template from the prompt, and saves the result without the prompt', async () => {
+      const { result, add } = await call(withBoard({ prompt: 'A status board' }));
+
+      expect(mockResolver).toHaveBeenCalledWith(
+        expect.objectContaining({ prompt: 'A status board' })
+      );
+      expect(result.type).toBe(ToolResultType.other);
+      expect(add.mock.calls[0][0].data.document.root).toEqual({
+        type: 'custom_content',
+        id: 'board',
+        query: 'ROW value = 1',
+        template: '<p>ok</p>',
+        height: 300,
+      });
+    });
+
+    it('asks for a prompt when a component has neither a prompt nor a template', async () => {
+      const { result, add } = await call(withBoard({}));
+
+      expect(result.type).toBe(ToolResultType.error);
+      expect(JSON.stringify(result.data)).toContain('describe what it should show');
+      expect(add).not.toHaveBeenCalled();
+    });
+
+    it('reports a template that could not be written, and saves nothing', async () => {
+      mockResolver.mockRejectedValue(new Error('model unavailable'));
+      const { result, add } = await call(withBoard({ prompt: 'A board' }));
+
+      expect(result.type).toBe(ToolResultType.error);
+      expect(JSON.stringify(result.data)).toContain('template of');
+      expect(JSON.stringify(result.data)).toContain('board');
+      expect(JSON.stringify(result.data)).toContain('model unavailable');
+      expect(add).not.toHaveBeenCalled();
+    });
   });
 });

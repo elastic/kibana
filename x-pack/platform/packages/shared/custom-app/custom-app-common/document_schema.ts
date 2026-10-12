@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
 import {
   CUSTOM_APP_STATE_VERSION,
   MAX_ACTIONS_PER_EVENT,
@@ -15,10 +16,12 @@ import {
   MAX_HEADING_LENGTH,
   MAX_KEY_VALUE_FIELDS,
   MAX_NODE_ID_LENGTH,
+  MAX_PROMPT_LENGTH,
   MAX_QUERY_LENGTH,
   MAX_STATE_KEY_LENGTH,
   MAX_STATE_STRING_LENGTH,
   MAX_TABLE_COLUMNS,
+  MAX_TEMPLATE_LENGTH,
   MAX_TEXT_LENGTH,
   RESERVED_STATE_KEYS,
 } from './constants';
@@ -117,6 +120,23 @@ const chartNodeSchema = z.object({
   chartType: z.enum(CHART_TYPES).optional(),
 });
 
+/**
+ * HTML with Liquid in it, filled with the rows of the query and shown in a sandbox, as in a custom
+ * content panel. `template` is optional here, and `prompt` exists, only so that an agent can ask
+ * for a template to be written: whoever receives the document turns the prompt into the template
+ * and drops it, and a document that is saved always has a template.
+ */
+const customContentNodeSchema = z.object({
+  type: z.literal('custom_content'),
+  id: nodeIdSchema,
+  /** Without a query the template is shown as it is. */
+  query: querySchema.optional(),
+  template: z.string().max(MAX_TEMPLATE_LENGTH).optional(),
+  /** The template is shown in a frame that cannot measure it, so it says how tall it needs to be. */
+  height: z.number().int().min(CUSTOM_CONTENT_MIN_HEIGHT).max(CUSTOM_CONTENT_MAX_HEIGHT).optional(),
+  prompt: z.string().min(1).max(MAX_PROMPT_LENGTH).optional(),
+});
+
 const tableNodeSchema = z.object({
   type: z.literal('table'),
   id: nodeIdSchema,
@@ -196,6 +216,7 @@ type LeafNode =
   | z.output<typeof calloutNodeSchema>
   | z.output<typeof statNodeSchema>
   | z.output<typeof chartNodeSchema>
+  | z.output<typeof customContentNodeSchema>
   | z.output<typeof tableNodeSchema>
   | z.output<typeof keyValueNodeSchema>
   | z.output<typeof selectNodeSchema>
@@ -234,6 +255,7 @@ export const nodeSchema = z.discriminatedUnion('type', [
   calloutNodeSchema,
   statNodeSchema,
   chartNodeSchema,
+  customContentNodeSchema,
   tableNodeSchema,
   keyValueNodeSchema,
   selectNodeSchema,

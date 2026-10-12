@@ -12,6 +12,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -30,9 +31,11 @@ import {
 } from '@kbn/custom-app-common';
 import { getCatalogEntry } from './node_catalog';
 import { InterpolatedTextField, SelectField, TextField } from './fields/fields';
+import { DEFAULT_QUERY } from './node_defaults';
 import { ColumnsEditor, OptionsEditor } from './fields/list_editors';
 import { QueryField } from './fields/query_field';
 import { RowClickEditor } from './fields/row_click_editor';
+import { TemplateField } from './fields/template_field';
 import { Section } from './fields/section';
 
 export type UpdateNode = <T extends AppNodeType>(
@@ -98,6 +101,9 @@ const sections = {
   options: i18n.translate('xpack.customApp.editor.sectionOptions', { defaultMessage: 'Options' }),
   value: i18n.translate('xpack.customApp.editor.sectionValue', {
     defaultMessage: 'What it sets',
+  }),
+  template: i18n.translate('xpack.customApp.editor.sectionTemplate', {
+    defaultMessage: 'Template',
   }),
   layout: i18n.translate('xpack.customApp.editor.sectionLayout', { defaultMessage: 'Layout' }),
 };
@@ -289,6 +295,40 @@ export const PropertiesPanel = ({
                 state={document.state}
                 onChange={(query) => onChange<'chart'>({ query })}
               />
+            </Section>
+          </Sections>
+        );
+      case 'custom_content':
+        return (
+          <Sections>
+            <Section title={sections.template}>
+              <TemplateField
+                value={node.template ?? ''}
+                onChange={(template) => onChange<'custom_content'>({ template })}
+              />
+            </Section>
+            <Section title={sections.data}>
+              <EuiSwitch
+                label={i18n.translate('xpack.customApp.editor.fillWithData', {
+                  defaultMessage: 'Fill the template with the rows of a query',
+                })}
+                checked={node.query !== undefined}
+                onChange={(event) =>
+                  onChange<'custom_content'>({
+                    query: event.target.checked ? DEFAULT_QUERY : undefined,
+                  })
+                }
+              />
+              {node.query !== undefined && (
+                <>
+                  <EuiSpacer size="s" />
+                  <QueryField
+                    query={node.query}
+                    state={document.state}
+                    onChange={(query) => onChange<'custom_content'>({ query })}
+                  />
+                </>
+              )}
             </Section>
           </Sections>
         );

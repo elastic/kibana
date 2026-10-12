@@ -19,6 +19,18 @@ import {
 import { PropertiesPanel } from './properties_panel';
 
 jest.mock('@kbn/esql/public', () => jest.requireActual('./fields/esql_editor.mock'));
+// The template editor is a Monaco editor, which cannot run under Jest.
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({
+    value,
+    onChange,
+    'aria-label': label,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    'aria-label': string;
+  }) => <textarea aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} />,
+}));
 
 const initial = (): AppDocument =>
   appDocumentSchema.parse({
@@ -34,6 +46,13 @@ const initial = (): AppDocument =>
         { type: 'text', id: 'intro', text: 'Intro' },
         { type: 'callout', id: 'note', title: 'Note', text: 'Body', color: 'primary' },
         { type: 'stat', id: 'stat', title: 'Users', query: 'ROW users = 1' },
+        {
+          type: 'chart',
+          id: 'trend',
+          query: 'FROM logs | STATS c = COUNT(*) BY d = DATE_TRUNC(1 hour, @timestamp)',
+        },
+        { type: 'custom_content', id: 'board', query: 'FROM status', template: '<b>hi</b>' },
+        { type: 'custom_content', id: 'note-board', template: '<p>static</p>', height: 400 },
         { type: 'table', id: 'table', query: 'FROM rows', caption: 'Rows' },
         { type: 'key_value', id: 'facts', query: 'FROM detail', fields: ['a', 'b'] },
         {
@@ -158,6 +177,58 @@ describe('PropertiesPanel', () => {
 
       // It shows the first column; a query that wants another can KEEP it.
       expect(screen.queryByLabelText('Column')).not.toBeInTheDocument();
+    });
+
+    it('edits a chart: its heading, its type and its query', async () => {
+      const { onChange } = setup('trend');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Title' }), 'T');
+      expect(onChange).toHaveBeenLastCalledWith({ title: 'T' });
+
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Chart type' }), 'line');
+      expect(onChange).toHaveBeenLastCalledWith({ chartType: 'line' });
+
+      await userEvent.type(screen.getByLabelText('ES|QL query editor'), ' ');
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ query: expect.any(String) })
+      );
+    });
+
+    it('lets a chart go back to the type Lens suggests', async () => {
+      const { onChange } = setup('trend');
+
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Chart type' }), 'bar');
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Chart type' }), 'auto');
+
+      expect(onChange).toHaveBeenLastCalledWith({ chartType: undefined });
+    });
+
+    it('edits the template of custom content, in a code editor', async () => {
+      const { onChange } = setup('board');
+
+      expect(screen.getByLabelText('Template editor')).toHaveValue('<b>hi</b>');
+      await userEvent.type(screen.getByLabelText('Template editor'), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ template: '<b>hi</b>!' });
+    });
+
+    it('lets custom content use a query or not, and has no say in how tall it is', async () => {
+      const { onChange } = setup('note-board');
+
+      expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
+      expect(screen.queryByRole('spinbutton', { name: 'Height' })).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch'));
+      expect(onChange).toHaveBeenLastCalledWith({ query: 'ROW value = 1' });
+    });
+
+    it('lets custom content that has a query drop it', async () => {
+      const { onChange } = setup('board');
+
+      expect(screen.getByLabelText('ES|QL query editor')).toHaveValue('FROM status');
+      await userEvent.click(screen.getByRole('switch'));
+
+      expect(onChange).toHaveBeenLastCalledWith({ query: undefined });
     });
 
     it('edits the query of a table', async () => {

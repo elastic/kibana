@@ -10,12 +10,14 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { getDocumentIssues } from '@kbn/custom-app-common';
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
   type CustomAppContextAttachmentData,
 } from '../../common/app_context_attachment';
 import { CUSTOM_APP_AUTHORING_GUIDE } from '../../common/authoring_guide';
 import { customAppCreateSchema } from '../../common/create_app_schema';
+import { resolveCustomContent } from './resolve_custom_content';
 import { CREATE_CUSTOM_APP_TOOL_ID, UPDATE_CUSTOM_APP_TOOL_ID } from './update_custom_app_tool';
 
 const error = (message: string) => ({
@@ -48,11 +50,21 @@ Pass the COMPLETE \`document\`. Check every ES|QL query and its fields with the 
 
 If the document has problems, this returns them one by one, each naming the component it is about. Fix every one and call the tool again.
 
-On success this returns \`attachment_id\` and \`version\`. You MUST render the app inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\`. To change the app later, call ${UPDATE_CUSTOM_APP_TOOL_ID} with that \`attachment_id\`.
+On success this returns \`attachment_id\` and \`version\`. You MUST render the app inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\`. To change the app later, call ${UPDATE_CUSTOM_APP_TOOL_ID} with that \`attachment_id\`. To put it on a dashboard that is attached to this conversation, use the dashboard generation tool with \`source: "config"\`, \`type: "custom_app"\` and \`config: { title, document }\`, passing this document unchanged; if no dashboard is attached, tell the user to choose "Save to dashboard" on the app's card.
 
 ${CUSTOM_APP_AUTHORING_GUIDE}`,
   schema: customAppCreateSchema,
-  handler: async ({ title, document }, { attachments, logger }) => {
+  handler: async (
+    { title, document: requested },
+    { attachments, logger, modelProvider, esClient }
+  ) => {
+    const resolved = await resolveCustomContent(
+      requested,
+      createCustomContentTemplateResolver({ modelProvider, esClient, logger })
+    );
+    if ('error' in resolved) return error(resolved.error);
+    const { document } = resolved;
+
     const issues = getDocumentIssues(document);
     if (issues.length > 0) {
       return error(

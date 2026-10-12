@@ -14,6 +14,8 @@ import type { SourceData, SourceState } from '../data/data_layer';
 interface DataStateProps {
   state: SourceState;
   onRetry: () => void;
+  /** For a component that has something to say about no results itself, such as a template. */
+  handlesEmpty?: boolean;
   children: (data: SourceData) => ReactNode;
 }
 
@@ -21,7 +23,7 @@ interface DataStateProps {
  * The loading, error and empty states shared by every node that shows source data, so they
  * look and behave the same everywhere.
  */
-export const DataState = ({ state, onRetry, children }: DataStateProps) => {
+export const DataState = ({ state, onRetry, handlesEmpty = false, children }: DataStateProps) => {
   switch (state.status) {
     case 'loading':
       return <EuiSkeletonText lines={2} isLoading />;
@@ -46,7 +48,7 @@ export const DataState = ({ state, onRetry, children }: DataStateProps) => {
         </KbnDangerCallout>
       );
     case 'success':
-      return state.data.rows.length === 0 ? (
+      return state.data.rows.length === 0 && !handlesEmpty ? (
         <EuiText size="s" color="subdued">
           <p>
             {i18n.translate('xpack.customApp.dataState.empty', {

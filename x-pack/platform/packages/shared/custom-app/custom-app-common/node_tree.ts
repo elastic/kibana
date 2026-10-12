@@ -38,6 +38,7 @@ export const getInterpolatedText = (
 export const getNodeQuery = (node: AppNode): string | undefined =>
   node.type === 'stat' ||
   node.type === 'chart' ||
+  node.type === 'custom_content' ||
   node.type === 'table' ||
   node.type === 'key_value'
     ? node.query

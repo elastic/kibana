@@ -6,6 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '@kbn/custom-content-common';
 import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_STATE_KEYS } from './constants';
 import type { AppNode, StateDeclaration } from './document_schema';
 import { findStateReferences, hasMalformedReference } from './interpolation';
@@ -100,6 +101,20 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       } else if (declaration.type !== 'string') {
         issue(
           `Node "${node.id}" binds state key "${binding}" (${declaration.type}); an input needs a string key`,
+          node.id
+        );
+      }
+    }
+
+    if (node.type === 'custom_content') {
+      if (!node.template?.trim()) {
+        issue(
+          `Node "${node.id}" has no template; describe what it should show in its "prompt"`,
+          node.id
+        );
+      } else if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(node.template)) {
+        issue(
+          `Node "${node.id}" has a template with a script in it; it is shown with scripting off, so write it as plain HTML`,
           node.id
         );
       }

@@ -11,6 +11,7 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { getDocumentIssues } from '@kbn/custom-app-common';
+import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
   type CustomAppContextAttachmentData,
@@ -22,6 +23,7 @@ import {
   CUSTOM_APP_UPDATED_UI_EVENT,
   type CustomAppUpdatedUiEventData,
 } from '../../common/ui_events';
+import { resolveCustomContent } from './resolve_custom_content';
 
 export const UPDATE_CUSTOM_APP_TOOL_ID = 'custom_app_update_app';
 export const CREATE_CUSTOM_APP_TOOL_ID = 'custom_app_create_app';
@@ -63,8 +65,8 @@ On success this returns \`attachment_id\` and \`version\`. You MUST render the u
 ${CUSTOM_APP_AUTHORING_GUIDE}`,
   schema: customAppUpdateSchema,
   handler: async (
-    { embeddable_id: embeddableId, attachment_id: attachmentId, document },
-    { attachments, events, logger }
+    { embeddable_id: embeddableId, attachment_id: attachmentId, document: requested },
+    { attachments, events, logger, modelProvider, esClient }
   ) => {
     if (!embeddableId && !attachmentId) {
       return error('Pass either the embeddable_id or the attachment_id of the app to change.');
@@ -95,6 +97,13 @@ ${CUSTOM_APP_AUTHORING_GUIDE}`,
           : `No custom app is attached to this conversation. To make a new one, use ${CREATE_CUSTOM_APP_TOOL_ID}; to change one on a dashboard, ask the user to open its editor and choose "Generate with chat".`
       );
     }
+
+    const resolved = await resolveCustomContent(
+      requested,
+      createCustomContentTemplateResolver({ modelProvider, esClient, logger })
+    );
+    if ('error' in resolved) return error(resolved.error);
+    const { document } = resolved;
 
     const issues = getDocumentIssues(document);
     if (issues.length > 0) {

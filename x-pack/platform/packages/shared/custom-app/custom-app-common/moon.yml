@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/packages/shared/custom-app/custom-app-common
 dependsOn:
   - '@kbn/zod'
+  - '@kbn/custom-content-common'
 tags:
   - shared-common
   - package

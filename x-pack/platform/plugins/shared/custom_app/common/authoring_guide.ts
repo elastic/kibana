@@ -64,6 +64,7 @@ Components:
 - heading { text }, text { text }, callout { title, text?, color: "primary" | "success" | "warning" | "danger" }.
 - stat { title, query }: one number, the FIRST column of the FIRST row of its query.
 - chart { query, title?, chartType?: "bar" | "line" | "area" | "donut" }: a chart of its query. Leave chartType out and Lens picks the chart from the columns: for a time series return a date column then the numbers; for a breakdown return a category then a number. Name the columns in the query so the chart reads well.
+- custom_content { query?, prompt?, template?, height? }: your own HTML layout (a status board, KPI cards, a styled list) filled with the rows of its query. NEVER write the HTML yourself: put what you want in "prompt" and the server writes the template and its height, with the real columns of the query in front of it. To change an existing one, keep its "template" and "height" as they are and add a "prompt" with only the change; to keep it as it is, leave "prompt" out. Prefer stat, chart and table for what they cover; use this for what they cannot express.
 - table { query, columns?: [{ field, label? }], onRowClick: [] }: every row of its query, sortable and paged.
 - key_value { query, fields?: [column names] }: every row of its query (up to 25), each as a group of fields.
 - select { label, bind, options: [{ value, label? }] }, button_group { label, bind, options } (at most 10 options; a select takes up to 50), search { label, bind, placeholder? }: inputs that set a value.

@@ -49,6 +49,11 @@ const summarize = (node: AppNode): string => {
       return node.title;
     case 'chart':
       return node.title ?? node.query.split('\n')[0];
+    case 'custom_content':
+      return (
+        node.query?.split('\n')[0] ??
+        i18n.translate('xpack.customApp.editor.staticContent', { defaultMessage: 'Static content' })
+      );
     case 'select':
     case 'button_group':
     case 'search':
