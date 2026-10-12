@@ -1,11 +1,11 @@
 {
-  "sha1": "847ca857acd1ef04888766ba9d79e562e32a3aa4",
+  "sha1": "03cffcabf4fd7fd4cf492330da2e7c288edd240b",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "c6fe95d49438245-2840d6686a1b3ec",
+      "id": "c3b403d392b027e-2840d6686a1b3ec",
       "title": "Workflows Extensions - Event-Driven Trigger Definitions Approval should validate that registered event-driven trigger definitions match the workflows-eng approved catalog",
       "expectedStatus": "passed",
       "tags": [
