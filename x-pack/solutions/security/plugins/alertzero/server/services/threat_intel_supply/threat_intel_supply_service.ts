@@ -135,11 +135,14 @@ export class ThreatIntelSupplyService {
       return;
     }
 
-    // Resolved once, lazily, so ingest and enrich get the same answer and the space walk
-    // happens at most once.
-    let otherSpaceHunting: boolean | undefined;
+    // A positive answer is cached: once another space hunts, no global is undone. A negative
+    // answer is rechecked before every global write, because another space can finish
+    // enabling Hunt while an earlier undo is awaiting its update.
+    let otherSpaceHunting = false;
     const isOtherSpaceHunting = async (): Promise<boolean> => {
-      otherSpaceHunting ??= await this.isHuntEnabledInOtherSpace(spaceId);
+      if (!otherSpaceHunting) {
+        otherSpaceHunting = await this.isHuntEnabledInOtherSpace(spaceId);
+      }
       return otherSpaceHunting;
     };
 

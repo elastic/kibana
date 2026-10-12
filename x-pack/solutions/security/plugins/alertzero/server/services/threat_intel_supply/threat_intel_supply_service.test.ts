@@ -220,12 +220,21 @@ describe('ThreatIntelSupplyService', () => {
       expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
     });
 
-    it('checks the other spaces once when undoing both globals', async () => {
-      await ensureWithMissingAttribute();
-      const otherSpaceChecks = getWorkflowStatus.mock.calls.filter(
-        ([, options]) => options.workflowIdSuffix === SPACE_B
-      );
-      expect(otherSpaceChecks).toHaveLength(1);
+    it('leaves ingest on when another space enables Hunt during the enrich undo', async () => {
+      const defaultUpdate = updateWorkflow.getMockImplementation()!;
+      updateWorkflow.mockImplementation(async (id: string, patch: { enabled: boolean }) => {
+        const result = await defaultUpdate(id, patch);
+        if (id === THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID && patch.enabled === false) {
+          huntEnabledBySpace.set(SPACE_B, true);
+        }
+        return result;
+      });
+      try {
+        await ensureWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+      } finally {
+        updateWorkflow.mockImplementation(defaultUpdate);
+      }
     });
 
     describe('when an undo step fails', () => {
