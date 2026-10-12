@@ -7,42 +7,28 @@
 
 import type { SeriesType, XYVisualizationState } from '@kbn/lens-common';
 import type { LensAttributesV2 } from '../../v2';
-import { transformToV3LensItemAttributes } from './transforms';
+import { transformToV2LensSavedObjectFromV3, transformToV3LensItemAttributes } from './transforms';
+import type { LensSavedObjectV3 } from './types';
+
+interface XYAttributesOptions {
+  version?: 2 | 3;
+  seriesTypes?: SeriesType[];
+  areaFill?: XYVisualizationState['areaFill'];
+}
 
 const getXYAttributes = ({
   version = 2,
   seriesTypes = ['area'],
   areaFill,
-}: {
-  version?: 2 | 3;
-  seriesTypes?: SeriesType[];
-  areaFill?: XYVisualizationState['areaFill'];
-} = {}) =>
+}: XYAttributesOptions = {}) =>
   ({
-    title: 'XY chart',
     visualizationType: 'lnsXY',
     version,
-    references: [],
     state: {
-      datasourceStates: {},
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization: {
-        legend: { isVisible: true, position: 'bottom' },
-        preferredSeriesType: seriesTypes[0],
         layers: [
-          ...seriesTypes.map((seriesType, i) => ({
-            layerId: `layer-${i}`,
-            layerType: 'data',
-            seriesType,
-            accessors: ['y'],
-            xAccessor: 'x',
-          })),
-          {
-            layerId: 'reference-layer',
-            layerType: 'referenceLine',
-            accessors: ['ref'],
-          },
+          ...seriesTypes.map((seriesType) => ({ layerType: 'data', seriesType })),
+          { layerType: 'referenceLine' },
         ],
         ...(areaFill ? { areaFill } : {}),
       },
@@ -53,57 +39,52 @@ const getAreaFill = (attributes: { state?: unknown }) =>
   (attributes.state as { visualization: XYVisualizationState }).visualization.areaFill;
 
 describe('transformToV3LensItemAttributes', () => {
-  it.each<SeriesType>(['area', 'area_stacked', 'area_percentage_stacked'])(
-    'sets an unset areaFill to solid on v2 %s charts',
-    (seriesType) => {
-      const result = transformToV3LensItemAttributes(
-        getXYAttributes({ seriesTypes: [seriesType] })
-      );
-
-      expect(result.version).toBe(3);
-      expect(getAreaFill(result)).toBe('solid');
-    }
-  );
-
-  it('sets solid when only one of the layers is an area', () => {
-    const result = transformToV3LensItemAttributes(
-      getXYAttributes({ seriesTypes: ['bar', 'area'] })
-    );
-
-    expect(getAreaFill(result)).toBe('solid');
-  });
-
-  it.each(['solid', 'gradient'] as const)('keeps an explicit %s areaFill on v2 charts', (fill) => {
-    const result = transformToV3LensItemAttributes(getXYAttributes({ areaFill: fill }));
+  it.each<[string, XYAttributesOptions, XYVisualizationState['areaFill']]>([
+    ['pins unset areaFill to solid on area charts', { seriesTypes: ['area'] }, 'solid'],
+    ['keeps an explicit areaFill', { areaFill: 'gradient' }, 'gradient'],
+    ['leaves areaFill unset without area layers', { seriesTypes: ['bar', 'line'] }, undefined],
+  ])('%s', (_, options, expectedAreaFill) => {
+    const result = transformToV3LensItemAttributes(getXYAttributes(options));
 
     expect(result.version).toBe(3);
-    expect(getAreaFill(result)).toBe(fill);
-  });
-
-  it('does not set areaFill on v2 charts without area layers', () => {
-    const result = transformToV3LensItemAttributes(
-      getXYAttributes({ seriesTypes: ['bar', 'line'] })
-    );
-
-    expect(result.version).toBe(3);
-    expect(getAreaFill(result)).toBeUndefined();
+    expect(getAreaFill(result)).toBe(expectedAreaFill);
   });
 
   it('leaves v3 charts untouched', () => {
     const attributes = getXYAttributes({ version: 3 });
-    const result = transformToV3LensItemAttributes(attributes);
 
-    expect(result).toBe(attributes);
-    expect(getAreaFill(result)).toBeUndefined();
+    expect(transformToV3LensItemAttributes(attributes)).toBe(attributes);
   });
 
-  it('in non-XY charts, only bumps the version', () => {
-    const attributes = {
-      ...getXYAttributes(),
-      visualizationType: 'lnsMetric',
-    } as LensAttributesV2;
-    const result = transformToV3LensItemAttributes(attributes);
+  it('only bumps the version of non-XY charts', () => {
+    const attributes = { ...getXYAttributes(), visualizationType: 'lnsMetric' } as LensAttributesV2;
 
-    expect(result).toEqual({ ...attributes, version: 3 });
+    expect(transformToV3LensItemAttributes(attributes)).toEqual({ ...attributes, version: 3 });
+  });
+});
+
+describe('transformToV2LensSavedObjectFromV3', () => {
+  const getSavedObject = (options: XYAttributesOptions = {}) =>
+    ({
+      id: 'lens-1',
+      type: 'lens',
+      attributes: getXYAttributes({ version: 3, ...options }),
+    } as unknown as LensSavedObjectV3);
+
+  it.each<[string, XYAttributesOptions, XYVisualizationState['areaFill']]>([
+    ['pins unset areaFill to gradient on area charts', {}, 'gradient'],
+    ['keeps an explicit areaFill', { areaFill: 'solid' }, 'solid'],
+    ['leaves areaFill unset without area layers', { seriesTypes: ['bar', 'line'] }, undefined],
+  ])('%s', (_, options, expectedAreaFill) => {
+    const result = transformToV2LensSavedObjectFromV3(getSavedObject(options));
+
+    expect(result.attributes.version).toBe(2);
+    expect(getAreaFill(result.attributes)).toBe(expectedAreaFill);
+  });
+
+  it('leaves v2 saved objects untouched', () => {
+    const savedObject = getSavedObject({ version: 2 });
+
+    expect(transformToV2LensSavedObjectFromV3(savedObject)).toBe(savedObject);
   });
 });

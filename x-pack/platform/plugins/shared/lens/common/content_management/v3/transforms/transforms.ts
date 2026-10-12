@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { LENS_ITEM_VERSION_V3 } from '@kbn/lens-common/content_management/constants';
-import { convertToLegacyAreaFill } from './legacy_area_fill';
+import {
+  LENS_ITEM_VERSION_V2,
+  LENS_ITEM_VERSION_V3,
+} from '@kbn/lens-common/content_management/constants';
+import { convertAreaFillDefault } from './legacy_area_fill';
 import { increaseVersion } from './increase_version';
 import type { LensAttributesV2, LensSavedObjectV2 } from '../../v2';
 import type { LensAttributesV3, LensSavedObjectV3 } from './types';
@@ -25,7 +28,7 @@ export function transformToV3LensItemAttributes(
 ): LensAttributesV3 {
   if (attributes.version === LENS_ITEM_VERSION_V3) return attributes as LensAttributesV3;
 
-  return increaseVersion(convertToLegacyAreaFill(attributes));
+  return increaseVersion(convertAreaFillDefault(attributes, 'solid'));
 }
 
 /**
@@ -41,5 +44,26 @@ export function transformToV3LensSavedObject(
   return {
     ...so,
     attributes: transformToV3LensItemAttributes(so.attributes),
+  };
+}
+
+/**
+ * Transforms v3 Lens SO back to v2, so v3 items can be read where v2 is latest
+ *
+ * Includes:
+ * - Pin unset `areaFill` to gradient on area charts
+ * - Update version to v2
+ */
+export function transformToV2LensSavedObjectFromV3(
+  so: LensSavedObjectV2 | LensSavedObjectV3
+): LensSavedObjectV2 {
+  if (so.attributes.version !== LENS_ITEM_VERSION_V3) return so as LensSavedObjectV2;
+
+  return {
+    ...so,
+    attributes: {
+      ...convertAreaFillDefault(so.attributes, 'gradient'),
+      version: LENS_ITEM_VERSION_V2,
+    },
   };
 }

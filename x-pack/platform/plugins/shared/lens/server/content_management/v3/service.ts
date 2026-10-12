@@ -18,7 +18,9 @@ import {
   lensCMUpdateOptionsSchema,
 } from './schema';
 import type { LensAttributes, LensGetOut, LensSavedObject } from './types';
+import type { LensGetOut as LensGetOutV2, LensSavedObject as LensSavedObjectV2 } from '../v2/types';
 import {
+  transformToV2LensSavedObjectFromV3,
   transformToV3LensItemAttributes,
   transformToV3LensSavedObject,
 } from '../../../common/content_management/v3';
@@ -33,6 +35,12 @@ export const serviceDefinition = {
             ...result,
             item: transformToV3LensSavedObject(result.item),
           } satisfies LensGetOut;
+        },
+        down: (result: LensGetOut) => {
+          return {
+            ...result,
+            item: transformToV2LensSavedObjectFromV3(result.item),
+          } satisfies LensGetOutV2;
         },
       },
     },
@@ -85,6 +93,9 @@ export const serviceDefinition = {
         up: (item: LensSavedObject) => {
           // apply v3 transform per item, items may have different versions
           return transformToV3LensSavedObject(item);
+        },
+        down: (item: LensSavedObject): LensSavedObjectV2 => {
+          return transformToV2LensSavedObjectFromV3(item);
         },
       },
     },

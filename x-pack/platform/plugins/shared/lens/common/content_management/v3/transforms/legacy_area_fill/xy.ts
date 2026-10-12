@@ -15,10 +15,12 @@ const AREA_SERIES_TYPES: ReadonlySet<SeriesType> = new Set([
 ]);
 
 /**
- * Area charts saved before v3 had no `areaFill` and rendered solid, so pin them to solid
- * before the unset default changes to gradient.
+ * Writes out an explicit `areaFill` to the state if it is not already set, matching the version's default.
  */
-export function convertToLegacyAreaFillFn(state: XYVisualizationState): XYVisualizationState {
+export function convertAreaFillDefaultFn(
+  state: XYVisualizationState,
+  areaFill: NonNullable<XYVisualizationState['areaFill']>
+): XYVisualizationState {
   if (state.areaFill !== undefined) return state;
 
   const hasAreaLayer = state.layers.some(
@@ -27,5 +29,5 @@ export function convertToLegacyAreaFillFn(state: XYVisualizationState): XYVisual
 
   if (!hasAreaLayer) return state;
 
-  return { ...state, areaFill: 'solid' };
+  return { ...state, areaFill };
 }

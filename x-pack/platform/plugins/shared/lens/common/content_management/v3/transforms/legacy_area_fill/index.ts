@@ -6,26 +6,26 @@
  */
 
 import type { XYVisualizationState } from '@kbn/lens-common';
-import { LENS_ITEM_VERSION_V3 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributesV2 } from '../../../v2';
 import type { LensAttributesV3 } from '../types';
-import { convertToLegacyAreaFillFn } from './xy';
+import { convertAreaFillDefaultFn } from './xy';
 
-export function convertToLegacyAreaFill<T extends LensAttributesV2 | LensAttributesV3>(
-  attributes: T
+export function convertAreaFillDefault<T extends LensAttributesV2 | LensAttributesV3>(
+  attributes: T,
+  areaFill: NonNullable<XYVisualizationState['areaFill']>
 ): T {
-  if ((attributes.version ?? 0) >= LENS_ITEM_VERSION_V3) return attributes;
-
-  if (attributes.visualizationType === 'lnsXY' && attributes.state?.visualization) {
-    return {
-      ...attributes,
-      state: {
-        ...(attributes.state as Record<string, unknown>),
-        visualization: convertToLegacyAreaFillFn(
-          attributes.state.visualization as XYVisualizationState
-        ),
-      },
-    };
+  if (attributes.visualizationType !== 'lnsXY' || !attributes.state?.visualization) {
+    return attributes;
   }
-  return attributes;
+
+  return {
+    ...attributes,
+    state: {
+      ...(attributes.state as Record<string, unknown>),
+      visualization: convertAreaFillDefaultFn(
+        attributes.state.visualization as XYVisualizationState,
+        areaFill
+      ),
+    },
+  };
 }
