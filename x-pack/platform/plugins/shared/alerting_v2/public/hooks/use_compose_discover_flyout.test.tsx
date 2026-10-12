@@ -44,6 +44,16 @@ jest.mock('./use_create_action_policy_disabled_reason', () => ({
   useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
 }));
 
+const mockActionPolicyGetRedirectUrl = jest.fn(
+  ({ actionPolicyId }: { actionPolicyId: string }) =>
+    `/app/alerting_v2/action-policies/edit/${actionPolicyId}`
+);
+jest.mock('../application/locator_context', () => ({
+  useAlertingLocators: () => ({
+    actionPolicyLocators: { getRedirectUrl: mockActionPolicyGetRedirectUrl },
+  }),
+}));
+
 const mockNavigateToUrl = jest.fn();
 const mockAddWarning = jest.fn();
 
@@ -172,6 +182,21 @@ describe('useComposeDiscoverFlyout — action policy creation', () => {
       'createActionPolicyDisabledReason',
       disabledReason
     );
+  });
+
+  it('injects a host-aware action policy edit href builder into the rule form services', async () => {
+    await renderAndOpenCreate();
+
+    const services = capturedFlyoutProps.services as {
+      getActionPolicyEditHref: (id: string) => string;
+    };
+    expect(services.getActionPolicyEditHref('ap-1')).toBe(
+      '/app/alerting_v2/action-policies/edit/ap-1'
+    );
+    expect(mockActionPolicyGetRedirectUrl).toHaveBeenCalledWith({
+      page: 'edit',
+      actionPolicyId: 'ap-1',
+    });
   });
 });
 

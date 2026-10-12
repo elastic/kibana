@@ -1,0 +1,56 @@
+{
+  "sha1": "",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "ecb9dffb5199516-694d72184ba2607",
+      "title": "Overview threat intelligence panel shows the disabled module when there are no threat intel sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 78,
+        "column": 84
+      }
+    },
+    {
+      "id": "ecb9dffb5199516-4becee59581b261",
+      "title": "Overview threat intelligence panel shows zero indicators when the time range has no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 92,
+        "column": 27
+      }
+    },
+    {
+      "id": "ecb9dffb5199516-c8936ae7fa85b90",
+      "title": "Overview threat intelligence panel lists the feed and counts indicators in the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/overview/ui/parallel_tests/cti_link_panel.spec.ts",
+        "line": 96,
+        "column": 53
+      }
+    }
+  ]
+}

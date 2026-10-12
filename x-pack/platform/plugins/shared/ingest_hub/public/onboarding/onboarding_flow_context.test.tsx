@@ -848,4 +848,32 @@ describe('OnboardingFlowProvider', () => {
       expect(result.current.authenticateAndDeployStep.authMethod).toBeUndefined();
     });
   });
+
+  describe('clearStagedStaticKeys', () => {
+    it('drops the in-memory keys and the persisted access key id but keeps the auth method', () => {
+      const { result, rerender } = renderHook(() => useOnboardingFlow(), { wrapper });
+
+      act(() => {
+        result.current.setStaticKeys({ access_key_id: 'AKIA', secret_access_key: 'secret' });
+      });
+      rerender();
+      expect(result.current.authenticateAndDeployStep.staticKeys).toBeDefined();
+
+      act(() => {
+        result.current.clearStagedStaticKeys();
+      });
+      rerender();
+
+      expect(result.current.authenticateAndDeployStep.staticKeys).toBeUndefined();
+      expect(result.current.authenticateAndDeployStep.authMethod).toBe('static_keys');
+      // Not seeded back from the persisted access key id after a reload.
+      const authStepIndex = mockUseSessionStorage.mock.calls.findLastIndex(
+        ([key]) => typeof key === 'string' && key.endsWith('authenticateAndDeployStep')
+      );
+      const setAuthStep = mockUseSessionStorage.mock.results[authStepIndex].value[1] as jest.Mock;
+      expect(setAuthStep.mock.calls.at(-1)?.[0]).toEqual(
+        expect.objectContaining({ authMethod: 'static_keys', accessKeyId: undefined })
+      );
+    });
+  });
 });
