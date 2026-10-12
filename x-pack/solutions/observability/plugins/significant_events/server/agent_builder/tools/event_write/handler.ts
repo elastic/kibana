@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantEvent } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
@@ -15,25 +14,24 @@ import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
-  type CompactBulkError,
 } from '../bulk_write';
+import type { CompactBulkError } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
-import {
-  addsNewDetectionRules,
-  extractRuleUuids,
-  extractRuleUuidsFromEvents,
-  mergeEpisodeContext,
-  mergeSignalsLatestPerRule,
-  preserveStableNarrative,
-} from './episode_context';
-import { getCalibratedSeverity, type EventsWriteSource } from './severity_calibration_guard';
 import { toRuleEvent } from '../../../lib/significant_events/events/to_rule_event';
+import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
   fetchActiveEventsForDedup,
   markDuplicateKeys,
   resolveDedupSkips,
 } from './dedup';
+import {
+  applyWriteOutcomes,
+  buildPendingWrite,
+  computeEventFacts,
+  fetchPriorDocsByEventId,
+  shouldSkipAsNoOp,
+} from './event_facts';
 import {
   alignResults,
   type BulkResults,
@@ -42,156 +40,11 @@ import {
   type EventsWriteInput,
   type EventsWriteNoOpResult,
   type EventsWriteResult,
-  type WriteCandidate,
 } from './types';
-
-const WRITE_CONCURRENCY = 10;
 
 export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
 
-/**
- * Returns true when the latest stored version for this event_id has the same severity and status
- * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
- * would produce a pure-churn duplicate.
- * Must not call any esClient or eventClient method.
- */
-const shouldSkipAsNoOp = (
-  latestEvent: SignificantEvent | undefined,
-  candidate: WriteCandidate,
-  priorDocs: SignificantEvent[]
-): boolean => {
-  if (latestEvent === undefined) return false;
-
-  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
-  const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
-
-  return (
-    latestEvent.status === candidate.input.status &&
-    latestEvent.severity === candidate.input.severity &&
-    !addsRule
-  );
-};
-
-/** Full history for remaining continuation writes (lineage merge). */
-const fetchPriorDocsByEventId = async (
-  eventSearchClient: RuleEventsClient,
-  candidates: WriteCandidate[]
-): Promise<{
-  latestByEventId: Map<string, SignificantEvent>;
-  priorDocsByEventId: Map<string, SignificantEvent[]>;
-}> => {
-  const latestByEventId = new Map<string, SignificantEvent>();
-  const priorDocsByEventId = new Map<string, SignificantEvent[]>();
-  await Promise.all(
-    candidates
-      .filter((c) => c.input.event_id !== undefined)
-      .map(async (c) => {
-        const { hits } = await eventSearchClient.findByEventId(c.eventId);
-        priorDocsByEventId.set(c.eventId, hits);
-        const latest = hits.at(-1);
-        if (latest !== undefined) {
-          latestByEventId.set(c.eventId, latest);
-        }
-      })
-  );
-  return { latestByEventId, priorDocsByEventId };
-};
-
-const buildPendingWrite = (
-  candidate: WriteCandidate,
-  timestamp: string,
-  latestByEventId: Map<string, SignificantEvent>,
-  priorDocsByEventId: Map<string, SignificantEvent[]>
-) => {
-  const { event_id: _explicitId, ...rest } = candidate.input;
-  const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
-  const latestEvent = latestByEventId.get(candidate.eventId);
-  const isContinuation = candidate.input.event_id !== undefined;
-
-  const signals = isContinuation
-    ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
-    : candidate.input.signals ?? [];
-
-  const episodeContext = isContinuation
-    ? mergeEpisodeContext(priorDocs, rest, timestamp)
-    : {
-        streamNames: rest.stream_names,
-        causalFeatures: rest.causal_features ?? [],
-        blastRadius: rest.blast_radius ?? [],
-      };
-
-  // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
-  const status = candidate.input.status;
-
-  // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to
-  // prevent identity hijack — the scenario where an unrelated condition's narrative replaces the
-  // original event identity while the old rules are still listed in signals (#1082).
-  const frozenNarrative = isContinuation
-    ? preserveStableNarrative(
-        extractRuleUuids(candidate.input.signals),
-        latestEvent,
-        extractRuleUuidsFromEvents([...priorDocs, latestEvent])
-      )
-    : undefined;
-
-  return {
-    candidate,
-    status,
-    narrativePreserved: frozenNarrative?.narrativePreserved,
-    document: {
-      ...rest,
-      ...(frozenNarrative
-        ? {
-            title: frozenNarrative.title,
-            ...(frozenNarrative.symptom_hypothesis !== undefined && {
-              symptom_hypothesis: frozenNarrative.symptom_hypothesis,
-            }),
-          }
-        : {}),
-      '@timestamp': timestamp,
-      event_id: candidate.eventId,
-      investigations: latestEvent?.investigations,
-      signals,
-      stream_names: episodeContext.streamNames,
-      causal_features: episodeContext.causalFeatures,
-      blast_radius: episodeContext.blastRadius,
-      severity: candidate.input.severity,
-      status,
-    },
-  };
-};
-
-/** Writes `error ? bulk_error : written` into `results` for each pending write, by index. */
-const applyWriteOutcomes = (
-  pendingWrites: Array<ReturnType<typeof buildPendingWrite>>,
-  errors: Array<CompactBulkError | undefined>,
-  results: BulkResults
-): void => {
-  pendingWrites.forEach(({ candidate, status, narrativePreserved }, responseIndex) => {
-    const error = errors[responseIndex];
-    if (error) {
-      results[candidate.index] = {
-        index: candidate.index,
-        event_id: candidate.eventId,
-        status,
-        written: false,
-        reason: 'bulk_error',
-        error,
-      };
-    } else {
-      const result: EventsWriteResult = {
-        index: candidate.index,
-        event_id: candidate.eventId,
-        status,
-        written: true,
-      };
-      if (narrativePreserved) {
-        result.narrative_preserved = true;
-      }
-      results[candidate.index] = result;
-    }
-  });
-};
+const WRITE_CONCURRENCY = 10;
 
 /**
  * Versions a batch of significant events in one request while preserving input order in the
@@ -245,10 +98,11 @@ export async function eventsWriteBulkHandler({
   const activeEvents = await fetchActiveEventsForDedup(eventSearchClient, dedupCandidates);
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId({
     eventSearchClient,
-    toWrite
-  );
+    candidates: toWrite,
+  });
+
   const knownCandidates = toWrite.filter((candidate) => {
     if (
       rejectUnknownEventIds &&
@@ -273,27 +127,21 @@ export async function eventsWriteBulkHandler({
     }
     return true;
   });
-  const calibrated = knownCandidates.map((candidate) => ({
-    ...candidate,
-    input: {
-      ...candidate.input,
-      severity: getCalibratedSeverity({
-        source,
-        latestEvent: latestByEventId.get(candidate.eventId),
-        proposedSeverity: candidate.input.severity,
-        proposedStatus: candidate.input.status,
-        proposedSignals: candidate.input.signals,
-      }),
-    },
-  }));
-  const remaining = calibrated.filter((candidate) => {
+  // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate
+  // here, so the no-op check below and the final document agree on the same severity.
+  const factsByCandidate = knownCandidates.map((candidate) =>
+    computeEventFacts({ candidate, timestamp, latestByEventId, priorDocsByEventId, source })
+  );
+  const remaining = factsByCandidate.filter((facts) => {
+    const { candidate } = facts;
     if (
       candidate.mode === 'snapshot' &&
-      shouldSkipAsNoOp(
-        latestByEventId.get(candidate.eventId),
+      shouldSkipAsNoOp({
+        latestEvent: latestByEventId.get(candidate.eventId),
         candidate,
-        priorDocsByEventId.get(candidate.eventId) ?? []
-      )
+        priorDocs: priorDocsByEventId.get(candidate.eventId) ?? [],
+        severity: facts.severity,
+      })
     ) {
       results[candidate.index] = {
         index: candidate.index,
@@ -302,6 +150,7 @@ export async function eventsWriteBulkHandler({
         written: false,
         skipped: true,
         reason: 'unchanged_outcome',
+        severity: latestByEventId.get(candidate.eventId)?.severity,
       };
       return false;
     }
@@ -312,9 +161,7 @@ export async function eventsWriteBulkHandler({
     return alignResults(results, 'Event bulk results were not aligned');
   }
 
-  const pendingToWrite = remaining.map((candidate) =>
-    buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
-  );
+  const pendingToWrite = remaining.map((facts) => buildPendingWrite({ facts, timestamp }));
 
   // `createAlertEvent` waits for a refresh, so the next discovery read sees the new version.
   const writeLimit = pLimit(WRITE_CONCURRENCY);
@@ -332,7 +179,7 @@ export async function eventsWriteBulkHandler({
       })
     )
   );
-  applyWriteOutcomes(pendingToWrite, errors, results);
+  applyWriteOutcomes({ pendingWrites: pendingToWrite, errors, results });
 
   // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
   // version -> created; a prior version with a different status (e.g. triage re-open) -> status

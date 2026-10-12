@@ -63,10 +63,12 @@ export type {
   RelayAppConnectionStatus,
   SlackAppBindChannelResponse,
   SlackAppBindingsResponse,
+  SlackAppConfirmResponse,
   SlackAppConnectResponse,
   SlackAppDisconnectResponse,
   SlackAppStatusResponse,
   SlackAppUnbindChannelResponse,
+  SlackAppWorkspace,
   SlackChannelBinding,
   SlackChannelBindingStatus,
 } from './slack_app/types';
@@ -88,6 +90,7 @@ export { MAINTENANCE_FEATURE_FLAG_ACTOR } from './maintenance/actors';
 export {
   getDetectionPausedCalloutBody,
   getDetectionPausedCalloutTitle,
+  getDetectionPausedSettingsCalloutBody,
   isPausedByFeatureFlag,
 } from './maintenance/paused_callout_copy';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
