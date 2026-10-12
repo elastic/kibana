@@ -81,10 +81,11 @@ describe('generateSampleForPattern', () => {
   });
 
   it('returns undefined rather than a wrong value when an exact count exceeds the repeat cap', () => {
-    // The generator caps repeats well below 50, so its output can't satisfy an exact `{50}` and
-    // is correctly rejected by the final match-against-the-real-regex safety check, instead of
-    // returning a string that looks plausible but doesn't actually match.
+    // The generator caps repeats well below 50, so it cannot produce a value satisfying an exact
+    // `{50}` and refuses, instead of returning a string that looks plausible but doesn't match.
     expect(generateSampleForPattern('\\d{50}')).toBeUndefined();
+    expect(generateSampleForPattern('[A-Z]{20,30}')).toBeUndefined();
+    expect(generateSampleForPattern('\\d{20,}')).toBeUndefined();
   });
 
   it('caps unbounded-minimum repeats so the example stays short', () => {
@@ -116,5 +117,18 @@ describe('toExampleFieldKey', () => {
   it('falls back to "value" when nothing usable remains', () => {
     expect(toExampleFieldKey('')).toBe('value');
     expect(toExampleFieldKey('åäö')).toBe('value');
+  });
+
+  it('never builds or runs the pattern as a regex, which could freeze the page while typing', () => {
+    // Executing a pattern like `^(a+){12}$` against its own sample backtracks exponentially.
+    const RegExpSpy = jest.spyOn(global, 'RegExp');
+    try {
+      generateSampleForPattern('EMP-\\d+');
+      generateSampleForPattern('^(a+){12}$');
+
+      expect(RegExpSpy).not.toHaveBeenCalled();
+    } finally {
+      RegExpSpy.mockRestore();
+    }
   });
 });

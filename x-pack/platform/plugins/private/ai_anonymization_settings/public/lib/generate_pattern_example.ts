@@ -47,6 +47,11 @@ const repeatCountFor = (quantifier: Quantifier | undefined): number => {
     return 1;
   }
   const { min, max } = quantifier;
+  if (min > MAX_REPEAT) {
+    // A sample short enough to show cannot satisfy this minimum, and nothing checks the result
+    // against the real regex, so refuse instead of returning a string that does not match.
+    throw new Error(`Repeat minimum ${min} exceeds the supported maximum of ${MAX_REPEAT}`);
+  }
   if (min === 0 && max === 1) {
     return 1; // `?`
   }
@@ -345,7 +350,11 @@ export const toExampleFieldKey = (label: string): string =>
 /**
  * Generates a short string that matches `pattern`, for use as a contextual pattern-tester
  * example. Returns `undefined` (rather than a guess) when the pattern uses syntax outside the
- * supported subset, or if the generated string somehow fails to match the real regex.
+ * supported subset.
+ *
+ * The user's pattern is never executed here: this runs while the flyout renders, on the browser
+ * thread, where a pattern with catastrophic backtracking would freeze the page. Only the isolated
+ * tester endpoint runs user-authored regexes; if a sample does not match, the tester shows it.
  */
 export const generateSampleForPattern = (pattern: string): string | undefined => {
   const trimmed = pattern.trim();
@@ -357,7 +366,7 @@ export const generateSampleForPattern = (pattern: string): string | undefined =>
     if (!sample || sample.length > MAX_GENERATED_LENGTH) {
       return undefined;
     }
-    return new RegExp(trimmed).test(sample) ? sample : undefined;
+    return sample;
   } catch {
     return undefined;
   }
