@@ -6,13 +6,16 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
+import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
 import { ADD_CUSTOM_APP_ACTION_ID, VIEW_CUSTOM_APP_SOURCE_ACTION_ID } from '../common/constants';
+import { customAppContextAttachmentUiDefinition } from './attachment_types/custom_app_context';
 import { setServices } from './services';
 
 interface SetupDeps {
@@ -21,7 +24,9 @@ interface SetupDeps {
 
 interface StartDeps {
   data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
@@ -32,8 +37,8 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     });
   }
 
-  start(core: CoreStart, { data, uiActions }: StartDeps) {
-    setServices(core, data.search.search);
+  start(core: CoreStart, { data, embeddable, uiActions, agentBuilder }: StartDeps) {
+    setServices(core, data.search.search, embeddable, agentBuilder);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_APP_ACTION_ID, async () => {
       const { getAddCustomAppAction } = await import('./actions/add_custom_app_action');
@@ -49,5 +54,12 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       }
     );
     uiActions.attachAction(ON_OPEN_PANEL_MENU, VIEW_CUSTOM_APP_SOURCE_ACTION_ID);
+
+    if (agentBuilder) {
+      agentBuilder.attachments.addAttachmentType(
+        CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
+        customAppContextAttachmentUiDefinition
+      );
+    }
   }
 }

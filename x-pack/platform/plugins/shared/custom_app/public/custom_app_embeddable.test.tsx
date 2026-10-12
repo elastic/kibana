@@ -7,13 +7,17 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { ChatEventType } from '@kbn/agent-builder-common';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
 import type { CustomAppEmbeddableState } from '../server';
 import { customAppEmbeddableFactory } from './custom_app_embeddable';
 
+// Set by the tests that need chat; without it the panel behaves as when Agent Builder is absent.
+let mockAgentBuilder: unknown;
 jest.mock('./services', () => ({
-  getServices: () => ({ core: { http: {} }, search: jest.fn() }),
+  getServices: () => ({ core: { http: {} }, search: jest.fn(), agentBuilder: mockAgentBuilder }),
 }));
 jest.mock('./data/run_esql_query', () => ({
   createRunEsqlQuery: () => async () => ({ columns: [], rows: [] }),
@@ -211,6 +215,200 @@ describe('the custom app panel', () => {
 
       expect(await screen.findByRole('heading', { name: 'Edited heading' })).toBeInTheDocument();
       expect(screen.queryByRole('heading', { name: 'Saved heading' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('chat', () => {
+    const fakeAgentBuilder = () => {
+      const activeConversation$ = new BehaviorSubject<{ id: string } | undefined>(undefined);
+      const chatEvents$ = new Subject<unknown>();
+      return {
+        openChat: jest.fn(),
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+        activeConversation$,
+        chatEvents$,
+      };
+    };
+
+    const updatedEvent = (
+      embeddableId: string,
+      document: AppDocument,
+      event = 'custom_app:updated'
+    ) => ({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'custom_app_update_app',
+        tool_call_id: 'call-1',
+        custom_event: event,
+        data: {
+          attachmentId: 'att-1',
+          data: { embeddable_id: embeddableId, document },
+        },
+      },
+    });
+
+    let agentBuilder: ReturnType<typeof fakeAgentBuilder>;
+
+    beforeEach(() => {
+      agentBuilder = fakeAgentBuilder();
+      mockAgentBuilder = agentBuilder;
+    });
+    afterEach(() => {
+      mockAgentBuilder = undefined;
+    });
+
+    describe('sending the app to chat', () => {
+      it('is offered by the editor, and opens a new conversation with the app attached', async () => {
+        const api = await build();
+        const { editorProps, closeFlyout } = await openEditor(api);
+        const draft = documentWith('Draft heading');
+
+        editorProps.onGenerateWithChat(draft);
+
+        expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+        expect(agentBuilder.openChat).toHaveBeenCalledWith({
+          newConversation: true,
+          attachments: [
+            expect.objectContaining({
+              type: 'platform.custom_app.app_context',
+              data: expect.objectContaining({ embeddable_id: 'panel-1', document: draft }),
+            }),
+          ],
+        });
+        expect(closeFlyout).toHaveBeenCalledTimes(1);
+      });
+
+      it('sends the draft, not the saved app, so what the author was working on is what the agent starts from', async () => {
+        const api = await build();
+        const { editorProps } = await openEditor(api);
+
+        editorProps.onGenerateWithChat(documentWith('Unsaved draft'));
+
+        const [{ attachments }] = agentBuilder.openChat.mock.calls[0];
+        expect(attachments[0].data.document).toEqual(documentWith('Unsaved draft'));
+      });
+
+      it('is not offered when Agent Builder is not available', async () => {
+        mockAgentBuilder = undefined;
+        const api = await build();
+
+        const { editorProps } = await openEditor(api);
+
+        expect(editorProps.onGenerateWithChat).toBeUndefined();
+      });
+    });
+
+    describe('receiving the result', () => {
+      const converse = async () => {
+        const api = await build();
+        agentBuilder.activeConversation$.next({ id: 'conversation-1' });
+        return api;
+      };
+
+      it('listens only once there is a conversation, and to that one', async () => {
+        await build();
+        expect(agentBuilder.events.getChatEvents$).not.toHaveBeenCalled();
+
+        await act(async () => agentBuilder.activeConversation$.next({ id: 'conversation-1' }));
+
+        expect(agentBuilder.events.getChatEvents$).toHaveBeenCalledWith('conversation-1');
+      });
+
+      it('shows the app the agent made, on the panel, at once', async () => {
+        const api = await converse();
+        const made = documentWith('Made by the agent');
+
+        await act(async () => agentBuilder.chatEvents$.next(updatedEvent('panel-1', made)));
+
+        expect(
+          await screen.findByRole('heading', { name: 'Made by the agent' })
+        ).toBeInTheDocument();
+        expect(api.getDocument()).toEqual(made);
+      });
+
+      it("makes it the panel's own state, so the dashboard has unsaved changes", async () => {
+        const api = await converse();
+        const changed = jest.fn();
+        api.anyStateChange$.subscribe(changed);
+
+        await act(async () =>
+          agentBuilder.chatEvents$.next(updatedEvent('panel-1', documentWith('Made by the agent')))
+        );
+
+        expect(changed).toHaveBeenCalled();
+        expect(api.serializeState().document).toEqual(documentWith('Made by the agent'));
+      });
+
+      it('ignores an answer about another panel', async () => {
+        const api = await converse();
+
+        await act(async () =>
+          agentBuilder.chatEvents$.next(updatedEvent('panel-2', documentWith('For someone else')))
+        );
+
+        expect(api.getDocument()).toBe(SAVED);
+        expect(screen.getByRole('heading', { name: 'Saved heading' })).toBeInTheDocument();
+      });
+
+      it('ignores events that are not about a custom app', async () => {
+        const api = await converse();
+
+        await act(async () => {
+          agentBuilder.chatEvents$.next(
+            updatedEvent('panel-1', documentWith('Not this'), 'custom_content:updated')
+          );
+          agentBuilder.chatEvents$.next({ type: 'something-else' });
+        });
+
+        expect(api.getDocument()).toBe(SAVED);
+      });
+
+      it('ignores an app that is not valid, rather than break the panel', async () => {
+        const api = await converse();
+        const broken = { root: { type: 'carousel', id: 'x' } } as unknown as AppDocument;
+
+        await act(async () => agentBuilder.chatEvents$.next(updatedEvent('panel-1', broken)));
+
+        expect(api.getDocument()).toBe(SAVED);
+        expect(screen.getByRole('heading', { name: 'Saved heading' })).toBeInTheDocument();
+      });
+
+      it('follows each answer in turn, as the agent refines the app', async () => {
+        await converse();
+
+        await act(async () =>
+          agentBuilder.chatEvents$.next(updatedEvent('panel-1', documentWith('First')))
+        );
+        expect(await screen.findByRole('heading', { name: 'First' })).toBeInTheDocument();
+
+        await act(async () =>
+          agentBuilder.chatEvents$.next(updatedEvent('panel-1', documentWith('Second')))
+        );
+        expect(await screen.findByRole('heading', { name: 'Second' })).toBeInTheDocument();
+      });
+
+      it('moves to the next conversation when the user starts another', async () => {
+        await converse();
+        const second = new Subject<unknown>();
+        agentBuilder.events.getChatEvents$.mockReturnValueOnce(second);
+
+        await act(async () => agentBuilder.activeConversation$.next({ id: 'conversation-2' }));
+        await act(async () =>
+          second.next(updatedEvent('panel-1', documentWith('From the second')))
+        );
+
+        expect(await screen.findByRole('heading', { name: 'From the second' })).toBeInTheDocument();
+      });
+
+      it('does not listen at all without Agent Builder, and does not mind', async () => {
+        mockAgentBuilder = undefined;
+
+        await expect(build()).resolves.toBeDefined();
+        expect(agentBuilder.events.getChatEvents$).not.toHaveBeenCalled();
+      });
     });
   });
 });

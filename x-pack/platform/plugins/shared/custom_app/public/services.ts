@@ -6,17 +6,27 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 
 interface Services {
   core: CoreStart;
   search: ISearchGeneric;
+  embeddable: EmbeddableStart;
+  /** Absent when Agent Builder is not available, in which case nothing offers chat. */
+  agentBuilder: AgentBuilderPluginStart | undefined;
 }
 
 let services: Services | undefined;
 
-export const setServices = (core: CoreStart, search: ISearchGeneric) => {
-  services = { core, search };
+export const setServices = (
+  core: CoreStart,
+  search: ISearchGeneric,
+  embeddable: EmbeddableStart,
+  agentBuilder: AgentBuilderPluginStart | undefined
+) => {
+  services = { core, search, embeddable, agentBuilder };
 };
 
 export const getServices = (): Services => {

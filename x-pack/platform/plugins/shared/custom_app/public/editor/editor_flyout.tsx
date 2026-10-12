@@ -22,6 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import type { AppDocument } from '@kbn/custom-app-common';
 import { IconButton } from './fields/fields';
@@ -33,6 +34,8 @@ export interface EditorFlyoutProps {
   initialDocument: AppDocument;
   /** Shows the draft on the panel itself, without saving it. */
   onPreview: (document: AppDocument) => void;
+  /** Sends the draft to chat. Absent when chat is not available, and then nothing offers it. */
+  onGenerateWithChat?: (document: AppDocument) => void;
   onSave: (document: AppDocument) => void;
   onCancel: () => void;
   ariaLabelledBy: string;
@@ -41,6 +44,7 @@ export interface EditorFlyoutProps {
 export const EditorFlyout = ({
   initialDocument,
   onPreview,
+  onGenerateWithChat,
   onSave,
   onCancel,
   ariaLabelledBy,
@@ -84,7 +88,21 @@ export const EditorFlyout = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {onGenerateWithChat && (
+                <EuiFlexItem grow={false}>
+                  <AiButton
+                    size="s"
+                    iconType="sparkles"
+                    data-test-subj="customAppEditorGenerateWithChat"
+                    onClick={() => onGenerateWithChat(editor.document)}
+                  >
+                    {i18n.translate('xpack.customApp.editor.generateWithChat', {
+                      defaultMessage: 'Generate with chat',
+                    })}
+                  </AiButton>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <IconButton
                   iconType="undo"

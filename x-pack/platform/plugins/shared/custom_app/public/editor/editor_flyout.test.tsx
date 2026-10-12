@@ -26,20 +26,22 @@ const initialDocument = (): AppDocument =>
     },
   });
 
-const setup = () => {
+const setup = ({ withChat = false } = {}) => {
   const onSave = jest.fn();
   const onCancel = jest.fn();
   const onPreview = jest.fn();
+  const onGenerateWithChat = jest.fn();
   render(
     <EditorFlyout
       initialDocument={initialDocument()}
       onPreview={onPreview}
+      onGenerateWithChat={withChat ? onGenerateWithChat : undefined}
       onSave={onSave}
       onCancel={onCancel}
       ariaLabelledBy="editor-title"
     />
   );
-  return { onSave, onCancel, onPreview };
+  return { onSave, onCancel, onPreview, onGenerateWithChat };
 };
 
 const outline = (id: string) => screen.getByTestId(`customAppOutline-${id}`);
@@ -352,6 +354,43 @@ describe('EditorFlyout', () => {
       const saved: AppDocument = onSave.mock.calls[0][0];
       expect(JSON.stringify(saved)).toContain('Service health!');
       expect(appDocumentSchema.safeParse(saved).success).toBe(true);
+    });
+  });
+
+  describe('generating with chat', () => {
+    it('is offered when chat is available, as Generate with chat', () => {
+      setup({ withChat: true });
+
+      expect(screen.getByTestId('customAppEditorGenerateWithChat')).toHaveTextContent(
+        'Generate with chat'
+      );
+    });
+
+    it('is not offered when chat is not available', () => {
+      setup();
+
+      expect(screen.queryByTestId('customAppEditorGenerateWithChat')).not.toBeInTheDocument();
+    });
+
+    it('sends the app as it is being edited, not as it was opened', async () => {
+      const { onGenerateWithChat } = setup({ withChat: true });
+      await userEvent.click(outline('title'));
+      await userEvent.type(screen.getByLabelText('Text'), '!');
+
+      await userEvent.click(screen.getByTestId('customAppEditorGenerateWithChat'));
+
+      expect(onGenerateWithChat).toHaveBeenCalledTimes(1);
+      expect(JSON.stringify(onGenerateWithChat.mock.calls[0][0])).toContain('Service health!');
+    });
+
+    it('does not change what the editor shows or what has changed by itself', async () => {
+      const { onGenerateWithChat, onSave } = setup({ withChat: true });
+
+      await userEvent.click(screen.getByTestId('customAppEditorGenerateWithChat'));
+
+      expect(onGenerateWithChat).toHaveBeenCalledWith(initialDocument());
+      expect(onSave).not.toHaveBeenCalled();
+      expect(screen.getByTestId('customAppEditorSave')).toBeDisabled();
     });
   });
 });

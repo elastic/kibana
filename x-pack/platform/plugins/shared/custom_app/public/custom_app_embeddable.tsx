@@ -6,8 +6,20 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map, merge, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  EMPTY,
+  catchError,
+  combineLatest,
+  distinctUntilChanged,
+  map,
+  merge,
+  skip,
+  switchMap,
+} from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
+import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type {
@@ -30,6 +42,7 @@ import {
 import {
   CUSTOM_APP_EMBEDDABLE_TYPE,
   CUSTOM_APP_STATE_VERSION,
+  appDocumentSchema,
   collectQueries,
   type AppDocument,
 } from '@kbn/custom-app-common';
@@ -38,11 +51,18 @@ import { AppFrame } from './components/app_frame';
 import { NodeRenderer } from './components/node_renderer';
 import { createDataLayer } from './data/data_layer';
 import { DataLayerContext } from './data/data_layer_context';
+import { CUSTOM_APP_UPDATED_UI_EVENT, type CustomAppUpdatedUiEventData } from '../common/ui_events';
 import type { HasCustomAppDocument } from './has_custom_app_document';
 import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { createRunEsqlQuery } from './data/run_esql_query';
 import { getServices } from './services';
+import { buildCustomAppContextAttachment } from './utils/chat_integration';
+
+const isCustomAppUpdatedUiEvent = (
+  event: BrowserChatEvent
+): event is ToolUiEvent<typeof CUSTOM_APP_UPDATED_UI_EVENT, CustomAppUpdatedUiEventData> =>
+  isToolUiEvent(event, CUSTOM_APP_UPDATED_UI_EVENT);
 
 export type CustomAppApi = DefaultEmbeddableApi<CustomAppEmbeddableState> &
   HasTypeDisplayName &
@@ -57,7 +77,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
 > = {
   type: CUSTOM_APP_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-    const { core, search } = getServices();
+    const { core, search, agentBuilder } = getServices();
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const document$ = new BehaviorSubject<AppDocument>(initialState.document);
@@ -66,6 +86,19 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
     // not part of the panel's state, so previewing never marks the dashboard as changed.
     const previewDocument$ = new BehaviorSubject<AppDocument | undefined>(undefined);
     const renderedDocument$ = new BehaviorSubject<AppDocument>(initialState.document);
+
+    /** Opens chat with the app as it stands attached, for the agent to build or change. */
+    const generateWithChat = (draft: AppDocument) =>
+      agentBuilder?.openChat({
+        newConversation: true,
+        attachments: [
+          buildCustomAppContextAttachment({
+            document: draft,
+            embeddableId: uuid,
+            panelTitle: titleManager.api.title$.getValue(),
+          }),
+        ],
+      });
 
     const dataLayer = createDataLayer({
       runQuery: createRunEsqlQuery({ search, http: core.http }),
@@ -129,6 +162,16 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                 initialDocument={document$.getValue()}
                 ariaLabelledBy={ariaLabelledBy}
                 onPreview={(document) => previewDocument$.next(document)}
+                onGenerateWithChat={
+                  agentBuilder
+                    ? (draft) => {
+                        // The draft goes with the attachment; chat opens beside the dashboard,
+                        // where the editor would be in its way.
+                        closeFlyout();
+                        generateWithChat(draft);
+                      }
+                    : undefined
+                }
                 onCancel={closeFlyout}
                 onSave={(document) => {
                   document$.next(document);
@@ -171,6 +214,37 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
         useEffect(() => {
           const fetchSubscription = fetch$(api).subscribe(dataLayer.refresh);
           return () => fetchSubscription.unsubscribe();
+        }, []);
+
+        // The agent's answers arrive on the conversation that is open, for whichever panel they
+        // are about. A panel takes only its own, and shows the new app at once.
+        useEffect(() => {
+          if (!agentBuilder) return;
+
+          const subscription = agentBuilder.events.ui.activeConversation$
+            .pipe(
+              distinctUntilChanged((previous, next) => previous?.id === next?.id),
+              switchMap((conversation) =>
+                conversation?.id
+                  ? agentBuilder.events
+                      .getChatEvents$(conversation.id)
+                      .pipe(catchError(() => EMPTY))
+                  : EMPTY
+              )
+            )
+            .subscribe((event) => {
+              if (!isCustomAppUpdatedUiEvent(event)) return;
+
+              const {
+                data: { data },
+              } = event.data;
+              if (data.embeddable_id !== uuid) return;
+
+              const parsed = appDocumentSchema.safeParse(data.document);
+              if (parsed.success) document$.next(parsed.data);
+            });
+
+          return () => subscription.unsubscribe();
         }, []);
 
         useEffect(

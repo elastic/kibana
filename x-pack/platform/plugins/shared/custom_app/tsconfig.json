@@ -21,7 +21,12 @@
     "@kbn/esql-types",
     "@kbn/esql-utils",
     "@kbn/esql",
-    "@kbn/presentation-util"
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/shared-ux-ai-components",
+    "@kbn/presentation-util",
+    "@kbn/presentation-util-plugin"
   ],
   "exclude": ["target/**/*"]
 }

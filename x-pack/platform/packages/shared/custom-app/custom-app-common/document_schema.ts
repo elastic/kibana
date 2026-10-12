@@ -232,12 +232,17 @@ export const nodeSchema = z.discriminatedUnion('type', [
 export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
   node.type === 'stack' || node.type === 'flyout' ? node.children : [];
 
-export const appDocumentSchema = z
-  .object({
-    state: z.record(stateKeySchema, stateDeclarationSchema).default({}),
-    root: nodeSchema,
-  })
-  .superRefine(validateDocument);
+/**
+ * The shape of a document, without the checks that look across it. For anything that only needs
+ * to say what a document looks like, such as the input of an agent tool, whose own handler then
+ * reports what is wrong with it in words an agent can act on.
+ */
+export const appDocumentShapeSchema = z.object({
+  state: z.record(stateKeySchema, stateDeclarationSchema).default({}),
+  root: nodeSchema,
+});
+
+export const appDocumentSchema = appDocumentShapeSchema.superRefine(validateDocument);
 
 export type StateDeclaration = z.output<typeof stateDeclarationSchema>;
 export type AppDocument = z.output<typeof appDocumentSchema>;

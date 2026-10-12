@@ -16,6 +16,7 @@ export {
 export {
   actionSchema,
   appDocumentSchema,
+  appDocumentShapeSchema,
   customAppStateSchema,
   nodeSchema,
   stateDeclarationSchema,
