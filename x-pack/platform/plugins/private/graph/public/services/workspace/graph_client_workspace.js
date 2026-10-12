@@ -123,6 +123,7 @@ function GraphWorkspace(options) {
   this.lastRequest = null;
   this.lastResponse = null;
   this.changeHandler = options.changeHandler;
+  this.topologyChangeHandler = options.topologyChangeHandler;
   if (options.graphExploreProxy) {
     graphExplorer = options.graphExploreProxy;
   }
@@ -890,6 +891,7 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
+    self.topologyChangeHandler?.();
     this.runLayout();
   };
 

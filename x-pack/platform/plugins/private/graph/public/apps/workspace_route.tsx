@@ -109,6 +109,7 @@ export const WorkspaceRoute = ({
             // console.log(newNodes);
           },
           changeHandler: () => setRenderCounter((current) => current + 1),
+          topologyChangeHandler: notifyWorkspaceChanged,
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,

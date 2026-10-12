@@ -166,6 +166,7 @@ export type WorkspaceOptions = Partial<{
   vertex_fields: WorkspaceField[];
   nodeLabeller: (newNodes: WorkspaceNode[]) => void;
   changeHandler: () => void;
+  topologyChangeHandler: () => void;
   graphExploreProxy: (
     indexPattern: string,
     request: ExploreRequest,
