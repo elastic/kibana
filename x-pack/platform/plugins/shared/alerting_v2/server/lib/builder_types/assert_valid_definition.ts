@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { normalizeJsonSchemaTypeArrays, z } from '@kbn/zod/v4';
 import {
   MAX_BUILDER_FIELDS_ARRAY_ITEMS,
   MAX_BUILDER_FIELDS_BYTES,
@@ -395,10 +395,12 @@ function assertTotalMapping(
 
   let json: Record<string, unknown>;
   try {
-    json = z.toJSONSchema(definition.builderFieldsSchema, { io: 'input' }) as Record<
-      string,
-      unknown
-    >;
+    // Normalized the same way as the bounded walk (checks 3-5): zod >= 4.5 emits a
+    // nullable boolean or number leaf as a type array (`type: ['boolean', 'null']`),
+    // which the walk below would skip without checking its mapping.
+    json = normalizeJsonSchemaTypeArrays(
+      z.toJSONSchema(definition.builderFieldsSchema, { io: 'input' })
+    ) as Record<string, unknown>;
   } catch {
     // assertBoundedSchema (checks 3-5) already surfaces JSON-Schema conversion
     // errors; reaching here means something unexpected happened, so bail out.

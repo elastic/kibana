@@ -477,6 +477,41 @@ describe('assertValidDefinition — check 6: total mapping', () => {
   });
 
   // ---------------------------------------------------------------------------
+  // Nullable leaves: zod emits a nullable boolean or number as a type array
+  // (`type: ['boolean', 'null']`), which must still count as a leaf
+  // ---------------------------------------------------------------------------
+
+  it('rejects a nullable number leaf that has no sub-field declaration', () => {
+    const schema = z.object({ f: z.number().nullable() }).strict();
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      withMappings({})
+    );
+  });
+
+  it('rejects a nullable boolean leaf against keyword sub-field', () => {
+    const schema = z.object({ f: z.boolean().nullable() }).strict();
+    const folded = withMappings({
+      f: { type: 'keyword', ignore_above: KEYWORD_SUB_FIELD_IGNORE_ABOVE },
+    });
+    rejects(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      /total mapping check/,
+      folded
+    );
+  });
+
+  it('accepts a nullable boolean leaf against boolean sub-field', () => {
+    const schema = z.object({ f: z.boolean().nullable() }).strict();
+    const folded = withMappings({ f: { type: 'boolean' } });
+    passes(
+      { builderFieldsSchema: schema as unknown as RegisteredBuilderType['builderFieldsSchema'] },
+      folded
+    );
+  });
+
+  // ---------------------------------------------------------------------------
   // Keyword bound check
   // ---------------------------------------------------------------------------
 

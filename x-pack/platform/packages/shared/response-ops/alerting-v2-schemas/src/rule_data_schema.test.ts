@@ -1754,9 +1754,18 @@ describe('updateRuleDataSchema', () => {
 });
 
 describe('ruleResponseSchema metadata', () => {
+  // The fields every rule response carries in metadata.
+  const responseMetadata = {
+    name: 'test rule',
+    signature_id: 'sig-1',
+    source: { type: 'internal', version: 1 },
+    revision: 0,
+    ownership: { managed: false },
+  };
+
   it('does not carry metadata.template: the strict response block omits it', () => {
     const result = ruleResponseSchema.shape.metadata.safeParse({
-      name: 'test rule',
+      ...responseMetadata,
       template: { id: 'template-1' },
     });
 
@@ -1764,7 +1773,7 @@ describe('ruleResponseSchema metadata', () => {
   });
 
   it('accepts metadata without a template', () => {
-    expect(ruleResponseSchema.shape.metadata.safeParse({ name: 'test rule' }).success).toBe(true);
+    expect(ruleResponseSchema.shape.metadata.safeParse(responseMetadata).success).toBe(true);
   });
 });
 
