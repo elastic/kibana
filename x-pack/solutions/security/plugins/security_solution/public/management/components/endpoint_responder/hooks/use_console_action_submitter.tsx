@@ -76,11 +76,6 @@ export interface UseConsoleActionSubmitterOptions<
   actionRequestBody: TReqBody | undefined;
 
   dataTestSubj?: string;
-
-  /**  */
-  pendingMessage?: string;
-
-  successMessage?: string;
 }
 
 /**
@@ -96,8 +91,6 @@ export interface UseConsoleActionSubmitterOptions<
  * @param store
  * @param ResultComponent
  * @param dataTestSubj
- * @param pendingMessage
- * @param successMessage
  */
 export const useConsoleActionSubmitter = <
   TReqBody extends BaseActionRequestBody = BaseActionRequestBody,
@@ -112,8 +105,6 @@ export const useConsoleActionSubmitter = <
   store,
   ResultComponent,
   dataTestSubj,
-  pendingMessage,
-  successMessage,
 }: UseConsoleActionSubmitterOptions<TReqBody, TOutputContent, TParameters>): ConsoleActionSubmitter<
   TOutputContent,
   TParameters

@@ -6,7 +6,6 @@
  */
 
 import { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -44,9 +43,6 @@ export const GetFileActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'getFile',
-    pendingMessage: i18n.translate('xpack.securitySolution.getFileAction.pendingMessage', {
-      defaultMessage: 'Retrieving the file from host.',
-    }),
   }).result;
 });
 GetFileActionResult.displayName = 'GetFileActionResult';

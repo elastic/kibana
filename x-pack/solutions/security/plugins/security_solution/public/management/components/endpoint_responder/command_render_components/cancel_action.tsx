@@ -6,7 +6,6 @@
  */
 
 import { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useSendCancelRequest } from '../../../hooks/response_actions/use_send_cancel_request';
 import type { CancelActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
@@ -47,9 +46,6 @@ export const CancelActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'cancel',
-    pendingMessage: i18n.translate('xpack.securitySolution.cancelAction.pendingMessage', {
-      defaultMessage: 'Cancel action in progress.',
-    }),
   }).result;
 });
 
