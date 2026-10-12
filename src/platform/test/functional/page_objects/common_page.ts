@@ -334,10 +334,10 @@ export class CommonPageObject extends FtrService {
         // accept alert if it pops up
         const alert = await this.browser.getAlert();
         await alert?.accept();
-        // browser.get() waits for document.readyState==='complete' before returning,
-        // so no sleep is needed here; the refresh below starts from a fully loaded page.
-        this.log.debug('returned from get, calling refresh');
-        await this.browser.refresh();
+        // Timestamped navigation already loads a new document, including for hash URLs.
+        if (!insertTimestamp) {
+          await this.browser.refresh();
+        }
         let currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp, disableWelcomePrompt)
           : await this.browser.getCurrentUrl();

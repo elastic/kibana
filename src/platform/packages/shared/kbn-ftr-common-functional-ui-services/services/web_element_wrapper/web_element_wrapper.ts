@@ -438,10 +438,10 @@ export class WebElementWrapper {
   public async moveMouseTo({ xOffset = 0, yOffset = 0, topOffset = 0 } = {}) {
     await this.retryCall(async function moveMouseTo(wrapper) {
       await wrapper.scrollIntoViewIfNecessary(topOffset);
-      await wrapper.getActions().move({ x: 0, y: 0 }).perform();
+      await wrapper.getActions().move({ x: 0, y: 0, duration: 0 }).perform();
       await wrapper
         .getActions()
-        .move({ x: xOffset, y: yOffset, origin: wrapper._webElement })
+        .move({ x: xOffset, y: yOffset, origin: wrapper._webElement, duration: 0 })
         .perform();
     });
   }

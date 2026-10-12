@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, of, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  map,
+  of,
+  Subject,
+  takeUntil,
+  type Observable,
+} from 'rxjs';
 
 import type {
   HasLastSavedChildState,
@@ -63,6 +72,8 @@ export function initializeUnsavedChangesManager({
     unsavedChanges$: Observable<Partial<DashboardState>>;
   };
 } {
+  const stopComparing$ = new Subject<void>();
+  const stopBackup$ = new Subject<void>();
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
   const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
@@ -70,11 +81,11 @@ export function initializeUnsavedChangesManager({
   });
 
   const dashboardStateChanges$ = combineLatest([
-    settingsManager.internalApi.startComparing(lastSavedState$),
-    unifiedSearchManager.internalApi.startComparing(lastSavedState$),
-    layoutManager.internalApi.startComparing(lastSavedState$),
-    projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
-    approximationManager.internalApi.startComparing(lastSavedState$),
+    settingsManager.internalApi.startComparing(lastSavedState$, stopComparing$),
+    unifiedSearchManager.internalApi.startComparing(lastSavedState$, stopComparing$),
+    layoutManager.internalApi.startComparing(lastSavedState$, stopComparing$),
+    projectRoutingManager?.internalApi.startComparing(lastSavedState$, stopComparing$) ?? of({}),
+    approximationManager.internalApi.startComparing(lastSavedState$, stopComparing$),
   ]).pipe(
     map(([settings, unifiedSearch, layout, projectRouting, approximation]) => {
       return { ...settings, ...unifiedSearch, ...layout, ...projectRouting, ...approximation };
@@ -82,7 +93,7 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
-    .pipe(debounceTime(DEBOUNCE_TIME))
+    .pipe(takeUntil(stopBackup$), debounceTime(DEBOUNCE_TIME))
     .subscribe(([viewMode, dashboardChanges]) => {
       const hasUnsavedChanges = Object.keys(dashboardChanges ?? {}).length > 0;
 
@@ -115,6 +126,11 @@ export function initializeUnsavedChangesManager({
       getLastSavedStateForChild,
     },
     cleanup: () => {
+      // Completing before debounceTime flushes the final comparison and backup.
+      stopComparing$.next();
+      stopComparing$.complete();
+      stopBackup$.next();
+      stopBackup$.complete();
       unsavedChangesSubscription.unsubscribe();
       onSaveSubscription.unsubscribe();
     },

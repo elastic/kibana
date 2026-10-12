@@ -12,6 +12,7 @@ import deepEqual from 'fast-deep-equal';
 import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
 import {
   BehaviorSubject,
+  NEVER,
   combineLatest,
   combineLatestWith,
   debounceTime,
@@ -21,6 +22,7 @@ import {
   mergeMap,
   skip,
   startWith,
+  takeUntil,
   tap,
   type Observable,
 } from 'rxjs';
@@ -546,12 +548,14 @@ export function initializeLayoutManager(
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
 
       startComparing: (
-        lastSavedState$: BehaviorSubject<DashboardState>
+        lastSavedState$: BehaviorSubject<DashboardState>,
+        stopComparing$: Observable<void> = NEVER
       ): Observable<{
         panels?: DashboardState['panels'];
         pinned_panels?: DashboardState['pinned_panels'];
       }> => {
         return combineLatest([layout$, childrenChanges$]).pipe(
+          takeUntil(stopComparing$),
           debounceTime(100),
           combineLatestWith(
             lastSavedState$.pipe(

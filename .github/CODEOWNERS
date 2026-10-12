@@ -3950,6 +3950,7 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-generative-ai
 
 # Shared FTR wait optimization guidance
+/src/platform/test/functional/apps/ftr_helpers/ @elastic/kibana-operations @elastic/appex-qa
 /src/platform/test/functional/wait_optimization.md @elastic/kibana-operations @elastic/appex-qa
 /src/platform/test/functional/wait_optimization_failures.md @elastic/kibana-operations @elastic/appex-qa
 

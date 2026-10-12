@@ -9,7 +9,17 @@
 
 import type { StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
+import {
+  BehaviorSubject,
+  NEVER,
+  combineLatestWith,
+  debounceTime,
+  map,
+  skip,
+  startWith,
+  takeUntil,
+} from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 export function initializeApproximationManager(initialState: DashboardState) {
@@ -41,9 +51,13 @@ export function initializeApproximationManager(initialState: DashboardState) {
     },
     internalApi: {
       anyStateChange$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (
+        lastSavedState$: BehaviorSubject<DashboardState>,
+        stopComparing$: Observable<void> = NEVER
+      ) => {
         return anyStateChange$.pipe(
           startWith(undefined),
+          takeUntil(stopComparing$),
           debounceTime(100),
           map(() => getState()),
           combineLatestWith(lastSavedState$),

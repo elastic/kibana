@@ -10,8 +10,17 @@
 import type { ProjectRouting } from '@kbn/es-query';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
-import type { Subscription } from 'rxjs';
-import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import {
+  BehaviorSubject,
+  NEVER,
+  combineLatestWith,
+  debounceTime,
+  map,
+  skip,
+  startWith,
+  takeUntil,
+} from 'rxjs';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { cpsService } from '../services/kibana_services';
@@ -84,11 +93,15 @@ export function initializeProjectRoutingManager(
     },
     internalApi: {
       anyStateChange$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (
+        lastSavedState$: BehaviorSubject<DashboardState>,
+        stopComparing$: Observable<void> = NEVER
+      ) => {
         return anyStateChange$.pipe(
           // anyStateChange$ does not emit on subscribe
           // use startWith to compare unsaved changes on subscribe
           startWith(undefined),
+          takeUntil(stopComparing$),
           debounceTime(COMPARE_DEBOUNCE),
           map(() => getState()),
           combineLatestWith(lastSavedState$),

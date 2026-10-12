@@ -8,7 +8,7 @@
  */
 
 import { pick } from 'lodash';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 
 import {
@@ -232,6 +232,37 @@ describe('layout manager', () => {
     expect(incomingPanelStatePanelThree).toEqual({
       title: 'Panel Three',
     });
+  });
+
+  test('flushes pending layout comparisons before stopping', () => {
+    jest.useFakeTimers();
+    const manager = initializeLayoutManager(viewModeManagerMock, [panel1], [], trackPanelMock);
+    const onChanges = jest.fn();
+    const stopComparing$ = new Subject<void>();
+    const subscription = manager.internalApi
+      .startComparing(
+        new BehaviorSubject<DashboardState>({
+          ...getSampleDashboardState(),
+          panels: [],
+          pinned_panels: [],
+        }),
+        stopComparing$
+      )
+      .subscribe(onChanges);
+    try {
+      jest.advanceTimersByTime(100);
+      expect(onChanges).not.toHaveBeenCalled();
+      stopComparing$.next();
+      expect(onChanges).toHaveBeenCalledWith({
+        panels: manager.internalApi.serializeLayout().panels,
+      });
+      jest.runAllTimers();
+      expect(onChanges).toHaveBeenCalledTimes(1);
+    } finally {
+      subscription.unsubscribe();
+      manager.cleanup();
+      jest.useRealTimers();
+    }
   });
 
   describe('duplicatePanel', () => {

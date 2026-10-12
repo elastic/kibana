@@ -23,6 +23,7 @@ import moment from 'moment';
 import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
+  NEVER,
   Subject,
   Subscription,
   combineLatest,
@@ -35,6 +36,7 @@ import {
   skip,
   startWith,
   switchMap,
+  takeUntil,
   tap,
 } from 'rxjs';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -318,11 +320,15 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       anyStateChange$,
       unifiedSearchFilters$,
-      startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+      startComparing: (
+        lastSavedState$: BehaviorSubject<DashboardState>,
+        stopComparing$: Observable<void> = NEVER
+      ) => {
         return anyStateChange$.pipe(
           // anyStateChange$ does not emit on subscribe
           // use startWith to compare unsaved changes on subscribe
           startWith(undefined),
+          takeUntil(stopComparing$),
           debounceTime(COMPARE_DEBOUNCE),
           map(() => {
             return {

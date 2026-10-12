@@ -124,6 +124,87 @@ describe('unsavedChangesManager', () => {
     });
 
     describe('session state', () => {
+      test.each([false, true])(
+        'flushes pending state on cleanup (alreadySaved=%s)',
+        (alreadySaved) => {
+          jest.useFakeTimers();
+          const currentState = {
+            ...DEFAULT_DASHBOARD_STATE,
+            panels: [
+              {
+                type: 'testType',
+                config: { title: 'New panel' },
+                grid: { x: 0, y: 0, w: 24, h: 15 },
+              },
+            ],
+          };
+          const manager = initializeUnsavedChangesManager({
+            viewMode$,
+            storeUnsavedChanges: true,
+            lastSavedState: DEFAULT_DASHBOARD_STATE,
+            layoutManager: layoutManagerMock,
+            savedObjectId$,
+            settingsManager: settingsManagerMock,
+            unifiedSearchManager: unifiedSearchManagerMock,
+            projectRoutingManager: projectRoutingManagerMock,
+            approximationManager: approximationManagerMock,
+            setState: setStateMock,
+            onSave$: onSave$.asObservable(),
+          });
+
+          if (alreadySaved) {
+            onSave$.next({
+              previousDashboardId: savedObjectId$.value,
+              dashboardId: savedObjectId$.value,
+              dashboardState: currentState,
+            });
+          }
+          layoutUnsavedChanges$.next({
+            ...(!alreadySaved ? { panels: currentState.panels } : {}),
+          });
+          expect(setBackupStateMock).not.toHaveBeenCalled();
+          manager.cleanup();
+          expect(setBackupStateMock).toHaveBeenCalledWith(savedObjectId$.value, {
+            viewMode: 'edit',
+            ...(alreadySaved ? {} : { panels: currentState.panels }),
+          });
+          jest.runAllTimers();
+          expect(setBackupStateMock).toHaveBeenCalledTimes(1);
+          jest.useRealTimers();
+        }
+      );
+
+      test('flushes a pending settings comparison before writing the final backup', () => {
+        jest.useFakeTimers();
+        const settingsManager = initializeSettingsManager(DEFAULT_DASHBOARD_STATE);
+        const manager = initializeUnsavedChangesManager({
+          viewMode$,
+          storeUnsavedChanges: true,
+          lastSavedState: DEFAULT_DASHBOARD_STATE,
+          layoutManager: layoutManagerMock,
+          savedObjectId$,
+          settingsManager,
+          unifiedSearchManager: unifiedSearchManagerMock,
+          projectRoutingManager: projectRoutingManagerMock,
+          approximationManager: approximationManagerMock,
+          setState: setStateMock,
+          onSave$: onSave$.asObservable(),
+        });
+        try {
+          settingsManager.api.setTags(['pending tag']);
+          expect(setBackupStateMock).not.toHaveBeenCalled();
+          manager.cleanup();
+          expect(setBackupStateMock).toHaveBeenCalledWith(savedObjectId$.value, {
+            viewMode: 'edit',
+            tags: ['pending tag'],
+          });
+          jest.runAllTimers();
+          expect(setBackupStateMock).toHaveBeenCalledTimes(1);
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
       test('should backup unsaved panel changes and references when only layout changes', (done) => {
         initializeUnsavedChangesManager({
           viewMode$,
