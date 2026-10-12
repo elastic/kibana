@@ -16,7 +16,10 @@ const mockCancel = jest.fn();
 const mockOpenCustomContext = jest.fn();
 let mockRunLimitGroups: readonly string[] = [];
 const mockKibanaServices = {
-  application: { navigateToUrl: jest.fn() },
+  application: {
+    navigateToUrl: jest.fn(),
+    capabilities: { nightshift: { show: true, manage: true } },
+  },
   http: {},
   overlays: { openConfirm: jest.fn() },
   appParams: { history: {} },
@@ -27,6 +30,9 @@ jest.mock('@kbn/unsaved-changes-prompt', () => ({
 }));
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: mockKibanaServices }),
+}));
+jest.mock('./components/investigation_identity_section', () => ({
+  InvestigationIdentitySection: () => <div data-test-subj="investigation-identity-section" />,
 }));
 jest.mock('./components/run_limits_section', () => ({
   RunLimitsSection: () => <div data-test-subj="run-limits-section" />,

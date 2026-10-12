@@ -10,8 +10,10 @@ import { EuiButton, EuiHorizontalRule } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { useKibana } from '../hooks/use_kibana';
+import { InvestigationIdentitySection } from './components/investigation_identity_section';
 import { RunLimitsSection } from './components/run_limits_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
 import { SettingsSection, SettingsSectionRow } from './components/settings_section';
@@ -28,6 +30,7 @@ export const InvestigationsSettingsTab = ({
 }) => {
   const { appParams, application, http, overlays } = useKibana().services;
   const runLimits = useRunLimitsForm({ groups: INVESTIGATION_RUN_LIMIT_GROUPS });
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: runLimits.isDirty,
@@ -67,6 +70,8 @@ export const InvestigationsSettingsTab = ({
           onSave={saveRunLimits}
           onConfirmSave={confirmRunLimits}
         />
+        <EuiHorizontalRule margin="l" />
+        <InvestigationIdentitySection canManage={canManageAndConfigure} />
         {onCustomContextClick && (
           <>
             <EuiHorizontalRule margin="l" />

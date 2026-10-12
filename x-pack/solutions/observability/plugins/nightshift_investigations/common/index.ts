@@ -291,3 +291,4 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
+export type { InvestigatorServiceAccountStatus } from './service_account';

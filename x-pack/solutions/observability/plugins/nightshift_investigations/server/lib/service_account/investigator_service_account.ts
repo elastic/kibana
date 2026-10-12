@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import type { InvestigatorServiceAccountStatus } from '../../../common';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from '../managed_workflows/constants';
 import {
   getBoundInvestigationWorkflowId,
@@ -37,14 +38,6 @@ export const NIGHTSHIFT_INVESTIGATOR_ROLE = {
   applications: [{ application: KIBANA_APPLICATION, privileges: ['all'], resources: ['*'] }],
   metadata: { managed_by: 'nightshift' },
 };
-
-export interface InvestigatorBindingStatus {
-  serviceAccountsEnabled: boolean;
-  serviceAccountId: string;
-  workflowId: string;
-  installed: boolean;
-  enabled: boolean | null;
-}
 
 interface Deps {
   core: CoreStart;
@@ -95,7 +88,7 @@ export const createInvestigatorServiceAccountService = ({
   const getStatus = async (
     request: KibanaRequest,
     spaceId: string
-  ): Promise<InvestigatorBindingStatus> => {
+  ): Promise<InvestigatorServiceAccountStatus> => {
     const workflowId = getBoundInvestigationWorkflowId(spaceId);
     const client = await workflowsExtensions.getClient(request);
     const status = await client.managedWorkflows.getWorkflowStatus(
@@ -120,7 +113,7 @@ export const createInvestigatorServiceAccountService = ({
   const enable = async (
     request: KibanaRequest,
     spaceId: string
-  ): Promise<InvestigatorBindingStatus> => {
+  ): Promise<InvestigatorServiceAccountStatus> => {
     if (!core.security.serviceAccounts.isEnabled()) {
       throw Boom.badRequest(
         'Service accounts are disabled. Set xpack.security.serviceAccounts.enabled: true.'
@@ -154,7 +147,7 @@ export const createInvestigatorServiceAccountService = ({
   const disable = async (
     request: KibanaRequest,
     spaceId: string
-  ): Promise<InvestigatorBindingStatus> => {
+  ): Promise<InvestigatorServiceAccountStatus> => {
     const client = await workflowsExtensions.getClient(request);
     await client.managedWorkflows.uninstall(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER,
