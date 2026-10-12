@@ -1,6 +1,6 @@
 # Server plugin rspack bundle (experiment)
 
-Not for merge. Builds one production `plugins.cjs` for server-enabled plugins and preloads it in a from-source serverless security boot, so idle heap can be compared with `node scripts/heap_snapshot_analyzer.js`.
+Not for merge. Builds one production bundle per server plugin (shared modules stay in separate chunks) and preloads that map in a from-source serverless security boot, so idle heap can be compared with `node scripts/heap_snapshot_analyzer.js`.
 
 The bundle and heap snapshot are written under `/tmp/kibana-server-plugin-bundle` (override with `KBN_PLUGIN_BUNDLE_OUT`). They are not part of this tree.
 
@@ -11,8 +11,7 @@ From a bootstrapped checkout, on the Node version in `.nvmrc`:
 ```sh
 python3 scripts/server_plugin_bundle/generate_entry.py
 node --max-old-space-size=16384 scripts/server_plugin_bundle/compile.js
-node scripts/server_plugin_bundle/latin1ify.js /tmp/kibana-server-plugin-bundle/plugins.cjs
-node --check /tmp/kibana-server-plugin-bundle/plugins.cjs
+find /tmp/kibana-server-plugin-bundle -name '*.cjs' -exec node scripts/server_plugin_bundle/latin1ify.js {} \;
 KBN_NODE="$(command -v node)" KBN_SERVER_PORT=5602 bash scripts/server_plugin_bundle/launch.sh
 ```
 

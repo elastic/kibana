@@ -6,7 +6,8 @@
 # your election, the "Elastic License 2.0", the "GNU Affero General Public
 # License v3.0 only", or the "Server Side Public License, v 1".
 
-"""Write entry.js for every non-example, non-test server plugin."""
+"""Write one rspack entry per non-example, non-test server plugin."""
+import json
 import os
 import re
 from pathlib import Path
@@ -14,7 +15,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 REPO = Path(os.environ.get('KBN_REPO', HERE.parents[1]))
 OUT_DIR = Path(os.environ.get('KBN_PLUGIN_BUNDLE_OUT', '/tmp/kibana-server-plugin-bundle'))
-OUT = OUT_DIR / 'entry.js'
+ENTRIES_DIR = OUT_DIR / 'entries'
 
 SKIP_PREFIXES = (
     'examples/',
@@ -54,32 +55,38 @@ for manifest in REPO.rglob('kibana.jsonc'):
     plugins.append((rel, pkg_id))
 
 plugins.sort()
-repo_literal = str(REPO)
-lines = [
-    "const path = require('path');",
-    f"const REPO = {repo_literal!r};",
-    'const modules = Object.create(null);',
-    'function add(rootRel, pkgId, mod) {',
-    "  modules[path.join(REPO, rootRel, 'server')] = mod;",
-    "  modules[rootRel + '/server'] = mod;",
-    # Distributable package-map.json points plugins at node_modules/<id>.
-    "  if (pkgId) modules['node_modules/' + pkgId + '/server'] = mod;",
-    '}',
-]
-for rel, pkg_id in plugins:
+OUT_DIR.mkdir(parents=True, exist_ok=True)
+ENTRIES_DIR.mkdir(parents=True, exist_ok=True)
+for old in OUT_DIR.glob('*.cjs'):
+    old.unlink()
+
+entries = []
+manifest = {}
+for index, (rel, pkg_id) in enumerate(plugins):
     abs_entry = REPO / rel / 'server' / 'index.ts'
     if not abs_entry.is_file():
         abs_entry = REPO / rel / 'server' / 'index.js'
     if not abs_entry.is_file():
         abs_entry = REPO / rel / 'server' / 'index.tsx'
-    lines.append(f"add({rel!r}, {pkg_id!r}, require({str(abs_entry)!r}));")
-lines += [
-    'globalThis.__KBN_PLUGIN_MODULES = modules;',
-    'module.exports = modules;',
-    '',
-]
-OUT_DIR.mkdir(parents=True, exist_ok=True)
-OUT.write_text('\n'.join(lines))
-print(f'plugins {len(plugins)} skipped {len(skipped)} -> {OUT}')
+    name = f'p{index}'
+    keys = [str(REPO / rel / 'server'), f'{rel}/server']
+    # Distributable package-map.json points plugins at node_modules/<id>.
+    if pkg_id:
+        keys.append(f'node_modules/{pkg_id}/server')
+    assigns = '\n'.join(f'global.__KBN_PLUGIN_MODULES[{key!r}] = mod;' for key in keys)
+    entry_path = ENTRIES_DIR / f'{name}.js'
+    entry_path.write_text(
+        'var mod = require(' + repr(str(abs_entry)) + ');\n'
+        'if (!global.__KBN_PLUGIN_MODULES) global.__KBN_PLUGIN_MODULES = Object.create(null);\n'
+        + assigns
+        + '\nmodule.exports = mod;\n'
+    )
+    entries.append({'name': name, 'file': str(entry_path)})
+    for key in keys:
+        manifest[key] = name + '.cjs'
+
+(OUT_DIR / 'entries.json').write_text(json.dumps(entries))
+(OUT_DIR / 'manifest.json').write_text(json.dumps(manifest))
+print(f'plugins {len(plugins)} skipped {len(skipped)} -> {ENTRIES_DIR}')
 for item in skipped:
     print('  skip', item)

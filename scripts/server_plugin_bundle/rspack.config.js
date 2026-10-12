@@ -7,11 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+var fs = require('fs');
 var path = require('path');
 var paths = require('./paths');
 var rspack = require('@rspack/core');
 var REPO = paths.REPO;
 var OUT = paths.OUT;
+var entryList = JSON.parse(fs.readFileSync(path.join(OUT, 'entries.json'), 'utf8'));
+var entry = {};
+var entryIndex;
+for (entryIndex = 0; entryIndex < entryList.length; entryIndex++) {
+  entry[entryList[entryIndex].name] = entryList[entryIndex].file;
+}
 
 var alias = {
   'mdast-util-to-hast/lib/all': path.join(__dirname, 'empty.js'),
@@ -33,10 +40,11 @@ module.exports = {
   target: 'node',
   devtool: false,
   cache: false,
-  entry: path.join(OUT, 'entry.js'),
+  entry: entry,
   output: {
     path: OUT,
-    filename: 'plugins.cjs',
+    filename: '[name].cjs',
+    chunkFilename: 'shared-[name].cjs',
     library: { type: 'commonjs2' },
     asyncChunks: false,
     chunkFormat: 'commonjs',
@@ -133,6 +141,14 @@ module.exports = {
     usedExports: true,
     sideEffects: true,
     concatenateModules: true,
+    // One runtime, and modules used by 2+ plugins, stay shared. Each entry is
+    // still its own file so one plugin is not one 70MB script source.
+    runtimeChunk: 'single',
+    splitChunks: {
+      chunks: 'all',
+      minChunks: 2,
+      minSize: 20000,
+    },
     // One non-Latin-1 character stores the whole plugins.cjs source as UTF-16.
     minimizer: [
       new rspack.SwcJsMinimizerRspackPlugin({

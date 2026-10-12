@@ -10,6 +10,7 @@
 // Load the plugin server bundle only in the Kibana server process.
 // Workers and the dev CLI parent inherit NODE_OPTIONS; skip them.
 var workerThreads = require('node:worker_threads');
+var fs = require('fs');
 var path = require('path');
 var paths = require('./paths');
 var isMainThread = workerThreads.isMainThread;
@@ -42,10 +43,9 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
   }
 
   require('@kbn/setup-node-env');
-  // Loaded through Module._load so the generated bundle stays outside the repo
-  // and still lands in Node's module cache, including fileContentsCache.
-  Module._load(path.join(OUT, 'plugins.cjs'), module, false);
 
+  var manifest = JSON.parse(fs.readFileSync(path.join(OUT, 'manifest.json'), 'utf8'));
+  var manifestKeys = Object.keys(manifest);
   var moduleHooks = require('node:module');
   var url = require('url');
   var v8 = require('v8');
@@ -65,17 +65,20 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
     }
     return url.pathToFileURL(shimPath).href;
   }
-  var registered = global.__KBN_PLUGIN_MODULES ? Object.keys(global.__KBN_PLUGIN_MODULES) : [];
   var distKeyCount = 0;
-  var registeredIndex;
-  for (registeredIndex = 0; registeredIndex < registered.length; registeredIndex++) {
-    if (registered[registeredIndex].indexOf('node_modules/') === 0) distKeyCount++;
+  var manifestIndex;
+  for (manifestIndex = 0; manifestIndex < manifestKeys.length; manifestIndex++) {
+    if (manifestKeys[manifestIndex].indexOf('node_modules/') === 0) distKeyCount++;
   }
-  console.log('[kbn-plugin-bundle] registered', registered.length, 'dist keys', distKeyCount);
+  console.log('[kbn-plugin-bundle] manifest', manifestKeys.length, 'dist keys', distKeyCount);
+
+  function ensureBundle(key) {
+    if (global.__KBN_PLUGIN_MODULES && global.__KBN_PLUGIN_MODULES[key]) return;
+    Module._load(path.join(OUT, manifest[key]), module, false);
+  }
 
   function moduleKey(specifier) {
     var trimmed;
-    var mods;
     var keys;
     var i;
     var key;
@@ -85,11 +88,9 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
     if (typeof specifier !== 'string' || specifier.charAt(0) !== '/') return undefined;
     trimmed = specifier.replace(/\/index\.(ts|js)$/, '');
     if (trimmed.slice(-7) !== '/server') return undefined;
-    mods = global.__KBN_PLUGIN_MODULES;
-    if (!mods) return trimmed;
-    if (mods[trimmed]) return trimmed;
+    if (manifest[trimmed]) return trimmed;
     // Built plugins are <dist>/node_modules/@kbn/<id>/server, not the checkout path.
-    keys = Object.keys(mods);
+    keys = manifestKeys;
     best = undefined;
     bestLen = -1;
     for (i = 0; i < keys.length; i++) {
@@ -138,7 +139,7 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
   moduleHooks.registerHooks({
     resolve: function (specifier, context, nextResolve) {
       var key = moduleKey(specifier);
-      if (key && global.__KBN_PLUGIN_MODULES && global.__KBN_PLUGIN_MODULES[key]) {
+      if (key && manifest[key]) {
         shortCircuits += 1;
         if (shortCircuits <= 5 || shortCircuits % 50 === 0) {
           console.log('[kbn-plugin-bundle] short-circuit', shortCircuits, key);
@@ -162,15 +163,18 @@ if (process.env.KBN_PLUGIN_BUNDLE === '1' && process.env.isDevCliChild !== 'true
     load: function (moduleUrl, context, nextLoad) {
       var key;
       var filePath;
-      if (moduleUrl.indexOf('file:') === 0 && global.__KBN_PLUGIN_MODULES) {
+      if (moduleUrl.indexOf('file:') === 0) {
         filePath = url.fileURLToPath(moduleUrl);
         key = keyByShimPath[filePath] || moduleKey(filePath);
-        if (key && global.__KBN_PLUGIN_MODULES[key]) {
-          return {
-            format: 'commonjs',
-            shortCircuit: true,
-            source: shimSource(key),
-          };
+        if (key && manifest[key]) {
+          ensureBundle(key);
+          if (global.__KBN_PLUGIN_MODULES && global.__KBN_PLUGIN_MODULES[key]) {
+            return {
+              format: 'commonjs',
+              shortCircuit: true,
+              source: shimSource(key),
+            };
+          }
         }
       }
       return nextLoad(moduleUrl, context);

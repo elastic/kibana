@@ -62,7 +62,9 @@ echo "--- Build server plugin bundle for the target boot"
 export KBN_PLUGIN_BUNDLE_OUT=/tmp/kibana-server-plugin-bundle
 python3 scripts/server_plugin_bundle/generate_entry.py
 node --max-old-space-size=16384 scripts/server_plugin_bundle/compile.js
-node scripts/server_plugin_bundle/latin1ify.js /tmp/kibana-server-plugin-bundle/plugins.cjs
+while IFS= read -r -d '' bundle; do
+  node scripts/server_plugin_bundle/latin1ify.js "$bundle"
+done < <(find "$KBN_PLUGIN_BUNDLE_OUT" -name '*.cjs' -print0)
 export KBN_PLUGIN_BUNDLE_CI=1
 
 echo "--- Warm-start memory benchmark against merge base"
