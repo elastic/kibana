@@ -162,6 +162,39 @@ describe('sameCompatibility', () => {
     ).toBe(false);
   });
 
+  describe('compares nodes by version and address, not by response order', () => {
+    const node = (version: string, ip: string) => ({ version, ip, name: ip });
+    const first = node('5.1.1', '10.0.0.1');
+    const second = node('5.2.0', '10.0.0.2');
+
+    it('treats the same nodes in a different order as equal', () => {
+      expect(
+        sameCompatibility(
+          compatibilityOf({ nodes: { a: first, b: second } }),
+          compatibilityOf({ nodes: { b: second, a: first } })
+        )
+      ).toBe(true);
+    });
+
+    it('distinguishes a node joining the cluster', () => {
+      expect(
+        sameCompatibility(
+          compatibilityOf({ nodes: { a: first } }),
+          compatibilityOf({ nodes: { a: first, b: second } })
+        )
+      ).toBe(false);
+    });
+
+    it('distinguishes a node replaced by another at the same version', () => {
+      expect(
+        sameCompatibility(
+          compatibilityOf({ nodes: { a: first } }),
+          compatibilityOf({ nodes: { a: node('5.1.1', '10.0.0.9') } })
+        )
+      ).toBe(false);
+    });
+  });
+
   it('distinguishes errors by message only', () => {
     expect(sameCompatibility(withError('boom'), withError('boom'))).toBe(true);
     expect(sameCompatibility(withError('boom'), withError('bang'))).toBe(false);

@@ -55,6 +55,18 @@ describe('classifyClockSkew', () => {
     expect(classifyClockSkew(sampleAt(kibanaTime + 500, 61_000))).toEqual({ type: 'inSync' });
   });
 
+  it('measures a node ahead from the response, not the request', () => {
+    // 60.5s after the request left, but only 59.5s after the response arrived.
+    expect(classifyClockSkew(sampleAt(kibanaTime + 60_500, 1_000))).toEqual({ type: 'inSync' });
+  });
+
+  it('reports the skew from the nearer end of the round trip, so it is a lower bound', () => {
+    expect(classifyClockSkew(sampleAt(kibanaTime + 62_000, 1_000))).toEqual({
+      type: 'skewed',
+      skew: { ms: 61_000, kibanaTime: kibanaTime + 1_000, elasticsearchTime: kibanaTime + 62_000 },
+    });
+  });
+
   it('measures nothing when no node reported a timestamp', () => {
     expect(classifyClockSkew({ ...inSync, timestamps: [] })).toEqual({ type: 'unmeasured' });
   });
@@ -140,6 +152,20 @@ describe('pollEsNodesClockSkew', () => {
       ],
     ]);
     expect(log.info.mock.calls).toEqual([['Kibana and Elasticsearch clocks are in sync again.']]);
+  });
+
+  it('reminds every hour from when the skew was detected', async () => {
+    // In sync at 0, skewed from 10 minutes: detected at 10, reminders due at 70 and 130.
+    await runRequests([
+      respond(kibanaTime),
+      ...Array<() => Promise<unknown>>(13).fill(respond(kibanaTime - 61_000)),
+    ]);
+
+    expect(log.error.mock.calls.map(([message]) => String(message).includes('still'))).toEqual([
+      false,
+      true,
+      true,
+    ]);
   });
 
   it.each([

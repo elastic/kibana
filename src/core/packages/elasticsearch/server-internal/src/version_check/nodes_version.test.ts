@@ -15,9 +15,11 @@ import {
   fetchNodesInfo,
   initialState,
   model,
+  nodesVersionMachine,
   pollEsNodesVersion,
   type NodesVersionResult,
   type NodesVersionConfig,
+  type NodesVersionControlState,
   type NodesVersionState,
 } from './nodes_version';
 import { mapNodesVersionCompatibility, type NodesInfo } from './nodes_version_compatibility';
@@ -38,16 +40,9 @@ const compatible: NodesInfo = { nodes: { a: { version: '8.10.0', ip: '1.1.1.1', 
 const incompatible: NodesInfo = { nodes: { a: { version: '7.0.0', ip: '1.1.1.1', name: 'a' } } };
 const requestError = new Error('boom');
 
-const ok = (nodes: NodesInfo, completedAt = 0): NodesVersionResult => ({
-  ok: true,
-  value: nodes,
-  completedAt,
-});
-const fail = (error: Error, completedAt = 0): NodesVersionResult => ({
-  ok: false,
-  error,
-  completedAt,
-});
+// The version model never reads `completedAt`; the driver schedules from it.
+const ok = (nodes: NodesInfo): NodesVersionResult => ({ ok: true, value: nodes, completedAt: 0 });
+const fail = (error: Error): NodesVersionResult => ({ ok: false, error, completedAt: 0 });
 
 /** The request outcome a settled result presents to the compatibility mapping. */
 type RequestOutcome = NodesInfo & { nodesInfoRequestError?: Error };
@@ -55,22 +50,39 @@ type RequestOutcome = NodesInfo & { nodesInfoRequestError?: Error };
 const compatibilityOf = (outcome: RequestOutcome) =>
   mapNodesVersionCompatibility(outcome, config.kibanaVersion, config.ignoreVersionMismatch);
 
-/** How long after the request that produced it this state schedules the next one. */
-const dueIn = (state: NodesVersionState, completedAt = 0): number =>
-  state.nextActionAt - completedAt;
+describe('the polling interval', () => {
+  const state = (controlState: NodesVersionControlState): NodesVersionState => ({
+    controlState,
+    compatibility: undefined,
+    attemptsLeft: 0,
+  });
 
-describe('a zero interval falls back to the normal one', () => {
-  it('polls at the normal interval when the failure interval is zero', () => {
-    const zero = { ...config, healthCheckFailureInterval: 0 };
-    const normal: NodesVersionState = {
-      controlState: 'NORMAL',
-      compatibility: compatibilityOf(compatible),
-      attemptsLeft: 0,
-      nextActionAt: 0,
-    };
-    expect(model(zero, normal, fail(requestError)).state.nextActionAt).toBe(
-      config.healthCheckInterval
-    );
+  it('follows the control state', () => {
+    const machine = nodesVersionMachine(async () => compatible, config);
+    expect(machine.interval(state('STARTUP'))).toBe(config.healthCheckStartupInterval);
+    expect(machine.interval(state('FAILING'))).toBe(config.healthCheckFailureInterval);
+    expect(machine.interval(state('NORMAL'))).toBe(config.healthCheckInterval);
+  });
+
+  it('falls back to the normal interval when a configured interval is zero', () => {
+    const zeroFailure = nodesVersionMachine(async () => compatible, {
+      ...config,
+      healthCheckFailureInterval: 0,
+    });
+    const zeroStartup = nodesVersionMachine(async () => compatible, {
+      ...config,
+      healthCheckStartupInterval: 0,
+    });
+    expect(zeroFailure.interval(state('FAILING'))).toBe(config.healthCheckInterval);
+    expect(zeroStartup.interval(state('STARTUP'))).toBe(config.healthCheckInterval);
+  });
+
+  it('uses the normal interval during startup when no startup interval is configured', () => {
+    const machine = nodesVersionMachine(async () => compatible, {
+      ...config,
+      healthCheckStartupInterval: undefined,
+    });
+    expect(machine.interval(state('STARTUP'))).toBe(config.healthCheckInterval);
   });
 });
 
@@ -79,20 +91,17 @@ describe('FAILING tracks request errors, not incompatibility', () => {
     controlState: 'NORMAL',
     compatibility: compatibilityOf(compatible),
     attemptsLeft: 0,
-    nextActionAt: 0,
   };
 
   it('stays NORMAL for a reachable cluster running an incompatible version', () => {
     const { state: primed } = model(config, normal, ok(incompatible));
     expect(primed.compatibility?.isCompatible).toBe(false);
     expect(primed.controlState).toBe('NORMAL');
-    expect(dueIn(primed)).toBe(config.healthCheckInterval);
   });
 
   it('goes FAILING when the request itself fails', () => {
     const { state: primed } = model(config, normal, fail(requestError));
     expect(primed.controlState).toBe('FAILING');
-    expect(dueIn(primed)).toBe(config.healthCheckFailureInterval);
   });
 });
 
@@ -101,24 +110,22 @@ describe('attemptsLeft', () => {
     controlState: 'NORMAL',
     compatibility: compatibilityOf(compatible),
     attemptsLeft: config.healthCheckRetry,
-    nextActionAt: 0,
   };
-  const { healthCheckInterval: interval } = config;
 
   it('uses attempts on request errors without settling a compatibility', () => {
-    const first = model(config, normal, fail(requestError, 0));
+    const first = model(config, normal, fail(requestError));
     expect(first).toEqual({
-      state: { ...normal, attemptsLeft: 1, nextActionAt: interval },
+      state: { ...normal, attemptsLeft: 1 },
       event: { type: 'retried' },
     });
 
-    const second = model(config, first.state, fail(requestError, interval));
+    const second = model(config, first.state, fail(requestError));
     expect(second).toEqual({
-      state: { ...normal, attemptsLeft: 0, nextActionAt: 2 * interval },
+      state: { ...normal, attemptsLeft: 0 },
       event: { type: 'retried' },
     });
 
-    const { state: settled } = model(config, second.state, fail(requestError, 2 * interval));
+    const { state: settled } = model(config, second.state, fail(requestError));
     expect(settled.controlState).toBe('FAILING');
     expect(settled.attemptsLeft).toBe(config.healthCheckRetry);
   });
@@ -129,27 +136,24 @@ describe('attemptsLeft', () => {
   });
 });
 
-describe('the initial state', () => {
-  it('starts in STARTUP, so a retry waits the startup interval rather than 0', () => {
-    const { state: retried } = model(
-      config,
-      initialState(config, 1_000),
-      fail(requestError, 1_000)
-    );
-    expect(retried.controlState).toBe('STARTUP');
-    expect(retried.compatibility).toBeUndefined();
-    expect(dueIn(retried, 1_000)).toBe(config.healthCheckStartupInterval);
+describe('STARTUP', () => {
+  it('is the initial state, with no compatibility and every attempt left', () => {
+    expect(initialState(config)).toEqual({
+      controlState: 'STARTUP',
+      compatibility: undefined,
+      attemptsLeft: config.healthCheckRetry,
+    });
   });
 
-  it('stays in startup at the normal interval when no startup interval is configured', () => {
-    const withoutStartup = { ...config, healthCheckStartupInterval: undefined };
-    const { state: retried } = model(
-      withoutStartup,
-      initialState(withoutStartup, 1_000),
-      fail(requestError, 1_000)
-    );
-    expect(retried.controlState).toBe('STARTUP');
-    expect(dueIn(retried, 1_000)).toBe(withoutStartup.healthCheckInterval);
+  it('lasts until the cluster is first compatible, whether it answers incompatible or fails', () => {
+    const start = initialState(config);
+    const { state: answered } = model(config, start, ok(incompatible));
+    expect(answered.controlState).toBe('STARTUP');
+
+    const { state: failed } = model(config, { ...start, attemptsLeft: 0 }, fail(requestError));
+    expect(failed.controlState).toBe('STARTUP');
+
+    expect(model(config, answered, ok(compatible)).state.controlState).toBe('NORMAL');
   });
 });
 
@@ -158,11 +162,10 @@ describe('the event of a step', () => {
     controlState: 'NORMAL',
     compatibility: compatibilityOf(compatible),
     attemptsLeft: config.healthCheckRetry,
-    nextActionAt: 0,
   };
 
   it('is compatibilityChanged for the first compatibility, whatever it is', () => {
-    const { state, event } = model(config, initialState(config, 0), ok(incompatible));
+    const { state, event } = model(config, initialState(config), ok(incompatible));
     expect(event).toEqual({ type: 'compatibilityChanged', compatibility: state.compatibility });
   });
 
@@ -242,6 +245,15 @@ describe('pollEsNodesVersion', () => {
     await poll([incompatible, incompatible]);
     expect(log.error).toHaveBeenCalledTimes(1);
     expect(log.error).toHaveBeenCalledWith(expect.stringContaining('7.0.0'));
+  });
+
+  it('does not log a compatible cluster that only differs by patch version', async () => {
+    const patchAhead: NodesInfo = {
+      nodes: { a: { version: '8.10.1', ip: '1.1.1.1', name: 'a' } },
+    };
+    const { emitted } = await poll([patchAhead]);
+    expect(emitted[0].warningNodes).toHaveLength(1);
+    expect(log.error).not.toHaveBeenCalled();
   });
 });
 

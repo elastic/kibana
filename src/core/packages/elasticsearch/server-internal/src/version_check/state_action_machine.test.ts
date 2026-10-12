@@ -14,7 +14,6 @@ import {
   type AugmentedState,
   type StateActionMachine,
   type ActionResult,
-  type Scheduled,
 } from './state_action_machine';
 import { take, virtualClock } from './state_action_machine.test_helpers';
 
@@ -38,15 +37,16 @@ describe('run turns every failure of an action into an ok: false result', () => 
   }
   const recorder = <R>(
     action: Action<R>,
-    dueAt = 0
-  ): StateActionMachine<Scheduled, R, Recorded<R>> => ({
-    initialState: () => ({ nextActionAt: dueAt }),
+    interval = 0
+  ): StateActionMachine<null, R, Recorded<R>> => ({
+    initialState: () => null,
     next: () => action,
-    model: (state, result) => ({ state, event: { type: 'performed', result } }),
+    interval: () => interval,
+    model: (_state, result) => ({ state: null, event: { type: 'performed', result } }),
   });
 
   const resultOf = async <R>(
-    machine: StateActionMachine<Scheduled, R, Recorded<R>>,
+    machine: StateActionMachine<null, R, Recorded<R>>,
     clock = virtualClock()
   ) => {
     const [, step] = await take(run(machine, clock), 2);
@@ -90,16 +90,20 @@ describe('run turns every failure of an action into an ok: false result', () => 
       clock.advance(5);
       return 'value';
     };
-    expect(await resultOf(recorder(action, 100), clock)).toEqual({
-      ok: true,
-      value: 'value',
-      completedAt: 105,
+    // The first action is due at once (10) and completes at 15. Interval 90 puts the
+    // next one at 100, so the second action is the one that waits.
+    const [initial, first, second] = await take(run(recorder(action, 90), clock), 3);
+
+    expect([initial.dueAt, first.dueAt]).toEqual([10, 100]);
+    expect(second.event).toEqual({
+      type: 'performed',
+      result: { ok: true, value: 'value', completedAt: 105 },
     });
   });
 });
 
 describe('run', () => {
-  interface Counter extends Scheduled {
+  interface Counter {
     readonly count: number;
   }
   /** The domain's account of a step: what the request added, or that it added nothing. */
@@ -109,19 +113,19 @@ describe('run', () => {
     request: Action<number>,
     until = Infinity
   ): StateActionMachine<Counter, number, Counted> => ({
-    initialState: (now) => ({ count: 0, nextActionAt: now }),
+    initialState: () => ({ count: 0 }),
     // The next-action predicate: the one request, until the count is reached.
     next: (state) => (state.count >= until ? null : request),
+    interval: () => 100,
     model: (state, result): AugmentedState<Counter, Counted> => ({
       state: {
         count: result.ok ? state.count + result.value : state.count,
-        nextActionAt: nextOnGrid(state.nextActionAt, result.completedAt, 100),
       },
       event: result.ok ? { type: 'added', by: result.value } : { type: 'missed' },
     }),
   });
 
-  it('yields the initial state, then one augmented state per action, with the event the model chose', async () => {
+  it('yields the initial state, then one step per action, with the event the model chose and the next deadline', async () => {
     const clock = virtualClock();
     let calls = 0;
     const request = async () => {
@@ -134,9 +138,9 @@ describe('run', () => {
     const steps = await take(run(counter(request), clock), 3);
 
     expect(steps).toEqual([
-      { state: { count: 0, nextActionAt: 0 }, event: { type: 'initial' } },
-      { state: { count: 1, nextActionAt: 100 }, event: { type: 'added', by: 1 } },
-      { state: { count: 1, nextActionAt: 200 }, event: { type: 'missed' } },
+      { state: { count: 0 }, event: { type: 'initial' }, dueAt: 0 },
+      { state: { count: 1 }, event: { type: 'added', by: 1 }, dueAt: 100 },
+      { state: { count: 1 }, event: { type: 'missed' }, dueAt: 200 },
     ]);
   });
 
@@ -155,7 +159,7 @@ describe('run', () => {
     }
 
     expect(seen.map(({ state }) => state.count)).toEqual([0, 1, 2]);
-    expect(pulled.value).toEqual({ count: 2, nextActionAt: 200 });
+    expect(pulled.value).toEqual({ count: 2 });
   });
 
   it('drops the result of an action that completed after the abort', async () => {
@@ -203,7 +207,7 @@ describe('run', () => {
     await steps.next(); // the first request, due at once, scheduling the next at 100
     const pending = steps.next(); // waits for 100; the sleep aborts
 
-    await expect(pending).resolves.toEqual({ done: true, value: { count: 1, nextActionAt: 100 } });
+    await expect(pending).resolves.toEqual({ done: true, value: { count: 1 } });
     expect(request).toHaveBeenCalledTimes(1);
   });
 
@@ -227,7 +231,7 @@ describe('run', () => {
 
     await expect(pending).resolves.toEqual({
       done: true,
-      value: { count: 1, nextActionAt: 100 },
+      value: { count: 1 },
     });
   });
 });

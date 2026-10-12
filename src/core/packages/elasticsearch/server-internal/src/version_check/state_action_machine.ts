@@ -11,8 +11,11 @@
  * A state-action machine driver. A machine is an `initialState`, a `next` that
  * picks the action for a state, and a pure `model` that turns a state and its
  * action's result into the next state plus an event describing the step
- * (Lamport's augmented state, "Computer Science and State Machines", 2008).
+ * (Lamport's augmented state, "Computation and State Machines", 2008).
  * Models never read a clock; time arrives as the result's `completedAt`.
+ * The driver owns the timer: it waits until the action is due, schedules the
+ * next one from the interval of the state just reached, and yields that
+ * deadline with each step as `dueAt`.
  */
 
 import { setTimeout as delay } from 'node:timers/promises';
@@ -31,10 +34,6 @@ export type ActionResult<R> =
   | { readonly ok: true; readonly value: R; readonly completedAt: number }
   | { readonly ok: false; readonly error: Error; readonly completedAt: number };
 
-export interface Scheduled {
-  readonly nextActionAt: number;
-}
-
 export interface DomainEvent {
   readonly type: string;
 }
@@ -49,11 +48,16 @@ export interface AugmentedState<S, E> {
   readonly event: E;
 }
 
-export interface StateActionMachine<S extends Scheduled, R, E extends DomainEvent> {
-  readonly initialState: (now: number) => S;
+/** What `run` yields: an augmented state and when the next action is due, if `next` returns one. */
+export type Step<S, E> = AugmentedState<S, E> & { readonly dueAt: number };
+
+export interface StateActionMachine<S, R, E extends DomainEvent> {
+  readonly initialState: () => S;
   /** The action to run in `state`, or null once the machine is done. */
   readonly next: (state: S) => Action<R> | null;
   readonly model: (state: S, result: ActionResult<R>) => AugmentedState<S, E>;
+  /** Polling interval for the state just reached. Zero is due at the completion. */
+  readonly interval: (state: S) => number;
 }
 
 /** Monotonic, so wall-clock adjustments don't move schedules; unref'd, so it never holds the process open. */
@@ -74,11 +78,11 @@ export const nextOnGrid = (anchor: number, completedAt: number, interval: number
 /** Waits until the action is due and runs it; action failures become results, an abort throws. */
 const perform = async <R>(
   action: Action<R>,
-  state: Scheduled,
+  dueAt: number,
   { now, sleep }: Clock,
   signal?: AbortSignal
 ): Promise<ActionResult<R>> => {
-  const waitMs = state.nextActionAt - now();
+  const waitMs = dueAt - now();
   if (waitMs > 0) {
     await sleep(waitMs, signal);
   }
@@ -97,15 +101,19 @@ const perform = async <R>(
   }
 };
 
-/** Yields the initial state and then each step, until `next` returns null or `signal` aborts. */
-export async function* run<S extends Scheduled, R, E extends DomainEvent>(
-  { initialState, next, model }: StateActionMachine<S, R, E>,
+/**
+ * Yields the initial step, due at once, and then each step, until `next` returns null or
+ * `signal` aborts. Returns the last domain state; its deadline is on the last yielded step.
+ */
+export async function* run<S, R, E extends DomainEvent>(
+  { initialState, next, model, interval }: StateActionMachine<S, R, E>,
   clock: Clock = realClock,
   signal?: AbortSignal
-): AsyncGenerator<AugmentedState<S, E | InitialEvent>, S> {
-  let state = initialState(clock.now());
+): AsyncGenerator<Step<S, E | InitialEvent>, S> {
+  let state = initialState();
+  let dueAt = clock.now();
 
-  yield { state, event: { type: 'initial' } };
+  yield { state, event: { type: 'initial' }, dueAt };
   while (!signal?.aborted) {
     const action = next(state);
     if (action === null) {
@@ -113,7 +121,7 @@ export async function* run<S extends Scheduled, R, E extends DomainEvent>(
     }
     let result: ActionResult<R>;
     try {
-      result = await perform(action, state, clock, signal);
+      result = await perform(action, dueAt, clock, signal);
     } catch (error) {
       if (signal?.aborted) {
         return state;
@@ -125,8 +133,9 @@ export async function* run<S extends Scheduled, R, E extends DomainEvent>(
       return state;
     }
     const reached = model(state, result);
+    dueAt = nextOnGrid(dueAt, result.completedAt, interval(reached.state));
     state = reached.state;
-    yield reached;
+    yield { ...reached, dueAt };
   }
   return state;
 }

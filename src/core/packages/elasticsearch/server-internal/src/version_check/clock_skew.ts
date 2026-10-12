@@ -16,7 +16,6 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { HEALTH_CHECK_REQUEST_TIMEOUT } from './constants';
 import {
-  nextOnGrid,
   realClock,
   run,
   type Action,
@@ -24,7 +23,6 @@ import {
   type AugmentedState,
   type Clock,
   type InitialEvent,
-  type Scheduled,
 } from './state_action_machine';
 
 const MAX_CLOCK_SKEW_MS = 60_000;
@@ -49,11 +47,9 @@ type ClockSkewClassification =
   | { readonly type: 'inSync' }
   | { readonly type: 'skewed'; readonly skew: ClockSkew };
 
-type ClockSkewState = Scheduled &
-  (
-    | { readonly controlState: 'healthy' }
-    | { readonly controlState: 'skewed'; readonly remindAt: number }
-  );
+type ClockSkewState =
+  | { readonly controlState: 'healthy' }
+  | { readonly controlState: 'skewed'; readonly remindAt: number };
 
 type ClockSkewEvent =
   /** The request failed or measured nothing. */
@@ -64,11 +60,6 @@ type ClockSkewEvent =
   /** Still skewed; the hourly reminder is not yet due. */
   | { readonly type: 'skewPersists' }
   | { readonly type: 'skewReminder'; readonly skew: ClockSkew };
-
-const initialState = (nextActionAt: number): ClockSkewState => ({
-  controlState: 'healthy',
-  nextActionAt,
-});
 
 export const sampleClocks =
   (internalClient: ElasticsearchClient): Action<ClockSkewSample> =>
@@ -115,13 +106,8 @@ const model = (
   state: ClockSkewState,
   result: ActionResult<ClockSkewSample>
 ): AugmentedState<ClockSkewState, ClockSkewEvent> => {
-  const nextActionAt = nextOnGrid(
-    state.nextActionAt,
-    result.completedAt,
-    CLOCK_SKEW_CHECK_INTERVAL_MS
-  );
   const unavailable: AugmentedState<ClockSkewState, ClockSkewEvent> = {
-    state: { ...state, nextActionAt },
+    state,
     event: { type: 'unavailable' },
   };
 
@@ -134,7 +120,7 @@ const model = (
   }
   if (classification.type === 'inSync') {
     return {
-      state: { controlState: 'healthy', nextActionAt },
+      state: { controlState: 'healthy' },
       event: { type: state.controlState === 'skewed' ? 'recovered' : 'inSync' },
     };
   }
@@ -143,15 +129,15 @@ const model = (
   const remindAt = result.completedAt + CLOCK_SKEW_REMINDER_INTERVAL_MS;
   if (state.controlState === 'healthy') {
     return {
-      state: { controlState: 'skewed', remindAt, nextActionAt },
+      state: { controlState: 'skewed', remindAt },
       event: { type: 'skewDetected', skew },
     };
   }
   if (result.completedAt < state.remindAt) {
-    return { state: { ...state, nextActionAt }, event: { type: 'skewPersists' } };
+    return { state, event: { type: 'skewPersists' } };
   }
   return {
-    state: { controlState: 'skewed', remindAt, nextActionAt },
+    state: { controlState: 'skewed', remindAt },
     event: { type: 'skewReminder', skew },
   };
 };
@@ -192,7 +178,16 @@ export const pollEsNodesClockSkew = async (
   clock: Clock = realClock
 ): Promise<void> => {
   const action = sampleClocks(internalClient);
-  for await (const { event } of run({ initialState, next: () => action, model }, clock, signal)) {
+  for await (const { event } of run(
+    {
+      initialState: (): ClockSkewState => ({ controlState: 'healthy' }),
+      next: () => action,
+      model,
+      interval: () => CLOCK_SKEW_CHECK_INTERVAL_MS,
+    },
+    clock,
+    signal
+  )) {
     logClockSkewEvent(log, event);
   }
 };
