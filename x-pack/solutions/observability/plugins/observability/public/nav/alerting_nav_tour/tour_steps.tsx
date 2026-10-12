@@ -84,8 +84,7 @@ export const getAlertingNavTourSteps = (): AlertingNavTourStep[] => [
     }),
     content: wrap(
       i18n.translate('xpack.observability.alertingNavTour.steps.rulesTabs.description', {
-        defaultMessage:
-          'Switch between Universal and Classic rule management from one Rules page.',
+        defaultMessage: 'Switch between Universal and Classic rule management from one Rules page.',
       })
     ),
     anchor: '[data-test-subj="v2RulesTab"]',
@@ -157,7 +156,8 @@ export const getAlertingNavTourSteps = (): AlertingNavTourStep[] => [
     ),
     // Header Create rule is hidden when empty; fall back to the empty-state heading (not a card —
     // EuiTourStep wrapping shrinks full-width cards).
-    anchor: '[data-test-subj="createRuleButton"], [data-test-subj="ruleCreateOptionsPanel"] h2',
+    anchor:
+      '[data-test-subj="createRuleButton"], [data-test-subj="ruleCreateOptionsEmptyStateTitle"]',
     anchorPosition: 'downCenter',
     appId: OBSERVABILITY_ALERTING_APP_ID,
     path: OBSERVABILITY_ALERTING_RULES_V2_PATH,

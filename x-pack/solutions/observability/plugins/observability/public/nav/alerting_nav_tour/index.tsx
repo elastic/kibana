@@ -10,7 +10,10 @@ import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import { AlertingNavTour } from './alerting_nav_tour';
 
-/** Mounts promo + tour outside any single app so navigation does not unmount the tour. */
+export { AlertingNavPromo } from './alerting_nav_promo';
+export { ALERTING_NAV_START_TOUR_EVENT } from './alerting_nav_tour_state';
+
+/** Mounts the guided tour outside any single app so navigation does not unmount it. */
 export const mountAlertingNavTour = (coreStart: CoreStart): (() => void) => {
   const container = document.createElement('div');
   container.setAttribute('data-test-subj', 'alertingNavTourRoot');

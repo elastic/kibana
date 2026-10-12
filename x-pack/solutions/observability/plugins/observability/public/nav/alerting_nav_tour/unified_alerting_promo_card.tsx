@@ -48,12 +48,15 @@ const PROMO_DISMISS = i18n.translate('xpack.observability.alertingNavTour.promo.
 interface UnifiedAlertingPromoCardProps {
   onTakeTour: () => void;
   onDismiss: () => void;
+  /** When false (tours disabled), hide the Take tour CTA. */
+  showTakeTour?: boolean;
 }
 
 /** Compact promo card for the floating Unified Alerting entry on Alerts. */
 export const UnifiedAlertingPromoCard: React.FC<UnifiedAlertingPromoCardProps> = ({
   onTakeTour,
   onDismiss,
+  showTakeTour = true,
 }) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const promoImage = colorMode.toUpperCase() === 'DARK' ? promoImageDark : promoImageLight;
@@ -127,17 +130,21 @@ export const UnifiedAlertingPromoCard: React.FC<UnifiedAlertingPromoCardProps> =
         <EuiText size="xs" color="subdued">
           <p>{PROMO_DESCRIPTION}</p>
         </EuiText>
-        <EuiSpacer size="m" />
-        <EuiButton
-          fullWidth
-          size="s"
-          color="text"
-          iconType="map"
-          onClick={onTakeTour}
-          data-test-subj={ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID}
-        >
-          {PROMO_TAKE_TOUR}
-        </EuiButton>
+        {showTakeTour ? (
+          <>
+            <EuiSpacer size="m" />
+            <EuiButton
+              fullWidth
+              size="s"
+              color="text"
+              iconType="map"
+              onClick={onTakeTour}
+              data-test-subj={ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID}
+            >
+              {PROMO_TAKE_TOUR}
+            </EuiButton>
+          </>
+        ) : null}
       </div>
     </EuiPanel>
   );

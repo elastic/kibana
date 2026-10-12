@@ -30,4 +30,14 @@ describe('UnifiedAlertingPromoCard', () => {
     expect(onTakeTour).toHaveBeenCalledTimes(1);
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
+
+  it('hides Take tour when showTakeTour is false', () => {
+    render(
+      <UnifiedAlertingPromoCard onTakeTour={jest.fn()} onDismiss={jest.fn()} showTakeTour={false} />
+    );
+
+    expect(screen.getByTestId(ALERTING_NAV_PROMO_CARD_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID)).not.toBeInTheDocument();
+  });
 });
+

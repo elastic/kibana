@@ -34,6 +34,8 @@ describe('getAlertingNavTourSteps', () => {
     expect(byId.createFirstRule.appId).toBe('observabilityAlerting');
     expect(byId.createFirstRule.path).toBe('/rules/v2');
     expect(byId.createFirstRule.anchor).toContain('createRuleButton');
+    expect(byId.createFirstRule.anchor).toContain('ruleCreateOptionsEmptyStateTitle');
+    expect(byId.createFirstRule.anchor).not.toContain(' h2');
 
     for (const step of steps) {
       if (step.stepId === 'maintenanceWindows') {
