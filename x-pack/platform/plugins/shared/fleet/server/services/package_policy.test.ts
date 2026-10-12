@@ -9443,7 +9443,7 @@ describe('Package policy service', () => {
           latestVersion: '1.1.0',
           release: 'ga',
           format_version: '1.0.0',
-          owner: { github: 'elastic/obs-ux-management-team' },
+          owner: { github: 'elastic/obs-signals-logs-team' },
           policy_templates: [
             {
               name: 'synthetics',

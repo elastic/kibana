@@ -66,10 +66,8 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     settingsVersion: 1,
     scheduleInterval: '4h',
     // No extras: tier2When/candidateLimit/fanOutMax are fixed implementation constants,
-    // not settings.
-    // Default autonomy is manual, so the scheduled trigger is omitted even though
-    // scheduleInterval is a setting (assisted/supervised re-render it in).
-    triggerTypes: ['manual'],
+    // not settings. Manual autonomy is fixed; schedule still runs every 4h.
+    triggerTypes: ['scheduled', 'manual'],
   },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
