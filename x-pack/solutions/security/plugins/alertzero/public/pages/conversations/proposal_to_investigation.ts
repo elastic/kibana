@@ -95,14 +95,13 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
 
   const impactRank = IMPACT_RANK[proposal.impact];
   const confidenceRank = CONFIDENCE_RANK[proposal.confidence];
+  const actionLabel = closedActionLabel(proposal) ?? proposal.title;
+  const conversationTitle = proposal.conversationTitle ?? UNTITLED_INVESTIGATION;
 
   return {
     id: proposal.id,
     template_id: 'investigation',
-    // A card is titled by the investigation it belongs to, never by its action: the
-    // action name is already the call to action, and repeating it as the title loses
-    // the only thing that says which incident this decision is about.
-    title: proposal.conversationTitle ?? UNTITLED_INVESTIGATION,
+    title: actionLabel,
     createdAt: proposal.createdAt,
     // Proposals have no modification timestamp; decidedAt is the closest event.
     updatedAt: proposal.decidedAt ?? proposal.createdAt,
@@ -121,10 +120,9 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
     conversationId: proposal.conversationId,
-    // The title, not the comment: the card renders this as plain text, so the
-    // comment's markdown came through as literal asterisks and headings.
-    summary: proposal.title,
-    primaryActionLabel: closedActionLabel(proposal) ?? proposal.title,
+    summary: conversationTitle,
+    // Decided rows have no action button, and the compact row prints this after the title.
+    primaryActionLabel: isClosed ? conversationTitle : actionLabel,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.

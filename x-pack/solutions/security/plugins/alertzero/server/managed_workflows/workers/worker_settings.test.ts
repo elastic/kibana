@@ -637,6 +637,18 @@ describe('createWorkerSettingsRegistration', () => {
         expectInvalid(registration.applyPatch(storedDefaults, { extras: { tier2When: 'always' } }))
       ).toMatch(/extras/);
     });
+
+    it('rejects a schedule interval patch because the interval is read-only', () => {
+      expect(
+        expectInvalid(registration.applyPatch(storedDefaults, { scheduleInterval: '2h' }))
+      ).toContain('scheduleInterval');
+    });
+
+    it('rejects Assisted autonomy', () => {
+      expect(
+        expectInvalid(registration.applyPatch(storedDefaults, { autonomy: 'assisted' }))
+      ).toContain('autonomy');
+    });
   });
 
   describe('schedule interval — the Workers that own no schedule', () => {

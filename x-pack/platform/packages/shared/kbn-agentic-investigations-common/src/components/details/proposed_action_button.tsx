@@ -7,7 +7,13 @@
 
 import React, { memo, useCallback, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiToolTip,
+  euiTextTruncate,
+  useEuiMemoizedStyles,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import {
   ApprovalActorTime,
   ApprovalModal,
@@ -22,6 +28,7 @@ import {
 } from '@kbn/proposals-ui';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { getEmptyValue } from '../helpers';
+import { useIsTextTruncated } from '../use_is_text_truncated';
 
 export interface ProposedActionButtonProps {
   readOnly?: boolean;
@@ -61,13 +68,64 @@ const PENDING_BADGE = {
 };
 
 /**
- * A row in the flyout's "Proposed actions" list.
+ * A native button styled like a "What's happened" row (`GroupedAttachmentRow`), rather than a
+ * clickable `EuiPanel` — that lifts and casts a shadow on hover, which sits oddly next to the
+ * flat background tint the rows above it use. The border, radius and dividers belong to the
+ * surrounding `ProposedActionsList`.
+ */
+const rowStyles = ({ euiTheme }: UseEuiTheme) => ({
+  row: css`
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: ${euiTheme.size.s};
+    align-items: center;
+    box-sizing: border-box;
+    inline-size: 100%;
+    padding: ${euiTheme.size.base};
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+    transition: background ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+
+    &:hover,
+    &:focus-visible {
+      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+    }
+
+    &:focus-visible {
+      outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+      outline-offset: -${euiTheme.focus.width};
+    }
+  `,
+  text: css`
+    display: flex;
+    flex-direction: column;
+    gap: ${euiTheme.size.xs};
+    min-inline-size: 0;
+  `,
+  title: css`
+    display: block;
+    ${euiTextTruncate()}
+  `,
+  // The tooltip anchor must stretch like the button it wraps, or the grid collapses to content.
+  tooltipAnchor: css`
+    display: block;
+    min-inline-size: 0;
+  `,
+});
+
+/**
+ * A row in the flyout's "Proposed actions" list — a `<li>` meant for a `ProposedActionsList`.
  *
  * Always clickable: it opens the same {@link ApprovalModal} the conversation card's
  * recommended-action menu item opens (see `onClickRecommendedAction` in `BaseActions`), so a
  * proposal reads and decides identically whether it was reached from the queue or from inside its
  * own flyout. For a decided proposal that modal is read-only — the badge reports the outcome and
- * who/when decided it, and there is nothing left to submit.
+ * who/when decided it, and there is nothing left to submit — so hover feedback is the same for
+ * every row rather than suggesting a decided one is inert.
  *
  * Reads `isSubmitting` for its transient "Applying"/"Declining" phase — the same
  * {@link getApprovalOutcomeBadge} source of truth the modal itself reads, so the row behind the
@@ -92,7 +150,6 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     const approvalPhase: ApprovalPhase = decision ? decision.status : isSubmitting ?? 'pending';
 
     const badge = getApprovalOutcomeBadge(approvalPhase) ?? PENDING_BADGE;
-    const isInteractive = !decision && !isSubmitting;
 
     const pendingCaption = getProposalCaption(proposal);
 
@@ -116,87 +173,56 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
         getEmptyValue()
       );
 
-    const { euiTheme } = useEuiTheme();
-    const borderStyle = `1px solid ${euiTheme.colors.backgroundLightText}`;
+    const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
+    const isTitleTruncated = useIsTextTruncated(titleElement, proposal.title);
+    const styles = useEuiMemoizedStyles(rowStyles);
+
+    const button = (
+      <button
+        type="button"
+        aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel({
+          title: proposal.title,
+          status: badge.label,
+        })}
+        data-test-subj={dataTestSubj}
+        css={styles.row}
+        onClick={openModal}
+      >
+        <span css={styles.text}>
+          <span ref={setTitleElement} css={styles.title}>
+            <EuiText size="s" component="span">
+              <strong>{proposal.title}</strong>
+            </EuiText>
+          </span>
+          {caption && (
+            <EuiText size="xs" color="subdued" component="span">
+              {caption}
+            </EuiText>
+          )}
+        </span>
+        <ProposedActionStatusBadge
+          color={badge.color}
+          iconType={badge.iconType}
+          label={badge.label}
+          isLoading={badge.isLoading}
+        />
+      </button>
+    );
+
     return (
-      <>
-        <EuiPanel
-          hasBorder={false}
-          hasShadow={false}
-          paddingSize="m"
-          role="button"
-          tabIndex={0}
-          aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel({
-            title: proposal.title,
-            status: badge.label,
-          })}
-          data-test-subj={dataTestSubj}
-          css={css({
-            borderRadius: 0,
-            '&:first-child': {
-              borderRadius: `${euiTheme.size.m} ${euiTheme.size.m} 0 0`,
-              border: borderStyle,
-            },
-            '&:not(:first-child):not(:last-child)': {
-              borderLeft: borderStyle,
-              borderRight: borderStyle,
-              borderBottom: borderStyle,
-            },
-            '&:last-child': {
-              border: borderStyle,
-              borderTop: 'none',
-              borderRadius: `0 0 ${euiTheme.size.m} ${euiTheme.size.m}`,
-            },
-            // Must come after first/last so a lone item gets a full border and radius
-            '&:only-child': {
-              border: borderStyle,
-              borderRadius: euiTheme.size.m,
-            },
-            cursor: isInteractive ? 'pointer' : 'default',
-            ...(isInteractive
-              ? { '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseSubdued } }
-              : {}),
-          })}
-          onClick={openModal}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              openModal();
-            }
-          }}
-        >
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="s"
-                responsive={false}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>{proposal.title}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ProposedActionStatusBadge
-                    color={badge.color}
-                    iconType={badge.iconType}
-                    label={badge.label}
-                    isLoading={badge.isLoading}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {caption && (
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {caption}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPanel>
+      <li>
+        {/* Anchored on the button itself, so keyboard focus reveals the full title too. */}
+        {isTitleTruncated ? (
+          <EuiToolTip
+            content={proposal.title}
+            position="top"
+            anchorProps={{ css: styles.tooltipAnchor }}
+          >
+            {button}
+          </EuiToolTip>
+        ) : (
+          button
+        )}
 
         {isModalOpen && (
           <ApprovalModal
@@ -210,7 +236,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}
-      </>
+      </li>
     );
   }
 );

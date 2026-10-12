@@ -58,6 +58,58 @@ describe('ProposedActionButton', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders as a list item holding a native button, for a ProposedActionsList', () => {
+    renderButton();
+
+    const row = screen.getByTestId('proposedAction');
+    expect(row.tagName).toBe('BUTTON');
+    expect(row.closest('li')).not.toBeNull();
+  });
+
+  it('shows no tooltip while the title fits on one line', () => {
+    renderButton();
+
+    fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  describe('a title too long for the row', () => {
+    const scrollWidth = jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get');
+    const clientWidth = jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get');
+
+    beforeEach(() => {
+      // jsdom lays nothing out, so stand in for a title wider than the space it has.
+      scrollWidth.mockReturnValue(400);
+      clientWidth.mockReturnValue(200);
+    });
+
+    afterAll(() => {
+      scrollWidth.mockRestore();
+      clientWidth.mockRestore();
+    });
+
+    it('offers the full title in a tooltip', async () => {
+      renderButton();
+
+      fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+      await waitFor(() =>
+        expect(screen.getByRole('tooltip')).toHaveTextContent('Isolate cfo-mbp-14 — host isolation')
+      );
+    });
+
+    it('anchors that tooltip on the focusable button, so keyboard focus reveals it too', () => {
+      renderButton();
+
+      // EuiToolTip opens on its anchor's focus (jsdom cannot satisfy its :focus-visible check, so
+      // the hover case above proves it opens; this proves the anchor is the button, not a span
+      // inside it that focus never reaches).
+      const row = screen.getByTestId('proposedAction');
+      expect(row.parentElement).toHaveClass('euiToolTipAnchor');
+    });
+  });
+
   it('opens the approval modal on click, matching the one the card recommended-action opens', () => {
     renderButton();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
