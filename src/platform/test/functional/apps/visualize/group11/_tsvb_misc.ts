@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
-  const { visChart, visualBuilder, visualize, settings, common } = getPageObjects([
-    'visChart',
+  const { visualBuilder, visualize, settings, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'settings',
@@ -75,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.waitForIndexPatternTimeFieldOptionsLoaded();
           await visualBuilder.selectIndexPatternTimeField('@timestamp');
         });
-        const newValue = await visualBuilder.getMetricValue();
+        const newValue = await visualBuilder.expectMetricValue('156');
         expect(newValue).to.eql('156');
       };
 
@@ -99,19 +98,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to switch to gte interval (>=2d)', async () => {
         await visualBuilder.setIntervalValue('>=2d');
-        const newValue = await visualBuilder.getMetricValue();
+        const newValue = await visualBuilder.expectMetricValue('9,371');
         expect(newValue).to.eql('9,371');
       });
 
       it('should be able to switch to fixed interval (1d)', async () => {
         await visualBuilder.setIntervalValue('1d');
-        const newValue = await visualBuilder.getMetricValue();
+        const newValue = await visualBuilder.expectMetricValue('4,614');
         expect(newValue).to.eql('4,614');
       });
 
       it('should be able to switch to auto interval', async () => {
         await visualBuilder.setIntervalValue('auto');
-        const newValue = await visualBuilder.getMetricValue();
+        const newValue = await visualBuilder.expectMetricValue('156');
         expect(newValue).to.eql('156');
       });
     });
@@ -164,9 +163,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.setDropLastBucket(true);
         await visualBuilder.clickDataTab('timeSeries');
         await visualBuilder.setMetricsGroupByTerms('extension.raw');
-        await visChart.waitForVisualizationRenderingStabilized();
-        const legendItems1 = await visualBuilder.getLegendItemsContent();
-        expect(legendItems1).to.eql(finalLegendItems);
+        await retry.try(async () => {
+          const legendItems1 = await visualBuilder.getLegendItemsContent();
+          expect(legendItems1).to.eql(finalLegendItems);
+        });
 
         log.debug('Go back in browser history');
         await browser.goBack();
@@ -176,16 +176,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Go back in browser history');
         await browser.goBack();
         await visualBuilder.checkSelectedMetricsGroupByValue('Everything');
-        await visChart.waitForVisualizationRenderingStabilized();
-        const legendItems2 = await visualBuilder.getLegendItemsContent();
-        expect(legendItems2).to.eql(initialLegendItems);
+        await retry.try(async () => {
+          const legendItems2 = await visualBuilder.getLegendItemsContent();
+          expect(legendItems2).to.eql(initialLegendItems);
+        });
 
         log.debug('Go forward twice in browser history');
         await browser.goForward();
         await browser.goForward();
-        await visChart.waitForVisualizationRenderingStabilized();
-        const legendItems3 = await visualBuilder.getLegendItemsContent();
-        expect(legendItems3).to.eql(finalLegendItems);
+        await retry.try(async () => {
+          const legendItems3 = await visualBuilder.getLegendItemsContent();
+          expect(legendItems3).to.eql(finalLegendItems);
+        });
       });
     });
 
@@ -213,7 +215,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('bytes');
         await visualBuilder.setMetricsGroupByTerms('machine.os.raw');
-        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       it('should display title field formatted labels with byte field formatted values by default', async () => {
@@ -225,8 +226,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Osx: 5.928KB',
         ];
 
-        const legendItems = await visualBuilder.getLegendItemsContent();
-        expect(legendItems).to.eql(expectedLegendItems);
+        await retry.try(async () => {
+          const legendItems = await visualBuilder.getLegendItemsContent();
+          expect(legendItems).to.eql(expectedLegendItems);
+        });
       });
 
       it('should display title field formatted labels with raw values', async () => {
@@ -239,10 +242,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ];
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
-        await visChart.waitForVisualizationRenderingStabilized();
-        const legendItems = await visualBuilder.getLegendItemsContent();
+        await retry.try(async () => {
+          const legendItems = await visualBuilder.getLegendItemsContent();
 
-        expect(legendItems).to.eql(expectedLegendItems);
+          expect(legendItems).to.eql(expectedLegendItems);
+        });
       });
 
       it('should display title field formatted labels with TSVB formatted values', async () => {
@@ -257,10 +261,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
         await visualBuilder.enterSeriesTemplate('{{value}} format');
-        await visChart.waitForVisualizationRenderingStabilized();
 
-        const legendItems = await visualBuilder.getLegendItemsContent();
-        expect(legendItems).to.eql(expectedLegendItems);
+        await retry.try(async () => {
+          const legendItems = await visualBuilder.getLegendItemsContent();
+          expect(legendItems).to.eql(expectedLegendItems);
+        });
       });
 
       describe('formatting values for Metric, TopN and Gauge', () => {
@@ -268,7 +273,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.clickMetric();
           await visualBuilder.checkMetricTabIsPresent();
 
-          const metricValue = await visualBuilder.getMetricValue();
+          const metricValue = await visualBuilder.expectMetricValue('5.514KB');
           expect(metricValue).to.eql('5.514KB');
         });
 
@@ -276,9 +281,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.clickTopN();
           await visualBuilder.checkTopNTabIsPresent();
 
-          await visChart.waitForVisualizationRenderingStabilized();
-          const topNLabel = await visualBuilder.getTopNLabel();
-          const topNCount = await visualBuilder.getTopNCount();
+          const topNLabel = await visualBuilder.expectTopNLabel('Win 7');
+          const topNCount = await visualBuilder.expectTopNCount('5.664KB');
 
           expect(topNLabel).to.eql('Win 7');
           expect(topNCount).to.eql('5.664KB');
@@ -288,12 +292,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.clickGauge();
           await visualBuilder.checkGaugeTabIsPresent();
 
-          await visChart.waitForVisualizationRenderingStabilized();
-          const gaugeLabel = await visualBuilder.getGaugeLabel();
-          const gaugeCount = await visualBuilder.getGaugeCount();
+          await retry.try(async () => {
+            const gaugeLabel = await visualBuilder.getGaugeLabel();
+            const gaugeCount = await visualBuilder.getGaugeCount();
 
-          expect(gaugeLabel).to.eql('Average of bytes');
-          expect(gaugeCount).to.eql('5.514KB');
+            expect(gaugeLabel).to.eql('Average of bytes');
+            expect(gaugeCount).to.eql('5.514KB');
+          });
         });
       });
 

@@ -12,6 +12,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
   const browser = getService('browser');
   const queryBar = getService('queryBar');
@@ -89,10 +90,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickDiscardChanges();
         await dashboard.waitForRenderComplete();
 
-        const query = await queryBar.getQueryString();
-        expect(query).to.eql('');
-        const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.eql(0);
+        await retry.try(async () => {
+          expect(await queryBar.getQueryString()).to.eql('');
+          await filterBar.expectFilterCount(0);
+        });
       });
     });
 
@@ -117,14 +118,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('unsavedDashboardsCallout');
         }
         await dashboard.loadSavedDashboard('few panels');
-        expect(await dashboard.getPanelCount()).to.eql(unsavedPanelCount);
+        await dashboard.ensureHasUnsavedChangesNotification();
+        await retry.try(async () => {
+          expect(await dashboard.getPanelCount()).to.eql(unsavedPanelCount);
+        });
       });
 
       it('resets to original panel count after switching to view mode and discarding changes', async () => {
         await dashboard.clickCancelOutOfEditMode();
         await header.waitUntilLoadingHasFinished();
-        expect(await dashboard.getPanelCount()).to.eql(originalPanelCount);
-        expect(dashboard.getIsInViewMode()).to.eql(true);
+        await retry.try(async () => {
+          expect(await dashboard.getPanelCount()).to.eql(originalPanelCount);
+          expect(await dashboard.getIsInViewMode()).to.eql(true);
+        });
       });
 
       it('does not show unsaved changes badge after saving', async () => {
@@ -149,7 +155,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickUnsavedChangesContinueEditing('few panels');
         await header.waitUntilLoadingHasFinished();
         await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
-        expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
+        await retry.try(async () => {
+          expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
+        });
       });
     });
   });

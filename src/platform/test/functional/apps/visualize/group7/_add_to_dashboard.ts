@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualBuilder.checkMetricTabIsPresent();
       await visualBuilder.clickPanelOptions('metric');
       await visualBuilder.setIndexPatternValue('long-window-logstash-*', true);
-      const value = await visualBuilder.getMetricValue();
+      const value = await visualBuilder.expectMetricValue('35');
       expect(value).to.eql('35');
       await testSubjects.click('visualizeSaveButton');
       await timeToVisualize.saveFromModal('TSVB count', {

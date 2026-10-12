@@ -19,12 +19,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const { common, visualize, visEditor, visChart, header, timePicker } = getPageObjects([
+  const { common, visualize, visEditor, visChart, timePicker } = getPageObjects([
     'common',
     'visualize',
     'visEditor',
     'visChart',
-    'header',
     'timePicker',
   ]);
   const xyChartSelector = 'xyVisChart';
@@ -82,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should save and load', async function () {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName);
       await visualize.loadSavedVisualization(vizName);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should have inspector enabled', async function () {
@@ -253,7 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const url = await browser.getCurrentUrl();
         const embedUrl = url.split('/visualize#').pop() + '&embed=true';
         await common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
-        await header.waitUntilLoadingHasFinished();
+        await visChart.waitForVisualizationRenderComplete();
         const sideEditorExists = await visualize.getSideEditorExists();
         expect(sideEditorExists).to.be(false);
       });
@@ -388,7 +387,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('date histogram when no date field', () => {
       before(async () => {
         await visualize.loadSavedVisualization('AreaChart [no date field]');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
 
         log.debug('Click X-axis');
         await visEditor.clickBucket('X-axis');
@@ -410,7 +409,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('date histogram when no time filter', () => {
       before(async () => {
         await visualize.loadSavedVisualization('AreaChart [no time filter]');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
 
         log.debug('Click X-axis');
         await visEditor.clickBucket('X-axis');
@@ -475,7 +474,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('date histogram interval', () => {
       before(async () => {
         await visualize.loadSavedVisualization('Visualization AreaChart');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
       });
 
       beforeEach(async () => {

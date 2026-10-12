@@ -204,10 +204,25 @@ export class MonacoEditorService extends FtrService {
         const editor = window.MonacoEnvironment?.monaco?.editor
           ?.getEditors()
           ?.find((e: any) => container?.contains(e.getDomNode()));
-        return !!editor;
+        return !!editor?.getModel();
       }, cssSelector);
       return isReady;
     });
+  }
+
+  public async getCodeEditorValueByCssSelector(cssSelector: string): Promise<string> {
+    await this.waitCodeEditorReadyByCssSelector(cssSelector);
+    return await this.browser.execute((selector: string) => {
+      const container = document.querySelector(selector);
+      const editor = window.MonacoEnvironment?.monaco?.editor
+        ?.getEditors()
+        .find((candidate) => container?.contains(candidate.getDomNode()));
+      const model = editor?.getModel();
+      if (!model) {
+        throw new Error(`No Monaco model found in ${selector}`);
+      }
+      return model.getValue();
+    }, cssSelector);
   }
 
   public async setCodeEditorValueByCssSelector(cssSelector: string, value: string) {

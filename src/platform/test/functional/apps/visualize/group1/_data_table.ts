@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should have inspector enabled', async function () {
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(SAVE_NAME);
 
       await visualize.loadSavedVisualization(SAVE_NAME);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
 
       await expectValidTableData();
 
@@ -221,19 +221,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
+      const renderingCount = await visChart.getVisualizationRenderingCount();
       await filterBar.addFilter({
         field: '@timestamp',
         operation: 'is between',
         value: { from: '2015-09-19', to: '2015-09-21' },
       });
-      await visChart.waitForVisualizationRenderingStabilized();
+      await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
       const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
 
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
-      await visChart.waitForVisualizationRenderingStabilized();
+      await retry.waitFor('time filter to be pinned', async () =>
+        filterBar.isFilterPinned('@timestamp')
+      );
+      await visChart.waitForVisualizationRenderComplete();
       const data = await visChart.getTableVisContent();
       expect(data).to.be.eql([['2015-09-20', '4,757']]);
     });
@@ -292,8 +296,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should apply correct filter', async () => {
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await visChart.filterOnTableCell(0, 2);
-        await visChart.waitForVisualizationRenderingStabilized();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
           ['png', '1,373'],

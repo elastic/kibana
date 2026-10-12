@@ -13,6 +13,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
+  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
@@ -113,7 +114,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('applies global filters to controls with data view of filter field', async () => {
           await dashboardControls.optionsListOpenPopover(carrierControlId);
-          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('1');
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('1');
+          });
           await dashboardControls.optionsListEnsurePopoverIsClosed(carrierControlId);
 
           await dashboardControls.validateRange('placeholder', ticketPriceControlId, '100', '1196');
@@ -121,7 +124,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('ignores global filters to controls without data view of filter field', async () => {
           await dashboardControls.optionsListOpenPopover(osControlId);
-          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
+          });
           await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
 
           await dashboardControls.validateRange('placeholder', bytesControlId, '0', '19979');
@@ -146,7 +151,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('ignores control filters on controls without data view of control filter', async () => {
           await dashboardControls.optionsListOpenPopover(osControlId);
-          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('5');
+          });
           await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
 
           await dashboardControls.validateRange('placeholder', bytesControlId, '0', '19979');
@@ -193,7 +200,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('applies global filters to controls without data view of filter field', async () => {
           await dashboardControls.optionsListOpenPopover(osControlId);
-          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
+          });
           await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
 
           await dashboardControls.validateRange(
@@ -219,7 +228,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('applies control filters on controls without data view of control filter', async () => {
           await dashboardControls.optionsListOpenPopover(osControlId);
-          expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
+          await retry.try(async () => {
+            expect(await dashboardControls.optionsListGetCardinalityValue()).to.be('0');
+          });
           await dashboardControls.optionsListEnsurePopoverIsClosed(osControlId);
 
           await dashboardControls.validateRange(

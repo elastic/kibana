@@ -139,9 +139,11 @@ export function MachineLearningCommonUIProvider({
 
     async selectRadioGroupValue(testSubject: string, value: string) {
       const radioGroup = await testSubjects.find(testSubject);
-      const label = await radioGroup.findByCssSelector(`label[for="${value}"]`);
-      await label.click();
-      await this.assertRadioGroupValue(testSubject, value);
+      // Entity popovers reuse radio IDs, so a label can activate another group's
+      // input while that popover closes. Click the input scoped to this group.
+      const input = await radioGroup.findByCssSelector(`input[id="${value}"]`);
+      await input.click();
+      await retry.try(() => this.assertRadioGroupValue(testSubject, value));
     },
 
     async assertSelectSelectedOptionVisibleText(testSubject: string, visibleText: string) {

@@ -17,8 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
-  const { visChart, visualBuilder, visualize, common } = getPageObjects([
-    'visChart',
+  const { visualBuilder, visualize, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'common',
@@ -61,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show correct data', async () => {
-        const value = await visualBuilder.getMetricValue();
+        const value = await visualBuilder.expectMetricValue('156');
         expect(value).to.eql('156');
       });
 
@@ -70,7 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('math', 1);
         await visualBuilder.fillInVariable();
         await visualBuilder.fillInExpression('params.test + 1');
-        const value = await visualBuilder.getMetricValue();
+        const value = await visualBuilder.expectMetricValue('157');
         expect(value).to.eql('157');
       });
 
@@ -89,20 +88,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
 
-        const value = await visualBuilder.getMetricValue();
+        const value = await visualBuilder.expectMetricValue('13,492');
         expect(value).to.eql('13,492');
       });
 
       it('should show same data for kibana and string index pattern modes', async () => {
         await visualBuilder.selectAggType('Max');
         await visualBuilder.setFieldForAggregation('machine.ram');
-        const kibanaIndexPatternModeValue = await visualBuilder.getMetricValue();
+        const kibanaIndexPatternModeValue = await visualBuilder.expectMetricValue('32,212,254,720');
 
         await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': true });
         await browser.refresh();
         await visualBuilder.clickPanelOptions('metric');
         await visualBuilder.switchIndexPatternSelectionMode(false);
-        const stringIndexPatternModeValue = await visualBuilder.getMetricValue();
+        const stringIndexPatternModeValue = await visualBuilder.expectMetricValue('32,212,254,720');
 
         expect(kibanaIndexPatternModeValue).to.eql(stringIndexPatternModeValue);
         expect(kibanaIndexPatternModeValue).to.eql('32,212,254,720');
@@ -115,8 +114,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('derivative', 1);
         await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
 
-        await visChart.waitForVisualizationRenderingStabilized();
-        const value = await visualBuilder.getMetricValue();
+        const value = await visualBuilder.expectMetricValue('0');
 
         expect(value).to.eql('0');
 
@@ -144,14 +142,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should apply color rules to visualization background', async () => {
           await visualBuilder.setColorPickerValue('#FFCFDF');
 
-          const backGroundStyle = await visualBuilder.getBackgroundStyle();
+          const backGroundStyle = await visualBuilder.expectBackgroundStyle(
+            'background-color: rgb(255, 207, 223);'
+          );
           expect(backGroundStyle).to.eql('background-color: rgb(255, 207, 223);');
         });
 
         it('should apply color rules to metric value', async () => {
           await visualBuilder.setColorPickerValue('#AD7DE6', 1);
 
-          const backGroundStyle = await visualBuilder.getMetricValueStyle();
+          const backGroundStyle = await visualBuilder.expectMetricValueStyle(
+            'color: rgb(173, 125, 230);'
+          );
           expect(backGroundStyle).to.eql('color: rgb(173, 125, 230);');
         });
       });
@@ -166,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setFieldForAggregation('machine.os.raw');
           await visualBuilder.setTopHitAggregateWithOption('Concatenate');
 
-          const value = await visualBuilder.getMetricValue();
+          const value = await visualBuilder.expectMetricValue('win 7');
           expect(value).to.eql('win 7');
         });
 
@@ -174,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setFieldForAggregation('hello_world_runtime_field');
           await visualBuilder.setTopHitAggregateWithOption('Concatenate');
 
-          const value = await visualBuilder.getMetricValue();
+          const value = await visualBuilder.expectMetricValue('hello world');
           expect(value).to.eql('hello world');
         });
       });

@@ -188,7 +188,7 @@ export class UnifiedFieldListPageObject extends FtrService {
       return false;
     }
     const selectedList = await this.testSubjects.find('fieldListGroupedSelectedFields');
-    return await this.testSubjects.descendantExists(`field-${field}`, selectedList);
+    return await this.testSubjects.descendantExists(`field-${field}`, selectedList, { timeout: 0 });
   }
 
   public async clickFieldListItemRemove(field: string) {

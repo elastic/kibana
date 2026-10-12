@@ -12,11 +12,10 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualBuilder, common, visualize, visChart } = getPageObjects([
+  const { visualBuilder, common, visualize } = getPageObjects([
     'visualBuilder',
     'common',
     'visualize',
-    'visChart',
   ]);
   const retry = getService('retry');
 
@@ -67,20 +66,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should allow printing raw timestamp of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}');
-        const text = await visualBuilder.getMarkdownText();
+        const text = await visualBuilder.expectMarkdownText('1442901600000');
         expect(text).to.be('1442901600000');
       });
 
       it('should allow printing raw value of data', async () => {
         await visualBuilder.enterMarkdown('{{ count.data.raw.[0].[1] }}');
-        const text = await visualBuilder.getMarkdownText();
+        const text = await visualBuilder.expectMarkdownText('6');
         expect(text).to.be('6');
       });
 
       it('should render html as plain text', async () => {
         const html = '<h1>hello world</h1>';
         await visualBuilder.enterMarkdown(html);
-        const markdownText = await visualBuilder.getMarkdownText();
+        const markdownText = await visualBuilder.expectMarkdownText(html);
         expect(markdownText).to.be(html);
       });
 
@@ -88,8 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clearMarkdown();
         const [firstVariable] = await visualBuilder.getMarkdownTableVariables();
         await firstVariable.selector.click();
-        await visChart.waitForVisualizationRenderingStabilized();
-        const markdownText = await visualBuilder.getMarkdownText();
+        const markdownText = await visualBuilder.expectMarkdownText('46');
         expect(markdownText).to.be('46');
       });
 
@@ -97,7 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const list = '{{#each _all}}\n{{ data.formatted.[0] }} {{ data.raw.[0] }}\n{{/each}}';
         const expectedRenderer = 'Sep 22, 2015 @ 06:00:00.000,6 1442901600000,6';
         await visualBuilder.enterMarkdown(list);
-        const markdownText = await visualBuilder.getMarkdownText();
+        const markdownText = await visualBuilder.expectMarkdownText(expectedRenderer);
         expect(markdownText).to.be(expectedRenderer);
       });
       it('should render markdown table', async () => {
@@ -106,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const DATA = '46';
 
         await visualBuilder.enterMarkdown(TABLE);
-        const text = await visualBuilder.getMarkdownText();
+        const text = await visualBuilder.expectMarkdownText('raw formatted\n46 46');
         const tableValues = text.split('\n').map((row) => row.split(' '))[1]; // [46, 46]
 
         tableValues.forEach((value) => {
@@ -167,14 +165,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should apply field formatting by default', async () => {
-          const text = await visualBuilder.getMarkdownText();
+          const text = await visualBuilder.expectMarkdownText('5.588KB');
           expect(text).to.be('5.588KB');
         });
 
         it('should apply TSVB formatting', async () => {
           await visualBuilder.changeDataFormatter('percent');
 
-          const text = await visualBuilder.getMarkdownText();
+          const text = await visualBuilder.expectMarkdownText('572,241.265%');
           expect(text).to.be('572,241.265%');
         });
       });

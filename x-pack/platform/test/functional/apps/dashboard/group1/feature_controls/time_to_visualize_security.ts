@@ -212,7 +212,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const fullDataLabels = await vegaChart.getYAxisLabels();
         expect(fullDataLabels[0]).to.eql('0');
 
-        const newPanelCount = dashboard.getPanelCount();
+        const newPanelCount = await dashboard.getPanelCount();
         expect(newPanelCount).to.eql(1);
       });
 

@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { common, visualize, visEditor, visChart, timePicker } = getPageObjects([
-    'common',
+  const { visualize, visEditor, visChart, timePicker } = getPageObjects([
     'visualize',
     'visEditor',
     'visChart',
@@ -73,7 +72,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug(`Interval = ${providedInterval}`);
         await visEditor.setInterval(providedInterval, { type: 'numeric' });
         await visEditor.clickGo();
-        await common.sleep(1000); // fix this
         await retry.try(async () => {
           const data = await visChart.getTableVisContent();
           expect(data.length).to.eql(10);

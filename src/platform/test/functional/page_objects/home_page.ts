@@ -45,7 +45,8 @@ export class HomePageObject extends FtrService {
       const installStatus = await (
         await sampleDataCard.findByCssSelector('[data-status]')
       ).getAttribute('data-status');
-      const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`);
+      if (installStatus !== 'installed') return false;
+      const deleteButton = await sampleDataCard.findAllByTestSubject(`removeSampleDataSet${id}`, 0);
       this.log.debug(`Sample data installed: ${deleteButton.length > 0}`);
       return installStatus === 'installed' && deleteButton.length > 0;
     } catch (e) {
@@ -86,36 +87,34 @@ export class HomePageObject extends FtrService {
     await this.doesSampleDataSetExist('ecommerce');
   }
 
-  async addSampleDataSet(id: string) {
-    await this.openSampleDataAccordion();
-    if (await this.isSampleDataSetInstalled(id)) {
-      return;
-    }
-
-    this.log.debug(`Attempting to add sample data: ${id}`);
-    await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
-    await this.testSubjects.click(`addSampleDataSet${id}`);
-    await this.retry.waitForWithTimeout(
-      `${id} sample data to be installed`,
-      120_000,
-      async () => await this.isSampleDataSetInstalled(id)
-    );
+  private async getSampleDataSetStatus(id: string): Promise<string> {
+    const card = await this.testSubjects.find(`sampleDataSetCard${id}`);
+    const footer = await card.findByCssSelector('[data-status]');
+    const status = await footer.getAttribute('data-status');
+    if (!status) throw new Error(`Sample data ${id} has no installation status`);
+    return status;
   }
 
-  async removeSampleDataSet(id: string) {
+  async addSampleDataSet(id: string): Promise<void> {
     await this.openSampleDataAccordion();
-    if (!(await this.isSampleDataSetInstalled(id))) {
-      return;
-    }
-
-    this.log.debug(`Attempting to remove sample data: ${id}`);
+    if ((await this.getSampleDataSetStatus(id)) === 'installed') return;
+    this.log.debug(`Attempting to add sample data: ${id}`);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(`addSampleDataSet${id}`);
+    await this.retry.waitForWithTimeout(`${id} sample data to be installed`, 120_000, async () => {
+      return (await this.getSampleDataSetStatus(id)) === 'installed';
+    });
     await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-    await this.testSubjects.click(`removeSampleDataSet${id}`);
-    await this.retry.waitForWithTimeout(
-      `${id} sample data to be removed`,
-      120_000,
-      async () => !(await this.isSampleDataSetInstalled(id))
-    );
+  }
+
+  async removeSampleDataSet(id: string): Promise<void> {
+    await this.openSampleDataAccordion();
+    if ((await this.getSampleDataSetStatus(id)) === 'not_installed') return;
+    this.log.debug(`Attempting to remove sample data: ${id}`);
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(`removeSampleDataSet${id}`);
+    await this.retry.waitForWithTimeout(`${id} sample data to be removed`, 120_000, async () => {
+      return (await this.getSampleDataSetStatus(id)) === 'not_installed';
+    });
+    await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
   }
 
   async launchSampleDiscover(id: string) {

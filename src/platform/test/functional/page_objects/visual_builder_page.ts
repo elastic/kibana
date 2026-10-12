@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import expect from '@kbn/expect';
+import { decode } from '@kbn/rison';
 import type { DebugState } from '@elastic/charts';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
@@ -26,13 +28,13 @@ type ToDuration = Duration | 'Human readable';
 
 export class VisualBuilderPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly elasticChart = this.ctx.getService('elasticChart');
-  private readonly monacoEditor = this.ctx.getService('monacoEditor');
-  private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
@@ -68,10 +70,27 @@ export class VisualBuilderPageObject extends FtrService {
     }
   }
 
-  private async toggleYesNoSwitch(testSubj: string, value: boolean) {
-    const option = await this.testSubjects.find(`${testSubj}-${value ? 'yes' : 'no'}`);
+  private async toggleYesNoSwitch(
+    testSubj: string,
+    value: boolean,
+    panelModelKey?: 'drop_last_bucket'
+  ) {
+    const selector = `${testSubj}-${value ? 'yes' : 'no'}`;
+    const option = await this.testSubjects.find(selector);
+    const input = await option.findByCssSelector('input');
+    const isChanged = !(await input.isSelected());
+    const renderingCount = await this.visChart.getVisualizationRenderingCount();
+    const autoApply = await this.find.byCssSelector('#tsvbAutoApplyInput');
+    const shouldRender = isChanged && (await this.testSubjects.isEuiSwitchChecked(autoApply));
     await (await option.findByCssSelector('label')).click();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor(`${selector} to be selected`, async () =>
+      (await (await this.testSubjects.find(selector)).findByCssSelector('input')).isSelected()
+    );
+    if (panelModelKey) {
+      await this.waitForPanelModelValue(panelModelKey, Number(value));
+      return;
+    }
+    await this.visChart.waitForVisualizationRenderComplete(renderingCount + Number(shouldRender));
   }
 
   public async checkTabIsSelected(chartType: string) {
@@ -131,6 +150,80 @@ export class VisualBuilderPageObject extends FtrService {
     await button.click();
   }
 
+  private async expectText(selector: string, expected: string): Promise<string> {
+    return this.retry.try(async () => {
+      const actual = await (await this.find.byCssSelector(selector)).getVisibleText();
+      expect(actual).to.eql(expected);
+      return actual;
+    });
+  }
+
+  private async expectAttribute(
+    getElement: () => Promise<WebElementWrapper>,
+    attribute: string,
+    expected: string,
+    contains = false
+  ): Promise<string | null> {
+    return this.retry.try(async () => {
+      const actual = await (await getElement()).getAttribute(attribute);
+      if (contains) {
+        expect(actual).to.contain(expected);
+      } else {
+        expect(actual).to.eql(expected);
+      }
+      return actual;
+    });
+  }
+
+  public async expectMetricValue(expected: string): Promise<string> {
+    return this.expectText('.tvbVisMetric__value--primary', expected);
+  }
+
+  public async expectMarkdownText(expected: string): Promise<string> {
+    return this.expectText('.tvbVis', expected);
+  }
+
+  public async expectViewTable(expected: string): Promise<string> {
+    return this.expectText('[data-test-subj="tableView"]', expected);
+  }
+
+  public async expectTopNLabel(expected: string): Promise<string> {
+    return this.expectText('.tvbVisTopN__label', expected);
+  }
+
+  public async expectTopNCount(expected: string): Promise<string> {
+    return this.expectText('.tvbVisTopN__value', expected);
+  }
+
+  public async expectBackgroundStyle(expected: string): Promise<string | null> {
+    return this.expectAttribute(() => this.find.byClassName('tvbVis'), 'style', expected);
+  }
+
+  public async expectMetricValueStyle(expected: string): Promise<string | null> {
+    return this.expectAttribute(() => this.testSubjects.find('tsvbMetricValue'), 'style', expected);
+  }
+
+  public async expectGaugeValueStyle(expected: string): Promise<string | null> {
+    return this.expectAttribute(() => this.testSubjects.find('gaugeValue'), 'style', expected);
+  }
+
+  public async expectGaugeColor(expected: string, isInner = false): Promise<string | null> {
+    return this.expectAttribute(
+      () => this.testSubjects.find(`gaugeCircle${isInner ? 'Inner' : ''}`),
+      'stroke',
+      expected
+    );
+  }
+
+  public async expectTopNBarStyle(expected: string, nth = 0): Promise<string | null> {
+    return this.expectAttribute(
+      async () => (await this.testSubjects.findAll('topNInnerBar'))[nth],
+      'style',
+      expected,
+      true
+    );
+  }
+
   public async getMetricValue() {
     await this.visChart.waitForVisualizationRenderingStabilized();
     const metricValue = await this.find.byCssSelector('.tvbVisMetric__value--primary');
@@ -140,20 +233,41 @@ export class VisualBuilderPageObject extends FtrService {
   public async enterMarkdown(markdown: string) {
     await this.clearMarkdown();
     await this.monacoEditor.setCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor', markdown);
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.waitForPanelModelValue('markdown', markdown);
+  }
+
+  private async waitForPanelModelValue(
+    key: 'markdown' | 'pivot_label' | 'interval' | 'drop_last_bucket',
+    value: string | number
+  ): Promise<void> {
+    const autoApply = await this.find.byCssSelector('#tsvbAutoApplyInput');
+    if (!(await this.testSubjects.isEuiSwitchChecked(autoApply))) return;
+    await this.retry.waitFor(`${key} model to be applied`, async () => {
+      const url = new URL(await this.browser.getCurrentUrl());
+      const query = url.hash.substring(url.hash.indexOf('?') + 1);
+      const state = new URLSearchParams(query).get('_a');
+      if (!state) return false;
+      const appState = decode(state) as {
+        vis?: {
+          params?: {
+            markdown?: string;
+            pivot_label?: string;
+            interval?: string;
+            drop_last_bucket?: number;
+          };
+        };
+      };
+      return (appState.vis?.params?.[key] ?? (typeof value === 'number' ? 0 : '')) === value;
+    });
   }
 
   public async clearMarkdown() {
+    await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
     await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
-      await this.monacoEditor.clearCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor');
-
-      const linesContainer = await this.find.byCssSelector(
-        '.tvbMarkdownEditor__editor .view-lines'
+      return (
+        (await this.monacoEditor.getCodeEditorValueByCssSelector('.tvbMarkdownEditor__editor')) ===
+        ''
       );
-      // lines of code in monaco-editor
-      // text is not present in textarea
-      const lines = await linesContainer.findAllByClassName('mtk1');
-      return lines.length === 0;
     });
   }
 
@@ -285,9 +399,14 @@ export class VisualBuilderPageObject extends FtrService {
   public async changeDataFormatter(
     formatter: 'default' | 'bytes' | 'number' | 'percent' | 'duration' | 'custom'
   ) {
+    const previousLabel = await this.testSubjects.getVisibleText('tsvbDataFormatPicker');
+    const renderingCount = await this.visChart.getVisualizationRenderingCount();
     await this.testSubjects.click('tsvbDataFormatPicker');
     await this.testSubjects.click(`tsvbDataFormatPicker-${formatter}`);
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    const currentLabel = await this.testSubjects.getVisibleText('tsvbDataFormatPicker');
+    await this.visChart.waitForVisualizationRenderComplete(
+      renderingCount + Number(currentLabel !== previousLabel)
+    );
   }
 
   public async setDrilldownUrl(value: string) {
@@ -407,7 +526,6 @@ export class VisualBuilderPageObject extends FtrService {
     const prevAggs = await this.testSubjects.findAll('aggSelector');
     const elements = await this.testSubjects.findAll('addMetricAddBtn');
     await elements[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new agg is added', async () => {
       const currentAggs = await this.testSubjects.findAll('aggSelector');
       return currentAggs.length > prevAggs.length;
@@ -418,7 +536,6 @@ export class VisualBuilderPageObject extends FtrService {
     const prevAggs = await this.testSubjects.findAll('draggable');
     const elements = await this.testSubjects.findAll('AddAddBtn');
     await elements[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new agg series is added', async () => {
       const currentAggs = await this.testSubjects.findAll('draggable');
       return currentAggs.length > prevAggs.length;
@@ -428,7 +545,6 @@ export class VisualBuilderPageObject extends FtrService {
   public async createColorRule(nth = 0) {
     const elements = await this.testSubjects.findAll('AddAddBtn');
     await elements[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
     await this.retry.waitFor('new color rule is added', async () => {
       const currentAddButtons = await this.testSubjects.findAll('AddAddBtn');
       return currentAddButtons.length > elements.length;
@@ -438,7 +554,12 @@ export class VisualBuilderPageObject extends FtrService {
   public async selectAggType(value: string, nth = 0) {
     const element = await this.find.byXPath(`(//div[@data-test-subj='aggSelector'])[${nth + 1}]`);
     await this.comboBox.setElement(element, value);
-    return await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor(`aggregation ${value} to be selected`, async () =>
+      this.comboBox.isOptionSelected(
+        await this.find.byXPath(`(//div[@data-test-subj='aggSelector'])[${nth + 1}]`),
+        value
+      )
+    );
   }
 
   public async fillInExpression(expression: string, nth = 0) {
@@ -472,7 +593,7 @@ export class VisualBuilderPageObject extends FtrService {
     const el = await this.testSubjects.find('columnLabelName');
     await el.clearValue();
     await el.type(value);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitForPanelModelValue('pivot_label', value);
   }
 
   /**
@@ -491,9 +612,8 @@ export class VisualBuilderPageObject extends FtrService {
 
   private async switchTab(visType: string, tab: string) {
     const testSubj = `${visType}Editor${tab}Btn`;
+    await this.testSubjects.click(testSubj);
     await this.retry.try(async () => {
-      await this.testSubjects.click(testSubj);
-      await this.header.waitUntilLoadingHasFinished();
       if (!(await (await this.testSubjects.find(testSubj)).elementHasClass('euiTab-isSelected'))) {
         throw new Error('tab not active');
       }
@@ -594,11 +714,11 @@ export class VisualBuilderPageObject extends FtrService {
     const el = await this.testSubjects.find('metricsIndexPatternInterval');
     await el.clearValueWithKeyboard();
     await el.type(value);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.waitForPanelModelValue('interval', value);
   }
 
   public async setDropLastBucket(value: boolean) {
-    await this.toggleYesNoSwitch('metricsDropLastBucket', value);
+    await this.toggleYesNoSwitch('metricsDropLastBucket', value, 'drop_last_bucket');
   }
 
   public async setOverrideIndexPattern(value: boolean) {
@@ -661,11 +781,26 @@ export class VisualBuilderPageObject extends FtrService {
    * @memberof VisualBuilderPage
    */
   public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
-    await this.visChart.waitForVisualizationRenderingStabilized();
     const fieldEl = await this.getFieldForAggregation(aggNth);
+    const isAlreadySelected = await this.comboBox.isOptionSelected(fieldEl, field, {
+      allowInvalid: true,
+    });
+    const renderingCount = await this.visChart.getVisualizationRenderingCount();
+    const autoApply = await this.find.byCssSelector('#tsvbAutoApplyInput');
+    const shouldRender =
+      !isAlreadySelected && (await this.testSubjects.isEuiSwitchChecked(autoApply));
 
-    await this.comboBox.setElement(fieldEl, field);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.retry.try(async () => {
+      await this.comboBox.setElement(await this.getFieldForAggregation(aggNth), field);
+      expect(
+        await this.comboBox.isOptionSelected(await this.getFieldForAggregation(aggNth), field, {
+          allowInvalid: true,
+        })
+      ).to.be(true);
+      expect(
+        await this.visChart.isVisualizationRenderComplete(renderingCount + Number(shouldRender))
+      ).to.be(true);
+    });
   }
 
   public async setFieldForAggregateBy(field: string): Promise<void> {
@@ -712,14 +847,7 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setBackgroundColor(colorHex: string): Promise<void> {
-    await this.clickColorPicker();
-    await this.checkColorPickerPopUpIsPresent();
-    await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
-    await this.clickColorPicker();
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.setColorPickerValue(colorHex);
   }
 
   public async checkColorPickerPopUpIsPresent(): Promise<void> {
@@ -730,12 +858,21 @@ export class VisualBuilderPageObject extends FtrService {
   public async setColorPickerValue(colorHex: string, nth: number = 0): Promise<void> {
     await this.clickColorPicker(nth);
     await this.checkColorPickerPopUpIsPresent();
+    const input = await this.testSubjects.find('euiColorPickerInput_top');
+    const previousColor = await input.getAttribute('value');
+    const normalizeColor = (color: string) =>
+      (color.length === 7 ? `${color}FF` : color).toUpperCase();
+    const isChanged = normalizeColor(previousColor ?? '') !== normalizeColor(colorHex);
+    const renderingCount = await this.visChart.getVisualizationRenderingCount();
+    const autoApply = await this.find.byCssSelector('#tsvbAutoApplyInput');
+    const shouldRender = isChanged && (await this.testSubjects.isEuiSwitchChecked(autoApply));
     await this.testSubjects.setValue('euiColorPickerInput_top', colorHex, {
       clearWithKeyboard: true,
       typeCharByChar: true,
     });
     await this.clickColorPicker(nth);
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.testSubjects.missingOrFail('euiColorPickerPopover');
+    await this.visChart.waitForVisualizationRenderComplete(renderingCount + Number(shouldRender));
   }
 
   public async setColorRuleOperator(condition: string): Promise<void> {
@@ -787,7 +924,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async cloneSeries(nth: number = 0): Promise<void> {
     const cloneBtnArray = await this.testSubjects.findAll('AddCloneBtn');
     await cloneBtnArray[nth].click();
-    await this.visChart.waitForVisualizationRenderingStabilized();
+    await this.retry.waitFor(
+      'cloned series to be added',
+      async () => (await this.testSubjects.findAll('AddCloneBtn')).length > cloneBtnArray.length
+    );
   }
 
   /**
@@ -835,7 +975,9 @@ export class VisualBuilderPageObject extends FtrService {
   public async setMetricsGroupBy(option: string) {
     const groupBy = await this.testSubjects.find('groupBySelect');
     await this.comboBox.setElement(groupBy, option);
-    return await this.header.waitUntilLoadingHasFinished();
+    await this.retry.waitFor(`group-by ${option} to be selected`, async () =>
+      this.comboBox.isOptionSelected(await this.testSubjects.find('groupBySelect'), option)
+    );
   }
 
   public async setMetricsGroupByTerms(
@@ -843,7 +985,6 @@ export class VisualBuilderPageObject extends FtrService {
     filtering: { include?: string; exclude?: string } = {}
   ) {
     await this.setMetricsGroupBy('terms');
-    await this.common.sleep(1000);
     await this.retry.try(async () => {
       const byField = await this.testSubjects.find('groupByField');
       await this.comboBox.setElement(byField, field);
@@ -856,13 +997,17 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async setAnotherGroupByTermsField(field: string) {
+    const previousFieldCount = (await this.testSubjects.findAll('fieldSelectItem')).length;
     // Using xpath locator to find the last element
     const fieldSelectAddButtonLast = await this.find.byXPath(
       `(//*[@data-test-subj='fieldSelectItemAddBtn'])[last()]`
     );
     // In case of StaleElementReferenceError 'browser' service will try to find element again
     await fieldSelectAddButtonLast.click();
-    await this.common.sleep(2000);
+    await this.retry.waitFor(
+      'another group-by field to be added',
+      async () => (await this.testSubjects.findAll('fieldSelectItem')).length > previousFieldCount
+    );
 
     await this.retry.try(async () => {
       const selectedByField = await this.find.byXPath(
@@ -976,8 +1121,9 @@ export class VisualBuilderPageObject extends FtrService {
   }
 
   public async getChartDebugState(chartData?: DebugState) {
-    await this.header.waitUntilLoadingHasFinished();
-    return chartData ?? (await this.elasticChart.getChartDebugData())!;
+    if (chartData) return chartData;
+    await this.visChart.waitForVisualizationRenderComplete();
+    return (await this.elasticChart.getChartDebugData())!;
   }
 
   public async getXAxisTitle(chartData?: DebugState, nth: number = 0) {

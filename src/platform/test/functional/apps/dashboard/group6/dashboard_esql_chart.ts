@@ -105,9 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
       await dashboard.waitForRenderComplete();
-      await header.waitUntilLoadingHasFinished();
-      const panelsAfterDelete = await dashboard.getDashboardPanels();
-      expect(panelsAfterDelete.length).to.eql(0);
+      await retry.try(async () => {
+        expect((await dashboard.getDashboardPanels(0)).length).to.eql(0);
+      });
     });
 
     it('should be able to edit the query and render another chart', async () => {

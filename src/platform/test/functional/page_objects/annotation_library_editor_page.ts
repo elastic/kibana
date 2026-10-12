@@ -36,6 +36,7 @@ export class AnnotationEditorPageObject extends FtrService {
 
   public async saveGroup() {
     await this.testSubjects.click('saveAnnotationGroup');
+    await this.testSubjects.missingOrFail('saveAnnotationGroup');
   }
 
   public async getAnnotationCount() {
@@ -53,9 +54,18 @@ export class AnnotationEditorPageObject extends FtrService {
     color: string;
   }) {
     await this.testSubjects.click('lnsXY_annotation_query');
+    if (!(await this.testSubjects.exists('annotation-query-based-query-input'))) {
+      await this.testSubjects.click('indexPattern-filters-existingFilterTrigger');
+    }
 
     const queryInput = await this.testSubjects.find('annotation-query-based-query-input');
     await queryInput.type(config.query);
+    await this.retry.waitFor(
+      'annotation query to be committed',
+      async () =>
+        (await this.testSubjects.getVisibleText('indexPattern-filters-existingFilterTrigger')) ===
+        config.query
+    );
 
     const titles = await this.testSubjects.findAll(`lnsDimensionEditorSectionHeading`);
     const lastTitle = titles[titles.length - 1];
@@ -70,10 +80,8 @@ export class AnnotationEditorPageObject extends FtrService {
 
     await this.testSubjects.setValue('lnsXYThickness', '' + config.lineThickness);
 
-    await this.retry.waitFor('annotation editor UI to close', async () => {
-      await this.testSubjects.click('backToGroupSettings');
-      return !(await this.testSubjects.exists('backToGroupSettings'));
-    });
+    await this.testSubjects.pressEnter('backToGroupSettingsTop');
+    await this.testSubjects.missingOrFail('backToGroupSettings');
   }
 
   public async addAnnotation(config: { query: string; lineThickness: number; color: string }) {
@@ -82,7 +90,9 @@ export class AnnotationEditorPageObject extends FtrService {
   }
 
   public async removeAnnotation() {
-    await this.testSubjects.click('indexPattern-dimension-remove');
+    const annotation = await this.testSubjects.find('lnsLayerPanel-dimensionLink');
+    await annotation.moveMouseTo();
+    await this.testSubjects.pressEnter('indexPattern-dimension-remove');
   }
 
   public async showingMissingDataViewPrompt() {

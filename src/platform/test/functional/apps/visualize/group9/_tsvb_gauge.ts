@@ -13,9 +13,9 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
+  const retry = getService('retry');
 
-  const { visChart, visualBuilder, visualize, common } = getPageObjects([
-    'visChart',
+  const { visualBuilder, visualize, common } = getPageObjects([
     'visualBuilder',
     'visualize',
     'common',
@@ -65,10 +65,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.selectAggType('derivative', 1);
         await visualBuilder.setFieldForAggregation('Max of machine.ram', 1);
 
-        await visChart.waitForVisualizationRenderingStabilized();
-        const value = await visualBuilder.getGaugeCount();
+        await retry.try(async () => {
+          const value = await visualBuilder.getGaugeCount();
 
-        expect(value).to.eql('0');
+          expect(value).to.eql('0');
+        });
 
         await visualBuilder.clickPanelOptions('gauge');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
@@ -82,11 +83,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should verify gauge label and count display', async () => {
-        await visChart.waitForVisualizationRenderingStabilized();
-        const gaugeLabel = await visualBuilder.getGaugeLabel();
-        const gaugeCount = await visualBuilder.getGaugeCount();
-        expect(gaugeLabel).to.be('Count');
-        expect(gaugeCount).to.be('13,830');
+        await retry.try(async () => {
+          const gaugeLabel = await visualBuilder.getGaugeLabel();
+          const gaugeCount = await visualBuilder.getGaugeCount();
+          expect(gaugeLabel).to.be('Count');
+          expect(gaugeCount).to.be('13,830');
+        });
       });
 
       it('should display correct data for max aggregation with entire time range mode', async () => {
@@ -95,12 +97,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
 
-        await visChart.waitForVisualizationRenderingStabilized();
-        const gaugeLabel = await visualBuilder.getGaugeLabel();
-        const gaugeCount = await visualBuilder.getGaugeCount();
+        await retry.try(async () => {
+          const gaugeLabel = await visualBuilder.getGaugeLabel();
+          const gaugeCount = await visualBuilder.getGaugeCount();
 
-        expect(gaugeLabel).to.be('Max of bytes');
-        expect(gaugeCount).to.be('19,986');
+          expect(gaugeLabel).to.be('Max of bytes');
+          expect(gaugeCount).to.be('19,986');
+        });
       });
 
       it('should display correct data for sum aggregation with last value time range mode', async () => {
@@ -109,18 +112,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('gauge');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
 
-        await visChart.waitForVisualizationRenderingStabilized();
-        const gaugeLabel = await visualBuilder.getGaugeLabel();
-        const gaugeCount = await visualBuilder.getGaugeCount();
+        await retry.try(async () => {
+          const gaugeLabel = await visualBuilder.getGaugeLabel();
+          const gaugeCount = await visualBuilder.getGaugeCount();
 
-        expect(gaugeLabel).to.be('Sum of memory');
-        expect(gaugeCount).to.be('672,320');
+          expect(gaugeLabel).to.be('Sum of memory');
+          expect(gaugeCount).to.be('672,320');
+        });
       });
 
       it('should apply series color to gauge', async () => {
         await visualBuilder.setColorPickerValue('#90CEEAFF');
 
-        const gaugeColor = await visualBuilder.getGaugeColor();
+        const gaugeColor = await visualBuilder.expectGaugeColor('#90ceea');
         expect(gaugeColor).to.be('#90ceea');
       });
 
@@ -134,8 +138,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setBackgroundColor('#FFCFDF');
           await visualBuilder.setColorPickerValue('#AD7DE6', 1);
 
-          const backGroundStyle = await visualBuilder.getBackgroundStyle();
-          const gaugeInnerColor = await visualBuilder.getGaugeColor(true);
+          const backGroundStyle = await visualBuilder.expectBackgroundStyle(
+            'background-color: rgb(255, 207, 223);'
+          );
+          const gaugeInnerColor = await visualBuilder.expectGaugeColor('rgba(173,125,230,1)', true);
 
           expect(backGroundStyle).to.eql('background-color: rgb(255, 207, 223);');
           expect(gaugeInnerColor).to.eql('rgba(173,125,230,1)');
@@ -150,8 +156,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await visualBuilder.setColorPickerValue('#54B399', 2);
           await visualBuilder.setColorPickerValue('#DA8B45', 3);
 
-          const gaugeColor = await visualBuilder.getGaugeColor();
-          const gaugeValueStyle = await visualBuilder.getGaugeValueStyle();
+          const gaugeColor = await visualBuilder.expectGaugeColor('rgba(84,179,153,1)');
+          const gaugeValueStyle = await visualBuilder.expectGaugeValueStyle(
+            'color: rgb(218, 139, 69);'
+          );
 
           expect(gaugeColor).to.be('rgba(84,179,153,1)');
           expect(gaugeValueStyle).to.eql('color: rgb(218, 139, 69);');

@@ -61,7 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('gaugeColorRange2__to', '10000');
       await testSubjects.click('gaugePercentageMode');
       await testSubjects.setValue('gaugePercentageModeFormatPattern', '0.0%');
-      await visChart.waitForVisualizationRenderingStabilized();
       await visEditor.clickGo(true);
 
       await retry.try(async function tryingForTime() {
@@ -101,8 +100,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add machine.os.raw:win 8 filter by click on the first Gauge', async () => {
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await visChart.clickOnGaugeByLabel('win 8');
-        await visChart.waitForVisualizationRenderingStabilized();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         await filterBar.expectFilter('machine.os.raw', 'win 8');
       });
 

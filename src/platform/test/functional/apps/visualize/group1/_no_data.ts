@@ -13,7 +13,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
-  const { header, common } = getPageObjects(['header', 'common']);
+  const { common } = getPageObjects(['common']);
+  const config = getService('config');
   const esArchiver = getService('esArchiver');
   const dataViews = getService('dataViews');
   const kibanaServer = getService('kibanaServer');
@@ -28,7 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await common.navigateToApp('visualize');
-      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('noDataDefaultActionButton', {
+        timeout: config.get('timeouts.try'),
+      });
 
       const addIntegrations = await testSubjects.find('noDataDefaultActionButton');
       await addIntegrations.click();
@@ -44,7 +47,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await common.navigateToApp('visualize');
-      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('createDataViewButton', {
+        timeout: config.get('timeouts.try'),
+      });
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });

@@ -276,6 +276,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.rangeSliderSetLowerBound(firstId, '500');
         await dashboardControls.rangeSliderSetUpperBound(firstId, '400');
+        await retry.try(async () => {
+          expect(
+            await dashboardControls.rangeSliderGetLowerBoundAttribute(firstId, 'aria-invalid')
+          ).to.be('true');
+          expect(
+            await dashboardControls.rangeSliderGetUpperBoundAttribute(firstId, 'aria-invalid')
+          ).to.be('true');
+        });
       });
 
       it('cannot open popover when no data available', async () => {

@@ -209,14 +209,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createNCasesBeforeDeleteAllAfter(12, getPageObject, getService);
 
       it('paginates cases correctly', async () => {
-        await testSubjects.click('tablePaginationPopoverButton');
-        await testSubjects.click('tablePagination-25-rows');
+        await cases.casesTable.setRowsPerPage(25);
         await testSubjects.missingOrFail('pagination-button-1');
-        await testSubjects.click('tablePaginationPopoverButton');
-        await testSubjects.click('tablePagination-10-rows');
-        await testSubjects.isEnabled('pagination-button-1');
+        await cases.casesTable.setRowsPerPage(10);
+        await testSubjects.waitForEnabled('pagination-button-1');
         await testSubjects.click('pagination-button-1');
-        await testSubjects.isEnabled('pagination-button-0');
+        await testSubjects.waitForEnabled('pagination-button-0');
       });
     });
 

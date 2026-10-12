@@ -11,6 +11,57 @@ import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
+/** Returns normalized full text and label lines for decorated combobox options. */
+export const getComboBoxOptionTextCandidates = (
+  text: string,
+  requestedValue?: string
+): string[] => {
+  const normalize = (value: string) => value.toLowerCase().trim();
+  return [
+    ...new Set([
+      normalize(text),
+      ...text.split('\n').map(normalize),
+      ...(requestedValue === undefined ? [] : [normalize(requestedValue)]),
+    ]),
+  ].filter(Boolean);
+};
+
+/** Matches option labels and decorations while preserving prefix shorthand selection. */
+export const findMatchingComboBoxOption = <Option extends { text: string }>(
+  options: readonly Option[],
+  value: string
+): Option | undefined => {
+  const normalizedValue = value.toLowerCase().trim();
+  if (!normalizedValue) return;
+
+  const candidates = options.map((option) => ({
+    option,
+    texts: getComboBoxOptionTextCandidates(option.text),
+  }));
+  const exact = candidates.find(({ texts }) => texts.includes(normalizedValue));
+  if (exact) return exact.option;
+
+  const prefix = candidates.filter(({ texts }) =>
+    texts.some((text) => text.startsWith(normalizedValue))
+  );
+  const boundaryMatch = prefix.find(({ texts }) =>
+    texts.some(
+      (text) =>
+        text.startsWith(normalizedValue) &&
+        /^[^\p{L}\p{N}_]/u.test(text.slice(normalizedValue.length))
+    )
+  );
+  const prefixMatch = boundaryMatch?.option ?? prefix[0]?.option;
+  if (prefixMatch) return prefixMatch;
+
+  // EUI searches inside labels and treats separate words as search terms, so
+  // callers can use "k" for ".kibana" or "resource name" for "resource.name".
+  const searchTerms = normalizedValue.split(/\s+/);
+  return candidates.find(({ texts }) =>
+    texts.some((text) => searchTerms.every((term) => text.includes(term)))
+  )?.option;
+};
+
 /**
  * wrapper around EuiComboBox interactions
  */
@@ -24,6 +75,7 @@ export class ComboBoxService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
 
   private readonly WAIT_FOR_EXISTS_TIME: number = this.config.get('timeouts.waitForExists');
+  private readonly findTimeout: number = this.config.get('timeouts.find');
 
   /**
    * Finds combobox element and sets specified value
@@ -70,15 +122,20 @@ export class ComboBoxService extends FtrService {
    * @param isMouseClick if 'true', click will be done with mouse
    * @param trimmedValue normalized option text to match; when undefined, the first option is clicked
    */
-  private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<void> {
-    // Re-resolve the option element on each attempt: dynamic-options comboboxes re-render their
-    // option list, staling a captured element handle so that re-clicking a fixed reference can
-    // never recover. Finding the option inside the retry turns a stale element into a retryable error.
-    await this.retry.try(async () => {
-      const element = await this.findOption(trimmedValue);
-      // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
-      return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
-    });
+  private async clickOption(isMouseClick: boolean, trimmedValue?: string): Promise<string> {
+    // Async option providers can commit after their spinner disappears. Poll the
+    // options without typing again, which would restart a debounced search.
+    const element = await this.retry.tryForTime(this.findTimeout, () =>
+      this.findOption(trimmedValue)
+    );
+    const selectedText = await element.getVisibleText();
+    // Native click avoids scrolling that can close the dropdown.
+    if (isMouseClick) {
+      await element.clickMouseButton();
+    } else {
+      await element._webElement.click();
+    }
+    return selectedText;
   }
 
   /**
@@ -94,34 +151,23 @@ export class ComboBoxService extends FtrService {
     // Find options by visible text content.
     const optionsWithText = await Promise.all(
       (
-        await this.find.allByCssSelector(`.euiComboBoxOption`, this.WAIT_FOR_EXISTS_TIME)
+        await this.find.allByCssSelector(`.euiComboBoxOption`, 0)
       ).map(async (e) => {
         const text = (await e.getVisibleText()) ?? '';
-        return { element: e, text, formattedText: text.toLowerCase().trim() };
+        return { element: e, text };
       })
     );
 
-    const exactMatch = optionsWithText.find(({ formattedText }) => formattedText === trimmedValue);
-    if (exactMatch) {
-      return exactMatch.element;
+    const match = findMatchingComboBoxOption(optionsWithText, trimmedValue);
+    if (match) {
+      return match.element;
     }
 
-    // Fall back to a case-insensitive match (any option whose text equals
-    // the requested value when normalized).
-    const alternate = optionsWithText.find(
-      ({ formattedText }) =>
-        formattedText.toLowerCase() === trimmedValue.toLowerCase() && formattedText !== ''
+    throw new Error(
+      `Combobox option "${trimmedValue}" is not available; available options: ${optionsWithText
+        .map(({ text }) => text)
+        .join(', ')}`
     );
-    if (alternate) {
-      this.log.warning(
-        `comboBox.setElement - Found similar option [${alternate.text}] not [${trimmedValue}]`
-      );
-      return alternate.element;
-    }
-
-    // if it doesn't find the item which text starts with value, it will choose the first option
-    this.log.warning(`comboBox.setElement - Could not find option [${trimmedValue}], using first`);
-    return await this.find.byCssSelector('.euiComboBoxOption', 5000);
   }
 
   /**
@@ -147,20 +193,45 @@ export class ComboBoxService extends FtrService {
     options = { clickWithMouse: false }
   ): Promise<void> {
     const trimmedValue = value.toLowerCase().trim();
+    let selectedText = value;
     this.log.debug(`comboBox.setElement, value: ${trimmedValue}`);
-    const isOptionSelected = await this.isOptionSelected(comboBoxElement, trimmedValue);
+    await this.retry.try(async () => {
+      if (await this.isRenderedOptionSelected(comboBoxElement, selectedText, value)) {
+        this.log.debug('value is already selected. returning');
+        return;
+      }
 
-    if (isOptionSelected) {
-      this.log.debug(`value is already selected. returning`);
-      return;
+      await comboBoxElement.scrollIntoViewIfNecessary();
+      await this.setFilterValue(comboBoxElement, value);
+      await this.openOptionsList(comboBoxElement);
+      selectedText = await this.clickOption(options.clickWithMouse, trimmedValue);
+      await this.closeOptionsList(comboBoxElement);
+      // Async selections can disable the input before committing the selected label.
+      // Wait for that commit without restarting the selection or typing again.
+      await this.retry.try(async () => {
+        expect(await this.isRenderedOptionSelected(comboBoxElement, selectedText, value)).to.equal(
+          true
+        );
+      });
+    });
+  }
+
+  private async isRenderedOptionSelected(
+    comboBoxElement: WebElementWrapper,
+    text: string,
+    requestedValue: string
+  ): Promise<boolean> {
+    for (const candidate of getComboBoxOptionTextCandidates(text, requestedValue)) {
+      if (
+        await this.isOptionSelected(comboBoxElement, candidate, {
+          allowInvalid: true,
+          allowMultiple: true,
+        })
+      ) {
+        return true;
+      }
     }
-
-    await comboBoxElement.scrollIntoViewIfNecessary();
-    await this.setFilterValue(comboBoxElement, value);
-    await this.openOptionsList(comboBoxElement);
-
-    await this.clickOption(options.clickWithMouse, trimmedValue);
-    await this.closeOptionsList(comboBoxElement);
+    return false;
   }
 
   /**
@@ -347,7 +418,11 @@ export class ComboBoxService extends FtrService {
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.closeOptionsList');
 
-    // wait for potential other animations to finish (e.g. due to closing on selection)
+    if (!(await this.testSubjects.exists('~comboBoxOptionsList'))) {
+      return;
+    }
+
+    // Wait for closing animations only while the list is still open.
     const isOptionListClosed = await this.retry.tryForTime(
       5000,
       async () => {
@@ -397,7 +472,14 @@ export class ComboBoxService extends FtrService {
    */
   public async isOptionSelected(
     comboBoxElement: WebElementWrapper,
-    value: string
+    value: string,
+    {
+      allowInvalid = false,
+      allowMultiple = false,
+    }: {
+      allowInvalid?: boolean;
+      allowMultiple?: boolean;
+    } = {}
   ): Promise<boolean> {
     this.log.debug(`comboBox.isOptionSelected, value: ${value}`);
     const $ = await comboBoxElement.parseDomContent();
@@ -406,7 +488,8 @@ export class ComboBoxService extends FtrService {
       const input = $('input[role="combobox"]');
 
       const hasValidValue =
-        input.attr('aria-invalid') !== 'true' &&
+        input.attr('aria-expanded') !== 'true' &&
+        (allowInvalid || input.attr('aria-invalid') !== 'true') &&
         value.toLowerCase().trim() === input.val().toLowerCase().trim(); // Normalizing text here for Firefox driver shenanigans
 
       return !!hasValidValue;
@@ -417,8 +500,8 @@ export class ComboBoxService extends FtrService {
       .map((option) => $(option).text());
 
     return (
-      selectedOptions.length === 1 &&
-      selectedOptions[0].toLowerCase().trim() === value.toLowerCase().trim()
+      (allowMultiple || selectedOptions.length === 1) &&
+      selectedOptions.some((option) => option.toLowerCase().trim() === value.toLowerCase().trim())
     );
   }
 

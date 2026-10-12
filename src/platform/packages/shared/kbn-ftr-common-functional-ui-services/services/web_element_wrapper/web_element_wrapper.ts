@@ -82,14 +82,15 @@ export class WebElementWrapper {
     findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
     timeout?: number
   ) {
-    if (timeout && timeout !== this.timeout) {
-      await this.driver.manage().setTimeouts({ implicit: timeout });
+    if (timeout === undefined || timeout === this.timeout) {
+      return findFunction();
     }
-    const elements = await findFunction();
-    if (timeout && timeout !== this.timeout) {
+    await this.driver.manage().setTimeouts({ implicit: timeout });
+    try {
+      return await findFunction();
+    } finally {
       await this.driver.manage().setTimeouts({ implicit: this.timeout });
     }
-    return elements;
   }
 
   // Locator is re-found from the document root on retry. Omit it for child finds
@@ -239,7 +240,7 @@ export class WebElementWrapper {
    * @return {Promise<boolean>}
    */
   public async elementHasClass(className: string): Promise<boolean> {
-    const classes = (await this._webElement.getAttribute('class')) ?? '';
+    const classes = (await this.getAttribute('class')) ?? '';
 
     return classes.includes(className);
   }

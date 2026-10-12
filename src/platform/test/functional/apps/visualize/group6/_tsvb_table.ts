@@ -37,13 +37,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('table');
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');
-        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       it('should display correct values on changing group by field and column name', async () => {
         const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -70,7 +69,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visChart.waitForRenderingCount(prevRenderingCount + 1);
 
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(isFieldForAggregationValid).to.be(true);
         expect(tableData).to.be(EXPECTED);
       });
@@ -80,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualize.saveVisualizationExpectSuccessAndBreadcrumb('TSVB table saving test');
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -92,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -101,9 +100,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.selectAggType('Filter Ratio');
         await visualBuilder.setFilterRatioOption('Numerator', 'extension.raw : "css"');
         await visualBuilder.setFilterRatioOption('Denominator', 'bytes <= 3000');
-        await visChart.waitForVisualizationRenderingStabilized();
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -113,7 +111,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('machine.ram');
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -125,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('table');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -138,7 +136,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.fillInVariable('test', 'Min');
         await visualBuilder.fillInExpression('params.test + 1');
 
-        const tableData = await visualBuilder.getViewTable();
+        const tableData = await visualBuilder.expectViewTable(EXPECTED);
         expect(tableData).to.be(EXPECTED);
       });
 
@@ -167,7 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const expected =
             'OS Average of bytes\nWIN 8 6.786KB\nWIN XP 3.804KB\nWIN 7 6.596KB\nIOS 4.844KB\nOSX 3.06KB';
 
-          const tableData = await visualBuilder.getViewTable();
+          const tableData = await visualBuilder.expectViewTable(expected);
           expect(tableData).to.be(expected);
         });
 
@@ -178,7 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.clickSeriesOption();
           await visualBuilder.changeDataFormatter('number');
 
-          const tableData = await visualBuilder.getViewTable();
+          const tableData = await visualBuilder.expectViewTable(expected);
           expect(tableData).to.be(expected);
         });
 
@@ -189,7 +187,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.clickSeriesOption();
           await visualBuilder.changeDataFormatter('percent');
 
-          const tableData = await visualBuilder.getViewTable();
+          const tableData = await visualBuilder.expectViewTable(expected);
           expect(tableData).to.be(expected);
         });
 

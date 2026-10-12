@@ -42,6 +42,7 @@ export default function ({
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        'theme:darkMode': false,
         // Disable AI Assistant header nav selector
         [PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY]: AIAssistantType.Never,
       });

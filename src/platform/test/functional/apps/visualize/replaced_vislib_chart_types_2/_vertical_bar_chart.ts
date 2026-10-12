@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should have inspector enabled', async function () {
@@ -305,7 +305,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Split series');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('response.raw');
-        await visChart.waitForVisualizationRenderingStabilized();
         await visEditor.clickGo();
 
         const expectedEntries = ['200', '404', '503']; // sorting order aligned with the reading direction
@@ -325,12 +324,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should correctly filter by legend', async () => {
         await visChart.filterLegend('200');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete();
         const legendEntries = await visChart.getLegendEntriesXYCharts(xyChartSelector);
         const expectedEntries = ['200'];
         expect(legendEntries).to.eql(expectedEntries);
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await filterBar.removeFilter('response.raw');
-        await visChart.waitForVisualization();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
       });
     });
 
@@ -342,13 +342,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.clickBucket('Split series');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('response.raw');
-        await visChart.waitForVisualizationRenderingStabilized();
 
         await visEditor.toggleOpenEditor(3, 'false');
         await visEditor.clickBucket('Split series');
         await visEditor.selectAggregation('Terms');
         await visEditor.selectField('machine.os');
-        await visChart.waitForVisualizationRenderingStabilized();
         await visEditor.clickGo();
 
         const expectedEntries = [
@@ -391,7 +389,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.toggleOpenEditor(2, 'false');
         await visEditor.toggleOpenEditor(1);
         await visEditor.selectAggregation('Derivative', 'metrics');
-        await visChart.waitForVisualizationRenderingStabilized();
         await visEditor.clickGo();
 
         const expectedEntries = ['Derivative of Count'];

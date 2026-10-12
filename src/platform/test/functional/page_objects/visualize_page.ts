@@ -32,6 +32,8 @@ type DashboardPickerOption =
  */
 export class VisualizePageObject extends FtrService {
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly config = this.ctx.getService('config');
+  private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
@@ -46,6 +48,7 @@ export class VisualizePageObject extends FtrService {
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly appMenu = this.ctx.getPageObject('appMenu');
   private readonly toasts = this.ctx.getService('toasts');
+  private readonly renderable = this.ctx.getService('renderable');
 
   index = {
     LOGSTASH_TIME_BASED: 'logstash-*',
@@ -68,6 +71,25 @@ export class VisualizePageObject extends FtrService {
       'histogram:maxBars': 100,
       'timepicker:timeDefaults': `{ "from": "${this.timePicker.defaultStartTimeUTC}", "to": "${this.timePicker.defaultEndTimeUTC}"}`,
     });
+  }
+
+  private async confirmVisualizeLibraryNavigation(): Promise<boolean> {
+    const destination = await this.testSubjects.waitForFirst(
+      ['confirmModalConfirmButton', 'newItemButton'],
+      { timeout: this.config.get('timeouts.try') }
+    );
+    if (!destination) {
+      throw new Error('Visualize library navigation did not finish or request confirmation');
+    }
+    if (destination === 'confirmModalConfirmButton') {
+      await this.testSubjects.click('confirmModalConfirmButton');
+      await this.appMenu.existOrFail('newItemButton');
+      await this.testSubjects.missingOrFail('confirmModalConfirmButton', {
+        timeout: this.config.get('timeouts.try'),
+      });
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -93,8 +115,7 @@ export class VisualizePageObject extends FtrService {
     }
     try {
       await this.testSubjects.click(APP_HEADER_TEST_SUBJECTS.back);
-      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
-        await this.testSubjects.click('confirmModalConfirmButton');
+      if (await this.confirmVisualizeLibraryNavigation()) {
         return 'confirmed';
       }
       return 'clicked';
@@ -117,7 +138,7 @@ export class VisualizePageObject extends FtrService {
     }
     // Try to navigate to the Visualize Listing page from breadcrumb if available
     const selector = '[data-test-subj="breadcrumb first"][title="Visualize library"]';
-    const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
+    const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector, 0);
     if (visualizeLibraryBreadcrumb) {
       try {
         // The breadcrumb can be a transient leftover while the current app re-renders (for
@@ -133,10 +154,7 @@ export class VisualizePageObject extends FtrService {
       }
       // Lens offers a last modal before leaving the page for unsaved charts
       // so close it as quick as possible
-      if (await this.testSubjects.waitForExists('confirmModalConfirmButton', { timeout: 1500 })) {
-        await this.testSubjects.click('confirmModalConfirmButton');
-        return true;
-      }
+      return await this.confirmVisualizeLibraryNavigation();
     }
     return false;
   }
@@ -158,7 +176,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickNewVisualization() {
-    await this.appMenu.clickMenuItem('newItemButton');
+    await this.appMenu.clickMenuItem('newItemButton', { waitForEnabled: true });
     await this.waitForGroupsSelectPage();
   }
 
@@ -232,14 +250,14 @@ export class VisualizePageObject extends FtrService {
     options: { forceRefresh: boolean } = { forceRefresh: false }
   ) {
     await this.gotoVisualizationLandingPage(options);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.appMenu.existOrFail('newItemButton');
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
   }
 
   public async navigateToNewAggBasedVisualization() {
     await this.gotoVisualizationLandingPage();
-    await this.header.waitUntilLoadingHasFinished();
+    await this.appMenu.existOrFail('newItemButton');
     await this.clickNewVisualization();
     await this.clickAggBasedVisualizations();
     await this.waitForVisualizationSelectPage();
@@ -257,7 +275,7 @@ export class VisualizePageObject extends FtrService {
     return await this.testSubjects.exists(`visType-${type}`);
   }
 
-  public async clickVisType(type: string) {
+  private async selectVisType(type: string): Promise<void> {
     // waiting for the existence of the control gives the UI more time to bind a click handler
     // see https://github.com/elastic/kibana/issues/89958
     if (
@@ -268,19 +286,38 @@ export class VisualizePageObject extends FtrService {
       throw new Error(`The '${type}' visualization type does not exist (visType-${type})`);
     }
     await this.testSubjects.click(`visType-${type}`);
+    await this.retry.waitFor(
+      'visualization type picker to close',
+      async () => !(await this.testSubjects.exists(`visType-${type}`, { allowHidden: true }))
+    );
+  }
+
+  public async clickVisType(type: string) {
+    await this.selectVisType(type);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async clickAreaChart() {
-    await this.clickVisType('area');
+    await this.selectVisTypeWithSource('area');
+  }
+
+  private async selectVisTypeWithSource(type: string): Promise<void> {
+    await this.selectVisType(type);
+    const destination = await this.testSubjects.waitForFirst(
+      ['^savedObjectTitle', 'visualizationLoader'],
+      { timeout: this.config.get('timeouts.try') }
+    );
+    if (!destination) {
+      throw new Error(`The '${type}' visualization source selection or editor did not appear`);
+    }
   }
 
   public async clickDataTable() {
-    await this.clickVisType('table');
+    await this.selectVisTypeWithSource('table');
   }
 
   public async clickLineChart() {
-    await this.clickVisType('line');
+    await this.selectVisTypeWithSource('line');
   }
 
   public async clickLegacyTab() {
@@ -288,11 +325,11 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickMetric() {
-    await this.clickVisType('metric');
+    await this.selectVisTypeWithSource('metric');
   }
 
   public async clickGauge() {
-    await this.clickVisType('gauge');
+    await this.selectVisTypeWithSource('gauge');
   }
 
   public async clickGoal() {
@@ -300,7 +337,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickPieChart() {
-    await this.clickVisType('pie');
+    await this.selectVisTypeWithSource('pie');
   }
 
   public async clickTimelion() {
@@ -308,24 +345,26 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickTagCloud() {
-    await this.clickVisType('tagcloud');
+    await this.selectVisTypeWithSource('tagcloud');
   }
 
   public async clickVega() {
-    await this.clickVisType('vega');
+    await this.selectVisType('vega');
+    await this.testSubjects.existOrFail('vega-editor');
   }
 
   public async clickVisualBuilder() {
     await this.clickLegacyTab();
-    await this.clickVisType('metrics');
+    await this.selectVisType('metrics');
+    await this.testSubjects.existOrFail('tvbVisEditor');
   }
 
   public async clickVerticalBarChart() {
-    await this.clickVisType('histogram');
+    await this.selectVisTypeWithSource('histogram');
   }
 
   public async clickHeatmapChart() {
-    await this.clickVisType('heatmap');
+    await this.selectVisTypeWithSource('heatmap');
   }
 
   public async clickInputControlVis() {
@@ -353,7 +392,7 @@ export class VisualizePageObject extends FtrService {
 
   public async clickNewSearch(indexPattern = this.index.LOGSTASH_TIME_BASED) {
     await this.testSubjects.click(`savedObjectTitle${indexPattern.split(' ').join('-')}`);
-    await this.header.waitUntilLoadingHasFinished();
+    await this.visChart.waitForVisualizationRenderComplete(1, this.config.get('timeouts.try'));
   }
 
   public async selectVisSourceIfRequired() {
@@ -408,16 +447,17 @@ export class VisualizePageObject extends FtrService {
   public async clickUnlinkSavedSearch() {
     await this.testSubjects.click('showUnlinkSavedSearchPopover');
     await this.testSubjects.click('unlinkSavedSearch');
-    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.missingOrFail('showUnlinkSavedSearchPopover');
+    await this.visChart.waitForVisualizationRenderComplete();
   }
 
   public async ensureSavePanelOpen() {
     this.log.debug('ensureSavePanelOpen');
-    await this.header.waitUntilLoadingHasFinished();
-    const isOpen = await this.testSubjects.waitForExists('savedObjectSaveModal', { timeout: 5000 });
+    const isOpen = await this.testSubjects.exists('savedObjectSaveModal');
     if (!isOpen) {
-      await this.appMenu.clickMenuItem('visualizeSaveButton');
+      await this.appMenu.clickMenuItem('visualizeSaveButton', { waitForEnabled: true });
     }
+    await this.testSubjects.existOrFail('savedObjectSaveModal');
   }
 
   public async clickLoadSavedVisButton() {
@@ -441,7 +481,7 @@ export class VisualizePageObject extends FtrService {
       await this.testSubjects.click(dataTestSubj, 20000);
       await this.notOnLandingPageOrFail();
     });
-    await this.header.waitUntilLoadingHasFinished();
+    await this.renderable.waitForRender();
   }
 
   public async waitForVisualizationSavedToastGone() {
@@ -492,8 +532,7 @@ export class VisualizePageObject extends FtrService {
 
     // Confirm that the Visualization has actually been saved
     await this.testSubjects.existOrFail('saveVisualizationSuccess');
-    const message = await this.toasts.getTitleAndDismiss();
-    await this.header.waitUntilLoadingHasFinished();
+    const message = await this.toasts.getTitleAndDismiss('saveVisualizationSuccess');
     await this.common.waitForSaveModalToClose();
 
     return message;
@@ -577,9 +616,16 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async saveVisualizationAndReturn() {
-    await this.header.waitUntilLoadingHasFinished();
-    await this.appMenu.existOrFail('visualizesaveAndReturnButton');
-    await this.appMenu.clickMenuItem('visualizesaveAndReturnButton');
+    const editorUrl = new URL(await this.browser.getCurrentUrl());
+    await this.appMenu.clickMenuItem('visualizesaveAndReturnButton', { waitForEnabled: true });
+    if (editorUrl.hash.startsWith('#/edit/')) {
+      await this.testSubjects.existOrFail('saveVisualizationSuccess');
+      await this.toasts.getTitleAndDismiss('saveVisualizationSuccess');
+    }
+    await this.retry.waitFor('return to the originating application', async () => {
+      return new URL(await this.browser.getCurrentUrl()).pathname !== editorUrl.pathname;
+    });
+    await this.testSubjects.existOrFail('dshDashboardViewport');
   }
 
   public async linkedToOriginatingApp() {

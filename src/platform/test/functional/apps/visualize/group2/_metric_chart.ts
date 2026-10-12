@@ -188,15 +188,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await visEditor.selectField('machine.os.raw');
         await visEditor.clickGo();
 
-        let filterCount = 0;
+        const renderingCount = await visChart.getVisualizationRenderingCount();
+        await visEditor.clickMetricByIndex(0);
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         await retry.try(async function tryingForTime() {
-          // click first metric bucket
-          await visEditor.clickMetricByIndex(0);
-          await visChart.waitForVisualizationRenderingStabilized();
-          filterCount = await filterBar.getFilterCount();
+          expect(await filterBar.getFilterCount()).to.equal(1);
         });
         await filterBar.removeAllFilters();
-        expect(filterCount).to.equal(1);
       });
     });
   });

@@ -19,14 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pieChart = getService('pieChart');
   const filterBar = getService('filterBar');
 
-  const { dashboardControls, dashboard, header } = getPageObjects([
+  const { dashboardControls, dashboard } = getPageObjects([
     'dashboardControls',
     'timePicker',
     'dashboard',
     'settings',
     'console',
     'common',
-    'header',
   ]);
 
   /**
@@ -52,7 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('NOT animal.keyword : "dog" ');
         await queryBar.submitQuery();
         await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
 
         const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
           'hiss',
@@ -72,7 +70,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
         await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS,
           invalidSelections: [],
@@ -83,7 +80,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Can mark multiple selections invalid with Filter', async () => {
         await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
         await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: {
             hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,
@@ -108,7 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.setQuery('NOT animal.keyword : "dog" ');
         await queryBar.submitQuery();
         await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
 
         const suggestions = pick(OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS, [
           'hiss',
@@ -125,7 +120,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('Does not mark multiple selections invalid with Filter', async () => {
         await filterBar.addFilter({ field: 'sound.keyword', operation: 'is', value: 'hiss' });
         await dashboard.waitForRenderComplete();
-        await header.waitUntilLoadingHasFinished();
         await dashboardControls.ensureAvailableOptionsEqual(controlId, {
           suggestions: {
             hiss: OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS.hiss,

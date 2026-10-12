@@ -57,7 +57,6 @@ export const heatmapChartTests = (
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
     });
 
     it('should have inspector enabled', async function () {
@@ -110,7 +109,6 @@ export const heatmapChartTests = (
       await visEditor.clickOptionsTab();
       await visEditor.changeHeatmapColorNumbers(6);
       await visEditor.clickGo(isLegacyChart);
-      await visChart.waitForVisualizationRenderingStabilized();
 
       const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
@@ -152,7 +150,6 @@ export const heatmapChartTests = (
       await visEditor.setCustomRangeByIndex(7, '800', '905');
       await visEditor.clickGo(isLegacyChart);
 
-      await visChart.waitForVisualizationRenderingStabilized();
       const legends = await visChart.getLegendEntries();
       let expectedLegends = [];
       if (isLegacyChart) {

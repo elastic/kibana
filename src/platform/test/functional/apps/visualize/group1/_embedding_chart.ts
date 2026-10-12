@@ -16,11 +16,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const renderable = getService('renderable');
   const embedding = getService('embedding');
   const retry = getService('retry');
-  const { visualize, visEditor, visChart, header, timePicker } = getPageObjects([
+  const { visualize, visEditor, visChart, timePicker } = getPageObjects([
     'visualize',
     'visEditor',
     'visChart',
-    'header',
     'timePicker',
   ]);
 
@@ -63,13 +62,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow to filter in embedded mode', async () => {
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await filterBar.addFilter({
           field: '@timestamp',
           operation: 'is between',
           value: { from: '2015-09-21', to: '2015-09-23' },
         });
-        await header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
 
         const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([
@@ -87,11 +86,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should allow to change timerange from the visualization in embedded mode', async () => {
+        const renderingCount = await visChart.getVisualizationRenderingCount();
+        await visChart.filterOnTableCell(0, 6);
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         await retry.try(async () => {
-          await visChart.filterOnTableCell(0, 6);
-          await header.waitUntilLoadingHasFinished();
-          await renderable.waitForRender();
-
           const data = await visChart.getTableVisContent();
           expect(data).to.be.eql([
             ['03:00', '0B', '1'],

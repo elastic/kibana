@@ -96,10 +96,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('input control is clear', async () => {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
-        await common.sleep(500); // Wait for DOM to stabilize after clear
         await comboBox.set('listControlSelect0', 'osx', { timeout: 20_000 });
         await visEditor.inputControlSubmit();
-        await common.sleep(1000);
 
         await filterBar.expectNoFilter(FIELD_NAME, 'ios');
         await filterBar.expectFilter(FIELD_NAME, 'osx');
@@ -107,10 +105,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should clear dropdown when filter pill removed', async () => {
         await filterBar.removeFilter(FIELD_NAME);
-        await common.sleep(500); // give time for filter to be removed and event handlers to fire
-
-        const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
-        expect(hasValue).to.equal(false);
+        await retry.try(async () => {
+          expect(await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')).to.equal(
+            false
+          );
+        });
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {

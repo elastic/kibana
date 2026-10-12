@@ -7,6 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Session, WebDriver, WebElement } from 'selenium-webdriver';
+import { ToolingLog } from '@kbn/tooling-log';
+import {
+  RetryService,
+  type FtrProviderContext as CommonFtrProviderContext,
+} from '@kbn/ftr-common-functional-services';
+import { WebElementWrapper } from './web_element_wrapper';
+import { Browsers } from './remote/browsers';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { TestSubjects } from './test_subjects';
 
@@ -37,13 +45,14 @@ describe('TestSubjects existence checks', () => {
         existsByDisplayedByCssSelector,
         firstDisplayedIndexByCssSelector,
       },
-      log: { debug: jest.fn() },
+      log: { debug: jest.fn(), warning: jest.fn() },
       retry: {},
     };
     const ctx = {
       getService: (name: keyof typeof services) => services[name],
-    } as unknown as FtrProviderContext;
+    } as unknown as FtrProviderContext & CommonFtrProviderContext;
 
+    services.retry = new RetryService(ctx);
     return new TestSubjects(ctx);
   };
 
@@ -51,6 +60,54 @@ describe('TestSubjects existence checks', () => {
     existsByCssSelector.mockReset().mockResolvedValue(true);
     existsByDisplayedByCssSelector.mockReset().mockResolvedValue(true);
     firstDisplayedIndexByCssSelector.mockReset().mockResolvedValue(-1);
+  });
+
+  describe('enabled controls', () => {
+    const createElement = () => {
+      const driver = new WebDriver(Promise.resolve(new Session('ftr', {})), {
+        execute: jest.fn(),
+      });
+      return new WebElementWrapper(
+        new WebElement(driver, 'button'),
+        null,
+        driver,
+        10000,
+        0,
+        new ToolingLog(),
+        Browsers.Chrome
+      );
+    };
+
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('waits through disabled and hidden states and re-resolves the element', async () => {
+      const testSubjects = getTestSubjects();
+      const element = createElement();
+      jest.spyOn(element, 'isDisplayed').mockResolvedValueOnce(false).mockResolvedValue(true);
+      jest.spyOn(element, 'isEnabled').mockResolvedValueOnce(false).mockResolvedValue(true);
+      const find = jest.spyOn(testSubjects, 'find').mockResolvedValue(element);
+      const result = testSubjects.waitForEnabled('button', 5000);
+
+      await jest.runAllTimersAsync();
+
+      await expect(result).resolves.toBe(true);
+      expect(find).toHaveBeenCalledTimes(3);
+    });
+
+    it('rejects when a control stays disabled within the configured budget', async () => {
+      const testSubjects = getTestSubjects();
+      const element = createElement();
+      jest.spyOn(element, 'isDisplayed').mockResolvedValue(true);
+      jest.spyOn(element, 'isEnabled').mockResolvedValue(false);
+      jest.spyOn(testSubjects, 'find').mockResolvedValue(element);
+      const result = expect(testSubjects.waitForEnabled('button', 50)).rejects.toThrow(
+        'timed out waiting for button to be visible and enabled'
+      );
+
+      await jest.runAllTimersAsync();
+      await result;
+    });
   });
 
   it('performs an immediate displayed check with exists', async () => {

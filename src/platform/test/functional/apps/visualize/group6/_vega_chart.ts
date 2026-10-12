@@ -93,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.navigateToNewVisualization();
       log.debug('clickVega');
       await visualize.clickVega();
-      await visChart.waitForVisualizationRenderingStabilized();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     describe('vega chart', () => {
@@ -146,12 +146,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
           await vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
           await visEditor.clickGo();
-          await visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await vegaChart.getYAxisLabels();
           expect(fullDataLabels[0]).to.eql('0');
           expect(fullDataLabels[fullDataLabels.length - 1]).to.eql('1,600');
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await filterBar.addFilter({ field: '@tags.raw', operation: 'is', value: 'error' });
-          await visChart.waitForVisualizationRenderingStabilized();
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
           const filteredDataLabels = await vegaChart.getYAxisLabels();
           expect(filteredDataLabels[0]).to.eql('0');
           expect(filteredDataLabels[filteredDataLabels.length - 1]).to.eql('90');
@@ -281,9 +281,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       beforeEach(async () => {
         const filtersCount = await filterBar.getFilterCount();
         if (filtersCount > 0) {
+          const renderingCount = await visChart.getVisualizationRenderingCount();
           await filterBar.removeAllFilters();
+          await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
+        } else {
+          await visChart.waitForVisualizationRenderComplete();
         }
-        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       const fillSpecAndGo = async (newSpec: string) => {
@@ -310,7 +313,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getTestSpec('kibanaAddFilter({ query_string: { query: "response:200" }})')
         );
 
-        expect(await filterBar.getFilterCount()).to.be(1);
+        await filterBar.expectFilterCount(1);
       });
 
       it('should remove filter by calling "kibanaRemoveFilter" expression', async () => {
@@ -318,24 +321,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('breadcrumb last');
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
 
-        expect(await filterBar.getFilterCount()).to.be(1);
+        await filterBar.expectFilterCount(1);
 
         await fillSpecAndGo(
           getTestSpec('kibanaRemoveFilter({ match_phrase: { response: "200" }})')
         );
 
-        expect(await filterBar.getFilterCount()).to.be(0);
+        await filterBar.expectFilterCount(0);
       });
 
       it('should remove all filters by calling "kibanaRemoveAllFilters" expression', async () => {
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '200' });
         await filterBar.addFilter({ field: 'response', operation: 'is', value: '500' });
 
-        expect(await filterBar.getFilterCount()).to.be(2);
+        await filterBar.expectFilterCount(2);
 
         await fillSpecAndGo(getTestSpec('kibanaRemoveAllFilters()'));
 
-        expect(await filterBar.getFilterCount()).to.be(0);
+        await filterBar.expectFilterCount(0);
       });
     });
 

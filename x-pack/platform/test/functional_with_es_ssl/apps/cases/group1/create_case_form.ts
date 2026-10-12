@@ -21,6 +21,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const cases = getService('cases');
     const testSubjects = getService('testSubjects');
     const comboBox = getService('comboBox');
+    const retry = getService('retry');
     const header = getPageObject('header');
 
     beforeEach(async () => {
@@ -69,23 +70,25 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
         category: longCategory,
       });
 
-      const title = await find.byCssSelector('[data-test-subj="caseTitle"]');
-      expect(await title.getVisibleText()).contain(
-        'The length of the name is too long. The maximum length is 160 characters.'
-      );
+      await retry.try(async () => {
+        const title = await find.byCssSelector('[data-test-subj="caseTitle"]');
+        expect(await title.getVisibleText()).contain(
+          'The length of the name is too long. The maximum length is 160 characters.'
+        );
 
-      const description = await testSubjects.find('caseDescription');
-      expect(await description.getVisibleText()).contain('A description is required.');
+        const description = await testSubjects.find('caseDescription');
+        expect(await description.getVisibleText()).contain('A description is required.');
 
-      const tags = await testSubjects.find('caseTags');
-      expect(await tags.getVisibleText()).contain(
-        'The length of the tag is too long. The maximum length is 256 characters.'
-      );
+        const tags = await testSubjects.find('caseTags');
+        expect(await tags.getVisibleText()).contain(
+          'The length of the tag is too long. The maximum length is 256 characters.'
+        );
 
-      const category = await testSubjects.find('caseCategory');
-      expect(await category.getVisibleText()).contain(
-        'The length of the category is too long. The maximum length is 50 characters.'
-      );
+        const category = await testSubjects.find('caseCategory');
+        expect(await category.getVisibleText()).contain(
+          'The length of the category is too long. The maximum length is 50 characters.'
+        );
+      });
     });
 
     describe('Assignees', function () {

@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, markdownVis } = getPageObjects(['dashboard', 'header', 'markdownVis']);
+  const { dashboard, markdownVis } = getPageObjects(['dashboard', 'markdownVis']);
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -54,7 +54,6 @@ text
       // 1. adds markdown panel and saves
       const originalPanelCount = await dashboard.getPanelCount();
       await dashboardAddPanel.clickAddMarkdownPanel();
-      await header.waitUntilLoadingHasFinished();
       await markdownVis.typeText(sample.markdown);
       await markdownVis.applyChanges();
       expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
@@ -68,7 +67,6 @@ text
       // 2. does not add a panel when discarded immediately
       const originalPanelCount = await dashboard.getPanelCount();
       await dashboardAddPanel.clickAddMarkdownPanel();
-      await header.waitUntilLoadingHasFinished();
       await markdownVis.discardChanges();
 
       await retry.try(
@@ -79,21 +77,25 @@ text
 
       // 3. edits markdown panel - handles preview and editor mode and discards unsaved changes
       await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
       await markdownVis.typeText('text that wont be saved');
       await markdownVis.clickPreview();
-      expect(await markdownVis.getRenderedText()).to.eql('text that wont be saved');
+      await retry.try(async () => {
+        expect(await markdownVis.getRenderedText()).to.eql('text that wont be saved');
+      });
       await markdownVis.clickEditor();
       expect(await markdownVis.getEditedText()).to.eql('text that wont be saved');
       await markdownVis.discardChanges();
-      expect(await markdownVis.getRenderedText()).to.eql(sample.result);
+      await retry.try(async () => {
+        expect(await markdownVis.getRenderedText()).to.eql(sample.result);
+      });
 
       // 4. edits markdown panel and saves
       await dashboardPanelActions.clickEdit();
-      await header.waitUntilLoadingHasFinished();
       await markdownVis.typeText(modifiedSample.markdown);
       await markdownVis.applyChanges();
-      expect(await markdownVis.getRenderedText()).to.eql(modifiedSample.result);
+      await retry.try(async () => {
+        expect(await markdownVis.getRenderedText()).to.eql(modifiedSample.result);
+      });
       expect(await markdownVis.getMarkdownTextByTag('h1')).to.equal('Modified Heading 1');
     });
   });

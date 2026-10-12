@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const comboBox = getService('comboBox');
+  const retry = getService('retry');
 
   /**
    * Purpose: Legacy options list control smoke test
@@ -43,10 +44,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
 
         await comboBox.filterOptionsList('listControlSelect0', 'R');
-        await header.waitUntilLoadingHasFinished();
-
-        const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW');
+        await retry.try(async () => {
+          const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
+          expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW');
+        });
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
@@ -59,12 +60,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await comboBox.filterOptionsList('listControlSelect0', '17');
-        await header.waitUntilLoadingHasFinished();
-
-        const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal(
-          '135.206.117.161,177.194.175.66,243.158.217.196'
-        );
+        await retry.try(async () => {
+          const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
+          expect(updatedOptions.trim().split('\n').join()).to.equal(
+            '135.206.117.161,177.194.175.66,243.158.217.196'
+          );
+        });
       });
     });
 
@@ -83,10 +84,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,MX,NG,PK');
 
         await comboBox.filterOptionsList('listControlSelect1', 'R');
-        await header.waitUntilLoadingHasFinished();
-
-        const updatedOptions = await comboBox.getOptionsList('listControlSelect1');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RS,RU');
+        await retry.try(async () => {
+          const updatedOptions = await comboBox.getOptionsList('listControlSelect1');
+          expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RS,RU');
+        });
       });
     });
   });

@@ -16,13 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const renderable = getService('renderable');
-  const { visualize, visEditor, header, visChart } = getPageObjects([
-    'visualize',
-    'visEditor',
-    'header',
-    'visChart',
-  ]);
+  const { visualize, visEditor, visChart } = getPageObjects(['visualize', 'visEditor', 'visChart']);
 
   describe('data table with index without time filter', function indexPatternCreation() {
     const vizName1 = 'Visualization DataTable without time filter';
@@ -64,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.saveVisualizationExpectSuccessAndBreadcrumb(vizName1);
 
       await visualize.loadSavedVisualization(vizName1);
-      await visChart.waitForVisualization();
+      await visChart.waitForVisualizationRenderComplete();
     });
 
     it('should have inspector enabled', async function () {
@@ -127,21 +121,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should correctly filter for applied time filter on the main timefield', async () => {
+        const renderingCount = await visChart.getVisualizationRenderingCount();
         await filterBar.addFilter({
           field: '@timestamp',
           operation: 'is between',
           value: { from: '2015-09-19', to: '2015-09-21' },
         });
-        await header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
+        await visChart.waitForVisualizationRenderComplete(renderingCount + 1);
         const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([['2015-09-20', '4,757']]);
       });
 
       it('should correctly filter for pinned filters', async () => {
         await filterBar.toggleFilterPinned('@timestamp');
-        await header.waitUntilLoadingHasFinished();
-        await renderable.waitForRender();
+        await retry.waitFor('time filter to be pinned', async () =>
+          filterBar.isFilterPinned('@timestamp')
+        );
+        await visChart.waitForVisualizationRenderComplete();
         const data = await visChart.getTableVisContent();
         expect(data).to.be.eql([['2015-09-20', '4,757']]);
       });

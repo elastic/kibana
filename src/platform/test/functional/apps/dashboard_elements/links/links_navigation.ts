@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
+  const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const filterBar = getService('filterBar');
@@ -19,12 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const { dashboard, common, header, timePicker } = getPageObjects([
-    'dashboard',
-    'common',
-    'header',
-    'timePicker',
-  ]);
+  const { dashboard, common, timePicker } = getPageObjects(['dashboard', 'common', 'timePicker']);
 
   const FROM_TIME = 'Oct 22, 2018 @ 00:00:00.000';
   const TO_TIME = 'Dec 3, 2018 @ 00:00:00.000';
@@ -124,10 +120,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await dashboard.loadSavedDashboard('links 002');
           await dashboard.waitForRenderComplete();
           await testSubjects.clickWhenNotDisabled('dashboardLink--links 001');
-          await header.waitUntilLoadingHasFinished();
-          expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
-            '0930f310-5bc2-11ee-9a85-7b86504227bc'
-          );
+          await retry.try(async () => {
+            expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+              '0930f310-5bc2-11ee-9a85-7b86504227bc'
+            );
+          });
           await dashboard.waitForRenderComplete();
           // Should pass the filters
           expect(await filterBar.getFilterCount()).to.equal(2);
@@ -159,10 +156,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
         await testSubjects.clickWhenNotDisabled('dashboardLink--links 002');
-        await header.waitUntilLoadingHasFinished();
-        expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
-          '24751520-5bc2-11ee-9a85-7b86504227bc'
-        );
+        await retry.try(async () => {
+          expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+            '24751520-5bc2-11ee-9a85-7b86504227bc'
+          );
+        });
 
         await dashboard.waitForRenderComplete();
         // Should pass the date range
@@ -193,19 +191,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.loadSavedDashboard('links 001');
         await dashboard.waitForRenderComplete();
         await testSubjects.clickWhenNotDisabled('dashboardLink--links 003');
-        await header.waitUntilLoadingHasFinished();
 
         // Should have opened another tab
+        await retry.try(async () => {
+          expect((await browser.getAllWindowHandles()).length).to.equal(2);
+        });
         const windowHandlers = await browser.getAllWindowHandles();
-        expect(windowHandlers.length).to.equal(2);
         await browser.switchToWindow(windowHandlers[1]);
-        expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
-          '27398c50-5bc2-11ee-9a85-7b86504227bc'
-        );
+        await retry.try(async () => {
+          expect(await dashboard.getDashboardIdFromCurrentUrl()).to.equal(
+            '27398c50-5bc2-11ee-9a85-7b86504227bc'
+          );
+        });
 
         await dashboard.waitForRenderComplete();
         // Should not pass any filters
-        expect((await filterBar.getFiltersLabel()).length).to.equal(0);
+        await filterBar.expectFilterCount(0);
 
         // Should not pass any date range
         const time = await timePicker.getTimeConfig();
@@ -238,8 +239,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.clickWhenNotDisabled('externalLink--opens in new tab');
 
         // Should have opened another tab
+        await retry.try(async () => {
+          expect((await browser.getAllWindowHandles()).length).to.equal(2);
+        });
         const windowHandlers = await browser.getAllWindowHandles();
-        expect(windowHandlers.length).to.equal(2);
         await browser.switchToWindow(windowHandlers[1]);
         const currentUrl = await browser.getCurrentUrl();
         expect(currentUrl).to.be('https://example.com/1');
