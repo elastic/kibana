@@ -104,7 +104,7 @@ export const PrivateLocationsTable = ({
   const { canSave } = useSyntheticsSettingsContext();
   const { hasAtLeast } = useLicense();
   // Stats carry the server's answer (license + rebalance switch); license is the pre-load fallback.
-  const isAgentSharding = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
+  const isShardingActive = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -173,7 +173,7 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
-          isAgentSharding={agentStatsByLocation.get(item.id)?.isAgentSharding ?? isAgentSharding}
+          isShardingActive={agentStatsByLocation.get(item.id)?.isShardingActive ?? isShardingActive}
         />
       ),
     },

@@ -217,4 +217,24 @@ describe('verb-specific bulk action body schemas', () => {
       })
     ).toThrow();
   });
+
+  it('rejects an episode envelope that repeats an alert_id', () => {
+    expect(() =>
+      bulkTagEpisodeActionBodySchema.parse({
+        items: [
+          { alert_id: 'e1', tags: ['p1'] },
+          { alert_id: 'e2', tags: ['p1'] },
+          { alert_id: 'e1', tags: ['p2'] },
+        ],
+      })
+    ).toThrow('Each alert_id can appear at most once per request; [e1] is repeated');
+  });
+
+  it('rejects a series envelope that repeats a group_hash', () => {
+    expect(() =>
+      bulkSnoozeSeriesActionBodySchema.parse({
+        items: [{ group_hash: GROUP_HASH }, { group_hash: GROUP_HASH }],
+      })
+    ).toThrow(`Each group_hash can appear at most once per request; [${GROUP_HASH}] is repeated`);
+  });
 });
