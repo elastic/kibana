@@ -1048,10 +1048,12 @@ class ConversationClientImpl implements ConversationClient {
           event.id.startsWith(roundPrefix)
         );
         const insertAt = firstRoundIndex === -1 ? nonRoundEvents.length : firstRoundIndex;
-        // The generated title follows its round block; its uuid id survives rewrites of the round.
+        // The generated title goes last, as in `appendEvents`: it carries the write time, so its
+        // position matches its `created_at` and a reconcile does not move it.
         const replaced = [
           ...nonRoundEvents.slice(0, insertAt),
           ...eventsToWrite,
+          ...nonRoundEvents.slice(insertAt),
           ...this.generatedTitleEvents({
             current,
             title,
@@ -1059,7 +1061,6 @@ class ConversationClientImpl implements ConversationClient {
             skipIfTerminalExistsFor,
             createdAt,
           }),
-          ...nonRoundEvents.slice(insertAt),
         ];
         return {
           events: replaced,

@@ -5414,9 +5414,10 @@ describe('ConversationClient', () => {
         terminated('round-1', '2026-01-01T00:00:05.000Z'),
       ];
 
-      it('replaceRoundEvents appends an agent-attributed title right after the round block', async () => {
+      it('replaceRoundEvents appends an agent-attributed title after every stored event', async () => {
         // The round's receipt-time message is already stored, followed by a later additive event:
-        // the rewritten block, and the title with it, take the block's position.
+        // the rewritten block takes the block's position, while the title, stamped with the write
+        // time, lands last so stored order and `created_at` order agree.
         const later = userMessage('later-uuid', '2026-01-01T00:01:00.000Z');
         mockGetDocumentResponse(eventsNativeDocument({ events: [roundEvents[0], later] }));
 
@@ -5434,11 +5435,11 @@ describe('ConversationClient', () => {
         expect(events.map((event) => event.id)).toEqual([
           'round-1::user_message',
           'round-1::execution_terminated',
-          expect.any(String),
           'later-uuid',
+          expect.any(String),
         ]);
-        expect(events[2].type).toBe(ConversationActivityEventType.titleUpdated);
-        expect(events[2]).toMatchObject({
+        expect(events[3].type).toBe(ConversationActivityEventType.titleUpdated);
+        expect(events[3]).toMatchObject({
           actor: agentActorFor('agent-1'),
           execution_id: 'round-1::execution',
           data: { previous_title: 'Conversation 1', title: 'Generated title' },
