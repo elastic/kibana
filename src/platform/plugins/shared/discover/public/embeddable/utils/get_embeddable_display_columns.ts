@@ -9,7 +9,6 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { hasAggregatingCommand } from '@kbn/esql-utils';
 import type { DefaultAppStateColumn } from '../../context_awareness';
 import { getResolvedProfileColumns } from '../../context_awareness/utils/get_resolved_profile_columns';
@@ -27,7 +26,7 @@ export const getEmbeddableDisplayColumns = ({
   dataView,
   isEsql,
   esql,
-  columnsMeta,
+  esqlResultColumnNames,
 }: {
   autoApplyDiscoverColumnDefaults: boolean;
   persistedColumns: string[] | undefined;
@@ -35,7 +34,7 @@ export const getEmbeddableDisplayColumns = ({
   dataView: DataView;
   isEsql: boolean;
   esql?: string;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  esqlResultColumnNames: readonly string[] | undefined;
 }): {
   columns: string[];
   grid: DiscoverGridSettings | undefined;
@@ -44,12 +43,12 @@ export const getEmbeddableDisplayColumns = ({
     return { columns: persistedColumns ?? [], grid: undefined };
   }
 
-  if (isEsql && !columnsMeta) {
+  if (isEsql && !esqlResultColumnNames) {
     return { columns: persistedColumns ?? [], grid: undefined };
   }
 
   const esqlQueryColumns = isEsql
-    ? Object.keys(columnsMeta ?? {}).map((name) => ({ name }))
+    ? (esqlResultColumnNames ?? []).map((name) => ({ name }))
     : undefined;
 
   const profileResolved = getResolvedProfileColumns({
@@ -80,7 +79,7 @@ export const getEmbeddableDisplayColumns = ({
   if (isEsql && esql && hasAggregatingCommand(esql)) {
     const esqlDefaults = getEsqlDefaultColumns({
       esql,
-      responseColumns: columnsMeta ? Object.keys(columnsMeta) : undefined,
+      responseColumns: esqlResultColumnNames ? [...esqlResultColumnNames] : undefined,
     });
 
     if (esqlDefaults.length) {

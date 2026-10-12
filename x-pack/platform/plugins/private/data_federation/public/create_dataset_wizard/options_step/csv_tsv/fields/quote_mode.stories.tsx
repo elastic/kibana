@@ -12,6 +12,7 @@ import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/preview-api';
 
 import { fieldStoryDecorator } from '../../../__stories__/field_story_decorator';
+import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import type { DatasetModeFormValue } from '../../../create_dataset_form_state';
 import { QuoteMode } from './quote_mode';
 
@@ -35,9 +36,9 @@ const meta: Meta<typeof QuoteMode> = {
   },
   render: function Render(args) {
     const [, updateArgs] = useArgs<QuoteModeProps>();
-    const onChange = (value: DatasetModeFormValue) => {
-      args.onChange(value);
-      updateArgs({ value });
+    const onChange = (change: ComboBoxChange<DatasetModeFormValue>) => {
+      args.onChange(change);
+      updateArgs({ value: change.value });
     };
     return <QuoteMode {...args} onChange={onChange} />;
   },

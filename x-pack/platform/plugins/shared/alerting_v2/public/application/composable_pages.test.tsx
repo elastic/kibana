@@ -59,8 +59,8 @@ jest.mock('../pages/rule_library_page/rule_library_page', () => ({
   RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
 }));
 
-jest.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => ({
-  AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+jest.mock('../pages/alert_episodes_list_page/alerts_list_page', () => ({
+  AlertsListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
 }));
 
 jest.mock('../pages/episode_details_page/episode_details_page', () => ({
@@ -133,6 +133,13 @@ const defaultProps = (): InternalPageProps => ({
   coreStart: createMockCoreStart(),
   container: createMockContainer() as unknown as Container,
   setBreadcrumbs: jest.fn() as (crumbs: ChromeBreadcrumb[]) => void,
+  hostApp: createAlertingV2HostApp('test', {
+    rules: '/alerting',
+    ruleLibrary: '/alerting/library',
+    alerts: '/alerting/inbox',
+    actionPolicies: '/alerting/action-policies',
+    executionHistory: '/alerting/execution-history',
+  }),
 });
 
 const renderInRouter = (ui: React.ReactElement, path = '/') =>

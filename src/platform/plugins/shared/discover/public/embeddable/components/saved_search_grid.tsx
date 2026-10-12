@@ -10,12 +10,10 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme, type EuiFlyoutMenuAction } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { DataSource } from '@kbn/data-source';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
-  type DataTableColumnsMeta,
   type UnifiedDataTableProps,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
@@ -56,7 +54,6 @@ interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampl
   wrapToolbar?: boolean;
   searchContext?: CellRenderersSearchContext;
   flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
-  dataSource?: DataSource;
 }
 
 const noopSetExpandedDoc: NonNullable<UnifiedDataTableProps['setExpandedDoc']> = () => undefined;
@@ -80,6 +77,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   } = useSearchEmbeddableToolbar();
   const setExpandedDoc = props.setExpandedDoc ?? noopSetExpandedDoc;
   const hasRows = (props.rows?.length ?? 0) > 0;
+  const isEsqlResult = props.dataSource?.kind === 'esql';
   // UnifiedDataTable does not render the grid toolbar when there are no rows.
   const showToolbarSlotOutsideGrid =
     !hasRows && Boolean(toolbarSlotLeftSide || saveToDashboardButton);
@@ -89,19 +87,14 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   }, [onVisibleColumnsChange, props.columns]);
 
   const renderDocumentView = useCallback(
-    (
-      hit: DataTableRecord,
-      displayedRows: DataTableRecord[],
-      displayedColumns: string[],
-      columnsMeta?: DataTableColumnsMeta
-    ) => (
+    (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={columnsMeta}
+        dataSource={props.dataSource}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}
@@ -120,6 +113,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     [
       setExpandedDoc,
       props.dataView,
+      props.dataSource,
       props.docViewerRef,
       props.filters,
       props.initialDocViewerTabId,
@@ -136,7 +130,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const renderCustomToolbarWithElements = useMemo(() => {
     const totalDocuments =
       typeof props.totalHitCount === 'number' ? (
-        <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={props.isPlainRecord} />
+        <TotalDocuments totalHitCount={props.totalHitCount} isEsqlMode={isEsqlResult} />
       ) : undefined;
     const leftSide =
       toolbarSlotLeftSide && hasRows ? (
@@ -155,8 +149,8 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
     });
   }, [
     hasRows,
+    isEsqlResult,
     props.totalHitCount,
-    props.isPlainRecord,
     saveToDashboardButton,
     toolbarSlotLeftSide,
     wrapToolbar,
@@ -192,7 +186,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const discoverGrid = (
     <DiscoverGrid
       {...gridProps}
-      isPaginationEnabled={!gridProps.isPlainRecord}
+      isPaginationEnabled={!isEsqlResult}
       totalHits={props.totalHitCount}
       setExpandedDoc={props.setExpandedDoc}
       expandedDoc={props.expandedDoc}

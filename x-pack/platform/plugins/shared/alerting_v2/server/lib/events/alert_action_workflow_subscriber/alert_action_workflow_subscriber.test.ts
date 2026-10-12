@@ -17,7 +17,7 @@ import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_ev
 import type { EventBus, Subscription } from '../event_bus';
 import { createWorkflowSubscriberMocks, handlerFor } from '../test_utils';
 import { AlertActionWorkflowSubscriber } from './alert_action_workflow_subscriber';
-import { ALERT_ACTION_WORKFLOW_TRIGGERS, EPISODE_ASSIGNED_TRIGGER_ID } from './triggers';
+import { ALERT_ACTION_WORKFLOW_TRIGGERS, ALERT_ASSIGNED_TRIGGER_ID } from './triggers';
 
 const episodeAssignedEvent: EpisodeAssignedEvent = {
   type: EPISODE_ASSIGNED_EVENT_TYPE,
@@ -69,13 +69,16 @@ describe('AlertActionWorkflowSubscriber', () => {
     it("forwards context.request through WorkflowService to workflowsExtensions, with the binding's triggerId and the mapped payload", async () => {
       subscriber.start();
 
-      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request });
+      await handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+        request,
+        origin: 'user',
+      });
 
       expect(mockEmitEvent).toHaveBeenCalledTimes(1);
-      expect(mockEmitEvent).toHaveBeenCalledWith(EPISODE_ASSIGNED_TRIGGER_ID, {
+      expect(mockEmitEvent).toHaveBeenCalledWith(ALERT_ASSIGNED_TRIGGER_ID, {
         occurredAt: episodeAssignedEvent.occurredAt,
         groupHash: episodeAssignedEvent.groupHash,
-        episodeId: episodeAssignedEvent.episodeId,
+        alertId: episodeAssignedEvent.episodeId,
         ruleId: episodeAssignedEvent.ruleId,
         spaceId: episodeAssignedEvent.spaceId,
         actorUid: episodeAssignedEvent.actorUid,
@@ -90,7 +93,10 @@ describe('AlertActionWorkflowSubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, { request })
+        handlerFor(bus, EPISODE_ASSIGNED_EVENT_TYPE)(episodeAssignedEvent, {
+          request,
+          origin: 'user',
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
@@ -98,7 +104,7 @@ describe('AlertActionWorkflowSubscriber', () => {
         labels: {
           event_type: EPISODE_ASSIGNED_EVENT_TYPE,
           space_id: episodeAssignedEvent.spaceId,
-          episode_id: episodeAssignedEvent.episodeId,
+          alert_id: episodeAssignedEvent.episodeId,
           rule_id: episodeAssignedEvent.ruleId,
           code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
         },

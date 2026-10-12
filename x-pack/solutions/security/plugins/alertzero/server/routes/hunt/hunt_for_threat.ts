@@ -61,6 +61,13 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           });
 
           if (scope.status === 'blocked') {
+            // Deliberately a different convention from the coordinator route, which
+            // answers a blocked scope with 200 + `status: 'blocked'` instead: the
+            // coordinator chains Tier 1 into Tier 2 and a caller there reads the status
+            // field either way, so a hard error would just be a status check wearing an
+            // exception handler. This standalone route has no chain to read a body field
+            // from, so refusing outright is the more direct signal. See
+            // elastic/security-team#19741.
             return response.customError({
               statusCode: 409,
               body: {

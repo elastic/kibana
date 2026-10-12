@@ -19,7 +19,6 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { SavedSearch, DiscoverGridSettings, VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import {
   DataGridDensity,
-  type DataTableColumnsMeta,
   type SortOrder,
   type JsonModeSettings,
   type DocumentsDisplayMode,
@@ -35,6 +34,13 @@ import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 import type { SearchEmbeddableApi, SearchEmbeddableStateManager } from '../types';
 import { SearchEmbeddableGridComponent } from './search_embeddable_grid_component';
 import type { EsqlSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+
+const createResultDataSource = (columnNames: string[]) =>
+  createMockEsqlSource(
+    columnNames.map((name) => ({ name, type: 'string', source: 'index' })),
+    columnNames.map((name) => ({ id: name, name, meta: { type: 'string' } }))
+  );
 
 const mockDiscoverGridEmbeddableProps = jest.fn();
 
@@ -47,7 +53,7 @@ jest.mock('./saved_search_grid', () => ({
 
 const createStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),
-  columnsMeta: new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined),
+  resultDataSource: new BehaviorSubject<EsqlSource | undefined>(undefined),
   grid: new BehaviorSubject<DiscoverGridSettings | undefined>(undefined),
   rowHeight: new BehaviorSubject<number | undefined>(undefined),
   headerRowHeight: new BehaviorSubject<number | undefined>(undefined),
@@ -138,7 +144,6 @@ describe('SearchEmbeddableGridComponent', () => {
     isEsql,
     columns,
     query,
-    columnsMeta,
     autoApplyDiscoverColumnDefaults,
     profileColumns,
     parentApi,
@@ -146,6 +151,7 @@ describe('SearchEmbeddableGridComponent', () => {
     showSortSelector,
     expandedDoc,
     fetchContext,
+    resultDataSource,
     savedObjectId,
     panelFilters,
     services: servicesOverride = services,
@@ -154,7 +160,6 @@ describe('SearchEmbeddableGridComponent', () => {
     isEsql: boolean;
     columns?: string[];
     query?: string;
-    columnsMeta?: DataTableColumnsMeta;
     autoApplyDiscoverColumnDefaults?: boolean;
     profileColumns?: Array<{ name: string; width?: number }>;
     parentApi?: SearchEmbeddableApi['parentApi'];
@@ -162,6 +167,7 @@ describe('SearchEmbeddableGridComponent', () => {
     showSortSelector?: boolean;
     expandedDoc?: DataTableRecord;
     fetchContext?: FetchContext;
+    resultDataSource?: EsqlSource;
     savedObjectId?: string;
     panelFilters?: Filter[];
     services?: ReturnType<typeof createDiscoverServicesMock>;
@@ -177,8 +183,8 @@ describe('SearchEmbeddableGridComponent', () => {
     const docViewerRef = React.createRef<DocViewerApi>();
     stateManager.rows.next(rows);
     stateManager.totalHitCount.next(rows.length);
-    if (columnsMeta) {
-      stateManager.columnsMeta.next(columnsMeta);
+    if (resultDataSource) {
+      stateManager.resultDataSource.next(resultDataSource);
     }
 
     const { dataSourceProfileProviderMock, profilesManagerMock, scopedEbtManagerMock } =
@@ -322,18 +328,14 @@ describe('SearchEmbeddableGridComponent', () => {
   describe('autoApplyDiscoverColumnDefaults', () => {
     const categorizeQuery =
       'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline = SPARKLINE(COUNT(*), @timestamp) BY Pattern = CATEGORIZE(message)';
-    const categorizeColumnsMeta: DataTableColumnsMeta = {
-      Count: { type: 'number' },
-      Sparkline: { type: 'number' },
-      Pattern: { type: 'string' },
-    };
+    const categorizeResultDataSource = createResultDataSource(['Count', 'Sparkline', 'Pattern']);
 
     it('applies profile columns when opted in and stored columns are empty', async () => {
       const { stateManager } = await renderComponent({
         isEsql: true,
         columns: [],
         query: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        resultDataSource: categorizeResultDataSource,
         autoApplyDiscoverColumnDefaults: true,
         profileColumns: [
           { name: 'Count', width: 150 },
@@ -360,7 +362,7 @@ describe('SearchEmbeddableGridComponent', () => {
         isEsql: true,
         columns: [],
         query: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        resultDataSource: categorizeResultDataSource,
         autoApplyDiscoverColumnDefaults: true,
         profileColumns: [
           { name: 'Count', width: 150 },
@@ -395,7 +397,7 @@ describe('SearchEmbeddableGridComponent', () => {
         isEsql: true,
         columns: [],
         query: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        resultDataSource: categorizeResultDataSource,
         autoApplyDiscoverColumnDefaults: true,
         profileColumns: [
           { name: 'Count', width: 150 },
@@ -438,7 +440,7 @@ describe('SearchEmbeddableGridComponent', () => {
         isEsql: true,
         columns: [],
         query: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        resultDataSource: categorizeResultDataSource,
         autoApplyDiscoverColumnDefaults: true,
         profileColumns: [
           { name: 'Count', width: 150 },
@@ -461,14 +463,9 @@ describe('SearchEmbeddableGridComponent', () => {
         columns: [],
         query: statsQuery.esql,
       });
-      const statsColumnsMeta: DataTableColumnsMeta = {
-        count: { type: 'number' },
-        status: { type: 'string' },
-      };
-
       api.query$.next(statsQuery);
       api.savedSearch$.next(statsSavedSearch);
-      stateManager.columnsMeta.next(statsColumnsMeta);
+      stateManager.resultDataSource.next(createResultDataSource(['count', 'status']));
 
       await waitFor(() => {
         expect(mockDiscoverGridEmbeddableProps.mock.calls.at(-1)?.[0]?.columns).toEqual([
@@ -489,10 +486,7 @@ describe('SearchEmbeddableGridComponent', () => {
         isEsql: true,
         columns: ['oldField'],
         query: 'FROM logs | KEEP oldField',
-        columnsMeta: {
-          timestamp: { type: 'date' },
-          variableColumn: { type: 'string' },
-        },
+        resultDataSource: createResultDataSource(['timestamp', 'variableColumn']),
         autoApplyDiscoverColumnDefaults: true,
         parentApi: {
           esqlVariables$: new BehaviorSubject([
@@ -541,13 +535,14 @@ describe('SearchEmbeddableGridComponent', () => {
       isApproximate: true,
     };
 
-    const columnsMeta: DataTableColumnsMeta = {
-      message: { type: 'string' },
-    };
+    const resultDataSource = createMockEsqlSource(
+      [],
+      [{ id: 'message', name: 'message', meta: { type: 'string' } }]
+    );
 
     it('passes a completed ES|QL table and dashboard filterQuery', async () => {
       const abortController = new AbortController();
-      const { api } = await renderComponent({ isEsql: true, fetchContext, columnsMeta });
+      const { api } = await renderComponent({ isEsql: true, fetchContext, resultDataSource });
       api.abortSignal$.next(abortController.signal);
 
       await waitFor(() => {
@@ -573,7 +568,7 @@ describe('SearchEmbeddableGridComponent', () => {
       await renderComponent({
         isEsql: true,
         fetchContext: { ...fetchContext, timeRange: undefined },
-        columnsMeta,
+        resultDataSource,
       });
 
       await waitFor(() => {
@@ -587,7 +582,11 @@ describe('SearchEmbeddableGridComponent', () => {
     });
 
     it('changes requestId when the grid rows identity changes', async () => {
-      const { stateManager } = await renderComponent({ isEsql: true, fetchContext, columnsMeta });
+      const { stateManager } = await renderComponent({
+        isEsql: true,
+        fetchContext,
+        resultDataSource,
+      });
 
       await waitFor(() => {
         expect(mockDiscoverGridEmbeddableProps).toHaveBeenCalled();

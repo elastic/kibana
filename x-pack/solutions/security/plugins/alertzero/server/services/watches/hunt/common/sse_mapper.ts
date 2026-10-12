@@ -811,6 +811,7 @@ const buildEntry = ({
       capability: CAPABILITY_ID,
       run_id: result.run_id,
       report_id: reportId,
+      ...(techniqueId ? { corroborated_technique_id: techniqueId } : {}),
       security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
       entities,
       alerts,
@@ -843,6 +844,10 @@ const buildEntry = ({
  * `hunt_result.tier2.behaviors`, Tier 2 `hits`, and Tier 2 entities are
  * filtered to that technique. Tier 1 events attributed to another technique
  * are excluded; IOC-only / unscoped Tier 1 hits stay shared.
+ *
+ * A technique-scoped entry also carries `corroborated_technique_id`, so a reader can
+ * tell it apart from the report-scoped fallback entry even though the latter can list
+ * (uncorroborated) technique indicators of its own.
  */
 export const buildSseData = (
   result: HuntCoordinatorCoreResult,

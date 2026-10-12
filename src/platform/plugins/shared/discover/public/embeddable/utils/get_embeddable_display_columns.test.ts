@@ -8,14 +8,9 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { getEmbeddableDisplayColumns } from './get_embeddable_display_columns';
 
-const categorizeColumnsMeta: DataTableColumnsMeta = {
-  Count: { type: 'number' },
-  Sparkline: { type: 'number' },
-  Pattern: { type: 'string' },
-};
+const categorizeResultColumnNames = ['Count', 'Sparkline', 'Pattern'];
 
 const categorizeQuery =
   'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline = SPARKLINE(COUNT(*), @timestamp) BY Pattern = CATEGORIZE(message)';
@@ -34,7 +29,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        esqlResultColumnNames: categorizeResultColumnNames,
       })
     ).toEqual({ columns: [], grid: undefined });
   });
@@ -48,7 +43,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        esqlResultColumnNames: categorizeResultColumnNames,
       })
     ).toEqual({ columns: ['message', 'host'], grid: undefined });
   });
@@ -66,7 +61,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        esqlResultColumnNames: categorizeResultColumnNames,
       })
     ).toEqual({
       columns: ['Count', 'Sparkline', 'Pattern'],
@@ -88,7 +83,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        esqlResultColumnNames: categorizeResultColumnNames,
       })
     ).toEqual({ columns: ['_source'], grid: undefined });
   });
@@ -106,7 +101,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
-        columnsMeta: categorizeColumnsMeta,
+        esqlResultColumnNames: categorizeResultColumnNames,
       })
     ).toEqual({
       columns: ['Count', 'Sparkline', 'Pattern'],
@@ -128,10 +123,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | STATS count = COUNT(*) BY status',
-        columnsMeta: {
-          count: { type: 'number' },
-          status: { type: 'string' },
-        },
+        esqlResultColumnNames: ['count', 'status'],
       })
     ).toEqual({
       columns: ['count', 'status'],
@@ -147,14 +139,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | WHERE response == "404"',
-        columnsMeta: {
-          a: { type: 'string' },
-          b: { type: 'string' },
-          c: { type: 'string' },
-          d: { type: 'string' },
-          e: { type: 'string' },
-          f: { type: 'string' },
-        },
+        esqlResultColumnNames: ['a', 'b', 'c', 'd', 'e', 'f'],
       })
     ).toEqual({ columns: [], grid: undefined });
   });
@@ -168,13 +153,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | WHERE response == "404"',
-        columnsMeta: {
-          a: { type: 'string' },
-          b: { type: 'string' },
-          c: { type: 'string' },
-          d: { type: 'string' },
-          default_column: { type: 'string' },
-        },
+        esqlResultColumnNames: ['a', 'b', 'c', 'd', 'default_column'],
       })
     ).toEqual({ columns: [], grid: undefined });
   });
@@ -187,11 +166,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | KEEP host, message, status',
-        columnsMeta: {
-          host: { type: 'string' },
-          message: { type: 'string' },
-          status: { type: 'string' },
-        },
+        esqlResultColumnNames: ['host', 'message', 'status'],
       })
     ).toEqual({ columns: [], grid: undefined });
   });
@@ -204,10 +179,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | FORK (WHERE x > 0) (STATS count = COUNT(*) BY status)',
-        columnsMeta: {
-          count: { type: 'number' },
-          status: { type: 'string' },
-        },
+        esqlResultColumnNames: ['count', 'status'],
       })
     ).toEqual({ columns: ['count', 'status'], grid: undefined });
   });
@@ -220,19 +192,12 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: 'FROM logs | WHERE message == "STATS count"',
-        columnsMeta: {
-          a: { type: 'string' },
-          b: { type: 'string' },
-          c: { type: 'string' },
-          d: { type: 'string' },
-          e: { type: 'string' },
-          f: { type: 'string' },
-        },
+        esqlResultColumnNames: ['a', 'b', 'c', 'd', 'e', 'f'],
       })
     ).toEqual({ columns: [], grid: undefined });
   });
 
-  it('keeps empty columns until ES|QL columnsMeta is available', () => {
+  it('keeps empty columns until ES|QL result columns are available', () => {
     expect(
       getEmbeddableDisplayColumns({
         autoApplyDiscoverColumnDefaults: true,
@@ -241,7 +206,7 @@ describe('getEmbeddableDisplayColumns', () => {
         dataView: dataViewMock,
         isEsql: true,
         esql: categorizeQuery,
-        columnsMeta: undefined,
+        esqlResultColumnNames: undefined,
       })
     ).toEqual({ columns: [], grid: undefined });
   });
@@ -254,7 +219,7 @@ describe('getEmbeddableDisplayColumns', () => {
         profileColumns: [{ name: 'message', width: 100 }, { name: 'extension' }],
         dataView: dataViewMock,
         isEsql: false,
-        columnsMeta: undefined,
+        esqlResultColumnNames: undefined,
       })
     ).toEqual({
       columns: ['message', 'extension'],

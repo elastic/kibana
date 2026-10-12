@@ -48,7 +48,7 @@ export const WatchDetailPage: React.FC = () => {
   const { watchId } = useParams<{ watchId: string }>();
   const currentWatchId = useRef(watchId);
   currentWatchId.current = watchId;
-  const canWrite = useCanWriteAlertZero();
+  const canWriteAlertZero = useCanWriteAlertZero();
   const { euiTheme } = useEuiTheme();
   const { data, isLoading, error, refetch } = useWatch(watchId);
   const {
@@ -60,6 +60,10 @@ export const WatchDetailPage: React.FC = () => {
 
   const watch = data?.watch;
   useAlertZeroDocTitle(watch?.name ?? i18n.PAGE_TITLE);
+  // Absent until the workers response arrives. A loaded response without the flag stays editable
+  // only when the field is missing; an explicit false locks the controls.
+  const canModifyWorkers = workersData?.canModifyWorkers !== false;
+  const canWrite = canWriteAlertZero && canModifyWorkers;
 
   const members = useMemo(
     () => (workersData?.workers ?? []).filter((worker) => worker.watchIds.includes(watchId)),
@@ -114,9 +118,9 @@ export const WatchDetailPage: React.FC = () => {
     const storedEnabledById = new Map(
       (workersData?.workers ?? []).map((worker) => [worker.id, worker.enabled])
     );
-    let savedWorkerIds: string[];
+    let savedWorkers: Worker[];
     try {
-      savedWorkerIds = await save();
+      savedWorkers = await save();
       setSaveBlockedByInvalidDraft(false);
     } catch (saveError) {
       if (saveError instanceof Error && saveError.message === 'invalid') {
@@ -129,15 +133,15 @@ export const WatchDetailPage: React.FC = () => {
     if (currentWatchId.current !== savedFromWatchId) {
       return;
     }
-    const savedIds = new Set(savedWorkerIds);
+    const savedEnabledById = new Map(savedWorkers.map((worker) => [worker.id, worker.enabled]));
     const enabledAfterSave: WorkerEnabledById = new Map(
       [...enabledSavedFrom].map(([workerId, enabled]) => [
         workerId,
-        savedIds.has(workerId) ? enabled : storedEnabledById.get(workerId) ?? enabled,
+        savedEnabledById.get(workerId) ?? storedEnabledById.get(workerId) ?? enabled,
       ])
     );
     setBlockedNoticeQueue(
-      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkerIds)
+      getBlockedAfterSaveNotices(storedEnabledById, enabledAfterSave, savedWorkers)
     );
   }, [save, hasInvalidDraft, watchId, enabledById, workersData?.workers]);
 
@@ -330,7 +334,9 @@ export const WatchDetailPage: React.FC = () => {
                 enabled={draft.enabled}
                 settings={draft.settings}
                 error={draft.error}
-                warningReasons={getWorkerWarningReasons(worker.id, enabledById)}
+                warningReasons={getWorkerWarningReasons(worker, enabledById, {
+                  includeBlocking: canWrite,
+                })}
                 settingsLocked={worker.state === 'unavailable'}
                 isSaving={isSaving}
                 canWrite={canWrite}

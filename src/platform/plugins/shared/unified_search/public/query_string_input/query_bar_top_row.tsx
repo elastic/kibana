@@ -281,6 +281,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Enable data source browser in ESQL editor
    */
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
+  /**
+   * Optional ES|QL prop - Show the action to create an ES|QL view from the editor query.
+   * Hidden unless a host opts in.
+   */
+  enableCreateView?: ESQLEditorProps['enableCreateView'];
   useBackgroundSearchButton?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -1400,6 +1405,7 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
           />

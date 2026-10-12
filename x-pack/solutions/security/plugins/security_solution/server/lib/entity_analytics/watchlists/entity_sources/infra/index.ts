@@ -21,6 +21,8 @@ export {
 export {
   INTEGRATION_TYPES,
   type IntegrationType,
+  RuleBasedSourceType,
+  RULE_BASED_SOURCE_TYPES,
   STREAM_INDEX_PATTERNS,
   getStreamPatternFor,
   integrationsSourceIndex,

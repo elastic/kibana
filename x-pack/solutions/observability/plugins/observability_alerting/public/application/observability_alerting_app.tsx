@@ -16,12 +16,14 @@ import type { AppHeaderTab } from '@kbn/app-header';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
+  createObservabilityAlertingV2Host,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
+import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
@@ -47,14 +49,7 @@ const useObservabilityHostApp = (
   createAlertingV2HostApp: AlertingV2PublicStart['createAlertingV2HostApp']
 ): AlertingV2HostApp =>
   useMemo(
-    () =>
-      createAlertingV2HostApp(OBSERVABILITY_ALERTING_APP_ID, {
-        rules: OBSERVABILITY_ALERTING_RULES_V2_PATH,
-        ruleLibrary: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
-        alerts: OBSERVABILITY_ALERTING_ALERTS_PATH,
-        actionPolicies: OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
-        executionHistory: OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
-      }),
+    () => createObservabilityAlertingV2Host(createAlertingV2HostApp),
     [createAlertingV2HostApp]
   );
 
@@ -68,14 +63,14 @@ const useObservabilityRulesTabs = (
 
     if (showV2) {
       tabs.push({
-        id: 'v2Rules',
+        id: ALERTING_V2_RULES_TAB_ID,
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v2RulesTabTitle', {
-          defaultMessage: 'V2 rules',
+          defaultMessage: 'Universal',
         }),
         isSelected: selected === 'v2',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V2_PATH}`),
         badge: {
-          iconType: 'sparkles',
+          iconType: 'dot',
           tooltip: i18n.translate(
             'xpack.observabilityAlerting.rulesPage.v2RulesTabNewBadgeTooltip',
             { defaultMessage: 'New' }
@@ -89,7 +84,7 @@ const useObservabilityRulesTabs = (
       tabs.push({
         id: 'v1Rules',
         label: i18n.translate('xpack.observabilityAlerting.rulesPage.v1RulesTabTitle', {
-          defaultMessage: 'V1 rules',
+          defaultMessage: 'Classic',
         }),
         isSelected: selected === 'v1',
         href: prepend(`${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_RULES_V1_PATH}`),

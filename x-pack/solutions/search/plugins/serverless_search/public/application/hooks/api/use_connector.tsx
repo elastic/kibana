@@ -15,7 +15,9 @@ export const useConnector = (id: string) => {
   const result = useQuery({
     queryKey,
     queryFn: () =>
-      http.fetch<{ connector: Connector }>(`/internal/serverless_search/connector/${id}`),
+      http.fetch<{ connector: Connector }>(
+        `/internal/serverless_search/connector/${encodeURIComponent(id)}`
+      ),
   });
   return { queryKey, ...result };
 };
