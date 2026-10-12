@@ -86,20 +86,57 @@ spaceTest.describe(
         });
         const { username } = await meResponse.json();
 
+        // TEMPORARY diagnostics for the flaky Apply step: record whether the assignees request is
+        // sent and how it ends, and put that in the failure message (CI keeps only screenshots and
+        // the failure summary, not traces).
+        const assigneesRequestLog: string[] = [];
+        const startedAt = Date.now();
+        const logAssigneesEvent = (event: string) =>
+          assigneesRequestLog.push(`+${Date.now() - startedAt}ms ${event}`);
+        const isAssigneesRoute = (url: string) => url.includes('/signals/assignees');
+        page.on('request', (r) => {
+          if (isAssigneesRoute(r.url())) logAssigneesEvent(`request ${r.method()}`);
+        });
+        page.on('response', (r) => {
+          if (isAssigneesRoute(r.url())) logAssigneesEvent(`response ${r.status()}`);
+        });
+        page.on('requestfailed', (r) => {
+          if (isAssigneesRoute(r.url()))
+            logAssigneesEvent(`requestfailed ${r.failure()?.errorText}`);
+        });
+
         await pageObjects.documentFlyout.openAssigneesPanel();
 
         // Select the current user — Apply must become enabled
         await pageObjects.documentFlyout.selectAssignee(username);
         await expect(pageObjects.documentFlyout.assigneesApplyButton).toBeEnabled();
 
+        const applyBox = await pageObjects.documentFlyout.assigneesApplyButton.boundingBox();
+        const viewport = page.viewportSize();
+        logAssigneesEvent(
+          `before apply click: button box ${JSON.stringify(applyBox)}, viewport ${JSON.stringify(
+            viewport
+          )}`
+        );
         await pageObjects.documentFlyout.applyAssignees();
+        logAssigneesEvent('apply click returned');
 
         // The user-visible reaction: the assigned user's avatar appears in the flyout header. The
         // assignees request payload (add/remove ids) is covered server-side in
         // set_alert_assignees_route.test.ts, so we don't re-assert it from the UI.
-        await expect(pageObjects.documentFlyout.getAssigneeAvatar(username)).toBeVisible({
-          timeout: 10_000,
-        });
+        try {
+          await expect(pageObjects.documentFlyout.getAssigneeAvatar(username)).toBeVisible({
+            timeout: 10_000,
+          });
+        } catch (error) {
+          const popoverOpen = await pageObjects.documentFlyout.assigneesApplyPanel.isVisible();
+          throw new Error(
+            `${
+              (error as Error).message
+            }\nASSIGNEES DIAGNOSTICS: popover still open: ${popoverOpen}; ` +
+              `events: ${assigneesRequestLog.length ? assigneesRequestLog.join(' | ') : 'none'}`
+          );
+        }
       }
     );
   }
