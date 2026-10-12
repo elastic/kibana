@@ -307,7 +307,9 @@ describe('UpdateMonitorAPI', () => {
       expect(result.survivors).toHaveLength(1);
       expect(validateMonitor).toHaveBeenCalledWith(
         expect.objectContaining({ [ConfigKey.URLS]: 'https://new.example.com' }),
-        'default'
+        'default',
+        undefined,
+        { checkInlineScript: true }
       );
       const persisted = result.survivors[0].monitorWithRevision as Record<string, unknown>;
       expect(persisted[ConfigKey.URLS]).toBe('https://new.example.com');

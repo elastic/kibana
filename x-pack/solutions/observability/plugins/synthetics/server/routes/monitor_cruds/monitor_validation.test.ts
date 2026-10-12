@@ -462,6 +462,39 @@ describe('validateMonitor', () => {
     });
   });
 
+  describe('inline script check', () => {
+    const browserMonitorWith = (script: string) =>
+      ({
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: script,
+        [ConfigKey.TIMEOUT]: '10',
+      } as MonitorFields);
+
+    it('rejects a browser script with a syntax error when checkInlineScript is set', () => {
+      const testMonitor = browserMonitorWith('step("x", async () => {{{ this is not js');
+      const result = validateMonitor(testMonitor, 'default', false, { checkInlineScript: true });
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Invalid browser monitor script',
+        details: expect.stringContaining('syntax error'),
+      });
+    });
+
+    it('rejects a browser step that destructures its argument when checkInlineScript is set', () => {
+      const testMonitor = browserMonitorWith('step("open example", async ({ page }) => {});');
+      const result = validateMonitor(testMonitor, 'default', false, { checkInlineScript: true });
+      expect(result).toMatchObject({
+        valid: false,
+        details: expect.stringContaining('Step "open example" destructures an argument'),
+      });
+    });
+
+    it('does not inspect the script unless checkInlineScript is set', () => {
+      const testMonitor = browserMonitorWith('step("x", async () => {{{ this is not js');
+      expect(validateMonitor(testMonitor, 'default')).toMatchObject({ valid: true });
+    });
+  });
+
   describe('HTTP authentication mutual exclusivity', () => {
     it('validates an HTTP monitor using only Kerberos auth', () => {
       const testMonitor = {
