@@ -1,9 +1,20 @@
 {
-  "sha1": "71fb40362d797a18420cabeb2cc5839952c67516",
+  "sha1": "571338ba884cc9bedff41f311298de2ce7598ffa",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "6429ae5067b2a21-fe5d0084e4dbd1a",
+      "title": "Install Entity Store once for logs extraction API suite",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "c8588d2004a116a-879855ef4ecd93b",
       "title": "Entity Store dual-process union equivalence flag off: single-process extraction builds the baseline",
@@ -16,8 +27,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 333,
-        "column": 23
+        "line": 342,
+        "column": 13
       }
     },
     {
@@ -32,7 +43,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 346,
+        "line": 355,
         "column": 16
       }
     },
@@ -48,7 +59,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 362,
+        "line": 371,
         "column": 21
       }
     },
@@ -64,7 +75,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 385,
+        "line": 394,
         "column": 23
       }
     },
@@ -80,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 402,
+        "line": 411,
         "column": 14
       }
     },
@@ -96,7 +107,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
-        "line": 442,
+        "line": 451,
         "column": 17
       }
     },
@@ -112,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/entity_extraction_paginated.spec.ts",
-        "line": 67,
-        "column": 7
+        "line": 69,
+        "column": 26
       }
     },
     {
@@ -128,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/entity_extraction_paginated.spec.ts",
-        "line": 97,
-        "column": 16
+        "line": 102,
+        "column": 26
       }
     },
     {
@@ -144,8 +155,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 421,
-        "column": 17
+        "line": 411,
+        "column": 9
       }
     },
     {
@@ -160,8 +171,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 459,
-        "column": 53
+        "line": 449,
+        "column": 23
       }
     },
     {
@@ -176,8 +187,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 558,
-        "column": 22
+        "line": 546,
+        "column": 62
       }
     },
     {
@@ -192,8 +203,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 598,
-        "column": 25
+        "line": 586,
+        "column": 67
       }
     },
     {
@@ -208,8 +219,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
-        "line": 730,
-        "column": 25
+        "line": 713,
+        "column": 15
       }
     },
     {
@@ -224,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
-        "line": 73,
-        "column": 12
+        "line": 74,
+        "column": 5
       }
     },
     {
@@ -240,8 +251,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
-        "line": 169,
-        "column": 15
+        "line": 158,
+        "column": 4
       }
     },
     {
@@ -256,8 +267,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
-        "line": 227,
-        "column": 17
+        "line": 205,
+        "column": 51
       }
     },
     {
@@ -272,8 +283,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 89,
-        "column": 22
+        "line": 83,
+        "column": 38
       }
     },
     {
@@ -288,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 117,
+        "line": 106,
         "column": 12
       }
     },
@@ -304,8 +315,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 152,
-        "column": 12
+        "line": 142,
+        "column": 14
       }
     },
     {
@@ -320,8 +331,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 178,
-        "column": 11
+        "line": 169,
+        "column": 15
       }
     },
     {
@@ -336,8 +347,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 209,
-        "column": 72
+        "line": 196,
+        "column": 11
       }
     },
     {
@@ -352,8 +363,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 450,
-        "column": 23
+        "line": 437,
+        "column": 20
       }
     },
     {
@@ -368,8 +379,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 597,
-        "column": 15
+        "line": 586,
+        "column": 22
       }
     },
     {
@@ -384,8 +395,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 669,
-        "column": 15
+        "line": 656,
+        "column": 9
       }
     },
     {
@@ -400,8 +411,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 695,
-        "column": 60
+        "line": 691,
+        "column": 14
       }
     },
     {
@@ -416,8 +427,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 728,
-        "column": 49
+        "line": 715,
+        "column": 44
       }
     },
     {
@@ -432,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 810,
-        "column": 14
+        "line": 799,
+        "column": 22
       }
     },
     {
@@ -448,8 +459,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 880,
-        "column": 17
+        "line": 866,
+        "column": 52
       }
     },
     {
@@ -464,8 +475,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 990,
-        "column": 15
+        "line": 979,
+        "column": 23
       }
     },
     {
@@ -480,8 +491,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1056,
-        "column": 7
+        "line": 1045,
+        "column": 16
       }
     },
     {
@@ -496,8 +507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1188,
-        "column": 24
+        "line": 1073,
+        "column": 10
       }
     },
     {
@@ -512,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1250,
-        "column": 24
+        "line": 1129,
+        "column": 13
       }
     },
     {
@@ -528,8 +539,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1227,
-        "column": 9
+        "line": 1218,
+        "column": 14
       }
     },
     {
@@ -544,8 +555,19 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
-        "line": 1378,
-        "column": 14
+        "line": 1362,
+        "column": 15
+      }
+    },
+    {
+      "id": "6985e874ee1895b-82a237443bee9f2",
+      "title": "Uninstall Entity Store for logs extraction API suite",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

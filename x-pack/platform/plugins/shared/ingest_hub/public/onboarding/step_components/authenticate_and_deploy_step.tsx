@@ -222,6 +222,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isAlreadyDeployed,
     deployGroups,
     isCleanupOnly,
+    storedSecretFields,
+    isStoredSecretsLoading,
   } = useDeploy({
     onContinue: () => {},
   });
@@ -269,6 +271,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     isAlreadyDeployed: isAgentAlreadyDeployed,
     handleDeploy: handleAgentDeploy,
     setAgentCredentials,
+    secretSourcePolicyId,
   } = useAgentBasedDeploy();
 
   const [agentDeployAttempted, setAgentDeployAttempted] = useState(false);
@@ -827,6 +830,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isDone={isMiDone}
           hasFailed={hasFailed}
           isCleanupOnly={isCleanupOnly}
+          storedSecretFields={storedSecretFields}
+          isStoredSecretsLoading={isStoredSecretsLoading}
           isDirty={isDirty}
           onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
         />
@@ -839,6 +844,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           serviceCount={agentTargets.reduce((sum, g) => sum + g.instanceIds.length, 0)}
           onDeploy={handleAgentDeployClick}
           onCredentialsChange={setAgentCredentials}
+          secretSourcePolicyId={secretSourcePolicyId}
+          onStoredCredentialsReplacedChange={handleReplaceFormDirtyChange}
           onNextReadyChange={setIsAgentNextReady}
           isDeploying={isAgentDeploying}
           isDone={isAgentDone}
