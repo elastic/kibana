@@ -7,9 +7,8 @@
 
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
-import type { EventClient } from './event_client';
+import type { RuleEventsClient } from './rule_events_client';
 import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale_events';
 import { updateSignificantEventStatus } from './update_event_status';
 
@@ -29,36 +28,36 @@ const makeAlertEventsClient = (
     ...overrides,
   } as jest.Mocked<AlertEventsClientApi>);
 
-const makeLogger = (): jest.Mocked<Logger> =>
+const createEvent = (eventId: string, ruleIds: string[]): SignificantEventResponse =>
   ({
-    error: jest.fn(),
-    warn: jest.fn(),
-    info: jest.fn(),
-    debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
-
-const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
-  ({
-    event_uuid: eventUuid,
-    event_id: eventUuid,
+    event_id: eventId,
     signals: ruleIds.map((ruleId) => ({
       type: 'detection',
       metadata: { rule_uuid: ruleId },
     })),
   } as SignificantEventResponse);
 
-const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
+const groupHashOf = (eventId: string) => `group-${eventId}`;
+
+const createEventSearchClient = (pages: SignificantEventResponse[][]): RuleEventsClient =>
   ({
     findLatestByCurrentStateBatch: jest
       .fn()
-      .mockImplementation(({ afterEventId }: { afterEventId?: string }) => {
+      .mockImplementation(({ afterGroupHash }: { afterGroupHash?: string }) => {
         const previousPageIndex =
-          afterEventId === undefined
+          afterGroupHash === undefined
             ? -1
-            : pages.findIndex((page) => page.at(-1)?.event_id === afterEventId);
-        return Promise.resolve({ hits: pages[previousPageIndex + 1] ?? [] });
+            : pages.findIndex(
+                (page) => groupHashOf(page.at(-1)?.event_id ?? '') === afterGroupHash
+              );
+        const hits = pages[previousPageIndex + 1] ?? [];
+        const last = hits.at(-1);
+        return Promise.resolve({
+          hits,
+          lastGroupHash: last ? groupHashOf(last.event_id) : undefined,
+        });
       }),
-  } as unknown as EventClient);
+  } as unknown as RuleEventsClient);
 
 const createRulesClient = (existingIds: string[]): IRulesManagementClient =>
   ({
@@ -69,24 +68,22 @@ describe('cleanupStaleEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     updateStatusMock.mockResolvedValue({
-      event_uuid: 'next-event',
       updated: 1,
       ignored: 0,
-      status: 'closed',
+      status: 'inactive',
     });
   });
 
-  it('closes only open events with no remaining backing rule', async () => {
+  it('inactivates only active events with no remaining backing rule', async () => {
     const stale = createEvent('stale-event', ['deleted-rule']);
     const mixed = createEvent('mixed-event', ['deleted-rule', 'live-rule']);
     const noRules = createEvent('no-rules-event', []);
-    const eventClient = createEventClient([[stale, mixed, noRules]]);
+    const eventSearchClient = createEventSearchClient([[stale, mixed, noRules]]);
     const rulesClient = createRulesClient(['live-rule']);
     const alertEventsClient = makeAlertEventsClient();
-    const logger = makeLogger();
 
     await expect(
-      cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger })
+      cleanupStaleEvents({ eventSearchClient, rulesClient, alertEventsClient })
     ).resolves.toEqual({
       scanned: 3,
       closed: 1,
@@ -97,12 +94,11 @@ describe('cleanupStaleEvents', () => {
     expect(rulesClient.findExistingRuleIds).toHaveBeenCalledWith(['deleted-rule', 'live-rule']);
     expect(updateStatusMock).toHaveBeenCalledTimes(1);
     expect(updateStatusMock).toHaveBeenCalledWith({
-      eventClient,
-      eventUuid: 'stale-event',
-      status: 'closed',
+      eventSearchClient,
+      eventId: 'stale-event',
+      status: 'inactive',
       assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
       alertEventsClient,
-      logger,
     });
   });
 
@@ -110,21 +106,23 @@ describe('cleanupStaleEvents', () => {
     const firstBatch = Array.from({ length: 1000 }, (_, index) =>
       createEvent(`event-${String(index).padStart(4, '0')}`, ['rule-1'])
     );
-    const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
+    const eventSearchClient = createEventSearchClient([
+      firstBatch,
+      [createEvent('event-1000', ['rule-2'])],
+    ]);
     const rulesClient = createRulesClient([]);
 
     await cleanupStaleEvents({
-      eventClient,
+      eventSearchClient,
       rulesClient,
       alertEventsClient: makeAlertEventsClient(),
-      logger: makeLogger(),
     });
 
-    expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledTimes(2);
-    expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenNthCalledWith(2, {
-      status: ['open'],
+    expect(eventSearchClient.findLatestByCurrentStateBatch).toHaveBeenCalledTimes(2);
+    expect(eventSearchClient.findLatestByCurrentStateBatch).toHaveBeenNthCalledWith(2, {
+      status: ['active'],
       ruleUuids: undefined,
-      afterEventId: 'event-0999',
+      afterGroupHash: 'group-event-0999',
       batchSize: 1000,
     });
     expect(rulesClient.findExistingRuleIds).toHaveBeenNthCalledWith(1, ['rule-1']);
@@ -133,27 +131,26 @@ describe('cleanupStaleEvents', () => {
   });
 
   it('uses candidate rule IDs to narrow rule-deletion cleanup', async () => {
-    const eventClient = createEventClient([]);
+    const eventSearchClient = createEventSearchClient([]);
     const rulesClient = createRulesClient([]);
 
     await cleanupStaleEvents({
-      eventClient,
+      eventSearchClient,
       rulesClient,
       candidateRuleIds: ['rule-1', 'rule-1'],
       alertEventsClient: makeAlertEventsClient(),
-      logger: makeLogger(),
     });
 
-    expect(eventClient.findLatestByCurrentStateBatch).toHaveBeenCalledWith({
-      status: ['open'],
+    expect(eventSearchClient.findLatestByCurrentStateBatch).toHaveBeenCalledWith({
+      status: ['active'],
       ruleUuids: ['rule-1'],
-      afterEventId: undefined,
+      afterGroupHash: undefined,
       batchSize: 1000,
     });
   });
 
   it('does not write when checking live rules fails', async () => {
-    const eventClient = createEventClient([[createEvent('event-1', ['rule-1'])]]);
+    const eventSearchClient = createEventSearchClient([[createEvent('event-1', ['rule-1'])]]);
     const rulesClient = createRulesClient([]);
     jest
       .mocked(rulesClient.findExistingRuleIds)
@@ -161,10 +158,9 @@ describe('cleanupStaleEvents', () => {
 
     await expect(
       cleanupStaleEvents({
-        eventClient,
+        eventSearchClient,
         rulesClient,
         alertEventsClient: makeAlertEventsClient(),
-        logger: makeLogger(),
       })
     ).rejects.toThrow('rule lookup failed');
     expect(updateStatusMock).not.toHaveBeenCalled();
@@ -174,7 +170,10 @@ describe('cleanupStaleEvents', () => {
     const firstBatch = Array.from({ length: 1000 }, (_, index) =>
       createEvent(`event-${String(index).padStart(4, '0')}`, ['rule-1'])
     );
-    const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
+    const eventSearchClient = createEventSearchClient([
+      firstBatch,
+      [createEvent('event-1000', ['rule-2'])],
+    ]);
     const rulesClient = createRulesClient([]);
     jest
       .mocked(rulesClient.findExistingRuleIds)
@@ -183,80 +182,70 @@ describe('cleanupStaleEvents', () => {
 
     await expect(
       cleanupStaleEvents({
-        eventClient,
+        eventSearchClient,
         rulesClient,
         alertEventsClient: makeAlertEventsClient(),
-        logger: makeLogger(),
       })
     ).rejects.toThrow('later lookup failed');
     expect(updateStatusMock).toHaveBeenCalledTimes(1000);
     expect(updateStatusMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ eventUuid: 'event-1000' })
+      expect.objectContaining({ eventId: 'event-1000' })
     );
   });
 
   it('limits concurrent event status updates', async () => {
-    const eventClient = createEventClient([
+    const eventSearchClient = createEventSearchClient([
       Array.from({ length: 11 }, (_, index) => createEvent(`event-${index}`, ['deleted-rule'])),
     ]);
     const rulesClient = createRulesClient([]);
     let activeUpdates = 0;
     let maxActiveUpdates = 0;
-    updateStatusMock.mockImplementation(async ({ eventUuid }) => {
+    updateStatusMock.mockImplementation(async ({ eventId }) => {
       activeUpdates += 1;
       maxActiveUpdates = Math.max(maxActiveUpdates, activeUpdates);
       await Promise.resolve();
       activeUpdates -= 1;
       return {
-        event_uuid: eventUuid,
         updated: 1,
         ignored: 0,
-        status: 'closed',
+        status: 'inactive',
       };
     });
 
     await cleanupStaleEvents({
-      eventClient,
+      eventSearchClient,
       rulesClient,
       alertEventsClient: makeAlertEventsClient(),
-      logger: makeLogger(),
     });
 
     expect(maxActiveUpdates).toBe(10);
   });
 
-  describe('dual-write to .rule-events (Writer 3)', () => {
-    it('propagates alertEventsClient and logger to each updateSignificantEventStatus call', async () => {
+  describe('.rule-events writes', () => {
+    it('propagates alertEventsClient to each updateSignificantEventStatus call', async () => {
       const stale = createEvent('stale-1', ['deleted-rule']);
-      const eventClient = createEventClient([[stale]]);
+      const eventSearchClient = createEventSearchClient([[stale]]);
       const rulesClient = createRulesClient([]);
       const alertEventsClient = makeAlertEventsClient();
-      const logger = makeLogger();
 
-      await cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger });
+      await cleanupStaleEvents({ eventSearchClient, rulesClient, alertEventsClient });
 
-      expect(updateStatusMock).toHaveBeenCalledWith(
-        expect.objectContaining({ alertEventsClient, logger })
-      );
+      expect(updateStatusMock).toHaveBeenCalledWith(expect.objectContaining({ alertEventsClient }));
     });
 
-    it('returns success even when updateSignificantEventStatus rejects (error not swallowed by cleanup)', async () => {
-      // Note: cleanupStaleEvents does NOT suppress errors from updateSignificantEventStatus —
-      // that suppression happens inside updateSignificantEventStatus itself for the .rule-events write.
-      // This test verifies the propagation contract: alertEventsClient reaches each update call.
+    it('passes alertEventsClient to every stale event update', async () => {
       const stale1 = createEvent('stale-1', ['deleted-rule']);
       const stale2 = createEvent('stale-2', ['deleted-rule']);
-      const eventClient = createEventClient([[stale1, stale2]]);
+      const eventSearchClient = createEventSearchClient([[stale1, stale2]]);
       const rulesClient = createRulesClient([]);
       const alertEventsClient = makeAlertEventsClient();
-      const logger = makeLogger();
 
-      await cleanupStaleEvents({ eventClient, rulesClient, alertEventsClient, logger });
+      await cleanupStaleEvents({ eventSearchClient, rulesClient, alertEventsClient });
 
       // Both stale events should have received the alertEventsClient
       expect(updateStatusMock).toHaveBeenCalledTimes(2);
       for (const call of updateStatusMock.mock.calls) {
-        expect(call[0]).toMatchObject({ alertEventsClient, logger });
+        expect(call[0]).toMatchObject({ alertEventsClient });
       }
     });
   });

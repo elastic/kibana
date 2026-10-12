@@ -117,8 +117,8 @@ describe('executeFeatureIdentificationAgent', () => {
             message: expect.stringContaining('`sample_documents`:'),
           },
           telemetryMetadata: {
-            pluginId: 'significant_events_ki_extraction',
-            aggregateBy: 'significant_events',
+            pluginId: 'nightshift_ki_extraction',
+            aggregateBy: 'nightshift',
             productSolution: 'observability',
             productFeature: 'nightshift',
             interactionId: 'run-1',

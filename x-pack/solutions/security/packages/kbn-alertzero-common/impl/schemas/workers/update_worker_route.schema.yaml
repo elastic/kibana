@@ -37,7 +37,11 @@ paths:
                   type: boolean
                   description: >-
                     Enables or disables the Worker. Enabling an uninstalled Worker first installs
-                    its per-space managed document with defaults.
+                    its per-space managed document with defaults. `true` is refused with a 400,
+                    and nothing in the patch is applied, while the Worker's `blockingReasons`
+                    include `no_model`. The Workflows API does not apply this check, so a user
+                    who can edit managed workflows can still enable the underlying workflow
+                    there.
                 settingsRevision:
                   type: integer
                   format: int64
@@ -64,11 +68,21 @@ paths:
                 properties:
                   worker:
                     $ref: '../components/watch_settings.schema.yaml#/components/schemas/Worker'
+                  skippedRuleCount:
+                    type: integer
+                    minimum: 1
+                    description: >-
+                      Present when enabling or disabling the Alert Triage Worker left rules the
+                      caller cannot edit (machine learning rules without machine learning
+                      permissions). On enable those rules were not attached and are not triaged;
+                      on disable they still carry the Worker action.
                 required:
                   - worker
         '409':
           description: The settings changed before this request began applying its patch
         '400':
-          description: The settings patch is unsupported or omitted its revision
+          description: >-
+            The settings patch is unsupported or omitted its revision, or it enables a Worker in a
+            space with no AI model
         '404':
           description: Unknown Worker

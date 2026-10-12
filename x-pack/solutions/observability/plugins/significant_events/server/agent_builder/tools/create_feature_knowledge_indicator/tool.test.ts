@@ -8,10 +8,13 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import type { SignificantEventsServer } from '../../../types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import {
+  createMockToolContext,
+  createSignificantEventsServer,
+  invokeHandler,
+} from '../../utils/test_helpers';
 import {
   createFeatureKnowledgeIndicatorTool,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_FEATURE_TOOL_ID,
@@ -24,12 +27,42 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
 
 describe('ki_feature_create tool', () => {
   const logger = loggingSystemMock.createLogger();
-  const server = {} as unknown as SignificantEventsServer;
+  const server = createSignificantEventsServer({ featurePrivilege: 'all' });
   const request = {} as unknown as KibanaRequest;
   const uiSettings = {} as unknown as IUiSettingsClient;
   const telemetry = {
     trackAgentBuilderKnowledgeIndicatorCreated: jest.fn(),
   } as unknown as EbtTelemetryClient;
+
+  const featureParams = {
+    stream_name: 'logs.test',
+    id: 'feature-1',
+    type: 'custom',
+    description: 'desc',
+    properties: {},
+    confidence: 80,
+  };
+
+  // Scoped clients that let a write through, so only the privilege check can stop it.
+  const createScopedClients = (kiClient: object) =>
+    jest.fn(async () => {
+      return {
+        streamsClient: {
+          getStream: jest.fn().mockResolvedValue({
+            name: 'logs.test',
+            ingest: {
+              classic: { field_overrides: {} },
+              processing: [],
+              lifecycle: { inherit: {} },
+              failure_store: { inherit: {} },
+            },
+          }),
+        },
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
+        licensing: {},
+        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -126,24 +159,7 @@ describe('ki_feature_create tool', () => {
       bulk: jest.fn().mockResolvedValue(undefined),
     };
 
-    const getScopedClients = jest.fn(async () => {
-      return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
-        licensing: {},
-        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
-      } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = createScopedClients(featureClient);
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -153,18 +169,7 @@ describe('ki_feature_create tool', () => {
     });
 
     const context = createMockToolContext();
-    await invokeHandler(
-      tool as never,
-      {
-        stream_name: 'logs.test',
-        id: 'feature-1',
-        type: 'custom',
-        description: 'desc',
-        properties: {},
-        confidence: 80,
-      },
-      context
-    );
+    await invokeHandler(tool as never, featureParams, context);
 
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -184,24 +189,7 @@ describe('ki_feature_create tool', () => {
       bulk: jest.fn().mockRejectedValue(new Error('write failed')),
     };
 
-    const getScopedClients = jest.fn(async () => {
-      return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
-        licensing: {},
-        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
-      } as unknown as RouteHandlerScopedClients;
-    }) as unknown as jest.MockedFunction<GetScopedClients>;
+    const getScopedClients = createScopedClients(featureClient);
 
     const tool = createFeatureKnowledgeIndicatorTool({
       getScopedClients,
@@ -211,18 +199,7 @@ describe('ki_feature_create tool', () => {
     });
 
     const context = createMockToolContext();
-    await invokeHandler(
-      tool as never,
-      {
-        stream_name: 'logs.test',
-        id: 'feature-1',
-        type: 'custom',
-        description: 'desc',
-        properties: {},
-        confidence: 80,
-      },
-      context
-    );
+    await invokeHandler(tool as never, featureParams, context);
 
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -233,6 +210,25 @@ describe('ki_feature_create tool', () => {
         stream_type: 'classic',
         error_message: 'write failed',
       })
+    );
+  });
+
+  it('does not let a Nightshift reader create a feature KI', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+
+    const featureClient = { bulk: jest.fn() };
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients(featureClient),
+      server: createSignificantEventsServer({ featurePrivilege: 'read' }),
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(tool as never, featureParams, createMockToolContext());
+
+    expect(featureClient.bulk).not.toHaveBeenCalled();
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ ki_kind: 'feature', success: false })
     );
   });
 });

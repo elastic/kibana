@@ -6,19 +6,15 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    HuntTechnology:
-      type: string
-      enum: [aws_iam, fortigate]
-      description: >-
-        Supported technologies. Extend only alongside a TECHNOLOGY_INDEX_MAP entry.
-
     IndexScopeStatus:
       type: string
       enum: [ok, degraded, blocked]
       description: >-
-        `ok`: every required/optional pattern resolved. `degraded`: every
-        required pattern resolved but an optional one did not. `blocked`: a
-        required pattern resolved to nothing; the hunt must not run.
+        `ok`: the hunt universe resolved and every list derived from it fit its
+        bounds. `degraded`: the universe resolved but a derived list could not be
+        computed or had to collapse (the `_field_caps` call failed, or a bounded
+        list outgrew the request path). `blocked`: nothing in the universe is
+        visible to this hunt, or resolving it failed; the hunt must not run.
 
     HuntIncompleteReason:
       type: string
@@ -91,27 +87,61 @@ components:
           type: string
           description: ISO 8601 end of the search window, exclusive.
 
-    ResolvedIndexScope:
-      type: object
-      required: [technology, status, required, optional, missing, window, row_limit]
+    HuntScopeResolution:
+      type: string
+      enum: [universe, 'blocked:empty_universe', 'blocked:discovery_failed']
       description: >-
-        `required`/`optional` list every pattern checked for the technology;
-        `missing` lists every pattern from either list that resolved to zero indices.
+        How the hunt scope was produced. `universe`: at least one pattern of the
+        space's default data view resolves, and Tier 1 searches the list as given.
+        `blocked:empty_universe`: nothing under any universe pattern is visible to
+        this hunt. `blocked:discovery_failed`: `_resolve/index` failed, so the scope
+        stays blocked rather than guessing.
+
+    HuntScope:
+      type: object
+      required:
+        - status
+        - resolution
+        - index_patterns
+        - missing
+        - report_matches
+        - actionable_indices
+        - window
+        - row_limit
+      description: >-
+        What a hunt searches and where an action could land. `index_patterns` is the
+        universe Tier 1 searches: the space's Security Solution default data view
+        patterns, exclusions included, never an alerts index. `blocked` scopes carry
+        an empty `index_patterns`.
       properties:
-        technology:
-          $ref: '#/components/schemas/HuntTechnology'
         status:
           $ref: '#/components/schemas/IndexScopeStatus'
-        required:
+        resolution:
+          $ref: '#/components/schemas/HuntScopeResolution'
+        index_patterns:
           type: array
-          items:
-            type: string
-        optional:
-          type: array
+          description: >-
+            The universe as searched by Tier 1. Empty when the scope is blocked.
           items:
             type: string
         missing:
           type: array
+          description: Universe patterns that resolved to nothing. Informational.
+          items:
+            type: string
+        report_matches:
+          type: array
+          description: >-
+            `*`-suffixed patterns of datasets the report's vendor or product matched
+            deterministically. Empty when no report was supplied or nothing matched.
+          items:
+            type: string
+        actionable_indices:
+          type: array
+          description: >-
+            `*`-suffixed streams and indices whose mapping carries `process.entity_id`
+            or `process.pid`: where a hit can become a Defend response action. Whether
+            the host is enrolled is decided later, at packaging.
           items:
             type: string
         window:
@@ -139,7 +169,7 @@ components:
       type: string
       enum: [scope_blocked, no_searchable_terms, no_environment_hits, environment_hits_found]
       description: >-
-        Tier 1 raw hunt statuses. The hit/clean collapse for
+        Tier 1 raw hunt statuses. The collapse to hit/clean/incomplete for
         evidence[].last_hunt_status happens in the managed-workflow evidence step.
         `scope_blocked` means no required index existed, so the hunt never ran; it is
         a failed run, never clean.
@@ -214,15 +244,15 @@ components:
         has_confirmed_hit:
           type: boolean
           description: >-
-            A confirmed event match in a required index inside the window.
-            Never set by an optional-index or out-of-window match.
+            A confirmed event match in the searched universe inside the window.
+            Never set by an out-of-window match.
         incomplete:
           type: array
           description: >-
             Gaps in what the search actually covered. Absent or empty means the
             search ran over the whole scope, so `status: no_environment_hits` is a
             statement about the environment. Present means it is not: shards failed,
-            the search timed out, or a required pattern resolved to no index.
+            the search timed out, or every searched pattern resolved to no index.
           items:
             $ref: '#/components/schemas/HuntIncompleteness'
         searched_iocs:
@@ -290,9 +320,8 @@ components:
               required:
                 type: boolean
                 description: >-
-                  Regex match of this concrete `_index` bucket against the
-                  resolved technology's required index patterns (e.g.
-                  `logs-aws.*`), computed once by Tier 1, not re-derived
-                  downstream.
+                  Always true: every searched index counts towards the hit bar,
+                  because the hunt searches one universe and no bucket is
+                  non-confirming. The field predates that and stays for the SSE.
         message:
           type: string

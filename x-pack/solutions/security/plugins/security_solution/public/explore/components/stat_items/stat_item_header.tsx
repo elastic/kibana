@@ -20,7 +20,7 @@ const StatItemHeaderComponent = ({
 }) => (
   <FlexGroup gutterSize={'none'}>
     <EuiFlexItem className={isToggleExpanded ? '' : 'no-margin'}>
-      <EuiFlexGroup gutterSize={'none'} responsive={false}>
+      <EuiFlexGroup gutterSize={'none'} responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip content={i18n.QUERY_BUTTON_TITLE(isToggleExpanded)} disableScreenReaderOutput>
             <EuiButtonIcon

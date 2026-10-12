@@ -90,7 +90,7 @@ const TestWrapper = ({ actions }: TestWrapperProps) => {
           onClose={() => setIsOpen(false)}
           actions={actions}
           episodes={mockEpisodes}
-          viewDetailsHref="/app/management/alertingV2/episodes/ep-1"
+          viewDetailsHref="/app/management/alertingV2/alerts/ep-1"
           onSuccess={mockOnSuccess}
         />
       )}
@@ -143,6 +143,25 @@ describe('EpisodeFooterActionMenu', () => {
     ]);
   });
 
+  it('groups custom actions with isWorkflowAction in the workflow section', () => {
+    renderMenu([
+      makeAction('CUSTOM_NON_WORKFLOW'),
+      makeAction('CUSTOM_WORKFLOW', { isWorkflowAction: true }),
+    ]);
+
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    const itemTestSubjects = screen
+      .getAllByRole('menuitem')
+      .map((item) => item.getAttribute('data-test-subj'));
+
+    expect(itemTestSubjects).toEqual([
+      'alertingV2EpisodeTakeAction-viewDetails',
+      'alertingV2EpisodeTakeAction-CUSTOM_WORKFLOW',
+      'alertingV2EpisodeTakeAction-CUSTOM_NON_WORKFLOW',
+    ]);
+  });
+
   it('renders view details with the given href', () => {
     renderMenu([]);
 
@@ -150,7 +169,7 @@ describe('EpisodeFooterActionMenu', () => {
 
     expect(screen.getByTestId('alertingV2EpisodeTakeAction-viewDetails')).toHaveAttribute(
       'href',
-      '/app/management/alertingV2/episodes/ep-1'
+      '/app/management/alertingV2/alerts/ep-1'
     );
   });
 
@@ -185,7 +204,11 @@ describe('EpisodeFooterActionMenu', () => {
 
     const ownEntry = await screen.findByTestId('ownEntry');
     expect(renderMenuItem).toHaveBeenCalledWith(
-      expect.objectContaining({ episodes: mockEpisodes, onSuccess: mockOnSuccess })
+      expect.objectContaining({
+        episodes: mockEpisodes,
+        onSuccess: mockOnSuccess,
+        surface: 'details_flyout',
+      })
     );
     // The default descriptor item is bypassed, so `execute` never fires on click.
     expect(
@@ -198,5 +221,23 @@ describe('EpisodeFooterActionMenu', () => {
       expect(screen.queryByTestId('ownEntry')).not.toBeInTheDocument();
     });
     expect(assigneeAction.execute).not.toHaveBeenCalled();
+  });
+
+  it('renders an incompatible action as disabled and does not execute it', () => {
+    const unresolve = makeAction('ALERTING_V2_UNRESOLVE_EPISODE', {
+      displayName: 'Unresolve',
+      isCompatible: () => false,
+      disabledTooltip: 'Unresolve is not available for classic alerts',
+    });
+
+    renderMenu([unresolve]);
+    fireEvent.click(screen.getByTestId('alertingV2EpisodeFlyoutTakeActionButton'));
+
+    const item = screen.getByTestId('alertingV2EpisodeTakeAction-ALERTING_V2_UNRESOLVE_EPISODE');
+    expect(item).toBeDisabled();
+    expect(item).toHaveTextContent('Unresolve');
+
+    fireEvent.click(item);
+    expect(unresolve.execute).not.toHaveBeenCalled();
   });
 });

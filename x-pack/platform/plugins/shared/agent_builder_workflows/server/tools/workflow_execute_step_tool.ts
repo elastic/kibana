@@ -24,6 +24,8 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { hasWorkflowExecutePrivilege } from '@kbn/agent-builder-tools-base/workflows';
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
@@ -536,7 +538,8 @@ const pollExecution = async (
 
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getSecurity: () => SecurityPluginStart | undefined
 ): void {
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
@@ -586,6 +589,19 @@ API documentation — Workflows guide: https://www.elastic.co/docs/explore-analy
       { stepName, yaml: inlineYaml, contextOverride, confirmation_body: confirmationBody },
       context
     ) => {
+      const canExecute = await hasWorkflowExecutePrivilege({
+        security: getSecurity(),
+        request: context.request,
+        spaceId: context.spaceId,
+      });
+      if (!canExecute) {
+        return createToolResult({
+          success: false,
+          error:
+            "Unauthorized to execute workflow step. The 'workflowsManagement' execute privilege is required.",
+        });
+      }
+
       const attachment = inlineYaml ? null : findWorkflowYamlAttachment(context);
       if (!inlineYaml && !attachment) {
         return createToolResult({

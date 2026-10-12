@@ -51,7 +51,11 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
       {(workspace.selectedNodes.length > 1 ||
         (workspace.selectedNodes.length > 0 && workspace.selectedNodes[0] !== selectedNode)) && (
         <EuiToolTip content={groupButtonMsg}>
-          <EuiButtonEmpty iconType="fold" onClick={onGroupButtonClick}>
+          <EuiButtonEmpty
+            data-test-subj="graphGroupSelection"
+            iconType="fold"
+            onClick={onGroupButtonClick}
+          >
             <FormattedMessage id="xpack.graph.sidebar.groupButtonLabel" defaultMessage="group" />
           </EuiButtonEmpty>
         </EuiToolTip>
@@ -59,7 +63,11 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
 
       {selectedNode.numChildren > 0 && (
         <EuiToolTip content={ungroupButtonMsg}>
-          <EuiButtonEmpty iconType="unfold" onClick={onClickUngroup}>
+          <EuiButtonEmpty
+            data-test-subj="graphUngroupSelection"
+            iconType="unfold"
+            onClick={onClickUngroup}
+          >
             <FormattedMessage
               id="xpack.graph.sidebar.ungroupButtonLabel"
               defaultMessage="ungroup"
@@ -80,6 +88,7 @@ export const SelectedNodeEditor = ({ workspace, selectedNode }: SelectedNodeEdit
               ref={(element) => element && (element.value = selectedNode.label)}
               type="text"
               id="labelEdit"
+              data-test-subj="graphNodeLabelInput"
               className="form-control input-sm"
               onChange={onChangeSelectedVertexLabel}
             />

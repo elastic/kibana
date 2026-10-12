@@ -94,7 +94,7 @@ describe('user activity injected context', () => {
           message: 'ua-test',
           event: { action: 'ua_test_action' as any, type: ['user'] },
           object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
-          metadata: { a: 1, b: '2', c: { d: true } },
+          kibana: { dashboard: { a: 1, b: '2', c: { d: true } } },
         });
         return response.ok({ body: { ok: true } });
       }
@@ -119,11 +119,11 @@ describe('user activity injected context', () => {
     expect(meta).toMatchObject({
       message: 'ua-test',
       event: { action: 'ua_test_action', type: ['user'], outcome: 'unknown' },
-      metadata: { a: 1, b: '2', c: { d: true } },
       kibana: {
         space: { id: 'myspace' },
         session: { id: 'some-redacted-sid' },
         object: { id: 'obj-1', name: 'Test Object', type: 'test', tags: ['tag-a'] },
+        dashboard: { a: 1, b: '2', c: { d: true } },
       },
       http: { request: { referrer } },
       client: {
@@ -143,5 +143,6 @@ describe('user activity injected context', () => {
     });
     expect(meta).not.toHaveProperty('session');
     expect(meta).not.toHaveProperty('object');
+    expect(meta).not.toHaveProperty('metadata');
   });
 });

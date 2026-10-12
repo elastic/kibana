@@ -93,7 +93,15 @@ const createAction = ({
   };
 };
 
+const withoutEsql = () => createDashboardApi({ children: { c: child([]) } });
+
 describe('createEnhanceDashboardAction', () => {
+  it('prefixes the prompt with the dashboards skill badge', () => {
+    expect(ENHANCE_DASHBOARD_PROMPT).toBe(
+      '[/dashboards](skill://dashboards) Enhance this dashboard'
+    );
+  });
+
   it('is compatible when a child uses ES|QL', async () => {
     const { action } = createAction();
 
@@ -104,53 +112,10 @@ describe('createEnhanceDashboardAction', () => {
     ).resolves.toBe(true);
   });
 
-  it('is compatible when at least one child uses ES|QL', async () => {
+  it('is compatible when no child uses ES|QL', async () => {
     const { action } = createAction();
 
-    await expect(
-      action.isCompatible!({
-        dashboardApi: createDashboardApi({
-          children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]), c: child([]) },
-        }),
-      })
-    ).resolves.toBe(true);
-  });
-
-  it('is incompatible when no child uses ES|QL', async () => {
-    const { action } = createAction();
-
-    await expect(
-      action.isCompatible!({
-        dashboardApi: createDashboardApi({
-          children: { c: child([]) },
-        }),
-      })
-    ).resolves.toBe(false);
-  });
-
-  it('is incompatible when there are no children', async () => {
-    const { action } = createAction();
-
-    await expect(
-      action.isCompatible!({
-        dashboardApi: createDashboardApi({
-          children: {},
-        }),
-      })
-    ).resolves.toBe(false);
-  });
-
-  it('is incompatible when an ES|QL child is not in layout$.panels', async () => {
-    const { action } = createAction();
-
-    await expect(
-      action.isCompatible!({
-        dashboardApi: createDashboardApi({
-          children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]) },
-          layout: createLayout([]),
-        }),
-      })
-    ).resolves.toBe(false);
+    await expect(action.isCompatible!({ dashboardApi: withoutEsql() })).resolves.toBe(true);
   });
 
   it.each(['view', 'print', 'preview'] as const)('is incompatible in %s mode', async (viewMode) => {
@@ -203,6 +168,39 @@ describe('createEnhanceDashboardAction', () => {
     ).resolves.toBe(false);
   });
 
+  it('is enabled with the enhance tooltip when a child uses ES|QL', () => {
+    const { action } = createAction();
+    const dashboardApi = createDashboardApi({
+      children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]), c: child([]) },
+    });
+
+    expect(action.isDisabled!({ dashboardApi })).toBe(false);
+    expect(action.getDisplayNameTooltip!({ dashboardApi })).toBe(
+      'Improve the content and style of your dashboard using AI'
+    );
+  });
+
+  it.each([
+    ['no child uses ES|QL', withoutEsql],
+    ['there are no children', () => createDashboardApi({ children: {} })],
+    [
+      'an ES|QL child is not in layout$.panels',
+      () =>
+        createDashboardApi({
+          children: { a: child([{ esql: 'FROM logs | LIMIT 10' }]) },
+          layout: createLayout([]),
+        }),
+    ],
+  ])('is disabled with an ES|QL tooltip when %s', (_, getDashboardApi) => {
+    const { action } = createAction();
+    const dashboardApi = getDashboardApi();
+
+    expect(action.isDisabled!({ dashboardApi })).toBe(true);
+    expect(action.getDisplayNameTooltip!({ dashboardApi })).toBe(
+      'Enhance requires at least one ES|QL visualization'
+    );
+  });
+
   it('opens chat with the dashboard attachment', async () => {
     const draftAttachmentId = createDraftAttachmentId('shared-draft-id');
     const { action, openChat } = createAction({ draftAttachmentId });
@@ -237,14 +235,18 @@ describe('createEnhanceDashboardAction', () => {
     });
   });
 
-  it('does not open chat when the dashboard is ineligible', async () => {
+  it('does not open chat when no child uses ES|QL', async () => {
     const { action, openChat } = createAction();
 
-    await action.execute!({
-      dashboardApi: createDashboardApi({
-        children: { c: child([]) },
-      }),
-    });
+    await action.execute!({ dashboardApi: withoutEsql() });
+
+    expect(openChat).not.toHaveBeenCalled();
+  });
+
+  it('does not open chat when the dashboard is incompatible', async () => {
+    const { action, openChat } = createAction();
+
+    await action.execute!({ dashboardApi: createDashboardApi({ viewMode: 'view' }) });
 
     expect(openChat).not.toHaveBeenCalled();
   });
@@ -254,11 +256,23 @@ describe('createEnhanceDashboardAction', () => {
     expect(action.id).toBe(ENHANCE_DASHBOARD_ACTION_ID);
   });
 
-  it('getCompatibilityChangesSubject emits when layout$.panels length changes', () => {
+  it('getCompatibilityChangesSubject emits when the view mode changes', () => {
     const { action } = createAction();
     const dashboardApi = createDashboardApi();
     const next = jest.fn();
     const subscription = action.getCompatibilityChangesSubject!({ dashboardApi })?.subscribe(next);
+
+    (dashboardApi.viewMode$ as BehaviorSubject<string>).next('view');
+
+    expect(next).toHaveBeenCalledTimes(1);
+    subscription?.unsubscribe();
+  });
+
+  it('getDisabledStateChangesSubject emits when layout$.panels length changes', () => {
+    const { action } = createAction();
+    const dashboardApi = createDashboardApi();
+    const next = jest.fn();
+    const subscription = action.getDisabledStateChangesSubject!({ dashboardApi })?.subscribe(next);
 
     (dashboardApi.layout$ as BehaviorSubject<ReturnType<typeof createLayout>>).next(
       createLayout([])
@@ -268,11 +282,11 @@ describe('createEnhanceDashboardAction', () => {
     subscription?.unsubscribe();
   });
 
-  it('getCompatibilityChangesSubject does not emit when a panel is only repositioned', () => {
+  it('getDisabledStateChangesSubject does not emit when a panel is only repositioned', () => {
     const { action } = createAction();
     const dashboardApi = createDashboardApi();
     const next = jest.fn();
-    const subscription = action.getCompatibilityChangesSubject!({ dashboardApi })?.subscribe(next);
+    const subscription = action.getDisabledStateChangesSubject!({ dashboardApi })?.subscribe(next);
 
     (dashboardApi.layout$ as BehaviorSubject<ReturnType<typeof createLayout>>).next({
       panels: {
@@ -283,6 +297,19 @@ describe('createEnhanceDashboardAction', () => {
     });
 
     expect(next).not.toHaveBeenCalled();
+    subscription?.unsubscribe();
+  });
+
+  it('getDisabledStateChangesSubject emits when a child ES|QL query changes', () => {
+    const { action } = createAction();
+    const esqlChild = child([]);
+    const dashboardApi = createDashboardApi({ children: { a: esqlChild } });
+    const next = jest.fn();
+    const subscription = action.getDisabledStateChangesSubject!({ dashboardApi })?.subscribe(next);
+
+    esqlChild.esql$.next([{ esql: 'FROM logs | LIMIT 10' }]);
+
+    expect(next).toHaveBeenCalledTimes(1);
     subscription?.unsubscribe();
   });
 });

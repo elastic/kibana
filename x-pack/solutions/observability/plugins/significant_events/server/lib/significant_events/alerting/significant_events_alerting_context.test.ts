@@ -51,7 +51,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
   it('returns the v2 alerts reader and rules adapter', async () => {
     const context = await createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient: async () => v2Client,
-      isServerless: false,
+      cpsEnabled: false,
     })();
 
     expect(context.alertsReader).toBe(ALERTS_READER_V2);
@@ -63,7 +63,7 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     const getAlertingV2RulesClient = jest.fn().mockResolvedValue(v2Client);
     const resolveContext = createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient,
-      isServerless: false,
+      cpsEnabled: false,
     });
 
     const [first, second] = await Promise.all([resolveContext(), resolveContext()]);
@@ -73,14 +73,14 @@ describe('createSignificantEventsAlertingContextResolver', () => {
     expect(first.alertsReader).toBe(ALERTS_READER_V2);
   });
 
-  it.each([true, false])('forwards isServerless=%s to the rules adapter', async (isServerless) => {
+  it.each([true, false])('forwards cpsEnabled=%s to the rules adapter', async (cpsEnabled) => {
     const createRule = jest.fn().mockResolvedValue({});
     const context = await createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient: async () =>
         ({
           createRule,
         } as unknown as RulesClientApi),
-      isServerless,
+      cpsEnabled,
     })();
 
     await context.rulesClient.createRule('rule-1', {
@@ -91,8 +91,8 @@ describe('createSignificantEventsAlertingContextResolver', () => {
       schedule: { interval: '5m' },
     });
 
-    expect(
-      createRule.mock.calls[0][0].data.query.breach.query.includes('SET project_routing')
-    ).toBe(isServerless);
+    expect(createRule.mock.calls[0][0].data.query.base.includes('SET project_routing')).toBe(
+      cpsEnabled
+    );
   });
 });

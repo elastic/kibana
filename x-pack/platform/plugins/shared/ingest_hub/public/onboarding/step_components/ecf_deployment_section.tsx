@@ -43,7 +43,7 @@ import type { EcfServiceConfig } from '../ecf_cloudformation';
 import { getOnboardingSessionKey } from '../onboarding_session_storage';
 import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
 import { useEcfTemplateVersion } from '../use_ecf_template_version';
-import { ECF_STACK_NAME_MAX_LENGTH } from '../../../common/ecf_template_version';
+import { ECF_STACK_NAME_MAX_LENGTH } from '../../../common/providers/aws/ecf_template_version';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 

@@ -43,15 +43,37 @@ export const isRetryableIncompleteReason = (reason: HuntIncompleteReason): boole
   RETRYABLE_REASONS.has(reason);
 
 /**
+ * Reasons that stop being retryable when Tier 1 had nothing to search. Grounding
+ * checks a generated query against the report's own literal values; a report that
+ * gave Tier 1 no IOC and no technique has no literals for a query to be grounded in,
+ * so every generation from the same text fails the same gate. That is a deterministic
+ * gap by this file's own rule, and treating it as retryable re-spends a Tier 2 call on
+ * the report every sweep without ever retiring it (seen live with CISA KEV entries,
+ * whose bodies are two sentences of prose).
+ */
+export const FINAL_WHEN_NOTHING_SEARCHABLE: ReadonlySet<HuntIncompleteReason> =
+  new Set<HuntIncompleteReason>(['query_ungrounded']);
+
+/**
  * Collapses a run's coverage gaps into the one value a caller decides on.
  *
  * A retryable gap wins over a deterministic one because retrying still gains
  * something: the next run closes the transient half and reports the remainder as
  * `incomplete_final`, so the report settles instead of cycling.
  */
-export const huntCompletenessOf = (gaps: readonly HuntIncompleteness[]): HuntCompleteness => {
+export const huntCompletenessOf = (
+  gaps: readonly HuntIncompleteness[],
+  {
+    treatAsFinal,
+  }: {
+    /** Reasons that are deterministic for this particular run; see `FINAL_WHEN_NOTHING_SEARCHABLE`. */
+    treatAsFinal?: ReadonlySet<HuntIncompleteReason>;
+  } = {}
+): HuntCompleteness => {
   if (gaps.length === 0) return 'complete';
-  return gaps.some(({ reason }) => isRetryableIncompleteReason(reason))
+  return gaps.some(
+    ({ reason }) => isRetryableIncompleteReason(reason) && !treatAsFinal?.has(reason)
+  )
     ? 'incomplete_retryable'
     : 'incomplete_final';
 };

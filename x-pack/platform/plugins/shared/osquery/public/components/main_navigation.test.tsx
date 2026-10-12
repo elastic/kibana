@@ -167,10 +167,10 @@ describe('MainNavigation', () => {
     expect(screen.queryAllByRole('tab')).toHaveLength(0);
   });
 
-  it('should render the Add pack title and Packs back on /packs/add', () => {
+  it('should render the Create pack title and Packs back on /packs/add', () => {
     renderNavigation('/packs/add');
 
-    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Add pack');
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('Create pack');
     expect(screen.getByTestId('appHeaderBack')).toHaveAttribute('aria-label', 'Back to Packs');
     expect(screen.queryByTestId('osqueryRunQueryButton')).not.toBeInTheDocument();
     expect(screen.queryAllByRole('tab')).toHaveLength(0);

@@ -11,9 +11,11 @@ applies_to:
 
 The Datadog connector connects directly to the Datadog REST API. It lets a workflow or agent triage firing monitors — list monitors, fetch alert events, confirm with metric or log queries — then mute monitors, schedule downtimes, open or update incidents, and post events, without opening the Datadog console.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that uses Datadog's regional API hosts with API key and Application key authentication. You configure the Datadog site (region) and both keys when creating the connector.
+The Datadog connector uses Datadog's regional API hosts with API key and Application key authentication. You configure the Datadog site (region) and both keys when creating the connector.
 
 ## Create connectors in {{kib}} [define-datadog-ui]
 

@@ -367,7 +367,15 @@ const agentToolEventStatusUpdateSchema: RootSchema<AgentToolEventStatusUpdatePro
   event_uuid: {
     type: 'keyword',
     _meta: {
-      description: 'The identifier of the updated significant event',
+      description:
+        'Deprecated — superseded by `event_id`. The identifier of the updated significant event',
+      optional: true,
+    },
+  },
+  event_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The stable event id of the updated significant event',
     },
   },
   status: {
@@ -570,7 +578,17 @@ const agentToolEventInvestigationAttachSchema: RootSchema<AgentToolEventInvestig
     event_uuid: {
       type: 'keyword',
       _meta: {
-        description: 'The identifier of the significant event the investigation was attached to',
+        description:
+          'Deprecated — superseded by `event_id`. The identifier of the significant event the investigation was attached to',
+        optional: true,
+      },
+    },
+    event_id: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'The stable event id of the significant event the investigation was attached to',
+        optional: true,
       },
     },
     workflow_execution_id: {
@@ -629,6 +647,13 @@ const agentToolEventWriteSchema: RootSchema<AgentToolEventWriteProps> = {
     type: 'text',
     _meta: {
       description: 'Error message when the workflow event write fails',
+      optional: true,
+    },
+  },
+  severity: {
+    type: 'keyword',
+    _meta: {
+      description: 'The severity tier actually stored. Present only when written is true.',
       optional: true,
     },
   },

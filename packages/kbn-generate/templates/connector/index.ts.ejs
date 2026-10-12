@@ -6,7 +6,9 @@ export const <%= connector.className %>: ConnectorSpec = {
     id: '<%= connector.id %>',
     displayName: '<%= connector.displayName %>',
     description: '',
-    minimumLicense: 'basic',
+    // New third party connectors default to an enterprise license by policy. The floor
+    // the actions plugin enforces is gold; raise this only, never lower it below gold.
+    minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
   schema: lazySchema(() => z.object({})),

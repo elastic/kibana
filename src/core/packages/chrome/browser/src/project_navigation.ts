@@ -90,7 +90,8 @@ export type CloudLinkId =
   | 'billingAndSub'
   | 'deployment'
   | 'deployments'
-  | 'projects';
+  | 'projects'
+  | 'searchPower';
 
 export interface CloudURLs {
   baseUrl?: string;
@@ -100,6 +101,7 @@ export interface CloudURLs {
   projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
+  searchPowerUrl?: string;
 }
 
 export interface CloudLink {

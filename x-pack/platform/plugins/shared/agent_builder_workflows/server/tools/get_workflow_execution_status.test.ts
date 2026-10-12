@@ -11,6 +11,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
+  ...jest.requireActual('@kbn/agent-builder-tools-base/workflows'),
   getExecutionState: jest.fn(),
 }));
 

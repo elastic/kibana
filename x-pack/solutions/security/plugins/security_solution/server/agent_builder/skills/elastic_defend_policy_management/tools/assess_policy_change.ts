@@ -45,7 +45,7 @@ type PresentedRequestedOperationIdentity =
   | Exclude<PolicyChangeOperation, { op: 'set_field' }>
   | { readonly op: 'set_field'; readonly path: string; readonly value_truncated: true };
 
-type PresentedPolicyChangeFact = Readonly<{
+export type PresentedPolicyChangeFact = Readonly<{
   path: PolicyChangeFact['path'];
   originKind: PolicyChangeFact['origin']['kind'];
   registryKind: PolicyChangeFact['registry']['kind'];
@@ -55,9 +55,9 @@ type PresentedPolicyChangeFact = Readonly<{
 }> &
   PresentedFromTo;
 
-type PresentedNormalizedDiff = Pick<PolicyDiffEntry, 'path'> & PresentedFromTo;
+export type PresentedNormalizedDiff = Pick<PolicyDiffEntry, 'path'> & PresentedFromTo;
 
-type PresentedSideEffect = Readonly<{
+export type PresentedSideEffect = Readonly<{
   path: PolicyChangeSideEffect['path'];
   reason: PolicyChangeSideEffect['reason'];
   registryKind: PolicyChangeSideEffect['registry']['kind'];

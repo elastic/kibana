@@ -22,6 +22,8 @@ import {
   deleteVersionSpecificFleetServerPolicies,
   deleteVersionSpecificFleetServerPoliciesForVersions,
   getAgentCountsForVariantPolicyIds,
+  getVariantAgentsKuery,
+  getVariantPolicyIdsFromAgentsWithoutBaseId,
   getAgentVersionsForVersionSpecificPolicies,
   hasAgentVersionConditionInInputTemplate,
 } from '../services/utils/version_specific_policies';
@@ -83,6 +85,13 @@ const mockedGetAgentCountsForVariantPolicyIds =
   getAgentCountsForVariantPolicyIds as jest.MockedFunction<
     typeof getAgentCountsForVariantPolicyIds
   >;
+const mockedGetVariantPolicyIdsFromAgentsWithoutBaseId =
+  getVariantPolicyIdsFromAgentsWithoutBaseId as jest.MockedFunction<
+    typeof getVariantPolicyIdsFromAgentsWithoutBaseId
+  >;
+const mockedGetVariantAgentsKuery = getVariantAgentsKuery as jest.MockedFunction<
+  typeof getVariantAgentsKuery
+>;
 const mockedGetAgentVersionsForVersionSpecificPolicies =
   getAgentVersionsForVersionSpecificPolicies as jest.MockedFunction<
     typeof getAgentVersionsForVersionSpecificPolicies
@@ -664,6 +673,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       mockedGetAgentVersionsForVersionSpecificPolicies.mockResolvedValue(['9.5', '9.4', '8.19']);
       // Default: no agents on any variant — safe for tests that don't care about agent counts.
       mockedGetAgentCountsForVariantPolicyIds.mockResolvedValue(new Map());
+      mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockResolvedValue(new Map());
     });
 
     afterEach(() => {
@@ -710,6 +720,60 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       );
       expect(mockedDeleteVersionSpecificFleetServerPolicies).toHaveBeenCalledWith(
         expect.anything(),
+        'policy-1'
+      );
+    });
+
+    it('locates orphaned agents (including those without policy_base_id) via the variant agents kuery', async () => {
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      const kuery =
+        '(policy_base_id:"policy-1") or (policy_id:("policy-1#9.4") and not policy_base_id:*)';
+      mockedGetVariantAgentsKuery.mockResolvedValue(kuery);
+      mockedFetchAllAgentsByKuery.mockResolvedValue(
+        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+      );
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+      await runTask();
+
+      expect(mockedGetVariantAgentsKuery).toHaveBeenCalledWith(expect.anything(), 'policy-1', []);
+      expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ kuery })
+      );
+      expect(mockedGetAgentsByKuery).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ kuery, includeStatusRuntimeField: false })
+      );
+    });
+
+    it('reassigns agents without policy_base_id even when no variant doc remains in .fleet-policies', async () => {
+      await mockVariantPoliciesInIndex([]);
+      mockedGetVariantPolicyIdsFromAgentsWithoutBaseId.mockResolvedValue(
+        new Map([['policy-1', ['policy-1#9.4']]])
+      );
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      mockedFetchAllAgentsByKuery.mockResolvedValue(
+        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+      );
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
+
+      await runTask();
+
+      expect(mockedGetVariantAgentsKuery).toHaveBeenCalledWith(expect.anything(), 'policy-1', [
+        'policy-1#9.4',
+      ]);
+      expect(mockedReassignAgents).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ agentIds: ['agent-1'] }),
         'policy-1'
       );
     });

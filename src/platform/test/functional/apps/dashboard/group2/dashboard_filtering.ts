@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import expect from '@kbn/expect';
 import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 
 import type { FtrProviderContext } from '../../../ftr_provider_context';
@@ -110,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('tsvb time series shows no data message', async () => {
-        expect(await testSubjects.exists('timeseriesVis > visNoResult')).to.be(true);
+        await testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
       });
 
       it('metric value shows no data', async () => {

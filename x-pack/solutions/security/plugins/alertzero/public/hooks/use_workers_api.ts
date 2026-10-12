@@ -18,6 +18,7 @@ import type {
   Worker,
 } from '@kbn/alertzero-common';
 import { retryOnTransientError } from './retry_on_transient_error';
+import { invalidateHuntThreatIntelSupplyStatus } from './use_hunt_threat_intel_supply';
 import { queryKeys } from '../query_keys';
 
 export const useWorkers = () => {
@@ -59,7 +60,39 @@ export const notifyWorkerUpdateError = (toasts: IToasts, error: unknown): void =
     return;
   }
   const cause = error instanceof Error ? error : new Error(String(error));
-  toasts.addError(cause, { title: WORKER_UPDATE_ERROR_TITLE });
+  const body = isHttpFetchError(error)
+    ? (error.body as { message?: unknown } | undefined)
+    : undefined;
+  toasts.addError(cause, {
+    title: WORKER_UPDATE_ERROR_TITLE,
+    ...(typeof body?.message === 'string' ? { toastMessage: body.message } : {}),
+  });
+};
+
+export const notifyWorkerRulesSkipped = (toasts: IToasts, skippedRuleCount: number): void => {
+  toasts.addWarning({
+    title: i18n.translate('xpack.alertzero.workerRulesSkippedTitle', {
+      defaultMessage: 'Some rules were not attached to the worker',
+    }),
+    text: i18n.translate('xpack.alertzero.workerRulesSkippedText', {
+      defaultMessage:
+        '{count, plural, one {# machine learning rule was} other {# machine learning rules were}} skipped because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. {count, plural, one {It} other {They}} will not be triaged by the worker.',
+      values: { count: skippedRuleCount },
+    }),
+  });
+};
+
+export const notifyWorkerRulesLeftAttached = (toasts: IToasts, skippedRuleCount: number): void => {
+  toasts.addWarning({
+    title: i18n.translate('xpack.alertzero.workerRulesLeftAttachedTitle', {
+      defaultMessage: 'Some rules still have the worker attached',
+    }),
+    text: i18n.translate('xpack.alertzero.workerRulesLeftAttachedText', {
+      defaultMessage:
+        '{count, plural, one {# machine learning rule still has} other {# machine learning rules still have}} the worker attached because you do not have the machine learning permissions needed to edit {count, plural, one {it} other {them}}. Someone with machine learning permissions must disable the worker to detach {count, plural, one {it} other {them}}.',
+      values: { count: skippedRuleCount },
+    }),
+  });
 };
 
 const replaceWorkerInList = (
@@ -72,6 +105,7 @@ const replaceWorkerInList = (
     return;
   }
   queryClient.setQueryData<ListWorkersResponse>(queryKey, {
+    ...current,
     workers: current.workers.map((worker) => (worker.id === next.id ? next : worker)),
   });
 };
@@ -99,8 +133,16 @@ export const useUpdateWorker = () => {
         body: JSON.stringify(patch),
       }),
     // Only the confirmed Worker touches the cache; nothing is written before the server answers.
-    onSuccess: (data) => {
+    onSuccess: (data, { patch }) => {
       replaceWorkerInList(queryClient, queryKey, data.worker);
+      if (!data.skippedRuleCount) {
+        return;
+      }
+      if (patch.enabled === false) {
+        notifyWorkerRulesLeftAttached(services.notifications!.toasts, data.skippedRuleCount);
+      } else {
+        notifyWorkerRulesSkipped(services.notifications!.toasts, data.skippedRuleCount);
+      }
     },
     onError: (error) => {
       notifyWorkerUpdateError(services.notifications!.toasts, error);
@@ -109,6 +151,8 @@ export const useUpdateWorker = () => {
     // workers query error, which the Watch page uses to block Save.
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey });
+      // Hunt enable/disable/settings can change TI supply; refresh when present.
+      await invalidateHuntThreatIntelSupplyStatus(queryClient);
     },
   });
 };

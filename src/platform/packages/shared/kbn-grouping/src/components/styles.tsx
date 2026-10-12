@@ -19,13 +19,13 @@ export const groupingContainerCss = (euiTheme: EuiThemeComputed<{}>) => css`
     border-left: ${euiTheme.border.thin};
     border-right: ${euiTheme.border.thin};
     border-bottom: ${euiTheme.border.thin};
-    border-radius: 0 0 6px 6px;
+    border-radius: 0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel};
   }
   .groupingAccordionForm .euiAccordion__triggerWrapper {
     border-bottom: ${euiTheme.border.thin};
     border-left: ${euiTheme.border.thin};
     border-right: ${euiTheme.border.thin};
-    border-radius: 6px;
+    border-radius: ${euiTheme.border.radius.panel};
     min-height: 78px;
     padding-left: 16px;
     padding-right: 16px;
@@ -33,7 +33,7 @@ export const groupingContainerCss = (euiTheme: EuiThemeComputed<{}>) => css`
   .groupingAccordionForm {
     border-top: ${euiTheme.border.thin};
     border-bottom: none;
-    border-radius: 6px;
+    border-radius: ${euiTheme.border.radius.panel};
     min-width: 1090px;
   }
   .groupingPanelRenderer {
@@ -76,16 +76,10 @@ export const groupingContainerCssLevel = (euiTheme: EuiThemeComputed<{}>) => css
   }
 `;
 
-export const StyledContextMenu = euiStyled(EuiContextMenu)<{ border: EuiThemeComputed['border'] }>`
+export const StyledContextMenu = euiStyled(EuiContextMenu)`
   width: 250px;
   & .euiContextMenuItem__text {
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .euiContextMenuItem {
-    border-bottom: ${(props) => props.border.thin};
-  }
-  .euiContextMenuItem:last-child {
-    border: none;
   }
 `;

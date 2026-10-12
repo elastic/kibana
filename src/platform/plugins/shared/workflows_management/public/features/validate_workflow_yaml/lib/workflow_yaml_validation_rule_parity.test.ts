@@ -14,6 +14,7 @@ import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { getYamlMarkerRuleId } from './get_yaml_marker_rule_id';
 import { validateGraphBuild } from './validate_graph_build';
+import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
@@ -84,6 +85,21 @@ const INVALID_TRIGGER_YAML = [
   '    type: console',
   '    with:',
   '      message: test',
+].join('\n');
+const KIBANA_FETCHER_YAML = [
+  "version: '1'",
+  'name: kibana-fetcher',
+  'enabled: true',
+  'triggers:',
+  '  - type: manual',
+  'steps:',
+  '  - name: status',
+  '    type: kibana.request',
+  '    with:',
+  '      method: GET',
+  '      path: /api/status',
+  '      fetcher:',
+  '        skip_ssl_verification: true',
 ].join('\n');
 
 const workflowSchema = getWorkflowZodSchema({}, []);
@@ -183,6 +199,19 @@ const ruleParityCases: RuleParityCase[] = [
     },
     getServerRuleIds: () =>
       getServerRuleIds(INVALID_TRIGGER_YAML, { triggerDefinitions: [customTriggerDefinition] }),
+  },
+  {
+    name: 'ignored kibana fetcher setting',
+    expectedRuleId: 'ignoredFetcherSetting',
+    getClientRuleIds: () => {
+      const { workflowLookup, yamlLineCounter } = performComputation(KIBANA_FETCHER_YAML);
+      if (!workflowLookup || !yamlLineCounter) {
+        throw new Error('Expected kibana fetcher fixture to parse');
+      }
+      return getClientRuleIds(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter, true));
+    },
+    getServerRuleIds: () =>
+      getServerRuleIds(KIBANA_FETCHER_YAML, { warnIgnoredKibanaFetcher: true }),
   },
 ];
 

@@ -11,8 +11,8 @@ module.exports = {
       files: ['**/*.{ts,tsx}'],
       parser: '@typescript-eslint/parser',
 
-      // `ban/*` and `@eslint-community/eslint-comments/*` rules run in oxlint (.oxlint/ban.jsonc,
-      // .oxlint/eslint_comments.jsonc); registered so `eslint-disable` directives naming them resolve.
+      // `ban/*` and `@eslint-community/eslint-comments/*` rules run in oxlint (.oxlint/ban.mts,
+      // .oxlint/eslint_comments.mts); registered so `eslint-disable` directives naming them resolve.
       plugins: ['@typescript-eslint', 'ban', 'import', '@eslint-community/eslint-comments'],
 
       env: {

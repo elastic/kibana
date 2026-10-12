@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InvalidNotificationDestinationError } from '../client/errors';
 import { startInvestigationRoute } from './start_investigation';
 
 const { handler, params } = startInvestigationRoute['POST /internal/nightshift/investigations'];
@@ -69,6 +70,21 @@ it('keeps a caller-provided concurrency key', async () => {
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ concurrency_key: 'key-1' }));
 });
 
+it('forwards connector_id for an alert investigation', async () => {
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient,
+    params: {
+      body: {
+        subject: { type: 'alert', id: 'alert-1' },
+        connector_id: 'custom-model',
+      },
+    },
+  } as never);
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
+});
+
 it('starts a manual investigation from the question alone', async () => {
   const body = schema.parse({
     subject: { type: 'manual' },
@@ -91,6 +107,23 @@ it('starts a manual investigation from the question alone', async () => {
       trigger_type: 'manual',
     })
   );
+});
+
+it('forwards connector_id for a manual investigation', async () => {
+  const body = schema.parse({
+    subject: { type: 'manual' },
+    message: 'Why did checkout p99 spike?',
+    connector_id: 'custom-model',
+  });
+
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient,
+    params: { body },
+  } as never);
+
+  expect(start).toHaveBeenCalledWith(expect.objectContaining({ connector_id: 'custom-model' }));
 });
 
 it('collapses a multi-line question into a one-line manual title unless a title is given', async () => {
@@ -135,4 +168,56 @@ it('returns service unavailable when alert lookup is not wired', async () => {
       params: { body: { subject: { type: 'alert', id: 'alert-1' } } },
     } as never)
   ).rejects.toMatchObject({ output: { statusCode: 503 } });
+});
+
+it.each(['alert', 'manual'])(
+  'validates and forwards destination-only notificationDestinations for %s starts',
+  async (type) => {
+    const destination = { type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } };
+    const input = {
+      subject: { type, id: 'alert-1' },
+      message: 'Investigate',
+      notificationDestinations: [destination],
+    };
+    const body = schema.parse(input);
+    await handler({
+      request: {},
+      getInvestigationsClient,
+      getAlertsClient,
+      params: { body },
+    } as never);
+    expect(start).toHaveBeenCalledWith(
+      expect.objectContaining({ notificationDestinations: [destination] })
+    );
+    expect(
+      schema.safeParse({ ...input, notificationDestinations: [{ ...destination, status: 'sent' }] })
+        .success
+    ).toBe(false);
+    expect(
+      schema.safeParse({ ...input, notificationDestinations: Array(5).fill(destination) }).success
+    ).toBe(true);
+    expect(
+      schema.safeParse({ ...input, notificationDestinations: Array(6).fill(destination) }).success
+    ).toBe(false);
+  }
+);
+
+it('returns bad request for runtime notification validation failures', async () => {
+  start.mockRejectedValueOnce(
+    new InvalidNotificationDestinationError('Unsupported notification type')
+  );
+  await expect(
+    handler({
+      request: {},
+      getInvestigationsClient,
+      getAlertsClient,
+      params: {
+        body: schema.parse({
+          subject: { type: 'manual' },
+          message: 'Investigate',
+          notificationDestinations: [{ type: 'unsupported', connector_id: 'c', params: {} }],
+        }),
+      },
+    } as never)
+  ).rejects.toMatchObject({ output: { statusCode: 400 } });
 });

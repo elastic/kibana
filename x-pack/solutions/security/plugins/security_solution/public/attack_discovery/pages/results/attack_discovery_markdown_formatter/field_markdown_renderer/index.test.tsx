@@ -145,6 +145,32 @@ describe('FieldMarkdownRenderer', () => {
     expect(disabledActionsBadge).toBeInTheDocument();
   });
 
+  it('does NOT use the Security flyout APIs when disableActions is true', () => {
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: true }}>
+          <FieldMarkdownRenderer icon="storage" name="host.name" operator={':'} value="srv-1" />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    expect(mockUseExpandableFlyoutApi).not.toHaveBeenCalled();
+    expect(mockUseFlyoutApi).not.toHaveBeenCalled();
+    expect(useIsNewFlyoutEnabled).not.toHaveBeenCalled();
+  });
+
+  it('wraps disabled chip labels when wrapFieldValues is true', () => {
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: true, wrapFieldValues: true }}>
+          <FieldMarkdownRenderer icon="storage" name="host.name" operator={':'} value="srv-1" />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('disabledChipLabel')).toHaveStyleRule('white-space', 'normal');
+  });
+
   it('renders the field tooltip on the badge when disableActions is true', () => {
     const icon = 'user';
     const name = 'user.name';

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
+import styled from '@emotion/styled';
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiPanel,
   EuiText,
   EuiTextTruncate,
@@ -21,76 +23,120 @@ import type { EscalationQueueItem } from './types';
 import { EscalationMetaInfo } from './escalation_meta_info';
 import { LinkedInvestigationsBadge } from './linked_investigations_badge';
 import { ESCALATION_QUEUE_LABELS } from './translations';
+import { createCardLinkClickHandler } from '../actions/card_link_click';
 
 interface EscalationCardProps {
   escalation: EscalationQueueItem;
-  hasBorder: boolean;
   /** Render the assignee widget. Supplied by the page so hook calls stay outside the package. */
   renderAssignees: (escalation: EscalationQueueItem) => React.ReactNode;
   /**
    * When provided the row becomes interactive (keyboard and pointer): clicking or pressing Enter/
-   * Space calls this callback with the escalation id. This is used to open the escalation details
-   * flyout. The assignee widget captures pointer events so it does not trigger the card click.
+   * Space calls this callback with the full escalation item. The assignee widget captures pointer
+   * events so it does not trigger the card click.
    */
-  onClickCard?: (id: string) => void;
+  onClickCard?: (escalation: EscalationQueueItem) => void;
   /** Renders with a highlighted background when true (e.g. the flyout for this row is open). */
   isSelected?: boolean;
+  /**
+   * When provided, the title becomes a real `<a>` link pointing at this URL.
+   * This enables Cmd/Ctrl-click (new tab), URL preview on hover, and correct link
+   * semantics for assistive technology. The link's click is intercepted so that a
+   * plain click still calls `onClickCard` for in-app navigation instead of a full
+   * page load.
+   */
+  href?: string;
 }
+
+interface StyledEuiPanelProps {
+  $isClickable: boolean;
+  $isSelected: boolean;
+  $hasLink: boolean;
+}
+
+const StyledEuiPanel = styled(EuiPanel, {
+  shouldForwardProp: (prop) => !prop.startsWith('$'),
+})<StyledEuiPanelProps>(({ theme: { euiTheme }, $isClickable, $isSelected, $hasLink }) => ({
+  borderRadius: 0,
+  '&:not(:last-child)': {
+    borderBottom: `1px solid ${euiTheme.colors.disabled}`,
+  },
+  // The last row rounds to the queue panel's corners so the hover fill does not
+  // square them off. A footer after the rows keeps it from being the last child.
+  '&:last-child': {
+    borderRadius: `0 0 ${euiTheme.border.radius.panel} ${euiTheme.border.radius.panel}`,
+  },
+  boxSizing: 'border-box',
+  cursor: $isClickable ? 'pointer' : undefined,
+  backgroundColor: $isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
+  ...($isClickable && {
+    '&:hover': {
+      backgroundColor: $isSelected
+        ? euiTheme.colors.backgroundBaseInteractiveSelect
+        : euiTheme.colors.backgroundBaseSubdued,
+      boxShadow: 'none',
+    },
+    ...(!$hasLink && {
+      '&:focus-visible': {
+        outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
+      },
+    }),
+  }),
+}));
 
 /**
  * One row in the escalation queue.
  */
 export const EscalationCard = memo<EscalationCardProps>(
-  ({ escalation, hasBorder, renderAssignees, onClickCard, isSelected = false }) => {
+  ({ escalation, renderAssignees, onClickCard, isSelected = false, href }) => {
     const { euiTheme } = useEuiTheme();
     const isClosed = escalation.status === 'closed';
     const isClickable = onClickCard !== undefined;
+    // A link href promotes the row to a real navigable element; without it, fall back to the
+    // button pattern so the card still works for callers that don't supply an href.
+    const hasLink = href !== undefined;
 
     const handleClick = useCallback(() => {
-      onClickCard?.(escalation.id);
-    }, [onClickCard, escalation.id]);
+      onClickCard?.(escalation);
+    }, [onClickCard, escalation]);
 
     const handleKeyDown = useCallback(
       (event: React.KeyboardEvent) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
-          onClickCard?.(escalation.id);
+          onClickCard?.(escalation);
         }
       },
-      [onClickCard, escalation.id]
+      [onClickCard, escalation]
+    );
+
+    // Link-mode: createCardLinkClickHandler stops propagation (so the panel's onClick does not
+    // fire for the link click) and lets modified/middle clicks reach the browser for new-tab
+    // support; a plain click calls onClickCard for in-app navigation.
+    // useMemo (rather than useCallback) mirrors how ConversationsActionsGroup wraps this helper:
+    // the factory is called inside the memo, so its deps are statically visible to the lint rule.
+    const handleLinkClick = useMemo(
+      () => createCardLinkClickHandler(() => onClickCard?.(escalation)),
+      [onClickCard, escalation]
     );
 
     return (
-      <EuiPanel
+      <StyledEuiPanel
         paddingSize="l"
         borderRadius="none"
         hasBorder={false}
         hasShadow={false}
-        // Interactive mode: add pointer cursor and keyboard/hover affordances.
-        role={isClickable ? 'button' : undefined}
-        tabIndex={isClickable ? 0 : undefined}
-        aria-label={isClickable ? escalation.title : undefined}
+        // Button mode (no href): expose as a keyboard-focusable button.
+        // Link mode (href present): the title link is the keyboard/a11y control; the panel's
+        // onClick is a convenience for mouse clicks outside the link.
+        role={isClickable && !hasLink ? 'button' : undefined}
+        tabIndex={isClickable && !hasLink ? 0 : undefined}
+        aria-label={isClickable && !hasLink ? escalation.title : undefined}
         aria-current={isSelected || undefined}
         onClick={isClickable ? handleClick : undefined}
-        onKeyDown={isClickable ? handleKeyDown : undefined}
-        css={{
-          borderBottom: hasBorder ? `1px solid ${euiTheme.colors.disabled}` : 'none',
-          borderRadius: hasBorder ? 'none' : `0 0 ${euiTheme.size.s} ${euiTheme.size.s}`,
-          boxSizing: 'border-box',
-          boxShadow: 'none',
-          cursor: isClickable ? 'pointer' : undefined,
-          backgroundColor: isSelected ? euiTheme.colors.backgroundBaseInteractiveSelect : undefined,
-          ...(isClickable && {
-            '&:hover': {
-              backgroundColor: isSelected
-                ? euiTheme.colors.backgroundBaseInteractiveSelect
-                : euiTheme.colors.backgroundBaseSubdued,
-            },
-            '&:focus-visible': {
-              outline: `${euiTheme.focus.width} solid ${euiTheme.colors.primary}`,
-            },
-          }),
-        }}
+        onKeyDown={isClickable && !hasLink ? handleKeyDown : undefined}
+        $isClickable={isClickable}
+        $isSelected={isSelected}
+        $hasLink={hasLink}
         data-test-subj={`escalationCard-${escalation.id}`}
       >
         <EuiFlexGroup
@@ -120,9 +166,20 @@ export const EscalationCard = memo<EscalationCardProps>(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxs">
-                  <span css={{ color: isClosed ? euiTheme.colors.subduedText : undefined }}>
-                    <EuiTextTruncate text={escalation.title} />
-                  </span>
+                  {hasLink ? (
+                    <EuiLink
+                      href={href}
+                      onClick={handleLinkClick}
+                      color={isClosed ? 'subdued' : 'text'}
+                      data-test-subj={`escalationCardLink-${escalation.id}`}
+                    >
+                      <EuiTextTruncate text={escalation.title} />
+                    </EuiLink>
+                  ) : (
+                    <span css={{ color: isClosed ? euiTheme.colors.subduedText : undefined }}>
+                      <EuiTextTruncate text={escalation.title} />
+                    </span>
+                  )}
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -163,7 +220,7 @@ export const EscalationCard = memo<EscalationCardProps>(
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </StyledEuiPanel>
     );
   }
 );

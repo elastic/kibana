@@ -11,6 +11,8 @@ applies_to:
 
 The Gmail connector connects to the Gmail API and enables search, read, label, quarantine, and send operations on Gmail mailboxes.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-gmail-ui]
 
 You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}** or when adding a Gmail data source.

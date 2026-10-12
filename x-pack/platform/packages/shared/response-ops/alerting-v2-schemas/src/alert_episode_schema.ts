@@ -11,7 +11,7 @@ import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH } from './constants';
 
 export const alertEpisodeStatusSchema = z.union([
-  z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert episode is fully recovered'),
+  z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert is fully recovered'),
   z
     .literal(ALERT_EPISODE_STATUS.PENDING)
     .describe('Breached but below the consecutive-breaches threshold'),
@@ -52,6 +52,8 @@ export const alertEpisodeSchema = z
     episode_data: z.string().nullable().optional(),
     /** Latest top-level `severity` from a breached rule event, when present. */
     severity: z.string().min(1).nullable().optional(),
+    /** Source that originated the alert (e.g. "zabbix", "datadog"). Native Elastic rules use "internal". */
+    source: z.string().min(1).nullable().optional(),
   })
   .strict();
 

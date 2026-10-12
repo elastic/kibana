@@ -193,13 +193,87 @@ describe('assertEsqlGroundedInReport', () => {
   });
 
   it('accepts a report value passed to a full-text function in the filter', () => {
+    const query = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole") | LIMIT 10';
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: 'the actor reached escalated-role via AssumeRole',
+        iocValues: [],
+      }).ok
+    ).toBe(true);
+  });
+
+  it('refuses a hyphenated full-text term even when the report contains it verbatim', () => {
+    // `escalated-role` is not unambiguously one token under the standard tokenizer. Whether a
+    // field's mapping would split it on the hyphen is not something this gate can see, and the
+    // executed MATCH query would OR whatever the analyzer produces -- so a document holding only
+    // `role` would come back as a hit this gate had approved as `escalated-role`. MATCH_PHRASE is
+    // the escape hatch for exactly this shape; see that test below.
     const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role") | LIMIT 10';
     expect(
       assertEsqlGroundedInReport(query, {
         reportText: 'the actor reached escalated-role',
         iocValues: [],
       }).ok
+    ).toBe(false);
+  });
+
+  it('still grounds a hyphenated value under MATCH_PHRASE, the escape hatch', () => {
+    // MATCH_PHRASE's terms are conjunctive and ordered, not independent OR alternatives, so a
+    // hyphenated or multi-word phrase still has to appear together, in order -- safe regardless
+    // of how the field's analyzer would tokenize it.
+    const query = 'FROM logs-aws.* | WHERE MATCH_PHRASE(message, "escalated-role") | LIMIT 10';
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: 'the actor reached escalated-role',
+        iocValues: [],
+      }).ok
     ).toBe(true);
+  });
+
+  it('refuses a CJK full-text term even though every character is a Unicode letter', () => {
+    // Every character in `权限提升` ("privilege escalation") matches `\p{L}`, but the standard
+    // tokenizer has no space-delimited word boundary for Han text, so it emits one token per
+    // ideograph. A document containing only `升` would come back as a hit this gate would have
+    // approved as the whole four-character value, the same gap as the hyphenated-term case above,
+    // just via a script this gate's letters-only check could not tell from one safe word.
+    const query = 'FROM logs-aws.* | WHERE MATCH(message, "权限提升") | LIMIT 10';
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: 'the actor reached 权限提升',
+        iocValues: [],
+      }).ok
+    ).toBe(false);
+  });
+
+  it("still grounds an ASCII full-text term at exactly the tokenizer's length limit", () => {
+    // 255 is the tokenizer's own default max_token_length, not past it -- the boundary case the
+    // refusal test below needs to be more than a one-sided assertion.
+    const atLimit = 'r'.repeat(251) + 'role';
+    expect(atLimit).toHaveLength(255);
+    const query = `FROM logs-aws.* | WHERE MATCH(message, "${atLimit}") | LIMIT 10`;
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: `the actor reached ${atLimit}`,
+        iocValues: [],
+      }).ok
+    ).toBe(true);
+  });
+
+  it("refuses an ASCII full-text term past the tokenizer's own length limit", () => {
+    // Elasticsearch's standard tokenizer splits a token once it passes its default
+    // `max_token_length` (255), into a 255-character chunk plus whatever is left over -- so a
+    // 259-character literal ending in `role` grounds here as one term but analyzes into a separate
+    // `role` token Elasticsearch ORs in, same gap as the hyphenated and CJK cases above, just via
+    // length rather than character class.
+    const longRun = 'a'.repeat(255) + 'role';
+    expect(longRun).toHaveLength(259);
+    const query = `FROM logs-aws.* | WHERE MATCH(message, "${longRun}") | LIMIT 10`;
+    expect(
+      assertEsqlGroundedInReport(query, {
+        reportText: `the actor reached ${longRun}`,
+        iocValues: [],
+      }).ok
+    ).toBe(false);
   });
 
   it('says an unfiltered query has no predicate, not that the report is missing from it', () => {
@@ -459,9 +533,9 @@ describe('assertEsqlGroundedInReport', () => {
     it('requires every term of a full-text match to be grounded', () => {
       // A match query ORs its terms by default, so an ungrounded term widens the result exactly
       // as an ungrounded OR branch does.
-      const grounded = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role")';
-      const widened = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role unrelated-term")';
-      const text = 'the actor reached escalated-role';
+      const grounded = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole")';
+      const widened = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole irrelevant")';
+      const text = 'the actor called AssumeRole';
       expect(assertEsqlGroundedInReport(grounded, { reportText: text, iocValues: [] }).ok).toBe(
         true
       );
@@ -471,13 +545,15 @@ describe('assertEsqlGroundedInReport', () => {
     });
 
     it('refuses a match whose term is too short for the gate to judge', () => {
-      // A short term is not a term Elasticsearch ignores: `MATCH(message, "escalated-role up")`
+      // A short term is not a term Elasticsearch ignores: `MATCH(message, "AssumeRole up")`
       // returns documents holding only `up`, so excusing it from the requirement — which an
       // earlier version of this test asserted as intent — counted those rows as the report's.
-      const query = 'FROM logs-aws.* | WHERE MATCH(message, "escalated-role up")';
+      // A single-token first term keeps this isolated to the short-term rule, not the hyphenated
+      // -term rule the tests above cover.
+      const query = 'FROM logs-aws.* | WHERE MATCH(message, "AssumeRole up")';
       expect(
         assertEsqlGroundedInReport(query, {
-          reportText: 'the actor reached escalated-role',
+          reportText: 'the actor called AssumeRole',
           iocValues: [],
         }).ok
       ).toBe(false);

@@ -170,6 +170,34 @@ const PATTERN_OPERATORS: ReadonlySet<string> = new Set(['like', 'rlike']);
 const WORD_CHARACTER = /[\p{L}\p{N}_]/u;
 
 /**
+ * Elasticsearch's `standard` tokenizer's own default `max_token_length`: a token longer than this
+ * is split into chunks of this size rather than kept whole, regardless of what characters it's
+ * made of. A 259-character ASCII run ending in `role` grounds as one term here but analyzes into
+ * a 255-character chunk plus a separate `role` token, so `MATCH` ORs them and a document holding
+ * only `role` comes back as a hit this gate had approved as the full literal. This is the
+ * tokenizer's own default, not a limit this gate derives from anything else -- a deployment that
+ * raises it on a specific field's mapping would make this gate stricter than it needs to be for
+ * that field, which is the safe direction; one that lowers it is the one way this gate could still
+ * be wrong, and nothing short of reading the field's own mapping would catch that.
+ */
+const MAX_SINGLE_TOKEN_LENGTH = 255;
+
+/**
+ * Unambiguously one token under the standard tokenizer: ASCII letters, digits and underscore
+ * throughout, no longer than `MAX_SINGLE_TOKEN_LENGTH`. Deliberately narrower than
+ * `WORD_CHARACTER` above (which has a different job -- finding term boundaries inside report text
+ * that may itself be in any script): the standard tokenizer's word-break algorithm (UAX #29) only
+ * behaves like "one token per space-delimited word" for scripts that use spaces. CJK text has no
+ * such boundary, so the standard tokenizer emits one token per ideograph -- `MATCH(message,
+ * "权限提升")` is four independent OR alternatives, not one, even though every character is a
+ * `\p{L}` letter. Accepting all of `\p{L}` here would ground the whole value as a single verified
+ * term while the analyzed query matches on any one character of it. ASCII is the one range this
+ * gate can be sure of; anything else -- including an ASCII run past the length bound -- keeps the
+ * placeholder and has `MATCH_PHRASE` as its escape hatch, same as punctuation.
+ */
+const SINGLE_TOKEN = new RegExp(`^[A-Za-z0-9_]{1,${MAX_SINGLE_TOKEN_LENGTH}}$`);
+
+/**
  * True when `value` appears in `text` as a term of its own rather than buried inside a longer
  * word. A report describing an `unsuccessful login` contains the characters of `success`, but the
  * rows `WHERE event.outcome == "success"` brings back are the opposite of what it describes, and
@@ -333,6 +361,25 @@ const requiredRegexpCore = (alternative: string): string[] => {
  *   a match on short tokens alone — `MATCH(process.command_line, "net use")` keeps the
  *   placeholder — and costs nothing that can be verified.
  *
+ * `match` and `:` split their literal on whitespace here and compare each piece whole, but
+ * Elasticsearch's own analyzer also splits on punctuation, and `MATCH` ORs whatever it produces.
+ * `MATCH(message, "escalated-role")` is one term above and verified as a report artifact once —
+ * but the query that actually runs matches any document holding the analyzed `escalated` **or**
+ * `role`, so a document containing only `role` comes back as a hit this gate had already approved
+ * as `escalated-role`. Whether a given field's mapping would really split it is not something this
+ * gate can see, so there is no correct simulation of the analyzer to fall back on — only a choice
+ * about which direction to be wrong in. The choice here: a term has to be ASCII letters, digits
+ * and underscore throughout, no longer than `MAX_SINGLE_TOKEN_LENGTH` (unambiguously one token
+ * under the standard tokenizer) to ground at all; anything else — hyphenated, dotted,
+ * multi-word-as-one-literal, a non-ASCII script the tokenizer would segment differently (CJK text
+ * has no space-delimited words, so the standard tokenizer emits one token per ideograph), or an
+ * ASCII run long enough that the tokenizer's own length limit would split it anyway — keeps the
+ * placeholder regardless of whether the report contains it. `MATCH_PHRASE` is exempt, because its
+ * terms are conjunctive
+ * and ordered rather than independent OR alternatives: a hyphenated or multi-word phrase still has
+ * to appear together, in order, so it stays grounded by the whitespace-split rule above with no
+ * extra check, and is the shape to steer generation at when a value cannot stand as one token.
+ *
  * `LIKE` needs neither the alternation rule nor `RLIKE`'s whitelist: its only wildcards are `*`
  * for any sequence and `?` for exactly one character, so every fragment between them is text the
  * matching rows contain.
@@ -348,7 +395,15 @@ const groundingRequirements = (operator: string, literal: string): string[][] =>
     const terms = literal.split(/\s+/).filter((term) => term.length > 0);
     // A literal with no term asks for nothing, and an empty requirement list is satisfied by
     // everything, so it has to fail here rather than pass vacuously.
-    return terms.length > 0 ? terms.map((term) => [term]) : [[]];
+    if (terms.length === 0) {
+      return [[]];
+    }
+    if (operator === 'match_phrase') {
+      return terms.map((term) => [term]);
+    }
+    // `match` and `:` OR their terms — see the comment above this function for why a term this
+    // gate cannot confirm is a single token refuses rather than grounds as one.
+    return terms.map((term) => (SINGLE_TOKEN.test(term) ? [term] : []));
   }
   return [[literal]];
 };

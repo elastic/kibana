@@ -48,6 +48,7 @@ interface EntityMaintainerTaskMethodContext {
   crudClient: EntityUpdateClient;       // For updating entity documents (incl. createEntitiesFromSource — see risk-score.md)
   resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient; // Relationship metadata reads; clearRelationshipIds before a snapshot-source repopulation
   telemetry: MaintainerTelemetryClient; // .report(...) — the Entity Maintainers framework telemetry
 }
 ```

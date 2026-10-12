@@ -24,21 +24,23 @@ core.userActivity.trackUserAction({
 });
 ```
 
-You can optionally provide a custom message, ECS `event.outcome`, top-level ECS `error.*` fields, and metadata:
+You can optionally provide a custom message, ECS `event.outcome`, top-level ECS `error.*` fields, and metadata. Each producer passes its own metadata bucket through the `kibana` param, emitted as `kibana.<bucket>.*` (in this example, `kibana.dashboard.*`). Buckets are declared in `UserActivityKibanaMetadata` ([`src/types.ts`](./src/types.ts)), so adding a new one requires a Core-reviewed change:
 
 ```ts
 core.userActivity.trackUserAction({
-  message: 'User snoozed an alerting rule',
-  event: { action: 'snooze_alerting_rule', type: ['change'], outcome: 'success' },
-  object: { id: 'rule-456', name: 'CPU usage threshold', type: 'rule', tags: ['production'] },
-  metadata: {
-    ui_surface: 'rules_table',
-    interaction_id: 'snooze_rule_flyout',
+  message: 'User refreshed dashboard "Web traffic"',
+  event: { action: 'dashboard_refresh', type: ['access'], outcome: 'success' },
+  object: { id: 'dash-123', name: 'Web traffic', type: 'dashboard', tags: ['production'] },
+  kibana: {
+    dashboard: {
+      panel_count: 12,
+      refresh_interval: 60000,
+    },
   },
 });
 ```
 
-For failed actions, set `event.outcome` to `failure` and populate `error` with ECS fields (`type`, `message`, `stack_trace`, `code`) instead of stuffing failure detail only into `metadata`. When `event.outcome` is omitted, the emitted event defaults to `unknown`.
+For failed actions, set `event.outcome` to `failure` and populate `error` with ECS fields (`type`, `message`, `stack_trace`, `code`) instead of stuffing failure detail only into the metadata bucket. When `event.outcome` is omitted, the emitted event defaults to `unknown`.
 
 ## Registering new actions
 
@@ -122,7 +124,7 @@ Here's the current schema reference: [`docs/reference/user-activity.md`](../../.
 
 Some of the fields in the schema come from:
 
-- `trackUserAction()` params (for example `message`, `event.*`, `metadata.*`; the `object` param is emitted as `kibana.object.*`)
+- `trackUserAction()` params (for example `message` and `event.*`; the `object` param is emitted as `kibana.object.*`, and the `kibana` param buckets as `kibana.<bucket>.*`, for example `kibana.dashboard.*`)
 - Injected context (for example `user.*`, `client.*`, `source.*`, `kibana.session.id`, `kibana.space.id`, and `http.request.referrer`)
 - Fields derived by the service (`kibana.saved_object.type` and `kibana.saved_object.id`, emitted when `object.type` is a registered saved object type)
 - Fields automatically added by the logging system / JSON layout (for example `@timestamp`)

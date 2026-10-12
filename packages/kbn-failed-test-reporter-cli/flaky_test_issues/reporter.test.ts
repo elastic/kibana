@@ -71,6 +71,7 @@ const run = (
     githubRepo: TARGET_REPO,
     closedSince: CLOSED_SINCE,
     maxNewIssues: 10,
+    omitSkippedTests: true,
     dryRun: false,
     ...overrides,
   });
@@ -81,7 +82,7 @@ const suiteIssue = (number: number, overrides: Partial<GithubIssue> = {}) => {
   const [suite] = groupIntoSuites(report.flaky);
   return githubIssue({
     number,
-    title: 'Flaky Scout suite: Default status alert',
+    title: 'Flaky Scout UI suite: Default status alert',
     body: renderFlakySuiteIssueBody(suite, {
       report: { ...report, generatedAt: new Date('2026-09-01T09:00:00.000Z') },
     }),
@@ -145,6 +146,7 @@ describe('reportFlakySuiteIssues', () => {
       dryRun: false,
       githubRepo: TARGET_REPO,
       suites: 0,
+      omittedTests: 0,
       issues: { open: 1, closed: 1, closedSince: CLOSED_SINCE },
       counts: { created: 0, skipped: 0, failed: 0 },
       actions: [],
@@ -159,7 +161,7 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(1);
       const [title, body, labels] = github.createIssue.mock.calls[0];
-      expect(title).toBe('Flaky Scout suite: Default status alert');
+      expect(title).toBe('Flaky Scout UI suite: Default status alert');
       expect(body).toContain('Possibly related: #7.');
       expect(readFlakySuiteIssueMetadata(body)?.['suite.filePath']).toBe(SUITE_PATH);
       expect(labels).toEqual(['failed-test']);
@@ -190,8 +192,8 @@ describe('reportFlakySuiteIssues', () => {
 
       expect(github.createIssue).toHaveBeenCalledTimes(2);
       expect(github.createIssue.mock.calls.map(([title]) => title)).toEqual([
-        'Flaky Scout suite: second describe',
-        'Flaky Scout suite: first describe',
+        'Flaky Scout UI suite: second describe',
+        'Flaky Scout UI suite: first describe',
       ]);
       expect(summary.actions.map(({ suiteTitle }) => suiteTitle)).toEqual([
         'second describe',
@@ -364,6 +366,67 @@ describe('reportFlakySuiteIssues', () => {
         issue: { number: 43, state: 'open' },
         match: 'test',
       });
+    });
+  });
+
+  describe('flaky tests skipped since', () => {
+    const skippedTest = (overrides: Parameters<typeof flakyTest>[0] = {}) =>
+      flakyTest({
+        ...overrides,
+        byBranch: [{ ...flakyTest().byBranch[0], skipped: true }],
+      });
+
+    it('files no issue for a suite whose every flaky test was skipped, without spending a slot on it', async () => {
+      const github = createGithubApi();
+      const report = flakyReport([
+        skippedTest(),
+        flakyTest({ testId: 'n', filePath: 'new.spec.ts', failedBuilds: 9 }),
+      ]);
+
+      const summary = await run(github, { report, maxNewIssues: 1 });
+
+      expect(github.createIssue).toHaveBeenCalledTimes(1);
+      expect(summary.suites).toBe(2);
+      expect(summary.omittedTests).toBe(1);
+      expect(summary.actions).toEqual([
+        {
+          action: 'skipped',
+          filePath: SUITE_PATH,
+          suiteTitle: 'Default status alert',
+          reason: 'all-tests-skipped',
+        },
+        expect.objectContaining({ action: 'created', filePath: 'new.spec.ts' }),
+      ]);
+    });
+
+    it('leaves a skipped test out of its suite: it needs no issue and is not listed in one', async () => {
+      const tracked = createGithubApi([scoutTestIssue(43, 'pw-1')]);
+      const untracked = createGithubApi();
+      const report = flakyReport([
+        trackedTest(),
+        skippedTest({ testId: 'pw-2', title: 'a skipped test' }),
+      ]);
+
+      const trackedSummary = await run(tracked, { report });
+      await run(untracked, { report });
+
+      expect(tracked.createIssue).not.toHaveBeenCalled();
+      expect(trackedSummary.actions[0]).toMatchObject({ reason: 'tracked', issue: { number: 43 } });
+      const [, body] = untracked.createIssue.mock.calls[0];
+      expect(body).not.toContain('a skipped test');
+      expect(readFlakySuiteIssueMetadata(body)?.['suite.testIds']).toEqual(['pw-1']);
+    });
+
+    it('keeps them with --no-omit-skipped-tests', async () => {
+      const github = createGithubApi();
+
+      const summary = await run(github, {
+        report: flakyReport([skippedTest()]),
+        omitSkippedTests: false,
+      });
+
+      expect(summary.omittedTests).toBe(0);
+      expect(summary.actions[0]).toMatchObject({ action: 'created' });
     });
   });
 

@@ -81,11 +81,7 @@ import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
-import {
-  createInboundEventsClient,
-  dispatchConnectorEvents,
-  type ConnectorEventEmitter,
-} from './inbound';
+import { setupInboundEvents, type ConnectorEventEmitter } from './inbound';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import {
   initializeOAuthStateCleanupTask,
@@ -499,29 +495,15 @@ export class ActionsPlugin
 
     // Routes
     const router = core.http.createRouter<ActionsRequestHandlerContext>();
-    const inboundEventsEnabled = actionsConfigUtils.isInboundEventsEnabled();
-    const inboundEvents = inboundEventsEnabled
-      ? {
-          maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-          client: createInboundEventsClient({
-            logger: this.logger,
-            inboundEventsEnabled: true,
-            isActionTypeEnabled: (actionTypeId) =>
-              actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-            maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
-            maxBodyBytes: actionsConfigUtils.getInboundEventsMaxBodyBytes(),
-            getStartServices: core.getStartServices,
-            inMemoryConnectors: this.inMemoryConnectors,
-            emitConnectorEvents: (params) =>
-              dispatchConnectorEvents({
-                emitter: this.connectorEventEmitter,
-                params,
-              }),
-          }),
-          getSpaceId: (request: KibanaRequest) =>
-            this.spaces?.spacesService.getSpaceId(request) ?? 'default',
-        }
-      : undefined;
+    const inboundEvents = setupInboundEvents({
+      actionsConfigUtils,
+      http: core.http,
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+      spaces: this.spaces,
+      inMemoryConnectors: this.inMemoryConnectors,
+      getConnectorEventEmitter: () => this.connectorEventEmitter,
+    });
     defineRoutes({
       router,
       licenseState: this.licenseState,
@@ -1192,10 +1174,14 @@ export class ActionsPlugin
 
   private registerDynamicConnector = (connector: InMemoryConnector): boolean => {
     if (!this.inMemoryConnectors.find((c) => c.id === connector.id)) {
+      const { isInboundEventsEnabled: requestedEventsEnabled, ...withoutEventsFlag } = connector;
       this.inMemoryConnectors.push({
-        ...connector,
+        ...withoutEventsFlag,
         isDynamic: true,
         isPreconfigured: true,
+        ...(this.actionsConfig.inboundEvents.enabled && requestedEventsEnabled === true
+          ? { isInboundEventsEnabled: true }
+          : {}),
       });
       this.logger.info(`Registered dynamic connector with id ${connector.id}`);
       return true;

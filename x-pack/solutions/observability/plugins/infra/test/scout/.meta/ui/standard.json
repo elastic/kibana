@@ -1,5 +1,5 @@
 {
-  "sha1": "800df1b3ddeac38b0d4fa8c4328a66df7fc7a18c",
+  "sha1": "5859da0700ea75022fb98587f976e492ce859d1c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -64,7 +64,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 57
       }
     },
@@ -80,7 +80,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 9
       }
     },
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 9
       }
     },
@@ -112,7 +112,23 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 103,
+        "line": 104,
+        "column": 22
+      }
+    },
+    {
+      "id": "8704529b6902d2d-fcce288d1469cd3",
+      "title": "Infrastructure Inventory - Kubernetes Pods OpenTelemetry schema unavailable schema shows invalid state without rewriting preferredSchema",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
+        "line": 121,
         "column": 22
       }
     },
@@ -128,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 120,
-        "column": 22
+        "line": 140,
+        "column": 20
       }
     },
     {
@@ -144,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 139,
-        "column": 20
+        "line": 156,
+        "column": 15
       }
     },
     {
@@ -160,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 154,
-        "column": 25
+        "line": 171,
+        "column": 26
       }
     },
     {
@@ -176,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 177,
-        "column": 7
+        "line": 192,
+        "column": 24
       }
     },
     {
@@ -192,8 +208,88 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_pods_semconv.spec.ts",
-        "line": 196,
-        "column": 18
+        "line": 214,
+        "column": 36
+      }
+    },
+    {
+      "id": "e1f6fa13efa8aad-98c5458d519c09e",
+      "title": "Infrastructure Inventory - Rule flyout pod schema selector creating an inventory rule from the pods view prefills the schema selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
+        "line": 57,
+        "column": 23
+      }
+    },
+    {
+      "id": "e1f6fa13efa8aad-81f7939d41e2ac3",
+      "title": "Infrastructure Inventory - Rule flyout pod schema selector rule flyout schema follows the toolbar selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
+        "line": 64,
+        "column": 63
+      }
+    },
+    {
+      "id": "e1f6fa13efa8aad-7b79c05bdef75f4",
+      "title": "Infrastructure Inventory - Rule flyout pod schema selector opening the rule flyout from a SemConv pod waffle tile prefills OpenTelemetry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
+        "line": 67,
+        "column": 11
+      }
+    },
+    {
+      "id": "e1f6fa13efa8aad-360d4b812a8d2fe",
+      "title": "Infrastructure Inventory - Rule flyout pod schema selector saves the schema picked in the rule flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
+        "line": 73,
+        "column": 20
+      }
+    },
+    {
+      "id": "e1f6fa13efa8aad-80916be6ca80271",
+      "title": "Infrastructure Inventory - Rule flyout pod schema selector opening the rule flyout from an ECS pod waffle tile prefills Elastic System Integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/inventory_rule_pod_schema.spec.ts",
+        "line": 100,
+        "column": 20
       }
     },
     {
@@ -210,6 +306,54 @@
         "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/no_data_inventory.spec.ts",
         "line": 40,
         "column": 15
+      }
+    },
+    {
+      "id": "cae0fa4f91bcd16-9e427e0b61a751f",
+      "title": "Pod Metric Detail - schema selector flag off ignores a leftover OpenTelemetry URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv_flag_off.spec.ts",
+        "line": 29,
+        "column": 30
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-9ff361d381da54d",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats opens kubeletstats charts from an OpenTelemetry tile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 49,
+        "column": 57
+      }
+    },
+    {
+      "id": "bc1c963cd55d152-a5d3326a44a1949",
+      "title": "Pod Metric Detail - OpenTelemetry kubeletstats keeps an Elastic Common Schema tile off the kubeletstats request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/ui/tests/inventory/node_details.pod_semconv.spec.ts",
+        "line": 76,
+        "column": 13
       }
     },
     {

@@ -62,19 +62,18 @@ describe('buildReinforcementPrompt', () => {
   const base = {
     learnings: [] as LearningRecord[],
     connectorNames: ['elastic-telemetry'],
-    prompt: 'Why is checkout slow?',
     response: 'Connection pool exhausted.',
   };
 
   it('asks for a new tree when the investigator did not open one', () => {
-    const message = buildReinforcementPrompt({ ...base, trees: [] });
+    const { message } = buildReinforcementPrompt({ ...base, trees: [] });
 
     expect(message).toContain(scripts.initialCreate);
     expect(message).toContain('Decision-tree files available for edit:\n- None');
   });
 
   it('asks for a merge when the investigator opened a first-version tree', () => {
-    const message = buildReinforcementPrompt({ ...base, trees: [tree()] });
+    const { message } = buildReinforcementPrompt({ ...base, trees: [tree()] });
 
     expect(message).toContain(scripts.initialMerge);
     expect(message).toContain(
@@ -83,7 +82,7 @@ describe('buildReinforcementPrompt', () => {
   });
 
   it('asks for reinforcement once a revised tree has a confirmed root cause', () => {
-    const message = buildReinforcementPrompt({
+    const { message } = buildReinforcementPrompt({
       ...base,
       trees: [tree({ version: 3 })],
       response: '{"hypotheses":[{"status":"confirmed"}]}',
@@ -93,13 +92,21 @@ describe('buildReinforcementPrompt', () => {
   });
 
   it('asks for an extension on a follow-up with no confirmed root cause', () => {
-    const message = buildReinforcementPrompt({ ...base, trees: [tree({ version: 3 })] });
+    const { message } = buildReinforcementPrompt({ ...base, trees: [tree({ version: 3 })] });
 
     expect(message).toContain(scripts.followupExtend);
   });
 
-  it('carries the transcript and the active learnings', () => {
-    const message = buildReinforcementPrompt({
+  it('reports the turn kind so the caller can pick the tool set', () => {
+    expect(buildReinforcementPrompt({ ...base, trees: [] }).turnKind).toBe('initial_investigation');
+    expect(buildReinforcementPrompt({ ...base, trees: [tree({ version: 2 })] }).turnKind).toBe(
+      'feedback_reinforcement'
+    );
+  });
+
+  // The investigation reaches the agent as conversation history, not inside this message.
+  it('leaves the transcript out and carries the active learnings', () => {
+    const { message } = buildReinforcementPrompt({
       ...base,
       trees: [tree()],
       learnings: [
@@ -147,8 +154,8 @@ describe('buildReinforcementPrompt', () => {
       ],
     });
 
-    expect(message).toContain('Why is checkout slow?');
-    expect(message).toContain('Connection pool exhausted.');
+    expect(message).not.toContain('Connection pool exhausted.');
+    expect(message).not.toContain('## Investigation transcript');
     expect(message).toContain('- Checkout depends on Redis.');
     expect(message).toContain('- Checkout shares a connection pool.');
     expect(message).not.toContain('Payments use a different cluster.');

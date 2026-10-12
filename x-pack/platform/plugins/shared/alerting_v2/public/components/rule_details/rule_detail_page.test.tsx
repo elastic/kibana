@@ -18,6 +18,15 @@ import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
+import { createAlertingV2HostApp } from '../../locators';
+
+const TEST_HOST = createAlertingV2HostApp('test-app', {
+  rules: '/alerting/rules',
+  ruleLibrary: '/alerting/library',
+  alerts: '/alerting/inbox',
+  actionPolicies: '/alerting/action-policies',
+  executionHistory: '/alerting/execution-history',
+});
 import { AlertingV2RulesLocatorDefinition } from '../../locators';
 
 const mockLocators = createMockLocators();
@@ -132,18 +141,15 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'signal',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'Test Events Rule',
-    version: 1,
     description: 'Test rule description',
     tags: ['prod', 'infra'],
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
-  },
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
   created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: { profile_uid: 'bob@example.com' },
@@ -231,27 +237,29 @@ describe('RuleDetailPage', () => {
     expect(backButton).toHaveAttribute('href', '/mock-locator-url');
   });
 
-  it('back link params resolve to management rules list URL', async () => {
+  it('back link params resolve to rules list URL for the bound host', async () => {
     renderPage(baseRule);
 
     const [params] = jest.mocked(mockLocators.rulesLocators.useUrl).mock.calls[0];
-    const location = await AlertingV2RulesLocatorDefinition.getLocation(params);
+    const location = await AlertingV2RulesLocatorDefinition.getLocation({
+      ...params,
+      host: TEST_HOST.rules,
+    });
     expect(location).toMatchObject({
-      app: 'management',
-      path: '/alertingV2/rules',
+      app: 'test-app',
+      path: '/alerting/rules',
     });
   });
 
-  it('renders native kind, status, and tag badges in the app header', () => {
+  it('renders native kind and status badges without duplicating tags in the app header', () => {
     renderPage(baseRule);
     const kindBadge = screen.getByTestId('kindBadge');
     expect(kindBadge).toHaveTextContent('Events');
     expect(kindBadge.querySelector('[data-euiicon-type="chartBarVertical"]')).toBeInTheDocument();
     expect(screen.getByTestId('enabledBadge')).toHaveTextContent('Enabled');
     expect(screen.queryByTestId('disabledBadge')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText('+2'));
-    expect(screen.getByText('prod')).toBeInTheDocument();
-    expect(screen.getByText('infra')).toBeInTheDocument();
+    expect(screen.queryByText('prod')).not.toBeInTheDocument();
+    expect(screen.queryByText('infra')).not.toBeInTheDocument();
   });
 
   it('renders Alerts kind badge with its icon and disabled status badge', () => {

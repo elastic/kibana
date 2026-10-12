@@ -32,6 +32,7 @@ import {
   createConversationNotFoundError,
   createRequestAbortedError,
   isAttachmentEvent,
+  resumeExecutionId,
   roundUserMessageEventId,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
@@ -40,6 +41,7 @@ import {
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import type { ConversationWithOperation } from './conversations';
 import {
   appendResumeExecution$,
@@ -357,6 +359,48 @@ describe('conversations utils', () => {
 
       expect(conversationClient.create).not.toHaveBeenCalled();
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes appendRefresh to the append on UPDATE, and leaves the default otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const persist = (appendRefresh?: false) =>
+        persistUserMessage({
+          conversation,
+          conversationClient,
+          eventId: 'round-1::user_message',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+          appendRefresh,
+        });
+
+      await persist(false);
+      await persist();
+
+      const [[, withRefresh], [, withDefault]] = conversationClient.appendEvents.mock.calls;
+      expect(withRefresh).toEqual({ access: 'converse', source: 'execution', refresh: false });
+      expect(withDefault).toEqual({ access: 'converse', source: 'execution' });
+    });
+
+    it('ignores appendRefresh on CREATE: the create still refreshes', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+
+      await persistUserMessage({
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+        appendRefresh: false,
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
     it('falls back to appendEvents when CREATE races another writer (conversationAlreadyExists)', async () => {
@@ -745,6 +789,19 @@ describe('conversations utils', () => {
           },
         },
       ] as never,
+    });
+
+    it('derives the same execution index telemetry reports, so the two cannot drift', () => {
+      // `nextResumeIndex` is the single source of the index: this write path stamps it into
+      // the event ids, and `buildExecutionTelemetry` reports it. A divergence would silently
+      // mislabel which execution a billing record belongs to.
+      const conversation = pausedConversation();
+
+      expect(nextResumeIndex(conversation, 'round-1')).toBe(1);
+      expect(resumeExecutionId('round-1', nextResumeIndex(conversation, 'round-1'))).toBe(
+        'round-1::execution::1'
+      );
+      expect(nextResumeIndex(conversation, 'some-other-round')).toBe(0);
     });
 
     const followUpRound = () => ({
@@ -1513,6 +1570,97 @@ describe('conversations utils', () => {
         time_to_last_token: 5,
         model_usage: usage,
         aborted_by: abortReason,
+      });
+    });
+
+    describe('compaction summary', () => {
+      const compactionSummary = {
+        summarized_up_to: { round_id: 'round-1', tool_call_id: 'call-1' },
+        summarized_round_count: 0,
+        covered_round_ids: [],
+        created_at: T0,
+        token_count: 10,
+        structured_data: {
+          discussion_summary: 's',
+          user_intent: 'i',
+          key_topics: [],
+          entities: [],
+          outcomes_and_decisions: [],
+          unanswered_questions: [],
+          agent_actions: [],
+          tool_calls_summary: [],
+        },
+      };
+      const storedState: NonNullable<ConversationWithOperation['state']> = { subagents: {} };
+
+      it('fresh round: persists the summary of a compaction that ran before the interruption, keeping the rest of the state', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: { ...freshConversation(), state: storedState },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: compactionSummary }),
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call.state).toEqual({ ...storedState, compaction_summary: compactionSummary });
+      });
+
+      it('resume: persists the summary with the appended execution', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: pausedConversation(),
+          input: { prompts: {} },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: compactionSummary }),
+        });
+
+        const [call] = conversationClient.appendEvents.mock.calls[0];
+        expect(call.state).toEqual({ compaction_summary: compactionSummary });
+      });
+
+      it('leaves the state untouched when the summary is the stored one', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          conversation: {
+            ...freshConversation(),
+            state: { ...storedState, compaction_summary: compactionSummary },
+          },
+          error: new Error('boom'),
+          interrupted: interruptedData({ compaction_summary: { ...compactionSummary } }),
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call).not.toHaveProperty('state');
+      });
+
+      it('uses the completed conversation state when the success write failed', async () => {
+        const conversationClient = createConversationClientMock();
+        echoWrite(conversationClient);
+        const round = {
+          ...createRound({ id: 'r1', status: ConversationRoundStatus.completed }),
+          started_at: T0,
+        };
+
+        await persistExecutionInterruption({
+          ...baseParams(conversationClient),
+          error: new Error('write failed'),
+          completed: {
+            round,
+            conversation_state: { compaction_summary: compactionSummary },
+          },
+        });
+
+        const [call] = conversationClient.replaceRoundEvents.mock.calls[0];
+        expect(call.state).toEqual({ compaction_summary: compactionSummary });
       });
     });
   });
