@@ -68,6 +68,9 @@ dependsOn:
   - '@kbn/security-mitre-attack-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
+  - '@kbn/context-engine-plugin'
+  - '@kbn/security-solution-plugin'
+  - '@kbn/workflows-execution-engine'
   - '@kbn/ui-callout'
 tags:
   - plugin
@@ -80,6 +83,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - integration_tests/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
