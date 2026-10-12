@@ -42,6 +42,10 @@ export interface ReverseCategorizeFieldContext {
   originatingApp: string;
   /** Opens a query, with optional filters, in a new Discover tab, if supported. */
   openInNewTab?: ReverseCategorizeOpenInNewTab;
+  /** The query of the originating panel or tab (ES|QL, KQL or Lucene). */
+  query?: Query | AggregateQuery;
+  /** The filters applied to the originating panel or tab. */
+  filters?: Filter[];
   projectRouting?: string;
 }
 

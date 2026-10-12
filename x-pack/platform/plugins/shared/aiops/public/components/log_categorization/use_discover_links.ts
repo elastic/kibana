@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import moment from 'moment';
 
 import rison from '@kbn/rison';
@@ -23,7 +24,13 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 export function useDiscoverLinks() {
   const {
     http: { basePath },
+    share,
   } = useAiopsAppContext();
+
+  const discoverLocator = useMemo(
+    () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+    [share?.url.locators]
+  );
 
   const openInDiscoverWithFilter = (
     index: string,
@@ -33,8 +40,35 @@ export function useDiscoverLinks() {
     timefilterActiveBounds: TimeRangeBounds,
     mode: QueryMode,
     category?: Category,
-    additionalField?: { name: string; value: string }
+    additionalField?: { name: string; value: string },
+    /** Full ES|QL query to open, which switches Discover to ES|QL mode. */
+    esqlQuery?: string
   ) => {
+    if (discoverLocator !== undefined) {
+      const timeRange = {
+        from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),
+        to: moment(timefilterActiveBounds.max?.valueOf()).toISOString(),
+      };
+      const url = discoverLocator.getRedirectUrl(
+        esqlQuery !== undefined
+          ? { query: { esql: esqlQuery }, timeRange }
+          : {
+              indexPatternId: index,
+              timeRange,
+              filters: [
+                ...aiopsListState.filters,
+                createFilter(index, field, selection, mode, category, additionalField),
+              ],
+              query: {
+                language: aiopsListState.searchQueryLanguage,
+                query: aiopsListState.searchString,
+              },
+            }
+      );
+      window.open(url, '_blank');
+      return;
+    }
+
     const _g = rison.encode({
       time: {
         from: moment(timefilterActiveBounds.min?.valueOf()).toISOString(),

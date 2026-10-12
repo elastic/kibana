@@ -248,6 +248,7 @@ describe('Default cell actions ', () => {
                 dataViewMock
               ),
             onOpenInNewTab,
+            queryContext: { query: { esql: 'FROM logs-*' }, filters: [] },
           }}
         >
           <ReverseCategorizeBtn
@@ -262,7 +263,12 @@ describe('Default cell actions ', () => {
 
       expect(executeTriggerActions).toHaveBeenCalledWith(
         'REVERSE_CATEGORIZE_FIELD_TRIGGER',
-        expect.objectContaining({ field: textField, openInNewTab: onOpenInNewTab })
+        expect.objectContaining({
+          field: textField,
+          openInNewTab: onOpenInNewTab,
+          query: { esql: 'FROM logs-*' },
+          filters: [],
+        })
       );
     });
   });

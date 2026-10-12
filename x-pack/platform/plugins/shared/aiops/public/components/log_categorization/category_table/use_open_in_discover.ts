@@ -10,7 +10,12 @@ import { useCallback } from 'react';
 import moment from 'moment';
 
 import type { QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import { isOfAggregateQueryType, type Filter } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  type AggregateQuery,
+  type Filter,
+  type Query,
+} from '@kbn/es-query';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { QueryStringContract, TimefilterContract } from '@kbn/data-plugin/public';
@@ -20,6 +25,7 @@ import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 import {
   addWhereToEsqlQuery,
+  buildCategoriesMatchExpression,
   buildMatchFilterExpression,
 } from '../reverse_categorization/build_esql_analysis_queries';
 import { getLabels } from './labels';
@@ -57,7 +63,9 @@ export function useOpenInDiscover(
   timefilter: TimefilterContract,
   onAddFilter?: (values: Filter, alias?: string) => void,
   additionalFilter?: CategorizationAdditionalFilter,
-  onClose: () => void = () => {}
+  onClose: () => void = () => {},
+  /** Query of the originating panel or tab. When ES|QL, Discover is opened in ES|QL mode. */
+  originatingQuery?: Query | AggregateQuery
 ): OpenInDiscover {
   const { openInDiscoverWithFilter } = useDiscoverLinks();
   const { data } = useAiopsAppContext();
@@ -103,6 +111,18 @@ export function useOpenInDiscover(
         return;
       }
 
+      const fieldName = typeof selectedField === 'string' ? selectedField : selectedField.name;
+      const newEsqlQuery = isOfAggregateQueryType(originatingQuery)
+        ? addWhereToEsqlQuery(
+            originatingQuery.esql,
+            buildCategoriesMatchExpression(
+              fieldName,
+              (category ? [category] : selectedCategories).map(({ key }) => key),
+              mode
+            )
+          )
+        : undefined;
+
       openInDiscoverWithFilter(
         dataViewId,
         typeof selectedField === 'string' ? selectedField : selectedField.name,
@@ -111,7 +131,8 @@ export function useOpenInDiscover(
         timefilterActiveBounds,
         mode,
         category,
-        additionalFilter?.field
+        additionalFilter?.field,
+        newEsqlQuery
       );
     },
     [
@@ -125,6 +146,7 @@ export function useOpenInDiscover(
       aiopsListState,
       data.query.queryString,
       onClose,
+      originatingQuery,
     ]
   );
 

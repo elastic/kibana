@@ -83,6 +83,7 @@ import type {
   DocumentsDisplayMode,
   JsonModeSettings,
   UnifiedDataTableOpenInNewTab,
+  UnifiedDataTableQueryContext,
 } from '../types';
 import {
   getDisplayedColumns,
@@ -222,6 +223,11 @@ interface InternalUnifiedDataTableProps {
    * passed to actions that continue the analysis elsewhere, such as "Find similar values".
    */
   onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
+  /**
+   * The query and filters the rows were fetched with. Passed to actions that continue the analysis
+   * elsewhere, such as "Find similar values", so they use this table's context rather than the global one.
+   */
+  queryContext?: UnifiedDataTableQueryContext;
   /**
    * Function triggered when a column is resized by the user, passes `undefined` for auto-width
    */
@@ -586,6 +592,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       loadingState,
       onFilter,
       onOpenInNewTab,
+      queryContext,
       onResize,
       onSetColumns,
       onSort,
@@ -936,6 +943,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         getRowByIndex: (index: number) => displayedRows[index],
         onFilter,
         onOpenInNewTab,
+        queryContext,
         hideFilteringOnComputedColumns,
         dataView,
         selectedDocsState,
@@ -956,6 +964,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         expandedDoc,
         onFilter,
         onOpenInNewTab,
+        queryContext,
         hideFilteringOnComputedColumns,
         setExpandedDoc,
         selectedDocsState,

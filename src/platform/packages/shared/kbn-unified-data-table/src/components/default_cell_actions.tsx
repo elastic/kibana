@@ -164,6 +164,8 @@ export const ReverseCategorizeBtn = ({
           originatingApp: 'discover',
           fieldValue,
           openInNewTab: context.onOpenInNewTab,
+          query: context.queryContext?.query,
+          filters: context.queryContext?.filters,
         });
         dataGridRef?.current?.closeCellPopover();
       }}

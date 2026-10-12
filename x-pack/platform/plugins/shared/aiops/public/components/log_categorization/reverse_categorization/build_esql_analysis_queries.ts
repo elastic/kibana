@@ -113,6 +113,19 @@ export function buildMatchFilterExpression(
   return `${notPrefix}MATCH(${field}, "${escapedValue}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})`;
 }
 
+/**
+ * Builds one WHERE expression for several categories: documents in any of them when including,
+ * documents in none of them when excluding.
+ */
+export function buildCategoriesMatchExpression(
+  fieldName: string,
+  values: string[],
+  mode: QueryMode = QUERY_MODE.INCLUDE
+): string {
+  const expressions = values.map((value) => buildMatchFilterExpression(fieldName, value, mode));
+  return mode === QUERY_MODE.INCLUDE ? `(${expressions.join(' OR ')})` : expressions.join(' AND ');
+}
+
 /** Commands that truncate, aggregate or project rows; a filter on documents must come before them. */
 const COMMANDS_TO_FILTER_BEFORE = new Set(['limit', 'sample', 'stats', 'keep', 'drop']);
 

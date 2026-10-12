@@ -32,8 +32,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { Filter } from '@kbn/es-query';
-import { buildEmptyFilter, buildEsQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import {
+  buildEmptyFilter,
+  buildEsQuery,
+  isOfAggregateQueryType,
+  isOfQueryType,
+} from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-service';
 import { QUERY_MODE, type QueryMode } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 
@@ -72,6 +77,10 @@ export interface ReverseCategorizationPageProps {
   fieldValue: string;
   /** Opens a query, with optional filters, in a new tab of the originating app (e.g. Discover). */
   openInNewTab?: ReverseCategorizeOpenInNewTab;
+  /** Query of the originating panel or tab. Falls back to the global query when not set. */
+  query?: Query | AggregateQuery;
+  /** Filters of the originating panel or tab. Only used together with `query`. */
+  filters?: Filter[];
   onClose: () => void;
 }
 
@@ -83,6 +92,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   selectedField,
   fieldValue,
   openInNewTab,
+  query: originatingQuery,
+  filters: originatingFilters,
   onClose,
 }) => {
   const {
@@ -94,7 +105,14 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     uiSettings,
   } = useAiopsAppContext();
 
-  const { filters, query } = useMemo(() => getState(), [getState]);
+  // Use the query and filters of the panel or tab the flyout was opened from. The global
+  // query state is not the right source there, e.g. in a dashboard.
+  const { filters, query } = useMemo(() => {
+    if (originatingQuery !== undefined) {
+      return { query: originatingQuery, filters: originatingFilters ?? [] };
+    }
+    return getState();
+  }, [getState, originatingFilters, originatingQuery]);
   const isEsqlQuery = isOfAggregateQueryType(query);
   const [matchNotFound, setMatchNotFound] = useState(false);
 
@@ -111,6 +129,13 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
+      filters: filters ?? [],
+      ...(isOfQueryType(query)
+        ? {
+            searchString: query.query,
+            searchQueryLanguage: query.language === 'lucene' ? 'lucene' : 'kuery',
+          }
+        : {}),
       searchQuery: buildEsQuery(
         dataView,
         isEsqlQuery ? [] : query ?? [],
@@ -199,7 +224,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     timefilter,
     onAddFilter,
     undefined,
-    onClose
+    onClose,
+    query
   );
 
   const openCategoryInDiscover = useCallback(
@@ -221,13 +247,9 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       };
 
       if (openInNewTab === undefined) {
-        // No new tab support from the originating app.
-        if (isEsqlQuery) {
-          openInDiscover.openFunction(mode, false);
-        } else {
-          openInDiscover.openFunction(mode, true);
-          onClose();
-        }
+        // No new tab support from the originating app: open Discover in a browser tab.
+        openInDiscover.openFunction(mode, true);
+        onClose();
         return;
       }
 
@@ -266,7 +288,6 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     [
       dataView.id,
       earliest,
-      isEsqlQuery,
       latest,
       onClose,
       openInDiscover,

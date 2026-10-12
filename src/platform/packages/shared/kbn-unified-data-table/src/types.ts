@@ -96,6 +96,14 @@ export type CustomBulkActions = Array<
 export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;
 
 /**
+ * The query and filters the rows were fetched with.
+ */
+export interface UnifiedDataTableQueryContext {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+}
+
+/**
  * Opens a query, with optional filters, in a new Discover tab.
  */
 export type UnifiedDataTableOpenInNewTab = (params: {

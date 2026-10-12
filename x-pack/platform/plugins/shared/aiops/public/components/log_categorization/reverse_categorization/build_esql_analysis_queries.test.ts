@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { QUERY_MODE } from '@kbn/aiops-log-pattern-analysis/get_category_query';
 import {
   addWhereToEsqlQuery,
+  buildCategoriesMatchExpression,
   buildEsqlCategorizeQuery,
   buildEsqlCategoryDocsQuery,
   categoryKeyFromPattern,
@@ -101,6 +103,23 @@ describe('build_esql_analysis_queries', () => {
         'SPARKLINE(COUNT(*), `@timestamp`, 40, TO_DATETIME("2024-01-01T00:00:00.000Z"), TO_DATETIME("2024-01-01T20:00:00.000Z"))'
       );
       expect(query).toContain('SORT Count DESC');
+    });
+  });
+
+  describe('buildCategoriesMatchExpression', () => {
+    it('ORs categories when including, grouped so it is safe to AND with other filters', () => {
+      const expression = buildCategoriesMatchExpression('message', ['a b', 'c']);
+
+      expect(expression.startsWith('(MATCH(`message`, "a b"')).toBe(true);
+      expect(expression).toContain(') OR MATCH(`message`, "c"');
+      expect(expression.endsWith(')')).toBe(true);
+    });
+
+    it('ANDs the negated matches when excluding', () => {
+      const expression = buildCategoriesMatchExpression('message', ['a', 'b'], QUERY_MODE.EXCLUDE);
+
+      expect(expression).toContain('NOT MATCH(`message`, "a"');
+      expect(expression).toContain(' AND NOT MATCH(`message`, "b"');
     });
   });
 

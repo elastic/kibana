@@ -15,6 +15,7 @@ import type { DataSource } from '@kbn/data-source';
 import type {
   DocumentsDisplayMode,
   UnifiedDataTableOpenInNewTab,
+  UnifiedDataTableQueryContext,
   ValueToStringConverter,
 } from './types';
 import type { UseSelectedDocsState } from './hooks/use_selected_docs';
@@ -25,6 +26,7 @@ export interface DataTableContext {
   getRowByIndex: (index: number) => DataTableRecord | undefined;
   onFilter?: DocViewFilterFn;
   onOpenInNewTab?: UnifiedDataTableOpenInNewTab;
+  queryContext?: UnifiedDataTableQueryContext;
   hideFilteringOnComputedColumns?: boolean;
   dataView: DataView;
   selectedDocsState: UseSelectedDocsState;
