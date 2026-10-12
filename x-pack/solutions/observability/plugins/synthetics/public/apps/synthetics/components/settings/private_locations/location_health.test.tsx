@@ -35,7 +35,7 @@ const stats = (agents: AgentStat[]): LocationAgentStats => ({
   locationLabel: 'Local',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Synthetics policy',
-  isAgentSharding: false,
+  isShardingActive: false,
   agents,
 });
 

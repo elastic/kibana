@@ -51,7 +51,7 @@ const stats = (
   locationLabel: 'Local Docker PL',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'synthetics-private-pol',
-  isAgentSharding: false,
+  isShardingActive: false,
   agents,
   ...overrides,
 });
@@ -140,7 +140,7 @@ describe('LocationAgentDetails', () => {
             agent({ monitorsAssigned: 1 }),
             agent({ host: 'agent-b', agentId: 'agent-b-id', monitorsAssigned: 2 }),
           ],
-          { isAgentSharding: true }
+          { isShardingActive: true }
         )}
         loading={false}
         agentPolicyId="policy-1"

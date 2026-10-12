@@ -21,7 +21,7 @@ export interface MonitorAssignedAgent {
 export interface MonitorLocationAssignment {
   locationId: string;
   locationLabel: string;
-  isAgentSharding: boolean;
+  isShardingActive: boolean;
   agentPolicyId: string;
   agentPolicyName: string;
   /**

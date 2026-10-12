@@ -140,7 +140,31 @@ describe('ActionPolicySavedObjectService', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      mockSoClient.update.mockResolvedValue({
+        id: 'policy-1',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: mockAttrs,
+        references: [],
+        version: 'v2',
+      });
+    });
+
     it('updates the saved object and returns id and version', async () => {
+      const result = await service.update({ id: 'policy-1', attrs: mockAttrs, version: 'v1' });
+
+      expect(result).toEqual({ id: 'policy-1', version: 'v2' });
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        ACTION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-1',
+        mockAttrs,
+        { version: 'v1', mergeAttributes: false }
+      );
+    });
+  });
+
+  describe('patchFields', () => {
+    it('merges server-owned fields onto the stored document', async () => {
       mockSoClient.update.mockResolvedValue({
         id: 'policy-1',
         type: ACTION_POLICY_SAVED_OBJECT_TYPE,
@@ -149,14 +173,13 @@ describe('ActionPolicySavedObjectService', () => {
         version: 'v2',
       });
 
-      const result = await service.update({ id: 'policy-1', attrs: mockAttrs, version: 'v1' });
+      const result = await service.patchFields({ id: 'policy-1', attrs: { enabled: false } });
 
       expect(result).toEqual({ id: 'policy-1', version: 'v2' });
       expect(mockSoClient.update).toHaveBeenCalledWith(
         ACTION_POLICY_SAVED_OBJECT_TYPE,
         'policy-1',
-        mockAttrs,
-        { version: 'v1' }
+        { enabled: false }
       );
     });
   });

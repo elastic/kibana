@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
@@ -67,11 +67,20 @@ export const PrivateLocationsTable = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [monitorPendingReset, setMonitorPendingReset] = useState<{
+    locationId: string;
     resetIds: string[];
     skippedMonitors: Array<{ id: string; name: string }>;
   } | null>(null);
-  const { resetMonitors, getUnhealthyLocationStatuses, getUnhealthyMonitorsForLocation } =
-    useMonitorIntegrationHealth();
+  const privateLocationIds = useMemo(
+    () => privateLocations.map(({ id }) => id),
+    [privateLocations]
+  );
+  const {
+    resetPrivateLocation,
+    getUnhealthyLocationStatuses,
+    getUnhealthyMonitorsForLocation,
+    getUnhealthyConfigIdsForLocation,
+  } = useMonitorIntegrationHealth({ locationIds: privateLocationIds });
 
   const [locationPendingDelete, setLocationPendingDelete] = useState<string | null>(null);
 
@@ -99,7 +108,7 @@ export const PrivateLocationsTable = ({
   const { canSave } = useSyntheticsSettingsContext();
   const { hasAtLeast } = useLicense();
   // Stats carry the server's answer (license + rebalance switch); license is the pre-load fallback.
-  const isAgentSharding = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
+  const isShardingActive = hasAtLeast(AGENT_SHARDING_MIN_LICENSE) === true;
 
   const { services } = useKibana<ClientPluginsStart>();
 
@@ -151,7 +160,10 @@ export const PrivateLocationsTable = ({
             <EuiFlexItem grow={false}>
               <ViewLocationMonitors count={monitors} locationName={item.label} />
             </EuiFlexItem>
-            <UnhealthyCountBadge item={item} />
+            <UnhealthyCountBadge
+              item={item}
+              unhealthyConfigIds={getUnhealthyConfigIdsForLocation(item.id)}
+            />
           </EuiFlexGroup>
         );
       },
@@ -165,7 +177,7 @@ export const PrivateLocationsTable = ({
           locationStats={agentStatsByLocation.get(item.id)}
           // The expanded panel already shows the agent count, so drop the badge there.
           hideAgentCount={expandedIds.has(item.id)}
-          isAgentSharding={agentStatsByLocation.get(item.id)?.isAgentSharding ?? isAgentSharding}
+          isShardingActive={agentStatsByLocation.get(item.id)?.isShardingActive ?? isShardingActive}
         />
       ),
     },
@@ -255,7 +267,7 @@ export const PrivateLocationsTable = ({
             }
 
             if (resetIds.length > 0) {
-              setMonitorPendingReset({ resetIds, skippedMonitors });
+              setMonitorPendingReset({ locationId: item.id, resetIds, skippedMonitors });
             }
           },
         },
@@ -395,7 +407,7 @@ export const PrivateLocationsTable = ({
         <ResetMonitorModal
           configIds={monitorPendingReset.resetIds}
           onClose={() => setMonitorPendingReset(null)}
-          resetMonitors={resetMonitors}
+          resetMonitors={() => resetPrivateLocation(monitorPendingReset.locationId)}
           skippedMonitors={monitorPendingReset.skippedMonitors}
         />
       )}

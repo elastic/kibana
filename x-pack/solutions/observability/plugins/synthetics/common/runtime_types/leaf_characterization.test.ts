@@ -208,7 +208,6 @@ describeCodecCases({
       defaultEmail: { to: ['ops@example.com'], cc: ['sec@example.com'], bcc: [] },
       defaultTLSRuleEnabled: true,
       defaultStatusRuleEnabled: false,
-      privateLocationsSyncInterval: 60,
       rebalancePrivateLocationShardsEnabled: true,
     },
   ],

@@ -14,11 +14,11 @@ import {
   NON_INTERACTIVE_DECLINED_REASON,
   agentBuilderDefaultAgentId,
   agentIdMaxLength,
+  CHAT_MESSAGE_MAX_LENGTH,
   createAgentNotFoundError,
 } from '@kbn/agent-builder-common';
 import { chatApiPath } from '../../common/constants';
 import {
-  CHAT_MESSAGE_MAX_LENGTH,
   chatMessagePayloadSchema,
   chatMessageResponseSchema,
   chatPayloadSchema,

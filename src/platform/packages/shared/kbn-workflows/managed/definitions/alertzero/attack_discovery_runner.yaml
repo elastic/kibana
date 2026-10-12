@@ -141,6 +141,7 @@ steps:
     timeout: '4h'
     with:
       workflow-id: system-security-attack-discovery-batched-generation
+      run-as-mode: inherit
       inputs:
         # `batch_size` and `lookback` are left at the child's defaults. Surfacing
         # them as Worker settings means threading new values through the Worker
@@ -242,6 +243,7 @@ steps:
             type: workflow.executeAsync
             with:
               workflow-id: system-security-attack-discovery-review
+              run-as-mode: inherit
               inputs:
                 # `${{ }}` preserves the value's type (arrays stay arrays); `{{ }}`
                 # stringifies.

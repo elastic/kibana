@@ -165,6 +165,7 @@ steps:
               {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
     with:
       workflow-id: system-create-alertzero-proposal
+      run-as-mode: inherit
       inputs:
         conversationId: "{{ inputs.conversation_id }}"
         comment: >-
