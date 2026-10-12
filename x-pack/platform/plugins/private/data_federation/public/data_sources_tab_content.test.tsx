@@ -14,8 +14,11 @@ import type { DataSetWithName, DataSource } from '../common';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import type { DataFederationKibanaServices } from './types';
+import { UI_COUNTER_EVENTS } from './ui_counters';
 
-type MockDataSourcesClient = Pick<DataFederationKibanaServices['dataSourcesClient'], 'delete'>;
+type MockDataSourcesClient = Partial<
+  Pick<DataFederationKibanaServices['dataSourcesClient'], 'add' | 'update' | 'delete'>
+>;
 
 jest.mock('./data_sources_table', () => ({
   DataSourcesTable: (props: Record<string, unknown>) => {
@@ -25,6 +28,10 @@ jest.mock('./data_sources_table', () => ({
     return (
       <div data-test-subj="mockDataSourcesTable">
         <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
+        <button
+          data-test-subj="mockEditFirst"
+          onClick={() => (props.onEdit as any)(dataSources[0])}
+        />
         <button
           data-test-subj="mockDeleteFirst"
           onClick={() => (props.onDelete as any)(dataSources[0])}
@@ -48,8 +55,17 @@ jest.mock('./data_sources_table', () => ({
 }));
 
 jest.mock('./create_data_source_flyout', () => ({
-  CreateDataSourceFlyout: (props: { onClose: (result?: { savedChanges?: boolean }) => void }) => (
+  CreateDataSourceFlyout: (props: {
+    onClose: (result?: { savedChanges?: boolean }) => void;
+    onSave: (dataSource: unknown) => Promise<string | null>;
+  }) => (
     <div data-test-subj="mockCreateDataSourceFlyout">
+      <button
+        data-test-subj="mockFlyoutSave"
+        onClick={() =>
+          void props.onSave({ name: 'ds-new', type: 's3', description: '', settings: {} })
+        }
+      />
       <button
         data-test-subj="mockFlyoutCloseSaved"
         onClick={() => props.onClose({ savedChanges: true })}
@@ -106,13 +122,16 @@ const createDataSet = (dataSourceName: string): DataSetWithName => ({
 
 const createServicesMock = ({
   dataSourcesClient,
+  reportUiCounter,
 }: {
   dataSourcesClient: MockDataSourcesClient;
+  reportUiCounter?: jest.Mock;
 }): DataFederationKibanaServices =>
   ({
     dataSourcesClient,
     datasetsClient: { get: jest.fn() },
     toasts: { addDanger: jest.fn(), addSuccess: jest.fn() },
+    reportUiCounter,
     docLinks: {
       links: {
         dataFederation: {
@@ -136,15 +155,17 @@ const renderComponent = async ({
   dataSets,
   dataSourcesClient,
   loadDataSources,
+  reportUiCounter,
 }: {
   dataSources: DataSource[];
   dataSets: DataSetWithName[];
   dataSourcesClient: MockDataSourcesClient;
   loadDataSources: () => Promise<void>;
+  reportUiCounter?: jest.Mock;
 }) => {
   return render(
     <EuiProvider>
-      <KibanaContextProvider services={createServicesMock({ dataSourcesClient })}>
+      <KibanaContextProvider services={createServicesMock({ dataSourcesClient, reportUiCounter })}>
         <DataSourcesTabContent
           dataSources={dataSources}
           dataSets={dataSets}
@@ -223,6 +244,126 @@ describe('DataSourcesTabContent', () => {
       expect(document.querySelector('[data-test-subj="mockDeleteManyError"]')?.textContent).toBe(
         mainTranslations.confirmDeleteDataSources.hasRelatedDataSetsError
       );
+    });
+  });
+
+  describe('ui counters', () => {
+    it('reports datasource_create after a successful create', async () => {
+      const reportUiCounter = jest.fn();
+      const add = jest.fn().mockResolvedValue(undefined);
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [],
+        dataSourcesClient: { add },
+        loadDataSources: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
+
+      await waitFor(() => {
+        expect(reportUiCounter).toHaveBeenCalledWith(['datasource_create', 'datasource_create_s3']);
+      });
+      expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports datasource_update after a successful edit', async () => {
+      const reportUiCounter = jest.fn();
+      const update = jest.fn().mockResolvedValue(undefined);
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [],
+        dataSourcesClient: { update },
+        loadDataSources: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockEditFirst"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
+
+      await waitFor(() => {
+        expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasourceUpdate);
+      });
+      expect(reportUiCounter).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report when the save fails', async () => {
+      const reportUiCounter = jest.fn();
+      const add = jest.fn().mockRejectedValue(new Error('nope'));
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [],
+        dataSourcesClient: { add },
+        loadDataSources: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockCreate"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockFlyoutSave"]') as Element);
+
+      await waitFor(() => {
+        expect(add).toHaveBeenCalled();
+      });
+      expect(reportUiCounter).not.toHaveBeenCalled();
+    });
+
+    it('reports datasource_delete after a successful single delete', async () => {
+      const reportUiCounter = jest.fn();
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [],
+        dataSourcesClient: { delete: jest.fn().mockResolvedValue(undefined) },
+        loadDataSources: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockDeleteFirst"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockConfirmDelete"]') as Element);
+
+      await waitFor(() => {
+        expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasourceDelete);
+      });
+    });
+
+    it('reports datasource_delete with the number of deleted data sources on bulk delete', async () => {
+      const reportUiCounter = jest.fn();
+      await renderComponent({
+        dataSources: [createDataSource('ds1'), createDataSource('ds2')],
+        dataSets: [],
+        dataSourcesClient: { delete: jest.fn().mockResolvedValue(undefined) },
+        loadDataSources: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockDeleteAll"]') as Element);
+      fireEvent.click(
+        document.querySelector('[data-test-subj="mockConfirmDeleteMany"]') as Element
+      );
+
+      await waitFor(() => {
+        expect(reportUiCounter).toHaveBeenCalledWith(UI_COUNTER_EVENTS.datasourceDelete, 2);
+      });
+    });
+
+    it('does not report when the delete fails', async () => {
+      const reportUiCounter = jest.fn();
+      const deleteMock = jest.fn().mockRejectedValue(new Error('nope'));
+      await renderComponent({
+        dataSources: [createDataSource('ds1')],
+        dataSets: [],
+        dataSourcesClient: { delete: deleteMock },
+        loadDataSources: jest.fn().mockResolvedValue(undefined),
+        reportUiCounter,
+      });
+
+      fireEvent.click(document.querySelector('[data-test-subj="mockDeleteFirst"]') as Element);
+      fireEvent.click(document.querySelector('[data-test-subj="mockConfirmDelete"]') as Element);
+
+      await waitFor(() => {
+        expect(document.querySelector('[data-test-subj="mockDeleteError"]')).not.toBeNull();
+      });
+      expect(reportUiCounter).not.toHaveBeenCalled();
     });
   });
 });
