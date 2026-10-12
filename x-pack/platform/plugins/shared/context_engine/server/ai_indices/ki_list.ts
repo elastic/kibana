@@ -61,10 +61,11 @@ const probeQuery = (expression: string): string =>
 /** The mapped columns of one index expression, or undefined when it resolves to nothing. */
 export const probeColumns = async (
   esClient: ElasticsearchClient,
-  expression: string
+  expression: string,
+  options?: { requestTimeout?: number }
 ): Promise<string[] | undefined> => {
   try {
-    const probe = await esClient.esql.query({ query: probeQuery(expression) });
+    const probe = await esClient.esql.query({ query: probeQuery(expression) }, options);
     return (probe as unknown as ESQLSearchResponse).columns.map(({ name }) => name);
   } catch (error) {
     if (isEsqlUnknownIndexError(error)) {
@@ -74,20 +75,13 @@ export const probeColumns = async (
   }
 };
 
-/**
- * One row per KI: the latest revision by `@timestamp` for each logical id,
- * excluding KIs whose lifecycle status is deleted. On an index dest the same
- * id may exist in several backing indices, so those are distinct KIs.
- * Documents without a timestamp sort first, and `_id` breaks timestamp ties.
- */
-const currentKisQuery = (
+/** Keeps only the newest revision (`@timestamp`, then `_id`) of each KI. */
+export const latestRevisionPipeline = (
   dest: AiIndexDest,
-  sources: string[],
-  has: (field: KiListField) => boolean
-): string => {
+  has: (field: 'id' | '@timestamp') => boolean
+): string[] => {
   const key = dest.type === 'data_stream' ? 'id' : '_index, id';
   return [
-    `FROM ${fromSources(sources)} METADATA _id, _index`,
     has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
     ...(has('@timestamp')
       ? [
@@ -98,13 +92,24 @@ const currentKisQuery = (
           'WHERE _id == latest_doc',
         ]
       : []),
+  ];
+};
+
+/** One row per current KI, excluding KIs whose lifecycle status is deleted. */
+const currentKisQuery = (
+  dest: AiIndexDest,
+  sources: string[],
+  has: (field: KiListField) => boolean
+): string =>
+  [
+    `FROM ${fromSources(sources)} METADATA _id, _index`,
+    ...latestRevisionPipeline(dest, has),
     ...(has('governance.lifecycle.status')
       ? ['WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status != "deleted"']
       : []),
     ...(has('type') ? [] : ['EVAL type = TO_STRING(NULL)']),
     ...(has('title') ? [] : ['EVAL title = TO_STRING(NULL)']),
   ].join('\n| ');
-};
 
 export const getKis = async (
   esClient: ElasticsearchClient,

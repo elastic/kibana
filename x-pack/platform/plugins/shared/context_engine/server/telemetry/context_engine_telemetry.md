@@ -64,7 +64,7 @@ A cancelled workflow run reports `outcome: aborted` instead of `failure`, keyed 
 The collector reads up to 10,000 entries from `.contextengine-ai-indices` across all spaces as the internal user.
 
 - A managed entry's `dest` comes from its code registration.
-- Each distinct `dest` is counted once; a `dest` shared with a managed entry counts toward `kis.managed`.
+- Each distinct `dest` is counted once.
 - Index patterns are skipped, and a missing or unreadable `dest` counts 0 KIs.
 
 KI counts use the latest revision of each KI, the same collapse the KI list applies.

@@ -11,13 +11,15 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
-import { probeColumns } from '../ai_indices/ki_list';
+import { latestRevisionPipeline, probeColumns } from '../ai_indices/ki_list';
 import { aiIndicesIndexName, type StoredAiIndexDocument } from '../ai_indices/storage';
 import { formatErrorMessage } from '../utils/format_es_error';
 
 /** Upper bound on AI index entries read per collection. */
 const MAX_COLLECTED_AI_INDICES = 10_000;
 const COUNT_KIS_CONCURRENCY = 5;
+/** How long to wait on one backing index before giving up on it. */
+const ESQL_REQUEST_TIMEOUT_MS = 30_000;
 
 const KI_LIFECYCLE_BUCKETS = ['active', 'expired', 'deleted'] as const;
 type KiLifecycleBucket = (typeof KI_LIFECYCLE_BUCKETS)[number];
@@ -44,25 +46,15 @@ const emptyKiCounts = (): KiLifecycleCounts => ({ active: 0, expired: 0, deleted
 const isKiLifecycleBucket = (value: unknown): value is KiLifecycleBucket =>
   KI_LIFECYCLE_BUCKETS.includes(value as KiLifecycleBucket);
 
-/** Latest revision per KI, bucketed by lifecycle status; each clause is guarded by the probed columns. */
+/** Counts the newest revision of each KI into a lifecycle bucket. Unmapped fields are skipped. */
 const kiLifecycleCountsQuery = (dest: AiIndexDest, columns: Set<string>): string => {
-  const key = dest.type === 'data_stream' ? 'id' : '_index, id';
   const status = columns.has('governance.lifecycle.status')
     ? 'governance.lifecycle.status == "deleted"'
     : 'false';
   const expired = columns.has('expires_at') ? 'expires_at <= NOW()' : 'false';
   return [
     `FROM ${JSON.stringify(dest.value)} METADATA _id, _index`,
-    columns.has('id') ? 'EVAL id = COALESCE(id, _id)' : 'EVAL id = _id',
-    ...(columns.has('@timestamp')
-      ? [
-          'EVAL revision_time = COALESCE(@timestamp, TO_DATETIME("1970-01-01T00:00:00Z"))',
-          `INLINE STATS latest = MAX(revision_time) BY ${key}`,
-          'WHERE revision_time == latest',
-          `INLINE STATS latest_doc = MAX(_id) BY ${key}`,
-          'WHERE _id == latest_doc',
-        ]
-      : []),
+    ...latestRevisionPipeline(dest, (field) => columns.has(field)),
     `EVAL lifecycle = CASE(COALESCE(${status}, false), "deleted", COALESCE(${expired}, false), "expired", "active")`,
     'STATS count = COUNT(*) BY lifecycle',
   ].join('\n| ');
@@ -73,13 +65,16 @@ const countKisByLifecycle = async (
   dest: AiIndexDest
 ): Promise<KiLifecycleCounts> => {
   const counts = emptyKiCounts();
-  const columns = await probeColumns(esClient, dest.value);
+  const columns = await probeColumns(esClient, dest.value, {
+    requestTimeout: ESQL_REQUEST_TIMEOUT_MS,
+  });
   if (columns === undefined) {
     return counts;
   }
-  const response = (await esClient.esql.query({
-    query: kiLifecycleCountsQuery(dest, new Set(columns)),
-  })) as unknown as ESQLSearchResponse;
+  const response = (await esClient.esql.query(
+    { query: kiLifecycleCountsQuery(dest, new Set(columns)) },
+    { requestTimeout: ESQL_REQUEST_TIMEOUT_MS }
+  )) as unknown as ESQLSearchResponse;
   const countIndex = response.columns.findIndex(({ name }) => name === 'count');
   const lifecycleIndex = response.columns.findIndex(({ name }) => name === 'lifecycle');
   for (const row of response.values) {
@@ -118,7 +113,7 @@ const fetchContextEngineUsage = async ({
     ai_indices: { user: 0, managed: 0 },
     kis: { user: emptyKiCounts(), managed: emptyKiCounts() },
   };
-  // A dest shared by several entries, such as a managed AI index bootstrapped in many spaces, is counted once.
+  // Every dest counts once.
   const destOwners = new Map<string, { dest: AiIndexDest; owner: 'user' | 'managed' }>();
   for (const hit of response.hits.hits) {
     const source = hit._source;
@@ -129,12 +124,7 @@ const fetchContextEngineUsage = async ({
     usage.ai_indices[owner] += 1;
     const id = source.id ?? hit._id;
     const dest = owner === 'managed' && id !== undefined ? getManagedDest(id) : source.dest;
-    // A dest shared by managed and user entries counts as managed.
-    if (
-      dest !== undefined &&
-      !isIndexPattern(dest.value) &&
-      (owner === 'managed' || !destOwners.has(dest.value))
-    ) {
+    if (dest !== undefined && !isIndexPattern(dest.value) && !destOwners.has(dest.value)) {
       destOwners.set(dest.value, { dest, owner });
     }
   }
