@@ -27,7 +27,6 @@ export {
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
-export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
 
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
@@ -48,12 +47,18 @@ export {
 export {
   OverviewTab,
   type OverviewTabProps,
+  type OverviewSections,
 } from './src/components/details/details_flyout_tab_contents';
 export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export {
+  SEVERITY_COLORS,
+  SEVERITY_LABELS,
+  type InvestigationSeverityLevel,
+} from './src/components/details/severity';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
@@ -91,6 +96,12 @@ export {
   type RenderSyncIndicator,
   type SyncIndicatorSlotRenderProps,
   type LinkedInvestigationsSlotRenderProps,
+  type RenderOverview,
+  type OverviewSlotRenderProps,
+  type RenderLiveState,
+  type LiveStateSlotRenderProps,
+  type RenderTitle,
+  type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {
   LinkedInvestigationsList,
@@ -135,7 +146,7 @@ export {
 } from './src/components/modals/investigation_action_modals';
 export {
   type EscalationModalMode,
-  type EscalationIncidentSummary,
+  type EscalationSummary,
 } from './src/components/modals/escalation_modal';
 export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
 

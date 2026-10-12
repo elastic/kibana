@@ -39125,8 +39125,6 @@
     "xpack.searchInferenceEndpoints.eisModelCard.previewStatusBadge.content": "预览",
     "xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button": "查看云使用情况",
     "xpack.searchInferenceEndpoints.eisModelsPage.description": "管理 Elastic Inference Service 的模型和端点",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.body": "在获取模型数据时发生错误。",
-    "xpack.searchInferenceEndpoints.eisModelspage.error.title": "无法加载模型",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "嵌入",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "重排序",
