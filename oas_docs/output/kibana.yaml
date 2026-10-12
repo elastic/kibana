@@ -172322,6 +172322,7 @@ components:
           oneOf:
             - $ref: '#/components/schemas/Security_Detections_API_BulkEditSkipReason'
             - $ref: '#/components/schemas/Security_Detections_API_BulkGapsFillingSkipReason'
+            - $ref: '#/components/schemas/Security_Detections_API_BulkDeleteSkipReason'
       required:
         - id
         - skip_reason
@@ -172359,6 +172360,10 @@ components:
           type: string
       required:
         - action
+    Security_Detections_API_BulkDeleteSkipReason:
+      enum:
+        - RULE_NOT_FOUND
+      type: string
     Security_Detections_API_BulkDisableRules:
       type: object
       properties:
