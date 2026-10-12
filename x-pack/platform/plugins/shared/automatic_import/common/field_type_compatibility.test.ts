@@ -95,6 +95,15 @@ describe('getFieldTypeCompatibility', () => {
     expect(getFieldTypeCompatibility('constant_keyword', ['a', 'a']).status).toBe('compatible');
   });
 
+  it('checks constant_keyword values across array elements', () => {
+    expect(getFieldTypeCompatibility('constant_keyword', [['a', 'b']]).issue).toBe(
+      'multiple_constant_values'
+    );
+    expect(getFieldTypeCompatibility('constant_keyword', [['a', 'a'], 'a']).status).toBe(
+      'compatible'
+    );
+  });
+
   it('reports negative unsigned_long values as a certain failure', () => {
     expect(getFieldTypeCompatibility('unsigned_long', [-1]).issue).toBe('negative_value');
   });
@@ -122,5 +131,33 @@ describe('getFieldValue', () => {
     expect(getFieldValue({ a: { b: { c: 1 } } }, 'a.b.c')).toBe(1);
     expect(getFieldValue({ 'a.b': { c: 2 } }, 'a.b.c')).toBe(2);
     expect(getFieldValue({ a: 1 }, 'a.b')).toBeUndefined();
+  });
+
+  it('collects values from arrays of objects', () => {
+    const document = { rules: [{ id: 22 }, { id: 443, zone: 'dmz' }] };
+
+    expect(getFieldValue(document, 'rules.id')).toEqual([22, 443]);
+    expect(getFieldValue(document, 'rules.zone')).toEqual(['dmz']);
+    expect(getFieldValue(document, 'rules.missing')).toBeUndefined();
+  });
+
+  it('collects values through nested arrays and dotted keys inside array elements', () => {
+    expect(getFieldValue({ a: [{ b: [{ c: 1 }, { c: 2 }] }, { b: { c: 3 } }] }, 'a.b.c')).toEqual([
+      1, 2, 3,
+    ]);
+    expect(getFieldValue({ a: [[{ b: 1 }], [{ b: 2 }]] }, 'a.b')).toEqual([1, 2]);
+    expect(getFieldValue({ a: [{ 'b.c': 'x' }] }, 'a.b.c')).toEqual(['x']);
+  });
+
+  it('flattens array leaf values from array elements', () => {
+    expect(getFieldValue({ a: [{ tags: ['x', 'y'] }, { tags: ['z'] }] }, 'a.tags')).toEqual([
+      'x',
+      'y',
+      'z',
+    ]);
+  });
+
+  it('returns array leaf values unchanged', () => {
+    expect(getFieldValue({ tags: ['x', 'y'] }, 'tags')).toEqual(['x', 'y']);
   });
 });

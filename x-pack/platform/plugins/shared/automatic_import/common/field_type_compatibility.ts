@@ -184,36 +184,37 @@ export const getFieldTypeCompatibility = (
   return { status: 'compatible', failingDocuments: 0, totalDocuments };
 };
 
+const readPath = (value: unknown, segments: readonly string[], index: number): unknown => {
+  if (index === segments.length) return value;
+
+  if (Array.isArray(value)) {
+    const values = value.flatMap((element) => {
+      const elementValue = readPath(element, segments, index);
+      if (elementValue === undefined) return [];
+      return Array.isArray(elementValue) ? elementValue : [elementValue];
+    });
+    return values.length > 0 ? values : undefined;
+  }
+
+  if (!isPlainObject(value)) return undefined;
+
+  for (let end = segments.length; end > index; end -= 1) {
+    const candidate = segments.slice(index, end).join('.');
+    if (Object.prototype.hasOwnProperty.call(value, candidate)) {
+      return readPath(value[candidate], segments, end);
+    }
+  }
+  return undefined;
+};
+
 /**
- * Reads a field from a document by its flattened name, supporting both nested objects and
- * keys that themselves contain dots.
+ * Reads a field from a document by its flattened name, supporting nested objects, keys that
+ * themselves contain dots, and arrays of objects (whose values are collected into one array).
  */
 export const getFieldValue = (document: Record<string, unknown>, fieldName: string): unknown => {
   if (Object.prototype.hasOwnProperty.call(document, fieldName)) {
     return document[fieldName];
   }
 
-  const segments = fieldName.split('.');
-  let value: unknown = document;
-  let index = 0;
-
-  while (index < segments.length) {
-    if (!isPlainObject(value)) return undefined;
-    const objectValue = value;
-    let matched = false;
-
-    for (let end = segments.length; end > index; end -= 1) {
-      const candidate = segments.slice(index, end).join('.');
-      if (Object.prototype.hasOwnProperty.call(objectValue, candidate)) {
-        value = objectValue[candidate];
-        index = end;
-        matched = true;
-        break;
-      }
-    }
-
-    if (!matched) return undefined;
-  }
-
-  return value;
+  return readPath(document, fieldName.split('.'), 0);
 };

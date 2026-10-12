@@ -7,6 +7,7 @@
 
 import type { EuiTokenProps } from '@elastic/eui';
 import ipaddr from 'ipaddr.js';
+import { mergeObjectElements } from '../../../../../common';
 import * as i18n from './translations';
 
 const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
@@ -30,7 +31,8 @@ const TYPE_TO_ICON_MAP: Record<string, EuiTokenProps['iconType']> = {
   ip: 'tokenIP',
   geo_point: 'tokenGeo',
   version: 'tokenTag',
-  object: 'tokenQuestion',
+  object: 'tokenObject',
+  group: 'tokenObject',
   nested: 'tokenNested',
   boolean: 'tokenBoolean',
 } as const;
@@ -52,7 +54,9 @@ export const getFieldType = (value: unknown): string => {
   if (value === null || value === undefined) return 'null';
   if (typeof value === 'number') return Number.isInteger(value) ? 'long' : 'float';
   if (typeof value === 'boolean') return 'boolean';
-  if (Array.isArray(value)) return 'nested';
+  if (Array.isArray(value)) {
+    return getFieldType(value.find((element) => element != null));
+  }
   if (typeof value === 'object') return 'object';
   if (typeof value === 'string') {
     const looksLikeIPv4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(value);
@@ -117,17 +121,30 @@ export const diffPipelineLines = (
   };
 };
 
+interface FlattenedField {
+  field: string;
+  value: string;
+  type: string;
+}
+
+/**
+ * Flattens a document into dotted field names. Arrays of objects are merged into one object
+ * before flattening, the same way field mappings are generated.
+ */
 export const flattenPipelineObject = (
   obj: Record<string, unknown>,
   parentKey = ''
-): Array<{ field: string; value: string; type: string }> => {
-  const result: Array<{ field: string; value: string; type: string }> = [];
+): FlattenedField[] => {
+  const result: FlattenedField[] = [];
 
   for (const [key, value] of Object.entries(obj)) {
     const fieldName = parentKey ? `${parentKey}.${key}` : key;
+    const mergedElements = Array.isArray(value) ? mergeObjectElements(value) : undefined;
 
-    if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-      result.push(...flattenPipelineObject(value as Record<string, unknown>, fieldName));
+    if (isPlainObject(value)) {
+      result.push(...flattenPipelineObject(value, fieldName));
+    } else if (mergedElements) {
+      result.push(...flattenPipelineObject(mergedElements, fieldName));
     } else {
       result.push({
         field: fieldName,

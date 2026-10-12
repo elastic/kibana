@@ -173,6 +173,7 @@ const getTypeOptions = (type: string, originalType?: string): string[] => {
 
 const formatValue = (value: unknown): string => {
   if (value === undefined) return '—';
+  if (Array.isArray(value) && value.length === 1) return formatValue(value[0]);
   if (typeof value === 'string') return value;
   return JSON.stringify(value);
 };

@@ -65,6 +65,8 @@ export {
 } from './field_type_compatibility';
 export type { FieldTypeCompatibility, FieldTypeIssue } from './field_type_compatibility';
 
+export { isUnsafeProperty, mergeObjectElements, mergeSamples } from './merge_samples';
+
 export type {
   Integration,
   DataStream,

@@ -27,6 +27,28 @@ describe('field type overrides', () => {
         { name: 'size', issue: 'out_of_range', failing_documents: 1, total_documents: 2 },
       ]);
     });
+
+    it('checks values of fields inside arrays of objects', () => {
+      expect(
+        collectRuleErrors(
+          [
+            { name: 'rules.id', type: 'long', original_type: 'keyword' },
+            { name: 'rules.port', type: 'long', original_type: 'keyword' },
+          ],
+          [
+            {
+              rules: [
+                { id: 'abc', port: 22 },
+                { id: 'def', port: 443 },
+              ],
+            },
+            { rules: [{ id: 'ghi' }] },
+          ]
+        )
+      ).toEqual([
+        { name: 'rules.id', issue: 'not_numeric', failing_documents: 2, total_documents: 2 },
+      ]);
+    });
   });
 
   describe('applyFieldTypeOverrides', () => {

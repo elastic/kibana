@@ -333,6 +333,60 @@ describe('EditPipelineFlyout', () => {
       expect(screen.getByText('wrapped_value')).toBeInTheDocument();
     });
 
+    it('expands arrays of objects into their fields with sample values', () => {
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: {
+          ...createMockResults(),
+          results: [
+            {
+              rules: [
+                { name: 'block-ssh', owner: 'admin' },
+                { name: 'allow-web', owner: 'admin' },
+              ],
+            },
+          ],
+          field_mapping: [
+            { name: 'rules.name', type: 'keyword', is_ecs: false },
+            { name: 'rules.owner', type: 'keyword', is_ecs: false },
+          ],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.queryByText('rules')).not.toBeInTheDocument();
+      expect(screen.getByText('rules.name')).toBeInTheDocument();
+      expect(screen.getByText('["block-ssh","allow-web"]')).toBeInTheDocument();
+      expect(screen.getByText('rules.owner')).toBeInTheDocument();
+      expect(screen.getByText('["admin","admin"]')).toBeInTheDocument();
+    });
+
+    it('shows a single array value without brackets', () => {
+      mockUseGetDataStreamResults.mockReturnValue({
+        data: {
+          ...createMockResults(),
+          results: [{ rules: [{ owner: 'admin' }], tags: ['prod'] }],
+          field_mapping: [
+            { name: 'rules.owner', type: 'keyword', is_ecs: false },
+            { name: 'tags', type: 'keyword', is_ecs: false },
+          ],
+        },
+        isLoading: false,
+        isError: false,
+        error: null,
+        refetch: jest.fn(),
+      });
+
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.getByText('admin')).toBeInTheDocument();
+      expect(screen.getByText('prod')).toBeInTheDocument();
+    });
+
     it('should show search box with correct placeholder', () => {
       render(<EditPipelineFlyout {...defaultProps} />);
 
