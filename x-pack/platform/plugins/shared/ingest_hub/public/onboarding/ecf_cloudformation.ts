@@ -33,6 +33,8 @@ import {
   ECF_FALLBACK_TEMPLATE_VERSION,
 } from '../../common/providers/aws/ecf_template_version';
 
+export { buildEcfTemplateUrl };
+
 // ── Template filenames ────────────────────────────────────────────────────────
 
 /** CloudFormation template filename for the unified multi-signal (ECS) ECF stack. */
@@ -108,6 +110,27 @@ export const buildEcfStackConsoleUrl = (stackArn: string): string | undefined =>
   const url = new URL(`https://${host}/cloudformation/home`);
   url.searchParams.set('region', region);
   url.hash = `/stacks/stackinfo?stackId=${encodeURIComponent(stackArn.trim())}`;
+  return url.toString();
+};
+
+/**
+ * Builds the AWS Console URL for the CloudFormation stack update wizard.
+ * Pre-fills the stack ID and template URL so the wizard opens with the correct template ready to apply.
+ * Returns undefined when `stackArn` is not a valid CFN stack ARN.
+ */
+export const buildEcfStackUpdateUrl = (
+  stackArn: string,
+  templateUrl: string
+): string | undefined => {
+  const match = CFN_STACK_ARN_REGEX.exec(stackArn.trim());
+  if (!match) return undefined;
+  const [, partition, region] = match;
+  const host = CFN_CONSOLE_HOSTS[partition] ?? 'console.aws.amazon.com';
+  const url = new URL(`https://${host}/cloudformation/home`);
+  url.searchParams.set('region', region);
+  url.hash = `/stacks/update/template?stackId=${encodeURIComponent(
+    stackArn.trim()
+  )}&templateURL=${encodeURIComponent(templateUrl)}`;
   return url.toString();
 };
 

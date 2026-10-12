@@ -33,6 +33,12 @@ const EcfStackSchema = schema.object({
       meta: { description: 'CloudFormation stack ARN pasted by the user post-launch.' },
     })
   ),
+  serviceIds: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1 }), {
+      maxSize: 1000,
+      meta: { description: 'Service IDs active when the stack was last launched or updated.' },
+    })
+  ),
 });
 
 const CloudOnboardingDeploymentProviderSchema = schema.oneOf(

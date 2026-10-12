@@ -18,11 +18,14 @@ jest.mock('../ecf_cloudformation', () => ({
   buildEcfUnifiedCloudFormationUrl: jest.fn(() => 'https://cf.aws/unified'),
   buildEcfOtelCloudFormationUrl: jest.fn(() => 'https://cf.aws/otel'),
   buildEcfCrowdstrikeCloudFormationUrl: jest.fn(() => 'https://cf.aws/crowdstrike'),
-  buildEcfStackConsoleUrl: jest.fn(
+  buildEcfStackUpdateUrl: jest.fn(
     (arn: string) =>
-      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/stackinfo?stackId=${encodeURIComponent(
+      `https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/update/template?stackId=${encodeURIComponent(
         arn
-      )}`
+      )}&templateURL=mock`
+  ),
+  buildEcfTemplateUrl: jest.fn(
+    (_file: string, version: string) => `https://s3.amazonaws.com/ecf/${version}/template.yaml`
   ),
   isEcfStackArnValid: jest.fn((arn: string) =>
     /^arn:aws(?:-us-gov|-cn)?:cloudformation:[a-z0-9-]+:\d+:stack\//.test(arn.trim())
@@ -30,6 +33,9 @@ jest.mock('../ecf_cloudformation', () => ({
   ECF_UNIFIED_STACK_NAME: 'edot-cloud-forwarder',
   ECF_OTEL_STACK_NAME: 'edot-cloud-forwarder-otel',
   ECF_CROWDSTRIKE_STACK_NAME: 'edot-cloud-forwarder-crowdstrike-fdr',
+  ECF_UNIFIED_TEMPLATE_FILE: 'unified.yaml',
+  ECF_OTEL_TEMPLATE_FILE: 'otel.yaml',
+  ECF_CROWDSTRIKE_TEMPLATE_FILE: 'crowdstrike.yaml',
 }));
 
 jest.mock('../onboarding_session_storage', () => ({
@@ -115,7 +121,9 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
     onStackArnChange: jest.fn() as React.ComponentProps<
       typeof EcfDeploymentSection
     >['onStackArnChange'],
-    onUpdateStack: jest.fn() as React.ComponentProps<typeof EcfDeploymentSection>['onUpdateStack'],
+    unifiedUpdateUrl: undefined as string | undefined,
+    otelUpdateUrl: undefined as string | undefined,
+    crowdstrikeUpdateUrl: undefined as string | undefined,
     ...props,
   } satisfies React.ComponentProps<typeof EcfDeploymentSection>;
   return render(
@@ -427,6 +435,9 @@ describe('EcfDeploymentSection', () => {
             unifiedLaunchUrl="https://cf.aws/unified"
             otelLaunchUrl={undefined}
             crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl={undefined}
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
             globalRegion="us-east-1"
             launchedFamilies={['unified'] as any}
             stackNames={{}}
@@ -436,7 +447,6 @@ describe('EcfDeploymentSection', () => {
             onLaunch={jest.fn()}
             onStackNameChange={jest.fn()}
             onStackArnChange={jest.fn()}
-            onUpdateStack={jest.fn()}
           />
         </I18nProvider>
       );
@@ -567,6 +577,9 @@ describe('EcfDeploymentSection', () => {
             unifiedLaunchUrl="https://cf.aws/unified"
             otelLaunchUrl={undefined}
             crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl={undefined}
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
             globalRegion="us-east-1"
             launchedFamilies={['unified'] as any}
             stackNames={stackNames}
@@ -578,7 +591,6 @@ describe('EcfDeploymentSection', () => {
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
             onStackArnChange={jest.fn()}
-            onUpdateStack={jest.fn()}
           />
         );
       };
@@ -606,6 +618,9 @@ describe('EcfDeploymentSection', () => {
             unifiedLaunchUrl="https://cf.aws/unified"
             otelLaunchUrl={undefined}
             crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl={undefined}
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
             globalRegion="us-east-1"
             launchedFamilies={['unified'] as any}
             stackNames={stackNames}
@@ -617,7 +632,6 @@ describe('EcfDeploymentSection', () => {
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
             onStackArnChange={jest.fn()}
-            onUpdateStack={jest.fn()}
           />
         );
       };
@@ -771,32 +785,43 @@ describe('EcfDeploymentSection', () => {
       expect(btn).toBeDisabled();
     });
 
-    it('shows an enabled Update stack button when a valid ARN is stored', () => {
+    it('shows an enabled Update stack button when a valid updateUrl is provided', () => {
       const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
         stackArns: { unified: arn },
         isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+        unifiedUpdateUrl: 'https://console.aws.amazon.com/cloudformation/home#/stacks/update',
       });
       const btn = screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateStackButton');
       expect(btn).not.toBeDisabled();
     });
 
-    it('calls onUpdateStack when the Update stack button is clicked', () => {
+    it('shows "update opened" callout after the Update stack button is clicked', () => {
       const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
-      const onUpdateStack = jest.fn();
       renderSection({
         ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
         launchedFamilies: ['unified'],
         stackArns: { unified: arn },
         isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
-        onUpdateStack,
+        unifiedUpdateUrl: 'https://console.aws.amazon.com/cloudformation/home#/stacks/update',
       });
+      // Initially shows the stale callout
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toBeInTheDocument();
       fireEvent.click(
         screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateStackButton')
       );
-      expect(onUpdateStack).toHaveBeenCalledWith('unified');
+      // After clicking, transitions to the "update opened" callout
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-updateOpenedCallout')
+      ).toBeInTheDocument();
+      expect(screen.getByText(/Update opened in AWS Console/i)).toBeInTheDocument();
     });
   });
 });
@@ -912,7 +937,7 @@ describe('useEcfDeployment staleness', () => {
     expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail']);
   });
 
-  it('onUpdateStack updates the launchedServiceIds snapshot to the current set', () => {
+  it('advanceStaleSnapshots updates launchedServiceIds snapshot for all stale families', () => {
     mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail'), unifiedConfig('waf')]);
     const setter = makeSessionStorageMock({
       launchedFamilies: ['unified'],
@@ -928,7 +953,7 @@ describe('useEcfDeployment staleness', () => {
       })
     );
     act(() => {
-      result.current.sectionProps.onUpdateStack('unified');
+      result.current.advanceStaleSnapshots();
     });
     const persisted = setter.mock.calls[0][0];
     expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail', 'waf']);

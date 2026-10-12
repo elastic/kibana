@@ -45,6 +45,8 @@ const EcfStackSchema = schema.object({
   templateVersion: schema.string({ minLength: 1, maxLength: 32 }),
   /** CloudFormation stack ARN pasted by the user post-launch. Used to deep-link to the update flow. */
   stackArn: schema.maybe(schema.string({ minLength: 1, maxLength: 2048 })),
+  /** Service IDs active when the stack was last launched or updated. Used for staleness detection on session resume. */
+  serviceIds: schema.maybe(schema.arrayOf(schema.string({ minLength: 1 }), { maxSize: 1000 })),
 });
 
 const SharedFields = {

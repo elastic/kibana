@@ -169,6 +169,8 @@ function makeEcfReturn(
     isDone: overrides.isDone ?? false,
     ecfServiceIds: new Set(),
     stackArns: overrides.stackArns ?? {},
+    currentServiceIdsByFamily: { unified: [], otel: [], crowdstrike: [] },
+    advanceStaleSnapshots: jest.fn(),
     sectionProps: {
       ecfUnifiedConfigs: [],
       ecfOtelConfigs: [],
@@ -176,6 +178,9 @@ function makeEcfReturn(
       unifiedLaunchUrl: undefined,
       otelLaunchUrl: undefined,
       crowdstrikeLaunchUrl: undefined,
+      unifiedUpdateUrl: undefined,
+      otelUpdateUrl: undefined,
+      crowdstrikeUpdateUrl: undefined,
       globalRegion: 'us-east-1',
       launchedFamilies: (overrides.launchedFamilies as any[]) ?? [],
       stackNames: overrides.stackNames ?? {},
@@ -189,7 +194,6 @@ function makeEcfReturn(
       onLaunch: jest.fn(),
       onStackNameChange: jest.fn(),
       onStackArnChange: jest.fn(),
-      onUpdateStack: jest.fn(),
     },
   };
 }

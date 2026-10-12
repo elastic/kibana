@@ -341,6 +341,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     hasAnyEcf,
     isDone: isEcfDone,
     sectionProps: ecfSectionProps,
+    currentServiceIdsByFamily,
+    advanceStaleSnapshots,
   } = useEcfDeployment({
     instances: isAgentBased ? [] : ecfInstances,
     serviceVars,
@@ -379,11 +381,13 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         const version = ecfSectionProps.stackVersions[family];
         if (!version) return null;
         const stackArn = ecfSectionProps.stackArns[family];
+        const serviceIds = currentServiceIdsByFamily[family];
         return {
           family,
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
           templateVersion: version,
           ...(stackArn ? { stackArn } : {}),
+          ...(serviceIds.length > 0 ? { serviceIds } : {}),
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);
@@ -392,6 +396,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     ecfSectionProps.stackVersions,
     ecfSectionProps.stackNames,
     ecfSectionProps.stackArns,
+    currentServiceIdsByFamily,
   ]);
 
   const ecfStacksUnchanged = useMemo(
@@ -457,6 +462,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     } else {
       setIsSavingSO(false);
     }
+    advanceStaleSnapshots();
     onContinue();
     // persistDeploymentId after navigate: onContinue pushes a stale location snapshot, so
     // calling persistDeploymentId before it would replace step 3's URL. Calling it after
@@ -471,6 +477,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     awsServicesMap,
     globalRegion,
     dataFormat,
+    advanceStaleSnapshots,
     onContinue,
     createDeployment,
     updateDeployment,
@@ -480,6 +487,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
 
   // Mixed (MI + ECF): SO was created by handleDeploy with both mechanisms; update ecfStacks now.
   const handleMixedEcfNext = useCallback(async () => {
+    advanceStaleSnapshots();
     onContinue();
     if (!ecfStacksUnchanged && detectAndReviewStep.onboardingDeploymentId) {
       await updateDeployment(detectAndReviewStep.onboardingDeploymentId, { ecfStacks });
@@ -513,6 +521,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     deployGroups,
     failedInstances,
     selectedServiceIds,
+    advanceStaleSnapshots,
     removeDeployInstances,
     onContinue,
     updateDeployment,
