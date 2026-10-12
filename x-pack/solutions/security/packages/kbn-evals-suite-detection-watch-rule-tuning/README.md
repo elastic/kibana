@@ -11,27 +11,24 @@ golden tuning path.
 | Evaluator | Kind | Gate or smoke |
 |-----------|------|---------------|
 | `ChangeTypeAccuracy` | CODE (binary) | **gate** — predicted tuning path == golden label, all fixtures |
-| `ChangeTypeAccuracyUncontested` | CODE (binary) | **gate** — same question on the fixtures whose labels are agreed (22/39); contested fixtures score N/A, so the run's N/A count states the coverage gap |
+| `ChangeTypeAccuracyUncontested` | CODE (binary) | **gate** — same question on the fixtures whose labels are agreed (33/39); contested fixtures score N/A, so the run's N/A count states the coverage gap |
 | `TuningQuality` | LLM judge | **gate** — summary grounded in the seeded FP evidence |
 | `Tool Routing` | CODE (trace) | **gate** — the agent actually retrieved the alerts (`investigate-rule.get_alerts_by_ids`); N/A when no span is reachable |
 | `ValidProposal` | CODE (structural) | **smoke** — schema/apply-gate conformance; expected to saturate |
 
-### Contested labels
+### Label contract: exception-first
 
-17 fixtures carry golden labels that are contested against the product contract at
-upstream main and await sign-off (see `CONTESTED_FIXTURE_IDS` in `src/constants.ts` and
-`g6-label-proposal.md` on the tracking card): the whole volume-suppression and low-value
-families (labeled `manual`/`risk_score`), the whole new_terms family (labeled `manual`),
-and two single-entity manual suppressions (`fp-suppression-logship`,
-`fp-suppression-incapable-rule-type`) — the same one-known-good-entity shape as the
-contested suppression fixtures.
-The contract's diagnose prompt ranks `exception` first and the runtime applies exceptions on
-every rule type including new_terms (verified at upstream main
-`e25202cf957`: `rule_tuning_review.yaml:341-395,595-605`, `create_new_terms_alert_type.ts:117,141`).
-No gold label changes without sign-off; until then both accuracy numbers are reported side
-by side. The earlier belief that new_terms exceptions do not work at main was wrong — only
-the backtest preview is type-gated (`can_preview_query_change`, `rule_tuning_review.yaml:614-633`);
-exception creation and application are not.
+Product decision 2026-10-12: the diagnose prompt's order of preference (`exception` first,
+`rule_tuning_review.yaml:341`) is the intended contract. A cluster that shares one identifiable
+entity is labeled `exception` whatever the rule type or alert volume; the runtime applies
+exceptions on every rule type including new_terms (`create_new_terms_alert_type.ts:117,141`).
+Eleven fixtures were relabeled `manual` -> `exception` on that basis: `fp-volume-suppression`,
+`fp-suppression-{healthcheck,vulnscan,inventory,patchagent,logship}`,
+`fp-suppression-incapable-rule-type` and `fp-manual-newterms-{dns,proxy,vpn,ntp}`.
+
+6 fixtures stay contested (`CONTESTED_FIXTURE_IDS` in `src/constants.ts`): the low-value family,
+labeled `risk_score`, whose alerts share no entity beyond a process name. They await sign-off;
+`ChangeTypeAccuracyUncontested` reports the other 33/39 and scores these N/A.
 
 See [CAPABILITY_PROFILE.md](./CAPABILITY_PROFILE.md) for the gate-vs-smoke contract, the N/A
 semantics and the (unratified) pass/kill thresholds.

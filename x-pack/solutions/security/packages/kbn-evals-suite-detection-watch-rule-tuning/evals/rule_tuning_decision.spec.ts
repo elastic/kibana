@@ -92,13 +92,12 @@ const SUMMARY_CRITERIA = [
  *   - `schedule`: the FPs are routine events that only land inside the rule because
  *     its lookback is far wider than the activity needs; the alerts are seeded spread
  *     across a now-24h window so the over-wide lookback is visible to the model.
- *   - `manual`: no automated branch applies — the pattern is volume rather than
- *     identity, every entity is distinct with no shared key, or the rule type blocks the
- *     only candidate (a query change needs a `query` rule). The workflow's automated
- *     paths are exception/query/risk_score/threshold/schedule, so a volume-shaped fix
- *     has to be recommended through the hand-off branch.
+ *   - `manual`: no automated branch applies — every entity is distinct with no shared
+ *     key and nothing separates benign from malicious. A cluster that shares one
+ *     identifiable entity is `exception`, whatever the rule type or alert volume
+ *     (exception-first is the intended contract; product decision 2026-10-12).
  *
- * Distribution: 6 exception / 6 query / 6 risk_score / 2 threshold / 2 schedule / 17
+ * Distribution: 17 exception / 6 query / 6 risk_score / 2 threshold / 2 schedule / 6
  * manual (39 total). Labels are
  * PRELIMINARY until validated on the live stack: the first full run is a
  * characterization baseline, and any relabel must go through the golden-label
@@ -124,10 +123,9 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-volume-suppression',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'query',
-    description:
-      'Low-value alert flood from a repeated benign process — no automated path, recommend suppression manually',
+    description: 'Alert flood from one repeated benign process — add an exception on that entity',
   },
   {
     id: 'fp-low-value-risk',
@@ -177,17 +175,14 @@ const TUNING_FIXTURES: Array<{
     description:
       'Rule fires exclusively on benign activity with no discriminating signal — disable',
   },
-  // Rule-type precondition fixture: the alert cluster looks exactly like the
-  // single-entity exception cases (one entity re-firing), but `new_terms` is not a
-  // rule type the workflow can preview or apply a query change on
-  // (`can_preview_query_change` requires type == "query"), and a novel term on a
-  // new_terms rule is a judgement call rather than a tuning — so the only safe
-  // answer is the manual hand-off. Without this the query rule-type gate is
-  // asserted only in unit tests and never exercised against a real model on a real
-  // rule.
+  // Rule-type fixture: the alert cluster looks exactly like the single-entity exception
+  // cases (one entity re-firing) but runs on a `new_terms` rule. A query change is not
+  // available there (`can_preview_query_change` requires type == "query"), yet exceptions
+  // are created and applied on every rule type, so `exception` is the answer. Relabelled
+  // manual -> exception 2026-10-12 (product decision, exception-first).
   {
     id: 'fp-suppression-incapable-rule-type',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
       'Repeated single-entity FPs on a new_terms rule — a query change is not applicable to ' +
@@ -260,38 +255,33 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-suppression-healthcheck',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'query',
-    description:
-      'Benign curl re-firing from one entity - no automated path, recommend suppression manually',
+    description: 'Benign curl re-firing from one entity - add an exception on that entity',
   },
   {
     id: 'fp-suppression-vulnscan',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'query',
-    description:
-      'Benign nessus re-firing from one entity - no automated path, recommend suppression manually',
+    description: 'Benign nessus re-firing from one entity - add an exception on that entity',
   },
   {
     id: 'fp-suppression-inventory',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'query',
-    description:
-      'Benign osqueryd re-firing from one entity - no automated path, recommend suppression manually',
+    description: 'Benign osqueryd re-firing from one entity - add an exception on that entity',
   },
   {
     id: 'fp-suppression-patchagent',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'query',
-    description:
-      'Benign wuauclt re-firing from one entity - no automated path, recommend suppression manually',
+    description: 'Benign wuauclt re-firing from one entity - add an exception on that entity',
   },
   {
     id: 'fp-suppression-logship',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'query',
-    description:
-      'Benign filebeat re-firing from one entity - no automated path, recommend suppression manually',
+    description: 'Benign filebeat re-firing from one entity - add an exception on that entity',
   },
   {
     id: 'fp-low-value-admin-tools',
@@ -358,31 +348,31 @@ const TUNING_FIXTURES: Array<{
   },
   {
     id: 'fp-manual-newterms-dns',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
-      'New DNS resolvers trip a new_terms rule; an unseen term is a judgement call for the analyst, so escalate',
+      'New DNS resolvers trip a new_terms rule; the resolvers are one known-good entity - add an exception',
   },
   {
     id: 'fp-manual-newterms-proxy',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
-      'A newly introduced proxy host looks novel to a new_terms rule - needs human review, not an automated tuning',
+      'A newly introduced proxy host looks novel to a new_terms rule - add an exception on that host',
   },
   {
     id: 'fp-manual-newterms-vpn',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
-      'A replacement VPN concentrator registers as an unseen term - escalate rather than auto-tune',
+      'A replacement VPN concentrator registers as an unseen term - add an exception on that concentrator',
   },
   {
     id: 'fp-manual-newterms-ntp',
-    expected: 'manual',
+    expected: 'exception',
     ruleType: 'new_terms',
     description:
-      'A re-pointed NTP source appears novel on a new_terms rule - route to manual review',
+      'A re-pointed NTP source appears novel on a new_terms rule - add an exception on that source',
   },
 ];
 

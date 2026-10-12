@@ -69,12 +69,12 @@ describe('rule-tuning evaluators', () => {
     it('scores N/A (null) for a contested fixture id', async () => {
       const result = await changeTypeAccuracyUncontested.evaluate!({
         output: verdict('exception'),
-        expected: { change_type: 'manual' },
-        metadata: { fixtureId: 'fp-volume-suppression', ruleType: 'query', expected: 'manual' },
+        expected: { change_type: 'risk_score' },
+        metadata: { fixtureId: 'fp-low-value-risk', ruleType: 'query', expected: 'risk_score' },
       } as never);
       expect(result.score).toBeNull();
       expect(result.label).toBe('contested');
-      expect(result.explanation).toContain('fp-volume-suppression');
+      expect(result.explanation).toContain('fp-low-value-risk');
     });
 
     it('scores 1 on an uncontested fixture when predicted matches golden', async () => {
@@ -104,17 +104,17 @@ describe('rule-tuning evaluators', () => {
       expect(result.score).toBe(1);
     });
 
-    it('never scores on new_terms fixtures — the whole family is contested', async () => {
+    it('scores the relabelled new_terms fixtures (exception-first, no longer contested)', async () => {
       const result = await changeTypeAccuracyUncontested.evaluate!({
-        output: verdict('manual'),
-        expected: { change_type: 'manual' },
+        output: verdict('exception'),
+        expected: { change_type: 'exception' },
         metadata: {
           fixtureId: 'fp-manual-newterms-dns',
           ruleType: 'new_terms',
-          expected: 'manual',
+          expected: 'exception',
         },
       } as never);
-      expect(result.score).toBeNull();
+      expect(result.score).toBe(1);
     });
   });
 

@@ -81,37 +81,21 @@ export const EXCEPTION_OPERATOR_PAYLOAD = {
 } as const;
 
 /**
- * Fixtures whose golden label is contested and awaits Seth/Andrew sign-off
- * (see g6-label-proposal.md on the tracking card). The product contract at
- * upstream main prefers `exception` whenever the FP cluster concentrates on
- * identifiable entities — including volume, low-value and new_terms clusters —
- * so these labels measure the reviewer's proposed contract, not an agreed one.
- * `ChangeTypeAccuracyUncontested` scores only the remaining fixtures; the
- * coverage-characterization test asserts this list stays well-formed.
- * No gold label changes without sign-off: this list documents the dispute.
+ * Fixtures whose golden label is still contested. Product decision 2026-10-12: exception-first
+ * is the intended contract, so the volume, new_terms and single-entity families were relabelled
+ * `exception` and are no longer disputed. What remains is the low-value family (labeled
+ * `risk_score`): its alerts share no entity beyond a process name, and exception still
+ * outranks `risk_score` in the prompt's preference order (rule_tuning_review.yaml:341), so
+ * these labels await the same sign-off. `ChangeTypeAccuracyUncontested` scores only the
+ * remaining fixtures; the coverage-characterization test asserts this list stays well-formed.
  */
 export const CONTESTED_FIXTURE_IDS = [
-  // volume + low-value families: identifiable entities → `exception` outranks
-  // `manual`/`risk_score` by the prompt's preference order (rule_tuning_review.yaml:341)
-  'fp-volume-suppression',
-  'fp-suppression-healthcheck',
-  'fp-suppression-vulnscan',
-  'fp-suppression-inventory',
-  'fp-suppression-patchagent',
-  'fp-suppression-logship',
   'fp-low-value-risk',
   'fp-low-value-scripting',
   'fp-low-value-admin-tools',
   'fp-low-value-devtools',
   'fp-low-value-remote-support',
   'fp-low-value-archive',
-  // new_terms: exceptions are applied by the runtime at upstream main, so
-  // `manual` is not forced by the rule type
-  'fp-manual-newterms-dns',
-  'fp-manual-newterms-proxy',
-  'fp-manual-newterms-vpn',
-  'fp-manual-newterms-ntp',
-  'fp-suppression-incapable-rule-type',
 ] as const;
 
 /** Tag prefix the workflow writes to harvested alerts. Isolated to the eval namespace. */

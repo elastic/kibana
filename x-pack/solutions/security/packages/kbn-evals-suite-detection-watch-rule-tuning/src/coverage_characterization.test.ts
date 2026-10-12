@@ -204,7 +204,7 @@ describe('rule-tuning coverage characterization', () => {
 
   it('characterizes the golden label contract of all fixtures', () => {
     // Labels are PRELIMINARY until validated on the live stack; pin the mapping so any
-    // further relabel is a deliberate, reviewed decision. `manual` is the majority class
+    // further relabel is a deliberate, reviewed decision. `exception` is the majority class
     // at 17/39 — comfortably below the 0.5 guard in eval_budget.test.ts.
     const labels = goldenLabels();
     expect(labels.size).toBe(39);
@@ -212,12 +212,12 @@ describe('rule-tuning coverage characterization', () => {
     const counts = new Map<string, number>();
     for (const label of labels.values()) counts.set(label, (counts.get(label) ?? 0) + 1);
     expect(Object.fromEntries(counts)).toEqual({
-      exception: 6,
+      exception: 17,
       query: 6,
       risk_score: 6,
       threshold: 2,
       schedule: 2,
-      manual: 17,
+      manual: 6,
     });
 
     // No label may sit outside the emittable oneOf branches — the suite's core invariant.
@@ -247,28 +247,16 @@ describe('rule-tuning coverage characterization', () => {
     // Unique: a duplicated id double-counts one dispute.
     expect(new Set(contested).size).toBe(contested.length);
 
-    // The dispute is exactly the volume + low-value + new_terms families plus
-    // the two single-entity manual suppressions (logship, incapable-rule-type)
-    // the label proposal documents (17 fixtures). If a fixture joins or leaves
-    // the dispute, update g6-label-proposal.md in the same commit.
+    // The remaining dispute is exactly the low-value family (6 fixtures, labeled
+    // risk_score). The volume, new_terms and single-entity families were relabelled
+    // exception on 2026-10-12 (exception-first is the intended contract).
     expect(contested).toEqual([
-      'fp-volume-suppression',
-      'fp-suppression-healthcheck',
-      'fp-suppression-vulnscan',
-      'fp-suppression-inventory',
-      'fp-suppression-patchagent',
-      'fp-suppression-logship',
       'fp-low-value-risk',
       'fp-low-value-scripting',
       'fp-low-value-admin-tools',
       'fp-low-value-devtools',
       'fp-low-value-remote-support',
       'fp-low-value-archive',
-      'fp-manual-newterms-dns',
-      'fp-manual-newterms-proxy',
-      'fp-manual-newterms-vpn',
-      'fp-manual-newterms-ntp',
-      'fp-suppression-incapable-rule-type',
     ]);
 
     // The uncontested subset must still exercise every branch the full set
@@ -281,7 +269,7 @@ describe('rule-tuning coverage characterization', () => {
     expect(uncontestedLabels).toContain('schedule');
     // ...and stays the majority of the dataset, or the uncontested number
     // stops being the headline metric.
-    expect(uncontestedLabels.length).toBe(22);
+    expect(uncontestedLabels.length).toBe(33);
   });
 
   it('pins the seed fix: schedule alerts land inside the lookback and entity spreads defeat exception-first', () => {

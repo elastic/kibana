@@ -72,7 +72,7 @@ const ENTITY_PROFILES: Record<
     { host: 'cache-04', user: 'redis', ip: '10.1.3.30', process: 'redis-server' },
     { host: 'worker-05', user: 'batch', ip: '10.1.4.40', process: 'python3' },
   ],
-  // Same benign scanner entity repeatedly re-firing → suppression with group-by.
+  // Same benign scanner entity repeatedly re-firing → exception on that entity.
   'fp-volume-suppression': [
     { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
     { host: 'scan-host', user: 'svc_scanner', ip: '10.9.9.9', process: 'nmap' },
@@ -98,9 +98,9 @@ const ENTITY_PROFILES: Record<
     { host: 'any-d', user: 'svc_deploy', ip: '10.3.3.4', process: 'helm' },
     { host: 'any-e', user: 'svc_cron', ip: '10.3.4.5', process: 'cron' },
   ],
-  // Deliberately shaped like the suppression case — one entity re-firing — but seeded on a
-  // new_terms rule, which cannot carry alert_suppression. The entity evidence points at
-  // suppression while the rule type forbids it, so the only safe answer is manual.
+  // Shaped like the single-entity case — one entity re-firing — but seeded on a
+  // new_terms rule, where a query change is unavailable. Exceptions apply on every rule
+  // type, so the answer is still exception.
   'fp-suppression-incapable-rule-type': [
     { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
     { host: 'nt-scan-host', user: 'svc_inventory', ip: '10.7.7.7', process: 'inventory-agent' },
