@@ -168,6 +168,8 @@ function buildEuiGridColumn({
     dataSource,
     fieldName: columnName,
   });
+  // A configured time field which doesn't match any field is a regular column, like other missing fields
+  const isTimeFieldColumn = columnName === dataView.timeFieldName && Boolean(dataViewField);
   const editFieldButton =
     editField &&
     dataViewField &&
@@ -250,7 +252,7 @@ function buildEuiGridColumn({
     displayAsText: columnDisplayName,
     actions: {
       showHide:
-        isSummaryOnlyColumn || columnName === dataView.timeFieldName
+        isSummaryOnlyColumn || isTimeFieldColumn
           ? false
           : {
               label: i18n.translate('unifiedDataTable.removeColumnLabel', {
@@ -301,7 +303,7 @@ function buildEuiGridColumn({
     }
   }
 
-  if (column.id === dataView.timeFieldName) {
+  if (isTimeFieldColumn) {
     column.display = (
       <DataTableTimeColumnHeaderMemoized
         dataView={dataView}
