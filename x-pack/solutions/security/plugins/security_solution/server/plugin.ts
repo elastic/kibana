@@ -150,6 +150,12 @@ import {
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
+import {
+  setupExecutiveBrief,
+  startExecutiveBrief,
+} from './lib/entity_analytics/executive_brief/register';
+import { createBriefTelemetry } from './lib/entity_analytics/executive_brief/telemetry/brief_telemetry';
+import { EXECUTIVE_BRIEF_INFERENCE_FEATURE_ID } from '../common/entity_analytics/executive_brief/constants';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
 import { registerRiskScoreMaintainer } from './lib/entity_analytics/risk_score/maintainer/register_risk_score_maintainer';
@@ -506,6 +512,18 @@ export class Plugin implements ISecuritySolutionPlugin {
         recommendedEndpoints: [],
       });
 
+      if (experimentalFeatures.entityAnalyticsExecutiveBriefEnabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
+          featureId: EXECUTIVE_BRIEF_INFERENCE_FEATURE_ID,
+          featureName: 'Entity Analytics Executive Brief',
+          featureDescription: 'Entity Analytics executive brief inference endpoint configuration',
+          taskType: 'chat_completion',
+          // Composes a brief in about 30 s, roughly four times faster than the inference default.
+          recommendedEndpoints: ['.anthropic-claude-5-sonnet-chat_completion'],
+        });
+      }
+
       if (experimentalFeatures.leadGenerationEnabled) {
         plugins.searchInferenceEndpoints.features.register({
           parentFeatureId: SECURITY_INFERENCE_PARENT_FEATURE_ID,
@@ -722,6 +740,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.platformCpsEnabled,
       this.securityEventBus
     );
+
+    if (experimentalFeatures.entityAnalyticsExecutiveBriefEnabled) {
+      setupExecutiveBrief({
+        router,
+        taskManager: plugins.taskManager,
+        getStartServices: core.getStartServices,
+        logger: this.logger,
+        hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
+        telemetry: createBriefTelemetry({
+          analytics: core.analytics,
+          logger: this.logger.get('executive_brief'),
+        }),
+      });
+    }
 
     registerEndpointRoutes(router, this.endpointContext);
     registerEndpointSuggestionsRoutes(
@@ -1114,6 +1146,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.endpointAppContextService
       );
       this.telemetryWatcher.start(this.telemetryConfigProvider);
+    }
+
+    if (config.experimentalFeatures.entityAnalyticsExecutiveBriefEnabled) {
+      startExecutiveBrief({ taskManager: plugins.taskManager, logger });
     }
 
     if (plugins.taskManager) {

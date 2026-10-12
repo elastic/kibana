@@ -9,6 +9,7 @@ import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
+import type { BriefCompletedEvent } from '../../entity_analytics/executive_brief/telemetry/types';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
@@ -2493,6 +2494,131 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
+const briefStageDurationSchema = (stage: string) =>
+  ({
+    type: 'long',
+    _meta: { description: `Duration of the ${stage} stage in milliseconds`, optional: true },
+  } as const);
+
+const briefDroppedSchema = (check: string) =>
+  ({
+    type: 'long',
+    _meta: {
+      description: `Brief items removed by the ${check} check during verification`,
+      optional: true,
+    },
+  } as const);
+
+// One event per finished executive brief job. Counts and codes only: no free text, entity names
+// or prompts.
+export const ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT: EventTypeOpts<BriefCompletedEvent> =
+  {
+    eventType: 'entity_analytics_executive_brief_completed',
+    schema: {
+      outcome: {
+        type: 'keyword',
+        _meta: { description: 'Job outcome: "succeeded" or "failed"' },
+      },
+      errorCode: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Bounded failure code (e.g. "timeout", "llm_error", "llm_output", "interrupted") when the job failed',
+          optional: true,
+        },
+      },
+      range: {
+        type: 'keyword',
+        _meta: { description: 'Time range the brief covers: "24h", "7d" or "30d"' },
+      },
+      model: {
+        type: 'keyword',
+        _meta: {
+          description: 'Model id reported by the LLM provider, when available',
+          optional: true,
+        },
+      },
+      durationMs: {
+        type: 'long',
+        _meta: { description: 'Total job duration in milliseconds' },
+      },
+      stageDurationsMs: {
+        properties: {
+          gather: briefStageDurationSchema('gather (signals)'),
+          compose: briefStageDurationSchema('compose (LLM)'),
+          verify: briefStageDurationSchema('verify'),
+        },
+        _meta: { description: 'Duration of each stage that ran, in milliseconds' },
+      },
+      signals: {
+        type: 'array',
+        items: {
+          properties: {
+            id: {
+              type: 'keyword',
+              _meta: { description: 'Signal id, e.g. "attack_discoveries"' },
+            },
+            status: {
+              type: 'keyword',
+              _meta: {
+                description: 'Signal status: "ok", "empty", "unavailable", "timeout" or "error"',
+              },
+            },
+            durationMs: {
+              type: 'long',
+              _meta: { description: 'Signal duration in milliseconds' },
+            },
+            factCount: {
+              type: 'long',
+              _meta: { description: 'Number of facts the signal produced' },
+            },
+          },
+        },
+        _meta: { description: 'One entry per signal that ran in the gather stage' },
+      },
+      entityCount: {
+        type: 'long',
+        _meta: { description: 'Number of entities in the gathered evidence' },
+      },
+      factCount: {
+        type: 'long',
+        _meta: { description: 'Number of facts in the gathered evidence' },
+      },
+      linkCount: {
+        type: 'long',
+        _meta: { description: 'Number of links in the gathered evidence' },
+      },
+      tokens: {
+        properties: {
+          prompt: {
+            type: 'long',
+            _meta: { description: 'Input (prompt) tokens across all LLM calls of the job' },
+          },
+          completion: {
+            type: 'long',
+            _meta: { description: 'Output (completion) tokens across all LLM calls of the job' },
+          },
+        },
+        _meta: {
+          description: 'LLM token usage, when the provider reported it',
+          optional: true,
+        },
+      },
+      repaired: {
+        type: 'boolean',
+        _meta: { description: 'Whether a repair round-trip to the LLM was needed' },
+      },
+      verificationDropped: {
+        properties: {
+          citation: briefDroppedSchema('citation'),
+          number: briefDroppedSchema('number'),
+          guardrail: briefDroppedSchema('guardrail'),
+        },
+        _meta: { description: 'Brief items removed during verification, per check' },
+      },
+    },
+  };
+
 interface ResolutionCsvUploadEvent {
   total: number;
   successful: number;
@@ -2732,6 +2858,7 @@ export const events = [
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
   LEAD_GENERATION_EXECUTION_EVENT,
+  ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT,
   ENTITY_STORE_RESOLUTION_CSV_UPLOAD_EVENT,
   ALERT_ANALYSIS_WORKFLOW_SETTINGS_UPDATED_EVENT,
 ];
