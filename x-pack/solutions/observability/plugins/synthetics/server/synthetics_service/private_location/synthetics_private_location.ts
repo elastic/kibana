@@ -7,6 +7,7 @@
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { escapeQuotes } from '@kbn/es-query';
@@ -29,6 +30,7 @@ import type {
   HeartbeatConfig,
   MonitorFields,
   PrivateLocation,
+  ServiceLocationErrors,
 } from '../../../common/runtime_types';
 import {
   ConfigKey,
@@ -65,6 +67,13 @@ interface EnrolledAgents {
   /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
   completeAgentIds?: string[];
 }
+
+type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
+
+export type CreatePackagePoliciesResult = BulkCreatedPolicies & {
+  /** Test runs skipped because the location cannot run the monitor. */
+  errors?: ServiceLocationErrors;
+};
 
 export interface FailedPolicyUpdate {
   packagePolicy: NewPackagePolicyWithId;
@@ -394,11 +403,12 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean
-  ) {
+  ): Promise<CreatePackagePoliciesResult> {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
+    const locationErrors: ServiceLocationErrors = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
     const referencedPrivateLocations = this.getReferencedPrivateLocations(
       configs,
@@ -423,6 +433,22 @@ export class SyntheticsPrivateLocation {
             );
           }
 
+          const enrolledAgents = enrolledAgentsByLocation.get(location.id);
+          // A real monitor stays unassigned until a complete agent enrolls. A test run
+          // would only wait forever for results, so report it instead.
+          if (
+            testRunId &&
+            shardingMode === 'active' &&
+            config.type === MonitorTypeEnum.BROWSER &&
+            !enrolledAgents?.completeAgentIds?.length
+          ) {
+            locationErrors.push({
+              locationId: location.id,
+              error: { reason: browserNeedsCompleteAgentReason(location.label), status: 400 },
+            });
+            continue;
+          }
+
           const newPolicy = await this.generateNewPolicy(
             config,
             location,
@@ -432,7 +458,7 @@ export class SyntheticsPrivateLocation {
             maintenanceWindows,
             testRunId,
             runOnce,
-            enrolledAgentsByLocation.get(location.id),
+            enrolledAgents,
             undefined,
             shardingMode
           );
@@ -462,6 +488,9 @@ export class SyntheticsPrivateLocation {
     }
 
     if (newPolicies.length === 0) {
+      if (locationErrors.length > 0) {
+        return { created: [], failed: [], errors: locationErrors };
+      }
       throw new Error('Failed to build package policies for all monitors');
     }
 
@@ -474,7 +503,7 @@ export class SyntheticsPrivateLocation {
         // ignore await here, we don't want to wait for this to finish
         void scheduleTestNowCleanUp(this.server, result.created);
       }
-      return result;
+      return locationErrors.length > 0 ? { ...result, errors: locationErrors } : result;
     } catch (e) {
       this.server.logger.error(e);
       throw e;
@@ -940,3 +969,10 @@ const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string)
 const deletePolicyError = (name: string, location?: string) => {
   return `Unable to delete Synthetics package policy for monitor ${name} with private location ${location}`;
 };
+
+const browserNeedsCompleteAgentReason = (locationLabel: string) =>
+  i18n.translate('xpack.synthetics.privateLocation.browserNeedsCompleteAgent', {
+    defaultMessage:
+      'Browser monitors run only on the elastic-agent-complete image, and no complete agent is enrolled in {locationLabel}.',
+    values: { locationLabel },
+  });

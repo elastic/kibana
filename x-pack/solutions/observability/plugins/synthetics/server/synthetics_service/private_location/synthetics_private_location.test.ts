@@ -1498,6 +1498,94 @@ describe('SyntheticsPrivateLocation', () => {
 
       expect(scheduleTestNowCleanUp).not.toHaveBeenCalled();
     });
+
+    describe('browser test run without a complete agent', () => {
+      const getBrowserConfig = () =>
+        ({
+          ...dummyBrowserConfig,
+          id: 'browser-id',
+          locations: [mockPrivateLocation],
+        } as unknown as HeartbeatConfig);
+      const makeLocation = (agents: unknown[]) =>
+        new SyntheticsPrivateLocation({
+          ...serverMock,
+          fleet: {
+            ...serverMock.fleet,
+            agentService: {
+              asInternalUser: {
+                listAgents: jest.fn().mockResolvedValue({ agents, total: agents.length }),
+              },
+            },
+            packagePolicyService: {
+              ...serverMock.fleet.packagePolicyService,
+              buildPackagePolicyFromPackage: jest.fn().mockResolvedValue(testMonitorPolicy),
+            },
+          },
+        } as unknown as SyntheticsServerSetup);
+
+      it('reports a location error instead of creating an unassigned policy', async () => {
+        const bulkCreate = jest.spyOn(PackagePolicyService.prototype, 'bulkCreate');
+        bulkCreate.mockClear();
+
+        const result = await makeLocation([{ id: 'basic' }]).createPackagePolicies(
+          [{ config: getBrowserConfig(), globalParams: {} }],
+          [mockPrivateLocation],
+          'default',
+          [],
+          'test-run-id'
+        );
+
+        expect(bulkCreate).not.toHaveBeenCalled();
+        expect(result).toEqual({
+          created: [],
+          failed: [],
+          errors: [
+            {
+              locationId: mockPrivateLocation.id,
+              error: {
+                reason: expect.stringContaining(mockPrivateLocation.label),
+                status: 400,
+              },
+            },
+          ],
+        });
+      });
+
+      it('creates the test policy when a complete agent is enrolled', async () => {
+        const created = [{ id: 'tn-1', name: BROWSER_TEST_NOW_RUN }];
+        jest
+          .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+          .mockResolvedValue({ created, failed: [] } as any);
+
+        const result = await makeLocation([
+          { id: 'complete', local_metadata: { elastic: { agent: { complete: true } } } },
+        ]).createPackagePolicies(
+          [{ config: getBrowserConfig(), globalParams: {} }],
+          [mockPrivateLocation],
+          'default',
+          [],
+          'test-run-id'
+        );
+
+        expect(result.errors).toBeUndefined();
+        expect(result.created).toBe(created);
+      });
+
+      it('keeps a regular browser monitor create unassigned instead of failing', async () => {
+        jest
+          .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+          .mockResolvedValue({ created: [{ id: 'm1-loc1' }], failed: [] } as any);
+
+        const result = await makeLocation([{ id: 'basic' }]).createPackagePolicies(
+          [{ config: getBrowserConfig(), globalParams: {} }],
+          [mockPrivateLocation],
+          'default',
+          []
+        );
+
+        expect(result.errors).toBeUndefined();
+      });
+    });
   });
 
   it('formats monitors stream properly', () => {
