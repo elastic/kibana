@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { defer } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { buildPath } from '@kbn/core-http-browser';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
@@ -314,11 +315,16 @@ export function useInvestigationState({
       }
 
       subscription = defer(() =>
-        http.get(`/internal/agent_builder/executions/${agentExecutionId}/follow`, {
-          signal: abortController.signal,
-          asResponse: true,
-          rawResponse: true,
-        })
+        http.get(
+          buildPath('/internal/agent_builder/executions/{executionId}/follow', {
+            executionId: agentExecutionId,
+          }),
+          {
+            signal: abortController.signal,
+            asResponse: true,
+            rawResponse: true,
+          }
+        )
       )
         .pipe(
           /** `ChatEvent` doesn't satisfy the SSE event mixin constraint, and only `tool_ui`

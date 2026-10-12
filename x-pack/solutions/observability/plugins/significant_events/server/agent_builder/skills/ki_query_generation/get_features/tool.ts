@@ -14,43 +14,49 @@ import {
   QUERY_GENERATION_EXCLUDED_FEATURE_TYPES,
   toFeatureForLlmContext,
 } from '@kbn/nightshift-ai';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { GetScopedClients } from '../../../../routes/types';
+import { assertCanReadSignificantEvents } from '../../../../routes/utils/assert_can_manage_significant_events';
+import type { SignificantEventsServer } from '../../../../types';
 import { streamToAnalysisTarget } from '../../../../lib/significant_events/stream_to_analysis_target';
 
 export const SIGNIFICANT_EVENTS_GET_FEATURES_TOOL_ID = 'platform.sig_events.ki_features_get';
 
-const getFeaturesSchema = z.object({
-  target_id: z.string().max(MAX_ID_LENGTH).describe('Target identifier for KI feature lookup.'),
-  feature_types: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .max(20)
-    .optional()
-    .describe('Optional KI feature types to return. Unknown types produce no matches.'),
-  min_confidence: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe(
-      'Only return features with confidence at or above this value (0-100). Omit to include inferred low-confidence features.'
-    ),
-  limit: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .optional()
-    .describe(
-      'Maximum number of features to return, highest confidence first. Omit on the first call to load all features; combine with min_confidence for focused follow-up calls.'
-    ),
-});
+const getFeaturesSchema = lazySchema(() =>
+  z.object({
+    target_id: z.string().max(MAX_ID_LENGTH).describe('Target identifier for KI feature lookup.'),
+    feature_types: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .max(20)
+      .optional()
+      .describe('Optional KI feature types to return. Unknown types produce no matches.'),
+    min_confidence: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe(
+        'Only return features with confidence at or above this value (0-100). Omit to include inferred low-confidence features.'
+      ),
+    limit: z
+      .number()
+      .int()
+      .min(1)
+      .max(100)
+      .optional()
+      .describe(
+        'Maximum number of features to return, highest confidence first. Omit on the first call to load all features; combine with min_confidence for focused follow-up calls.'
+      ),
+  })
+);
 
 export const createGetFeaturesTool = ({
   getScopedClients,
+  server,
   logger,
 }: {
   getScopedClients: GetScopedClients;
+  server: Pick<SignificantEventsServer, 'security'>;
   logger: Logger;
 }): BuiltinSkillBoundedTool<typeof getFeaturesSchema> => {
   return {
@@ -65,6 +71,7 @@ export const createGetFeaturesTool = ({
     ) => {
       try {
         const scopedClients = await getScopedClients({ request: context.request });
+        await assertCanReadSignificantEvents({ request: context.request, server });
         const stream = await scopedClients.streamsClient.getStream(targetId);
         const target = streamToAnalysisTarget(stream);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

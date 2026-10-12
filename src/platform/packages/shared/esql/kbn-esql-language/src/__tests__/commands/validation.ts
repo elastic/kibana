@@ -10,7 +10,7 @@
 import { Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { ESQLMessage } from '../../commands/definitions/types';
-import type { ICommandContext } from '../../commands/registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../commands/registry/types';
 import { isTimeseriesSourceCommand } from '../../commands/definitions/utils/timeseries_check';
 import { mockContext } from './context_fixtures';
 /**
@@ -26,17 +26,29 @@ export const expectErrors = (
   expectedErrors: string[],
   context = mockContext,
   commandName: string,
-  validate: (arg0: ESQLCommand, arg1: ESQLCommand[], arg2: ICommandContext) => ESQLMessage[]
+  validate: (
+    arg0: ESQLCommand,
+    arg1: ESQLCommand[],
+    arg2: ICommandContext,
+    arg3?: ICommandCallbacks,
+    arg4?: string
+  ) => ESQLMessage[]
 ) => {
   const { root } = Parser.parse(query);
   const command = root.commands.find((cmd) => cmd.name === commandName.toLowerCase());
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
-  const result = validate(command, root.commands, {
-    ...context,
-    isTimeseriesSource: context.isTimeseriesSource ?? isTimeseriesSourceCommand(root.commands),
-  });
+  const result = validate(
+    command,
+    root.commands,
+    {
+      ...context,
+      isTimeseriesSource: context.isTimeseriesSource ?? isTimeseriesSourceCommand(root.commands),
+    },
+    undefined,
+    query
+  );
 
   const errors: string[] = [];
   result.forEach((error) => {

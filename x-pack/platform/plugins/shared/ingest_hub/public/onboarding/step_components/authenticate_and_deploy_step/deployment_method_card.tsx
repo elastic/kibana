@@ -84,6 +84,11 @@ interface DeploymentMethodCardProps {
   locked?: boolean;
   /** When true, the Edit button is disabled with a tooltip — deployment method is locked after the first deploy. */
   disabled?: boolean;
+  /**
+   * Methods offered in the edit modal. Omitted means all of them; self-managed passes
+   * `['agent_based']` because the agentless infrastructure the other methods need is cloud-only.
+   */
+  availableMethods?: DeploymentMethod[];
 }
 
 export function DeploymentMethodCard({
@@ -91,17 +96,22 @@ export function DeploymentMethodCard({
   onChange,
   locked = false,
   disabled,
+  availableMethods,
 }: DeploymentMethodCardProps) {
   const { euiTheme } = useEuiTheme();
   const modalTitleId = useGeneratedHtmlId();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [draftMethod, setDraftMethod] = useState<DeploymentMethod>(selectedMethod);
 
+  const options = availableMethods
+    ? DEPLOYMENT_METHOD_OPTIONS.filter((o) => availableMethods.includes(o.value))
+    : DEPLOYMENT_METHOD_OPTIONS;
+
   // Defensive fallback: if a stale/hand-edited session-storage value carries an unknown method,
   // show the first option rather than crashing. The type permits any DeploymentMethod string.
+  // The second fallback covers an availableMethods list that filters everything out.
   const selectedOption =
-    DEPLOYMENT_METHOD_OPTIONS.find((o) => o.value === selectedMethod) ??
-    DEPLOYMENT_METHOD_OPTIONS[0];
+    options.find((o) => o.value === selectedMethod) ?? options[0] ?? DEPLOYMENT_METHOD_OPTIONS[0];
 
   const panelCss = css`
     border: 1px solid ${euiTheme.colors.borderBaseSubdued};
@@ -207,7 +217,7 @@ export function DeploymentMethodCard({
             </EuiText>
             <EuiSpacer size="m" />
             <EuiSelect
-              options={DEPLOYMENT_METHOD_OPTIONS}
+              options={options}
               value={draftMethod}
               onChange={(e) => setDraftMethod(e.target.value as DeploymentMethod)}
               aria-label={i18n.translate(

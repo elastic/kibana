@@ -19,12 +19,18 @@ const EXECUTIONS_INDEX = '.workflows-executions';
 const RUN_ID_PREFIX = 'seed-nightshift-';
 const SEED_USER_PASSWORD = 'changeme';
 const HOUR_MS = 3_600_000;
+const REMOVED_AUTOMATION_NAMES = ['Managed Slack bot mention'];
 
-type RunStatus = 'completed' | 'failed' | 'running';
+type RunStatus = 'completed' | 'failed' | 'running' | 'skipped';
+
+type SeedCompletion = Record<string, string>;
+
+const THREAD_REPLY: SeedCompletion = { action: 'post_to_slack', targetMode: 'thread' };
 
 interface SeedAutomation {
   name: string;
   trigger: Record<string, string | string[]>;
+  completion?: SeedCompletion;
   tags: string[];
   author: string;
   enabled: boolean;
@@ -33,12 +39,18 @@ interface SeedAutomation {
   runsToday: number;
   failed: number;
   running: number;
+  skipped: number;
 }
 
 const AUTOMATIONS: SeedAutomation[] = [
   {
     name: 'Triage incoming alerts',
     trigger: { kind: 'alert' },
+    completion: {
+      action: 'post_to_slack',
+      targetMode: 'channel',
+      destination: '#nightshift-alerts',
+    },
     tags: ['triage', 'alerts'],
     author: 'Emily Clarke',
     enabled: true,
@@ -47,10 +59,12 @@ const AUTOMATIONS: SeedAutomation[] = [
     runsToday: 27,
     failed: 4,
     running: 1,
+    skipped: 3,
   },
   {
     name: 'Escalate on-call alerts',
     trigger: { kind: 'slack', event: 'message', channels: ['#oncall'] },
+    completion: THREAD_REPLY,
     tags: ['oncall', 'escalation', 'p1'],
     author: 'James Turner',
     enabled: true,
@@ -58,11 +72,13 @@ const AUTOMATIONS: SeedAutomation[] = [
     runs48h: 21,
     runsToday: 10,
     failed: 5,
-    running: 0,
+    running: 1,
+    skipped: 2,
   },
   {
     name: 'Triage P0 Issues',
     trigger: { kind: 'slack', event: 'message', channels: ['#incidents'] },
+    completion: THREAD_REPLY,
     tags: ['p0', 'triage'],
     author: 'Sarah Mitchell',
     enabled: true,
@@ -71,22 +87,26 @@ const AUTOMATIONS: SeedAutomation[] = [
     runsToday: 3,
     failed: 2,
     running: 0,
+    skipped: 0,
   },
   {
     name: 'Managed Slack bot messages',
     trigger: { kind: 'slack', event: 'message', channels: ['#nightshift'] },
+    completion: THREAD_REPLY,
     tags: [],
     author: 'Nightshift',
     enabled: true,
-    limit: 100,
+    limit: 50,
     runs48h: 2,
     runsToday: 2,
     failed: 0,
     running: 0,
+    skipped: 0,
   },
   {
     name: 'Daily Report - Active Usage',
     trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
+    completion: { action: 'post_to_slack', targetMode: 'self', destination: '@emily.clarke' },
     tags: ['reporting', 'leadership'],
     author: 'Emily Clarke',
     enabled: true,
@@ -95,6 +115,7 @@ const AUTOMATIONS: SeedAutomation[] = [
     runsToday: 1,
     failed: 0,
     running: 1,
+    skipped: 0,
   },
   {
     name: 'Product usage by channel and customers',
@@ -107,10 +128,12 @@ const AUTOMATIONS: SeedAutomation[] = [
     runsToday: 0,
     failed: 0,
     running: 0,
+    skipped: 0,
   },
   {
     name: 'Investigate incoming alerts',
     trigger: { kind: 'slack', event: 'message', channels: ['#alerts'] },
+    completion: { action: 'post_to_slack', targetMode: 'channel', destination: '#alerts' },
     tags: [],
     author: 'Daniel Hughes',
     enabled: false,
@@ -119,6 +142,7 @@ const AUTOMATIONS: SeedAutomation[] = [
     runsToday: 0,
     failed: 0,
     running: 0,
+    skipped: 0,
   },
 ];
 
@@ -174,11 +198,11 @@ const resolveKibanaUrl = async (url: string, auth: string): Promise<string> => {
 const randomTimes = (start: number, end: number, count: number): number[] =>
   Array.from({ length: count }, () => start + Math.random() * (end - start)).sort((a, b) => a - b);
 
-const getRunStatuses = ({ runs48h, failed, running }: SeedAutomation): RunStatus[] => {
-  const statuses: RunStatus[] = Array.from({ length: runs48h }, (_, index) =>
-    index < failed ? 'failed' : 'completed'
+const getRunStatuses = ({ runs48h, failed, running, skipped }: SeedAutomation): RunStatus[] => {
+  const statuses: RunStatus[] = Array.from({ length: runs48h - running }, (_, index) =>
+    index < failed ? 'failed' : index < failed + skipped ? 'skipped' : 'completed'
   ).sort(() => Math.random() - 0.5);
-  return [...statuses.slice(0, runs48h - running), ...Array(running).fill('running')];
+  return [...statuses, ...Array(running).fill('running')];
 };
 
 const runDoc = (
@@ -188,7 +212,7 @@ const runDoc = (
   startedAt: number,
   status: RunStatus
 ) => {
-  const duration = 20_000 + Math.floor(Math.random() * 580_000);
+  const duration = status === 'skipped' ? 0 : 20_000 + Math.floor(Math.random() * 580_000);
   return {
     id: runId,
     spaceId: 'default',
@@ -212,7 +236,7 @@ run(
     const kibanaUrl = await resolveKibanaUrl(String(flags['kibana-url']), auth);
     const now = Date.now();
     const midnight = new Date(now).setUTCHours(0, 0, 0, 0);
-    const names = new Set(AUTOMATIONS.map(({ name }) => name));
+    const names = new Set([...AUTOMATIONS.map(({ name }) => name), ...REMOVED_AUTOMATION_NAMES]);
 
     const { automations } = await request<{ automations: Array<{ id: string; name: string }> }>(
       `${kibanaUrl}/internal/nightshift/automations`,
@@ -249,7 +273,7 @@ run(
             isEnabled: enabled,
             trigger: { rows: [automation.trigger] },
             execution: {},
-            completion: {},
+            completion: automation.completion ?? {},
             runtime: { dailyDispatchLimit: limit },
           },
         }
@@ -289,8 +313,10 @@ run(
   {
     description: `Seeds ${AUTOMATIONS.length} Nightshift automations with varied authors, tags, run history, and daily usage.
 
-      Each author is created as a superuser so the automation records them as its creator. Runs are
-      written straight into ${EXECUTIONS_INDEX}, including failed and still-running runs.
+      Slack-triggered automations reply in the triggering thread, other triggers use a channel or
+      direct message action or none, and "Investigate incoming alerts" keeps a legacy channel
+      action on a Slack trigger, which the edit form shows as stored. Each author is created as a superuser so the automation records them as its creator. Runs are
+      written straight into ${EXECUTIONS_INDEX}, including failed, skipped, and still-running runs.
       Re-running deletes the seeded automations and runs first.`,
     flags: {
       string: ['es-url', 'kibana-url', 'auth'],

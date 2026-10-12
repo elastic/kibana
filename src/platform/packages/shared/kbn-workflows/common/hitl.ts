@@ -76,10 +76,15 @@ export type HitlWaitStepType = 'waitForInput' | 'waitForApproval';
 export const isHitlWaitStepType = (stepType: string | undefined): stepType is HitlWaitStepType =>
   stepType === 'waitForInput' || stepType === 'waitForApproval';
 
-/** Maps `with.channels` keys to Kibana connector action types for connector-id autocomplete/validation. */
+/**
+ * Maps `with.channels` keys to connector step types for connector-id autocomplete/validation.
+ * Include the required sub-action when the connector uses `selectedActions` (e.g. `slack2.sendMessage`)
+ * so suggestions exclude instances that cannot execute the HITL notification.
+ */
 export const HITL_CHANNEL_CONNECTOR_TYPES = {
   slack: 'slack',
   slack_api: 'slack_api',
+  slack2: 'slack2.sendMessage',
 } as const satisfies Record<string, string>;
 
 export type HitlChannelKey = keyof typeof HITL_CHANNEL_CONNECTOR_TYPES;

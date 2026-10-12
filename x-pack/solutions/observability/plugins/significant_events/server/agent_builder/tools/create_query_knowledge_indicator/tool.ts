@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -19,6 +19,7 @@ import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
@@ -26,25 +27,29 @@ import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID =
   platformSignificantEventsTools.createQueryKnowledgeIndicator;
 
-const queryInputSchema = upsertStreamQueryRequestSchema.extend({
-  id: z.string().max(MAX_ID_LENGTH).optional(),
-  expires_at: z.iso
-    .datetime()
-    .optional()
-    .describe(
-      'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
-        'Omit to create a durable KI with no expiry.'
-    ),
-});
-
-const createQueryKnowledgeIndicatorSchema = z
-  .object({
-    stream_name: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('Target stream name where this query KI should be saved.'),
+const queryInputSchema = lazySchema(() =>
+  upsertStreamQueryRequestSchema.extend({
+    id: z.string().max(MAX_ID_LENGTH).optional(),
+    expires_at: z.iso
+      .datetime()
+      .optional()
+      .describe(
+        'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
+          'Omit to create a durable KI with no expiry.'
+      ),
   })
-  .extend(queryInputSchema.shape);
+);
+
+const createQueryKnowledgeIndicatorSchema = lazySchema(() =>
+  z
+    .object({
+      stream_name: z
+        .string()
+        .max(MAX_ID_LENGTH)
+        .describe('Target stream name where this query KI should be saved.'),
+    })
+    .extend(queryInputSchema.shape)
+);
 
 export function createQueryKnowledgeIndicatorTool({
   getScopedClients,
@@ -132,6 +137,7 @@ export function createQueryKnowledgeIndicatorTool({
           server,
           licensing: scopedClients.licensing,
         });
+        await assertCanManageSignificantEvents({ request, server });
 
         const definition = await scopedClients.streamsClient.getStream(streamName);
         streamType = getStreamTypeFromDefinition(definition);
