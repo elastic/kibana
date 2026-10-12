@@ -621,6 +621,16 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/imports/restricted_redux_imports': [
+          'warn',
+          {
+            paths: ['redux', 'redux-v4'].map((name) => ({
+              name,
+              importNames: ['createStore', 'legacy_createStore'],
+              message: 'Prefer configureStore from the matching Redux Toolkit package.',
+            })),
+          },
+        ],
         '@kbn/imports/no_redux_toolkit_middleware_spread': 'warn',
         '@kbn/imports/no_redux_toolkit_state_reassignment': 'warn',
         '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],

@@ -86,9 +86,19 @@ Before adding Redux state, establish why the value must be shared, global, cache
 - Memoize selectors only for expensive calculations or new-reference outputs.
 - Keep Reselect input selectors simple and reference-stable; transform in the result function.
 - Where RTK Query is already used, design tags deliberately and avoid duplicating query data into ordinary slices.
-- Preserve an established TanStack React Query / `useQuery` pattern unless there is a concrete reason to change it.
-- Avoid parallel RTK Query and TanStack Query caches for the same server resource within one feature.
 - Add or update focused tests when behavior changes.
+
+## Automated checks
+
+Kibana warns on middleware spreading and draft reassignment via `@kbn/imports/no_redux_toolkit_middleware_spread` and `@kbn/imports/no_redux_toolkit_state_reassignment`. See [coverage and limitations](../../../packages/kbn-eslint-plugin-imports/README.mdx#redux-toolkit-warnings).
+
+`@kbn/imports/restricted_redux_imports` also warns on `createStore` / `legacy_createStore` imports from `redux` and `redux-v4`; prefer `configureStore`. See [import restrictions](../../../packages/kbn-eslint-plugin-imports/README.mdx#redux-store-import-warnings).
+
+Run directly from the repository root; `node scripts/eslint` hides warnings:
+
+```bash
+node -r ./src/setup_node_env node_modules/eslint/bin/eslint.js path/to/file.ts
+```
 
 ## Review output
 

@@ -65,6 +65,12 @@ This config will find any import of `@kbn/kitchen-sink` which specifically refer
 
 The auto-fixer here covers the vast majority of import styles in the repository but might not cover everything, including `import * as Namespace from '@kbn/kitchen-sink'`. Imports like this will need to be found and updated manually, though TypeScript should be able to find the vast majority of those.
 
+## Redux store import warnings
+
+`@kbn/imports/restricted_redux_imports` reuses ESLint's built-in `no-restricted-imports` implementation under a separate rule ID so existing import errors remain errors. Kibana configures it at warning severity for `createStore` and `legacy_createStore` imports and re-exports from `redux` and `redux-v4`; prefer `configureStore` from the matching RTK package. Other named Redux imports and valid low-level RTK APIs remain allowed.
+
+As with the built-in rule, namespace imports and wildcard re-exports also warn because they include restricted APIs, even if those APIs are not used. CommonJS calls are not checked. No autofixes are provided.
+
 ## Redux Toolkit warnings
 
 The following import-aware rules run at warning severity across JavaScript and TypeScript files. They recognize named imports (including aliases) and namespace imports from both `@reduxjs/toolkit` and `redux-toolkit-v1`. Neither rule requires type-aware parsing or provides autofixes.
