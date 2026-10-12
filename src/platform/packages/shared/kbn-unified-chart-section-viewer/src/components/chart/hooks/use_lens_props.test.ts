@@ -181,6 +181,7 @@ describe('useLensProps', () => {
             esql: 'FROM metrics-*',
           },
           fittingFunction: 'Linear',
+          areaFill: 'solid',
           legend: {
             show: false,
           },
