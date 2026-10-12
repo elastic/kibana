@@ -1506,9 +1506,19 @@ describe('SyntheticsPrivateLocation', () => {
           id: 'browser-id',
           locations: [mockPrivateLocation],
         } as unknown as HeartbeatConfig);
-      const makeLocation = (agents: unknown[]) =>
+      const makeLocation = (agents: unknown[], { shardingOff = false } = {}) =>
         new SyntheticsPrivateLocation({
           ...serverMock,
+          ...(shardingOff && {
+            pluginsStart: {
+              licensing: enterpriseLicensing,
+              taskManager: {
+                get: jest.fn().mockResolvedValue({
+                  state: { rebalancePrivateLocationShardsEnabled: false },
+                }),
+              },
+            },
+          }),
           fleet: {
             ...serverMock.fleet,
             agentService: {
@@ -1549,6 +1559,47 @@ describe('SyntheticsPrivateLocation', () => {
             },
           ],
         });
+      });
+
+      it('reports the location error when sharding is off', async () => {
+        const bulkCreate = jest.spyOn(PackagePolicyService.prototype, 'bulkCreate');
+        bulkCreate.mockClear();
+
+        const result = await makeLocation([{ id: 'basic' }], {
+          shardingOff: true,
+        }).createPackagePolicies(
+          [{ config: getBrowserConfig(), globalParams: {} }],
+          [mockPrivateLocation],
+          'default',
+          [],
+          'test-run-id'
+        );
+
+        expect(bulkCreate).not.toHaveBeenCalled();
+        expect(result.errors).toEqual([
+          expect.objectContaining({ locationId: mockPrivateLocation.id }),
+        ]);
+      });
+
+      it('runs the test when sharding is off and a complete agent is enrolled', async () => {
+        const created = [{ id: 'tn-1', name: BROWSER_TEST_NOW_RUN }];
+        jest
+          .spyOn(PackagePolicyService.prototype, 'bulkCreate')
+          .mockResolvedValue({ created, failed: [] } as any);
+
+        const result = await makeLocation(
+          [{ id: 'complete', local_metadata: { elastic: { agent: { complete: true } } } }],
+          { shardingOff: true }
+        ).createPackagePolicies(
+          [{ config: getBrowserConfig(), globalParams: {} }],
+          [mockPrivateLocation],
+          'default',
+          [],
+          'test-run-id'
+        );
+
+        expect(result.errors).toBeUndefined();
+        expect(result.created).toBe(created);
       });
 
       it('creates the test policy when a complete agent is enrolled', async () => {

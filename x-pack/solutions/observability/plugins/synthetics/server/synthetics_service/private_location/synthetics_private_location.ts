@@ -420,10 +420,13 @@ export class SyntheticsPrivateLocation {
       privateLocations
     );
     const shardingMode = await getAgentShardingMode(this.server);
-    const enrolledAgentsByLocation =
-      shardingMode === 'active'
-        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
-        : new Map<string, EnrolledAgents>();
+    // Test runs need the browser check in every sharding mode.
+    const needsEnrolledAgents =
+      shardingMode === 'active' ||
+      (Boolean(testRunId) && configs.some(({ config }) => config.type === MonitorTypeEnum.BROWSER));
+    const enrolledAgentsByLocation = needsEnrolledAgents
+      ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -439,11 +442,9 @@ export class SyntheticsPrivateLocation {
           }
 
           const enrolledAgents = enrolledAgentsByLocation.get(location.id);
-          // A real monitor stays unassigned until a complete agent enrolls. A test run
-          // would only wait forever for results, so report it instead.
+          // No agent here can run the test, so it would wait forever for results.
           if (
             testRunId &&
-            shardingMode === 'active' &&
             config.type === MonitorTypeEnum.BROWSER &&
             !enrolledAgents?.completeAgentIds?.length
           ) {
