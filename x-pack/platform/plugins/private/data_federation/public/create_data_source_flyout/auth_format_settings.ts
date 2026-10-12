@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { AzureDataSourceWithSecrets, GCSDataSourceWithSecrets, S3DataSourceWithSecrets } from "@kbn/data-federation-plugin/common/datasource_types";
-import { AzureAuthenticationMode, GcsAuthenticationMode, S3AuthenticationMode } from "./create_data_source_flyout_authentication";
+import type {
+  AzureDataSourceWithSecrets,
+  GCSDataSourceWithSecrets,
+  S3DataSourceWithSecrets,
+} from '../../common/datasource_types';
+import type {
+  AzureAuthenticationMode,
+  GcsAuthenticationMode,
+  S3AuthenticationMode,
+} from './create_data_source_flyout_authentication';
 
 const s3AccessAndSecretKeysFormatSettings = (dataSourceWithSecrets: S3DataSourceWithSecrets) => {
   const { access_key, secret_key, region, endpoint } = dataSourceWithSecrets.settings || {};
@@ -20,7 +28,8 @@ const s3AccessAndSecretKeysFormatSettings = (dataSourceWithSecrets: S3DataSource
 };
 
 const s3FederatedIdentityFormatSettings = (dataSourceWithSecrets: S3DataSourceWithSecrets) => {
-  const { role_arn, jwt_audience, role_session_name, sts_endpoint, sts_region, region, endpoint } = dataSourceWithSecrets.settings || {};
+  const { role_arn, jwt_audience, role_session_name, sts_endpoint, sts_region, region, endpoint } =
+    dataSourceWithSecrets.settings || {};
   return {
     region,
     endpoint,
@@ -42,11 +51,14 @@ const s3AnonymousFormatSettings = (dataSourceWithSecrets: S3DataSourceWithSecret
   };
 };
 
-const s3AuthFormatSettings: Record<S3AuthenticationMode, (dataSourceWithSecrets: S3DataSourceWithSecrets) => Record<string, unknown>> = {
-  'access_and_secret_keys': s3AccessAndSecretKeysFormatSettings,
-  'federated_identity': s3FederatedIdentityFormatSettings,
-  'anonymous': s3AnonymousFormatSettings,
-}
+const s3AuthFormatSettings: Record<
+  S3AuthenticationMode,
+  (dataSourceWithSecrets: S3DataSourceWithSecrets) => Record<string, unknown>
+> = {
+  access_and_secret_keys: s3AccessAndSecretKeysFormatSettings,
+  federated_identity: s3FederatedIdentityFormatSettings,
+  anonymous: s3AnonymousFormatSettings,
+};
 
 const gcsAccessAndSecretKeysFormatSettings = (dataSourceWithSecrets: GCSDataSourceWithSecrets) => {
   const { credentials, project_id, endpoint, token_uri } = dataSourceWithSecrets.settings || {};
@@ -61,7 +73,14 @@ const gcsAccessAndSecretKeysFormatSettings = (dataSourceWithSecrets: GCSDataSour
 };
 
 const gcsFederatedIdentityFormatSettings = (dataSourceWithSecrets: GCSDataSourceWithSecrets) => {
-  const { jwt_audience, sts_audience, service_account_impersonation_url, project_id, endpoint, token_uri } = dataSourceWithSecrets.settings || {};
+  const {
+    jwt_audience,
+    sts_audience,
+    service_account_impersonation_url,
+    project_id,
+    endpoint,
+    token_uri,
+  } = dataSourceWithSecrets.settings || {};
   return {
     project_id,
     endpoint,
@@ -83,11 +102,14 @@ const gcsAnonymousFormatSettings = (dataSourceWithSecrets: GCSDataSourceWithSecr
   };
 };
 
-const gcsAuthFormatSettings: Record<GcsAuthenticationMode, (dataSourceWithSecrets: GCSDataSourceWithSecrets) => Record<string, unknown>> = {
-  'access_and_secret_keys': gcsAccessAndSecretKeysFormatSettings,
-  'federated_identity': gcsFederatedIdentityFormatSettings,
-  'anonymous': gcsAnonymousFormatSettings,
-}
+const gcsAuthFormatSettings: Record<
+  GcsAuthenticationMode,
+  (dataSourceWithSecrets: GCSDataSourceWithSecrets) => Record<string, unknown>
+> = {
+  access_and_secret_keys: gcsAccessAndSecretKeysFormatSettings,
+  federated_identity: gcsFederatedIdentityFormatSettings,
+  anonymous: gcsAnonymousFormatSettings,
+};
 
 const azureCredentialsFormatSettings = (dataSourceWithSecrets: AzureDataSourceWithSecrets) => {
   const { account, key, endpoint } = dataSourceWithSecrets.settings || {};
@@ -99,7 +121,9 @@ const azureCredentialsFormatSettings = (dataSourceWithSecrets: AzureDataSourceWi
   };
 };
 
-const azureFederatedIdentityFormatSettings = (dataSourceWithSecrets: AzureDataSourceWithSecrets) => {
+const azureFederatedIdentityFormatSettings = (
+  dataSourceWithSecrets: AzureDataSourceWithSecrets
+) => {
   const { tenant_id, client_id, jwt_audience, endpoint } = dataSourceWithSecrets.settings || {};
   return {
     endpoint,
@@ -118,15 +142,17 @@ const azureAnonymousFormatSettings = (dataSourceWithSecrets: AzureDataSourceWith
   };
 };
 
-const azureAuthFormatSettings: Record<AzureAuthenticationMode, (dataSourceWithSecrets: AzureDataSourceWithSecrets) => Record<string, unknown>> = {
-  'credentials': azureCredentialsFormatSettings,
-  'federated_identity': azureFederatedIdentityFormatSettings,
-  'anonymous': azureAnonymousFormatSettings,
-}
+const azureAuthFormatSettings: Record<
+  AzureAuthenticationMode,
+  (dataSourceWithSecrets: AzureDataSourceWithSecrets) => Record<string, unknown>
+> = {
+  credentials: azureCredentialsFormatSettings,
+  federated_identity: azureFederatedIdentityFormatSettings,
+  anonymous: azureAnonymousFormatSettings,
+};
 
 export const authFormatSettingsByDataSourceType = {
   s3: s3AuthFormatSettings,
   gcs: gcsAuthFormatSettings,
   azure: azureAuthFormatSettings,
 };
-
