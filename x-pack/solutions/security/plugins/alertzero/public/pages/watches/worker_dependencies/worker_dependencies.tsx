@@ -28,8 +28,8 @@ interface WorkerDependencyNames {
 const strong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
 /**
- * While the provider Worker is off, the dependent Worker loses some or all of its work. Each
- * entry's copy names only what is lost, since the dependent may still do the rest of its job.
+ * While the provider Worker is off, the dependent Worker loses some or all of its work; each
+ * entry's copy names only what is lost.
  */
 export interface WorkerDependency {
   providerId: string;
@@ -100,13 +100,13 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
   },
   {
     // Endpoint Analysis is the only reader of the `security.analyze_endpoint` records Attack
-    // Discovery's forensics handoff writes. False positives still close without it.
+    // Discovery's forensics handoff writes.
     providerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
     dependentId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
     disableBody: ({ providerName, dependentName }) => (
       <FormattedMessage
         id="xpack.alertzero.watches.workerDependencies.endpointAnalysisToAttackDiscovery.disableBody"
-        defaultMessage="<strong>{dependentName}</strong> is enabled and hands attacks it can't rule out as false positives to this Worker. While {providerName} is off, those handoffs aren't analyzed and their Investigations stay open."
+        defaultMessage="<strong>{dependentName}</strong> is enabled and can hand attacks with true positive or inconclusive verdicts to this Worker. While {providerName} is off, those handoffs aren't analyzed, so their Investigations get no forensic timeline, IoCs, or containment proposals."
         values={{ providerName, dependentName, strong }}
       />
     ),
@@ -115,7 +115,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         'xpack.alertzero.watches.workerDependencies.endpointAnalysisToAttackDiscovery.providerReason',
         {
           defaultMessage:
-            "{dependentName} is enabled but its handoffs aren't analyzed while this Worker is off.",
+            "{dependentName} is enabled, but attacks it hands off to this Worker aren't analyzed while this Worker is off.",
           values: { dependentName },
         }
       ),
@@ -124,7 +124,7 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         'xpack.alertzero.watches.workerDependencies.endpointAnalysisToAttackDiscovery.dependentReason',
         {
           defaultMessage:
-            "{providerName} is disabled — attacks handed off for analysis aren't analyzed.",
+            "{providerName} is disabled — attacks this Worker hands off aren't analyzed.",
           values: { providerName },
         }
       ),
@@ -215,9 +215,9 @@ export const getWorkerWarningReasons = (
 ];
 
 /**
- * Notices for saved Workers that are on after the save but can't do their work. A missing model
- * is reported after every such save; a disabled provider only after the save that turned the
- * Worker on.
+ * Notices for saved Workers that are on after the save but can't do all of their work. A missing
+ * model is reported after every such save; a disabled provider only after the save that turned
+ * the Worker on.
  */
 export const getBlockedAfterSaveNotices = (
   enabledBeforeSave: WorkerEnabledById,

@@ -1737,11 +1737,11 @@ describe('WatchDetailPage', () => {
       const notice = await screen.findByTestId('alertZeroWorkerBlockedAfterSaveModal');
       expect(notice).toHaveTextContent("Saved — but Attack Discovery won't run properly yet");
       expect(notice).toHaveTextContent(
-        "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed."
+        "Endpoint Analysis is disabled — attacks this Worker hands off aren't analyzed."
       );
     });
 
-    it('tells the user after Save that an enabled Worker still will not run, without blocking the save', async () => {
+    it('tells the user after Save that an enabled Worker still has unmet requirements, without blocking the save', async () => {
       const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, allWorkers([]));
 
       fireEvent.click(enabledSwitch(RULE_COVERAGE));

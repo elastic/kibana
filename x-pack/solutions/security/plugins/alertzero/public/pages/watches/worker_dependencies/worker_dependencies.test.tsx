@@ -77,7 +77,7 @@ describe('getDisableConfirmation', () => {
     expect(screen.getByText('Rule Coverage', { selector: 'strong' })).toBeInTheDocument();
   });
 
-  it("says Attack Discovery's handoffs won't be analyzed when Endpoint Analysis is turned off", () => {
+  it("names the forensic outputs Attack Discovery's handoffs lose when Endpoint Analysis is turned off", () => {
     const confirmation = getDisableConfirmation(
       ENDPOINT_ANALYSIS,
       enabledById({ [ENDPOINT_ANALYSIS]: true, [ATTACK_DISCOVERY]: true })
@@ -87,7 +87,7 @@ describe('getDisableConfirmation', () => {
     );
 
     expect(container).toHaveTextContent(
-      "Attack Discovery is enabled and hands attacks it can't rule out as false positives to this Worker. While Endpoint Analysis is off, those handoffs aren't analyzed and their Investigations stay open."
+      "Attack Discovery is enabled and can hand attacks with true positive or inconclusive verdicts to this Worker. While Endpoint Analysis is off, those handoffs aren't analyzed, so their Investigations get no forensic timeline, IoCs, or containment proposals."
     );
   });
 
@@ -187,7 +187,7 @@ describe('getWorkerWarningReasons', () => {
     );
   });
 
-  it('uses the Attack Discovery → Endpoint Analysis copy', () => {
+  it('uses the copy for Attack Discovery as provider of Endpoint Analysis', () => {
     const state = enabledById({ [ATTACK_DISCOVERY]: false, [ENDPOINT_ANALYSIS]: true });
 
     expect(messages(warnings(subject(ENDPOINT_ANALYSIS), state))).toEqual([
@@ -198,14 +198,21 @@ describe('getWorkerWarningReasons', () => {
     ]);
   });
 
-  it('uses the Endpoint Analysis → Attack Discovery copy', () => {
+  it('warns neither Endpoint Analysis nor Attack Discovery while both are on', () => {
+    const state = enabledById({ [ENDPOINT_ANALYSIS]: true, [ATTACK_DISCOVERY]: true });
+
+    expect(warnings(subject(ENDPOINT_ANALYSIS), state)).toEqual([]);
+    expect(warnings(subject(ATTACK_DISCOVERY), state)).toEqual([]);
+  });
+
+  it('uses the copy for Endpoint Analysis as provider of Attack Discovery', () => {
     const state = enabledById({ [ENDPOINT_ANALYSIS]: false, [ATTACK_DISCOVERY]: true });
 
     expect(messages(warnings(subject(ATTACK_DISCOVERY), state))).toEqual([
-      "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed.",
+      "Endpoint Analysis is disabled — attacks this Worker hands off aren't analyzed.",
     ]);
     expect(messages(warnings(subject(ENDPOINT_ANALYSIS), state))).toEqual([
-      "Attack Discovery is enabled but its handoffs aren't analyzed while this Worker is off.",
+      "Attack Discovery is enabled, but attacks it hands off to this Worker aren't analyzed while this Worker is off.",
     ]);
   });
 });
@@ -240,7 +247,7 @@ describe('getBlockedAfterSaveNotices', () => {
 
     expect(notices.map(({ workerId }) => workerId)).toEqual([ATTACK_DISCOVERY]);
     expect(messages(notices[0].reasons)).toEqual([
-      "Endpoint Analysis is disabled — attacks handed off for analysis aren't analyzed.",
+      "Endpoint Analysis is disabled — attacks this Worker hands off aren't analyzed.",
     ]);
   });
 
