@@ -12,6 +12,16 @@ import { ProposalConflictError } from '@kbn/proposals-plugin/server';
 import type { LiveProposal } from './resolve_proposal_slot';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
+
+/**
+ * The revision after which packaging stops adding to a Proposal's comment. Every addition is a new
+ * revision row and a new card in the owner's conversation, so with no limit a busy host would pile
+ * revisions on a Proposal until its comment ran out of room. Worse, an analyst reading the
+ * Proposal on revision N is refused when they decide it once N+1 has landed, which was rare while
+ * only analysts revised. Past this, the journal line on the converging Investigation is the
+ * pointer, and nothing is lost: the finding is still covered and still visible.
+ */
+export const MAX_AUTOMATIC_REVISION = 5;
 type ProposalPrivileges = Pick<
   ReturnType<ProposalsPluginStart['getProposalPrivileges']>,
   'canManage'
@@ -26,6 +36,7 @@ type ProposalPrivileges = Pick<
  * - `already_mentioned`: the comment already names this Investigation.
  * - `not_revisable`: an analyst has already decided it, and `revise()` refuses a decided one.
  * - `too_long`: the line would push the comment past the length the service allows.
+ * - `revision_limit`: the Proposal has already been revised {@link MAX_AUTOMATIC_REVISION} times.
  * - `failed`: the revision was refused (including for want of the privilege to manage proposals)
  *   or errored. Never fatal: the duplicate was avoided either way, and the line is a courtesy to
  *   the analyst.
@@ -36,6 +47,7 @@ export type ConvergeOutcome =
   | 'already_mentioned'
   | 'not_revisable'
   | 'too_long'
+  | 'revision_limit'
   | 'failed';
 
 /** The link the conversations page already copies, so an analyst lands on that Investigation. */
@@ -97,6 +109,9 @@ export const createAlsoRaisedByAppender = ({
     if (live.comment.includes(investigationConversationId)) {
       return 'already_mentioned';
     }
+    if (live.revision >= MAX_AUTOMATIC_REVISION) {
+      return 'revision_limit';
+    }
     const line = buildAlsoRaisedByLine(
       buildInvestigationLink({ spaceId, conversationId: investigationConversationId })
     );
@@ -138,6 +153,7 @@ export const createAlsoRaisedByAppender = ({
           ...live,
           proposalId: head.proposalId,
           comment: reloaded.comment,
+          revision: head.revision,
           revisable: head.status === 'pending' && head.decision === undefined,
         },
         investigationConversationId

@@ -13,6 +13,7 @@ import {
   buildConvergenceNote,
   buildInvestigationLink,
   createAlsoRaisedByAppender,
+  MAX_AUTOMATIC_REVISION,
 } from './converge_on_live_proposal';
 import type { LiveProposal } from './resolve_proposal_slot';
 
@@ -25,6 +26,7 @@ const live = (overrides: Partial<LiveProposal> = {}): LiveProposal => ({
   conversationId: 'conv-owner',
   title: 'Isolate host A',
   comment: 'Isolate host A.',
+  revision: 1,
   revisable: true,
   ...overrides,
 });
@@ -155,6 +157,55 @@ describe('createAlsoRaisedByAppender', () => {
       expect(outcome).toBe('failed');
       expect(service.revise).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('security unavailable'));
+    });
+  });
+
+  describe('how many times it will revise one proposal', () => {
+    // Every addition is a new revision and a new card on the owner's conversation, and an analyst
+    // reading revision N is refused when they decide it once N+1 has landed.
+    it('stops once the proposal has been revised as often as it will, and leaves the pointer to the journal', async () => {
+      const service = createService();
+      const { append, privileges } = appender(service);
+
+      const outcome = await append({
+        live: live({ revision: MAX_AUTOMATIC_REVISION }),
+        investigationConversationId: THIS_RUN,
+      });
+
+      expect(outcome).toBe('revision_limit');
+      expect(service.revise).not.toHaveBeenCalled();
+      expect(privileges.canManage).not.toHaveBeenCalled();
+    });
+
+    it('still revises one below the limit', async () => {
+      const service = createService();
+      const { append } = appender(service);
+
+      const outcome = await append({
+        live: live({ revision: MAX_AUTOMATIC_REVISION - 1 }),
+        investigationConversationId: THIS_RUN,
+      });
+
+      expect(outcome).toBe('revised');
+    });
+
+    it('counts a revision that landed while it was deciding', async () => {
+      // The 409 means someone revised first; the reloaded head may be the one that reaches the limit.
+      const service = createService();
+      service.revise.mockRejectedValueOnce(new ProposalConflictError('superseded'));
+      service.getLatestRevision.mockResolvedValue({
+        proposalId: 'proposal-newer',
+        revision: MAX_AUTOMATIC_REVISION,
+        status: 'pending',
+        decision: undefined,
+      });
+      service.get.mockResolvedValue({ comment: 'Isolate host A.' });
+      const { append } = appender(service);
+
+      const outcome = await append({ live: live(), investigationConversationId: THIS_RUN });
+
+      expect(outcome).toBe('revision_limit');
+      expect(service.revise).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -322,7 +373,7 @@ describe('buildConvergenceNote', () => {
     }
   );
 
-  it.each(['too_long', 'failed'] as const)(
+  it.each(['too_long', 'revision_limit', 'failed'] as const)(
     'does not claim it was added when the outcome is %s',
     (outcome) => {
       expect(buildConvergenceNote({ spaceId: SPACE, live: live(), outcome })).not.toContain(

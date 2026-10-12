@@ -188,6 +188,7 @@ const liveProposal = (overrides: Partial<LiveProposal> = {}): LiveProposal => ({
   conversationId: 'conv-other',
   title: 'Isolate host',
   comment: 'Isolate host.',
+  revision: 1,
   revisable: true,
   ...overrides,
 });

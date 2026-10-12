@@ -150,9 +150,17 @@ export const convergedProposalSchema = z.object({
   ownerConversationId: z.string(),
   /**
    * What happened to that Proposal's comment: `revised` when this Investigation was added to it,
-   * otherwise why it was not (already named, already decided, too long, refused).
+   * otherwise why it was not (already named, already decided, too long, already revised as
+   * often as packaging will, refused).
    */
-  outcome: z.enum(['revised', 'already_mentioned', 'not_revisable', 'too_long', 'failed']),
+  outcome: z.enum([
+    'revised',
+    'already_mentioned',
+    'not_revisable',
+    'too_long',
+    'revision_limit',
+    'failed',
+  ]),
   /** The journal line for this Investigation, saying where its finding went. */
   note: z.string().max(2000),
 });

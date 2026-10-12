@@ -7,6 +7,7 @@
 
 import { parse } from 'yaml';
 import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
+import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
@@ -320,6 +321,10 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
+      // The gate reads the Proposal under its id to tell a lost race from any other failed create.
+      // Imported rather than typed, with the route's own `{id}` swapped for the gate's template,
+      // so a moved route fails here instead of 404ing on the first lost race.
+      PROPOSAL_BY_ID_URL.replace('{id}', '{{ inputs.proposalId }}'),
       // Owned by agentic investigations; imported rather than typed so a moved route fails here.
       IMPACT_INTERNAL_URL,
     ]);

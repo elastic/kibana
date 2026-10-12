@@ -28,6 +28,8 @@ interface Chain {
   headId?: string;
   /** What the live revision acts on. */
   actionInput?: Record<string, unknown>;
+  /** Overrides the revision number the fake would derive from `headId`. */
+  revision?: number;
 }
 
 /** A Proposals service fake: chains keyed by the id of their root, one per generation. */
@@ -44,7 +46,7 @@ const createService = (chains: Record<string, Chain> = {}) => {
       }
       return {
         proposalId: entry.headId ?? id,
-        revision: entry.headId ? 2 : 1,
+        revision: entry.revision ?? (entry.headId ? 2 : 1),
         status: entry.status,
         decision: entry.decision,
         actionInput: entry.actionInput,
@@ -68,16 +70,36 @@ const createService = (chains: Record<string, Chain> = {}) => {
   return service;
 };
 
-const resolver = (service: ReturnType<typeof createService>, spaceId = SPACE) => {
+const THIS_RUN = 'conv-this';
+const transient = () => Object.assign(new Error('unavailable'), { statusCode: 503 });
+
+const resolver = (
+  service: ReturnType<typeof createService>,
+  overrides: {
+    spaceId?: string;
+    assertCanRead?: () => Promise<void>;
+    isInvestigationOpen?: (conversationId: string) => Promise<boolean>;
+  } = {}
+) => {
   const logger = loggerMock.create();
+  const privileges = { assertCanRead: jest.fn(overrides.assertCanRead ?? (async () => undefined)) };
+  const isInvestigationOpen = jest.fn(overrides.isInvestigationOpen ?? (async () => true));
+  const sleep = jest.fn(async () => undefined);
   return {
     logger,
+    privileges,
+    isInvestigationOpen,
+    sleep,
     resolve: createProposalSlotResolver({
       proposalsService: service as never,
-      spaceId,
+      privileges,
+      isInvestigationOpen,
+      investigationConversationId: THIS_RUN,
+      spaceId: overrides.spaceId ?? SPACE,
       request,
       logger,
       now: () => NOW,
+      retry: { sleep },
     }),
   };
 };
@@ -104,6 +126,7 @@ describe('createProposalSlotResolver', () => {
           conversationId: 'conv-1',
           title: 'Isolate host A',
           comment: `Comment of ${idAt(0)}`,
+          revision: 1,
           revisable: true,
         },
       });
@@ -289,6 +312,270 @@ describe('createProposalSlotResolver', () => {
       await resolve({ subjectKey: SUBJECT, actionInput: forHost('agent-a') });
 
       expect(service.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('a live proposal that asks for a weaker criticality than the finding', () => {
+    const asking = (level: string) => ({
+      id_field: 'user.name',
+      id_value: 'dev-user',
+      criticality_level: level,
+    });
+    const liveAt = (level: string) =>
+      createService({ [idAt(0)]: { status: 'pending', actionInput: asking(level) } });
+
+    it('does not absorb a stronger finding: it would only add a link and the analyst would approve the lower level', async () => {
+      // A critical report asks for extreme_impact, any other confirmed finding for high_impact.
+      const { resolve } = resolver(liveAt('high_impact'));
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: asking('extreme_impact') })
+      ).resolves.toEqual({ kind: 'mint', proposalId: idAt(1) });
+    });
+
+    it('covers a weaker finding: a stronger proposal already asks for more', async () => {
+      const { resolve } = resolver(liveAt('extreme_impact'));
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: asking('high_impact') })
+      ).resolves.toMatchObject({ kind: 'converge' });
+    });
+
+    it('covers a finding that asks for the same level', async () => {
+      const { resolve } = resolver(liveAt('high_impact'));
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: asking('high_impact') })
+      ).resolves.toMatchObject({ kind: 'converge' });
+    });
+
+    it.each([
+      ['low_impact', 'medium_impact'],
+      ['medium_impact', 'high_impact'],
+      ['high_impact', 'extreme_impact'],
+    ])('ranks %s below %s', async (live, wanted) => {
+      const { resolve } = resolver(liveAt(live));
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: asking(wanted) })
+      ).resolves.toMatchObject({ kind: 'mint' });
+    });
+
+    it('is covered only by the same level when it does not know the level, rather than guessing', async () => {
+      const same = resolver(liveAt('custom_impact'));
+      const other = resolver(liveAt('high_impact'));
+
+      await expect(
+        same.resolve({ subjectKey: SUBJECT, actionInput: asking('custom_impact') })
+      ).resolves.toMatchObject({ kind: 'converge' });
+      await expect(
+        other.resolve({ subjectKey: SUBJECT, actionInput: asking('custom_impact') })
+      ).resolves.toMatchObject({ kind: 'mint' });
+    });
+
+    it('does not hold a finding that asks for a level when the live proposal asks for none', async () => {
+      const service = createService({
+        [idAt(0)]: {
+          status: 'pending',
+          actionInput: { id_field: 'user.name', id_value: 'dev-user' },
+        },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(
+        resolve({ subjectKey: SUBJECT, actionInput: asking('high_impact') })
+      ).resolves.toMatchObject({ kind: 'mint' });
+    });
+
+    it('ignores criticality for a finding that carries none', async () => {
+      const { resolve } = resolver(liveAt('low_impact'));
+
+      await expect(
+        resolve({
+          subjectKey: SUBJECT,
+          actionInput: { id_field: 'user.name', id_value: 'dev-user' },
+        })
+      ).resolves.toMatchObject({ kind: 'converge' });
+    });
+  });
+
+  describe('a live proposal whose Investigation has been closed', () => {
+    // A Proposal on a closed Investigation is one the analyst cannot see: converging a finding
+    // onto it would hide the finding.
+    it('does not hold the subject: the finding gets a proposal of its own', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'pending', conversationId: 'conv-closed' },
+      });
+      const { resolve, isInvestigationOpen } = resolver(service, {
+        isInvestigationOpen: async (id) => id !== 'conv-closed',
+      });
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toEqual({
+        kind: 'mint',
+        proposalId: idAt(1),
+      });
+      expect(isInvestigationOpen).toHaveBeenCalledWith('conv-closed');
+    });
+
+    it('converges onto an open one further along', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'pending', conversationId: 'conv-closed' },
+        [idAt(1)]: { status: 'pending', conversationId: 'conv-open' },
+      });
+      const { resolve } = resolver(service, {
+        isInvestigationOpen: async (id) => id === 'conv-open',
+      });
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({
+        kind: 'converge',
+        live: { proposalId: idAt(1), conversationId: 'conv-open' },
+      });
+    });
+
+    it('is not asked about this run’s own Investigation, which is the one being packaged', async () => {
+      const service = createService({ [idAt(0)]: { status: 'pending', conversationId: THIS_RUN } });
+      const { resolve, isInvestigationOpen } = resolver(service, {
+        isInvestigationOpen: async () => false,
+      });
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
+      expect(isInvestigationOpen).not.toHaveBeenCalled();
+    });
+
+    it('is not asked about a proposal that was already ruled out', async () => {
+      const service = createService({
+        [idAt(0)]: { status: 'succeeded', conversationId: 'conv-x' },
+      });
+      const { resolve, isInvestigationOpen } = resolver(service);
+
+      await resolve({ subjectKey: SUBJECT });
+
+      expect(isInvestigationOpen).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when it cannot tell whether the Investigation is open', async () => {
+      const service = createService({ [idAt(0)]: { status: 'pending', conversationId: 'conv-x' } });
+      const { resolve } = resolver(service, {
+        isInvestigationOpen: async () => {
+          throw new Error('conversations unavailable');
+        },
+      });
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('conversations unavailable');
+    });
+  });
+
+  describe('the privilege to read proposals', () => {
+    it('is checked for the request before anything is read', async () => {
+      const service = createService();
+      const { resolve, privileges } = resolver(service);
+
+      await resolve({ subjectKey: SUBJECT });
+
+      expect(privileges.assertCanRead).toHaveBeenCalledWith(request);
+      expect(privileges.assertCanRead.mock.invocationCallOrder[0]).toBeLessThan(
+        service.getLatestRevision.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('is checked once per run, however many findings it resolves', async () => {
+      const { resolve, privileges } = resolver(createService());
+
+      await resolve({ subjectKey: SUBJECT });
+      await resolve({ subjectKey: 'another-subject' });
+      await resolve({ subjectKey: 'a-third' });
+
+      expect(privileges.assertCanRead).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads nothing, and copies nothing from another Investigation, when it is refused', async () => {
+      // `get` hands back another Investigation's title and comment, which end up in this
+      // Investigation's journal.
+      const service = createService({ [idAt(0)]: { status: 'pending' } });
+      const { resolve } = resolver(service, {
+        assertCanRead: async () => {
+          throw new Error('forbidden');
+        },
+      });
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('forbidden');
+      expect(service.getLatestRevision).not.toHaveBeenCalled();
+      expect(service.get).not.toHaveBeenCalled();
+    });
+
+    it('stays refused for every later finding in the run', async () => {
+      const { resolve, privileges } = resolver(createService(), {
+        assertCanRead: async () => {
+          throw new Error('forbidden');
+        },
+      });
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('forbidden');
+      await expect(resolve({ subjectKey: 'another-subject' })).rejects.toThrow('forbidden');
+      expect(privileges.assertCanRead).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('a read that fails in a way a second try could pass', () => {
+    it('is retried, so one throttled request does not lose a run its findings', async () => {
+      const service = createService({ [idAt(0)]: { status: 'pending' } });
+      service.getLatestRevision.mockRejectedValueOnce(transient());
+      const { resolve, sleep } = resolver(service);
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
+      expect(service.getLatestRevision).toHaveBeenCalledTimes(2);
+      expect(sleep).toHaveBeenCalledTimes(1);
+    });
+
+    it('is retried when it is reading the live proposal itself', async () => {
+      const service = createService({ [idAt(0)]: { status: 'pending' } });
+      service.get.mockRejectedValueOnce(transient());
+      const { resolve } = resolver(service);
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
+      expect(service.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('is retried when it is asking whether an Investigation is open', async () => {
+      const service = createService({ [idAt(0)]: { status: 'pending', conversationId: 'conv-x' } });
+      const isInvestigationOpen = jest
+        .fn()
+        .mockRejectedValueOnce(transient())
+        .mockResolvedValue(true);
+      const { resolve } = resolver(service, { isInvestigationOpen });
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'converge' });
+      expect(isInvestigationOpen).toHaveBeenCalledTimes(2);
+    });
+
+    it('still fails closed once the retries are spent', async () => {
+      const service = createService();
+      service.getLatestRevision.mockRejectedValue(transient());
+      const { resolve } = resolver(service);
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('unavailable');
+      expect(service.getLatestRevision).toHaveBeenCalledTimes(3);
+    });
+
+    it('does not retry a refusal', async () => {
+      const service = createService();
+      service.getLatestRevision.mockRejectedValue(
+        Object.assign(new Error('forbidden'), { statusCode: 403 })
+      );
+      const { resolve } = resolver(service);
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('forbidden');
+      expect(service.getLatestRevision).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry "nothing there", which is an answer', async () => {
+      const service = createService();
+      const { resolve, sleep } = resolver(service);
+
+      await resolve({ subjectKey: SUBJECT });
+
+      expect(service.getLatestRevision).toHaveBeenCalledTimes(1);
+      expect(sleep).not.toHaveBeenCalled();
     });
   });
 

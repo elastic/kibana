@@ -137,8 +137,14 @@ describe('package_report step wiring', () => {
       request,
       logger,
     });
+    // What the resolver reads belongs to other Investigations: it needs the means to check that the
+    // request may read proposals, to ask whether their owner is still open, and to know which
+    // Investigation is this run's own.
     expect(createProposalSlotResolverMock).toHaveBeenCalledWith({
       proposalsService,
+      privileges,
+      isInvestigationOpen: expect.any(Function),
+      investigationConversationId: 'conv-1',
       spaceId: 'default',
       request,
       logger,

@@ -403,10 +403,9 @@ export const runPackageReport = async ({
     } catch {
       // Fails closed: the one case it must not mishandle is the one where it cannot tell what
       // already exists, because minting then could duplicate a Proposal an analyst is deciding on.
+      // `proposals`, `converged` and `alreadyOpenCount` still hold their empty starting values:
+      // they are only assigned from a `settleProposals` that returned.
       mintSuppression = 'check_failed';
-      proposals = [];
-      converged = [];
-      alreadyOpenCount = 0;
     }
   }
 
