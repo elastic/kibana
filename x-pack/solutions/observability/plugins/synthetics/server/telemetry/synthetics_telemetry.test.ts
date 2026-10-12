@@ -60,6 +60,15 @@ describe('SyntheticsTelemetry', () => {
       expect(telemetry.shouldReportError(errorEvent, start + ERROR_THROTTLE_MS)).toBe(true);
     });
 
+    it('forgets expired errors the next time any error is reported', () => {
+      const { telemetry } = setup();
+
+      telemetry.shouldReportError(errorEvent, 0);
+      telemetry.shouldReportError({ ...errorEvent, message: 'other' }, ERROR_THROTTLE_MS);
+
+      expect(telemetry.shouldReportError(errorEvent, ERROR_THROTTLE_MS)).toBe(true);
+    });
+
     it('throttles each error type and message independently', () => {
       const { telemetry } = setup();
 

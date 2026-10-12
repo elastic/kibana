@@ -53,9 +53,9 @@ export class SyntheticsTelemetry {
 
   /** True at most once per throttle window for the same error type and message shape. */
   public shouldReportError(event: MonitorErrorEvent, now: number = Date.now()): boolean {
+    this.pruneExpiredErrors(now);
     const key = getErrorThrottleKey(event);
-    const lastReportedAt = this.errorReportedAt.get(key);
-    if (lastReportedAt !== undefined && now - lastReportedAt < ERROR_THROTTLE_MS) {
+    if (this.errorReportedAt.has(key)) {
       return false;
     }
     if (this.errorReportedAt.size >= MAX_THROTTLE_KEYS) {
@@ -63,6 +63,14 @@ export class SyntheticsTelemetry {
     }
     this.errorReportedAt.set(key, now);
     return true;
+  }
+
+  private pruneExpiredErrors(now: number): void {
+    this.errorReportedAt.forEach((reportedAt, key) => {
+      if (now - reportedAt >= ERROR_THROTTLE_MS) {
+        this.errorReportedAt.delete(key);
+      }
+    });
   }
 
   public reportEvent<K extends keyof SyntheticsEventMap>(
