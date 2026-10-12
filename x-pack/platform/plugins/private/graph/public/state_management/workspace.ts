@@ -15,27 +15,63 @@ import { reset } from './global';
 import { datasourceSelector } from './datasource';
 import { liveResponseFieldsSelector, selectedFieldsSelector } from './fields';
 import { fetchTopNodes } from '../services/fetch_top_nodes';
-import type { Workspace } from '../types';
+import type { Workspace, WorkspaceNode } from '../types';
 import type { ServerResultNode } from '../types';
 import type { MatchedAction } from './helpers';
 import { matchesAction } from './helpers';
 
 const actionCreator = actionCreatorFactory('x-pack/graph/workspace');
 
+export interface WorkspaceNodeState {
+  id: string;
+  parentId?: string;
+  x: number;
+  y: number;
+  label: string;
+  color: string;
+  scaledSize: number;
+  data: WorkspaceNode['data'];
+}
+
+export interface WorkspaceEdgeState {
+  id: string;
+  sourceId: string;
+  targetId: string;
+  topSourceId: string;
+  topTargetId: string;
+  label: string;
+  weight: number;
+  width: number;
+}
+
 export interface WorkspaceState {
   isInitialized: boolean;
+  nodesById: Record<string, WorkspaceNodeState>;
+  nodeIds: string[];
+  edgesById: Record<string, WorkspaceEdgeState>;
+  edgeIds: string[];
+  blocklistedNodesById: Record<string, WorkspaceNodeState>;
+  blocklistedNodeIds: string[];
 }
 
 const initialWorkspaceState: WorkspaceState = {
   isInitialized: false,
+  nodesById: {},
+  nodeIds: [],
+  edgesById: {},
+  edgeIds: [],
+  blocklistedNodesById: {},
+  blocklistedNodeIds: [],
 };
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
+export const workspaceChanged = actionCreator<WorkspaceState>('WORKSPACE_CHANGED');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
-  .case(reset, () => ({ isInitialized: false }))
-  .case(initializeWorkspace, () => ({ isInitialized: true }))
+  .case(reset, () => initialWorkspaceState)
+  .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
+  .case(workspaceChanged, (_state, workspace) => workspace)
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -43,6 +79,55 @@ export const workspaceInitializedSelector = createSelector(
   workspaceSelector,
   (workspace: WorkspaceState) => workspace.isInitialized
 );
+
+export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
+  const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
+  const nodesById = Object.fromEntries(workspace.nodes.map((node) => [node.id, toNodeState(node)]));
+  const edgesById = Object.fromEntries(
+    workspace.edges.map((edge) => {
+      const id = getEdgeId(edge);
+      return [
+        id,
+        {
+          id,
+          sourceId: edge.source.id,
+          targetId: edge.target.id,
+          topSourceId: edge.topSrc.id,
+          topTargetId: edge.topTarget.id,
+          label: edge.label,
+          weight: edge.weight,
+          width: edge.width,
+        },
+      ];
+    })
+  );
+
+  return {
+    isInitialized: true,
+    nodesById,
+    nodeIds: workspace.nodes.map(({ id }) => id),
+    edgesById,
+    edgeIds: Object.keys(edgesById),
+    blocklistedNodesById: Object.fromEntries(
+      blocklistedNodes.map((node) => [node.id, toNodeState(node)])
+    ),
+    blocklistedNodeIds: blocklistedNodes.map(({ id }) => id),
+  };
+};
+
+const toNodeState = (node: WorkspaceNode): WorkspaceNodeState => ({
+  id: node.id,
+  parentId: node.parent?.id,
+  x: node.x,
+  y: node.y,
+  label: node.label,
+  color: node.color,
+  scaledSize: node.scaledSize,
+  data: node.data,
+});
+
+const getEdgeId = ({ id, source, target }: Workspace['edges'][number]): string =>
+  id ?? `${source.id}-${target.id}`;
 
 /**
  * Listener handling filling in top terms into workspace.

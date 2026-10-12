@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { appStateToSavedWorkspace } from './serialize';
+import { reduxStateToSavedWorkspace } from './serialize';
 import type {
   GraphWorkspaceSavedObject,
   Workspace,
   WorkspaceEdge,
+  WorkspaceNode,
   UrlTemplate,
   AdvancedSettings,
   WorkspaceField,
 } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
-import type { IndexpatternDatasource } from '../../state_management';
+import { createWorkspaceState, type IndexpatternDatasource } from '../../state_management';
 
 describe('serialize', () => {
   let appState: {
@@ -158,10 +159,35 @@ describe('serialize', () => {
     } as WorkspaceEdge);
   });
 
-  it('should serialize given workspace', () => {
-    const savedWorkspace = {} as unknown as GraphWorkspaceSavedObject;
+  const serializeWorkspace = (
+    savedWorkspace: GraphWorkspaceSavedObject,
+    canSaveData: boolean
+  ): void => {
+    appState.workspace.nodes.forEach((node, index) => {
+      node.id = `node-${index}`;
+    });
+    appState.workspace.blocklistedNodes.forEach((node, index) => {
+      (node as WorkspaceNode).id = `blocked-${index}`;
+    });
+    appState.workspace.edges.forEach((edge, index) => {
+      edge.id = `edge-${index}`;
+      edge.topSrc = edge.source;
+      edge.topTarget = edge.target;
+    });
+    appState.workspace.selectedNodes = [];
+    appState.workspace.getEdgeSelection = () => [];
 
-    appStateToSavedWorkspace(savedWorkspace, appState, true);
+    reduxStateToSavedWorkspace(
+      savedWorkspace,
+      { ...appState, workspace: createWorkspaceState(appState.workspace) },
+      canSaveData
+    );
+  };
+
+  it('should serialize normalized Redux workspace state', () => {
+    const savedWorkspace = {} as GraphWorkspaceSavedObject;
+
+    serializeWorkspace(savedWorkspace, true);
 
     const workspaceState = JSON.parse(savedWorkspace.wsState);
     expect(workspaceState).toMatchInlineSnapshot(`
@@ -278,15 +304,20 @@ describe('serialize', () => {
         ],
       }
     `);
+    expect(savedWorkspace.numVertices).toBe(5);
+    expect(savedWorkspace.numLinks).toBe(2);
   });
 
   it('should not save data if set to false', () => {
     const savedWorkspace = {} as unknown as GraphWorkspaceSavedObject;
 
-    appStateToSavedWorkspace(savedWorkspace, appState, false);
+    serializeWorkspace(savedWorkspace, false);
 
     const workspaceState = JSON.parse(savedWorkspace.wsState);
-    expect(workspaceState.vertices.length).toEqual(0);
-    expect(workspaceState.links.length).toEqual(0);
+    expect(workspaceState.vertices).toHaveLength(0);
+    expect(workspaceState.links).toHaveLength(0);
+    expect(workspaceState.blocklist).toHaveLength(0);
+    expect(savedWorkspace.numVertices).toBe(0);
+    expect(savedWorkspace.numLinks).toBe(0);
   });
 });

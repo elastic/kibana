@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { GraphWorkspaceSavedObject, Workspace } from '../types';
 import type { GraphStoreDependencies, GraphState, StartGraphListening } from '.';
-import { submitSearch } from '.';
+import { createWorkspaceState, submitSearch, workspaceChanged } from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';
 import { setDatasource } from './datasource';
@@ -20,7 +20,7 @@ import { loadTemplates, templatesSelector } from './url_templates';
 import {
   migrateLegacyIndexPatternRef,
   savedWorkspaceToAppState,
-  appStateToSavedWorkspace,
+  reduxStateToSavedWorkspace,
   lookupIndexPatternId,
 } from '../services/persistence';
 import { updateMetaData, metaDataSelector } from './meta_data';
@@ -111,6 +111,7 @@ export const registerPersistenceListeners = (
       listenerApi.dispatch(loadFields(allFields));
       listenerApi.dispatch(updateSettings(advancedSettings));
       listenerApi.dispatch(loadTemplates(urlTemplates));
+      listenerApi.dispatch(workspaceChanged(createWorkspaceState(createdWorkspace)));
       if (urlQuery) {
         listenerApi.dispatch(submitSearch(urlQuery));
       }
@@ -179,10 +180,10 @@ function showModal({
     const canSaveData =
       deps.savePolicy === 'configAndData' ||
       (deps.savePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
-    appStateToSavedWorkspace(
+    reduxStateToSavedWorkspace(
       savedWorkspace,
       {
-        workspace,
+        workspace: state.workspace,
         urlTemplates: templatesSelector(state),
         advancedSettings: settingsSelector(state),
         selectedIndex: selectedDatasource,
