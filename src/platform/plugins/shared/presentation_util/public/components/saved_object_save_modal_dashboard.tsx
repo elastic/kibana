@@ -47,8 +47,8 @@ export function SavedObjectSaveModalDashboard<T = void>(props: SaveModalDashboar
     documentId || disableDashboardOptions
       ? null
       : initialDashboardOption !== undefined
-      ? initialDashboardOption
-      : 'existing'
+        ? initialDashboardOption
+        : 'existing'
   );
   const [isAddToLibrarySelected, setAddToLibrary] = useState<boolean>(
     (shouldForceSaveByReference || canSaveByReference) &&

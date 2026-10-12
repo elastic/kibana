@@ -70,7 +70,7 @@ export interface ToolConfirmationPolicy {
  */
 export interface ToolDefinition<
   TType extends ToolType = ToolType,
-  TConfig extends object = Record<string, unknown>
+  TConfig extends object = Record<string, unknown>,
 > {
   /**
    * A unique id for this tool.
@@ -108,7 +108,7 @@ export interface ToolDefinition<
 
 export interface ToolDefinitionWithSchema<
   TType extends ToolType = ToolType,
-  TConfig extends object = Record<string, unknown>
+  TConfig extends object = Record<string, unknown>,
 > extends ToolDefinition<TType, TConfig> {
   /**
    * the JSON schema associated with this tool's input parameters.

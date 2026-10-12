@@ -26,7 +26,8 @@ import type { PlacementStrategy } from './constants';
  * Before adding anything to this interface, please be certain that it belongs in *every* embeddable.
  */
 export interface DefaultEmbeddableApi<SerializedState extends object = object>
-  extends DefaultPresentationPanelApi,
+  extends
+    DefaultPresentationPanelApi,
     HasType,
     PublishesPhaseEvents,
     HasSerializableState<SerializedState> {}
@@ -37,12 +38,12 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
  */
 export type EmbeddableApiRegistration<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 > = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$' | 'relatedPanels$' | keyof CanLockHoverActions>;
 
 export interface BuildEmbeddableProps<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 > {
   /**
    * Initial serialized state provided by the parent.
@@ -82,7 +83,7 @@ export interface BuildEmbeddableProps<
  **/
 export interface EmbeddablePublicDefinition<
   SerializedState extends object = object,
-  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type

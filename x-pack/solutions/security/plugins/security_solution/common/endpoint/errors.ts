@@ -13,7 +13,10 @@ export class EndpointError<MetaType = unknown> extends Error {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public debug: any = undefined;
 
-  constructor(message: string, public readonly meta?: MetaType) {
+  constructor(
+    message: string,
+    public readonly meta?: MetaType
+  ) {
     super(message);
     // For debugging - capture name of subclasses
     this.name = this.constructor.name;

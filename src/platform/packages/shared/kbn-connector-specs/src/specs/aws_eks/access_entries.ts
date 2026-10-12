@@ -158,8 +158,8 @@ export const accessEntryActions: ConnectorSpec['actions'] = {
       // EKS resets whichever of the two fields the update body omits, so carry the current value.
       const current =
         input.kubernetesGroups === undefined || input.username === undefined
-          ? (await request<{ accessEntry?: EksAccessEntry }>(() => ctx.client.get(path)))
-              .accessEntry ?? {}
+          ? ((await request<{ accessEntry?: EksAccessEntry }>(() => ctx.client.get(path)))
+              .accessEntry ?? {})
           : {};
       const data = await request<{ accessEntry?: EksAccessEntry }>(() =>
         ctx.client.post(path, {

@@ -19,7 +19,7 @@ const createMlJob = (datafeedConfig?: Record<string, unknown>): estypes.MlJob =>
   ({
     job_id: 'test-job',
     ...(datafeedConfig ? { datafeed_config: datafeedConfig } : {}),
-  } as unknown as estypes.MlJob);
+  }) as unknown as estypes.MlJob;
 
 describe('resolveJobProjectRouting', () => {
   it('returns the stored project routing when the datafeed has one', () => {
@@ -128,7 +128,7 @@ describe('createIsCpsPlatformGateEnabled', () => {
 });
 
 describe('fetchIsInfraMlCpsEnabled', () => {
-  const createMlSystem = (mlInfo: jest.Mock): MlSystem => ({ mlInfo } as unknown as MlSystem);
+  const createMlSystem = (mlInfo: jest.Mock): MlSystem => ({ mlInfo }) as unknown as MlSystem;
 
   it('is false without calling ML when the platform gate is disabled', async () => {
     const mlInfo = jest.fn();

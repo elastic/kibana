@@ -17,7 +17,7 @@ import type { AgentOutputBase } from '../types';
  */
 export function createExecuteEsqlGroundingEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends AgentOutputBase = AgentOutputBase
+  TTaskOutput extends AgentOutputBase = AgentOutputBase,
 >(): Evaluator<TExample, TTaskOutput> {
   return {
     name: 'execute_esql_grounding',

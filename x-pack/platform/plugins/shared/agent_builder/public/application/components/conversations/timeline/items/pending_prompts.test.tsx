@@ -68,7 +68,7 @@ const authorization = (id: string): PromptRequest =>
     connector_name: 'C',
     connector_type: 't',
     auth_method: 'oauth_authorization_code',
-  } as PromptRequest);
+  }) as PromptRequest;
 const question = (id: string): PromptRequest => ({
   id,
   type: AgentPromptType.ask_user_question,

@@ -50,9 +50,10 @@ interface TelemetryCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
 }
 
-export class TelemetryCollectionManagerPlugin
-  implements Plugin<TelemetryCollectionManagerPluginSetup, TelemetryCollectionManagerPluginStart>
-{
+export class TelemetryCollectionManagerPlugin implements Plugin<
+  TelemetryCollectionManagerPluginSetup,
+  TelemetryCollectionManagerPluginStart
+> {
   private readonly logger: Logger;
   private collectionStrategy: CollectionStrategy | undefined;
   private usageGetterMethodPriority = -1;

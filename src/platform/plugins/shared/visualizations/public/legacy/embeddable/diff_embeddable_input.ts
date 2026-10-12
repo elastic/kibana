@@ -47,7 +47,7 @@ type GenericEmbedableInputToCompare = Pick<
 >;
 
 export const omitGenericEmbeddableInput = <
-  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>
+  I extends Partial<EmbeddableInput> = Partial<EmbeddableInput>,
 >(
   input: I
 ): Omit<I, keyof EmbeddableInput> => omit(input, allGenericInputKeys);

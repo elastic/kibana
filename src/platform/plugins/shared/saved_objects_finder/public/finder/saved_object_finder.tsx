@@ -228,7 +228,7 @@ class SavedObjectFinderUiClass extends React.Component<
           ...originalTagColumn,
           sortable: (item) =>
             typeof originalTagColumn.sortable === 'function'
-              ? originalTagColumn.sortable(item) ?? ''
+              ? (originalTagColumn.sortable(item) ?? '')
               : '',
           ['data-test-subj']: 'savedObjectFinderTags',
         }
@@ -344,7 +344,7 @@ class SavedObjectFinderUiClass extends React.Component<
       ...(tagColumn ? [tagColumn] : []),
     ];
     const pagination = {
-      initialPageSize: !!this.props.fixedPageSize ? this.props.fixedPageSize : pageSize ?? 10,
+      initialPageSize: !!this.props.fixedPageSize ? this.props.fixedPageSize : (pageSize ?? 10),
       pageSize: !!this.props.fixedPageSize ? undefined : pageSize,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
       showPerPageOptions: !this.props.fixedPageSize,

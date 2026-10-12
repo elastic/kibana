@@ -53,7 +53,7 @@ const getTranslatedDashboard = () =>
     '@timestamp': '2024-06-01T12:00:00Z',
     status: 'completed',
     translation_result: 'full',
-  } as DashboardMigrationDashboard);
+  }) as DashboardMigrationDashboard;
 
 const getInstalledDashboard = () =>
   ({
@@ -94,7 +94,7 @@ const getInstalledDashboard = () =>
     '@timestamp': '2024-06-01T12:00:00Z',
     status: 'completed',
     translation_result: 'full',
-  } as DashboardMigrationDashboard);
+  }) as DashboardMigrationDashboard;
 
 const mockDashboards: DashboardMigrationDashboard[] = [
   getTranslatedDashboard(),
@@ -166,7 +166,9 @@ jest
   .mockReturnValue({
     data: mockTranslationStats,
     isLoading: false,
-  } as unknown as ReturnType<typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats>);
+  } as unknown as ReturnType<
+    typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats
+  >);
 
 const mockInstallMigrationDashboards = jest.fn();
 const mockInstallMigrationDashboard = jest.fn();
@@ -174,7 +176,9 @@ const mockInstallMigrationDashboard = jest.fn();
 jest.spyOn(useInstallMigrationDashboardsModule, 'useInstallMigrationDashboards').mockReturnValue({
   mutateAsync: mockInstallMigrationDashboards,
   isLoading: false,
-} as unknown as ReturnType<typeof useInstallMigrationDashboardsModule.useInstallMigrationDashboards>);
+} as unknown as ReturnType<
+  typeof useInstallMigrationDashboardsModule.useInstallMigrationDashboards
+>);
 
 jest.spyOn(useInstallMigrationDashboardModule, 'useInstallMigrationDashboard').mockReturnValue({
   mutateAsync: mockInstallMigrationDashboard,

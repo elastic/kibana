@@ -46,10 +46,10 @@ describe('Overview - Migrate system indices - Flyout', () => {
         feature.migration_status === 'NO_MIGRATION_NEEDED'
           ? 'Migration complete'
           : feature.migration_status === 'MIGRATION_NEEDED'
-          ? 'Migration required'
-          : feature.migration_status === 'IN_PROGRESS'
-          ? 'Migration in progress'
-          : 'Migration failed';
+            ? 'Migration required'
+            : feature.migration_status === 'IN_PROGRESS'
+              ? 'Migration in progress'
+              : 'Migration failed';
 
       expect(within(row!).getByText(expectedStatusText)).toBeInTheDocument();
     });

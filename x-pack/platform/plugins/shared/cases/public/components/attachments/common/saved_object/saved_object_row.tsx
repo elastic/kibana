@@ -103,13 +103,13 @@ const SavedObjectRowComponent: React.FC<SavedObjectRowProps> = ({
           <EuiButton
             size="s"
             color={isAttached ? 'success' : 'primary'}
-            iconType={isAttached ? 'check' : actionIconType ?? 'plusCircle'}
+            iconType={isAttached ? 'check' : (actionIconType ?? 'plusCircle')}
             isLoading={isAttachInFlight}
             isDisabled={isAttachingAny || isAttached}
             onClick={handleClick}
             data-test-subj={`cases-attach-so-button-${savedObject.id}`}
           >
-            {isAttached ? i18n.ATTACHED_ACTION : actionLabel ?? i18n.ATTACH_ACTION}
+            {isAttached ? i18n.ATTACHED_ACTION : (actionLabel ?? i18n.ATTACH_ACTION)}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

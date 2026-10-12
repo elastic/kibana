@@ -65,7 +65,7 @@ describe('useSourcesBadge', () => {
   ): monaco.editor.IEditorMouseEvent =>
     ({
       target: { type, position: { lineNumber, column } },
-    } as unknown as monaco.editor.IEditorMouseEvent);
+    }) as unknown as monaco.editor.IEditorMouseEvent;
 
   beforeEach(() => {
     jest.clearAllMocks();

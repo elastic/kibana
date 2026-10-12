@@ -185,8 +185,8 @@ export const FlyoutSummaryKPIs = ({
     data && data.availability < 99
       ? 'danger'
       : data && data.availability < 99.9
-      ? 'warning'
-      : 'success';
+        ? 'warning'
+        : 'success';
 
   return (
     <EuiPageSection bottomBorder="extended">

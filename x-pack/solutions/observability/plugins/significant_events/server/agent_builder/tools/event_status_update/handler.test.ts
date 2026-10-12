@@ -8,7 +8,7 @@
 import { updateEventStatusToolHandler } from './handler';
 
 const makeLogger = () =>
-  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as never);
+  ({ error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() }) as never;
 
 describe('updateEventStatusToolHandler', () => {
   it('creates a new event version when status changes', async () => {

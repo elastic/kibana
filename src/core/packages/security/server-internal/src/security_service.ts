@@ -22,9 +22,10 @@ import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 import { createCoreUiamService } from './uiam';
 import { WorkloadTypeRegistry } from './workload_type_registry';
 
-export class SecurityService
-  implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>
-{
+export class SecurityService implements CoreService<
+  InternalSecurityServiceSetup,
+  InternalSecurityServiceStart
+> {
   private readonly log: Logger;
   private securityApi?: CoreSecurityDelegateContract;
   private fakeRequestEnricherAcquired = false;

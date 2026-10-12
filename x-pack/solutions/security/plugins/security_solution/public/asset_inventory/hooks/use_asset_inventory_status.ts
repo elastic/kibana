@@ -106,7 +106,7 @@ export const useAssetInventoryStatus = () => {
         })
       );
       const total = response.rawResponse.hits.total;
-      const totalValue = typeof total === 'number' ? total : total?.value ?? 0;
+      const totalValue = typeof total === 'number' ? total : (total?.value ?? 0);
       return totalValue > 0;
     },
     enabled: featureGatesPassed,

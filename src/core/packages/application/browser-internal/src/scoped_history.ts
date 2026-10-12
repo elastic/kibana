@@ -25,9 +25,9 @@ import type { ScopedHistory } from '@kbn/core-application-browser';
  *
  * @internal Only exposed publicly for testing purpose.
  */
-export class CoreScopedHistory<HistoryLocationState = unknown>
-  implements ScopedHistory<HistoryLocationState>
-{
+export class CoreScopedHistory<
+  HistoryLocationState = unknown,
+> implements ScopedHistory<HistoryLocationState> {
   /**
    * Tracks whether or not the user has left this history's scope. All methods throw errors if called after scope has
    * been left.

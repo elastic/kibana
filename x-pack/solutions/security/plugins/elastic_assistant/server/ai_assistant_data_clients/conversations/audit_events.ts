@@ -90,8 +90,8 @@ export function conversationAuditEvent({
   let message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
   if (
     (action === ConversationAuditAction.SHARED || action === ConversationAuditAction.RESTRICTED) &&
     users
@@ -112,7 +112,7 @@ export function conversationAuditEvent({
       action,
       category: [AUDIT_CATEGORY.DATABASE],
       type: type ? [type] : undefined,
-      outcome: error ? AUDIT_OUTCOME.FAILURE : outcome ?? AUDIT_OUTCOME.SUCCESS,
+      outcome: error ? AUDIT_OUTCOME.FAILURE : (outcome ?? AUDIT_OUTCOME.SUCCESS),
     },
     error: error && {
       code: error.name,

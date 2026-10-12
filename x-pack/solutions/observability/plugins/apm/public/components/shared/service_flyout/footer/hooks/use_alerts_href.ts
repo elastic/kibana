@@ -37,8 +37,8 @@ export function useAlertsHref(): string | undefined {
       environment === ENVIRONMENT_NOT_DEFINED.value
         ? `(${SERVICE_ENVIRONMENT}: "${ENVIRONMENT_NOT_DEFINED.value}" OR NOT ${SERVICE_ENVIRONMENT}: *)` // sentinel is a known safe literal, escaping not needed
         : isEnvironmentDefined(environment)
-        ? `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`
-        : null;
+          ? `${SERVICE_ENVIRONMENT}: "${escapeQuotes(environment)}"`
+          : null;
     const kuery = [`${SERVICE_NAME}: "${escapeQuotes(service.name)}"`, envKuery]
       .filter(Boolean)
       .join(' AND ');

@@ -77,7 +77,7 @@ export const createUseKibanaMockValue = (services?: StartServicesMock) => {
 export const workflowsManagementMocks = {
   createStart: (): jest.Mocked<WorkflowsPublicPluginStart> => ({
     setUnavailableInServerlessTier: jest.fn(),
-    getTelemetry: jest.fn(async () => ({} as WorkflowsBaseTelemetry)),
+    getTelemetry: jest.fn(async () => ({}) as WorkflowsBaseTelemetry),
     getQueryClient: jest.fn(async () => new QueryClient()),
   }),
 };

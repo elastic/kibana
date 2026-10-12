@@ -95,9 +95,10 @@ export interface FeaturesPluginStart {
 /**
  * Represents Features Plugin instance that will be managed by the Kibana plugin system.
  */
-export class FeaturesPlugin
-  implements Plugin<RecursiveReadonly<FeaturesPluginSetup>, RecursiveReadonly<FeaturesPluginStart>>
-{
+export class FeaturesPlugin implements Plugin<
+  RecursiveReadonly<FeaturesPluginSetup>,
+  RecursiveReadonly<FeaturesPluginStart>
+> {
   private readonly logger: Logger;
   private readonly featureRegistry: FeatureRegistry = new FeatureRegistry();
   private isReportingEnabled: boolean = false;

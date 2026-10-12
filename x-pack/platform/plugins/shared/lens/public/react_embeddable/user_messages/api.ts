@@ -274,12 +274,13 @@ export function buildUserMessagesHelpers(
         blockingMessages instanceof Error
           ? blockingMessages
           : blockingMessages.length
-          ? new Error(
-              typeof blockingMessages[0].longMessage === 'string' && blockingMessages[0].longMessage
-                ? blockingMessages[0].longMessage
-                : blockingMessages[0].shortMessage
-            )
-          : undefined;
+            ? new Error(
+                typeof blockingMessages[0].longMessage === 'string' &&
+                  blockingMessages[0].longMessage
+                  ? blockingMessages[0].longMessage
+                  : blockingMessages[0].shortMessage
+              )
+            : undefined;
 
       if (error) {
         addLog(`Blocking error: ${error?.message}`);

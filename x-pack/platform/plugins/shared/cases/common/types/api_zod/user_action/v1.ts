@@ -33,7 +33,7 @@ const UserActionFindRequestTypes = {
 
 const UserActionFindRequestTypesValues = Object.values(UserActionFindRequestTypes) as [
   string,
-  ...string[]
+  ...string[],
 ];
 
 const ActionSourceTypeValues = Object.values(ActionSourceTypes) as [string, ...string[]];

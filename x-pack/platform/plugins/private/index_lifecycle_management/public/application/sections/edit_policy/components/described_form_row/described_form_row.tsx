@@ -10,8 +10,10 @@ import React, { useState } from 'react';
 import type { EuiDescribedFormGroupProps, EuiSwitchProps } from '@elastic/eui';
 import { EuiDescribedFormGroup, EuiSwitch, EuiSpacer } from '@elastic/eui';
 
-export interface SwitchProps
-  extends Omit<EuiSwitchProps, 'children' | 'checked' | 'value' | 'onChange'> {
+export interface SwitchProps extends Omit<
+  EuiSwitchProps,
+  'children' | 'checked' | 'value' | 'onChange'
+> {
   /**
    * use initialValue to specify an uncontrolled component
    */

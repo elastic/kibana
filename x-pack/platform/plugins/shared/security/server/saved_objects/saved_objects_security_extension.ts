@@ -1721,7 +1721,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
    */
   async filterInaccessibleObjectsForBulkAction<
     L extends { type: string; id?: string; error: Payload },
-    R extends { type: string; id: string; esRequestIndex?: number }
+    R extends { type: string; id: string; esRequestIndex?: number },
   >(
     expectedResults: Array<Either<L, R>>,
     inaccessibleObjects: Array<{ type: string; id: string }>,

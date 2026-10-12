@@ -18,7 +18,10 @@ export class LoginPage {
   public readonly passwordInput: Locator;
   public readonly submitButton: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.loginBtn = this.page.testSubj.locator('loginButton');
     this.roleSelectionInput = this.page.getByRole('combobox');
     this.usernameInput = this.page.testSubj.locator('loginUsername');

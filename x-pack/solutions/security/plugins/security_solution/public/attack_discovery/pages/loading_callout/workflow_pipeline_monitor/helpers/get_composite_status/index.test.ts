@@ -13,7 +13,7 @@ import { getCompositeStatus } from '.';
 const createStep = (status: ExecutionStatus): StepExecutionWithLink =>
   ({
     status,
-  } as unknown as StepExecutionWithLink);
+  }) as unknown as StepExecutionWithLink;
 
 describe('getCompositeStatus', () => {
   it('returns PENDING for empty array', () => {

@@ -27,7 +27,7 @@ const createClient = ({
     assertCanManage: jest.fn(),
   };
   const client = createImpactClient({
-    getImpactService: () => ({ listByConversationIds } as unknown as ImpactService),
+    getImpactService: () => ({ listByConversationIds }) as unknown as ImpactService,
     getSpaceId,
     privileges,
   })(request);

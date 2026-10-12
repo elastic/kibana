@@ -23,9 +23,12 @@ export interface StartDependencies {
   uiActions: UiActionsStart;
 }
 
-export class LensInlineEditingPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class LensInlineEditingPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'lens_embeddable_inline_editing_example',

@@ -24,7 +24,7 @@ const createLogger = (): Logger =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {
   const logger = createLogger();
@@ -40,7 +40,7 @@ describe('getCriblPackagePolicyPostCreateOrUpdateCallback', () => {
           },
         },
       }),
-    } as unknown as RequestHandlerContext);
+    }) as unknown as RequestHandlerContext;
 
   const criblPolicyWithRoutes = {
     package: { name: 'cribl' },

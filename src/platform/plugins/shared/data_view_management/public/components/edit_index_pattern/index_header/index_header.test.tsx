@@ -23,7 +23,7 @@ const createDataView = (overrides: Partial<DataView> = {}): DataView =>
     getName: () => 'logs-*',
     isPersisted: () => true,
     ...overrides,
-  } as DataView);
+  }) as DataView;
 
 const renderHeader = (props: Partial<React.ComponentProps<typeof IndexHeader>> = {}) =>
   render(

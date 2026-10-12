@@ -562,7 +562,7 @@ export const ActionTypeForm = ({
                       // if action is a summary action, show the default summary message
                       isSummaryAction
                         ? defaultSummaryMessage
-                        : selectedActionGroup?.defaultActionMessage ?? defaultActionMessage
+                        : (selectedActionGroup?.defaultActionMessage ?? defaultActionMessage)
                     }
                     useDefaultMessage={useDefaultMessage}
                     actionConnector={actionConnector}

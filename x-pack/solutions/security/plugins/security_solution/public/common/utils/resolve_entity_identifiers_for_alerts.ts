@@ -21,8 +21,8 @@ export const resolveEntityIdentifiers = (
       typeof entityFilter.value === 'string'
         ? entityFilter.value
         : Array.isArray(entityFilter.value)
-        ? entityFilter.value[0]
-        : '';
+          ? entityFilter.value[0]
+          : '';
     return { [entityFilter.field]: String(value) };
   }
   return undefined;

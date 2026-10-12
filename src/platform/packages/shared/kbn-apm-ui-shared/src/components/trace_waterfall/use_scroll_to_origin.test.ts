@@ -35,9 +35,9 @@ const itemC = makeItem('c');
 const visibleList = [itemA, itemB, itemC];
 
 const makeListRef = (scrollToRow = jest.fn()) =>
-  ({ current: { scrollToRow } } as unknown as React.MutableRefObject<List>);
+  ({ current: { scrollToRow } }) as unknown as React.MutableRefObject<List>;
 
-const makeScrollToOriginRef = () => ({ current: () => {} } as React.MutableRefObject<() => void>);
+const makeScrollToOriginRef = () => ({ current: () => {} }) as React.MutableRefObject<() => void>;
 
 describe('useScrollToOrigin', () => {
   describe('onScrolled', () => {

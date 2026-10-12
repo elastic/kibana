@@ -151,7 +151,7 @@ export const localSchemaValidator = (
   return async (variant, target) => {
     try {
       const validate = validators[variant].validate;
-      return { errors: validate(target) ? [] : validate.errors ?? [], overflowed: false };
+      return { errors: validate(target) ? [] : (validate.errors ?? []), overflowed: false };
     } catch {
       return { errors: [], overflowed: true };
     }

@@ -28,7 +28,7 @@ describe('ExecutionDataViewsBootstrap', () => {
   }) =>
     ({
       dataViewsServiceFactory: jest.fn().mockResolvedValue(dataViewsService),
-    } as unknown as DataViewsServerPluginStart);
+    }) as unknown as DataViewsServerPluginStart;
 
   it('creates two managed data views for the space', async () => {
     const dataViewsService = {

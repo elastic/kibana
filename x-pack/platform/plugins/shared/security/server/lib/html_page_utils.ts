@@ -41,8 +41,8 @@ export function createRedirectHtmlPage(heading: string, location: string): strin
   <body>
     <h1>${escape(heading)}</h1>
     <a href="${location}">${i18nLib.translate('xpack.security.redirectPage.linkText', {
-    defaultMessage: 'Click here if you are not redirected automatically',
-  })}</a>
+      defaultMessage: 'Click here if you are not redirected automatically',
+    })}</a>
   </body>
 </html>`;
 }

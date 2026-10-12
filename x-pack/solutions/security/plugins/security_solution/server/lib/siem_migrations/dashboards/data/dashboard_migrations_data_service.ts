@@ -43,7 +43,10 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
 
   private readonly adapters: DashboardMigrationAdapters;
 
-  constructor(private logger: Logger, protected kibanaVersion: string) {
+  constructor(
+    private logger: Logger,
+    protected kibanaVersion: string
+  ) {
     super(kibanaVersion);
     this.adapters = {
       migrations: this.createDashboardIndexPatternAdapter({

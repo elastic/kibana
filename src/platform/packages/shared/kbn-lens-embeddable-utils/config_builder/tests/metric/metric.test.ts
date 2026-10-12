@@ -359,7 +359,7 @@ describe('Metric', () => {
           },
         ],
         ...(label ? { styling: { secondary: { label } } } : {}),
-      } satisfies MetricConfig);
+      }) satisfies MetricConfig;
 
     const convert = (config: MetricConfig) => {
       const builder = new LensConfigBuilder();

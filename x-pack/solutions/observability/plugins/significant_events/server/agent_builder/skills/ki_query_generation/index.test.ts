@@ -16,7 +16,7 @@ describe('createKIQueryGenerationSkill', () => {
     ({
       getScopedClients: jest.fn(),
       logger: loggerMock.create(),
-    } as unknown as KIQueryGenerationSkillOptions);
+    }) as unknown as KIQueryGenerationSkillOptions;
 
   it('returns query-generation tools as inline tools', () => {
     const skill = createKIQueryGenerationSkill(createOptions());

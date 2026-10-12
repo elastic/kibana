@@ -51,7 +51,7 @@ const todosUiEvent = (ids: string[]): ChatAgentEvent =>
       custom_event: TODOS_UPDATED_UI_EVENT,
       data: { todos: ids.map((id) => ({ content: id, status: 'pending' })) },
     },
-  } as ChatAgentEvent);
+  }) as ChatAgentEvent;
 
 const GRAPH = 'my-graph';
 const stateChunk = (

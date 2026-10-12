@@ -119,7 +119,8 @@ const useTitleStyles = (compact?: boolean) => {
 
       &::after {
         border: ${euiTheme.border.width.thin} solid transparent;
-        transition: border-color ${euiTheme.animation.fast} ease,
+        transition:
+          border-color ${euiTheme.animation.fast} ease,
           border-width ${euiTheme.animation.fast} ease;
       }
     `;

@@ -13,15 +13,12 @@ import type {
   PluginStartDependencies,
 } from './types';
 
-export class AgentBuilderWorkflowsPlugin
-  implements
-    Plugin<
-      AgentBuilderWorkflowsPluginSetup,
-      AgentBuilderWorkflowsPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
+export class AgentBuilderWorkflowsPlugin implements Plugin<
+  AgentBuilderWorkflowsPluginSetup,
+  AgentBuilderWorkflowsPluginStart,
+  PluginSetupDependencies,
+  PluginStartDependencies
+> {
   setup(
     coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderWorkflowsPluginStart>,
     setupDeps: PluginSetupDependencies

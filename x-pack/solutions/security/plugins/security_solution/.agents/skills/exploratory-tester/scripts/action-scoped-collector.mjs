@@ -83,7 +83,8 @@ import { pathToFileURL } from 'url';
 // Query parameter names (case-insensitive) whose values must never appear in
 // a persisted finding or diff. Deliberately conservative — false positives
 // (redacting a harmless param) are free; false negatives are not.
-const SENSITIVE_PARAM_NAMES = /^(x[-_]?api[-_]?key|api[-_]?key|token|password|passwd|secret|client[-_]?secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
+const SENSITIVE_PARAM_NAMES =
+  /^(x[-_]?api[-_]?key|api[-_]?key|token|password|passwd|secret|client[-_]?secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
 
 // Non-cryptographic, deterministic — its only job is to turn two DIFFERENT
 // secret values into two DIFFERENT (but still opaque) placeholders. Without
@@ -435,7 +436,9 @@ export function reduceAction(action, priorState) {
     // Playwright's navigation tears it down. The bridge marks these
     // `abandonedByNavigation` so they read as "the page moved on", not as an
     // ever-worsening "stuck" signal across subsequent checklist steps.
-    const abandoned = events.filter((ev) => ev.abandonedByNavigation && ev.respondedAt == null && ev.failure == null);
+    const abandoned = events.filter(
+      (ev) => ev.abandonedByNavigation && ev.respondedAt == null && ev.failure == null
+    );
     for (const ev of abandoned) {
       level3.push({
         type: 'request_abandoned_by_navigation',
@@ -460,7 +463,8 @@ export function reduceAction(action, priorState) {
     // coarser "assume same request" behavior this reducer always had.
     const currentPendingIds = pendingNow.map((ev) => ev.id).filter((id) => id != null);
     const priorPendingIds = (history[sig] && history[sig].pendingRequestIds) || null;
-    const idsKnown = currentPendingIds.length > 0 && priorPendingIds != null && priorPendingIds.length > 0;
+    const idsKnown =
+      currentPendingIds.length > 0 && priorPendingIds != null && priorPendingIds.length > 0;
     const continuesPriorPendingRequest = idsKnown
       ? currentPendingIds.some((id) => priorPendingIds.includes(id))
       : true;
@@ -495,9 +499,12 @@ export function reduceAction(action, priorState) {
     // app acted on. Counting it as a "settled" attempt let a same-URL retry
     // after an abandoned request read as duplicate_api_call/retry_after_failure
     // against a call that, from the app's perspective, never happened.
-    const settled = events.filter((ev) => (ev.status != null || ev.failure != null) && !ev.abandonedByNavigation);
+    const settled = events.filter(
+      (ev) => (ev.status != null || ev.failure != null) && !ev.abandonedByNavigation
+    );
     if (settled.length >= 2 && !isPolling(path)) {
-      const firstFailed = settled[0].failure != null || (settled[0].status != null && settled[0].status >= 400);
+      const firstFailed =
+        settled[0].failure != null || (settled[0].status != null && settled[0].status >= 400);
       const laterSucceeded = settled
         .slice(1)
         .some((ev) => ev.failure == null && ev.status != null && ev.status < 400);
@@ -562,9 +569,10 @@ export function reduceAction(action, priorState) {
         pendingNow.length === 0
           ? null
           : continuesPriorPendingRequest && priorEntry.firstPendingAt != null
-          ? priorEntry.firstPendingAt
-          : Date.now(),
-      pendingRequestIds: pendingNow.length === 0 ? null : currentPendingIds.length > 0 ? currentPendingIds : null,
+            ? priorEntry.firstPendingAt
+            : Date.now(),
+      pendingRequestIds:
+        pendingNow.length === 0 ? null : currentPendingIds.length > 0 ? currentPendingIds : null,
     };
   }
 

@@ -44,7 +44,7 @@ const createListViewMock = (error?: unknown): ReturnType<typeof useProfilesListV
     setPage: jest.fn(),
     setPerPage: jest.fn(),
     refetch: jest.fn(),
-  } as unknown as ReturnType<typeof useProfilesListView>);
+  }) as unknown as ReturnType<typeof useProfilesListView>;
 
 const createDeleteFlowMock = (
   confirmDelete: jest.Mock = jest.fn().mockResolvedValue(false),
@@ -57,7 +57,7 @@ const createDeleteFlowMock = (
     openConfirmation: jest.fn(),
     cancel: jest.fn(),
     confirmDelete,
-  } as unknown as ReturnType<typeof useDeleteProfileFlow>);
+  }) as unknown as ReturnType<typeof useDeleteProfileFlow>;
 
 const createProfileFormMock = (
   submit: jest.Mock = jest.fn().mockResolvedValue(undefined),
@@ -89,7 +89,7 @@ const createProfileFormMock = (
     setRegexRules: jest.fn(),
     setNerRules: jest.fn(),
     submit,
-  } as unknown as ReturnType<typeof useProfileForm>);
+  }) as unknown as ReturnType<typeof useProfileForm>;
 
 describe('useAnonymizationProfilesSectionState', () => {
   beforeEach(() => {

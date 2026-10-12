@@ -62,7 +62,7 @@ export interface ShareMenuProviderLegacy {
 type ShareImplementationFactory<
   T extends Omit<ShareTypes, 'legacy'>,
   C extends Record<string, unknown> = Record<string, unknown>,
-  S extends SharingData = SharingData
+  S extends SharingData = SharingData,
 > = T extends 'integration'
   ? {
       id: string;
@@ -118,7 +118,7 @@ export type EmbedShare = ShareImplementationFactory<
  */
 export type ShareIntegration<
   IntegrationParameters extends Record<string, unknown> = Record<string, unknown>,
-  S extends SharingData = SharingData
+  S extends SharingData = SharingData,
 > = ShareImplementationFactory<'integration', IntegrationParameters, S>;
 
 /**
@@ -133,57 +133,56 @@ export interface ShareLegacy {
 /**
  * @description Share integration implementation definition for performing exports within kibana
  */
-export interface ExportShare<S extends SharingData = SharingData>
-  extends ShareIntegration<
-    {
-      /**
-       * @deprecated only kept around for legacy reasons
-       */
-      name?: string;
-      icon?: EuiIconProps['type'];
-      sortOrder?: number;
-      /**
-       * @deprecated only kept around for legacy reasons
-       */
-      toolTipContent?: string;
-      label: string;
-      exportType: string;
-      /**
-       * allows disabling the export action, for instance the current app has no data to export
-       */
-      disabled?: boolean;
-      helpText?: ReactNode;
-      generateExportButtonLabel?: ReactNode;
-      generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
-      renderCopyURIButton?: boolean;
-      warnings?: Array<{ title: string; message: string }>;
-      requiresSavedState?: boolean;
-      supportedLayoutOptions?: Array<'print'>;
-      renderLayoutOptionSwitch?: boolean;
-      /**
-       * indicates if the export integration supports generating it exports with absolute time ranges
-       */
-      supportsAbsoluteTime?: boolean;
-      renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
-      flyoutAriaLabel?: string;
-    } & (
-      | {
-          generateAssetComponent?: never;
-          copyAssetURIConfig: {
-            headingText: string;
-            helpText?: string;
-            contentType: EuiCodeProps['language'];
-            generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
-          };
-        }
-      | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
-      | {
-          generateAssetComponent?: never;
-          copyAssetURIConfig?: never;
-        }
-    ),
-    S
-  > {
+export interface ExportShare<S extends SharingData = SharingData> extends ShareIntegration<
+  {
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    name?: string;
+    icon?: EuiIconProps['type'];
+    sortOrder?: number;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    toolTipContent?: string;
+    label: string;
+    exportType: string;
+    /**
+     * allows disabling the export action, for instance the current app has no data to export
+     */
+    disabled?: boolean;
+    helpText?: ReactNode;
+    generateExportButtonLabel?: ReactNode;
+    generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
+    renderCopyURIButton?: boolean;
+    warnings?: Array<{ title: string; message: string }>;
+    requiresSavedState?: boolean;
+    supportedLayoutOptions?: Array<'print'>;
+    renderLayoutOptionSwitch?: boolean;
+    /**
+     * indicates if the export integration supports generating it exports with absolute time ranges
+     */
+    supportsAbsoluteTime?: boolean;
+    renderTotalHitsSizeWarning?: (totalHits?: number) => ReactNode | undefined;
+    flyoutAriaLabel?: string;
+  } & (
+    | {
+        generateAssetComponent?: never;
+        copyAssetURIConfig: {
+          headingText: string;
+          helpText?: string;
+          contentType: EuiCodeProps['language'];
+          generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
+        };
+      }
+    | { generateAssetComponent: ReactNode; copyAssetURIConfig?: never }
+    | {
+        generateAssetComponent?: never;
+        copyAssetURIConfig?: never;
+      }
+  ),
+  S
+> {
   groupId: 'export';
 }
 
@@ -278,8 +277,10 @@ export type SharingDataLocatorParams<P extends SerializableRecord = Serializable
       version?: string;
     }>;
 
-export interface SharingData<P extends SerializableRecord = SerializableRecord>
-  extends Record<string, unknown> {
+export interface SharingData<P extends SerializableRecord = SerializableRecord> extends Record<
+  string,
+  unknown
+> {
   title: string;
   locatorParams: SharingDataLocatorParams<P>;
 }
@@ -292,18 +293,16 @@ export type ShareIntegrationMapKey = `integration-${string}`;
  * `ShareIntegration` use `SharingData`, and `config`'s `ctx` is contravariant in `S`, so
  * `ExportShare<ReportingCSVSharingData>` is not assignable to the default `ShareIntegration`).
  */
-export type RegisterShareIntegrationArgs<I = ShareIntegration> = I extends ShareIntegration<
-  infer P,
-  infer S
->
-  ? P extends Record<string, unknown>
-    ? S extends SharingData
-      ? Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> & {
-          getShareIntegrationConfig: (ctx: ShareActionConfigArgs<S>) => ReturnType<I['config']>;
-        }
+export type RegisterShareIntegrationArgs<I = ShareIntegration> =
+  I extends ShareIntegration<infer P, infer S>
+    ? P extends Record<string, unknown>
+      ? S extends SharingData
+        ? Pick<I, 'id' | 'groupId' | 'prerequisiteCheck'> & {
+            getShareIntegrationConfig: (ctx: ShareActionConfigArgs<S>) => ReturnType<I['config']>;
+          }
+        : never
       : never
-    : never
-  : never;
+    : never;
 
 export interface ShareRegistryInternalApi {
   registerShareIntegration<I>(shareObject: string, arg: RegisterShareIntegrationArgs<I>): void;
@@ -392,8 +391,10 @@ export interface ShareContext<S extends SharingData = SharingData> {
  * used to order the individual items in a flat list returned by all registered
  * menu providers.
  * */
-export interface ShareContextMenuPanelItem
-  extends Omit<EuiContextMenuPanelItemDescriptorEntry, 'name'> {
+export interface ShareContextMenuPanelItem extends Omit<
+  EuiContextMenuPanelItemDescriptorEntry,
+  'name'
+> {
   name: string; // EUI will accept a `ReactNode` for the `name` prop, but `ShareContentMenu` assumes a `string`.
   sortOrder?: number;
 }
@@ -436,7 +437,7 @@ export interface ShowShareMenuOptions<
   /**
    * Specifies the type of the sharing data.
    */
-  S extends Record<string, unknown> = Record<string, unknown>
+  S extends Record<string, unknown> = Record<string, unknown>,
 > extends Omit<ShareContext<SharingData<P> & S>, 'onClose'> {
   asExport?: boolean;
   anchorElement?: HTMLElement;

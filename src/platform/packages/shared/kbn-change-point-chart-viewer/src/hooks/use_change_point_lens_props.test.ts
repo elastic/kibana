@@ -80,7 +80,7 @@ const makeFetchParams = (
     esqlVariables: [],
     lastReloadRequestTime: 0,
     ...overrides,
-  } as HookProps['fetchParams']);
+  }) as HookProps['fetchParams'];
 
 // Props are always created outside renderHook callbacks so object references (especially
 // discoverFetch$) are stable across re-renders. Passing makeDefaultProps() inline would

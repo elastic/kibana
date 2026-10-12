@@ -71,8 +71,8 @@ function buildVisualizationState(config: TagcloudConfig): LensTagCloudState {
       ? layer.styling.orientation === 'horizontal'
         ? TAGCLOUD_ORIENTATION.SINGLE
         : layer.styling.orientation === 'vertical'
-        ? TAGCLOUD_ORIENTATION.RIGHT_ANGLED
-        : TAGCLOUD_ORIENTATION.MULTIPLE
+          ? TAGCLOUD_ORIENTATION.RIGHT_ANGLED
+          : TAGCLOUD_ORIENTATION.MULTIPLE
       : LENS_TAGCLOUD_DEFAULT_STATE.orientation,
     maxFontSize: layer.styling?.font_size?.max ?? LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
     minFontSize: layer.styling?.font_size?.min ?? LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
@@ -171,8 +171,8 @@ function reverseBuildVisualizationState(
         visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
           ? 'horizontal'
           : visualization.orientation === TAGCLOUD_ORIENTATION.MULTIPLE
-          ? 'angled'
-          : 'vertical',
+            ? 'angled'
+            : 'vertical',
       font_size: {
         min: visualization.minFontSize,
         max: visualization.maxFontSize,

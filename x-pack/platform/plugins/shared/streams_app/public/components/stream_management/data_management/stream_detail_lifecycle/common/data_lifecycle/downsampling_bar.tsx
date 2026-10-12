@@ -192,8 +192,8 @@ export const DownsamplingBar = ({
                         (editedPhaseName &&
                           segment.phaseName &&
                           segment.phaseName === editedPhaseName) ||
-                          (editedDownsampleStepIndex !== undefined &&
-                            segment.stepIndex === editedDownsampleStepIndex)
+                        (editedDownsampleStepIndex !== undefined &&
+                          segment.stepIndex === editedDownsampleStepIndex)
                       )}
                       canManageLifecycle={canManageLifecycle}
                       isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}

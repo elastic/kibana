@@ -41,9 +41,11 @@ const fadeOut = keyframes`
 const FADE_WIDTH = 200;
 
 const getErrorOverlayStyles = (euiTheme: EuiThemeComputed, errorType: 'error' | 'warn') => css`
-  background-color: ${errorType === 'error'
-    ? euiTheme.colors.backgroundBaseDanger
-    : euiTheme.colors.backgroundBaseWarning};
+  background-color: ${
+    errorType === 'error'
+      ? euiTheme.colors.backgroundBaseDanger
+      : euiTheme.colors.backgroundBaseWarning
+  };
   color: ${euiTheme.colors.textParagraph};
 
   display: flex;
@@ -112,9 +114,9 @@ export const ConsoleErrorIndicator: React.FC<ConsoleErrorIndicatorProps> = ({
               color="accent"
               size="s"
               css={css`
-                background-color: ${error.type === 'error'
-                  ? TOOLBAR_ERROR_COLOR
-                  : TOOLBAR_WARNING_COLOR};
+                background-color: ${
+                  error.type === 'error' ? TOOLBAR_ERROR_COLOR : TOOLBAR_WARNING_COLOR
+                };
               `}
             >
               {errorCount}

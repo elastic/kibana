@@ -18,8 +18,10 @@ export const DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON = 'aiCTAManageLicenseButton';
 /**
  * Props for the `NeedLicenseUpgrade` call to action.
  */
-export interface NeedLicenseUpgradeProps
-  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
+export interface NeedLicenseUpgradeProps extends Pick<
+  AssistantCallToActionProps,
+  'data-test-subj' | 'centered'
+> {
   /** Callback to handle managing the license. */
   onManageLicense: () => void;
 }

@@ -25,7 +25,7 @@ describe('Workspace files route', () => {
       licensing: Promise.resolve({
         license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
       }),
-    } as any);
+    }) as any;
 
   const createRequest = (path: string, conversationId = 'conv-1') =>
     httpServerMock.createKibanaRequest({
@@ -43,7 +43,7 @@ describe('Workspace files route', () => {
       getScopedClient: jest.fn().mockResolvedValue({ readFile: mockReadFile }),
     };
     const getInternalServices = () =>
-      ({ workspaces: workspacesService } as unknown as InternalStartServices);
+      ({ workspaces: workspacesService }) as unknown as InternalStartServices;
 
     const handlers: Record<string, any> = {};
     const mockRouter = {

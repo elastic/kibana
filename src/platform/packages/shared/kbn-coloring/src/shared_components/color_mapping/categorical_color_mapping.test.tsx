@@ -43,7 +43,7 @@ describe('color mapping', () => {
   let defaultProps: ColorMappingProps;
 
   mockFormatter.convertToText = jest.fn(
-    (v: any) => (typeof v === 'string' ? specialTokens.get(v) ?? v : JSON.stringify(v)) // simple way to check formatting is applied
+    (v: any) => (typeof v === 'string' ? (specialTokens.get(v) ?? v) : JSON.stringify(v)) // simple way to check formatting is applied
   );
   const onModelUpdateFn = jest.fn();
 

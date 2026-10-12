@@ -18,7 +18,7 @@ const capabilities = (features: Record<string, unknown>): Capabilities =>
     management: {},
     catalogue: {},
     ...features,
-  } as Capabilities);
+  }) as Capabilities;
 
 describe('hasObservabilityRulesV1Capability', () => {
   it('returns true for apm navLink', () => {

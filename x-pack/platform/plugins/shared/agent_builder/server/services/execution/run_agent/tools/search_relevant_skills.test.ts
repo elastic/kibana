@@ -19,7 +19,7 @@ const skill = (overrides: Partial<InternalSkillDefinition>): InternalSkillDefini
     basePath: 'skills/platform/core',
     referencedContent: [],
     ...overrides,
-  } as unknown as InternalSkillDefinition);
+  }) as unknown as InternalSkillDefinition;
 
 describe('createSearchRelevantSkillsTool', () => {
   const logger = loggingSystemMock.createLogger();

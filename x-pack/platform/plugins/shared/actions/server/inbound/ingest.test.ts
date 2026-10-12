@@ -124,7 +124,7 @@ describe('ingestInboundEvent', () => {
         },
         handleEvents,
       },
-    } as ReturnType<typeof getConnectorSpec>);
+    }) as ReturnType<typeof getConnectorSpec>;
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -155,12 +155,12 @@ export function useTriggerEventSearch(options: UseTriggerEventSearchOptions) {
 
   const hasMoreHits = Boolean(
     searchResult &&
-      resolveWorkflowsEventsHasMoreHits({
-        totalHits: searchResult.total,
-        accumulatedHitsLength: accumulatedHits.length,
-        currentPageHitsLength: searchResult.hits.length,
-        pageSize: TRIGGER_EVENT_SEARCH_PAGE_SIZE,
-      })
+    resolveWorkflowsEventsHasMoreHits({
+      totalHits: searchResult.total,
+      accumulatedHitsLength: accumulatedHits.length,
+      currentPageHitsLength: searchResult.hits.length,
+      pageSize: TRIGGER_EVENT_SEARCH_PAGE_SIZE,
+    })
   );
   const totalHits = searchResult?.total ?? 0;
 

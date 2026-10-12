@@ -54,7 +54,7 @@ export function getSupportedColumnAlignment<
   C extends {
     alignment?: 'left' | 'right' | 'center';
     colorMode?: ColumnCellDecorationMode;
-  }
+  },
 >(column: C, isNumeric = false): 'left' | 'right' | 'center' {
   const currentAlignment = getColumnAlignment(column, isNumeric);
   const colorMode = column.colorMode ?? COLUMN_CELL_DECORATION_MODE.NONE;
@@ -62,7 +62,7 @@ export function getSupportedColumnAlignment<
 
   return isAlignmentSupported(colorMode, currentAlignment)
     ? currentAlignment
-    : decoration.defaultAlignment ?? currentAlignment;
+    : (decoration.defaultAlignment ?? currentAlignment);
 }
 
 export function hasIncompatibleColorConfig({
@@ -504,7 +504,7 @@ function getProgressBarPaletteRangeType(
     return 'percent';
   }
 
-  return 'range' in paletteParams ? paletteParams.range : paletteParams.rangeType ?? 'percent';
+  return 'range' in paletteParams ? paletteParams.range : (paletteParams.rangeType ?? 'percent');
 }
 
 /**

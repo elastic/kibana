@@ -22,13 +22,13 @@ const { dataViews } = dataPluginMock.createStartContract();
 
 type Rule = FindRulesResponse['items'][number];
 
-const buildRule = (query: string): Rule => ({ query: { base: query } } as unknown as Rule);
+const buildRule = (query: string): Rule => ({ query: { base: query } }) as unknown as Rule;
 
 describe('useAlertingRuleSourceDataViews', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetEsqlDataView.mockImplementation(
-      async ({ esql }) => ({ id: esql } as unknown as DataView)
+      async ({ esql }) => ({ id: esql }) as unknown as DataView
     );
   });
 

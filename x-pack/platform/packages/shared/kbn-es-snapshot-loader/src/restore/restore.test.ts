@@ -48,7 +48,7 @@ const createMockEsClient = ({
     cluster: {
       health: jest.fn().mockResolvedValue(healthResponse),
     },
-  } as unknown as Client);
+  }) as unknown as Client;
 
 describe('filterIndicesToRestore', () => {
   it('filters regular indices by pattern', () => {

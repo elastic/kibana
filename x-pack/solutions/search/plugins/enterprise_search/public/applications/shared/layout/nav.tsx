@@ -32,10 +32,13 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
 
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
     const baseNavItems = searchNavigation.getBaseClassicNavItems();
-    const deepLinks = getNavLinks().reduce((links, link) => {
-      links[link.id] = link;
-      return links;
-    }, {} as Record<string, ChromeNavLink | undefined>);
+    const deepLinks = getNavLinks().reduce(
+      (links, link) => {
+        links[link.id] = link;
+        return links;
+      },
+      {} as Record<string, ChromeNavLink | undefined>
+    );
 
     return generateSideNavItems(baseNavItems, deepLinks);
   }, []);

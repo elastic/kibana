@@ -68,10 +68,11 @@ const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as Par
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
-const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
-  | ParsedWorkflow & {
-      triggers: Array<{ type: string; on?: { condition?: string } }>;
-    };
+const investigationCompleted = parse(
+  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml
+) as ParsedWorkflow & {
+  triggers: Array<{ type: string; on?: { condition?: string } }>;
+};
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {

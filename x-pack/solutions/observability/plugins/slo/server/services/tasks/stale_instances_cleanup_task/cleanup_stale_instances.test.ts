@@ -37,7 +37,7 @@ const createMockSpaceAggregationResponse = (
         ...(afterKey ? { after_key: afterKey } : {}),
       },
     },
-  } as any);
+  }) as any;
 
 const createMockSettingsResponse = (
   settings: Array<{
@@ -71,7 +71,7 @@ const createMockTaskResponse = (completed: boolean, runningTimeInNanos?: number)
     task: {
       running_time_in_nanos: runningTimeInNanos ?? 0,
     },
-  } as TasksGetResponse);
+  }) as TasksGetResponse;
 
 describe('cleanupStaleInstances', () => {
   let esClient: ElasticsearchClientMock;

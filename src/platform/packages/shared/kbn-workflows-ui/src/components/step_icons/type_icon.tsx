@@ -118,7 +118,7 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 
-  const label = title ?? (kind === 'trigger' ? TRIGGER_TYPE_LABELS[type] ?? type : type);
+  const label = title ?? (kind === 'trigger' ? (TRIGGER_TYPE_LABELS[type] ?? type) : type);
   const maskUrl = tintable ? getMaskableIconUrl(iconType) : undefined;
 
   const icon = maskUrl ? (

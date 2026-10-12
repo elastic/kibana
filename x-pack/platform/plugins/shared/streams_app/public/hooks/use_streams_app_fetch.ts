@@ -27,7 +27,7 @@ type ParametersFromOptions<TOptions extends StreamsAppFetchOptions | undefined> 
 
 export function useStreamsAppFetch<
   T,
-  TOptions extends StreamsAppFetchOptions | undefined = undefined
+  TOptions extends StreamsAppFetchOptions | undefined = undefined,
 >(
   callback: ({}: ParametersFromOptions<TOptions>) => T,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

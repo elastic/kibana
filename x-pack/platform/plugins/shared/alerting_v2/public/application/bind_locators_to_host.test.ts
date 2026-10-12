@@ -23,7 +23,7 @@ const createMockLocator = (): LocatorPublic<AlertingV2RulesLocatorParams> =>
     navigate: jest.fn().mockResolvedValue(undefined),
     navigateSync: jest.fn(),
     getLocation: jest.fn().mockResolvedValue({ app: 'management', path: '/', state: {} }),
-  } as unknown as LocatorPublic<AlertingV2RulesLocatorParams>);
+  }) as unknown as LocatorPublic<AlertingV2RulesLocatorParams>;
 
 const SEARCH_HOST = createAlertingV2HostApp('search', {
   rules: '/alerting',

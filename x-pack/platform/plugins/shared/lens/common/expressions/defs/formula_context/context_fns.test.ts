@@ -13,28 +13,20 @@ describe('interval', () => {
   it('should return 0 if no time range available', () => {
     // (not sure if this case is actually possible)
     const result = formulaIntervalFn.fn(undefined, { targetBars: 100 }, {
-      getSearchContext: () => ({
-        /* no time range */
-      }),
+      getSearchContext: () => ({/* no time range */}),
     } as ExecutionContext<Adapters>);
     expect(result).toEqual(0);
   });
 
   it('should return 0 if no targetBars is passed', () => {
-    const result = formulaIntervalFn.fn(
-      undefined,
-      {
-        /* no targetBars */
-      },
-      {
-        getSearchContext: () => ({
-          timeRange: {
-            from: 'now-15m',
-            to: 'now',
-          },
-        }),
-      } as ExecutionContext<Adapters>
-    );
+    const result = formulaIntervalFn.fn(undefined, {/* no targetBars */}, {
+      getSearchContext: () => ({
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      }),
+    } as ExecutionContext<Adapters>);
     expect(result).toEqual(0);
   });
 
@@ -55,9 +47,7 @@ describe('time range', () => {
   it('should return 0 if no time range is available', () => {
     // (not sure if this case is actually possible)
     const result = formulaTimeRangeFn.fn(undefined, {}, {
-      getSearchContext: () => ({
-        /* no time range */
-      }),
+      getSearchContext: () => ({/* no time range */}),
     } as ExecutionContext<Adapters>);
     expect(result).toEqual(0);
   });

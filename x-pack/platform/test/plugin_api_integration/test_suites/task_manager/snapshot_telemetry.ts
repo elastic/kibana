@@ -70,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       return typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
     }
 
     it('is scheduled on startup as a daily singleton task', async () => {

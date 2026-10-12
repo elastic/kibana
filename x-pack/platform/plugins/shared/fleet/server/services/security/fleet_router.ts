@@ -59,7 +59,7 @@ function withDefaultPublicAccess<Method extends RouteMethod>(
 
 export function withDefaultErrorHandler<
   TContext extends FleetRequestHandlerContext,
-  R extends RouteMethod
+  R extends RouteMethod,
 >(
   wrappedHandler: RequestHandler<any, any, any, TContext, R, KibanaResponseFactory>
 ): RequestHandler<any, any, any, TContext, R, KibanaResponseFactory> {

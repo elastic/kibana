@@ -42,7 +42,7 @@ export const OptionsListPopoverInvalidSelections = () => {
 
   const conditionalApiSubjects: [
     DSLOptionsListComponentApi['invalidSelections$'] | PublishingSubject<undefined>,
-    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>
+    DSLOptionsListComponentApi['fieldFormatter'] | PublishingSubject<undefined>,
   ] = useMemo(() => {
     const isDSLControl = isDSLOptionsListApi(componentApi);
     return [

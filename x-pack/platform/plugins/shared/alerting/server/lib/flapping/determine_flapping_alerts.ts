@@ -16,7 +16,7 @@ interface DetermineFlappingAlertsOpts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>>;
@@ -30,7 +30,7 @@ export function determineFlappingAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   newAlerts,
   activeAlerts,

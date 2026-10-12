@@ -367,8 +367,8 @@ export const EndpointList = () => {
   const refreshIsPaused = !endpointsExist
     ? false
     : hasSelectedEndpoint
-    ? true
-    : !isAutoRefreshEnabled;
+      ? true
+      : !isAutoRefreshEnabled;
 
   const refreshInterval = !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
 

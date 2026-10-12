@@ -22,7 +22,7 @@ export const MonitorMWsCallout = () => {
   // (remote / heartbeat) monitors expose no MW data, so skip the callout for them.
   const monitorMWIds =
     monitor && !isExternalSyntheticsMonitor(monitor)
-      ? monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? []
+      ? (monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? [])
       : [];
   const { activeMWs, hasPendingChanges, syncInterval } = useHasPendingMwChanges(monitorMWIds);
 

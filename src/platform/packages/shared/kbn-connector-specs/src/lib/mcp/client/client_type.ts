@@ -53,7 +53,10 @@ export interface McpConnectRetryOptions {
 }
 
 export class McpConnectionHttpError extends Error {
-  constructor(public readonly httpStatus: number, cause: unknown) {
+  constructor(
+    public readonly httpStatus: number,
+    cause: unknown
+  ) {
     super(cause instanceof Error ? cause.message : String(cause), { cause });
     this.name = 'McpConnectionHttpError';
   }

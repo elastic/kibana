@@ -156,8 +156,8 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
     statusColor === 'warning'
       ? KbnWarningCallout
       : statusColor === 'success'
-      ? KbnSuccessCallout
-      : KbnInfoCallout;
+        ? KbnSuccessCallout
+        : KbnInfoCallout;
 
   return (
     <Callout size="s" data-test-subj="createIndexPatternStatusMessage" title={statusMessage} />

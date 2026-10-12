@@ -52,7 +52,10 @@ export class StatusHandler {
     timeout: 504,
   };
 
-  constructor(private kibanaConfig: KibanaConfig, private logger: Logger) {
+  constructor(
+    private kibanaConfig: KibanaConfig,
+    private logger: Logger
+  ) {
     this.handler = this.handler.bind(this);
   }
 
@@ -68,7 +71,7 @@ export class StatusHandler {
   private async poll(): Promise<StatusRouteResponse> {
     const hosts = await Promise.all(this.kibanaConfig.hosts.map(this.pollHost.bind(this)));
     const statuses = chain(hosts).map('status').uniq().value();
-    const status = statuses.length <= 1 ? statuses[0] ?? 'healthy' : 'unhealthy';
+    const status = statuses.length <= 1 ? (statuses[0] ?? 'healthy') : 'unhealthy';
 
     return {
       status,

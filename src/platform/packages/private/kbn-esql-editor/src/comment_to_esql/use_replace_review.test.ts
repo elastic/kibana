@@ -82,7 +82,7 @@ const buildEditor = () => {
 };
 
 const buildModel = (lineMaxColumn = 10) =>
-  ({ getLineMaxColumn: jest.fn(() => lineMaxColumn) } as unknown as monaco.editor.ITextModel);
+  ({ getLineMaxColumn: jest.fn(() => lineMaxColumn) }) as unknown as monaco.editor.ITextModel;
 
 const REVIEW_STATE = {
   firstChangedOriginalLine: 2,

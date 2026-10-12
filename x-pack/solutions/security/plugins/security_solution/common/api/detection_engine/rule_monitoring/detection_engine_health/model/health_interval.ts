@@ -14,12 +14,12 @@ import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
  * - a custom interval with "from" and "to" timestamps
  */
 export enum HealthIntervalType {
-  'last_hour' = 'last_hour',
-  'last_day' = 'last_day',
-  'last_week' = 'last_week',
-  'last_month' = 'last_month',
-  'last_year' = 'last_year',
-  'custom_range' = 'custom_range',
+  last_hour = 'last_hour',
+  last_day = 'last_day',
+  last_week = 'last_week',
+  last_month = 'last_month',
+  last_year = 'last_year',
+  custom_range = 'custom_range',
 }
 
 /**
@@ -30,11 +30,11 @@ export enum HealthIntervalType {
  * - 24 times for each hour in that interval
  */
 export enum HealthIntervalGranularity {
-  'minute' = 'minute',
-  'hour' = 'hour',
-  'day' = 'day',
-  'week' = 'week',
-  'month' = 'month',
+  minute = 'minute',
+  hour = 'hour',
+  day = 'day',
+  week = 'week',
+  month = 'month',
 }
 
 /**

@@ -125,4 +125,4 @@ export const getMockPackageInfoAWS = (): PackageInfo =>
       },
     ],
     owner: { github: 'elastic/security' },
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;

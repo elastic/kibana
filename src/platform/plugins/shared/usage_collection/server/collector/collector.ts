@@ -10,9 +10,10 @@
 import type { Logger } from '@kbn/core/server';
 import type { CollectorFetchMethod, CollectorOptions, ICollector } from './types';
 
-export class Collector<TFetchReturn, ExtraOptions extends object = {}>
-  implements ICollector<TFetchReturn, ExtraOptions>
-{
+export class Collector<TFetchReturn, ExtraOptions extends object = {}> implements ICollector<
+  TFetchReturn,
+  ExtraOptions
+> {
   public readonly type: CollectorOptions<TFetchReturn>['type'];
   public readonly fetch: CollectorFetchMethod<TFetchReturn, ExtraOptions>;
   public readonly isReady: CollectorOptions<TFetchReturn>['isReady'];

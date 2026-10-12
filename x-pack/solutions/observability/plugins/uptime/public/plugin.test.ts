@@ -40,13 +40,13 @@ const createInitContext = () =>
   ({
     config: { get: () => ({}) },
     env: { packageInfo: { version: '9.0.0' }, mode: { dev: false } },
-  } as unknown as ConstructorParameters<typeof UptimePlugin>[0]);
+  }) as unknown as ConstructorParameters<typeof UptimePlugin>[0];
 
 const createPluginsSetup = () =>
   ({
     observability: { dashboard: { register: jest.fn() } },
     exploratoryView: { register: jest.fn() },
-  } as unknown as ClientPluginsSetup);
+  }) as unknown as ClientPluginsSetup;
 
 const createPluginsStart = () =>
   ({
@@ -57,7 +57,7 @@ const createPluginsStart = () =>
     },
     share: { url: { locators: { create: jest.fn() } } },
     observabilityShared: { navigation: { registerSections: jest.fn() } },
-  } as unknown as ClientPluginsStart);
+  }) as unknown as ClientPluginsStart;
 
 const getLatestStatus = (updater$: BehaviorSubject<AppUpdater>): AppStatus | undefined => {
   let latest: Partial<App> | undefined;

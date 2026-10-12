@@ -64,16 +64,16 @@ export const ValuesInput = ({
               }),
             ]
           : isLowerThanMin
-          ? [
-              i18n.translate('xpack.lens.indexPattern.terms.sizeLimitMin', {
-                defaultMessage:
-                  'Value is lower than the minimum {min}, the minimum value is used instead.',
-                values: {
-                  min: minValue,
-                },
-              }),
-            ]
-          : null
+            ? [
+                i18n.translate('xpack.lens.indexPattern.terms.sizeLimitMin', {
+                  defaultMessage:
+                    'Value is lower than the minimum {min}, the minimum value is used instead.',
+                  values: {
+                    min: minValue,
+                  },
+                }),
+              ]
+            : null
       }
     >
       <EuiFieldNumber

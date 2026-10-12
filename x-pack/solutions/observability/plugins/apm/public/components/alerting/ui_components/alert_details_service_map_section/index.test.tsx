@@ -128,7 +128,7 @@ function renderComponent(
 function getEmbeddableFlyoutOptions() {
   expect(mockServiceMapEmbeddable).toHaveBeenCalled();
   const [props] = mockServiceMapEmbeddable.mock.calls.at(-1) as unknown as [
-    { flyoutOptions: ServiceFlyoutOptions }
+    { flyoutOptions: ServiceFlyoutOptions },
   ];
   return props.flyoutOptions;
 }

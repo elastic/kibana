@@ -73,12 +73,9 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
   handleSubmit,
   buttonRef,
 }) => {
-  useEffect(
-    () => {
-      onOpen();
-    },
-    [] /* eslint-disable-line react-hooks/exhaustive-deps */
-  );
+  useEffect(() => {
+    onOpen();
+  }, [] /* eslint-disable-line react-hooks/exhaustive-deps */);
 
   const isFormDirty = useFormIsModified({ form });
   const pipelineTitleId = useGeneratedHtmlId();

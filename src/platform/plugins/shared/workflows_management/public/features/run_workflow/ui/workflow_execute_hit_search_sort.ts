@@ -41,7 +41,7 @@ export function buildWorkflowExecuteHitSearchEsSort(
   const mappedSort = mapSortOrderToEsFields(effectiveSort);
 
   if (mappedSort.every(([field]) => field === '_doc')) {
-    return mappedSort.map(([, direction]) => ({ _doc: direction } as EsQuerySortValue));
+    return mappedSort.map(([, direction]) => ({ _doc: direction }) as EsQuerySortValue);
   }
 
   const dataViewSort = mappedSort.filter(([field]) => field !== '_doc');

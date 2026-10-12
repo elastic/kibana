@@ -20,7 +20,7 @@ import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import { NightshiftNavigationIcon } from '@kbn/observability-plugin/public';
 
 export function filterForFeatureAvailability<
-  T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>
+  T extends RootNodeDefinition<AppDeepLinkId> | PanelOpenerChildDefinition<AppDeepLinkId>,
 >(node: T, featureFlag: boolean = false): T[] {
   if (!featureFlag) {
     return [];

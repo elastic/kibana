@@ -336,7 +336,7 @@ export const createSignificantEventsMaintenanceService = ({
   }> => {
     const { mode } = run;
     const access: MaintenanceAccess = run.mode === 'reassert' ? 'system' : run.access;
-    const actor = mode === 'pause' ? updatedBy : existing?.updatedBy ?? 'system:reassert';
+    const actor = mode === 'pause' ? updatedBy : (existing?.updatedBy ?? 'system:reassert');
 
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
     await persistPausedIntent({ existing, actor, target: mode });

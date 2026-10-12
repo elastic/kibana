@@ -101,9 +101,9 @@ describe('Layout', () => {
       if (!unifiedHistogram.isInitialized) return null;
 
       const resolvedHits =
-        hits === undefined ? unifiedHistogram.chartProps.hits : hits ?? undefined;
+        hits === undefined ? unifiedHistogram.chartProps.hits : (hits ?? undefined);
       const resolvedChart =
-        chart === undefined ? unifiedHistogram.chartProps.chart : chart ?? undefined;
+        chart === undefined ? unifiedHistogram.chartProps.chart : (chart ?? undefined);
 
       return (
         <UnifiedHistogramLayout
@@ -122,7 +122,7 @@ describe('Layout', () => {
           topPanelHeight={
             topPanelHeight === undefined
               ? unifiedHistogram.layoutProps.topPanelHeight
-              : topPanelHeight ?? undefined
+              : (topPanelHeight ?? undefined)
           }
         />
       );

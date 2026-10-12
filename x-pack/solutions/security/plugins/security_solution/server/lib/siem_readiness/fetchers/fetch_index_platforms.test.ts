@@ -58,7 +58,7 @@ const makeEsClient = (buckets: IndexBucketInput[]): ElasticsearchClient =>
         },
       },
     }),
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('fetchIndexPlatforms', () => {
   beforeEach(() => {

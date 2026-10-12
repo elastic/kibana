@@ -793,8 +793,8 @@ export const getEndpointConsoleCommands = ({
         const memoryDumpType = argsInterface.hasArg('kernel')
           ? 'kernel'
           : argsInterface.hasArg('raw')
-          ? 'raw'
-          : 'process';
+            ? 'raw'
+            : 'process';
 
         // PID and Entity ID are only supported for process memory dumps
         if (

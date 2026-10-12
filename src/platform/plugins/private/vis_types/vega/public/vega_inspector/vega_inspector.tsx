@@ -39,4 +39,4 @@ export const getVegaInspectorView = (dependencies: VegaInspectorViewDependencies
         </Suspense>
       </KibanaContextProvider>
     ),
-  } as InspectorViewDescription);
+  }) as InspectorViewDescription;

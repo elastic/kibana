@@ -203,7 +203,7 @@ describe('Endpoint Trusted Device API validations', () => {
         osTypes: ['windows'],
         tags: [GLOBAL_ARTIFACT_TAG],
         entries: [{ field: 'host.name', type: 'match', operator: 'included', value }],
-      } as unknown as CreateExceptionListItemOptions);
+      }) as unknown as CreateExceptionListItemOptions;
 
     it('accepts a scalar value at the 4096 character limit', async () => {
       await expect(

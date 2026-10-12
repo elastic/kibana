@@ -10,7 +10,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type { DetectionAlertLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 export const getNumberOfSuppressedAlerts = <
-  T extends SuppressionFieldsLatest & DetectionAlertLatest & { _id: string }
+  T extends SuppressionFieldsLatest & DetectionAlertLatest & { _id: string },
 >(
   createdAlerts: T[],
   suppressedAlerts: T[]

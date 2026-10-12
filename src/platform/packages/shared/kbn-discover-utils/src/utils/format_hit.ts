@@ -27,7 +27,7 @@ import { formatFieldValueReact } from './format_value';
 type PartialHitReactPair = [
   fieldDisplayName: string,
   formattedValue: ReactNode | undefined,
-  fieldName: string | null
+  fieldName: string | null,
 ];
 
 interface FormatHitReactOptions {

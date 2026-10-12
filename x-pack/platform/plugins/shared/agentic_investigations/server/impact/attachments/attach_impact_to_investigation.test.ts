@@ -25,7 +25,7 @@ const impact: Impact = {
 const ownerConversations = () =>
   ({
     get: jest.fn().mockResolvedValue({ permissions: { update_access_control: true } }),
-  } as unknown as ConversationPublicClient & { get: jest.Mock });
+  }) as unknown as ConversationPublicClient & { get: jest.Mock };
 
 const run = ({
   attachments,

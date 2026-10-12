@@ -74,7 +74,7 @@ const makeSO = <T>(
     references: [caseRef],
     attributes,
     ...overrides,
-  } as SavedObject<T>);
+  }) as SavedObject<T>;
 
 describe('buildAttachmentDoc', () => {
   describe('update-mirror shape: audit fields survive only with the full SO', () => {

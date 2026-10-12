@@ -86,7 +86,7 @@ export interface FilterOption {
  * ```
  */
 export interface CategoryAccordionTableProps<
-  T extends Record<string, unknown> = Record<string, unknown>
+  T extends Record<string, unknown> = Record<string, unknown>,
 > {
   /**
    * Array of categories with their items.

@@ -15,7 +15,7 @@ const makeAttachment = (versions: Array<{ version: number; data: unknown }>, cur
     type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
     current_version: currentVersion,
     versions,
-  } as unknown as VersionedAttachment);
+  }) as unknown as VersionedAttachment;
 
 const validData = { panel_template: '<p>hi</p>', embeddable_id: 'p1' };
 

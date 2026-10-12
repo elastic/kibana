@@ -93,7 +93,7 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
   }, []);
 
   const tooltipAnchorProps = useMemo(
-    () => ({ 'data-test-subj': 'osqueryExportFilteredCheckboxTooltip' } as const),
+    () => ({ 'data-test-subj': 'osqueryExportFilteredCheckboxTooltip' }) as const,
     []
   );
 

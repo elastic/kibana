@@ -30,9 +30,12 @@ interface LaunchDarklyClientConfig {
 /**
  * Browser-side implementation of the Cloud Experiments plugin
  */
-export class CloudExperimentsPlugin
-  implements Plugin<void, void, CloudExperimentsPluginSetupDeps, CloudExperimentsPluginStartDeps>
-{
+export class CloudExperimentsPlugin implements Plugin<
+  void,
+  void,
+  CloudExperimentsPluginSetupDeps,
+  CloudExperimentsPluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly metadataService: MetadataService;
 

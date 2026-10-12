@@ -37,8 +37,10 @@ export interface FindRuleTemplatesResponse {
   data: RuleTemplate[];
 }
 
-export interface FindRuleTemplatesApiResponse
-  extends Omit<AsApiContract<FindRuleTemplatesResponse>, 'data'> {
+export interface FindRuleTemplatesApiResponse extends Omit<
+  AsApiContract<FindRuleTemplatesResponse>,
+  'data'
+> {
   data: AsApiContract<RuleTemplate>[];
 }
 

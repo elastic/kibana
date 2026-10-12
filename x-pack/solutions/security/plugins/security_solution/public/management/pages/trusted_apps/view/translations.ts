@@ -146,10 +146,9 @@ export const OPERATOR_TITLES: { [K in OperatorFieldIds]: string } = {
 };
 
 export const ENTRY_PROPERTY_TITLES: Readonly<{
-  [K in keyof Omit<
-    LinuxConditionEntry | WindowsConditionEntry | MacosConditionEntry,
-    'type'
-  >]: string;
+  [
+    K in keyof Omit<LinuxConditionEntry | WindowsConditionEntry | MacosConditionEntry, 'type'>
+  ]: string;
 }> = {
   field: i18n.translate('xpack.securitySolution.trustedapps.trustedapp.entry.field', {
     defaultMessage: 'Field',

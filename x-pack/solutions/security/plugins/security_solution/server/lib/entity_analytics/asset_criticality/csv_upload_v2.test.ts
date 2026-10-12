@@ -30,7 +30,7 @@ const createMockEntityStoreClient = () =>
     upsertEntity: jest.fn(),
     upsertEntitiesBulk: jest.fn(),
     deleteEntity: jest.fn(),
-  } as unknown as EntityStoreCRUDClient);
+  }) as unknown as EntityStoreCRUDClient;
 
 describe('csvUploadV2', () => {
   let entityStoreClient: EntityStoreCRUDClient;

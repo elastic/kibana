@@ -192,8 +192,8 @@ export function ChartBarSeriesBase({
             !hasData && value !== 0
               ? ''
               : formatAsBytes
-              ? formatBytes(value)
-              : formatNumber(value, '0,0')
+                ? formatBytes(value)
+                : formatNumber(value, '0,0')
           }
           gridLine={{ visible: true }}
         />
@@ -288,8 +288,8 @@ function ChartBarPhasesSeriesBase({
                 !hasData && value !== 0
                   ? ''
                   : formatAsBytes
-                  ? formatBytes(value)
-                  : formatNumber(value, '0,0')
+                    ? formatBytes(value)
+                    : formatNumber(value, '0,0')
               }
             />
           </Chart>

@@ -25,7 +25,7 @@ import { DataViewMissingIndices } from '../lib';
 const createFieldsFetcher = () =>
   ({
     getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: ['test'] })),
-  } as any as IDataViewsApiClient);
+  }) as any as IDataViewsApiClient;
 
 const fieldFormats = fieldFormatsMock;
 let object: any = {};

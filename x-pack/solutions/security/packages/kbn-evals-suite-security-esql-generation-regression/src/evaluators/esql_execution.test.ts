@@ -32,7 +32,7 @@ const createEsClient = (
         return { values: response?.values ?? [] };
       }),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;
 
 describe('createEsqlExecutionEvaluator', () => {
   describe('evaluator metadata', () => {

@@ -135,7 +135,7 @@ export const createRequest = async (
               : [parsedFilters]
             : []),
           ...rangeQuery(timerange.from, timerange.to),
-          ...(schema ? inventoryModels.nodeFilter?.({ schema }) ?? [] : []),
+          ...(schema ? (inventoryModels.nodeFilter?.({ schema }) ?? []) : []),
         ],
       },
     },

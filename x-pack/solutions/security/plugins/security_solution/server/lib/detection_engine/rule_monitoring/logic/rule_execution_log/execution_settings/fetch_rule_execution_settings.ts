@@ -37,7 +37,7 @@ export const fetchRuleExecutionSettings = async (
     return ruleExecutionSettings;
   } catch (e) {
     const logMessage = 'Error fetching rule execution settings';
-    const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
+    const logReason = e instanceof Error ? (e.stack ?? e.message) : String(e);
     logger.error(`${logMessage}: ${logReason}`);
 
     return getRuleExecutionSettingsDefault(config);

@@ -101,9 +101,11 @@ export const MenuItem = forwardRef<HTMLAnchorElement | HTMLButtonElement, MenuIt
         border-radius: ${euiTheme.border.radius.control};
         border: ${euiTheme.border.width.thin} solid
           ${isHighlighted ? euiTheme.colors.borderBasePlain : 'transparent'};
-        background-color: ${isHighlighted
-          ? euiTheme.components.buttons.backgroundText
-          : euiTheme.colors.backgroundTransparent};
+        background-color: ${
+          isHighlighted
+            ? euiTheme.components.buttons.backgroundText
+            : euiTheme.colors.backgroundTransparent
+        };
         z-index: 1;
       }
 

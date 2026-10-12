@@ -22,7 +22,7 @@ export interface DataStreamConfig {
         dataset: MonitorTypeEnum;
         type: 'synthetics';
       };
-    } & Partial<MonitorFields>
+    } & Partial<MonitorFields>,
   ];
 }
 

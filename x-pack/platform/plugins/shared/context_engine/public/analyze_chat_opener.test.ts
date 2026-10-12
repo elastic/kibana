@@ -26,7 +26,7 @@ const analyzeOptions = async (ctx: AnalyzeAndImproveContext): Promise<AnalyzeCha
 const context = (feedbackAgentId?: string): AnalyzeAndImproveContext =>
   ({
     aiIndex: { id: 'idx-1', feedback_analysis: { enabled: false, agent_id: feedbackAgentId } },
-  } as AnalyzeAndImproveContext);
+  }) as AnalyzeAndImproveContext;
 
 const coreWithCapability = (show: boolean | undefined) => {
   const core = coreMock.createStart();
@@ -47,7 +47,7 @@ const mockAgentBuilder = (
       hasLlmConnector: true,
     })),
     ...overrides,
-  } as AgentBuilderPluginStart);
+  }) as AgentBuilderPluginStart;
 
 describe('createAnalyzeChatOpener', () => {
   it('returns undefined when Agent Builder is absent', () => {

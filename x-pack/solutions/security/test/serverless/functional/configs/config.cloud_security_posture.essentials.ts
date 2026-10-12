@@ -28,9 +28,7 @@ export default createTestConfig({
   ],
   // we should only resolve files which are ending with `.essentials.ts`
   testFiles: [
-    require.resolve(
-      '../test_suites/ftr/cloud_security_posture/csp_integrations_form.essentials.ts'
-    ),
+    require.resolve('../test_suites/ftr/cloud_security_posture/csp_integrations_form.essentials.ts'),
   ],
   enableFleetDockerRegistry: false,
 });

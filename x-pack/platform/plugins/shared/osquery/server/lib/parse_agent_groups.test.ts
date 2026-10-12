@@ -216,7 +216,7 @@ describe('parseAgentSelection', () => {
 
     mockAgentService = {
       listAgents: jest.fn(),
-      getByIds: jest.fn(async (ids: string[]) => ids.map((id) => ({ id } as Agent))),
+      getByIds: jest.fn(async (ids: string[]) => ids.map((id) => ({ id }) as Agent)),
     };
 
     mockPackagePolicyService = {

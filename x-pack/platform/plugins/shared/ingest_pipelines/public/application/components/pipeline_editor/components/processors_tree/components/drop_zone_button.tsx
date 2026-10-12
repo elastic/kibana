@@ -57,15 +57,17 @@ const useStyles = ({
       visibility: hidden;
       background-color: transparent;
       height: 2px;
-      ${isVisible &&
-      css`
-        visibility: visible;
-        &:hover {
-          background-color: ${isUnavailable
-            ? euiTheme.colors.mediumShade
-            : euiTheme.colors.primary};
-        }
-      `}
+      ${
+        isVisible &&
+        css`
+          visibility: visible;
+          &:hover {
+            background-color: ${
+              isUnavailable ? euiTheme.colors.mediumShade : euiTheme.colors.primary
+            };
+          }
+        `
+      }
     `,
     button: css`
       position: absolute;
@@ -75,13 +77,15 @@ const useStyles = ({
       width: 100%;
       text-decoration: none !important;
       z-index: ${euiTheme.levels.flyout};
-      ${isVisible &&
-      css`
-        pointer-events: visible !important;
-        &:hover {
-          transform: none !important;
-        }
-      `}
+      ${
+        isVisible &&
+        css`
+          pointer-events: visible !important;
+          &:hover {
+            transform: none !important;
+          }
+        `
+      }
     `,
   };
 };
@@ -92,8 +96,8 @@ export const DropZoneButton: FunctionComponent<Props> = (props) => {
   const isUnavailable = isVisible && isDisabled;
   const styles = useStyles({ isVisible, isUnavailable, compressed });
   const ariaLabel = isUnavailable
-    ? unavailableAriaLabel ?? cannotMoveHereLabel
-    : availableAriaLabel ?? moveHereLabel;
+    ? (unavailableAriaLabel ?? cannotMoveHereLabel)
+    : (availableAriaLabel ?? moveHereLabel);
 
   return (
     <div css={styles.container}>

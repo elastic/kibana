@@ -782,13 +782,13 @@ describe('supports_cloud_connectors conditional inclusion', () => {
     ({
       data_streams: [{ streams: [{ vars: [{ name: varName }] }] }],
       policy_templates: [{ name: TEMPLATE_NAME, inputs: [{ vars: [] }] }],
-    } as unknown as PackageInfo);
+    }) as unknown as PackageInfo;
 
   const makePackageInfoWithoutVar = (): PackageInfo =>
     ({
       data_streams: [{ streams: [{ vars: [{ name: 'unrelated_var' }] }] }],
       policy_templates: [{ name: TEMPLATE_NAME, inputs: [{ vars: [] }] }],
-    } as unknown as PackageInfo);
+    }) as unknown as PackageInfo;
 
   describe('getDefaultGcpCredentialConfig', () => {
     it('should include gcp.supports_cloud_connectors when the var is defined in the package', () => {

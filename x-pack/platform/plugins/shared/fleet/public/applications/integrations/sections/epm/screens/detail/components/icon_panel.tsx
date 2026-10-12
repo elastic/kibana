@@ -59,8 +59,10 @@ export function ErrorIconPanel() {
   );
 }
 
-export interface MiniIconProps
-  extends Pick<UsePackageIconType, 'packageName' | 'integrationName' | 'version' | 'icons'> {
+export interface MiniIconProps extends Pick<
+  UsePackageIconType,
+  'packageName' | 'integrationName' | 'version' | 'icons'
+> {
   size?: number; // Optional size multiplier
 }
 

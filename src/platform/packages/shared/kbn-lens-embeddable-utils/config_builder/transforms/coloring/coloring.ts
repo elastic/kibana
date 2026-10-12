@@ -63,10 +63,10 @@ export function getContinuity(
   return rangeMin === null && rangeMax === null
     ? 'all'
     : rangeMax === null
-    ? 'above'
-    : rangeMin === null
-    ? 'below'
-    : 'none';
+      ? 'above'
+      : rangeMin === null
+        ? 'below'
+        : 'none';
 }
 
 /**
@@ -188,21 +188,17 @@ export function fromColorByValueAPIToLensState(
 
   const effectiveSteps = mergeTrailingSameColorStep(config.steps);
 
-  const stops = effectiveSteps.map(
-    ({ lt, lte, color }): ColorStop => ({
-      color,
-      // @ts-expect-error - This can be null
-      stop: lt ?? lte ?? null,
-    })
-  );
+  const stops = effectiveSteps.map(({ lt, lte, color }): ColorStop => ({
+    color,
+    // @ts-expect-error - This can be null
+    stop: lt ?? lte ?? null,
+  }));
 
-  const colorStops = effectiveSteps.map(
-    ({ gte, color }): ColorStop => ({
-      color,
-      // @ts-expect-error - This can be null
-      stop: gte ?? null,
-    })
-  );
+  const colorStops = effectiveSteps.map(({ gte, color }): ColorStop => ({
+    color,
+    // @ts-expect-error - This can be null
+    stop: gte ?? null,
+  }));
 
   return {
     type: 'palette',
@@ -428,8 +424,8 @@ function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): SerializableV
       isRawRule(rule)
         ? mapSerializedValueToAPI(rule.value)
         : rule.matchCase
-        ? rule.pattern
-        : rule.pattern.toLowerCase()
+          ? rule.pattern
+          : rule.pattern.toLowerCase()
     );
 }
 

@@ -15,7 +15,7 @@ const makeQuery = (overrides: Partial<PackQueryFormData>): PackQueryFormData =>
     interval: 3600,
     ecs_mapping: {},
     ...overrides,
-  } as PackQueryFormData);
+  }) as PackQueryFormData;
 
 describe('pack form serializer (public) — convertSOQueriesToPack', () => {
   it('create payload carries NO per-query id (server derives it from the map key)', () => {

@@ -512,7 +512,7 @@ export const useHostsKpisEsql = (): UseHostsKpisResult => {
   const hasQuery = Boolean(esqlQuery);
 
   return {
-    kpis: hasQuery ? result ?? EMPTY_KPIS : EMPTY_KPIS,
+    kpis: hasQuery ? (result ?? EMPTY_KPIS) : EMPTY_KPIS,
     loading,
     error: hasQuery ? error : undefined,
   };

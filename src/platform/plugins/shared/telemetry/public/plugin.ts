@@ -157,15 +157,12 @@ function getTelemetryConstants(docLinks: DocLinksStart): TelemetryConstants {
   };
 }
 
-export class TelemetryPlugin
-  implements
-    Plugin<
-      TelemetryPluginSetup,
-      TelemetryPluginStart,
-      TelemetryPluginSetupDependencies,
-      TelemetryPluginStartDependencies
-    >
-{
+export class TelemetryPlugin implements Plugin<
+  TelemetryPluginSetup,
+  TelemetryPluginStart,
+  TelemetryPluginSetupDependencies,
+  TelemetryPluginStartDependencies
+> {
   private readonly currentKibanaVersion: string;
   private readonly config: TelemetryPluginConfig;
   private readonly telemetryLabels$: BehaviorSubject<TelemetryConfigLabels>;

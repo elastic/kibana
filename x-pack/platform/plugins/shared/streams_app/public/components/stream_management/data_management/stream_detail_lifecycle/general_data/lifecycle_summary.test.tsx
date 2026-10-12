@@ -158,7 +158,7 @@ describe('LifecycleSummary', () => {
           downsample,
         },
       },
-    } as unknown as Streams.ingest.all.GetResponse);
+    }) as unknown as Streams.ingest.all.GetResponse;
 
   const createFrozenDslDefinition = (frozenAfter: string, dataRetention?: string) =>
     ({
@@ -175,7 +175,7 @@ describe('LifecycleSummary', () => {
       effective_lifecycle: {
         dsl: { frozen_after: frozenAfter, data_retention: dataRetention },
       },
-    } as unknown as Streams.ingest.all.GetResponse);
+    }) as unknown as Streams.ingest.all.GetResponse;
 
   const createWiredDslDefinition = ({
     name,
@@ -228,7 +228,7 @@ describe('LifecycleSummary', () => {
       data_stream_exists: true,
       dashboards: [],
       rules: [],
-    } as unknown as Streams.WiredStream.GetResponse);
+    }) as unknown as Streams.WiredStream.GetResponse;
 
   const createIlmDefinition = () =>
     ({
@@ -241,7 +241,7 @@ describe('LifecycleSummary', () => {
           policy: 'test-policy',
         },
       },
-    } as unknown as Streams.ingest.all.GetResponse);
+    }) as unknown as Streams.ingest.all.GetResponse;
 
   const createDisabledDefinition = () =>
     ({
@@ -250,7 +250,7 @@ describe('LifecycleSummary', () => {
         lifecycle: true,
       },
       effective_lifecycle: { disabled: {} },
-    } as Streams.ingest.all.GetResponse);
+    }) as Streams.ingest.all.GetResponse;
 
   beforeEach(() => {
     jest.clearAllMocks();

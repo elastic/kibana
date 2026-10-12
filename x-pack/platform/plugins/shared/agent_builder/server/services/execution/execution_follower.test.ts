@@ -30,19 +30,19 @@ const createMockExecutionClient = () =>
     peek: jest.fn(),
     readEvents: jest.fn(),
     find: jest.fn().mockResolvedValue([]),
-  } as jest.Mocked<AgentExecutionClient>);
+  }) as jest.Mocked<AgentExecutionClient>;
 
 const messageChunkEvent = (text: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { message_id: 'm1', text_chunk: text },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const roundCompleteEvent = (): ChatEvent =>
   ({
     type: ChatEventType.roundComplete,
     data: { round: { id: 'round-1' } },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 const terminalEvent = (
   type: TimelineEventType.executionFailed | TimelineEventType.executionAborted
@@ -55,7 +55,7 @@ const terminalEvent = (
     execution_id: 'round-1::execution',
     trigger_event_id: 'round-1::user_message',
     data: { time_to_last_token: 1 },
-  } as unknown as ChatEvent);
+  }) as unknown as ChatEvent;
 
 /**
  * Helper to build the return value of `executionClient.peek`.

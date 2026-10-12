@@ -21,7 +21,7 @@ const createRecord = (flattened: DataTableRecord['flattened']): DataTableRecord 
     raw: {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const getDocViewerResult = (
   record: DataTableRecord,

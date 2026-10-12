@@ -15,15 +15,12 @@ import { registerRoutes } from './routes';
 import { ESQLExtensionsRegistry } from './extensions_registry';
 import type { EsqlServerPluginSetup, EsqlServerPluginStart } from './types';
 
-export class EsqlServerPlugin
-  implements
-    Plugin<
-      EsqlServerPluginSetup,
-      void,
-      { contentManagement: ContentManagementServerSetup },
-      EsqlServerPluginStart
-    >
-{
+export class EsqlServerPlugin implements Plugin<
+  EsqlServerPluginSetup,
+  void,
+  { contentManagement: ContentManagementServerSetup },
+  EsqlServerPluginStart
+> {
   private readonly initContext: PluginInitializerContext;
   private extensionsRegistry: ESQLExtensionsRegistry = new ESQLExtensionsRegistry();
 

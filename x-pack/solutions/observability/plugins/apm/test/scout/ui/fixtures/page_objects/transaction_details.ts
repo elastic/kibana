@@ -18,7 +18,10 @@ import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_w
 export class TransactionDetailsPage {
   public readonly traceWaterfallFlyout: TraceWaterfallFlyout;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.traceWaterfallFlyout = createTraceWaterfallFlyout(page);
   }
 

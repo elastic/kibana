@@ -35,5 +35,5 @@ export const EnhancedAttackFlyoutFooter = ({
 
   return renderFooter
     ? renderFooter({ hit, ...docViewProps, onAttackUpdated: handleAttackUpdated })
-    : fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null;
+    : (fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null);
 };

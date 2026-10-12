@@ -15,7 +15,7 @@ const buildItem = (snoozedUntil: string): MatchedActionPolicy =>
   ({
     action_policy: { id: 'policy-1', snoozed_until: snoozedUntil },
     category: 'tags',
-  } as MatchedActionPolicy);
+  }) as MatchedActionPolicy;
 
 const Probe = ({ item }: { item: MatchedActionPolicy }) => {
   useRerenderWhenSnoozeExpires([item]);

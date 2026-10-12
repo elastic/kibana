@@ -25,7 +25,7 @@ export const DashboardTabTitleSetter = ({ dashboardApi }: { dashboardApi: Dashbo
    */
   useEffect(() => {
     coreServices.chrome.docTitle.change(
-      !lastSavedId ? getNewDashboardTitle() : title ?? lastSavedId
+      !lastSavedId ? getNewDashboardTitle() : (title ?? lastSavedId)
     );
   }, [title, lastSavedId]);
 

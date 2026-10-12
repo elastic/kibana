@@ -835,14 +835,14 @@ export const enrichCasesWithFieldLabels = (
       const templateKey = c.template?.id != null ? `${c.template.id}:${c.template.version}` : null;
       const fieldKeyToLabel = {
         ...globalLabelMap,
-        ...(templateKey != null ? labelsByTemplateKey.get(templateKey) ?? {} : {}),
+        ...(templateKey != null ? (labelsByTemplateKey.get(templateKey) ?? {}) : {}),
       };
       if (Object.keys(fieldKeyToLabel).length === 0) {
         return [];
       }
       const fieldKeyToControl = {
         ...globalControlMap,
-        ...(templateKey != null ? controlsByTemplateKey.get(templateKey) ?? {} : {}),
+        ...(templateKey != null ? (controlsByTemplateKey.get(templateKey) ?? {}) : {}),
       };
       return [
         [

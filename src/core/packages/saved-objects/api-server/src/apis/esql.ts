@@ -33,8 +33,10 @@ import type { ComposerQuery } from '@elastic/esql';
  *
  * @public
  */
-export interface SavedObjectsEsqlOptions
-  extends Omit<estypes.EsqlQueryRequest, 'format' | 'columnar' | 'delimiter' | 'query'> {
+export interface SavedObjectsEsqlOptions extends Omit<
+  estypes.EsqlQueryRequest,
+  'format' | 'columnar' | 'delimiter' | 'query'
+> {
   /** The type or types of saved objects to query. Used for index resolution and security filtering. */
   type: string | string[];
 

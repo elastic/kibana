@@ -10,7 +10,7 @@ import type { ProjectRouting } from '@kbn/es-query';
 import { type CPSProject, type ICPSManager, PROJECT_ROUTING } from '@kbn/cps-utils';
 import { useProjectScopeLabel } from './use_project_scope_label';
 
-const asProject = (id: string) => ({ _id: id } as CPSProject);
+const asProject = (id: string) => ({ _id: id }) as CPSProject;
 
 const createCpsManager = ({
   totalProjectCount = 3,
@@ -28,7 +28,7 @@ const createCpsManager = ({
     fetchProjects,
     getTotalProjectCount: jest.fn().mockReturnValue(totalProjectCount),
     hasLinkedProjects: jest.fn().mockReturnValue(hasLinkedProjects),
-  } as unknown as ICPSManager);
+  }) as unknown as ICPSManager;
 
 const renderProjectScopeLabel = (cpsManager: ICPSManager, projectRouting: ProjectRouting) =>
   renderHook(() => useProjectScopeLabel({ cpsManager, projectRouting }));

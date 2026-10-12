@@ -151,9 +151,11 @@ export function ChatHeader({
                 value={newTitle}
                 className={css`
                   .euiTitle {
-                    color: ${!conversation?.archived
-                      ? theme.euiTheme.colors.textParagraph
-                      : theme.euiTheme.colors.textSubdued};
+                    color: ${
+                      !conversation?.archived
+                        ? theme.euiTheme.colors.textParagraph
+                        : theme.euiTheme.colors.textSubdued
+                    };
                   }
                 `}
                 inputAriaLabel={i18n.translate(

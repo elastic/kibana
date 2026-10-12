@@ -61,10 +61,12 @@ export interface EsoModelVersionExamplePluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
-export class EsoModelVersionExample
-  implements
-    Plugin<void, void, EsoModelVersionExamplePluginSetup, EsoModelVersionExamplePluginsStart>
-{
+export class EsoModelVersionExample implements Plugin<
+  void,
+  void,
+  EsoModelVersionExamplePluginSetup,
+  EsoModelVersionExamplePluginsStart
+> {
   public setup(
     core: CoreSetup<EsoModelVersionExamplePluginsStart>,
     plugins: EsoModelVersionExamplePluginSetup
@@ -420,9 +422,8 @@ export class EsoModelVersionExample
             return { type: parts[0], id: parts[1] };
           });
 
-          const result: SavedObjectsBulkResponse = await savedObjects.client.bulkGet(
-            bulkGetObjects
-          );
+          const result: SavedObjectsBulkResponse =
+            await savedObjects.client.bulkGet(bulkGetObjects);
           return response.ok({
             body: result,
           });

@@ -205,7 +205,7 @@ const CustomYaraSignaturesSwitch = memo<CustomYaraSignaturesSwitchProps>(
 
     const tooltipContent = isAvailable
       ? CUSTOM_YARA_SIGNATURES_HINT
-      : upsellMessage ?? CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL;
+      : (upsellMessage ?? CUSTOM_YARA_SIGNATURES_LICENSE_UPSELL);
 
     const handleCustomYaraSignaturesSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (event) => {

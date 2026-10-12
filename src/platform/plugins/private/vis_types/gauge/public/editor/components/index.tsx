@@ -16,5 +16,6 @@ const GaugeOptionsLazy = lazy(() => import('./gauge'));
 
 export const getGaugeOptions =
   ({ showElasticChartsOptions }: GaugeTypeProps) =>
-  (props: VisEditorOptionsProps<GaugeVisParams>) =>
-    <GaugeOptionsLazy {...props} showElasticChartsOptions={showElasticChartsOptions} />;
+  (props: VisEditorOptionsProps<GaugeVisParams>) => (
+    <GaugeOptionsLazy {...props} showElasticChartsOptions={showElasticChartsOptions} />
+  );

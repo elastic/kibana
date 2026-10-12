@@ -16,7 +16,10 @@ export class SLOApp {
   private readonly appMenu: AppMenu;
   private readonly nav: ObservabilityNavigation;
 
-  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly config: ScoutTestConfig
+  ) {
     this.appMenu = new AppMenu(page);
     this.nav = new ObservabilityNavigation(page);
   }

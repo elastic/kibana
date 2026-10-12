@@ -33,7 +33,7 @@ const createMockNestedFormat = (overrides: Partial<IFieldFormat> = {}) =>
     convertToText: jest.fn().mockReturnValue('text'),
     convertToReact: jest.fn(),
     ...overrides,
-  } as unknown as IFieldFormat);
+  }) as unknown as IFieldFormat;
 
 const getReactConvertText = (format: IFieldFormat, value: unknown): string => {
   const result = format.convertToReact(value);

@@ -12,9 +12,12 @@ import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { LIST_BREADCRUMB, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import type { SetupDependencies, StartDependencies } from './types';
 
-export class FilesManagementPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class FilesManagementPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { management }: SetupDependencies): void {
     management.sections.section.kibana.registerApp({
       id: PLUGIN_ID,

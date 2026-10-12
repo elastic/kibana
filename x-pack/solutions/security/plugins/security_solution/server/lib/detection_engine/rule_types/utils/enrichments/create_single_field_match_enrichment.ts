@@ -29,16 +29,19 @@ export const createSingleFieldMatchEnrichment: CreateFieldsMatchEnrichment = asy
 
     const eventsToEnrich = events.filter((event) => getEventValue(event, mappingField.eventField));
 
-    const eventsMapByFieldValue = eventsToEnrich.reduce((acc, event) => {
-      const eventFieldValue = getEventValue(event, mappingField.eventField);
+    const eventsMapByFieldValue = eventsToEnrich.reduce(
+      (acc, event) => {
+        const eventFieldValue = getEventValue(event, mappingField.eventField);
 
-      if (!eventFieldValue) return {};
+        if (!eventFieldValue) return {};
 
-      acc[eventFieldValue] ??= [];
-      acc[eventFieldValue].push(event);
+        acc[eventFieldValue] ??= [];
+        acc[eventFieldValue].push(event);
 
-      return acc;
-    }, {} as { [key: string]: typeof events });
+        return acc;
+      },
+      {} as { [key: string]: typeof events }
+    );
 
     const uniqueEventsValuesToSearchBy = Object.keys(eventsMapByFieldValue);
 

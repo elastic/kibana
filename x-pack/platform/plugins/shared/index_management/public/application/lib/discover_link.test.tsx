@@ -33,7 +33,7 @@ describe('DiscoverLink', () => {
     mockedUseAppContext.mockReturnValue({
       url: {
         locators: {
-          get: () => ({ navigate: navigateMock } as unknown),
+          get: () => ({ navigate: navigateMock }) as unknown,
         },
       },
     } as unknown as AppDependencies);
@@ -49,7 +49,7 @@ describe('DiscoverLink', () => {
     mockedUseAppContext.mockReturnValue({
       url: {
         locators: {
-          get: () => ({ navigate: navigateMock } as unknown),
+          get: () => ({ navigate: navigateMock }) as unknown,
         },
       },
     } as unknown as AppDependencies);
@@ -65,7 +65,7 @@ describe('DiscoverLink', () => {
     mockedUseAppContext.mockReturnValue({
       url: {
         locators: {
-          get: () => ({ navigate: navigateMock } as unknown),
+          get: () => ({ navigate: navigateMock }) as unknown,
         },
       },
     } as unknown as AppDependencies);

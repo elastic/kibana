@@ -35,9 +35,12 @@ export interface SavedSearchServerStartDeps {
   data: DataPluginStart;
 }
 
-export class SavedSearchServerPlugin
-  implements Plugin<object, object, object, SavedSearchServerStartDeps>
-{
+export class SavedSearchServerPlugin implements Plugin<
+  object,
+  object,
+  object,
+  SavedSearchServerStartDeps
+> {
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(

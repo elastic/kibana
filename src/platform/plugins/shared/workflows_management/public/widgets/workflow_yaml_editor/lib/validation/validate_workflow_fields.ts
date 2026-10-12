@@ -101,8 +101,8 @@ export function validateWorkflowFields(
               receivedValue === null
                 ? 'null'
                 : Array.isArray(receivedValue)
-                ? 'array'
-                : typeof receivedValue;
+                  ? 'array'
+                  : typeof receivedValue;
             message = `expected array, received ${receivedType}`;
           } else {
             message = 'expected array';

@@ -33,9 +33,7 @@ export interface ServerShortUrlClientFactoryCreateParams {
   storage?: ShortUrlStorage;
 }
 
-export class ServerShortUrlClientFactory
-  implements IShortUrlClientFactory<ServerShortUrlClientFactoryCreateParams>
-{
+export class ServerShortUrlClientFactory implements IShortUrlClientFactory<ServerShortUrlClientFactoryCreateParams> {
   constructor(private readonly dependencies: ServerShortUrlClientFactoryDependencies) {}
 
   public get(params: ServerShortUrlClientFactoryCreateParams): ServerShortUrlClient {

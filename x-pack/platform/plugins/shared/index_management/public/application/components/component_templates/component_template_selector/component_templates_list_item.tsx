@@ -49,19 +49,21 @@ const useStyles = ({ isSelected }: { isSelected: boolean }) => {
       position: relative;
       height: calc(${euiTheme.size.l} * 2);
 
-      ${isSelected &&
-      css`
-        &::before {
-          content: '';
-          background-color: rgba(${euiTheme.colors.emptyShade}, 0.7);
-          height: 100%;
-          left: 0;
-          position: absolute;
-          top: 0;
-          width: 100%;
-          z-index: ${Number(euiTheme.levels.content) + 1};
-        }
-      `}
+      ${
+        isSelected &&
+        css`
+          &::before {
+            content: '';
+            background-color: rgba(${euiTheme.colors.emptyShade}, 0.7);
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: ${Number(euiTheme.levels.content) + 1};
+          }
+        `
+      }
     `,
     nameButton: css`
       block-size: auto;

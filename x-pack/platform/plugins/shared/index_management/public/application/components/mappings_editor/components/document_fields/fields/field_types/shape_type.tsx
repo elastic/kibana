@@ -33,8 +33,8 @@ const getDefaultToggleValue = (param: ParameterName, field: FieldType): boolean 
       return field[param] !== undefined
         ? (field[param] as boolean) // If the field has a value set, use it
         : defaultValue !== undefined // If the parameter definition has a "defaultValue" set, use it
-        ? (defaultValue as boolean)
-        : false; // Defaults to "false"
+          ? (defaultValue as boolean)
+          : false; // Defaults to "false"
   }
 };
 

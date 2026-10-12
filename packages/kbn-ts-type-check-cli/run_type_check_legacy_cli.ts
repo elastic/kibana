@@ -47,9 +47,8 @@ export const runLegacyTypeCheckCli = () => {
         return;
       }
 
-      const { updateRootRefsConfig, cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH } = await import(
-        './root_refs_config'
-      );
+      const { updateRootRefsConfig, cleanupRootRefsConfig, ROOT_REFS_CONFIG_PATH } =
+        await import('./root_refs_config');
 
       // If the tsconfig.refs.json file is not self-managed then make sure it has
       // a reference to every composite project in the repo.

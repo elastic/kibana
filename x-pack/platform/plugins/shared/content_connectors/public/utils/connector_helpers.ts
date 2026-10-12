@@ -21,16 +21,16 @@ export const hasDocumentLevelSecurityFeature = (connector: Connector | undefined
 export const hasAdvancedFilteringFeature = (connector: Connector | undefined): boolean =>
   Boolean(
     connector?.features
-      ? connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
-          connector.features[FeatureName.FILTERING_ADVANCED_CONFIG]
+      ? (connector.features[FeatureName.SYNC_RULES]?.advanced?.enabled ??
+          connector.features[FeatureName.FILTERING_ADVANCED_CONFIG])
       : false
   );
 
 export const hasBasicFilteringFeature = (connector: Connector | undefined): boolean =>
   Boolean(
     connector?.features
-      ? connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
-          connector.features[FeatureName.FILTERING_RULES]
+      ? (connector.features[FeatureName.SYNC_RULES]?.basic?.enabled ??
+          connector.features[FeatureName.FILTERING_RULES])
       : false
   );
 
@@ -40,7 +40,7 @@ export const hasNonEmptyAdvancedSnippet = (
 ): boolean =>
   Boolean(
     connector &&
-      connector.status &&
-      hasAdvancedFilteringFeature(connector) &&
-      !isAdvancedSyncRuleSnippetEmpty(advancedSnippet)
+    connector.status &&
+    hasAdvancedFilteringFeature(connector) &&
+    !isAdvancedSyncRuleSnippetEmpty(advancedSnippet)
   );

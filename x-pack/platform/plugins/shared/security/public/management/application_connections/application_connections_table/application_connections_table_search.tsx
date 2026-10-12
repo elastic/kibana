@@ -44,14 +44,12 @@ interface ApplicationConnectionsTableSearchBase {
   searchConfig: EuiSearchBarProps;
 }
 
-export interface GroupedApplicationConnectionsTableSearch
-  extends ApplicationConnectionsTableSearchBase {
+export interface GroupedApplicationConnectionsTableSearch extends ApplicationConnectionsTableSearchBase {
   viewMode: 'grouped';
   results: ApplicationConnections[];
 }
 
-export interface ListApplicationConnectionsTableSearch
-  extends ApplicationConnectionsTableSearchBase {
+export interface ListApplicationConnectionsTableSearch extends ApplicationConnectionsTableSearchBase {
   viewMode: 'list';
   results: ApplicationConnection[];
 }

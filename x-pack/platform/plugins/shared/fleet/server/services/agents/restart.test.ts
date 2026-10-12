@@ -202,7 +202,7 @@ describe('restart', () => {
         () =>
           ({
             runActionAsyncTask: mockRunActionAsyncTask,
-          } as any)
+          }) as any
       );
 
       const result = await bulkRestartAgents(esClient, soClient, { kuery: 'status:online' });

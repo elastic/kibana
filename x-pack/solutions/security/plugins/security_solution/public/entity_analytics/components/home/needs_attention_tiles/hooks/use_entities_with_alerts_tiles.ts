@@ -141,11 +141,11 @@ export const useAlertBasedTiles = ({
     alertsCount: queryResult?.alertsCount ?? 0,
     alertsEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
+      : (queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS),
     watchlistedCount: queryResult?.watchlistedCount ?? 0,
     watchlistedEntityIds: isFetching
       ? EMPTY_ENTITY_IDS
-      : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+      : (queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS),
     isLoading: isIndexLoading || isLoading || isFetching,
     error: filteredError ?? indexError,
   };

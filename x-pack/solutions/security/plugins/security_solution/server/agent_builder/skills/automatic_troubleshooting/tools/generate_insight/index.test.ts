@@ -227,7 +227,7 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
         logger: {
           error: jest.fn(),
         },
-      } as unknown as ToolHandlerContext);
+      }) as unknown as ToolHandlerContext;
 
     beforeEach(() => {
       mockEndpointAppContextService = createMockEndpointAppContextService();

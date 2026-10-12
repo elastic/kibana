@@ -63,7 +63,7 @@ const failedRun = (): BenchmarkRunResult => ({
   samples: [],
 });
 
-const createContext = (buildDir: string): GlobalRunContext => ({ buildDir } as GlobalRunContext);
+const createContext = (buildDir: string): GlobalRunContext => ({ buildDir }) as GlobalRunContext;
 
 const config: LoadedBenchConfig = {
   name: 'paired-test',

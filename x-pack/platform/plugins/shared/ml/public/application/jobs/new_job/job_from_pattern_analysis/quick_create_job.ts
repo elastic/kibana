@@ -99,7 +99,7 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
       const dataView = await this.data.dataViews.get(dataViewId);
       const field = dataView.getFieldByName(fieldName);
       const partitionField = partitionFieldName
-        ? dataView.getFieldByName(partitionFieldName) ?? null
+        ? (dataView.getFieldByName(partitionFieldName) ?? null)
         : null;
 
       if (field === undefined) {

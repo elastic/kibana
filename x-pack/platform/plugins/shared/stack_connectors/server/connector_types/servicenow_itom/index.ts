@@ -52,12 +52,12 @@ import { createServiceWrapper } from '../lib/servicenow/create_service_wrapper';
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParamsITOM
+  T extends Record<string, unknown> = ExecutorParamsITOM,
 > = ConnectorType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowConnectorTypeExecutorOptions<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParamsITOM
+  T extends Record<string, unknown> = ExecutorParamsITOM,
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition

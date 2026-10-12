@@ -60,7 +60,7 @@ describe('useChildWorkflowExecutions', () => {
   let queryClient: QueryClient;
 
   const executeStep = (id: string, status: ExecutionStatus) =>
-    ({ id, stepType: 'workflow.execute', status } as never);
+    ({ id, stepType: 'workflow.execute', status }) as never;
 
   const childExecutionResponse = [
     {

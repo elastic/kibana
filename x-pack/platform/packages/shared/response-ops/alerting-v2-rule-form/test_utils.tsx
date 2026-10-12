@@ -53,7 +53,7 @@ export const createMockDashboardStart = (): DashboardStart =>
       findByIds: jest.fn().mockResolvedValue([]),
       findByTitle: jest.fn(),
     }),
-  } as unknown as DashboardStart);
+  }) as unknown as DashboardStart;
 
 /**
  * Creates mock services for testing.

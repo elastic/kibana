@@ -20,7 +20,7 @@ const makePackageInfo = (overrides: Record<string, unknown> = {}) =>
     policy_templates: [],
     data_streams: [],
     ...overrides,
-  } as any);
+  }) as any;
 
 const CLOUDTRAIL_LOOKUP: ServiceManifestLookup = {
   packageName: 'aws',

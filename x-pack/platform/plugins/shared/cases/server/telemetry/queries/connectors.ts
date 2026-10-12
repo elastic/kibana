@@ -92,11 +92,14 @@ export const getConnectorsTelemetryData = async ({
     SavedObjectsFindResponse<unknown, ReferencesAggregation>
   >;
 
-  const data = connectorData.reduce((acc, res, currentIndex) => {
-    acc[connectorTypes[currentIndex]] =
-      res.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
-    return acc;
-  }, {} as Record<(typeof connectorTypes)[number], number>);
+  const data = connectorData.reduce(
+    (acc, res, currentIndex) => {
+      acc[connectorTypes[currentIndex]] =
+        res.aggregations?.references?.referenceType?.referenceAgg?.value ?? 0;
+      return acc;
+    },
+    {} as Record<(typeof connectorTypes)[number], number>
+  );
 
   const statsPerConnector = Object.entries(CONNECTOR_TELEMETRY_MAPPING).reduce(
     (acc, [connectorType, connectorName]) => {

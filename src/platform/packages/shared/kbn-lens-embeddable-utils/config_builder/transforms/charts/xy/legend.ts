@@ -63,18 +63,18 @@ function extractAlignment(legend: XYConfig['legend']):
 function isOutsideListLegendLayout(legend: XYConfig['legend']) {
   return Boolean(
     legend &&
-      legend.placement !== 'inside' &&
-      'layout' in legend &&
-      legend.layout?.type === 'list' &&
-      'position' in legend &&
-      (legend.position === 'top' || legend.position === 'bottom')
+    legend.placement !== 'inside' &&
+    'layout' in legend &&
+    legend.layout?.type === 'list' &&
+    'position' in legend &&
+    (legend.position === 'top' || legend.position === 'bottom')
   );
 }
 function isOutsideListLegendLayoutState(legend: XYVisualizationState['legend']) {
   return Boolean(
     !isLegendInside(legend) &&
-      legend.layout === LegendLayout.List &&
-      (legend.position === 'top' || legend.position === 'bottom')
+    legend.layout === LegendLayout.List &&
+    (legend.position === 'top' || legend.position === 'bottom')
   );
 }
 

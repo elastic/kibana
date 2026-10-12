@@ -44,9 +44,11 @@ const useStyles = ({ enabled, phase }: { enabled: boolean; phase: string }) => {
       align-items: center;
       border-radius: 50%;
       background-color: ${backgroundColor};
-      ${enabled
-        ? `color: ${getPhaseIconForegroundColor(backgroundColor, euiTheme, isDarkMode, phase)};`
-        : ''}
+      ${
+        enabled
+          ? `color: ${getPhaseIconForegroundColor(backgroundColor, euiTheme, isDarkMode, phase)};`
+          : ''
+      }
       ${!enabled && `margin: ${euiTheme.size.s};`}
     `,
   };

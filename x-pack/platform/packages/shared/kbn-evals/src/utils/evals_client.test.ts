@@ -25,12 +25,12 @@ import { EvalsClient } from './evals_client';
 const createMockKbnClient = (): jest.Mocked<KbnClient> =>
   ({
     request: jest.fn(),
-  } as unknown as jest.Mocked<KbnClient>);
+  }) as unknown as jest.Mocked<KbnClient>;
 
 const asKbnResponse = <T>(value: T, status = 200): Awaited<ReturnType<KbnClient['request']>> =>
-  ({ data: value, status, statusText: 'OK', headers: new Headers() } as unknown as Awaited<
+  ({ data: value, status, statusText: 'OK', headers: new Headers() }) as unknown as Awaited<
     ReturnType<KbnClient['request']>
-  >);
+  >;
 
 const createLog = (): jest.Mocked<SomeDevLog> =>
   ({
@@ -42,7 +42,7 @@ const createLog = (): jest.Mocked<SomeDevLog> =>
     trace: jest.fn(),
     success: jest.fn(),
     fatal: jest.fn(),
-  } as unknown as jest.Mocked<SomeDevLog>);
+  }) as unknown as jest.Mocked<SomeDevLog>;
 
 const createIngestRequest = (): IngestScoresRequestBodyInput => ({
   experiment_id: 'experiment-1',

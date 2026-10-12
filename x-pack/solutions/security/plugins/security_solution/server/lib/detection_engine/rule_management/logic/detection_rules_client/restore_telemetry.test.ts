@@ -20,7 +20,7 @@ import {
 } from './restore_telemetry';
 
 const mockAnalytics = (): AnalyticsServiceSetup =>
-  ({ reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup);
+  ({ reportEvent: jest.fn() }) as unknown as AnalyticsServiceSetup;
 
 const mockLogger = (): Logger =>
   ({
@@ -29,7 +29,7 @@ const mockLogger = (): Logger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('sendRuleRestoreTelemetryEvent', () => {
   const restoredRevisionTimestamp = '2020-02-19T03:57:54.037Z';

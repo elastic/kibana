@@ -72,7 +72,7 @@ const createMockGcpAccountPackageInfo = (): PackageInfo =>
     data_streams: [],
     assets: [],
     owner: { github: 'elastic/security-team' },
-  } as unknown as PackageInfo);
+  }) as unknown as PackageInfo;
 
 const createMockGcpAccountPolicy = (input: NewPackagePolicyInput): NewPackagePolicy =>
   ({
@@ -81,7 +81,7 @@ const createMockGcpAccountPolicy = (input: NewPackagePolicyInput): NewPackagePol
     policy_id: 'policy-123',
     enabled: true,
     inputs: [input],
-  } as NewPackagePolicy);
+  }) as NewPackagePolicy;
 
 const getDefaultGcpAccountCloudSetup = () => ({
   gcpOrganizationEnabled: true,

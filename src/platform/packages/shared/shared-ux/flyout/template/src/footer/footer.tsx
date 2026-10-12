@@ -64,8 +64,8 @@ export const FooterZone = ({ children, 'data-test-subj': dataTestSubj }: FlyoutF
   const primarySlot = activeMenu
     ? primaryActionMenuPart.resolve(activeMenu, undefined)
     : primary
-    ? primaryActionPart.resolve(primary, undefined)
-    : null;
+      ? primaryActionPart.resolve(primary, undefined)
+      : null;
   const secondaryAction = secondary ? secondaryActionPart.resolve(secondary, undefined) : null;
 
   if (!primarySlot && !secondaryAction) {

@@ -66,15 +66,12 @@ import {
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import type { CloudSecurityPostureConfig } from './config';
 
-export class CspPlugin
-  implements
-    Plugin<
-      CspServerPluginSetup,
-      CspServerPluginStart,
-      CspServerPluginSetupDeps,
-      CspServerPluginStartDeps
-    >
-{
+export class CspPlugin implements Plugin<
+  CspServerPluginSetup,
+  CspServerPluginStart,
+  CspServerPluginSetupDeps,
+  CspServerPluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly config: CloudSecurityPostureConfig;
   private isCloudEnabled?: boolean;

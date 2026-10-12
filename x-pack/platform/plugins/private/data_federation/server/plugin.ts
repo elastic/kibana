@@ -19,10 +19,12 @@ import { MINIMUM_LICENSE_TYPE, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { registerDataSetsRoutes } from './routes/register_routes';
 import type { DataFederationConfigType } from './config';
 
-export class DataFederationServerPlugin
-  implements
-    Plugin<void, void, { features: FeaturesPluginSetup }, { licensing: LicensingPluginStart }>
-{
+export class DataFederationServerPlugin implements Plugin<
+  void,
+  void,
+  { features: FeaturesPluginSetup },
+  { licensing: LicensingPluginStart }
+> {
   private readonly config: DataFederationConfigType;
   private readonly logger: Logger;
   private readonly license = new License();

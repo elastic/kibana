@@ -41,8 +41,8 @@ const buildConnectOptions = (
   const connect: ConnectOptions = exclusiveTrust
     ? { ca: certificateAuthorities, allowPartialTrustChain: true }
     : certificateAuthorities.length === 0
-    ? {}
-    : { ca: [...rootCertificates, ...certificateAuthorities], allowPartialTrustChain: true };
+      ? {}
+      : { ca: [...rootCertificates, ...certificateAuthorities], allowPartialTrustChain: true };
 
   switch (verificationMode) {
     case 'none':
@@ -82,8 +82,8 @@ export class SelfHttpDispatcherProvider {
     const additionalCertificateAuthorities = pinLocalLeaf
       ? [extractLeafCertificate(localCertificate)]
       : usesLocalTarget
-      ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
-      : config.selfHttp.ssl.certificateAuthorities ?? [];
+        ? [config.ssl.certificate, ...(config.ssl.certificateAuthorities ?? [])]
+        : (config.selfHttp.ssl.certificateAuthorities ?? []);
     const certificateAuthorities = additionalCertificateAuthorities.filter(
       (certificate): certificate is string => certificate !== undefined
     );

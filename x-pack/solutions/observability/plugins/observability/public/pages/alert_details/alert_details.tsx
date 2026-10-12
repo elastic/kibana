@@ -158,10 +158,10 @@ export function AlertDetails() {
     !canReadAlertRule || isLoadingRule
       ? 'unknown'
       : isRuleNotFound
-      ? 'deleted'
-      : rule?.enabled === false
-      ? 'disabled'
-      : 'ok';
+        ? 'deleted'
+        : rule?.enabled === false
+          ? 'disabled'
+          : 'ok';
 
   useAlertDetailsPageViewEbt({ ruleType: rule?.ruleTypeId });
 

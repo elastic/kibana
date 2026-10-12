@@ -18,12 +18,12 @@ import { executeEsql } from '../utils/esql';
 
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
 
-const createMockEsClient = () => ({} as unknown as ElasticsearchClient);
+const createMockEsClient = () => ({}) as unknown as ElasticsearchClient;
 
 const createMockLogger = () =>
   ({
     debug: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 const textField = (path: string): MappingField => ({ path, type: 'text', meta: {} });
 

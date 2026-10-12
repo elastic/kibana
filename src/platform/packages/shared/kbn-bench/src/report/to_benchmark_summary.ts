@@ -57,23 +57,29 @@ export function toBenchmarkSummary(result: BenchmarkResult): BenchmarkSummary {
 
   const time = toMetricSummary(times)!;
 
-  const metrics = completed.reduce((prev, run) => {
-    Object.entries(run.metrics).forEach(([name, metric]) => {
-      const { value, title, format } =
-        typeof metric === 'number'
-          ? { title: name, value: metric, format: 'number' as const }
-          : metric;
+  const metrics = completed.reduce(
+    (prev, run) => {
+      Object.entries(run.metrics).forEach(([name, metric]) => {
+        const { value, title, format } =
+          typeof metric === 'number'
+            ? { title: name, value: metric, format: 'number' as const }
+            : metric;
 
-      if (!prev[name]) {
-        prev[name] = { values: [value], title, format };
-        return;
-      }
+        if (!prev[name]) {
+          prev[name] = { values: [value], title, format };
+          return;
+        }
 
-      prev[name].values.push(value);
-    });
+        prev[name].values.push(value);
+      });
 
-    return prev;
-  }, {} as Record<string, { values: number[]; title: string; format?: 'size' | 'duration' | 'percentage' | 'number' }>);
+      return prev;
+    },
+    {} as Record<
+      string,
+      { values: number[]; title: string; format?: 'size' | 'duration' | 'percentage' | 'number' }
+    >
+  );
 
   const runProcStats: RunProcStats[] = [];
 

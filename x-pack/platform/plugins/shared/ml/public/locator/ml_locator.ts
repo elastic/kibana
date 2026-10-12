@@ -49,7 +49,7 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
             },
           }
         : {}),
-    } as MlLocatorParams);
+    }) as MlLocatorParams;
 
   public readonly getLocation = async (params: MlLocatorParams): Promise<KibanaLocation> => {
     let path: string = '';

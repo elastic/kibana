@@ -24,11 +24,10 @@ const DISABLED_ACTIONS = [
   'create-ml-ad-job-action',
 ];
 
-interface TrendDocsChartProps
-  extends Pick<
-    ReturnType<typeof useQualityIssuesDocsChart>,
-    'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
-  > {
+interface TrendDocsChartProps extends Pick<
+  ReturnType<typeof useQualityIssuesDocsChart>,
+  'attributes' | 'isChartLoading' | 'onChartLoading' | 'extraActions'
+> {
   timeRange: TimeRangeConfig;
   lastReloadTime: number;
   onTimeRangeChange: (props: Pick<OnTimeChangeProps, 'start' | 'end'>) => void;

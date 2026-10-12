@@ -80,9 +80,10 @@ export interface ObservabilityOnboardingPluginStartDeps {
 export type ObservabilityOnboardingContextValue = CoreStart &
   ObservabilityOnboardingPluginStartDeps & { config: ConfigSchema };
 
-export class ObservabilityOnboardingPlugin
-  implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>
-{
+export class ObservabilityOnboardingPlugin implements Plugin<
+  ObservabilityOnboardingPluginSetup,
+  ObservabilityOnboardingPluginStart
+> {
   private locators?: ObservabilityOnboardingPluginLocators;
   private readonly addDataExperience$ = new ReplaySubject<AddDataExperience>(1);
   private addDataExperienceSubscription?: Subscription;
@@ -161,9 +162,8 @@ export class ObservabilityOnboardingPlugin
       registerIngestFlows(core, plugins);
     }
 
-    const { getLazyElbLogsCloudForwarderExtension } = await import(
-      './fleet_extensions/elb_logs_cloud_forwarder'
-    );
+    const { getLazyElbLogsCloudForwarderExtension } =
+      await import('./fleet_extensions/elb_logs_cloud_forwarder');
     plugins.fleet.registerExtension({
       package: 'aws_cloudwatch_input_otel',
       view: 'package-policy-create-bottom',

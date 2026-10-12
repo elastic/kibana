@@ -44,9 +44,7 @@ export const queryExistingUsers =
           return users;
         }, {})
       )
-      .then(
-        (existingUsers): Batch => ({
-          existingUsers,
-          uploaded: batch,
-        })
-      );
+      .then((existingUsers): Batch => ({
+        existingUsers,
+        uploaded: batch,
+      }));

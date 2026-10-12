@@ -40,7 +40,7 @@ const LINKED_PROJECT_EVENT_TEXT =
   'This event originates from a linked project. Some features may not be available.';
 
 const makeHit = (raw: DataTableRecord['raw'], flattened: DataTableRecord['flattened'] = {}) =>
-  ({ id: '1', raw, flattened, isAnchor: false } as DataTableRecord);
+  ({ id: '1', raw, flattened, isAnchor: false }) as DataTableRecord;
 
 const renderCallout = (props: React.ComponentProps<typeof RemoteDocumentCallout>) =>
   render(

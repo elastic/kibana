@@ -33,8 +33,8 @@ export const useTableItems = (
         error: !factory
           ? invalidDrilldownType(drilldownState.type) // this shouldn't happen for the end user, but useful during development
           : !factory.isLicenseCompatible
-          ? insufficientLicenseLevel
-          : undefined,
+            ? insufficientLicenseLevel
+            : undefined,
         trigger: getTrigger(drilldownState.trigger),
         triggerIncompatible: !triggers.find((t) => t === drilldownState.trigger),
       };

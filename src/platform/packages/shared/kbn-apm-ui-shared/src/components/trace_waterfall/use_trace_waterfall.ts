@@ -82,8 +82,8 @@ export function useTraceWaterfall({
         ...item,
         color:
           colorBy === WaterfallLegendType.ServiceName
-            ? colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`) ?? ''
-            : colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`) ?? '',
+            ? (colorMap.get(`${WaterfallLegendType.ServiceName}:${item.serviceName}`) ?? '')
+            : (colorMap.get(`${WaterfallLegendType.Type}:${item.type ?? ''}`) ?? ''),
       }));
 
       const errorMarks =

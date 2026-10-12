@@ -26,7 +26,7 @@ const createRequest = ({ selfCall = true }: { selfCall?: boolean } = {}) =>
     response: { statusCode: 201 },
     route: { path: '/api/items/{id}' },
     url: new URL('http://localhost/api/items/raw-id?filter=raw-value'),
-  } as unknown as Request);
+  }) as unknown as Request;
 
 const responseToolkit = { continue: Symbol('continue') } as unknown as ResponseToolkit;
 const invoke = (handler: Lifecycle.Method, request: Request) =>

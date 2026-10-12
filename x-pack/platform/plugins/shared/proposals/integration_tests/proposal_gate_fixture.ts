@@ -181,7 +181,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     getWorkflowsApi: () => workflowsApi as never,
     // The gate's behaviour does not depend on the conversation card, so the
     // attachment write is stubbed rather than simulated.
-    getAttachmentsClient: async () => ({ create: jest.fn() } as never),
+    getAttachmentsClient: async () => ({ create: jest.fn() }) as never,
   });
 
   const privileges: ProposalPrivilegesChecker = {
@@ -198,7 +198,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
 
   const proposals = () =>
     [...documents.entries()].map(
-      ([id, { document }]) => ({ id, ...document } as Proposal & { id: string })
+      ([id, { document }]) => ({ id, ...document }) as Proposal & { id: string }
     );
 
   /** Stages the payload `waitForApproval` reduces a resume to, without waking the run. */

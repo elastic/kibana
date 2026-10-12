@@ -49,7 +49,7 @@ const resolveSegment = (schema: JsonSchema, segment: string): JsonSchema | null 
   if (schema.type === 'array') {
     // Liquid indexes arrays numerically and can't pick a slot out of a tuple schema.
     const items = Array.isArray(schema.items) ? schema.items[0] : schema.items;
-    return /^\d+$/.test(segment) ? items ?? ANY_KEY_OBJECT : null;
+    return /^\d+$/.test(segment) ? (items ?? ANY_KEY_OBJECT) : null;
   }
 
   if (schema.type !== 'object') {

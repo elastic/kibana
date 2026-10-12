@@ -28,10 +28,10 @@ jest.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accord
       {isLoading || validationErrors === null
         ? 'Initializing validation...'
         : error
-        ? `Validation failed: ${error.message}`
-        : !validationErrors || validationErrors.length === 0
-        ? 'No validation errors'
-        : `${validationErrors.length} error(s)`}
+          ? `Validation failed: ${error.message}`
+          : !validationErrors || validationErrors.length === 0
+            ? 'No validation errors'
+            : `${validationErrors.length} error(s)`}
     </div>
   ),
 }));

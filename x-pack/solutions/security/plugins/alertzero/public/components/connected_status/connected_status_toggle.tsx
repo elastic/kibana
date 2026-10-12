@@ -240,8 +240,8 @@ export const ConnectedStatusToggle: React.FC<ConnectedStatusToggleProps> = ({
           ? i18n.CLOSE_ESCALATION_SUCCESS
           : i18n.CLOSE_INVESTIGATION_SUCCESS
         : templateId === 'escalation'
-        ? i18n.REOPEN_ESCALATION_SUCCESS
-        : i18n.REOPEN_INVESTIGATION_SUCCESS;
+          ? i18n.REOPEN_ESCALATION_SUCCESS
+          : i18n.REOPEN_INVESTIGATION_SUCCESS;
 
       services.notifications?.toasts.addSuccess(successMsg);
 

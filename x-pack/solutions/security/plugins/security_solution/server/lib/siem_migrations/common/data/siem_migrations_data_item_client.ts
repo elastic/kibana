@@ -48,7 +48,7 @@ const BULK_MAX_SIZE = 500 as const;
 const DEFAULT_SEARCH_BATCH_SIZE = 500 as const;
 
 export abstract class SiemMigrationsDataItemClient<
-  I extends ItemDocument = ItemDocument
+  I extends ItemDocument = ItemDocument,
 > extends SiemMigrationsDataBaseClient {
   protected abstract type: MigrationType;
   public abstract getVendor(migrationId: string): Promise<SiemMigrationVendor | undefined>;

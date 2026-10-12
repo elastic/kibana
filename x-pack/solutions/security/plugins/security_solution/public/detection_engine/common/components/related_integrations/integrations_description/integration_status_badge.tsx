@@ -40,8 +40,8 @@ const IntegrationStatusBadgeComponent: React.FC<IntegrationStatusBadgeProps> = (
   const statusText = isEnabled
     ? i18n.INTEGRATIONS_ENABLED
     : isInstalled
-    ? i18n.INTEGRATIONS_DISABLED
-    : i18n.INTEGRATIONS_UNINSTALLED;
+      ? i18n.INTEGRATIONS_DISABLED
+      : i18n.INTEGRATIONS_UNINSTALLED;
 
   return (
     <EuiToolTip content={tooltipText}>

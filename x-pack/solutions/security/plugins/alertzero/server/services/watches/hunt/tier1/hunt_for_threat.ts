@@ -360,7 +360,9 @@ export const huntForThreat = async (
   const aggs = response.aggregations as HuntAggregations | undefined;
 
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
   const docs: HitDocument[] = (response.hits.hits ?? []).map((hit) => {
     const source = (hit._source ?? {}) as Record<string, unknown>;
     const timestamp =

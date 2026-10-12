@@ -138,9 +138,8 @@ describe('When using `getActionDetailsById()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(
@@ -159,9 +158,8 @@ describe('When using `getActionDetailsById()', () => {
       .mockReturnValue({
         findHostMetadataForFleetAgents: jest.fn().mockResolvedValue([]),
       });
-    (
-      actionRequests.hits.hits[0]._source as LogsEndpointAction
-    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
+    (actionRequests.hits.hits[0]._source as LogsEndpointAction).EndpointActions.expiration =
+      `2021-04-30T16:08:47.449Z`;
 
     await expect(
       getActionDetailsById(endpointAppContextService, 'default', '123')

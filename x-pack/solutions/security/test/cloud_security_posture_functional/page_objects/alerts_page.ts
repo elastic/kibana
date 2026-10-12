@@ -152,8 +152,8 @@ export class AlertsPageObject extends FtrService {
         type === 'alert'
           ? 'Preview alert details'
           : type === 'event'
-          ? 'Preview event details'
-          : 'Grouped entities panel'
+            ? 'Preview event details'
+            : 'Grouped entities panel'
       );
     },
     assertPreviewPanelGroupedItemsNumber: async (expected: number) => {

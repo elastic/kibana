@@ -86,11 +86,13 @@ const useStyles = (isEmbeddable: boolean) => {
       overflow: hidden;
       padding: ${euiTheme.size.m};
       gap: 0;
-      ${isEmbeddable &&
-      css`
-        padding: 0;
-        gap: 0;
-      `}
+      ${
+        isEmbeddable &&
+        css`
+          padding: 0;
+          gap: 0;
+        `
+      }
 
       /*
       * The z-index for the autocomplete suggestions popup

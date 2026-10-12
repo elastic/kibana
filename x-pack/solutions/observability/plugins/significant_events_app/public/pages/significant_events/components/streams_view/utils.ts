@@ -190,10 +190,10 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     type: Streams.ClassicStream.Definition.is(node.stream)
       ? 'classic'
       : Streams.QueryStream.Definition.is(node.stream)
-      ? 'query'
-      : isRootStreamDefinition(node.stream)
-      ? 'root'
-      : 'wired',
+        ? 'query'
+        : isRootStreamDefinition(node.stream)
+          ? 'root'
+          : 'wired',
     ...(children && { children }),
   };
 };

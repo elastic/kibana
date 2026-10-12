@@ -18,5 +18,5 @@ import type { z } from '@kbn/zod/v4';
 export type CommonStepDefinition<
   InputSchema extends z.ZodType = z.ZodType,
   OutputSchema extends z.ZodType = z.ZodType,
-  ConfigSchema extends z.ZodObject = z.ZodObject
+  ConfigSchema extends z.ZodObject = z.ZodObject,
 > = BaseStepDefinition<InputSchema, OutputSchema, ConfigSchema>;

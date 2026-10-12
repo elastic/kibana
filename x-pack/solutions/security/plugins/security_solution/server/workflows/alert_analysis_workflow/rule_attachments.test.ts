@@ -83,7 +83,7 @@ const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
 
       return { data, total, page, perPage };
     }),
-  } as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>);
+  }) as Partial<jest.Mocked<RulesClient>> as jest.Mocked<RulesClient>;
 
 const createBulkEditDependencies = () => ({
   actionsClient: {} as ActionsClient,

@@ -89,7 +89,7 @@ export function RetraceView({ core }: RetraceViewProps) {
       } catch (err) {
         const message =
           err instanceof Error
-            ? (err as { body?: { message?: string } }).body?.message ?? err.message
+            ? ((err as { body?: { message?: string } }).body?.message ?? err.message)
             : i18n.translate('xpack.clientApps.android.retrace.genericErrorMessage', {
                 defaultMessage: 'Retrace failed',
               });

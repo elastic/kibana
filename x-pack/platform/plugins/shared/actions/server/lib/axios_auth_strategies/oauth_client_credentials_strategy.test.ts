@@ -46,7 +46,7 @@ const baseDeps: AuthStrategyDeps = {
 const createMockAxiosInstance = () =>
   ({
     interceptors: { response: { use: jest.fn() } },
-  } as unknown as AxiosInstance);
+  }) as unknown as AxiosInstance;
 
 describe('OAuthClientCredentialsStrategy', () => {
   let strategy: OAuthClientCredentialsStrategy;

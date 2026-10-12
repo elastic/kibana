@@ -60,7 +60,10 @@ export class WorkflowRuntimeGraph {
   >();
   private readonly syntheticNodeIdByOwnerId = new Map<string, string>();
 
-  constructor(private compiledGraph: WorkflowGraph, stackFrames: StackFrame[]) {
+  constructor(
+    private compiledGraph: WorkflowGraph,
+    stackFrames: StackFrame[]
+  ) {
     this.originalNodesTopologicalOrder = compiledGraph.topologicalOrder
       .map((id) => compiledGraph.getNode(id))
       .filter((node): node is GraphNodeUnion => node !== undefined);

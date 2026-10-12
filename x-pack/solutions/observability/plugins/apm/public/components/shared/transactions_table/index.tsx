@@ -234,7 +234,7 @@ export function TransactionsTable({
   const CreateSloFlyout = useMemo(
     () =>
       sloIndicatorType && sloTransactionName
-        ? sloPlugin?.getCreateSLOFormFlyout({
+        ? (sloPlugin?.getCreateSLOFormFlyout({
             initialValues: {
               name: `APM SLO for ${serviceName} - ${sloTransactionName}`,
               indicator: {
@@ -250,7 +250,7 @@ export function TransactionsTable({
             formSettings: {
               allowedIndicatorTypes: [...APM_SLO_INDICATOR_TYPES],
             },
-          }) ?? null
+          }) ?? null)
         : null,
     [sloPlugin, sloIndicatorType, sloTransactionName, serviceName, sloEnvironment, closeFlyout]
   );

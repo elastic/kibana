@@ -38,7 +38,7 @@ export const normalizeUnit = ({
     return undefined;
   }
 
-  const normalizedUnit = unit ? normalizedUnitMap[unit.toLowerCase()] ?? unit : undefined;
+  const normalizedUnit = unit ? (normalizedUnitMap[unit.toLowerCase()] ?? unit) : undefined;
 
   if (isRatio && (!normalizedUnit || normalizedUnit === 'count')) {
     return 'percent';

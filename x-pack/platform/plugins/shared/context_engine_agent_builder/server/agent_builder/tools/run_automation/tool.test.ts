@@ -31,7 +31,7 @@ describe('run_automation tool', () => {
       getWorkflowsManagement: () =>
         ({
           getWorkflow: getWorkflowMock,
-        } as never),
+        }) as never,
     });
 
   const createConfirmationContext = (toolParams: { workflowId: string }, spaceId = 'default') => {

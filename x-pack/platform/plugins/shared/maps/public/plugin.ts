@@ -124,15 +124,12 @@ export type MapsPluginSetup = ReturnType<MapsPlugin['setup']>;
 export type MapsPluginStart = ReturnType<MapsPlugin['start']>;
 
 /** @internal */
-export class MapsPlugin
-  implements
-    Plugin<
-      MapsPluginSetup,
-      MapsPluginStart,
-      MapsPluginSetupDependencies,
-      MapsPluginStartDependencies
-    >
-{
+export class MapsPlugin implements Plugin<
+  MapsPluginSetup,
+  MapsPluginStart,
+  MapsPluginSetupDependencies,
+  MapsPluginStartDependencies
+> {
   readonly _initializerContext: PluginInitializerContext<MapsXPackConfig>;
 
   constructor(initializerContext: PluginInitializerContext<MapsXPackConfig>) {

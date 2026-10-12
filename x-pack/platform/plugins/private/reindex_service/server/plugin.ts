@@ -36,9 +36,12 @@ interface PluginsStart {
   licensing: LicensingPluginStart;
 }
 
-export class ReindexServiceServerPlugin
-  implements Plugin<void, ReindexServiceServerPluginStart, PluginsSetup, PluginsStart>
-{
+export class ReindexServiceServerPlugin implements Plugin<
+  void,
+  ReindexServiceServerPluginStart,
+  PluginsSetup,
+  PluginsStart
+> {
   private reindexService: ReindexServiceInternalApi | null = null;
   private readonly logger: Logger;
   private version: Version;

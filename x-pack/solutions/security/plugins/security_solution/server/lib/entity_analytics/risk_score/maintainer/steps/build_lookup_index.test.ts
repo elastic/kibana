@@ -21,7 +21,7 @@ const buildLogger = (): ScopedLogger =>
     info: jest.fn(),
     warn: jest.fn(),
     error: jest.fn(),
-  } as unknown as ScopedLogger);
+  }) as unknown as ScopedLogger;
 
 describe('build_lookup_index', () => {
   let esClient: ElasticsearchClient;

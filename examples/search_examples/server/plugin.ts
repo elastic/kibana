@@ -27,15 +27,12 @@ import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
 import { fibonacciStrategyProvider } from './fibonacci_strategy';
 
-export class SearchExamplesPlugin
-  implements
-    Plugin<
-      SearchExamplesPluginSetup,
-      SearchExamplesPluginStart,
-      SearchExamplesPluginSetupDeps,
-      SearchExamplesPluginStartDeps
-    >
-{
+export class SearchExamplesPlugin implements Plugin<
+  SearchExamplesPluginSetup,
+  SearchExamplesPluginStart,
+  SearchExamplesPluginSetupDeps,
+  SearchExamplesPluginStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

@@ -21,7 +21,7 @@ import { checkManagedWorkflowIntegrity } from './check_managed_workflow_integrit
 const createMockAnalytics = (): jest.Mocked<AnalyticsServiceSetup> =>
   ({
     reportEvent: jest.fn(),
-  } as unknown as jest.Mocked<AnalyticsServiceSetup>);
+  }) as unknown as jest.Mocked<AnalyticsServiceSetup>;
 
 const createIntactReport = (id: string): ManagedWorkflowStatusReport => ({
   definitionId: id as ManagedWorkflowStatusReport['definitionId'],
@@ -73,7 +73,7 @@ const createMockWorkflowsExtensions = ({
   ({
     hasStepDefinition: jest.fn((stepTypeId: string) => registeredStepTypes.includes(stepTypeId)),
     initManagedWorkflowsClient: jest.fn().mockResolvedValue(managedClient),
-  } as unknown as jest.Mocked<WorkflowsExtensionsServerPluginStart>);
+  }) as unknown as jest.Mocked<WorkflowsExtensionsServerPluginStart>;
 
 const AD_STEP_TYPES = [
   'security.attack-discovery.defaultAlertRetrieval',
@@ -89,7 +89,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('checkManagedWorkflowIntegrity', () => {
   describe('all_intact', () => {

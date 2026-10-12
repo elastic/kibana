@@ -37,8 +37,7 @@ export type SavedObjectsCollectMultiNamespaceReferencesPurpose =
  *
  * @public
  */
-export interface SavedObjectsCollectMultiNamespaceReferencesOptions
-  extends SavedObjectsBaseOptions {
+export interface SavedObjectsCollectMultiNamespaceReferencesOptions extends SavedObjectsBaseOptions {
   /** Optional purpose used to determine filtering and authorization checks; default is 'collectMultiNamespaceReferences' */
   purpose?: SavedObjectsCollectMultiNamespaceReferencesPurpose;
 }

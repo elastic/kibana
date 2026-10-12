@@ -73,8 +73,8 @@ const buildWatchlistModifiers = (
         (watchlistId): watchlistId is string => typeof watchlistId === 'string'
       )
     : typeof rawWatchlistIds === 'string'
-    ? [rawWatchlistIds]
-    : [];
+      ? [rawWatchlistIds]
+      : [];
   if (watchlistIds.length === 0 || !watchlistConfigs) {
     return [];
   }

@@ -143,7 +143,7 @@ export const useConnectorsTableColumns = (): Array<EuiBasicTableColumn<Connector
         width: '25%',
         render: (actionTypeId: string) => {
           const typeName = actionTypeRegistry.has(actionTypeId)
-            ? actionTypeRegistry.get(actionTypeId).actionTypeTitle ?? actionTypeId
+            ? (actionTypeRegistry.get(actionTypeId).actionTypeTitle ?? actionTypeId)
             : actionTypeId;
 
           return (

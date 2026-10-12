@@ -51,8 +51,7 @@ export interface LegacyIRuleActionsAttributes extends Record<string, any> {
  * @deprecated Remove this once the legacy notification/side car is gone
  */
 export interface LegacyIRuleActionsAttributesSavedObjectAttributes
-  extends LegacyIRuleActionsAttributes,
-    SavedObjectAttributes {}
+  extends LegacyIRuleActionsAttributes, SavedObjectAttributes {}
 
 /**
  * @deprecated Remove this once the legacy notification/side car is gone

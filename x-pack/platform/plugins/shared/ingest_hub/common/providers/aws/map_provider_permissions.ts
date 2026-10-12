@@ -87,7 +87,7 @@ export const mapProviderPermissions = (
     }
 
     // Input level — only RegistryPolicyIntegrationTemplate has `inputs`.
-    const ptInputs = 'inputs' in pt ? pt.inputs ?? [] : [];
+    const ptInputs = 'inputs' in pt ? (pt.inputs ?? []) : [];
     for (const input of ptInputs) {
       // Skip inputs not in this service's input list (when the list is non-empty).
       if (inputTypes.length > 0 && !inputTypes.includes(input.type)) continue;

@@ -49,7 +49,7 @@ interface ConstructorOpts<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   context: TaskRunnerContext;
   task: ConcreteTaskInstance;
@@ -86,7 +86,7 @@ interface RunOpts<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   context: RuleTypeRunnerContext;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
@@ -128,7 +128,7 @@ export class RuleTypeRunner<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private cancelled = false;
 

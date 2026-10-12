@@ -46,9 +46,10 @@ export type EventAnnotationPluginStart = EventAnnotationService;
 export type EventAnnotationPluginSetup = void;
 
 /** @public */
-export class EventAnnotationPlugin
-  implements Plugin<EventAnnotationPluginSetup, EventAnnotationService>
-{
+export class EventAnnotationPlugin implements Plugin<
+  EventAnnotationPluginSetup,
+  EventAnnotationService
+> {
   public setup(
     core: CoreSetup<EventAnnotationStartDependencies, EventAnnotationService>,
     dependencies: SetupDependencies

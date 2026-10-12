@@ -15,8 +15,9 @@ export type ISearchRequestParams = {
   trackTotalHits?: boolean;
 } & estypes.SearchRequest;
 
-export interface IEsSearchRequest<T extends ISearchRequestParams = ISearchRequestParams>
-  extends IKibanaSearchRequest<T> {
+export interface IEsSearchRequest<
+  T extends ISearchRequestParams = ISearchRequestParams,
+> extends IKibanaSearchRequest<T> {
   indexType?: string;
 }
 

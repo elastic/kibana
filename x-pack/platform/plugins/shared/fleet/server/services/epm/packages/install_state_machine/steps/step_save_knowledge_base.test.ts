@@ -114,7 +114,7 @@ describe('stepSaveKnowledgeBase', () => {
         info: jest.fn(),
         debug: jest.fn(),
       } as any,
-    } as InstallContext);
+    }) as InstallContext;
 
   it('should extract and save knowledge base files from archive', async () => {
     const entries: ArchiveEntry[] = [
@@ -818,7 +818,7 @@ describe('cleanupKnowledgeBaseStep', () => {
         warn: jest.fn(),
         info: jest.fn(),
       } as any,
-    } as InstallContext);
+    }) as InstallContext;
 
   it('should delete knowledge base content during retry from SAVE_KNOWLEDGE_BASE state', async () => {
     const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');

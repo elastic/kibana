@@ -78,7 +78,7 @@ export function TransactionTypeSelect({
       disabled={isDisabled}
       onChange={handleChange}
       options={isDisabled ? [{ text: NO_SELECTION_OPTION, value: '' }] : options}
-      value={isDisabled ? '' : transactionType ?? options[0]?.value ?? ''}
+      value={isDisabled ? '' : (transactionType ?? options[0]?.value ?? '')}
     />
   );
 }

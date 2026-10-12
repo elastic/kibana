@@ -76,7 +76,7 @@ const onSave: ContentEditorConfig['onSave'] = async ({ id, title, description, t
   const tagging = getSavedObjectsTagging();
   const references = tagging
     ? tagging.ui.updateTagsReferences(item.references ?? [], tags)
-    : item.references ?? [];
+    : (item.references ?? []);
   await getMapClient().update({
     id,
     data: { ...item.attributes, title, description },

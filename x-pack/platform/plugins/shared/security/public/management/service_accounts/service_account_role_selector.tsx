@@ -100,22 +100,20 @@ export const ServiceAccountRoleSelector = ({
     (name) => !availableRoles.some((role) => role.name === name)
   );
   const options: RoleOption[] = [
-    ...missingRoles.map(
-      (name): RoleOption => ({
-        key: name,
-        label: name,
-        checked: 'on',
-        'data-test-subj': `roleOption-${name}`,
-        append: (
-          <EuiBadge color="warning">
-            <FormattedMessage
-              id="xpack.security.management.serviceAccounts.create.unavailableRoleBadge"
-              defaultMessage="unavailable"
-            />
-          </EuiBadge>
-        ),
-      })
-    ),
+    ...missingRoles.map((name): RoleOption => ({
+      key: name,
+      label: name,
+      checked: 'on',
+      'data-test-subj': `roleOption-${name}`,
+      append: (
+        <EuiBadge color="warning">
+          <FormattedMessage
+            id="xpack.security.management.serviceAccounts.create.unavailableRoleBadge"
+            defaultMessage="unavailable"
+          />
+        </EuiBadge>
+      ),
+    })),
     ...customRoles.map(optionForRole),
     ...(predefinedRoles.length
       ? [

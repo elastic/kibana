@@ -68,8 +68,9 @@ export interface RendererActionButtonsParams<TPayload = unknown> {
  * browser has everything it needs to validate a resolved payload before mounting,
  * and the payload type passed to `render` is inferred directly from the schema.
  */
-export interface RendererUIDefinition<TSchema extends ZodObject<any> = ZodObject<any>>
-  extends RendererDefinition<string, TSchema> {
+export interface RendererUIDefinition<
+  TSchema extends ZodObject<any> = ZodObject<any>,
+> extends RendererDefinition<string, TSchema> {
   /**
    * Renders the payload inline in the conversation.
    */

@@ -11,7 +11,10 @@ import { EXTENDED_TIMEOUT } from '../constants';
 import { waitForApmMainContainer } from '../page_helpers';
 
 export class AnomalyDetectionPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async goto() {
     await this.page.goto(`${this.kbnUrl.app('apm')}/settings/anomaly-detection`);

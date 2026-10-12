@@ -42,7 +42,7 @@ const attachment = (
     data: { proposalId: 'proposal-1' },
     origin: 'proposal-1',
     ...overrides,
-  } as Attachment<typeof PROPOSAL_ATTACHMENT_TYPE, ProposalAttachmentData>);
+  }) as Attachment<typeof PROPOSAL_ATTACHMENT_TYPE, ProposalAttachmentData>;
 
 const createType = () => {
   const get = jest.fn().mockResolvedValue(proposal());
@@ -55,7 +55,7 @@ const createType = () => {
 
   return {
     type: createProposalAttachmentType({
-      getProposalsService: () => ({ get } as unknown as ProposalsService),
+      getProposalsService: () => ({ get }) as unknown as ProposalsService,
       privileges,
       logger,
     }),

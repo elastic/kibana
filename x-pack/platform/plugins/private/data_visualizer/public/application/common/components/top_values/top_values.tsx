@@ -88,7 +88,7 @@ export const TopValues: FC<TopValuesProps> = ({
   const originalTopValues = (showSampledValues ? stats.sampledValues : stats.topValues) ?? [];
   if (originalTopValues?.length === 0) return null;
   const totalDocuments = showSampledValues
-    ? stats.topValuesSampleSize ?? 0
+    ? (stats.topValuesSampleSize ?? 0)
     : Math.min(sampleCount ?? Infinity, stats.totalDocuments ?? Infinity);
 
   const getMessage = () => {

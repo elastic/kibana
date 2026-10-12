@@ -62,7 +62,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     raw: { _id: '1', _index: 'test', _source: {} },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const baseAlert = {
   '@timestamp': '2025-01-01T00:00:00.000Z',

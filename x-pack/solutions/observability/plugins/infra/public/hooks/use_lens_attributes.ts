@@ -69,16 +69,16 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
 
   const openInLensAction = useCallback(
     ({
-        timeRange,
-        query,
-        filters,
-        lastReloadRequestTime,
-      }: {
-        timeRange: TimeRange;
-        filters: Filter[];
-        query: Query;
-        lastReloadRequestTime?: number;
-      }) =>
+      timeRange,
+      query,
+      filters,
+      lastReloadRequestTime,
+    }: {
+      timeRange: TimeRange;
+      filters: Filter[];
+      query: Query;
+      lastReloadRequestTime?: number;
+    }) =>
       (openInNewTab: boolean) => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {

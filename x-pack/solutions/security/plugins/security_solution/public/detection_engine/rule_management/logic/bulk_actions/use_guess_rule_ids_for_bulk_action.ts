@@ -20,8 +20,8 @@ export function useGuessRuleIdsForBulkAction(): (bulkActionType: BulkActionType)
         bulkActionType === BulkActionTypeEnum.enable
           ? allRules.filter((x) => !x.enabled)
           : bulkActionType === BulkActionTypeEnum.disable
-          ? allRules.filter((x) => x.enabled)
-          : allRules;
+            ? allRules.filter((x) => x.enabled)
+            : allRules;
 
       return processingRules.map((r) => r.id);
     },

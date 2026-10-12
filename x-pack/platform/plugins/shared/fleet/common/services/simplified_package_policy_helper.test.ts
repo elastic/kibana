@@ -152,15 +152,18 @@ const multiTemplatePkgInfo = {
 function getEnabledInputsAndStreams(newPackagePolicy: NewPackagePolicy) {
   return newPackagePolicy.inputs
     .filter((input) => input.enabled)
-    .reduce((acc, input) => {
-      const inputId = generateInputId(input);
+    .reduce(
+      (acc, input) => {
+        const inputId = generateInputId(input);
 
-      acc[inputId] = input.streams
-        .filter((stream) => stream.enabled)
-        .map((stream) => stream.data_stream.dataset);
+        acc[inputId] = input.streams
+          .filter((stream) => stream.enabled)
+          .map((stream) => stream.data_stream.dataset);
 
-      return acc;
-    }, {} as Record<string, string[]>);
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
 }
 
 describe('generateInputId', () => {
@@ -789,7 +792,7 @@ describe('agentlessPolicyToPackagePolicy', () => {
       updated_at: '2026-06-30T00:00:00.000Z',
       updated_by: 'elastic',
       ...overrides,
-    } as AgentlessPolicy);
+    }) as AgentlessPolicy;
 
   it('expands the agentless policy into the full package policy form shape', () => {
     const result = agentlessPolicyToPackagePolicy(

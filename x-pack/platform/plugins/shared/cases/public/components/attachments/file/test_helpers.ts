@@ -30,4 +30,4 @@ export const makeFileComment = (
     updatedAt: null,
     updatedBy: null,
     version: 'v',
-  } as unknown as AttachmentUIV2);
+  }) as unknown as AttachmentUIV2;

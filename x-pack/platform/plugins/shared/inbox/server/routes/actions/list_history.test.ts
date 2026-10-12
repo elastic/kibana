@@ -73,7 +73,7 @@ const invokeHandler = async (
 
 const getOkBody = (response: ReturnType<typeof httpServerMock.createResponseFactory>) => {
   const [[{ body }]] = response.ok.mock.calls as unknown as [
-    [{ body: ListInboxActionsHistoryResponse }]
+    [{ body: ListInboxActionsHistoryResponse }],
   ];
   return body;
 };

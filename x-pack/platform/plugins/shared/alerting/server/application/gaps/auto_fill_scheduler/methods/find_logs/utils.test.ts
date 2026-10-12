@@ -24,7 +24,7 @@ const createEventLogEntry = (
       },
     },
     ...overrides,
-  } as unknown as IValidatedEventInternalDocInfo);
+  }) as unknown as IValidatedEventInternalDocInfo;
 
 describe('formatGapAutoFillSchedulerLogEntry', () => {
   test('formats full log entry', () => {

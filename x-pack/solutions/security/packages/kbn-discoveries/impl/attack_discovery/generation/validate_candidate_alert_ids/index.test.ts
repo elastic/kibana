@@ -12,7 +12,7 @@ import { validateCandidateAlertIds } from '.';
 const getLogger = (): Logger =>
   ({
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('validateCandidateAlertIds', () => {
   it('keeps candidates that carry a recoverable backing _id', () => {

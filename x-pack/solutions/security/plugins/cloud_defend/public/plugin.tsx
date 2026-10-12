@@ -34,15 +34,12 @@ const Router = (props: CloudDefendRouterProps) => (
   </Suspense>
 );
 
-export class CloudDefendPlugin
-  implements
-    Plugin<
-      CloudDefendPluginSetup,
-      CloudDefendPluginStart,
-      CloudDefendPluginSetupDeps,
-      CloudDefendPluginStartDeps
-    >
-{
+export class CloudDefendPlugin implements Plugin<
+  CloudDefendPluginSetup,
+  CloudDefendPluginStart,
+  CloudDefendPluginSetupDeps,
+  CloudDefendPluginStartDeps
+> {
   private isCloudEnabled?: boolean;
 
   public setup(

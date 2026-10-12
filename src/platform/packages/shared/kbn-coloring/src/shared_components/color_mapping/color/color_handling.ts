@@ -46,8 +46,8 @@ export function getAssignmentColor(
       return total === 0
         ? FALLBACK_ASSIGNMENT_COLOR
         : total === 1
-        ? colorScale(0)
-        : colorScale(index / (total - 1));
+          ? colorScale(0)
+          : colorScale(index / (total - 1));
     }
     default:
       return FALLBACK_ASSIGNMENT_COLOR;

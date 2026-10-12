@@ -80,7 +80,7 @@ const csvEscape = (value: string): string => {
 };
 
 const cellForColumn = (row: MatrixRow, column: MatrixDisplayColumn): MatrixCell =>
-  column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
+  column.kind === 'overall' ? row.overall : (row.cells[column.id] ?? { kind: 'missing' });
 
 const buildHeader = (displayColumns: MatrixDisplayColumn[]): string[] => [
   'Model',

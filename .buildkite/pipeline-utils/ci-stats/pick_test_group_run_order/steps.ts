@@ -105,10 +105,10 @@ export function sortFunctionalGroups(groups: FunctionalGroup[]): FunctionalGroup
     typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
       ? a.sortBy - b.sortBy
       : typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-      ? a.sortBy.localeCompare(b.sortBy)
-      : typeof a.sortBy === 'number'
-      ? 1
-      : -1
+        ? a.sortBy.localeCompare(b.sortBy)
+        : typeof a.sortBy === 'number'
+          ? 1
+          : -1
   );
 }
 

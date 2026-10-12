@@ -18,7 +18,10 @@ import { RemoveUnusedComponentsProcessor } from './process_document/document_pro
 import type { DocumentNodeProcessor } from './process_document/document_processors/types/document_node_processor';
 
 export class SkipException extends Error {
-  constructor(public documentPath: string, message: string) {
+  constructor(
+    public documentPath: string,
+    message: string
+  ) {
     super(message);
   }
 }

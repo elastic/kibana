@@ -35,7 +35,7 @@ export interface Font {
 function createFont<
   RawFont extends { value: RawFontValue; label: RawFontLabel },
   RawFontValue extends string,
-  RawFontLabel extends string
+  RawFontLabel extends string,
 >(font: RawFont) {
   return font;
 }

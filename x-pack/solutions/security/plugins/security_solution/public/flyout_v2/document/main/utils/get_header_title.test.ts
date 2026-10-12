@@ -21,7 +21,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     raw: {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 describe('getAlertTitle', () => {
   it('returns the rule name when provided', () => {

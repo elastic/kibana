@@ -19,7 +19,7 @@ const phraseFilter = (field: string, value: string) =>
   ({
     meta: { type: 'phrase', key: field, params: { query: value } },
     query: { match_phrase: { [field]: value } },
-  } as any);
+  }) as any;
 
 const buildApi = ({
   filters$,

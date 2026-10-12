@@ -877,10 +877,10 @@ export function buildAwsServiceMatrix(
         const ptDataStreamIds: string[] = ptInputType
           ? []
           : (pt as any).data_streams?.length > 0
-          ? (pt as any).data_streams
-          : (packageInfo.data_streams ?? [])
-              .map((ds: any) => ds.path as string)
-              .filter((dsId) => !otherPtDataStreamIds.has(dsId));
+            ? (pt as any).data_streams
+            : (packageInfo.data_streams ?? [])
+                .map((ds: any) => ds.path as string)
+                .filter((dsId) => !otherPtDataStreamIds.has(dsId));
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
@@ -1032,7 +1032,7 @@ export function buildAwsServiceMatrix(
     // Use static fallback signal types when the manifest couldn't be derived (manifest unavailable
     // or no PT matched). Manifest-derived types take precedence when present.
     const signalTypes: SignalType[] =
-      signalTypesSet.size > 0 ? [...signalTypesSet] : entry.signalTypes ?? [];
+      signalTypesSet.size > 0 ? [...signalTypesSet] : (entry.signalTypes ?? []);
     const deploymentMethods = buildDeploymentMethods(
       staticMethods,
       managedIntegrations,

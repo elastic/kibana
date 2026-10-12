@@ -12,9 +12,12 @@ import type { MyImageMetadata } from '../common';
 import { PLUGIN_ID, PLUGIN_NAME, exampleFileKind } from '../common';
 import type { FilesExamplePluginsStart, FilesExamplePluginsSetup } from './types';
 
-export class FilesExamplePlugin
-  implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
-{
+export class FilesExamplePlugin implements Plugin<
+  unknown,
+  unknown,
+  FilesExamplePluginsSetup,
+  FilesExamplePluginsStart
+> {
   public setup(
     core: CoreSetup<FilesExamplePluginsStart>,
     { files, developerExamples }: FilesExamplePluginsSetup

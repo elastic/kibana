@@ -28,9 +28,10 @@ import type {
 import { ACTION_GLOBAL_APPLY_FILTER, UPDATE_FILTER_REFERENCES_ACTION } from './actions/constants';
 import { FiltersBuilderLazy } from './filters_builder';
 
-export class UnifiedSearchPublicPlugin
-  implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
-{
+export class UnifiedSearchPublicPlugin implements Plugin<
+  UnifiedSearchPluginSetup,
+  UnifiedSearchPublicPluginStart
+> {
   private readonly storage: IStorageWrapper;
   private usageCollection: UsageCollectionSetup | undefined;
 

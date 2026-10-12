@@ -14,7 +14,7 @@ import type { CreateTestConfigOptions } from '../shared/types';
 
 export function createTestConfig<
   TServices extends {} = typeof services,
-  TPageObjects extends {} = typeof pageObjects
+  TPageObjects extends {} = typeof pageObjects,
 >(options: CreateTestConfigOptions<TServices, TPageObjects>) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));

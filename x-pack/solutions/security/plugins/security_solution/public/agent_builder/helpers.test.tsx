@@ -10,9 +10,9 @@ import { SecurityAgentBuilderAttachments } from '../../common/constants';
 import { alertsToAttachmentGroup, hashIds, stringifyEssentialAlertData } from './helpers';
 
 const makeItem = (id: string) =>
-  ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as Parameters<
+  ({ _id: id, data: [], ecs: { _id: id, _index: '' } }) as unknown as Parameters<
     typeof alertsToAttachmentGroup
-  >[0][number]);
+  >[0][number];
 
 describe('alertsToAttachmentGroup', () => {
   it('returns an AttachmentGroup with type "group"', () => {

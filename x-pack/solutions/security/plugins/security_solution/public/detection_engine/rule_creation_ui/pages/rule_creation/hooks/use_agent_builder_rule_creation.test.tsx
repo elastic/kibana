@@ -41,7 +41,7 @@ jest.mock('../../../../common/helpers', () => ({
 const SYNC_DEBOUNCE_MS = 500;
 
 const makeForm = <T extends object>() =>
-  ({ updateFieldValues: jest.fn() } as unknown as FormHook<T, T>);
+  ({ updateFieldValues: jest.fn() }) as unknown as FormHook<T, T>;
 
 /** Conversation attachment as delivered by activeConversation$ (versioned shape). */
 const makeRuleAttachment = ({ id = 'card-1', origin }: { id?: string; origin?: string } = {}) => ({

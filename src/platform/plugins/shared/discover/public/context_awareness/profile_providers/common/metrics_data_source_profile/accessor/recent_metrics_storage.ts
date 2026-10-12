@@ -25,7 +25,10 @@ const loadKeys = (storage: IStorageWrapper, storageKey: string): string[] => {
 export class RecentMetricsStorage {
   private readonly storageKey: string;
 
-  constructor(basePath: string, private readonly storage: IStorageWrapper) {
+  constructor(
+    basePath: string,
+    private readonly storage: IStorageWrapper
+  ) {
     this.storageKey = buildStorageKey(basePath);
   }
 

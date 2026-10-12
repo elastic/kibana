@@ -15,7 +15,7 @@ import type { UnboundOptions } from '../bind/bind_api';
 export type UnboundOutputOptions<
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 > = UnboundOptions<OutputOptions<TId, TOutputSchema, TStream>>;
 
 /**
@@ -24,7 +24,7 @@ export type UnboundOutputOptions<
 export type BoundOutputAPI = <
   TId extends string = string,
   TOutputSchema extends ToolSchema | undefined = ToolSchema | undefined,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 >(
   options: UnboundOutputOptions<TId, TOutputSchema, TStream>
 ) => OutputCompositeResponse<TId, TOutputSchema, TStream>;

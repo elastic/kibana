@@ -12,9 +12,11 @@ interface InferenceWorkflowsPublicSetupDeps {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
 }
 
-export class InferenceWorkflowsPublicPlugin
-  implements Plugin<{}, {}, InferenceWorkflowsPublicSetupDeps>
-{
+export class InferenceWorkflowsPublicPlugin implements Plugin<
+  {},
+  {},
+  InferenceWorkflowsPublicSetupDeps
+> {
   setup(_core: CoreSetup, deps: InferenceWorkflowsPublicSetupDeps) {
     deps.workflowsExtensions.registerStepDefinition(() =>
       import('./steps/ai/ai_prompt_step').then((m) => m.AiPromptStepDefinition)

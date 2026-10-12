@@ -24,7 +24,7 @@ export const createSavedSearchMock = () =>
     }),
     columns: ['default_column'],
     sort: [],
-  } as unknown as SavedSearch);
+  }) as unknown as SavedSearch;
 
 export const savedSearchMock = createSavedSearchMock();
 
@@ -53,6 +53,6 @@ export const createSavedSearchAdHocMock = () =>
   ({
     id: 'the-saved-search-with-ad-hoc',
     searchSource: createSearchSourceMock({ index: dataViewAdHoc }),
-  } as unknown as SavedSearch);
+  }) as unknown as SavedSearch;
 
 export const savedSearchAdHoc = createSavedSearchAdHocMock();

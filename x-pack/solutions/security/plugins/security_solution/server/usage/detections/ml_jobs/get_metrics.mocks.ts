@@ -398,7 +398,7 @@ export const getMockRuleSearchResponse = (
       },
     ],
     // NOTE: We have to cast as "unknown" and then back to "RuleSearchResult" because "RuleSearchResult" isn't an exact type. See notes in the JSDocs fo that type.
-  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+  }) as unknown as SavedObjectsFindResponse<RuleSearchResult, never>;
 
 export const getMockThreatMatchRuleSO = ({
   isElastic = false,
@@ -521,7 +521,7 @@ export const getMockThreatMatchRuleSO = ({
     version: 'Wzk4NTQwLDNd',
     score: 0,
     sort: ['1644865254209', '19548'],
-  } as unknown as RuleSearchResult);
+  }) as unknown as RuleSearchResult;
 
 export const getMockThreatMatchRuleSearchResponse = (
   rulesSO: RuleSearchResult[]
@@ -531,4 +531,4 @@ export const getMockThreatMatchRuleSearchResponse = (
     per_page: 1_000,
     total: 1,
     saved_objects: rulesSO,
-  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+  }) as unknown as SavedObjectsFindResponse<RuleSearchResult, never>;

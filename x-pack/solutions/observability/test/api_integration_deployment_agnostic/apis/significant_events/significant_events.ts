@@ -253,14 +253,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               }
             : isIlmLifecycle(lifecycle)
-            ? {
-                settings: {
-                  'index.default_pipeline': 'logs@default-pipeline',
-                  'index.lifecycle.prefer_ilm': true,
-                  'index.lifecycle.name': lifecycle.ilm.policy,
-                },
-              }
-            : undefined,
+              ? {
+                  settings: {
+                    'index.default_pipeline': 'logs@default-pipeline',
+                    'index.lifecycle.prefer_ilm': true,
+                    'index.lifecycle.name': lifecycle.ilm.policy,
+                  },
+                }
+              : undefined,
         });
         await esClient.indices.createDataStream({ name });
 

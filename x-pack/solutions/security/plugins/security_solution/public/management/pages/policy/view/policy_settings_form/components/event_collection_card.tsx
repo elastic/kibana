@@ -59,8 +59,9 @@ export interface SupplementalEventFormOption<T extends OperatingSystem> {
   isDisabled?(policyConfig: UIPolicyConfig): boolean;
 }
 
-export interface EventCollectionCardProps<T extends OperatingSystem = OperatingSystem>
-  extends PolicyFormComponentCommonProps {
+export interface EventCollectionCardProps<
+  T extends OperatingSystem = OperatingSystem,
+> extends PolicyFormComponentCommonProps {
   os: T;
   options: ReadonlyArray<EventFormOption<T>>;
   selection: EventFormSelection<T>;
@@ -70,10 +71,10 @@ export interface EventCollectionCardProps<T extends OperatingSystem = OperatingS
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ANY = any;
 interface EventCollectionCardComponent {
-  <T extends OperatingSystem>(props: EventCollectionCardProps<T>, context?: ANY): ReactElement<
-    ANY,
-    ANY
-  > | null;
+  <T extends OperatingSystem>(
+    props: EventCollectionCardProps<T>,
+    context?: ANY
+  ): ReactElement<ANY, ANY> | null;
   displayName?: string | undefined;
 }
 
@@ -245,7 +246,8 @@ export const EventCollectionCard = memo(
 EventCollectionCard.displayName = 'EventCollectionCard';
 
 interface EventCheckboxProps
-  extends Omit<PolicyFormComponentCommonProps, 'mode'>,
+  extends
+    Omit<PolicyFormComponentCommonProps, 'mode'>,
     Pick<EuiCheckboxProps, 'label' | 'disabled'> {
   keyPath: string;
 }

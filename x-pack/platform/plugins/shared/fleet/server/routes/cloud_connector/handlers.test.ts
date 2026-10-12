@@ -24,7 +24,7 @@ jest.mock('../../services/cloud_connectors', () => ({
 
 const mockedVerify = jest.mocked(verifyCloudConnectorIacKey);
 
-const buildContext = () => ({ fleet: Promise.resolve({ internalSoClient: {} }) } as any);
+const buildContext = () => ({ fleet: Promise.resolve({ internalSoClient: {} }) }) as any;
 
 describe('verifyCloudConnectorIacKeyHandler', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;

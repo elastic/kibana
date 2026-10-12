@@ -118,7 +118,7 @@ describe('getPreconfiguredConflictWarnings', () => {
       updated_at: '2021-04-27T04:10:33.043Z',
       version: 'WzcxLDFd',
       namespaces: ['default'],
-    } as unknown as SavedObject<RawAction> & { destinationId?: string });
+    }) as unknown as SavedObject<RawAction> & { destinationId?: string };
 
   it('returns empty array when no connectors conflict with preconfigured', () => {
     const connectors = [createConnector('custom-1'), createConnector('custom-2')];
@@ -164,7 +164,7 @@ describe('getInvalidConnectorIdWarnings', () => {
       },
       references: [],
       namespaces: ['default'],
-    } as unknown as SavedObject<RawAction> & { destinationId?: string });
+    }) as unknown as SavedObject<RawAction> & { destinationId?: string };
 
   it('returns empty array when all connector ids are valid slugs', () => {
     const connectors = [createConnector('my-connector'), createConnector('another-one')];

@@ -120,8 +120,8 @@ const manuallyCountPromptTokens = (requestBody: string) => {
             'name' in msg
               ? msg.name
               : 'function_call' in msg && msg.function_call
-              ? msg.function_call.name + '\n' + msg.function_call.arguments
-              : ''
+                ? msg.function_call.name + '\n' + msg.function_call.arguments
+                : ''
           }<|end|>`
       )
       .join('\n')

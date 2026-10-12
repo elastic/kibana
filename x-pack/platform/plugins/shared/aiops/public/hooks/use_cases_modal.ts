@@ -33,10 +33,10 @@ type EmbeddableRuntimeState<T extends SupportedEmbeddableTypes> =
   T extends EmbeddableChangePointChartType
     ? ChangePointChartEmbeddableState
     : T extends EmbeddablePatternAnalysisType
-    ? PatternAnalysisEmbeddableState
-    : T extends EmbeddableLogRateAnalysisType
-    ? LogRateAnalysisEmbeddableState
-    : never;
+      ? PatternAnalysisEmbeddableState
+      : T extends EmbeddableLogRateAnalysisType
+        ? LogRateAnalysisEmbeddableState
+        : never;
 
 const attachmentTypeByEmbeddableType: Record<SupportedEmbeddableTypes, string> = {
   [EMBEDDABLE_CHANGE_POINT_CHART_TYPE]: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,

@@ -91,9 +91,8 @@ export const getEqlFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { searchService, uiSettingsClient, dataViews } = await getStartDependencies(
-        getKibanaRequest
-      );
+      const { searchService, uiSettingsClient, dataViews } =
+        await getStartDependencies(getKibanaRequest);
 
       const dsl = {
         query: args.query,

@@ -30,5 +30,5 @@ export enum SecurityRuleChangeTrackingAction {
  * Omit the action field to let the underlying RulesClient apply the default action for the operation.
  */
 export type SecurityRuleChangeTracking<
-  ChangeAction extends string = SecurityRuleChangeTrackingAction
+  ChangeAction extends string = SecurityRuleChangeTrackingAction,
 > = RuleChangeTracking<ChangeAction>;

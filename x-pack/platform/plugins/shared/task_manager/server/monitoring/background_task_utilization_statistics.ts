@@ -154,7 +154,7 @@ export function createBackgroundTaskUtilizationAggregator(
         Pick<BackgroundTaskUtilizationStat, 'adhoc'>,
         Pick<BackgroundTaskUtilizationStat, 'recurring'>,
         Pick<BackgroundTaskUtilizationStat, 'load'>,
-        Pick<BackgroundTaskUtilizationStat, 'es_backpressure_active'>
+        Pick<BackgroundTaskUtilizationStat, 'es_backpressure_active'>,
       ]) => {
         return {
           key: 'utilization',

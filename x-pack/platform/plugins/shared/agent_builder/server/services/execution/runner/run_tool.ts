@@ -214,7 +214,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
         ({
           ...result,
           tool_result_id: result.tool_result_id ?? getToolResultId(),
-        } as ToolResult)
+        }) as ToolResult
     );
     // Storage guardrail: cap the total persisted size for non-MCP calls
     const guardedResults =

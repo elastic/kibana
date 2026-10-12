@@ -40,7 +40,7 @@ describe('recordImprovements', () => {
 
   beforeEach(() => {
     improvementsService = {
-      write: jest.fn(async (inputs) => inputs.map((input) => ({ ...input } as never))),
+      write: jest.fn(async (inputs) => inputs.map((input) => ({ ...input }) as never)),
     };
   });
 

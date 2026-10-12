@@ -72,9 +72,8 @@ export function sendAlertTelemetryEvents(
     selectedEvents = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
   }
   try {
-    const filtered = selectedEvents.map(
-      (event: TelemetryEvent): TelemetryEvent =>
-        copyAllowlistedFields(filterList.endpointAlerts, event)
+    const filtered = selectedEvents.map((event: TelemetryEvent): TelemetryEvent =>
+      copyAllowlistedFields(filterList.endpointAlerts, event)
     );
     eventsTelemetry.sendAsync(TelemetryChannel.ENDPOINT_ALERTS, filtered);
   } catch (exc) {

@@ -33,9 +33,12 @@ interface StartDeps {
   security?: SecurityPluginStart;
 }
 
-export class SavedObjectTaggingPlugin
-  implements Plugin<{}, SavedObjectTaggingStart, SetupDeps, StartDeps>
-{
+export class SavedObjectTaggingPlugin implements Plugin<
+  {},
+  SavedObjectTaggingStart,
+  SetupDeps,
+  StartDeps
+> {
   public setup(
     { savedObjects, http, getStartServices }: CoreSetup<StartDeps, SavedObjectTaggingStart>,
     { features, usageCollection, security }: SetupDeps

@@ -99,12 +99,10 @@ export interface TaskManagerBackpressureStats {
 }
 export type TaskManagerBackpressure = TaskEvent<TaskManagerBackpressureStats, never>;
 
-export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
-  ? OkResult
-  : never;
-export type ErrResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
-  ? ErrorResult
-  : never;
+export type OkResultOf<EventType> =
+  EventType extends TaskEvent<infer OkResult, infer ErrorResult> ? OkResult : never;
+export type ErrResultOf<EventType> =
+  EventType extends TaskEvent<infer OkResult, infer ErrorResult> ? ErrorResult : never;
 
 export function asTaskMarkRunningEvent(
   id: string,

@@ -48,7 +48,8 @@ import type { MockGroupData } from '../../__fixtures__/types';
 type ChildVirtualizerRows = Parameters<typeof useConnectedChildVirtualizer>[0]['rows'];
 
 interface CustomCascadeGridBodyProps
-  extends EuiDataGridCustomBodyProps,
+  extends
+    EuiDataGridCustomBodyProps,
     Pick<CascadeLeafCellContentProps, 'virtualizerController' | 'cellId' | 'rowIndex'> {
   data: LeafNode[];
   isFullScreenMode?: boolean;
@@ -107,7 +108,7 @@ const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGridBody(
   }, [isFullScreenMode, isDetached, handle]);
 
   const items = virtualizer.getVirtualItems();
-  const scrollMargin = isDetached ? 0 : virtualizer.measurementsCache[0]?.start ?? 0;
+  const scrollMargin = isDetached ? 0 : (virtualizer.measurementsCache[0]?.start ?? 0);
   const translateY = items.length > 0 ? items[0].start - scrollMargin : 0;
 
   return (
@@ -242,19 +243,22 @@ export const CascadeWithNestedVirtualization: StoryObj<
 
     const generateGroupFieldRecord = useCallback(
       (nodePath?: string[], nodePathMap?: Record<string, string>) => {
-        return groupByFields.reduce<Record<string, string>>((acc, field) => {
-          return {
-            ...acc,
-            [field]:
-              nodePathMap && nodePath?.indexOf(field) !== -1
-                ? nodePathMap[field]
-                : /clientip/.test(field)
-                ? faker.internet.ipv4()
-                : /url\.keyword/.test(field)
-                ? faker.internet.url({ protocol: 'https' })
-                : faker.person.fullName(),
-          };
-        }, {} as Record<string, string>);
+        return groupByFields.reduce<Record<string, string>>(
+          (acc, field) => {
+            return {
+              ...acc,
+              [field]:
+                nodePathMap && nodePath?.indexOf(field) !== -1
+                  ? nodePathMap[field]
+                  : /clientip/.test(field)
+                    ? faker.internet.ipv4()
+                    : /url\.keyword/.test(field)
+                      ? faker.internet.url({ protocol: 'https' })
+                      : faker.person.fullName(),
+            };
+          },
+          {} as Record<string, string>
+        );
       },
       [groupByFields]
     );

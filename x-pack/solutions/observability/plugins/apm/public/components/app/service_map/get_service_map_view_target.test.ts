@@ -15,7 +15,7 @@ const makeNode = (x: number, y: number, overrides: Partial<ServiceMapNode> = {})
     position: { x, y },
     data: {},
     ...overrides,
-  } as ServiceMapNode);
+  }) as ServiceMapNode;
 
 const VIEWPORT = { viewportWidth: 1200, viewportHeight: 600 };
 const EMPTY_BOUNDS: Rect = { x: 0, y: 0, width: 0, height: 0 };

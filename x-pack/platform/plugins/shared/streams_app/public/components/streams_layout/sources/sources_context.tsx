@@ -281,8 +281,8 @@ export const useSources = ({
     const creation = state.context.creationContext;
     return Boolean(
       creation?.formData.sourceName.trim() &&
-        !creation.formErrors.sourceName &&
-        state.context.availableSourceTypes.includes(creation.formData.sourceType)
+      !creation.formErrors.sourceName &&
+      state.context.availableSourceTypes.includes(creation.formData.sourceType)
     );
   });
   const isUnitSaving = useSelector(sourcesActorRef, (state) =>

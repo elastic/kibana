@@ -14,7 +14,7 @@ const createLog = (): ToolingLog =>
     error: jest.fn(),
     info: jest.fn(),
     warning: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 describe('DashboardAgentEvaluationChatClient', () => {
   it('calls the converse API with connector, agent, conversation, and latest message', async () => {

@@ -114,7 +114,7 @@ describe('track panel', () => {
           ({
             top: 200,
             bottom: 900,
-          } as DOMRect)
+          }) as DOMRect
       );
       mockPanelRef.scrollIntoView = jest.fn();
       expect(scrollPosition$.value).toBe(undefined);
@@ -136,7 +136,7 @@ describe('track panel', () => {
           ({
             top: -100,
             bottom: 400,
-          } as DOMRect)
+          }) as DOMRect
       );
       mockPanelRef.scrollIntoView = jest.fn();
       expect(scrollPosition$.value).toBe(undefined);
@@ -159,7 +159,7 @@ describe('track panel', () => {
           ({
             top: 200,
             bottom: 500,
-          } as DOMRect)
+          }) as DOMRect
       );
       mockPanelRef.scrollIntoView = jest.fn();
 

@@ -33,7 +33,7 @@ export const vegaVisTooltipStyles = (euiThemeContext: UseEuiTheme) => {
       ${euiStyles.euiToolTip}
 
       ${logicalCSS('max-width', '100%')}
-        position: fixed;
+      position: fixed;
 
       h2 {
         ${logicalCSS('margin-bottom', euiTheme.size.s)}

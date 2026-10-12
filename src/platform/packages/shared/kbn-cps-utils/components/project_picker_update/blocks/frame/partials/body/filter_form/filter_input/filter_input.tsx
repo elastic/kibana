@@ -55,11 +55,10 @@ interface FilterSelectionInputProps {
 
 type FilterInputSelectName = Exclude<keyof FilterInput, 'tagValue'>;
 
-interface FilterInputStandardSelectProps<TName extends FilterInputSelectName>
-  extends Pick<
-    EuiSuperSelectProps,
-    'compressed' | 'disabled' | 'placeholder' | 'aria-label' | 'fullWidth' | 'popoverProps' | 'css'
-  > {
+interface FilterInputStandardSelectProps<TName extends FilterInputSelectName> extends Pick<
+  EuiSuperSelectProps,
+  'compressed' | 'disabled' | 'placeholder' | 'aria-label' | 'fullWidth' | 'popoverProps' | 'css'
+> {
   control: Control<FilterInput>;
   name: TName;
   rules?: UseControllerProps<FilterInput, TName>['rules'];

@@ -136,10 +136,12 @@ export function FrameLayout(props: FrameLayoutProps) {
                 &:first-child {
                   padding-left: ${euiTheme.size.base};
                 }
-                ${isFullscreen &&
-                `
+                ${
+                  isFullscreen &&
+                  `
                   flex: 1;
-                  padding: 0;`}
+                  padding: 0;`
+                }
               `}
               aria-labelledby="workspaceId"
             >

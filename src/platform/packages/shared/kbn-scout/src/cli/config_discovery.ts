@@ -255,8 +255,8 @@ const handleNonFlattenedOutput = (
     const runScope = bypassCiFilter
       ? 'requested configs'
       : isSelective
-      ? 'selective'
-      : 'full suite';
+        ? 'selective'
+        : 'full suite';
     log.info(
       `Scout configs saved for CI (${runScope}): ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) written to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );

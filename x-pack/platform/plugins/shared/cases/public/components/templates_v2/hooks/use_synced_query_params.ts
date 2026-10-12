@@ -86,7 +86,7 @@ export const useSyncedQueryParams = (): UseSyncedQueryParamsReturn => {
 
 const useTemplatesUrlState = (): [
   TemplatesURLQueryParams,
-  (updated: TemplatesFindRequest, mode?: 'push' | 'replace') => void
+  (updated: TemplatesFindRequest, mode?: 'push' | 'replace') => void,
 ] => {
   const history = useHistory();
   const location = useLocation();
@@ -133,7 +133,7 @@ const isURLStateEmpty = (urlState: TemplatesURLQueryParams) => {
 
 const useTemplatesLocalStorage = (): [
   TemplatesFindRequest | undefined,
-  (item: TemplatesFindRequest | undefined) => void
+  (item: TemplatesFindRequest | undefined) => void,
 ] => {
   const [state, setState] = useCasesLocalStorage<TemplatesFindRequest | undefined>(
     LOCAL_STORAGE_KEYS.templatesTableState,

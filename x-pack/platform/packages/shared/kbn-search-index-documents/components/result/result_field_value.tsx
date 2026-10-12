@@ -32,8 +32,8 @@ function truncateVectors(embeddings: string[] | string[][]): string {
   const embeds = Array.isArray(embeddings[0])
     ? truncateVectors(embeddings[0])
     : embeddings.length > 4
-    ? embeddings.slice(0, 5).concat(['...']).join(', ')
-    : embeddings.join(', ');
+      ? embeddings.slice(0, 5).concat(['...']).join(', ')
+      : embeddings.join(', ');
   return `[${embeds}]`;
 }
 

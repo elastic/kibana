@@ -33,7 +33,7 @@ export interface PromptOptions<TPrompt extends Prompt = Prompt> extends PromptCh
  * versions to a top-level `tools` type.
  */
 export type ChatCompleteOptionsOfPromptOptions<
-  TPromptOptions extends PromptOptions = PromptOptions
+  TPromptOptions extends PromptOptions = PromptOptions,
 > = {
   messages: Message[];
 } & TPromptOptions &
@@ -52,7 +52,7 @@ export type PromptCompositeResponse<TPromptOptions extends PromptOptions = Promp
  */
 export type PromptResponseOf<
   TPrompt extends Prompt,
-  TStream extends boolean = false
+  TStream extends boolean = false,
 > = PromptCompositeResponse<Assign<PromptOptions<TPrompt>, { stream: TStream }>>;
 
 export type PromptAPIResponse<TPromptOptions extends PromptOptions = PromptOptions> =

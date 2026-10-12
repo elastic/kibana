@@ -11,7 +11,7 @@ import type { monaco } from '@kbn/monaco';
 import { isInsideLiquidBlock } from './liquid_utils';
 
 const makePosition = (lineNumber: number, column: number): monaco.Position =>
-  ({ lineNumber, column } as monaco.Position);
+  ({ lineNumber, column }) as monaco.Position;
 
 describe('isInsideLiquidBlock', () => {
   it('returns true when cursor is inside a liquid block', () => {

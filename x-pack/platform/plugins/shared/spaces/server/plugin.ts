@@ -88,15 +88,12 @@ export interface SpacesPluginStartApi {
   hasOnlyDefaultSpace$: Observable<boolean>;
 }
 
-export class SpacesPlugin
-  implements
-    Plugin<
-      SpacesPluginSetupApi,
-      SpacesPluginStartApi,
-      SpacesPluginSetupDeps,
-      SpacesPluginStartDeps
-    >
-{
+export class SpacesPlugin implements Plugin<
+  SpacesPluginSetupApi,
+  SpacesPluginStartApi,
+  SpacesPluginSetupDeps,
+  SpacesPluginStartDeps
+> {
   private readonly config$: Observable<ConfigType>;
 
   private readonly log: Logger;

@@ -16,8 +16,9 @@ import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import type { FieldOptionValue, FieldOption } from './types';
 
-export interface FieldPickerProps<T extends FieldOptionValue>
-  extends EuiComboBoxProps<FieldOption<T>['value']> {
+export interface FieldPickerProps<T extends FieldOptionValue> extends EuiComboBoxProps<
+  FieldOption<T>['value']
+> {
   options: Array<FieldOption<T>>;
   activeField: EuiComboBoxOptionOption<FieldOption<T>['value']> | undefined;
   onChoose: (choice: T | undefined) => void;

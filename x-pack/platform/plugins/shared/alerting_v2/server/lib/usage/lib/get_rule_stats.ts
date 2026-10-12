@@ -114,7 +114,9 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
   });
 
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   const aggs = response.aggregations as unknown as RuleStatsAggregations | undefined;
 

@@ -29,7 +29,7 @@ export interface SingleSearchAfterParams<TSearchRequest> {
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async <
-  TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest
+  TSearchRequest extends estypes.SearchRequest = estypes.SearchRequest,
 >({
   searchRequest,
   services,

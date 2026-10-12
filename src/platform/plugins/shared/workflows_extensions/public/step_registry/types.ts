@@ -20,7 +20,7 @@ import type { CommonStepDefinition } from '../../common';
 export function createPublicStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 >(
   definition: PublicStepDefinition<Input, Output, Config>
 ): PublicStepDefinition<Input, Output, Config> {
@@ -34,7 +34,7 @@ export function createPublicStepDefinition<
 export interface PublicStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 > extends CommonStepDefinition<Input, Output, Config> {
   /**
    * Icon type from EUI icon library.

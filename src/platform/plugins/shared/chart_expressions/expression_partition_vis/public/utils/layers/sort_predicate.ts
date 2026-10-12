@@ -77,4 +77,4 @@ export const sortPredicateByType = (
     [ChartTypes.WAFFLE]: () => sortPredicateWaffle(),
     [ChartTypes.TREEMAP]: () => undefined,
     [ChartTypes.MOSAIC]: () => sortPredicateMosaic(visData, columns),
-  }[chartType]());
+  })[chartType]();

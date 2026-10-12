@@ -21,7 +21,7 @@ import type { JudgeVerdict } from './judge_agreement';
 const doc = (evaluatorName: string | undefined, score: number | null): EvaluationScoreDocument =>
   ({
     evaluator: { name: evaluatorName, score },
-  } as EvaluationScoreDocument);
+  }) as EvaluationScoreDocument;
 
 describe('exampleScoresByEvaluator', () => {
   it('means scores per evaluator across repetitions', () => {
@@ -53,7 +53,7 @@ describe('exampleSpreadByEvaluator', () => {
     ({
       evaluator: { name, score },
       task: { repetition_index: repetition },
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   it('reports max - min per evaluator across repetitions', () => {
     expect(
@@ -92,7 +92,7 @@ describe('exampleSpreadByEvaluator', () => {
 
 describe('countRepetitions', () => {
   const repDoc = (repetitionIndex: number | undefined): EvaluationScoreDocument =>
-    ({ task: { repetition_index: repetitionIndex } } as EvaluationScoreDocument);
+    ({ task: { repetition_index: repetitionIndex } }) as EvaluationScoreDocument;
 
   it('counts distinct repetition indices', () => {
     expect(countRepetitions([repDoc(0), repDoc(0), repDoc(1), repDoc(2)])).toBe(3);
@@ -114,7 +114,7 @@ describe('queryMatrixTraces example fetching', () => {
         output: { messages: [{ message: 'done' }] },
         repetition_index: 0,
       },
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   const makeClient = (opts: { filtered: boolean }) => {
     const getExampleScores = jest.fn(
@@ -318,7 +318,7 @@ describe('queryMatrixTraces example fetching', () => {
           output: { messages: [{ message: 'done' }] },
           repetition_index: judgeId === 'judge-a' ? 0 : 1,
         },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const client = {
       getExperimentScores: jest.fn(
@@ -368,7 +368,7 @@ describe('queryMatrixTraces example fetching', () => {
           },
           repetition_index: 0,
         },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const client = {
       getExperimentScores: jest.fn(
@@ -407,7 +407,7 @@ describe('queryMatrixTraces example fetching', () => {
           },
           repetition_index: 0,
         },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const client = {
       getExperimentScores: jest.fn(
@@ -581,7 +581,7 @@ describe('queryMatrixTraces example fetching', () => {
           output: { messages: [{ message: 'done' }] },
           repetition_index: 0,
         },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const getExperimentScores = jest.fn(
       async (_experimentId: string, { executionId }: { executionId?: string }) =>
@@ -686,7 +686,7 @@ describe('queryMatrixTraces example fetching', () => {
           output: { steps: [{ type: 'tool_call', tool_id: `tool-${suiteId}` }] },
           repetition_index: 0,
         },
-      } as unknown as EvaluationScoreDocument);
+      }) as unknown as EvaluationScoreDocument;
 
     const client = {
       getExperimentScores: jest.fn(
@@ -890,7 +890,7 @@ describe('overlayRepeatedCacheTrails', () => {
         output: { steps: [{ type: 'tool_call', tool_id: toolId }] },
       },
       metadata: { suite_id: suiteId },
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   it('overlays the genuine 3-rep execution and ignores sibling 1-rep weekly runs', () => {
     const traces: MatrixTraceData = {
@@ -959,7 +959,7 @@ describe('overlayRepeatedCacheTrails', () => {
 });
 
 describe('aliasTraceKeys', () => {
-  const entry = (stepCount: number) => ({ stepCount } as MatrixTraceData[string]);
+  const entry = (stepCount: number) => ({ stepCount }) as MatrixTraceData[string];
 
   it('mirrors provider-keyed cells onto the row id for aliased models', () => {
     const traces: MatrixTraceData = {
@@ -1118,7 +1118,7 @@ describe('round 8 review findings: trace policy filtering', () => {
         output: { messages: [{ message: 'done' }] },
         repetition_index: 0,
       },
-    } as unknown as EvaluationScoreDocument);
+    }) as unknown as EvaluationScoreDocument;
 
   const makeClient = (docs: EvaluationScoreDocument[]) => ({
     getExperimentScores: jest.fn(

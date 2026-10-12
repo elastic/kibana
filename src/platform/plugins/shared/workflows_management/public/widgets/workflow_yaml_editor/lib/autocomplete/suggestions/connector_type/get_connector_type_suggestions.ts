@@ -97,8 +97,8 @@ export function getConnectorTypeSuggestions(
       documentation: connectorType.startsWith('elasticsearch.')
         ? `Elasticsearch API - ${connectorType.replace('elasticsearch.', '')}`
         : connectorType.startsWith('kibana.')
-        ? `Kibana API - ${connectorType.replace('kibana.', '')}`
-        : connector?.description || connector?.summary || `Workflow connector - ${connectorType}`,
+          ? `Kibana API - ${connectorType.replace('kibana.', '')}`
+          : connector?.description || connector?.summary || `Workflow connector - ${connectorType}`,
       filterText: connectorType,
       sortText: `!${connectorType}`, // Priority prefix to sort before default suggestions
       preselect: false,

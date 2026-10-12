@@ -44,7 +44,7 @@ const makeState = (scope: string, error: CcrApiError | null): CcrState =>
       status: {},
       error: error ? { [scope]: error } : {},
     },
-  } as unknown as CcrState);
+  }) as unknown as CcrState;
 
 describe('store/selectors/isApiAuthorized', () => {
   const scope = 'autoFollowPattern';

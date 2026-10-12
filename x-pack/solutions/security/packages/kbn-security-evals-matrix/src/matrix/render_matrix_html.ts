@@ -283,7 +283,7 @@ const mdToHtml = (md: string): string => {
 
 const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
   const cell =
-    column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
+    column.kind === 'overall' ? row.overall : (row.cells[column.id] ?? { kind: 'missing' });
   switch (cell.kind) {
     case 'score': {
       // Self-judged scores must be visibly disclosed, not silently rendered
@@ -319,7 +319,7 @@ const cellHtml = (row: MatrixRow, column: MatrixDisplayColumn): string => {
 
 /** Skill entries are either bare strings or `{ id, name, ... }` objects. */
 const skillLabel = (skill: string | { id?: string; name?: string }): string =>
-  typeof skill === 'string' ? skill : skill?.name ?? skill?.id ?? '';
+  typeof skill === 'string' ? skill : (skill?.name ?? skill?.id ?? '');
 
 const stepHtml = (step: TraceStep, index: number): string => {
   if (step.type === 'tool') {
@@ -473,13 +473,13 @@ const renderModelCard = (
         .filter((col) => col.kind === 'base')
         .map((col) => {
           const cell =
-            col.kind === 'overall' ? row.overall : row.cells[col.id] ?? { kind: 'missing' };
+            col.kind === 'overall' ? row.overall : (row.cells[col.id] ?? { kind: 'missing' });
           const status =
             cell.kind === 'score'
               ? '<span class="status ok">completed</span>'
               : cell.kind === 'not-recommended'
-              ? '<span class="status err">failed</span>'
-              : '<span class="status err">missing</span>';
+                ? '<span class="status err">failed</span>'
+                : '<span class="status err">missing</span>';
 
           const column = config.columns.find((c) => c.id === col.id);
           // One card per fetched example matching a column prefix — the suffix set is open, so

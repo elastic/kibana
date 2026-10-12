@@ -41,7 +41,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    */
   registerDrilldown: <
     StoredState extends DrilldownState = DrilldownState,
-    State extends DrilldownState = DrilldownState
+    State extends DrilldownState = DrilldownState,
   >(
     type: string,
     drilldown: DrilldownSetup<StoredState, State>

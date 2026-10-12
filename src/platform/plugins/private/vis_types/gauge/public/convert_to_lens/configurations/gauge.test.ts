@@ -55,7 +55,7 @@ describe('getConfiguration', () => {
       name: 'custom',
       params: { name: 'custom', gaugeType },
       type: 'palette',
-    } as PaletteOutput<CustomPaletteParams>);
+    }) as PaletteOutput<CustomPaletteParams>;
 
   test('shourd return correct configuration - Arc', () => {
     const layerId = 'layer-id';

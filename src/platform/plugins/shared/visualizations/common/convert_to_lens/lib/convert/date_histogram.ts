@@ -16,7 +16,7 @@ import { getFieldNameFromField } from '../utils';
 import type { DateHistogramColumn } from './types';
 
 export const getLabel = (aggParams: AggParamsDateHistogram, fieldName: string) => {
-  return aggParams && 'customLabel' in aggParams ? aggParams.customLabel ?? fieldName : fieldName;
+  return aggParams && 'customLabel' in aggParams ? (aggParams.customLabel ?? fieldName) : fieldName;
 };
 
 export const convertToDateHistogramParams = (

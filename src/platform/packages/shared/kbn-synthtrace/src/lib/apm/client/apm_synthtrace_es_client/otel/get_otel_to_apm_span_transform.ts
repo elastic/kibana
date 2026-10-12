@@ -53,24 +53,24 @@ export function getOtelToApmTransform() {
             kind === 'Internal'
               ? 'app'
               : document['attributes.http.url']
-              ? 'http'
-              : document['attributes.db.system']
-              ? 'db'
-              : document['attributes.messaging.system']
-              ? 'messaging'
-              : document['attributes.gen_ai.system']
-              ? 'external'
-              : 'custom';
+                ? 'http'
+                : document['attributes.db.system']
+                  ? 'db'
+                  : document['attributes.messaging.system']
+                    ? 'messaging'
+                    : document['attributes.gen_ai.system']
+                      ? 'external'
+                      : 'custom';
           document['attributes.span.subtype'] =
             kind === 'Internal'
               ? 'internal'
               : document['attributes.http.url']
-              ? 'http'
-              : document['attributes.db.system'] ??
-                document['attributes.messaging.system'] ??
-                (document['attributes.gen_ai.system']
-                  ? String(document['attributes.gen_ai.system'])
-                  : 'internal');
+                ? 'http'
+                : (document['attributes.db.system'] ??
+                  document['attributes.messaging.system'] ??
+                  (document['attributes.gen_ai.system']
+                    ? String(document['attributes.gen_ai.system'])
+                    : 'internal'));
 
           document['attributes.span.duration.us'] = duration;
           break;
@@ -81,7 +81,7 @@ export function getOtelToApmTransform() {
           document['attributes.transaction.duration.us'] = duration;
           document['attributes.transaction.type'] = document['attributes.http.request.method']
             ? 'request'
-            : document['attributes.messaging.system'] ?? 'unknown';
+            : (document['attributes.messaging.system'] ?? 'unknown');
           document['attributes.transaction.sampled'] = true;
         }
         default: {

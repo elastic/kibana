@@ -25,7 +25,7 @@ export const removeServerGeneratedPropertiesFromObject = <T extends object, K ex
   return omit<T, K>(object, keys);
 };
 export const removeServerGeneratedPropertiesFromSavedObject = <
-  T extends CommonSavedObjectAttributes
+  T extends CommonSavedObjectAttributes,
 >(
   attributes: T,
   keys: Array<keyof T> = []

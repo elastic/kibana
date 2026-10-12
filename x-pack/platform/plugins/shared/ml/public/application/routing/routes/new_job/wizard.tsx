@@ -213,8 +213,8 @@ const PageWrapper: FC<WizardPageProps> = ({ location, jobType }) => {
     typeof projectRoutingFromUrl === 'string' && projectRoutingFromUrl !== ''
       ? projectRoutingFromUrl
       : isMlCpsEnabled && cps?.cpsManager
-      ? cps?.cpsManager?.getDefaultProjectRouting() ?? undefined
-      : undefined;
+        ? (cps?.cpsManager?.getDefaultProjectRouting() ?? undefined)
+        : undefined;
 
   const { context, results } = useRouteResolver('full', ['canGetJobs', 'canCreateJob'], {
     ...basicResolvers(),

@@ -35,8 +35,8 @@ function isAlreadyExistsEndpointError(error: unknown): boolean {
     typeof data === 'object' && data !== null && 'message' in data
       ? String((data as { message: unknown }).message)
       : error instanceof Error
-      ? error.message
-      : '';
+        ? error.message
+        : '';
   return /already exists/i.test(message);
 }
 

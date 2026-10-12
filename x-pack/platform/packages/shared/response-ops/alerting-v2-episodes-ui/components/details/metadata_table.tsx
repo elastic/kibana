@@ -76,16 +76,18 @@ export const AlertEpisodeMetadataTable = ({
             block-size: 100%;
             min-block-size: 0;
 
-            ${controlsPaddingSize
-              ? css`
-                  > :has(input[type='search']),
-                  > :has([role='switch']) {
-                    box-sizing: border-box;
-                    max-inline-size: 100%;
-                    padding-inline: ${euiTheme.size[controlsPaddingSize]};
-                  }
-                `
-              : undefined}
+            ${
+              controlsPaddingSize
+                ? css`
+                    > :has(input[type='search']),
+                    > :has([role='switch']) {
+                      box-sizing: border-box;
+                      max-inline-size: 100%;
+                      padding-inline: ${euiTheme.size[controlsPaddingSize]};
+                    }
+                  `
+                : undefined
+            }
           }
         `}
       >

@@ -48,8 +48,8 @@ const formatOptions = (
     checked: includedUrls?.includes(item.url)
       ? 'on'
       : excludedUrls?.includes(item.url)
-      ? 'off'
-      : undefined,
+        ? 'off'
+        : undefined,
   }));
 };
 

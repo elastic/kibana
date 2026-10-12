@@ -24,7 +24,7 @@ describe('indexTemplateNameField', () => {
       path: 'name',
       form: {
         getFormData: () => ({}),
-        getFields: () => ({} as any),
+        getFields: () => ({}) as any,
       },
       formData: {},
       errors: [],

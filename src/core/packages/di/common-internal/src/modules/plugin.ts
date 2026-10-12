@@ -71,7 +71,10 @@ export class PluginModule extends ContainerModule {
   };
   private bound = new WeakSet<Container>();
 
-  constructor(root: Container, private readonly options?: Omit<ContainerOptions, 'parent'>) {
+  constructor(
+    root: Container,
+    private readonly options?: Omit<ContainerOptions, 'parent'>
+  ) {
     super(({ bind, onActivation }) => {
       bind(Container).toConstantValue(root);
       bind(Fork).toDynamicValue(this.getForkFactory.bind(this)).inRequestScope();

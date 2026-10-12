@@ -41,7 +41,7 @@ const createUiSettingsClient = ({
         return defaultConnectorOnly ?? false;
       return undefined;
     }),
-  } as unknown as IUiSettingsClient);
+  }) as unknown as IUiSettingsClient;
 
 describe('resolveModelsForFeature', () => {
   let logger: Logger;

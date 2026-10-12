@@ -54,10 +54,10 @@ describe('installAutomationTemplateHandler', () => {
     getAiIndexService: async () =>
       ({
         get: async () => ({ automations }),
-      } as unknown as AiIndexService),
-    getCoreStart: async () => ({} as never),
+      }) as unknown as AiIndexService,
+    getCoreStart: async () => ({}) as never,
     getSecurityStart: async () => undefined,
-    getWorkflowsManagement: () => ({ getWorkflow } as never),
+    getWorkflowsManagement: () => ({ getWorkflow }) as never,
   });
 
   const documentParams = {

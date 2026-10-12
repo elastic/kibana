@@ -54,16 +54,15 @@ const defaultApplyButtonLabel = i18n.translate('cpsUtils.projectPicker.flyout.ap
   defaultMessage: 'Apply changes',
 });
 
-export interface ProjectPickerFlyoutProps
-  extends Pick<
-    ProjectPickerStateProviderProps,
-    | 'availableProjects'
-    | 'defaultProjectRoutingGetter'
-    | 'controlsState'
-    | 'originProjectId'
-    | 'fetchProjectsByRouting'
-    | 'projectRoutingStrategy'
-  > {
+export interface ProjectPickerFlyoutProps extends Pick<
+  ProjectPickerStateProviderProps,
+  | 'availableProjects'
+  | 'defaultProjectRoutingGetter'
+  | 'controlsState'
+  | 'originProjectId'
+  | 'fetchProjectsByRouting'
+  | 'projectRoutingStrategy'
+> {
   projectRouting: ProjectRouting;
   onApplyChanges: (projectRouting: NonNullable<ProjectRouting>) => void;
   onClose: () => void;

@@ -55,15 +55,12 @@ import { resolveSpaceId } from './utils/resolve_space_id';
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
 
-export class ContextEnginePlugin
-  implements
-    Plugin<
-      ContextEnginePluginSetup,
-      ContextEnginePluginStart,
-      ContextEngineSetupDependencies,
-      ContextEngineStartDependencies
-    >
-{
+export class ContextEnginePlugin implements Plugin<
+  ContextEnginePluginSetup,
+  ContextEnginePluginStart,
+  ContextEngineSetupDependencies,
+  ContextEngineStartDependencies
+> {
   private logger: Logger;
   private aiIndexService?: AiIndexService;
   private signalsService?: SignalsService;

@@ -85,8 +85,8 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   const addVariableButtonTitle = !messageVariables?.length
     ? i18n.NO_VARIABLES_AVAILABLE
     : buttonTitle
-    ? buttonTitle
-    : i18n.ADD_VARIABLE_TITLE;
+      ? buttonTitle
+      : i18n.ADD_VARIABLE_TITLE;
 
   const Button = useMemo(
     () =>

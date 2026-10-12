@@ -42,8 +42,8 @@ export const ModelSelector: React.FC<Props> = React.memo(
         const newModel =
           modelSelectorOption.length === 0
             ? undefined
-            : models.find((model) => model === modelSelectorOption[0]?.label) ??
-              modelSelectorOption[0]?.label;
+            : (models.find((model) => model === modelSelectorOption[0]?.label) ??
+              modelSelectorOption[0]?.label);
         onModelSelectionChange?.(newModel);
       },
       [onModelSelectionChange, models]

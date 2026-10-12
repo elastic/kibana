@@ -38,7 +38,7 @@ describe('signals routes', () => {
           client: { asCurrentUser: { search } },
         },
       }),
-    } as unknown as Parameters<RequestHandler>[0]);
+    }) as unknown as Parameters<RequestHandler>[0];
 
   const getRoute = (path: string): RegisteredRoute => {
     const route = routes[`GET:${path}`];

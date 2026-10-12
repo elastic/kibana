@@ -56,6 +56,12 @@ export const androidMapFixtures: AndroidMapFixture[] = scenarios.map(({ name, do
     content: fs.readFileSync(path.resolve(DATA_DIR, 'es-documents', fileName)).toString(),
     fileName,
   })),
-  expected: fs.readFileSync(path.resolve(DATA_DIR, 'expected-output', name)).toString().trimEnd(),
-  stacktrace: fs.readFileSync(path.resolve(DATA_DIR, 'stacktraces', name)).toString().trimEnd(),
+  expected: fs
+    .readFileSync(path.resolve(DATA_DIR, 'expected-output', name))
+    .toString()
+    .trimEnd(),
+  stacktrace: fs
+    .readFileSync(path.resolve(DATA_DIR, 'stacktraces', name))
+    .toString()
+    .trimEnd(),
 }));

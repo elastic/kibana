@@ -96,32 +96,40 @@ const useHeaderStyles = (
     const primaryRowBottomPadding = bottomPad(hasTabs || hasSecondaryContent);
 
     const root = css`
-      ${sticky &&
-      css`
-        position: sticky;
-        top: 0;
-        z-index: ${euiTheme.levels.mask};
-      `}
+      ${
+        sticky &&
+        css`
+          position: sticky;
+          top: 0;
+          z-index: ${euiTheme.levels.mask};
+        `
+      }
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
       min-width: 0;
       box-sizing: border-box;
-      ${paddingInline &&
-      css`
-        padding-inline: ${paddingInline};
-      `}
-      ${bleedMargin &&
-      css`
-        margin-inline: -${bleedMargin};
-        margin-top: -${bleedMargin};
-      `}
+      ${
+        paddingInline &&
+        css`
+          padding-inline: ${paddingInline};
+        `
+      }
+      ${
+        bleedMargin &&
+        css`
+          margin-inline: -${bleedMargin};
+          margin-top: -${bleedMargin};
+        `
+      }
       background: ${euiTheme.colors.backgroundBasePlain};
-      ${!borderless &&
-      css`
-        border-bottom: ${euiTheme.border.thin};
-        margin-bottom: -${euiTheme.border.width.thin};
-      `}
+      ${
+        !borderless &&
+        css`
+          border-bottom: ${euiTheme.border.thin};
+          margin-bottom: -${euiTheme.border.width.thin};
+        `
+      }
 
       &:hover .titleActionsReveal,
       &:focus-within .titleActionsReveal {
@@ -138,20 +146,26 @@ const useHeaderStyles = (
       gap: ${euiTheme.size.m};
       min-width: 0;
       box-sizing: border-box;
-      ${!isMultiRow &&
-      css`
-        min-height: ${minHeight}px;
-      `}
-      ${isMultiRow &&
-      !hasTitleAppend &&
-      css`
-        min-height: calc(${minHeight}px - ${paddingBlock} + ${primaryRowBottomPadding});
-      `}
-      ${!hasTitleAppend &&
-      css`
-        padding-block-start: ${paddingBlock};
-        padding-block-end: ${primaryRowBottomPadding};
-      `}
+      ${
+        !isMultiRow &&
+        css`
+          min-height: ${minHeight}px;
+        `
+      }
+      ${
+        isMultiRow &&
+        !hasTitleAppend &&
+        css`
+          min-height: calc(${minHeight}px - ${paddingBlock} + ${primaryRowBottomPadding});
+        `
+      }
+      ${
+        !hasTitleAppend &&
+        css`
+          padding-block-start: ${paddingBlock};
+          padding-block-end: ${primaryRowBottomPadding};
+        `
+      }
     `;
 
     const titleCluster = css`
@@ -168,10 +182,12 @@ const useHeaderStyles = (
       flex: 0 1 auto;
       min-width: 0;
       max-width: 100%;
-      ${hasTitleAppend &&
-      css`
-        max-width: min(40%, 360px);
-      `}
+      ${
+        hasTitleAppend &&
+        css`
+          max-width: min(40%, 360px);
+        `
+      }
     `;
 
     const titleClusterSpacer = css`

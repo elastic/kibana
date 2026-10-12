@@ -341,7 +341,7 @@ describe('createLoadSkillToolsAfterRead', () => {
 
       toolHandlerContext.skillsStore.getEntry.mockResolvedValue(createSkillFileEntry());
       toolHandlerContext.skills.get.mockResolvedValue(skill);
-      toolHandlerContext.toolProvider.list.mockResolvedValue(toolIds.map((id) => ({ id } as any)));
+      toolHandlerContext.toolProvider.list.mockResolvedValue(toolIds.map((id) => ({ id }) as any));
 
       const context = createHookContext({ toolHandlerContext });
 

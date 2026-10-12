@@ -41,7 +41,7 @@ const createMockLogger = (): Logger =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as Logger);
+  }) as unknown as Logger;
 
 describe('buildLensConfig', () => {
   const events = {} as ToolEventEmitter;

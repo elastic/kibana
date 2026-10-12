@@ -62,7 +62,7 @@ const buildBulk = (rejectedCall: 1 | 2 | undefined) => {
   });
 };
 
-const buildEsClient = (bulk: jest.Mock): EsClient => ({ bulk } as unknown as EsClient);
+const buildEsClient = (bulk: jest.Mock): EsClient => ({ bulk }) as unknown as EsClient;
 const buildFetch = (): HttpHandler => jest.fn().mockResolvedValue({}) as unknown as HttpHandler;
 const DENSE_MARKER = createAd2RunMarker('dense-run');
 

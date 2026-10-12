@@ -54,7 +54,7 @@ const createHistoryItem = (rule: RuleResponse): RuleHistoryItem =>
     action: 'rule_update',
     rule,
     old_values: null,
-  } as RuleHistoryItem);
+  }) as RuleHistoryItem;
 
 const createConflictError = () =>
   Object.assign(new Error('conflict'), {

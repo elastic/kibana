@@ -402,13 +402,13 @@ function GraphWorkspace(options) {
   };
 
   this.arrRemoveAll = function remove(arr, items) {
-    for (let i = items.length; i--; ) {
+    for (let i = items.length; i--;) {
       self.arrRemove(arr, items[i]);
     }
   };
 
   this.arrRemove = function remove(arr, item) {
-    for (let i = arr.length; i--; ) {
+    for (let i = arr.length; i--;) {
       if (arr[i] === item) {
         arr.splice(i, 1);
       }

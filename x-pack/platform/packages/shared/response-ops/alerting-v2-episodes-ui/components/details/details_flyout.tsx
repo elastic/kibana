@@ -248,7 +248,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const titleNode = isLoading ? (
     <EuiSkeletonTitle size="xs" />
   ) : (
-    ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK
+    (ruleName ?? i18n.HEADER_EPISODE_TITLE_FALLBACK)
   );
 
   // Header description: triggered timestamp.

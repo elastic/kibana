@@ -127,7 +127,7 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({
 
     const title = getNonEmptyField(attributes.title) ?? panelTitle;
     const librarySavedObjectId = attachmentsEnabled
-      ? getNonEmptyField(savedObjectId) ?? getLensLibrarySavedObjectId(lensApi)
+      ? (getNonEmptyField(savedObjectId) ?? getLensLibrarySavedObjectId(lensApi))
       : undefined;
 
     const attachment = librarySavedObjectId

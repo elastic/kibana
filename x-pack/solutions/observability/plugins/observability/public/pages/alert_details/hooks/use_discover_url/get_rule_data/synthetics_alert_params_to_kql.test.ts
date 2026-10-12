@@ -16,16 +16,18 @@ describe('synthetics_alert_params_to_kql', () => {
   const DAYS_TO_MS = 1000 * 60 * 60 * 24;
 
   beforeAll(() => {
-    jest
-      .spyOn(moment.prototype, 'subtract')
-      .mockImplementation(function (this: Moment, ...args: unknown[]) {
-        return new Date(new Date(FIXED_DATE_ISO).valueOf() - (args[0] as number) * DAYS_TO_MS);
-      });
-    jest
-      .spyOn(moment.prototype, 'add')
-      .mockImplementation(function (this: Moment, ...args: unknown[]) {
-        return new Date(new Date(FIXED_DATE_ISO).valueOf() + (args[0] as number) * DAYS_TO_MS);
-      });
+    jest.spyOn(moment.prototype, 'subtract').mockImplementation(function (
+      this: Moment,
+      ...args: unknown[]
+    ) {
+      return new Date(new Date(FIXED_DATE_ISO).valueOf() - (args[0] as number) * DAYS_TO_MS);
+    });
+    jest.spyOn(moment.prototype, 'add').mockImplementation(function (
+      this: Moment,
+      ...args: unknown[]
+    ) {
+      return new Date(new Date(FIXED_DATE_ISO).valueOf() + (args[0] as number) * DAYS_TO_MS);
+    });
   });
 
   afterAll(() => {

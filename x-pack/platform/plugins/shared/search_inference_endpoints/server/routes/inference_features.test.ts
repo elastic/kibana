@@ -19,7 +19,7 @@ const makeContext = (uiSettingsGet: jest.Mock): jest.Mocked<RequestHandlerContex
     core: Promise.resolve({
       uiSettings: { client: { get: uiSettingsGet } },
     }),
-  } as unknown as jest.Mocked<RequestHandlerContext>);
+  }) as unknown as jest.Mocked<RequestHandlerContext>;
 
 describe('Inference Features API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();

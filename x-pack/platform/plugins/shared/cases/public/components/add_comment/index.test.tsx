@@ -56,7 +56,7 @@ const draftKey = `cases.${appId}.${addCommentProps.caseId}.${addCommentProps.id}
 
 const getConfigMock = jest.spyOn(KibanaServices, 'getConfig');
 const getCasesConfig = (attachmentsEnabled: boolean): ReturnType<typeof KibanaServices.getConfig> =>
-  ({ attachments: { enabled: attachmentsEnabled } } as ReturnType<typeof KibanaServices.getConfig>);
+  ({ attachments: { enabled: attachmentsEnabled } }) as ReturnType<typeof KibanaServices.getConfig>;
 
 describe('AddComment ', () => {
   beforeEach(() => {

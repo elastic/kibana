@@ -19,9 +19,12 @@ export function parseCountIgnoreRuleTypeBucket(
   ruleTypeBuckets: AggregationsBuckets<AggregationsStringTermsBucketKeys>
 ) {
   const buckets = ruleTypeBuckets as Bucket[];
-  return (buckets ?? []).reduce((acc, bucket: Bucket) => {
-    const ruleType: string = replaceDotSymbols(`${bucket.key}`);
-    acc[ruleType] = bucket.ignored_field.buckets?.length ?? 0;
-    return acc;
-  }, {} as Record<string, number>);
+  return (buckets ?? []).reduce(
+    (acc, bucket: Bucket) => {
+      const ruleType: string = replaceDotSymbols(`${bucket.key}`);
+      acc[ruleType] = bucket.ignored_field.buckets?.length ?? 0;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 }

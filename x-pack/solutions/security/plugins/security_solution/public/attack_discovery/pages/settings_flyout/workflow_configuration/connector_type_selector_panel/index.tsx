@@ -61,9 +61,11 @@ const ConnectorTypeSelectorPanelComponent: React.FC<ConnectorTypeSelectorPanelPr
       #alertActionTypeTitle {
         border: ${euiTheme.border.thin};
         ${isOpen ? 'border-bottom: none;' : ''}
-        border-radius: ${isOpen
-          ? `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0`
-          : euiTheme.border.radius.medium};
+        border-radius: ${
+          isOpen
+            ? `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0`
+            : euiTheme.border.radius.medium
+        };
         padding: ${euiTheme.size.s} ${euiTheme.size.m};
         cursor: pointer;
 

@@ -60,7 +60,9 @@ export async function getEventLogStats(
   );
 
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
 
   const aggregations = response.aggregations as EventLogStatsAggregations | undefined;
   const percentiles = aggregations?.delay_percentiles.values;

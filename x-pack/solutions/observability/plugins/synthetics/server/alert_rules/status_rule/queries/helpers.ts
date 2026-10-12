@@ -156,7 +156,7 @@ export const applyPendingCounts = (
   for (const [key, config] of Object.entries(pendingConfigs)) {
     const prev = prevPendingConfigs[key];
     // Persisted state from before pendingCount existed is treated as 1 prior evaluation.
-    const prevCount = prev ? prev.pendingCount ?? 1 : 0;
+    const prevCount = prev ? (prev.pendingCount ?? 1) : 0;
     next[key] = {
       ...config,
       pendingCount: prevCount + 1,

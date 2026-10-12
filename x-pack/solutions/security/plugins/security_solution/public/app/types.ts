@@ -25,8 +25,10 @@ import type { StartServices } from '../types';
 /**
  * The React properties used to render `SecurityApp` as well as the `element` to render it into.
  */
-export interface RenderAppProps
-  extends Omit<AppMountParameters, 'appBasePath' | 'onAppLeave' | 'setHeaderActionMenu'> {
+export interface RenderAppProps extends Omit<
+  AppMountParameters,
+  'appBasePath' | 'onAppLeave' | 'setHeaderActionMenu'
+> {
   services: StartServices;
   store: Store<State, Action>;
   subPluginRoutes?: RouteProps[];
@@ -70,8 +72,10 @@ export type SecuritySubPluginKeyStore =
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.
  */
-export interface SecuritySubPluginWithStore<K extends SecuritySubPluginKeyStore, T>
-  extends SecuritySubPlugin {
+export interface SecuritySubPluginWithStore<
+  K extends SecuritySubPluginKeyStore,
+  T,
+> extends SecuritySubPlugin {
   store: SecuritySubPluginStore<K, T>;
 }
 

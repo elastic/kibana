@@ -15,7 +15,8 @@ export const useCanvasCheckeredStyles = (): SerializedStyles => {
   return useMemo(
     () => css`
       background-color: ${euiTheme.colors.plainLight};
-      background-image: linear-gradient(45deg, ${euiTheme.colors.lightShade} 25%, transparent 25%),
+      background-image:
+        linear-gradient(45deg, ${euiTheme.colors.lightShade} 25%, transparent 25%),
         linear-gradient(-45deg, ${euiTheme.colors.lightShade} 25%, transparent 25%),
         linear-gradient(45deg, transparent 75%, ${euiTheme.colors.lightShade} 75%),
         linear-gradient(-45deg, transparent 75%, ${euiTheme.colors.lightShade} 75%);

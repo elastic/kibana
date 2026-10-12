@@ -15,4 +15,4 @@ export const createMockTelemetryConfigProvider = (
     start: jest.fn(),
     stop: jest.fn(),
     getObservable: jest.fn(),
-  } as any);
+  }) as any;

@@ -6,7 +6,10 @@
  */
 
 export class PackageNotFoundError extends Error {
-  constructor(message: string, public cause?: Error) {
+  constructor(
+    message: string,
+    public cause?: Error
+  ) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'PackageNotFoundError';

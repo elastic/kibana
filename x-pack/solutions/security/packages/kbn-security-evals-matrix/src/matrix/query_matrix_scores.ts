@@ -165,19 +165,19 @@ export const scoresByPrefixToDatasets = (
       );
       const rejectedSelfJudged = Boolean(
         evaluatorName &&
-          !rejectedEisJudge &&
-          options.excludeSelfJudged &&
-          judgeId &&
-          taskModelId &&
-          describeJudge(judgeId, taskModelId).selfJudged
+        !rejectedEisJudge &&
+        options.excludeSelfJudged &&
+        judgeId &&
+        taskModelId &&
+        describeJudge(judgeId, taskModelId).selfJudged
       );
       // Only maximize-direction evaluators are quality scores.
       const rejectedNonQuality = Boolean(
         evaluatorName &&
-          !rejectedEisJudge &&
-          !rejectedSelfJudged &&
-          direction &&
-          direction !== 'maximize'
+        !rejectedEisJudge &&
+        !rejectedSelfJudged &&
+        direction &&
+        direction !== 'maximize'
       );
       if (evaluatorName) {
         if (rejectedEisJudge) {

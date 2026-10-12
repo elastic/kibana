@@ -42,7 +42,7 @@ export async function getAlertStats(esClient: ElasticsearchClient): Promise<Aler
   const total =
     typeof searchResponse.hits.total === 'number'
       ? searchResponse.hits.total
-      : searchResponse.hits.total?.value ?? 0;
+      : (searchResponse.hits.total?.value ?? 0);
 
   const aggs = searchResponse.aggregations as unknown as AlertStatsAggregations | undefined;
 

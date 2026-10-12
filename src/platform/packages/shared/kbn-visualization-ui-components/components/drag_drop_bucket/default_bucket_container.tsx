@@ -60,8 +60,8 @@ export const DefaultBucketContainer = ({
                 isInvalid
                   ? euiTheme.colors.textDanger
                   : isNotDraggable
-                  ? euiTheme.colors.textDisabled
-                  : euiTheme.colors.textSubdued
+                    ? euiTheme.colors.textDisabled
+                    : euiTheme.colors.textSubdued
               }
               type={isInvalid ? 'warning' : 'dragVertical'}
               aria-label={

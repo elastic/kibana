@@ -17,9 +17,12 @@ interface SetupDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StartDependencies {}
 
-export class UrlDrilldownPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class UrlDrilldownPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
     embeddable.registerDrilldown(URL_DRILLDOWN_TYPE, {
       schema: urlDrilldownSchema,

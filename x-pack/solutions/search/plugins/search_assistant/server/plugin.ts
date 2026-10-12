@@ -15,15 +15,12 @@ import type {
 
 import { registerFunctions } from './functions';
 
-export class SearchAssistantPlugin
-  implements
-    Plugin<
-      SearchAssistantPluginSetup,
-      SearchAssistantPluginStart,
-      {},
-      SearchAssistantPluginStartDependencies
-    >
-{
+export class SearchAssistantPlugin implements Plugin<
+  SearchAssistantPluginSetup,
+  SearchAssistantPluginStart,
+  {},
+  SearchAssistantPluginStartDependencies
+> {
   isServerless: boolean;
 
   constructor(context: PluginInitializerContext) {

@@ -37,10 +37,13 @@ export async function getPackagePoliciesCountByPackageName(soClient: SavedObject
   });
 
   return (
-    res.aggregations?.count_by_package_name.buckets.reduce((acc, bucket) => {
-      acc[bucket.key] = bucket.doc_count;
+    res.aggregations?.count_by_package_name.buckets.reduce(
+      (acc, bucket) => {
+        acc[bucket.key] = bucket.doc_count;
 
-      return acc;
-    }, {} as { [k: string]: number }) ?? {}
+        return acc;
+      },
+      {} as { [k: string]: number }
+    ) ?? {}
   );
 }

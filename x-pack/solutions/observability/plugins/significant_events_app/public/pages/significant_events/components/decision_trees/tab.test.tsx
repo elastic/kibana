@@ -17,9 +17,9 @@ jest.mock('./use_decision_trees');
 const mockUseDecisionTrees = useDecisionTrees as jest.MockedFunction<typeof useDecisionTrees>;
 
 const asQueryResult = (overrides: Record<string, unknown>) =>
-  ({ isLoading: false, isError: false, data: undefined, ...overrides } as unknown as ReturnType<
+  ({ isLoading: false, isError: false, data: undefined, ...overrides }) as unknown as ReturnType<
     typeof useDecisionTrees
-  >);
+  >;
 
 const response = (trees: ListDecisionTreesResponse['trees']): ListDecisionTreesResponse => ({
   trees,

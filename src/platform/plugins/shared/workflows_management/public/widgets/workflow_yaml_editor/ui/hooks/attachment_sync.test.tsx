@@ -203,7 +203,7 @@ const createFakeAgentBuilder = () => {
             type: WORKFLOW_YAML_ATTACHMENT_TYPE,
             versions: [{ version: 1 }],
             current_version: 1,
-          } as unknown as VersionedAttachment)
+          }) as unknown as VersionedAttachment
       )
     );
     window.localStorage.setItem(lastConversationKey(tag), JSON.stringify(conversationId));
@@ -276,7 +276,7 @@ const createEditor = () =>
       getValue: () => 'name: test',
       onDidChangeContent: () => ({ dispose: jest.fn() }),
     }),
-  } as never);
+  }) as never;
 
 const renderEditor = async (workflowId?: string) => {
   const rendered = renderHook(() =>

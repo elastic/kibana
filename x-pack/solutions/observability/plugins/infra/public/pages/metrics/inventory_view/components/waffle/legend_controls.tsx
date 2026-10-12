@@ -88,7 +88,7 @@ const createDraftState = (
     bounds: convertBoundsToPercents(boundsOverride),
     legend: {
       ...options,
-      rules: type === 'steps' ? options.rules ?? defaultSteps : options.rules,
+      rules: type === 'steps' ? (options.rules ?? defaultSteps) : options.rules,
     },
     type,
   };

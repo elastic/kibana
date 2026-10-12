@@ -81,7 +81,7 @@ describe('memoryOptimizeStepDefinition', () => {
       abortSignal: new AbortController().signal,
       stepId: 'optimize_memory',
       stepType: 'nightshift.memoryOptimize',
-    } as never);
+    }) as never;
 
   it('optimizes with the injected internal client and never the scoped client', async () => {
     const definition = memoryOptimizeStepDefinition({

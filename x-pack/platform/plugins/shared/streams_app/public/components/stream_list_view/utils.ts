@@ -189,7 +189,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
   const retentionMs =
     lifecycle && isIlmLifecycle(lifecycle)
       ? Number.POSITIVE_INFINITY
-      : lifecycleToRetentionMs(lifecycle) ?? 0;
+      : (lifecycleToRetentionMs(lifecycle) ?? 0);
   const nameSortKey =
     'children' in node
       ? `${getSegments(node.stream.name).length}_${node.stream.name.toLowerCase()}`

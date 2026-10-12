@@ -7,7 +7,10 @@
 
 export class FetchResponseError extends Error {
   public readonly statusCode: number;
-  constructor(public response: globalThis.Response, content?: string) {
+  constructor(
+    public response: globalThis.Response,
+    content?: string
+  ) {
     super(content ?? response.statusText);
     this.statusCode = response.status;
     this.name = 'FetchResponseError';

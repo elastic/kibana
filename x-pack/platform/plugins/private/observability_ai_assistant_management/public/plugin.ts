@@ -52,15 +52,12 @@ export interface ConfigSchema {
   spacesEnabled: boolean;
 }
 
-export class AiAssistantManagementObservabilityPlugin
-  implements
-    Plugin<
-      AiAssistantManagementObservabilityPluginSetup,
-      AiAssistantManagementObservabilityPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class AiAssistantManagementObservabilityPlugin implements Plugin<
+  AiAssistantManagementObservabilityPluginSetup,
+  AiAssistantManagementObservabilityPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   private readonly config: ConfigSchema;
   private readonly isServerless: boolean;
   private registeredApp?: ManagementApp;

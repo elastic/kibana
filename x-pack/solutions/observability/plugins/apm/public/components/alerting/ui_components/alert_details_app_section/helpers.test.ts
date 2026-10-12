@@ -21,7 +21,7 @@ import {
 describe('alert details anomaly helpers', () => {
   describe('getAnomalyTimestamp', () => {
     const makeAlert = (anomalyTimestamp?: unknown): TopAlert =>
-      ({ fields: { [ANOMALY_TIMESTAMP]: anomalyTimestamp } } as unknown as TopAlert);
+      ({ fields: { [ANOMALY_TIMESTAMP]: anomalyTimestamp } }) as unknown as TopAlert;
 
     it('parses an ISO string into epoch millis', () => {
       expect(getAnomalyTimestamp(makeAlert('2026-07-16T09:00:00.000Z'))).toBe(

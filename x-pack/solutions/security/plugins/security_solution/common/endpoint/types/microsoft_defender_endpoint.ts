@@ -32,8 +32,7 @@ export interface MicrosoftDefenderEndpointLogEsDoc {
   };
 }
 
-export interface MicrosoftDefenderEndpointActionRequestFileMeta
-  extends MicrosoftDefenderEndpointActionRequestCommonMeta {
+export interface MicrosoftDefenderEndpointActionRequestFileMeta extends MicrosoftDefenderEndpointActionRequestCommonMeta {
   // Timestamp of when the file was created
   createdAt: string;
   // Name of the file

@@ -38,17 +38,16 @@ import { getNextTabNumber } from '../../utils/get_next_tab_number';
 import { MAX_ITEMS_COUNT, TAB_SWITCH_DEBOUNCE_MS } from '../../constants';
 import { TabsEventDataKeys } from '../../event_data_keys';
 
-export interface TabbedContentProps
-  extends Pick<
-    TabsBarProps,
-    | 'unsavedItemIds'
-    | 'maxItemsCount'
-    | 'onClearRecentlyClosed'
-    | 'disableCloseButton'
-    | 'disableInlineLabelEditing'
-    | 'disableDragAndDrop'
-    | 'disableTabsBarMenu'
-  > {
+export interface TabbedContentProps extends Pick<
+  TabsBarProps,
+  | 'unsavedItemIds'
+  | 'maxItemsCount'
+  | 'onClearRecentlyClosed'
+  | 'disableCloseButton'
+  | 'disableInlineLabelEditing'
+  | 'disableDragAndDrop'
+  | 'disableTabsBarMenu'
+> {
   items: TabItem[];
   selectedItemId?: string;
   recentlyClosedItems: RecentlyClosedTabItem[];

@@ -24,8 +24,7 @@ const validateInteger = (value: number): string | undefined =>
   Number.isInteger(value) ? undefined : 'Value must be an integer.';
 
 export interface RunQuotaSettingsAttributes
-  extends Omit<RunQuotaSettings, 'limits'>,
-    Record<string, unknown> {
+  extends Omit<RunQuotaSettings, 'limits'>, Record<string, unknown> {
   limits: Record<RunQuotaGroup, number> & Record<string, number>;
 }
 

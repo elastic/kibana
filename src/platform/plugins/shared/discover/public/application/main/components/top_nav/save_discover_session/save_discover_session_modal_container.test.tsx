@@ -98,11 +98,11 @@ const setup = async ({
     persistedDiscoverSession === false
       ? undefined
       : additionalPersistedTabs
-      ? {
-          ...persistedDiscoverSession,
-          tabs: [...persistedDiscoverSession.tabs, ...additionalPersistedTabs],
-        }
-      : persistedDiscoverSession;
+        ? {
+            ...persistedDiscoverSession,
+            tabs: [...persistedDiscoverSession.tabs, ...additionalPersistedTabs],
+          }
+        : persistedDiscoverSession;
 
   const allDataViews = [
     ...(initialTabDataView ? [initialTabDataView] : []),

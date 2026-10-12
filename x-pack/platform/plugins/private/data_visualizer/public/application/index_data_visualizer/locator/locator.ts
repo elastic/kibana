@@ -78,9 +78,7 @@ export interface IndexDataVisualizerLocatorParams extends SerializableRecord {
   showDistributions?: number;
 }
 
-export class IndexDataVisualizerLocatorDefinition
-  implements LocatorDefinition<IndexDataVisualizerLocatorParams>
-{
+export class IndexDataVisualizerLocatorDefinition implements LocatorDefinition<IndexDataVisualizerLocatorParams> {
   public readonly id = DATA_VISUALIZER_APP_LOCATOR;
 
   constructor() {}

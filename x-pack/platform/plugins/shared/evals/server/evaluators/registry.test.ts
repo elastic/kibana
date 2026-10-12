@@ -37,7 +37,7 @@ const createDefinitionClient = (documents: EvaluatorDefinitionDocument[]) =>
     getVersion: jest.fn(async (name: string, version: string) =>
       documents.find((doc) => doc.name === name && doc.version === version)
     ),
-  } as unknown as jest.Mocked<EvaluatorDefinitionClient>);
+  }) as unknown as jest.Mocked<EvaluatorDefinitionClient>;
 
 const createRegistry = (documents: EvaluatorDefinitionDocument[] = []) => {
   const definitionClient = createDefinitionClient(documents);

@@ -79,7 +79,7 @@ describe('color_assignment', () => {
       convertToText(x: unknown) {
         return x;
       },
-    } as unknown)) as FormatFactory;
+    }) as unknown) as FormatFactory;
 
   describe('totalSeriesCount', () => {
     it('should calculate total number of series per palette', () => {
@@ -126,7 +126,7 @@ describe('color_assignment', () => {
         (() =>
           ({
             convertToText: formatMock,
-          } as unknown)) as FormatFactory
+          }) as unknown) as FormatFactory
       );
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
@@ -202,7 +202,7 @@ describe('color_assignment', () => {
         (() =>
           ({
             convertToText: () => 'formatted',
-          } as unknown)) as FormatFactory
+          }) as unknown) as FormatFactory
       );
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
       expect(assignments.palette1.getRank(layers[0], 'formatted', 'y1')).toEqual(2);

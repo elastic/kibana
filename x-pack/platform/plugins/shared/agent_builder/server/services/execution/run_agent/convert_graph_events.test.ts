@@ -48,7 +48,7 @@ const chainEnd = (
       ...metadata,
     },
     data: { output },
-  } as LangchainStreamEvent);
+  }) as LangchainStreamEvent;
 
 const collect = (
   events: LangchainStreamEvent[],

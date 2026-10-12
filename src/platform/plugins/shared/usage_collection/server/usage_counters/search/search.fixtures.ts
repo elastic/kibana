@@ -18,7 +18,7 @@ export type CounterAttributes = [
   string,
   UsageCounters.v1.CounterEventSource,
   number,
-  string?
+  string?,
 ];
 
 export const mockedUsageCounters: Array<

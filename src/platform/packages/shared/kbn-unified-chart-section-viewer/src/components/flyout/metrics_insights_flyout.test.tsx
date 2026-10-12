@@ -59,7 +59,7 @@ describe('MetricInsightsFlyout', () => {
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
       dimensionFields: ['host.name'],
       ...overrides,
-    } as ParsedMetricItem);
+    }) as ParsedMetricItem;
 
   const defaultProps = {
     metricItem: createMockMetric(),

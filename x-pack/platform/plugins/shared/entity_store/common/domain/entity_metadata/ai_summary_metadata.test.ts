@@ -127,9 +127,8 @@ const AI_SUMMARY_FLAT_TEMPLATE_PATHS = [
 ] as const;
 
 // True iff A and B are mutually assignable — used for exhaustiveness enforcement.
-type Equals<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-  ? true
-  : false;
+type Equals<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 
 // Every top-level key on AiSummaryMetadataDoc. Adding a field to the type
 // without listing it here fails compilation.

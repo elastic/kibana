@@ -98,7 +98,7 @@ describe('useLensProps', () => {
         attributes: {},
         state: {},
         visualizationType: 'lnsXY',
-      } as unknown as LensAttributes);
+      }) as unknown as LensAttributes;
     LensConfigBuilderMock.prototype.build.mockImplementation(() =>
       Promise.resolve(createMockLensAttributes())
     );

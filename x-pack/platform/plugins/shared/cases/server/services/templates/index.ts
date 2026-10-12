@@ -772,7 +772,7 @@ export class TemplatesService {
       ) {
         const value = getYamlDefaultAsString(metadata.default);
         if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
-          const fieldName = isRefField(field) ? field.name ?? field.$ref : field.name;
+          const fieldName = isRefField(field) ? (field.name ?? field.$ref) : field.name;
           throw Boom.badRequest(
             `Template field "${fieldName}" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
           );

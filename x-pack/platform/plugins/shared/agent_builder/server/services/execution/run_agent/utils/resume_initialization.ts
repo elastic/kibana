@@ -143,18 +143,16 @@ export const buildResumeInitialization = ({
       ? {
           type: 'tool_calls',
           toolCallGroupId: pendingSteps[0].tool_call_group_id ?? uuidv4(),
-          toolCalls: pendingSteps.map(
-            (step): ToolCallWithReasoning => ({
-              toolCallId: step.tool_call_id,
-              toolName: langchainNameFor(step.tool_id),
-              args: step.params,
-              reasoning:
-                reasoningSteps
-                  .filter((reasoning) => reasoning.tool_call_id === step.tool_call_id)
-                  .map((reasoning) => reasoning.reasoning)
-                  .join('\n') || undefined,
-            })
-          ),
+          toolCalls: pendingSteps.map((step): ToolCallWithReasoning => ({
+            toolCallId: step.tool_call_id,
+            toolName: langchainNameFor(step.tool_id),
+            args: step.params,
+            reasoning:
+              reasoningSteps
+                .filter((reasoning) => reasoning.tool_call_id === step.tool_call_id)
+                .map((reasoning) => reasoning.reasoning)
+                .join('\n') || undefined,
+          })),
         }
       : undefined;
 

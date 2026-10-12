@@ -38,15 +38,12 @@ import type { Counters } from './usage';
 import { registerUsageCollector } from './usage';
 import * as DefaultImageKind from '../common/default_image_file_kind';
 
-export class FilesPlugin
-  implements
-    Plugin<
-      FilesServerSetup,
-      FilesServerStart,
-      FilesServerSetupDependencies,
-      FilesServerStartDependencies
-    >
-{
+export class FilesPlugin implements Plugin<
+  FilesServerSetup,
+  FilesServerStart,
+  FilesServerSetupDependencies,
+  FilesServerStartDependencies
+> {
   private static analytics?: AnalyticsServiceStart;
   private readonly logger: Logger;
   private fileServiceFactory: undefined | FileServiceFactory;

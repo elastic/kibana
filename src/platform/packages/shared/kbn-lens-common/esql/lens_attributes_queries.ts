@@ -138,7 +138,7 @@ export const EMPTY_KQL_QUERY: Readonly<Query> = { query: '', language: 'kuery' }
  * authoritative — and is dropped. Documents self-clean on next save.
  */
 export const dropLegacyAggregateQuerySlot = <
-  T extends { state?: { query?: Query | AggregateQuery } }
+  T extends { state?: { query?: Query | AggregateQuery } },
 >(
   attributes: T
 ): T => {

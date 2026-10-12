@@ -66,9 +66,8 @@ export const runReportPackageMetrics = async (log: ToolingLog, flags: CliFlags) 
       );
 
       const { enzymeImportCount } = await countEnzymeImports(paths);
-      const { eslintDisableLineCount, eslintDisableFileCount } = await countEslintDisableLines(
-        paths
-      );
+      const { eslintDisableLineCount, eslintDisableFileCount } =
+        await countEslintDisableLines(paths);
 
       const pluginTeam = plugin.manifest.owner.name;
 

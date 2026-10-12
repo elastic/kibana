@@ -16,15 +16,12 @@ import type {
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes';
 
-export class ElasticConsolePlugin
-  implements
-    Plugin<
-      ElasticConsolePluginSetup,
-      ElasticConsolePluginStart,
-      ElasticConsoleSetupDependencies,
-      ElasticConsoleStartDependencies
-    >
-{
+export class ElasticConsolePlugin implements Plugin<
+  ElasticConsolePluginSetup,
+  ElasticConsolePluginStart,
+  ElasticConsoleSetupDependencies,
+  ElasticConsoleStartDependencies
+> {
   private logger: Logger;
 
   constructor(context: PluginInitializerContext) {

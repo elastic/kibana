@@ -17,15 +17,13 @@ import {
 } from '@kbn/content-list-provider';
 import { ContentListFooter } from './content_list_footer';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: Array.from({ length: 50 }, (_, i) => ({
-      id: `item-${i}`,
-      title: `Item ${i}`,
-    })),
-    total: 50,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: Array.from({ length: 50 }, (_, i) => ({
+    id: `item-${i}`,
+    title: `Item ${i}`,
+  })),
+  total: 50,
+}));
 
 const createWrapper =
   (options?: {

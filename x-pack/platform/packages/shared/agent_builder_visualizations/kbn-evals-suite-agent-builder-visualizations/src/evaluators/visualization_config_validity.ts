@@ -129,7 +129,7 @@ const validateVisualizationConfig = (
  */
 export function createVisualizationConfigValidityEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   visualizationExtractor: (output: TTaskOutput) => ExtractedVisualization[];
   name?: string;

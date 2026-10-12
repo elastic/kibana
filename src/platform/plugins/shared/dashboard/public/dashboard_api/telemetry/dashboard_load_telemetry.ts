@@ -84,8 +84,8 @@ export function startTrackingDashboardLoadTelemetry(
       const loadType: DashboardLoadType = isFirstDashboardLoadOfSession
         ? 'sessionFirstLoad'
         : performanceState.firstLoad
-        ? 'dashboardFirstLoad'
-        : 'dashboardSubsequentLoad';
+          ? 'dashboardFirstLoad'
+          : 'dashboardSubsequentLoad';
 
       const queryHasStarted = !wasDashboardStillLoading && isDashboardStillLoading;
       const queryHasFinished = wasDashboardStillLoading && !isDashboardStillLoading;

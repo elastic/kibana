@@ -26,7 +26,7 @@ const createMockHit = (flattened: DataTableRecord['flattened'], index = ''): Dat
     raw: { _index: index },
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const PREVIEW_INDEX = '.preview.alerts-security.alerts-default';
 const REMOTE_INDEX = 'remote_cluster:alerts';

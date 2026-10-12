@@ -27,7 +27,7 @@ const aggregationsResponse = (
     total: 0,
     data: [],
     aggregations: raw,
-  } as unknown as Awaited<ReturnType<typeof findRules>>);
+  }) as unknown as Awaited<ReturnType<typeof findRules>>;
 
 describe('buildAggregations', () => {
   it('maps friendly facet names to ES fields', () => {

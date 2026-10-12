@@ -31,7 +31,7 @@ describe('checkReferenceOrigins', () => {
     page: 1,
     per_page: 1,
     total: objectIds.length,
-    saved_objects: objectIds.map((id) => ({ id, score: 0 } as unknown as SavedObjectsFindResult)),
+    saved_objects: objectIds.map((id) => ({ id, score: 0 }) as unknown as SavedObjectsFindResult),
   });
 
   const setupParams = (partial: {

@@ -492,7 +492,7 @@ describe('openModal', () => {
 
       openModal(
         getMockLensApi(undefined, {
-          serializeState: () => ({ ref_id: 'so-from-serialize' } as never),
+          serializeState: () => ({ ref_id: 'so-from-serialize' }) as never,
         }),
         'myAppId',
         {} as unknown as CasesActionContextProps,

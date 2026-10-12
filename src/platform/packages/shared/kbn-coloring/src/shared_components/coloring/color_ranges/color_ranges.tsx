@@ -97,7 +97,7 @@ export function ColorRanges({
             shouldDisableAdd={Boolean(
               (paletteConfiguration?.maxSteps &&
                 colorRanges.length >= paletteConfiguration?.maxSteps) ||
-                errors.length
+              errors.length
             )}
             shouldDisableDistribute={Boolean(colorRanges.length === 1)}
             shouldDisableReverse={Boolean(colorRanges.length === 1)}

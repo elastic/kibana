@@ -124,8 +124,8 @@ function resolveErrorContext(
       ? 'internal_error'
       : (directType as ServiceErrorType)
     : failedDownstreams.some((o) => o.childHttpStatus === ERROR_TYPE_STATUS.gateway_timeout)
-    ? 'gateway_timeout'
-    : 'bad_gateway';
+      ? 'gateway_timeout'
+      : 'bad_gateway';
 
   const sourceDep = directError ? directFailConf?.sourceDep : undefined;
 
@@ -194,7 +194,7 @@ export function simulateRequest({
 
     // Failure roll
     const directFailConf = resolvedFailures?.[current];
-    const errorRate = directFailConf ? directFailConf.rate ?? 1 : AMBIENT_ERROR_RATE;
+    const errorRate = directFailConf ? (directFailConf.rate ?? 1) : AMBIENT_ERROR_RATE;
     const directError = rng() < errorRate;
     const isFailing = directFailConf !== undefined && errorRate > 0;
     const emitWarn = !directError && isFailing && resolveLogLevel(isFailing, rng) === 'warn';
@@ -257,7 +257,7 @@ export function simulateRequest({
           }));
 
     // Build docs
-    const docCount = isError ? (directError ? directFailConf?.multiplier ?? 1 : 1) : 1;
+    const docCount = isError ? (directError ? (directFailConf?.multiplier ?? 1) : 1) : 1;
     const selfLogs = buildSelfLogs({
       serviceNode,
       level: isError ? 'error' : 'info',

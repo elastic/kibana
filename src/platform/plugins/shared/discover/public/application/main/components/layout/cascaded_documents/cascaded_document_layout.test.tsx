@@ -119,7 +119,7 @@ const createMockFetcher = (): CascadedDocumentsFetcher =>
   ({
     fetchCascadedDocuments: jest.fn().mockResolvedValue([]),
     cancelFetch: jest.fn(),
-  } as unknown as CascadedDocumentsFetcher);
+  }) as unknown as CascadedDocumentsFetcher;
 
 const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
   const esqlQuery: AggregateQuery = { esql: 'FROM logs | STATS count() BY category' };

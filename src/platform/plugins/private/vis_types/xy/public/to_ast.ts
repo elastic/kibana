@@ -107,7 +107,7 @@ const prepareLayers = (
     isStacked: seriesParam.mode === ChartMode.Stacked,
     lineWidth: !isBar ? seriesParam.lineWidth : undefined,
     showPoints: !isBar ? seriesParam.showCircles : undefined,
-    pointsRadius: !isBar ? seriesParam.circlesRadius ?? 3 : undefined,
+    pointsRadius: !isBar ? (seriesParam.circlesRadius ?? 3) : undefined,
     showLines: !isBar ? seriesParam.drawLinesBetweenPoints : undefined,
     curveType: getCurveType(seriesParam.interpolate),
     decorations: yAccessors.map((accessor) =>

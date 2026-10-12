@@ -72,13 +72,15 @@ test('Read a normal source file is allowed', () => {
 test('Read a skill SKILL.md for analysis is allowed', () => {
   // Read is allowed (only Write/Edit to skill files is blocked)
   allow('Read', {
-    file_path: '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/SKILL.md',
+    file_path:
+      '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/SKILL.md',
   });
 });
 
 test('Read a references file for analysis is allowed', () => {
   allow('Read', {
-    file_path: '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/references/domain-knowledge.md',
+    file_path:
+      '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/references/domain-knowledge.md',
   });
 });
 
@@ -92,19 +94,22 @@ test('Read a file named .environment (not .env) is allowed', () => {
 
 test('Write to references/defect-patterns.md is denied', () => {
   deny('Write', {
-    file_path: '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/references/defect-patterns.md',
+    file_path:
+      '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/references/defect-patterns.md',
   });
 });
 
 test('Edit references/domain-knowledge.md is denied', () => {
   deny('Edit', {
-    file_path: '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/references/domain-knowledge.md',
+    file_path:
+      '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/references/domain-knowledge.md',
   });
 });
 
 test('Write to SKILL.md is denied', () => {
   deny('Write', {
-    file_path: '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md',
+    file_path:
+      '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md',
   });
 });
 
@@ -148,7 +153,8 @@ test('Write to bug-fixer-session analysis.json is allowed', () => {
 
 test('Write to a scripts/ file inside a skill is allowed', () => {
   allow('Write', {
-    file_path: '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/scripts/fetch_issue.sh',
+    file_path:
+      '/Users/glo/projects/kibana/x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/scripts/fetch_issue.sh',
   });
 });
 
@@ -186,7 +192,8 @@ test('Bash git log is allowed', () => {
 
 test('Bash node scripts invocation is allowed', () => {
   allow('Bash', {
-    command: 'bash x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/scripts/fetch_issue.sh 12345',
+    command:
+      'bash x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/scripts/fetch_issue.sh 12345',
   });
 });
 
@@ -199,11 +206,15 @@ test('Bash rg search is allowed', () => {
 // ---------------------------------------------------------------------------
 
 test('Bash redirect append to references/ is denied', () => {
-  deny('Bash', { command: 'echo "evil" >> .agents/skills/bug-validator/references/defect-patterns.md' });
+  deny('Bash', {
+    command: 'echo "evil" >> .agents/skills/bug-validator/references/defect-patterns.md',
+  });
 });
 
 test('Bash redirect overwrite to references/ is denied', () => {
-  deny('Bash', { command: 'echo "evil" > .agents/skills/bug-validator/references/domain-knowledge.md' });
+  deny('Bash', {
+    command: 'echo "evil" > .agents/skills/bug-validator/references/domain-knowledge.md',
+  });
 });
 
 test('Bash tee to skill file is denied', () => {
@@ -211,7 +222,9 @@ test('Bash tee to skill file is denied', () => {
 });
 
 test('Bash sed -i on skill references file is denied', () => {
-  deny('Bash', { command: "sed -i 's/old/new/' .agents/skills/bug-validator/references/bulk-mode.md" });
+  deny('Bash', {
+    command: "sed -i 's/old/new/' .agents/skills/bug-validator/references/bulk-mode.md",
+  });
 });
 
 // Regression: no-space redirect bypassed the '> ' indicator check

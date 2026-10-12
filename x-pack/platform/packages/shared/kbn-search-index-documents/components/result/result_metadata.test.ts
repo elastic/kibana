@@ -17,7 +17,7 @@ import type { FieldProps } from './result_types';
 const makeSearchHit = (source: undefined | unknown): SearchHit =>
   ({
     _source: source,
-  } as SearchHit);
+  }) as SearchHit;
 
 describe('resultTitle', () => {
   it('returns result title if available', () => {

@@ -35,5 +35,5 @@ export const EnhancedAlertFlyoutFooter = ({
 
   return renderFooter
     ? renderFooter({ hit, ...docViewProps, onAlertUpdated: handleAlertUpdated })
-    : fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null;
+    : (fallbackRenderFooter?.({ hit, ...docViewProps }) ?? null);
 };

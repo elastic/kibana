@@ -62,10 +62,10 @@ export const QueryModeEmptyPrompt = () => {
             isAtMaxNestingLevel
               ? maxNestingLevelText
               : !canManage
-              ? i18n.translate('xpack.streams.queryModeEmptyPrompt.cannotCreateQueryStream', {
-                  defaultMessage: "You don't have sufficient privileges to create query streams.",
-                })
-              : undefined
+                ? i18n.translate('xpack.streams.queryModeEmptyPrompt.cannotCreateQueryStream', {
+                    defaultMessage: "You don't have sufficient privileges to create query streams.",
+                  })
+                : undefined
           }
         >
           <EuiButton

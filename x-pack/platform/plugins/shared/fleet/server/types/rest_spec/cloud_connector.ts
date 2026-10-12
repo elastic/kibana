@@ -389,7 +389,7 @@ export const VerifyCloudConnectorIacKeyResponseSchema = schema.object({
   // `compare: false` read (`not_checked`); `outcome` tells them apart.
   outcome: schema.oneOf(
     IAC_KEY_VERIFICATION_OUTCOMES.map((outcome) => schema.literal(outcome)) as [
-      Type<IacKeyVerificationOutcome>
+      Type<IacKeyVerificationOutcome>,
     ]
   ),
   deploymentId: schema.maybe(schema.string()),

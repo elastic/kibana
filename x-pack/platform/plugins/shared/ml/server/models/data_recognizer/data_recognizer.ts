@@ -287,7 +287,9 @@ export class DataRecognizer {
           try {
             const resp = await func();
             const totalHits =
-              typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits?.total?.value ?? 0;
+              typeof resp.hits.total === 'number'
+                ? resp.hits.total
+                : (resp.hits?.total?.value ?? 0);
             return { id, name, title, totalHits };
           } catch (error) {
             mlLog.warn(

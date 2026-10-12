@@ -33,17 +33,23 @@ export function prepareSOForExport({
   return savedObjects.filter(isSupportedSavedObjectType).map((object) => {
     const { patterns } = findConfiguration(object);
     const replacements = {
-      ...replacedPatterns.reduce((acc, pattern) => {
-        acc[pattern] = INDEX_PLACEHOLDER;
-        return acc;
-      }, {} as Record<string, string>),
+      ...replacedPatterns.reduce(
+        (acc, pattern) => {
+          acc[pattern] = INDEX_PLACEHOLDER;
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
 
       ...patterns
         .filter((pattern) => pattern.startsWith(source))
-        .reduce((acc, pattern) => {
-          acc[pattern] = pattern.replace(source, INDEX_PLACEHOLDER);
-          return acc;
-        }, {} as Record<string, string>),
+        .reduce(
+          (acc, pattern) => {
+            acc[pattern] = pattern.replace(source, INDEX_PLACEHOLDER);
+            return acc;
+          },
+          {} as Record<string, string>
+        ),
     };
 
     return replaceIndexPatterns(object, replacements);
@@ -79,10 +85,13 @@ export function prepareSOForImport({
       const { patterns } = findConfiguration(object);
       const replacements = patterns
         .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
-        .reduce((acc, pattern) => {
-          acc[pattern] = pattern.replace(INDEX_PLACEHOLDER, target);
-          return acc;
-        }, {} as Record<string, string>);
+        .reduce(
+          (acc, pattern) => {
+            acc[pattern] = pattern.replace(INDEX_PLACEHOLDER, target);
+            return acc;
+          },
+          {} as Record<string, string>
+        );
 
       return replaceIndexPatterns(object, replacements);
     });

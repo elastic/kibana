@@ -31,7 +31,7 @@ const createHandlerContext = () =>
     modelProvider: {},
     logger: { debug: jest.fn() },
     events: {},
-  } as any);
+  }) as any;
 
 const run = async (query = 'total sales') => {
   const tool = generateEsqlTool();

@@ -26,9 +26,12 @@ export interface StartDependencies {
   esql: EsqlPluginStart;
 }
 
-export class ESQLUxExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class ESQLUxExamplePlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'esql_ux_example',

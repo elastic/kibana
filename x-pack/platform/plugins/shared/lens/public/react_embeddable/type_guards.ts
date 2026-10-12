@@ -37,11 +37,11 @@ function apiHasLensCallbacks(api: unknown): api is LensApiCallbacks {
 export const isLensApi = (api: unknown): api is LensApi => {
   return Boolean(
     api &&
-      apiIsOfType(api, LENS_EMBEDDABLE_TYPE) &&
-      'canViewUnderlyingData$' in api &&
-      apiHasLensCallbacks(api) &&
-      apiPublishesTitle(api) &&
-      apiPublishesUnifiedSearch(api)
+    apiIsOfType(api, LENS_EMBEDDABLE_TYPE) &&
+    'canViewUnderlyingData$' in api &&
+    apiHasLensCallbacks(api) &&
+    apiPublishesTitle(api) &&
+    apiPublishesUnifiedSearch(api)
   );
 };
 

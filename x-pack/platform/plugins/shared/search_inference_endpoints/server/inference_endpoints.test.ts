@@ -61,7 +61,7 @@ const createSoClient = (
         attributes: { features },
       } as SavedObject<InferenceSettingsAttributes>;
     }),
-  } as unknown as ISavedObjectsRepository);
+  }) as unknown as ISavedObjectsRepository;
 
 const createGetConnectorById = (
   connectorIds: string[]

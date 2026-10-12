@@ -167,7 +167,7 @@ describe('lens document equality', () => {
       ({
         ...defaultDoc,
         state: { ...defaultDoc.state, query },
-      } as LensDocument);
+      }) as LensDocument;
 
     const noFilterVariants = [
       withQuery(undefined),

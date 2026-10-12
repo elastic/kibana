@@ -31,7 +31,7 @@ const createLog = (): SomeDevLog =>
     warning: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
-  } as unknown as SomeDevLog);
+  }) as unknown as SomeDevLog;
 
 const asChild = (promise: Promise<unknown>) => {
   const kill = jest.fn();

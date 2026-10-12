@@ -225,7 +225,7 @@ describe('checkAndFormatPrivileges', () => {
           })
         ),
       },
-    } as unknown as SecurityPluginStart);
+    }) as unknown as SecurityPluginStart;
 
   it('sets has_kibana_feature_access to true when all requested kibana privileges are authorized', async () => {
     const security = buildSecurityMock([

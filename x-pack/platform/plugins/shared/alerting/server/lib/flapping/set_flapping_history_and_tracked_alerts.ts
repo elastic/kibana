@@ -15,7 +15,7 @@ export function setFlappingHistoryAndTrackedAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupIds extends string
+  RecoveryActionGroupIds extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
@@ -72,7 +72,7 @@ export function updateAlertFlappingHistory<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >(
   flappingSettings: RulesSettingsFlappingProperties,
   alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>,

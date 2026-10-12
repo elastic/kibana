@@ -19,15 +19,12 @@ export interface AgentBuilderSmlPublicPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AgentBuilderSmlPublicPluginStart {}
 
-export class AgentBuilderSmlPublicPlugin
-  implements
-    Plugin<
-      AgentBuilderSmlPublicPluginSetup,
-      AgentBuilderSmlPublicPluginStart,
-      AgentBuilderSmlPublicPluginSetupDeps,
-      AgentBuilderSmlPublicPluginStartDeps
-    >
-{
+export class AgentBuilderSmlPublicPlugin implements Plugin<
+  AgentBuilderSmlPublicPluginSetup,
+  AgentBuilderSmlPublicPluginStart,
+  AgentBuilderSmlPublicPluginSetupDeps,
+  AgentBuilderSmlPublicPluginStartDeps
+> {
   constructor(_context: PluginInitializerContext) {}
 
   public setup(

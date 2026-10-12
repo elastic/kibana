@@ -146,8 +146,8 @@ export async function find(
       queryParams?.type == null
         ? undefined
         : Array.isArray(queryParams.type)
-        ? queryParams.type
-        : [queryParams.type];
+          ? queryParams.type
+          : [queryParams.type];
 
     const filter = combineFilters([buildAttachmentTypeFilter(requestedTypes), authorizationFilter]);
 

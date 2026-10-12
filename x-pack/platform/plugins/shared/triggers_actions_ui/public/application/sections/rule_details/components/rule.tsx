@@ -178,8 +178,8 @@ export function RuleComponent({
     solutionNavId === 'oblt'
       ? 'observability'
       : solutionNavId === 'security'
-      ? 'securitySolution'
-      : 'cases';
+        ? 'securitySolution'
+        : 'cases';
 
   const { capabilities } = application;
   const hasObservabilityAccess = [

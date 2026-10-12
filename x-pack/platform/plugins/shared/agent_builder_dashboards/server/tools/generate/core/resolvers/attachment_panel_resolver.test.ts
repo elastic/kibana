@@ -17,7 +17,7 @@ import { createAttachmentPanelResolver } from './attachment_panel_resolver';
 const makeAttachments = (record?: Record<string, unknown>): AttachmentStateManager =>
   ({
     getAttachmentRecord: jest.fn().mockReturnValue(record),
-  } as unknown as AttachmentStateManager);
+  }) as unknown as AttachmentStateManager;
 
 const makeVisualizationAttachment = (data: Record<string, unknown>) => ({
   id: 'att-1',

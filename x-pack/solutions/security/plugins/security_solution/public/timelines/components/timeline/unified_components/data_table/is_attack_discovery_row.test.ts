@@ -21,7 +21,7 @@ const createEventData = (
     data: [],
     ecs: {},
     ...overrides,
-  } as DataTableRecord & TimelineItem);
+  }) as DataTableRecord & TimelineItem;
 
 describe('isAttackDiscoveryRow', () => {
   it('returns false when only attack discovery alert ids are present', () => {

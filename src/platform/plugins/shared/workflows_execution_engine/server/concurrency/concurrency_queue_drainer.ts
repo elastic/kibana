@@ -38,10 +38,10 @@ export const isRecoverablePromoteRunSoonError = (error: unknown): boolean => {
     typeof error === 'number'
       ? error
       : error &&
-        typeof error === 'object' &&
-        typeof (error as { statusCode?: unknown }).statusCode === 'number'
-      ? (error as { statusCode: number }).statusCode
-      : undefined;
+          typeof error === 'object' &&
+          typeof (error as { statusCode?: unknown }).statusCode === 'number'
+        ? (error as { statusCode: number }).statusCode
+        : undefined;
   return statusCode !== undefined && RECOVERABLE_RUN_SOON_STATUS_CODES.has(statusCode);
 };
 

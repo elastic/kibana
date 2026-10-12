@@ -29,11 +29,9 @@ export const createAckAction = (
       execute: (eps, http) =>
         bulkAckEpisodeActions(
           http,
-          eps.map(
-            (ep): BulkAckEpisodeActionItem => ({
-              alert_id: ep['episode.id'],
-            })
-          )
+          eps.map((ep): BulkAckEpisodeActionItem => ({
+            alert_id: ep['episode.id'],
+          }))
         ),
     },
     extension,

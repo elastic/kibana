@@ -11,7 +11,10 @@ import { expect } from '@kbn/scout-oblt/ui';
 export class ExploratoryViewPage {
   public readonly echLegendItemLocator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.echLegendItemLocator = this.page.locator('[data-testid="echLegendItemLabel"]');
   }
 

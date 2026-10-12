@@ -76,8 +76,8 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
                 scheduleDelayP95 > 5000
                   ? euiTheme.colors.vis.euiColorVisDanger0
                   : scheduleDelayP95 > 1000
-                  ? euiTheme.colors.vis.euiColorVisWarning0
-                  : euiTheme.colors.vis.euiColorVisSuccess0,
+                    ? euiTheme.colors.vis.euiColorVisWarning0
+                    : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.SCHEDULE_DELAY_P95,
               value: scheduleDelayP95,
               valueFormatter: (v) => humanizeMs(Math.round(v)),
@@ -87,8 +87,8 @@ export const HealthOverviewCards = memo(function HealthOverviewCards({
                 searchDurationP95 > 5000
                   ? euiTheme.colors.vis.euiColorVisDanger0
                   : searchDurationP95 > 1000
-                  ? euiTheme.colors.vis.euiColorVisWarning0
-                  : euiTheme.colors.vis.euiColorVisSuccess0,
+                    ? euiTheme.colors.vis.euiColorVisWarning0
+                    : euiTheme.colors.vis.euiColorVisSuccess0,
               title: i18n.SEARCH_DURATION_P95,
               value: searchDurationP95,
               valueFormatter: (v) => humanizeMs(Math.round(v)),

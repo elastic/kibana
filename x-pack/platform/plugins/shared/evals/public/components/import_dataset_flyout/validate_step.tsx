@@ -24,10 +24,10 @@ export const ValidateStep = ({ validCount, errors, blockingErrors }: ValidateSte
   const title = isBlocked
     ? translations.VALIDATION_BLOCKED_TITLE
     : hasValidRows
-    ? hasErrors
-      ? translations.VALIDATION_WARNING_TITLE
-      : translations.VALIDATION_SUCCESS_TITLE
-    : translations.NO_VALID_ROWS_TITLE;
+      ? hasErrors
+        ? translations.VALIDATION_WARNING_TITLE
+        : translations.VALIDATION_SUCCESS_TITLE
+      : translations.NO_VALID_ROWS_TITLE;
 
   return (
     <>

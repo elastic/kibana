@@ -89,9 +89,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     const pluginSetupDeps = plugins;
     if (plugins.observability) {
       const getUxDataHelper = async () => {
-        const { fetchUxOverviewDate, hasRumData, createCallApmApi } = await import(
-          './components/app/rum_dashboard/ux_overview_fetchers'
-        );
+        const { fetchUxOverviewDate, hasRumData, createCallApmApi } =
+          await import('./components/app/rum_dashboard/ux_overview_fetchers');
         // have to do this here as well in case app isn't mounted yet
         createCallApmApi(core);
 

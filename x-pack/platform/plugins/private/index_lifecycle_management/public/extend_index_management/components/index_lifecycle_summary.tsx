@@ -115,7 +115,7 @@ export const IndexLifecycleSummary = ({ index, getUrlForApp }: IndexLifecycleSum
 
   const shouldFetchExplain = Boolean(
     managedIlm &&
-      (!managedIlm.policy || !managedIlm.phase || !managedIlm.action || !managedIlm.step)
+    (!managedIlm.policy || !managedIlm.phase || !managedIlm.action || !managedIlm.step)
   );
 
   const pollExplain = useCallback(async () => {
@@ -318,55 +318,57 @@ export const IndexLifecycleSummary = ({ index, getUrlForApp }: IndexLifecycleSum
               <EuiSpacer />
             </>
           )}
-          {managedIlm?.step_info && managedIlm.step === 'ERROR' && (
-            // there is an error
-            <>
-              <EuiPanel
-                color="danger"
-                hasBorder={true}
-                grow={false}
-                data-test-subj="policyErrorPanel"
-              >
-                <EuiText size="xs">
-                  <h3>
-                    <FormattedMessage
-                      defaultMessage="Lifecycle error"
-                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
-                    />
-                  </h3>
-                  <EuiSpacer />
-                  <EuiCodeBlock language="json" isCopyable>
-                    {JSON.stringify(
-                      { failed_step: managedIlm.failed_step, step_info: managedIlm.step_info },
-                      null,
-                      2
-                    )}
-                  </EuiCodeBlock>
-                </EuiText>
-              </EuiPanel>
-              <EuiSpacer />
-            </>
-          )}
-          {managedIlm?.step_info && managedIlm.step !== 'ERROR' && (
-            // ILM is waiting for the step to complete
-            <>
-              <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
-                <EuiText size="xs">
-                  <h3>
-                    <FormattedMessage
-                      defaultMessage="Current step info"
-                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
-                    />
-                  </h3>
-                  <EuiSpacer />
-                  <EuiCodeBlock language="json" isCopyable>
-                    {JSON.stringify(managedIlm.step_info, null, 2)}
-                  </EuiCodeBlock>
-                </EuiText>
-              </EuiPanel>
-              <EuiSpacer />
-            </>
-          )}
+          {managedIlm?.step_info &&
+            managedIlm.step === 'ERROR' && (
+              // there is an error
+              <>
+                <EuiPanel
+                  color="danger"
+                  hasBorder={true}
+                  grow={false}
+                  data-test-subj="policyErrorPanel"
+                >
+                  <EuiText size="xs">
+                    <h3>
+                      <FormattedMessage
+                        defaultMessage="Lifecycle error"
+                        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
+                      />
+                    </h3>
+                    <EuiSpacer />
+                    <EuiCodeBlock language="json" isCopyable>
+                      {JSON.stringify(
+                        { failed_step: managedIlm.failed_step, step_info: managedIlm.step_info },
+                        null,
+                        2
+                      )}
+                    </EuiCodeBlock>
+                  </EuiText>
+                </EuiPanel>
+                <EuiSpacer />
+              </>
+            )}
+          {managedIlm?.step_info &&
+            managedIlm.step !== 'ERROR' && (
+              // ILM is waiting for the step to complete
+              <>
+                <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
+                  <EuiText size="xs">
+                    <h3>
+                      <FormattedMessage
+                        defaultMessage="Current step info"
+                        id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
+                      />
+                    </h3>
+                    <EuiSpacer />
+                    <EuiCodeBlock language="json" isCopyable>
+                      {JSON.stringify(managedIlm.step_info, null, 2)}
+                    </EuiCodeBlock>
+                  </EuiText>
+                </EuiPanel>
+                <EuiSpacer />
+              </>
+            )}
           {managedIlm?.phase_execution && (
             <EuiPanel hasBorder={true} grow={false} data-test-subj="phaseDefinitionPanel">
               <EuiText size="xs">

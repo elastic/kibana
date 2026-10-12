@@ -61,25 +61,31 @@ const KubernetesSecurityRoutesComponent = ({
   const lastUpdated = useLastUpdated(globalFilter);
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
-      result.buckets.reduce((groupedByKeyValue, aggregate) => {
-        groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
-          aggregate.count_by_aggs?.value ?? 0;
-        return groupedByKeyValue;
-      }, {} as Record<string, number>),
+      result.buckets.reduce(
+        (groupedByKeyValue, aggregate) => {
+          groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
+            aggregate.count_by_aggs?.value ?? 0;
+          return groupedByKeyValue;
+        },
+        {} as Record<string, number>
+      ),
     []
   );
 
   const onReduceRootAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
-      result.buckets.reduce((groupedByKeyValue, aggregate) => {
-        if (aggregate.key.toString() === '0') {
-          groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs?.value ?? 0;
-        } else {
-          groupedByKeyValue.nonRoot =
-            (groupedByKeyValue.nonRoot || 0) + (aggregate.count_by_aggs?.value ?? 0);
-        }
-        return groupedByKeyValue;
-      }, {} as Record<string, number>),
+      result.buckets.reduce(
+        (groupedByKeyValue, aggregate) => {
+          if (aggregate.key.toString() === '0') {
+            groupedByKeyValue[aggregate.key] = aggregate.count_by_aggs?.value ?? 0;
+          } else {
+            groupedByKeyValue.nonRoot =
+              (groupedByKeyValue.nonRoot || 0) + (aggregate.count_by_aggs?.value ?? 0);
+          }
+          return groupedByKeyValue;
+        },
+        {} as Record<string, number>
+      ),
     []
   );
 

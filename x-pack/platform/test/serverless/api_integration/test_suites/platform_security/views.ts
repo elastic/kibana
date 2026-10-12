@@ -77,9 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('space selector', async () => {
-          const { status } = await supertestAdminWithCookieCredentials.get(
-            '/spaces/space_selector'
-          );
+          const { status } =
+            await supertestAdminWithCookieCredentials.get('/spaces/space_selector');
           expect(status).toBe(200);
         });
 

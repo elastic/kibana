@@ -6,7 +6,11 @@
  */
 
 export class AggregateStatusError extends AggregateError {
-  constructor(errors: Error[], message: string, public readonly statusCode: number) {
+  constructor(
+    errors: Error[],
+    message: string,
+    public readonly statusCode: number
+  ) {
     super(errors, message);
   }
 }

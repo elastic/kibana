@@ -118,7 +118,7 @@ const createServicesMock = ({
         },
       },
     },
-  } as unknown as DataFederationKibanaServices);
+  }) as unknown as DataFederationKibanaServices;
 
 const renderComponent = async ({
   dataSources,

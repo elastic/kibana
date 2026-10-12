@@ -76,7 +76,7 @@ export type SchemaNode = SchemaLeafNode | SchemaInternalNode;
 
 export type SchemaType = Record<string, SchemaNode>;
 
-/** 
+/**
  * This type is a no-op: Expand<T> evaluates to T. Its use is to force VSCode to evaluate type expressions
  * and show the expanded form, e.g.
  * type test5 = {
@@ -104,14 +104,14 @@ export type ConvertSchemaType<ModelVersion extends string, Schema extends Schema
   // Key remapping via `as` here filters out keys that are not in that schema version,
   // so instead of { key: undefined } the key is completely gone
   // https://www.typescriptlang.org/docs/handbook/2/mapped-types.html#key-remapping-via-as
-  [k in keyof Schema as Required<Schema>[k]['version'] extends ModelVersion
-    ? k
-    : never]: ConvertSchemaNode<ModelVersion, Required<Schema>[k]>;
+  [
+    k in keyof Schema as Required<Schema>[k]['version'] extends ModelVersion ? k : never
+  ]: ConvertSchemaNode<ModelVersion, Required<Schema>[k]>;
 }>;
 
 export type ConvertSchemaNode<
   ModelVersion extends string,
-  N extends SchemaNode
+  N extends SchemaNode,
 > = N extends SchemaInternalNode
   ? N['type'] extends object[]
     ? Array<ConvertSchemaType<ModelVersion, N['fields']>>
@@ -120,7 +120,7 @@ export type ConvertSchemaNode<
 
 export type ConvertSchemaTypeToReadSchema<
   OriginalVersion extends string,
-  Schema extends SchemaType
+  Schema extends SchemaType,
 > = Expand<{
   [k in keyof Schema]: Required<Schema>[k]['version'] extends OriginalVersion
     ? ConvertSchemaNode<OriginalVersion, Required<Schema>[k]>

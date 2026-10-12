@@ -107,9 +107,8 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
 
     let nestedResourcesFound = resourcesFound;
     do {
-      const nestedResourcesIdentified = await resourceIdentifier.fromResources(
-        nestedResourcesFound
-      );
+      const nestedResourcesIdentified =
+        await resourceIdentifier.fromResources(nestedResourcesFound);
       const nextNestedResources: MigrationDefinedResource[] = [];
 
       nestedResourcesIdentified.forEach((resource, index) => {

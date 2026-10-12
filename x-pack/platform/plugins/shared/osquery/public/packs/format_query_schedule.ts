@@ -286,8 +286,8 @@ export const formatQuerySchedule = (schedule: EffectiveSchedule): string => {
           return weekdayQualifier
             ? formatWeekly(interval, weekdayQualifier)
             : interval === 1
-            ? DAILY_TEXT
-            : formatEveryNDays(interval);
+              ? DAILY_TEXT
+              : formatEveryNDays(interval);
 
         case Frequency.WEEKLY:
           return formatWeekly(interval, weekdayQualifier ?? []);

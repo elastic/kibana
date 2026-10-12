@@ -73,9 +73,8 @@ apiTest.describe(
         const actualJobIds = [...calendar.job_ids].sort();
         expect(actualJobIds).toStrictEqual(expectedJobIds);
 
-        const { events } = await apiServices.ml.anomalyDetection.calendars.getCalendarEvents(
-          CALENDAR_ID
-        );
+        const { events } =
+          await apiServices.ml.anomalyDetection.calendars.getCalendarEvents(CALENDAR_ID);
         expect(events).toHaveLength(UPDATE_REQUEST_BODY.events.length);
         assertAllEventsExistInCalendar(UPDATE_REQUEST_BODY.events, { events });
       }

@@ -43,6 +43,6 @@ export const useFetchConnectorsByType = ({
   isEnabled?: boolean;
 }) =>
   ({
-    data: connectorTypeId ? MOCK_CONNECTORS_BY_TYPE[connectorTypeId] ?? [] : [],
+    data: connectorTypeId ? (MOCK_CONNECTORS_BY_TYPE[connectorTypeId] ?? []) : [],
     isLoading: false,
-  } as UseQueryResult<SingleStepConnector[], Error>);
+  }) as UseQueryResult<SingleStepConnector[], Error>;

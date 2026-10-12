@@ -15,8 +15,10 @@ import { StyledTableFlexGroup, StyledUnifiedTableFlexItem } from '../unified_com
 import { UnifiedTimeline } from '../unified_components';
 import { defaultUdtHeaders } from './column_headers/default_headers';
 
-export interface UnifiedTimelineBodyProps
-  extends Omit<ComponentProps<typeof UnifiedTimeline>, 'dataView'> {
+export interface UnifiedTimelineBodyProps extends Omit<
+  ComponentProps<typeof UnifiedTimeline>,
+  'dataView'
+> {
   header: ReactElement;
 }
 

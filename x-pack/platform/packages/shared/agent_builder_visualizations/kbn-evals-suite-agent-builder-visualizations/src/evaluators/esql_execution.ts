@@ -107,7 +107,7 @@ async function evaluateSingleQuery(
  */
 export function createEsqlExecutionEvaluator<
   TExample extends Example = Example,
-  TTaskOutput extends TaskOutput = TaskOutput
+  TTaskOutput extends TaskOutput = TaskOutput,
 >(config: {
   esClient: ElasticsearchClient;
   queryExtractor: (output: TTaskOutput) => string[];
@@ -202,10 +202,10 @@ export function createEsqlExecutionEvaluator<
           score === 1
             ? 'valid'
             : astValidCount === 0
-            ? 'syntax-error'
-            : executionValidCount === 0
-            ? 'execution-error'
-            : 'partial',
+              ? 'syntax-error'
+              : executionValidCount === 0
+                ? 'execution-error'
+                : 'partial',
         explanation,
         metadata: {
           totalQueries: queries.length,

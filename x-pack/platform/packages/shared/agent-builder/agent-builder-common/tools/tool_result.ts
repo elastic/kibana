@@ -42,8 +42,8 @@ export interface ToolResultMixin<TType extends string = string, TData extends Ob
   data: TType extends ToolResultType.other
     ? TData
     : TType extends ToolResultType
-    ? ToolResultDataOf<TType>
-    : TData;
+      ? ToolResultDataOf<TType>
+      : TData;
 }
 
 type UnknownToolType<T extends string> = T extends ToolResultType ? never : T;

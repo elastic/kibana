@@ -31,8 +31,10 @@ export interface DataVisualizerPageState {
   documentCountStats?: FieldVisConfig;
 }
 
-export interface DataVisualizerIndexBasedAppState
-  extends Omit<ListingPageUrlState, 'queryText' | 'showPerPageOptions' | 'showAll'> {
+export interface DataVisualizerIndexBasedAppState extends Omit<
+  ListingPageUrlState,
+  'queryText' | 'showPerPageOptions' | 'showAll'
+> {
   searchString?: Query['query'];
   searchQuery?: Query['query'];
   searchQueryLanguage?: SearchQueryLanguage;

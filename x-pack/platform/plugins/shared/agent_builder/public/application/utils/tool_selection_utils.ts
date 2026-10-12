@@ -119,7 +119,7 @@ export const getActiveTools = <T extends ToolSelectionRelevantFields>(
  * Returns whether a skill is automatically included when Elastic capabilities are enabled.
  */
 export const isSkillAutoIncluded = <
-  T extends { readonly: boolean; exclude_from_elastic_capabilities?: boolean }
+  T extends { readonly: boolean; exclude_from_elastic_capabilities?: boolean },
 >(
   skill: T,
   enableElasticCapabilities: boolean
@@ -132,7 +132,7 @@ export const isSkillAutoIncluded = <
  * that are already explicitly selected are not duplicated.
  */
 export const getActiveSkills = <
-  T extends { id: string; readonly: boolean; exclude_from_elastic_capabilities?: boolean }
+  T extends { id: string; readonly: boolean; exclude_from_elastic_capabilities?: boolean },
 >(
   allSkills: T[],
   agentSkillIds: string[] | undefined,

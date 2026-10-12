@@ -142,7 +142,7 @@ describe('lazyImmutableGCableObject', () => {
   });
 
   it('throws an error upon setting a prop', () => {
-    const obj = lazyImmutableGCableObject(() => ({ value: 1 } as { value: number }));
+    const obj = lazyImmutableGCableObject(() => ({ value: 1 }) as { value: number });
 
     expect(() => {
       obj.value = 42;
@@ -150,7 +150,7 @@ describe('lazyImmutableGCableObject', () => {
   });
 
   it('throws an error upon defining a prop', () => {
-    const obj = lazyImmutableGCableObject(() => ({ value: 1 } as Partial<{ value: number }>));
+    const obj = lazyImmutableGCableObject(() => ({ value: 1 }) as Partial<{ value: number }>);
 
     expect(() => {
       Object.defineProperty(obj, 'foo', {
@@ -161,7 +161,7 @@ describe('lazyImmutableGCableObject', () => {
   });
 
   it('throws an error upon deleting a prop', () => {
-    const obj = lazyImmutableGCableObject(() => ({ value: 1 } as Partial<{ value: number }>));
+    const obj = lazyImmutableGCableObject(() => ({ value: 1 }) as Partial<{ value: number }>);
 
     expect(() => {
       delete obj.value;

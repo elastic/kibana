@@ -145,10 +145,10 @@ const buildCloudSetupState = ({
       provider === AWS_PROVIDER
         ? AWS_PROVIDER_TEST_SUBJ
         : provider === GCP_PROVIDER
-        ? GCP_PROVIDER_TEST_SUBJ
-        : provider === AZURE_PROVIDER
-        ? AZURE_PROVIDER_TEST_SUBJ
-        : '',
+          ? GCP_PROVIDER_TEST_SUBJ
+          : provider === AZURE_PROVIDER
+            ? AZURE_PROVIDER_TEST_SUBJ
+            : '',
   }));
 
   const getCloudSetupProviderByInputType = (inputType: string) => {

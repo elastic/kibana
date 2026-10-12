@@ -37,8 +37,8 @@ export const buildFederatedIdentityClusterInfo = (
     cloud?.isServerlessEnabled && cloud.serverless?.projectId
       ? `project:${cloud.serverless.projectId}`
       : cloud?.deploymentId
-      ? `deployment:${cloud.deploymentId}`
-      : undefined;
+        ? `deployment:${cloud.deploymentId}`
+        : undefined;
 
   return {
     jwtIssuer: injectedIssuerUrl,

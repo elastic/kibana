@@ -14,7 +14,10 @@ export class UptimeAppPage {
   public readonly monitorPage: Locator;
   public readonly certificatesPage: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.overviewPage = page.testSubj.locator('uptimeOverviewPage');
     this.settingsPage = page.testSubj.locator('uptimeSettingsPage');
     this.monitorPage = page.testSubj.locator('uptimeMonitorPage');

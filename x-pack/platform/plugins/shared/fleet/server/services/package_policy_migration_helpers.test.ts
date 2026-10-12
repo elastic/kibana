@@ -342,7 +342,7 @@ describe('applyVarScopeMigration', () => {
       title: dataset,
       data_stream: { dataset, type: 'logs' },
       vars,
-    } as unknown as RegistryStreamWithDataStream);
+    }) as unknown as RegistryStreamWithDataStream;
 
   describe('stream → input', () => {
     it('carries the value from a single old stream into the new input-level var', () => {

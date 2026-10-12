@@ -14,12 +14,10 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
 const TIMEOUT_CONFIG = require.resolve('./__fixtures__/abort_on_timeout/config.js');
-const ORDINARY_FAILURE_CONFIG = require.resolve(
-  './__fixtures__/abort_on_timeout/ordinary_failure_config.js'
-);
-const HANGING_CLEANUP_CONFIG = require.resolve(
-  './__fixtures__/abort_on_timeout/hanging_cleanup_config.js'
-);
+const ORDINARY_FAILURE_CONFIG =
+  require.resolve('./__fixtures__/abort_on_timeout/ordinary_failure_config.js');
+const HANGING_CLEANUP_CONFIG =
+  require.resolve('./__fixtures__/abort_on_timeout/hanging_cleanup_config.js');
 
 function runFixture(config) {
   const startMs = Date.now();

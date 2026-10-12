@@ -27,7 +27,7 @@ const makeAlertEventsClient = (
   ({
     createAlertEvent: jest.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+  }) as jest.Mocked<AlertEventsClientApi>;
 
 const makeLogger = (): jest.Mocked<Logger> =>
   ({
@@ -35,7 +35,7 @@ const makeLogger = (): jest.Mocked<Logger> =>
     warn: jest.fn(),
     info: jest.fn(),
     debug: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResponse =>
   ({
@@ -45,7 +45,7 @@ const createEvent = (eventUuid: string, ruleIds: string[]): SignificantEventResp
       type: 'detection',
       metadata: { rule_uuid: ruleId },
     })),
-  } as SignificantEventResponse);
+  }) as SignificantEventResponse;
 
 const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
   ({
@@ -58,12 +58,12 @@ const createEventClient = (pages: SignificantEventResponse[][]): EventClient =>
             : pages.findIndex((page) => page.at(-1)?.event_id === afterEventId);
         return Promise.resolve({ hits: pages[previousPageIndex + 1] ?? [] });
       }),
-  } as unknown as EventClient);
+  }) as unknown as EventClient;
 
 const createRulesClient = (existingIds: string[]): IRulesManagementClient =>
   ({
     findExistingRuleIds: jest.fn().mockResolvedValue(existingIds),
-  } as unknown as IRulesManagementClient);
+  }) as unknown as IRulesManagementClient;
 
 describe('cleanupStaleEvents', () => {
   beforeEach(() => {

@@ -27,8 +27,8 @@ export const GapAutoFillStatus = React.memo(() => {
   const badgeLabel = isStatusLoading
     ? i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_LOADING
     : isEnabled
-    ? i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_ON
-    : i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_OFF;
+      ? i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_ON
+      : i18n.RULE_GAPS_OVERVIEW_PANEL_AUTO_GAP_FILL_STATUS_OFF;
   const badgeColor = isEnabled ? 'success' : 'default';
 
   return (

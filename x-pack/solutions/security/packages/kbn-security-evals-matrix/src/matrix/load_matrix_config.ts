@@ -281,7 +281,7 @@ const assertNoDuplicateIds = (config: MatrixConfig): void => {
           owner === model.id
             ? `Duplicate model id "${identifier}".`
             : `Model identifier "${identifier}" is used by more than one model row ` +
-              `(as id or matchIds); each model id/alias must resolve to exactly one row.`
+                `(as id or matchIds); each model id/alias must resolve to exactly one row.`
         );
       }
       modelIdentifierOwners.set(identifier, model.id);

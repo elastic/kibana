@@ -22,7 +22,7 @@ const createMockInjection = (scope = createMockScope()): CoreDiServiceStart =>
   ({
     fork: jest.fn().mockReturnValue(scope),
     getContainer: jest.fn(),
-  } as unknown as CoreDiServiceStart);
+  }) as unknown as CoreDiServiceStart;
 
 describe('resolveRequestScoped', () => {
   it('forks the container on each call', () => {

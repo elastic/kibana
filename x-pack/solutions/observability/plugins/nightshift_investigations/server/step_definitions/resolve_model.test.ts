@@ -43,7 +43,7 @@ const createContext = (input: {
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
     },
-  } as never);
+  }) as never;
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -33,10 +33,10 @@ const getParam = (history: ReturnType<typeof createMemoryHistory>, key = FLYOUT_
   new URLSearchParams(history.location.search).get(key);
 
 const docDescriptor = (id: string) =>
-  ({ kind: 'document' as const, documentId: id, indexName: 'idx' } as const);
+  ({ kind: 'document' as const, documentId: id, indexName: 'idx' }) as const;
 
 const analyzerDescriptor = (id: string) =>
-  ({ kind: 'analyzer' as const, documentId: id, indexName: 'idx' } as const);
+  ({ kind: 'analyzer' as const, documentId: id, indexName: 'idx' }) as const;
 
 // ---------------------------------------------------------------------------
 // Tests

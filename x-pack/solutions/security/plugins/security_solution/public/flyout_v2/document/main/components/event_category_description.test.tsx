@@ -18,7 +18,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     raw: {},
     flattened,
     isAnchor: false,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const renderDescription = (hit: DataTableRecord) =>
   render(

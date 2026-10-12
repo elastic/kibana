@@ -45,7 +45,7 @@ const makeClassicEpisode = (alertUuid = 'alert-1'): AlertEpisode =>
       workflowStatus: 'open',
       workflowTags: [],
     },
-  } as unknown as AlertEpisode);
+  }) as unknown as AlertEpisode;
 
 const makeNativeEpisode = (episodeId = 'v2-ep-1'): AlertEpisode =>
   ({
@@ -66,7 +66,7 @@ const makeNativeEpisode = (episodeId = 'v2-ep-1'): AlertEpisode =>
     severity: 'critical',
     supports_actions: true,
     supports_timeline: true,
-  } as unknown as AlertEpisode);
+  }) as unknown as AlertEpisode;
 
 const ebtProps = {
   investigateEbtProps: {

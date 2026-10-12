@@ -21,7 +21,7 @@ export const casesWorkflowIcon: React.ComponentType = React.lazy(() =>
 export function createPublicCaseStepDefinition<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
-  Config extends z.ZodObject = z.ZodObject
+  Config extends z.ZodObject = z.ZodObject,
 >(definition: PublicStepDefinition<Input, Output, Config>) {
   return createPublicStepDefinition({
     icon: casesWorkflowIcon,

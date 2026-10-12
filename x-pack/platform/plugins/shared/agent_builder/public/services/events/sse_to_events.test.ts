@@ -33,7 +33,7 @@ const executionStarted = (executionId = EXECUTION_ID): ChatEvent =>
     execution_id: executionId,
     trigger_event_id: `${ROUND_ID}::user_message`,
     data: { trigger_type: 'user_message' },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionTerminated = (executionId = EXECUTION_ID): ChatEvent =>
   ({
@@ -49,7 +49,7 @@ const executionTerminated = (executionId = EXECUTION_ID): ChatEvent =>
       time_to_last_token: 20,
       outcome: { type: 'responded', response: { message: 'all done' } },
     },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionFailed = (): ChatEvent =>
   ({
@@ -60,7 +60,7 @@ const executionFailed = (): ChatEvent =>
     execution_id: EXECUTION_ID,
     trigger_event_id: `${ROUND_ID}::user_message`,
     data: { error: { code: 'internalError', message: 'boom' }, time_to_last_token: 20 },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionAborted = (): ChatEvent =>
   ({
@@ -71,16 +71,16 @@ const executionAborted = (): ChatEvent =>
     execution_id: EXECUTION_ID,
     trigger_event_id: `${ROUND_ID}::user_message`,
     data: { aborted_by: { source: 'api' }, time_to_last_token: 20 },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const chunk = (text: string): ChatEvent =>
-  ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } } as ChatEvent);
+  ({ type: ChatEventType.messageChunk, data: { message_id: 'm1', text_chunk: text } }) as ChatEvent;
 
 const toolCall = (toolCallId: string): ChatEvent =>
   ({
     type: ChatEventType.toolCall,
     data: { tool_call_id: toolCallId, tool_id: 'my_tool', params: { q: 1 } },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const fold = (...events: ChatEvent[]): LiveEventsState =>
   events.reduce(sseToEvents, emptyLiveEventsState());

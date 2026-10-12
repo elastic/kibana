@@ -33,15 +33,12 @@ import type {
   ProposalsStartDependencies,
 } from './types';
 
-export class ProposalsPlugin
-  implements
-    Plugin<
-      ProposalsPluginSetup,
-      ProposalsPluginStart,
-      ProposalsSetupDependencies,
-      ProposalsStartDependencies
-    >
-{
+export class ProposalsPlugin implements Plugin<
+  ProposalsPluginSetup,
+  ProposalsPluginStart,
+  ProposalsSetupDependencies,
+  ProposalsStartDependencies
+> {
   private readonly logger: Logger;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   // `workflowsManagement` is a required plugin, so this is set in setup() and

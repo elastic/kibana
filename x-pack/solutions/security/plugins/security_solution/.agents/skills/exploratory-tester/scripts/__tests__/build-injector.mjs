@@ -20,9 +20,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRIPTS_DIR = resolve(__dirname, '..');
 const OUTPUT_PATH = join(SCRIPTS_DIR, 'inject-detectors.js');
 
-const domScript     = readFileSync(join(SCRIPTS_DIR, 'check-dom-anomalies.js'), 'utf8').trim();
-const consoleScript = readFileSync(join(SCRIPTS_DIR, 'classify-console.js'),   'utf8').trim();
-const networkScript = readFileSync(join(SCRIPTS_DIR, 'dedup-network.js'),       'utf8').trim();
+const domScript = readFileSync(join(SCRIPTS_DIR, 'check-dom-anomalies.js'), 'utf8').trim();
+const consoleScript = readFileSync(join(SCRIPTS_DIR, 'classify-console.js'), 'utf8').trim();
+const networkScript = readFileSync(join(SCRIPTS_DIR, 'dedup-network.js'), 'utf8').trim();
 
 const injector = buildInjectorSource({ domScript, consoleScript, networkScript });
 
@@ -32,5 +32,9 @@ console.log(`  DOM source length:     ${domScript.length} bytes`);
 console.log(`  Console source length: ${consoleScript.length} bytes`);
 console.log(`  Network source length: ${networkScript.length} bytes`);
 console.log(`  Injector total:        ${injector.length} bytes`);
-console.log(`\nPaste cost per checklist step: ${domScript.length + consoleScript.length + networkScript.length} bytes (all three scripts pasted once per step).`);
-console.log(`Inject cost: ${injector.length} bytes per injection (once per flow, and again after every browser_navigate) + a small per-step call for each detector.`);
+console.log(
+  `\nPaste cost per checklist step: ${domScript.length + consoleScript.length + networkScript.length} bytes (all three scripts pasted once per step).`
+);
+console.log(
+  `Inject cost: ${injector.length} bytes per injection (once per flow, and again after every browser_navigate) + a small per-step call for each detector.`
+);

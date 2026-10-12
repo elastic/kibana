@@ -43,7 +43,7 @@ export const getSelectedIlmPhases = ({
   ilmStatsPhases?: IlmPolicyPhases;
 }): PhaseName[] => {
   const effectivePhases = isEditLifecycleFlyoutOpen
-    ? previewPhases ?? editFlyoutInitialPhases
+    ? (previewPhases ?? editFlyoutInitialPhases)
     : ilmStatsPhases;
 
   if (!effectivePhases) {
@@ -67,7 +67,7 @@ export const buildLifecycleSummaryPhases = ({
   ilmPhases: IlmPhaseUiMeta;
 }): LifecyclePhase[] => {
   const summaryPhases = isEditLifecycleFlyoutOpen
-    ? previewPhases ?? ilmStatsPhases
+    ? (previewPhases ?? ilmStatsPhases)
     : ilmStatsPhases;
   const phasesWithGrow = summaryPhases ? getILMRatios({ phases: summaryPhases }) : undefined;
 

@@ -12,11 +12,10 @@ import type { RunWorkflowExecutor, RunWorkflowPanelProps } from '@kbn/workflows-
 import { useFocusButtonTrap } from '../use_focus_button';
 import * as i18n from './translations';
 
-interface RunCaseWorkflowModalProps
-  extends Pick<
-    RunWorkflowPanelProps,
-    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled'
-  > {
+interface RunCaseWorkflowModalProps extends Pick<
+  RunWorkflowPanelProps,
+  'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute' | 'onExecutionSettled'
+> {
   /** Required: the panel's success toast is suppressed, so the executor must raise its own. */
   runWorkflow: RunWorkflowExecutor;
   onClose: () => void;

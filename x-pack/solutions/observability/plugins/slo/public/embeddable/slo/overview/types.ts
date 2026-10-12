@@ -36,8 +36,8 @@ export const apiHasSloGroupOverviewConfig = (
 ): api is HasSloGroupOverviewConfig => {
   return Boolean(
     api &&
-      typeof (api as HasSloGroupOverviewConfig).getSloGroupOverviewConfig === 'function' &&
-      typeof (api as HasSloGroupOverviewConfig).updateSloGroupOverviewConfig === 'function'
+    typeof (api as HasSloGroupOverviewConfig).getSloGroupOverviewConfig === 'function' &&
+    typeof (api as HasSloGroupOverviewConfig).updateSloGroupOverviewConfig === 'function'
   );
 };
 

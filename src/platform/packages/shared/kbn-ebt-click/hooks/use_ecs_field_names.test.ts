@@ -26,7 +26,7 @@ const makeFieldsMetadata = (
         })
       ),
     }),
-  } as unknown as FieldsMetadataPublicStart);
+  }) as unknown as FieldsMetadataPublicStart;
 
 describe('useEcsFieldNames', () => {
   it('returns null when fieldsMetadata is not provided', () => {

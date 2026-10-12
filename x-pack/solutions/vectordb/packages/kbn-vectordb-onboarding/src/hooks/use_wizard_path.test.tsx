@@ -13,8 +13,9 @@ import { GETTING_STARTED_PATH } from '../routes';
 
 const wrapperFor =
   (initialEntries: MemoryRouterProps['initialEntries']) =>
-  ({ children }: { children: React.ReactNode }) =>
-    <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>;
+  ({ children }: { children: React.ReactNode }) => (
+    <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+  );
 
 describe('useWizardPath', () => {
   it('returns the path from a valid "path" query parameter', () => {

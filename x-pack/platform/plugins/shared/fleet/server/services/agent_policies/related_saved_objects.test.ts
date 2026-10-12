@@ -29,7 +29,7 @@ const mockedBulkGetFleetProxies = bulkGetFleetProxies as jest.Mock;
 const soClientMock = createSavedObjectClientMock();
 
 const makeOutput = (id: string, type: string, extra: Partial<Output> = {}): Output =>
-  ({ id, type, name: id, is_default: false, is_default_monitoring: false, ...extra } as Output);
+  ({ id, type, name: id, is_default: false, is_default_monitoring: false, ...extra }) as Output;
 
 const esOutput = makeOutput('default-es', 'elasticsearch');
 const otlpOutput = makeOutput('otlp-out', 'otlp');

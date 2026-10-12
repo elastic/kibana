@@ -113,7 +113,7 @@ function visitRecursive(node: KueryNode, accumulator: Set<string>): void {
         const [leftRangeLiteral] = functionNode.arguments as [
           KqlLiteralNode,
           string,
-          KqlLiteralNode
+          KqlLiteralNode,
         ];
         if (!leftRangeLiteral.value) {
           break;

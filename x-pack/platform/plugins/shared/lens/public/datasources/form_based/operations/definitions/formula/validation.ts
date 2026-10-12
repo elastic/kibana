@@ -895,8 +895,8 @@ function runFullASTValidation(
         // In general this should be handled down the Esaggs route rather than here
         const isFirstArgumentNotValid = Boolean(
           !isArgumentValidType(firstArg, 'function') ||
-            (isMathNode(firstArg) &&
-              validateMathNodes(firstArg, missingVariablesSet, operations).length)
+          (isMathNode(firstArg) &&
+            validateMathNodes(firstArg, missingVariablesSet, operations).length)
         );
         // First field has a special handling
         if (isFirstArgumentNotValid) {

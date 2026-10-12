@@ -29,7 +29,7 @@ const makeRepository = (): jest.Mocked<RunQuotaSavedObjectsRepository> =>
     create: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
-  } as unknown as jest.Mocked<RunQuotaSavedObjectsRepository>);
+  }) as unknown as jest.Mocked<RunQuotaSavedObjectsRepository>;
 
 describe('run quota settings repository', () => {
   it('returns enabled enforcement and the default limits when settings do not exist', async () => {

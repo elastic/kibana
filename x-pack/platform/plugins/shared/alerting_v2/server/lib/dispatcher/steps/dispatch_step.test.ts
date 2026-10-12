@@ -32,10 +32,10 @@ const getExecutionIds = (
   result: Awaited<ReturnType<DispatchStep['execute']>>,
   groupId: string
 ): readonly string[] =>
-  result.type === 'continue' ? result.data?.outcome?.executionIdsFor(groupId) ?? [] : [];
+  result.type === 'continue' ? (result.data?.outcome?.executionIdsFor(groupId) ?? []) : [];
 
 const getScheduledGroupCount = (result: Awaited<ReturnType<DispatchStep['execute']>>): number =>
-  result.type === 'continue' ? result.data?.outcome?.scheduledGroupCount ?? 0 : 0;
+  result.type === 'continue' ? (result.data?.outcome?.scheduledGroupCount ?? 0) : 0;
 
 const createMockWorkflowsManagement = (): jest.Mocked<WorkflowsServerPluginSetup['management']> => {
   const bulkScheduleWorkflow = jest.fn().mockResolvedValue([]);

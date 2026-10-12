@@ -44,7 +44,7 @@ export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk = ((
     serializeError: (error) => {
       return error instanceof SavedObjectNotFound
         ? error
-        : options?.serializeError?.(error) ?? miniSerializeError(error);
+        : (options?.serializeError?.(error) ?? miniSerializeError(error));
     },
   });
 }) as CreateInternalStateAsyncThunk;
@@ -166,7 +166,7 @@ export const extractEsqlVariables = (
       acc.push({
         key: panel.variable_name,
         type: panel.variable_type as ESQLVariableType,
-        value: isSingleSelect ? selectedValues[0] ?? '' : selectedValues,
+        value: isSingleSelect ? (selectedValues[0] ?? '') : selectedValues,
       });
     }
     return acc;

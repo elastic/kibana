@@ -24,7 +24,7 @@ const storageMock = <T>() =>
     get: jest.fn(),
     index: jest.fn(),
     delete: jest.fn(),
-  } as unknown as jest.Mocked<T>);
+  }) as unknown as jest.Mocked<T>;
 
 const searchResponse = (hits: Array<{ _id: string; _source: object }>, total = hits.length) => ({
   hits: { total: { value: total, relation: 'eq' }, hits },

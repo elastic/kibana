@@ -74,8 +74,8 @@ export function knowledgeBaseAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
   const type = knowledgeBaseEventTypes[action];
 
   return {
@@ -84,7 +84,7 @@ export function knowledgeBaseAuditEvent({
       action,
       category: [AUDIT_CATEGORY.DATABASE],
       type: type ? [type] : undefined,
-      outcome: error ? AUDIT_OUTCOME.FAILURE : outcome ?? AUDIT_OUTCOME.SUCCESS,
+      outcome: error ? AUDIT_OUTCOME.FAILURE : (outcome ?? AUDIT_OUTCOME.SUCCESS),
     },
     error: error && {
       code: error.name,

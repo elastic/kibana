@@ -143,7 +143,7 @@ export const bulkActionConversationsRoute = (
         const operationsCount =
           (body?.update ? body.update?.length : 0) +
           (body?.create ? body.create?.length : 0) +
-          (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
+          (body?.delete ? (body.delete?.ids?.length ?? 0) : 0);
         if (operationsCount > CONVERSATIONS_TABLE_MAX_PAGE_SIZE) {
           return assistantResponse.error({
             body: `More than ${CONVERSATIONS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,

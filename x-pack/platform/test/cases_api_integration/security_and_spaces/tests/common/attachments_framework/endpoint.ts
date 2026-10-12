@@ -45,7 +45,7 @@ const unifiedEndpointPayload = (overrides: Record<string, unknown> = {}) =>
     data: unifiedData,
     metadata: unifiedMetadata,
     ...overrides,
-  } as unknown as AttachmentRequest);
+  }) as unknown as AttachmentRequest;
 
 const legacyExternalReferencePayload = (overrides: Record<string, unknown> = {}) =>
   ({
@@ -59,7 +59,7 @@ const legacyExternalReferencePayload = (overrides: Record<string, unknown> = {})
     },
     owner: OWNER,
     ...overrides,
-  } as unknown as AttachmentRequest);
+  }) as unknown as AttachmentRequest;
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

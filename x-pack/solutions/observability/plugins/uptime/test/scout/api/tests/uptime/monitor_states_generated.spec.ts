@@ -218,9 +218,8 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
     'should return a monitor with mix state if check status filter is down',
     async ({ apiClient, esClient, esArchiver }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
-      const { upMonitorId, dateRangeStart, dateRangeEnd } = await setupStatusFilterMonitors(
-        esClient
-      );
+      const { upMonitorId, dateRangeStart, dateRangeEnd } =
+        await setupStatusFilterMonitors(esClient);
 
       const params = new URLSearchParams({
         dateRangeStart,
@@ -245,9 +244,8 @@ apiTest.describe('monitor state scoping', { tag: '@local-stateful-classic' }, ()
     'should not return a monitor with mix state if check status filter is up',
     async ({ apiClient, esClient, esArchiver }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.BLANK);
-      const { upMonitorId, dateRangeStart, dateRangeEnd } = await setupStatusFilterMonitors(
-        esClient
-      );
+      const { upMonitorId, dateRangeStart, dateRangeEnd } =
+        await setupStatusFilterMonitors(esClient);
 
       const deadline = Date.now() + 10000;
       let lastError: Error | undefined;

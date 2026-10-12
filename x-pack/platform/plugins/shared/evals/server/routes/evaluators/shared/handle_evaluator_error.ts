@@ -54,7 +54,7 @@ export const handleEvaluatorError = ({
     return response.badRequest({ body: { message: error.message } });
   }
 
-  const detail = error instanceof Error ? error.stack ?? error.message : String(error);
+  const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
   logger.error(`${fallbackMessage}: ${detail}`);
   return response.customError({ statusCode: 500, body: { message: fallbackMessage } });
 };

@@ -32,7 +32,7 @@ export class PublicStepRegistry {
   public register<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
-    Config extends z.ZodObject = z.ZodObject
+    Config extends z.ZodObject = z.ZodObject,
   >(definitionOrLoader: PublicStepDefinitionOrLoader<Input, Output, Config>): void {
     if (typeof definitionOrLoader === 'function') {
       this.pending.push(async () => {
@@ -59,7 +59,7 @@ export class PublicStepRegistry {
   private addToRegistry<
     Input extends z.ZodType = z.ZodType,
     Output extends z.ZodType = z.ZodType,
-    Config extends z.ZodObject = z.ZodObject
+    Config extends z.ZodObject = z.ZodObject,
   >(definition: PublicStepDefinition<Input, Output, Config>): void {
     if (this.registry.has(definition.id)) {
       throw new Error(

@@ -115,7 +115,7 @@ describe('CostSavingsKeyInsight', () => {
         },
         ...overrides,
       },
-    } as Partial<StartServices>);
+    }) as Partial<StartServices>;
   const chatCompleteResult = 'Test result';
 
   const mockChatComplete = jest.fn().mockResolvedValue({

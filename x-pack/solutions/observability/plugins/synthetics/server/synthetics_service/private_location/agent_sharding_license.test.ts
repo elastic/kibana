@@ -23,7 +23,7 @@ const buildServer = (
   ({
     logger: loggerMock.create(),
     pluginsStart: { licensing: { getLicense }, taskManager: { get: taskManagerGet } },
-  } as unknown as SyntheticsServerSetup);
+  }) as unknown as SyntheticsServerSetup;
 
 const licenseOf = (type: LicenseType) =>
   jest.fn().mockResolvedValue(licenseMock.createLicense({ license: { type } }));

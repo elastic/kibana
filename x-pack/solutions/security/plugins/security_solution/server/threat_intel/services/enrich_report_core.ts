@@ -131,7 +131,8 @@ export interface ReportBehavior extends z.infer<typeof behaviorSchema> {
 }
 
 export interface EnrichReportCoreResult
-  extends Omit<ReportCoreModelOutput, 'approved_ioc_candidate_ids' | 'severity' | 'behaviors'>,
+  extends
+    Omit<ReportCoreModelOutput, 'approved_ioc_candidate_ids' | 'severity' | 'behaviors'>,
     AdjudicateIocsResult {
   severity: {
     level: SeverityLevel;

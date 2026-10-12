@@ -51,7 +51,7 @@ const getTypes = ({
   const modelVersionMap =
     typeof definition.definition.modelVersions === 'function'
       ? definition.definition.modelVersions()
-      : definition.definition.modelVersions ?? {};
+      : (definition.definition.modelVersions ?? {});
 
   const typeBefore: SavedObjectsType = {
     ...definition.definition,

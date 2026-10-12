@@ -13,7 +13,11 @@ import { KbnError } from '../common';
 
 export class KbnServerError extends KbnError {
   public errBody?: Record<string, any>;
-  constructor(message: string, public readonly statusCode: number, errBody?: Record<string, any>) {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    errBody?: Record<string, any>
+  ) {
     super(message);
     this.errBody = errBody;
   }

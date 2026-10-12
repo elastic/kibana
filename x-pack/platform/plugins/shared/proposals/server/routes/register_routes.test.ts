@@ -91,7 +91,7 @@ describe('proposals routes', () => {
     registerRoutes({
       router,
       logger: loggingSystemMock.createLogger(),
-      getProposalsService: () => ({} as ProposalsService),
+      getProposalsService: () => ({}) as ProposalsService,
       getSpaceId: () => 'default',
       resolveUser: async () => ANALYST,
     } as unknown as RouteDependencies);

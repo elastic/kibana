@@ -24,7 +24,7 @@ const makeMeta = (overrides: Partial<OverviewStatusMetaData> = {}): OverviewStat
     overallStatus: 'up',
     locations: [{ id: 'us_east', label: 'US East', status: 'up' }],
     ...overrides,
-  } as OverviewStatusMetaData);
+  }) as OverviewStatusMetaData;
 
 describe('useMetricSubtitle', () => {
   const Wrapper = ({ children }: React.PropsWithChildren) => (

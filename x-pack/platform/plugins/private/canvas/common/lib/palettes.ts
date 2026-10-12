@@ -37,7 +37,7 @@ function createPalette<
   RawPalette extends {
     id: RawPaletteID;
   },
-  RawPaletteID extends string
+  RawPaletteID extends string,
 >(palette: RawPalette) {
   return palette;
 }

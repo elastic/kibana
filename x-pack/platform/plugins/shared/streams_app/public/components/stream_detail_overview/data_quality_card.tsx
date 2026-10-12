@@ -81,7 +81,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         uiSettings,
       });
       const colIdx = response.columns.findIndex((c) => c.name === 'doc_count');
-      return colIdx !== -1 ? (response.values[0]?.[colIdx] as number) ?? 0 : 0;
+      return colIdx !== -1 ? ((response.values[0]?.[colIdx] as number) ?? 0) : 0;
     },
     [dataSourceForTimeRange, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
@@ -102,7 +102,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         uiSettings,
       });
       const colIdx = response.columns.findIndex((c) => c.name === 'degraded_doc_count');
-      return colIdx !== -1 ? (response.values[0]?.[colIdx] as number) ?? 0 : 0;
+      return colIdx !== -1 ? ((response.values[0]?.[colIdx] as number) ?? 0) : 0;
     },
     [dataSourceForTimeRange, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
@@ -140,7 +140,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         uiSettings,
       });
       const countCol = response.columns.findIndex((c) => c.name === 'ignored_fields_count');
-      return countCol !== -1 ? (response.values[0]?.[countCol] as number) ?? 0 : 0;
+      return countCol !== -1 ? ((response.values[0]?.[countCol] as number) ?? 0) : 0;
     },
     [dataSourceForTimeRange, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }

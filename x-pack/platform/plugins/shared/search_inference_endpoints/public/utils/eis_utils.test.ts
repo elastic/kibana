@@ -28,7 +28,7 @@ const makeEndpoint = (modelId: string, regions: CspRegion[]): EisInferenceEndpoi
     service: 'elastic',
     service_settings: { model_id: modelId },
     metadata: { regions },
-  } as unknown as EisInferenceEndpoint);
+  }) as unknown as EisInferenceEndpoint;
 
 const makeMetadata = (
   overrides: NonNullable<EisInferenceEndpointMetadata['heuristics']>
@@ -360,7 +360,7 @@ describe('getRegionOptions', () => {
       service: 'elastic',
       service_settings: { model_id: modelId },
       metadata: { regions: geos.map((geo) => ({ geo })) },
-    } as unknown as EisInferenceEndpoint);
+    }) as unknown as EisInferenceEndpoint;
 
   it('returns an empty array when there are no endpoints', () => {
     expect(getRegionOptions([])).toEqual([]);

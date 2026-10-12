@@ -64,7 +64,7 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
       'kibana.alert.attack_discovery.mitre_attack_tactics': ['Initial Access', 'Execution'],
       ...overrides,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const KEY = 'visualizations';
 

@@ -130,7 +130,7 @@ export const runInvestigation = async (
       output.conversation_round_count = conversation.rounds.length;
       output.traceId = conversation.rounds
         .flatMap(({ trace_id: traceId }) =>
-          typeof traceId === 'string' ? [traceId] : traceId ?? []
+          typeof traceId === 'string' ? [traceId] : (traceId ?? [])
         )
         .filter(Boolean)
         .at(-1);

@@ -61,8 +61,10 @@ export interface UseFindMatchesState {
   renderCellsShadowPortal: (() => ReactNode) | null;
 }
 
-export interface UseFindMatchesReturn
-  extends Omit<UseFindMatchesState, 'matchesList' | 'columns' | 'term'> {
+export interface UseFindMatchesReturn extends Omit<
+  UseFindMatchesState,
+  'matchesList' | 'columns' | 'term'
+> {
   goToPrevMatch: () => void;
   goToNextMatch: () => void;
   resetState: () => void;

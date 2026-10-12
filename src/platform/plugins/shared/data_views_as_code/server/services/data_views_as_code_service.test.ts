@@ -50,7 +50,7 @@ const createMockDataViewLazy = ({
     toMinimalSpec: jest.fn().mockResolvedValue(minimalSpec),
     getFieldAttrs: jest.fn().mockReturnValue(new Map(Object.entries(fieldAttrs))),
     getAsSavedObjectBody: jest.fn().mockReturnValue(savedObjectBody ?? spec),
-  } as unknown as DataViewLazy);
+  }) as unknown as DataViewLazy;
 
 const createService = () => {
   dataViewsService.clearInstanceCache = jest.fn();

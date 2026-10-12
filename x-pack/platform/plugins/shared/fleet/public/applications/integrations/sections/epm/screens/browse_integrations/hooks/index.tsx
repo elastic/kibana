@@ -92,7 +92,7 @@ export function useBrowseIntegrationHook({
   const urlFilters = useUrlFilters();
 
   const localSearch = useLocalSearch(allCards, !!isLoading);
-  const searchTerm = urlFilters.q ?? urlFilters.q !== '' ? urlFilters.q : undefined;
+  const searchTerm = (urlFilters.q ?? urlFilters.q !== '') ? urlFilters.q : undefined;
 
   // IDs of top-level allCards entries that match the current search term.
   // Computed once and shared by nonCategoryFilteredCards and filteredCards so both
@@ -100,9 +100,9 @@ export function useBrowseIntegrationHook({
   const searchResults = useMemo(
     () =>
       searchTerm
-        ? (localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
+        ? ((localSearch?.search(searchTerm) as IntegrationCardItem[])?.map(
             (match) => match[searchIdField]
-          ) ?? []
+          ) ?? [])
         : [],
     [localSearch, searchTerm]
   );

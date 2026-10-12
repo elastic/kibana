@@ -198,7 +198,7 @@ export const AwsEks: ConnectorSpec = {
         const cluster =
           input.includeClusterDetails === false
             ? undefined
-            : (await request<{ cluster?: EksCluster }>(() => ctx.client.get(url))).cluster ?? {};
+            : ((await request<{ cluster?: EksCluster }>(() => ctx.client.get(url))).cluster ?? {});
         if (cluster && !cluster.endpoint) {
           throw new Error(
             `Cluster ${input.clusterName} has no Kubernetes API server endpoint (for example a cluster registered through the EKS Connector), so there is nothing to mint a token for.`

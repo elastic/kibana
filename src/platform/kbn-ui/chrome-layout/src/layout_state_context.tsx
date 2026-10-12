@@ -48,20 +48,20 @@ export const LayoutStateProvider = ({ children, ...props }: LayoutStateProps) =>
 
   const layoutState: LayoutState = {
     hasBanner,
-    bannerHeight: hasBanner ? layoutConfig.bannerHeight ?? 0 : 0,
+    bannerHeight: hasBanner ? (layoutConfig.bannerHeight ?? 0) : 0,
     hasFooter,
-    footerHeight: hasFooter ? layoutConfig.footerHeight ?? 0 : 0,
+    footerHeight: hasFooter ? (layoutConfig.footerHeight ?? 0) : 0,
     hasHeader,
-    headerHeight: hasHeader ? layoutConfig.headerHeight ?? 0 : 0,
+    headerHeight: hasHeader ? (layoutConfig.headerHeight ?? 0) : 0,
     hasNavigation,
-    navigationWidth: hasNavigation ? layoutConfig.navigationWidth ?? 0 : 0,
+    navigationWidth: hasNavigation ? (layoutConfig.navigationWidth ?? 0) : 0,
     hasSidebar,
-    sidebarWidth: hasSidebar ? layoutConfig.sidebarWidth ?? 0 : 0,
+    sidebarWidth: hasSidebar ? (layoutConfig.sidebarWidth ?? 0) : 0,
     hasApplicationTopBar,
-    applicationTopBarHeight: hasApplicationTopBar ? layoutConfig.applicationTopBarHeight ?? 0 : 0,
+    applicationTopBarHeight: hasApplicationTopBar ? (layoutConfig.applicationTopBarHeight ?? 0) : 0,
     hasApplicationBottomBar,
     applicationBottomBarHeight: hasApplicationBottomBar
-      ? layoutConfig.applicationBottomBarHeight ?? 0
+      ? (layoutConfig.applicationBottomBarHeight ?? 0)
       : 0,
     applicationMarginTop: layoutConfig.applicationMarginTop ?? 0,
     applicationMarginRight: layoutConfig.applicationMarginRight ?? 0,

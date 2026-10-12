@@ -12,7 +12,10 @@ import type { LockId } from './lock_manager_client';
 import { withLock, getLock } from './lock_manager_client';
 
 export class LockManagerService {
-  constructor(private readonly coreSetup: CoreSetup<any>, private readonly logger: Logger) {}
+  constructor(
+    private readonly coreSetup: CoreSetup<any>,
+    private readonly logger: Logger
+  ) {}
 
   /**
    * Acquires a lock with the given ID and executes the callback function.

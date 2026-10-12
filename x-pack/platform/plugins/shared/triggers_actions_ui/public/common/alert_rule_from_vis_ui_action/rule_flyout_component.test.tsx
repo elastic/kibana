@@ -26,7 +26,7 @@ jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
 }));
 
 function createRegistryMock<
-  T extends PublicMethodsOf<TypeRegistry<{ id: string }>>
+  T extends PublicMethodsOf<TypeRegistry<{ id: string }>>,
 >(): jest.Mocked<T> {
   return {
     has: jest.fn(),

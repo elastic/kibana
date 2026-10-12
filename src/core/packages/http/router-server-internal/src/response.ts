@@ -30,9 +30,9 @@ import mime from 'mime';
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
  * @internal
  */
-export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
-  implements IKibanaResponse<T>
-{
+export class KibanaResponse<
+  T extends HttpResponsePayload | ResponseError = any,
+> implements IKibanaResponse<T> {
   constructor(
     public readonly status: number,
     public readonly payload?: T,
@@ -108,8 +108,8 @@ export const fileResponseFactory = {
       typeof fileContentSize === 'number'
         ? fileContentSize
         : Buffer.isBuffer(responseBody)
-        ? responseBody.length
-        : '';
+          ? responseBody.length
+          : '';
 
     return new KibanaResponse(200, responseBody, {
       bypassErrorFormat,

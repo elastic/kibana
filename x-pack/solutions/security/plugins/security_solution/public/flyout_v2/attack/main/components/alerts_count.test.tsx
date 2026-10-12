@@ -29,7 +29,7 @@ const buildHit = (alertIds: unknown): DataTableRecord =>
     flattened: {
       'kibana.alert.attack_discovery.alert_ids': alertIds,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);

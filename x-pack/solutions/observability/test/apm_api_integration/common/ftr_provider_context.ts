@@ -9,12 +9,10 @@ import type { GenericFtrProviderContext } from '@kbn/test';
 import type { FtrProviderContext as InheritedFtrProviderContext } from '@kbn/test-suites-xpack-platform/api_integration/ftr_provider_context';
 import type { ApmServices } from './config';
 
-export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
-  infer TServices,
-  {}
->
-  ? TServices
-  : {};
+export type InheritedServices =
+  InheritedFtrProviderContext extends GenericFtrProviderContext<infer TServices, {}>
+    ? TServices
+    : {};
 
 export type { InheritedFtrProviderContext };
 export type FtrProviderContext = GenericFtrProviderContext<ApmServices, {}>;

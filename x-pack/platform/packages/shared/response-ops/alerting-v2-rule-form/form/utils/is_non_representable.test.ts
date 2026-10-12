@@ -26,7 +26,7 @@ const createMockRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     recovery: { strategy: recoveryStrategy.no_breach },
     no_data: { strategy: noDataStrategy.ignore },
     ...overrides,
-  } as unknown as RuleResponse);
+  }) as unknown as RuleResponse;
 
 describe('isNonRepresentableRule', () => {
   it('returns false for a standard alert rule', () => {

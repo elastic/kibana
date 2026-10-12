@@ -118,7 +118,7 @@ function getSideNavItemLinkProps(
   if (!deepLink || !deepLink.url) return undefined;
   const isSelected = Boolean(
     deepLink.url === currentLocation ||
-      (shouldShowActiveForSubroutes && currentLocation.startsWith(deepLink.url))
+    (shouldShowActiveForSubroutes && currentLocation.startsWith(deepLink.url))
   );
 
   return {

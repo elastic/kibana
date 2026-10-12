@@ -153,7 +153,7 @@ export class StreamsUnitService {
     const metadataToWrite =
       uiMetadata !== undefined
         ? uiMetadata
-        : (await this.getUiMetadataSavedObject(unitId))?.attributes.metadata ?? {};
+        : ((await this.getUiMetadataSavedObject(unitId))?.attributes.metadata ?? {});
 
     await this.writeUiMetadata({
       configurationSavedObjectId: unitId,

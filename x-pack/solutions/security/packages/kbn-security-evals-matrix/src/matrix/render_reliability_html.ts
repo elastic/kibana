@@ -169,8 +169,8 @@ const rowHtml = (
     <td class="metric">${reliabilityHtml(agreement, tied)}</td>
     <td class="metric">${judgeHtml(judge)}</td>
     <td class="metric">${esc(cellValue(row.judgedQuality ?? { kind: 'missing' }))}<small>${esc(
-    tier
-  )} · ${row.coverage.covered}/${row.coverage.total} columns</small></td>
+      tier
+    )} · ${row.coverage.covered}/${row.coverage.total} columns</small></td>
   </tr>`;
 };
 

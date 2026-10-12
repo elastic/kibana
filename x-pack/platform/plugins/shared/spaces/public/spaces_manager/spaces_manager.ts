@@ -60,7 +60,10 @@ export class SpacesManager {
 
   private readonly _onActiveSpaceChange$: Observable<Space>;
 
-  constructor(private readonly http: HttpSetup, private readonly logger: Logger) {
+  constructor(
+    private readonly http: HttpSetup,
+    private readonly logger: Logger
+  ) {
     this.serverBasePath = http.basePath.serverBasePath;
 
     this._onActiveSpaceChange$ = this.activeSpace$

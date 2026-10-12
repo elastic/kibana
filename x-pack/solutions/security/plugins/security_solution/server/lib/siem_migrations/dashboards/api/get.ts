@@ -49,9 +49,8 @@ export const registerSiemDashboardMigrationsGetRoute = (
               ctx.securitySolution.siemMigrations.getDashboardsClient();
             await siemMigrationAuditLogger.logGetMigration({ migrationId });
 
-            const storedMigration = await dashboardMigrationsClient.data.migrations.get(
-              migrationId
-            );
+            const storedMigration =
+              await dashboardMigrationsClient.data.migrations.get(migrationId);
 
             if (!storedMigration) {
               return res.notFound({

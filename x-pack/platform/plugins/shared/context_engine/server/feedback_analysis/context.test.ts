@@ -40,7 +40,7 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
     sources: [{ type: 'esql', value: 'FROM logs-orders' }],
     automations: [],
     ...overrides,
-  } as unknown as AiIndexHttpItem);
+  }) as unknown as AiIndexHttpItem;
 
 describe('buildFeedbackContext', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

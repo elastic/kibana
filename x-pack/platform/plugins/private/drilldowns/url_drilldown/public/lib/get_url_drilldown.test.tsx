@@ -24,7 +24,7 @@ const createDrilldown = () =>
     getSyntaxHelpDocsLink: () => 'http://localhost:5601/docs',
     getVariablesHelpDocsLink: () => 'http://localhost:5601/docs',
     settings: {} as any,
-    theme: () => ({} as any),
+    theme: () => ({}) as any,
   });
 
 const mockContext = {

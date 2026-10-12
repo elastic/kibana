@@ -70,12 +70,14 @@ function DecisionTreeNode({ data: { label, nodeType } }: NodeProps<DecisionTreeF
     text-align: center;
     padding: ${euiTheme.size.s} ${isDecision ? `${HEXAGON_INSET + 4}px` : euiTheme.size.m};
     background: ${background};
-    border: ${isDecision
-      ? 'none'
-      : `${nodeType === 'end' ? 3 : 1}px ${nodeType === 'end' ? 'double' : 'solid'} ${border}`};
-    border-radius: ${nodeType === 'symptom' || nodeType === 'end'
-      ? '999px'
-      : euiTheme.border.radius.small};
+    border: ${
+      isDecision
+        ? 'none'
+        : `${nodeType === 'end' ? 3 : 1}px ${nodeType === 'end' ? 'double' : 'solid'} ${border}`
+    };
+    border-radius: ${
+      nodeType === 'symptom' || nodeType === 'end' ? '999px' : euiTheme.border.radius.small
+    };
     ${isDecision ? `clip-path: ${hexagonClipPath};` : ''}
   `;
 

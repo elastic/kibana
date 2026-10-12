@@ -17,8 +17,7 @@ import {
 import { css } from '@emotion/react';
 
 export interface CallToActionCardProps
-  extends Pick<EuiCardProps, 'title' | 'description' | 'children'>,
-    Pick<EuiPanelProps, 'color'> {
+  extends Pick<EuiCardProps, 'title' | 'description' | 'children'>, Pick<EuiPanelProps, 'color'> {
   iconType: IconType;
 }
 

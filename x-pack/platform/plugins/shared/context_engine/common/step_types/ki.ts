@@ -83,7 +83,7 @@ const omitNullAttributes = (
  * null `expires_at` on update still clears the expiry.
  */
 export const omitNullKiAttributes = <
-  T extends { [field: string]: unknown; attributes?: Record<string, KiAttributeValue | null> }
+  T extends { [field: string]: unknown; attributes?: Record<string, KiAttributeValue | null> },
 >(
   ki: T
 ): T => {

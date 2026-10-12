@@ -92,8 +92,8 @@ export const FieldSummary = (props: FieldSummaryProps) => {
 
   const showHeaderActions = Boolean(
     (field.status !== 'inherited' && !isEditing) ||
-      (field.status === 'inherited' && !isRoot(field.parent)) ||
-      (field.alias_for && onGoToField)
+    (field.status === 'inherited' && !isRoot(field.parent)) ||
+    (field.alias_for && onGoToField)
   );
 
   const headerActions = showHeaderActions ? (

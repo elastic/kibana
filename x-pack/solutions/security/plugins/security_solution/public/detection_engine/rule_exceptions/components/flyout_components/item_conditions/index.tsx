@@ -187,8 +187,8 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
       return currentOs === 'linux'
         ? sharedI18n.OPERATING_SYSTEM_LINUX
         : currentOs === 'macos'
-        ? sharedI18n.OPERATING_SYSTEM_MAC
-        : sharedI18n.OPERATING_SYSTEM_WINDOWS;
+          ? sharedI18n.OPERATING_SYSTEM_MAC
+          : sharedI18n.OPERATING_SYSTEM_WINDOWS;
     };
     return osTypes
       .reduce((osString, currentOs) => {

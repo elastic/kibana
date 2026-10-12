@@ -46,7 +46,7 @@ function formattedMarkerKey(marker: monaco.editor.IMarkerData): string {
     marker.endColumn,
     marker.severity,
     marker.source ?? '',
-    typeof marker.code === 'string' ? marker.code : marker.code?.value ?? '',
+    typeof marker.code === 'string' ? marker.code : (marker.code?.value ?? ''),
     marker.message ?? '',
   ].join('|');
 }

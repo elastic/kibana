@@ -23,21 +23,21 @@ const createToastsMock = (): ToastsStart =>
   ({
     addSuccess: jest.fn(),
     addDanger: jest.fn(),
-  } as unknown as ToastsStart);
+  }) as unknown as ToastsStart;
 
 const createClientMock = (): DataSourcesClient =>
   ({
     add: jest.fn().mockResolvedValue(undefined),
     getById: jest.fn().mockResolvedValue(undefined),
     delete: jest.fn().mockResolvedValue(undefined),
-  } as unknown as DataSourcesClient);
+  }) as unknown as DataSourcesClient;
 
 const createDatasetsClientMock = (): DatasetsClient =>
   ({
     add: jest.fn().mockResolvedValue(undefined),
     get: jest.fn().mockResolvedValue([]),
     delete: jest.fn().mockResolvedValue(undefined),
-  } as unknown as DatasetsClient);
+  }) as unknown as DatasetsClient;
 
 const createDocLinksMock = (): DocLinksStart =>
   ({
@@ -55,7 +55,7 @@ const createDocLinksMock = (): DocLinksStart =>
         security: 'https://example.com/data-federation-security',
       },
     },
-  } as unknown as DocLinksStart);
+  }) as unknown as DocLinksStart;
 
 const federatedS3DataSource: S3DataSourceWithSecrets = {
   type: 's3',

@@ -356,7 +356,7 @@ const AlertsTableContent = typedForwardRef(
       () =>
         [bulkActionsState, dispatchBulkAction] as [
           typeof bulkActionsState,
-          typeof dispatchBulkAction
+          typeof dispatchBulkAction,
         ],
       [bulkActionsState, dispatchBulkAction]
     );
@@ -557,7 +557,7 @@ const AlertsTableContent = typedForwardRef(
           onExpandedAlertIndexChange: updateExpandedAlertIndex,
           renderExpandedAlertView,
           isMutedAlertsEnabled,
-        } as RenderContext<AC>),
+        }) as RenderContext<AC>,
       [
         additionalContext,
         columnsWithFieldsData,

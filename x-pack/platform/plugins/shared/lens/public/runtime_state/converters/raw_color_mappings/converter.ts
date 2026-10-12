@@ -140,7 +140,7 @@ function isValidColorMappingAssignment<
     | DeprecatedColorMappingConfig['assignments'][number]
     | DeprecatedColorMappingConfig['specialAssignments'][number]
     | ColorMapping.Config['assignments'][number]
-    | ColorMapping.Config['specialAssignments'][number]
+    | ColorMapping.Config['specialAssignments'][number],
 >(
   assignment: T
 ): assignment is Exclude<
@@ -152,14 +152,14 @@ function isValidColorMappingAssignment<
 }
 
 export function isDeprecatedColorMapping<
-  T extends DeprecatedColorMappingConfig | ColorMapping.Config
+  T extends DeprecatedColorMappingConfig | ColorMapping.Config,
 >(colorMapping?: T): colorMapping is Exclude<T, ColorMapping.Config> {
   if (!colorMapping) return false;
   return Boolean(
     colorMapping.assignments &&
-      (colorMapping.assignments.some((assignment) => !isValidColorMappingAssignment(assignment)) ||
-        colorMapping.specialAssignments.some(
-          (specialAssignment) => !isValidColorMappingAssignment(specialAssignment)
-        ))
+    (colorMapping.assignments.some((assignment) => !isValidColorMappingAssignment(assignment)) ||
+      colorMapping.specialAssignments.some(
+        (specialAssignment) => !isValidColorMappingAssignment(specialAssignment)
+      ))
   );
 }

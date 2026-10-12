@@ -74,8 +74,8 @@ export const formSerializer = (formData: GenericObject) => {
   const dynamic = dynamicMapping?.enabled
     ? true
     : dynamicMapping?.throwErrorsForUnmappedFields
-    ? 'strict'
-    : dynamicMapping?.enabled;
+      ? 'strict'
+      : dynamicMapping?.enabled;
 
   const serialized = {
     dynamic,
@@ -119,10 +119,10 @@ export const formDeserializer = (formData: GenericObject) => {
         mode === 'stored'
           ? STORED_SOURCE_OPTION
           : mode === 'synthetic'
-          ? SYNTHETIC_SOURCE_OPTION
-          : enabled === false
-          ? DISABLED_SOURCE_OPTION
-          : undefined,
+            ? SYNTHETIC_SOURCE_OPTION
+            : enabled === false
+              ? DISABLED_SOURCE_OPTION
+              : undefined,
       includes,
       excludes,
     },

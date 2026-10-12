@@ -1077,7 +1077,7 @@ export const buildWorkflow = ({
     passedAlertCount,
     validatedDiscoveryCount: Array.isArray(pipeline?.validated_discoveries)
       ? pipeline.validated_discoveries.length
-      : adToolResult?.discoveryCount ?? null,
+      : (adToolResult?.discoveryCount ?? null),
     retrievalEvidence: extractRetrievalEvidence({
       pipeline,
       agentEsqlRowCounts,

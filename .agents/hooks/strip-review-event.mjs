@@ -70,9 +70,23 @@ const API_FIELD_FLAGS = new Set(['-f', '-F', '--field', '--raw-field']);
 
 /** `gh api` flags that consume the following argv token as their value. */
 const API_VALUE_FLAGS = new Set([
-  '-f', '-F', '--field', '--raw-field', '-H', '--header', '-X', '--method',
-  '--hostname', '-q', '--jq', '-t', '--template', '--input', '--cache',
-  '-p', '--preview',
+  '-f',
+  '-F',
+  '--field',
+  '--raw-field',
+  '-H',
+  '--header',
+  '-X',
+  '--method',
+  '--hostname',
+  '-q',
+  '--jq',
+  '-t',
+  '--template',
+  '--input',
+  '--cache',
+  '-p',
+  '--preview',
 ]);
 
 /** `gh` global flags that may precede the subcommand and consume the next token. */
@@ -257,7 +271,9 @@ const findInputValue = (args) => {
 
 /** True if any argv token is an inline body flag (`-f`/`-F`/`--field`/…). */
 const hasInlineBodyFlag = (args) =>
-  args.some((arg) => API_FIELD_FLAGS.has(arg) || /^-[fF]/.test(arg) || /^--(raw-)?field=/.test(arg));
+  args.some(
+    (arg) => API_FIELD_FLAGS.has(arg) || /^-[fF]/.test(arg) || /^--(raw-)?field=/.test(arg)
+  );
 
 /**
  * True if a `gh pr review` argv carries a publish flag. Tolerates the

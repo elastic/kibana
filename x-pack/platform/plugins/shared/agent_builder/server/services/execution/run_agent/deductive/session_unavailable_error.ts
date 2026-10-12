@@ -17,10 +17,10 @@ export class DeductiveSessionUnavailableError extends DeductiveError {
       statusCode === 404
         ? 'session not found'
         : statusCode === 403
-        ? 'session not accessible (team mismatch or permission denied)'
-        : statusCode === 410
-        ? 'session has expired'
-        : `server returned status ${statusCode}`;
+          ? 'session not accessible (team mismatch or permission denied)'
+          : statusCode === 410
+            ? 'session has expired'
+            : `server returned status ${statusCode}`;
     super(message, statusCode);
     this.name = 'DeductiveSessionUnavailableError';
   }

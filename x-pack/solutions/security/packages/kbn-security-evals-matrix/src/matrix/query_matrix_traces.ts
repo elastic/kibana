@@ -500,11 +500,11 @@ export const queryMatrixTraces = async (
         suite.executions && suite.executions.length > 0
           ? suite.executions
           : suite.executionIds && suite.executionIds.length > 0
-          ? suite.executionIds.map((executionId) => ({
-              experimentId: suite.experimentId,
-              executionId,
-            }))
-          : [{ experimentId: suite.experimentId, executionId: suite.experimentId }];
+            ? suite.executionIds.map((executionId) => ({
+                experimentId: suite.experimentId,
+                executionId,
+              }))
+            : [{ experimentId: suite.experimentId, executionId: suite.experimentId }];
       for (const { experimentId, executionId } of executions) {
         modelSuites.push({
           modelId: modelScores.modelId,

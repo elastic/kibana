@@ -83,7 +83,7 @@ export function toElasticsearchQuery(
   if (functions.and.isNode(node))
     return functions.and.toElasticsearchQuery(node, indexPattern, config, context);
   if (functions.exists.isNode(node))
-    return functions.exists.toElasticsearchQuery(node), indexPattern, config, context;
+    return (functions.exists.toElasticsearchQuery(node), indexPattern, config, context);
   if (functions.is.isNode(node))
     return functions.is.toElasticsearchQuery(node, indexPattern, config, context);
   if (functions.nested.isNode(node))

@@ -51,7 +51,7 @@ describe('Observability AI Assistant Management plugin', () => {
   const createCoreSetupMock = (): CoreSetup<any, any> =>
     ({
       getStartServices: jest.fn().mockResolvedValue([{} as any, {} as any, {} as any]),
-    } as any);
+    }) as any;
 
   describe('Licensing', () => {
     let plugin: any;

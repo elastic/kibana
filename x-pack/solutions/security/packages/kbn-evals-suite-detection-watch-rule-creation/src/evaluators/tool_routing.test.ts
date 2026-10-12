@@ -31,7 +31,7 @@ const esWith = (
 ) =>
   ({
     esql: { query: jest.fn(async ({ query }: { query: string }) => handler(query)) },
-  } as unknown as EsClient);
+  }) as unknown as EsClient;
 
 const counts = (tool: number, required: number) => ({
   columns: [
@@ -54,7 +54,7 @@ const result = (over: Partial<RuleCreationResult> = {}): RuleCreationResult =>
     workflowExecutionId: 'exec-1',
     stepExecutions: [{ stepId: DRAFT_STEP_ID, output: { conversation_id: 'conv-1' } }],
     ...over,
-  } as unknown as RuleCreationResult);
+  }) as unknown as RuleCreationResult;
 
 const evaluateWith = (client: EsClient, output: RuleCreationResult) =>
   createToolRoutingEvaluator({ traceEsClient: client, log }).evaluate({

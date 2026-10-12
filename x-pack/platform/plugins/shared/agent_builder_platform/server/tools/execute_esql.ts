@@ -118,7 +118,7 @@ If results look incomplete for a time range that reaches far into the past, tell
     ) => {
       const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
-      const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
+      const timeRangeParams = usesTimeRangeParams ? (buildTimeRangeParams(timeRange) ?? []) : [];
 
       const params: Array<Record<string, FieldValue>> = [
         ...Object.entries(esqlParams).map(([key, value]) => {

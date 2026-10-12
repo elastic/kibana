@@ -102,8 +102,8 @@ export const getAttackDiscoveryGenerationsQuery = ({
         ...(scheduled === true
           ? [{ term: { 'event.category': 'scheduled' } }]
           : scheduled === false
-          ? [{ bool: { must_not: [{ term: { 'event.category': 'scheduled' } }] } }]
-          : []),
+            ? [{ bool: { must_not: [{ term: { 'event.category': 'scheduled' } }] } }]
+            : []),
       ],
     },
   },

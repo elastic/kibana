@@ -154,8 +154,8 @@ export class ServiceAccountsTestPlugin implements Plugin<void, void, SetupDepend
           const statusCode = Boom.isBoom(error)
             ? error.output.statusCode
             : error instanceof errors.ResponseError
-            ? error.statusCode ?? 500
-            : 500;
+              ? (error.statusCode ?? 500)
+              : 500;
           return response.customError({
             statusCode,
             body: { message: 'Service account test operation failed.' },

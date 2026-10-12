@@ -24,7 +24,7 @@ import type {
  * @param subjects Publishing subjects array.
  */
 export const useBatchedPublishingSubjects = <
-  SubjectsType extends [...Array<PublishingSubject<any>>]
+  SubjectsType extends [...Array<PublishingSubject<any>>],
 >(
   ...subjects: [...SubjectsType]
 ): UnwrapPublishingSubjectTuple<SubjectsType> => {

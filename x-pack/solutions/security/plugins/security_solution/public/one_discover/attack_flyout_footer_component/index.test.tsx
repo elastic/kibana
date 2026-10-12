@@ -73,7 +73,7 @@ describe('AttackFlyoutFooter', () => {
         _source: { 'kibana.alert.workflow_status': workflowStatus },
       },
       flattened: { _id: 'attack-1', _index: 'test-index' },
-    } as unknown as DataTableRecord);
+    }) as unknown as DataTableRecord;
 
   it('does not render before promises resolve', () => {
     render(

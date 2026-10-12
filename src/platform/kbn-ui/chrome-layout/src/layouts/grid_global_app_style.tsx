@@ -84,8 +84,9 @@ const globalTempHackStyles = (
     .euiFlyout[class*='right'] {
       // match the application area border-radius on the right edge,
       // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
-      ${appearance === 'framed' &&
-      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
+      ${
+        appearance === 'framed' &&
+        `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
           border-top-right-radius: ${_euiTheme.border.radius.frame};
           border-bottom-right-radius: ${_euiTheme.border.radius.frame};
           // EUI clips overlay-right flyout shadows with a sharp polygon; round it to match
@@ -101,7 +102,8 @@ const globalTempHackStyles = (
         // Preserve EUI's unclipped shadow when a child flyout is stacked on top.
         &.euiFlyout--hasChild {
           clip-path: none !important;
-        }`}
+        }`
+      }
     }
 
     // When overlay is above the header (full-viewport modal style), restore square corners
@@ -137,12 +139,12 @@ const globalTempHackStyles = (
     left: ${layoutVar('application.left', '0px')} !important; /* override EUI inline style */
     right: ${layoutVar('application.right', '0px')} !important; /* override EUI inline style */
     bottom: ${layoutVar('application.bottom', '0px')} !important; /* override EUI inline style */
-    border-bottom-left-radius: ${appearance === 'framed'
-      ? _euiTheme.border.radius.frame
-      : _euiTheme.border.radius.medium} !important;
-    border-bottom-right-radius: ${appearance === 'framed'
-      ? _euiTheme.border.radius.frame
-      : _euiTheme.border.radius.medium} !important;
+    border-bottom-left-radius: ${
+      appearance === 'framed' ? _euiTheme.border.radius.frame : _euiTheme.border.radius.medium
+    } !important;
+    border-bottom-right-radius: ${
+      appearance === 'framed' ? _euiTheme.border.radius.frame : _euiTheme.border.radius.medium
+    } !important;
     box-shadow: ${_euiTheme.shadows.xs.down} !important;
     clip-path: inset(0 -10px -10px -10px) !important;
   }

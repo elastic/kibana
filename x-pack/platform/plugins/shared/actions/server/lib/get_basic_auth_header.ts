@@ -29,5 +29,5 @@ export const combineHeadersWithBasicAuthHeader = ({
 }: CombineHeadersWithBasicAuthHeader = {}) => {
   return username != null && password != null
     ? { ...getBasicAuthHeader({ username, password }), ...headers }
-    : headers ?? undefined;
+    : (headers ?? undefined);
 };

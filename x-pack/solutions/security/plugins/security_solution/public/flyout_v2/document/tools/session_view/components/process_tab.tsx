@@ -35,12 +35,12 @@ export const ProcessTab = memo(({ selectedProcess, index }: ProcessTabProps) => 
   const process = isProcess(selectedProcess)
     ? selectedProcess
     : isCustomProcess(selectedProcess)
-    ? ({
-        getDetails: () => selectedProcess.details,
-        id: selectedProcess.id,
-        getEndTime: () => selectedProcess.endTime,
-      } as Process)
-    : null;
+      ? ({
+          getDetails: () => selectedProcess.details,
+          id: selectedProcess.id,
+          getEndTime: () => selectedProcess.endTime,
+        } as Process)
+      : null;
 
   return (
     <EuiPanel

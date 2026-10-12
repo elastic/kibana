@@ -70,15 +70,12 @@ export interface SharePublicSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SharePublicStartDependencies {}
 
-export class SharePlugin
-  implements
-    Plugin<
-      SharePublicSetup,
-      SharePublicStart,
-      SharePublicSetupDependencies,
-      SharePublicStartDependencies
-    >
-{
+export class SharePlugin implements Plugin<
+  SharePublicSetup,
+  SharePublicStart,
+  SharePublicSetupDependencies,
+  SharePublicStartDependencies
+> {
   private readonly shareRegistry = new ShareRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;

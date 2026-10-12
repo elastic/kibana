@@ -86,7 +86,7 @@ class PluginClientImpl implements PluginClient {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? 0;
+        : (response.hits.total?.value ?? 0);
 
     if (total > MAX_PLUGINS_PER_SPACE) {
       this.logger.warn(

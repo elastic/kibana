@@ -24,7 +24,7 @@ describe('patchRuleStepDefinition', () => {
     ({
       input: { patch: rule },
       contextManager: mockContextManager,
-    } as unknown as Context);
+    }) as unknown as Context;
 
   beforeEach(() => {
     mockContextManager = {

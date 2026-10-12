@@ -87,9 +87,9 @@ const setMockCreateSchedule = ({ mutateAsync }: { mutateAsync: jest.Mock }) => {
   mockUseScheduleApi.mockReturnValue({
     isWorkflowsEnabled: false,
     useCreateSchedule: () =>
-      ({ isLoading: false, mutateAsync } as unknown as ReturnType<
+      ({ isLoading: false, mutateAsync }) as unknown as ReturnType<
         ReturnType<typeof useScheduleApi>['useCreateSchedule']
-      >),
+      >,
   } as unknown as ReturnType<typeof useScheduleApi>);
 };
 

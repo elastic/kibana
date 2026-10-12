@@ -39,7 +39,7 @@ const createWorkflow = (
     createdAt: '2026-01-01T00:00:00Z',
     history: [],
     valid: true,
-  } as unknown as WorkflowListItemDto);
+  }) as unknown as WorkflowListItemDto;
 
 describe('export_workflows - additional coverage', () => {
   beforeEach(() => {

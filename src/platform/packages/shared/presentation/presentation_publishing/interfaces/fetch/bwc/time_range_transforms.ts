@@ -20,7 +20,7 @@ interface LegacyStoredTimeRange {
  * a legacy stored state. This should only be used for embeddables that existed before 9.4.
  */
 export const transformTimeRangeOut = <
-  StoredStateType extends SerializedTimeRange & Record<string, unknown>
+  StoredStateType extends SerializedTimeRange & Record<string, unknown>,
 >(
   storedState: StoredStateType
 ): StoredStateType => {

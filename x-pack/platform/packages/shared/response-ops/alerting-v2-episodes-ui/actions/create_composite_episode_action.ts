@@ -35,7 +35,7 @@ export const createCompositeEpisodeAction = (
   deps: CompositeActionDeps
 ): EpisodeAction => {
   const isEligible = (ep: AlertEpisode): boolean =>
-    ep.source_id == null ? def.isCompatible(ep) : extension?.isCompatible(ep) ?? false;
+    ep.source_id == null ? def.isCompatible(ep) : (extension?.isCompatible(ep) ?? false);
 
   return {
     id: def.id,

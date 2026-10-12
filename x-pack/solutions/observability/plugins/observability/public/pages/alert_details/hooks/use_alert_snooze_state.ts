@@ -35,8 +35,8 @@ export function useAlertSnoozeState(alert: TopAlert | null) {
   );
 
   return useMemo(() => {
-    const mutedInstances = ruleId ? data?.mutedAlerts[ruleId] ?? [] : [];
-    const snoozedInstances = ruleId ? data?.snoozedAlerts[ruleId] ?? [] : [];
+    const mutedInstances = ruleId ? (data?.mutedAlerts[ruleId] ?? []) : [];
+    const snoozedInstances = ruleId ? (data?.snoozedAlerts[ruleId] ?? []) : [];
     const snoozedInstance = instanceId
       ? snoozedInstances.find((instance) => instance.instanceId === instanceId)
       : undefined;

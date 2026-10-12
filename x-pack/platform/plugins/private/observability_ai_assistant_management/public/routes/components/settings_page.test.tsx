@@ -20,7 +20,7 @@ const createSpacesMock = (solution: string) =>
     spaces: {
       getActiveSpace: jest.fn().mockResolvedValue({ solution }),
     },
-  } as any);
+  }) as any;
 
 const createServerlessMock = (projectType: 'observability' | 'search' = 'observability') => {
   const setBreadcrumbs = jest.fn();

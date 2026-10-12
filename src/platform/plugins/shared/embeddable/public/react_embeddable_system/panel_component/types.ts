@@ -30,7 +30,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
  * ------------------------------------------------------------------------------------------ */
 export interface PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
-  PropsType extends {} = {}
+  PropsType extends {} = {},
 > {
   Component: React.FC<PropsType>;
   componentApi: ApiType;
@@ -87,7 +87,8 @@ export interface PresentationPanelProps<
  * Everything in this API is Partial because it is valid for a component to implement none of these methods.
  */
 export interface DefaultPresentationPanelApi
-  extends HasUniqueId,
+  extends
+    HasUniqueId,
     Partial<
       PublishesTitle &
         PublishesDataLoading &

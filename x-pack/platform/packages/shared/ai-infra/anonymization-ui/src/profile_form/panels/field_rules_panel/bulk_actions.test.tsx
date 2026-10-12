@@ -45,7 +45,7 @@ const createContextValue = (
     isManageMode: true,
     isSubmitting: false,
     ...overrides,
-  } as ReturnType<typeof useFieldRulesPanelContext>);
+  }) as ReturnType<typeof useFieldRulesPanelContext>;
 
 describe('FieldRulesPanelBulkActions', () => {
   it('applies selected action and entity class updates', () => {

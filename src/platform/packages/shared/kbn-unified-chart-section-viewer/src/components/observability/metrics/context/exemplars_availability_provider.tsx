@@ -15,8 +15,10 @@ import {
   type MetricsWithExemplars,
 } from '../utils/fetch_metrics_with_exemplars';
 
-export interface ProbeExemplarsAvailabilityParams
-  extends Omit<FetchMetricsWithExemplarsParams, 'signal'> {
+export interface ProbeExemplarsAvailabilityParams extends Omit<
+  FetchMetricsWithExemplarsParams,
+  'signal'
+> {
   /**
    * Identifies the Discover fetch the caller belongs to (`fetchParams.lastReloadRequestTime`).
    * Every chart in one fetch shares a single probe; a new id starts a new probe, so a metric

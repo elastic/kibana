@@ -37,7 +37,7 @@ const instantiatedClients: Record<
 > = {};
 
 export async function getSynthtraceClient<
-  TClient extends SynthtraceClientTypes = SynthtraceClientTypes
+  TClient extends SynthtraceClientTypes = SynthtraceClientTypes,
 >(
   synthClient: TClient,
   { esClient, kbnUrl, log, config }: SynthtraceClientOptions,

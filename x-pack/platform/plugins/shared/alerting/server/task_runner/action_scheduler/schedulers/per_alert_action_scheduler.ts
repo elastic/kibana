@@ -61,9 +61,8 @@ export class PerAlertActionScheduler<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
-> implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId>
-{
+  AlertData extends RuleAlertData,
+> implements IActionScheduler<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   private actions: RuleAction[] = [];
   private mutedAlertIdsSet: Set<string> = new Set();
   private snoozedAlertIdsSet: Set<string> = new Set();

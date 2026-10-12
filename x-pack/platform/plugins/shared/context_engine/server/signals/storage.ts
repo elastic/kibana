@@ -24,7 +24,7 @@ export const signalsSchema = {
 } satisfies StorageSchema;
 
 const buildStorageSettings = (spaceId: string) =>
-  ({ name: buildSignalsIndexName(spaceId), schema: signalsSchema } satisfies IndexStorageSettings);
+  ({ name: buildSignalsIndexName(spaceId), schema: signalsSchema }) satisfies IndexStorageSettings;
 
 export type SignalsStorageSettings = ReturnType<typeof buildStorageSettings>;
 

@@ -167,4 +167,4 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
         name: `indexpattern-datasource-layer-${layerId}`,
       },
     ],
-  } as unknown as LensAttributes);
+  }) as unknown as LensAttributes;

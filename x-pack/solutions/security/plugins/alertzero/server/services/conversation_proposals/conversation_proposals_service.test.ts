@@ -38,7 +38,7 @@ const makeProposalsService = (
       proposals,
       total: total ?? proposals.length,
     }),
-  } as unknown as ReturnType<ProposalsPluginStart['getProposalsService']>);
+  }) as unknown as ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
  * Builds an Agent Builder mock whose scoped client exposes `bulkGet`.
@@ -79,7 +79,7 @@ const makeAgentBuilder = (
         }),
       }),
     },
-  } as unknown as AgentBuilderPluginStart);
+  }) as unknown as AgentBuilderPluginStart;
 
 const makeImpactClient = (
   entityIdsByConversationId: Record<string, string[]> = {}
@@ -278,7 +278,7 @@ describe('ConversationProposalsService', () => {
                 bulkGet: jest.fn().mockRejectedValue(new Error('access denied')),
               }),
             },
-          } as unknown as AgentBuilderPluginStart),
+          }) as unknown as AgentBuilderPluginStart,
       ],
     ])('defaults assignees to an empty array when %s', async (_label, buildAgentBuilder) => {
       const proposals = [makeProposal({ conversationId: 'conv-1' })];

@@ -11,7 +11,7 @@ import { stableStringify } from '@kbn/std';
 
 export type JoinedReturnType<
   T extends Record<string, any>,
-  U extends UnionToIntersection<T>
+  U extends UnionToIntersection<T>,
 > = Array<
   Partial<U> & {
     [k in keyof T]: T[k];
@@ -34,7 +34,7 @@ type CombinedNestedKeys<T, U> = (NestedKeys<T> & NestedKeys<U>) | (keyof T & key
 export function joinByKey<
   T extends Record<string, any>,
   U extends UnionToIntersection<T>,
-  V extends ArrayOrSingle<CombinedNestedKeys<T, U>>
+  V extends ArrayOrSingle<CombinedNestedKeys<T, U>>,
 >(items: T[], key: V): JoinedReturnType<T, U>;
 
 export function joinByKey<
@@ -42,7 +42,7 @@ export function joinByKey<
   U extends UnionToIntersection<T>,
   V extends ArrayOrSingle<CombinedNestedKeys<T, U>>,
   W extends JoinedReturnType<T, U>,
-  X extends (a: T, b: T) => ValuesType<W>
+  X extends (a: T, b: T) => ValuesType<W>,
 >(items: T[], key: V, mergeFn: X): W;
 
 export function joinByKey(

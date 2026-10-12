@@ -34,9 +34,9 @@ describe('EvalsPublicPlugin', () => {
   const createWorkflowsExtensionsMock = () =>
     ({
       registerStepDefinition: jest.fn(),
-    } as unknown as EvalsSetupDependencies['workflowsExtensions'] & {
+    }) as unknown as EvalsSetupDependencies['workflowsExtensions'] & {
       registerStepDefinition: jest.Mock;
-    });
+    };
 
   const createCoreSetupMock = () =>
     ({
@@ -44,7 +44,7 @@ describe('EvalsPublicPlugin', () => {
         register: jest.fn(),
       },
       getStartServices: jest.fn(),
-    } as any);
+    }) as any;
 
   it('registers the standalone app and the Stack Management AI entry when management is available', () => {
     const plugin = createPlugin(true);

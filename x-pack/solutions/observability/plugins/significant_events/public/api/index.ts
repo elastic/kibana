@@ -36,7 +36,7 @@ export type SignificantEventsAPIReturnType<TEndpoint extends SignificantEventsRe
   ReturnOf<SignificantEventsRouteRepository, TEndpoint>;
 
 export type SignificantEventsAPIClientRequestParamsOf<
-  TEndpoint extends SignificantEventsRepositoryEndpoint
+  TEndpoint extends SignificantEventsRepositoryEndpoint,
 > = ClientRequestParamsOf<SignificantEventsRouteRepository, TEndpoint>;
 
 export function createSignificantEventsRepositoryClient(core: {

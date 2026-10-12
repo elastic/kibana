@@ -46,7 +46,7 @@ export const useMissingResources = ({
 
   const missingResourceCount =
     migrationSource === MigrationSource.QRADAR
-      ? missingResourcesIndexed?.lookups.length ?? 0
+      ? (missingResourcesIndexed?.lookups.length ?? 0)
       : (missingResourcesIndexed?.macros.length ?? 0) +
         (missingResourcesIndexed?.lookups.length ?? 0);
 

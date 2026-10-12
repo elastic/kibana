@@ -42,7 +42,7 @@ const makeModel = (uri: string) =>
       endLineNumber: 1,
       endColumn: QUERY.length + 1,
     }),
-  } as unknown as monaco.editor.ITextModel);
+  }) as unknown as monaco.editor.ITextModel;
 
 const noopToken = {
   isCancellationRequested: false,

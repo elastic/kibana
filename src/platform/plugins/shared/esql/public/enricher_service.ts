@@ -19,7 +19,10 @@ type Enricher<T> = (items: T[]) => Promise<T[]>;
 export class EnricherService<T> {
   private readonly enrichers: Enricher<T>[] = [];
 
-  constructor(private readonly logger: Logger, private readonly errorType: string) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly errorType: string
+  ) {}
 
   register(enricher: Enricher<T>): void {
     this.enrichers.push(enricher);

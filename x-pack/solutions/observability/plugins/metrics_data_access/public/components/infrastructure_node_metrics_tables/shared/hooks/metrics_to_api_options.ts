@@ -62,8 +62,10 @@ export type MetricsMap<T extends string> = {
 // This type only ensures that the MetricsMap is defined in a way that the key matches the field
 // it uses
 // { 'some-field: { field: 'some-field', aggregation: 'whatever' } }
-export interface NodeMetricsExplorerOptionsMetric<Field extends string>
-  extends Omit<MetricsExplorerOptionsMetric, 'field'> {
+export interface NodeMetricsExplorerOptionsMetric<Field extends string> extends Omit<
+  MetricsExplorerOptionsMetric,
+  'field'
+> {
   field: Field;
 }
 

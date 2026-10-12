@@ -93,7 +93,7 @@ export interface EmbeddableOutput {
 export interface IEmbeddable<
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
-  N = any
+  N = any,
 > {
   /**
    * The type of embeddable, this is what will be used to take a serialized

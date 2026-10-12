@@ -111,8 +111,8 @@ const buildSlackExecutorSuccessResponse = <T extends SlackAPiResponse>({
       typeof rawError === 'string'
         ? rawError
         : rawError != null
-        ? safeJsonStringify(rawError)
-        : undefined;
+          ? safeJsonStringify(rawError)
+          : undefined;
     return serviceErrorResult(CONNECTOR_ID, serviceMessage);
   }
   return successResult<T>(CONNECTOR_ID, slackApiResponseData);

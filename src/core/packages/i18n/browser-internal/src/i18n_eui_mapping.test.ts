@@ -19,7 +19,7 @@ const TYPE_ANNOTATIONS_REGEX = /(?<=})\s*:\s*{[\s\S]*?}(?=\s*\))/;
 const VALUES_REGEXP = /\{\w+\}/;
 type I18nTranslateCall = [
   string,
-  { defaultMessage: string; values?: object; description?: string }
+  { defaultMessage: string; values?: object; description?: string },
 ];
 
 describe('@elastic/eui i18n tokens', () => {

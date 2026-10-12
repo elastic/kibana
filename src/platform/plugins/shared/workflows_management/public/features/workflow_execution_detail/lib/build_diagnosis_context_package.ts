@@ -84,14 +84,12 @@ export const buildDiagnosisContextPackage = ({
 
   const attemptHistory =
     siblingAttempts.length > 0
-      ? siblingAttempts.map(
-          (s): DiagnosisAttemptHistoryEntry => ({
-            attemptNumber: attemptNumberFromScope(s),
-            status: String(s.status ?? ''),
-            durationMs: s.executionTimeMs,
-            error: s.error ?? null,
-          })
-        )
+      ? siblingAttempts.map((s): DiagnosisAttemptHistoryEntry => ({
+          attemptNumber: attemptNumberFromScope(s),
+          status: String(s.status ?? ''),
+          durationMs: s.executionTimeMs,
+          error: s.error ?? null,
+        }))
       : undefined;
 
   return {

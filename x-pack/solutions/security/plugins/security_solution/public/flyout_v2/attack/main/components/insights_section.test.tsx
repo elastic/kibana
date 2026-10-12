@@ -58,7 +58,7 @@ const buildHit = (alertIds: string[]): DataTableRecord =>
     flattened: {
       'kibana.alert.attack_discovery.alert_ids': alertIds,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const renderSection = (hit: DataTableRecord) =>
   render(<InsightsSection hit={hit} onShowEntities={jest.fn()} onShowCorrelations={jest.fn()} />);

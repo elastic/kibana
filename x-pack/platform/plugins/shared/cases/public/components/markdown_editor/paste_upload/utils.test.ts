@@ -50,7 +50,7 @@ describe('utils', () => {
         hasFiles: () => hasFiles,
         isUploading: () => uploading,
         // The remaining members of UploadState are not needed for this test suite.
-      } as unknown as UploadState);
+      }) as unknown as UploadState;
 
     it('returns truthy when there are files, not uploading, and caseId provided', () => {
       const state = mockUploadState(true, false);

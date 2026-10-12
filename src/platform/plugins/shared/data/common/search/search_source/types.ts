@@ -28,8 +28,7 @@ export type ISearchSource = Pick<SearchSource, keyof SearchSource>;
  * high level search service
  * @public
  */
-export interface ISearchStartSearchSource
-  extends PersistableStateService<SerializedSearchSourceFields> {
+export interface ISearchStartSearchSource extends PersistableStateService<SerializedSearchSourceFields> {
   /**
    * creates {@link SearchSource} based on provided serialized {@link SearchSourceFields}
    * @param fields

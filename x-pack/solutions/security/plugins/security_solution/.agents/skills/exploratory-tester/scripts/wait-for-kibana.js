@@ -11,15 +11,20 @@
   const creds = Buffer.from('elastic:changeme').toString('base64');
   for (let i = 1; i <= 60; i++) {
     try {
-      const r = await fetch('http://127.0.0.1:5620/api/status',
-        { headers: { Authorization: 'Basic ' + creds } });
+      const r = await fetch('http://127.0.0.1:5620/api/status', {
+        headers: { Authorization: 'Basic ' + creds },
+      });
       const s = await r.json();
       if (s?.status?.overall?.level === 'available') {
-        process.stdout.write('Kibana ready\n'); process.exit(0);
+        process.stdout.write('Kibana ready\n');
+        process.exit(0);
       }
-    } catch(e) { /* retry */ }
+    } catch (e) {
+      /* retry */
+    }
     process.stdout.write('Attempt ' + i + ' — waiting 10s...\n');
-    await new Promise(r => setTimeout(r, 10000));
+    await new Promise((r) => setTimeout(r, 10000));
   }
-  process.stderr.write('Kibana not ready after 10 minutes\n'); process.exit(1);
+  process.stderr.write('Kibana not ready after 10 minutes\n');
+  process.exit(1);
 })();

@@ -84,7 +84,7 @@ export const registerGetExperimentTracesRoute = ({
           });
 
           const totalHits = aggregationResponse.hits?.total;
-          const matchedScores = typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+          const matchedScores = typeof totalHits === 'number' ? totalHits : (totalHits?.value ?? 0);
           if (matchedScores === 0) {
             const message = evaluator
               ? `Experiment not found for evaluator ${evaluator}: ${experimentId}`
@@ -127,7 +127,7 @@ export const registerGetExperimentTracesRoute = ({
               if (item === undefined || 'error' in item) {
                 const reason =
                   item !== undefined && 'error' in item
-                    ? item.error?.reason ?? item.error?.type ?? 'unknown error'
+                    ? (item.error?.reason ?? item.error?.type ?? 'unknown error')
                     : 'missing msearch response item';
                 throw new Error(`Span search failed for trace ${reference.trace_id}: ${reason}`);
               }

@@ -25,7 +25,7 @@ const createDefinitions = () => {
 const createSecurity = (username = 'operator') =>
   ({
     authc: { getCurrentUser: () => ({ username }) },
-  } as unknown as SecurityServiceStart);
+  }) as unknown as SecurityServiceStart;
 
 const setup = (serviceOverrides = {}) => {
   const router = httpServiceMock.createRouter();

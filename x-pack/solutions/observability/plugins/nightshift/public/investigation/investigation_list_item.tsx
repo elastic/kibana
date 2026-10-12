@@ -92,12 +92,15 @@ export function InvestigationListItem({
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
-        background: ${isSelected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
-          : euiTheme.colors.backgroundBasePlain};
+        background: ${
+          isSelected
+            ? euiTheme.colors.backgroundBaseInteractiveSelect
+            : euiTheme.colors.backgroundBasePlain
+        };
         padding: ${euiTheme.size.base};
-        ${onClick
-          ? `
+        ${
+          onClick
+            ? `
         cursor: pointer;
         transition: ${nightshiftBackgroundTransition(euiTheme)};
 
@@ -109,7 +112,8 @@ export function InvestigationListItem({
           };
         }
         `
-          : ''}
+            : ''
+        }
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>

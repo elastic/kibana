@@ -33,7 +33,7 @@ const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
     severity: 'low',
     risk_score: 21,
     ...overrides,
-  } as unknown as RuleResponse);
+  }) as unknown as RuleResponse;
 
 const savedRule = makeRule({ id: 'saved-id-1', name: 'Saved Rule' });
 

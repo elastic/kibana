@@ -79,15 +79,12 @@ const LINKED_INVESTIGATIONS_LOADING_LABEL = i18n.translate(
   { defaultMessage: 'Loading linked investigations…' }
 );
 
-export class AlertZeroPublicPlugin
-  implements
-    Plugin<
-      AlertZeroPublicSetup,
-      AlertZeroPublicStart,
-      AlertZeroSetupDependencies,
-      AlertZeroStartDependencies
-    >
-{
+export class AlertZeroPublicPlugin implements Plugin<
+  AlertZeroPublicSetup,
+  AlertZeroPublicStart,
+  AlertZeroSetupDependencies,
+  AlertZeroStartDependencies
+> {
   private readonly config: AlertZeroClientConfig;
   private readonly isServerless: boolean;
   private readonly serverlessTierAvailable$ = new BehaviorSubject(false);
@@ -246,9 +243,8 @@ export class AlertZeroPublicPlugin
     // Escalation creation modal (opened from the investigation flyout footer)
     // ---------------------------------------------------------------------------
     const LazyEscalationModal = makeLazyWithProviders(async () => {
-      const { ConnectedEscalationModal } = await import(
-        './pages/conversations/connected_escalation_modal'
-      );
+      const { ConnectedEscalationModal } =
+        await import('./pages/conversations/connected_escalation_modal');
       return ConnectedEscalationModal as React.ComponentType<
         React.ComponentProps<typeof ConnectedEscalationModal>
       >;
@@ -301,9 +297,8 @@ export class AlertZeroPublicPlugin
     // Assignee picker (embedded in both investigation and escalation flyout headers)
     // ---------------------------------------------------------------------------
     const LazyConnectedAssignees = makeLazyWithProviders(async () => {
-      const { ConnectedAssignees } = await import(
-        './components/connected_assignees/connected_assignees'
-      );
+      const { ConnectedAssignees } =
+        await import('./components/connected_assignees/connected_assignees');
       return ConnectedAssignees as React.ComponentType<
         React.ComponentProps<typeof ConnectedAssignees>
       >;
@@ -313,9 +308,8 @@ export class AlertZeroPublicPlugin
     // Status toggle (embedded in both investigation and escalation flyout headers)
     // ---------------------------------------------------------------------------
     const LazyConnectedStatusToggle = makeLazyWithProviders(async () => {
-      const { ConnectedStatusToggle } = await import(
-        './components/connected_status/connected_status_toggle'
-      );
+      const { ConnectedStatusToggle } =
+        await import('./components/connected_status/connected_status_toggle');
       return ConnectedStatusToggle as React.ComponentType<
         React.ComponentProps<typeof ConnectedStatusToggle>
       >;
@@ -325,9 +319,8 @@ export class AlertZeroPublicPlugin
     // Close investigation modal (used from the flyout footer and queue card actions)
     // ---------------------------------------------------------------------------
     const LazyConnectedCloseInvestigationModal = makeLazyWithProviders(async () => {
-      const { ConnectedCloseInvestigationModal } = await import(
-        './components/connected_status/connected_close_investigation_modal'
-      );
+      const { ConnectedCloseInvestigationModal } =
+        await import('./components/connected_status/connected_close_investigation_modal');
       return ConnectedCloseInvestigationModal as React.ComponentType<
         React.ComponentProps<typeof ConnectedCloseInvestigationModal>
       >;
@@ -337,9 +330,8 @@ export class AlertZeroPublicPlugin
     // Linked investigations list (escalation flyout overview tab body)
     // ---------------------------------------------------------------------------
     const LazyConnectedLinkedInvestigations = makeLazyWithProviders(async () => {
-      const { ConnectedLinkedInvestigations } = await import(
-        './components/connected_linked_investigations/connected_linked_investigations'
-      );
+      const { ConnectedLinkedInvestigations } =
+        await import('./components/connected_linked_investigations/connected_linked_investigations');
       return ConnectedLinkedInvestigations as React.ComponentType<
         React.ComponentProps<typeof ConnectedLinkedInvestigations>
       >;

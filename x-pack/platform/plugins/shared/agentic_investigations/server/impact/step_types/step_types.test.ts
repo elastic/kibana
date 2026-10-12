@@ -50,7 +50,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     abortSignal: new AbortController().signal,
     stepId: 'attach_impact',
     stepType: 'investigations.attachImpact',
-  } as unknown as StepHandlerContext<never, never>);
+  }) as unknown as StepHandlerContext<never, never>;
 
 describe('investigations.attachImpact input schema', () => {
   it('should require at least one entity', () => {
@@ -105,7 +105,7 @@ describe('investigations.attachImpact step', () => {
             return result.written;
           }),
           revertAttach: jest.fn().mockResolvedValue(undefined),
-        } as unknown as ImpactService),
+        }) as unknown as ImpactService,
       resolveUser,
       privileges,
       getAttachmentClient: getAttachmentClient as never,
@@ -231,7 +231,7 @@ describe('investigations.getImpact step', () => {
 
   const getDefinition = (getByConversationId: jest.Mock, privileges = allowAll()) =>
     getGetImpactStepDefinition({
-      getImpactService: () => ({ getByConversationId } as unknown as ImpactService),
+      getImpactService: () => ({ getByConversationId }) as unknown as ImpactService,
       privileges,
     });
 

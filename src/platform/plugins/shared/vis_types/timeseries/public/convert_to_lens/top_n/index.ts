@@ -91,7 +91,7 @@ export const convertToLens: ConvertTsvbToLensVisualization = async (
       extendedLayers[layerIdx] = {
         ignoreGlobalFilters: Boolean(
           model.ignore_global_filter ||
-            visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
+          visibleSeries.some(({ ignore_global_filter }) => ignore_global_filter)
         ),
         indexPatternId,
         layerId,

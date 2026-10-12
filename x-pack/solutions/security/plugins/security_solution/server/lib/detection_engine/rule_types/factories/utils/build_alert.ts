@@ -120,10 +120,9 @@ export interface BuildAlertFieldsProps {
 export const generateAlertId = (alert: DetectionAlertLatest) => {
   return createHash('sha256')
     .update(
-      alert[ALERT_ANCESTORS].reduce(
-        (acc, ancestor) => acc.concat(ancestor.id, ancestor.index),
-        ''
-      ).concat(alert[ALERT_RULE_UUID])
+      alert[ALERT_ANCESTORS]
+        .reduce((acc, ancestor) => acc.concat(ancestor.id, ancestor.index), '')
+        .concat(alert[ALERT_RULE_UUID])
     )
     .digest('hex');
 };
@@ -139,7 +138,7 @@ export const buildParent = (doc: SimpleHit): AncestorLatest => {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: isSignal ? (getField(doc, ALERT_DEPTH) as number | undefined) ?? 1 : 0,
+    depth: isSignal ? ((getField(doc, ALERT_DEPTH) as number | undefined) ?? 1) : 0,
     rule: isSignal ? (getField(doc, ALERT_RULE_UUID) as string) : undefined,
   };
   return parent;

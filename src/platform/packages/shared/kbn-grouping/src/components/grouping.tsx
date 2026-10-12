@@ -353,9 +353,11 @@ const GroupingComponent = <T,>({
                       justify-content: center;
                       margin-top: ${euiTheme.size.s};
                       background-color: ${euiTheme.colors.lightestShade};
-                      padding: ${hasMoreBatchesToReveal
-                        ? `0 ${euiTheme.size.base}`
-                        : `${euiTheme.size.s} ${euiTheme.size.base}`};
+                      padding: ${
+                        hasMoreBatchesToReveal
+                          ? `0 ${euiTheme.size.base}`
+                          : `${euiTheme.size.s} ${euiTheme.size.base}`
+                      };
                       text-align: center;
                     `}
                   >

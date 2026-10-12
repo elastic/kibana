@@ -50,14 +50,14 @@ const createContext = ({
         },
       },
     }),
-  } as unknown as jest.Mocked<RequestHandlerContext>);
+  }) as unknown as jest.Mocked<RequestHandlerContext>;
 
 const makeFeatureRegistry = (ignoreGlobalDefault = false): InferenceFeatureRegistry =>
   ({
     get: jest.fn(() =>
       ignoreGlobalDefault ? { featureId: 'my_feature', ignoreGlobalDefault: true } : undefined
     ),
-  } as unknown as InferenceFeatureRegistry);
+  }) as unknown as InferenceFeatureRegistry;
 
 describe('GET /internal/search_inference_endpoints/connectors', () => {
   const mockLogger = loggingSystemMock.createLogger().get();

@@ -2012,7 +2012,7 @@ export const createAssetCriticalityProcessedFileEvent = ({
   endTime,
 }: CreateAssetCriticalityProcessedFileEvent): [
   string,
-  AssetCriticalitySystemProcessedAssignmentFileEvent
+  AssetCriticalitySystemProcessedAssignmentFileEvent,
 ] => {
   const status = getUploadStatus(result);
 

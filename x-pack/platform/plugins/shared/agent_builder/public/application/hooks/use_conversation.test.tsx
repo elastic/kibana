@@ -83,7 +83,7 @@ const createFetchedConversation = (accessControl?: ConversationAccessControl) =>
     id: conversationId,
     rounds: [{ id: 'round-1', status: ConversationRoundStatus.completed }],
     ...(accessControl ? { access_control: accessControl } : {}),
-  } as Conversation);
+  }) as Conversation;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

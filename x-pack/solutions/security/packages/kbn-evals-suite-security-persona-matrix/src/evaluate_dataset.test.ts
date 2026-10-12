@@ -41,7 +41,7 @@ const buildLog = (): ToolingLog =>
     warning: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
-  } as unknown as ToolingLog);
+  }) as unknown as ToolingLog;
 
 describe('toDatasetExample', () => {
   it('resolves the golden path from metadata.expectedTools into output.tool_sequence', () => {
@@ -179,7 +179,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
         steps: [{ type: 'tool_call', tool_id: 'security.alerts' }],
       } as unknown as TaskOutput,
       metadata: baseExample.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBe(1);
   });
 
@@ -194,7 +196,9 @@ describe('createPersonaMatrixExpectedToolCalledEvaluator', () => {
       expected: toDatasetExample(unannotated).output,
       output: { steps: [] } as unknown as TaskOutput,
       metadata: unannotated.metadata,
-    } as unknown as Parameters<ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']>[0]);
+    } as unknown as Parameters<
+      ReturnType<typeof createPersonaMatrixExpectedToolCalledEvaluator>['evaluate']
+    >[0]);
     expect(result.score).toBeNull();
     expect(result.label).toBe('N/A');
   });
@@ -207,9 +211,9 @@ describe('createPersonaMatrixSkillInvokedEvaluator', () => {
       expected: {},
       output: { traceId } as unknown as TaskOutput,
       metadata,
-    } as unknown as Parameters<
+    }) as unknown as Parameters<
       ReturnType<typeof createPersonaMatrixSkillInvokedEvaluator>['evaluate']
-    >[0]);
+    >[0];
 
   it('returns N/A when the example has no expectedSkill/allowSkills annotation', async () => {
     // 4 of the 21 real examples (workflow-authoring-b/c, workflow-execution-a/b)

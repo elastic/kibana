@@ -50,11 +50,11 @@ const buildEvent = ({
   },
 });
 
-const buildPolicy = (id: string, name: string) => ({ id, name } as any);
-const buildRule = (id: string, name: string) => ({ id, metadata: { name } } as any);
-const buildWorkflow = (id: string, name: string) => ({ id, name } as any);
+const buildPolicy = (id: string, name: string) => ({ id, name }) as any;
+const buildRule = (id: string, name: string) => ({ id, metadata: { name } }) as any;
+const buildWorkflow = (id: string, name: string) => ({ id, name }) as any;
 const buildFindRulesResponse = (rules: Array<{ id: string; metadata: { name: string } }>) =>
-  ({ items: rules, total: rules.length, page: 1, perPage: rules.length } as any);
+  ({ items: rules, total: rules.length, page: 1, perPage: rules.length }) as any;
 
 const createMocks = () => {
   const eventLogService: jest.Mocked<EventLogServiceContract> = {

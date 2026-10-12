@@ -57,8 +57,8 @@ export const KillProcessActionResult = memo<
           actionDetails?.wasCanceled
             ? 'canceled'
             : actionDetails?.wasSuccessful
-            ? 'success'
-            : 'failure'
+              ? 'success'
+              : 'failure'
         }
       >
         <KillSuspendProcessActionResult

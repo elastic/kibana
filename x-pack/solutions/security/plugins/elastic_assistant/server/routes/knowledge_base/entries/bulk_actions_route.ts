@@ -99,7 +99,7 @@ const buildBulkResponse = (
     created.forEach((entry) => {
       telemetry.reportEvent(CREATE_KNOWLEDGE_BASE_ENTRY_SUCCESS_EVENT.eventType, {
         entryType: entry.type,
-        required: 'required' in entry ? entry.required ?? false : false,
+        required: 'required' in entry ? (entry.required ?? false) : false,
         sharing: entry.users.length ? 'private' : 'global',
         ...(entry.type === 'document' ? { source: entry.source } : {}),
       });
@@ -221,7 +221,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           const operationsCount =
             (body?.update ? body.update?.length : 0) +
             (body?.create ? body.create?.length : 0) +
-            (body?.delete ? body.delete?.ids?.length ?? 0 : 0);
+            (body?.delete ? (body.delete?.ids?.length ?? 0) : 0);
           if (operationsCount > KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE) {
             return assistantResponse.error({
               body: `More than ${KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,

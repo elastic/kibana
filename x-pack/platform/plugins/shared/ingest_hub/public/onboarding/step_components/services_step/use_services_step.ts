@@ -54,7 +54,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const activeCategory =
     selectedCategory && categories.includes(selectedCategory)
       ? selectedCategory
-      : categories[0] ?? null;
+      : (categories[0] ?? null);
 
   const servicesInCategory = useMemo(
     () => filteredServices.filter((s) => s.category === activeCategory),

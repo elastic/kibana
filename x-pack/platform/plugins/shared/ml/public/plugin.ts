@@ -286,9 +286,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               );
             }
 
-            const { registerSearchLinks, registerCasesAttachments } = await import(
-              './register_helper'
-            );
+            const { registerSearchLinks, registerCasesAttachments } =
+              await import('./register_helper');
             registerSearchLinks(
               this.appUpdater$,
               fullLicense,
@@ -327,9 +326,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                 }
 
                 if (pluginStart.agentBuilder) {
-                  const { registerAgentBuilderAttachments } = await import(
-                    './agent_builder/register_agent_builder_attachments'
-                  );
+                  const { registerAgentBuilderAttachments } =
+                    await import('./agent_builder/register_agent_builder_attachments');
                   registerAgentBuilderAttachments(pluginStart.agentBuilder, {
                     application: coreStart.application,
                     unifiedSearch: pluginStart.unifiedSearch,

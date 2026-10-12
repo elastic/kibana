@@ -198,7 +198,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
     const total =
       typeof response.hits.total === 'number'
         ? response.hits.total
-        : response.hits.total?.value ?? items.length;
+        : (response.hits.total?.value ?? items.length);
 
     return { items, total };
   }
@@ -243,7 +243,7 @@ export class ImprovementsService implements ImprovementsServiceApi {
       total:
         typeof response.hits.total === 'number'
           ? response.hits.total
-          : response.hits.total?.value ?? 0,
+          : (response.hits.total?.value ?? 0),
       by_status: byStatus,
     };
   }

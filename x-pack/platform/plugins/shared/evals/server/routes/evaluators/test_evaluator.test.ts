@@ -105,7 +105,7 @@ describe('POST /internal/evals/evaluators/_test', () => {
         subject: { traces: [{ trace_id: TRACE_ID }] },
         ...overrides,
       },
-    } as unknown as Parameters<ReturnType<typeof setup>['handler']>[1]);
+    }) as unknown as Parameters<ReturnType<typeof setup>['handler']>[1];
 
   beforeEach(() => {
     const round = { input: { message: 'Question' }, response: { message: 'Answer' }, steps: [] };

@@ -76,7 +76,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   const fleetStatus = useFleetStatus();
   const useOutputSecretsStorage = fleetStatus.isSecretsStorageEnabled ?? false;
   const useSSLSecretsStorage = enableSSLSecrets
-    ? fleetStatus.isSSLSecretsStorageEnabled ?? false
+    ? (fleetStatus.isSSLSecretsStorageEnabled ?? false)
     : false;
 
   useEffect(() => {

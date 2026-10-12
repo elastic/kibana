@@ -47,7 +47,10 @@ export interface AttributeServiceOptions {
 }
 
 export class AttributeService {
-  constructor(private type: string, private options: AttributeServiceOptions) {}
+  constructor(
+    private type: string,
+    private options: AttributeServiceOptions
+  ) {}
 
   private async defaultUnwrapMethod(
     input: VisualizeByReferenceInput

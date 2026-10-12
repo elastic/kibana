@@ -36,7 +36,7 @@ export type DiscoverSessionClientRequestData = Omit<DiscoverSessionInternalDataI
 };
 
 export type DiscoverSessionClientRequestTab<
-  Tab = DiscoverSessionInternalDataInput['tabs'][number]
+  Tab = DiscoverSessionInternalDataInput['tabs'][number],
 > = {
   [Key in keyof Tab]: Key extends 'control_panels'
     ? ReturnType<typeof deserializeEsqlControls>

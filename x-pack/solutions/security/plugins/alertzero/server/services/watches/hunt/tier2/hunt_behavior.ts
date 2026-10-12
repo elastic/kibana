@@ -330,8 +330,8 @@ const executeValidatedEsql = async ({
         ...(rowsUnclassifiable
           ? { inconclusive_reason: 'rows_unclassifiable' as const }
           : refsUnavailable
-          ? { inconclusive_reason: 'refs_unavailable' as const }
-          : {}),
+            ? { inconclusive_reason: 'refs_unavailable' as const }
+            : {}),
       },
       ...(hosts && hosts.items.length > 0
         ? {
@@ -893,7 +893,7 @@ export const huntBehavior = async (
           'Consider lowering the LLM threshold or falling back to IOC matching for this ' +
           `report.${partialSuffix}`
         : hasHit
-        ? `Behaviors proposed; at least one grounded query hit a required index.${partialSuffix}`
-        : `Behaviors proposed for Investigation staging.${partialSuffix}`,
+          ? `Behaviors proposed; at least one grounded query hit a required index.${partialSuffix}`
+          : `Behaviors proposed for Investigation staging.${partialSuffix}`,
   };
 };

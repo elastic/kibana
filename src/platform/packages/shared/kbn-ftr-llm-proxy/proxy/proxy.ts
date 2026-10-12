@@ -41,7 +41,10 @@ export class LlmProxy {
     matchingInterceptorName: string | undefined;
   }> = [];
 
-  constructor(private readonly port: number, private readonly log: ToolingLog) {
+  constructor(
+    private readonly port: number,
+    private readonly log: ToolingLog
+  ) {
     this.interval = setInterval(() => this.log.debug(`LLM proxy listening on port ${port}`), 5000);
 
     this.server = http

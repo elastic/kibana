@@ -84,7 +84,7 @@ export const useEditFlyoutPreviewSync = ({
 
     setTimelineModel({
       phases,
-      downsampleSteps: includeDownsampleStepsInTimeline ? downsampleSteps ?? null : null,
+      downsampleSteps: includeDownsampleStepsInTimeline ? (downsampleSteps ?? null) : null,
     });
     setRetentionPeriod(retentionPeriod);
     setDataPhasesCount(phases.length);
@@ -110,7 +110,7 @@ export const useEditFlyoutPreviewSync = ({
 
     const downsampleCount = countDownsampleFromPhases
       ? phases.filter((phase) => Boolean(phase.downsample)).length
-      : downsampleSteps?.length ?? 0;
+      : (downsampleSteps?.length ?? 0);
 
     setDownsampleStepsCount(downsampleCount);
   }, [

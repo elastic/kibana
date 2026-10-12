@@ -20,8 +20,9 @@ const makeAttachment = (id: string, type = 'security.alert'): VersionedAttachmen
 
 const makeSectionRenderer =
   (sectionTestId: string) =>
-  ({ attachment }: { attachment: { id: string } }) =>
-    <div data-test-subj={sectionTestId} data-attachment-id={attachment.id} />;
+  ({ attachment }: { attachment: { id: string } }) => (
+    <div data-test-subj={sectionTestId} data-attachment-id={attachment.id} />
+  );
 
 const makeService = (
   renderConversationDetailsContent?: (props: { attachment: { id: string } }) => React.ReactNode
@@ -29,7 +30,7 @@ const makeService = (
   ({
     getAttachmentUiDefinition: () =>
       renderConversationDetailsContent ? { renderConversationDetailsContent } : {},
-  } as unknown as AttachmentServiceStartContract);
+  }) as unknown as AttachmentServiceStartContract;
 
 describe('AttachmentSummaryList', () => {
   it('renders nothing when there are no attachments', () => {

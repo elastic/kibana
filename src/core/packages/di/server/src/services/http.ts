@@ -27,9 +27,9 @@ export interface RouteDefinition<
   P = unknown,
   Q = unknown,
   B = unknown,
-  Method extends Exclude<RouteMethod, 'options'> = Exclude<RouteMethod, 'options'>
-> extends RouteConfig<P, Q, B, Method>,
-    Newable<RouteHandler> {
+  Method extends Exclude<RouteMethod, 'options'> = Exclude<RouteMethod, 'options'>,
+>
+  extends RouteConfig<P, Q, B, Method>, Newable<RouteHandler> {
   /**
    * The HTTP method of the route.
    */

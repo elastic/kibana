@@ -81,7 +81,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
     const initialState = {
       selectedTabId:
         tabs.length > 0
-          ? tabs.find(({ initialSelected }) => initialSelected)?.id ?? tabs[0].id
+          ? (tabs.find(({ initialSelected }) => initialSelected)?.id ?? tabs[0].id)
           : '',
     };
 

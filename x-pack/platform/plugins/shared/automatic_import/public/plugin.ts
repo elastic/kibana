@@ -23,9 +23,10 @@ import { getCreateIntegrationSideCardButtonLazy } from './components/create_inte
 import { getDataStreamResultsFlyoutComponent } from './components/data_stream_results_flyout';
 import { AutomaticImportTelemetry } from './services/telemetry';
 
-export class AutomaticImportPlugin
-  implements Plugin<AutomaticImportPluginSetup, AutomaticImportPluginStart>
-{
+export class AutomaticImportPlugin implements Plugin<
+  AutomaticImportPluginSetup,
+  AutomaticImportPluginStart
+> {
   private telemetry = new AutomaticImportTelemetry();
   private readonly renderUpselling$ = new BehaviorSubject<React.ReactNode | undefined>(undefined);
 

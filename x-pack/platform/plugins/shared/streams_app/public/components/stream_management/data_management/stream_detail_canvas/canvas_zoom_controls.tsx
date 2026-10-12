@@ -50,9 +50,11 @@ function ZoomButton({
         border: none;
         cursor: pointer;
         color: ${euiTheme.colors.textParagraph};
-        ${hasTopBorder
-          ? `border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};`
-          : ''}
+        ${
+          hasTopBorder
+            ? `border-top: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};`
+            : ''
+        }
         &:hover {
           background-color: ${euiTheme.colors.backgroundBaseSubdued};
         }

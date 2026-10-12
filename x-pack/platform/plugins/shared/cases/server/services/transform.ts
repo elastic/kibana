@@ -50,10 +50,13 @@ function transformConnectorFieldsToExternalModel(
     type: connector.type,
     fields:
       connector.fields != null && connector.fields.length > 0
-        ? connector.fields.reduce((fields, { key, value }) => {
-            fields[key] = value;
-            return fields;
-          }, {} as Record<string, unknown>)
+        ? connector.fields.reduce(
+            (fields, { key, value }) => {
+              fields[key] = value;
+              return fields;
+            },
+            {} as Record<string, unknown>
+          )
         : null,
   } as ConnectorTypeFields;
 

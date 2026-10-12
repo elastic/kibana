@@ -19,9 +19,12 @@ export interface ConnectorEventsBridgeStartDeps {
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
-export class ConnectorEventsBridgePlugin
-  implements Plugin<{}, {}, ConnectorEventsBridgeSetupDeps, ConnectorEventsBridgeStartDeps>
-{
+export class ConnectorEventsBridgePlugin implements Plugin<
+  {},
+  {},
+  ConnectorEventsBridgeSetupDeps,
+  ConnectorEventsBridgeStartDeps
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

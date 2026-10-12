@@ -87,7 +87,9 @@ export const getRulePreviewMetadata = (
   response: RulePreviewMetadataResponse
 ): PreviewMetadataState | undefined => {
   const total =
-    typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
+    typeof response.hits.total === 'number'
+      ? response.hits.total
+      : (response.hits.total?.value ?? 0);
   const minTimestamp = response.aggregations?.minTimestamp?.value;
   const maxTimestamp = response.aggregations?.maxTimestamp?.value;
 

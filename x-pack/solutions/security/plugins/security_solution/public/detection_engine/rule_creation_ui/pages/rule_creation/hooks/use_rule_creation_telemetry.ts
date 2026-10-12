@@ -68,10 +68,10 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
       const isAi = aiSessionOnUnmount != null && aiSessionOnUnmount.applyCount > 0;
       const sessionId = isAi
         ? aiSessionOnUnmount.sessionId
-        : manualSessionRef.current?.sessionId ?? '';
+        : (manualSessionRef.current?.sessionId ?? '');
       const sessionStart = isAi
         ? aiSessionOnUnmount.startTimestamp
-        : manualSessionRef.current?.startTimestamp ?? Date.now();
+        : (manualSessionRef.current?.startTimestamp ?? Date.now());
 
       telemetry.reportEvent(RuleCreationEventTypes.CreationAbandoned, {
         creationSource: isAi ? 'ai' : 'manual',
@@ -93,10 +93,10 @@ export const useRuleCreationTelemetry = (ruleType: string): UseRuleCreationTelem
     const isAiCreated = isAiRuleAppliedRef.current && aiSession != null;
     return {
       creationSource: isAiCreated ? 'ai' : 'manual',
-      sessionId: isAiCreated ? aiSession.sessionId : manualSessionRef.current?.sessionId ?? '',
+      sessionId: isAiCreated ? aiSession.sessionId : (manualSessionRef.current?.sessionId ?? ''),
       sessionStart: isAiCreated
         ? aiSession.startTimestamp
-        : manualSessionRef.current?.startTimestamp ?? Date.now(),
+        : (manualSessionRef.current?.startTimestamp ?? Date.now()),
     };
   }, [aiRuleCreation]);
 

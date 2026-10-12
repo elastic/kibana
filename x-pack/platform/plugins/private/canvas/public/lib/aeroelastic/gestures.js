@@ -15,9 +15,9 @@ import { select } from './select';
 // actually getting the OS on the server side.
 const appleKeyboard = Boolean(
   window &&
-    window.navigator &&
-    window.navigator.userAgent &&
-    window.navigator.userAgent.match('Macintosh|iPhone|iPad')
+  window.navigator &&
+  window.navigator.userAgent &&
+  window.navigator.userAgent.match('Macintosh|iPhone|iPad')
 );
 
 /**

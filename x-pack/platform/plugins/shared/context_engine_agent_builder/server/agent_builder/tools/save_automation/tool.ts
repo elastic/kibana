@@ -174,10 +174,10 @@ export const createSaveAutomationTool = ({
       // — `workflowId` on its own attaches an existing workflow and writes nothing.
       const targetWorkflowId =
         workflowAttachmentId || workflowYaml
-          ? workflowId ??
+          ? (workflowId ??
             (workflowAttachmentId
               ? tryResolveWorkflowOriginFromAttachments(attachments, workflowAttachmentId)
-              : undefined)
+              : undefined))
           : undefined;
 
       let draftName: string | undefined;

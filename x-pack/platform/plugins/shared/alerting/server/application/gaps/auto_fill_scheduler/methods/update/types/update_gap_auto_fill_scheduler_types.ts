@@ -11,7 +11,9 @@ import type { updateGapAutoFillSchedulerSchema } from '../schemas';
 
 export type UpdateGapAutoFillSchedulerBase = TypeOf<typeof updateGapAutoFillSchedulerSchema>;
 
-export interface UpdateGapAutoFillSchedulerParams
-  extends Omit<UpdateGapAutoFillSchedulerBase, 'request'> {
+export interface UpdateGapAutoFillSchedulerParams extends Omit<
+  UpdateGapAutoFillSchedulerBase,
+  'request'
+> {
   request: KibanaRequest;
 }

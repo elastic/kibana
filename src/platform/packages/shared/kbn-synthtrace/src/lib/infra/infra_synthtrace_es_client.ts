@@ -31,8 +31,7 @@ const KUBELETSTATS_OTEL_TEMPLATE = 'metrics-kubeletstatsreceiver.otel';
 const OTEL_INDEX_TEMPLATE_NAMES = [HOSTMETRICS_OTEL_TEMPLATE, KUBELETSTATS_OTEL_TEMPLATE] as const;
 
 export interface InfraSynthtraceEsClient
-  extends SynthtraceEsClient<InfraDocument>,
-    PackageManagement {}
+  extends SynthtraceEsClient<InfraDocument>, PackageManagement {}
 
 export class InfraSynthtraceEsClientImpl
   extends SynthtraceEsClientBase<InfraDocument>

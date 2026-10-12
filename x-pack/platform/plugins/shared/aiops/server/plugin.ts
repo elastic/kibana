@@ -44,9 +44,12 @@ import { transformOut as logRateTransformOut } from '../common/embeddables/log_r
 import { transformIn as patternAnalysisTransformIn } from '../common/embeddables/pattern_analysis/transform_in';
 import { transformOut as patternAnalysisTransformOut } from '../common/embeddables/pattern_analysis/transform_out';
 
-export class AiopsPlugin
-  implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
-{
+export class AiopsPlugin implements Plugin<
+  AiopsPluginSetup,
+  AiopsPluginStart,
+  AiopsPluginSetupDeps,
+  AiopsPluginStartDeps
+> {
   private readonly logger: Logger;
   private licenseSubscription: Subscription | null = null;
   private usageCounter?: UsageCounter;

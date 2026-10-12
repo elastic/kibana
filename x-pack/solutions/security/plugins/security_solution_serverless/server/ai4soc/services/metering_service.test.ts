@@ -29,7 +29,7 @@ describe('Ai4SocMeteringService', () => {
           product_tier: ProductTier.essentials,
         },
       ],
-    } as ServerlessSecurityConfig);
+    }) as ServerlessSecurityConfig;
 
   function buildDefaultUsageRecordArgs(): MeteringCallbackInput {
     logger = loggingSystemMock.createLogger();

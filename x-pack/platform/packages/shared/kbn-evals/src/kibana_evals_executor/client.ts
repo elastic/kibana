@@ -104,7 +104,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
   async runExperiment<
     TEvaluationDataset extends EvaluationDataset,
-    TTaskOutput extends TaskOutput = TaskOutput
+    TTaskOutput extends TaskOutput = TaskOutput,
   >(
     {
       name,
@@ -165,7 +165,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
 
   private async runSingleDatasetExperiment<
     TEvaluationDataset extends EvaluationDataset,
-    TTaskOutput extends TaskOutput = TaskOutput
+    TTaskOutput extends TaskOutput = TaskOutput,
   >(
     {
       experimentName,

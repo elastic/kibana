@@ -10,17 +10,15 @@ import type { IPatternExtractionService } from './pattern_extraction_service';
 
 export const createPatternExtractionServiceMock = (): jest.Mocked<IPatternExtractionService> => {
   const mock: jest.Mocked<IPatternExtractionService> = {
-    extractGrokPatterns: jest.fn(
-      (_messages: string[]): Promise<GrokExtractionResult> =>
-        Promise.resolve({ type: 'grok', patternGroups: [] })
+    extractGrokPatterns: jest.fn((_messages: string[]): Promise<GrokExtractionResult> =>
+      Promise.resolve({ type: 'grok', patternGroups: [] })
     ),
-    extractDissectPattern: jest.fn(
-      (_messages: string[]): Promise<DissectExtractionResult> =>
-        Promise.resolve({
-          type: 'dissect',
-          dissectPattern: { ast: { nodes: [] }, fields: [] },
-          largestGroupMessages: [],
-        })
+    extractDissectPattern: jest.fn((_messages: string[]): Promise<DissectExtractionResult> =>
+      Promise.resolve({
+        type: 'dissect',
+        dissectPattern: { ast: { nodes: [] }, fields: [] },
+        largestGroupMessages: [],
+      })
     ),
     stop: jest.fn().mockResolvedValue(undefined),
   };

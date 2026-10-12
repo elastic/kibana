@@ -353,7 +353,7 @@ export class FlyoutClass extends Component<
                   text: indexPattern.title,
                   value: indexPattern.id,
                   'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-                } as { text: string; value: string; 'data-test-subj'?: string })
+                }) as { text: string; value: string; 'data-test-subj'?: string }
             ),
           ];
 

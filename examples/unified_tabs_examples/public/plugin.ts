@@ -17,15 +17,12 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import image from './unified_tabs.png';
 
-export class UnifiedTabsExamplesPlugin
-  implements
-    Plugin<
-      UnifiedTabsExamplesPluginSetup,
-      UnifiedTabsExamplesPluginStart,
-      AppPluginSetupDependencies,
-      AppPluginStartDependencies
-    >
-{
+export class UnifiedTabsExamplesPlugin implements Plugin<
+  UnifiedTabsExamplesPluginSetup,
+  UnifiedTabsExamplesPluginStart,
+  AppPluginSetupDependencies,
+  AppPluginStartDependencies
+> {
   public setup(
     core: CoreSetup<AppPluginStartDependencies>,
     { developerExamples }: AppPluginSetupDependencies

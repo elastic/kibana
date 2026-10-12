@@ -42,15 +42,12 @@ export interface AnonymizationStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
-export class AnonymizationPlugin
-  implements
-    Plugin<
-      AnonymizationPluginSetup,
-      AnonymizationPluginStart,
-      AnonymizationSetupDeps,
-      AnonymizationStartDeps
-    >
-{
+export class AnonymizationPlugin implements Plugin<
+  AnonymizationPluginSetup,
+  AnonymizationPluginStart,
+  AnonymizationSetupDeps,
+  AnonymizationStartDeps
+> {
   private readonly logger: Logger;
   private policyService: AnonymizationPolicyService | undefined;
   private readonly profileInitializers = new Map<string, AnonymizationProfileInitializer>();

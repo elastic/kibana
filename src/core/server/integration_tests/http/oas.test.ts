@@ -234,9 +234,7 @@ it.each([
             path: '/api/internal-test',
             security: { authz: { enabled: false, reason: '' } },
             validate: false,
-            options: {
-              /* empty */
-            },
+            options: {/* empty */},
           },
           (_, __, res) => res.ok()
         );

@@ -54,14 +54,14 @@ const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecor
     },
     isAnchor: false,
     ...overrides,
-  } as DataTableRecord);
+  }) as DataTableRecord;
 
 const createMockAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDiscoveryAlert =>
   ({
     id: 'attack-123',
     '@timestamp': '2023-01-01T00:00:00.000Z',
     ...overrides,
-  } as AttackDiscoveryAlert);
+  }) as AttackDiscoveryAlert;
 
 describe('<Footer />', () => {
   const mockHit = createMockHit();

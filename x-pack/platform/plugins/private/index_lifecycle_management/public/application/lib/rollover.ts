@@ -40,13 +40,13 @@ export const hasRecommendedRolloverDefaults = ({
 
   return Boolean(
     hasOnlyRecommendedFields &&
-      selectedRestrictionFields.length === 0 &&
-      `${rollover?.max_age ?? ''}` === recommendedRolloverFormValues.max_age &&
-      `${rollover?.max_primary_shard_size ?? ''}` ===
-        recommendedRolloverFormValues.max_primary_shard_size &&
-      (maxAgeUnit ?? recommendedRolloverFormValues.maxAgeUnit) ===
-        recommendedRolloverFormValues.maxAgeUnit &&
-      (maxPrimaryShardSizeUnit ?? recommendedRolloverFormValues.maxPrimaryShardSizeUnit) ===
-        recommendedRolloverFormValues.maxPrimaryShardSizeUnit
+    selectedRestrictionFields.length === 0 &&
+    `${rollover?.max_age ?? ''}` === recommendedRolloverFormValues.max_age &&
+    `${rollover?.max_primary_shard_size ?? ''}` ===
+      recommendedRolloverFormValues.max_primary_shard_size &&
+    (maxAgeUnit ?? recommendedRolloverFormValues.maxAgeUnit) ===
+      recommendedRolloverFormValues.maxAgeUnit &&
+    (maxPrimaryShardSizeUnit ?? recommendedRolloverFormValues.maxPrimaryShardSizeUnit) ===
+      recommendedRolloverFormValues.maxPrimaryShardSizeUnit
   );
 };

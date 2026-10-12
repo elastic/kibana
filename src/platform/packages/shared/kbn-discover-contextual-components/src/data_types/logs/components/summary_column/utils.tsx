@@ -54,15 +54,18 @@ const getUnformattedFields = (
   doc: DataTableRecord,
   fields: readonly FieldKey[]
 ): Readonly<Record<FieldKey, FieldValue>> =>
-  fields.reduce((acc, field) => {
-    const fieldValue = getFieldValue(doc, field);
+  fields.reduce(
+    (acc, field) => {
+      const fieldValue = getFieldValue(doc, field);
 
-    if (fieldValue != null) {
-      acc[field] = fieldValue;
-    }
+      if (fieldValue != null) {
+        acc[field] = fieldValue;
+      }
 
-    return acc;
-  }, {} as Record<FieldKey, FieldValue>);
+      return acc;
+    },
+    {} as Record<FieldKey, FieldValue>
+  );
 
 const DurationIcon = () => {
   const { euiTheme } = useEuiTheme();

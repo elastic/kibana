@@ -26,7 +26,7 @@ const createLogger = (): jest.Mocked<Logger> =>
     error: jest.fn(),
     info: jest.fn(),
     warn: jest.fn(),
-  } as unknown as jest.Mocked<Logger>);
+  }) as unknown as jest.Mocked<Logger>;
 
 const createWorkflowsManagementApi = (): jest.Mocked<WorkflowsManagementApi> =>
   ({
@@ -34,7 +34,7 @@ const createWorkflowsManagementApi = (): jest.Mocked<WorkflowsManagementApi> =>
     getWorkflowExecution: jest.fn(),
     runWorkflow: jest.fn(),
     scheduleWorkflow: jest.fn().mockResolvedValue('report-run-id'),
-  } as unknown as jest.Mocked<WorkflowsManagementApi>);
+  }) as unknown as jest.Mocked<WorkflowsManagementApi>;
 
 const baseParams = {
   connectorId: 'connector-xyz',

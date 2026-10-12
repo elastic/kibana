@@ -84,9 +84,9 @@ describe('GET /internal/evals/tracing/projects', () => {
       logger,
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
-      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
-      getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
-      getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+      getInferenceStart: async () => ({ getClient: jest.fn() }) as unknown as InferenceServerStart,
+      getEncryptedSavedObjectsStart: async () => ({}) as EncryptedSavedObjectsPluginStart,
+      getInternalRemoteConfigsSoClient: async () => ({}) as SavedObjectsClientContract,
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;

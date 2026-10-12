@@ -57,7 +57,7 @@ const buildMockChildApi = (id: string): DefaultEmbeddableApi =>
     uuid: id,
     type: TEST_EMBEDDABLE,
     relatedPanels$: new BehaviorSubject<string[]>([]),
-  } as unknown as DefaultEmbeddableApi);
+  }) as unknown as DefaultEmbeddableApi;
 
 const createAndMountDashboardGridItem = (props: DashboardGridItemProps) => {
   const panels = [

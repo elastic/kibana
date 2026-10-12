@@ -59,7 +59,9 @@ export const areMatchersEqual = (a?: Matcher[], b?: Matcher[]) =>
 const isIntegrationType = (value?: string): value is IntegrationType =>
   Boolean(value && INTEGRATION_TYPES.includes(value as IntegrationType));
 
-export const getDefaultMatchersForIntegration = (integrationName?: string): Matcher[] | undefined =>
+export const getDefaultMatchersForIntegration = (
+  integrationName?: string
+): Matcher[] | undefined =>
   isIntegrationType(integrationName) ? getMatchersFor(integrationName) : undefined;
 
 export const getDefaultMatchersForSource = (

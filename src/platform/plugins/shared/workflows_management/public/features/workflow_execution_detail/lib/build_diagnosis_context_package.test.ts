@@ -25,7 +25,7 @@ const step = (
     stepExecutionIndex: 0,
     topologicalIndex: 0,
     ...partial,
-  } as WorkflowStepExecutionDto);
+  }) as WorkflowStepExecutionDto;
 
 describe('buildDiagnosisContextPackage', () => {
   const definition = {

@@ -35,9 +35,12 @@ import type {
 import { IngestPipelinesLocatorDefinition } from './locator';
 import { IngestPipelineFlyout } from './application/sections/pipelines_list/ingest_pipeline_flyout_embeddable';
 
-export class IngestPipelinesPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class IngestPipelinesPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   private license: ILicense | null = null;
   private licensingSubscription?: Subscription;
   private readonly config: Config;

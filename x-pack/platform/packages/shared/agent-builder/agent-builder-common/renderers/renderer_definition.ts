@@ -12,7 +12,7 @@ import type { z, ZodObject } from '@kbn/zod/v4';
  */
 export interface RendererDefinition<
   TType extends string = string,
-  TSchema extends ZodObject<any> = ZodObject<any>
+  TSchema extends ZodObject<any> = ZodObject<any>,
 > {
   /**
    * Unique identifier for the renderer type.

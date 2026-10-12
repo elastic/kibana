@@ -53,7 +53,7 @@ interface FetchActionResponsesOptions {
 
 export interface FetchActionResponsesResult<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 > {
   /** Response (aka: the `ack`) sent to the fleet index */
   fleetResponses: EndpointActionResponse[];
@@ -66,7 +66,7 @@ export interface FetchActionResponsesResult<
  */
 export const fetchActionResponses = async <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 >(
   options: FetchActionResponsesOptions
 ): Promise<FetchActionResponsesResult<TOutputContent, TResponseMeta>> => {
@@ -93,7 +93,7 @@ export const fetchActionResponses = async <
  */
 export const fetchEndpointActionResponses = async <
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TResponseMeta extends {} = {}
+  TResponseMeta extends {} = {},
 >({
   esClient,
   endpointService,

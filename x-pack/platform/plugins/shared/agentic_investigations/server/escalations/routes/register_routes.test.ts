@@ -302,7 +302,7 @@ describe('escalation routes', () => {
     const buildAssignService = (assignFn: jest.Mock) =>
       ({
         assign: assignFn,
-      } as unknown as AssignmentsService);
+      }) as unknown as AssignmentsService;
 
     it('calls service.assign with the escalation id and assignees and returns 200', async () => {
       const assign = jest.fn().mockResolvedValue(MOCK_ESCALATION);
@@ -325,7 +325,7 @@ describe('escalation routes', () => {
       registerEscalationRoutes({
         router,
         logger: loggingSystemMock.createLogger(),
-        getEscalationsService: () => ({} as EscalationsService),
+        getEscalationsService: () => ({}) as EscalationsService,
         getAssignmentsService: () => buildAssignService(assign),
         getSpaceId: () => 'default',
         getSecurity: jest.fn(),
@@ -363,7 +363,7 @@ describe('escalation routes', () => {
       registerEscalationRoutes({
         router,
         logger: loggingSystemMock.createLogger(),
-        getEscalationsService: () => ({} as EscalationsService),
+        getEscalationsService: () => ({}) as EscalationsService,
         getAssignmentsService: () => buildAssignService(assign),
         getSpaceId: () => 'default',
         getSecurity: jest.fn(),
@@ -399,7 +399,7 @@ describe('escalation routes', () => {
       registerEscalationRoutes({
         router,
         logger: loggingSystemMock.createLogger(),
-        getEscalationsService: () => ({} as EscalationsService),
+        getEscalationsService: () => ({}) as EscalationsService,
         getAssignmentsService: () => buildAssignService(assign),
         getSpaceId: () => 'default',
         getSecurity: jest.fn(),

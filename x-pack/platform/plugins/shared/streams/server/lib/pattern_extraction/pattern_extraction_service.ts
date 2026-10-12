@@ -27,7 +27,10 @@ export class PatternExtractionService implements IPatternExtractionService {
   private worker?: Piscina;
   private readonly config: PatternExtractionWorkerConfig;
 
-  constructor(config: PatternExtractionWorkerConfig, private readonly logger: Logger) {
+  constructor(
+    config: PatternExtractionWorkerConfig,
+    private readonly logger: Logger
+  ) {
     this.config = config;
     this.enabled = config.enabled;
 

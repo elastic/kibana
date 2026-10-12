@@ -25,15 +25,12 @@ export interface KQLServerPluginSetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KQLServerPluginStartDependencies {}
 
-export class KQLServerPlugin
-  implements
-    Plugin<
-      KQLServerPluginSetup,
-      KQLServerPluginStart,
-      KQLServerPluginSetupDependencies,
-      KQLServerPluginStartDependencies
-    >
-{
+export class KQLServerPlugin implements Plugin<
+  KQLServerPluginSetup,
+  KQLServerPluginStart,
+  KQLServerPluginSetupDependencies,
+  KQLServerPluginStartDependencies
+> {
   private readonly autocompleteService: AutocompleteService;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {

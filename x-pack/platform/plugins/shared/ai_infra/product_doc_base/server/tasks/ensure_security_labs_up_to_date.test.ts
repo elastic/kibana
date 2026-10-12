@@ -28,7 +28,7 @@ describe('EnsureSecurityLabsUpToDate task', () => {
       taskManager,
       lockManager: { withLock },
       getServices: () =>
-        ({ packageInstaller: { ensureSecurityLabsUpToDate } } as unknown as InternalServices),
+        ({ packageInstaller: { ensureSecurityLabsUpToDate } }) as unknown as InternalServices,
     });
     const definition =
       taskManager.registerTaskDefinitions.mock.calls[0][0][

@@ -51,7 +51,7 @@ export const useEffectiveWorkflowTracking = ({
   // Poll for fresh tracking data internally so the flyout updates in real-time
   // regardless of the parent's polling lifecycle. Only poll while running.
   const { data: internalTrackingData } = useWorkflowTracking({
-    executionId: !isTerminalStatus ? executionUuid ?? null : null,
+    executionId: !isTerminalStatus ? (executionUuid ?? null) : null,
     http,
   });
 
@@ -110,7 +110,7 @@ export const useEffectiveWorkflowTracking = ({
   const effectiveWorkflowRunId: string | null | undefined =
     workflowRunId != null
       ? workflowRunId
-      : internalTrackingData?.generation?.workflow_run_id ?? workflowRunId;
+      : (internalTrackingData?.generation?.workflow_run_id ?? workflowRunId);
 
   const pipelineDataRefetchIntervalMs = isTerminalStatus ? 0 : PIPELINE_DATA_POLL_INTERVAL_MS;
 

@@ -45,7 +45,7 @@ describe('registerUpdateWorkerRoute', () => {
   it('requires alertzero_write and checks Workflows managed-update as extended privileges', () => {
     const { router } = setupRoute(jest.fn());
     const [{ security }] = (router.versioned.patch as jest.Mock).mock.calls[0] as [
-      { security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } } }
+      { security: { authz: { requiredPrivileges: string[]; extendedPrivileges: string[] } } },
     ];
 
     expect(security.authz.requiredPrivileges).toEqual([ALERTZERO_API_PRIVILEGE_WRITE]);

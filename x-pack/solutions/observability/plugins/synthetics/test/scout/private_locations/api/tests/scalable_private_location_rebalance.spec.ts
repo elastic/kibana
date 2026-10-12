@@ -64,9 +64,8 @@ apiTest.describe('ScalablePrivateLocationRebalance', { tag: ['@local-stateful-cl
 
     await kbnClient.savedObjects.clean({ types: SYNTHETICS_MONITOR_SO_TYPES });
     await apiServices.syntheticsPrivateLocations.installSyntheticsPackage();
-    privateLocation = await apiServices.syntheticsPrivateLocations.addTestPrivateLocation(
-      'default'
-    );
+    privateLocation =
+      await apiServices.syntheticsPrivateLocations.addTestPrivateLocation('default');
 
     agentAId = await indexFakeFleetAgent(esClient, privateLocation.agentPolicyId, {
       hostname: 'rebalance-agent-a',

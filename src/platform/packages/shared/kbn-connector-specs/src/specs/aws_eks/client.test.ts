@@ -11,7 +11,7 @@ import type { ActionContext } from '../../connector_spec';
 import { accessEntryPath, awsCredentials, request, resolveRegion } from './client';
 
 const ctx = (config: Record<string, unknown>, secrets: Record<string, unknown> = {}) =>
-  ({ config, secrets } as unknown as ActionContext);
+  ({ config, secrets }) as unknown as ActionContext;
 
 describe('client', () => {
   it('prefers the per-call Region and trims it', () => {

@@ -69,7 +69,7 @@ export const createRuleMigrationsDataClientMock = () =>
     lookups: mockSiemMigrationsDataLookupsClient,
     migrations: mockRuleMigrationsDataMigrationsClient,
     deleteMigration: mockDeleteMigration,
-  } as jest.MockedObjectDeep<RuleMigrationsDataClient>);
+  }) as jest.MockedObjectDeep<RuleMigrationsDataClient>;
 
 export const MockRuleMigrationsDataClient = jest
   .fn()

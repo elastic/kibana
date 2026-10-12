@@ -193,7 +193,7 @@ const resolveTransportPort = (transportPort: number | string | undefined): numbe
 };
 
 export function createTestEsCluster<
-  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions
+  Options extends CreateTestEsClusterOptions = CreateTestEsClusterOptions,
 >(options: Options): EsTestCluster<Options> {
   const {
     port = esTestConfig.getPort(),

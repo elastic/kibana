@@ -161,7 +161,7 @@ describe('trace evaluators integration', () => {
       getInferenceStart: async () =>
         ({
           getClient,
-        } as unknown as InferenceServerStart),
+        }) as unknown as InferenceServerStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -505,7 +505,7 @@ describe('trace evaluators integration', () => {
       getInferenceStart: async () =>
         ({
           getClient: jest.fn(),
-        } as unknown as InferenceServerStart),
+        }) as unknown as InferenceServerStart,
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });

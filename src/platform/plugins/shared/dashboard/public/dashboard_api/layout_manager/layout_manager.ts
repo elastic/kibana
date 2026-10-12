@@ -419,7 +419,7 @@ export function initializeLayoutManager(
     if (!apiToDuplicate || !layoutItemToDuplicate) throw new PanelNotFoundError();
 
     const allTitles = await getPanelTitles();
-    const lastTitle = apiPublishesTitle(apiToDuplicate) ? getTitle(apiToDuplicate) ?? '' : '';
+    const lastTitle = apiPublishesTitle(apiToDuplicate) ? (getTitle(apiToDuplicate) ?? '') : '';
     const newTitle = getClonedPanelTitle(allTitles, lastTitle);
 
     const uuidOfDuplicate = v4();
@@ -497,8 +497,8 @@ export function initializeLayoutManager(
     const panelLayout = Object.hasOwn(panels, uuid)
       ? panels[uuid]
       : Object.hasOwn(pinnedPanels, uuid)
-      ? pinnedPanels[uuid]
-      : undefined;
+        ? pinnedPanels[uuid]
+        : undefined;
     if (!panelLayout) throw new PanelNotFoundError();
     if (children$.value[uuid]) return children$.value[uuid];
 

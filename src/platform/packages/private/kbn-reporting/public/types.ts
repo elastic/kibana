@@ -71,5 +71,5 @@ export interface ReportParamsGetterOptions<S extends SharingData = SharingData> 
 
 export type ReportParamsGetter<
   O extends ReportParamsGetterOptions = ReportParamsGetterOptions,
-  T = unknown
+  T = unknown,
 > = (options: O) => T;

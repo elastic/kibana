@@ -35,7 +35,7 @@ const makePolicy = (
         })),
       },
     ],
-  } as unknown as PackagePolicy);
+  }) as unknown as PackagePolicy;
 
 const BUCKET_INTERVAL_SECONDS = 30 * 60; // 1800s — mirrors the constant in throughput.ts
 const FULL_WINDOW_SECONDS = 24 * 3600; // 86400s

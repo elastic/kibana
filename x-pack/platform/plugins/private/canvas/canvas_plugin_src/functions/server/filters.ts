@@ -14,7 +14,7 @@ import { fromExpression } from '@kbn/interpreter';
 import { buildFiltersFunction } from '../../../common/functions';
 import type { FiltersFunction } from '../../../common/functions';
 
-/* 
+/*
   Expression function `filters` can't be used on the server, because it is tightly coupled with the redux store. 
   It is replaced with `kibana | selectFilter`.
   

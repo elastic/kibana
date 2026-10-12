@@ -25,10 +25,12 @@ interface StartDeps {
 export type ExpressionHeatmapPluginSetup = void;
 export type ExpressionHeatmapPluginStart = void;
 
-export class ExpressionHeatmapPlugin
-  implements
-    Plugin<ExpressionHeatmapPluginSetup, ExpressionHeatmapPluginStart, SetupDeps, StartDeps>
-{
+export class ExpressionHeatmapPlugin implements Plugin<
+  ExpressionHeatmapPluginSetup,
+  ExpressionHeatmapPluginStart,
+  SetupDeps,
+  StartDeps
+> {
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionHeatmapPluginSetup {
     expressions.registerFunction(heatmapFunction);
     expressions.registerFunction(heatmapLegendConfig);

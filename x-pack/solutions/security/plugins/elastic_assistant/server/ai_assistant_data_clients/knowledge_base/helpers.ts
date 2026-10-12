@@ -159,10 +159,10 @@ export const getStructuredToolForIndexEntry = ({
       input.fieldType === 'string'
         ? z.string()
         : input.fieldType === 'number'
-        ? z.number()
-        : input.fieldType === 'boolean'
-        ? z.boolean()
-        : z.any().optional();
+          ? z.number()
+          : input.fieldType === 'boolean'
+            ? z.boolean()
+            : z.any().optional();
     return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
   }, {});
 

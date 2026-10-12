@@ -297,9 +297,7 @@ apiTest.describe(
               MOCK_IDP_UIAM_SHARED_SECRET,
               new HTTPAuthorizationHeader(
                 'ApiKey',
-                (
-                  await otherInternalUiamApiKeyResponse.json()
-                ).key
+                (await otherInternalUiamApiKeyResponse.json()).key
               )
             ),
           },

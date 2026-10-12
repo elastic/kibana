@@ -21,9 +21,10 @@ import { getIncludeExcludeFilter } from '../../datasource';
 // Test setup
 // ─────────────────────────────────────────────────────────────────────────────
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({ items: [], total: 0 })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const mockUser = {
   uid: 'u_jane',

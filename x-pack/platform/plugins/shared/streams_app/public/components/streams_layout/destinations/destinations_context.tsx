@@ -214,10 +214,10 @@ export const useDestinations = ({
     const creation = state.context.creationContext;
     return Boolean(
       creation &&
-        canSubmitDestinationForm({
-          formData: creation.formData,
-          unitDefinition: state.context.unitDefinition,
-        })
+      canSubmitDestinationForm({
+        formData: creation.formData,
+        unitDefinition: state.context.unitDefinition,
+      })
     );
   });
   const isUnitSaving = useSelector(destinationsActorRef, (state) =>

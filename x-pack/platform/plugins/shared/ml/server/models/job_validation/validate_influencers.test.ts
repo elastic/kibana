@@ -58,7 +58,7 @@ describe('ML - validateInfluencers', () => {
       datafeed_config: {
         indices: [],
       },
-    } as unknown as CombinedJob);
+    }) as unknown as CombinedJob;
 
   it('success_influencer', () => {
     const job = getJobConfig(['airline']);

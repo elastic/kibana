@@ -97,33 +97,31 @@ const getSnoozeTooltip = (groupAction: AlertEpisodeGroupAction): string => {
 // restore the original icon-and-tooltip badges (checkCircle / bellSlash) from the shared status row.
 const renderIconBadge =
   (iconType: string, tooltip: string, dataTestSubj: string) =>
-  ({ badgeText }: { badgeText: string }) =>
-    (
-      <EuiToolTip
-        content={tooltip}
-        disableScreenReaderOutput
-        anchorProps={{ css: { display: 'flex' } }}
+  ({ badgeText }: { badgeText: string }) => (
+    <EuiToolTip
+      content={tooltip}
+      disableScreenReaderOutput
+      anchorProps={{ css: { display: 'flex' } }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType={iconType}
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj={dataTestSubj}
       >
-        <EuiBadge
-          color="hollow"
-          iconType={iconType}
-          iconSide="left"
-          tabIndex={0}
-          data-test-subj={dataTestSubj}
-        >
-          {badgeText}
-        </EuiBadge>
-      </EuiToolTip>
-    );
+        {badgeText}
+      </EuiBadge>
+    </EuiToolTip>
+  );
 
 const renderFilledBadge =
   (color: EuiBadgeProps['color'], dataTestSubj: string) =>
-  ({ badgeText }: { badgeText: string }) =>
-    (
-      <EuiBadge color={color} fill data-test-subj={dataTestSubj}>
-        {badgeText}
-      </EuiBadge>
-    );
+  ({ badgeText }: { badgeText: string }) => (
+    <EuiBadge color={color} fill data-test-subj={dataTestSubj}>
+      {badgeText}
+    </EuiBadge>
+  );
 
 const renderFlappingBadge = (_props: { badgeText: string }) => <FlappingBadge />;
 

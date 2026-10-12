@@ -96,7 +96,7 @@ type PartialProfileStates<TDefinitions extends ProfileStateDefinitions> = {
 /** Maps an ordered tuple of profile states to and from a tab type's complete saved payload. */
 export interface ProfileSavedStateTransform<
   TTabType extends SavedTabType,
-  TDefinitions extends ProfileStateDefinitions
+  TDefinitions extends ProfileStateDefinitions,
 > {
   /** Saved tab type handled by this transform. */
   tabType: TTabType;
@@ -111,14 +111,14 @@ export interface ProfileSavedStateTransform<
 /** Identity helper so callers don't have to write the transform's generics by hand. */
 export const createProfileSavedStateTransform = <
   TTabType extends SavedTabType,
-  const TDefinitions extends ProfileStateDefinitions
+  const TDefinitions extends ProfileStateDefinitions,
 >(
   transform: ProfileSavedStateTransform<TTabType, TDefinitions>
 ): ProfileSavedStateTransform<TTabType, TDefinitions> => transform;
 
 type ProfileStateDescriptorEntry<TState extends SerializableRecord> = [
   keyof TState,
-  ProfileStateDescriptor<TState>[keyof TState]
+  ProfileStateDescriptor<TState>[keyof TState],
 ];
 
 const getProfileStateDescriptorEntries = <TState extends SerializableRecord>(
@@ -172,7 +172,7 @@ export class ProfileStateRegistry {
    */
   public registerTransform<
     TTabType extends SavedTabType,
-    const TDefinitions extends ProfileStateDefinitions
+    const TDefinitions extends ProfileStateDefinitions,
   >(transform: ProfileSavedStateTransform<TTabType, TDefinitions>) {
     if (this.stateTransforms.has(transform.tabType)) {
       throw new Error(`Transform for tab type ${transform.tabType} is already registered.`);

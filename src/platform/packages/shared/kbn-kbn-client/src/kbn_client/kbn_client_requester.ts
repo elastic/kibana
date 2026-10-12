@@ -133,7 +133,10 @@ export class KbnClientRequester {
   private readonly authorization?: string;
   private readonly dispatcher: Dispatcher | null;
 
-  constructor(private readonly log: ToolingLog, options: Options) {
+  constructor(
+    private readonly log: ToolingLog,
+    options: Options
+  ) {
     this.url = options.url;
 
     // Unlike high-level HTTP clients such as axios, the native fetch rejects URLs that carry
@@ -213,8 +216,8 @@ export class KbnClientRequester {
           options.body === undefined
             ? undefined
             : isJsonBody
-            ? JSON.stringify(options.body)
-            : (options.body as BodyInit);
+              ? JSON.stringify(options.body)
+              : (options.body as BodyInit);
 
         const response = await fetch(fullUrl, {
           method: options.method,
@@ -319,10 +322,10 @@ export function errMsg({
     const result = isConflictOnGetError(_, method)
       ? `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`
       : requestedRetries || failedToGetResponseSvc(_)
-      ? `[${
-          description || `${method} - ${redacted}`
-        }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
-      : '';
+        ? `[${
+            description || `${method} - ${redacted}`
+          }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
+        : '';
     if (result === '') throw _;
     return result;
   };

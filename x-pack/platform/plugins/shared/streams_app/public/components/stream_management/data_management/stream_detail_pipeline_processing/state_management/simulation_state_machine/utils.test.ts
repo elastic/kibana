@@ -29,7 +29,7 @@ const makeAction = (
     action: 'set',
     field: 'foo',
     value: 'bar',
-  } as PipelineStepWithUIAttributes);
+  }) as PipelineStepWithUIAttributes;
 
 const makeCondition = (
   id: string,
@@ -39,7 +39,7 @@ const makeCondition = (
     customIdentifier: id,
     parentId,
     condition: { steps: [] },
-  } as PipelineStepWithUIAttributes);
+  }) as PipelineStepWithUIAttributes;
 
 const steps: PipelineStepWithUIAttributes[] = [
   makeAction('p1'),

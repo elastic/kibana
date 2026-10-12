@@ -196,9 +196,9 @@ export const SettingsPage: React.FC<Props> = memo(
     const agentlessPolicyIds = useMemo(
       () =>
         agentlessUIEnabled
-          ? packagePoliciesData?.items
+          ? (packagePoliciesData?.items
               .filter((packagePolicy) => isEffectivelyAgentless(packagePolicy))
-              .map(({ id }) => id) ?? []
+              .map(({ id }) => id) ?? [])
           : [],
       [packagePoliciesData, agentlessUIEnabled, isEffectivelyAgentless]
     );

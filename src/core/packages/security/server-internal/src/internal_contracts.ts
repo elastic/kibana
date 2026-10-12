@@ -26,8 +26,10 @@ export interface InternalCoreServiceAccountsSetup {
   ): void;
 }
 
-export interface InternalSecurityServiceSetup
-  extends Omit<SecurityServiceSetup, 'serviceAccounts'> {
+export interface InternalSecurityServiceSetup extends Omit<
+  SecurityServiceSetup,
+  'serviceAccounts'
+> {
   serviceAccounts: InternalCoreServiceAccountsSetup;
   /**
    * The {@link CoreUiamService | UIAM service}
@@ -46,7 +48,9 @@ export interface InternalCoreServiceAccountsStart {
   asScopedToPlugin(pluginId: string): CoreServiceAccountsService;
 }
 
-export interface InternalSecurityServiceStart
-  extends Omit<SecurityServiceStart, 'serviceAccounts'> {
+export interface InternalSecurityServiceStart extends Omit<
+  SecurityServiceStart,
+  'serviceAccounts'
+> {
   serviceAccounts: InternalCoreServiceAccountsStart;
 }

@@ -23,7 +23,7 @@ const makeEpisode = (overrides: Partial<AlertEpisode> = {}): AlertEpisode =>
     last_timestamp: '2026-04-23T00:00:00Z',
     duration: 0,
     ...overrides,
-  } as AlertEpisode);
+  }) as AlertEpisode;
 
 const makeClassicEpisode = (id: string, status = 'acknowledged'): AlertEpisode =>
   makeEpisode({

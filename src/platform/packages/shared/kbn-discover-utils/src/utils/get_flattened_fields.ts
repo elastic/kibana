@@ -14,8 +14,11 @@ export function getFlattenedFields<T>(doc: DataTableRecord, fields: Array<keyof 
   const formatField = <K extends keyof T>(field: K) =>
     castArray(doc.flattened[field as string])[0] as T[K];
 
-  return fields.reduce((acc, field) => {
-    acc[field] = formatField(field) as string | number | undefined;
-    return acc;
-  }, {} as { [ket in keyof T]?: string | number }) as T;
+  return fields.reduce(
+    (acc, field) => {
+      acc[field] = formatField(field) as string | number | undefined;
+      return acc;
+    },
+    {} as { [ket in keyof T]?: string | number }
+  ) as T;
 }

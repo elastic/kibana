@@ -28,7 +28,7 @@ import { AlertingRouteContext } from '../../alerting_route_context';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../../route_descriptions';
 
 export interface BulkEpisodeActionBody<
-  TAction extends CreateEpisodeAlertActionBody['action_type']
+  TAction extends CreateEpisodeAlertActionBody['action_type'],
 > {
   items: Array<
     Omit<Extract<CreateEpisodeAlertActionBody, { action_type: TAction }>, 'action_type'> & {
@@ -38,7 +38,7 @@ export interface BulkEpisodeActionBody<
 }
 
 interface CreateBulkEpisodeActionRouteForTypeOptions<
-  TAction extends CreateEpisodeAlertActionBody['action_type']
+  TAction extends CreateEpisodeAlertActionBody['action_type'],
 > {
   actionType: TAction;
   pathSuffix: string;
@@ -49,7 +49,7 @@ interface CreateBulkEpisodeActionRouteForTypeOptions<
 }
 
 export const createBulkEpisodeActionRouteForType = <
-  TAction extends CreateEpisodeAlertActionBody['action_type']
+  TAction extends CreateEpisodeAlertActionBody['action_type'],
 >({
   actionType,
   pathSuffix,
@@ -113,7 +113,7 @@ export const createBulkEpisodeActionRouteForType = <
             ({
               action_type: actionType,
               ...item,
-            } as BulkCreateEpisodeAlertActionItemBody)
+            }) as BulkCreateEpisodeAlertActionItemBody
         )
       );
 

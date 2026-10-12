@@ -63,9 +63,10 @@ export type InternalExecutionContextSetup = IExecutionContext;
  */
 export type InternalExecutionContextStart = IExecutionContext;
 
-export class ExecutionContextService
-  implements CoreService<InternalExecutionContextSetup, InternalExecutionContextStart>
-{
+export class ExecutionContextService implements CoreService<
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart
+> {
   private readonly log: Logger;
   private readonly contextStore: AsyncLocalStorage<IExecutionContextContainer>;
   private readonly requestIdStore: AsyncLocalStorage<{ requestId: string }>;
@@ -169,10 +170,13 @@ export class ExecutionContextService
 
     // meta labels are only propagated server-side for APM transaction tracing
     const metaLabels = executionContext?.meta
-      ? Object.entries(executionContext.meta).reduce((acc, [key, value]) => {
-          acc[`kibana_meta_${key}`] = value;
-          return acc;
-        }, {} as Record<string, string | number | boolean | undefined>)
+      ? Object.entries(executionContext.meta).reduce(
+          (acc, [key, value]) => {
+            acc[`kibana_meta_${key}`] = value;
+            return acc;
+          },
+          {} as Record<string, string | number | boolean | undefined>
+        )
       : {};
 
     return omitBy(

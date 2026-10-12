@@ -61,7 +61,9 @@ const wrapperStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: 100%;
   border-radius: ${CONVERSATION_INPUT_SHELL_RADIUS}px;
   ${euiCanAnimate} {
-    transition: background-color ${euiTheme.animation.fast} ease-out, box-shadow 250ms;
+    transition:
+      background-color ${euiTheme.animation.fast} ease-out,
+      box-shadow 250ms;
   }
 `;
 
@@ -94,7 +96,8 @@ const headerStyles = ({ euiTheme }: UseEuiTheme) => css`
   grid-template-rows: 0fr;
   visibility: hidden;
   ${euiCanAnimate} {
-    transition: grid-template-rows ${euiTheme.animation.fast} ease-out,
+    transition:
+      grid-template-rows ${euiTheme.animation.fast} ease-out,
       visibility 0s linear ${euiTheme.animation.fast};
   }
 `;

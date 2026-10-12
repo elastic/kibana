@@ -18,7 +18,7 @@ const createStore = (): jest.Mocked<LearningStore> =>
   ({
     record: jest.fn(async (input) => ({ ...input, connector_name: undefined, updated_at: 'now' })),
     list: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<LearningStore>);
+  }) as unknown as jest.Mocked<LearningStore>;
 
 const context = { esClient: { asCurrentUser: {} } } as never;
 

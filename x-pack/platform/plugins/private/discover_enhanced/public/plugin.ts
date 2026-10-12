@@ -29,10 +29,12 @@ export interface DiscoverEnhancedStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export class DiscoverEnhancedPlugin
-  implements
-    Plugin<void, void, DiscoverEnhancedSetupDependencies, DiscoverEnhancedStartDependencies>
-{
+export class DiscoverEnhancedPlugin implements Plugin<
+  void,
+  void,
+  DiscoverEnhancedSetupDependencies,
+  DiscoverEnhancedStartDependencies
+> {
   public readonly config: Config;
 
   constructor(protected readonly context: PluginInitializerContext) {

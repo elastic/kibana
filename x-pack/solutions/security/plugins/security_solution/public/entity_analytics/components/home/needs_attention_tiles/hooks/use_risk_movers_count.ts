@@ -77,8 +77,8 @@ export const useRiskMoversCount = ({
       const entityIds: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
-        ? [rawIds]
-        : [];
+          ? [rawIds]
+          : [];
       return { count, entityIds };
     },
     {
@@ -103,7 +103,7 @@ export const useRiskMoversCount = ({
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (queryResult?.entityIds ?? EMPTY_ENTITY_IDS),
     isLoading: isIndexLoading || isLoading || isFetching,
     isMissingIndex,
     error: filteredError ?? indexError,

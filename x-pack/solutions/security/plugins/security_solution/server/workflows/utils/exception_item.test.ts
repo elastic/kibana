@@ -91,10 +91,10 @@ describe('toApiEntries', () => {
           uiOperator.type === 'match_any'
             ? { values: ['a'] }
             : uiOperator.type === 'list'
-            ? { list: { id: 'ips', type: 'ip' as const } }
-            : uiOperator.type === 'exists'
-            ? {}
-            : { value: 'a' };
+              ? { list: { id: 'ips', type: 'ip' as const } }
+              : uiOperator.type === 'exists'
+                ? {}
+                : { value: 'a' };
 
         const [apiEntry] = toApiEntries([
           {
@@ -322,7 +322,7 @@ describe('createExceptionItemForRule', () => {
   const mockManager = () =>
     ({
       callKibanaApi: jest.fn().mockResolvedValue({ status: 200, headers: {}, body: [apiItem] }),
-    } as unknown as jest.Mocked<StepHandlerContext['contextManager']>);
+    }) as unknown as jest.Mocked<StepHandlerContext['contextManager']>;
 
   it('sends a POST to the rule exceptions endpoint and returns the validated item', async () => {
     const mockContextManager = mockManager();

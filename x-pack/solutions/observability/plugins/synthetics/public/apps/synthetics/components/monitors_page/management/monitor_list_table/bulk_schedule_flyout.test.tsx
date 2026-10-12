@@ -54,7 +54,7 @@ const makeMonitor = (
     [ConfigKey.MONITOR_SOURCE_TYPE]: origin,
     [ConfigKey.MONITOR_TYPE]: type,
     [ConfigKey.SCHEDULE]: schedule,
-  } as unknown as EncryptedSyntheticsSavedMonitor);
+  }) as unknown as EncryptedSyntheticsSavedMonitor;
 
 describe('<BulkScheduleFlyout />', () => {
   const onClose = jest.fn();

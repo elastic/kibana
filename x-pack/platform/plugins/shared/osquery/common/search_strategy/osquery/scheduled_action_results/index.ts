@@ -12,26 +12,25 @@ import type { RequestOptionsPaginated } from '../..';
 
 export type ScheduledActionResultEdges = estypes.SearchResponse<object>['hits']['hits'];
 
-export interface ScheduledActionResultsStrategyResponse
-  extends IKibanaSearchResponse<
-    estypes.SearchResponse<
-      object,
-      {
-        aggs: {
-          responses_by_schedule: estypes.AggregationsSingleBucketAggregateBase & {
-            rows_count: estypes.AggregationsSumAggregate;
-            responded_agents: estypes.AggregationsCardinalityAggregate;
-            success_agents: estypes.AggregationsSingleBucketAggregateBase & {
-              agents: estypes.AggregationsCardinalityAggregate;
-            };
-            error_agents: estypes.AggregationsSingleBucketAggregateBase & {
-              agents: estypes.AggregationsCardinalityAggregate;
-            };
+export interface ScheduledActionResultsStrategyResponse extends IKibanaSearchResponse<
+  estypes.SearchResponse<
+    object,
+    {
+      aggs: {
+        responses_by_schedule: estypes.AggregationsSingleBucketAggregateBase & {
+          rows_count: estypes.AggregationsSumAggregate;
+          responded_agents: estypes.AggregationsCardinalityAggregate;
+          success_agents: estypes.AggregationsSingleBucketAggregateBase & {
+            agents: estypes.AggregationsCardinalityAggregate;
+          };
+          error_agents: estypes.AggregationsSingleBucketAggregateBase & {
+            agents: estypes.AggregationsCardinalityAggregate;
           };
         };
-      }
-    >
-  > {
+      };
+    }
+  >
+> {
   edges: ScheduledActionResultEdges;
   inspect?: Maybe<Inspect>;
 }

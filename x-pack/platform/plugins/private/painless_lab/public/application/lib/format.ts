@@ -50,11 +50,11 @@ export function formatRequestPayload(
   const requestPayload = `{
   "script": {
     "source": ${formattedCode}${
-    parameters
-      ? `,
+      parameters
+        ? `,
     "params": ${formattedParameters}`
-      : ``
-  }
+        : ``
+    }
   }${
     isAdvancedContext
       ? `,
@@ -62,11 +62,11 @@ export function formatRequestPayload(
   "context_setup": {
     "index": "${formattedIndex}",
     "document": ${formattedDocument}${
-          query && context === 'score'
-            ? `,
+      query && context === 'score'
+        ? `,
     "query": ${formattedQuery}`
-            : ''
-        }
+        : ''
+    }
   }`
       : ``
   }

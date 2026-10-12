@@ -45,15 +45,12 @@ import { automatedResolutionMaintainerConfig } from './domain/resolution/rules/m
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 import { subscribeToDualProcessFlag } from './infra/feature_flags';
 
-export class EntityStorePlugin
-  implements
-    Plugin<
-      EntityStoreSetupContract,
-      EntityStoreStartContract,
-      EntityStoreSetupPlugins,
-      EntityStoreStartPlugins
-    >
-{
+export class EntityStorePlugin implements Plugin<
+  EntityStoreSetupContract,
+  EntityStoreStartContract,
+  EntityStoreSetupPlugins,
+  EntityStoreStartPlugins
+> {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
   private readonly stop$ = new Subject<void>();

@@ -38,8 +38,8 @@ export const addWatchlistAttributeToStore = async ({
     const watchlists = Array.isArray(currentWatchlists)
       ? currentWatchlists
       : typeof currentWatchlists === 'string'
-      ? [currentWatchlists]
-      : [];
+        ? [currentWatchlists]
+        : [];
     const updated = watchlists.includes(watchlistId) ? watchlists : [...watchlists, watchlistId];
 
     return {

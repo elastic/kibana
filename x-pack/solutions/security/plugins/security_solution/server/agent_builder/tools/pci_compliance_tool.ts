@@ -100,10 +100,13 @@ const scoreToStatus = (score: number): ComplianceStatus => {
 
 const rollupConfidence = (rows: EvaluatedRequirement[]): ComplianceConfidence => {
   if (rows.length === 0) return 'NOT_ASSESSABLE';
-  const counts = rows.reduce((acc, r) => {
-    acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const counts = rows.reduce(
+    (acc, r) => {
+      acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
   if ((counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'NOT_ASSESSABLE';
   if ((counts.LOW ?? 0) + (counts.NOT_ASSESSABLE ?? 0) > rows.length / 2) return 'LOW';
   if ((counts.HIGH ?? 0) >= rows.length / 2) return 'HIGH';
@@ -111,10 +114,13 @@ const rollupConfidence = (rows: EvaluatedRequirement[]): ComplianceConfidence =>
 };
 
 const rollupOverallStatus = (rows: EvaluatedRequirement[]): ComplianceStatus => {
-  const statusCounts = rows.reduce((acc, r) => {
-    acc[r.status] = (acc[r.status] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const statusCounts = rows.reduce(
+    (acc, r) => {
+      acc[r.status] = (acc[r.status] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
   if ((statusCounts.RED ?? 0) > 0) return 'RED';
   if ((statusCounts.AMBER ?? 0) > 0 || (statusCounts.NOT_ASSESSABLE ?? 0) > 0) return 'AMBER';
   return 'GREEN';
@@ -288,10 +294,13 @@ function buildCheckResponse({
   requirements: string[];
   timeRange?: { from: string; to: string };
 }) {
-  const statusCounts = rows.reduce((acc, r) => {
-    acc[r.status] = (acc[r.status] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const statusCounts = rows.reduce(
+    (acc, r) => {
+      acc[r.status] = (acc[r.status] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   const overallStatus = rollupOverallStatus(rows);
   const overallConfidence = rollupConfidence(rows);

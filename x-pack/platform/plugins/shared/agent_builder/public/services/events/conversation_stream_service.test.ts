@@ -34,13 +34,13 @@ const executionStartedEvent = (): ChatEvent =>
     execution_id: EXECUTION_ID,
     trigger_event_id: TRIGGER_EVENT_ID,
     data: { trigger_type: 'user_message' },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const messageChunkEvent = (chunk: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { message_id: 'm1', text_chunk: chunk },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const RESUME_EXECUTION_ID = `${ROUND_ID}::execution::1`;
 
@@ -54,7 +54,7 @@ const resumeStartedEvent = (): ChatEvent =>
     execution_id: RESUME_EXECUTION_ID,
     trigger_event_id: `${ROUND_ID}::prompt_response::1`,
     data: { trigger_type: 'prompt_response' },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const executionTerminatedEvent = (executionId = EXECUTION_ID): ChatEvent =>
   ({
@@ -76,7 +76,7 @@ const executionTerminatedEvent = (executionId = EXECUTION_ID): ChatEvent =>
       time_to_last_token: 200,
       outcome: { type: 'responded', response: { message: 'done' } },
     },
-  } as ChatEvent);
+  }) as ChatEvent;
 
 const hasTerminal = (events: TimelineDisplayEvent[]): boolean =>
   events.some((event) => event.type === TimelineEventType.executionTerminated);

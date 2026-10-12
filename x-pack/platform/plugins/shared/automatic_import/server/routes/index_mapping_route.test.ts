@@ -26,7 +26,7 @@ describe('Index mapping route', () => {
         esClient: { indices: { getMapping: mockGetMapping } },
         isAvailable: () => true,
       }),
-    } as unknown as AutomaticImportPluginRequestHandlerContext);
+    }) as unknown as AutomaticImportPluginRequestHandlerContext;
 
   beforeEach(() => {
     mockGetMapping = jest.fn();

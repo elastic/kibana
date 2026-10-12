@@ -55,9 +55,9 @@ const useCompleteBadgeStyles = () => {
   const { euiTheme } = useEuiTheme();
   const isDarkMode = useKibanaIsDarkMode();
   return css`
-    background-color: ${isDarkMode
-      ? euiTheme.colors.success
-      : euiTheme.colors.backgroundBaseSuccess};
+    background-color: ${
+      isDarkMode ? euiTheme.colors.success : euiTheme.colors.backgroundBaseSuccess
+    };
     color: ${isDarkMode ? euiTheme.colors.plainDark : euiTheme.colors.textSuccess};
     text-decoration: none;
   `;

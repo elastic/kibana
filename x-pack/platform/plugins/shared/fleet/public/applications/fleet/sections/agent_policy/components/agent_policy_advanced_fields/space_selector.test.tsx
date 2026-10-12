@@ -45,7 +45,7 @@ describe('Space Selector', () => {
               }),
             },
           },
-        } as any)
+        }) as any
     );
     jest.mocked(useAgentPoliciesSpaces).mockReturnValue({
       data: {

@@ -15,7 +15,7 @@ export type RuleTypeGroup = [
     name: string;
     checkEnabledResult: IsEnabledResult | IsDisabledResult;
     ruleTypeItem: RuleTypeModel;
-  }>
+  }>,
 ];
 
 export function ruleTypeGroupCompare(

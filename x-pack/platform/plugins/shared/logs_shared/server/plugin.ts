@@ -27,15 +27,12 @@ import type {
   UsageCollector,
 } from './types';
 
-export class LogsSharedPlugin
-  implements
-    Plugin<
-      LogsSharedPluginSetup,
-      LogsSharedPluginStart,
-      LogsSharedServerPluginSetupDeps,
-      LogsSharedServerPluginStartDeps
-    >
-{
+export class LogsSharedPlugin implements Plugin<
+  LogsSharedPluginSetup,
+  LogsSharedPluginStart,
+  LogsSharedServerPluginSetupDeps,
+  LogsSharedServerPluginStartDeps
+> {
   private readonly logger: Logger;
   private config: LogsSharedConfig;
   private libs!: LogsSharedBackendLibs;

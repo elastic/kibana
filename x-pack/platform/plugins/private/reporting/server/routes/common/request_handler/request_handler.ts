@@ -42,7 +42,7 @@ export const BodyValidation = schema.nullable(
 interface ConstructorOpts<
   Params extends typeof ParamsValidation,
   Query extends typeof QueryValidation,
-  Body extends typeof BodyValidation
+  Body extends typeof BodyValidation,
 > {
   reporting: ReportingCore;
   user: ReportingUser;
@@ -69,7 +69,7 @@ export abstract class RequestHandler<
   Params extends typeof ParamsValidation,
   Query extends typeof QueryValidation,
   Body extends typeof BodyValidation,
-  Output extends Record<string, any>
+  Output extends Record<string, any>,
 > {
   constructor(protected readonly opts: ConstructorOpts<Params, Query, Body>) {}
 

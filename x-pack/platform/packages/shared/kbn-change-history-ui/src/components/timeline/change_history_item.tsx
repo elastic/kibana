@@ -98,9 +98,11 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
       ${selected ? `background-color: ${euiTheme.colors.backgroundLightPrimary};` : ''}
 
       &:hover {
-        background-color: ${selected
-          ? euiTheme.colors.backgroundLightPrimary
-          : euiTheme.colors.backgroundBaseInteractiveHover};
+        background-color: ${
+          selected
+            ? euiTheme.colors.backgroundLightPrimary
+            : euiTheme.colors.backgroundBaseInteractiveHover
+        };
       }
     `,
     [euiTheme, selected]

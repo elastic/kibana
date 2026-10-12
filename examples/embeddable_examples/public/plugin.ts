@@ -61,17 +61,15 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     const startServicesPromise = core.getStartServices();
 
     embeddable.registerEmbeddablePublicDefinition(FIELD_LIST_ID, async () => {
-      const { getFieldListFactory } = await import(
-        './react_embeddables/field_list/field_list_embeddable'
-      );
+      const { getFieldListFactory } =
+        await import('./react_embeddables/field_list/field_list_embeddable');
       const [coreStart, deps] = await startServicesPromise;
       return getFieldListFactory(coreStart, deps);
     });
 
     embeddable.registerEmbeddablePublicDefinition(DATA_TABLE_ID, async () => {
-      const { getDataTableFactory } = await import(
-        './react_embeddables/data_table/data_table_react_embeddable'
-      );
+      const { getDataTableFactory } =
+        await import('./react_embeddables/data_table/data_table_react_embeddable');
       const [coreStart, deps] = await startServicesPromise;
       return getDataTableFactory(coreStart, deps);
     });
@@ -88,24 +86,21 @@ export class EmbeddableExamplesPlugin implements Plugin<void, void, SetupDeps, S
     setKibanaServices(core, deps);
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_FIELD_LIST_ACTION_ID, async () => {
-      const { createFieldListAction } = await import(
-        './react_embeddables/field_list/create_field_list_action'
-      );
+      const { createFieldListAction } =
+        await import('./react_embeddables/field_list/create_field_list_action');
       return createFieldListAction;
     });
 
     registerSearchPanelAction(deps.uiActions);
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID, async () => {
-      const { createDataTableAction } = await import(
-        './react_embeddables/data_table/create_data_table_action'
-      );
+      const { createDataTableAction } =
+        await import('./react_embeddables/data_table/create_data_table_action');
       return createDataTableAction;
     });
 
     deps.uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID, async () => {
-      const { createSavedBookAction } = await import(
-        './react_embeddables/saved_book/create_saved_book_action'
-      );
+      const { createSavedBookAction } =
+        await import('./react_embeddables/saved_book/create_saved_book_action');
       return createSavedBookAction(core);
     });
   }

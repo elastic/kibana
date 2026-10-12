@@ -17,7 +17,7 @@ const closeFlyout = jest.fn();
 const useOnExpandableFlyoutClose = jest.fn();
 
 const buildRecord = (source: Record<string, unknown>) =>
-  ({ raw: { _source: source } } as unknown as DataTableRecord);
+  ({ raw: { _source: source } }) as unknown as DataTableRecord;
 
 const buildFlyoutHandle = () => {
   let resolveClose = () => {};
@@ -39,9 +39,9 @@ const renderCspFlyoutHook = (
       ({
         openFlyout,
         closeFlyout,
-      } as unknown as ReturnType<
+      }) as unknown as ReturnType<
         NonNullable<CspSecuritySolutionContext['useExpandableFlyoutApi']>
-      >),
+      >,
     useOnExpandableFlyoutClose,
     ...contextOverrides,
   };

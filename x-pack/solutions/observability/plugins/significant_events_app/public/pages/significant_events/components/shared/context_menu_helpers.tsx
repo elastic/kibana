@@ -61,8 +61,8 @@ export function buildConnectorMenuItem({
     (selectedConnectorId === undefined
       ? SELECT_MODEL_LABEL
       : selectedConnectorId === resolvedConnectorId
-      ? MISSING_DEFAULT_MODEL_LABEL
-      : MISSING_SELECTED_MODEL_LABEL);
+        ? MISSING_DEFAULT_MODEL_LABEL
+        : MISSING_SELECTED_MODEL_LABEL);
 
   return {
     name: (

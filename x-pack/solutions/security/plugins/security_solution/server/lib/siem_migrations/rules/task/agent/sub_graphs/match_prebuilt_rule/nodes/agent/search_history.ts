@@ -45,7 +45,7 @@ export const getPreviousSearchAttempts = (messages: BaseMessage[]): PreviousSear
       )
       .map((toolCall) => ({
         query: toolCall.args.query as string,
-        candidateNames: (toolCall.id ? resultsByCallId.get(toolCall.id) ?? [] : []).map(
+        candidateNames: (toolCall.id ? (resultsByCallId.get(toolCall.id) ?? []) : []).map(
           ({ name }) => name
         ),
       }))

@@ -30,8 +30,10 @@ import {
   isAgentDownloadFromDiskAvailable,
 } from '../../../../scripts/endpoint/common/agent_downloads_service';
 
-export interface CreateAndEnrollEndpointHostCIOptions
-  extends Pick<BaseVmCreateOptions, 'disk' | 'cpus' | 'memory'> {
+export interface CreateAndEnrollEndpointHostCIOptions extends Pick<
+  BaseVmCreateOptions,
+  'disk' | 'cpus' | 'memory'
+> {
   esClient: Client;
   kbnClient: KbnClient;
   log: ToolingLog;

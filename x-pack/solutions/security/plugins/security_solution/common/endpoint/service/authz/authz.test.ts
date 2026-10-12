@@ -96,8 +96,7 @@ describe('Endpoint Authz service', () => {
       });
 
       it('should set `canWriteActionsLogManagement` to false if privilege not granted', () => {
-        fleetAuthz.packagePrivileges!.endpoint.actions.writeActionsLogManagement.executePackageAction =
-          false;
+        fleetAuthz.packagePrivileges!.endpoint.actions.writeActionsLogManagement.executePackageAction = false;
 
         expect(
           calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
@@ -124,8 +123,7 @@ describe('Endpoint Authz service', () => {
       });
 
       it('should set `canReadActionsLogManagement` to false if privilege not granted', () => {
-        fleetAuthz.packagePrivileges!.endpoint.actions.readActionsLogManagement.executePackageAction =
-          false;
+        fleetAuthz.packagePrivileges!.endpoint.actions.readActionsLogManagement.executePackageAction = false;
 
         expect(
           calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)

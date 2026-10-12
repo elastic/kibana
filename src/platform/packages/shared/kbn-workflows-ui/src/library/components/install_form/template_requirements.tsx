@@ -79,7 +79,7 @@ export const TemplateRequirements = React.memo<TemplateRequirementsProps>(
                             field.connectorType,
                             triggersActionsUi.actionTypeRegistry
                           )
-                        : field.label ?? field.name}
+                        : (field.label ?? field.name)}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

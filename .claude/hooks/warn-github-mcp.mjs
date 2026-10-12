@@ -24,9 +24,7 @@ if (!input || typeof input !== 'object') process.exit(0);
 
 const stateDir = join(
   process.env.XDG_STATE_HOME ||
-    (process.env.HOME
-      ? join(process.env.HOME, '.local', 'state')
-      : process.env.TMPDIR || '/tmp'),
+    (process.env.HOME ? join(process.env.HOME, '.local', 'state') : process.env.TMPDIR || '/tmp'),
   'kibana-claude'
 );
 const marker = join(stateDir, 'github-mcp-warned');

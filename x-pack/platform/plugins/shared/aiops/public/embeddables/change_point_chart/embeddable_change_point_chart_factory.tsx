@@ -114,9 +114,8 @@ export const getChangePointChartEmbeddableFactory = (
               focusedPanelId: uuid,
             },
             loadContent: async ({ closeFlyout }) => {
-              const { EmbeddableChangePointUserInput } = await import(
-                './change_point_config_input'
-              );
+              const { EmbeddableChangePointUserInput } =
+                await import('./change_point_config_input');
               return (
                 <EmbeddableChangePointUserInput
                   coreStart={coreStart}

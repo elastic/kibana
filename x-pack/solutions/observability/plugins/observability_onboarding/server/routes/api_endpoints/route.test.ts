@@ -157,7 +157,7 @@ describe('create_key handler', () => {
       config: { serverless: { enabled: isServerless } },
       plugins: {},
       params: { path: { id } },
-    } as unknown as Parameters<typeof handler>[0]);
+    }) as unknown as Parameters<typeof handler>[0];
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -44,7 +44,7 @@ const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
       'kibana.alert.attack_discovery.title': 'Suspicious PowerShell Activity',
       ...overrides,
     },
-  } as unknown as DataTableRecord);
+  }) as unknown as DataTableRecord;
 
 const renderWithEui = (ui: React.ReactElement) => render(<EuiProvider>{ui}</EuiProvider>);
 

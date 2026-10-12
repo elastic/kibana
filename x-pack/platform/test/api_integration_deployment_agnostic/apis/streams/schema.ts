@@ -270,8 +270,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
           ? existingIndexTemplate.ignore_missing_component_templates
           : existingIndexTemplate.ignore_missing_component_templates
-          ? [existingIndexTemplate.ignore_missing_component_templates]
-          : undefined;
+            ? [existingIndexTemplate.ignore_missing_component_templates]
+            : undefined;
 
         // `getIndexTemplate` returns extra fields (e.g. `created_date`) that are not allowed
         // when updating templates. Build a "put-safe" body from the known writable properties.

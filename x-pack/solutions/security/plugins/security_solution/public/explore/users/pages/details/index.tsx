@@ -137,7 +137,7 @@ const UserDetailsAssetCriticalitySection: React.FC<{
     <AssetCriticalityAccordion
       entity={{ name: detailName, type: EntityType.user }}
       onChange={onCriticalityChange}
-      entityRecord={entityStoreV2Enabled ? observedUserEntityRecord ?? undefined : undefined}
+      entityRecord={entityStoreV2Enabled ? (observedUserEntityRecord ?? undefined) : undefined}
       criticalityFromEntityStore={
         entityStoreV2Enabled && observedUserEntityRecord
           ? storeRecord?.asset?.criticality
@@ -463,16 +463,16 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                         setQuery={setQuery}
                         refetch={
                           entityStoreV2Enabled
-                            ? observedUser.refetchEntityStore ??
+                            ? (observedUser.refetchEntityStore ??
                               observedUser.refetchObservedDetails ??
-                              refetch
+                              refetch)
                             : refetch
                         }
                         inspect={
                           entityStoreV2Enabled
-                            ? entityFromStoreResult?.inspect ??
+                            ? (entityFromStoreResult?.inspect ??
                               observedUser.observedDetailsInspect ??
-                              inspect
+                              inspect)
                             : inspect
                         }
                         userName={detailName}
@@ -484,12 +484,12 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                         riskScoreState={userRiskScoreStateFromEntityStore}
                         firstSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedUser.firstSeen?.date ?? undefined
+                            ? (observedUser.firstSeen?.date ?? undefined)
                             : undefined
                         }
                         lastSeenFromEntityStore={
                           entityStoreV2Enabled
-                            ? observedUser.lastSeen?.date ?? undefined
+                            ? (observedUser.lastSeen?.date ?? undefined)
                             : undefined
                         }
                       />
@@ -548,7 +548,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               type={UsersType.details}
               setQuery={setQuery}
               entityRecord={
-                entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined
+                entityStoreV2Enabled ? (observedUser.entityRecord ?? undefined) : undefined
               }
               filterQuery={stringifiedUserDetailsIdentityFilterQuery}
               usersDetailsPagePath={usersDetailsPagePath}

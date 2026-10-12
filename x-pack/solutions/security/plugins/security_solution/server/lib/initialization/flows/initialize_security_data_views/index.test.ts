@@ -46,14 +46,14 @@ const createMockDataViewsService = (): jest.Mocked<DataViewsService> =>
       name: 'mock-name',
     })),
     updateSavedObject: jest.fn().mockResolvedValue(undefined),
-  } as unknown as jest.Mocked<DataViewsService>);
+  }) as unknown as jest.Mocked<DataViewsService>;
 
 const makeDataViewListItem = (id: string, title: string, name?: string): DataViewListItem =>
   ({
     id,
     title,
     name: name ?? id,
-  } as DataViewListItem);
+  }) as DataViewListItem;
 
 // ---------------------------------------------------------------------------
 // getOrCreateDefaultDataView
@@ -420,7 +420,7 @@ describe('initializeSecurityDataViewsFlow', () => {
           }),
         },
         logger: loggerMock.create(),
-      } as unknown as InitializationFlowContext);
+      }) as unknown as InitializationFlowContext;
 
     it('returns status ready with default and alert data views', async () => {
       const context = createMockFlowContext();

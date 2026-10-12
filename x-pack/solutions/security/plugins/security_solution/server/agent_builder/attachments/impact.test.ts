@@ -30,7 +30,7 @@ describe('createImpactAttachmentType', () => {
       id: 'att-1',
       type: SecurityAgentBuilderAttachments.impact,
       data,
-    } as Attachment<string, unknown>);
+    }) as Attachment<string, unknown>;
 
   it('has the impact type id', () => {
     expect(attachmentType.id).toBe(SecurityAgentBuilderAttachments.impact);

@@ -180,7 +180,7 @@ const createDataStream = (overrides: Partial<DataStream> = {}): DataStream => ({
   ...overrides,
 });
 
-const createHistory = (): ScopedHistory => ({ location: {} } as unknown as ScopedHistory);
+const createHistory = (): ScopedHistory => ({ location: {} }) as unknown as ScopedHistory;
 
 describe('DataStreamTable', () => {
   beforeEach(() => {

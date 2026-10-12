@@ -38,7 +38,7 @@ export const getShareMenuItems =
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
 
     const jobProviderOptions: JobParamsProviderOptions = {
-      shareableUrl: isDirty ? shareableUrl : shareableUrlForSavedObject ?? shareableUrl,
+      shareableUrl: isDirty ? shareableUrl : (shareableUrlForSavedObject ?? shareableUrl),
       objectType,
       sharingData,
     };

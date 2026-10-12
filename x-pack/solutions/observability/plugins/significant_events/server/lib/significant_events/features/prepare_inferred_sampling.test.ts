@@ -34,7 +34,7 @@ const createFeature = (runId: string): FeatureWithFilter =>
     updated_at: '2026-01-01T00:00:00.000Z',
     run_id: runId,
     filter: { field: 'service.name', eq: 'checkout' },
-  } as FeatureWithFilter);
+  }) as FeatureWithFilter;
 
 const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
   _index: 'logs.test-default',

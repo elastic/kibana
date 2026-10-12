@@ -95,8 +95,8 @@ const renderBlastRadius = (blastRadius: ApplyPreviewFacts['blastRadius']): reado
     agentPolicyCount === 0
       ? 'Enrolled agents: count unavailable because the policy has no agent policy assignments.'
       : enrollment.status.all !== undefined
-      ? `Enrolled agents: ${enrollment.status.all} (source: ${enrollment.source}).`
-      : 'Enrolled agents: count unavailable.';
+        ? `Enrolled agents: ${enrollment.status.all} (source: ${enrollment.source}).`
+        : 'Enrolled agents: count unavailable.';
   const entries = Object.entries(enrollment.status);
   const statusLine =
     entries.length === 0

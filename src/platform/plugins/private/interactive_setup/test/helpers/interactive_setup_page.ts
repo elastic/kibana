@@ -33,7 +33,10 @@ export class InteractiveSetupPage {
   private readonly submitConfigurationButton: Locator;
   private readonly progressIndicator: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.enrollmentTokenInput = page.testSubj.locator('interactiveSetupEnrollmentTokenInput');
     this.submitEnrollmentTokenButton = page.testSubj.locator(
       'interactiveSetupSubmitEnrollmentTokenButton'

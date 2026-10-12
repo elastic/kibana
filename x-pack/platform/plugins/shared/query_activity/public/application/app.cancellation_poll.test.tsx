@@ -80,7 +80,7 @@ const mockContext = (
       missingClusterPrivileges: [],
     },
     ...overrides,
-  } as QueryActivityAppContextValue);
+  }) as QueryActivityAppContextValue;
 
 describe('QueryActivityApp - cancellation polling', () => {
   beforeEach(() => {

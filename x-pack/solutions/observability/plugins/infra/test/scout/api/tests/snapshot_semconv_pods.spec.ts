@@ -121,8 +121,8 @@ apiTest.describe(
         const expectedMemory = fixture.omitMemory
           ? null
           : fixture.withoutLimits
-          ? SEMCONV_MEMORY_WITHOUT_LIMIT
-          : SEMCONV_MEMORY_WITH_LIMIT;
+            ? SEMCONV_MEMORY_WITHOUT_LIMIT
+            : SEMCONV_MEMORY_WITH_LIMIT;
         expect(fixture.omitMemory ? memory.value : Number(memory.value?.toFixed(2))).toStrictEqual(
           expectedMemory
         );

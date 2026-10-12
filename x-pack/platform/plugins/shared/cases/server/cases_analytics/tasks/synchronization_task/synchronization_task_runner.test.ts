@@ -41,15 +41,18 @@ describe('SynchronizationTaskRunner', () => {
       owner: 'securitySolution',
       spaceId: 'default',
     },
-    state: CAISyncTypes.reduce((acc, syncType) => {
-      acc[syncType] = {
-        lastSyncSuccess,
-        lastSyncAttempt,
-        esReindexTaskId,
-        syncType,
-      };
-      return acc;
-    }, {} as Record<string, unknown>),
+    state: CAISyncTypes.reduce(
+      (acc, syncType) => {
+        acc[syncType] = {
+          lastSyncSuccess,
+          lastSyncAttempt,
+          esReindexTaskId,
+          syncType,
+        };
+        return acc;
+      },
+      {} as Record<string, unknown>
+    ),
   } as unknown as ConcreteTaskInstance;
 
   let taskRunner: SynchronizationTaskRunner;
@@ -64,16 +67,19 @@ describe('SynchronizationTaskRunner', () => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(newAttemptTime);
     esClient.indices.getMapping.mockResolvedValue({
-      ...(CAISyncTypes.reduce((acc, syncType) => {
-        acc[destinationIndexBySyncType(syncType, 'default', 'securitySolution')] = {
-          mappings: {
-            _meta: {
-              painless_script_id: painlessScriptId,
+      ...(CAISyncTypes.reduce(
+        (acc, syncType) => {
+          acc[destinationIndexBySyncType(syncType, 'default', 'securitySolution')] = {
+            mappings: {
+              _meta: {
+                painless_script_id: painlessScriptId,
+              },
             },
-          },
-        };
-        return acc;
-      }, {} as Record<string, unknown>) as IndicesGetMappingResponse),
+          };
+          return acc;
+        },
+        {} as Record<string, unknown>
+      ) as IndicesGetMappingResponse),
     });
 
     esClient.getScript.mockResolvedValue({

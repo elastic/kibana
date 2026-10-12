@@ -147,7 +147,7 @@ export const addFilter: InternalStateThunkActionCreator<
       field: Parameters<DocViewFilterFn>[0];
       value: Parameters<DocViewFilterFn>[1];
       mode: Parameters<DocViewFilterFn>[2];
-    }>
+    }>,
   ]
 > = ({ tabId, field, value, mode }) =>
   function addFilterThunkFn(_, getState, { runtimeStateManager, services }) {

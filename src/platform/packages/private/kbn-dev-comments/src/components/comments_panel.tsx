@@ -646,12 +646,14 @@ export const CommentsPanel = () => {
         display: flex;
         flex-direction: column;
         pointer-events: auto;
-        ${minimized
-          ? `
+        ${
+          minimized
+            ? `
             padding: ${euiTheme.size.m} ${euiTheme.size.l};
             border-radius: ${euiTheme.size.base};
           `
-          : `border-radius: ${euiTheme.border.radius.medium};`}
+            : `border-radius: ${euiTheme.border.radius.medium};`
+        }
       `}
       data-test-subj="devCommentsPanel"
     >

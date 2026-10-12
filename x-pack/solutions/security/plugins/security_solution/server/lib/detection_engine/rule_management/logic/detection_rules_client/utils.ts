@@ -122,7 +122,10 @@ export class ClientError extends Error {
  */
 export class RuleConcurrencyError extends Error {
   public readonly statusCode = 409;
-  constructor(message: string, public readonly currentRevision: number) {
+  constructor(
+    message: string,
+    public readonly currentRevision: number
+  ) {
     super(message);
   }
 }

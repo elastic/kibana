@@ -21,7 +21,7 @@ const createMockCrudClient = (): jest.Mocked<CRUDClient> =>
       .fn()
       .mockResolvedValue({ records: [], total: 0, inspect: { dsl: [], response: [] } }),
     bulkUpdateEntity: jest.fn().mockResolvedValue([]),
-  } as unknown as jest.Mocked<CRUDClient>);
+  }) as unknown as jest.Mocked<CRUDClient>;
 
 const emptyWatchlistsByEuid: WatchlistsByEuid = new Map();
 

@@ -13,7 +13,7 @@ describe('assertSiemReadinessEnabled', () => {
   const createUiSettingsClient = (enabled: boolean) =>
     ({
       get: jest.fn().mockResolvedValue(enabled),
-    } as unknown as IUiSettingsClient);
+    }) as unknown as IUiSettingsClient;
 
   const createResponse = () => {
     const forbidden = jest.fn().mockReturnValue({ status: 403 });

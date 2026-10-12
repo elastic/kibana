@@ -42,29 +42,33 @@ export function OverviewTableContainer({
     return css`
       min-inline-size: 0;
 
-      ${useFixedLayout
-        ? css`
-            min-height: ${tableHeight}px;
-            display: flex;
-            flex-direction: column;
-          `
-        : undefined}
+      ${
+        useFixedLayout
+          ? css`
+              min-height: ${tableHeight}px;
+              display: flex;
+              flex-direction: column;
+            `
+          : undefined
+      }
 
       .euiBasicTable {
         min-inline-size: 0;
 
-        ${useFixedLayout
-          ? css`
-              display: flex;
-              flex-direction: column;
-              flex-grow: 1;
+        ${
+          useFixedLayout
+            ? css`
+                display: flex;
+                flex-direction: column;
+                flex-grow: 1;
 
-              /* Align the pagination to the bottom of the card */
-              > :last-child {
-                margin-top: auto;
-              }
-            `
-          : undefined}
+                /* Align the pagination to the bottom of the card */
+                > :last-child {
+                  margin-top: auto;
+                }
+              `
+            : undefined
+        }
       }
 
       /*

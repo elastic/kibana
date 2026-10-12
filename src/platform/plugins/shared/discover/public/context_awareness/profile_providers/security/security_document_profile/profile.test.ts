@@ -19,7 +19,7 @@ const mockServices = createProfileProviderSharedServicesMock();
 const provider = createSecurityDocumentProfileProvider(mockServices);
 
 const buildRecord = (fields: Record<string, unknown>): DataTableRecord =>
-  ({ flattened: fields, raw: {}, id: 'test-id' } as unknown as DataTableRecord);
+  ({ flattened: fields, raw: {}, id: 'test-id' }) as unknown as DataTableRecord;
 
 const prevDocViewer = () => ({
   title: 'test title',

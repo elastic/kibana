@@ -15,7 +15,7 @@ describe('getKqlSuggestionsIfApplicable', () => {
     ({
       innerText,
       callbacks: { getKqlSuggestions },
-    } as ExpressionContext);
+    }) as ExpressionContext;
 
   it('should return null when getKqlSuggestions callback is not provided', async () => {
     const ctx = createContext('KQL("""query');

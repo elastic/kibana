@@ -267,9 +267,8 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
     this.logger.debug('Trying to authenticate request via peer certificate chain.');
 
     // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
-    const { peerCertificate, certificateChain, isChainIncomplete } = await this.getCertificateChain(
-      request
-    );
+    const { peerCertificate, certificateChain, isChainIncomplete } =
+      await this.getCertificateChain(request);
 
     if (!request.socket.authorized) {
       // `authorized === false` means the peer cert was presented but rejected (e.g. untrusted CA).

@@ -42,13 +42,16 @@ export const setupAlertsCapabilitiesSwitcher = ({ core, logger, getSecurityStart
   ];
 
   core.capabilities.registerProvider(() =>
-    deprecatedFeatures.reduce((acc, featureId) => {
-      acc[featureId] = {
-        // Even though we set it to true here, the privilege is only granted
-        // if it is explicitly listed in the ui privileges in the feature configuration
-        [ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE]: true,
-      };
-      return acc;
-    }, {} as Record<string, { [ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE]: boolean }>)
+    deprecatedFeatures.reduce(
+      (acc, featureId) => {
+        acc[featureId] = {
+          // Even though we set it to true here, the privilege is only granted
+          // if it is explicitly listed in the ui privileges in the feature configuration
+          [ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE]: true,
+        };
+        return acc;
+      },
+      {} as Record<string, { [ALERTS_UI_UPDATE_DEPRECATED_PRIVILEGE]: boolean }>
+    )
   );
 };

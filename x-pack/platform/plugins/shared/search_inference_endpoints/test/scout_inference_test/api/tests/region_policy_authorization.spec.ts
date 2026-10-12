@@ -107,9 +107,8 @@ apiTest.describe('Region policy authorization', { tag: [...INFERENCE_LOCAL_TAGS]
   apiTest(
     'feature-read user gets 403 on GET when a policy exists',
     async ({ samlAuth, apiClient }) => {
-      const { cookieHeader: privilegedCookie } = await samlAuth.asInteractiveUser(
-        FEATURE_PRIVILEGED_ROLE
-      );
+      const { cookieHeader: privilegedCookie } =
+        await samlAuth.asInteractiveUser(FEATURE_PRIVILEGED_ROLE);
       await apiClient.put(REGION_POLICY_API_PATH, {
         headers: { ...COMMON_HEADERS, ...privilegedCookie },
         body: JSON.stringify({ allowed_geos: ['us'] }),

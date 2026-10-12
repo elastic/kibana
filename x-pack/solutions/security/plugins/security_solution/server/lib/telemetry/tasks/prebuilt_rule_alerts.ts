@@ -80,29 +80,25 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             return 0;
           }
 
-          const processedAlerts = alerts.map(
-            (event: TelemetryEvent): TelemetryEvent =>
-              event['kibana.alert.rule.type'] === DETECTION_RULE_TYPE_ESQL
-                ? copyAllowlistedFields(unflattenedFilterList, unflatten<TelemetryEvent>(event))
-                : copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
+          const processedAlerts = alerts.map((event: TelemetryEvent): TelemetryEvent =>
+            event['kibana.alert.rule.type'] === DETECTION_RULE_TYPE_ESQL
+              ? copyAllowlistedFields(unflattenedFilterList, unflatten<TelemetryEvent>(event))
+              : copyAllowlistedFields(filterList.prebuiltRulesAlerts, event)
           );
 
-          const sanitizedAlerts = processedAlerts.map(
-            (event: TelemetryEvent): TelemetryEvent =>
-              processK8sUsernames(clusterInfo?.cluster_uuid, event)
+          const sanitizedAlerts = processedAlerts.map((event: TelemetryEvent): TelemetryEvent =>
+            processK8sUsernames(clusterInfo?.cluster_uuid, event)
           );
 
-          const enrichedAlerts = sanitizedAlerts.map(
-            (event: TelemetryEvent): TelemetryEvent => ({
-              ...event,
-              licence_id: licenseInfo?.uid,
-              cluster_uuid: clusterInfo?.cluster_uuid,
-              cluster_name: clusterInfo?.cluster_name,
-              package_version: packageInfo?.version,
-              task_version: taskVersion,
-              customizations: processDetectionRuleCustomizations(event),
-            })
-          );
+          const enrichedAlerts = sanitizedAlerts.map((event: TelemetryEvent): TelemetryEvent => ({
+            ...event,
+            licence_id: licenseInfo?.uid,
+            cluster_uuid: clusterInfo?.cluster_uuid,
+            cluster_name: clusterInfo?.cluster_name,
+            package_version: packageInfo?.version,
+            task_version: taskVersion,
+            customizations: processDetectionRuleCustomizations(event),
+          }));
 
           log.debug('sending elastic prebuilt alerts', {
             length: enrichedAlerts.length,

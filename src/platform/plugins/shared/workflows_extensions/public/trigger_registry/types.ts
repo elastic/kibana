@@ -22,8 +22,9 @@ export type { TriggerDocumentation, TriggerSnippets } from '../../common/trigger
  *   icon: React.lazy(() => import('...')),
  * }
  */
-export interface PublicTriggerDefinition<EventSchema extends z.ZodType = z.ZodType>
-  extends CommonTriggerDefinition<EventSchema> {
+export interface PublicTriggerDefinition<
+  EventSchema extends z.ZodType = z.ZodType,
+> extends CommonTriggerDefinition<EventSchema> {
   /**
    * Used to visually represent this trigger in the UI.
    */

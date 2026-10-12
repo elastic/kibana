@@ -840,7 +840,7 @@ export const registerPromoteThreatIndicatorsTask = ({
             // that a re-scan would fix.
             lastSyncedAt:
               scanCompleted && !hadRetryableWriteFailures
-                ? latestExtractedAt ?? previousState.lastSyncedAt
+                ? (latestExtractedAt ?? previousState.lastSyncedAt)
                 : previousState.lastSyncedAt,
             totalReportsProcessed: (previousState.totalReportsProcessed ?? 0) + reportsProcessed,
             totalIndicatorsWritten: (previousState.totalIndicatorsWritten ?? 0) + indicatorsWritten,

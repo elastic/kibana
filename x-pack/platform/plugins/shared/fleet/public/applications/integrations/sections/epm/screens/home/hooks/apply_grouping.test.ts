@@ -32,7 +32,7 @@ const makePackage = (overrides: Record<string, unknown> = {}): PackageListItem =
     description: 'A test package',
     categories: [],
     ...overrides,
-  } as unknown as PackageListItem);
+  }) as unknown as PackageListItem;
 
 const baseParams = {
   getHref: jest.fn().mockReturnValue('/mock/collection/href'),

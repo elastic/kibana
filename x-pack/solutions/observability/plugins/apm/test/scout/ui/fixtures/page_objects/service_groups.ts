@@ -10,7 +10,10 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmAppMenuReady } from '../page_helpers';
 
 export class ServiceGroupsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {}
 
   async gotoServiceGroupsPageWithDateSelected(start: string, end: string) {
     await this.page.goto(

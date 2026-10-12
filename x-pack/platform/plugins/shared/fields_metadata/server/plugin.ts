@@ -18,15 +18,12 @@ import { initFieldsMetadataServer } from './fields_metadata_server';
 import { FieldsMetadataService } from './services/fields_metadata';
 import type { FieldsMetadataBackendLibs } from './lib/shared_types';
 
-export class FieldsMetadataPlugin
-  implements
-    Plugin<
-      FieldsMetadataServerSetup,
-      FieldsMetadataServerStart,
-      FieldsMetadataServerPluginSetupDeps,
-      FieldsMetadataServerPluginStartDeps
-    >
-{
+export class FieldsMetadataPlugin implements Plugin<
+  FieldsMetadataServerSetup,
+  FieldsMetadataServerStart,
+  FieldsMetadataServerPluginSetupDeps,
+  FieldsMetadataServerPluginStartDeps
+> {
   private readonly logger: Logger;
   private libs!: FieldsMetadataBackendLibs;
   private fieldsMetadataService: FieldsMetadataService;

@@ -29,8 +29,8 @@ export const MetricsExplorerGroupBy = ({ options, onChange }: Props) => {
   const selectedOptions = Array.isArray(options.groupBy)
     ? options.groupBy.map((field) => ({ label: field }))
     : options.groupBy
-    ? [{ label: options.groupBy }]
-    : [];
+      ? [{ label: options.groupBy }]
+      : [];
 
   const comboOptions = (metricsView?.fields ?? [])
     .filter((f) => f.aggregatable && f.type === 'string')

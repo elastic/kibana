@@ -18,7 +18,7 @@ const buildActionsMock = (): jest.Mocked<ConversationActions> =>
     onExecutionTerminated: jest.fn(),
     deleteConversation: jest.fn(),
     renameConversation: jest.fn(),
-  } as unknown as jest.Mocked<ConversationActions>);
+  }) as unknown as jest.Mocked<ConversationActions>;
 
 const run = async (events: ChatEvent[]) => {
   const events$ = new Subject<ChatEvent>();

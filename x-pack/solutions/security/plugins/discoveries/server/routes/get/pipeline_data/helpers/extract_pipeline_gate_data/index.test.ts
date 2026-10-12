@@ -20,7 +20,7 @@ const gateExecution = (structuredOutput: Record<string, unknown>): WorkflowExecu
       },
     ],
     workflowId: 'system-attack-discovery-skill-alert-retrieval',
-  } as unknown as WorkflowExecutionDto);
+  }) as unknown as WorkflowExecutionDto;
 
 describe('extractPipelineGateData', () => {
   it('reports the gate net-new additions as the interim count (kept resolved by the caller)', () => {

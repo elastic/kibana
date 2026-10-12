@@ -40,7 +40,7 @@ const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): Relationship
       lookback_window: 'now-30d',
     },
     ...overrides,
-  } as RelationshipMetadataDoc);
+  }) as RelationshipMetadataDoc;
 
 describe('EntityMetadataClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

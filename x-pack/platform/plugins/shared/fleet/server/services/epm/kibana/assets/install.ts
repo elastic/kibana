@@ -331,7 +331,7 @@ export async function deleteOrphanedMultipleIsolatedAssets({
     const refsForSpace =
       !spaceId || spaceId === installedSpaceId
         ? installedPkg.attributes.installed_kibana
-        : installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [];
+        : (installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? []);
 
     for (const ref of refsForSpace) {
       trackedIds.add(ref.id);
@@ -478,7 +478,7 @@ export async function installKibanaAssetsAndReferences({
         id: destinationId ?? id,
         ...(destinationId ? { originId: id } : {}),
         type,
-      } as KibanaAssetReference)
+      }) as KibanaAssetReference
   );
 
   await replaceInMarkdown({

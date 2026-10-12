@@ -13,7 +13,7 @@ import { apiHasUseGlobalFiltersSetting } from '../../fetch/applies_filters';
 import type { RelatedPanelsConfig } from './initialize_related_panels';
 
 export const panelIsRelatedByGlobalFilters = <
-  const UseGlobalFilters$ extends Observable<boolean | undefined>
+  const UseGlobalFilters$ extends Observable<boolean | undefined>,
 >(
   useGlobalFilters$: UseGlobalFilters$
 ) => {

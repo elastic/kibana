@@ -115,7 +115,7 @@ const setup = ({
     const result = await callHandler(offset);
     const [streamed, options] = mockObservableIntoEventSourceStream.mock.calls[0] as [
       Observable<{ type: string }>,
-      { flushMinBytes?: number }
+      { flushMinBytes?: number },
     ];
     return { result, emitted: await firstValueFrom(streamed.pipe(toArray())), options };
   };

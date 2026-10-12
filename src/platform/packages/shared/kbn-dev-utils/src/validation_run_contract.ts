@@ -140,7 +140,7 @@ const resolveValidationContract = ({
     testMode: testMode ?? defaults.testMode,
     downstream: downstream ?? defaults.downstream,
     baseRef,
-    headRef: resolvedScope === 'branch' ? headRef ?? 'HEAD' : headRef,
+    headRef: resolvedScope === 'branch' ? (headRef ?? 'HEAD') : headRef,
   };
 };
 

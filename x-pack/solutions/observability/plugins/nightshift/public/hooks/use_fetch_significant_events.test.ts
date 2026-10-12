@@ -31,7 +31,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
     severity: '40-medium',
     confidence: 0.9,
     ...overrides,
-  } as SignificantEvent);
+  }) as SignificantEvent;
 
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({

@@ -65,9 +65,8 @@ describe('Upgrade Assistant Usage Collector', () => {
 
     it('fetchUpgradeAssistantMetrics should return correct info', async () => {
       registerUpgradeAssistantUsageCollector(dependencies);
-      const upgradeAssistantStats = await makeUsageCollectorStub.mock.calls[0][0].fetch(
-        callClusterStub
-      );
+      const upgradeAssistantStats =
+        await makeUsageCollectorStub.mock.calls[0][0].fetch(callClusterStub);
       expect(upgradeAssistantStats).toEqual({
         features: {
           deprecation_logging: {

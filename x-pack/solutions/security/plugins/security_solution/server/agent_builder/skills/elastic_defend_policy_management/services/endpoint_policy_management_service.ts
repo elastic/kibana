@@ -117,12 +117,10 @@ const attachUsage = async (
     })
   );
 
-  const undeterminedTail = items.slice(LIST_USAGE_FANOUT_MAX).map(
-    (item): ListedPolicyItem => ({
-      ...item,
-      usage: { classification: 'undetermined', reason: 'usage_truncated' },
-    })
-  );
+  const undeterminedTail = items.slice(LIST_USAGE_FANOUT_MAX).map((item): ListedPolicyItem => ({
+    ...item,
+    usage: { classification: 'undetermined', reason: 'usage_truncated' },
+  }));
 
   return {
     items: [...classifiedHead, ...undeterminedTail],

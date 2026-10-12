@@ -55,7 +55,7 @@ export const transformSearchResponseToAlerts = ({
       `[TRANSFORM] Processing ${response.hits.hits.length} raw hits from Elasticsearch (total: ${
         typeof response.hits.total === 'number'
           ? response.hits.total
-          : response.hits.total?.value ?? 'unknown'
+          : (response.hits.total?.value ?? 'unknown')
       })`
   );
 
@@ -101,7 +101,7 @@ export const transformSearchResponseToAlerts = ({
   const uniqueAttackAlertIdsAggregation: TermsAggregation | undefined = response.aggregations
     ?.all_attack_alert_ids as TermsAggregation;
   const uniqueAlertIds = includeUniqueAlertIds
-    ? uniqueAttackAlertIdsAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? []
+    ? (uniqueAttackAlertIdsAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? [])
     : [];
 
   const connectorNamesAggregation: TermsAggregation | undefined = response.aggregations

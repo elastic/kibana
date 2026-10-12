@@ -47,13 +47,15 @@ export const AppMenuOverflowButton = ({
   };
 
   const buttonCss = css`
-    background-color: ${isPopoverOpen
-      ? getIsSelectedColor({
-          color: 'text',
-          euiTheme,
-          isFilled: false,
-        })
-      : undefined};
+    background-color: ${
+      isPopoverOpen
+        ? getIsSelectedColor({
+            color: 'text',
+            euiTheme,
+            isFilled: false,
+          })
+        : undefined
+    };
   `;
 
   const button = (

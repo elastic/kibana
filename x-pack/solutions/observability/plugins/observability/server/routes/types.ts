@@ -32,5 +32,5 @@ export interface ObservabilityRouteCreateOptions {
 export type AbstractObservabilityServerRouteRepository = ServerRouteRepository;
 
 export type ObservabilityAPIReturnType<
-  TEndpoint extends EndpointOf<ObservabilityServerRouteRepository>
+  TEndpoint extends EndpointOf<ObservabilityServerRouteRepository>,
 > = ReturnOf<ObservabilityServerRouteRepository, TEndpoint>;

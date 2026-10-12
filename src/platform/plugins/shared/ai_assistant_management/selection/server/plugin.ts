@@ -31,15 +31,12 @@ import { classicSetting } from './src/settings/classic_setting';
 import { AIAssistantType } from '../common/ai_assistant_type';
 import { chatExperienceSetting } from './src/settings/chat_experience_setting';
 
-export class AIAssistantManagementSelectionPlugin
-  implements
-    Plugin<
-      AIAssistantManagementSelectionPluginServerSetup,
-      AIAssistantManagementSelectionPluginServerStart,
-      AIAssistantManagementSelectionPluginServerDependenciesSetup,
-      AIAssistantManagementSelectionPluginServerDependenciesStart
-    >
-{
+export class AIAssistantManagementSelectionPlugin implements Plugin<
+  AIAssistantManagementSelectionPluginServerSetup,
+  AIAssistantManagementSelectionPluginServerStart,
+  AIAssistantManagementSelectionPluginServerDependenciesSetup,
+  AIAssistantManagementSelectionPluginServerDependenciesStart
+> {
   private readonly config: AIAssistantManagementSelectionConfig;
   private readonly logger: Logger;
 
@@ -93,9 +90,8 @@ export class AIAssistantManagementSelectionPlugin
               const [, startServices] = await core.getStartServices();
               // Avoid security exceptions before login - only check space when authenticated
               if (startServices.spaces && request?.auth.isAuthenticated) {
-                const activeSpace = await startServices.spaces.spacesService.getActiveSpace(
-                  request
-                );
+                const activeSpace =
+                  await startServices.spaces.spacesService.getActiveSpace(request);
                 const solution = activeSpace?.solution;
                 if (
                   solution === 'es' ||

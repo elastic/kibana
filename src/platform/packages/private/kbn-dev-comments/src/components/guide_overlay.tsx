@@ -214,24 +214,24 @@ export const GuideOverlay = ({ comment }: { comment: Comment }) => {
           values: { label: step.label },
         })
     : searching
-    ? i18n.translate('devComments.guide.searching', {
-        defaultMessage: 'Looking for the comment…',
-      })
-    : found
-    ? i18n.translate('devComments.guide.covered', {
-        defaultMessage:
-          'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.',
-      })
-    : coveredStep
-    ? i18n.translate('devComments.guide.stepCovered', {
-        defaultMessage:
-          '“{label}” is behind other UI, like a dialog or menu: close it to get to the comment.',
-        values: { label: coveredStep.label },
-      })
-    : i18n.translate('devComments.guide.lost', {
-        defaultMessage:
-          'The commented element cannot be found: the UI may have changed since the comment was made.',
-      });
+      ? i18n.translate('devComments.guide.searching', {
+          defaultMessage: 'Looking for the comment…',
+        })
+      : found
+        ? i18n.translate('devComments.guide.covered', {
+            defaultMessage:
+              'The commented element is behind other UI, like a dialog or menu: close it to get to the comment.',
+          })
+        : coveredStep
+          ? i18n.translate('devComments.guide.stepCovered', {
+              defaultMessage:
+                '“{label}” is behind other UI, like a dialog or menu: close it to get to the comment.',
+              values: { label: coveredStep.label },
+            })
+          : i18n.translate('devComments.guide.lost', {
+              defaultMessage:
+                'The commented element cannot be found: the UI may have changed since the comment was made.',
+            });
 
   return createPortal(
     <>

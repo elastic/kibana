@@ -170,7 +170,7 @@ export function clusterSampleDocs({
   function populateKvWeights() {
     for (let kvId = 0; kvId < kvFieldById.length; kvId++) {
       const fieldId = kvFieldById[kvId];
-      kvWeightById[kvId] = trackValueForFieldById[fieldId] ? fieldWeightById[fieldId] ?? 0 : 0;
+      kvWeightById[kvId] = trackValueForFieldById[fieldId] ? (fieldWeightById[fieldId] ?? 0) : 0;
     }
   }
 

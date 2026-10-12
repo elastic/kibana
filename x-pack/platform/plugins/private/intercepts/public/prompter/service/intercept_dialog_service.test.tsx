@@ -32,7 +32,7 @@ const mockPerformanceMark = jest.fn(
       entryType: 'mark',
       detail: {},
       toJSON: () => ({}),
-    } as PerformanceMark)
+    }) as PerformanceMark
 );
 
 const mockPerformanceMeasure = jest.fn(
@@ -44,7 +44,7 @@ const mockPerformanceMeasure = jest.fn(
       entryType: 'measure',
       detail: {},
       toJSON: () => ({}),
-    } as PerformanceMeasure)
+    }) as PerformanceMeasure
 );
 
 describe('InterceptDialogService', () => {

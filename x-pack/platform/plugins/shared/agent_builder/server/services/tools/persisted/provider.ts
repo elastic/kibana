@@ -52,10 +52,13 @@ export const createPersistedToolClient = ({
   request: KibanaRequest;
 }): WritableToolProvider => {
   const toolClient = createClient({ space, esClient, logger });
-  const definitionMap = toolTypes.filter(isEnabledDefinition).reduce((map, def) => {
-    map[def.toolType] = def;
-    return map;
-  }, {} as Record<ToolType, ToolTypeDefinition>);
+  const definitionMap = toolTypes.filter(isEnabledDefinition).reduce(
+    (map, def) => {
+      map[def.toolType] = def;
+      return map;
+    },
+    {} as Record<ToolType, ToolTypeDefinition>
+  );
 
   const validationContext = (): ToolTypeValidatorContext => {
     return {

@@ -15,9 +15,12 @@ import type {
   ClientConfigType,
 } from './types';
 
-export class UpgradeAssistantUIPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class UpgradeAssistantUIPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   constructor(private ctx: PluginInitializerContext) {}
 
   setup(

@@ -24,7 +24,10 @@ export class DataLoader {
   private _indexPatternTitle: IndexPatternTitle = '';
   private _maxExamples: number = MAX_EXAMPLES_DEFAULT;
 
-  constructor(private _indexPattern: DataView, private _mlApi: MlApi) {
+  constructor(
+    private _indexPattern: DataView,
+    private _mlApi: MlApi
+  ) {
     this._runtimeMappings = this._indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
     this._indexPatternTitle = _indexPattern.title;
   }

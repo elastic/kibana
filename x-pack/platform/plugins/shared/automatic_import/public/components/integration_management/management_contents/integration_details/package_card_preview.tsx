@@ -14,9 +14,7 @@ const useCardCss = () => {
   const { euiTheme } = useEuiTheme();
   return {
     card: css`
-      margin-top: calc(
-        ${euiTheme.size.m} + 7px
-      ); // To align with title input that has a margin-top of 4px to the label
+      margin-top: calc(${euiTheme.size.m} + 7px); // To align with title input that has a margin-top of 4px to the label
 
       min-height: 127px;
 

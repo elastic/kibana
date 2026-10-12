@@ -19,7 +19,7 @@ import {
 } from './relay';
 
 const createLogger = () =>
-  ({ debug: jest.fn(), error: jest.fn() } as unknown as jest.Mocked<Logger>);
+  ({ debug: jest.fn(), error: jest.fn() }) as unknown as jest.Mocked<Logger>;
 
 const createContext = (
   secrets: Record<string, unknown>,
@@ -29,7 +29,7 @@ const createContext = (
     log: createLogger(),
     secrets,
     ...(relay ? { relay } : {}),
-  } as unknown as ActionContext);
+  }) as unknown as ActionContext;
 
 const relaySecrets = { authType: 'relay', tenantKey: 'team-A' };
 

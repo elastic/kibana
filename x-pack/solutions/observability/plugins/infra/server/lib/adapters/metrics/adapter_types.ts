@@ -14,8 +14,10 @@ import type {
 } from '../../../../common/http_api/node_details_api';
 import type { InfraSourceConfiguration } from '../../sources';
 
-export interface InfraMetricsRequestOptions
-  extends Omit<NodeDetailsRequest, 'sourceId' | 'nodeId' | 'cloudId'> {
+export interface InfraMetricsRequestOptions extends Omit<
+  NodeDetailsRequest,
+  'sourceId' | 'nodeId' | 'cloudId'
+> {
   nodeIds: {
     nodeId: string;
     cloudId?: string | null;

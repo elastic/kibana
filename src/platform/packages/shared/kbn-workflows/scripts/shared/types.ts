@@ -16,8 +16,10 @@ export interface Operation {
   method: string;
 }
 
-export interface ContractMeta
-  extends Omit<InternalConnectorContract, 'paramsSchema' | 'outputSchema'> {
+export interface ContractMeta extends Omit<
+  InternalConnectorContract,
+  'paramsSchema' | 'outputSchema'
+> {
   fileName: string;
   contractName: string;
   operations: Operation[];

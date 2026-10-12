@@ -23,9 +23,12 @@ export interface StartDependencies {
   settings: SettingsStart;
 }
 
-export class TestingEmbeddedLensPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class TestingEmbeddedLensPlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'testing_embedded_lens',

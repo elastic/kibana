@@ -16,9 +16,10 @@ import type {
 import type { InferenceEndpointPluginSetup, InferenceEndpointPluginStart } from './types';
 import { getInferenceServicesRoute } from './routes';
 
-export class InferenceEndpointPlugin
-  implements Plugin<InferenceEndpointPluginSetup, InferenceEndpointPluginStart>
-{
+export class InferenceEndpointPlugin implements Plugin<
+  InferenceEndpointPluginSetup,
+  InferenceEndpointPluginStart
+> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

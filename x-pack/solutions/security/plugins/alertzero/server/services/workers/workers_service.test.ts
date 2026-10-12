@@ -39,7 +39,7 @@ const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
         ),
       })),
     },
-  } as unknown as AgentBuilderPluginStart);
+  }) as unknown as AgentBuilderPluginStart;
 
 interface PersistentWorkerDocument {
   id: string;

@@ -73,10 +73,10 @@ export function transformCoreWebVitalsResponse<T>(
     fcp: fcp?.values?.[pkey],
 
     lcpRanks: lcp?.values?.[pkey]
-      ? getRanksPercentages(lcpRanks?.values) ?? DEFAULT_RANKS
+      ? (getRanksPercentages(lcpRanks?.values) ?? DEFAULT_RANKS)
       : DEFAULT_RANKS,
     clsRanks: cls?.values?.[pkey]
-      ? getRanksPercentages(clsRanks?.values) ?? DEFAULT_RANKS
+      ? (getRanksPercentages(clsRanks?.values) ?? DEFAULT_RANKS)
       : DEFAULT_RANKS,
   };
 }

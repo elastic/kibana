@@ -16,7 +16,7 @@ import { LIST_RULES_RESPONSE } from './list_rules_oas_example';
 const createRulesClientStub = () =>
   ({
     findMatchingRules: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, per_page: 20 }),
-  } as unknown as jest.Mocked<Pick<RulesClient, 'findMatchingRules'>>);
+  }) as unknown as jest.Mocked<Pick<RulesClient, 'findMatchingRules'>>;
 
 const buildRoute = (body: MatchRulesBody) => {
   const { ctx } = createRouteDependencies();

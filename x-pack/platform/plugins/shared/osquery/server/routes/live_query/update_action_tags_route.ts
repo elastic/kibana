@@ -143,7 +143,7 @@ export const updateActionTagsRoute = (
 
             const totalHits = scheduledCheck.hits.total;
             const scheduledCount =
-              typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+              typeof totalHits === 'number' ? totalHits : (totalHits?.value ?? 0);
 
             if (scheduledCount > 0) {
               return response.badRequest({

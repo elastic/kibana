@@ -93,8 +93,8 @@ export const useEntitiesWithAnomaliesCount = ({
       const entityIds: string[] = Array.isArray(rawIds)
         ? (rawIds as string[]).filter(Boolean)
         : typeof rawIds === 'string' && rawIds
-        ? [rawIds]
-        : [];
+          ? [rawIds]
+          : [];
       return { count, entityIds };
     },
     {
@@ -119,7 +119,7 @@ export const useEntitiesWithAnomaliesCount = ({
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : (queryResult?.entityIds ?? EMPTY_ENTITY_IDS),
     isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
     error: filteredError ?? indexError,
   };

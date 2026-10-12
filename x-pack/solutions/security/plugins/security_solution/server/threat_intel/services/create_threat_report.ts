@@ -86,7 +86,9 @@ export const createThreatReport = async (
   });
 
   const total =
-    typeof existing.hits.total === 'number' ? existing.hits.total : existing.hits.total?.value ?? 0;
+    typeof existing.hits.total === 'number'
+      ? existing.hits.total
+      : (existing.hits.total?.value ?? 0);
 
   if (total > 0) {
     const existingId = existing.hits.hits[0]._id;

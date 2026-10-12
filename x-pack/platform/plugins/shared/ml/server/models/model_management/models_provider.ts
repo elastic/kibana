@@ -992,14 +992,17 @@ export class ModelsProvider {
     }
 
     // Groups results by model id
-    const byModelId = (result.tasks as TasksTaskInfo[]).reduce((acc, task) => {
-      const modelId = task.description!.replace(`model_id-`, '');
-      acc[modelId] = {
-        downloaded_parts: task.status.downloaded_parts,
-        total_parts: task.status.total_parts,
-      };
-      return acc;
-    }, {} as Record<string, ModelDownloadState>);
+    const byModelId = (result.tasks as TasksTaskInfo[]).reduce(
+      (acc, task) => {
+        const modelId = task.description!.replace(`model_id-`, '');
+        acc[modelId] = {
+          downloaded_parts: task.status.downloaded_parts,
+          total_parts: task.status.total_parts,
+        };
+        return acc;
+      },
+      {} as Record<string, ModelDownloadState>
+    );
 
     return byModelId;
   }

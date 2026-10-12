@@ -14,28 +14,27 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorApi, ESQLEditorProps } from '@kbn/esql-editor';
 import { untilPluginStartServicesReady } from './kibana_services';
 
-export const ESQLLangEditor = forwardRef<ESQLEditorApi, ESQLEditorProps>(function ESQLLangEditor(
-  props,
-  ref
-) {
-  const { loading, value } = useAsync(() => {
-    const startServicesPromise = untilPluginStartServicesReady();
-    const modulePromise = import('@kbn/esql-editor');
-    return Promise.all([startServicesPromise, modulePromise]);
-  }, []);
+export const ESQLLangEditor = forwardRef<ESQLEditorApi, ESQLEditorProps>(
+  function ESQLLangEditor(props, ref) {
+    const { loading, value } = useAsync(() => {
+      const startServicesPromise = untilPluginStartServicesReady();
+      const modulePromise = import('@kbn/esql-editor');
+      return Promise.all([startServicesPromise, modulePromise]);
+    }, []);
 
-  const ESQLEditor = value?.[1]?.default;
-  const deps = value?.[0];
+    const ESQLEditor = value?.[1]?.default;
+    const deps = value?.[0];
 
-  if (loading || !deps || !ESQLEditor) return <EuiLoadingSpinner />;
+    if (loading || !deps || !ESQLEditor) return <EuiLoadingSpinner />;
 
-  return (
-    <KibanaContextProvider
-      services={{
-        ...deps,
-      }}
-    >
-      <ESQLEditor ref={ref} {...props} />
-    </KibanaContextProvider>
-  );
-});
+    return (
+      <KibanaContextProvider
+        services={{
+          ...deps,
+        }}
+      >
+        <ESQLEditor ref={ref} {...props} />
+      </KibanaContextProvider>
+    );
+  }
+);

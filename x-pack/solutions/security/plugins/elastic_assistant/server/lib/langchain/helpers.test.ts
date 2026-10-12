@@ -21,7 +21,7 @@ describe('helpers', () => {
     const testCases: Array<
       [
         Pick<Message, 'content' | 'role'>,
-        typeof SystemMessage | typeof HumanMessage | typeof AIMessage
+        typeof SystemMessage | typeof HumanMessage | typeof AIMessage,
       ]
     > = [
       [

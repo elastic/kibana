@@ -63,8 +63,10 @@ export interface SerializedNode extends Pick<WorkspaceNode, 'x' | 'y' | 'label' 
   size: number;
 }
 
-export interface SerializedEdge
-  extends Omit<WorkspaceEdge, 'source' | 'target' | 'topTarget' | 'topSrc'> {
+export interface SerializedEdge extends Omit<
+  WorkspaceEdge,
+  'source' | 'target' | 'topTarget' | 'topSrc'
+> {
   source: number;
   target: number;
 }

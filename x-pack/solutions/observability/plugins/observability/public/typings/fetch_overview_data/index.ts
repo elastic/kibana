@@ -84,7 +84,7 @@ export type ObservabilityFetchDataPlugins = Exclude<
 >;
 
 export interface DataHandler<
-  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
+  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins,
 > {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData<T>;

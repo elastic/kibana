@@ -58,7 +58,7 @@ const baseState = (over: Partial<StateType> = {}): StateType =>
     lastContextActionCycle: Number.NEGATIVE_INFINITY,
     contextRetryCount: 0,
     ...over,
-  } as StateType);
+  }) as StateType;
 
 const deps = (
   over: Partial<ContextManagementDeps> = {},

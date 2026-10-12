@@ -108,16 +108,16 @@ export const CreateServiceAccountFlyout = ({
           }
         )
       : hasTooManyRoles
-      ? i18n.translate(
-          'xpack.security.management.serviceAccounts.create.tooManyRolesErrorMessage',
-          {
-            defaultMessage: 'Select no more than {maxRoles} roles.',
-            values: { maxRoles },
-          }
-        )
-      : i18n.translate('xpack.security.management.serviceAccounts.create.rolesErrorMessage', {
-          defaultMessage: 'Select at least one role.',
-        });
+        ? i18n.translate(
+            'xpack.security.management.serviceAccounts.create.tooManyRolesErrorMessage',
+            {
+              defaultMessage: 'Select no more than {maxRoles} roles.',
+              values: { maxRoles },
+            }
+          )
+        : i18n.translate('xpack.security.management.serviceAccounts.create.rolesErrorMessage', {
+            defaultMessage: 'Select at least one role.',
+          });
   const normalizedName = name.trim();
   const isNameInvalid =
     !SERVICE_ACCOUNT_NAME_REGEX.test(normalizedName) ||

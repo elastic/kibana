@@ -29,8 +29,8 @@ const removeServerBasePath = (pathname: string, { serverBasePath }: IBasePath): 
   pathname === serverBasePath
     ? '/'
     : pathname.startsWith(`${serverBasePath}/`)
-    ? pathname.slice(serverBasePath.length)
-    : pathname;
+      ? pathname.slice(serverBasePath.length)
+      : pathname;
 
 /** The current page as a comment's route: without origin or server base path, but with the space prefix, which makes the same page of another space another page. */
 export const routeOf = (

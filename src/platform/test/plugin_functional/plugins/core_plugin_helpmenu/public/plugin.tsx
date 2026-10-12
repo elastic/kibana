@@ -9,9 +9,10 @@
 
 import type { Plugin, CoreSetup } from '@kbn/core/public';
 
-export class CoreHelpMenuPlugin
-  implements Plugin<CoreHelpMenuPluginSetup, CoreHelpMenuPluginStart>
-{
+export class CoreHelpMenuPlugin implements Plugin<
+  CoreHelpMenuPluginSetup,
+  CoreHelpMenuPluginStart
+> {
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'core_help_menu',

@@ -55,16 +55,15 @@ export interface BaseFlameGraph {
 }
 
 /** Elasticsearch flamegraph */
-export interface ElasticFlameGraph
-  extends Omit<
-    BaseFlameGraph,
-    | 'AnnualCO2TonsExclusive'
-    | 'AnnualCO2TonsInclusive'
-    | 'SelfAnnualCO2Tons'
-    | 'TotalAnnualCO2Tons'
-    | 'AnnualCostsUSDInclusive'
-    | 'AnnualCostsUSDExclusive'
-  > {
+export interface ElasticFlameGraph extends Omit<
+  BaseFlameGraph,
+  | 'AnnualCO2TonsExclusive'
+  | 'AnnualCO2TonsInclusive'
+  | 'SelfAnnualCO2Tons'
+  | 'TotalAnnualCO2Tons'
+  | 'AnnualCostsUSDInclusive'
+  | 'AnnualCostsUSDExclusive'
+> {
   /** ID */
   ID: string[];
   /** Label */

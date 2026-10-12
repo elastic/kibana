@@ -73,7 +73,7 @@ const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleD
     schedule: { every: '1m', lookback: '5m' },
     query: { base: 'FROM metrics-*' },
     ...overrides,
-  } as CreateRuleData);
+  }) as CreateRuleData;
 
 const createTemplate = (overrides: Partial<RuleTemplateResponse> = {}): RuleTemplateResponse => ({
   id: 'template-1',

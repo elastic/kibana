@@ -72,7 +72,7 @@ const transformTemplateCaseFieldsToCaseFormFields = (
       syncAlerts: templateSettings?.syncAlerts ?? ownerSettings.syncAlerts,
       extractObservables: isObservablesExtractionBlocked(owner)
         ? false
-        : templateSettings?.extractObservables ?? ownerSettings.extractObservables,
+        : (templateSettings?.extractObservables ?? ownerSettings.extractObservables),
     },
     customFields: transFormedCustomFields as CaseUI['customFields'],
   });
@@ -125,7 +125,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         'extractObservables',
         isObservablesExtractionBlocked(caseOwner)
           ? false
-          : configuration.extractObservables ?? false
+          : (configuration.extractObservables ?? false)
       );
     }, [
       caseOwner,

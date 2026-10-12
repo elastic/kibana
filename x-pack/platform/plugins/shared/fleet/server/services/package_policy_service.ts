@@ -49,31 +49,31 @@ export type RunExternalCallbacksPackagePolicyArgument<A extends ExternalCallback
   A extends 'packagePolicyDelete'
     ? DeletePackagePoliciesResponse
     : A extends 'packagePolicyPostDelete'
-    ? PostDeletePackagePoliciesResponse
-    : A extends 'packagePolicyCreate'
-    ? NewPackagePolicy
-    : A extends 'packagePolicyPostCreate'
-    ? PackagePolicy
-    : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicyWithId
-    : A extends 'packagePolicyPostUpdate'
-    ? PackagePolicy
-    : never;
+      ? PostDeletePackagePoliciesResponse
+      : A extends 'packagePolicyCreate'
+        ? NewPackagePolicy
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyUpdate'
+            ? UpdatePackagePolicyWithId
+            : A extends 'packagePolicyPostUpdate'
+              ? PackagePolicy
+              : never;
 
 export type RunExternalCallbacksPackagePolicyResponse<A extends ExternalCallback[0]> =
   A extends 'packagePolicyDelete'
     ? void
     : A extends 'packagePolicyPostDelete'
-    ? void
-    : A extends 'packagePolicyCreate'
-    ? NewPackagePolicy
-    : A extends 'packagePolicyPostCreate'
-    ? PackagePolicy
-    : A extends 'packagePolicyUpdate'
-    ? UpdatePackagePolicy
-    : A extends 'packagePolicyPostUpdate'
-    ? PackagePolicy
-    : undefined;
+      ? void
+      : A extends 'packagePolicyCreate'
+        ? NewPackagePolicy
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyUpdate'
+            ? UpdatePackagePolicy
+            : A extends 'packagePolicyPostUpdate'
+              ? PackagePolicy
+              : undefined;
 
 export interface PackagePolicyClient {
   create(

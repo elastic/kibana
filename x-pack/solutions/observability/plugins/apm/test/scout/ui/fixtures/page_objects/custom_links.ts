@@ -12,7 +12,10 @@ import { EXTENDED_TIMEOUT } from '../constants';
 
 export class CustomLinksPage {
   public saveButton: Locator;
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+  constructor(
+    private readonly page: ScoutPage,
+    private readonly kbnUrl: KibanaUrl
+  ) {
     this.saveButton = this.page.testSubj.locator('apmCustomLinkFlyoutFooterSaveButton');
   }
 

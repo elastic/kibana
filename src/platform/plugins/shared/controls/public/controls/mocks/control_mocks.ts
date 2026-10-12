@@ -17,7 +17,7 @@ import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/re
 export const getMockedFinalizeApi =
   <
     StateType extends object = object,
-    ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
+    ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>,
   >(
     uuid: string,
     factory: EmbeddablePublicDefinition<StateType, ApiType>,

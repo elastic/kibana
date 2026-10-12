@@ -15,7 +15,7 @@ const respond = (hits: unknown[]): SearchResponse<unknown, unknown> =>
     timed_out: false,
     _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
     hits: { hits, total: { value: hits.length, relation: 'eq' } },
-  } as unknown as SearchResponse<unknown, unknown>);
+  }) as unknown as SearchResponse<unknown, unknown>;
 
 const reportHit = {
   _index: '.kibana-threat-reports',

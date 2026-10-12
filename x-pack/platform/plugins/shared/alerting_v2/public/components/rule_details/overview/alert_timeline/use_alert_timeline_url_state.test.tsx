@@ -26,7 +26,7 @@ const createMockStorage = (initialValue: unknown = null): Storage =>
     set: jest.fn(),
     remove: jest.fn(),
     clear: jest.fn(),
-  } as unknown as Storage);
+  }) as unknown as Storage;
 
 const createStatefulStorage = (initialValue: unknown = null): Storage => {
   let stored: unknown = initialValue;

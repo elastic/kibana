@@ -39,8 +39,8 @@ export function createAddServiceMapPanelAction(
     isCompatible: async ({ embeddable }) => {
       return Boolean(
         deps.config.serviceMapEnabled &&
-          (await hasServiceMapLicense(deps)) &&
-          apiIsPresentationContainer(embeddable)
+        (await hasServiceMapLicense(deps)) &&
+        apiIsPresentationContainer(embeddable)
       );
     },
     execute: async ({ embeddable, returnFocus }) => {

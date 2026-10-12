@@ -167,9 +167,8 @@ export function initAPIAuthorization(
 
     for (const reservedPrivilege of requestedReservedPrivileges) {
       if (reservedPrivilege === ReservedPrivilegesSet.superuser) {
-        const checkSuperuserPrivilegesResponse = await checkPrivilegesWithRequest(request).globally(
-          SUPERUSER_PRIVILEGES
-        );
+        const checkSuperuserPrivilegesResponse =
+          await checkPrivilegesWithRequest(request).globally(SUPERUSER_PRIVILEGES);
         kibanaPrivileges[ReservedPrivilegesSet.superuser] =
           checkSuperuserPrivilegesResponse.hasAllRequested;
       }

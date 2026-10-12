@@ -53,10 +53,13 @@ export function syncSavedObjectsFactory(
 
     const tasks: Array<() => Promise<void>> = [];
 
-    const adJobsById = status.jobs['anomaly-detector'].reduce((acc, j) => {
-      acc[j.jobId] = j;
-      return acc;
-    }, {} as Record<string, JobStatus>);
+    const adJobsById = status.jobs['anomaly-detector'].reduce(
+      (acc, j) => {
+        acc[j.jobId] = j;
+        return acc;
+      },
+      {} as Record<string, JobStatus>
+    );
 
     for (const job of status.jobs['anomaly-detector']) {
       if (job.checks.savedObjectExits === false) {
@@ -346,10 +349,13 @@ export function syncSavedObjectsFactory(
       success: true,
     };
     const status = await checkStatus();
-    const adJobsById = status.jobs['anomaly-detector'].reduce((acc, j) => {
-      acc[j.jobId] = j;
-      return acc;
-    }, {} as Record<string, JobStatus>);
+    const adJobsById = status.jobs['anomaly-detector'].reduce(
+      (acc, j) => {
+        acc[j.jobId] = j;
+        return acc;
+      },
+      {} as Record<string, JobStatus>
+    );
 
     const jobObjects: Array<{ job: JobObject; namespaces: string[] }> = [];
     const datafeeds: Array<{ jobId: string; datafeedId: string }> = [];
@@ -413,13 +419,16 @@ export function syncSavedObjectsFactory(
           await client.asInternalUser.ml.getTrainedModels({
             model_id: models.map(({ modelId }) => modelId).join(','),
           });
-        const jobDetails = trainedModelConfigs.reduce((acc, cur) => {
-          const job = getJobDetailsFromTrainedModel(cur);
-          if (job !== null) {
-            acc[cur.model_id] = job;
-          }
-          return acc;
-        }, {} as Record<string, TrainedModelObject['job']>);
+        const jobDetails = trainedModelConfigs.reduce(
+          (acc, cur) => {
+            const job = getJobDetailsFromTrainedModel(cur);
+            if (job !== null) {
+              acc[cur.model_id] = job;
+            }
+            return acc;
+          },
+          {} as Record<string, TrainedModelObject['job']>
+        );
 
         models.forEach(({ modelId }) => {
           modelObjects.push({

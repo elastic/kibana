@@ -19,12 +19,10 @@ import type { ContentListItemConfig } from '@kbn/content-list-provider';
 import { useColumns } from './use_columns';
 import { Column, NameColumn } from '../column';
 
-const mockFindItems = jest.fn(
-  async (_params: FindItemsParams): Promise<FindItemsResult> => ({
-    items: [],
-    total: 0,
-  })
-);
+const mockFindItems = jest.fn(async (_params: FindItemsParams): Promise<FindItemsResult> => ({
+  items: [],
+  total: 0,
+}));
 
 const createWrapper =
   (options?: {
@@ -32,18 +30,17 @@ const createWrapper =
     getHref?: (item: { id: string }) => string;
     item?: ContentListItemConfig;
   }) =>
-  ({ children }: { children: React.ReactNode }) =>
-    (
-      <ContentListProvider
-        id="test-list"
-        labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
-        dataSource={{ findItems: mockFindItems }}
-        isReadOnly={options?.isReadOnly}
-        item={options?.item ?? (options?.getHref ? { getHref: options.getHref } : undefined)}
-      >
-        {children}
-      </ContentListProvider>
-    );
+  ({ children }: { children: React.ReactNode }) => (
+    <ContentListProvider
+      id="test-list"
+      labels={{ entity: 'dashboard', entityPlural: 'dashboards' }}
+      dataSource={{ findItems: mockFindItems }}
+      isReadOnly={options?.isReadOnly}
+      item={options?.item ?? (options?.getHref ? { getHref: options.getHref } : undefined)}
+    >
+      {children}
+    </ContentListProvider>
+  );
 
 describe('useColumns', () => {
   beforeEach(() => {

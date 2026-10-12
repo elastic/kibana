@@ -54,8 +54,8 @@ describe('discoverFeatureFlags', () => {
         flagName === CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY
           ? false
           : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY
-          ? true
-          : fallback
+            ? true
+            : fallback
       )
     );
 

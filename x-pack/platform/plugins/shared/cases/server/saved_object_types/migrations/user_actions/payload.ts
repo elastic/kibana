@@ -150,7 +150,7 @@ const convertPayload = (
 
 const decodeValue = (value: string) => {
   try {
-    return isString(value) ? JSON.parse(value) : value ?? {};
+    return isString(value) ? JSON.parse(value) : (value ?? {});
   } catch {
     return value;
   }
@@ -178,8 +178,8 @@ const getSingleFieldPayload = (
         tags: isString(value)
           ? value.split(',').map((item) => item.trim())
           : Array.isArray(value)
-          ? value
-          : [],
+            ? value
+            : [],
       };
     case 'comment':
       /**

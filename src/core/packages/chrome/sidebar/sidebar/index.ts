@@ -56,7 +56,7 @@ export function isValidSidebarAppId(appId: string): appId is SidebarAppId {
  */
 export type SidebarComponentProps<
   TState = undefined,
-  TActions = undefined
+  TActions = undefined,
 > = TState extends undefined
   ? { onClose: () => void }
   : { state: TState; actions: TActions; onClose: () => void };

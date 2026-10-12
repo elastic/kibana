@@ -41,7 +41,7 @@ const createContext = (input: { step: NightshiftModelStep; connector_id?: string
     contextManager: {
       getFakeRequest: jest.fn().mockReturnValue(request),
     },
-  } as never);
+  }) as never;
 
 beforeEach(() => {
   jest.clearAllMocks();

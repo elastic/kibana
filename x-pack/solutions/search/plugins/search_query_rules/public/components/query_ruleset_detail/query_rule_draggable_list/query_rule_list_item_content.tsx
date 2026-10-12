@@ -295,9 +295,11 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                         key="delete"
                         icon="trash"
                         css={css`
-                          color: ${rules.length === 1
-                            ? euiTheme.colors.textDisabled
-                            : euiTheme.colors.danger};
+                          color: ${
+                            rules.length === 1
+                              ? euiTheme.colors.textDisabled
+                              : euiTheme.colors.danger
+                          };
                         `}
                         data-test-subj="searchQueryRulesQueryRulesetDetailDeleteButton"
                         onClick={() => {

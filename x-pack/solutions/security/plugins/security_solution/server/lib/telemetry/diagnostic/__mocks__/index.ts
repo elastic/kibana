@@ -26,17 +26,17 @@ export const createMockLogger = (): jest.Mocked<Logger> =>
     warn: jest.fn(),
     error: jest.fn(),
     get: jest.fn().mockReturnThis(),
-  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockTaskManager = (): jest.Mocked<TaskManagerStartContract> =>
   ({
     ensureScheduled: jest.fn(),
-  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockAnalytics = (): jest.Mocked<AnalyticsServiceStart> =>
   ({
     reportEvent: jest.fn(),
-  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockTelemetryConfigProvider = (
   isOptedIn = true
@@ -46,13 +46,13 @@ export const createMockTelemetryConfigProvider = (
     start: jest.fn(),
     stop: jest.fn(),
     getObservable: jest.fn(),
-  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockQueryExecutor = (): jest.Mocked<CircuitBreakingQueryExecutorImpl> =>
   ({
     search: jest.fn(),
     searchApi: jest.fn(),
-  } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+  }) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
 export const createMockDocument = (overrides = {}) => ({
   '@timestamp': '2023-01-01T00:00:00Z',

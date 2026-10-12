@@ -96,7 +96,9 @@ export const scheduleThrottledNotificationActions = async ({
 
     // This will give us counts up to the max of 10k from tracking total hits.
     const signalsCountFromResults =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value ?? 0;
+      typeof results.hits.total === 'number'
+        ? results.hits.total
+        : (results.hits.total?.value ?? 0);
 
     const resultsFlattened = results.hits.hits.map((hit) => {
       return {

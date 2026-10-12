@@ -10,7 +10,10 @@ import type { AnalyticsServiceStart, EventTypeOpts, LogMeta, Logger } from '@kbn
 export class MetadataSender {
   private readonly logger: Logger;
 
-  constructor(logger: Logger, private readonly analytics: AnalyticsServiceStart) {
+  constructor(
+    logger: Logger,
+    private readonly analytics: AnalyticsServiceStart
+  ) {
     this.logger = logger.get(MetadataSender.name);
   }
 

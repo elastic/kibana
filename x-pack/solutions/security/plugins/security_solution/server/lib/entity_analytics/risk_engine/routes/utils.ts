@@ -32,9 +32,8 @@ export const withEntityStoreV2Disabled = <P, Q, B, T extends HttpResponsePayload
   ): Promise<IKibanaResponse<T>> => {
     if (isRiskScoringMaintainerEnabled) {
       const core = await context.core;
-      const isEntityStoreV2ModeEnabled = await core.uiSettings.client.get<boolean>(
-        FF_ENABLE_ENTITY_STORE_V2
-      );
+      const isEntityStoreV2ModeEnabled =
+        await core.uiSettings.client.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
       if (!isEntityStoreV2ModeEnabled) {
         return handler(context, request, response);

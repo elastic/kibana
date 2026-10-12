@@ -27,8 +27,9 @@ export const visorStyles = (
     visorContainer: css`
       background-color: ${euiTheme.colors.backgroundBasePlain};
       width: 100%;
-      ${isInline
-        ? `
+      ${
+        isInline
+          ? `
           min-height: ${isVisible ? euiTheme.size.xl : '0'};
           height: ${isVisible ? 'auto' : '0'};
           max-height: ${isVisible ? NL_TEXTAREA_MAX_HEIGHT : '0'};
@@ -37,7 +38,8 @@ export const visorStyles = (
           overflow: ${isVisible ? 'visible' : 'hidden'};
           transition: min-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), max-height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
         `
-        : `min-height: ${euiTheme.size.xl};`}
+          : `min-height: ${euiTheme.size.xl};`
+      }
     `,
     visorWrapper: css`
       width: 100%;

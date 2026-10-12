@@ -21,7 +21,7 @@ import { Global } from './plugin';
 class ScopePlugin extends Plugin<ScopedContainer> {
   public load(api: PluginApi): void {
     api.define('expose', function <
-      T
+      T,
     >(this: Container, serviceIdentifier: ServiceIdentifier<T>): BindToFluentSyntax<T> {
       this.bind(Global).toConstantValue(serviceIdentifier);
 

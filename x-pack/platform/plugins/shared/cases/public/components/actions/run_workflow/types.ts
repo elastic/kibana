@@ -8,11 +8,10 @@
 import type { RunWorkflowExecutor, RunWorkflowPanelProps } from '@kbn/workflows-ui';
 
 /** Props passed directly to `RunCaseWorkflowModal` from the action hook. */
-export interface RunCaseWorkflowModalProps
-  extends Pick<
-    RunWorkflowPanelProps,
-    'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecutionSettled'
-  > {
+export interface RunCaseWorkflowModalProps extends Pick<
+  RunWorkflowPanelProps,
+  'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecutionSettled'
+> {
   runWorkflow: RunWorkflowExecutor;
   onClose: () => void;
   focusButtonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;

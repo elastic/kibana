@@ -27,15 +27,12 @@ import type {
   OtelTelemetryCollectionPluginStartDeps,
 } from './plugin.types';
 
-export class OtelTelemetryCollectionPlugin
-  implements
-    Plugin<
-      OtelTelemetryCollectionPluginSetup,
-      OtelTelemetryCollectionPluginStart,
-      OtelTelemetryCollectionPluginSetupDeps,
-      OtelTelemetryCollectionPluginStartDeps
-    >
-{
+export class OtelTelemetryCollectionPlugin implements Plugin<
+  OtelTelemetryCollectionPluginSetup,
+  OtelTelemetryCollectionPluginStart,
+  OtelTelemetryCollectionPluginSetupDeps,
+  OtelTelemetryCollectionPluginStartDeps
+> {
   private readonly logger: Logger;
   private readonly pluginConfig: PluginConfig;
 

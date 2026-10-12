@@ -62,15 +62,12 @@ const sectionsHeader = i18n.translate('indexPatternManagement.dataView.sectionsH
   defaultMessage: 'Data Views',
 });
 
-export class IndexPatternManagementPlugin
-  implements
-    Plugin<
-      IndexPatternManagementSetup,
-      IndexPatternManagementStart,
-      IndexPatternManagementSetupDependencies,
-      IndexPatternManagementStartDependencies
-    >
-{
+export class IndexPatternManagementPlugin implements Plugin<
+  IndexPatternManagementSetup,
+  IndexPatternManagementStart,
+  IndexPatternManagementSetupDependencies,
+  IndexPatternManagementStartDependencies
+> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(

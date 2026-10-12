@@ -47,10 +47,10 @@ export const UnifiedSearchBar = ({
       indexPatterns={metricsView && [metricsView.dataViewReference]}
       placeholder={
         showPlaceholder
-          ? placeholder ??
+          ? (placeholder ??
             i18n.translate('xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder', {
               defaultMessage: 'Search for infrastructure data… (e.g. host.name:host-1)',
-            })
+            }))
           : undefined
       }
       showSubmitButton={showSubmitButton}

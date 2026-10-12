@@ -39,9 +39,8 @@ export function VisualizeData({ onboardingId, selectedCreateStackOption, hasExis
   const [orderedVisibleAWSServiceList, setOrderedVisibleAWSServiceList] = useState<
     AWSServiceGetStartedConfig[]
   >([]);
-  const [shouldShowDataReceivedToast, setShouldShowDataReceivedToast] = useState<boolean>(
-    !hasExistingData
-  );
+  const [shouldShowDataReceivedToast, setShouldShowDataReceivedToast] =
+    useState<boolean>(!hasExistingData);
   const { data: populatedAWSIndexList, status, refetch } = usePopulatedAWSIndexList();
   const {
     services: {

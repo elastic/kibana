@@ -23,4 +23,4 @@ export const createEsClient = (
         };
       }),
     },
-  } as unknown as ElasticsearchClient);
+  }) as unknown as ElasticsearchClient;

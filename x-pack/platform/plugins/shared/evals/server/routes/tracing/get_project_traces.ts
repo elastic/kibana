@@ -142,7 +142,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
           const total =
             typeof totalHits === 'number'
               ? totalHits
-              : (totalHits as { value: number })?.value ?? 0;
+              : ((totalHits as { value: number })?.value ?? 0);
 
           const traceIds = hits
             .map((hit) => hit._source?.trace_id ?? hit._id)

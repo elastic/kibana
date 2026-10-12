@@ -48,7 +48,7 @@ const makeDeps = (
           featureFlags: {
             getBooleanValue$: jest.fn().mockReturnValue(of(false)),
           },
-        } as any),
+        }) as any,
     },
     actionsClient,
     actionsClientWithRequest,

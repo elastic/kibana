@@ -24,7 +24,10 @@ import type { EvaluatorDefinition } from '../../../evaluators/types';
 import { resolveConnectorModel } from '../../../lib/resolve_connector_model';
 
 export class EvaluationExecutionError extends Error {
-  constructor(message: string, public readonly responseType: 'badRequest' | 'notFound') {
+  constructor(
+    message: string,
+    public readonly responseType: 'badRequest' | 'notFound'
+  ) {
     super(message);
     this.name = 'EvaluationExecutionError';
   }
@@ -222,7 +225,7 @@ export const executeEvaluators = async ({
         scores: result.scores,
       });
     } catch (error) {
-      const errorDetail = error instanceof Error ? error.stack ?? error.message : String(error);
+      const errorDetail = error instanceof Error ? (error.stack ?? error.message) : String(error);
       logger.error(`Failed to execute evaluator "${definition.name}": ${errorDetail}`);
       results.push({
         status: 'error',

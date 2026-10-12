@@ -38,7 +38,7 @@ const createContext = (
     esClient: { asCurrentUser: { ml: mlMock } },
     request: {},
     events,
-  } as any);
+  }) as any;
 
 const getResultData = (result: unknown) =>
   (result as { results: Array<{ type: string; data: Record<string, unknown> }> }).results[0];

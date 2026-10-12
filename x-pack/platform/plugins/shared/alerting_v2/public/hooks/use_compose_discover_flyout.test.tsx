@@ -29,7 +29,7 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
 
 jest.mock('@kbn/alerting-v2-schemas', () => ({
   getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
-    query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
+    query?.breach ? `${query.base} | ${query.breach.segment}` : (query?.base ?? ''),
   getRecoverEsqlQuery: () => undefined,
 }));
 

@@ -41,7 +41,7 @@ export function buildHeadersFromSecrets(
         const headerName = config.apiKeyHeaderName ?? 'X-API-Key';
         headers[headerName] = config.apiKeyHeaderValue
           ? config.apiKeyHeaderValue.split(API_KEY_PLACEHOLDER).join(secrets.apiKey ?? '')
-          : secrets.apiKey ?? '';
+          : (secrets.apiKey ?? '');
       }
       break;
 

@@ -132,7 +132,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               collapse: schema.maybe(
                 schema.oneOf(
                   WorkflowExecutionCollapseFields.map((field) => schema.literal(field)) as [
-                    Type<WorkflowExecutionCollapseField>
+                    Type<WorkflowExecutionCollapseField>,
                   ],
                   {
                     meta: {
@@ -145,7 +145,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               sortField: schema.maybe(
                 schema.oneOf(
                   WorkflowExecutionSortFields.map((field) => schema.literal(field)) as [
-                    Type<WorkflowExecutionSortField>
+                    Type<WorkflowExecutionSortField>,
                   ],
                   {
                     meta: {
@@ -233,8 +233,8 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             executedBy: Array.isArray(executedBy)
               ? executedBy
               : executedBy
-              ? [executedBy]
-              : undefined,
+                ? [executedBy]
+                : undefined,
             concurrencyGroupKey: request.query.concurrencyGroupKey,
             page: request.query.page,
             size: request.query.size,

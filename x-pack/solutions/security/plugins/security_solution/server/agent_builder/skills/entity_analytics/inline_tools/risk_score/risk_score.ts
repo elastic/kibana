@@ -102,8 +102,8 @@ export const queryRisksOverInterval = async (opts: BuildEsqlQueryOpts) => {
 
   const query = `FROM ${opts.timeseriesIndex}
       | WHERE ${scoreField} IS NOT NULL AND @timestamp >= ${intervalToEsql(opts.interval)}${
-    entityId ? ` AND ${idValueField} == "${entityId}"` : ''
-  }
+        entityId ? ` AND ${idValueField} == "${entityId}"` : ''
+      }
       | STATS latest_score = LAST(${scoreField}, @timestamp), earliest_score = FIRST(${scoreField}, @timestamp), calculated_level = LAST(${levelField}, @timestamp) BY ${idValueField}
       | EVAL risk_score_change = latest_score - earliest_score
       | EVAL significant_increase = CASE(risk_score_change > 20, true,risk_score_change <= 20, false)

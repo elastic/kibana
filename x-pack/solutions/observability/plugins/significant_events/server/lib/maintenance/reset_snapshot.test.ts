@@ -21,7 +21,7 @@ const createClient = () =>
     findOwnedRuleIds: jest.fn(async (streamName: string) =>
       streamName === 'logs.orphan' ? ['orphan-rule'] : ['linked-rule', 'owned-rule']
     ),
-  } as unknown as jest.Mocked<KnowledgeIndicatorClient>);
+  }) as unknown as jest.Mocked<KnowledgeIndicatorClient>;
 
 describe('collectResetSnapshot', () => {
   it('counts all feature/query records and unions linked and tag-owned rule ids', async () => {

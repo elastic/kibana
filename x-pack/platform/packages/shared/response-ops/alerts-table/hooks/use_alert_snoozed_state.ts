@@ -17,7 +17,7 @@ export const useAlertSnoozedState = (alert?: Alert) => {
   const ruleId = alert && (alert[ALERT_RULE_UUID]?.[0] as string);
 
   return useMemo(() => {
-    const ruleSnoozedInstances: SnoozedInstance[] = ruleId ? snoozedAlerts?.[ruleId] ?? [] : [];
+    const ruleSnoozedInstances: SnoozedInstance[] = ruleId ? (snoozedAlerts?.[ruleId] ?? []) : [];
     const snoozedInstance = alertInstanceId
       ? ruleSnoozedInstances.find((instance) => instance.instanceId === alertInstanceId)
       : undefined;

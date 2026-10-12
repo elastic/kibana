@@ -22,15 +22,12 @@ import type {
   StartDependencies,
 } from './types';
 
-export class ServerlessWorkplaceAIPlugin
-  implements
-    Plugin<
-      ServerlessWorkplaceAIPluginSetup,
-      ServerlessWorkplaceAIPluginStart,
-      SetupDependencies,
-      StartDependencies
-    >
-{
+export class ServerlessWorkplaceAIPlugin implements Plugin<
+  ServerlessWorkplaceAIPluginSetup,
+  ServerlessWorkplaceAIPluginStart,
+  SetupDependencies,
+  StartDependencies
+> {
   // @ts-ignore config is not used for now
   private readonly config: ServerlessChatConfig;
   // @ts-ignore logger is not used for now

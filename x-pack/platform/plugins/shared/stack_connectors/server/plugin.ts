@@ -40,9 +40,12 @@ export interface ConnectorsPluginsStart {
   licensing: LicensingPluginStart;
 }
 
-export class StackConnectorsPlugin
-  implements Plugin<void, void, ConnectorsPluginsSetup, ConnectorsPluginsStart>
-{
+export class StackConnectorsPlugin implements Plugin<
+  void,
+  void,
+  ConnectorsPluginsSetup,
+  ConnectorsPluginsStart
+> {
   private config: StackConnectorsConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
 

@@ -94,7 +94,7 @@ export function createHooksRunner(deps: CreateHooksRunnerDeps): HooksServiceStar
       try {
         const timeoutMs =
           hook.mode === HookExecutionMode.blocking && 'timeout' in hook
-            ? hook.timeout ?? DEFAULT_HOOK_TIMEOUT_MS
+            ? (hook.timeout ?? DEFAULT_HOOK_TIMEOUT_MS)
             : DEFAULT_HOOK_TIMEOUT_MS;
         const timed = await withTimeout({
           promise: (async () => hook.handler(currentContext))(),

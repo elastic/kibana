@@ -119,7 +119,7 @@ describe('getFilesFromComments', () => {
         files: [{ name, extension, mimeType: 'image/png', created: '2024-01-01T00:00:00.000Z' }],
         soType: FILE_SO_TYPE,
       },
-    } as unknown as AttachmentUIV2);
+    }) as unknown as AttachmentUIV2;
 
   it('returns an empty array when there are no file comments', () => {
     expect(getFilesFromComments([basicComment], owner)).toEqual([]);

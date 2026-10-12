@@ -106,7 +106,7 @@ const createContext = () =>
       },
     }),
     search: Promise.resolve(mockSearch),
-  } as unknown as RequestHandlerContext & DataRequestHandlerContext);
+  }) as unknown as RequestHandlerContext & DataRequestHandlerContext;
 
 type ExportHandlerRequest = KibanaRequest<
   unknown,
@@ -124,7 +124,7 @@ const createExportRequest = (options: {
       body: options.body ?? {},
     }),
     events: { aborted$: NEVER, completed$: NEVER },
-  } as unknown as ExportHandlerRequest);
+  }) as unknown as ExportHandlerRequest;
 
 const createSecurityMock = (options?: { useRbac?: boolean; authorizedPrivileges?: string[] }) => {
   const useRbac = options?.useRbac ?? false;
@@ -190,7 +190,7 @@ const createOsqueryContext = (options?: {
     config: jest.fn(),
     telemetryEventsSender: {},
     licensing: {},
-  } as unknown as OsqueryAppContext);
+  }) as unknown as OsqueryAppContext;
 
 describe('createExportRouteHandler', () => {
   beforeEach(() => {

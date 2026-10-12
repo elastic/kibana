@@ -15,7 +15,7 @@ const createStub = (hasPending: boolean, content = 'yaml: after') =>
     hasPendingProposals: jest.fn().mockReturnValue(hasPending),
     acceptAll: jest.fn(),
     getCurrentContent: jest.fn().mockReturnValue(content),
-  } as unknown as ProposalManager);
+  }) as unknown as ProposalManager;
 
 describe('active_proposal_manager', () => {
   afterEach(() => {

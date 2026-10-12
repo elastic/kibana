@@ -216,19 +216,22 @@ export function countErrors(
   ).pipe(
     // When tag is "flush", reset the error counter
     // Otherwise increment the error counter
-    mergeScan(({ count, isBlockException, reason }, next) => {
-      if (next === FLUSH_MARKER) {
-        return of(emitErrorCount(count, isBlockException, reason), resetErrorCount());
-      }
-      const error = next as Error;
-      return of(
-        incrementOrEmitErrorCount(
-          count,
-          isClusterBlockException(error),
-          getBackpressureReason(error)
-        )
-      );
-    }, emitErrorCount(0, false, null)),
+    mergeScan(
+      ({ count, isBlockException, reason }, next) => {
+        if (next === FLUSH_MARKER) {
+          return of(emitErrorCount(count, isBlockException, reason), resetErrorCount());
+        }
+        const error = next as Error;
+        return of(
+          incrementOrEmitErrorCount(
+            count,
+            isClusterBlockException(error),
+            getBackpressureReason(error)
+          )
+        );
+      },
+      emitErrorCount(0, false, null)
+    ),
     filter(isEmitEvent),
     map(({ count, isBlockException, reason }) => {
       return { count, isBlockException, reason };

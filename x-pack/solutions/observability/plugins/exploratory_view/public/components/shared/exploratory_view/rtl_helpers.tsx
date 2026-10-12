@@ -59,8 +59,9 @@ export interface KibanaProviderOptions<ExtraCore> {
   kibanaProps?: KibanaProps;
 }
 
-interface MockKibanaProviderProps<ExtraCore extends Partial<CoreStart>>
-  extends KibanaProviderOptions<ExtraCore> {
+interface MockKibanaProviderProps<
+  ExtraCore extends Partial<CoreStart>,
+> extends KibanaProviderOptions<ExtraCore> {
   children: ReactElement;
   history: History;
 }

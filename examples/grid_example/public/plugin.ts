@@ -22,10 +22,12 @@ export interface GridExamplePluginStartDependencies {
   uiActions: UiActionsStart;
 }
 
-export class GridExamplePlugin
-  implements
-    Plugin<void, void, GridExamplePluginSetupDependencies, GridExamplePluginStartDependencies>
-{
+export class GridExamplePlugin implements Plugin<
+  void,
+  void,
+  GridExamplePluginSetupDependencies,
+  GridExamplePluginStartDependencies
+> {
   public setup(
     core: CoreSetup<GridExamplePluginStartDependencies>,
     { developerExamples }: GridExamplePluginSetupDependencies

@@ -23,9 +23,12 @@ export interface StartDependencies {
   dataViews: DataViewsPublicPluginStart;
 }
 
-export class ESQLValidationExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
+export class ESQLValidationExamplePlugin implements Plugin<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> {
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'esql_validation_example',

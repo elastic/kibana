@@ -18,7 +18,7 @@ const createApiMock = () =>
       action: 'rule_update',
       snapshot: {},
     }),
-  } as unknown as jest.Mocked<RuleChangeHistoryApi>);
+  }) as unknown as jest.Mocked<RuleChangeHistoryApi>;
 
 describe('createRuleChangeHistoryAdapter', () => {
   describe('listChanges', () => {

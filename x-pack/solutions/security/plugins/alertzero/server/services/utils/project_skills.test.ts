@@ -18,7 +18,7 @@ const makeDefinition = (agentStep: object) =>
     enabled: true,
     triggers: [{ type: 'manual' }],
     steps: [agentStep],
-  } as unknown as WorkflowYaml);
+  }) as unknown as WorkflowYaml;
 
 /**
  * Build an AgentLookup that knows one agent ('my-agent' of type 'my-type').
@@ -105,7 +105,7 @@ describe('projectSkillsFromDefinition', () => {
           ({
             type: undefined,
             configuration: { skill_ids: ['skill-a'] },
-          } as unknown as InternalAgentDefinition),
+          }) as unknown as InternalAgentDefinition,
         getAgentType,
         getSkill: () => null,
       };
@@ -120,7 +120,7 @@ describe('projectSkillsFromDefinition', () => {
           ({
             type: 'unknown-type',
             configuration: { skill_ids: ['skill-a'] },
-          } as unknown as InternalAgentDefinition),
+          }) as unknown as InternalAgentDefinition,
         getAgentType: () => null,
         getSkill: () => null,
       };

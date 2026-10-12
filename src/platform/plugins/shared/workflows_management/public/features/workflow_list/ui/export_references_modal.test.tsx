@@ -15,7 +15,7 @@ import type { WorkflowListItemDto } from '@kbn/workflows';
 import { ExportReferencesModal } from './export_references_modal';
 
 const makeMissingWorkflow = (id: string, name: string): WorkflowListItemDto =>
-  ({ id, name } as WorkflowListItemDto);
+  ({ id, name }) as WorkflowListItemDto;
 
 describe('ExportReferencesModal', () => {
   const mockOnIgnore = jest.fn();

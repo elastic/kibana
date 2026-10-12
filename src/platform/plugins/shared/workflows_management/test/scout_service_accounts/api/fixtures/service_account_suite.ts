@@ -211,10 +211,10 @@ export const createServiceAccountSuite = (options: { testWritePermissions?: bool
             name === 'read-only'
               ? ['viewer']
               : config.serverless
-              ? ['admin']
-              : options.testWritePermissions
-              ? ['editor', writerRole]
-              : ['superuser'],
+                ? ['admin']
+                : options.testWritePermissions
+                  ? ['editor', writerRole]
+                  : ['superuser'],
         },
         responseType: 'json',
       });

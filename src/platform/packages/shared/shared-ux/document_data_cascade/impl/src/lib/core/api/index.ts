@@ -35,7 +35,7 @@ import type {
  */
 export interface DataCascadeUISnapshot<
   G extends GroupNode = GroupNode,
-  L extends LeafNode = LeafNode
+  L extends LeafNode = LeafNode,
 > extends Pick<IStoreState<G, L>['table'], 'expanded' | 'rowSelection'> {
   scrollRect: { width: number; height: number };
   scrollOffset: number;

@@ -48,9 +48,12 @@ const LoadingFallback = () => (
   </Suspense>
 );
 
-export class ApmSharedPlugin
-  implements Plugin<ApmSharedPluginSetup, ApmSharedPluginStart, {}, ApmSharedPluginStartDeps>
-{
+export class ApmSharedPlugin implements Plugin<
+  ApmSharedPluginSetup,
+  ApmSharedPluginStart,
+  {},
+  ApmSharedPluginStartDeps
+> {
   private cpsEnabledSubscription?: Subscription;
 
   public setup(core: CoreSetup): ApmSharedPluginSetup {

@@ -39,7 +39,7 @@ const createServices = (canWriteDashboards = true) =>
     unifiedSearch: { ui: { SearchBar: () => <span data-test-subj="search-bar" /> } },
     embeddable: { getStateTransfer: () => ({ navigateToWithEmbeddablePackages }) },
     customContent: {},
-  } as unknown as VisualizationServices);
+  }) as unknown as VisualizationServices;
 
 const visualization = { template: '<div>board</div>', height: 420 };
 

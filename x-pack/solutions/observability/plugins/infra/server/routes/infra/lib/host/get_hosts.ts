@@ -81,10 +81,13 @@ export const getHosts = async ({
     })
   );
 
-  const alertsByHostName = alertsCountResponse.reduce((acc, { name, alertsCount }) => {
-    acc[name] = { alertsCount };
-    return acc;
-  }, {} as Record<string, { alertsCount: number }>);
+  const alertsByHostName = alertsCountResponse.reduce(
+    (acc, { name, alertsCount }) => {
+      acc[name] = { alertsCount };
+      return acc;
+    },
+    {} as Record<string, { alertsCount: number }>
+  );
 
   const hosts = filteredHostMetrics.map((host) => {
     const { alertsCount } = alertsByHostName[host.name] ?? {};

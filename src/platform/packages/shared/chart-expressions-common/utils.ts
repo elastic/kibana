@@ -39,9 +39,9 @@ export const isOnAggBasedEditor = (context?: KibanaExecutionContext): boolean =>
   if (context) {
     return Boolean(
       context.type &&
-        context.type === 'application' &&
-        context.child &&
-        context.child.type === 'agg_based'
+      context.type === 'application' &&
+      context.child &&
+      context.child.type === 'agg_based'
     );
   }
   return false;
@@ -72,7 +72,7 @@ export function getOverridesFor<
   // Overrides
   O extends Record<string, P>,
   // Overrides Component names
-  K extends keyof O
+  K extends keyof O,
 >(overrides: O | undefined, componentName: K) {
   if (!overrides || !overrides[componentName]) {
     return {};

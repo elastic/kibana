@@ -19,7 +19,7 @@ describe('findCasesContainingAllDocuments', () => {
         attachments: {
           getAllDocumentsAttachedToCase: jest.fn().mockResolvedValue(overrides.documents ?? []),
         },
-      } as unknown as CasesClient);
+      }) as unknown as CasesClient;
 
     it('returns null when required alert not found', async () => {
       const casesClient = buildCasesClient();

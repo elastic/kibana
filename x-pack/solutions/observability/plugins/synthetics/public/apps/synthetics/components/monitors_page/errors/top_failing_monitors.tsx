@@ -145,18 +145,18 @@ export const TopFailingMonitors = ({
             sortMode === 'errorRate'
               ? monitor.errorRate * 100
               : sortMode === 'downtime'
-              ? maxDowntime > 0
-                ? (monitor.downtimeMs / maxDowntime) * 100
-                : 0
-              : maxDown > 0
-              ? (monitor.downChecks / maxDown) * 100
-              : 0;
+                ? maxDowntime > 0
+                  ? (monitor.downtimeMs / maxDowntime) * 100
+                  : 0
+                : maxDown > 0
+                  ? (monitor.downChecks / maxDown) * 100
+                  : 0;
           const barColor =
             monitor.errorRate >= 0.8
               ? euiTheme.colors.danger
               : monitor.errorRate >= 0.4
-              ? euiTheme.colors.warning
-              : euiTheme.colors.vis.euiColorVis0;
+                ? euiTheme.colors.warning
+                : euiTheme.colors.vis.euiColorVis0;
 
           const barLabel = `${monitor.downChecks} errors, ${pct}% failure, ${formatDowntime(
             monitor.downtimeMs
