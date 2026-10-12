@@ -375,17 +375,29 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from the space-scoped ad-hoc discovery index', () => {
+    it('reads it from both Attack Discovery destinations, unioned', () => {
+      // Serverless rejects user creation of dot-prefixed names, so only the
+      // persisted-alerts data stream exists there; stateful stacks also have the
+      // runner-launched ad-hoc index. The union reads both, missing side ignored.
       expect(loadAttack?.with?.index).toBe(
-        '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
+        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
       );
+      expect(loadAttack?.with?.ignore_unavailable).toBe(true);
     });
 
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
-    // same value and needs no mapping to be queryable.
-    it('reads it by the id it was given', () => {
+    // same value and needs no mapping to be queryable. The ad-hoc copy keeps the
+    // same `_id`, while the data-stream document matches on `kibana.alert.uuid`,
+    // so the union query covers both.
+    it('reads it by the id it was given from either destination', () => {
       expect(loadAttack?.with?.query).toEqual({
-        ids: { values: ['{{ inputs.attack_discovery_id }}'] },
+        bool: {
+          should: [
+            { ids: { values: ['{{ inputs.attack_discovery_id }}'] } },
+            { term: { 'kibana.alert.uuid': '{{ inputs.attack_discovery_id }}' } },
+          ],
+          minimum_should_match: 1,
+        },
       });
     });
 
