@@ -8,9 +8,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "scripts/**/*",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/dev-cli-runner",
+    "@kbn/tooling-log",
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-security-server",

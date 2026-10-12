@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiToolTip, euiTextTruncate, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { EuiIcon, EuiToolTip, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
+import { useIsTextTruncated } from '../use_is_text_truncated';
 import { openInNewTabAriaLabel } from './translations';
 
 const CIRCLE_SIZE_PX = 32;
@@ -32,14 +33,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
     const { euiTheme } = useEuiTheme();
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
-    const { width: titleWidth } = useResizeObserver(titleElement, 'width');
-    const [isTitleTruncated, setIsTitleTruncated] = useState(false);
-
-    useEffect(() => {
-      setIsTitleTruncated(
-        titleElement ? titleElement.scrollWidth > titleElement.clientWidth : false
-      );
-    }, [titleElement, titleWidth, title]);
+    const isTitleTruncated = useIsTextTruncated(titleElement, title);
 
     const rowStyles = css`
       display: grid;

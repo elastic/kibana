@@ -52,6 +52,15 @@ export type ActionImpact = z.infer<typeof actionImpactSchema>;
 export const actionApprovalPolicySchema = z.enum(['always-gate', 'autonomy-dependent']);
 export type ActionApprovalPolicy = z.infer<typeof actionApprovalPolicySchema>;
 
+/**
+ * What an action acts on. Packaging matches subjects it found to actions by
+ * kind and fills the action's declared input keys from the subject. An action
+ * that declares no `subject` is inferred `process` when its input schema has
+ * `parameters`, else `host`, so older installed definitions keep working.
+ */
+export const actionSubjectKindSchema = z.enum(['host', 'process', 'user', 'service']);
+export type ActionSubjectKind = z.infer<typeof actionSubjectKindSchema>;
+
 /** Self-description an action workflow declares under `consts.actionMetadata`. */
 export const actionMetadataSchema = z.object({
   name: z.string().min(1).max(256),
@@ -60,5 +69,9 @@ export const actionMetadataSchema = z.object({
   impact: actionImpactSchema.optional(),
   reversible: z.boolean().optional(),
   approvalPolicy: actionApprovalPolicySchema.optional(),
+  /** A single kind or a list of kinds; the catalog normalizes to a list. */
+  subject: z
+    .union([actionSubjectKindSchema, z.array(actionSubjectKindSchema).min(1).max(4)])
+    .optional(),
 });
 export type ActionMetadata = z.infer<typeof actionMetadataSchema>;
