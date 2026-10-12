@@ -62,8 +62,13 @@ const attributesStub = {
   references: [],
 } as unknown as LensAttributes;
 
-// chartLayers must be non-empty to pass the early-return guard inside buildAttributesFn.
-const sampleLayers = [{ type: 'series' }] as HookProps['chartLayers'];
+// layers must be non-empty to pass the early-return guard inside buildAttributesFn.
+const sampleLensConfig = {
+  chartType: 'xy',
+  title: 'My chart',
+  dataset: { esql: 'FROM logs | CHANGE_POINT metric' },
+  layers: [{ type: 'series' }],
+} as HookProps['lensConfig'];
 
 // ---- helpers ----
 
@@ -88,9 +93,7 @@ const makeFetchParams = (
 // causing an infinite subscription-teardown/rebuild loop.
 const makeDefaultProps = (overrides: Partial<HookProps> = {}): HookProps => ({
   lensInstanceId: 'lens-1',
-  title: 'My chart',
-  query: 'FROM logs | CHANGE_POINT metric',
-  chartLayers: sampleLayers,
+  lensConfig: sampleLensConfig,
   fetchParams: makeFetchParams(),
   services: {} as HookProps['services'],
   discoverFetch$: makeDiscoverFetch$(),
@@ -212,7 +215,9 @@ describe('useChangePointLensProps', () => {
 
   it('remains undefined when chartLayers is empty and no error is set', async () => {
     // buildAttributesFn returns null → triggers$ never emits → state stays undefined.
-    const props = makeDefaultProps({ chartLayers: [] });
+    const props = makeDefaultProps({
+      lensConfig: { ...sampleLensConfig, layers: [] },
+    });
     const { result } = renderHook(() => useChangePointLensProps(props));
 
     await act(async () => {});
@@ -261,20 +266,24 @@ describe('useChangePointLensProps', () => {
     await waitFor(() => expect(mockBuild.mock.calls.length).toBeGreaterThan(buildCallsAfterMount));
   });
 
-  it('rebuilds when a card config prop changes (query)', async () => {
-    // Guards the useEffect(() => chartConfigUpdates$.current.next(), [query, title, ...]) trigger.
+  it('rebuilds when the lens config changes', async () => {
+    // Guards the useEffect that emits on chartConfigUpdates$ when lensConfig changes.
     // If that effect were removed, the initial BehaviorSubject emission would still cause one
     // build on mount, but subsequent prop changes would silently stop triggering rebuilds.
-    let query = 'FROM logs | CHANGE_POINT metric';
-    const props = makeDefaultProps({ query });
+    let lensConfig = sampleLensConfig;
+    const props = makeDefaultProps({ lensConfig });
 
-    const { result, rerender } = renderHook(() => useChangePointLensProps({ ...props, query }));
+    const { result, rerender } = renderHook(() =>
+      useChangePointLensProps({ ...props, lensConfig })
+    );
 
     await waitFor(() => expect(result.current.lensProps).toBeDefined());
     const buildCallsAfterMount = mockBuild.mock.calls.length;
 
-    // Change the query prop and re-render — chartConfigUpdates$ should emit, triggering a rebuild.
-    query = 'FROM metrics | CHANGE_POINT value';
+    lensConfig = {
+      ...sampleLensConfig,
+      dataset: { esql: 'FROM metrics | CHANGE_POINT value' },
+    };
     rerender();
 
     await waitFor(() => expect(mockBuild.mock.calls.length).toBeGreaterThan(buildCallsAfterMount));

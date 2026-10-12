@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDelayRender, EuiEmptyPrompt, EuiSkeletonText } from '@elastic/eui';
+import { EuiDelayRender, EuiEmptyPrompt, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ChangePointExperienceGridContent } from './change_point_experience_grid_content';
+import { CHANGE_POINT_CHART_PAGE_SIZE } from './constants';
 import type { UnifiedChangePointGridProps } from './types';
 import { useChangePointCards } from './hooks/use_change_point_cards';
+import { getChangePointLensConfig } from './utils/get_change_point_lens_config';
 
 export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = (props) => {
   const {
+    actions,
     renderToggleActions,
     chartToolbarCss,
     isChartLoading,
@@ -25,6 +28,7 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
     fetchParams,
   } = props;
 
+  const { euiTheme } = useEuiTheme();
   const { cards, seriesColumns } = useChangePointCards(fetchParams);
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -48,6 +52,59 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
 
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
+  const onAddPageToDashboard = useCallback(() => {
+    if (!actions?.addPageToDashboard || !seriesColumns || !cards?.length) {
+      return;
+    }
+
+    const pageStart = currentPage * CHANGE_POINT_CHART_PAGE_SIZE;
+    const pageCards = cards.slice(pageStart, pageStart + CHANGE_POINT_CHART_PAGE_SIZE);
+    actions.addPageToDashboard(
+      pageCards.map((card) => ({
+        config: getChangePointLensConfig({
+          card,
+          timeColumn: seriesColumns.timeColumn,
+          valueColumn: seriesColumns.valueColumn,
+          annotationColor: euiTheme.colors.danger,
+        }),
+        description: card.entityDescription,
+      }))
+    );
+  }, [actions, cards, currentPage, euiTheme.colors.danger, seriesColumns]);
+
+  const addToDashboardAction = useMemo(() => {
+    if (
+      !actions?.addPageToDashboard ||
+      isChartLoading ||
+      showNoData ||
+      showNoSeries ||
+      !seriesColumns ||
+      !cards?.length
+    ) {
+      return;
+    }
+
+    return {
+      label: i18n.translate('changePointChartViewer.actions.addToDashboard', {
+        defaultMessage: 'Add to dashboard',
+      }),
+      toolTipContent: i18n.translate('changePointChartViewer.actions.addToDashboardTooltip', {
+        defaultMessage: 'Add the charts on this page to a dashboard',
+      }),
+      iconType: 'addToDashboard',
+      onClick: onAddPageToDashboard,
+      'data-test-subj': 'changePointAddPageToDashboard',
+    };
+  }, [
+    actions?.addPageToDashboard,
+    cards?.length,
+    isChartLoading,
+    onAddPageToDashboard,
+    seriesColumns,
+    showNoData,
+    showNoSeries,
+  ]);
+
   return (
     <div
       css={css`
@@ -61,6 +118,7 @@ export const ChangePointExperienceGrid: React.FC<UnifiedChangePointGridProps> = 
         toolbarCss={chartToolbarCss}
         toolbar={{
           toggleActions: toolbarToggleActions,
+          rightSide: addToDashboardAction ? [addToDashboardAction] : undefined,
         }}
       >
         {showLoading ? (

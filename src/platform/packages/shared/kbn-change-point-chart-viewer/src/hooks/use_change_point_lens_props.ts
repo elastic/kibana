@@ -68,23 +68,18 @@ export type ChangePointLensProps = Pick<
  */
 export const useChangePointLensProps = ({
   lensInstanceId,
-  title,
-  query,
   services,
   fetchParams,
   discoverFetch$,
   chartRef,
-  chartLayers,
   timeRange: timeRangeOverride,
   error,
   userMessages,
   description,
+  lensConfig,
 }: {
   lensInstanceId: string;
-  /** Human-readable label shown in the Lens panel header, e.g. `"web-server-1"`. */
-  title: string;
-  /** The ES|QL query driving this chart (the entity-filtered line-data sub-query). */
-  query: string;
+  lensConfig: LensXYConfig;
   /**
    * Emits whenever Discover executes a new search (time range change, filter change, etc.).
    *
@@ -95,8 +90,6 @@ export const useChangePointLensProps = ({
   discoverFetch$: UnifiedChangePointGridProps['fetch$'];
   /** Ref to the chart's wrapper element used for viewport visibility detection. When omitted (e.g. in tests), builds run unconditionally. */
   chartRef?: React.RefObject<HTMLDivElement>;
-  /** Lens XY layer config: one series layer plus an optional annotation layer. */
-  chartLayers: LensXYConfig['layers'];
   /** Overrides the Discover global time range, e.g. to include annotation timestamps that fall before the range start. */
   timeRange?: TimeRange;
   /** When set, renders an error overlay via Lens `userMessages` instead of the chart. */
@@ -109,7 +102,6 @@ export const useChangePointLensProps = ({
   // Captured once — used only as IntersectionObserver rootMargin and does not need to cause the
   // subscription to be torn down and recreated when the theme changes.
   const rootMarginRef = useRef(euiTheme.size.base);
-
   // Emits whenever any prop that affects the compiled Lens attributes changes, bridging React's
   // render cycle into the RxJS pipeline without recreating the subscription. A BehaviorSubject
   // is used (rather than a plain Subject) so the initial emission fires immediately on mount,
@@ -118,32 +110,18 @@ export const useChangePointLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, description, chartLayers, error, userMessages]);
+  }, [lensConfig, description, error, userMessages]);
 
   // useLatest keeps `.current` pointing to the latest closure on every render. The RxJS
   // subscription reads `buildAttributesFn.current()` — so it always sees fresh prop values —
   // without the ref's stable identity ever causing the subscription to be torn down.
   const buildAttributesFn = useLatest(async () => {
-    if (!chartLayers.length && !error) return null;
-
-    const lensParams: LensXYConfig = {
-      chartType: 'xy',
-      dataset: { esql: query },
-      title,
-      legend: { show: false },
-      axisTitleVisibility: {
-        showXAxisTitle: false,
-        showYAxisTitle: false,
-        showYRightAxisTitle: false,
-      },
-      layers: chartLayers,
-      fittingFunction: 'Linear',
-    };
+    if (!lensConfig.layers.length && !error) return null;
 
     // builder.build() compiles the high-level LensXYConfig into a full LensSavedObjectAttributes
     // document (visualizationType, datasourceStates, visualization, query, filters, references).
     const result = (await new LensConfigBuilder(services.dataViews).build(
-      lensParams
+      lensConfig
     )) as LensAttributes;
 
     // LensConfigBuilder does not expose a description field in its config; set it directly on

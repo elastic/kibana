@@ -8,6 +8,7 @@
  */
 
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import type { LensXYConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 
 export interface ChangePointChartSectionActions {
@@ -17,6 +18,12 @@ export interface ChangePointChartSectionActions {
     timeRange?: TimeRange;
   }) => void;
   updateESQLQuery?: (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
+  addPageToDashboard?: (
+    charts: ReadonlyArray<{
+      config: LensXYConfig;
+      description?: string;
+    }>
+  ) => void;
 }
 
 /** Props for the Discover chart section (lazy bundle). Chart data comes from `fetchParams.query` and `fetchParams.table`. */

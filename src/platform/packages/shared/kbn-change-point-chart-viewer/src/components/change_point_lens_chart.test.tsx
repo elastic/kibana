@@ -126,10 +126,12 @@ describe('ChangePointLensChart', () => {
 
   it('produces a single area series layer (no annotation layer) when card has no annotations', () => {
     const capturedLayers: unknown[] = [];
-    useChangePointLensProps.mockImplementation(({ chartLayers }: { chartLayers: unknown }) => {
-      capturedLayers.push(...(chartLayers as unknown[]));
-      return { lensProps: stubLensProps, buildError: undefined };
-    });
+    useChangePointLensProps.mockImplementation(
+      ({ lensConfig }: { lensConfig: { layers: unknown[] } }) => {
+        capturedLayers.push(...lensConfig.layers);
+        return { lensProps: stubLensProps, buildError: undefined };
+      }
+    );
 
     render(<ChangePointLensChart {...baseProps} card={stubCard()} />);
 
