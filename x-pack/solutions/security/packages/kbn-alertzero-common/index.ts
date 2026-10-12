@@ -95,6 +95,7 @@ export type {
   ActionCategory,
   ActionCatalogEntry,
   ActionImpact,
+  ActionSubjectKind,
   JsonSchema,
   ListActionsResponse,
 } from './action_catalog_types';

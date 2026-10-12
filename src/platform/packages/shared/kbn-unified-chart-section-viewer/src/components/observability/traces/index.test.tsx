@@ -34,7 +34,7 @@ describe('TraceMetricsGrid', () => {
     render(
       <TraceMetricsGrid
         {...({
-          fetchParams: { query: { esql: query }, dataSource, columns: [], isESQLQuery: true },
+          fetchParams: { query: { esql: query }, dataSource, columns: [] },
           services: {},
           renderToggleActions: () => null,
         } as unknown as UnifiedMetricsGridProps)}
