@@ -7,6 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const SORT_DIRECTIONS = ['asc', 'desc'] as const;
+
+/** The direction a sort is applied in. */
+export type SortDirection = (typeof SORT_DIRECTIONS)[number];
+
+/** Type guard for untrusted values (URL params, `localStorage`). */
+export const isSortDirection = (value: string | undefined): value is SortDirection =>
+  SORT_DIRECTIONS.some((direction) => direction === value);
+
+/**
+ * The state of a sort configuration.
+ *
+ * @property field - The field to sort by.
+ * @property direction - The direction to sort in.
+ */
+export interface SortState {
+  field: string;
+  direction: SortDirection;
+}
+
 /**
  * Simplified sort field definition.
  *
@@ -37,12 +57,10 @@ export interface SortField {
    * Restricts the directions offered in the sort dropdown. Omit to offer both.
    * Use single-direction arrays for fields where only one direction is meaningful.
    */
-  allowedDirections?: readonly ['asc' | 'desc', ...Array<'asc' | 'desc'>];
+  allowedDirections?: readonly [SortDirection, ...Array<SortDirection>];
   /** When set, the field's dropdown options show a "?" icon with this help text as a tooltip. */
   description?: string;
 }
-
-const SORT_DIRECTIONS = ['asc', 'desc'] as const;
 
 /**
  * Gets the directions a sort field offers, in canonical order (`asc` before `desc`).
@@ -50,7 +68,7 @@ const SORT_DIRECTIONS = ['asc', 'desc'] as const;
  */
 export const getSortFieldDirections = ({
   allowedDirections,
-}: SortField): ReadonlyArray<'asc' | 'desc'> =>
+}: SortField): ReadonlyArray<SortDirection> =>
   SORT_DIRECTIONS.filter(
     (direction) => !allowedDirections || allowedDirections.includes(direction)
   );
@@ -58,13 +76,9 @@ export const getSortFieldDirections = ({
 /**
  * Sort option definition with explicit label, field, and direction.
  */
-export interface SortOption {
+export interface SortOption extends SortState {
   /** Display label for the sort option. */
   label: string;
-  /** Field to sort by. */
-  field: string;
-  /** Sort direction. */
-  direction: 'asc' | 'desc';
 }
 
 /**
@@ -83,11 +97,8 @@ export interface SortingConfig {
    */
   options?: SortOption[];
 
-  /** Initial sort state. */
-  initialSort?: {
-    field: string;
-    direction: 'asc' | 'desc';
-  };
+  /** Sort used when the user has not chosen one. A sort the user picked previously (saved per listing) takes precedence. */
+  initialSort?: SortState;
 }
 
 /**
@@ -107,7 +118,7 @@ export const DEFAULT_SORT_FIELDS: SortField[] = [
  * Sorts by `title` ascending (A-Z), matching `TableListView` behavior.
  * Consumers that prefer "newest first" can set `initialSort: { field: 'updatedAt', direction: 'desc' }`.
  */
-export const DEFAULT_INITIAL_SORT: { field: string; direction: 'asc' | 'desc' } = {
+export const DEFAULT_INITIAL_SORT: SortState = {
   field: 'title',
   direction: 'asc',
 };

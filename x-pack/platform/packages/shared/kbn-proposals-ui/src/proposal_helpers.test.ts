@@ -206,6 +206,22 @@ describe('getProposalDecision', () => {
       )
     ).toMatchObject({ status: 'declined' });
   });
+
+  it("reports a failed action's error as its reason", () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'failed',
+          executionError: 'The rule was changed after this proposal was created',
+          rationale: 'Looks right',
+        })
+      )
+    ).toMatchObject({
+      status: 'failed',
+      reason: 'The rule was changed after this proposal was created',
+    });
+  });
 });
 
 describe('isProposalExpired', () => {

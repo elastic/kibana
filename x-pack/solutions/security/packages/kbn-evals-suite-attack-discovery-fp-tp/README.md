@@ -6,7 +6,7 @@ Outcome eval for the Attack Discovery FP/TP analysis ([security-team#19285](http
 
 The suite runs the managed analysis workflow (`system-security-attack-discovery-fp-tp-analysis`, shipped as `attack_discovery_fp_tp_analysis.yaml`) in place — it is not installed or modified by the suite. There is no sample copy: a second YAML would drift from the managed one (a stranded-reader bug on PR #294309 came from exactly that), so the managed workflow is the single source of truth.
 
-Caveat: the claim-grounding evaluator is still a follow-up, and parts of the managed analysis body are placeholders while security-team#19282 iterates — until both land, scores measure the shipped prompt, not the finished product. The numbers in the acceptance criteria below carry the same caveat: they are the managed-path baseline measured on the commit in this PR, not a claim about the finished product.
+Caveat: scores measure the shipped managed prompt, not the finished product. The numbers in this README are the managed-path baseline measured on the commit in this PR, not a claim about the finished product. ClaimGrounding: no baseline yet.
 
 The workflow's `ai.agent` step runs `alertzero-thin-agent` with no tools and resolves its connector from the `alertzero_reasoning` inference feature. `beforeAll` routes that feature to the model under test and restores the previous inference settings in `afterAll`.
 
@@ -73,11 +73,12 @@ src/
 
 - `OutcomeAccuracy` (primary): the outcome matches the gold; a `failed` gold also needs an explicit `FAILED` execution, so a timeout or cancellation does not pass. The label is the predicted outcome, so the report reads as a confusion matrix.
 - `UnsafeClose`: 0 when the run predicts `false_positive` and the gold is anything else. A false positive closes the attack.
-- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
+- `PayloadConformance`: the run completed and has a supported verdict, a non-empty `summary_markdown` of at most 8000 characters, a `rationale_markdown` of at most 50000 characters when present, and an `attack_discovery_id` that echoes the input. It also checks the verdict against the run's own `raw.checks` and `raw.coverage`: the three world checks are present, a `false_positive` has evidence from both sources, and the verdict obeys the prompt's rules 1-3. It only checks that a `false_positive` or `true_positive` verdict is permitted by those rules; it does not enforce rules 2/3 against an `inconclusive` verdict, so an unwarranted `inconclusive` still passes. A run whose gold is `failed` ended `FAILED` (a timeout or cancellation does not count) and produced no payload.
+- `ClaimGrounding`: a code check of the model's `claims`, with no LLM. Cited ids are checked against the seeded documents: every `claims.world` entry must cite a seeded document from the evidence source its check is permitted to use (`entity_role` -> `entity_store`, `process_parent`/`network_destination` -> `raw_event`; `entity_store` ids resolve to a seeded entity's `entity.id`, `raw_event` ids to a seeded event `_id`). A world claim whose `check` is not one of those three is ungrounded. The claimed `result` is checked only against the model's own `raw.checks` (self-consistency): it must match a completed (not skipped) check there. It is not checked against the seeded documents, so a wrong but internally consistent verdict still scores as grounded; a wrong verdict is caught by `OutcomeAccuracy` and `PayloadConformance`, not by `ClaimGrounding`. World claims are deduplicated on (`check`, `result`, `source`, `id`) before counting, so repeating a claim does not raise the score; two claims that cite the same (`check`, `source`, `id`) with different `result` values are both scored. An `alert_link` is only grounded when its `field` is one of the prompt's pivot fields (`user.name`, `user.id`, `host.id`, `host.name`, `process.entity_id`, `process.pid`, `agent.id`, `source.ip`), `raw.checks` has `alert_linkage` with status `completed` and result `supports`, it cites only seeded alerts, at least two distinct ids, and every listed alert's source carries the pivot `field`'s value by membership (arrays and numeric pids included). Score is grounded claims / total claims. `missing-claims` (score 0) fires for a TP/FP verdict whose `claims.world` is empty, even when an `alert_link` is present. Claims are validated regardless of the verdict (including `inconclusive`); an `inconclusive` run with no claims at all (including a truncation downgrade, or no payload) is `N/A` (score null) so the inconclusive rate does not pad the mean.
 - `trajectory`: the agent called no tools. N/A when traces are unavailable.
 - LLM criteria on the summary and rationale: cited ids exist in the seeded data, nothing is invented (the task output carries the seeded documents in `seededEvidence`), the discovery's and alerts' story is stated as fact only where the entities or raw events show it, the deciding checks are named, and an `inconclusive` verdict says what was missing or conflicting. N/A for failed runs.
 
-A grader for whether `claims` are grounded in the seeded data waits for the verification gate; the raw `coverage`, `checks`, and `claims` are already captured in the task output.
+The raw `coverage`, `checks`, and `claims` are captured in the task output and graded by `ClaimGrounding` against the seeded documents.
 
 ## Running locally
 
@@ -113,8 +114,7 @@ What each evaluator checks after the #295393 tightening: `PayloadConformance` no
 
 ## Follow-ups (sample-workflow removal done)
 
-1. Add the claim-grounding evaluator.
-2. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
-3. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced). Tracked in #295393.
+1. Add a weekly step to `.buildkite/pipelines/evals/llm_evals.yml`, copying `Evals: Alert Analysis Workflow` with `EVAL_SUITE_ID: 'security-attack-discovery-fp-tp'`.
+2. Give `UnsafeClose` new discriminating scenarios — a `false_positive` prediction on a non-FP gold — so it can leave the 1.0 ceiling. `PayloadConformance` no longer needs this (rules 1-3 enforced). Tracked in #295393.
 
 Until then the suite runs on demand through the `evals:security-attack-discovery-fp-tp` PR label.

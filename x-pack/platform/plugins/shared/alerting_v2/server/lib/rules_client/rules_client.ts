@@ -400,6 +400,7 @@ export class RulesClient {
     actor,
     nowIso,
     version,
+    template,
   }: {
     data: CreateRuleData;
     id?: string;
@@ -407,6 +408,7 @@ export class RulesClient {
     actor: RuleSavedObjectAttributes['createdBy'];
     nowIso: string;
     version: number;
+    template?: RuleSavedObjectAttributes['metadata']['template'];
   }): PreparedRule {
     this.artifactTypeRegistry.validate(data.artifacts);
     this.assertScheduleIntervalAllowed(data.schedule.every);
@@ -418,6 +420,7 @@ export class RulesClient {
       updatedBy: actor,
       updatedAt: nowIso,
       version,
+      template,
     });
 
     return {
@@ -625,6 +628,7 @@ export class RulesClient {
       actor,
       nowIso,
       version: this.getNextVersion(),
+      template: params.options?.template,
     });
 
     await this.validateSchedule([
@@ -1824,6 +1828,7 @@ export class RulesClient {
       updatedBy: actor,
       updatedAt: nowIso,
       version: this.getNextVersion(existingAttrs.version),
+      template: existingAttrs.metadata.template,
     });
 
     await this.validateSchedule([

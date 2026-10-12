@@ -21,6 +21,7 @@ import type { BulkOptionalAttributes, OptionalAttributes } from '../../services/
 import type { CasesClient } from '../client';
 import type { AttachmentSavedObject, SOWithErrors } from '../../common/types';
 import { partitionByCaseAssociation } from '../../common/partitioning';
+import { getCaseReferenceId } from '../../common/references';
 import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>;
@@ -82,7 +83,7 @@ export async function bulkGet(
 interface PartitionedAttachments {
   validAttachments: AttachmentSavedObject[];
   attachmentsWithErrors: AttachmentSavedObjectWithErrors;
-  invalidAssociationAttachments: AttachmentSavedObject[];
+  invalidAssociationAttachments: Array<Pick<AttachmentSavedObject, 'id'>>;
 }
 
 const partitionAttachments = (
@@ -94,11 +95,16 @@ const partitionAttachments = (
     caseId,
     attachmentsWithoutErrors
   );
+  // A decode error from another case would leak its type; report it as not attached.
+  const [otherCaseErrors, caseErrors] = partition(errors, ({ references }) => {
+    const caseRefId = getCaseReferenceId(references ?? []);
+    return caseRefId != null && caseRefId !== caseId;
+  });
 
   return {
     validAttachments: caseAttachments,
-    attachmentsWithErrors: errors,
-    invalidAssociationAttachments,
+    attachmentsWithErrors: caseErrors,
+    invalidAssociationAttachments: [...invalidAssociationAttachments, ...otherCaseErrors],
   };
 };
 
@@ -116,7 +122,7 @@ const constructErrors = ({
 }: {
   caseId: string;
   soBulkGetErrors: AttachmentSavedObjectWithErrors;
-  associationErrors: AttachmentSavedObject[];
+  associationErrors: Array<Pick<AttachmentSavedObject, 'id'>>;
   unauthorizedAttachments: AttachmentSavedObject[];
 }): BulkGetUnifiedAttachmentsResponse['errors'] => {
   const errors: BulkGetUnifiedAttachmentsResponse['errors'] = [];
