@@ -225,6 +225,7 @@ steps:
               tagged or closed.
     with:
       workflow-id: system-security-alert-analysis
+      run-as-mode: inherit
       inputs:
         # A child run has no trigger event of its own, so the batch must be passed
         # explicitly or the sub-workflow analyses nothing and returns empty verdicts.
@@ -635,6 +636,7 @@ steps:
                   {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count == 1 %}remains{% else %}remain{% endif %} open and tagged az:false_positive.
         with:
           workflow-id: system-security-floor-alert-triage-review
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
             rule_id: "{{ event.rule.id }}"

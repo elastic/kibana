@@ -27,7 +27,6 @@ export {
 export { ConversationCard } from './src/components/conversation_card/conversation_card';
 export { ConversationCardCompact } from './src/components/conversation_card/conversation_card_compact';
 export { ConversationMetaInfo } from './src/components/conversation_card/conversation_meta_info';
-export { TemplateBadge } from './src/components/conversation_card/template_badge';
 export { type ConversationsActionsGroupProps } from './src/components/conversation_card/actions_group';
 
 export { ConversationQueue } from './src/components/conversation_queue/conversation_queue';
@@ -48,12 +47,18 @@ export {
 export {
   OverviewTab,
   type OverviewTabProps,
+  type OverviewSections,
 } from './src/components/details/details_flyout_tab_contents';
 export {
   EscalationFlyoutHeader,
   type EscalationFlyoutHeaderProps,
 } from './src/components/details/escalation_flyout_header';
 export { StatusToggle, type StatusToggleProps } from './src/components/details/status_toggle';
+export {
+  SEVERITY_COLORS,
+  SEVERITY_LABELS,
+  type InvestigationSeverityLevel,
+} from './src/components/details/severity';
 export { DetailsBlock } from './src/components/details/detail_block';
 export {
   ProposedActionButton,
@@ -61,19 +66,18 @@ export {
 } from './src/components/details/proposed_action_button';
 
 export {
-  AttachmentSummarySection,
-  type AttachmentSummarySectionProps,
-  AttachmentSummaryList,
-  type AttachmentSummaryListProps,
-  AttachmentSummaryGroup,
-  type AttachmentSummaryGroupProps,
-  DEFAULT_COLLAPSED_COUNT,
-  AttachmentSummaryRow,
-  type AttachmentSummaryRowProps,
-  selectSummaryAttachments,
-  SUMMARY_ATTACHMENT_TYPES,
-  type SummaryAttachmentType,
-} from './src/components/attachment_summary';
+  FlyoutGroupedAttachments,
+  createFlyoutGroupedAttachmentsRegistry,
+  GroupedAttachmentRow,
+  GroupedAttachmentsSection,
+  type FlyoutGroupedAttachmentDefinition,
+  type FlyoutGroupedAttachmentRendererProps,
+  type FlyoutGroupedAttachmentsRegistry,
+  type GroupedAttachmentRowAction,
+  type GroupedAttachmentRowProps,
+  type GroupedAttachmentsSectionProps,
+  type RegisterFlyoutGroupedAttachment,
+} from './src/components/grouped_attachments';
 
 export {
   registerAgenticInvestigationTemplateUI,
@@ -89,7 +93,15 @@ export {
   type RenderStatus,
   type StatusSlotRenderProps,
   type RenderLinkedInvestigations,
+  type RenderSyncIndicator,
+  type SyncIndicatorSlotRenderProps,
   type LinkedInvestigationsSlotRenderProps,
+  type RenderOverview,
+  type OverviewSlotRenderProps,
+  type RenderLiveState,
+  type LiveStateSlotRenderProps,
+  type RenderTitle,
+  type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {
   LinkedInvestigationsList,
@@ -108,6 +120,15 @@ export {
 } from './src/types/queue';
 
 export {
+  clearImpactDetailsRenderer,
+  registerImpactDetailsRenderer,
+  renderImpactDetails,
+} from './src/components/impact/impact_details_renderer';
+export {
+  entityStoreIdType,
+  type ImpactEntityTarget,
+} from './src/components/impact/open_impact_entity';
+export {
   Impact,
   impactPills,
   investigationEntityIds,
@@ -125,7 +146,7 @@ export {
 } from './src/components/modals/investigation_action_modals';
 export {
   type EscalationModalMode,
-  type EscalationIncidentSummary,
+  type EscalationSummary,
 } from './src/components/modals/escalation_modal';
 export { type EscalationModalRenderProps } from './src/components/modals/investigation_action_modals';
 

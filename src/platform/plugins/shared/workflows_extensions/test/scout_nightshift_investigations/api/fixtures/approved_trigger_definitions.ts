@@ -127,6 +127,10 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
     schemaHash: 'af8917afcff27e816e16aab810bb0295d4ea16931414fc266aa629f220e4592c',
   },
   {
+    id: 'cases.attachmentsDeleted',
+    schemaHash: 'af15c7003f07847f8e3b553e83925d6a82b2de4a0c66f9ecec4e48957c616ad1',
+  },
+  {
     id: 'cases.caseCreated',
     schemaHash: '616f3b574681800b6ee48d4809ea220bd2179ddc97a08c72f77171c0844de98b',
   },

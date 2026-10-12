@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/as-code-dashboard-schema'
   - '@kbn/controls-constants'
   - '@kbn/custom-content-common'
+  - '@kbn/dashboard-markdown-schemas'
   - '@kbn/esql-utils'
   - '@kbn/field-types'
   - '@kbn/lens-common'

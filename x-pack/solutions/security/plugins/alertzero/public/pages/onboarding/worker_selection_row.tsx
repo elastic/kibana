@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
@@ -20,8 +19,9 @@ import { css } from '@emotion/react';
 import {
   resolveWatchAccent,
   SYSTEM_SECURITY_WATCH_CATALOG,
-  SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+  type Worker,
 } from '@kbn/alertzero-common';
+import { WorkerDependenciesCallout } from '../../components/worker_dependencies/worker_dependencies_callout';
 import { workerScheduleCadenceLabel } from '../watches/components/worker_trigger_cadence';
 import { workerName } from '../watches/workers/translations';
 import type { CatalogWorker } from './use_worker_selection';
@@ -29,6 +29,7 @@ import * as i18n from './translations';
 
 interface Props {
   worker: CatalogWorker;
+  serverWorker?: Pick<Worker, 'id'>;
   scheduleInterval?: string;
   checked: boolean;
   disabled: boolean;
@@ -37,6 +38,7 @@ interface Props {
 
 export const WorkerSelectionRow: React.FC<Props> = ({
   worker: { id, name, watchId },
+  serverWorker,
   scheduleInterval,
   checked,
   disabled,
@@ -49,8 +51,6 @@ export const WorkerSelectionRow: React.FC<Props> = ({
   const triggerLabel = scheduleInterval
     ? workerScheduleCadenceLabel(scheduleInterval)
     : i18n.onboardingWorkerEventTrigger(id);
-  const hasWorkflowsNote = id === SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
-
   return (
     <>
       <EuiFlexGroup
@@ -58,8 +58,7 @@ export const WorkerSelectionRow: React.FC<Props> = ({
         gutterSize="m"
         responsive={false}
         css={css`
-          padding: ${euiTheme.size.l} ${euiTheme.size.l}
-            ${hasWorkflowsNote ? euiTheme.size.m : euiTheme.size.l};
+          padding: ${euiTheme.size.l};
         `}
       >
         <EuiFlexItem>
@@ -92,6 +91,7 @@ export const WorkerSelectionRow: React.FC<Props> = ({
               <p id={`alertZeroOnboardingWorkerDescription-${id}`}>{description}</p>
             </EuiText>
           ) : null}
+          <WorkerDependenciesCallout worker={serverWorker ?? { id }} surface="onboarding" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
@@ -107,22 +107,6 @@ export const WorkerSelectionRow: React.FC<Props> = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {hasWorkflowsNote ? (
-        <div
-          css={css`
-            padding: 0 ${euiTheme.size.l} ${euiTheme.size.l};
-          `}
-        >
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            iconType="info"
-            data-test-subj="alertZeroOnboardingAttackDiscoveryNote"
-          >
-            <p>{i18n.ATTACK_DISCOVERY_WORKFLOWS_NOTE}</p>
-          </EuiCallOut>
-        </div>
-      ) : null}
     </>
   );
 };

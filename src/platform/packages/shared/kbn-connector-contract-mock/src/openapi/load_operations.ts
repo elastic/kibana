@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { convertSwagger2 } from './convert_swagger2';
 import { appendPointer, resolveObject } from './json_pointer';
 import { isRecord } from './schema_walk';
 import type {
@@ -86,16 +87,20 @@ const getDialect = ({ openapi }: OpenApiDocument): ContractSpec['dialect'] => {
   if (/^3\.[1-9]\d*\./.test(version)) {
     return 'draft-2020-12';
   }
-  throw new Error(`Unsupported spec version ${version || 'unknown'}; expected OpenAPI 3.x`);
+  throw new Error(
+    `Unsupported spec version ${version || 'unknown'}; expected Swagger 2.0 or OpenAPI 3.x`
+  );
 };
 
 /**
- * Indexes the operations of an OpenAPI 3.x document. Parameter, request body, response and
- * header refs are resolved, while schemas stay in place in a copy of the document, so their
- * refs keep resolving against it and large specs such as Microsoft Graph load quickly.
+ * Indexes the operations of an OpenAPI 3.x document, converting Swagger 2.0 documents first.
+ * Parameter, request body, response and header refs are resolved, while schemas stay in place
+ * in a copy of the document, so their refs keep resolving against it and large specs such as
+ * Microsoft Graph load quickly.
  */
 export const loadOperations = (source: OpenApiDocument): ContractOperation[] => {
-  const spec: ContractSpec = { document: structuredClone(source), dialect: getDialect(source) };
+  const openApi = source.swagger === '2.0' ? convertSwagger2(source) : structuredClone(source);
+  const spec: ContractSpec = { document: openApi, dialect: getDialect(openApi) };
   const { document } = spec;
   const resolve = (node: unknown, pointer: string) => resolveObject(document, node, pointer);
   const rootServers = toServers(document.servers) ?? [];
