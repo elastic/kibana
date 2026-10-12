@@ -815,13 +815,16 @@ export class TaskManagerRunner implements TaskRunner {
               this.getPollInterval(),
               this.logger
             );
-          if (!runAt) {
+          // A yield without an explicit runAt resumes on the next claim cycle.
+          const effectiveRunAt = runAt ?? (shouldYieldTask ? new Date() : undefined);
+          if (!effectiveRunAt) {
             getRunAtForSchedule = nextRunAtForSchedule;
           }
           return asOk({
-            runAt: runAt || nextRunAtForSchedule(updatedTaskSchedule),
+            runAt: effectiveRunAt || nextRunAtForSchedule(updatedTaskSchedule),
             state,
-            ...(params !== undefined ? { params } : {}),
+            // Returned params are only honored on a yield (they already passed `beforeSave`).
+            ...(shouldYieldTask && params !== undefined ? { params } : {}),
             schedule: updatedTaskSchedule,
             ...(priority !== undefined && allowPriority ? { priority } : {}),
             attempts,
@@ -966,7 +969,7 @@ export class TaskManagerRunner implements TaskRunner {
           const processedResult = {
             task,
             persistence: taskPersistence,
-            result: await (runAt || schedule || task.schedule
+            result: await (runAt || schedule || task.schedule || shouldYieldTask
               ? this.processResultForRecurringTask(result)
               : this.processResultWhenDone()),
           };

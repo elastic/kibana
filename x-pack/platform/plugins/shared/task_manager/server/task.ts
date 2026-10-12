@@ -200,23 +200,33 @@ export type SuccessfulRunResult = {
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
       /**
+       * When true, an ad-hoc task releases its capacity slot and moves to the
+       * `waiting` status with the returned state and params. It resumes when its
+       * `runAt` deadline arrives (immediately claimable if `runAt` is omitted),
+       * or earlier via `runSoon`. Recurring tasks cannot yield.
+       */
+      shouldYieldTask: true;
+      /**
+       * The resume deadline for the yielded task. If unspecified, the task is
+       * eligible on the next claim cycle.
+       */
+      runAt?: Date;
+      schedule?: never;
+      /**
+       * Replaces the task params for the next run. Omit to keep the current params.
+       */
+      params?: Record<string, any>;
+    }
+  | {
+      /**
        * Specifies the next run date / time for this task. If unspecified, this is
        * treated as a single-run task, and will not be rescheduled after
        * completion.
        */
       runAt?: Date;
       schedule?: never;
-      /**
-       * When true, an ad-hoc task releases its capacity slot and moves to the
-       * `waiting` status with the returned state and params. It resumes when its
-       * `runAt` deadline arrives, or earlier via `runSoon`. Recurring tasks
-       * cannot yield.
-       */
-      shouldYieldTask?: boolean;
-      /**
-       * Replaces the task params for the next run. Only applied when the task yields.
-       */
-      params?: Record<string, any>;
+      shouldYieldTask?: never;
+      params?: never;
     }
   | {
       /**

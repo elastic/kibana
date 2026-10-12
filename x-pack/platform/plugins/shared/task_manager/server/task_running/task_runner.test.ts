@@ -19,7 +19,7 @@ import {
 } from '.';
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
-import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
+import type { ConcreteTaskInstance, SuccessfulRunResult, TaskEventLogger } from '../task';
 import {
   getDeleteTaskRunResult,
   getYieldTaskRunResult,
@@ -1137,6 +1137,68 @@ describe('TaskManagerRunner', () => {
           validate: true,
           doc: instance,
         }
+      );
+    });
+
+    test('parks a yielded ad-hoc task instead of deleting it when the result has no runAt', async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: { phase: 'resume' }, shouldYieldTask: true as const };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.remove).not.toHaveBeenCalled();
+      expect(store.partialUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          state: { phase: 'resume' },
+          status: TaskStatus.Waiting,
+          runAt: expect.any(Date),
+        }),
+        expect.anything()
+      );
+    });
+
+    test('ignores returned params when the task does not yield', async () => {
+      const { runner, store } = await readyToRunStageSetup({
+        instance: {
+          status: TaskStatus.Running,
+          startedAt: new Date(),
+        },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return {
+                  state: {},
+                  runAt: new Date(Date.now() + 60000),
+                  params: { injected: true },
+                } as unknown as SuccessfulRunResult;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
+      expect(store.partialUpdate.mock.calls[0][0]).not.toHaveProperty('params');
+      expect(store.partialUpdate.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ status: TaskStatus.Idle })
       );
     });
 
