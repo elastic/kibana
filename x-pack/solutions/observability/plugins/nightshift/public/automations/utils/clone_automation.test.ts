@@ -31,7 +31,12 @@ describe('toCloneRequestBody', () => {
       description: 'Triage alerts',
       trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completion: {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#oncall',
+        connectorId: 'saved-slack',
+      },
       runtime: { dailyDispatchLimit: 5 },
     });
 
@@ -43,7 +48,12 @@ describe('toCloneRequestBody', () => {
       automationType: 'custom',
       trigger: { rows: [{ kind: 'schedule', cronExpression: '0 7 * * 1', timezone: 'CET' }] },
       execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
-      completion: { action: 'post_to_slack', targetMode: 'self', destination: '@me' },
+      completion: {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#oncall',
+        connectorId: 'saved-slack',
+      },
       runtime: { dailyDispatchLimit: 5 },
     });
   });

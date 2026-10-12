@@ -584,7 +584,7 @@ describe('useDiscoverHistogram', () => {
 
       expect(api.fetch).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          columns: esqlSource.resultColumns,
+          dataSource: esqlSource,
           table: undefined,
         })
       );

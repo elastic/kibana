@@ -61,6 +61,10 @@ export const createDefaultWorkerSettings = (workerId: string): WorkerSettings =>
 export const getAllowedAutonomyLevels = (workerId: string): readonly WatchAutonomyLevel[] =>
   getContract(workerId).declaration.allowedAutonomyLevels;
 
+/** True when the Worker declares a schedule interval that operators cannot change. */
+export const isWorkerScheduleIntervalReadOnly = (workerId: string): boolean =>
+  getContract(workerId).declaration.scheduleInterval?.readOnly === true;
+
 export {
   nearestLowerAutonomyLevel,
   upgradeStoredWorkerSettings,
