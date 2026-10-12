@@ -5,19 +5,21 @@
  * 2.0.
  */
 import type { HttpStart } from '@kbn/core/public';
-import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import { createMockDataViewsService } from '@kbn/data-source/src/__mocks__/data_views_service.mock';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { getUsedDataViews } from './update_data_views';
 
 jest.mock('@kbn/data-source', () => ({
   ...jest.requireActual('@kbn/data-source'),
-  getOrRegisterEsqlDataView: jest.fn(),
+  registerEsqlSourceInDataViewsCache: jest.fn(),
 }));
 
-const mockGetOrRegisterEsqlDataView = getOrRegisterEsqlDataView as jest.MockedFunction<
-  typeof getOrRegisterEsqlDataView
->;
+const mockRegisterEsqlSourceInDataViewsCache =
+  registerEsqlSourceInDataViewsCache as jest.MockedFunction<
+    typeof registerEsqlSourceInDataViewsCache
+  >;
 
 const query = { esql: 'FROM logs-* | STATS count = COUNT(*) BY host.name | LIMIT 10' };
 
@@ -39,7 +41,7 @@ describe('getUsedDataViews', () => {
     EsqlSource.clearCache();
     dataViews.create.mockReset();
     dataViews.get.mockReset();
-    mockGetOrRegisterEsqlDataView.mockReset().mockResolvedValue(shimDataView);
+    mockRegisterEsqlSourceInDataViewsCache.mockReset().mockResolvedValue(shimDataView);
     createSpy = jest.spyOn(EsqlSource, 'create');
   });
 
@@ -52,6 +54,92 @@ describe('getUsedDataViews', () => {
 
     expect(result).toEqual([shimDataView]);
     expect(dataViews.create).not.toHaveBeenCalled();
+  });
+
+  it('registers the DataView from the schema the source was just created with', async () => {
+    await getUsedDataViews([], { [spec.id!]: spec }, dataViews, { layers, http });
+
+    // no `http`: the lookup already ran for this source, registering must not request it again
+    expect(mockRegisterEsqlSourceInDataViewsCache).toHaveBeenCalledWith(
+      dataViews,
+      expect.any(EsqlSource)
+    );
+  });
+
+  describe('schema lookups of the real registration', () => {
+    const publish = async (esql: string, response: unknown) => {
+      const post = jest.fn().mockResolvedValue(response);
+      const { datasetId } = await EsqlSource.resolveDataset({
+        query: esql,
+        timeFieldName: '@timestamp',
+      });
+      mockRegisterEsqlSourceInDataViewsCache.mockImplementation(
+        jest.requireActual('@kbn/data-source').registerEsqlSourceInDataViewsCache
+      );
+      const result = await getUsedDataViews(
+        [],
+        { [datasetId]: { id: datasetId, title: 'x', timeFieldName: '@timestamp' } },
+        createMockDataViewsService(),
+        {
+          layers: {
+            layer1: { index: datasetId, query: { esql }, columns: [], timeField: '@timestamp' },
+          },
+          http: { post } as unknown as HttpStart,
+        }
+      );
+      return { requests: post.mock.calls.length, dataView: result[0] };
+    };
+
+    it('requests the schema of a dataset once and publishes its fields', async () => {
+      const { requests, dataView } = await publish('FROM lookup-ok-*', {
+        columns: [{ name: 'message', esType: 'keyword' }],
+      });
+
+      expect(requests).toBe(1);
+      expect(dataView.fields.getByName('message')).toBeDefined();
+    });
+
+    it('gets the fields of the dataset once a failed lookup succeeds on a later reload', async () => {
+      const esql = 'FROM lookup-recover-*';
+      const post = jest
+        .fn()
+        .mockResolvedValueOnce({ columns: [], error: { statusCode: 503, message: 'transient' } })
+        .mockResolvedValue({ columns: [{ name: 'message', esType: 'keyword' }] });
+      const { datasetId } = await EsqlSource.resolveDataset({
+        query: esql,
+        timeFieldName: '@timestamp',
+      });
+      mockRegisterEsqlSourceInDataViewsCache.mockImplementation(
+        jest.requireActual('@kbn/data-source').registerEsqlSourceInDataViewsCache
+      );
+      const dataViewsService = createMockDataViewsService();
+      const reload = async () =>
+        (
+          await getUsedDataViews(
+            [],
+            { [datasetId]: { id: datasetId, title: 'x', timeFieldName: '@timestamp' } },
+            dataViewsService,
+            {
+              layers: {
+                layer1: { index: datasetId, query: { esql }, columns: [], timeField: '@timestamp' },
+              },
+              http: { post } as unknown as HttpStart,
+            }
+          )
+        )[0];
+
+      expect((await reload()).fields.getByName('message')).toBeUndefined();
+      expect((await reload()).fields.getByName('message')).toBeDefined();
+    });
+
+    it('does not repeat a failing schema lookup while registering the DataView', async () => {
+      const { requests } = await publish('FROM lookup-failing-*', {
+        columns: [],
+        error: { statusCode: 404, message: 'no such index' },
+      });
+
+      expect(requests).toBe(1);
+    });
   });
 
   it('resolves the dataset from the source command of the query, with the layer time field', async () => {
@@ -87,7 +175,7 @@ describe('getUsedDataViews', () => {
 
   it('falls back to the spec when the dataset resolves to another id than the layer one', async () => {
     const specDataView = { id: 'esql-dataset-id', fromSpec: true } as unknown as DataView;
-    mockGetOrRegisterEsqlDataView.mockResolvedValue({ id: 'another-id' } as DataView);
+    mockRegisterEsqlSourceInDataViewsCache.mockResolvedValue({ id: 'another-id' } as DataView);
     dataViews.create.mockResolvedValue(specDataView);
 
     const result = await getUsedDataViews([], { [spec.id!]: spec }, dataViews, { layers, http });
@@ -107,7 +195,7 @@ describe('getUsedDataViews', () => {
     });
 
     expect(result).toEqual([created]);
-    expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
+    expect(mockRegisterEsqlSourceInDataViewsCache).not.toHaveBeenCalled();
   });
 
   it('creates the DataView from the spec when no ES|QL context is given', async () => {
@@ -117,6 +205,6 @@ describe('getUsedDataViews', () => {
     const result = await getUsedDataViews([], { [spec.id!]: spec }, dataViews);
 
     expect(result).toEqual([created]);
-    expect(mockGetOrRegisterEsqlDataView).not.toHaveBeenCalled();
+    expect(mockRegisterEsqlSourceInDataViewsCache).not.toHaveBeenCalled();
   });
 });

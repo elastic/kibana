@@ -7,7 +7,7 @@
 
 import { uniqBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
-import { EsqlSource, getOrRegisterEsqlDataView } from '@kbn/data-source';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import {
   getProjectRoutingFromEsqlQuery,
   getSourceCommandQueryFromESQLQuery,
@@ -44,7 +44,7 @@ const getEsqlDataView = async (
     timeFieldName: timeField ?? spec.timeFieldName,
     resolveTimeField: false,
   });
-  const dataView = await getOrRegisterEsqlDataView(dataViews, source, http);
+  const dataView = await registerEsqlSourceInDataViewsCache(dataViews, source);
   return dataView.id === spec.id ? dataView : dataViews.create(spec);
 };
 
