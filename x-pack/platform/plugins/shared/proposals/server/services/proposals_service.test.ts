@@ -2015,6 +2015,124 @@ describe('ProposalsService', () => {
     });
   });
 
+  describe('findConversationsWithProposals', () => {
+    it('returns the conversations that hold a proposal of the origin, whatever its status', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: { by_conversation: { buckets: [{ key: 'conv-1', doc_count: 3 }] } },
+      });
+      const { service } = createService(storage);
+
+      const found = await service.findConversationsWithProposals(
+        { conversationIds: ['conv-1', 'conv-2', 'conv-1', ''], origin: 'alertzero' },
+        SPACE_ID
+      );
+
+      expect([...found]).toEqual(['conv-1']);
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest.aggs.by_conversation.terms).toEqual({
+        field: 'conversationId',
+        size: 2,
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { origin: 'alertzero' } },
+          { terms: { conversationId: ['conv-1', 'conv-2'] } },
+        ])
+      );
+      expect(JSON.stringify(searchRequest.query)).not.toContain('"status"');
+    });
+
+    it('does not search without conversation ids', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await expect(
+        service.findConversationsWithProposals(
+          { conversationIds: [], origin: 'alertzero' },
+          SPACE_ID
+        )
+      ).resolves.toEqual(new Set());
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('listConversationsByCategory', () => {
+    it('groups proposals of a category by conversation whatever their status, newest first', async () => {
+      const storage = createStorage();
+      storage.search.mockResolvedValue({
+        hits: { hits: [] },
+        aggregations: {
+          by_conversation: {
+            buckets: [
+              {
+                key: 'conv-1',
+                doc_count: 3,
+                newest: { value_as_string: '2026-09-02T00:00:00.000Z' },
+                pending: {
+                  doc_count: 2,
+                  lead: {
+                    hits: {
+                      hits: [
+                        { _id: 'proposal-1', _source: baseDocument({ conversationId: 'conv-1' }) },
+                      ],
+                    },
+                  },
+                },
+              },
+              {
+                key: 'conv-2',
+                doc_count: 1,
+                newest: { value_as_string: '2026-09-01T00:00:00.000Z' },
+                pending: { doc_count: 0, lead: { hits: { hits: [] } } },
+              },
+            ],
+          },
+        },
+      });
+      const { service } = createService(storage);
+
+      const groups = await service.listConversationsByCategory(
+        { category: 'respond', origin: 'alertzero', limit: 50 },
+        SPACE_ID,
+        request
+      );
+
+      expect(groups).toHaveLength(2);
+      expect(groups[0]).toMatchObject({
+        conversationId: 'conv-1',
+        newestProposalAt: '2026-09-02T00:00:00.000Z',
+        pendingCount: 2,
+        lead: { id: 'proposal-1' },
+      });
+      expect(groups[1]).toEqual({
+        conversationId: 'conv-2',
+        newestProposalAt: '2026-09-01T00:00:00.000Z',
+        pendingCount: 0,
+      });
+      const [searchRequest] = storage.search.mock.calls[0];
+      expect(searchRequest).toMatchObject({
+        size: 0,
+        aggs: {
+          by_conversation: {
+            terms: { field: 'conversationId', size: 50, order: { newest: 'desc' } },
+            aggs: { pending: { filter: { term: { status: 'pending' } } } },
+          },
+        },
+      });
+      expect(searchRequest.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          { term: { spaceId: SPACE_ID } },
+          { term: { category: 'respond' } },
+          { term: { origin: 'alertzero' } },
+        ])
+      );
+      expect(searchRequest.query.bool.filter).not.toContainEqual({ term: { status: 'pending' } });
+    });
+  });
+
   describe('getLatestRevision', () => {
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));

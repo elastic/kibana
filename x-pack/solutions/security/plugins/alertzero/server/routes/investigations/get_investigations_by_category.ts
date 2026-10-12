@@ -9,18 +9,18 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
-  ALERTZERO_PROPOSALS_CATEGORY_URL,
+  ALERTZERO_INVESTIGATIONS_CATEGORY_URL,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { proposalCategorySchema } from '@kbn/proposals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
-import type { ProposalsPageResponse } from '../../../common/proposals/list';
+import type { InvestigationsPageResponse } from '../../../common/investigations/queue';
 import {
   MAX_QUEUE_PAGE_SIZE,
   MAX_QUEUE_REACH,
   fitsQueueReach,
-} from '../../../common/proposals/list';
+} from '../../../common/investigations/queue';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
@@ -29,7 +29,7 @@ import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 // ProposalsService reads as asInternalUser, so authz is enforced only at this layer.
 const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
-const GetProposalsByCategoryParams = lazySchema(() =>
+const GetInvestigationsByCategoryParams = lazySchema(() =>
   z.object({
     category: proposalCategorySchema,
   })
@@ -37,7 +37,7 @@ const GetProposalsByCategoryParams = lazySchema(() =>
 
 // `size: 0` is a count-only read: a collapsed accordion needs the group total
 // without paying for its rows.
-const GetProposalsByCategoryQuery = lazySchema(() =>
+const GetInvestigationsByCategoryQuery = lazySchema(() =>
   z
     .object({
       size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(10),
@@ -46,31 +46,32 @@ const GetProposalsByCategoryQuery = lazySchema(() =>
     .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` })
 );
 
-export const registerGetProposalsByCategoryRoute = ({
+export const registerGetInvestigationsByCategoryRoute = ({
   router,
   logger,
   getSpaceId,
-  getConversationProposalsService,
+  getInvestigationQueueService,
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: ALERTZERO_PROPOSALS_CATEGORY_URL,
+      path: ALERTZERO_INVESTIGATIONS_CATEGORY_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Get pending proposals for a single action category',
-      description: 'Returns pending proposals in the given category, sorted newest first.',
+      summary: 'Get open investigations with pending proposals in an action category',
+      description:
+        'Returns open investigations with at least one pending proposal in the given category, ordered by their newest such proposal.',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetProposalsByCategoryParams),
-            query: buildRouteValidationWithZod(GetProposalsByCategoryQuery),
+            params: buildRouteValidationWithZod(GetInvestigationsByCategoryParams),
+            query: buildRouteValidationWithZod(GetInvestigationsByCategoryQuery),
           },
         },
       },
@@ -79,8 +80,8 @@ export const registerGetProposalsByCategoryRoute = ({
           const { category } = request.params;
           const { size, from } = request.query;
 
-          const body: ProposalsPageResponse =
-            await getConversationProposalsService().listByCategory(
+          const body: InvestigationsPageResponse =
+            await getInvestigationQueueService().listOpenByCategory(
               category,
               request,
               getSpaceId(request),
@@ -90,11 +91,11 @@ export const registerGetProposalsByCategoryRoute = ({
           return response.ok({ body });
         } catch (error) {
           logger.error(
-            error instanceof Error ? error : `Failed to get proposals by category: ${error}`
+            error instanceof Error ? error : `Failed to get investigations by category: ${error}`
           );
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get proposals by category' },
+            body: { message: 'Failed to get investigations by category' },
           });
         }
       })

@@ -21,7 +21,7 @@ const setup = () => {
     getSpaceId: service,
     getWatchesService: service,
     getWorkersService: service,
-    getConversationProposalsService: service,
+    getInvestigationQueueService: service,
     getActionsService: service,
     getAgentBuilderConversations: service,
     getHuntServices: service,

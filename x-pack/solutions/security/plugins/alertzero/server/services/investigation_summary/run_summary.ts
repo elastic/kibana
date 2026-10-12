@@ -13,6 +13,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { ExecuteAgentParams, ExecuteAgentResult } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core/server';
+import { INVESTIGATION_DESCRIPTION_MAX_LENGTH } from '@kbn/alertzero-common';
 import { filter, lastValueFrom } from 'rxjs';
 import { formatInvestigationStory, type StoryAttachment, type StoryEvent } from './format_story';
 
@@ -23,9 +24,18 @@ const SUMMARY_TEMPLATES = new Set(['investigation', 'escalation']);
 const OUTPUT_SCHEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['summary'],
+  required: ['summary', 'description'],
   properties: {
-    summary: { type: 'string' },
+    summary: {
+      type: 'string',
+      description:
+        'The story of the investigation so far, told in order as a short paragraph of several sentences.',
+    },
+    description: {
+      type: 'string',
+      maxLength: INVESTIGATION_DESCRIPTION_MAX_LENGTH,
+      description: `A one-line headline of the story, at most ${INVESTIGATION_DESCRIPTION_MAX_LENGTH} characters.`,
+    },
   },
 };
 
@@ -52,15 +62,28 @@ export interface InvestigationSummaryResult {
   skipped: boolean;
   reason?: 'template' | 'empty' | 'incomplete';
   summary?: string;
+  description?: string;
 }
 
 const clip = (value: string, max: number): string => value.trim().slice(0, max);
 
-const readOutput = (value: unknown): { summary: string } | undefined => {
+/** One line, cut at a word boundary, ending in an ellipsis when it had to be cut. */
+const clipDescription = (value: string): string => {
+  const line = value.replace(/\s+/g, ' ').trim();
+  if (line.length <= INVESTIGATION_DESCRIPTION_MAX_LENGTH) {
+    return line;
+  }
+  const cut = line.slice(0, INVESTIGATION_DESCRIPTION_MAX_LENGTH - 1);
+  const lastSpace = cut.lastIndexOf(' ');
+  const base = lastSpace > 0 ? cut.slice(0, lastSpace) : cut;
+  return `${base.replace(/[\s.,;:]+$/, '')}…`;
+};
+
+const readOutput = (value: unknown): { summary: string; description?: string } | undefined => {
   if (!value || typeof value !== 'object') {
     return undefined;
   }
-  const record = value as { summary?: unknown };
+  const record = value as { summary?: unknown; description?: unknown };
   if (typeof record.summary !== 'string') {
     return undefined;
   }
@@ -68,22 +91,31 @@ const readOutput = (value: unknown): { summary: string } | undefined => {
   if (!summary) {
     return undefined;
   }
-  return { summary };
+  const description =
+    typeof record.description === 'string' ? clipDescription(record.description) : '';
+  return { summary, ...(description ? { description } : {}) };
 };
 
 const promptFor = (story: string): string =>
   [
-    'Read this AlertZero investigation timeline and write the summary.',
+    'Read this AlertZero investigation timeline and write two things: the summary and the description.',
     'The timeline is the story: journal notes posted as user messages, comments, and attachments that were added.',
     'Do not invent events, hosts, or conclusions that are not in the timeline.',
-    'summary is a few sentences reading that story.',
+    '',
+    'summary: tell the story of the investigation so far, in the order it happened, as one short paragraph of about four to eight sentences.',
+    'Cover what raised it, what was looked at and found, what was done or decided and by whom when the timeline says so, and where things stand now.',
+    'Use plain prose, no markdown and no bullet points. Be specific: name the rules, hosts, users and actions the timeline names.',
+    'The summary is the full account and has no character limit.',
+    '',
+    `description: after the summary, write a one-line headline of that story, at most ${INVESTIGATION_DESCRIPTION_MAX_LENGTH} characters, no markdown and no line breaks. The limit applies to the description only, never to the summary.`,
+    '',
     'Do not write conversation metadata yourself.',
     '',
     story,
   ].join('\n');
 
 /**
- * Reads the investigation timeline and stores the summary on its metadata.
+ * Reads the investigation timeline and stores the summary and one-line description on its metadata.
  * Standalone, so the run is not appended to the investigation chat.
  */
 export const runInvestigationSummary = async ({
@@ -132,7 +164,12 @@ export const runInvestigationSummary = async ({
     return { skipped: true, reason: 'incomplete' };
   }
 
-  await client.patchMetadata(conversationId, { summary: output.summary }, { access: 'converse' });
+  const { summary, description } = output;
+  await client.patchMetadata(
+    conversationId,
+    { summary, ...(description ? { description } : {}) },
+    { access: 'converse' }
+  );
 
-  return { skipped: false, summary: output.summary };
+  return { skipped: false, summary, ...(description ? { description } : {}) };
 };

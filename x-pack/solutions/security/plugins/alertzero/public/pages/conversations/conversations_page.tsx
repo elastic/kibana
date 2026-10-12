@@ -48,7 +48,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import { useQueueAssignees } from '../../components/connected_assignees/use_queue_assignees';
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
-import { CLOSED_GROUP_KEY, type ProposalItem } from '../../../common/proposals/list';
+import { CLOSED_GROUP_KEY, type ProposalItem } from '../../../common/investigations/queue';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -107,7 +107,12 @@ export const ConversationsPage: React.FC = () => {
 const ConversationsPageContent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
-  const { sections, proposalsById, investigations: conversations } = useQueueSections();
+  const {
+    sections,
+    itemsByCardId,
+    proposalsById,
+    investigations: conversations,
+  } = useQueueSections();
 
   // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
   // so this page's QueryClient invalidates its proposal queries and the queue refreshes.
@@ -168,22 +173,22 @@ const ConversationsPageContent: React.FC = () => {
     hasEnabledWorkers &&
     openCount === 0 &&
     closedTotal === 0 &&
-    proposalsById.size === 0;
+    itemsByCardId.size === 0;
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
   }, []);
 
-  // Cards are keyed by proposal id, but the flyout addresses a conversation, so the
-  // click has to be translated through the proposal's conversation.
+  // Open cards are keyed by their lead proposal id, but the flyout addresses the
+  // investigation, so the click has to be translated through the row.
   const onClickCard = useCallback(
-    (proposalId: Investigation['id']) => {
-      const conversationId = proposalsById.get(proposalId)?.conversationId;
+    (cardId: Investigation['id']) => {
+      const conversationId = itemsByCardId.get(cardId)?.id;
       if (conversationId) {
         selectConversation(conversationId);
       }
     },
-    [proposalsById, selectConversation]
+    [itemsByCardId, selectConversation]
   );
 
   const closeModal = useCallback(() => setModalState({ type: null, recordId: null }), []);
@@ -191,23 +196,23 @@ const ConversationsPageContent: React.FC = () => {
 
   const { getChatHref, openChat } = useOpenInChat();
 
-  // A card's chat is its investigation's Agent Builder conversation, so the proposal id the card
-  // is keyed by is resolved to that conversation first. The agent id comes along on the proposal
-  // because the conversation URL is scoped to the agent it belongs to.
-  const getChatHrefForProposal = useCallback(
-    (proposalId: Investigation['id']) => {
-      const proposal = proposalsById.get(proposalId);
-      return getChatHref(proposal?.conversationId, proposal?.conversationAgentId);
+  // A card's chat is its investigation's Agent Builder conversation, so the id the card is keyed
+  // by is resolved to that conversation first. The agent id comes along on the row because the
+  // conversation URL is scoped to the agent it belongs to.
+  const getChatHrefForCard = useCallback(
+    (cardId: Investigation['id']) => {
+      const item = itemsByCardId.get(cardId);
+      return getChatHref(item?.id, item?.agentId);
     },
-    [getChatHref, proposalsById]
+    [getChatHref, itemsByCardId]
   );
 
-  const openChatForProposal = useCallback(
-    (proposalId: Investigation['id']) => {
-      const proposal = proposalsById.get(proposalId);
-      openChat(proposal?.conversationId, proposal?.conversationAgentId);
+  const openChatForCard = useCallback(
+    (cardId: Investigation['id']) => {
+      const item = itemsByCardId.get(cardId);
+      openChat(item?.id, item?.agentId);
     },
-    [openChat, proposalsById]
+    [openChat, itemsByCardId]
   );
 
   const {
@@ -337,16 +342,16 @@ const ConversationsPageContent: React.FC = () => {
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
   const copyInvestigationLink = useCopyInvestigationLink();
-  // Cards are keyed by proposal id, but the link and the flyout are keyed by its conversation.
-  const copyLinkForProposal = useCallback(
-    (proposalId: Investigation['id']) => {
-      const conversationId = proposalsById.get(proposalId)?.conversationId;
+  // Open cards are keyed by their lead proposal id, but the link and the flyout are keyed by the investigation.
+  const copyLinkForCard = useCallback(
+    (cardId: Investigation['id']) => {
+      const conversationId = itemsByCardId.get(cardId)?.id;
       // The card menu closes on click, so there is no tooltip to confirm in: use a toast.
       if (conversationId && copyInvestigationLink(conversationId)) {
         notifications?.toasts.addSuccess(COPY_LINK_TOASTS.copied);
       }
     },
-    [proposalsById, copyInvestigationLink, notifications]
+    [itemsByCardId, copyInvestigationLink, notifications]
   );
   useInvestigationDetails({
     conversationId: selectedConversationId,
@@ -480,11 +485,11 @@ const ConversationsPageContent: React.FC = () => {
                 onClickRecommendedAction={canDecide ? onClickRecommendedAction : undefined}
                 onClickAction={onClickAction}
                 onClickCard={onClickCard}
-                onOpenChat={openChatForProposal}
-                getChatHref={getChatHrefForProposal}
+                onOpenChat={openChatForCard}
+                getChatHref={getChatHrefForCard}
                 canManageEscalations={canManageEscalations}
                 canCloseInvestigation={canManageInvestigations}
-                onCopyLink={copyLinkForProposal}
+                onCopyLink={copyLinkForCard}
                 renderAssignees={renderAssignees}
                 renderInFlightStatus={renderInFlightStatus}
               />

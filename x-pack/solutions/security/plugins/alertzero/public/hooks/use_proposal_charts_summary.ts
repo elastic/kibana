@@ -12,7 +12,7 @@ import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
 import { ALERTZERO_PROPOSAL_ORIGIN } from '../../common/proposals/origin';
 import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
-import { PROPOSALS_POLL_INTERVAL_MS } from './use_proposals_api';
+import { QUEUE_POLL_INTERVAL_MS } from './use_investigation_queue_api';
 
 /**
  * Exported so callers that render the window (axis labels, tooltip ranges) read
@@ -39,7 +39,7 @@ export const useProposalChartsSummary = ({
     keepPreviousData: true,
     // Shares the queues' cadence: this drives the header count, which would otherwise
     // disagree with the badges beside it for up to a minute.
-    refetchInterval: PROPOSALS_POLL_INTERVAL_MS,
+    refetchInterval: QUEUE_POLL_INTERVAL_MS,
     retry: retryOnTransientError,
   });
 };

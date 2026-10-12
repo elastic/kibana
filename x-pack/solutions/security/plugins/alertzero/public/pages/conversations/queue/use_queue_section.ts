@@ -10,15 +10,22 @@ import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import {
-  useClosedProposals,
-  useClosedProposalsCount,
-  useProposalsByCategory,
-  useProposalsByCategoryCount,
-} from '../../../hooks/use_proposals_api';
-import type { ProposalItem, ProposalsPageResponse } from '../../../../common/proposals/list';
-import { CLOSED_GROUP_KEY, MAX_QUEUE_REACH } from '../../../../common/proposals/list';
+  useClosedInvestigations,
+  useClosedInvestigationsCount,
+  useOpenInvestigationsByCategory,
+  useOpenInvestigationsByCategoryCount,
+} from '../../../hooks/use_investigation_queue_api';
+import type {
+  InvestigationQueueItem,
+  InvestigationsPageResponse,
+  ProposalItem,
+} from '../../../../common/investigations/queue';
+import { CLOSED_GROUP_KEY, MAX_QUEUE_REACH } from '../../../../common/investigations/queue';
 import { queryKeys } from '../../../query_keys';
-import { proposalToInvestigation } from '../proposal_to_investigation';
+import {
+  investigationQueueItemToInvestigation,
+  toProposalItem,
+} from '../investigation_queue_item_to_investigation';
 
 /** Category queues open smaller than Closed, which is a 72 h backlog. */
 export const CATEGORY_PAGE_SIZE = 10;
@@ -32,6 +39,9 @@ export interface QueueSection {
   id: RecommendedAction;
   /** Bucket size from a count-only read, so a collapsed section knows it too. */
   total: number | undefined;
+  /** The queue rows as the server sent them. */
+  items: InvestigationQueueItem[];
+  /** The lead proposal of each open row, for the approval flows. */
   proposals: ProposalItem[];
   investigations: Investigation[];
   isOpen: boolean;
@@ -92,34 +102,37 @@ const useSectionState = (id: RecommendedAction) => {
  * Every page repeats the bucket total, so loaded rows answer the count for free.
  * The first page, which a refetch renews before the rest.
  */
-const totalFromPages = (pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>) =>
+const totalFromPages = (pagesQuery: UseInfiniteQueryResult<InvestigationsPageResponse>) =>
   pagesQuery.data?.pages[0]?.total;
 
 /** The count-only read earns its request until the rows can answer instead. */
 const needsCountRequest = (
   isOpen: boolean,
-  pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
+  pagesQuery: UseInfiniteQueryResult<InvestigationsPageResponse>
 ) => !isOpen || totalFromPages(pagesQuery) === undefined;
 
 const useSection = (
   id: RecommendedAction,
   firstPageSize: number,
   { isOpen, onToggle, retry }: ReturnType<typeof useSectionState>,
-  countQuery: UseQueryResult<ProposalsPageResponse>,
-  pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
+  countQuery: UseQueryResult<InvestigationsPageResponse>,
+  pagesQuery: UseInfiniteQueryResult<InvestigationsPageResponse>
 ): QueueSection => {
   const pages = pagesQuery.data?.pages;
 
   // Deduplicated because the pages are offset windows over a list that moves: a row
-  // decided between two fetches shifts everything after it up, and an optimistic drop
+  // that leaves between two fetches shifts everything after it up, and an optimistic drop
   // shortens a cached page without moving the offsets already paged past.
-  const proposals = useMemo(
+  const items = useMemo(
     () => [
-      ...new Map((pages ?? []).flatMap((page) => page.proposals).map((p) => [p.id, p])).values(),
+      ...new Map(
+        (pages ?? []).flatMap((page) => page.investigations).map((item) => [item.id, item])
+      ).values(),
     ],
     [pages]
   );
-  const investigations = useMemo(() => proposals.map(proposalToInvestigation), [proposals]);
+  const proposals = useMemo(() => items.flatMap((item) => toProposalItem(item) ?? []), [items]);
+  const investigations = useMemo(() => items.map(investigationQueueItemToInvestigation), [items]);
 
   const total = totalFromPages(pagesQuery) ?? countQuery.data?.total;
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = pagesQuery;
@@ -147,16 +160,17 @@ const useSection = (
   return {
     id,
     total,
+    items,
     proposals,
     investigations,
     isOpen,
     onToggle,
     retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
-    hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
+    hasLoadError: Boolean(pagesQuery.error) && items.length === 0,
     hasLoadMoreError,
     hasCountError: Boolean(countQuery.error) && total === undefined,
-    remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
+    remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - items.length, 0),
     // The authority, so the control is never offered when a click fetches nothing.
     canLoadMore: (hasNextPage ?? false) && !pagesQuery.isInitialLoading,
     loadMore,
@@ -166,12 +180,12 @@ const useSection = (
 
 export const useCategoryQueueSection = (category: RecommendedAction): QueueSection => {
   const state = useSectionState(category);
-  const pagesQuery = useProposalsByCategory(category, {
+  const pagesQuery = useOpenInvestigationsByCategory(category, {
     firstPageSize: CATEGORY_PAGE_SIZE,
     step: SHOW_MORE_STEP,
     enabled: state.isOpen,
   });
-  const countQuery = useProposalsByCategoryCount(
+  const countQuery = useOpenInvestigationsByCategoryCount(
     category,
     needsCountRequest(state.isOpen, pagesQuery)
   );
@@ -181,12 +195,12 @@ export const useCategoryQueueSection = (category: RecommendedAction): QueueSecti
 
 export const useClosedQueueSection = (): QueueSection => {
   const state = useSectionState(CLOSED_GROUP_KEY);
-  const pagesQuery = useClosedProposals({
+  const pagesQuery = useClosedInvestigations({
     firstPageSize: CLOSED_PAGE_SIZE,
     step: SHOW_MORE_STEP,
     enabled: state.isOpen,
   });
-  const countQuery = useClosedProposalsCount(needsCountRequest(state.isOpen, pagesQuery));
+  const countQuery = useClosedInvestigationsCount(needsCountRequest(state.isOpen, pagesQuery));
 
   return useSection(CLOSED_GROUP_KEY, CLOSED_PAGE_SIZE, state, countQuery, pagesQuery);
 };

@@ -7,13 +7,16 @@
 
 import { useMemo } from 'react';
 import type { Investigation } from '@kbn/agentic-investigations-common';
-import type { ProposalItem } from '../../../../common/proposals/list';
+import type { InvestigationQueueItem, ProposalItem } from '../../../../common/investigations/queue';
+import { queueCardId } from '../investigation_queue_item_to_investigation';
 import type { QueueSection } from './use_queue_section';
 import { useCategoryQueueSection, useClosedQueueSection } from './use_queue_section';
 
 export interface QueueSections {
   sections: QueueSection[];
-  /** Every loaded proposal, for the modals and the chat links. */
+  /** Every loaded row by card id, for the flyout, the chat links and the copied link. */
+  itemsByCardId: Map<string, InvestigationQueueItem>;
+  /** Every loaded lead proposal by id, for the approval modals. */
   proposalsById: Map<string, ProposalItem>;
   /** Unfiltered: Impact derives its chips from the whole set. */
   investigations: Investigation[];
@@ -26,6 +29,16 @@ export const useQueueSections = (): QueueSections => {
   const closed = useClosedQueueSection();
 
   const sections = [respond, investigate, configure, closed];
+
+  const itemsByCardId = useMemo(
+    () =>
+      new Map(
+        [...respond.items, ...investigate.items, ...configure.items, ...closed.items].map(
+          (item) => [queueCardId(item), item]
+        )
+      ),
+    [respond.items, investigate.items, configure.items, closed.items]
+  );
 
   // Keyed on the rows themselves, not the section objects: those are rebuilt every
   // render, which would rebuild and re-sort the union on every poll.
@@ -42,15 +55,22 @@ export const useQueueSections = (): QueueSections => {
     [respond.proposals, investigate.proposals, configure.proposals, closed.proposals]
   );
 
-  // Each section pages by its own recency, so priorityScore is what gives the
-  // union an impact-first order.
+  // Each section keeps the server's newest-proposal order, so priorityScore is what gives
+  // the union an impact-first order. An investigation in two categories is one entity row.
   const investigations = useMemo(
     () =>
       [
-        ...respond.investigations,
-        ...investigate.investigations,
-        ...configure.investigations,
-        ...closed.investigations,
+        ...new Map(
+          [
+            ...respond.investigations,
+            ...investigate.investigations,
+            ...configure.investigations,
+            ...closed.investigations,
+          ].map((investigation) => [
+            investigation.conversationId ?? investigation.id,
+            investigation,
+          ])
+        ).values(),
       ].toSorted((a, b) => {
         const priorityDiff = (b.priorityScore ?? 0) - (a.priorityScore ?? 0);
         return priorityDiff !== 0 ? priorityDiff : b.updatedAt.localeCompare(a.updatedAt);
@@ -63,5 +83,5 @@ export const useQueueSections = (): QueueSections => {
     ]
   );
 
-  return { sections, proposalsById, investigations };
+  return { sections, itemsByCardId, proposalsById, investigations };
 };

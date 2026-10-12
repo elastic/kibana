@@ -9,35 +9,42 @@ import React from 'react';
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
-  useClosedProposals,
-  useClosedProposalsCount,
-  useProposalsByCategory,
-  useProposalsByCategoryCount,
-} from '../../../hooks/use_proposals_api';
+  useClosedInvestigations,
+  useClosedInvestigationsCount,
+  useOpenInvestigationsByCategory,
+  useOpenInvestigationsByCategoryCount,
+} from '../../../hooks/use_investigation_queue_api';
 import { useCategoryQueueSection } from './use_queue_section';
 
-jest.mock('../../../hooks/use_proposals_api');
+jest.mock('../../../hooks/use_investigation_queue_api');
 
-const mockPages = useProposalsByCategory as jest.Mock;
-const mockCount = useProposalsByCategoryCount as jest.Mock;
+const mockPages = useOpenInvestigationsByCategory as jest.Mock;
+const mockCount = useOpenInvestigationsByCategoryCount as jest.Mock;
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   React.createElement(QueryClientProvider, { client: new QueryClient() }, children);
 
-const proposal = {
-  id: 'prop-1',
-  conversationId: 'inv-1',
-  category: 'respond',
-  impact: 'high',
-  confidence: 'high',
-  status: 'pending',
+const item = {
+  id: 'inv-1',
   createdAt: '2024-01-01T00:00:00Z',
-  conversationAssignees: [],
+  updatedAt: '2024-01-01T00:00:00Z',
+  status: 'open',
+  assignees: [],
+  pendingProposalCount: 1,
+  leadProposal: {
+    id: 'prop-1',
+    conversationId: 'inv-1',
+    category: 'respond',
+    impact: 'high',
+    confidence: 'high',
+    status: 'pending',
+    createdAt: '2024-01-01T00:00:00Z',
+  },
 };
 
 /** One page already on screen, which is what makes a later failure easy to miss. */
 const pagesQuery = (overrides: Record<string, unknown> = {}) => ({
-  data: { pages: [{ proposals: [proposal], total: 30 }], pageParams: [undefined] },
+  data: { pages: [{ investigations: [item], total: 30 }], pageParams: [undefined] },
   fetchNextPage: jest.fn().mockResolvedValue({}),
   hasNextPage: true,
   isFetchingNextPage: false,
@@ -47,8 +54,11 @@ const pagesQuery = (overrides: Record<string, unknown> = {}) => ({
 });
 
 beforeEach(() => {
-  (useClosedProposals as jest.Mock).mockReturnValue(pagesQuery());
-  (useClosedProposalsCount as jest.Mock).mockReturnValue({ data: undefined, error: undefined });
+  (useClosedInvestigations as jest.Mock).mockReturnValue(pagesQuery());
+  (useClosedInvestigationsCount as jest.Mock).mockReturnValue({
+    data: undefined,
+    error: undefined,
+  });
   mockCount.mockReturnValue({ data: undefined, error: undefined });
 });
 

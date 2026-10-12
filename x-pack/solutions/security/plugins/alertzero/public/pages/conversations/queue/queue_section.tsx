@@ -13,7 +13,8 @@ import {
   type ConversationsActionsGroupProps,
   type Investigation,
 } from '@kbn/agentic-investigations-common';
-import { proposalOutcome } from '../proposal_outcome';
+import { investigationOutcome } from '../investigation_outcome';
+import { queueCardId } from '../investigation_queue_item_to_investigation';
 import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
@@ -43,7 +44,7 @@ export const QueueSection = ({
 }: QueueSectionProps) => {
   const {
     investigations,
-    proposals,
+    items,
     total,
     id,
     isOpen,
@@ -70,19 +71,19 @@ export const QueueSection = ({
   const selectedIds = useMemo(
     () =>
       selectedConversationId
-        ? proposals
-            .filter(({ conversationId }) => conversationId === selectedConversationId)
-            .map(({ id: proposalId }) => proposalId)
+        ? items
+            .filter(({ id: conversationId }) => conversationId === selectedConversationId)
+            .map(queueCardId)
         : [],
-    [proposals, selectedConversationId]
+    [items, selectedConversationId]
   );
 
-  // Read off the raw proposals: the adapted Investigation carries no decision.
+  // Read off the raw rows: the adapted Investigation carries no close reason.
   const outcomes = useMemo(
-    () => new Map(proposals.map((proposal) => [proposal.id, proposalOutcome(proposal)])),
-    [proposals]
+    () => new Map(items.map((item) => [queueCardId(item), investigationOutcome(item)])),
+    [items]
   );
-  const getOutcomeLabel = useCallback((proposalId: string) => outcomes.get(proposalId), [outcomes]);
+  const getOutcomeLabel = useCallback((cardId: string) => outcomes.get(cardId), [outcomes]);
 
   return (
     <ConversationQueue

@@ -8,31 +8,50 @@
 import { useCallback } from 'react';
 import type { InfiniteData } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
-import type { ProposalsPageResponse } from '../../../../common/proposals/list';
+import type {
+  InvestigationQueueItem,
+  InvestigationsPageResponse,
+} from '../../../../common/investigations/queue';
 import { queryKeys } from '../../../query_keys';
 
-/** Closed only ever gains a decided proposal, never loses one. */
+/** Closed only ever gains an investigation after a close, never after a decision. */
 const OPEN_CATEGORIES = ['respond', 'investigate', 'configure'] as const;
 
-const withoutProposal = (data: InfiniteData<ProposalsPageResponse>, proposalId: string) => ({
+const isDecidedRow = ({ leadProposal }: InvestigationQueueItem, proposalId: string) =>
+  leadProposal?.id === proposalId;
+
+/** The investigation stays in its category; only the decided proposal stops being offered. */
+const withoutLeadProposal = ({
+  leadProposal,
+  pendingProposalCount,
+  ...item
+}: InvestigationQueueItem): InvestigationQueueItem => ({
+  ...item,
+  pendingProposalCount: Math.max((pendingProposalCount ?? 1) - 1, 0),
+});
+
+const settle = (data: InfiniteData<InvestigationsPageResponse>, proposalId: string) => ({
   ...data,
   pages: data.pages.map((page) => ({
     ...page,
-    // The badge reads this total while the section is open, so it has to fall with
-    // the row rather than wait for the poll.
-    total: Math.max(page.total - 1, 0),
-    proposals: page.proposals.filter(({ id }) => id !== proposalId),
+    investigations: page.investigations.map((item) =>
+      isDecidedRow(item, proposalId) ? withoutLeadProposal(item) : item
+    ),
   })),
 });
 
-const holds = (data: InfiniteData<ProposalsPageResponse> | undefined, proposalId: string) =>
-  Boolean(data?.pages.some((page) => page.proposals.some(({ id }) => id === proposalId)));
+const holds = (data: InfiniteData<InvestigationsPageResponse> | undefined, proposalId: string) =>
+  Boolean(
+    data?.pages.some((page) => page.investigations.some((item) => isDecidedRow(item, proposalId)))
+  );
 
 /**
- * Takes a just-decided proposal out of its queue. The decision is recorded
- * asynchronously — the route releases the gate and the workflow writes the outcome
- * behind it — so the server still reports it as pending for a moment. The row goes
- * now and the poll reconciles.
+ * Stops offering a just-decided proposal on its investigation's card. The decision is
+ * recorded asynchronously — the route releases the gate and the workflow writes the
+ * outcome behind it — so the server still reports the proposal as pending for a moment.
+ * The card loses its proposal now and the poll reconciles, including which proposal, if
+ * any, leads next. The investigation keeps its place: it still has a proposal in the
+ * category, so only the sections' totals are untouched.
  */
 export const useDropDecidedProposal = () => {
   const queryClient = useQueryClient();
@@ -41,7 +60,7 @@ export const useDropDecidedProposal = () => {
     async (proposalId: string) => {
       const category = OPEN_CATEGORIES.find((candidate) =>
         holds(
-          queryClient.getQueryData<InfiniteData<ProposalsPageResponse>>(
+          queryClient.getQueryData<InfiniteData<InvestigationsPageResponse>>(
             queryKeys.proposals.byCategory(candidate)
           ),
           proposalId
@@ -53,21 +72,14 @@ export const useDropDecidedProposal = () => {
       }
 
       const pagesKey = queryKeys.proposals.byCategory(category);
-      const countKey = queryKeys.proposals.byCategoryCount(category);
 
-      // Only this bucket's queries: the same decision also refreshes Closed and the
-      // header, and cancelling the whole proposals root would abort those too. The
-      // refetch here would read the proposal as still pending and restore the row.
-      await Promise.all([
-        queryClient.cancelQueries({ queryKey: pagesKey }),
-        queryClient.cancelQueries({ queryKey: countKey }),
-      ]);
+      // Only this bucket's rows: the same decision also refreshes Closed and the header,
+      // and cancelling the whole proposals root would abort those too. A refetch here
+      // would read the proposal as still pending and restore it.
+      await queryClient.cancelQueries({ queryKey: pagesKey });
 
-      queryClient.setQueryData<InfiniteData<ProposalsPageResponse>>(pagesKey, (cached) =>
-        cached ? withoutProposal(cached, proposalId) : cached
-      );
-      queryClient.setQueryData<ProposalsPageResponse>(countKey, (cached) =>
-        cached ? { ...cached, total: Math.max(cached.total - 1, 0) } : cached
+      queryClient.setQueryData<InfiniteData<InvestigationsPageResponse>>(pagesKey, (cached) =>
+        cached ? settle(cached, proposalId) : cached
       );
     },
     [queryClient]

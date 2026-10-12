@@ -10,13 +10,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
-import { MAX_QUEUE_REACH } from '../../common/proposals/list';
+import { MAX_QUEUE_REACH } from '../../common/investigations/queue';
 import {
-  PROPOSALS_POLL_INTERVAL_MS,
-  useClosedProposals,
-  useClosedProposalsCount,
-  useProposalsByCategory,
-} from './use_proposals_api';
+  QUEUE_POLL_INTERVAL_MS,
+  useClosedInvestigations,
+  useClosedInvestigationsCount,
+  useOpenInvestigationsByCategory,
+} from './use_investigation_queue_api';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 
@@ -33,7 +33,7 @@ const createWrapper = () => {
 };
 
 const page = (rows: number, total: number) => ({
-  proposals: Array.from({ length: rows }, (_, i) => ({ id: `prop-${i}` })),
+  investigations: Array.from({ length: rows }, (_, i) => ({ id: `prop-${i}` })),
   total,
 });
 
@@ -46,12 +46,13 @@ beforeEach(() => {
 
 const queryOf = (call: number) => http.get.mock.calls[call][1].query;
 
-describe('useProposalsByCategory', () => {
+describe('useOpenInvestigationsByCategory', () => {
   it('asks for the first page at the size the caller opened with', async () => {
     http.get.mockResolvedValue(page(10, 30));
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
 
@@ -63,7 +64,8 @@ describe('useProposalsByCategory', () => {
     http.get.mockResolvedValue(page(10, 30));
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -80,7 +82,8 @@ describe('useProposalsByCategory', () => {
     http.get.mockResolvedValue(page(10, 10));
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
 
@@ -95,7 +98,7 @@ describe('useProposalsByCategory', () => {
       .mockResolvedValueOnce(page(5, 50_000));
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize, step: 10, enabled: true }),
+      () => useOpenInvestigationsByCategory('respond', { firstPageSize, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -113,7 +116,8 @@ describe('useProposalsByCategory', () => {
 
   it('issues no request while the section is collapsed', () => {
     renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: false }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: false }),
       { wrapper: createWrapper().Wrapper }
     );
 
@@ -127,14 +131,15 @@ describe('useProposalsByCategory', () => {
     const { Wrapper, queryClient } = createWrapper();
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     await result.current.fetchNextPage();
     expect(http.get).toHaveBeenCalledTimes(2);
 
-    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+    jest.advanceTimersByTime(QUEUE_POLL_INTERVAL_MS);
 
     // Settled, not merely started: a replay of the second page trails the first and
     // would slip past a check that stops at the request it expected.
@@ -151,12 +156,13 @@ describe('useProposalsByCategory', () => {
     http.get.mockResolvedValue(page(10, 30));
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+    jest.advanceTimersByTime(QUEUE_POLL_INTERVAL_MS);
 
     await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
     jest.useRealTimers();
@@ -169,12 +175,13 @@ describe('useProposalsByCategory', () => {
     // still pending and restores it. Only the slow 60s baseline should ever re-check.
     jest.useFakeTimers();
     http.get.mockResolvedValue({
-      proposals: [{ id: 'prop-0', decision: 'approved', status: 'executing' }],
+      investigations: [{ id: 'prop-0', decision: 'approved', status: 'executing' }],
       total: 1,
     });
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -189,12 +196,12 @@ describe('useProposalsByCategory', () => {
   });
 });
 
-describe('useClosedProposals', () => {
+describe('useClosedInvestigations', () => {
   it('opens at its own larger first page', async () => {
     http.get.mockResolvedValue(page(25, 60));
 
     const { result } = renderHook(
-      () => useClosedProposals({ firstPageSize: 25, step: 10, enabled: true }),
+      () => useClosedInvestigations({ firstPageSize: 25, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
 
@@ -215,7 +222,8 @@ describe('refreshing after a decision', () => {
     const { Wrapper, queryClient } = createWrapper();
 
     const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
+      () =>
+        useOpenInvestigationsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -230,7 +238,7 @@ describe('refreshing after a decision', () => {
     const { Wrapper, queryClient } = createWrapper();
 
     const { result } = renderHook(
-      () => useClosedProposals({ firstPageSize: 25, step: 10, enabled: true }),
+      () => useClosedInvestigations({ firstPageSize: 25, step: 10, enabled: true }),
       { wrapper: Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -246,9 +254,9 @@ describe('refreshing after a decision', () => {
 
     const { result } = renderHook(
       () => ({
-        count: useClosedProposalsCount(true),
+        count: useClosedInvestigationsCount(true),
         // Collapsed, so its rows query is disabled and therefore inactive.
-        rows: useClosedProposals({ firstPageSize: 25, step: 10, enabled: false }),
+        rows: useClosedInvestigations({ firstPageSize: 25, step: 10, enabled: false }),
       }),
       { wrapper: Wrapper }
     );
@@ -267,11 +275,11 @@ describe('refreshing after a decision', () => {
   });
 });
 
-describe('useClosedProposalsCount', () => {
+describe('useClosedInvestigationsCount', () => {
   it('reads the total without any rows', async () => {
     http.get.mockResolvedValue(page(0, 42));
 
-    const { result } = renderHook(() => useClosedProposalsCount(true), {
+    const { result } = renderHook(() => useClosedInvestigationsCount(true), {
       wrapper: createWrapper().Wrapper,
     });
 
