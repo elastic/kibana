@@ -390,6 +390,13 @@ export const PresentationPanelHoverActions = ({
     <span
       css={css`
         align-items: center;
+        // follow the drag handle's visibility so the pill stays around it when the bar itself is hidden
+        // (e.g. the focused panel while an editor flyout is open)
+        visibility: hidden;
+
+        .embPanel__hoverActionsAnchor--editMode & {
+          visibility: visible;
+        }
       `}
     >
       {dragHandle}
