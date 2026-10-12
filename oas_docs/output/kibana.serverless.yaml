@@ -46459,6 +46459,13 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
                             stackArn:
                               description: CloudFormation stack ARN pasted by the user post-launch.
                               maxLength: 2048
@@ -46798,6 +46805,13 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
                             stackArn:
                               description: CloudFormation stack ARN pasted by the user post-launch.
                               maxLength: 2048
@@ -47030,6 +47044,13 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceIds:
+                        description: Service IDs active when the stack was last launched or updated.
+                        items:
+                          minLength: 1
+                          type: string
+                        maxItems: 1000
+                        type: array
                       stackArn:
                         description: CloudFormation stack ARN pasted by the user post-launch.
                         maxLength: 2048
@@ -47189,6 +47210,13 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
                             stackArn:
                               description: CloudFormation stack ARN pasted by the user post-launch.
                               maxLength: 2048
@@ -47455,6 +47483,13 @@ paths:
                                   - otel
                                   - crowdstrike
                                 type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
                               stackArn:
                                 description: CloudFormation stack ARN pasted by the user post-launch.
                                 maxLength: 2048
