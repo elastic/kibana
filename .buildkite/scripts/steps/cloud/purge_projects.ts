@@ -57,7 +57,6 @@ async function deleteProject({
   name: string;
 }) {
   try {
-    // TODO ideally rename 'elasticsearch' to 'search'
     await projectRequest.delete(`/api/v1/serverless/projects/${type}/${id}`);
 
     execSync(`.buildkite/scripts/common/deployment_credentials.sh unset ${name}`, {
