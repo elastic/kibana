@@ -320,7 +320,7 @@ export class WorkflowExecutionState {
    * concurrent in-memory updates are never overwritten by an older persisted snapshot.
    * Best-effort: a failed read is logged and execution continues.
    */
-  private async refreshCancelState(): Promise<void> {
+  public async refreshCancelState(): Promise<void> {
     const { id, spaceId } = this.workflowExecution;
     let cancelState: Awaited<
       ReturnType<WorkflowExecutionRepository['getWorkflowExecutionCancelState']>

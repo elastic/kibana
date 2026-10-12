@@ -50,6 +50,8 @@ export async function processNodeStackMonitoring(
     }
   }
 
+  // Poll ES on every monitor cycle so an external cancel is seen even if no flush runs during a long step.
+  await params.workflowExecutionState.refreshCancelState();
   await cancelWorkflowIfRequested(
     params.workflowExecutionState,
     monitoredStepExecutionRuntime,
