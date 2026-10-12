@@ -330,7 +330,7 @@ export function createEventsWriteTool({
       a generated event_id.
     `,
     annotations: {
-      title: 'Write Significant Events',
+      title: 'Write significant events',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,

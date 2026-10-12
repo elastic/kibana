@@ -6,9 +6,12 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
 
-export type HostEnrollment = { enrolled: true; agentId: string } | { enrolled: false };
+export type HostEnrollment =
+  | { enrolled: true; agentId: string; capabilities: string[] }
+  | { enrolled: false };
 
 /**
  * Declared with its implementation so packaging depends on this service for the contract, rather
@@ -16,10 +19,81 @@ export type HostEnrollment = { enrolled: true; agentId: string } | { enrolled: f
  */
 export type ResolveHostEnrollment = (hostName: string) => Promise<HostEnrollment>;
 
+/**
+ * Where Elastic Defend reports `Endpoint.capabilities`, keyed by `agent.id`. Mirrors
+ * `metadataCurrentIndexPattern` in `security_solution/common/endpoint/constants.ts`, which
+ * alertzero cannot import across the plugin boundary.
+ */
+export const ENDPOINT_METADATA_CURRENT_PATTERN = 'metrics-endpoint.metadata_current_*';
+
 const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1');
 
+interface EndpointMetadataSource {
+  Endpoint?: { capabilities?: unknown };
+}
+
 /**
- * Resolves a host name to its enrolled Elastic Defend agent id via a space-scoped Fleet client.
+ * Reads the endpoint's capability list from its metadata document. Conservative: a missing
+ * index, document, or field, or any error, yields `[]` ("suspend only"), never a skipped host.
+ */
+const readEndpointCapabilities = async ({
+  esClient,
+  agentId,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  agentId: string;
+  logger?: Logger;
+}): Promise<string[]> => {
+  try {
+    const response = await esClient.search<EndpointMetadataSource>({
+      index: ENDPOINT_METADATA_CURRENT_PATTERN,
+      size: 1,
+      _source: ['Endpoint.capabilities'],
+      // Same match and ordering as `getESQueryHostMetadataByIDs`: the id lives under either
+      // field depending on the metadata version, and the newest document wins.
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { 'agent.id': agentId } },
+                  { term: { 'HostDetails.agent.id': agentId } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+      sort: [
+        { 'event.created': { order: 'desc', unmapped_type: 'date' } },
+        { 'HostDetails.event.created': { order: 'desc', unmapped_type: 'date' } },
+      ],
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    const capabilities = response.hits.hits[0]?._source?.Endpoint?.capabilities;
+    return Array.isArray(capabilities) &&
+      capabilities.every((value): value is string => typeof value === 'string')
+      ? capabilities
+      : [];
+  } catch (error) {
+    // Warn, not debug: a privilege failure here silently downgrades every response to
+    // "suspend only", and nothing else would surface it.
+    logger?.warn(
+      `resolveHostEnrollment: endpoint capabilities lookup failed for agent ${agentId}; treating as none — ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return [];
+  }
+};
+
+/**
+ * Resolves a host name to its enrolled Elastic Defend agent id via a space-scoped Fleet client,
+ * plus the endpoint's reported capabilities when an ES client is available.
  *
  * Both Fleet name fields are matched: the caller collects entities from either `host.name` or
  * `host.hostname`, and the two routinely differ on one machine. `showInactive: false` matches
@@ -33,6 +107,7 @@ const escapeKuery = (value: string): string => value.replace(/(["\\])/g, '\\$1')
  */
 export const makeResolveHostEnrollment = (
   agentClient: AgentClient | undefined,
+  esClient?: ElasticsearchClient,
   logger?: Logger
 ): ResolveHostEnrollment => {
   if (!agentClient) {
@@ -40,6 +115,7 @@ export const makeResolveHostEnrollment = (
   }
   return async (hostName) => {
     const escaped = escapeKuery(hostName);
+    let agent: { id: string } | undefined;
     try {
       // Two, not one: a second match is the signal that the name is ambiguous, and the lookup
       // cannot see that with a page size of one.
@@ -54,8 +130,7 @@ export const makeResolveHostEnrollment = (
         );
         return { enrolled: false };
       }
-      const agent = agents[0];
-      return agent ? { enrolled: true, agentId: agent.id } : { enrolled: false };
+      agent = agents[0];
     } catch (err) {
       // A Fleet outage must not sink packaging. The hunt writes its evidence before packaging
       // runs, so the report is no longer swept automatically, and failing here would strand a
@@ -69,6 +144,13 @@ export const makeResolveHostEnrollment = (
       );
       return { enrolled: false };
     }
+    if (!agent) {
+      return { enrolled: false };
+    }
+    const capabilities = esClient
+      ? await readEndpointCapabilities({ esClient, agentId: agent.id, logger })
+      : [];
+    return { enrolled: true, agentId: agent.id, capabilities };
   };
 };
 
@@ -77,14 +159,16 @@ export const makeResolveHostEnrollment = (
  * unique across spaces and an unscoped search can act on another space's agent.
  *
  * The service is read through a getter because step definitions register during `setup` but
- * run after `start`. Without a space there is no correct lookup to make, so every host reports
- * unenrolled -- a recommendation instead of an action, rather than acting on whichever space's
- * host matched first.
+ * run after `start`. The ES client is passed per call: it must be the step's own scoped client so
+ * the calling user's privileges apply to the endpoint metadata read, not the internal user's. Without a space there is no correct lookup to make, so every
+ * host reports unenrolled -- a recommendation instead of an action, rather than acting on
+ * whichever space's host matched first.
  */
 export const makeScopedResolveHostEnrollment =
   (getAgentService: () => AgentService | undefined, logger?: Logger) =>
-  (spaceId: string): ResolveHostEnrollment =>
+  (spaceId: string, esClient?: ElasticsearchClient): ResolveHostEnrollment =>
     makeResolveHostEnrollment(
       spaceId ? getAgentService()?.asInternalScopedUser(spaceId) : undefined,
+      esClient,
       logger
     );
