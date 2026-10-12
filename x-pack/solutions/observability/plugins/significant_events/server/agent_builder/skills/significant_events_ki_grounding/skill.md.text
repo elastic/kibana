@@ -128,7 +128,7 @@ Avoid: storing the executed SORT/LIMIT tail or the tool result's rewritten query
 
 ### Step 4: Profile the Impact
 
-The sample proves a failure exists, not how bad it is. For every rule whose sample shows a failure (any rule that can be `confirms`, or `off_topic` with a concrete observed error), run three aggregates under the shared rules, built from two parts of that rule's KI query: `<scope>` (the field conditions that select the operation) and `<failure>` (the rest of its `WHERE`).
+The sample proves a failure exists, not how bad it is. For every rule whose sample shows a failure (any rule that can be `confirms`, or `off_topic` with a concrete observed error), run three aggregates under the shared rules, built from two parts of that rule's KI query: `<scope>` (the field conditions that select the operation) and `<failure>` (the rest of its `WHERE`). For an `off_topic` signal the rule's own `<failure>` measures the authored rule, not the observed error, so use as `<failure>` a condition that isolates that error (an exact field value seen in its sample row); with no such condition, leave its profile unmeasured.
 
 | Profile | Question | Queries | `time_range` | Read |
 |---|---|---|---|---|

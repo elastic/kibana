@@ -109,7 +109,9 @@ export const eventsWriteItemSchema = lazySchema(() =>
     )
     .superRefine((item, ctx) => {
       const signals = item.signals ?? [];
-      const hasConfirms = signals.some((s) => s.evidence != null && s.verdict === 'confirms');
+      const grounded = signals.filter((s) => s.evidence != null);
+      const hasConfirms = grounded.some((s) => s.verdict === 'confirms');
+      const hasOffTopicObservedError = grounded.some((s) => s.verdict === 'off_topic');
       const hasNotChecked = signals.some((s) => s.verdict === 'not_checked');
 
       if (hasConfirms && hasNotChecked) {
@@ -117,6 +119,22 @@ export const eventsWriteItemSchema = lazySchema(() =>
           code: z.ZodIssueCode.custom,
           message:
             'A confirms item cannot include not_checked signals; emit each not_checked detection as its own inactive item.',
+        });
+      }
+      // Continuations inherit prior severity; this cycle's signals may be
+      // inconclusive (telemetry gap, errored query) without a new confirms.
+      if (
+        item.event_id === undefined &&
+        item.status === 'active' &&
+        (item.severity === 'high' || item.severity === 'critical') &&
+        grounded.length > 0 &&
+        !hasConfirms &&
+        !hasOffTopicObservedError
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message:
+            'An active event at "high" or above whose signals carry query evidence requires at least one confirms or off_topic (observed-error) signal; without confirmed or observed-error evidence use a lower severity or a non-active status.',
         });
       }
     })
@@ -243,14 +261,25 @@ const enrichCausalFeatures = async (
           item.stream_names
         );
         return feature
-          ? { ...causalFeature, type: feature.type, subtype: feature.subtype }
+          ? {
+              ...causalFeature,
+              feature_id: feature.id,
+              type: feature.type,
+              subtype: feature.subtype,
+            }
           : causalFeature;
       }),
       // Blast radius rows carry their own row-shape discriminator in `type`; only the
       // indicator's subtype is enriched.
       blast_radius: item.blast_radius?.map((entry) => {
         const feature = resolveFeature(entry.feature_id, entry.stream_name, item.stream_names);
-        return feature ? { ...entry, subtype: feature.subtype } : entry;
+        return feature
+          ? {
+              ...entry,
+              feature_id: feature.id,
+              subtype: feature.subtype,
+            }
+          : entry;
       }),
     }));
   } catch (error) {

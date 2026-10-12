@@ -136,6 +136,86 @@ describe('events_write tool', () => {
     });
   });
 
+  describe('open high-severity confirms invariant', () => {
+    const highInput = { ...input, severity: 'high' as const };
+    const signalWith = (verdict: string) => ({
+      type: 'detection' as const,
+      stream_name: 'logs.test',
+      description: 'Found: matching failure logs at similar pre/post rates. Impact: not new.',
+      verdict,
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
+      metadata: {
+        rule_uuid: 'rule-1',
+        detection_id: 'detection-1',
+        change_point_type: 'spike' as const,
+        p_value: 0.01,
+      },
+    });
+
+    it('rejects a new active high item whose grounded signals lack a confirms verdict', () => {
+      const { event_id: _omitted, ...newEventInput } = highInput;
+      const result = eventsWriteSchema.safeParse({
+        items: [{ ...newEventInput, signals: [signalWith('inconclusive')] }],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues.at(-1)?.message).toContain('requires at least one confirms');
+      }
+    });
+
+    it('accepts an active high continuation (event_id present) with only inconclusive grounded signals', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...highInput, signals: [signalWith('inconclusive')] }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an active high item backed by a confirms signal', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...highInput, signals: [signalWith('confirms')] }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an active medium item with only inconclusive grounded signals', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [
+            { ...highInput, severity: 'medium' as const, signals: [signalWith('inconclusive')] },
+          ],
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an active high item whose only grounded signal is off_topic (observed-error path)', () => {
+      expect(
+        eventsWriteSchema.safeParse({
+          items: [{ ...highInput, signals: [signalWith('off_topic')] }],
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an active high item whose signals carry no evidence (quiet rules)', () => {
+      const quiet = {
+        type: 'detection' as const,
+        stream_name: 'logs.test',
+        description: 'Rule X: no backed query KI matched this detection.',
+        verdict: 'not_checked',
+        metadata: {
+          rule_uuid: 'rule-1',
+          detection_id: 'detection-1',
+          change_point_type: 'spike' as const,
+          p_value: 0.01,
+        },
+      };
+      expect(
+        eventsWriteSchema.safeParse({ items: [{ ...highInput, signals: [quiet] }] }).success
+      ).toBe(true);
+    });
+  });
+
   it('rejects mixing confirms and not_checked on the same item', () => {
     const confirmsSignal: SignalEntry = {
       type: 'detection',
@@ -382,6 +462,69 @@ describe('events_write tool', () => {
             ],
           }),
         ],
+      })
+    );
+  });
+
+  it('canonicalizes a uuid feature reference to the resolved feature id', async () => {
+    getFeatures.mockResolvedValue({
+      hits: [
+        {
+          id: 'checkout-api',
+          uuid: 'uuid-checkout',
+          stream_name: 'logs.test',
+          type: 'entity',
+          subtype: 'service',
+        },
+      ],
+    });
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              { feature_id: 'uuid-checkout', name: 'Checkout API', stream_name: 'logs.test' },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [
+          expect.objectContaining({
+            causal_features: [expect.objectContaining({ feature_id: 'checkout-api' })],
+          }),
+        ],
+      })
+    );
+  });
+
+  it('writes unenriched causal features when the lookup fails', async () => {
+    getFeatures.mockRejectedValue(new Error('ki index unavailable'));
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_uuid: 'u', event_id: 'e', status: 'open', written: true },
+    ]);
+    const causalFeatures = [{ feature_id: 'checkout-api', name: 'Checkout API' }];
+
+    await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      { items: [{ ...input, causal_features: causalFeatures }] },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        eventSearchClient: {},
+        inputs: [expect.objectContaining({ causal_features: causalFeatures })],
       })
     );
   });
