@@ -15,7 +15,6 @@ import type { ConversationAccessControl } from '@kbn/agent-builder-common';
 import {
   accessControlChangeEvents,
   conversationCreatedEvent,
-  diffMetadataKeys,
   metadataUpdatedEvents,
   titleUpdatedEvents,
   userEventActor,
@@ -108,21 +107,6 @@ describe('metadataUpdatedEvents', () => {
 
   it('returns nothing when no field changed', () => {
     expect(metadataUpdatedEvents({ changed_fields: [] }, envelope)).toEqual([]);
-  });
-});
-
-describe('diffMetadataKeys', () => {
-  it('reports added, changed and removed keys and ignores identical ones', () => {
-    expect(
-      diffMetadataKeys(
-        { same: 'a', changed: 'b', removed: 'c', list: ['x', 'y'] },
-        { same: 'a', changed: 'B', added: 'd', list: ['y', 'x'] }
-      ).sort()
-    ).toEqual(['added', 'changed', 'list', 'removed']);
-  });
-
-  it('is empty for identical records', () => {
-    expect(diffMetadataKeys({ a: ['1'] }, { a: ['1'] })).toEqual([]);
   });
 });
 

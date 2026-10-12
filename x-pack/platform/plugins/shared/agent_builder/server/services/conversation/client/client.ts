@@ -99,7 +99,6 @@ import {
   type ActivityEnvelope,
   accessControlChangeEvents,
   conversationCreatedEvent,
-  diffMetadataKeys,
   metadataUpdatedEvent,
   metadataUpdatedEvents,
   titleUpdatedEvents,
@@ -898,7 +897,7 @@ class ConversationClientImpl implements ConversationClient {
           ...(bounded.metadata !== undefined
             ? metadataUpdatedEvents(
                 {
-                  changed_fields: diffMetadataKeys(current.metadata ?? {}, bounded.metadata),
+                  changed_fields: diffMetadata(current.metadata ?? {}, bounded.metadata),
                   ...storedTemplateRef(current),
                 },
                 envelope
@@ -1391,7 +1390,7 @@ class ConversationClientImpl implements ConversationClient {
           Object.entries(storedMetadata).filter(([key]) => newTemplateFieldNames.has(key))
         );
         const metadata = { ...newTemplateMetadata, ...preservedValues };
-        const changedFields = diffMetadataKeys(storedMetadata, metadata);
+        const changedFields = diffMetadata(storedMetadata, metadata);
         const templateChanged =
           current.template_id !== templateId || current.template_version !== template.version;
         const activityEvents =

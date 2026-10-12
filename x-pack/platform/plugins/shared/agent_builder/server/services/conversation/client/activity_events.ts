@@ -83,17 +83,6 @@ export const metadataUpdatedEvents = (
 ): MetadataUpdatedEvent[] =>
   data.changed_fields.length === 0 ? [] : [metadataUpdatedEvent(data, envelope)];
 
-/** Keys added, changed or removed between two metadata records. Array order matters (checklists). */
-export const diffMetadataKeys = (
-  previous: Record<string, unknown>,
-  next: Record<string, unknown>
-): string[] => {
-  const keys = new Set([...Object.keys(previous), ...Object.keys(next)]);
-  return Array.from(keys).filter(
-    (key) => JSON.stringify(previous[key]) !== JSON.stringify(next[key])
-  );
-};
-
 const participantKey = ({ type, id }: ConversationParticipant) => `${type}:${id}`;
 
 const toParticipant = ({
