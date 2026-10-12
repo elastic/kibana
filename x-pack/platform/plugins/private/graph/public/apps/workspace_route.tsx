@@ -108,7 +108,7 @@ export const WorkspaceRoute = ({
           nodeLabeller() {
             // console.log(newNodes);
           },
-          changeHandler: notifyWorkspaceChanged,
+          changeHandler: () => setRenderCounter((current) => current + 1),
           graphExploreProxy: callNodeProxy,
           searchProxy: callSearchNodeProxy,
           exploreControls,

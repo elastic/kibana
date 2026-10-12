@@ -28,7 +28,6 @@ import {
 import { settingsSelector } from './advanced_settings';
 import { openSaveModal } from '../services/save_modal';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
-import { workspaceChanged } from './workspace';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 // mocking random id generator function
@@ -156,28 +155,27 @@ describe('persistence listeners', () => {
       expect(env.mockedDeps.changeUrl).toHaveBeenCalledWith(expect.stringContaining('123'));
     });
 
-    it('serializes the latest workspace snapshot when saving is confirmed', async () => {
+    it('serializes the latest runtime workspace when saving is confirmed', async () => {
       env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
-      env.store.dispatch(
-        workspaceChanged({
-          nodesById: {
-            latest: {
-              id: 'latest',
-              x: 1,
-              y: 2,
-              label: 'Latest',
-              color: 'black',
-              scaledSize: 1,
-              data: { field: 'field', term: 'latest' },
-            },
+      const runtimeWorkspace = env.mockedDeps.getWorkspace();
+      if (!runtimeWorkspace) {
+        throw new Error('Expected a runtime workspace');
+      }
+      Object.assign(runtimeWorkspace, {
+        nodes: [
+          {
+            id: 'latest',
+            x: 1,
+            y: 2,
+            label: 'Latest',
+            color: 'black',
+            scaledSize: 1,
+            data: { field: 'field', term: 'latest' },
           },
-          nodeIds: ['latest'],
-          edgesById: {},
-          edgeIds: [],
-          blocklistedNodesById: {},
-          blocklistedNodeIds: [],
-        })
-      );
+        ],
+        edges: [],
+        blocklistedNodes: [],
+      });
 
       await (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
 

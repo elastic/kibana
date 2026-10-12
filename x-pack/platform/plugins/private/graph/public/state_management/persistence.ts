@@ -141,7 +141,13 @@ export const registerPersistenceListeners = (
           deps,
           workspace,
           savedWorkspace: action.payload,
-          getState: listenerApi.getState,
+          getState: () => {
+            const currentWorkspace = deps.getWorkspace();
+            if (currentWorkspace) {
+              listenerApi.dispatch(workspaceChanged(createWorkspaceState(currentWorkspace)));
+            }
+            return listenerApi.getState();
+          },
           selectedDatasource,
         }),
         new Promise<undefined>((resolve) => {
