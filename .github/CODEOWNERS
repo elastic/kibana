@@ -1081,6 +1081,7 @@ x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_manag
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
 x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
 x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
@@ -1350,6 +1351,7 @@ x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @el
 x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
 x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+x-pack/platform/test/task_manager/plugins/service_accounts @elastic/response-ops
 x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-management
@@ -2567,6 +2569,43 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/serverless/api_integration/test_suites/task_manager_uiam @elastic/response-ops
 /x-pack/platform/test/serverless/api_integration/configs/security/config.task_manager_uiam.ts @elastic/response-ops
 
+# Rule params schemas are owned by the team that owns the rule type
+/x-pack/platform/packages/shared/response-ops/rule_params/ccr_read_exceptions                            @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/cluster_health                                 @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/cpu_usage                                      @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/disk_usage                                     @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/es_version_mismatch                            @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/kibana_version_mismatch                        @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/large_shard_size                               @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/license_expiration                             @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/logstash_version_mismatch                      @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/memory_usage                                   @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/missing_monitoring_data                        @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/nodes_changed                                  @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/thread_pool_search_rejections                  @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/thread_pool_write_rejections                   @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/common/stack_monitoring_common_schema.ts       @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/common/thread_pool_rejections_common_schema.ts @elastic/stack-monitoring
+/x-pack/platform/packages/shared/response-ops/rule_params/anomaly_detection                              @elastic/search-ml-ux
+/x-pack/platform/packages/shared/response-ops/rule_params/anomaly_detection_jobs_health                  @elastic/search-ml-ux
+/x-pack/platform/packages/shared/response-ops/rule_params/degraded_docs                                  @elastic/kibana-management
+/x-pack/platform/packages/shared/response-ops/rule_params/transform_health                               @elastic/kibana-management
+/x-pack/platform/packages/shared/response-ops/rule_params/geo_containment                                @elastic/kibana-dashboards
+/x-pack/platform/packages/shared/response-ops/rule_params/apm_anomaly                                    @elastic/obs-signals-traces-team
+/x-pack/platform/packages/shared/response-ops/rule_params/error_count                                    @elastic/obs-signals-traces-team
+/x-pack/platform/packages/shared/response-ops/rule_params/transaction_duration                           @elastic/obs-signals-traces-team
+/x-pack/platform/packages/shared/response-ops/rule_params/transaction_error_rate                         @elastic/obs-signals-traces-team
+/x-pack/platform/packages/shared/response-ops/rule_params/synthetics_monitor_status                      @elastic/obs-signals-logs-team
+/x-pack/platform/packages/shared/response-ops/rule_params/synthetics_tls                                 @elastic/obs-signals-logs-team
+/x-pack/platform/packages/shared/response-ops/rule_params/uptime_duration_anomaly                        @elastic/obs-signals-logs-team
+/x-pack/platform/packages/shared/response-ops/rule_params/uptime_monitor_status                          @elastic/obs-signals-logs-team
+/x-pack/platform/packages/shared/response-ops/rule_params/uptime_tls                                     @elastic/obs-signals-logs-team
+/x-pack/platform/packages/shared/response-ops/rule_params/custom_threshold                               @elastic/nightshift-sre-agent-team
+/x-pack/platform/packages/shared/response-ops/rule_params/log_threshold                                  @elastic/nightshift-sre-agent-team
+/x-pack/platform/packages/shared/response-ops/rule_params/metric_inventory_threshold                     @elastic/nightshift-sre-agent-team
+/x-pack/platform/packages/shared/response-ops/rule_params/metric_threshold                               @elastic/nightshift-sre-agent-team
+/x-pack/platform/packages/shared/response-ops/rule_params/slo_burn_rate                                  @elastic/nightshift-sre-agent-team
+
 # Connectors auth
 ## Client credentials with jwt
 src/platform/packages/shared/kbn-connector-specs/src/auth_types/oauth_client_credentials_private_key_jwt.ts @elastic/response-ops @elastic/workchat-eng
@@ -2957,6 +2996,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix @elastic/security-engineering-productivity
 /x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-validator/** @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug @elastic/security-engineering-productivity
+/x-pack/solutions/security/plugins/security_solution/.agents/references @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/* @elastic/security-engineering-productivity
 /x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/login.ts @elastic/security-engineering-productivity
@@ -2966,6 +3007,8 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 /x-pack/solutions/security/plugins/security_solution/test/scout @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - Security Investigations
+
+/x-pack/solutions/security/plugins/security_solution/scripts/data/ @elastic/security-investigations
 
 /x-pack/solutions/security/plugins/security_solution/public/app/links @elastic/security-investigations
 /x-pack/solutions/security/plugins/security_solution/public/common/components/navigation @elastic/security-investigations
@@ -3194,11 +3237,11 @@ x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule
 x-pack/solutions/security/plugins/security_solution/server/workflows/alert_analysis_workflow @elastic/security-investigations
 
 # AlertZero Worker settings contract
-/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer
-/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer
-/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer
-/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts @elastic/alertzero-common-layer
-/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.test.ts @elastic/alertzero-common-layer
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/fixtures @elastic/alertzero-common-layer @elastic/security-solution
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/test_helpers @elastic/alertzero-common-layer @elastic/security-solution
+/x-pack/solutions/security/plugins/alertzero/server/managed_workflows/workers/worker_settings_compat.test.ts @elastic/alertzero-common-layer @elastic/security-solution
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.ts @elastic/alertzero-common-layer @elastic/security-solution
+/src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/worker_settings_defaults.test.ts @elastic/alertzero-common-layer @elastic/security-solution
 
 
 ## Security Threat Hunting owner connectors
