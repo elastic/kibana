@@ -228,6 +228,16 @@ describe('buildEntityListSortPlan', () => {
     expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toEqual([row('empty', 0)]);
   });
 
+  it('gives up when the excluded ids are longer than ES|QL parses', async () => {
+    const longIds = Array.from({ length: 9_000 }, (_, i) => ({
+      'entity.id': `user:${'x'.repeat(110)}-${i}`,
+    }));
+    const { runQuery, limits } = recordingRunner(longIds);
+    expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toBeNull();
+    // Only the value ids query ran.
+    expect(limits).toHaveLength(1);
+  });
+
   it('gives up when ES|QL returns as many value ids as it can', async () => {
     const { runQuery, limits } = recordingRunner(ids(ESQL_MAX_RESULT_ROWS));
     expect(await plan.fetchEmptyRows(baseArgs, runQuery, null, 3)).toBeNull();

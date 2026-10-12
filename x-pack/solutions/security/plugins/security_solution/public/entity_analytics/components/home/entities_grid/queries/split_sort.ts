@@ -13,6 +13,7 @@ import {
   buildKeepClause,
   buildLookupJoinClause,
   buildSortSuffix,
+  ESQL_MAX_QUERY_LENGTH,
   ESQL_MAX_RESULT_ROWS,
   toList,
 } from './esql';
@@ -116,7 +117,8 @@ export const buildEmptyRowsQuery = (
 
 /**
  * Empty rows when the value rows come from a list of entities: the empty rows are the
- * entities in view that are not in the list. `null` when the list doesn't fit in one response.
+ * entities in view that are not in the list. `null` when the list doesn't fit in one response,
+ * or its ids don't fit in one query.
  */
 const fetchEmptyRowsExcludingValueIds = async (
   args: QueryArgs,
@@ -130,7 +132,10 @@ const fetchEmptyRowsExcludingValueIds = async (
   const valueIdsQuery = [...valueEntities, '| KEEP `entity.id`', `| LIMIT ${MAX_VALUE_ROWS + 1}`];
   const ids = getEntityIds(await runQuery(valueIdsQuery.join('\n')));
   if (ids.length > MAX_VALUE_ROWS) return null;
-  return runQuery(buildEmptyRowsQuery(args, { ...options, excludeIds: ids }, afterId, limit));
+  const emptyRowsQuery = buildEmptyRowsQuery(args, { ...options, excludeIds: ids }, afterId, limit);
+  // Long ids can make the excluded list longer than ES|QL parses.
+  if (emptyRowsQuery.length > ESQL_MAX_QUERY_LENGTH) return null;
+  return runQuery(emptyRowsQuery);
 };
 
 interface EntityListSortOptions {

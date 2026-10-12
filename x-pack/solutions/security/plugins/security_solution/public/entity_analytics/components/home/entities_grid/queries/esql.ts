@@ -52,6 +52,9 @@ export const buildAnomalyJobFilter = (jobIds: readonly string[]): string =>
  */
 export const ESQL_MAX_RESULT_ROWS = 10_000;
 
+/** Longest ES|QL query Elasticsearch parses, in characters (`EsqlParser.MAX_LENGTH`). */
+export const ESQL_MAX_QUERY_LENGTH = 1_000_000;
+
 export const toList = (items: readonly string[]) => items.map(escapeStringValue).join(', ');
 
 /** Raw identity fields that EUIDs are built from. */
