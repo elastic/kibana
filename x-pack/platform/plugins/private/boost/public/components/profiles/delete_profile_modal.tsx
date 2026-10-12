@@ -24,7 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { resolveRule, sortRules } from '../../../common/resolution';
+import { resolveRule } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
@@ -70,9 +70,12 @@ export const DeleteProfileModal = ({
 
   const deletedRules = useMemo<DeletedRule[]>(() => {
     const profilesByName = new Map(profiles.map((item) => [item.name, item]));
-    const attached = sortRules(rules).filter(
-      ({ is_builtin: isBuiltin, boost_profile: profileName }) => !isBuiltin && profileName === name
-    );
+    const attached = rules
+      .filter(
+        ({ is_builtin: isBuiltin, boost_profile: profileName }) =>
+          !isBuiltin && profileName === name
+      )
+      .sort((a, b) => a.name.localeCompare(b.name));
     const attachedNames = new Set(attached.map((rule) => rule.name));
     const remainingRules = rules.filter((rule) => !attachedNames.has(rule.name));
 
@@ -165,10 +168,11 @@ export const DeleteProfileModal = ({
           <EuiText size="s">
             <p>{summary}</p>
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           <EuiFormLabel id={listTitleId}>
             {i18n.translate('xpack.boost.deleteProfileModal.rulesListTitle', {
-              defaultMessage: 'Rules to be deleted',
+              defaultMessage: '{count, plural, one {# rule} other {# rules}} to be deleted',
+              values: { count: deletedRules.length },
             })}
           </EuiFormLabel>
           <EuiSpacer size="xs" />
@@ -182,7 +186,9 @@ export const DeleteProfileModal = ({
               tabIndex={0}
               css={css`
                 ${scrollStyles}
-                max-block-size: ${euiTheme.base * 20}px;
+                max-block-size: ${euiTheme.base * 15}px;
+                /* Clips rows and dividers to the panel's rounded corners. */
+                border-radius: inherit;
               `}
             >
               {deletedRules.map(({ name: ruleName, affected }, index) => (
@@ -196,11 +202,7 @@ export const DeleteProfileModal = ({
                       buttonContent={<EuiText size="s">{ruleName}</EuiText>}
                       buttonProps={{ paddingSize: 's' }}
                       extraAction={<AffectedCountBadge count={affected.length} type={type} />}
-                      css={{
-                        paddingBlock: euiTheme.size.s,
-                        paddingInlineStart: euiTheme.size.s,
-                        paddingInlineEnd: euiTheme.size.base,
-                      }}
+                      css={{ paddingInline: euiTheme.size.s }}
                       data-test-subj={`deletedRule-${ruleName}`}
                     >
                       {/* Indented by the accordion arrow's width and gap, so the content lines up
@@ -220,9 +222,9 @@ export const DeleteProfileModal = ({
                     <EuiText
                       size="s"
                       css={{
-                        paddingBlock: `calc(${euiTheme.size.s} * 2)`,
+                        paddingBlock: euiTheme.size.s,
                         paddingInlineStart: `calc(${euiTheme.size.s} + ${euiTheme.size.l} + ${euiTheme.size.xs})`,
-                        paddingInlineEnd: euiTheme.size.base,
+                        paddingInlineEnd: euiTheme.size.s,
                         lineHeight: euiTheme.size.l,
                       }}
                       data-test-subj={`deletedRule-${ruleName}`}
