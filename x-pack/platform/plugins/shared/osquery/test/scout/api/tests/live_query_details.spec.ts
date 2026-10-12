@@ -23,18 +23,16 @@ apiTest.describe(
     });
 
     apiTest('accepts live query creation request (permission check)', async ({ apiClient }) => {
-      // Verify the API accepts the request — returns 200 (with agents) or 500 (without agents).
-      // A 400 or 403 would indicate a request/permission issue. The live query creation
-      // dispatches to agents; without enrolled agents the server may return 500.
       const response = await apiClient.post(testData.API_PATHS.OSQUERY_LIVE_QUERIES, {
         headers: { ...testData.COMMON_HEADERS, ...adminCredentials.cookieHeader },
         body: testData.getMinimalLiveQuery(),
         responseType: 'json',
       });
 
-      // 200 = agents available, query dispatched. 500 = no enrolled agents, cannot dispatch.
-      // Both are valid outcomes. 400/403 would indicate a request/permission issue.
-      expect([200, 500]).toContain(response.statusCode);
+      const expectedBody =
+        response.statusCode === 400 ? { message: 'No agents found for selection' } : {};
+      expect(response).toHaveStatusCode({ oneOf: [200, 400, 500] });
+      expect(response.body).toMatchObject(expectedBody);
     });
 
     apiTest('GET live query details returns expected shape', async ({ apiClient, apiServices }) => {

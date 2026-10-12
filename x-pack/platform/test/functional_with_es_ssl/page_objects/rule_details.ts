@@ -114,7 +114,7 @@ export function RuleDetailsPageProvider({ getService }: FtrProviderContext) {
     async getNoOpAppTitle() {
       await retry.try(async () => {
         const title = await testSubjects.find('noop-title');
-        expect(title.isDisplayed()).to.eql(true);
+        expect(await title.isDisplayed()).to.eql(true);
       });
       return await testSubjects.getVisibleText('noop-title');
     },

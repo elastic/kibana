@@ -79,8 +79,6 @@ export class BrowserAuthService extends FtrService {
       // so cookie operations target the correct domain.
       this.log.debug('[browserAuth] navigating to /bootstrap-anonymous.js for cookie domain');
       await this.browser.get(hostPort + '/bootstrap-anonymous.js');
-      const alert = await this.browser.getAlert();
-      if (alert) await alert.accept();
     }
 
     this.log.debug('[browserAuth] deleting all cookies and clearing storage');

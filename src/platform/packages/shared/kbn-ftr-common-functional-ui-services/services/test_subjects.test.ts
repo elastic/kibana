@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext as CommonFtrProviderContext } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContext } from './ftr_provider_context';
 import { TestSubjects } from './test_subjects';
 
@@ -14,6 +16,7 @@ describe('TestSubjects existence checks', () => {
   const existsByCssSelector = jest.fn();
   const existsByDisplayedByCssSelector = jest.fn();
   const firstDisplayedIndexByCssSelector = jest.fn();
+  const findByCssSelector = jest.fn();
 
   const getTestSubjects = () => {
     const config = {
@@ -36,12 +39,17 @@ describe('TestSubjects existence checks', () => {
         existsByCssSelector,
         existsByDisplayedByCssSelector,
         firstDisplayedIndexByCssSelector,
+        byCssSelector: findByCssSelector,
       },
       log: { debug: jest.fn() },
-      retry: {},
     };
+    const retryContext: Pick<CommonFtrProviderContext, 'getService'> = {
+      getService: jest.fn().mockImplementation((name: keyof typeof services) => services[name]),
+    };
+    const retry = new RetryService(retryContext as CommonFtrProviderContext);
     const ctx = {
-      getService: (name: keyof typeof services) => services[name],
+      getService: (name: keyof typeof services | 'retry') =>
+        name === 'retry' ? retry : services[name],
     } as unknown as FtrProviderContext;
 
     return new TestSubjects(ctx);
@@ -51,6 +59,7 @@ describe('TestSubjects existence checks', () => {
     existsByCssSelector.mockReset().mockResolvedValue(true);
     existsByDisplayedByCssSelector.mockReset().mockResolvedValue(true);
     firstDisplayedIndexByCssSelector.mockReset().mockResolvedValue(-1);
+    findByCssSelector.mockReset();
   });
 
   it('performs an immediate displayed check with exists', async () => {
@@ -138,5 +147,57 @@ describe('TestSubjects existence checks', () => {
       ['[data-test-subj="legacy"]', '[data-test-subj="next"]'],
       50
     );
+  });
+
+  describe('waitForEnabled', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('retries while the element is disabled', async () => {
+      const isEnabled = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+      findByCssSelector.mockResolvedValue({
+        isDisplayed: jest.fn().mockResolvedValue(true),
+        isEnabled,
+      });
+      const result = expect(getTestSubjects().waitForEnabled('selector')).resolves.toBe(true);
+
+      await jest.advanceTimersByTimeAsync(100);
+
+      await result;
+      expect(isEnabled).toHaveBeenCalledTimes(2);
+    });
+
+    it('retries while the element is hidden', async () => {
+      const isDisplayed = jest.fn().mockResolvedValueOnce(false).mockResolvedValue(true);
+      findByCssSelector.mockResolvedValue({
+        isDisplayed,
+        isEnabled: jest.fn().mockResolvedValue(true),
+      });
+      const result = expect(getTestSubjects().waitForEnabled('selector')).resolves.toBe(true);
+
+      await jest.advanceTimersByTimeAsync(100);
+
+      await result;
+      expect(isDisplayed).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws when the element stays disabled until the timeout', async () => {
+      findByCssSelector.mockResolvedValue({
+        isDisplayed: jest.fn().mockResolvedValue(true),
+        isEnabled: jest.fn().mockResolvedValue(false),
+      });
+      const result = expect(getTestSubjects().waitForEnabled('selector', 250)).rejects.toThrow(
+        'expected testSubject(selector) to be displayed and enabled'
+      );
+
+      await jest.advanceTimersByTimeAsync(300);
+
+      await result;
+    });
   });
 });

@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.waitForRenderComplete();
         // Should not pass any filters
-        expect((await filterBar.getFiltersLabel()).length).to.equal(0);
+        expect((await filterBar.getFiltersLabel(0)).length).to.equal(0);
 
         // Should not pass any date range
         const time = await timePicker.getTimeConfig();

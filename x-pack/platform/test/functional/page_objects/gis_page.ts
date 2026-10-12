@@ -240,9 +240,11 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.existOrFail('addLayerButton');
   }
 
-  async onMapListingPage() {
+  async onMapListingPage(timeout = 5000) {
     this.log.debug(`onMapListingPage`);
-    return await this.testSubjects.exists('mapLandingPage');
+    return await this.testSubjects.waitForExists('mapLandingPage', {
+      timeout,
+    });
   }
 
   async onMapPage() {
@@ -271,7 +273,7 @@ export class GisPageObject extends FtrService {
 
   async gotoMapListingPage() {
     this.log.debug('gotoMapListingPage');
-    const onPage = await this.onMapListingPage();
+    const onPage = await this.onMapListingPage(0);
     if (!onPage) {
       await this.retry.try(async () => {
         await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/');
@@ -738,8 +740,5 @@ export class GisPageObject extends FtrService {
 
   async refreshAndClearUnsavedChangesWarning() {
     await this.browser.refresh();
-    // accept alert if it pops up
-    const alert = await this.browser.getAlert();
-    await alert?.accept();
   }
 }

@@ -30,14 +30,16 @@ describe('Retry for success', () => {
       onFailureBlock: async () => log.debug('handled failure'),
     });
 
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " [2mdebg[22m --- retryForSuccess unit test error: whoops, could not find anything",
-        " [2mdebg[22m handled failure",
-        " [2mdebg[22m --- retryForSuccess unit test failed again with the same message...",
-        " [2mdebg[22m handled failure",
-      ]
-    `);
+    expect(writer.messages).toEqual([
+      expect.stringContaining(
+        '--- retryForSuccess unit test error: whoops, could not find anything'
+      ),
+      expect.stringContaining('handled failure'),
+      expect.stringContaining(
+        '--- retryForSuccess unit test failed again with the same message...'
+      ),
+      expect.stringContaining('handled failure'),
+    ]);
   });
   it('should call delay with initialDelay if initialDelay is provided', async () => {
     const delaySpy = jest.spyOn(testJestHelpers, 'delay').mockResolvedValue(undefined);

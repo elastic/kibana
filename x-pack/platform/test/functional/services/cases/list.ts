@@ -61,6 +61,8 @@ export function CasesTableServiceProvider(
   // view the test leaves the list in.
   const CASE_ROWS_SELECTOR =
     '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
+  const CASE_LIST_LOADING_SELECTOR =
+    '[data-test-subj="cases-table-loading"],[data-test-subj="cases-list-loading"]';
 
   return {
     /**
@@ -147,9 +149,22 @@ export function CasesTableServiceProvider(
       do {
         await header.waitUntilLoadingHasFinished();
         await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
-        rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
+        rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"]', 100);
         if (rows.length > 0) {
+          const deletedRowIds = await Promise.all(
+            rows.map((row) => row.getAttribute('data-test-subj'))
+          );
           await this.bulkDeleteAllCases();
+          await retry.waitFor('bulk deleted cases to leave the table', async () => {
+            const remainingRows = await find.allByCssSelector(
+              '[data-test-subj*="cases-table-row-"]',
+              0
+            );
+            const remainingIds = await Promise.all(
+              remainingRows.map((row) => row.getAttribute('data-test-subj'))
+            );
+            return remainingIds.every((id) => !deletedRowIds.includes(id));
+          });
         }
       } while (rows.length > 0);
     },
@@ -201,7 +216,7 @@ export function CasesTableServiceProvider(
     },
 
     async waitForTableToFinishLoading() {
-      await testSubjects.missingOrFail('cases-table-loading', { timeout: 5000 });
+      await find.waitForDeletedByCssSelector(CASE_LIST_LOADING_SELECTOR, 5000);
     },
 
     async getCaseById(caseId: string) {
@@ -296,6 +311,9 @@ export function CasesTableServiceProvider(
 
     async refreshTable() {
       await testSubjects.click('superDatePickerApplyTimeButton');
+      // A fast retry can refresh again before the previous request has rendered its results.
+      await find.existsByCssSelector(CASE_LIST_LOADING_SELECTOR, 500);
+      await find.waitForDeletedByCssSelector(CASE_LIST_LOADING_SELECTOR, 10000);
     },
 
     async openRowActions(index: number) {
@@ -519,10 +537,7 @@ export function CasesTableServiceProvider(
     },
 
     async hasColumn(columnName: string) {
-      const column = await find.allByCssSelector(
-        `th.euiTableHeaderCell span[title="${columnName}"]`
-      );
-      return column.length !== 0;
+      return await find.existsByCssSelector(`th.euiTableHeaderCell span[title="${columnName}"]`);
     },
 
     async openColumnsPopover() {

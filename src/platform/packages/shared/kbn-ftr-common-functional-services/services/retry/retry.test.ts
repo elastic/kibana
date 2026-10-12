@@ -45,14 +45,12 @@ describe('RetryService', () => {
     await jest.advanceTimersByTimeAsync(200);
     await result;
 
-    expect(writer.messages).toMatchInlineSnapshot(`
-      Array [
-        " [2mdebg[22m --- retry.tryForTime error: whoops, could not find anything",
-        " [2mdebg[22m handled failure",
-        " [2mdebg[22m --- retry.tryForTime failed again with the same message...",
-        " [2mdebg[22m handled failure",
-      ]
-    `);
+    expect(writer.messages).toEqual([
+      expect.stringContaining('--- retry.tryForTime error: whoops, could not find anything'),
+      expect.stringContaining('handled failure'),
+      expect.stringContaining('--- retry.tryForTime failed again with the same message...'),
+      expect.stringContaining('handled failure'),
+    ]);
   });
 
   it('honors a timeout override with the 100 ms default delay', async () => {

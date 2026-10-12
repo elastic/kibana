@@ -160,6 +160,12 @@ export class ComboBoxService extends FtrService {
     await this.openOptionsList(comboBoxElement);
 
     await this.clickOption(options.clickWithMouse, trimmedValue);
+    if (await this.isSingleSelectionPlainText(comboBoxElement)) {
+      await this.testSubjects.missingOrFail('~comboBoxOptionsList', {
+        timeout: this.WAIT_FOR_EXISTS_TIME,
+      });
+      return;
+    }
     await this.closeOptionsList(comboBoxElement);
   }
 

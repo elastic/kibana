@@ -61,7 +61,7 @@ export class TestSubjects extends FtrService {
   }
 
   /**
-   * Waits up to `options.timeout` (default: `timeouts.waitForExists`, 2.5 s) for the element to
+   * Waits up to `options.timeout` (default: `timeouts.waitForExists`, 1.5 s) for the element to
    * appear and returns `true` as soon as it does, or `false` if the timeout elapses.
    *
    * Returns rather than throws, making it suitable for branching on optional UI that may still be
@@ -237,11 +237,16 @@ export class TestSubjects extends FtrService {
     await element.doubleClick();
   }
 
-  async descendantExists(selector: string, parentElement: WebElementWrapper): Promise<boolean> {
+  async descendantExists(
+    selector: string,
+    parentElement: WebElementWrapper,
+    timeout: number = this.WAIT_FOR_EXISTS_TIME
+  ): Promise<boolean> {
     this.log.debug(`TestSubjects.descendantExists(${selector})`);
     return await this.findService.descendantExistsByCssSelector(
       testSubjSelector(selector),
-      parentElement
+      parentElement,
+      timeout
     );
   }
 
@@ -431,7 +436,10 @@ export class TestSubjects extends FtrService {
   public async waitForEnabled(selector: string, timeout: number = this.TRY_TIME): Promise<boolean> {
     const success = await this.retry.tryForTime(timeout, async () => {
       const element = await this.find(selector);
-      return (await element.isDisplayed()) && (await element.isEnabled());
+      if (!(await element.isDisplayed()) || !(await element.isEnabled())) {
+        throw new Error(`expected testSubject(${selector}) to be displayed and enabled`);
+      }
+      return true;
     });
     return success;
   }

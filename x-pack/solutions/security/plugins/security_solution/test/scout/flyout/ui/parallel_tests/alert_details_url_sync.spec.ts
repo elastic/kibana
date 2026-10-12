@@ -15,22 +15,32 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let ruleName: string;
+    let indexName: string;
 
     spaceTest.setTimeout(5 * 60_000);
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace, esClient }) => {
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
+      indexName = `flyout-url-sync-${scoutSpace.id}`;
+      await esClient.index({
+        index: indexName,
+        id: 'flyout-url-sync',
+        document: { '@timestamp': new Date().toISOString() },
+        refresh: 'wait_for',
+      });
       await apiServices.detectionRule.createCustomQueryRule({
         ...CUSTOM_QUERY_RULE,
         name: ruleName,
+        index: [indexName],
       });
       await apiServices.detectionAlerts.waitForAlerts(ruleName, 1, 120_000);
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterEach(async ({ apiServices }) => {
+    spaceTest.afterEach(async ({ apiServices, esClient }) => {
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
+      await esClient.indices.delete({ index: indexName });
     });
 
     spaceTest('should test flyout url sync', async ({ pageObjects, page }) => {
