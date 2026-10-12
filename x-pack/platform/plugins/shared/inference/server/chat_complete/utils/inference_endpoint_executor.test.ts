@@ -6,6 +6,9 @@
  */
 
 import { PassThrough } from 'stream';
+import { errors } from '@elastic/elasticsearch';
+import { isInferenceProviderError } from '@kbn/inference-common';
+import { getRetryFilter } from '../../../common/utils/error_retry_filter';
 import {
   createInferenceEndpointExecutor,
   type InferenceEndpointExecutor,
@@ -42,7 +45,7 @@ describe('createInferenceEndpointExecutor', () => {
       },
       {
         asStream: true,
-        requestTimeout: 180_000,
+        requestTimeout: 120_000,
         headers: { 'X-Elastic-Product-Use-Case': 'inference', 'accept-encoding': 'identity' },
       }
     );
@@ -202,16 +205,67 @@ describe('createInferenceEndpointExecutor', () => {
     );
   });
 
-  it('uses the default requestTimeout when timeout is not provided', async () => {
+  it('bounds the header wait at 120s by default, independent of the 3m inference budget', async () => {
     const stream = new PassThrough();
     mockTransportRequest.mockResolvedValue(stream);
 
     await executor.invoke({ body: {} });
 
     expect(mockTransportRequest).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ requestTimeout: 180_000 })
+      expect.objectContaining({ querystring: { timeout: '3m' } }),
+      expect.objectContaining({ requestTimeout: 120_000 })
     );
+  });
+
+  it('prefers firstByteTimeoutMs over timeout for the header wait', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+
+    await executor.invoke({ body: {}, timeout: 300_000, firstByteTimeoutMs: 45_000 });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ querystring: { timeout: '5m' } }),
+      expect.objectContaining({ requestTimeout: 45_000 })
+    );
+  });
+
+  it('uses the executor-level firstByteTimeoutMs default', async () => {
+    const stream = new PassThrough();
+    mockTransportRequest.mockResolvedValue(stream);
+    const custom = createInferenceEndpointExecutor({
+      inferenceId,
+      esClient: { transport: { request: mockTransportRequest } } as any,
+      firstByteTimeoutMs: 30_000,
+    });
+
+    await custom.invoke({ body: {} });
+
+    expect(mockTransportRequest).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ requestTimeout: 30_000 })
+    );
+  });
+
+  it('maps a transport TimeoutError to a retryable 504 provider error', async () => {
+    mockTransportRequest.mockRejectedValue(new errors.TimeoutError('Request timed out'));
+
+    const error = await executor.invoke({ body: {} }).catch((e) => e);
+
+    expect(isInferenceProviderError(error)).toBe(true);
+    expect(error).toEqual(
+      expect.objectContaining({
+        message: 'Inference endpoint sent no response within 120000ms',
+        meta: expect.objectContaining({ status: 504 }),
+      })
+    );
+    expect(getRetryFilter('auto')(error)).toBe(true);
+  });
+
+  it('rethrows non-timeout transport errors unchanged', async () => {
+    const failure = new Error('boom');
+    mockTransportRequest.mockRejectedValue(failure);
+
+    await expect(executor.invoke({ body: {} })).rejects.toBe(failure);
   });
 
   it('returns the stream from the response', async () => {

@@ -7,7 +7,8 @@
 
 import { Readable } from 'node:stream';
 import { toArray, firstValueFrom } from 'rxjs';
-import { isInferenceRequestError } from '@kbn/inference-common';
+import { isInferenceProviderError, isInferenceRequestError } from '@kbn/inference-common';
+import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { eventSourceStreamIntoObservable } from './event_source_stream_into_observable';
 
 describe('eventSourceStreamIntoObservable', () => {
@@ -87,6 +88,8 @@ describe('eventSourceStreamIntoObservable', () => {
           meta: expect.objectContaining({ status: 408 }),
         })
       );
+      // the total-duration backstop must not be retried
+      expect(getRetryFilter('auto')(error as Error)).toBe(false);
     } finally {
       jest.useRealTimers();
     }
@@ -188,5 +191,73 @@ describe('eventSourceStreamIntoObservable', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  describe('idle timeout', () => {
+    beforeEach(() => jest.useFakeTimers());
+    afterEach(() => jest.useRealTimers());
+
+    it('destroys the stream and errors with a retryable 504 provider error when idle', async () => {
+      const stream = new Readable({ read: () => {} });
+
+      const error$ = new Promise<unknown>((resolve) => {
+        eventSourceStreamIntoObservable(stream, { idleTimeoutMs: 1_000 }).subscribe({
+          error: resolve,
+        });
+      });
+
+      jest.advanceTimersByTime(1_001);
+
+      const error = await error$;
+      expect(stream.destroyed).toBe(true);
+      expect(isInferenceProviderError(error)).toBe(true);
+      expect(error).toEqual(
+        expect.objectContaining({
+          message: 'Inference stream idle for 1000ms',
+          meta: expect.objectContaining({ status: 504 }),
+        })
+      );
+      expect(getRetryFilter('auto')(error as Error)).toBe(true);
+    });
+
+    it('resets the idle timer on every chunk', async () => {
+      const stream = new Readable({ read: () => {} });
+      const received: string[] = [];
+      let failure: unknown;
+
+      eventSourceStreamIntoObservable(stream, { idleTimeoutMs: 1_000 }).subscribe({
+        next: (value) => received.push(value),
+        error: (err) => (failure = err),
+      });
+
+      // 4 x 600ms = 2400ms in total, but never more than 600ms of silence
+      for (let i = 0; i < 4; i++) {
+        await jest.advanceTimersByTimeAsync(600);
+        stream.push(`data: ${i}\n\n`);
+      }
+      await jest.advanceTimersByTimeAsync(1);
+
+      expect(failure).toBeUndefined();
+      expect(received).toEqual(['0', '1', '2', '3']);
+      expect(stream.destroyed).toBe(false);
+
+      await jest.advanceTimersByTimeAsync(1_000);
+      expect(isInferenceProviderError(failure)).toBe(true);
+    });
+
+    it('fires the idle error before the total-duration cap', async () => {
+      const stream = new Readable({ read: () => {} });
+
+      const error$ = new Promise<unknown>((resolve) => {
+        eventSourceStreamIntoObservable(stream, {
+          idleTimeoutMs: 1_000,
+          maxDurationMs: 60_000,
+        }).subscribe({ error: resolve });
+      });
+
+      jest.advanceTimersByTime(1_001);
+
+      expect(isInferenceProviderError(await error$)).toBe(true);
+    });
   });
 });

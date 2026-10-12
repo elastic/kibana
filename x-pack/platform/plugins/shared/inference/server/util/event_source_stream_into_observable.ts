@@ -8,11 +8,24 @@
 import type { Readable } from 'node:stream';
 import { createParser } from 'eventsource-parser';
 import { Observable } from 'rxjs';
-import { createInferenceRequestError, MAX_STREAM_DURATION_MS } from '@kbn/inference-common';
+import {
+  createInferenceProviderError,
+  createInferenceRequestError,
+  DEFAULT_STREAM_IDLE_TIMEOUT_MS,
+  MAX_STREAM_DURATION_MS,
+} from '@kbn/inference-common';
 
 export function eventSourceStreamIntoObservable(
   readable: Readable,
-  { maxDurationMs = MAX_STREAM_DURATION_MS }: { maxDurationMs?: number } = {}
+  {
+    maxDurationMs = MAX_STREAM_DURATION_MS,
+    idleTimeoutMs = DEFAULT_STREAM_IDLE_TIMEOUT_MS,
+  }: {
+    /** Total backstop for the whole stream. Expiry is NOT retryable (408). */
+    maxDurationMs?: number;
+    /** Max silence between chunks, counted from subscription. Expiry is retryable (504). */
+    idleTimeoutMs?: number;
+  } = {}
 ) {
   return new Observable<string>((subscriber) => {
     const parser = createParser({
@@ -37,6 +50,7 @@ export function eventSourceStreamIntoObservable(
 
     async function processStream() {
       for await (const chunk of readable) {
+        armIdleTimer();
         if (Date.now() > deadline) {
           throw createTimeoutError();
         }
@@ -45,6 +59,20 @@ export function eventSourceStreamIntoObservable(
         await new Promise<void>((resolve) => setImmediate(resolve));
       }
     }
+
+    // a stalled endpoint is worth retrying, unlike the total-duration cap above
+    let idleTimer: ReturnType<typeof setTimeout>;
+    const armIdleTimer = () => {
+      clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        readable.destroy(
+          createInferenceProviderError(`Inference stream idle for ${idleTimeoutMs}ms`, {
+            status: 504,
+          })
+        );
+      }, idleTimeoutMs);
+    };
+    armIdleTimer();
 
     processStream().then(
       () => {
@@ -62,6 +90,7 @@ export function eventSourceStreamIntoObservable(
     return () => {
       tornDown = true;
       clearTimeout(maxDurationTimer);
+      clearTimeout(idleTimer);
       readable.destroy();
     };
   });

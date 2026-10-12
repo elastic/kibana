@@ -54,6 +54,8 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
   timeout?: number;
+  firstByteTimeoutMs?: number;
+  idleTimeoutMs?: number;
   tools?: ToolOptions['tools'];
   toolChoice?: ToolOptions['toolChoice'];
   cacheControl?: ChatCompleteCacheControl;
@@ -79,6 +81,8 @@ export const inferenceEndpointAdapter = {
       logger,
       abortSignal,
       timeout,
+      firstByteTimeoutMs,
+      idleTimeoutMs,
       metadata,
       cacheControl,
       sessionId,
@@ -112,9 +116,14 @@ export const inferenceEndpointAdapter = {
         signal: abortSignal,
         metadata,
         timeout,
+        firstByteTimeoutMs,
       })
     ).pipe(
-      switchMap((stream) => eventSourceStreamIntoObservable(stream)),
+      switchMap((stream) =>
+        eventSourceStreamIntoObservable(stream, {
+          ...(idleTimeoutMs !== undefined ? { idleTimeoutMs } : {}),
+        })
+      ),
       // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.
       processOpenAIStream({ allowNullObjectWithChoices: true }),
       emitTokenCountEstimateIfMissing({ request, logger }),
