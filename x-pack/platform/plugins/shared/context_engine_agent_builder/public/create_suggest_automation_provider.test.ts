@@ -182,7 +182,7 @@ describe('createSuggestAutomationProvider', () => {
         autoSendInitialMessage: true,
         agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
         initialMessage: 'Suggest an automation for this AI index.',
-        sessionTag: buildSuggestAutomationSessionTag('default', 'my-ai-index'),
+        sessionTag: buildSuggestAutomationSessionTag('default', 'my-ai-index', aiIndex.date_created),
         attachments: [
           expect.objectContaining({
             id: 'my-ai-index',
@@ -220,10 +220,10 @@ describe('createSuggestAutomationProvider', () => {
     provider.suggestAutomation({ aiIndex: otherAiIndex, spaceId: 'default', onSaved: jest.fn() });
 
     expect(openChat.mock.calls[0][0].sessionTag).toBe(
-      buildSuggestAutomationSessionTag('default', 'my-ai-index')
+      buildSuggestAutomationSessionTag('default', 'my-ai-index', aiIndex.date_created)
     );
     expect(openChat.mock.calls[1][0].sessionTag).toBe(
-      buildSuggestAutomationSessionTag('default', 'other-ai-index')
+      buildSuggestAutomationSessionTag('default', 'other-ai-index', otherAiIndex.date_created)
     );
   });
 
@@ -234,10 +234,29 @@ describe('createSuggestAutomationProvider', () => {
     provider.suggestAutomation({ aiIndex, spaceId: 'sales', onSaved: jest.fn() });
 
     expect(openChat.mock.calls[0][0].sessionTag).toBe(
-      buildSuggestAutomationSessionTag('marketing', 'my-ai-index')
+      buildSuggestAutomationSessionTag('marketing', 'my-ai-index', aiIndex.date_created)
     );
     expect(openChat.mock.calls[1][0].sessionTag).toBe(
-      buildSuggestAutomationSessionTag('sales', 'my-ai-index')
+      buildSuggestAutomationSessionTag('sales', 'my-ai-index', aiIndex.date_created)
+    );
+  });
+
+  it('uses a distinct sessionTag when the same AI index id is recreated, so the old conversation is not reused', () => {
+    const { provider, openChat } = createProvider();
+    const recreatedAiIndex: GetAiIndexResponse = {
+      ...aiIndex,
+      date_created: '2026-06-01T00:00:00.000Z',
+    };
+
+    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+    provider.suggestAutomation({ aiIndex: recreatedAiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(openChat.mock.calls[0][0].sessionTag).not.toBe(openChat.mock.calls[1][0].sessionTag);
+    expect(openChat.mock.calls[0][0].sessionTag).toBe(
+      buildSuggestAutomationSessionTag('default', 'my-ai-index', aiIndex.date_created)
+    );
+    expect(openChat.mock.calls[1][0].sessionTag).toBe(
+      buildSuggestAutomationSessionTag('default', 'my-ai-index', recreatedAiIndex.date_created)
     );
   });
 
