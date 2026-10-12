@@ -11,6 +11,7 @@ import { esql, BasicPrettyPrinter } from '@elastic/esql';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { HistogramBounds, ParsedMetricItem } from '../../../types';
 import { firstNonNullable } from '../first_null_nullable';
+import { isLegacyHistogram } from '../legacy_histogram';
 import { createTimeBucketAggregation } from './create_aggregation';
 import { fieldNameToColumn, resolveSource } from './esql_helpers';
 
@@ -24,29 +25,21 @@ export const HISTOGRAM_BUCKET_COUNT = 10;
 export const HISTOGRAM_COUNT_COLUMN = 'count';
 export const HISTOGRAM_BUCKET_COLUMN = 'bucket';
 
-/** Field expression for a supported single-histogram metric, or `undefined` otherwise. */
 export const getHistogramFieldExpression = (metricItem: ParsedMetricItem): string | undefined => {
-  if (firstNonNullable(metricItem.metricTypes) !== 'histogram') {
-    return undefined;
-  }
-
-  // The same field can be mapped as different histogram types across streams. One query cannot mix
-  // them, so only continue when every stream uses the same type.
-  const uniqueFieldTypes = new Set(metricItem.fieldTypes.filter(Boolean));
-  if (uniqueFieldTypes.size !== 1) {
-    return undefined;
-  }
-
-  const [fieldType] = uniqueFieldTypes;
-  if (!HISTOGRAM_FIELD_TYPES.has(fieldType)) {
-    return undefined;
-  }
-
+  const fieldType = firstNonNullable(metricItem.fieldTypes);
+  const instrument = firstNonNullable(metricItem.metricTypes);
   const column = BasicPrettyPrinter.print(fieldNameToColumn(metricItem.metricName));
 
-  // `TS` aggregations only accept `exponential_histogram` and `tdigest`, so a legacy `histogram`
-  // field has to be cast to tdigest first. The other two types are already accepted as they are.
-  return fieldType === ES_FIELD_TYPES.HISTOGRAM ? `TO_TDIGEST(${column})` : column;
+  // `TS` aggregations do not accept the legacy `histogram` type, so cast it to tdigest first.
+  if (isLegacyHistogram(fieldType, instrument)) {
+    return `TO_TDIGEST(${column})`;
+  }
+
+  if (instrument === 'histogram' && HISTOGRAM_FIELD_TYPES.has(fieldType)) {
+    return column;
+  }
+
+  return undefined;
 };
 
 /** Builds the distribution-over-time ES|QL query for a histogram chart, or `undefined` for non-histogram metrics. */
