@@ -245,6 +245,9 @@ export const useRuleDetailsMenu = ({
                 iconType: 'trash' as const,
                 overflow: true as const,
                 isDestructive: true,
+                // Items default to order 0, so this keeps "Delete rule" last, after the items that
+                // SecurityAppHeader appends (ML job settings, Add integrations).
+                order: 1,
                 disableButton: !isExistingRule || !canEditRules,
                 testId: 'rules-details-delete-rule',
                 run: async () => {
