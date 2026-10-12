@@ -57,6 +57,18 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
       });
     });
 
+    // The analysis reads the Investigation as a required source, and the fake read
+    // fails for an unknown conversation, so a broken review-to-analysis handoff
+    // would degrade the verdict instead of reaching `false_positive`.
+    it('hands the analysis the Investigation the review opened', () => {
+      expect(
+        fixture.backend.metadataReads.filter((id) => id === FAKE_INVESTIGATION_ID)
+      ).toHaveLength(2);
+      expect(fixture.backend.metadataReads.filter((id) => id !== FAKE_INVESTIGATION_ID)).toEqual(
+        []
+      );
+    });
+
     it('closes the Investigation', () => {
       const [investigation] = fixture.backend.conversations.values();
       expect(investigation.metadata.status).toBe('closed');

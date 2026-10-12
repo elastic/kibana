@@ -112,15 +112,16 @@ describe('payloadConformance', () => {
     executionStatus: 'completed',
   };
 
-  // REAL WORKFLOW SHAPE: label as plain string on `verdict` (summary lives on
-  // the workflow output object; when graded from the emit_result step, the
-  // string label alone satisfies the label check — summary conformance applies
-  // to the object form).
-  it('scores 1 on a string label from the real workflow shape', async () => {
+  // A bare label string is `runAttackDiscoveryWorkflow`'s fallback when the workflow
+  // emitted no payload (or failed output validation). It carries no summary, so it
+  // must not earn a conformance pass.
+  it('scores 0 on a bare string label, which has no emitted summary', async () => {
     const result = await payloadConformance.evaluate(
       params({ verdict: 'true_positive', executionStatus: 'completed' }, {})
     );
-    expect(result.score).toBe(1);
+    expect(result.score).toBe(0);
+    expect(meta(result).labelValid).toBe(true);
+    expect(meta(result).summaryValid).toBe(false);
   });
 
   // REAL EMIT_RESULT SHAPE (verified live, GET /api/workflows/executions/{id}):
@@ -172,6 +173,19 @@ describe('payloadConformance', () => {
     const result = await payloadConformance.evaluate(params(bad, {}));
     expect(result.score).toBe(0);
     expect(meta(result).summaryLength).toBe(9000);
+  });
+
+  // The workflow's output schema and the verdict attachment cap the summary at
+  // 8,000 characters; the default bound must sit exactly there.
+  it.each([
+    [8000, 1],
+    [8001, 0],
+  ])('with the default bound, scores a %i-char summary %i', async (length, score) => {
+    const output = {
+      ...good,
+      verdict: { ...good.verdict, summary_markdown: 'x'.repeat(length) },
+    };
+    expect((await payloadConformance.evaluate(params(output, {}))).score).toBe(score);
   });
 
   it('honors a custom maxSummaryLength expectation', async () => {

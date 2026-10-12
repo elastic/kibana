@@ -116,7 +116,7 @@ describe('buildAttackDiscoveryFromPayload', () => {
       'Host {{ host.name 153085 }} User {{ user.name 10479 }}'
     );
     expect(doc.mitreAttackTactics).toEqual(['CredentialAccess', 'InitialAccess']);
-    expect(doc.alertIds).toEqual(['case-guide-sanity-40-alert-1']);
+    expect(doc.alertIds).toEqual([expect.stringMatching(/^alert-[0-9a-f]{16}$/)]);
     expect(doc.timestamp).toBe('2024-06-12T13:22:38.000Z');
   });
 
@@ -187,6 +187,60 @@ describe('buildAttackDiscoveryFromPayload', () => {
     expect(doc.title).toContain('snapshots/delete');
     expect(doc.detailsMarkdown).toContain('svc-backup');
     expect(doc.timestamp).toBe('2026-09-21T02:00:00.000Z');
+  });
+
+  // The workflow prints these ids and the details into the model prompt, so a
+  // corpus case id in either would hand the model the expected class.
+  it.each([
+    ['guide-sanity-40', GUIDE_PAYLOAD],
+    [
+      'cloud-fp-d4e5f6a7-0',
+      { '@timestamp': '2026-09-21T02:00:00.000Z', 'labels.benign': true, event: { action: 'x' } },
+    ],
+    [
+      'botsv3-benign-day-3',
+      { window_start_utc: '2018-08-20T00:00:00Z', capture_day: '2018-08-20' },
+    ],
+  ])('keeps the case id %s out of everything the prompt can see', (caseId, payload) => {
+    const doc = buildAttackDiscoveryFromPayload(caseId, payload as Record<string, unknown>);
+    expect(JSON.stringify(doc)).not.toContain(caseId);
+  });
+
+  it('gives each case a distinct, stable alert id', () => {
+    const a = buildAttackDiscoveryFromPayload('c-a', GUIDE_PAYLOAD).alertIds;
+    expect(buildAttackDiscoveryFromPayload('c-a', GUIDE_PAYLOAD).alertIds).toEqual(a);
+    expect(buildAttackDiscoveryFromPayload('c-b', GUIDE_PAYLOAD).alertIds).not.toEqual(a);
+  });
+
+  // `cloud-fp-d4e5f6a7-0` (false_positive) and `-inc3` (inconclusive) differ ONLY in
+  // `azure.activitylogs.properties.status_code`; the document must carry it.
+  it('renders the fields that distinguish labeled cloud variants', () => {
+    const base = {
+      '@timestamp': '2026-09-21T02:00:00.000Z',
+      'labels.benign': true,
+      event: { action: 'MICROSOFT.COMPUTE/SNAPSHOTS/DELETE', outcome: 'Success' },
+      azure: { activitylogs: { properties: { status_code: 'Accepted' } } },
+    };
+    const failed = {
+      ...base,
+      azure: { activitylogs: { properties: { status_code: 'Failed' } } },
+    };
+    const accepted = buildAttackDiscoveryFromPayload('v1', base);
+    const rejected = buildAttackDiscoveryFromPayload('v2', failed);
+
+    expect(accepted.detailsMarkdown).toContain(
+      'azure.activitylogs.properties.status_code: Accepted'
+    );
+    expect(rejected.detailsMarkdown).toContain('azure.activitylogs.properties.status_code: Failed');
+    expect(accepted.detailsMarkdown).not.toEqual(rejected.detailsMarkdown);
+  });
+
+  it('never renders the labels.benign gold cue', () => {
+    const doc = buildAttackDiscoveryFromPayload('v3', {
+      '@timestamp': '2026-09-21T02:00:00.000Z',
+      'labels.benign': true,
+    });
+    expect(doc.detailsMarkdown).not.toContain('benign');
   });
 
   it('dispatches benign-window payloads to the window renderer (no events)', () => {

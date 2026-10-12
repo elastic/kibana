@@ -46,6 +46,29 @@ describe('corpus_loader — real vendored corpora', () => {
     expect(loadAllCorpora().perturbations.some((c) => c.corpus === 'tp-chains')).toBe(false);
   });
 
+  // The bridge omits `mutation_spec`, so a twin whose events still equal its base
+  // chain is the same observable attack carrying a contradictory gold label. The
+  // corpus rule: a mutation that changes nothing is discarded, never relabelled.
+  it('keeps no adversarial twin whose events equal its base tp-chain verbatim', () => {
+    const baseByChain = new Map(
+      loadCorpus('tp-chains').map((c) => [c.case_id.replace(/^tp-chains-/, ''), c])
+    );
+    const unmutated = loadCorpus('adversarial-twins')
+      .filter((twin) => {
+        const chain = [...baseByChain.keys()].find((name) =>
+          twin.case_id.startsWith(`mut-${name}-`)
+        );
+        expect(chain).toBeDefined();
+        return (
+          JSON.stringify((twin.payload as { events?: unknown }).events) ===
+          JSON.stringify((baseByChain.get(chain as string)?.payload as { events?: unknown }).events)
+        );
+      })
+      .map((twin) => twin.case_id);
+
+    expect(unmutated).toEqual([]);
+  });
+
   it('enforces the documented label counts per corpus', () => {
     expect(loadCorpus('guide-sanity').filter((c) => c.label === 'true_positive')).toHaveLength(300);
     expect(loadCorpus('guide-sanity').filter((c) => c.label === 'false_positive')).toHaveLength(
@@ -57,7 +80,7 @@ describe('corpus_loader — real vendored corpora', () => {
     expect(loadCorpus('tp-chains').every((c) => c.label === 'true_positive')).toBe(true);
     expect(
       loadCorpus('adversarial-twins').filter((c) => c.label === 'false_positive')
-    ).toHaveLength(15);
+    ).toHaveLength(14);
     expect(loadCorpus('adversarial-twins').filter((c) => c.label === 'inconclusive')).toHaveLength(
       6
     );

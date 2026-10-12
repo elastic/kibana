@@ -8,8 +8,14 @@
 import type { Evaluator } from '@kbn/evals';
 import { LABELS, type Label } from './constants';
 
+/** The `summary_markdown` bound the workflow's output schema and verdict attachment enforce. */
+const DEFAULT_MAX_SUMMARY_LENGTH = 8000;
+
 export interface PayloadConformanceExpectation {
-  /** Maximum allowed length of `summary_markdown` (default 8k chars). */
+  /**
+   * Maximum allowed length of `summary_markdown`. Defaults to the workflow's own
+   * 8,000-character output bound (`attack_discovery_fp_tp_analysis.yaml`).
+   */
   maxSummaryLength?: number;
 }
 
@@ -88,18 +94,17 @@ export const payloadConformance: Evaluator = {
   evaluate: async ({ output, expected }) => {
     const verdict = asOutput(output).verdict;
     const maxSummary =
-      (expected as PayloadConformanceExpectation | undefined)?.maxSummaryLength ?? 8192;
+      (expected as PayloadConformanceExpectation | undefined)?.maxSummaryLength ??
+      DEFAULT_MAX_SUMMARY_LENGTH;
 
     const label = verdictLabel(verdict);
     const summary = verdictSummary(verdict);
     const labelValid = label != null && (LABELS as readonly string[]).includes(label);
-    // String-form verdicts (the real workflow shape) carry the label only —
-    // their summary lives on the workflow output, not the graded verdict — so
-    // the summary bound applies only to the object form.
+    // A bare label string is what `runAttackDiscoveryWorkflow` falls back to when
+    // no `emit_result` payload exists, so it carries no summary and cannot conform:
+    // only the emitted label-and-summary object does.
     const summaryValid =
-      typeof verdict === 'string'
-        ? true
-        : typeof summary === 'string' && summary.trim().length > 0 && summary.length <= maxSummary;
+      typeof summary === 'string' && summary.trim().length > 0 && summary.length <= maxSummary;
     const valid = labelValid && summaryValid;
 
     return {

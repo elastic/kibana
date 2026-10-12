@@ -1,7 +1,7 @@
 # @kbn/evals-suite-attack-discovery-fp-tp-real-workflow
 
 FP/TP verdict eval suite for the attack-discovery review workflow, built on the
-`@kbn/evals` harness. Ships 7 vendored, validated JSONL corpora (1,017 cases) plus
+`@kbn/evals` harness. Ships 7 vendored, validated JSONL corpora (1,016 cases) plus
 the corpus loader, workflow task module, and evaluators that grade the review
 step's structured verdict.
 
@@ -23,11 +23,11 @@ validated at load time (`src/corpus_loader.ts`) with the same semantics as
 | botsv3-benign-day | 96 | 0 / 96 / 0 | `replay` (BOTSv3 benign day, no attack) | FP regression set |
 | botsv3-fp-alerts | 54 | 0 / 54 / 0 | `replay` (BOTSv3 alerts, honest known-FP slice; labels not human-adjudicated) | **PROVISIONAL** — pending review |
 | tp-chains | 3 | 3 / 0 / 0 | `replay` (multi-stage BOTSv3 attack chains) | Small TP smoke set |
-| adversarial-twins | 21 | 0 / 15 / 6 | `adversarial-mutation` (synthetic twins; every case carries `mutation_spec` naming the broken invariant) | Robustness: label must flip with the invariant |
+| adversarial-twins | 20 | 0 / 14 / 6 | `adversarial-mutation` (synthetic twins; every case carries `mutation_spec` naming the broken invariant) | Robustness: label must flip with the invariant |
 | perturbations | 15 | 12 / 0 / 3 | `adversarial-mutation` (synthetic) | Robustness |
 | cloud-fp-synthetic | 78 | 0 / 73 / 5 | `synthetic` (hand-built ECS fixtures from cloud-rule `false_positives` notes; per-clause verified) | **PROVISIONAL** — synthetic fixtures, detection-logic sanity and FP-condition modeling only |
 
-Total: **1,017 cases.** Raw source telemetry (837MB BOTSv3 capture, GUIDE CSV)
+Total: **1,016 cases.** Raw source telemetry (837MB BOTSv3 capture, GUIDE CSV)
 is intentionally **not** vendored — see the external
 `alertzero-datasets` repository for raw data, build scripts, and
 `ACCEPTANCE.md` (corpus acceptance criteria and validation evidence).

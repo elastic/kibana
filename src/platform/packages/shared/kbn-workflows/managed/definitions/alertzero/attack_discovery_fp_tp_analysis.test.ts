@@ -368,13 +368,21 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(loadAttack?.type).toBe('elasticsearch.search');
     });
 
-    it('reads it from the space-scoped discovery index the data_generator route writes', () => {
-      // The data_generator route indexes each discovery behind the
-      // `.alerts-security.attack.discovery.alerts-<space>` alias; the `.adhoc…`
-      // alias is a different, empty backfill index.
-      expect(loadAttack?.with?.index).toBe(
-        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}'
-      );
+    // The data_generator route indexes each discovery behind the
+    // `.alerts-security.attack.discovery.alerts-<space>` alias, while the AD Worker
+    // (`attack_discovery_batched_generation`) persists behind `.adhoc.…`. The
+    // runner hands this workflow ids from either, so both must be searched.
+    it('reads it from both the data_generator and the AD Worker discovery indices', () => {
+      expect(String(loadAttack?.with?.index).split(',')).toEqual([
+        '.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
+        '.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}',
+      ]);
+    });
+
+    // One of the two aliases is absent in any given space; without this the search
+    // 404s instead of returning the discovery from the other.
+    it('tolerates one of the two discovery indices being absent', () => {
+      expect(loadAttack?.with?.ignore_unavailable).toBe(true);
     });
 
     // The persisted document is indexed UNDER `kibana.alert.uuid`, so `_id` is the
@@ -387,6 +395,24 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
 
     it('loads the Investigation rather than trusting that it exists', () => {
       expect(stepIn('load_investigation')?.type).toBe('ai.conversation.metadata.read');
+    });
+
+    // `ai.conversation.metadata.read` wraps the conversation fields in `metadata`
+    // (get_conversation_metadata.ts), so the status sits one level below `output`.
+    describe('the Investigation status handed to the agent', () => {
+      const renderStatus = (output: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().parseAndRender(
+          String(stepIn('prepare_evidence')?.with?.investigation_status),
+          { steps: { load_investigation: { output } } }
+        );
+
+      it('reads the status out of the step output `metadata`', async () => {
+        await expect(renderStatus({ metadata: { status: 'closed' } })).resolves.toBe('closed');
+      });
+
+      it('falls back to unknown when the Investigation has no status', async () => {
+        await expect(renderStatus({ metadata: {} })).resolves.toBe('unknown');
+      });
     });
 
     // A metadata READ plus, since the real analysis, one `ai.agent` call — but on
@@ -640,6 +666,29 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           },
         })
       ).resolves.toBe('The correlation holds.');
+    });
+
+    // `emit_result` reads the rationale from `resolve_analysis`, so a rationale the
+    // agent supplied has to be copied across or it never reaches the attachment.
+    describe('the optional rationale', () => {
+      const renderRationale = (structuredOutput: Record<string, unknown>) =>
+        createWorkflowLiquidEngine().evalValueSync(
+          String(resolve?.with?.rationale_markdown)
+            .replace(/^\$\{\{/, '')
+            .replace(/\}\}$/, '')
+            .trim(),
+          { steps: { analyze: { output: { structured_output: structuredOutput } } } }
+        );
+
+      it('forwards the rationale the agent supplied', () => {
+        expect(renderRationale({ verdict: 'true_positive', rationale_markdown: 'Because.' })).toBe(
+          'Because.'
+        );
+      });
+
+      it('leaves an absent rationale absent rather than empty', () => {
+        expect(renderRationale({ verdict: 'true_positive' })).toBeUndefined();
+      });
     });
 
     it('returns a classification the analysis is allowed to return', () => {

@@ -130,10 +130,13 @@ steps:
   - name: load_attack_discovery
     type: elasticsearch.search
     with:
-      # The AD data_generator route (create_attack_discovery_alerts_route) persists
-      # under the `.alerts-security.attack.discovery.alerts-<space>` alias — NOT
-      # `.adhoc.…` (empty). Verified live: route response `index` field + counts.
-      index: .alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
+      # Both aliases: the AD data_generator route (create_attack_discovery_alerts_route)
+      # persists under `.alerts-security.attack.discovery.alerts-<space>`, while the
+      # AD Worker (attack_discovery_batched_generation.yaml) persists under
+      # `.adhoc.alerts-security.attack.discovery.alerts-<space>`. Either may be absent
+      # in a space, hence `ignore_unavailable` (same pair as forensics_run_endpoint_analysis).
+      index: ".alerts-security.attack.discovery.alerts-{{ workflow.spaceId }},.adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}"
+      ignore_unavailable: true
       size: 1
       query:
         ids:
@@ -178,7 +181,7 @@ steps:
       attack_summary: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.summary_markdown'] | default: steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.details_markdown'] | default: '' | truncate: 8000, '' }}"
       entity_summary_markdown: "{{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.entity_summary_markdown'] | default: '' | truncate: 8000, '' }}"
       alert_ids: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | default: consts.no_items }}"
-      investigation_status: "{{ steps.load_investigation.output.status | default: 'unknown' }}"
+      investigation_status: "{{ steps.load_investigation.output.metadata.status | default: 'unknown' }}"
 
   # One tool-less agent call classifies the correlation. `connector-id-by-feature`
   # routes to the AlertZero agentic connector; keep in sync with
@@ -260,6 +263,9 @@ steps:
     with:
       verdict: "{{ steps.analyze.output.structured_output.verdict | default: consts.inconclusive }}"
       summary_markdown: "{{ steps.analyze.output.structured_output.summary_markdown | default: 'FP/TP analysis could not reach a classification for this attack: the agent call did not return a usable verdict. Returned inconclusive, which asserts nothing about the attack.' }}"
+      # `${{ }}`, not `{{ }}`: the rationale is optional, and `emit_result` must see
+      # it absent rather than as an empty string.
+      rationale_markdown: "${{ steps.analyze.output.structured_output.rationale_markdown }}"
 
   # The contract boundary: it checks what the analysis produced, so the agent step
   # is held to the same payload the review consumes.

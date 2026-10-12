@@ -49,7 +49,7 @@ export const CORPUS_CASE_COUNTS = {
   'botsv3-benign-day': 96,
   'botsv3-fp-alerts': 54,
   'tp-chains': 3,
-  'adversarial-twins': 21,
+  'adversarial-twins': 20,
   perturbations: 15,
   'cloud-fp-synthetic': 78,
 } as const;

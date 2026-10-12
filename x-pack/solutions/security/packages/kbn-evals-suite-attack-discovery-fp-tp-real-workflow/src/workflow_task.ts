@@ -49,6 +49,7 @@
  * and is never skipped.
  */
 
+import { createHash } from 'crypto';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import {
@@ -253,8 +254,15 @@ interface AdDocumentFields {
   timestamp?: string;
 }
 
-/** Common alertId / timestamp helpers shared by the renderers. */
-const alertIdsFor = (caseId: string): string[] => [`case-${caseId}-alert-1`];
+/**
+ * Synthetic alert ids are opaque. The workflow puts them verbatim in the model
+ * prompt, and corpus case ids (`tp-chains-…`, `cloud-fp-…`, `botsv3-…`) name the
+ * expected class or dataset, so embedding one would let the model score on the
+ * test name instead of the evidence. A digest keeps the id stable per case.
+ */
+const alertIdsFor = (caseId: string): string[] => [
+  `alert-${createHash('sha256').update(caseId).digest('hex').slice(0, 16)}`,
+];
 
 /**
  * guide-sanity: flat GUIDE incident-level fields (Category, DetectorNames,
@@ -508,6 +516,15 @@ const flattenCloudFields = (p: Record<string, unknown>) => {
   };
 };
 
+/** Flattens nested objects to dotted keys; keeps already-dotted keys as they are. */
+const flattenScalars = (value: Record<string, unknown>, prefix = ''): Array<[string, string]> =>
+  Object.entries(value).flatMap(([key, v]): Array<[string, string]> => {
+    if (v != null && typeof v === 'object' && !Array.isArray(v)) {
+      return flattenScalars(v as Record<string, unknown>, `${prefix}${key}.`);
+    }
+    return v == null ? [] : [[`${prefix}${key}`, typeof v === 'string' ? v : JSON.stringify(v)]];
+  });
+
 const renderCloudFpPayload = (caseId: string, p: Record<string, unknown>): AdDocumentFields => {
   const f = flattenCloudFields(p);
 
@@ -529,7 +546,16 @@ const renderCloudFpPayload = (caseId: string, p: Record<string, unknown>): AdDoc
     `- Source IP: ${f.sourceIp}`,
     `- Timestamp: ${f.timestamp ?? 'unknown'}`,
   ];
-  const detailsMarkdown = `Evidence rendered from cloud event ${caseId}:\n\n${lines.join('\n')}`;
+  // Every remaining scalar field, so variants that differ only in a field the
+  // fixed lines above do not cover (e.g. `status_code`) stay distinguishable.
+  // `labels.benign` is a gold-label cue and is never rendered.
+  const shown = new Set(['labels.benign']);
+  const extraLines = flattenScalars(p)
+    .filter(([key]) => !shown.has(key))
+    .map(([key, value]) => `- ${key}: ${truncate(value)}`);
+  const detailsMarkdown = `Evidence rendered from a cloud event:\n\n${lines.join('\n')}${
+    extraLines.length > 0 ? `\n\nEvent fields:\n\n${extraLines.join('\n')}` : ''
+  }`;
 
   const entitySummaryMarkdown = `Host {{ host.name cloud }} User {{ user.name ${f.userName} }}`;
 
@@ -568,7 +594,7 @@ const renderBenignWindowPayload = (
       `Capture window ${start} to ${end} from dataset ${payload.dataset ?? 'unknown'} ` +
       `(day ${payload.capture_day ?? 'unknown'}) recorded no suspicious activity. Classify ` +
       `this window as a true or false positive based only on the (empty) evidence.`,
-    detailsMarkdown: `Evidence rendered from benign window ${caseId}:\n\n${[
+    detailsMarkdown: `Evidence rendered from a benign window:\n\n${[
       `- Window start: ${start}`,
       `- Window end: ${end}`,
       `- Dataset: ${String(payload.dataset ?? 'unknown')}`,

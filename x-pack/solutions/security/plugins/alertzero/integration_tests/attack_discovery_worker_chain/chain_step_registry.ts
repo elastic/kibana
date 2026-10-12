@@ -50,6 +50,8 @@ export interface FakeAlertZeroBackend {
     confidence?: number;
   }) => void;
   agentCallCount: () => number;
+  /** Every conversation id `ai.conversation.metadata.read` was asked for, in order. */
+  metadataReads: string[];
 }
 
 const CONVERSATION_TEMPLATE_DEFAULT_METADATA: Record<string, Record<string, unknown>> = {
@@ -80,6 +82,7 @@ export const createFakeAlertZeroBackend = (): {
     rationale_markdown?: string;
     confidence?: number;
   }> = [];
+  const metadataReads: string[] = [];
   let agentCalls = 0;
 
   const getConversation = (id: string): FakeConversation => {
@@ -125,8 +128,16 @@ export const createFakeAlertZeroBackend = (): {
     ...getConversationMetadataStepCommonDefinition,
     handler: async (context) => {
       const { conversation_id: conversationId } = context.input as { conversation_id: string };
+      metadataReads.push(conversationId);
+      // The real step's `client.get` throws for a conversation that does not exist
+      // (get_conversation_metadata.ts), and the analysis treats this read as a
+      // required source. Succeeding with `{}` here would let a wrong Investigation
+      // id sail through the review-to-analysis handoff.
       const conversation = conversations.get(conversationId);
-      return { output: { metadata: conversation?.metadata ?? {} } };
+      if (!conversation) {
+        return { error: new Error(`fake backend: conversation ${conversationId} not found`) };
+      }
+      return { output: { metadata: conversation.metadata } };
     },
   });
 
@@ -284,6 +295,7 @@ export const createFakeAlertZeroBackend = (): {
     knowledgeIndicators,
     queueAgentVerdict: (verdict) => agentVerdictQueue.push(verdict),
     agentCallCount: () => agentCalls,
+    metadataReads,
   };
 
   return {
