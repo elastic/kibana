@@ -10,6 +10,7 @@ import type { AlertingOasOperationObject } from '../../oas_types';
 import { buildOasOperation } from '../../oas_utils';
 import {
   ALERT_EPISODE_NOT_FOUND_RESPONSE,
+  ALERT_NOT_ACKNOWLEDGED_RESPONSE,
   INVALID_EPISODE_ACTION_PARAMS_RESPONSE,
 } from '../alert_oas_shared_examples';
 
@@ -25,5 +26,6 @@ export const createUnackEpisodeActionOasExamples = (): AlertingOasOperationObjec
     responses: {
       400: INVALID_EPISODE_ACTION_PARAMS_RESPONSE,
       404: ALERT_EPISODE_NOT_FOUND_RESPONSE,
+      409: ALERT_NOT_ACKNOWLEDGED_RESPONSE,
     },
   });

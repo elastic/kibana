@@ -60,6 +60,7 @@ import {
   FleetUnauthorizedError,
   FleetTooManyRequestsError,
   PackageInvalidDeploymentMode,
+  PackageFipsIncompatibleError,
   PackageAssetsVerificationError,
 } from '../../../errors';
 import {
@@ -91,6 +92,7 @@ import { brandInstallationSpaceId } from './brand_installation_space_id';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
 import { validatePackageUpload } from './validate_package_upload';
+import { isPackageFipsIncompatible } from './filter_fips_packages';
 import { removeOldAssets } from './cleanup';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
@@ -596,6 +598,8 @@ async function installPackageFromRegistry({
       );
     }
 
+    assertFipsCompatibleOrThrow(packageInfo, force);
+
     const result = await installPackageWithStateMachine({
       pkgName,
       pkgVersion,
@@ -649,6 +653,26 @@ async function installPackageFromRegistry({
       pkgName,
     };
   }
+}
+
+function assertFipsCompatibleOrThrow(
+  packageInfo: Pick<ArchivePackage, 'name' | 'policy_templates'>,
+  force = false
+) {
+  if (
+    !appContextService.getIsFipsEnabled() ||
+    !isPackageFipsIncompatible(packageInfo.policy_templates)
+  ) {
+    return;
+  }
+  if (!force) {
+    throw new PackageFipsIncompatibleError(
+      `${packageInfo.name} is not FIPS compatible and cannot be installed on a FIPS-enabled deployment`
+    );
+  }
+  appContextService
+    .getLogger()
+    .debug(`${packageInfo.name} is not FIPS compatible, installing anyway due to force flag`);
 }
 
 function getElasticSubscription(packageInfo: ArchivePackage) {
@@ -937,6 +961,7 @@ async function installPackageByUpload({
       contentType
     );
     pkgName = packageInfo.name;
+    assertFipsCompatibleOrThrow(packageInfo);
     const useStreaming = PACKAGES_TO_INSTALL_WITH_STREAMING.includes(pkgName);
 
     // Allow for overriding the version in the manifest for cases where we install
@@ -997,8 +1022,11 @@ async function installPackageByUpload({
       paths,
       archiveIterator,
     };
-    // update the timestamp of latest installation
-    setLastUploadInstallCache();
+    // update the timestamp of latest installation, unless this install is exempt
+    // from the rate limit check — it must not push back the deadline for uploads
+    if (!skipRateLimitCheck) {
+      setLastUploadInstallCache();
+    }
 
     return await installPackageWithStateMachine({
       packageInstallContext,

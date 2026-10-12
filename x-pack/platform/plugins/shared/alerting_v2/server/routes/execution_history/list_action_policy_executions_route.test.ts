@@ -22,12 +22,12 @@ const item: PolicyExecutionHistoryItem = {
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  total_rule_count: 1,
+  rule_count: 1,
   outcome: 'success',
   alert_count: 1,
+  alerts: [],
   action_group_count: 1,
   workflows: [],
-  error: null,
 };
 
 const createMocks = () => {
@@ -70,7 +70,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       search: 'foo',
       ruleIds: undefined,
       outcomes: ['throttled'],
-      episodeIds: undefined,
+      alertIds: undefined,
       from: undefined,
       to: undefined,
       sort: undefined,
@@ -78,7 +78,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
     });
   });
 
-  it('forwards alert_ids from the query to the client as episodeIds', async () => {
+  it('forwards alert_ids from the query to the client as alertIds', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest({
       query: { alert_ids: ['ep-1', 'ep-2'] },
@@ -88,7 +88,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
     await route.handle();
 
     expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
-      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+      expect.objectContaining({ alertIds: ['ep-1', 'ep-2'] })
     );
   });
 
@@ -134,7 +134,7 @@ describe('ListActionPolicyExecutionsRoute', () => {
       search: undefined,
       ruleIds: undefined,
       outcomes: undefined,
-      episodeIds: undefined,
+      alertIds: undefined,
       from: undefined,
       to: undefined,
       sort: undefined,
@@ -164,7 +164,6 @@ describe('ListActionPolicyExecutionsRoute', () => {
       page: 4,
       per_page: 25,
       total: 137,
-      search_matches: null,
     });
   });
 
@@ -202,7 +201,7 @@ describe('toListExecutionHistoryArgs', () => {
       search: 'foo',
       ruleIds: ['rule-1', 'rule-2'],
       outcomes: ['success'],
-      episodeIds: ['ep-1'],
+      alertIds: ['ep-1'],
       from: '2026-01-01T00:00:00.000Z',
       to: '2026-01-02T00:00:00.000Z',
       sortField: 'dispatched_at',

@@ -1,5 +1,5 @@
 {
-  "sha1": "198ebc42f7d92ca46ae7b4cb34a279ff4a0992a0",
+  "sha1": "601e2199f1e407ee5ce3728461b3bcc65a64d810",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -31,8 +31,8 @@
       }
     },
     {
-      "id": "b8e57e3fcdc8548-285479953fcc3a1",
-      "title": "Bulk create rules API validation: should reject an empty rules array",
+      "id": "b8e57e3fcdc8548-c17562168d4a5de",
+      "title": "Bulk create rules API validation: should reject an empty items array",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -44,8 +44,8 @@
       }
     },
     {
-      "id": "b8e57e3fcdc8548-3c8a33b4eeaede9",
-      "title": "Bulk create rules API validation: should reject a body with no rules field",
+      "id": "b8e57e3fcdc8548-da0739da340622d",
+      "title": "Bulk create rules API validation: should reject unknown keys in the body",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -57,6 +57,19 @@
       }
     },
     {
+      "id": "b8e57e3fcdc8548-fc91b08cbb2a7bb",
+      "title": "Bulk create rules API validation: should reject a body with no items field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
+        "line": 102,
+        "column": 17
+      }
+    },
+    {
       "id": "b8e57e3fcdc8548-7b7f42650518309",
       "title": "Bulk create rules API validation: should reject arrays longer than MAX_BULK_ITEMS",
       "expectedStatus": "passed",
@@ -65,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
-        "line": 94,
+        "line": 107,
         "column": 12
       }
     },
@@ -78,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
-        "line": 108,
+        "line": 121,
         "column": 40
       }
     },
@@ -91,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
-        "line": 121,
+        "line": 134,
         "column": 14
       }
     },
@@ -104,7 +117,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/api/tests/bulk_create_rules.spec.ts",
-        "line": 140,
+        "line": 153,
         "column": 23
       }
     },

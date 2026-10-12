@@ -1,5 +1,5 @@
 {
-  "sha1": "f27f797879a867fa07a5209a4e50c2743fb50322",
+  "sha1": "08b34cfbbfc8ba702c011ac817e9e48750fc763f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -850,8 +850,8 @@
       }
     },
     {
-      "id": "4ca74a7cb4b63d9-49e176b545fa646",
-      "title": "Create action policy API create: per_episode grouping with on_status_change strategy",
+      "id": "4ca74a7cb4b63d9-32c832c5566dffd",
+      "title": "Create action policy API create: per_alert grouping with on_status_change strategy",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"

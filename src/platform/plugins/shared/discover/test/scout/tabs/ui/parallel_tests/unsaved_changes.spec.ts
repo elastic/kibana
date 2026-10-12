@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const QUERY_IOS = 'machine.os: "ios"';
@@ -16,7 +16,7 @@ const QUERY_WINDOWS = 'machine.os: "win"';
 
 const createSessionName = (prefix: string) => `${prefix}-${Date.now()}`;
 
-const saveSession = async (pageObjects: PageObjects, sessionName: string) => {
+const saveSession = async (pageObjects: DiscoverPageObjects, sessionName: string) => {
   await pageObjects.discover.saveSearch(sessionName);
   await pageObjects.discover.waitUntilTabIsLoaded();
 };

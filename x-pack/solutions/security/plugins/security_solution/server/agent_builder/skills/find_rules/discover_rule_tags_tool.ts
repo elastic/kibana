@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -18,7 +18,7 @@ import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_co
 
 export const DISCOVER_RULE_TAGS_INLINE_TOOL_ID = 'security.discover_rule_tags';
 
-export const discoverRuleTagsSchema = z.object({}).strict();
+export const discoverRuleTagsSchema = lazySchema(() => z.object({}).strict());
 
 interface DiscoverRuleTagsToolDeps {
   getStartServices: StartServicesAccessor<SecuritySolutionPluginStartDependencies>;

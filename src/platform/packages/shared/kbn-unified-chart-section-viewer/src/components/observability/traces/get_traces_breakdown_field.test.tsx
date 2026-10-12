@@ -13,6 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { DataViewSource, EsqlSource } from '@kbn/data-source';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { UnifiedBreakdownFieldSelector } from '@kbn/unified-histogram';
 import { getTracesBreakdownField } from './get_traces_breakdown_field';
@@ -40,9 +41,8 @@ describe('getTracesBreakdownField', () => {
   it('builds a DataViewField from ES|QL result columns', () => {
     const field = getTracesBreakdownField({
       breakdownField: 'service.name',
-      isESQLQuery: true,
+      dataSource: createMockEsqlSource(),
       columns: [SERVICE_NAME_COLUMN],
-      dataView: undefined,
     });
 
     expect(field?.name).toBe('service.name');
@@ -53,7 +53,7 @@ describe('getTracesBreakdownField', () => {
     expect(
       getTracesBreakdownField({
         breakdownField: 'service.name',
-        isESQLQuery: true,
+        dataSource: createMockEsqlSource(),
         columns: [
           {
             id: 'span.name',
@@ -61,7 +61,6 @@ describe('getTracesBreakdownField', () => {
             meta: { type: 'string' },
           } satisfies DatatableColumn,
         ],
-        dataView: undefined,
       })
     ).toBeUndefined();
   });
@@ -69,9 +68,8 @@ describe('getTracesBreakdownField', () => {
   it('resolves Classic breakdown from the DataView', () => {
     const field = getTracesBreakdownField({
       breakdownField: 'service.name',
-      isESQLQuery: false,
+      dataSource: new DataViewSource(classicDataView),
       columns: undefined,
-      dataView: classicDataView,
     });
 
     expect(field).toBe(serviceNameField);
@@ -81,9 +79,8 @@ describe('getTracesBreakdownField', () => {
     expect(
       getTracesBreakdownField({
         breakdownField: undefined,
-        isESQLQuery: true,
+        dataSource: createMockEsqlSource(),
         columns: [SERVICE_NAME_COLUMN],
-        dataView: undefined,
       })
     ).toBeUndefined();
   });
@@ -102,9 +99,8 @@ describe('traces breakdown toolbar selector', () => {
     });
     const field = getTracesBreakdownField({
       breakdownField: 'service.name',
-      isESQLQuery: true,
+      dataSource: esqlSource,
       columns: [SERVICE_NAME_COLUMN],
-      dataView: undefined,
     });
 
     render(
@@ -132,9 +128,8 @@ describe('traces breakdown toolbar selector', () => {
           breakdown={{
             field: getTracesBreakdownField({
               breakdownField: 'service.name',
-              isESQLQuery: false,
+              dataSource: new DataViewSource(classicDataView),
               columns: undefined,
-              dataView: classicDataView,
             }),
           }}
           onBreakdownFieldChange={jest.fn()}

@@ -63,3 +63,40 @@ export interface ListServiceAccountsResponse {
   serviceAccounts: ServiceAccountDirectoryEntry[];
   nextPage?: string;
 }
+
+/**
+ * A workload bound to a service account, as the management routes report it. The workload type is
+ * scoped to the plugin that registered it, so `pluginId` and `workloadType` name the type
+ * together.
+ */
+export interface ServiceAccountBoundWorkload {
+  pluginId: string;
+  workloadType: string;
+  workloadId: string;
+  /**
+   * What to call the workload in the UI. The workload id for now, until a workload type can
+   * resolve its bindings to a title of its own.
+   */
+  displayName: string;
+}
+
+/** Every workload bound to one service account, across spaces. */
+export interface ListServiceAccountWorkloadsResponse {
+  workloads: ServiceAccountBoundWorkload[];
+}
+
+/**
+ * The body of a successful delete. `warnings` describes anything the delete left behind, and is
+ * empty when it cleaned up everything.
+ */
+export interface DeleteServiceAccountResponse {
+  warnings: string[];
+}
+
+/**
+ * The `attributes` of the 409 the delete route answers with when the account is still bound to
+ * workloads and the caller did not force the delete.
+ */
+export interface DeleteServiceAccountConflictAttributes {
+  workloads: ServiceAccountBoundWorkload[];
+}

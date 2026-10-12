@@ -60,6 +60,7 @@ it('provides the live attachment registry at registration without remounting tab
       attachmentsService: createPublicAttachmentContract({ attachmentsService }),
       openSidebarConversation: jest.fn(),
       openFullscreenConversation: jest.fn(),
+      getConversationUrl: jest.fn(),
     },
   });
   conversationTemplates.registerTab('test.details', ({ attachmentsService: service }) => ({
@@ -123,6 +124,7 @@ describe('ConversationDetailsFlyoutSnapshot', () => {
         }),
         openSidebarConversation: jest.fn(),
         openFullscreenConversation: jest.fn(),
+        getConversationUrl: jest.fn(),
       },
     });
     conversationTemplates.registerTab('test.first', () => ({
@@ -301,6 +303,7 @@ describe('ConversationDetailsFlyout', () => {
         }),
         openSidebarConversation: jest.fn(),
         openFullscreenConversation: jest.fn(),
+        getConversationUrl: jest.fn(),
       },
     }).registerTemplateUIDefinition('test', () => ({
       name: 'Test',

@@ -39,6 +39,7 @@ import {
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
   SERVERLESS_IDP_METADATA_PATH,
 } from '../paths';
+import { publishLoopbackPort } from './publish_loopback_port';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
@@ -64,7 +65,7 @@ const ENV_DEFAULTS = {
   UIAM_COSMOS_DB_UI_PORT: '8082',
   UIAM_SERVICE_PORT: '8443',
   UIAM_OAUTH_SERVICE_PORT: '8444',
-  UIAM_APP_LOGGING_LEVEL: 'DEBUG',
+  UIAM_APP_LOGGING_LEVEL: 'INFO',
   UIAM_LOGGING_LEVEL: 'INFO',
 };
 
@@ -94,6 +95,8 @@ export interface UiamContainer {
   cmdParams: string[];
 }
 
+const UIAM_CONTAINER_NAME = 'uiam';
+
 const UIAM_BASE_CONTAINERS: UiamContainer[] = [
   {
     name: 'uiam-cosmosdb',
@@ -112,10 +115,8 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
 
-      '-p',
-      `127.0.0.1:${env.UIAM_COSMOS_DB_PORT}:8081`, // Cosmos DB gateway
-      '-p',
-      `127.0.0.1:${env.UIAM_COSMOS_DB_UI_PORT}:1234`, // Cosmos DB emulator UI
+      ...publishLoopbackPort(env.UIAM_COSMOS_DB_PORT, 8081), // Cosmos DB gateway
+      ...publishLoopbackPort(env.UIAM_COSMOS_DB_UI_PORT, 1234), // Cosmos DB emulator UI
 
       '--env',
       'AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1',
@@ -134,7 +135,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
     cmdParams: ['--protocol', 'https', '--port', '8081'],
   },
   {
-    name: 'uiam',
+    name: UIAM_CONTAINER_NAME,
     image: process.env.UIAM_DOCKER_IMAGE || UIAM_DEFAULT_IMAGE,
     params: [
       '--net',
@@ -161,8 +162,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--volume',
       `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
-      '-p',
-      `127.0.0.1:${env.UIAM_SERVICE_PORT}:8443`, // UIAM API port
+      ...publishLoopbackPort(env.UIAM_SERVICE_PORT, 8443), // UIAM API port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -279,8 +279,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--volume',
     `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
-    '-p',
-    `127.0.0.1:${env.UIAM_OAUTH_SERVICE_PORT}:8443`, // UIAM OAuth HTTPS port
+    ...publishLoopbackPort(env.UIAM_OAUTH_SERVICE_PORT, 8443), // UIAM OAuth HTTPS port
 
     '--entrypoint',
     '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -376,14 +375,63 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
   cmdParams: [],
 };
 
+const EPHEMERAL_TOKEN_EXPIRATION_PATTERN = /^PT(?:(\d+)M)?(?:(\d+)S)?$/;
+const EPHEMERAL_TOKEN_EXPIRATION_MIN_SECONDS = 60;
+const EPHEMERAL_TOKEN_EXPIRATION_MAX_SECONDS = 300;
+
+// UIAM exits on startup when the lifetime is out of range, which kbn-es would otherwise only
+// report as a container that never became healthy, minutes later.
+const assertEphemeralTokenExpiration = (expiration: string) => {
+  const match = EPHEMERAL_TOKEN_EXPIRATION_PATTERN.exec(expiration);
+  const seconds = match ? Number(match[1] ?? 0) * 60 + Number(match[2] ?? 0) : undefined;
+  if (
+    seconds === undefined ||
+    seconds < EPHEMERAL_TOKEN_EXPIRATION_MIN_SECONDS ||
+    seconds > EPHEMERAL_TOKEN_EXPIRATION_MAX_SECONDS
+  ) {
+    throw new Error(
+      `Invalid UIAM ephemeral token expiration [${expiration}]: expected an ISO-8601 duration from PT1M to PT5M, such as PT1M or PT90S.`
+    );
+  }
+};
+
+export interface GetUiamContainersOptions {
+  /** Include the UIAM OAuth container. */
+  includeOAuth?: boolean;
+  /**
+   * ISO-8601 lifetime of the ephemeral tokens UIAM issues, such as service account exchange
+   * tokens. UIAM accepts PT1M to PT5M and defaults to PT5M.
+   */
+  ephemeralTokenExpiration?: string;
+}
+
 /**
  * Returns the list of UIAM containers to run.
- * When `includeOAuth` is true, includes the UIAM OAuth container.
  */
 export function getUiamContainers({
   includeOAuth = false,
-}: { includeOAuth?: boolean } = {}): UiamContainer[] {
-  return includeOAuth ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER] : [...UIAM_BASE_CONTAINERS];
+  ephemeralTokenExpiration,
+}: GetUiamContainersOptions = {}): UiamContainer[] {
+  const containers = includeOAuth
+    ? [...UIAM_BASE_CONTAINERS, UIAM_OAUTH_CONTAINER]
+    : [...UIAM_BASE_CONTAINERS];
+  if (!ephemeralTokenExpiration) {
+    return containers;
+  }
+
+  assertEphemeralTokenExpiration(ephemeralTokenExpiration);
+  return containers.map((container) =>
+    container.name === UIAM_CONTAINER_NAME
+      ? {
+          ...container,
+          params: [
+            ...container.params,
+            '--env',
+            `uiam.tokens.ephemeral.expiration=${ephemeralTokenExpiration}`,
+          ],
+        }
+      : container
+  );
 }
 
 /** @deprecated Use {@link getUiamContainers} instead */
