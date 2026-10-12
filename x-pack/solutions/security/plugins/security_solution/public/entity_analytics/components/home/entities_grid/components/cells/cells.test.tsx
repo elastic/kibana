@@ -90,6 +90,7 @@ describe('AlertCountCell', () => {
 describe('EntityTypeCell', () => {
   it.each([
     ['a known type as its label', 'host', 'Host'],
+    ['a generic entity as an entity', 'generic', 'Entity'],
     ['an unknown type as is', 'printer', 'printer'],
     ['no value as a dash', null, '—'],
   ])('renders %s', (_, value, expected) => {

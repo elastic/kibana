@@ -6,31 +6,13 @@
  */
 
 import React, { memo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { EntityIconByType } from '../../../../entity_store/entity_icon_by_type';
+import { getRiskEntityTranslation } from '../../../../risk_score/translations';
 
-const ENTITY_TYPE_LABELS: Record<EntityType, string> = {
-  [EntityType.host]: i18n.translate('xpack.securitySolution.entityAnalytics.home.entityType.host', {
-    defaultMessage: 'Host',
-  }),
-  [EntityType.user]: i18n.translate('xpack.securitySolution.entityAnalytics.home.entityType.user', {
-    defaultMessage: 'User',
-  }),
-  [EntityType.service]: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.home.entityType.service',
-    { defaultMessage: 'Service' }
-  ),
-  [EntityType.generic]: i18n.translate(
-    'xpack.securitySolution.entityAnalytics.home.entityType.generic',
-    { defaultMessage: 'Generic' }
-  ),
-};
-
-const ENTITY_TYPE_VALUES: readonly string[] = Object.values(EntityType);
 const isEntityType = (value: unknown): value is EntityType =>
-  typeof value === 'string' && ENTITY_TYPE_VALUES.includes(value);
+  Object.values(EntityType).some((type) => type === value);
 
 export const EntityTypeCell = memo(({ value }: { value: unknown }) => {
   if (!isEntityType(value)) return <>{value == null ? '—' : String(value)}</>;
@@ -43,7 +25,7 @@ export const EntityTypeCell = memo(({ value }: { value: unknown }) => {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiText size="s">{ENTITY_TYPE_LABELS[value]}</EuiText>
+        <EuiText size="s">{getRiskEntityTranslation(value)}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
