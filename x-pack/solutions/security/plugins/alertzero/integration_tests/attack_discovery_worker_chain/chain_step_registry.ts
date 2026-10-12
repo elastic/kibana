@@ -15,6 +15,7 @@ import { addAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/com
 import { readAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/attachment_read';
 import { updateAttachmentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/workflows/steps/attachment_update';
 import { runAgentStepCommonDefinition } from '@kbn/agent-builder-plugin/common/step_types/run_agent_step';
+import { reopenInvestigationStepCommonDefinition } from '@kbn/agentic-investigations-plugin/common/investigations/step_types';
 import { createKiStepCommonDefinition } from '@kbn/context-engine-plugin/common/step_types/create_ki';
 
 /**
@@ -273,6 +274,23 @@ export const createFakeAlertZeroBackend = (): {
     },
   });
 
+  // `investigations.reopen`: schema is the REAL common definition; the handler
+  // mirrors the shipped one against the fake conversation store. The AlertZero
+  // proposal bridge runs it before every escalation, and `resolve_auto_approve`
+  // reads `reopened` off it.
+  const reopenInvestigationStep = createServerStepDefinition({
+    ...reopenInvestigationStepCommonDefinition,
+    handler: async (context) => {
+      const { conversationId } = context.input as { conversationId: string };
+      const conversation = getConversation(conversationId);
+      if (conversation.metadata.status !== 'closed') {
+        return { output: { reopened: false, title: '' } };
+      }
+      conversation.metadata = { ...conversation.metadata, status: 'open' };
+      return { output: { reopened: true, title: '' } };
+    },
+  });
+
   const createKiStep = createServerStepDefinition({
     ...createKiStepCommonDefinition,
     handler: async (context) => {
@@ -329,6 +347,7 @@ export const createFakeAlertZeroBackend = (): {
       readAttachmentStep,
       updateAttachmentStep,
       setAttackStatusStep,
+      reopenInvestigationStep,
       createKiStep,
       runAgentStep,
     ],

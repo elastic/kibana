@@ -318,6 +318,19 @@ export const createAttackDiscoveryChainFixture = (): AttackDiscoveryChainFixture
 
   installKibanaRequestFake({
     getProposal: (id, spaceId) => proposalsService.get(id, spaceId, engine.fakeKibanaRequest),
+    findAttackDiscoveries: (ids) =>
+      ids.flatMap((id) => {
+        const doc = attackDiscoveryDocuments.get(id);
+        return doc
+          ? [
+              {
+                id,
+                title: doc['kibana.alert.attack_discovery.title'],
+                summary_markdown: doc['kibana.alert.attack_discovery.summary_markdown'],
+              },
+            ]
+          : [];
+      }),
   });
 
   // The chain seam: `workflow.execute`'s sync strategy calls

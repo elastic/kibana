@@ -28,8 +28,13 @@ export const withFakeAuthorizationHeader = (request: KibanaRequest): KibanaReque
  * Mocks `global.fetch`, which is what `KibanaActionStepImpl` calls to reach a
  * `kibana.request` step's target — real HTTP is not available in this harness.
  *
- * Routes exactly the two paths the AlertZero worker chain's `kibana.request`
+ * Routes exactly the three paths the AlertZero worker chain's `kibana.request`
  * steps ever hit:
+ *  - `GET /api/attack_discovery/_find?ids=…` — the review's `resolve_display_text`
+ *    step, which reads the discovery's analyst-facing title and summary. Answered
+ *    from the same seeded Attack Discovery document the FP/TP analysis loads. An
+ *    unseeded id yields an empty `data` list, which the review treats as "fall
+ *    back to the persisted inputs".
  *  - `POST /s/:space/api/chat/converse` — the journal-note helper
  *    (`system-alertzero-journal-note`), which posts a `trigger_mode: never`
  *    user_message. Faked as a no-op 200: the chain's plumbing does not depend
@@ -43,8 +48,10 @@ export const withFakeAuthorizationHeader = (request: KibanaRequest): KibanaReque
  */
 export const installKibanaRequestFake = ({
   getProposal,
+  findAttackDiscoveries,
 }: {
   getProposal: (id: string, spaceId: string) => Promise<unknown>;
+  findAttackDiscoveries: (ids: string[]) => Array<Record<string, unknown>>;
 }): jest.Mock => {
   const fetchMock = jest.fn(async (url: string | URL, init?: RequestInit) => {
     const path = typeof url === 'string' ? url : url.toString();
@@ -53,6 +60,13 @@ export const installKibanaRequestFake = ({
     const converseMatch = path.match(/\/s\/([^/]+)\/api\/chat\/converse$/);
     if (converseMatch && method === 'POST') {
       return jsonResponse(200, { conversation_id: 'journal', status: 'accepted' });
+    }
+
+    if (method === 'GET' && /\/api\/attack_discovery\/_find(\?|$)/.test(path)) {
+      const ids = (new URL(path, 'http://localhost').searchParams.get('ids') ?? '')
+        .split(',')
+        .filter(Boolean);
+      return jsonResponse(200, { data: findAttackDiscoveries(ids) });
     }
 
     const proposalMatch = path.match(/\/internal\/proposals\/([^/?]+)/);
