@@ -7,7 +7,7 @@ pageLoadAssetSize:
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
   agentBuilderWorkflows: 1152
-  agenticInvestigations: 34370
+  agenticInvestigations: 48669
   aiAssistantManagementSelection: 355
   aiops: 586
   alerting: 8789
@@ -67,7 +67,7 @@ pageLoadAssetSize:
   entityStore: 2252
   esql: 382
   esqlDataGrid: 215
-  esqlViews: 1332
+  esqlViews: 1652
   esUiShared: 2284
   evals: 4875
   eventAnnotation: 17278
@@ -133,7 +133,7 @@ pageLoadAssetSize:
   monitoring: 22416
   navigation: 332
   newsfeed: 10708
-  nightshift: 2362
+  nightshift: 2762
   nightshiftInvestigations: 9405
   nightshiftSources: 3928
   noDataPage: 630
@@ -193,7 +193,7 @@ pageLoadAssetSize:
   shared-misc: 155260
   shared-packages: 5513030
   shared-plugins: 13536562
-  shared-solution-packages: 347767
+  shared-solution-packages: 392658
   significantEvents: 4439
   significantEventsApp: 5212
   slo: 19531
@@ -218,7 +218,7 @@ pageLoadAssetSize:
   urlForwarding: 1412
   usageCollection: 223
   ux: 2687
-  vendors: 4591364
+  vendors: 5052492
   vendors-heavy: 2182280
   visDefaultEditor: 738
   visTypeGauge: 7638
@@ -232,7 +232,7 @@ pageLoadAssetSize:
   visTypeVega: 3994
   visTypeVislib: 21971
   visTypeXy: 24402
-  visualizationListing: 1339
+  visualizationListing: 1488
   visualizations: 1147
   watcher: 5497
   workflowsExtensions: 38186

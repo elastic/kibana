@@ -8,8 +8,8 @@
 import { esql, type EsqlRequest } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertEventType } from '../../resources/datastreams/alert_events';
-import type { AlertEpisode, ActionGroupId } from './types';
-import { episodeSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
+import type { Alert, ActionGroupId } from './types';
+import { alertSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
 const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 
@@ -18,13 +18,13 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // See: https://github.com/elastic/elasticsearch/issues/146318
 //
 // This scan is keys-only by design: no METADATA _source, no JSON_EXTRACT, no data_json.
-// Episode `data` is hydrated lazily by HydrateEpisodeDataStep (getEpisodeDataQueries) for the
-// surviving dispatchable set only, which is at most 10 000 episodes rather than the entire
+// Alert `data` is hydrated lazily by HydrateAlertDataStep (getAlertDataQueries) for the
+// surviving dispatchable set only, which is at most 10 000 alerts rather than the entire
 // multi-million-row window. See: https://github.com/elastic/rna-program/issues/838
 //
 // Rows with a null subject are dropped here: a doc with source "internal" and no rule is
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
-// TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
+// TypeScript throws, which would fail the whole tick and drop every other alert in the batch.
 /**
  * Row cap applied as `LIMIT` to every dispatcher ES|QL query. ES|QL silently
  * truncates to 1 000 rows when a query has no LIMIT, and 10 000 is its maximum.
@@ -34,13 +34,13 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 export const ESQL_QUERY_ROW_LIMIT = 10_000;
 
 /**
- * Keys-only episode scan over `.rule-events` ⨝ `.alert-actions`.
+ * Keys-only alert scan over `.rule-events` ⨝ `.alert-actions`.
  *
  * `gte`/`lte` cap **event** rows only. Action rows (`type IS NULL`) are not
  * window-capped: `StoreActionsStep` stamps `@timestamp` with `now`, which is
  * after `windowEnd` (`startedAt − SETTLE_BUFFER`). If those rows were dropped
  * before `INLINE STATS last_fired`, the overlap re-read would reprocess every
- * already-recorded episode on the next tick.
+ * already-recorded alert on the next tick.
  */
 export const getDispatchableAlertEventsQuery = ({
   gte,
@@ -54,24 +54,24 @@ export const getDispatchableAlertEventsQuery = ({
       | WHERE type IS NULL OR (@timestamp >= ${gte}::datetime AND @timestamp <= ${lte}::datetime)
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
-          episode_id = COALESCE(alert.id, alert_id),
-          episode_status = alert.status
+          alert_id = COALESCE(alert.id, alert_id),
+          alert_status = alert.status
       | EVAL ${SUBJECT_EVAL}
       | WHERE subject IS NOT NULL
-      | DROP alert.id, alert_id, rule.id, alert.status
+      | DROP alert.id, rule.id, alert.status
       | INLINE STATS last_fired = max(last_series_event_timestamp) WHERE action_type == "fire" OR action_type == "suppress" OR action_type == "unmatched" BY subject, group_hash
       | WHERE last_fired IS NULL OR last_fired < @timestamp
       | STATS
           last_event_timestamp = MAX(@timestamp) WHERE type IS NOT NULL,
-          last_episode_status = LAST(episode_status, @timestamp) WHERE type IS NOT NULL,
+          last_alert_status = LAST(alert_status, @timestamp) WHERE type IS NOT NULL,
           severity = LAST(severity, @timestamp) WHERE type IS NOT NULL,
           source = LAST(source, @timestamp) WHERE type IS NOT NULL,
           space_id = LAST(space_id, @timestamp) WHERE type IS NOT NULL,
           rule_id = LAST(rule_id, @timestamp) WHERE type IS NOT NULL
-          BY subject, group_hash, episode_id
+          BY subject, group_hash, alert_id
       | WHERE last_event_timestamp IS NOT NULL
-      | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, episode_id, last_episode_status, severity
-      | RENAME last_episode_status AS episode_status
+      | KEEP last_event_timestamp, rule_id, source, space_id, group_hash, alert_id, last_alert_status, severity
+      | RENAME last_alert_status AS alert_status
       | SORT last_event_timestamp asc
       | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
 };
@@ -80,7 +80,7 @@ const PAIR_SEPARATOR = '::';
 
 // Shared subject-derivation expression used in both dispatchable and suppression queries.
 // null/absent source is treated as 'internal' for backward compat with legacy action rows.
-// Must produce the same key as `episodeSubject`, which documents why the space is folded in.
+// Must produce the same key as `alertSubject`, which documents why the space is folded in.
 const SUBJECT_EVAL = esql.exp`subject = CASE(source IS NULL OR source == "internal", rule_id, CONCAT(space_id, ${SUBJECT_SEPARATOR}, source))`;
 
 // ES|QL caps statement text at 1 MB. IN-list queries exceed this at production cardinality,
@@ -129,7 +129,7 @@ export const chunkInClauseLiterals = (
   return chunks;
 };
 
-// External episodes have a null rule_id, so they're keyed by space_id + source instead.
+// External alerts have a null rule_id, so they're keyed by space_id + source instead.
 type PairComponents =
   | { kind: 'internal'; groupHash: string; ruleId: string }
   | { kind: 'external'; groupHash: string; spaceId: string; source: string };
@@ -184,17 +184,15 @@ const buildSuppressionsPreFilter = (
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
 // STATS keys on alert_id, the same key used for chunking.
 //
-// Ack and deactivate target a single episode, so filtering alert_id on the scan's episode ids
-// reads only the current episodes' actions and a series' past episodes never reach the output.
-// Episode ids are UUIDv4, so there is one row per id and rows per chunk stay within the literal
+// Ack and deactivate target a single alert, so filtering alert_id on the scan's alert ids
+// reads only the current alerts' actions and a series' past alerts never reach the output.
+// Alert ids are UUIDv4, so there is one row per id and rows per chunk stay within the literal
 // cap, below ESQL_QUERY_ROW_LIMIT. subject and group_hash stay in the BY clause so a reused id
 // cannot merge the actions of two series.
-export const getEpisodeSuppressionsQueries = (
-  alertEpisodes: readonly AlertEpisode[]
-): EsqlRequest[] => {
-  const episodeIds = [...new Set(alertEpisodes.map(({ episode_id: episodeId }) => episodeId))];
+export const getAlertSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequest[] => {
+  const alertIds = [...new Set(alerts.map(({ alert_id: alertId }) => alertId))];
 
-  return chunkInClauseLiterals(episodeIds).map((chunk) => {
+  return chunkInClauseLiterals(alertIds).map((chunk) => {
     const ids = chunk.map((id) => esql.str(id));
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
@@ -218,9 +216,9 @@ export const getEpisodeSuppressionsQueries = (
   });
 };
 
-const getMinLastEventTimestamp = (alertEpisodes: readonly AlertEpisode[]): string =>
-  alertEpisodes.reduce<string | undefined>((min, ep) => {
-    const parsedTimestamp = new Date(ep.last_event_timestamp);
+const getMinLastEventTimestamp = (alerts: readonly Alert[]): string =>
+  alerts.reduce<string | undefined>((min, alert) => {
+    const parsedTimestamp = new Date(alert.last_event_timestamp);
     if (Number.isNaN(parsedTimestamp.getTime())) {
       return min;
     }
@@ -240,28 +238,26 @@ const getMinLastEventTimestamp = (alertEpisodes: readonly AlertEpisode[]): strin
 // Expired snoozes are mapped to "snooze_expired" instead of being filtered out: they must stay
 // in the row set so LAST() still picks them as the latest snooze intent. Dropping them before
 // LAST() would resurrect an older snooze (e.g. an indefinite one) for the same series.
-export const getSeriesSuppressionsQueries = (
-  alertEpisodes: readonly AlertEpisode[]
-): EsqlRequest[] => {
-  const minLastEventTimestamp = getMinLastEventTimestamp(alertEpisodes);
+export const getSeriesSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequest[] => {
+  const minLastEventTimestamp = getMinLastEventTimestamp(alerts);
 
   const componentsByPairKey = new Map<string, PairComponents>();
   const uniquePairKeys = [
     ...new Set(
-      alertEpisodes.map((ep) => {
-        const subject = episodeSubject(ep);
-        const pairKey = `${subject}${PAIR_SEPARATOR}${ep.group_hash}`;
+      alerts.map((alert) => {
+        const subject = alertSubject(alert);
+        const pairKey = `${subject}${PAIR_SEPARATOR}${alert.group_hash}`;
         if (!componentsByPairKey.has(pairKey)) {
-          const isInternal = ep.source == null || ep.source === 'internal';
+          const isInternal = alert.source == null || alert.source === 'internal';
           componentsByPairKey.set(
             pairKey,
             isInternal
-              ? { kind: 'internal', groupHash: ep.group_hash, ruleId: subject }
+              ? { kind: 'internal', groupHash: alert.group_hash, ruleId: subject }
               : {
                   kind: 'external',
-                  groupHash: ep.group_hash,
-                  spaceId: ep.space_id,
-                  source: ep.source,
+                  groupHash: alert.group_hash,
+                  spaceId: alert.space_id,
+                  source: alert.source,
                 }
           );
         }
@@ -317,11 +313,11 @@ export const getLastNotifiedTimestampsQueries = (
   });
 };
 
-// Hydration pass for episode `data`: fetches the full `data` blob from `.rule-events` for the
-// surviving dispatchable episodes only (at most 10 000 after the scan-pass LIMIT).
+// Hydration pass for alert `data`: fetches the full `data` blob from `.rule-events` for the
+// surviving dispatchable alerts only (at most 10 000 after the scan-pass LIMIT).
 //
 // Ordering is load-bearing:
-//   - WHERE is the first command so type, episode.id, and the @timestamp range all push down to
+//   - WHERE is the first command so type, alert.id, and the @timestamp range all push down to
 //     Lucene; _source is never fetched for non-matching documents.
 //   - JSON_EXTRACT sits after WHERE so _source is materialised only for the matching rows.
 //   - DROP _source removes it before the STATS buffer.
@@ -330,27 +326,27 @@ export const getLastNotifiedTimestampsQueries = (
 // keeps the same EsqlRequest[] shape as its siblings and the range stays part of the ES|QL plan.
 //
 // LAST(data_json, @timestamp) reproduces the single-pass semantics: the scan pass returns
-// last_event_timestamp = MAX(@timestamp) per episode, so the row LAST() picks here is the same
+// last_event_timestamp = MAX(@timestamp) per alert, so the row LAST() picks here is the same
 // one the old STATS picked when data_json was in the scan.
 //
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
-// STATS aggregates by episode_id.
-export const getEpisodeDataQueries = (
-  episodeIds: readonly string[],
+// STATS aggregates by alert_id.
+export const getAlertDataQueries = (
+  alertIds: readonly string[],
   { gte, lte }: { gte: string; lte: string }
 ): EsqlRequest[] => {
-  return chunkInClauseLiterals(episodeIds).map((chunk) => {
+  return chunkInClauseLiterals(alertIds).map((chunk) => {
     const ids = chunk.map((id) => esql.str(id));
 
     return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
         | WHERE type == ${ALERT_EVENT_TYPE}
-            AND episode.id IN (${ids})
+            AND alert.id IN (${ids})
             AND @timestamp >= ${gte}::datetime
             AND @timestamp <= ${lte}::datetime
-        | EVAL episode_id = episode.id, data_json = JSON_EXTRACT(_source, "$.data")
+        | EVAL alert_id = alert.id, data_json = JSON_EXTRACT(_source, "$.data")
         | DROP _source
-        | STATS data_json = LAST(data_json, @timestamp) BY episode_id
-        | KEEP episode_id, data_json
+        | STATS data_json = LAST(data_json, @timestamp) BY alert_id
+        | KEEP alert_id, data_json
         | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
   });
 };

@@ -49,6 +49,24 @@ describe('CasesEventBus', () => {
     });
   });
 
+  it('emits attachments deleted events', () => {
+    const eventBus = new CasesEventBus();
+    const listener = jest.fn();
+    const payload = {
+      caseId: 'case-1',
+      owner: 'securitySolution' as const,
+      attachmentIds: ['attachment-1'],
+      attachmentType: 'alert',
+      alertIds: ['alert-1'],
+      alertIndices: ['.alerts-security.alerts-default'],
+    };
+
+    eventBus.onAttachmentsDeleted(listener);
+    eventBus.emitAttachmentsDeleted(request, payload);
+
+    expect(listener).toHaveBeenCalledWith({ type: 'attachmentsDeleted', request, payload });
+  });
+
   describe('listener isolation', () => {
     it('isolates a throwing onObservablesAdded subscriber so later subscribers still fire', () => {
       const logger = loggingSystemMock.createLogger();
