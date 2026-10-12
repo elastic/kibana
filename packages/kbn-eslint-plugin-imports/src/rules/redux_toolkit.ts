@@ -94,7 +94,7 @@ const hasSameBinding = (
 
 const walk = (node: Node, context: Rule.RuleContext, visit: (child: Node) => void): void => {
   visit(node);
-  if (isCallback(node)) return;
+  if (isCallback(node) || node.type === 'FunctionDeclaration') return;
   for (const key of context.getSourceCode().visitorKeys[node.type] ?? []) {
     const value = Reflect.get(node, key);
     if (Array.isArray(value)) {

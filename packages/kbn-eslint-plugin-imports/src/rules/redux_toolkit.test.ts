@@ -27,6 +27,7 @@ for (const source of ['@reduxjs/toolkit', 'redux-toolkit-v1']) {
       store('gDM().prepend(custom)'),
       store('[...custom]'),
       store('{ function nested(gDM) { return [...gDM()]; } return gDM(); }'),
+      store('{ function nested() { return [...gDM()]; } return gDM(); }'),
       store('{ { const gDM = other; const list = [...gDM()]; } return []; }'),
       `import { configureStore } from 'other'; configureStore({middleware: gDM => [...gDM()]});`,
       `import { configureStore as store } from '${source}'; function f(store) { store({middleware: gDM => [...gDM()]}); }`,
@@ -53,6 +54,7 @@ for (const source of ['@reduxjs/toolkit', 'redux-toolkit-v1']) {
       slice('draft = action.payload; return draft;'),
       slice('if (action.payload) { draft.value = 1; return; } return {};'),
       slice('function nested(draft) { draft = {}; }'),
+      slice('function nested() { draft = action.payload; }'),
       slice('{ let draft; draft = {}; }'),
       slice('return draft = action.payload;'),
       `import { createSlice } from 'other'; createSlice({reducers: {reset(state) {state = {};}}});`,
@@ -60,6 +62,10 @@ for (const source of ['@reduxjs/toolkit', 'redux-toolkit-v1']) {
     ],
     invalid: [
       { code: slice('draft = action.payload;'), errors: [{ messageId: 'reassignment' }] },
+      {
+        code: slice('function helper() { return 1; } draft = action.payload;'),
+        errors: [{ messageId: 'reassignment' }],
+      },
       {
         code: slice('if (action.payload) { draft = {}; }'),
         errors: [{ messageId: 'reassignment' }],
