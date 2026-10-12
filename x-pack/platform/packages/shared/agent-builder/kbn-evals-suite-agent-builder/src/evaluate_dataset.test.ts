@@ -316,10 +316,14 @@ describe('metadata-opt-in evaluators return N/A when their key is unset', () => 
     steps: [{ type: 'tool_call', tool_id: 'platform.core.search', results: [{ data: {} }] }],
   } satisfies TaskOutput;
 
-  async function evaluateByName(name: string, metadata: Record<string, unknown> | undefined) {
+  async function evaluateByName(
+    name: string,
+    metadata: Record<string, unknown> | undefined,
+    naWhenUnset = true
+  ) {
     const { dependencies, runExperiment } = createTestSetup();
 
-    await createEvaluateDataset(dependencies)({
+    await createEvaluateDataset({ ...dependencies, naWhenUnset })({
       dataset: {
         name: 'test-dataset',
         description: 'dataset for N/A evaluator tests',
@@ -356,7 +360,7 @@ describe('metadata-opt-in evaluators return N/A when their key is unset', () => 
   ];
 
   it.each(nAMetadataOptInCases)(
-    '%s returns score null with unavailable label when its metadata key is unset',
+    '%s returns score null with unavailable label when its metadata key is unset and naWhenUnset is on',
     async (name, metadata) => {
       const result = await evaluateByName(name, metadata);
 
@@ -367,6 +371,15 @@ describe('metadata-opt-in evaluators return N/A when their key is unset', () => 
       expect(result.metadata).toEqual(
         expect.objectContaining({ reason: expect.stringContaining('not set') })
       );
+    }
+  );
+
+  it.each(nAMetadataOptInCases)(
+    '%s keeps the legacy free 1 when its metadata key is unset and naWhenUnset is off (default)',
+    async (name, metadata) => {
+      const result = await evaluateByName(name, metadata, false);
+
+      expect(result.score).toBe(1);
     }
   );
 
