@@ -25,6 +25,7 @@ jest.mock('../hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 
 const automation = {
   id: 'automation-1',
