@@ -10,6 +10,7 @@
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DEFAULT_DASHBOARD_STATE } from '../../../common/default_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
+import { logger } from '../../services/logger';
 import { reportDashboardSaved } from './report_dashboard_saved';
 
 const dashboardState = {
@@ -80,5 +81,24 @@ describe('reportDashboardSaved', () => {
       panel_count: 0,
       panel_types: [],
     });
+  });
+
+  it('logs a reporting error instead of throwing it', () => {
+    const warnSpy = jest.spyOn(logger, 'warn');
+    (coreServices.analytics.reportEvent as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('Event type "dashboard_saved" is not registered');
+    });
+
+    expect(() =>
+      reportDashboardSaved({
+        previousDashboardId: 'existing-id',
+        dashboardId: 'existing-id',
+        dashboardState: DEFAULT_DASHBOARD_STATE,
+        changeSources: [],
+      })
+    ).not.toThrow();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Event type "dashboard_saved" is not registered')
+    );
   });
 });

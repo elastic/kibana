@@ -20,19 +20,14 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { type DashboardBackupState } from '../services/dashboard_backup_service';
 import type { initializeApproximationManager } from './approximation_manager';
-import type { ChangeSourceTracker, LatestChangeBySource } from './change_source_tracker';
+import type { ChangeSourceTracker } from './change_source_tracker';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
-import { reportDashboardSaved } from './telemetry/report_dashboard_saved';
-import type { DashboardSaveEvent } from './types';
+import type { PublishesOnSave } from './types';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
-
-export type DashboardSaveWithChangeSources = DashboardSaveEvent & {
-  latestChangeBySource: LatestChangeBySource;
-};
 
 export function initializeUnsavedChangesManager({
   layoutManager,
@@ -58,7 +53,7 @@ export function initializeUnsavedChangesManager({
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
   approximationManager: ReturnType<typeof initializeApproximationManager>;
   setState: (state: DashboardState) => Promise<void>;
-  onSave$: Observable<DashboardSaveWithChangeSources>;
+  onSave$: PublishesOnSave['onSave$'];
   changeSourceTracker: ChangeSourceTracker;
 }): {
   api: {
@@ -73,10 +68,8 @@ export function initializeUnsavedChangesManager({
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
-  const onSaveSubscription = onSave$.subscribe(({ latestChangeBySource, ...saveEvent }) => {
-    const changeSources = changeSourceTracker.markSaved(latestChangeBySource);
-    lastSavedState$.next(saveEvent.dashboardState);
-    reportDashboardSaved({ ...saveEvent, changeSources });
+  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
+    lastSavedState$.next(dashboardState);
   });
 
   const dashboardStateChanges$ = combineLatest([

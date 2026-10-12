@@ -12,6 +12,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardChangeSource } from '../../../common/change_sources';
 import { isDashboardSection } from '../../../common/is_dashboard_section';
 import { coreServices } from '../../services/kibana_services';
+import { logger } from '../../services/logger';
 import { DASHBOARD_SAVED_EVENT } from '../../utils/telemetry_constants';
 
 export interface DashboardSavedEvent {
@@ -74,11 +75,15 @@ export const reportDashboardSaved = ({
 }): void => {
   const isNew = previousDashboardId !== dashboardId;
   const panelTypes = getPanelTypes(dashboardState.panels);
-  coreServices.analytics.reportEvent<DashboardSavedEvent>(DASHBOARD_SAVED_EVENT, {
-    is_new: isNew,
-    is_copy: isNew && previousDashboardId !== undefined,
-    ...(changeSources.length > 0 && { change_sources: [...changeSources] }),
-    panel_count: panelTypes.length,
-    panel_types: panelTypes,
-  });
+  try {
+    coreServices.analytics.reportEvent<DashboardSavedEvent>(DASHBOARD_SAVED_EVENT, {
+      is_new: isNew,
+      is_copy: isNew && previousDashboardId !== undefined,
+      ...(changeSources.length > 0 && { change_sources: [...changeSources] }),
+      panel_count: panelTypes.length,
+      panel_types: panelTypes,
+    });
+  } catch (error) {
+    logger.warn(`Failed to report the ${DASHBOARD_SAVED_EVENT} event: ${error}`);
+  }
 };

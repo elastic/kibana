@@ -35,6 +35,7 @@ import { openSaveModal } from './save_modal/open_save_modal';
 import { saveDashboard } from './save_modal/save_dashboard';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
 import { initializeSettingsManager } from './settings_manager';
+import { reportDashboardSaved } from './telemetry/report_dashboard_saved';
 import { initializeTimesliceManager } from './timeslice_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
@@ -44,16 +45,14 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
+  DashboardSaveEvent,
   DashboardSetStateOptions,
   DashboardUser,
   UserActivity,
 } from './types';
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
-import {
-  initializeUnsavedChangesManager,
-  type DashboardSaveWithChangeSources,
-} from './unsaved_changes_manager';
+import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 
 export function getDashboardApi({
@@ -80,7 +79,7 @@ export function getDashboardApi({
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
-  const onSave$ = new Subject<DashboardSaveWithChangeSources>();
+  const onSave$ = new Subject<DashboardSaveEvent>();
   const changeSourceTracker = initializeChangeSourceTracker(changeSources);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
   const userActivity$ = new Subject<UserActivity>();
@@ -213,6 +212,15 @@ export function getDashboardApi({
     changeSourceTracker,
   });
 
+  const publishSave = (
+    saveEvent: DashboardSaveEvent,
+    latestChangeBySource: LatestChangeBySource
+  ) => {
+    const savedChangeSources = changeSourceTracker.markSaved(latestChangeBySource);
+    onSave$.next(saveEvent);
+    reportDashboardSaved({ ...saveEvent, changeSources: savedChangeSources });
+  };
+
   const getHistoryState = (): DashboardHistoryState => ({
     ...getState(),
     latestChangeBySource: changeSourceTracker.getLatestChanges(),
@@ -284,7 +292,7 @@ export function getDashboardApi({
       description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
-    onSave$: onSave$.pipe(map(({ latestChangeBySource, ...saveEvent }) => saveEvent)),
+    onSave$: onSave$.asObservable(),
     getAppContext: () => {
       const embeddableAppContext = creationOptions?.getEmbeddableAppContext?.(savedObjectId$.value);
       return {
@@ -344,12 +352,10 @@ export function getDashboardApi({
             title: savedState.title,
           });
           savedObjectId$.next(id);
-          onSave$.next({
-            previousDashboardId,
-            dashboardId: id,
-            dashboardState: getState(),
-            latestChangeBySource,
-          });
+          publishSave(
+            { previousDashboardId, dashboardId: id, dashboardState: getState() },
+            latestChangeBySource
+          );
           if (redirectTo && redirectRequired) {
             redirectTo({
               id,
@@ -378,12 +384,14 @@ export function getDashboardApi({
       });
 
       if ('error' in saveResult) return;
-      onSave$.next({
-        previousDashboardId,
-        dashboardId: saveResult?.id ?? previousDashboardId,
-        dashboardState,
-        latestChangeBySource,
-      });
+      publishSave(
+        {
+          previousDashboardId,
+          dashboardId: saveResult?.id ?? previousDashboardId,
+          dashboardState,
+        },
+        latestChangeBySource
+      );
 
       return;
     },

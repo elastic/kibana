@@ -198,6 +198,29 @@ describe('dashboard_saved telemetry', () => {
     ]);
   });
 
+  test('completes both saves and notifies save subscribers when reporting throws', async () => {
+    jest.mocked(coreServices.analytics.reportEvent).mockImplementation(() => {
+      throw new Error('Event type "dashboard_saved" is not registered');
+    });
+    jest.mocked(saveDashboard).mockResolvedValue({ id: 'existing-id' });
+    jest.mocked(openSaveModal).mockImplementation(({ onSave, serializeState }) => {
+      onSave({ id: 'copy-id', savedState: serializeState() });
+    });
+    const { api } = getDashboardApi({
+      incomingEmbeddables: [],
+      initialState: DEFAULT_DASHBOARD_STATE,
+      savedObjectId: 'existing-id',
+    });
+    const onSave = jest.fn();
+    api.onSave$.subscribe(onSave);
+
+    await expect(api.runQuickSave()).resolves.toBeUndefined();
+    await expect(api.runInteractiveSave()).resolves.toEqual({ id: 'copy-id' });
+
+    expect(onSave).toHaveBeenCalledTimes(2);
+    jest.mocked(coreServices.analytics.reportEvent).mockReset();
+  });
+
   describe('with undo and redo', () => {
     const agentSave = [
       'dashboard_saved',
