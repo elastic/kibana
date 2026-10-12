@@ -13,11 +13,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { LifecyclePhase } from './lifecycle_phase';
 
 import type { WaitCategory, WaitRecorder } from './wait_recorder';
+import type { BrowserVideoRecorder } from './browser_video_recorder';
 
 import type { Suite, Test } from '../fake_mocha_types';
 
 export class Lifecycle {
   public waitRecorder?: WaitRecorder;
+  public browserVideoRecorder?: BrowserVideoRecorder;
 
   /** Records a wait without changing the callback's result or error. */
   public async recordWait<T>(

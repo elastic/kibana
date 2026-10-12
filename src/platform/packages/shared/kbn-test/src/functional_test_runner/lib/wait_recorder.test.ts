@@ -262,4 +262,27 @@ describe('FTR wait recording', () => {
       rmSync(directory, { recursive: true, force: true });
     }
   });
+
+  it('puts visual freezes on the shared trace clock without changing wait totals', () => {
+    const { runner, recorder, advance } = setup();
+    const test = createRunnable('test');
+    runner.emit('test', test);
+    advance(2000);
+    runner.emit('test end', test);
+    runner.emit('end');
+    const directory = mkdtempSync(join(tmpdir(), 'ftr-video-trace-'));
+    try {
+      recorder.write(directory, [{ startMs: 100, endMs: 900 }]);
+      const trace: { traceEvents: Array<{ cat: string; tid: number; ts: number; dur: number }> } =
+        JSON.parse(readFileSync(join(directory, 'trace.json'), 'utf8'));
+      expect(trace.traceEvents.find(({ cat }) => cat === 'visualUnchanged')).toMatchObject({
+        tid: 7,
+        ts: 100000,
+        dur: 800000,
+      });
+      expect(recorder.getReport().waitOrLookupMs).toBe(0);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
 });

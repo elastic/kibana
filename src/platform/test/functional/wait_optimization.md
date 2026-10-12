@@ -15,7 +15,7 @@ FTR_RECORD_WAITS=1 TEST_BROWSER_HEADLESS=1 node scripts/functional_tests \
 
 Recordings are written under `target/ftr-wait-recordings/<config-path>/<timestamp>-<pid>/`. Start from a successful full-config run, inspect spans around 500 ms or longer, and group their call stacks by helper and action. Keep failed runs as diagnostics rather than baselines. Compare recorded runs with recorded runs, using the same environment.
 
-`waitOrLookupMs` and `sleepAndBackoffMs` use interval unions. Outer retries, WebDriver waits, and nested lookups overlap; adding their durations overcounts elapsed time. Conditional backoff can be necessary while the application works. Timings include browser and transport work and do not measure visual inactivity. Server startup is excluded. See [recorder details](apps/visualize/group1/README.md).
+`waitOrLookupMs` and `sleepAndBackoffMs` use interval unions. Outer retries, WebDriver waits, and nested lookups overlap; adding their durations overcounts elapsed time. Conditional backoff can be necessary while the application works. Timings include browser and transport work and do not measure visual inactivity. Server startup is excluded. `FTR_RECORD_VIDEO=1` additionally captures the browser viewport and runs FFmpeg freeze detection; it enables wait recording without config edits. See [video requirements and interpretation](../../packages/shared/kbn-test/README.mdx#recording-the-browser-and-detecting-unchanged-screens). Keep unchanged-screen time separate from instrumented waits and avoidable waiting. Historical measurements below used wait recording only. See [recorder details](apps/visualize/group1/README.md).
 
 ## Catalog
 

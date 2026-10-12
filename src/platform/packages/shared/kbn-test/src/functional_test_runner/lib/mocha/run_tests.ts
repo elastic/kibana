@@ -43,6 +43,7 @@ export async function runTests(
   });
 
   lifecycle.waitRecorder?.attach(runner);
+  lifecycle.browserVideoRecorder?.attach(runner);
 
   if (abortOnTimeout) {
     registerAbortOnTimeout(runner, lifecycle, log);

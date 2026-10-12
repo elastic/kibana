@@ -69,6 +69,15 @@ These are useful failure patterns, but were not discovered in CI.
 | A temporary delayed-network wrapper could not load the Markdown provider | The wrapper assumed each config loads its directory index; Markdown loads `_markdown_vis` directly. Read `testFiles` from the original config when wrapping a suite, and verify provider resolution before starting the stack. **Wrapper corrected to the config’s actual provider.** See the PR for delayed-network verification. |
 | Local bundle compression tests received gzip when requesting Brotli | Source-built assets lacked the distributable's `.br` sidecars. Validate the build artifact/environment before changing a compression assertion. **Environment prepared; all four bundle tests passed with the existing assertions.** |
 
+## Browser-recording validation
+
+These observations are local recording checks, not CI failures or evidence of avoidable waits.
+
+- **A screenshot queued through WebDriver can miss the wait being measured.** The video uses a separate DevTools channel. A real-browser regression captured 11 frames during a 2.56-second blocked implicit lookup, and covered named-window switches and a viewport resize.
+- **Frame count can distort elapsed time.** Encoding uses capture timestamps. A real FFmpeg smoke retained a 6.005-second run as a 6.000-second MP4, including two visible changes and changing image dimensions. Adjacent freeze intervals remain separate so the longest-interval metric does not hide intervening visible changes.
+- **Capture failure is unobserved time.** Errors, stalls, and long sampling gaps are excluded from unchanged-screen totals. A failed full group1 run with a timed-out chart-types setup and a subsequently closed browser produced partial diagnostic artifacts; it is excluded from baselines. The next full run passed all 41 tests, but still had 31.7 seconds of unobserved capture gaps in 196.6 seconds, so its 79.6 seconds of detected unchanged screen is an observed lower bound. A viewport-view capture experiment produced blank headless frames and was reverted after image inspection.
+- **Failed initialization must still close the browser.** Chrome capture-connection failures and unsupported Firefox recording have cleanup regressions. Wait artifacts are written even if video finalization fails.
+
 ## Checks to run before submitting another optimization
 
 1. Audit every caller of a changed shared helper, including negative actions, repeated calls to open/ensure helpers, inline editors, remote/CCS paths, accessibility tests, and applications with fixed chrome. Preserve existing timeout and matching contracts unless a caller migration is intentional.

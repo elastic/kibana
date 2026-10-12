@@ -193,6 +193,15 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(false),
         directory: Joi.string().default(resolve(REPO_ROOT, 'target/ftr-wait-recordings')),
+        video: Joi.object()
+          .keys({
+            enabled: Joi.boolean().default(false),
+            frameRate: Joi.number().integer().min(1).max(30).default(5),
+            noise: Joi.number().greater(0).max(1).default(0.001),
+            minimumFreezeSeconds: Joi.number().min(0.1).default(1),
+            ffmpegPath: Joi.string().default('ffmpeg'),
+          })
+          .default(),
       })
       .default(),
 
