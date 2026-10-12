@@ -259,7 +259,7 @@ steps:
     # timeout, and the timeout zone would then fail the step with a message about the
     # timeout instead of about the cap.
     #
-    # A failed check must not kill the run before it reports: with no verdict, no route
+    # A failed check must not be reported as a completed run: with no verdict, no route
     # below matches and no investigation opens, and `fail_coverage_check` ends the run
     # failed with the check's own error. Never fall through into an action.
     on-failure:
