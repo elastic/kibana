@@ -18,6 +18,8 @@ const API_VERSION_HEADER = { 'elastic-api-version': '2023-10-31' };
 const POLL_TIMEOUT_MS = 3 * 60 * 1000;
 const POLL_INTERVALS_MS = [2000, 3000, 5000];
 const TEST_TIMEOUT_MS = 10 * 60 * 1000;
+// How long an agent of a managed policy is watched: several runs of the assignment task
+const MANAGED_POLICY_OBSERVATION_MS = 45 * 1000;
 
 interface FleetAgentDoc {
   policy_id: string;
@@ -208,6 +210,53 @@ apiTest.describe(
         expect((await getAgentDoc(esClient, secondAgent.agentId)).policy_base_id).toBe(
           agentPolicyId
         );
+      }
+    );
+
+    apiTest(
+      'keeps an agent of a managed policy on the plain policy id',
+      async ({ esClient, kbnClient, realFleet }) => {
+        apiTest.setTimeout(TEST_TIMEOUT_MS);
+        const { data } = await kbnClient.request<{ item: { id: string } }>({
+          method: 'POST',
+          path: '/api/fleet/agent_policies',
+          headers: API_VERSION_HEADER,
+          body: {
+            name: `scout-sentinel-managed-${Date.now()}`,
+            namespace: 'default',
+            monitoring_enabled: [],
+            is_managed: true,
+          },
+        });
+        const managedPolicyId = data.item.id;
+        const agent = await realFleet.enrollAgent(managedPolicyId);
+        try {
+          // The assignment task runs every 5s, and moves the agent of a policy that is not
+          // managed within a few runs: the agent has to stay on the plain policy id all along.
+          const deadline = Date.now() + MANAGED_POLICY_OBSERVATION_MS;
+          while (Date.now() < deadline) {
+            expect((await getAgentDoc(esClient, agent.agentId)).policy_id).toBe(managedPolicyId);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+        } finally {
+          await kbnClient
+            .request({
+              method: 'POST',
+              path: '/api/fleet/agents/bulk_unenroll',
+              headers: API_VERSION_HEADER,
+              body: { agents: [agent.agentId], force: true, revoke: true },
+            })
+            .catch(() => undefined);
+          await agent.stop();
+          await kbnClient
+            .request({
+              method: 'POST',
+              path: '/api/fleet/agent_policies/delete',
+              headers: API_VERSION_HEADER,
+              body: { agentPolicyId: managedPolicyId, force: true },
+            })
+            .catch(() => undefined);
+        }
       }
     );
 
