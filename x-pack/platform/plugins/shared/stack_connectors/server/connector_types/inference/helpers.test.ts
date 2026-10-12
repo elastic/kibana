@@ -319,3 +319,110 @@ describe('structured redaction of non-scalar secret values', () => {
     expect(truncateUpstreamBody('Bearer abc.def.ghi failed')).not.toContain('abc.def.ghi');
   });
 });
+
+describe('redaction of JSON embedded in error strings', () => {
+  const redactors: Array<[string, (input: string) => string]> = [
+    ['truncateUpstreamBody', (input) => truncateUpstreamBody(input)],
+    ['buildInferenceErrorMessage', (input) => buildInferenceErrorMessage(new Error(input))],
+    [
+      'buildInferenceErrorMessage (nested reason)',
+      (input) => {
+        const message = buildInferenceErrorMessage({ error: { reason: input } });
+        try {
+          return JSON.parse(message).error.reason;
+        } catch (e) {
+          return message; // fail-closed redaction swallowed the wrapper's closing braces
+        }
+      },
+    ],
+  ];
+
+  describe.each(redactors)('%s', (_name, redact) => {
+    it.each([
+      [
+        'non-scalar value in JSON embedded in text',
+        'status [400]. Error message: [{"error":{"password":{"inner":"hunter2"}}}]',
+        ['hunter2', 'inner'],
+      ],
+      [
+        'array value in JSON embedded in text',
+        'status [400]. Error message: [{"credential":["s3cr3t"],"other":"x"}]',
+        ['s3cr3t'],
+      ],
+      [
+        'escaped scalars',
+        'Error message: [{\\"password\\":\\"hunter2\\",\\"api_key\\":\\"k1\\",\\"access_token\\":\\"t1\\"}]',
+        ['hunter2', 'k1', 't1'],
+      ],
+      [
+        'doubly escaped scalars',
+        'Error message: [{\\\\\\"password\\\\\\":\\\\\\"hunter2\\\\\\"}]',
+        ['hunter2'],
+      ],
+      [
+        'escaped object',
+        'Error message: [{\\"error\\":{\\"password\\":{\\"inner\\":\\"hunter2\\"}}}] trailing',
+        ['hunter2', 'inner'],
+      ],
+      [
+        'escaped scalar containing an escaped quote',
+        'Error message: {\\"password\\":\\"hun\\\\\\"ter2\\"}',
+        ['hun', 'ter2'],
+      ],
+      ['truncated top-level object', '{"password":{"x":"truncatedsecret', ['truncatedsecret']],
+      [
+        'truncated array under an embedded key',
+        'status [400]. Error message: [{"api_key":["trunc-secret-1","trunc',
+        ['trunc-secret-1'],
+      ],
+      [
+        'brackets inside strings do not end the secret early',
+        'x: {"password":{"a":"}]","b":"leaky"}} tail',
+        ['leaky'],
+      ],
+      ['cookie header', 'Cookie: session=abc123; theme=dark', ['abc123']],
+      ['set-cookie header', 'Set-Cookie: sid=zzsecret9; Path=/; HttpOnly', ['zzsecret9']],
+      ['quoted cookie', '{"cookie":"sid=zzsecret9; other=1"}', ['zzsecret9']],
+      ['passphrase', 'passphrase: correct-horse', ['correct-horse']],
+      ['client_assertion', '{"client_assertion":"eyJhbGciOi.zz"}', ['eyJhbGciOi.zz']],
+      ['x-goog-api-key', 'x-goog-api-key: AIzaZZSECRET9', ['AIzaZZSECRET9']],
+      ['access_key', 'access_key=AKIAZZSECRET9', ['AKIAZZSECRET9']],
+    ])('redacts %s', (_label, input, secrets) => {
+      const output = redact(input);
+      secrets.forEach((secret) => expect(output).not.toContain(secret));
+      expect(output).toContain('[redacted]');
+    });
+
+    it('keeps the surrounding text of an embedded JSON body readable', () => {
+      const output = redact(
+        'status [400]. Error message: [{"error":{"message":"bad model","password":{"inner":"hunter2"}},"code":400}]'
+      );
+      expect(output).toContain('status [400]. Error message:');
+      expect(output).toContain('bad model');
+    });
+
+    it.each([
+      'status [400]. Error message: [{"error":{"message":"max_tokens must be <= 4096","type":"invalid_request_error","code":400}}]',
+      '{"error":{"message":"bad request","usage":{"prompt_tokens":120,"completion_tokens":80,"total_tokens":200}}}',
+      'usage: {"prompt_tokens": 120, "max_tokens": 4096}',
+      'num_token: 5, eos_token: 2',
+      'status [400]. Error message: [{\\"message\\":\\"unknown field\\",\\"total_tokens\\":200}]',
+    ])('keeps ordinary body %s unchanged', (input) => {
+      expect(redact(input)).toBe(input);
+    });
+  });
+
+  it('keeps numeric *_token values but still redacts string tokens', () => {
+    const output = truncateUpstreamBody({
+      usage: { prompt_tokens: 120, total_tokens: 200 },
+      access_token: 'zzsecret9',
+      refresh_token: 12345,
+      max_tokens: 4096,
+    });
+    expect(output).not.toContain('zzsecret9');
+    expect(output).toContain('"prompt_tokens":120');
+    expect(output).toContain('"total_tokens":200');
+    expect(output).toContain('"max_tokens":4096');
+    expect(output).toContain('"refresh_token":12345');
+  });
+});

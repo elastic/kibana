@@ -162,49 +162,197 @@ export const detectandThrowUserError = (error: string) => {
 
 export const MAX_UPSTREAM_BODY_LENGTH = 1000;
 
-const redactUpstreamSecrets = (text: string): string =>
-  text
-    .replace(/(\b[a-z][a-z0-9+.-]*:\/\/[^\s:@\/"']+:)[^\s@/"']+@/gi, '$1[redacted]@')
-    .replace(/Bearer\s+\S+/gi, 'Bearer [redacted]')
-    .replace(/sk-[A-Za-z0-9_-]{8,}/g, '[redacted]')
-    .replace(
-      /(authorization["']?\s*[:=]\s*["']?)(?:[A-Za-z][\w-]*\s+)?[^\s"',}]+/gi,
-      '$1[redacted]'
-    )
-    .replace(
-      /(^|[{},&?;"'])\s*(token["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|"[^"\n]*|'[^'\n]*|[^\s"',}]+)/gim,
-      '$1$2[redacted]'
-    )
-    .replace(
-      /\b((?:api[-_ ]?key|password|passwd|(?:[\w-]+_)?secret(?:_key)?|private_key|aws_secret_access_key|credential|(?:access|refresh|id|auth|session|hf|api|bearer|user)_token|accessToken|clientSecret|refreshToken|idToken)["']?\s*[:=]\s*)(?:"[^"]*"|'[^']*'|"[^"\n]*|'[^'\n]*|[^\s"',}]+)/gi,
-      '$1[redacted]'
-    )
-    .replace(
-      /([A-Z][A-Z0-9_]{0,63}(?:_API_KEY|_TOKEN|_SECRET|_PASSWORD)\s*=\s*["']?)[^\s"',}]+/g,
-      '$1[redacted]'
-    );
+const REDACTED = '[redacted]';
 
-// Keys are compared lower-cased with `-`, `_` and whitespace removed, so `api_key`, `apiKey` and
-// `API-Key` (and `access_token` / `accessToken`, `client_secret` / `clientSecret`, ...) all match.
+// The ONE list of sensitive keys. It drives both the structured pass (JSON.stringify replacer) and
+// the text pass in `redactUpstreamSecrets`. Keys are compared lower-cased with `-`, `_` and
+// whitespace removed, so `api_key`, `apiKey` and `API-Key` (`access_token` / `accessToken`,
+// `client_secret` / `clientSecret`, ...) all match.
+const SENSITIVE_KEYS_EXACT = new Set([
+  'authorization',
+  'proxyauthorization',
+  'cookie',
+  'cookies',
+  'setcookie',
+  'credential',
+  'credentials',
+]);
+const SENSITIVE_KEY_SUFFIXES = [
+  'password',
+  'passwd',
+  'token',
+  'secret',
+  'secrets',
+  'secretkey',
+  'secretaccesskey',
+];
+const SENSITIVE_KEY_FRAGMENTS = [
+  'apikey', // api_key, x-api-key, x-goog-api-key
+  'accesskey',
+  'privatekey',
+  'passphrase',
+  'clientassertion',
+];
+// `*token` keys that carry counts or vocabulary markers rather than credentials
+const NON_SECRET_TOKEN_KEYS = new Set([
+  'maxtoken',
+  'prompttoken',
+  'totaltoken',
+  'completiontoken',
+  'eostoken',
+  'bostoken',
+  'stoptoken',
+  'padtoken',
+]);
+
+const normalizeKey = (key: string): string => key.toLowerCase().replace(/[-_\s]/g, '');
+
 const isSensitiveKey = (key: string): boolean => {
-  const normalized = key.toLowerCase().replace(/[-_\s]/g, '');
+  const normalized = normalizeKey(key);
+  if (NON_SECRET_TOKEN_KEYS.has(normalized)) return false;
   return (
-    normalized === 'authorization' ||
-    normalized === 'passwd' ||
-    normalized === 'credential' ||
-    normalized === 'credentials' ||
-    normalized.includes('apikey') ||
-    normalized.includes('secret') ||
-    normalized.includes('privatekey') ||
-    normalized.endsWith('password') ||
-    normalized.endsWith('token')
+    SENSITIVE_KEYS_EXACT.has(normalized) ||
+    SENSITIVE_KEY_SUFFIXES.some((suffix) => normalized.endsWith(suffix)) ||
+    SENSITIVE_KEY_FRAGMENTS.some((fragment) => normalized.includes(fragment))
   );
 };
 
-// Replaces the WHOLE value (scalar, object or array) of a sensitive key. The text based patterns
-// in `redactUpstreamSecrets` only consume a scalar value and leak the rest of a non-scalar one.
+// number of consecutive backslashes right before `index`
+const backslashRun = (text: string, index: number): number => {
+  let run = 0;
+  while (index - run - 1 >= 0 && text[index - run - 1] === '\\') run++;
+  return run;
+};
+
+// A quote delimits a string when it is escaped the same way the string opener was: plain text
+// (`level` 0) uses an even backslash run, JSON embedded in a JSON string (`\"`, `\\\"`, ...) uses
+// exactly `level` backslashes.
+const isDelimiterQuote = (text: string, index: number, level: number): boolean => {
+  const run = backslashRun(text, index);
+  return level === 0 ? run % 2 === 0 : run === level;
+};
+
+// Returns the end (exclusive) of the bracket group starting at `start`, honouring quoted strings in
+// both plain and escaped form. Fails closed: an unbalanced group runs to the end of the text.
+const findBracketEnd = (text: string, start: number): number => {
+  let depth = 0;
+  let inString = false;
+  let level = -1;
+  for (let i = start; i < text.length; i++) {
+    const char = text[i];
+    if (char === '"') {
+      if (level === -1) level = backslashRun(text, i);
+      if (isDelimiterQuote(text, i, level)) inString = !inString;
+    } else if (!inString) {
+      if (char === '{' || char === '[') {
+        depth++;
+      } else if (char === '}' || char === ']') {
+        depth--;
+        if (depth === 0) return i + 1;
+      }
+    }
+  }
+  return text.length;
+};
+
+const endOfLine = (text: string, from: number): number => {
+  const newline = text.slice(from).search(/[\r\n]/);
+  return newline === -1 ? text.length : from + newline;
+};
+
+const matchLength = (pattern: RegExp, text: string, index: number): number => {
+  pattern.lastIndex = index;
+  return pattern.exec(text)?.[0].length ?? 0;
+};
+
+const QUOTE_OPENER = /(\\*)(["'])/y;
+const AUTHORIZATION_VALUE = /(?:[A-Za-z][\w-]*\s+)?[^\s"',}]+/y;
+const COOKIE_VALUE = /[^\r\n"'}]+/y;
+const SCALAR_VALUE = /[^\s"',}]+/y;
+const NUMERIC_VALUE = /^-?\d+(?:\.\d+)?$/;
+
+// Returns the end (exclusive) of the secret value starting at `start`.
+const findSecretValueEnd = (text: string, key: string, start: number): number => {
+  QUOTE_OPENER.lastIndex = start;
+  const opener = QUOTE_OPENER.exec(text);
+  if (opener) {
+    // quoted string, plain (`"v"`) or escaped (`\"v\"`); an unterminated one runs to the line end
+    const level = opener[1].length;
+    const quote = opener[2];
+    const contentStart = start + opener[0].length;
+    for (let i = contentStart; i < text.length; i++) {
+      if (text[i] === quote && isDelimiterQuote(text, i, level)) return i + 1;
+    }
+    return endOfLine(text, contentStart);
+  }
+
+  // fail closed on object/array values: consume the balanced group or, when it never closes,
+  // everything up to the end of the text
+  if (text[start] === '{' || text[start] === '[') return findBracketEnd(text, start);
+
+  const normalized = normalizeKey(key);
+  if (normalized.endsWith('authorization')) {
+    return start + matchLength(AUTHORIZATION_VALUE, text, start);
+  }
+  if (normalized.endsWith('cookie') || normalized === 'cookies') {
+    return start + matchLength(COOKIE_VALUE, text, start);
+  }
+  const length = matchLength(SCALAR_VALUE, text, start);
+  // numeric values under `*token` keys are counts (`num_token: 5`), not credentials
+  if (normalized.endsWith('token') && NUMERIC_VALUE.test(text.slice(start, start + length)))
+    return start;
+  return start + length;
+};
+
+// The bare key `token` is only a credential at the start of a line or after a structural
+// delimiter; elsewhere ("Unexpected token: <", "special token: <|im_end|>") it is prose.
+const isStructuralPosition = (text: string, index: number): boolean => {
+  let i = index - 1;
+  while (i >= 0 && (text[i] === ' ' || text[i] === '\t')) i--;
+  return i < 0 || /[\r\n{},&?;"']/.test(text[i]);
+};
+
+// `key: value`, `key=value`, `"key":"value"` and the escaped forms found in JSON embedded in a
+// string (`\"key\":\"value\"`).
+const KEY_VALUE_PATTERN = /(?<![\w-])(api[ ]key|[A-Za-z_][\w-]*)(?:\\*["'])?\s*[:=]\s*/gi;
+
+const redactKeyedSecrets = (text: string): string => {
+  const pattern = new RegExp(KEY_VALUE_PATTERN.source, KEY_VALUE_PATTERN.flags);
+  let result = '';
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+  while ((match = pattern.exec(text)) !== null) {
+    const key = match[1];
+    if (!isSensitiveKey(key)) continue;
+    if (normalizeKey(key) === 'token' && !isStructuralPosition(text, match.index)) continue;
+    const valueStart = match.index + match[0].length;
+    const valueEnd = findSecretValueEnd(text, key, valueStart);
+    if (valueEnd <= valueStart) continue;
+    result += `${text.slice(cursor, valueStart)}${REDACTED}`;
+    cursor = valueEnd;
+    pattern.lastIndex = valueEnd;
+  }
+  return result + text.slice(cursor);
+};
+
+const redactUpstreamSecrets = (text: string): string =>
+  redactKeyedSecrets(
+    text
+      .replace(/(\b[a-z][a-z0-9+.-]*:\/\/[^\s:@\/"']+:)[^\s@/"']+@/gi, `$1${REDACTED}@`)
+      .replace(/Bearer\s+[^\s"'\\]+/gi, `Bearer ${REDACTED}`)
+      .replace(/sk-[A-Za-z0-9_-]{8,}/g, REDACTED)
+  );
+
+// Replaces the WHOLE value (scalar, object or array) of a sensitive key. The text pass in
+// `redactUpstreamSecrets` is the fallback for bodies that are not (complete) JSON.
 const redactSensitiveKeysReplacer = (key: string, value: unknown): unknown =>
-  key !== '' && value !== null && value !== undefined && isSensitiveKey(key) ? '[redacted]' : value;
+  key !== '' &&
+  value !== null &&
+  value !== undefined &&
+  isSensitiveKey(key) &&
+  !(typeof value === 'number' && normalizeKey(key).endsWith('token'))
+    ? REDACTED
+    : value;
 
 const stringifyStructured = (value: unknown): string | undefined =>
   JSON.stringify(value, redactSensitiveKeysReplacer);
