@@ -39,11 +39,14 @@ export const BulkEditSkipReason = z.literal('RULE_NOT_MODIFIED');
 export type BulkGapsFillingSkipReason = z.infer<typeof BulkGapsFillingSkipReason>;
 export const BulkGapsFillingSkipReason = z.literal('NO_GAPS_TO_FILL');
 
+export type BulkDeleteSkipReason = z.infer<typeof BulkDeleteSkipReason>;
+export const BulkDeleteSkipReason = z.literal('RULE_NOT_FOUND');
+
 export type BulkActionSkipResult = z.infer<typeof BulkActionSkipResult>;
 export const BulkActionSkipResult = z.object({
   id: z.string(),
   name: z.string().optional(),
-  skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason]),
+  skip_reason: z.union([BulkEditSkipReason, BulkGapsFillingSkipReason, BulkDeleteSkipReason]),
 });
 
 export type RuleDetailsInError = z.infer<typeof RuleDetailsInError>;
