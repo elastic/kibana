@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, Plugin } from '@kbn/core/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 
 export interface AiAnonymizationSettingsSetupDeps {
   management: ManagementSetup;
@@ -31,11 +31,13 @@ export class AiAnonymizationSettingsPlugin
       AiAnonymizationSettingsStartDeps
     >
 {
+  private registeredApp?: ManagementApp;
+
   public setup(
     core: CoreSetup<AiAnonymizationSettingsStartDeps, AiAnonymizationSettingsPluginStart>,
     { management }: AiAnonymizationSettingsSetupDeps
   ): AiAnonymizationSettingsPluginSetup {
-    management.sections.section.ai.registerApp({
+    this.registeredApp = management.sections.section.ai.registerApp({
       id: 'aiAnonymizationSettings',
       title: i18n.translate('xpack.aiAnonymizationSettings.managementSectionLabel', {
         defaultMessage: 'Anonymization',
@@ -50,10 +52,18 @@ export class AiAnonymizationSettingsPlugin
       },
     });
 
+    // Stays disabled until start() confirms the user can save advanced settings, so users without
+    // that privilege do not get a Stack Management entry for a page they cannot use.
+    this.registeredApp.disable();
+
     return {};
   }
 
-  public start(): AiAnonymizationSettingsPluginStart {
+  public start(coreStart: CoreStart): AiAnonymizationSettingsPluginStart {
+    if (coreStart.application.capabilities.advancedSettings?.save === true) {
+      this.registeredApp?.enable();
+    }
+
     return {};
   }
 
