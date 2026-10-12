@@ -1,5 +1,5 @@
 {
-  "sha1": "5ae24424723c3fc4a5fc2cc5bcc558b6c4146189",
+  "sha1": "4943aeeea90fbc27ecb913f4c265513e9da069a7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -509,8 +509,7 @@
       "title": "Discover app - errors should render invalid scripted field error",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/error_handling.spec.ts",
