@@ -563,7 +563,6 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
     getPaletteNormalizer<DatatableAttributes>(
       'state.visualization.columns.*.palette',
-      undefined,
       LENS_DATATABLE_DEFAULT_COLOR_STEPS
     ),
   ])(attributes);

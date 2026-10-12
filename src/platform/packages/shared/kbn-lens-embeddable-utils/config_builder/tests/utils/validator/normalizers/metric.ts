@@ -502,8 +502,8 @@ export const normalizeMetric = mergeNormalizers([
   })),
   getPaletteNormalizer<MetricAttributes>(
     'state.visualization.palette',
-    isSingleValueMetric,
-    LENS_METRIC_DEFAULT_COLOR_STEPS
+    LENS_METRIC_DEFAULT_COLOR_STEPS,
+    isSingleValueMetric
   ),
   alignIds,
   alignStaticValueMax,

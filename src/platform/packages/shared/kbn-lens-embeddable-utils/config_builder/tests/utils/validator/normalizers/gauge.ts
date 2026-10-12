@@ -165,7 +165,6 @@ export const normalizeGauge = mergeNormalizers<GaugeAttributes>([
   })),
   getPaletteNormalizer<GaugeAttributes>(
     'state.visualization.palette',
-    undefined,
     LENS_GAUGE_DEFAULT_COLOR_STEPS
   ),
   alignExtraLayers,

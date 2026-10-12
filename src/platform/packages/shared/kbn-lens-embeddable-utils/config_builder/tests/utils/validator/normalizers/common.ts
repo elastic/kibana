@@ -1581,8 +1581,8 @@ function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParam
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
   palettePath: string,
-  isSingleValuePalette?: (attributes: T) => boolean,
-  defaultBandCount?: number
+  defaultBandCount: number,
+  isSingleValuePalette?: (attributes: T) => boolean
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {

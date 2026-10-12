@@ -61,7 +61,7 @@ export const normalizeLegacyMetric = mergeNormalizers<LegacyMetricAttributes>([
   alignLegacyTypes,
   getPaletteNormalizer<LegacyMetricAttributes>(
     'state.visualization.palette',
-    () => true,
-    LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS
+    LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS,
+    () => true
   ),
 ]);

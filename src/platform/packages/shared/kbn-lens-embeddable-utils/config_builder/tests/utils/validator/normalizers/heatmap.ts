@@ -95,7 +95,6 @@ export const normalizeHeatmap = mergeNormalizers([
   alignLegacyTypes,
   getPaletteNormalizer<HeatmapAttributes>(
     'state.visualization.palette',
-    undefined,
     LENS_HEATMAP_DEFAULT_COLOR_STEPS
   ),
 ]);
