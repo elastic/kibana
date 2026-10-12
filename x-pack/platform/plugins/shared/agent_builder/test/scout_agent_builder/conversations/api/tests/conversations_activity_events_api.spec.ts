@@ -24,7 +24,6 @@ import type {
   RenameConversationResponse,
 } from '../../../../../common/http_api/conversations';
 import { internalApiPath } from '../../../../../common/constants';
-import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import { apiTest, API_AGENT_BUILDER, ELASTIC_API_VERSION } from '../fixtures';
 
 const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
@@ -69,8 +68,10 @@ apiTest.describe(
       conversationId = (res.body as CreateConversationResponse).id;
     });
 
-    apiTest.afterAll(async ({ esClient }) => {
-      await deleteAllConversationsFromEs(esClient);
+    apiTest.afterAll(async ({ asAdmin }) => {
+      if (conversationId) {
+        await asAdmin.delete(CONVERSATION_PATH(conversationId));
+      }
     });
 
     apiTest('creating a conversation records conversation_created', async ({ asAdmin }) => {
