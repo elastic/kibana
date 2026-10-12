@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { getIndexPatterns } from './utils';
+import type { DataViewListItem, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
+import { getIndexPatterns, getTags } from './utils';
 
 const indexPatternContractMock = {
   getIdsWithTitle: jest.fn().mockReturnValue(
@@ -31,4 +32,24 @@ const indexPatternContractMock = {
 test('getting index patterns', async () => {
   const indexPatterns = await getIndexPatterns('test', indexPatternContractMock);
   expect(indexPatterns).toMatchSnapshot();
+});
+
+describe('getTags', () => {
+  const rollupDataView = {
+    id: 'rollup',
+    title: 'rollup',
+    type: DataViewType.ROLLUP,
+  } as DataViewListItem;
+
+  test('adds the rollup tag when rollups are enabled', () => {
+    expect(getTags(rollupDataView, false, true).map(({ key }) => key)).toContain(
+      DataViewType.ROLLUP
+    );
+  });
+
+  test('omits the rollup tag when rollups are disabled', () => {
+    expect(getTags(rollupDataView, false, false).map(({ key }) => key)).not.toContain(
+      DataViewType.ROLLUP
+    );
+  });
 });

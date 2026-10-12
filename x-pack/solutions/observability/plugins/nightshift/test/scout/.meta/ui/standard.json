@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 46,
+        "line": 55,
         "column": 9
       }
     }

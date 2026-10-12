@@ -1,9 +1,105 @@
 {
-  "sha1": "ddb53ea6f1f5f877f054c78433a2969e4297187b",
+  "sha1": "71fb40362d797a18420cabeb2cc5839952c67516",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c8588d2004a116a-879855ef4ecd93b",
+      "title": "Entity Store dual-process union equivalence flag off: single-process extraction builds the baseline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 333,
+        "column": 23
+      }
+    },
+    {
+      "id": "c8588d2004a116a-72f3e03302fc3b9",
+      "title": "Entity Store dual-process union equivalence flag on: priority then non-priority matches single-process output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 346,
+        "column": 16
+      }
+    },
+    {
+      "id": "c8588d2004a116a-ce4317c5ca9ad92",
+      "title": "Entity Store dual-process union equivalence flag on: non-priority then priority gives the same entities and levels as single-process",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 362,
+        "column": 21
+      }
+    },
+    {
+      "id": "c8588d2004a116a-ec4c198ff60b40c",
+      "title": "Entity Store dual-process union equivalence flag on: public stop and start act on both processes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 385,
+        "column": 23
+      }
+    },
+    {
+      "id": "c8588d2004a116a-177173137fbbdf1",
+      "title": "Entity Store dual-process union equivalence dual-process: run order decides newest and oldest values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 402,
+        "column": 14
+      }
+    },
+    {
+      "id": "c8588d2004a116a-2099f470353f8e7",
+      "title": "Entity Store dual-process union equivalence flag on: a forced sampling rate samples non-priority only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 442,
+        "column": 17
+      }
+    },
     {
       "id": "6d37da1b366c84e-3c3ccd873a00934",
       "title": "Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage) Should extract host with entity pagination (docsLimit 5, wide log slices)",

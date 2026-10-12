@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
@@ -34,10 +35,21 @@ interface NestedStep {
   'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
 }
 
+const outputNames = (workflow: { outputs?: ParsedWorkflow['outputs'] }): string[] => {
+  const { outputs } = workflow;
+  if (!outputs) return [];
+  return Array.isArray(outputs)
+    ? outputs.map(({ name }) => name)
+    : Object.keys(outputs.properties ?? {});
+};
+
 interface ParsedWorkflow {
   tags?: string[];
   settings?: { timeout?: string };
-  outputs?: Array<{ name: string; type: string }>;
+  /** Legacy list form, or the JSON-schema form `hunt.yaml` uses to declare array outputs. */
+  outputs?:
+    | Array<{ name: string; type: string }>
+    | { properties?: Record<string, { type?: string }> };
   steps: NestedStep[];
 }
 
@@ -149,9 +161,7 @@ describe('system-security-hunt-execute', () => {
   it('exposes the headline, hit, and sse_count the Worker conclusion quotes', () => {
     const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
     expect(Object.keys(emitted)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
-    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
-      expect.arrayContaining(['headline', 'hit', 'sse_count'])
-    );
+    expect(outputNames(workflow)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
   });
 });
 
@@ -173,9 +183,7 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
     const workflow = parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID);
     const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
     expect(emitted.summary).toEqual(expect.stringContaining('package_summary'));
-    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
-      expect.arrayContaining(['summary'])
-    );
+    expect(outputNames(workflow)).toEqual(expect.arrayContaining(['summary']));
   });
 });
 
@@ -312,6 +320,8 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
+      // Owned by agentic investigations; imported rather than typed so a moved route fails here.
+      IMPACT_INTERNAL_URL,
     ]);
     const SPACE_PREFIX = '/s/{{ workflow.spaceId }}';
     const stripSpacePrefix = (path: string): string | undefined =>

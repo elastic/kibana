@@ -25,7 +25,7 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
   matcher: { expression: 'alert.severity = "critical"' },
-  groupingMode: 'per_episode',
+  grouping: { mode: 'per_alert' },
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: true,
   createdBy: { profile_uid: 'elastic' },
@@ -199,7 +199,7 @@ describe('createActionPolicySmlType', () => {
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
           'expression: "alert.severity = "critical""',
-          'per_episode',
+          'per_alert',
           'workflow:wf-critical-route',
         ].join('\n'),
       });

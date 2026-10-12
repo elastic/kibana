@@ -163,7 +163,7 @@ describe('createAttachmentPublicClient', () => {
       expect(deps.conversationClient.update).not.toHaveBeenCalled();
       expect(deps.conversationClient.appendEvents).toHaveBeenCalledTimes(1);
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.id).toBe('c1');
       expect(request.attachments).toEqual({
         snapshot: [],
@@ -192,8 +192,9 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build('workflow');
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
 
-      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
       expect(request.events[0].data).toMatchObject({ source: 'workflow' });
+      expect(options).toEqual({ access: 'converse', source: 'workflow' });
     });
 
     it('binds source `server_api` for external plugin callers reaching the client via AttachmentsStart', async () => {
@@ -203,8 +204,9 @@ describe('createAttachmentPublicClient', () => {
       const client = deps.build('server_api');
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'hi' } });
 
-      const [request] = deps.conversationClient.appendEvents.mock.calls[0];
+      const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
       expect(request.events[0].data).toMatchObject({ source: 'server_api' });
+      expect(options).toEqual({ access: 'converse', source: 'server_api' });
     });
 
     it('stamps id "unknown" (does NOT fall back to conversation owner) when the caller has no profile id', async () => {
@@ -533,7 +535,7 @@ describe('createAttachmentPublicClient', () => {
       await client.create({ conversationId: 'c1', type: 'text', data: { text: 'x' } });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
 
     it('forwards "converse" access to appendEvents for create', async () => {
@@ -549,7 +551,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
 
     it('forwards "converse" access to appendEvents for update', async () => {
@@ -569,7 +571,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
 
     it('forwards "converse" access to appendEvents for delete', async () => {
@@ -584,7 +586,7 @@ describe('createAttachmentPublicClient', () => {
       await client.delete({ conversationId: 'c1', attachmentId: 'a1', access: 'converse' });
 
       const [, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
     });
   });
 
@@ -619,7 +621,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.events[0].data).toMatchObject({ render_inline: false });
     });
 
@@ -636,7 +638,7 @@ describe('createAttachmentPublicClient', () => {
       });
 
       const [request, options] = deps.conversationClient.appendEvents.mock.calls[0];
-      expect(options).toEqual({ access: 'converse' });
+      expect(options).toEqual({ access: 'converse', source: 'http_api' });
       expect(request.events[0].data).toMatchObject({ render_inline: true });
     });
 

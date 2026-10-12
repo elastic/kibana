@@ -66,7 +66,7 @@ export const createEpisodeActionRouteForType = <
   @injectable()
   class CreateTypedEpisodeActionRoute extends BaseAlertingRoute {
     static method = 'post' as const;
-    static path = `${ALERTING_V2_EPISODES_API_PATH}/{alert_id}/${pathSuffix}`;
+    static path = `${ALERTING_V2_EPISODES_API_PATH}/{id}/${pathSuffix}`;
     static security: RouteSecurity = {
       authz: {
         requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],
@@ -112,7 +112,7 @@ export const createEpisodeActionRouteForType = <
 
     protected async execute() {
       await this.alertActionsClient.createEpisodeAction({
-        episodeId: this.request.params.alert_id,
+        episodeId: this.request.params.id,
         action: {
           action_type: actionType,
           ...this.request.body,

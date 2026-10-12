@@ -98,6 +98,15 @@ export const HuntCoordinatorResponse = lazySchema(() =>
         'Which signals contributed to `tier2_targets`, in a fixed order. Empty when `tier2_targets` is empty.'
       ),
     /**
+     * The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices Tier 1 hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched.
+     */
+    report_intent_targets: z
+      .array(z.string())
+      .max(200)
+      .describe(
+        "The datasets the report itself points at: the ones its vendor or product matched, or the model's match, without the indices Tier 1 hit or the process-bearing streams in `tier2_targets`. Hunt packaging names these as the data a detection would query when a run has no hit events to name. Empty when neither signal matched."
+      ),
+    /**
      * `*`-suffixed streams and indices in the hunt's universe whose mapping carries `process.entity_id` or `process.pid`: where a hit can become a Defend response action. A mapping says a host can report process telemetry, not that it is enrolled; packaging decides that later. Empty when the scope was blocked or no mapping carries either field.
      */
     actionable_indices: z
@@ -317,6 +326,22 @@ export const HuntCoordinatorResponse = lazySchema(() =>
       .optional()
       .describe(
         'Populated when `has_confirmed_hit` is true (Tier 1 environment hits or a Tier 2 executed required-index hit) and the request named a `report_id`: one entry per technique this run corroborated, meaning its ES|QL executed and returned required-index rows or a Tier 1 hit was attributed to it. A technique that was only proposed gets no entry of its own; when no technique was corroborated, a single report-scoped entry carries all of them under `hunt_result.tier2.behaviors`. The caller fans out over this array with ai.attachment.add, one call per entry; no templated fields.'
+      ),
+    /**
+     * Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation.
+     */
+    impacted_entities: z
+      .array(
+        z.object({
+          id: z.string().min(1).max(256),
+          name: z.string().min(1).max(512),
+          type: z.enum(['host', 'user']),
+        })
+      )
+      .max(50)
+      .optional()
+      .describe(
+        "Present alongside `sse`: the hosts and users the SSE entries name, deduplicated across entries, ready for the investigations impact route. Ids are `host:<host.name>` or `user:<user.name>`. Capped at 50, half of what one Investigation's impact may hold, because every sweep of a report merges onto the same Investigation."
       ),
   })
 );

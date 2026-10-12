@@ -20,17 +20,12 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getCortexEntityTypeLabel, getCortexStatusLabel } from './entity_type_labels';
 import { CortexPageEditor } from './page_editor';
 import { useArchiveCortexPage, useCortexPage } from './use_cortex';
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-const contentWithoutDuplicateTitle = (title: string, content: string): string =>
-  content.replace(new RegExp(`^#{1,3}\\s*${escapeRegExp(title)}\\s*\\n+`, 'i'), '');
+import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../shared/page_markdown';
 
 interface CortexPageViewProps {
   pageId: string;
@@ -157,16 +152,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
       )}
       <EuiSpacer />
       {page.content.length > 0 ? (
-        <div
-          className={css`
-            .euiMarkdownFormat :not(pre) > code {
-              background: transparent;
-              padding: 0;
-              border-radius: 0;
-              box-shadow: none;
-            }
-          `}
-        >
+        <div className={pageMarkdownCss}>
           <EuiMarkdownFormat textSize="s">
             {contentWithoutDuplicateTitle(page.title, page.content)}
           </EuiMarkdownFormat>

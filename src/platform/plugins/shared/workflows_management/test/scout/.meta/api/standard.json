@@ -1,5 +1,5 @@
 {
-  "sha1": "e7f4a3393445afbf472027ab9b1d0b018bc315c3",
+  "sha1": "8c1c1c1aebf1ad7f2c8d05d5bff8d167958ab989",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -904,6 +904,246 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/access_control.spec.ts",
         "line": 1269,
         "column": 24
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-8909064156ddf1c",
+      "title": "Workflow administrator recovery Workflows All cannot read or change another owner's private access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 117,
+        "column": 90
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-5f3500d67fe4760",
+      "title": "Workflow administrator recovery a wildcard admin role can manage access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 129,
+        "column": 67
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-fe558398b876389",
+      "title": "Workflow administrator recovery an administrator API key does not get an override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 151,
+        "column": 7
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-28c6d0bce8b85b7",
+      "title": "Workflow administrator recovery a Workflows API key does not get an override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 157,
+        "column": 38
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-2f4bd81f41a99a9",
+      "title": "Workflow administrator recovery an administrator can recover an offboarded owner without an execution grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 163,
+        "column": 51
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-f3b3e0f2389b79a",
+      "title": "Workflow administrator recovery an administrator cannot test a saved workflow without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 179,
+        "column": 18
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-9cc8182edc139a7",
+      "title": "Workflow administrator recovery an administrator cannot test a draft without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 187,
+        "column": 25
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-5d0bfab88ee69be",
+      "title": "Workflow administrator recovery an administrator cannot test a step without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 197,
+        "column": 5
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-2b742810edc7f43",
+      "title": "Workflow administrator recovery an administrator can hard-delete a private workflow without an ACL grant",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 209,
+        "column": 68
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-9ae5265b9dc09fa",
+      "title": "Workflow administrator recovery an administrator needs an Editor grant to change the workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 219,
+        "column": 11
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-c38f99a8e4afccd",
+      "title": "Workflow administrator recovery an administrator can grant and revoke execution access without changing the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 259,
+        "column": 14
+      }
+    },
+    {
+      "id": "488f5b95ed858b4-7c361f8834980a4",
+      "title": "Workflow administrator recovery an administrator can restore public access without changing the owner",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
+        "line": 322,
+        "column": 27
       }
     },
     {

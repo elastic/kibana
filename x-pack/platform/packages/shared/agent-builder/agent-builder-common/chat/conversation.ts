@@ -683,6 +683,9 @@ export const isZeroModelUsage = (usage: RoundModelUsageStats): boolean =>
 /** Placeholder title assigned to a new conversation */
 export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
 
+/** Maximum accepted length for a user chat message (`input` / `message`) */
+export const CHAT_MESSAGE_MAX_LENGTH = 100_000;
+
 /** Maximum accepted length for a client-supplied conversation title */
 export const CONVERSATION_TITLE_MAX_LENGTH = 500;
 

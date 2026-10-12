@@ -170,7 +170,15 @@ export async function deployGroup(
   }
 
   const pkgVarNames = getPackageVarNames(pkgInfo);
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
+  // Refs of a sibling policy let a new group reuse credentials the user kept; Fleet tracks them
+  // on the new policy too, so deleting the sibling does not delete the shared secret.
+  const vars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    undefined,
+    connectorId ? undefined : authenticateAndDeployStep.existingSecretRefs
+  );
 
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group),

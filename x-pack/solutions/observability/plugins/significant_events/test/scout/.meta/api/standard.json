@@ -1,5 +1,5 @@
 {
-  "sha1": "aa5219b86f10ff48c14fe56e99f6d1244b96b46f",
+  "sha1": "74e56919159b841fa71abf40a81adaa64852352d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,22 @@
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.setup.ts",
         "line": 14,
         "column": 27
+      }
+    },
+    {
+      "id": "83c95f0c4329cc6-46bc6083876c76b",
+      "title": "Significant Events read from .rule-events returns events to a Nightshift reader without Alerting v2 or index privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/rule_events_read.spec.ts",
+        "line": 77,
+        "column": 25
       }
     },
     {

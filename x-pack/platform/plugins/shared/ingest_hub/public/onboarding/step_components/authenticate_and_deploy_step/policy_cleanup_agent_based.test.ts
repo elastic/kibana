@@ -184,6 +184,115 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
   });
 
+  it('keeps the stored secret keys when the form kept them (empty values), and replaces them together', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: {
+          version: '2.5.0',
+          vars: [{ name: 'access_key_id' }, { name: 'secret_access_key' }],
+          policy_templates: [],
+        },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '2.5.0' },
+          vars: {
+            access_key_id: { value: { isSecretRef: true, id: 'ref-akid' } },
+            secret_access_key: { value: { isSecretRef: true, id: 'ref-secret' } },
+          },
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: '' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+
+    // Replaced together: both typed values are sent.
+    mockUpdatePackagePolicy.mockClear();
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: {
+        method: 'static_keys',
+        access_key_id: 'NEW-AKID',
+        secret_access_key: 'NEW',
+      },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: 'NEW-AKID',
+      secret_access_key: 'NEW',
+    });
+
+    // Half of the set typed: the stored refs are kept for both, never a mismatched pair.
+    mockUpdatePackagePolicy.mockClear();
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: 'NEW' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      access_key_id: { isSecretRef: true, id: 'ref-akid' },
+      secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+    });
+  });
+
+  it("prefers refs handed in (a secret an earlier policy just stored) over the policy's own", async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: {
+        item: { version: '2.5.0', vars: [{ name: 'secret_access_key' }], policy_templates: [] },
+      },
+    });
+    mockGetOnePackagePolicy.mockResolvedValue({
+      data: {
+        item: {
+          name: 'existing-policy-name',
+          namespace: 'existing-ns',
+          package: { version: '2.5.0' },
+          vars: { secret_access_key: { value: { isSecretRef: true, id: 'own-old-secret' } } },
+        },
+      },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      authenticateAndDeployStep: {
+        existingSecretRefs: new Map([
+          ['secret_access_key', { isSecretRef: true as const, id: 'shared-new-secret' }],
+        ]),
+      } as never,
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: [],
+      agentCredentials: { method: 'static_keys', access_key_id: '', secret_access_key: '' },
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].vars).toEqual({
+      secret_access_key: { isSecretRef: true, id: 'shared-new-secret' },
+    });
+  });
+
   it('includes enabled input for the surviving service', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

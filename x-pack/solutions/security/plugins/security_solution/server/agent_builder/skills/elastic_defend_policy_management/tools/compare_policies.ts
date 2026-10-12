@@ -6,7 +6,7 @@
  */
 
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import type { PolicyDiffEntry } from '../domain/diff_policy_config';
@@ -33,14 +33,16 @@ export const COMPARE_POLICIES_TOOL_ID = 'security.policy_management.compare_poli
 const COMPARE_DIFF_DISPLAY_CAP = 50;
 const COMPARE_POLICIES_MAX_RESULT_TOKENS = 12_000;
 
-export const comparePoliciesSchema = z.object({
-  from: policyReferenceInputSchema.describe(
-    'Source side of the comparison: either a live policy (idOrName) or a deployment baseline (preset).'
-  ),
-  to: policyReferenceInputSchema.describe(
-    'Target side of the comparison: either a live policy (idOrName) or a deployment baseline (preset).'
-  ),
-});
+export const comparePoliciesSchema = lazySchema(() =>
+  z.object({
+    from: policyReferenceInputSchema.describe(
+      'Source side of the comparison: either a live policy (idOrName) or a deployment baseline (preset).'
+    ),
+    to: policyReferenceInputSchema.describe(
+      'Target side of the comparison: either a live policy (idOrName) or a deployment baseline (preset).'
+    ),
+  })
+);
 
 type PresentedBaselineSideReference = Readonly<{
   preset: EndpointPolicyBaseline['preset'];

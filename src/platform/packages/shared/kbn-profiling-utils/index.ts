@@ -35,6 +35,12 @@ export {
   topNComparisonFunctionSortFieldRt,
 } from './common/functions';
 export { convertTonsToKgs } from './common/utils';
+export {
+  ProfilingSchema,
+  profilingSchemaRt,
+  DEFAULT_PROFILING_SCHEMA,
+  PROFILING_EVENTS_INDEX_BY_SCHEMA,
+} from './common/profiling_schema';
 
 export type {
   ProfilingStatusResponse,
@@ -52,6 +58,16 @@ export type {
   StackTrace,
   StackTraceID,
 } from './common/profiling';
-export type { ProfilingStatus } from './common/profiling_status';
+export type {
+  DisabledProfilingStatus,
+  EnabledProfilingSchemasStatus,
+  EnabledProfilingStatus,
+  OtelProfilingSchemaStatus,
+  ProfilingSchemasStatus,
+  ProfilingStatus,
+  UniversalProfilingSchemaStatus,
+  UniversalProfilingStatus,
+} from './common/profiling_status';
+export type { ProfilingSchemasAvailability } from './common/profiling_schema';
 export type { TopNFunctions } from './common/functions';
 export type { AggregationField, ESTopNFunctions } from './common/es_functions';

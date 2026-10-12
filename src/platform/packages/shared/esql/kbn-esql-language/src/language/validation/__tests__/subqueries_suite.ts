@@ -50,7 +50,7 @@ export const runSubqueriesValidationSuite = (setup: Setup) => {
         const { expectErrors } = await setup();
 
         await expectErrors('FROM index, (FROM other_index METADATA _invalidField)', [
-          'Metadata field "_invalidField" is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score]',
+          'Metadata field "_invalidField" is not available. Available metadata fields are: [_version, _id, _index, _source, _ignored, _index_mode, _score, _name, _class]',
         ]);
       });
 

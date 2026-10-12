@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { relative } from 'path';
+import { readFile } from 'fs/promises';
+import { relative, resolve } from 'path';
 
 import execa from 'execa';
 
@@ -53,6 +54,9 @@ const hasFilename = (d: OxlintDiagnostic): d is FileDiagnostic => Boolean(d.file
 // ARG_MAX on macOS is 1MB; explicit path lists are batched to stay well under it.
 const MAX_PATHS_PER_RUN = 4000;
 
+// Matches ESLint's fix-pass limit.
+const MAX_FIX_PASSES = 10;
+
 async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnostic>> {
   const { stdout, stderr, exitCode } = await execa(
     process.execPath,
@@ -92,6 +96,46 @@ async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnosti
   return { ...report, diagnostics: report.diagnostics.filter(hasFilename) };
 }
 
+async function runOxlintOnPaths(
+  args: string[],
+  paths: string[]
+): Promise<Array<OxlintJsonReport<FileDiagnostic>>> {
+  const reports: Array<OxlintJsonReport<FileDiagnostic>> = [];
+  for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
+    reports.push(await runOxlint([...args, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
+  }
+  return reports;
+}
+
+const readContents = (paths: string[]): Promise<string[]> =>
+  Promise.all(paths.map((path) => readFile(resolve(REPO_ROOT, path), 'utf8')));
+
+/**
+ * Oxlint applies a single fix pass, so fixes that overlap within a file (e.g. inserting the
+ * required license header and removing a disallowed one) only partially apply. Like ESLint,
+ * re-run fixes on files that still report diagnostics until their contents stop changing.
+ */
+async function applyRemainingFixes(diagnostics: FileDiagnostic[]): Promise<FileDiagnostic[]> {
+  let current = diagnostics;
+  let candidates = [...new Set(current.map((d) => d.filename))];
+
+  for (let pass = 1; pass < MAX_FIX_PASSES && candidates.length > 0; pass++) {
+    const before = await readContents(candidates);
+    const latest = (await runOxlintOnPaths(['--fix'], candidates)).flatMap(
+      (report) => report.diagnostics
+    );
+    const after = await readContents(candidates);
+
+    const rerun = new Set(candidates);
+    current = [...current.filter((d) => !rerun.has(d.filename)), ...latest];
+
+    const remaining = new Set(latest.map((d) => d.filename));
+    candidates = candidates.filter((path, i) => before[i] !== after[i] && remaining.has(path));
+  }
+
+  return current;
+}
+
 /**
  * Lints files with oxlint. Reports are written to the log.
  * Returns a result with `failedFiles` populated when errors are found.
@@ -102,18 +146,16 @@ export async function lintFiles(
   { fix, fullRepo }: LintFilesOptions = {}
 ): Promise<LintFilesResult> {
   const fixArgs = fix ? ['--fix'] : [];
-  const reports: Array<OxlintJsonReport<FileDiagnostic>> = [];
-  if (fullRepo) {
-    reports.push(await runOxlint(fixArgs));
-  } else {
-    const paths = files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()));
-    for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
-      reports.push(await runOxlint([...fixArgs, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
-    }
-  }
+  const reports = fullRepo
+    ? [await runOxlint(fixArgs)]
+    : await runOxlintOnPaths(
+        fixArgs,
+        files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()))
+      );
 
-  const diagnostics = reports.flatMap((report) => report.diagnostics);
   const lintedFileCount = reports.reduce((sum, report) => sum + report.number_of_files, 0);
+  const firstPassDiagnostics = reports.flatMap((report) => report.diagnostics);
+  const diagnostics = fix ? await applyRemainingFixes(firstPassDiagnostics) : firstPassDiagnostics;
   const failedFiles = [
     ...new Set(diagnostics.filter((d) => d.severity === 'error').map((d) => d.filename)),
   ].sort((left, right) => left.localeCompare(right));

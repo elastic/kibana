@@ -3,24 +3,19 @@
 exports[`alertingV2NotificationGroup builtin workflow input definition matches the reviewed schema snapshot 1`] = `
 Object {
   "additionalProperties": false,
-  "description": "Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alert episodes.",
+  "description": "Notification group dispatched by an alerting v2 policy: group identity, policy reference, and alerts.",
   "properties": Object {
-    "episodes": Object {
-      "description": "Alert episodes included in this notification group",
+    "alerts": Object {
+      "description": "Alerts included in this notification group",
       "items": Object {
         "additionalProperties": false,
         "properties": Object {
-          "data": Object {
-            "additionalProperties": true,
-            "description": "Data of the alert episode",
-            "type": "object",
-          },
-          "episode_id": Object {
-            "description": "Unique identifier of the alert episode",
+          "alert_id": Object {
+            "description": "Unique identifier of the alert",
             "type": "string",
           },
-          "episode_status": Object {
-            "description": "Current lifecycle status of the alert episode",
+          "alert_status": Object {
+            "description": "Current lifecycle status of the alert",
             "enum": Array [
               "inactive",
               "pending",
@@ -29,24 +24,29 @@ Object {
             ],
             "type": "string",
           },
+          "data": Object {
+            "additionalProperties": true,
+            "description": "Data of the alert",
+            "type": "object",
+          },
           "group_hash": Object {
-            "description": "Hash identifying the alert series/group this episode belongs to",
+            "description": "Hash identifying the alert series/group this alert belongs to",
             "type": "string",
           },
           "last_event_timestamp": Object {
-            "description": "Timestamp of the latest event seen for this episode",
+            "description": "Timestamp of the latest event seen for this alert",
             "format": "date-time",
             "type": "string",
           },
           "rule_id": Object {
-            "description": "Identifier of the rule that produced this episode",
+            "description": "Identifier of the rule that produced this alert",
             "type": Array [
               "string",
               "null",
             ],
           },
           "severity": Object {
-            "description": "Severity of the alert episode",
+            "description": "Severity of the alert",
             "enum": Array [
               "info",
               "low",
@@ -57,11 +57,11 @@ Object {
             "type": "string",
           },
           "source": Object {
-            "description": "Origin of the alert events for this episode (e.g. \`internal\`)",
+            "description": "Origin of the alert events for this alert (e.g. \`internal\`)",
             "type": "string",
           },
           "space_id": Object {
-            "description": "Identifier of the space the episode belongs to",
+            "description": "Identifier of the space the alert belongs to",
             "type": "string",
           },
         },
@@ -71,8 +71,8 @@ Object {
           "source",
           "space_id",
           "group_hash",
-          "episode_id",
-          "episode_status",
+          "alert_id",
+          "alert_status",
         ],
         "type": "object",
       },
@@ -105,7 +105,7 @@ Object {
         ],
         "type": "object",
       },
-      "description": "Rule metadata keyed by rule id. Each value contains rule metadata (e.g. \`{ name }\`) for a rule referenced by the episodes. Access via \`rules[episode.rule_id].name\`.",
+      "description": "Rule metadata keyed by rule id. Each value contains rule metadata (e.g. \`{ name }\`) for a rule referenced by the alerts. Access via \`rules[alert.rule_id].name\`.",
       "type": "object",
     },
   },
@@ -113,7 +113,7 @@ Object {
     "id",
     "policyId",
     "groupKey",
-    "episodes",
+    "alerts",
     "rules",
   ],
   "title": "Alerting v2 notification group",
