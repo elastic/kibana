@@ -79,6 +79,15 @@ triggers:
           description: >
             Set by the caller when its autonomy policy already permits this
             action. Defaults to false so the gate is fail-closed.
+        proposalId:
+          type: string
+          description: >
+            The id to create the proposal under, for a caller that derives it
+            from what it is proposing. An id that already exists fails the run
+            with a conflict before anything is gated. The caller owns the id, so
+            it must include the space and anything else that has to keep two
+            producers apart. Must be a UUID. Omit for a proposal that is always
+            new.
       # `origin` is absent on purpose: this workflow owns it. The gate closes
       # its own inputs to additional properties, so accepting one here would
       # only let a caller pass a value that the forward below has to discard.
@@ -99,16 +108,43 @@ outputs:
     type: string
 
 steps:
+  # Reopen the investigation if it was closed before raising a proposal against
+  # it. A closed Investigation cannot hold a proposal — the analyst cannot see
+  # or act on it — so a caller that triggers a proposal on a closed one would
+  # silently strand it. Reopening first keeps the gate reachable.
+  - name: reopen_investigation
+    type: investigations.reopen
+    with:
+      conversationId: "${{ inputs.conversationId }}"
+
+  # `autoApprove` is forced false whenever the investigation was closed and had
+  # to be reopened, regardless of what the caller requested. A reopened
+  # investigation means a human already saw it once; skipping the gate on a
+  # re-review would bypass that review entirely.
+  #
+  # `inputs.autoApprove == true` guards the undefined case: when the caller
+  # omits `autoApprove`, the expression is `false and ...`, which stays false
+  # rather than coercing undefined to truthy.
+  - name: resolve_auto_approve
+    type: data.set
+    with:
+      value: "${{ inputs.autoApprove == true and steps.reopen_investigation.output.reopened != true }}"
+
   # Every forward uses `${{ }}` rather than `{{ }}`. `{{ }}` renders through
   # Liquid and turns an absent input into `''`, which the gate's trigger
   # rejects for `autoApprove` (boolean) and `actionInput` (object) — the run
   # would fail on a field the caller simply did not set. `${{ }}` evaluates and
   # preserves the type, passing `undefined` through for the gate to treat as
   # unset.
+  #
+  # `autoApprove` is sourced from `resolve_auto_approve` rather than
+  # `inputs.autoApprove` directly: the reopen guard above may have forced it
+  # false, and a simple passthrough would ignore that.
   - name: create_proposal
     type: workflow.execute
     with:
       workflow-id: system-create-proposal
+      run-as-mode: inherit
       inputs:
         conversationId: "${{ inputs.conversationId }}"
         title: "${{ inputs.title }}"
@@ -119,7 +155,8 @@ steps:
         category: "${{ inputs.category }}"
         confidence: "${{ inputs.confidence }}"
         expiresIn: "${{ inputs.expiresIn }}"
-        autoApprove: "${{ inputs.autoApprove }}"
+        autoApprove: "${{ steps.resolve_auto_approve.output.value }}"
+        proposalId: "${{ inputs.proposalId }}"
         origin: alertzero
 
   # `{{ }}` here, matching how the gate emits these same three values, so an

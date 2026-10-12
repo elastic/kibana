@@ -47,7 +47,12 @@ const ModelFamilyFilterControl = ({ query, onChange }: FilterControlProps) => {
       }}
       options={options}
       renderOption={(option, { isActive }) => (
-        <StandardFilterOption isActive={isActive}>{option.label}</StandardFilterOption>
+        <StandardFilterOption
+          isActive={isActive}
+          data-test-subj={`modelFamilyFilterOption-${option.key}`}
+        >
+          {option.label}
+        </StandardFilterOption>
       )}
       data-test-subj="modelFamilyFilterMultiselect"
     />

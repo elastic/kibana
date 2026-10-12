@@ -11,6 +11,8 @@ applies_to:
 
 The Google Drive connector enables searching and accessing files and folders in Google Drive.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-google-drive-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

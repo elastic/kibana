@@ -11,6 +11,8 @@ applies_to:
 
 The BigQuery connector wraps the [BigQuery REST API](https://cloud.google.com/bigquery/docs/reference/rest) to run GoogleSQL queries, retrieve query results, and list datasets. Use it to query data in BigQuery from workflows and AI agents. Workflow authors can also run write or DDL statements through a separate action that is not exposed to AI agents.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-bigquery-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

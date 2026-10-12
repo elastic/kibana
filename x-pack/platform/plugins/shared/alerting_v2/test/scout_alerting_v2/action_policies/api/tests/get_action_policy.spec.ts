@@ -45,8 +45,8 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
           description: 'policy-description',
           destinations: [{ type: 'workflow', id: 'policy-workflow-id' }],
           matcher: { expression: "env == 'production' && region == 'us-east-1'" },
-          group_by: ['service.name'],
-          throttle: { interval: '10m' },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '10m' },
         })
       );
 
@@ -56,7 +56,6 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(typeof response.body.version).toBe('string');
       expect(response.body.name).toBe('policy-name');
       expect(response.body.description).toBe('policy-description');
       expect(response.body.destinations).toStrictEqual([
@@ -65,8 +64,11 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       expect(response.body.matcher).toMatchObject({
         expression: "env == 'production' && region == 'us-east-1'",
       });
-      expect(response.body.group_by).toStrictEqual(['service.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '10m' });
+      expect(response.body.grouping).toStrictEqual({ mode: 'per_field', fields: ['service.name'] });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'time_interval',
+        interval: '10m',
+      });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
       expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
       // Actors are structured objects, not the legacy bare profile-UID string.
@@ -91,15 +93,11 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        id: created.id,
-        enabled: true,
-        snoozed_until: null,
-        matcher: null,
-        group_by: null,
-        grouping_mode: null,
-        throttle: null,
-      });
+      expect(response.body).toMatchObject({ id: created.id, enabled: true });
+      expect(response.body.matcher).toBeUndefined();
+      expect(response.body.grouping).toBeUndefined();
+      expect(response.body.throttle).toBeUndefined();
+      expect(response.body.snoozed_until).toBeUndefined();
     }
   );
 

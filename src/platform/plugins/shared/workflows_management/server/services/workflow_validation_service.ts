@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   type ConnectorContractUnion,
@@ -80,9 +81,11 @@ export class WorkflowValidationService {
       allConnectors,
       toCustomTriggerSchemaConfigs(triggerDefinitions)
     );
-    const warnIgnoredKibanaFetcher = await this.deps
-      .getCoreStart()
-      .featureFlags.getBooleanValue(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
+    const warnIgnoredKibanaFetcher = await firstValueFrom(
+      this.deps
+        .getCoreStart()
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+    );
     return validateWorkflowYaml(yaml, zodSchema, {
       triggerDefinitions,
       warnIgnoredKibanaFetcher,

@@ -6,7 +6,12 @@
  */
 
 import type { InvestigationStructuredOutput } from '@kbn/nightshift-investigations-plugin/common';
-import type { InvestigationExample, InvestigationTaskOutput } from '../types';
+import type {
+  AccessedDecisionTree,
+  InvestigationExample,
+  InvestigationTaskOutput,
+  TrajectoryStep,
+} from '../types';
 
 /**
  * Deductive's goal judge scores 1-5 and treats >= 4 as a pass (see
@@ -30,6 +35,48 @@ export const normalizeGoalScore = (raw: number): number =>
 
 /** A raw 1-5 goal score passes when it is at least 4, matching `goal_achieved`. */
 export const goalScorePassed = (raw: number): boolean => clampGoalScore(raw) >= GOAL_PASS_THRESHOLD;
+
+/**
+ * The truthfulness (evidence-groundedness) judge scores 1-5: how well CLEAR, concrete evidence in
+ * the investigation's own report supports its stated root cause (1 = conclusion asserted with no
+ * supporting evidence, 5 = the stated root cause is directly backed by specific evidence). Like the
+ * goal judge, the normalized feedback value is `(score - 1) / 4` so it lands in [0, 1].
+ */
+export const TRUTHFULNESS_SCORE_MIN = 1;
+export const TRUTHFULNESS_SCORE_MAX = 5;
+
+/** Clamp a raw 1-5 truthfulness score into range, rounding fractional model output. */
+export const clampTruthfulnessScore = (raw: number): number => {
+  if (!Number.isFinite(raw)) return TRUTHFULNESS_SCORE_MIN;
+  return Math.max(TRUTHFULNESS_SCORE_MIN, Math.min(TRUTHFULNESS_SCORE_MAX, Math.round(raw)));
+};
+
+/** Map a raw 1-5 truthfulness score to a normalized value in [0, 1]. */
+export const normalizeTruthfulnessScore = (raw: number): number =>
+  (clampTruthfulnessScore(raw) - TRUTHFULNESS_SCORE_MIN) /
+  (TRUTHFULNESS_SCORE_MAX - TRUTHFULNESS_SCORE_MIN);
+
+/**
+ * The decision-tree-helpfulness judge scores 1-5: whether the decision tree(s) (curated symptom
+ * playbooks) the agent opened actually shaped its investigation, and how. Same 1-5 -> [0, 1]
+ * normalization as the other reward-style judges above.
+ */
+export const DECISION_TREE_HELPFULNESS_SCORE_MIN = 1;
+export const DECISION_TREE_HELPFULNESS_SCORE_MAX = 5;
+
+/** Clamp a raw 1-5 decision-tree-helpfulness score into range, rounding fractional output. */
+export const clampDecisionTreeHelpfulnessScore = (raw: number): number => {
+  if (!Number.isFinite(raw)) return DECISION_TREE_HELPFULNESS_SCORE_MIN;
+  return Math.max(
+    DECISION_TREE_HELPFULNESS_SCORE_MIN,
+    Math.min(DECISION_TREE_HELPFULNESS_SCORE_MAX, Math.round(raw))
+  );
+};
+
+/** Map a raw 1-5 decision-tree-helpfulness score to a normalized value in [0, 1]. */
+export const normalizeDecisionTreeHelpfulnessScore = (raw: number): number =>
+  (clampDecisionTreeHelpfulnessScore(raw) - DECISION_TREE_HELPFULNESS_SCORE_MIN) /
+  (DECISION_TREE_HELPFULNESS_SCORE_MAX - DECISION_TREE_HELPFULNESS_SCORE_MIN);
 
 /** Clamp an already-normalized [0, 1] judge score, tolerating out-of-range model output. */
 export const clampUnitScore = (raw: number): number => {
@@ -55,9 +102,6 @@ export const extractReferenceAnswer = (
   return undefined;
 };
 
-const truncate = (text: string, max: number): string =>
-  text.length > max ? `${text.slice(0, max)}…` : text;
-
 /**
  * Compose the candidate "final answer" text the judges score, from the persisted structured
  * report. Deductive judges read a single `final_answer` string; the investigation agent instead
@@ -75,7 +119,6 @@ export const composeAnswerText = (report: InvestigationStructuredOutput | undefi
     const rendered = hypotheses
       .slice()
       .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0))
-      .slice(0, 10)
       .map((hypothesis) => {
         const confidence = Math.round((hypothesis.confidence ?? 0) * 100);
         const reason = hypothesis.reason ? ` — ${hypothesis.reason}` : '';
@@ -84,47 +127,77 @@ export const composeAnswerText = (report: InvestigationStructuredOutput | undefi
       .join('\n');
     parts.push(`Hypotheses:\n${rendered}`);
   }
-  return truncate(parts.join('\n\n'), 8000);
+  return parts.join('\n\n');
 };
 
 /**
- * Compose an evidence/trajectory-style text from the structured report. Deductive judges also see a
- * truncated tool-call trajectory; the closest persisted analogue is the evidence attached to each
- * hypothesis, plus the recommendations the agent derived.
+ * Compose the report's own evidence text, per-hypothesis evidence tagged with that hypothesis's
+ * candidate and status so a judge cannot attribute a rejected/secondary hypothesis's evidence to
+ * the primary conclusion, plus the recommendations the agent derived. This is the model's own
+ * *selected* evidence, not what it actually accessed — see `composeTrajectoryText` for that.
  */
 export const composeEvidenceText = (report: InvestigationStructuredOutput | undefined): string => {
   if (!report) return '';
   const lines: string[] = [];
   for (const hypothesis of report.hypotheses ?? []) {
     for (const evidence of hypothesis.evidence ?? []) {
-      const query = evidence.esql_query ? ` [esql: ${truncate(evidence.esql_query, 200)}]` : '';
-      lines.push(`- ${evidence.description}${query}`);
+      const parts = [
+        evidence.description,
+        evidence.chart && `[chart: ${evidence.chart.title}]`,
+      ].filter(Boolean);
+      lines.push(`- [${hypothesis.status}] ${hypothesis.candidate}: ${parts.join(' ')}`);
     }
   }
   for (const recommendation of report.recommendations ?? []) {
     lines.push(`- recommendation: ${recommendation.title}`);
   }
-  return truncate(lines.join('\n'), 6000);
+  return lines.join('\n');
 };
 
 /**
- * Fast rule-based leakage pre-check, ported from `rca_anti_leakage_feedback` (commit 7d0cc81).
- * Flags post-incident resolution language that must not be used as primary causal evidence at
- * investigation time; a match escalates to the LLM confirmation call.
+ * Render the investigation's actual tool-call trajectory: what it called, with what arguments,
+ * and what came back, in order. Unlike `composeEvidenceText` (the model's own selected evidence),
+ * this is the real accessed history, so judges that must verify what the agent actually saw —
+ * rca_anti_leakage, truthfulness, decision_tree_helpfulness — use this instead.
  */
-const LEAKAGE_PATTERN =
-  /\b(incident\s+resolved|post[- ]incident|mitigation\s+completed|rollback\s+completed|rollback\s+fixed|resolution|resolved\s+at|pev[- ]\d+.*(?:resolved|mitigated|fixed))\b/i;
+export const composeTrajectoryText = (trajectory: TrajectoryStep[] | undefined): string => {
+  if (!trajectory || trajectory.length === 0) return '';
+  return trajectory
+    .map(
+      ({ tool_id: toolId, params, result }, index) =>
+        `${index + 1}. ${toolId}(${JSON.stringify(params)})\n   → ${result}`
+    )
+    .join('\n');
+};
 
-export const hasLeakageIndicators = (text: string): boolean => LEAKAGE_PATTERN.test(text);
+/**
+ * Render the decision tree(s) (symptom playbooks) the agent opened for the judge. A tree opened
+ * without readable content (e.g. a read that errored) still surfaces the tree id.
+ */
+export const composeDecisionTreesText = (trees: AccessedDecisionTree[] | undefined): string => {
+  if (!trees || trees.length === 0) return '';
+  return trees
+    .map(({ tree_id: treeId, content }) =>
+      content
+        ? `### ${treeId}\n${content}`
+        : `### ${treeId}\n(opened, no readable content captured)`
+    )
+    .join('\n\n');
+};
 
 /** Everything a judge needs about one investigation run, derived once and shared. */
 export interface JudgeInputs {
   question: string;
   reference?: string;
   answer: string;
+  /** The report's own selected evidence, tagged by hypothesis. */
   evidence: string;
+  /** The actual tool-call trajectory: what the agent really accessed, in order. */
+  trajectory: string;
   category?: string;
   executionError?: string;
+  decisionTrees: string;
+  hasDecisionTrees: boolean;
 }
 
 export const buildJudgeInputs = (
@@ -137,6 +210,9 @@ export const buildJudgeInputs = (
   reference: extractReferenceAnswer(expected),
   answer: composeAnswerText(output.structured_report),
   evidence: composeEvidenceText(output.structured_report),
+  trajectory: composeTrajectoryText(output.tool_call_trajectory),
   category: typeof metadata?.category === 'string' ? metadata.category : undefined,
   executionError: output.execution_error,
+  decisionTrees: composeDecisionTreesText(output.decision_trees_accessed),
+  hasDecisionTrees: Boolean(output.decision_trees_accessed?.length),
 });

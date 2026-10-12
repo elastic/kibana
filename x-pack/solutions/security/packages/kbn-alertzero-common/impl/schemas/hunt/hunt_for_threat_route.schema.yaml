@@ -9,8 +9,8 @@ paths:
       x-labels: [ess, serverless]
       operationId: HuntForThreat
       description: >-
-        Runs Tier 1's deterministic search against a technology's resolved
-        index scope. A blocked scope is refused with 409.
+        Runs Tier 1's deterministic search over the space's Security Solution
+        default data view. A blocked scope is refused with 409.
       summary: Run Tier 1 deterministic hunt
       tags:
         - AlertZero API
@@ -20,11 +20,8 @@ paths:
           application/json:
             schema:
               type: object
-              required: [technology]
               additionalProperties: false
               properties:
-                technology:
-                  $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
                 iocs:
                   type: array
                   maxItems: 100
@@ -63,8 +60,8 @@ paths:
                 required: [scope, result]
                 properties:
                   scope:
-                    $ref: '../components/hunt.schema.yaml#/components/schemas/ResolvedIndexScope'
+                    $ref: '../components/hunt.schema.yaml#/components/schemas/HuntScope'
                   result:
                     $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
         '409':
-          description: The technology's index scope is blocked (a required pattern is missing)
+          description: The hunt scope is blocked (nothing in the default data view is visible to this hunt)

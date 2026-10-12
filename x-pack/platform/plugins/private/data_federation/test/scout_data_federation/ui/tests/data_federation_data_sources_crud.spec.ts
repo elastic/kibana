@@ -43,11 +43,7 @@ test.describe('ES|QL Data Federation — data sources CRUD', { tag: tags.statefu
     await test.step('navigate to the Data Federation management app', async () => {
       await pageObjects.dataFederation.goto();
 
-      await page.getByRole('tab', { name: 'Data sources' }).click();
-      await expect(page.getByRole('tab', { name: 'Data sources' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      await pageObjects.dataFederation.selectTab('Data sources');
       await expect(pageObjects.dataFederation.dataSourcesTable).toBeVisible();
     });
 

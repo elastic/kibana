@@ -127,8 +127,9 @@ export const registerDashboardAppIntegration = ({
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
     api,
-    setAttachments: (attachments: DashboardAttachment[]) => {
-      state.attachments = attachments;
+    upsertAttachment: (attachment: DashboardAttachment) => {
+      const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
+      state.attachments = [...otherAttachments, attachment];
     },
   });
 

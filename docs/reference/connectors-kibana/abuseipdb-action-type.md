@@ -9,6 +9,8 @@ applies_to:
 
 The AbuseIPDB connector communicates with the AbuseIPDB API to check IP reputation and report abusive IPs.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-abuseipdb-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

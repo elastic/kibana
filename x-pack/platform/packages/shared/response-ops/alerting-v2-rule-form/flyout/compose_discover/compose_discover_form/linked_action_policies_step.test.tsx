@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -17,7 +17,7 @@ import { useActionPolicyConnectorTypes } from './use_action_policy_connector_typ
 
 jest.mock('react-hook-form', () => ({
   ...jest.requireActual('react-hook-form'),
-  useWatch: jest.fn().mockReturnValue({ name: '', tags: [] }),
+  useWatch: jest.fn().mockReturnValue({ name: '', routingTags: [] }),
 }));
 
 jest.mock('./use_matched_action_policies', () => ({
@@ -25,6 +25,9 @@ jest.mock('./use_matched_action_policies', () => ({
   useMatchedActionPolicies: jest.fn(),
 }));
 jest.mock('./use_action_policy_connector_types');
+jest.mock('../../../form/fields/routing_tags_field', () => ({
+  RoutingTagsField: () => <div data-test-subj="ruleRoutingTagsField" />,
+}));
 
 const mockInvalidateQueries = jest.fn();
 
@@ -42,13 +45,20 @@ const mockUseActionPolicyConnectorTypes = useActionPolicyConnectorTypes as jest.
 
 const mockUseWatch = useWatch as jest.Mock;
 
+const defaultGetActionPolicyEditHref = (id: string) =>
+  `/app/observability/alerting/action-policies/edit/${id}`;
+
 const renderComponent = (
   props?: Partial<React.ComponentProps<typeof LinkedActionPoliciesStep>>
 ) => {
   const http = httpServiceMock.createStartContract();
   return render(
     <IntlProvider locale="en">
-      <LinkedActionPoliciesStep http={http} {...props} />
+      <LinkedActionPoliciesStep
+        http={http}
+        getActionPolicyEditHref={defaultGetActionPolicyEditHref}
+        {...props}
+      />
     </IntlProvider>
   );
 };
@@ -82,9 +92,12 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByText('Action policies')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'These policies match this rule by catch-all or tag. Policies with a query condition may also match at dispatch time based on alert data.'
+        'Routing tags determine which action policies apply. Catch-all action policies match all alerts.'
       )
     ).toBeInTheDocument();
+    expect(screen.getByTestId('ruleRoutingTagsField')).toBeInTheDocument();
+    expect(screen.getByText('Applied policies')).toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPoliciesCount')).toHaveTextContent('1');
   });
 
   it('shows a loading spinner while fetching', () => {
@@ -151,7 +164,9 @@ describe('LinkedActionPoliciesStep', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['matchedActionPolicies'] });
   });
 
-  it('disables action policy creation when the license does not allow it', () => {
+  it('disables action policy creation with a keyboard-reachable reason', async () => {
+    const user = userEvent.setup();
+    const disabledReason = 'You do not have permission to create action policies';
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -163,9 +178,19 @@ describe('LinkedActionPoliciesStep', () => {
 
     const CreateActionPolicyFormFlyout = () => <div data-test-subj="actionPolicyFormFlyout" />;
 
-    renderComponent({ canCreateActionPolicy: false, CreateActionPolicyFormFlyout });
+    renderComponent({
+      createActionPolicyDisabledReason: disabledReason,
+      CreateActionPolicyFormFlyout,
+    });
 
-    expect(screen.getByRole('button', { name: 'Create action policy' })).toBeDisabled();
+    const createButton = screen.getByRole('button', { name: 'Create action policy' });
+    expect(createButton).toHaveAttribute('aria-disabled', 'true');
+
+    await user.tab();
+    expect(createButton).toHaveFocus();
+    await waitFor(() => expect(createButton).toHaveAccessibleDescription(disabledReason));
+
+    await user.keyboard('{Enter}');
     expect(screen.queryByTestId('actionPolicyFormFlyout')).not.toBeInTheDocument();
   });
 
@@ -193,7 +218,7 @@ describe('LinkedActionPoliciesStep', () => {
   });
 
   it('renders a tags badge for a policy matched by tags', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod', 'other'] });
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod', 'other'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -217,13 +242,13 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('matchedPolicyReasonTags')).toBeInTheDocument();
     expect(screen.getByTestId('matchedPolicyReasonTags')).toHaveAttribute(
       'aria-label',
-      'Matching rule tags: env:prod'
+      'Matching routing tags: env:prod'
     );
     expect(screen.queryByTestId('matchedPolicyReasonCatchAll')).not.toBeInTheDocument();
   });
 
   it('renders both tags and expression badges when the matcher has both clauses', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -248,9 +273,47 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('matchedPolicyReasonExpression')).toBeInTheDocument();
   });
 
-  it('renders the edit link for each policy row with the correct href', () => {
+  it('renders the edit link for each policy row using the injected host-aware href builder', () => {
     const http = httpServiceMock.createStartContract();
-    // createStartContract uses a real BasePath instance with basePath='', so prepend() is a pass-through.
+    const getActionPolicyEditHref = jest.fn(
+      (id: string) => `/app/observability/alerting/action-policies/edit/${id}`
+    );
+
+    mockUseMatchedActionPolicies.mockReturnValue({
+      isLoading: false,
+      isPreviousData: false,
+      error: null,
+      items: [
+        {
+          action_policy: { id: 'ap-1', name: 'Global Policy', matcher: null } as any,
+          category: 'catch_all',
+        },
+      ],
+      evaluatedCount: 1,
+      isTruncated: false,
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <LinkedActionPoliciesStep http={http} getActionPolicyEditHref={getActionPolicyEditHref} />
+      </IntlProvider>
+    );
+
+    expect(getActionPolicyEditHref).toHaveBeenCalledWith('ap-1');
+
+    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
+    expect(editLink).toBeInTheDocument();
+    expect(editLink).toHaveTextContent('Global Policy');
+    expect(editLink).toHaveAttribute(
+      'href',
+      '/app/observability/alerting/action-policies/edit/ap-1'
+    );
+    expect(editLink).toHaveAttribute('target', '_blank');
+    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
+  it('renders the policy name as plain text when no href builder is injected', () => {
+    const http = httpServiceMock.createStartContract();
 
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
@@ -272,15 +335,8 @@ describe('LinkedActionPoliciesStep', () => {
       </IntlProvider>
     );
 
-    const editLink = screen.getByTestId('linkedActionPolicyEdit-ap-1');
-    expect(editLink).toBeInTheDocument();
-    expect(editLink).toHaveTextContent('Global Policy');
-    expect(editLink).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/action_policies/edit/ap-1'
-    );
-    expect(editLink).toHaveAttribute('target', '_blank');
-    expect(editLink).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(screen.queryByTestId('linkedActionPolicyEdit-ap-1')).not.toBeInTheDocument();
+    expect(screen.getByTestId('linkedActionPolicyName-ap-1')).toHaveTextContent('Global Policy');
   });
 
   it('renders connector icons for a policy from the batched connector-types hook', () => {
@@ -355,8 +411,8 @@ describe('LinkedActionPoliciesStep', () => {
     expect(screen.getByTestId('linkedActionPoliciesError')).toBeInTheDocument();
   });
 
-  it('passes the current form tags to the matcher hook so unsaved changes are reflected', () => {
-    mockUseWatch.mockReturnValue({ name: 'My Rule', tags: ['env:prod'] });
+  it('passes the current form routing tags to the matcher hook so unsaved changes are reflected', () => {
+    mockUseWatch.mockReturnValue({ name: 'My Rule', routingTags: ['env:prod'] });
     mockUseMatchedActionPolicies.mockReturnValue({
       isLoading: false,
       isPreviousData: false,
@@ -369,7 +425,7 @@ describe('LinkedActionPoliciesStep', () => {
     renderComponent();
 
     expect(mockUseMatchedActionPolicies).toHaveBeenCalledWith(
-      expect.objectContaining({ tags: ['env:prod'] })
+      expect.objectContaining({ routingTags: ['env:prod'] })
     );
   });
 });

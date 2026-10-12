@@ -25,10 +25,6 @@ import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
 import type { AlertingServerStartDependencies } from '../../../types';
 import type { LatestTaskStateSchema } from './task_state';
-import {
-  INVALIDATE_API_KEYS_TASK_INTERVAL,
-  INVALIDATE_API_KEYS_TASK_REMOVAL_DELAY,
-} from './task_definition';
 
 type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
@@ -54,10 +50,8 @@ export class ApiKeyInvalidationTaskRunner {
 
   public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
     const state = taskInstance.state as LatestTaskStateSchema;
-    const interval =
-      this.config.invalidateApiKeysTask?.interval ?? INVALIDATE_API_KEYS_TASK_INTERVAL;
-    const removalDelay =
-      this.config.invalidateApiKeysTask?.removalDelay ?? INVALIDATE_API_KEYS_TASK_REMOVAL_DELAY;
+    const interval = this.config.invalidateApiKeysTask.interval;
+    const removalDelay = this.config.invalidateApiKeysTask.removalDelay;
     let totalInvalidated = 0;
     let missingApiKeyRetries = { ...state.missing_api_key_retries };
 

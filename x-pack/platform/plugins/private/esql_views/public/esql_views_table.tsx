@@ -100,7 +100,7 @@ interface ViewActionsProps {
   view: EsqlView;
   isEnabled: boolean;
   onEdit?: (view: EsqlView) => void;
-  onDelete: (views: EsqlView[]) => void;
+  onDelete?: (views: EsqlView[]) => void;
 }
 
 const ViewActions: FunctionComponent<ViewActionsProps> = ({
@@ -151,18 +151,22 @@ const ViewActions: FunctionComponent<ViewActionsProps> = ({
                 </EuiContextMenuItem>,
               ]
             : []),
-          <EuiContextMenuItem
-            data-test-subj="esqlViewsDeleteButton"
-            icon="trash"
-            color="danger"
-            key="delete"
-            onClick={() => {
-              closePopover();
-              onDelete([view]);
-            }}
-          >
-            {translations.deleteViewButtonLabel}
-          </EuiContextMenuItem>,
+          ...(onDelete
+            ? [
+                <EuiContextMenuItem
+                  data-test-subj="esqlViewsDeleteButton"
+                  icon="trash"
+                  color="danger"
+                  key="delete"
+                  onClick={() => {
+                    closePopover();
+                    onDelete([view]);
+                  }}
+                >
+                  {translations.deleteViewButtonLabel}
+                </EuiContextMenuItem>,
+              ]
+            : []),
         ]}
       />
     </EuiPopover>
@@ -178,7 +182,8 @@ interface EsqlViewsTableProps {
   onSelectionChange: (views: EsqlView[]) => void;
   onEdit?: (view: EsqlView) => void;
   onReload: () => void;
-  onDelete: (views: EsqlView[]) => void;
+  /** Omitted when the user cannot delete views, which also hides row selection and bulk delete. */
+  onDelete?: (views: EsqlView[]) => void;
   onOpenInDiscover: (view: EsqlView) => void;
 }
 
@@ -195,6 +200,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
   onOpenInDiscover,
 }) => {
   const [isSearchActive, setIsSearchActive] = useState(false);
+  const hasRowActionsMenu = onEdit !== undefined || onDelete !== undefined;
   const columns = useMemo<Array<EuiBasicTableColumn<EsqlView>>>(
     () => [
       {
@@ -227,32 +233,45 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
             name: translations.openInDiscoverButtonLabel,
             description: translations.openInDiscoverButtonTooltip,
             type: 'icon',
-            icon: 'discoverApp',
+            icon: 'productDiscover',
             color: 'text',
             enabled: () => isDiscoverAvailable,
             onClick: onOpenInDiscover,
             'data-test-subj': 'esqlViewsOpenInDiscoverAction',
           },
-          {
-            render: (view, isEnabled) => (
-              <ViewActions view={view} isEnabled={isEnabled} onEdit={onEdit} onDelete={onDelete} />
-            ),
-          },
+          ...(hasRowActionsMenu
+            ? [
+                {
+                  render: (view: EsqlView, isEnabled: boolean) => (
+                    <ViewActions
+                      view={view}
+                      isEnabled={isEnabled}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                    />
+                  ),
+                },
+              ]
+            : []),
         ],
         width: '120px',
         'data-test-subj': 'esqlViewsActionsColumn',
       },
     ],
-    [isDiscoverAvailable, onDelete, onEdit, onOpenInDiscover]
+    [hasRowActionsMenu, isDiscoverAvailable, onDelete, onEdit, onOpenInDiscover]
   );
 
-  const selection = useMemo<EuiTableSelectionType<EsqlView>>(
-    () => ({
-      selected: selectedViews,
-      onSelectionChange,
-      selectableMessage: () => translations.selectRowAriaLabel,
-    }),
-    [onSelectionChange, selectedViews]
+  // Selection only exists to bulk delete, so it is hidden along with the delete actions.
+  const selection = useMemo<EuiTableSelectionType<EsqlView> | undefined>(
+    () =>
+      onDelete
+        ? {
+            selected: selectedViews,
+            onSelectionChange,
+            selectableMessage: () => translations.selectRowAriaLabel,
+          }
+        : undefined,
+    [onDelete, onSelectionChange, selectedViews]
   );
 
   const search = useMemo<EuiInMemoryTableProps<EsqlView>['search']>(
@@ -278,7 +297,7 @@ export const EsqlViewsTable: FunctionComponent<EsqlViewsTableProps> = ({
         },
       },
       toolsLeft:
-        selectedViews.length > 0 ? (
+        onDelete && selectedViews.length > 0 ? (
           <EuiButton
             data-test-subj="esqlViewsBulkDeleteButton"
             color="danger"

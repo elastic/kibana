@@ -6,11 +6,14 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { createRuleDataSchema } from './rule_data_schema';
 import {
   findRuleTemplatesRequestSchema,
   ruleTemplateDataSchema,
   ruleTemplateIdParamsSchema,
+  ruleTemplateTagsParamsSchema,
+  ruleTemplateTagsResponseSchema,
 } from './rule_template_schema';
 import { FIND_MAX_RESULT_WINDOW, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
@@ -135,6 +138,7 @@ describe('findRuleTemplatesRequestSchema', () => {
         sort_field: 'name',
         sort_order: 'asc',
         tags: ['Kubernetes'],
+        excluded_tags: ['development'],
       })
     ).toEqual({
       page: 2,
@@ -143,6 +147,7 @@ describe('findRuleTemplatesRequestSchema', () => {
       sort_field: 'name',
       sort_order: 'asc',
       tags: ['Kubernetes'],
+      excluded_tags: ['development'],
     });
   });
 
@@ -285,6 +290,7 @@ describe('rule template create-rule schema coupling', () => {
                     "type": "string",
                   },
                   "maxItems": 16,
+                  "minItems": 1,
                   "type": "array",
                 },
               },
@@ -297,14 +303,26 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "description": "Rule metadata.",
               "properties": Object {
-                "builder_type": Object {
-                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL.",
-                  "maxLength": 64,
-                  "type": "string",
+                "builder": Object {
+                  "additionalProperties": false,
+                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL; send \`null\` on PATCH to clear it.",
+                  "properties": Object {
+                    "type": Object {
+                      "description": "Rule builder type.",
+                      "maxLength": 64,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "type",
+                  ],
+                  "type": "object",
                 },
                 "description": Object {
-                  "description": "Human-readable description of the rule.",
+                  "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
                   "maxLength": 1024,
+                  "minLength": 1,
                   "type": "string",
                 },
                 "name": Object {
@@ -312,6 +330,17 @@ describe('rule template create-rule schema coupling', () => {
                   "maxLength": 256,
                   "minLength": 1,
                   "type": "string",
+                },
+                "routing_tags": Object {
+                  "description": "Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\".",
+                  "items": Object {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "maxItems": 20,
+                  "minItems": 1,
+                  "type": "array",
                 },
                 "tags": Object {
                   "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
@@ -349,7 +378,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_alert": Object {
               "additionalProperties": false,
-              "description": "Marks an existing alert episode \`active\` when the rule finds no data. It never opens an episode for a group that has not breached. Not accepted when creating or updating rules.",
+              "description": "Marks an existing alert \`active\` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.",
               "properties": Object {
                 "query": Object {
                   "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used, which then has to be a presence query in its own right — so \`query.breach\` is required.",
@@ -383,7 +412,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_keep_last": Object {
               "additionalProperties": false,
-              "description": "Holds the alert episode's current status when the rule finds no data.",
+              "description": "Holds the alert's current status when the rule finds no data.",
               "properties": Object {
                 "query": Object {
                   "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used, which then has to be a presence query in its own right — so \`query.breach\` is required.",
@@ -403,7 +432,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_no_data_resolve": Object {
               "additionalProperties": false,
-              "description": "Closes the alert episode the first time the rule finds no data for a group.",
+              "description": "Closes the alert the first time the rule finds no data for a group.",
               "properties": Object {
                 "query": Object {
                   "description": "Optional ES|QL query that checks whether a group has data. If omitted, \`query.base\` is used, which then has to be a presence query in its own right — so \`query.breach\` is required.",
@@ -445,7 +474,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "object",
             },
             "alerting_rule_recovery": Object {
-              "description": "When an alert episode recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
+              "description": "When an alert recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
               "oneOf": Array [
                 Object {
                   "$ref": "#/definitions/alerting_rule_recovery_no_breach",
@@ -463,7 +492,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_condition": Object {
               "additionalProperties": false,
-              "description": "Recovers the alert episode when \`query.base\` plus \`segment\` returns the group. Requires \`query.breach\`.",
+              "description": "Recovers the alert when \`query.base\` plus \`segment\` returns the group. Requires \`query.breach\`.",
               "properties": Object {
                 "segment": Object {
                   "description": "ES|QL clause appended to \`query.base\`, for example \`WHERE avg_cpu < 0.60\`. Don't include a \`FROM\` clause.",
@@ -484,7 +513,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_manual": Object {
               "additionalProperties": false,
-              "description": "Does not recover automatically. Close the alert episode with a user action. \`state_transition.recovering\` has no effect.",
+              "description": "Does not recover automatically. Close the alert with a user action. \`state_transition.recovering\` has no effect.",
               "properties": Object {
                 "strategy": Object {
                   "const": "manual",
@@ -498,7 +527,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_no_breach": Object {
               "additionalProperties": false,
-              "description": "Recovers the alert episode when its group no longer appears in the breach results.",
+              "description": "Recovers the alert when its group no longer appears in the breach results.",
               "properties": Object {
                 "strategy": Object {
                   "const": "no_breach",
@@ -512,10 +541,10 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_recovery_query": Object {
               "additionalProperties": false,
-              "description": "Recovers the alert episode when this separate query returns the group.",
+              "description": "Recovers the alert when this separate query returns the group.",
               "properties": Object {
                 "query": Object {
-                  "description": "Independent ES|QL query, including its own \`FROM\` clause. A matching group recovers the alert episode.",
+                  "description": "Independent ES|QL query, including its own \`FROM\` clause. A matching group recovers the alert.",
                   "maxLength": 10000,
                   "minLength": 1,
                   "type": "string",
@@ -553,7 +582,7 @@ describe('rule template create-rule schema coupling', () => {
             },
             "alerting_rule_state_transition": Object {
               "additionalProperties": false,
-              "description": "Specifies how many consecutive matches, or how long a condition must hold, before an alert episode becomes \`active\` or \`inactive\`. Allowed only when \`kind\` is \`alert\`.",
+              "description": "Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes \`active\` or \`inactive\`. Allowed only when \`kind\` is \`alert\`.",
               "properties": Object {
                 "pending": Object {
                   "allOf": Array [
@@ -561,7 +590,7 @@ describe('rule template create-rule schema coupling', () => {
                       "$ref": "#/definitions/alerting_rule_state_transition_pending",
                     },
                   ],
-                  "description": "Delay before a match opens an alert episode.",
+                  "description": "Delay before a match opens an alert.",
                 },
                 "recovering": Object {
                   "allOf": Array [
@@ -569,7 +598,7 @@ describe('rule template create-rule schema coupling', () => {
                       "$ref": "#/definitions/alerting_rule_state_transition_recovering",
                     },
                   ],
-                  "description": "Delay before a recovered match closes the alert episode. Has no effect when \`recovery.strategy\` is \`manual\`.",
+                  "description": "Delay before a recovered match closes the alert. Has no effect when \`recovery.strategy\` is \`manual\`.",
                 },
               },
               "type": "object",
@@ -578,7 +607,7 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "properties": Object {
                 "count": Object {
-                  "description": "Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match.",
+                  "description": "Consecutive matches the alert spends in \`pending\` before it becomes \`active\` on the next match. For example, \`2\` opens it on the third consecutive match. Set to \`0\` to open it on the first match.",
                   "maximum": 1000,
                   "minimum": 0,
                   "type": "integer",
@@ -603,7 +632,7 @@ describe('rule template create-rule schema coupling', () => {
               "additionalProperties": false,
               "properties": Object {
                 "count": Object {
-                  "description": "Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery.",
+                  "description": "Consecutive recoveries the alert spends in \`recovering\` before it becomes \`inactive\` on the next recovery. For example, \`2\` closes it on the third consecutive recovery. Set to \`0\` to close it on the first recovery.",
                   "maximum": 1000,
                   "minimum": 0,
                   "type": "integer",
@@ -627,11 +656,12 @@ describe('rule template create-rule schema coupling', () => {
           },
           "properties": Object {
             "artifacts": Object {
-              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present.",
+              "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. An empty array is rejected: omit \`artifacts\` on create, or send \`null\` on PATCH to clear.",
               "items": Object {
                 "$ref": "#/definitions/alerting_rule_artifact",
               },
               "maxItems": 100,
+              "minItems": 1,
               "type": "array",
             },
             "grouping": Object {
@@ -680,16 +710,9 @@ describe('rule template create-rule schema coupling', () => {
               "$ref": "#/definitions/alerting_rule_schedule",
             },
             "state_transition": Object {
-              "anyOf": Array [
+              "allOf": Array [
                 Object {
-                  "allOf": Array [
-                    Object {
-                      "$ref": "#/definitions/alerting_rule_state_transition",
-                    },
-                  ],
-                },
-                Object {
-                  "type": "null",
+                  "$ref": "#/definitions/alerting_rule_state_transition",
                 },
               ],
             },
@@ -771,5 +794,38 @@ describe('ruleTemplateIdParamsSchema', () => {
 
   it('rejects unknown keys', () => {
     expect(() => ruleTemplateIdParamsSchema.parse({ id: 'template-1', foo: 'bar' })).toThrow();
+  });
+});
+
+describe('ruleTemplateTagsParamsSchema', () => {
+  it.each([{}, { search: '' }, { search: 'nginx' }, { search: 'a'.repeat(MAX_TAG_LENGTH) }])(
+    'accepts a bounded optional prefix: %j',
+    (params) => {
+      expect(ruleTemplateTagsParamsSchema.parse(params)).toEqual(params);
+    }
+  );
+
+  it.each([
+    { search: 'a'.repeat(MAX_TAG_LENGTH + 1) },
+    { kind: 'alert' },
+    { size: 100 },
+    { search: 1 },
+  ])('rejects invalid query parameters: %j', (params) => {
+    expect(ruleTemplateTagsParamsSchema.safeParse(params).success).toBe(false);
+  });
+});
+
+describe('ruleTemplateTagsResponseSchema', () => {
+  it.each([{ tags: [] }, { tags: ['nginx', 'infra'] }])('accepts tags %j', ({ tags }) => {
+    expect(ruleTemplateTagsResponseSchema.parse({ tags })).toEqual({ tags });
+  });
+
+  it.each([
+    {},
+    { tags: [''] },
+    { tags: ['a'.repeat(MAX_TAG_LENGTH + 1)] },
+    { tags: Array.from({ length: TAGS_RESPONSE_LIMIT + 1 }, (_, index) => `tag-${index}`) },
+  ])('rejects invalid or oversized responses', (response) => {
+    expect(ruleTemplateTagsResponseSchema.safeParse(response).success).toBe(false);
   });
 });

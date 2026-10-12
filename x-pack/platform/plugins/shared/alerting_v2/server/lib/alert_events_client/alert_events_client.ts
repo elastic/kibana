@@ -116,7 +116,7 @@ export class AlertEventsClient {
       status,
       source,
       type: alertEventType.alert,
-      episode: {
+      alert: {
         id: episodeId,
         status: episodeStatus,
         ...(statusCount != null ? { status_count: statusCount } : {}),
@@ -146,7 +146,7 @@ export class AlertEventsClient {
 
     return {
       group_hash: groupHash,
-      episode_id: episodeId,
+      alert_id: episodeId,
     };
   }
 
@@ -160,9 +160,9 @@ export class AlertEventsClient {
       last_episode_status: string;
     }>({
       query: `FROM ${ALERT_EVENTS_DATA_STREAM}
-          | WHERE type == "alert" AND group_hash == "${groupHash}" AND episode.status IS NOT NULL
-          | STATS last_episode_id = LAST(episode.id, @timestamp),
-                  last_episode_status = LAST(episode.status, @timestamp)
+          | WHERE type == "alert" AND group_hash == "${groupHash}" AND alert.status IS NOT NULL
+          | STATS last_episode_id = LAST(alert.id, @timestamp),
+                  last_episode_status = LAST(alert.status, @timestamp)
             BY group_hash
           | KEEP last_episode_id, last_episode_status
           | LIMIT 1`,

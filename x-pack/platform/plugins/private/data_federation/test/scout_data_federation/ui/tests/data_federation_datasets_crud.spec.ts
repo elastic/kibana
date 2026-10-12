@@ -36,7 +36,7 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     }
   });
 
-  test('creates, edits, and deletes a dataset', async ({
+  test('creates, edits, and deletes a data set', async ({
     browserAuth,
     kbnClient,
     page,
@@ -59,7 +59,6 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
           type: 's3',
           description: 'Scout dataset CRUD source',
           settings: {
-            region: 'us-east-1',
             access_key: 'AKIAIOSFODNN7EXAMPLE',
             secret_key: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
           },
@@ -70,11 +69,7 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     await test.step('navigate to the Data Federation management app and ensure the data sets tab is selected', async () => {
       await pageObjects.dataFederation.goto();
 
-      await page.getByRole('tab', { name: 'Datasets' }).click();
-      await expect(page.getByRole('tab', { name: 'Datasets' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      await pageObjects.dataFederation.selectTab('Datasets');
       await expect(pageObjects.dataFederation.dataSetsTable).toBeVisible();
     });
 

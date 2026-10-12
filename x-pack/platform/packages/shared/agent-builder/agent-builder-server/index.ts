@@ -69,6 +69,7 @@ export type {
 export {
   getToolResultId,
   createErrorResult,
+  createNonInteractiveDeclinedResult,
   createOtherResult,
   isToolResultId,
   isToolHandlerStandardReturn,
@@ -76,6 +77,7 @@ export {
 export type {
   AgentHandlerParams,
   AgentHandlerContext,
+  ExecutionConversationAccess,
   AgentHandlerReturn,
   AgentHandlerFn,
   RunAgentFn,
@@ -87,6 +89,8 @@ export type {
   AgentEventEmitterFn,
   RunAgentOnEventFn,
   ExperimentalFeatures,
+  DeploymentContext,
+  DeploymentEnvironment,
   SubAgentExecutor,
   SubAgentExecution,
   ConversationClient,
@@ -169,6 +173,8 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
+  ConversationsSetup,
+  ConversationUpdatedOptIn,
   ConversationsStart,
   ConversationTemplatesSetup,
   ConversationTemplatesStart,
@@ -176,12 +182,17 @@ export type {
 } from './plugin_contract';
 export type {
   AttachmentPublicClient,
+  AttachmentWriteAccess,
   ListAttachmentsResult,
   CreateAttachmentArgs,
   GetAttachmentArgs,
   UpdateAttachmentArgs,
   DeleteAttachmentArgs,
   ListAttachmentsArgs,
+  BulkCreateAttachmentInput,
+  BulkCreateAttachmentError,
+  BulkCreateAttachmentsResult,
+  BulkCreateAttachmentsArgs,
 } from './attachments';
 export type {
   ConversationPublicClient,

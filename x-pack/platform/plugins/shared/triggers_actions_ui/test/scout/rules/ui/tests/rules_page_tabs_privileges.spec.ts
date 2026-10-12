@@ -12,9 +12,8 @@ const RULES_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions(\/
 
 /*
  * With the `alerting:v2:enabled` advanced setting on, the classic Rules page
- * swaps its Rules/Logs tabs for V1/V2 rules tabs — but only for a viewer who
- * can read Alerting v2 rules. Lacking that privilege collapses the heading
- * tab bar to nothing.
+ * hides its heading tabs, including the V2 rules tab. The page stays on the
+ * Rules app. Lacking the v2 rules privilege also collapses the heading tab bar.
  *
  * Logs itself is unaffected by this privilege check: once the flag is on,
  * Logs always moves from a tab into the "More" menu instead — that placement
@@ -49,7 +48,7 @@ test.describe(
       });
     });
 
-    test('shows the V1 and V2 rules tabs when the user can read both surfaces', async ({
+    test('hides the V2 rules tab when the user can read both surfaces', async ({
       page,
       browserAuth,
     }) => {
@@ -57,10 +56,11 @@ test.describe(
       await page.gotoApp('rules');
       await page.waitForURL(RULES_URL_RE);
 
-      await expect(page.testSubj.locator('v1RulesTab')).toBeVisible();
-      await expect(page.testSubj.locator('v2RulesTab')).toBeVisible();
+      await expect(page.testSubj.locator('v1RulesTab')).toBeHidden();
+      await expect(page.testSubj.locator('v2RulesTab')).toBeHidden();
       await expect(page.testSubj.locator('rulesTab')).toBeHidden();
       await expect(page.testSubj.locator('logsTab')).toBeHidden();
+      await expect(page.locator('[role="tab"]')).toHaveCount(0);
     });
 
     test('hides all heading tabs when the user cannot read Alerting v2 rules', async ({
