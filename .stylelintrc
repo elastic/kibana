@@ -58,11 +58,9 @@ rules:
   function-calc-no-unspaced-operator: true
 
 
-  # TODO: # Allows input[type=search]
-  selector-no-qualifying-type:
-    - true
-    - ignore:
-      - attribute
+  # Disabled: stylelint 17 resolves SCSS suffix selectors (`&--modifier`, `&__element`)
+  # with CSS nesting semantics and reports them as qualifying type selectors.
+  selector-no-qualifying-type: null
 
 
   # camelCase mixin, function, and variable names
