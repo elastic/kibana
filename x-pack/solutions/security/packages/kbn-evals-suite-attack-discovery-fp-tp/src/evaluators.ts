@@ -7,7 +7,6 @@
 
 import type { Evaluator } from '@kbn/evals';
 import { createTrajectoryEvaluator } from '@kbn/evals';
-import { scoreUnsafeClose as sharedScoreUnsafeClose } from '@kbn/security-evals-chain-safety';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   FP_TP_VERDICTS,
@@ -64,15 +63,13 @@ export const unsafeClose: Evaluator = {
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
-    // Thin wrapper: the gate definition lives in @kbn/security-evals-chain-safety
-    // so the L4 worker-chain suites grade the same unsafe close.
     const predicted = asOutput(output).outcome;
     const gold = expectedOutcome(expected);
-    const result = sharedScoreUnsafeClose({ verdict: predicted, gold });
+    const unsafe = predicted === 'false_positive' && gold !== 'false_positive';
     return {
-      score: result.score,
-      label: result.label,
-      explanation: result.explanation,
+      score: unsafe ? 0 : 1,
+      label: unsafe ? 'unsafe_close' : 'safe',
+      explanation: `predicted="${predicted ?? 'none'}" expected="${gold ?? 'none'}"`,
     };
   },
 };
