@@ -13,6 +13,27 @@ const INTERNAL_HEADERS = {
   'elastic-api-version': '1',
 };
 
+interface WorkerRow {
+  id: string;
+  /** Null until the per-space managed Worker is installed — the API's install marker. */
+  settingsRevision: number | null;
+}
+
+const readWorkers = (data: unknown): WorkerRow[] => {
+  const body = data as { workers?: WorkerRow[] } | WorkerRow[];
+  return Array.isArray(body) ? body : body.workers ?? [];
+};
+
+/**
+ * Installed workers only. `GET /internal/alertzero/workers` always answers with the full
+ * registered catalog, so its array length says nothing about installation — the install
+ * marker is `settingsRevision`, which is null for a worker this space has not installed.
+ */
+const installedWorkerIds = (data: unknown): string[] =>
+  readWorkers(data)
+    .filter((worker) => worker.settingsRevision != null)
+    .map((worker) => worker.id);
+
 spaceTest.describe(
   'AlertZero onboarding derived states',
   { tag: [...tags.stateful.classic] },
@@ -62,9 +83,9 @@ spaceTest.describe(
           headers: INTERNAL_HEADERS,
         });
         expect(workers.status).toBe(200);
-        const body = workers.data as { workers?: unknown[] } | unknown[];
-        const workersList = Array.isArray(body) ? body : body.workers ?? [];
-        expect(workersList.length).toBeGreaterThan(0);
+        // Assert installation, not catalog size: the endpoint always lists every registered
+        // worker, so a non-empty array is true whether or not anything was installed.
+        expect(installedWorkerIds(workers.data)).not.toHaveLength(0);
       }
     );
     spaceTest(
@@ -113,9 +134,12 @@ spaceTest.describe(
           headers: INTERNAL_HEADERS,
         });
         expect(workers.status).toBe(200);
-        const body = workers.data as { workers?: unknown[] } | unknown[];
-        const workersList = Array.isArray(body) ? body : body.workers ?? [];
-        expect(workersList).toHaveLength(0);
+        // Real uninstall evidence, measured on the install marker rather than on the
+        // catalog: the endpoint always lists all registered workers, so only
+        // `settingsRevision` says whether this space still has one installed. The
+        // catalog line below locks in that reasoning — it is non-empty either way.
+        expect(installedWorkerIds(workers.data)).toHaveLength(0);
+        expect(readWorkers(workers.data).length).toBeGreaterThan(0);
         // The setting source of truth reads false again, so the gate is back on S0.
         await page.gotoApp('alertzero');
         await expect(page.testSubj.locator('alertZeroOnboardingDisabledPage')).toBeVisible();

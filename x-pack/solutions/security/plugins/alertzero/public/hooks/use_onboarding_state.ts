@@ -15,7 +15,8 @@ import {
 import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
 import { DEFAULT_PROPOSALS_WINDOW_HOURS, useProposalsList } from './use_proposals_api';
-import { retryOnceOnTransientError, useWatches } from './use_watches_api';
+import { retryOnceOnTransientError } from './use_watches_api';
+import { useWorkers } from './use_workers_api';
 import {
   ENABLE_SUCCESS_TOAST_BODY,
   ENABLE_SUCCESS_TOAST_TITLE,
@@ -24,11 +25,18 @@ import { fireConfetti } from '../components/confetti';
 
 /**
  * Derived onboarding state. There is no stored step — the state is recomputed from the
- * `alertzero:enabled` advanced setting, the installed watches, and any generated proposals.
+ * `alertzero:enabled` advanced setting plus the space's live Worker installation and run
+ * data, with generated proposals as a secondary completion signal.
+ *
+ * The Watch catalog (`/watches`) is deliberately NOT the source: it answers with the catalog
+ * placeholders for every space (`recentRuns: []`, `metrics.lastRun: null`), so it cannot say
+ * whether this space has workers installed or has ever run one. `/workers` can: its
+ * `settingsRevision` is null until the per-space managed Worker is installed, and `lastRun`
+ * is the real invocation timestamp.
  *
  * S0 `disabled` — advanced setting is `false`. Show the CTA + enable toggle.
- * S1 `no-watches` — enabled but no watches installed. Show empty state + watch catalog link.
- * S2 `awaiting-first-run` — watches installed but none have produced a run yet.
+ * S1 `no-watches` — enabled but no workers installed. Show empty state + watch catalog link.
+ * S2 `awaiting-first-run` — workers installed but none have produced a run yet.
  * `active` — a run exists; onboarding is complete and the app no longer needs this page.
  */
 export type OnboardingState = 'disabled' | 'no-watches' | 'awaiting-first-run' | 'active';
@@ -39,11 +47,15 @@ export interface UseOnboardingStateResult {
   enabled: boolean;
   hasWatches: boolean;
   hasRun: boolean;
-  /** Watches and proposals queries are still loading. */
+  /** Workers and proposals queries are still loading. */
   isLoading: boolean;
   /** Whether the current user may flip the setting (`capabilities.advancedSettings.save`). */
   canToggle: boolean;
-  watchesError: unknown;
+  /**
+   * The live installation/run read failed. The derived state is then NOT trustworthy: a failed
+   * read must never pass for an empty installation, so consumers must not treat S1 as real.
+   */
+  hasQueryError: boolean;
 }
 
 export const useOnboardingState = (): UseOnboardingStateResult => {
@@ -66,22 +78,31 @@ export const useOnboardingState = (): UseOnboardingStateResult => {
 
   const canToggle = services.application?.capabilities?.advancedSettings?.save === true;
 
-  const { data: watchesData, isLoading: watchesLoading, error: watchesError } = useWatches();
-  // The gate blocks routing on this query, so it uses the bounded retry policy: a
-  // persistently-failing backend must reach the empty state fast, not after ~11s of spinner.
-  const { data: proposalsData, isLoading: proposalsLoading } = useProposalsList(
-    DEFAULT_PROPOSALS_WINDOW_HOURS,
-    { retry: retryOnceOnTransientError }
-  );
+  // Live installation/run data. The gate blocks routing on this query, so it uses the
+  // bounded retry policy: a persistently-failing backend must be distinguishable from an
+  // empty installation in about a second, not after ~11s of spinner.
+  const {
+    data: workersData,
+    isLoading: workersLoading,
+    isFetching: workersFetching,
+    error: workersError,
+  } = useWorkers({ retry: retryOnceOnTransientError });
+  const {
+    data: proposalsData,
+    isLoading: proposalsLoading,
+    error: proposalsError,
+  } = useProposalsList(DEFAULT_PROPOSALS_WINDOW_HOURS, { retry: retryOnceOnTransientError });
 
-  const watches = watchesData?.watches ?? [];
+  const workers = workersData?.workers ?? [];
   // Any proposal inside the window — open or closed — is proof a run produced output.
   const proposalCount = proposalsData?.total ?? 0;
 
-  const hasWatches = watches.length > 0;
-  const hasRun =
-    proposalCount > 0 ||
-    watches.some((watch) => (watch.recentRuns?.length ?? 0) > 0 || watch.metrics?.lastRun != null);
+  // `settingsRevision` is the contract's install marker: null until the per-space managed
+  // Worker has been installed, so it answers "is this space set up" from the live document
+  // rather than from the catalog. `lastRun` is the real invocation timestamp, which makes
+  // S2 → active fire on an actual run even when that run produced no proposal.
+  const hasWatches = workers.some((worker) => worker.settingsRevision != null);
+  const hasRun = proposalCount > 0 || workers.some((worker) => worker.lastRun != null);
 
   const state: OnboardingState = !enabled
     ? 'disabled'
@@ -96,9 +117,11 @@ export const useOnboardingState = (): UseOnboardingStateResult => {
     enabled,
     hasWatches,
     hasRun,
-    isLoading: watchesLoading || proposalsLoading,
+    // A read still in flight can turn an apparently empty space into an installed one, so
+    // "no workers yet" while refetching is loading, not an empty installation.
+    isLoading: workersLoading || workersFetching || proposalsLoading,
     canToggle,
-    watchesError,
+    hasQueryError: workersError != null || proposalsError != null,
   };
 };
 
@@ -130,6 +153,9 @@ export const useEnableOnboarding = () => {
       // Celebration burst — imperative overlay, survives the gate's route transition.
       fireConfetti();
       void queryClient.invalidateQueries({ queryKey: queryKeys.watches.all });
+      // The gate derives its state from the live worker install, so the enable must refresh
+      // that read too — otherwise the space still looks empty and the app stays gated.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.workers.all });
       // Grouped proposal queries hang off the shared platform proposals root.
       void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
     },

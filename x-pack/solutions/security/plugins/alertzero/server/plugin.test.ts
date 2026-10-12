@@ -14,7 +14,8 @@ import { AlertZeroPlugin } from './plugin';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
-import { ensureAgentSafe, registerAgentType } from './agent';
+import { ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
+import { OnboardingService } from './services/onboarding/onboarding_service';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
 jest.mock('./managed_workflows/register_owner', () => ({
@@ -31,12 +32,17 @@ jest.mock('./managed_workflows/initialize_managed_workflows', () => ({
 
 jest.mock('./agent', () => ({
   agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
+  ensureAgent: jest.fn().mockResolvedValue(undefined),
   ensureAgentSafe: jest.fn().mockResolvedValue(undefined),
   registerAgentType: jest.fn(),
 }));
 
 jest.mock('./routes/register_routes', () => ({
   registerRoutes: jest.fn(),
+}));
+
+jest.mock('./services/onboarding/onboarding_service', () => ({
+  OnboardingService: jest.fn().mockImplementation(() => ({})),
 }));
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
@@ -212,6 +218,33 @@ describe('AlertZeroPlugin feature-flag gating', () => {
           spaceId: DEFAULT_SPACE_ID,
         })
       );
+    });
+
+    it('wires the throwing ensureAgent into the onboarding transaction, not the safe variant', async () => {
+      // ensureAgentSafe logs and swallows, so a failed agent ensure inside enable() would
+      // persist alertzero:enabled=true for a space whose agent was never created.
+      const plugin = new AlertZeroPlugin(createContext(createConfig({ enabled: true })));
+      const coreStart = coreMock.createStart();
+      const agentBuilder = { agents: { ensure: jest.fn() } };
+
+      plugin.start(coreStart, {
+        spaces: undefined,
+        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        agentBuilder,
+        agenticInvestigations: { getProposalsService: jest.fn().mockReturnValue({}) },
+      } as never);
+
+      expect(OnboardingService).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ensureAgentForSpace: expect.any(Function),
+        })
+      );
+      const [onboardingCall] = (OnboardingService as jest.Mock).mock.calls;
+      const onboardingEnsureCalls = (ensureAgentSafe as jest.Mock).mock.calls.length;
+      await onboardingCall[0].ensureAgentForSpace('default');
+      expect(ensureAgent).toHaveBeenCalledWith({ agentBuilder, spaceId: 'default' });
+      // The onboarding ensure must not add a safe-variant call.
+      expect((ensureAgentSafe as jest.Mock).mock.calls.length).toBe(onboardingEnsureCalls);
     });
   });
 });

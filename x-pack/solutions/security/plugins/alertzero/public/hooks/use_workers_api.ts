@@ -20,7 +20,10 @@ import type {
 import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
 import { queryKeys } from '../query_keys';
 
-export const useWorkers = () => {
+export const useWorkers = (options?: {
+  /** Override the shared transient-error retry — callers that block a render need it bounded. */
+  retry?: (failureCount: number, error: unknown) => boolean;
+}) => {
   const { services } = useKibana();
 
   return useQuery({
@@ -30,7 +33,7 @@ export const useWorkers = () => {
         version: API_VERSIONS.internal.v1,
       }),
     keepPreviousData: true,
-    retry: retryOnTransientError,
+    retry: options?.retry ?? retryOnTransientError,
   });
 };
 

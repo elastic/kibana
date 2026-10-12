@@ -37,10 +37,13 @@ import { useOnboardingState } from './hooks/use_onboarding_state';
  */
 const OnboardingGate: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const onboarding = useOnboardingState();
-  if (onboarding.state === 'disabled' || onboarding.state === 'no-watches') {
-    return <OnboardingPage />;
-  }
-  return <>{children}</>;
+  // S0 reads only the setting, so it always gates. S1 reads live installation state: when that
+  // read failed we cannot tell an empty space from a failed one, and a backend error must never
+  // pass for an empty installation and replace chats/settings/deep links with the install prompt.
+  const shouldGate =
+    onboarding.state === 'disabled' ||
+    (onboarding.state === 'no-watches' && !onboarding.hasQueryError);
+  return shouldGate ? <OnboardingPage /> : <>{children}</>;
 };
 
 /**

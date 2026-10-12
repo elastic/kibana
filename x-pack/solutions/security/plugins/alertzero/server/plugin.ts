@@ -187,9 +187,10 @@ export class AlertZeroPlugin
     this.onboardingService = new OnboardingService({
       logger: this.logger,
       getManagedWorkflows: async () => managedWorkflows,
+      // The onboarding transaction must see a failed agent ensure: swallowing it here would
+      // persist alertzero:enabled=true for a space whose agent was never created.
       ensureAgentForSpace: plugins.agentBuilder
-        ? (spaceId) =>
-            ensureAgentSafe({ agentBuilder: plugins.agentBuilder!, spaceId, logger: this.logger })
+        ? (spaceId) => ensureAgent({ agentBuilder: plugins.agentBuilder!, spaceId })
         : undefined,
     });
     this.workersService = new WorkersService(management, managedWorkflows, this.logger, {

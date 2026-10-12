@@ -7,6 +7,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { OnboardingPage } from '.';
 import { useEnableOnboarding, useOnboardingState } from '../../hooks/use_onboarding_state';
 
@@ -28,7 +29,7 @@ const defaultState = () => ({
   hasRun: false,
   isLoading: false,
   canToggle: true,
-  watchesError: null,
+  hasQueryError: false,
 });
 
 const defaultEnable = () => ({
@@ -43,10 +44,16 @@ const renderOnboarding = (
 ) => {
   mockUseOnboardingState.mockReturnValue(state as unknown as ReturnType<typeof useOnboardingState>);
   mockUseEnableOnboarding.mockReturnValue(enable as never);
+  // The page invalidates the live reads from its error state, so it needs a query client.
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  });
   return render(
-    <MemoryRouter initialEntries={['/onboarding']}>
-      <OnboardingPage />
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <OnboardingPage />
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 };
 
@@ -99,6 +106,19 @@ describe('OnboardingPage', () => {
   it('shows a loading prompt while watches/proposals are still loading', () => {
     renderOnboarding({ ...defaultState(), state: 'no-watches', isLoading: true });
     expect(screen.getByText('Checking your AlertZero setup…')).toBeInTheDocument();
+  });
+
+  it('shows the failure and a retry when the live read failed, not the empty-install prompt', () => {
+    renderOnboarding({
+      ...defaultState(),
+      state: 'no-watches',
+      enabled: true,
+      hasQueryError: true,
+    });
+    expect(screen.getByTestId('alertZeroOnboardingQueryErrorPage')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingQueryRetry')).toBeInTheDocument();
+    // The install-first prompt would claim this space has no watches, which we do not know.
+    expect(screen.queryByTestId('alertZeroOnboardingNoWatchesPage')).not.toBeInTheDocument();
   });
 
   it('renders the complete state once a run has happened', () => {

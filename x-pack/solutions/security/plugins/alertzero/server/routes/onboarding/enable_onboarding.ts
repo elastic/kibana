@@ -60,7 +60,14 @@ export const registerEnableOnboardingRoute = ({
         const spaceId = getSpaceId(request);
         try {
           const onboarding = getOnboardingService();
-          const result = await onboarding.enable(spaceId);
+          const core = await context.core;
+          // The source-of-truth write is the transaction's commit step, so a rejected write
+          // rolls the installs back instead of leaving workers behind in a space whose
+          // setting never flipped.
+          const result = await onboarding.enable(spaceId, async () => {
+            await core.uiSettings.client.set(ALERTZERO_ENABLED_SETTING, true);
+            logger.info(`alertzero:enabled set to true in space "${spaceId}"`);
+          });
           if (result.outcome === 'failed') {
             return response.customError({
               statusCode: 503,
@@ -72,10 +79,6 @@ export const registerEnableOnboardingRoute = ({
               },
             });
           }
-          // Source of truth flips last: install succeeded, now persist intent.
-          const core = await context.core;
-          await core.uiSettings.client.set(ALERTZERO_ENABLED_SETTING, true);
-          logger.info(`alertzero:enabled set to true in space "${spaceId}"`);
           return response.ok({
             body: {
               outcome: result.outcome,
@@ -132,14 +135,25 @@ export const registerDisableOnboardingRoute = ({
         const spaceId = getSpaceId(request);
         try {
           const onboarding = getOnboardingService();
-          const core = await context.core;
-          await core.uiSettings.client.set(ALERTZERO_ENABLED_SETTING, false);
           const result = await onboarding.disable(spaceId);
           if (result.outcome === 'failed') {
-            logger.error(
-              `AlertZero disabled in setting but worker removal failed in space "${spaceId}": ${result.error}`
-            );
+            // Report a partial removal as a failure instead of hiding it in logs behind a
+            // 200: the setting stays true so the space keeps advertising the workers that
+            // are still installed, and the caller can retry.
+            return response.customError({
+              statusCode: 503,
+              body: {
+                message: i18n.translate('xpack.alertzero.onboarding.disableFailed', {
+                  defaultMessage: 'AlertZero disablement failed: {error}',
+                  values: { error: result.error ?? 'unknown error' },
+                }),
+              },
+            });
           }
+          // Source of truth flips last: workers are removed, now persist intent.
+          const core = await context.core;
+          await core.uiSettings.client.set(ALERTZERO_ENABLED_SETTING, false);
+          logger.info(`alertzero:enabled set to false in space "${spaceId}"`);
           return response.ok({
             body: { outcome: 'disabled', spaceId, removedWorkerIds: result.installedWorkerIds },
           });

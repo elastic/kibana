@@ -77,6 +77,18 @@ export const ENABLE_SUCCESS_TOAST_BODY = i18n.translate(
   }
 );
 
+// Live status read failed — never present this as "no watches installed"
+export const QUERY_ERROR_TITLE = i18n.translate('xpack.alertzero.onboarding.queryError.title', {
+  defaultMessage: 'Could not check your AlertZero setup',
+});
+export const QUERY_ERROR_BODY = i18n.translate('xpack.alertzero.onboarding.queryError.body', {
+  defaultMessage:
+    'AlertZero could not read the current watch installation for this space, so its setup status is unknown. Retry, or continue and try again later.',
+});
+export const QUERY_ERROR_CTA = i18n.translate('xpack.alertzero.onboarding.queryError.cta', {
+  defaultMessage: 'Retry',
+});
+
 // Onboarding complete (beyond the three derived onboarding states)
 export const ACTIVE_TITLE = i18n.translate('xpack.alertzero.onboarding.active.title', {
   defaultMessage: "You're all set",

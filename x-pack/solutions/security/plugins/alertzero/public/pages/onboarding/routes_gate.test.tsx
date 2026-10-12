@@ -31,10 +31,11 @@ jest.mock('../../components/placeholder_page', () => ({
 
 const mockUseOnboardingState = jest.mocked(useOnboardingState);
 
-const renderRoutes = (state: string, path = '/') => {
-  mockUseOnboardingState.mockReturnValue({ state } as unknown as ReturnType<
-    typeof useOnboardingState
-  >);
+const renderRoutes = (state: string, path = '/', hasQueryError = false) => {
+  mockUseOnboardingState.mockReturnValue({
+    state,
+    hasQueryError,
+  } as unknown as ReturnType<typeof useOnboardingState>);
   return render(
     <MemoryRouter initialEntries={[path]}>
       <AlertZeroRoutes />
@@ -55,6 +56,20 @@ describe('OnboardingGate', () => {
 
   it('S1 (no-watches) keeps the onboarding empty state — there is no catalog page to land on', () => {
     renderRoutes('no-watches', '/watches');
+    expect(screen.getByText('onboarding')).toBeInTheDocument();
+    expect(screen.queryByText('watches')).not.toBeInTheDocument();
+  });
+
+  it('renders the app when the live installation read failed, even though it looks empty', () => {
+    // A backend read failure must not masquerade as an empty installation and replace
+    // chats/settings/deep links with the install-first prompt.
+    renderRoutes('no-watches', '/watches', true);
+    expect(screen.getByText('watches')).toBeInTheDocument();
+    expect(screen.queryByText('onboarding')).not.toBeInTheDocument();
+  });
+
+  it('still gates S0 when a background read failed, because S0 reads only the setting', () => {
+    renderRoutes('disabled', '/watches', true);
     expect(screen.getByText('onboarding')).toBeInTheDocument();
     expect(screen.queryByText('watches')).not.toBeInTheDocument();
   });

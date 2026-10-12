@@ -16,10 +16,10 @@ import { WatchDetailPage } from './watch_detail';
 
 /**
  * Landing redirect for the Watches section. The gate (see `routes.tsx`) already renders the S2
- * empty state while watches are still resolving, so by the time this renders a watch exists.
- * Resolves the installed watches from the react-query cache first (populated by the gate's
- * `useOnboardingState`, so no extra request) and falls back to the live query. It redirects to the
- * first catalog watch rather than a hardcoded floor id, which may not exist in this space.
+ * empty state while the live install read is still resolving, so by the time this renders a
+ * watch exists. Resolves the first watch from the react-query cache when the section was
+ * already visited, and falls back to the live query. It redirects to the first catalog watch
+ * rather than a hardcoded floor id, which may not exist in this space.
  */
 const WatchesIndexRedirect: React.FC = () => {
   const queryClient = useQueryClient();

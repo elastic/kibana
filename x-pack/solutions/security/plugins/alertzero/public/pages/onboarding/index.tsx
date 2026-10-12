@@ -7,9 +7,12 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { useQueryClient } from '@kbn/react-query';
+import { queryKeys as platformQueryKeys } from '@kbn/agentic-investigations-plugin/public';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useEnableOnboarding, useOnboardingState } from '../../hooks/use_onboarding_state';
+import { queryKeys } from '../../query_keys';
 import { AwaitingFirstRun } from './components/awaiting_first_run';
 import { DisabledCta } from './components/disabled_cta';
 import { NoWatches } from './components/no_watches';
@@ -43,6 +46,7 @@ export const OnboardingPage: React.FC = () => {
   useAlertZeroDocTitle(i18n.ONBOARDING_TITLE);
   const onboarding = useOnboardingState();
   const enable = useEnableOnboarding();
+  const queryClient = useQueryClient();
 
   // S0 renders immediately: it depends only on the advanced setting, not on watches/proposals.
   if (onboarding.state === 'disabled') {
@@ -66,6 +70,35 @@ export const OnboardingPage: React.FC = () => {
             <EuiText color="subdued" size="s">
               <p>{i18n.ONBOARDING_LOADING}</p>
             </EuiText>
+          }
+        />
+      </AlertZeroPageSection>
+    );
+  }
+
+  // A failed live read is not an empty space: show the failure with a retry instead of the
+  // install-first prompt, which would claim workers are missing when we simply could not look.
+  if (onboarding.hasQueryError) {
+    return (
+      <AlertZeroPageSection>
+        <EuiEmptyPrompt
+          data-test-subj="alertZeroOnboardingQueryErrorPage"
+          iconType="warning"
+          title={<h2>{i18n.QUERY_ERROR_TITLE}</h2>}
+          body={<p>{i18n.QUERY_ERROR_BODY}</p>}
+          actions={
+            <EuiButton
+              data-test-subj="alertZeroOnboardingQueryRetry"
+              fill
+              onClick={() => {
+                void queryClient.invalidateQueries({ queryKey: queryKeys.workers.all });
+                void queryClient.invalidateQueries({
+                  queryKey: platformQueryKeys.proposals.all,
+                });
+              }}
+            >
+              {i18n.QUERY_ERROR_CTA}
+            </EuiButton>
           }
         />
       </AlertZeroPageSection>
