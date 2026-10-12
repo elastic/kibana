@@ -19,7 +19,6 @@ import { SIGNIFICANT_EVENTS_TAB } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { getFormattedError } from '../../util/errors';
-import type { FeatureAvailability } from '../../util/feature_availability';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { useSignificantEventsAppRouter } from '../../hooks/use_significant_events_app_router';
 import { useSignificantEventsAvailability } from '../../hooks/use_significant_events_availability';
@@ -39,12 +38,6 @@ import { SignificantEventsPageProvider } from './context/significant_events_page
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
-import { CortexTab } from './components/cortex/tab';
-import { useCortexEnabled } from './components/cortex/use_cortex';
-import { DecisionTreesTab } from './components/decision_trees/tab';
-import { MemoryTab } from './components/memory/tab';
-import { useDecisionTreesEnabled } from './components/decision_trees/use_decision_trees';
-import { useMemoryEnabled } from './components/memory/use_memory';
 import { DetectionsTab } from './components/detections_tab';
 import { SignificantEventsTab } from './components/significant_events_tab';
 import { PausedActivityCallout } from './components/paused_activity_callout';
@@ -56,15 +49,18 @@ const significantEventsTabs = [
   'queries',
   'detections',
   SIGNIFICANT_EVENTS_TAB,
-  'cortex',
-  'decision_trees',
-  'memory',
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
+
+const legacyKnowledgeTabs = ['cortex', 'memory', 'decision_trees'] as const;
+type LegacyKnowledgeTabId = (typeof legacyKnowledgeTabs)[number];
 
 function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
   return significantEventsTabs.includes(value as SignificantEventsTabId);
 }
+
+const isLegacyKnowledgeTab = (value: string): value is LegacyKnowledgeTabId =>
+  legacyKnowledgeTabs.includes(value as LegacyKnowledgeTabId);
 
 export function SignificantEventsPage() {
   const {
@@ -76,6 +72,7 @@ export function SignificantEventsPage() {
     core: {
       application: {
         getUrlForApp,
+        navigateToApp,
         capabilities: { nightshift },
       },
       chrome,
@@ -90,20 +87,6 @@ export function SignificantEventsPage() {
   const { isDeveloperMode } = useDeveloperMode();
 
   const { availability, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
-  const cortexAvailability = useCortexEnabled();
-  const decisionTreesAvailability = useDecisionTreesEnabled();
-  const memoryAvailability = useMemoryEnabled();
-  const isCortexEnabled = cortexAvailability.isEnabled;
-  const isDecisionTreesEnabled = decisionTreesAvailability.isEnabled;
-  const isMemoryEnabled = memoryAvailability.isEnabled;
-
-  // A gated tab reads "off" until its query answers, so wait for the URL tab's own gate
-  // before redirecting; Detections is synchronous and needs no gate.
-  const availabilityGateByTab: Partial<Record<SignificantEventsTabId, FeatureAvailability>> = {
-    cortex: cortexAvailability,
-    memory: memoryAvailability,
-    decision_trees: decisionTreesAvailability,
-  };
   const {
     isBlocked,
     isLoading: isMaintenanceStatusLoading,
@@ -166,6 +149,15 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
+  useEffect(() => {
+    if (isLegacyKnowledgeTab(tab)) {
+      void navigateToApp(NIGHTSHIFT_APP_ID, {
+        path: `/knowledge/${tab}`,
+        replace: true,
+      });
+    }
+  }, [navigateToApp, tab]);
+
   const allTabs = useMemo(
     () => [
       {
@@ -210,51 +202,15 @@ export function SignificantEventsPage() {
         href: router.link('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB } }),
         isSelected: tab === SIGNIFICANT_EVENTS_TAB,
       },
-      ...(isCortexEnabled
-        ? [
-            {
-              id: 'cortex',
-              label: i18n.translate('xpack.significantEventsApp.cortexTab', {
-                defaultMessage: 'Cortex',
-              }),
-              href: router.link('/{tab}', { path: { tab: 'cortex' } }),
-              isSelected: tab === 'cortex',
-            },
-          ]
-        : []),
-      ...(isMemoryEnabled
-        ? [
-            {
-              id: 'memory',
-              label: i18n.translate('xpack.significantEventsApp.memoryTab', {
-                defaultMessage: 'Memory',
-              }),
-              href: router.link('/{tab}', { path: { tab: 'memory' } }),
-              isSelected: tab === 'memory',
-            },
-          ]
-        : []),
-      ...(isDecisionTreesEnabled
-        ? [
-            {
-              id: 'decision_trees',
-              label: i18n.translate('xpack.significantEventsApp.decisionTreesTab', {
-                defaultMessage: 'Decision Trees',
-              }),
-              href: router.link('/{tab}', { path: { tab: 'decision_trees' } }),
-              isSelected: tab === 'decision_trees',
-            },
-          ]
-        : []),
     ],
-    [tab, router, isCortexEnabled, isMemoryEnabled, isDecisionTreesEnabled]
+    [tab, router]
   );
   const tabs = useMemo(
     () => allTabs.filter((item) => item.id !== 'detections' || isDeveloperMode),
     [allTabs, isDeveloperMode]
   );
 
-  if (isAvailabilityLoading) {
+  if (isAvailabilityLoading || isLegacyKnowledgeTab(tab)) {
     return <SignificantEventsAppLoading />;
   }
 
@@ -269,10 +225,6 @@ export function SignificantEventsPage() {
 
   if (tab === 'discoveries') {
     return <RedirectTo path="/{tab}" params={{ path: { tab: SIGNIFICANT_EVENTS_TAB } }} />;
-  }
-
-  if (availabilityGateByTab[tab as SignificantEventsTabId]?.isLoading) {
-    return <SignificantEventsAppLoading />;
   }
 
   if (!isValidSignificantEventsTab(tab) || !tabs.some((item) => item.id === tab)) {
@@ -356,9 +308,6 @@ export function SignificantEventsPage() {
           )}
           {tab === 'detections' && <DetectionsTab />}
           {tab === SIGNIFICANT_EVENTS_TAB && <SignificantEventsTab />}
-          {tab === 'cortex' && isCortexEnabled && <CortexTab />}
-          {tab === 'decision_trees' && isDecisionTreesEnabled && <DecisionTreesTab />}
-          {tab === 'memory' && isMemoryEnabled && <MemoryTab />}
         </SignificantEventsAppPageTemplate.Body>
       </SignificantEventsPageProvider>
     </>

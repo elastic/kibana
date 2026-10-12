@@ -37,6 +37,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   VIEW_DETECTION: 'viewDetection',
   VIEW_ENTITY: 'viewEntity',
   VIEW_INVESTIGATION: EBT_CLICK_ACTIONS.VIEW_INVESTIGATION,
+  VIEW_KNOWLEDGE: 'viewKnowledge',
   VIEW_MANAGEMENT: 'viewManagement',
   VIEW_SETTINGS: 'viewSettings',
   VIEW_SIGNIFICANT_EVENT: 'viewSignificantEvent',
