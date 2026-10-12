@@ -11,6 +11,7 @@ import {
   MOCK_RULE_TEMPLATES,
   seedMockRuleTemplates,
 } from '../../../common/mock_rule_templates';
+import { trackCreateRuleRequests } from '../../../common/track_create_rule_requests';
 import { test } from '../fixtures';
 
 const { id: TEMPLATE_ID, attributes: TEMPLATE_ATTRIBUTES } = MOCK_RULE_TEMPLATES.nginxErrorRate;
@@ -51,6 +52,7 @@ test.describe(
       pageObjects,
     }) => {
       const { ruleLibrary, ruleDetails } = pageObjects;
+      const { createRequestUrls, installRequestUrls } = trackCreateRuleRequests(page);
 
       await test.step('open the rule library and find the template', async () => {
         await ruleLibrary.goto();
@@ -92,6 +94,13 @@ test.describe(
         expect(rule.enabled).toBe(false);
         expect(rule.metadata.name).toBe(TEMPLATE_RULE_NAME);
         expect(rule.metadata.template).toStrictEqual({ id: TEMPLATE_ID });
+      });
+
+      await test.step('the install went through the rule template API exactly once', async () => {
+        // Positive control for the create-API assertions on rules authored outside the rule library.
+        expect(installRequestUrls).toHaveLength(1);
+        expect(installRequestUrls[0]).toContain(`/${TEMPLATE_ID}/_install`);
+        expect(createRequestUrls).toHaveLength(0);
       });
 
       await test.step('view rule opens the installed rule', async () => {
