@@ -18,9 +18,8 @@ import type {
 import type { RoundState } from './round_state';
 import type { ExecutionInterruption } from './events';
 import type {
+  ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
-  ConversationAccessControlPrincipalType,
-  ConversationAccessControlRole,
 } from './access_control/types';
 
 /**
@@ -387,11 +386,8 @@ export type MetadataUpdatedEvent = ConversationEvent<
   MetadataUpdatedEventData
 >;
 
-export interface ConversationParticipant {
-  type: ConversationAccessControlPrincipalType;
-  id: string;
-  role: ConversationAccessControlRole;
-}
+/** An access-control entry as recorded on activity events: the principal and its role. */
+export type ConversationParticipant = ConversationAccessControlEntryInput;
 
 export interface ParticipantsAddedEventData {
   participants: ConversationParticipant[];
