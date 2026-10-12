@@ -26,6 +26,7 @@ const GIB = 1024 * 1024 * 1024;
 
 interface FakeAgent {
   id?: string;
+  active?: boolean;
   status?: string;
   last_checkin?: string;
   last_checkin_message?: string;
@@ -460,5 +461,28 @@ describe('getPrivateLocationAgentStats route', () => {
       ['basic', false],
       ['complete', true],
     ]);
+  });
+
+  it('does not count inactive or unenrolled complete agents as browser-capable', async () => {
+    const completeMetadata = {
+      host: { name: 'host-b' },
+      elastic: { agent: { version: '9.6.0', complete: true } },
+    };
+    const listAgents = jest.fn().mockResolvedValue({
+      agents: [
+        agent({ id: 'inactive', status: 'inactive', local_metadata: completeMetadata }),
+        agent({ id: 'unenrolled', status: 'unenrolled', local_metadata: completeMetadata }),
+        agent({ id: 'not-active', active: false, local_metadata: completeMetadata }),
+        agent({ id: 'offline', status: 'offline', local_metadata: completeMetadata }),
+      ],
+      total: 4,
+    });
+    const { routeContext } = makeContext({ listAgentsImpl: listAgents });
+
+    const result = await run(routeContext);
+
+    expect(
+      Object.fromEntries(result[0].agents.map(({ agentId, complete }) => [agentId, complete]))
+    ).toEqual({ inactive: false, unenrolled: false, 'not-active': false, offline: true });
   });
 });

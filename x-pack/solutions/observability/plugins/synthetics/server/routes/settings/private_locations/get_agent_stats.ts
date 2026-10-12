@@ -43,9 +43,12 @@ interface EnrolledAgentMeta {
   lastCheckinMessage: string | null;
   platform: string | null;
   tags: string[];
-  /** `elastic-agent-complete` image. */
+  /** Active agent that can run browser monitors. Inactive agents never count. */
   complete: boolean;
 }
+
+// Listed with `showInactive: true` for display, but placement only targets active agents.
+const NOT_ACTIVE_STATUSES = new Set(['inactive', 'unenrolled', 'uninstalled']);
 
 interface AgentLocalMetadata {
   host?: { name?: string; hostname?: string; memory?: number };
@@ -106,7 +109,10 @@ export const getEnrolledAgents = async (
         lastCheckinMessage: agent.last_checkin_message ?? null,
         platform: meta?.os?.platform ?? meta?.os?.name ?? null,
         tags: agent.tags ?? [],
-        complete: isCompleteElasticAgent(agent.local_metadata),
+        complete:
+          agent.active !== false &&
+          !NOT_ACTIVE_STATUSES.has(agent.status ?? '') &&
+          isCompleteElasticAgent(agent.local_metadata),
       });
     }
 
