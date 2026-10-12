@@ -237,6 +237,17 @@ describe('usesKafkaOAuth2', () => {
     ).toBe(true);
   });
 
+  it('is false when the oauth2 settings or secrets come with another auth type', () => {
+    expect(
+      usesKafkaOAuth2({
+        type: 'kafka',
+        auth_type: 'ssl',
+        oauth2: { token_url: 'https://idp' },
+        secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+      })
+    ).toBe(false);
+  });
+
   it('is false for any other Kafka output', () => {
     expect(usesKafkaOAuth2({ type: 'kafka', auth_type: 'ssl' })).toBe(false);
     expect(usesKafkaOAuth2({ type: 'kafka', oauth2: null, secrets: { password: 'p' } })).toBe(

@@ -302,18 +302,26 @@ export function omitRemovedKafkaOAuth2Secrets<T extends object>(attributes: T): 
   return (isEmpty(newSecrets) ? otherAttributes : { ...otherAttributes, secrets: newSecrets }) as T;
 }
 
-/** Whether an output payload sets anything of the OAuth2 authentication method. */
+/**
+ * Whether an output payload uses the OAuth2 authentication method: it names it, or it sets OAuth2
+ * settings or secrets without naming another method (a partial update). OAuth2 settings sent along
+ * with another `auth_type` are leftovers, they are cleared and do not count.
+ */
 export function usesKafkaOAuth2(output: {
   type?: string;
   auth_type?: string | null;
   oauth2?: unknown;
   secrets?: unknown;
 }): boolean {
+  if (output.type !== 'kafka') {
+    return false;
+  }
+  if (output.auth_type) {
+    return output.auth_type === kafkaAuthType.OAuth2;
+  }
   return (
-    output.type === 'kafka' &&
-    (output.auth_type === kafkaAuthType.OAuth2 ||
-      !isEmpty(output.oauth2) ||
-      !isEmpty((output.secrets as { oauth2?: unknown } | undefined)?.oauth2))
+    !isEmpty(output.oauth2) ||
+    !isEmpty((output.secrets as { oauth2?: unknown } | undefined)?.oauth2)
   );
 }
 
