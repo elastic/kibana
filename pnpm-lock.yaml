@@ -4567,9 +4567,6 @@ importers:
       ipaddr.js:
         specifier: 2.3.0
         version: 2.3.0
-      isbinaryfile:
-        specifier: 4.0.2
-        version: 4.0.2
       jest-diff:
         specifier: 29.7.0
         version: 29.7.0
@@ -20492,10 +20489,6 @@ packages:
 
   isarray@2.0.5:
     resolution: {integrity: sha512-xHjhDr3cNBK0BzdUJSPXZntQUx/mwMS5Rw4A7lPJ90XGAO6ISP/ePDNuo0vhqOZU+UD5JoodwCAAoZQd3FeAKw==}
-
-  isbinaryfile@4.0.2:
-    resolution: {integrity: sha512-C3FSxJdNrEr2F4z6uFtNzECDM5hXk+46fxaa+cwBe5/XrWSmzdG8DDgyjfX6/NRdBB21q2JXuRAzPCUs+fclnQ==}
-    engines: {node: '>= 8.0.0'}
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
@@ -39008,8 +39001,6 @@ snapshots:
   isarray@1.0.0: {}
 
   isarray@2.0.5: {}
-
-  isbinaryfile@4.0.2: {}
 
   isexe@2.0.0: {}
 
