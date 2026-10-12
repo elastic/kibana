@@ -52,8 +52,6 @@ import { toApiFieldSettings } from '../../../../transforms/columns/field_setting
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const COMMON_STATE_IGNORE_PATHS: string[] = [];
-
 export const DEFAULT_LAYER_ID = 'layer_0';
 
 export type IdRemapping = Array<[old: string | undefined, new: string]>;
@@ -1193,7 +1191,6 @@ export const getCommonNormalizer = <T extends LensAttributes>(
   getArgs: (attributes: T) => CommonNormalizerArgs
 ): NormalizerConfig<T> => ({
   order: -1,
-  ignore: COMMON_STATE_IGNORE_PATHS,
   original: (attributes: T) => {
     const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
