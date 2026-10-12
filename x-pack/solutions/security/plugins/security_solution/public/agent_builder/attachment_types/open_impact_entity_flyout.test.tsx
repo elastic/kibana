@@ -5,35 +5,54 @@
  * 2.0.
  */
 
-import React from 'react';
-import { act, screen } from '@testing-library/react';
+import React, { useEffect } from 'react';
+import { act, screen, waitFor } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { openImpactEntityFlyout } from './open_impact_entity_flyout';
 
+const opened = jest.fn();
+
 jest.mock('./grouped_attachments/flyout_opener', () => ({
-  GroupedAttachmentFlyoutOpener: ({ descriptor }: { descriptor: unknown }) => (
-    <div
-      data-test-subj="groupedAttachmentFlyoutOpener"
-      data-descriptor={JSON.stringify(descriptor)}
-    />
-  ),
+  GroupedAttachmentFlyoutOpener: ({
+    descriptor,
+    onOpened,
+  }: {
+    descriptor: unknown;
+    onOpened?: () => void;
+  }) => {
+    // The real opener opens the flyout in an effect, then reports it.
+    useEffect(() => {
+      opened(descriptor);
+      onOpened?.();
+    }, [descriptor, onOpened]);
+    return (
+      <div
+        data-test-subj="groupedAttachmentFlyoutOpener"
+        data-descriptor={JSON.stringify(descriptor)}
+      />
+    );
+  },
 }));
 
 /** Enough of the rendering service for `toMountPoint`: it only wraps the node. */
 const rendering = { addContext: (node: React.ReactNode) => <>{node}</> } as CoreStart['rendering'];
 
-const readDescriptor = () =>
-  JSON.parse(screen.getByTestId('groupedAttachmentFlyoutOpener').dataset.descriptor ?? '');
+const container = () =>
+  document.querySelector('[data-test-subj="securityImpactEntityFlyoutOpener"]');
 
 describe('openImpactEntityFlyout', () => {
   const resolveSecurityCanvasContext = jest.fn();
   const base = { rendering, resolveSecurityCanvasContext };
 
+  beforeEach(() => {
+    opened.mockReset();
+  });
+
   afterEach(() => {
     document.body.innerHTML = '';
   });
 
-  it('mounts the grouped attachment opener with a host descriptor for an Entity Store host', () => {
+  it('opens an Entity Store host by its id, titled by its name', () => {
     act(() => {
       openImpactEntityFlyout({
         entity: { id: 'host:ws-finance-04', name: 'ws-finance-04', type: 'host' },
@@ -41,36 +60,42 @@ describe('openImpactEntityFlyout', () => {
       });
     });
 
-    expect(readDescriptor()).toEqual({
+    expect(opened).toHaveBeenCalledWith({
       kind: 'host',
       hostName: 'ws-finance-04',
       entityId: 'host:ws-finance-04',
     });
   });
 
-  it('opens a user recorded by name through the user flyout, without an entity id', () => {
+  it('cuts the Entity Store prefix off an id when the entity has no name yet', () => {
     act(() => {
-      openImpactEntityFlyout({
-        entity: { id: 'jsmith', name: 'jsmith', type: 'user' },
-        ...base,
-      });
+      openImpactEntityFlyout({ entity: { id: 'user:cfo@corp' }, ...base });
     });
 
-    expect(readDescriptor()).toEqual({ kind: 'user', userName: 'jsmith' });
+    expect(opened).toHaveBeenCalledWith({
+      kind: 'user',
+      userName: 'cfo@corp',
+      entityId: 'user:cfo@corp',
+    });
+  });
+
+  it('opens a user recorded by name through the user flyout, without an entity id', () => {
+    act(() => {
+      openImpactEntityFlyout({ entity: { id: 'jsmith', name: 'jsmith', type: 'user' }, ...base });
+    });
+
+    expect(opened).toHaveBeenCalledWith({ kind: 'user', userName: 'jsmith' });
   });
 
   it('opens a service by name', () => {
     act(() => {
-      openImpactEntityFlyout({
-        entity: { id: 'okta-sso', type: 'service' },
-        ...base,
-      });
+      openImpactEntityFlyout({ entity: { id: 'okta-sso', type: 'service' }, ...base });
     });
 
-    expect(readDescriptor()).toEqual({ kind: 'service', serviceName: 'okta-sso' });
+    expect(opened).toHaveBeenCalledWith({ kind: 'service', serviceName: 'okta-sso' });
   });
 
-  it('keeps one opener mounted and replaces it on the next open', () => {
+  it('tears the opener down once the flyout has opened, keeping one hidden container', async () => {
     act(() => {
       openImpactEntityFlyout({ entity: { id: 'jsmith', type: 'user' }, ...base });
     });
@@ -78,11 +103,14 @@ describe('openImpactEntityFlyout', () => {
       openImpactEntityFlyout({ entity: { id: 'ws-finance-04', type: 'host' }, ...base });
     });
 
-    expect(screen.getAllByTestId('groupedAttachmentFlyoutOpener')).toHaveLength(1);
+    expect(opened).toHaveBeenCalledTimes(2);
     expect(
       document.querySelectorAll('[data-test-subj="securityImpactEntityFlyoutOpener"]')
     ).toHaveLength(1);
-    expect(readDescriptor()).toEqual({ kind: 'host', hostName: 'ws-finance-04' });
+    await waitFor(() =>
+      expect(screen.queryByTestId('groupedAttachmentFlyoutOpener')).not.toBeInTheDocument()
+    );
+    expect(container()).not.toBeNull();
   });
 
   it('does nothing when the entity has no flyout type', () => {
@@ -90,6 +118,7 @@ describe('openImpactEntityFlyout', () => {
       openImpactEntityFlyout({ entity: { id: 'generic-1', type: 'generic' }, ...base });
     });
 
-    expect(screen.queryByTestId('groupedAttachmentFlyoutOpener')).not.toBeInTheDocument();
+    expect(opened).not.toHaveBeenCalled();
+    expect(container()).toBeNull();
   });
 });

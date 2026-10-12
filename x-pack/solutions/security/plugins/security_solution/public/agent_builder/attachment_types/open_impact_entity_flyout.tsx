@@ -19,13 +19,17 @@ import { GroupedAttachmentFlyoutOpener } from './grouped_attachments/flyout_open
 
 const OPENER_CONTAINER_TEST_SUBJ = 'securityImpactEntityFlyoutOpener';
 
+/** The name the flyout queries by: `name`, or the id with any Entity Store `type:` prefix cut. */
+const entityName = (entity: ImpactEntityTarget): string =>
+  entity.name ?? (entityStoreIdType(entity.id) ? entity.id.replace(/^[^:]+:/, '') : entity.id);
+
 /** The entity's main flyout, by Entity Store id when it has one, otherwise by name. */
 const toDescriptor = (entity: ImpactEntityTarget): FlyoutDescriptor | undefined => {
   const flyoutType = impactEntityFlyoutType(entity);
   if (!flyoutType) {
     return undefined;
   }
-  const name = entity.name ?? entity.id;
+  const name = entityName(entity);
   const entityId = entityStoreIdType(entity.id) ? entity.id : undefined;
   switch (flyoutType) {
     case 'host':
@@ -39,14 +43,22 @@ const toDescriptor = (entity: ImpactEntityTarget): FlyoutDescriptor | undefined 
 
 let unmountOpener: (() => void) | undefined;
 
-/**
- * The opener is a component that opens the flyout on mount, as the "What's happened" rows do.
- * Those rows own their opener; the impact row lives in another plugin and reaches us through a
- * plain callback, so the opener mounts in a hidden node on the body instead. It stays mounted
- * the way a row's does, and the next open replaces it.
- */
-const mountOpener = (node: React.ReactElement, rendering: CoreStart['rendering']): void => {
+const unmount = (): void => {
   unmountOpener?.();
+  unmountOpener = undefined;
+};
+
+/**
+ * The opener opens the flyout on mount, as the "What's happened" rows do. Those rows own their
+ * opener; the impact row lives in another plugin and reaches us through a plain callback, so
+ * the opener mounts in a hidden node on the body. The flyout itself lives in a core overlay
+ * with its own providers, so the opener is torn down as soon as it has fired.
+ */
+const mountOpener = (
+  render: (onOpened: () => void) => React.ReactElement,
+  rendering: CoreStart['rendering']
+): void => {
+  unmount();
   let container = document.querySelector<HTMLElement>(
     `[data-test-subj="${OPENER_CONTAINER_TEST_SUBJ}"]`
   );
@@ -56,14 +68,13 @@ const mountOpener = (node: React.ReactElement, rendering: CoreStart['rendering']
     container.style.display = 'none';
     document.body.appendChild(container);
   }
-  unmountOpener = toMountPoint(node, rendering)(container);
+  // Deferred: `onOpened` fires inside the opener's own effect, and a root must not unmount
+  // from within its own commit.
+  const onOpened = () => setTimeout(unmount, 0);
+  unmountOpener = toMountPoint(render(onOpened), rendering)(container);
 };
 
-/**
- * Opens the entity's main flyout the way the "What's happened" rows open theirs: pushed onto the
- * investigation flyout's history, so Back returns to the investigation. An Entity Store id
- * resolves the record directly; an entity recorded by name resolves through its type.
- */
+/** Pushes the entity's flyout onto the investigation flyout, the way the "What's happened" rows do. */
 export const openImpactEntityFlyout = ({
   entity,
   rendering,
@@ -79,11 +90,13 @@ export const openImpactEntityFlyout = ({
   }
 
   mountOpener(
-    <GroupedAttachmentFlyoutOpener
-      key={`${descriptor.kind}:${entity.id}:${Date.now()}`}
-      descriptor={descriptor}
-      resolveSecurityCanvasContext={resolveSecurityCanvasContext}
-    />,
+    (onOpened) => (
+      <GroupedAttachmentFlyoutOpener
+        descriptor={descriptor}
+        resolveSecurityCanvasContext={resolveSecurityCanvasContext}
+        onOpened={onOpened}
+      />
+    ),
     rendering
   );
 };

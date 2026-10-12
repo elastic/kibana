@@ -99,6 +99,10 @@ describe('ImpactView', () => {
     const iconOf = (row: HTMLElement) =>
       row.querySelector('[data-euiicon-type]')?.getAttribute('data-euiicon-type');
     expect(rows.map(iconOf)).toEqual(['storage', 'user', 'vectorTriangle', 'globe']);
+    // The subtitle falls back to the type read off an Entity Store id.
+    expect(
+      screen.getAllByTestId('groupedAttachmentRowSubtitle').map((el) => el.textContent)
+    ).toEqual(['host', 'user', 'service']);
     expect(screen.getAllByTestId('groupedAttachmentRowTitle').map((el) => el.textContent)).toEqual([
       'fin-dc-01',
       'jsmith',

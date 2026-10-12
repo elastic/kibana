@@ -45,7 +45,7 @@ export interface ImpactContentProps {
   entities?: ImpactContentEntity[];
   /** `details` also renders per-entity evidence. */
   variant: 'inline' | 'details';
-  /** Present when a solution registered an entity flyout. Entity-store ids open it. */
+  /** Present when a solution registered an entity flyout. Hosts, users, and services open it. */
   onOpenEntity?: (entity: ImpactEntityTarget) => void;
 }
 
@@ -98,7 +98,7 @@ const ImpactEntityRow = ({
       iconType={entityIconType(entity)}
       iconColor="subdued"
       title={entityLabel(entity)}
-      subtitle={entity.type}
+      subtitle={entity.type ?? impactEntityFlyoutType(entity)}
       action={action}
       data-test-subj="investigationImpactEntityRow"
     >
@@ -186,8 +186,8 @@ const ImpactSummary = ({ summary }: { summary: string }) => {
 
 /**
  * Impact of an investigation: evidence, the summary, and the affected entities. The details
- * flyout matches Nightshift's impact section. An entity-store id opens the entity flyout; the
- * inline chat render lists entities only.
+ * flyout matches Nightshift's impact section. A host, user, or service opens the entity flyout;
+ * the inline chat render lists entities only.
  */
 export const ImpactContent: React.FC<ImpactContentProps> = ({
   summary,

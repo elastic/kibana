@@ -7,7 +7,13 @@
 
 import React, { memo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiIcon, EuiToolTip, euiTextTruncate, useEuiTheme } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiToolTip,
+  euiTextTruncate,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { useIsTextTruncated } from '../use_is_text_truncated';
 import { openInNewTabAriaLabel } from './translations';
@@ -54,6 +60,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
     'data-test-subj': dataTestSubj = 'groupedAttachmentRow',
   }) => {
     const { euiTheme } = useEuiTheme();
+    const bodyId = useGeneratedHtmlId({ prefix: 'groupedAttachmentRowBody' });
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
     const isTitleTruncated = useIsTextTruncated(titleElement, title);
@@ -206,6 +213,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
               type="button"
               onClick={action.onToggle}
               aria-expanded={action.isExpanded}
+              aria-controls={bodyId}
               css={[rowStyles, interactiveStyles]}
             >
               {content}
@@ -217,7 +225,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
     return (
       <li data-test-subj={dataTestSubj}>
         {renderControl()}
-        {children}
+        {action?.kind === 'expand' ? <div id={bodyId}>{children}</div> : children}
       </li>
     );
   }

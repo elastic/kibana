@@ -72,6 +72,7 @@ describe('GroupedAttachmentRow', () => {
       'arrowDown'
     );
     expect(screen.getByText('Body')).toBeInTheDocument();
+    expect(row).toHaveAttribute('aria-controls', screen.getByText('Body').parentElement?.id);
 
     fireEvent.click(row);
     expect(onToggle).toHaveBeenCalledTimes(1);

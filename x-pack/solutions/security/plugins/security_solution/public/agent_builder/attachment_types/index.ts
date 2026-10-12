@@ -14,7 +14,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, ISessionService } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -157,7 +156,6 @@ export const registerEntityAttachment = ({
   agentBuilder,
   chrome,
   experimentalFeatures,
-  overlays,
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
@@ -169,23 +167,20 @@ export const registerEntityAttachment = ({
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
   experimentalFeatures: ExperimentalFeatures;
-  overlays: Pick<OverlayStart, 'openFlyoutTemplate'>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
-  rendering?: CoreStart['rendering'];
+  rendering: CoreStart['rendering'];
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
-  if (rendering) {
-    registerImpactEntityOpener?.((entity) => {
-      void import(
-        /* webpackChunkName: "security_impact_entity_flyout" */
-        './open_impact_entity_flyout'
-      ).then(({ openImpactEntityFlyout }) =>
-        openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
-      );
-    });
-  }
+  registerImpactEntityOpener?.((entity) => {
+    void import(
+      /* webpackChunkName: "security_impact_entity_flyout" */
+      './open_impact_entity_flyout'
+    ).then(({ openImpactEntityFlyout }) =>
+      openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+    );
+  });
 
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */

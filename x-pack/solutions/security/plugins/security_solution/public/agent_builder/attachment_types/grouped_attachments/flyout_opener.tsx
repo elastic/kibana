@@ -35,7 +35,13 @@ const DataViewManagerBootstrap = () => {
   return null;
 };
 
-const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => {
+const OpenFlyoutOnMount = ({
+  descriptor,
+  onOpened,
+}: {
+  descriptor: FlyoutDescriptor;
+  onOpened?: () => void;
+}) => {
   const api = useFlyoutApi();
   const hasOpened = useRef(false);
 
@@ -48,7 +54,8 @@ const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => 
     openDescriptorAsStart(descriptor, {}, api, FLYOUT_ORIGIN.ATTACHMENT_SUMMARY, {
       originFlyoutSize: getOpenConversationFlyoutWidth() ?? 's',
     });
-  }, [descriptor, api]);
+    onOpened?.();
+  }, [descriptor, api, onOpened]);
 
   return null;
 };
@@ -56,11 +63,14 @@ const OpenFlyoutOnMount = ({ descriptor }: { descriptor: FlyoutDescriptor }) => 
 export interface GroupedAttachmentFlyoutOpenerProps {
   descriptor: FlyoutDescriptor;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
+  /** Called once the flyout has been opened. The flyout lives in a core overlay, not here. */
+  onOpened?: () => void;
 }
 
 export const GroupedAttachmentFlyoutOpener = ({
   descriptor,
   resolveSecurityCanvasContext,
+  onOpened,
 }: GroupedAttachmentFlyoutOpenerProps) => {
   const [bundle, setBundle] = useState<SecurityCanvasEmbeddedBundle>();
 
@@ -97,7 +107,7 @@ export const GroupedAttachmentFlyoutOpener = ({
         }}
       >
         <DataViewManagerBootstrap />
-        <OpenFlyoutOnMount descriptor={descriptor} />
+        <OpenFlyoutOnMount descriptor={descriptor} onOpened={onOpened} />
       </FlyoutSessionContextProvider>
     ),
   });
