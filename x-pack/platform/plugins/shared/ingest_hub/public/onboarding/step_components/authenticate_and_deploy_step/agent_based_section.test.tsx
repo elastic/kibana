@@ -28,6 +28,11 @@ jest.mock('../../onboarding_flow_context', () => ({
   useOnboardingFlow: jest.fn(),
 }));
 
+jest.mock('./secret_refs', () => ({
+  ...jest.requireActual('./secret_refs'),
+  fetchPackagePolicySecretRefs: jest.fn(),
+}));
+
 jest.mock('./agent_based_deploy/agent_policy_name', () => ({
   buildAgentPolicyName: jest.fn().mockResolvedValue('AWS Agent Policy 1'),
 }));
@@ -50,10 +55,12 @@ import {
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useLocation } from 'react-router-dom';
+import { fetchPackagePolicySecretRefs } from './secret_refs';
 import { SharedCredentialsForm } from './agent_based_section/shared_credentials_form';
 import { AssumeRoleForm } from './agent_based_section/assume_role_form';
 
 const mockUseLocation = useLocation as jest.Mock;
+const mockFetchSecretRefs = fetchPackagePolicySecretRefs as jest.Mock;
 
 const MockSharedCredentialsForm = SharedCredentialsForm as unknown as jest.Mock;
 const MockAssumeRoleForm = AssumeRoleForm as unknown as jest.Mock;
@@ -81,6 +88,8 @@ interface OnboardingFlowOptions {
   roleArn?: string;
   /** Persisted credential profile name — seeds isCredentialReady:true for shared_credentials */
   credentialProfileName?: string;
+  /** Policy ids of the already deployed package policies (what stored secrets are read from). */
+  policyIdsByInstance?: Record<string, string>;
   /** Whether the URL contains ?deploymentId= (resume/edit mode) */
   isEditMode?: boolean;
 }
@@ -95,6 +104,7 @@ function setupMocks({
   setAgentBasedDeployment = jest.fn(),
   roleArn = undefined,
   credentialProfileName = undefined,
+  policyIdsByInstance = {},
   isEditMode = false,
 }: OnboardingFlowOptions = {}) {
   mockUseLocation.mockReturnValue({ search: isEditMode ? '?deploymentId=dep-test' : '' });
@@ -114,17 +124,50 @@ function setupMocks({
   ));
 
   MockStaticKeysForm.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="static-keys-form">
         <button onClick={() => onReadyChange?.(true)}>mark-credential-ready</button>
+        <button onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: 'NEW' })}>
+          replace-secret
+        </button>
+        <button onClick={() => onFieldsChange?.({ access_key_id: '', secret_access_key: '' })}>
+          clear-secret
+        </button>
+        <button onClick={() => onFieldsChange?.(undefined)}>no-credentials</button>
       </div>
     )
   );
 
   MockTemporaryKeysForm.mockImplementation(
-    ({ onReadyChange }: { onReadyChange?: (v: boolean) => void }) => (
+    ({
+      onReadyChange,
+      onFieldsChange,
+    }: {
+      onReadyChange?: (v: boolean) => void;
+      onFieldsChange?: (f: unknown) => void;
+    }) => (
       <div data-test-subj="temporary-keys-form">
         <button onClick={() => onReadyChange?.(true)}>mark-temp-credential-ready</button>
+        <button
+          onClick={() =>
+            onFieldsChange?.({ access_key_id: '', secret_access_key: '', session_token: 'NEW' })
+          }
+        >
+          replace-session-token
+        </button>
+        <button
+          onClick={() =>
+            onFieldsChange?.({ access_key_id: '', secret_access_key: '', session_token: '' })
+          }
+        >
+          clear-session-token
+        </button>
       </div>
     )
   );
@@ -182,6 +225,7 @@ function setupMocks({
       credentialProfileName,
     },
     setAgentBasedDeployment,
+    detectAndReviewStep: { policyIdsByInstance },
   });
 }
 
@@ -194,6 +238,9 @@ interface RenderOptions {
   hasFailed?: boolean;
   failedInstances?: string[];
   deployErrors?: Record<string, string> | undefined;
+  secretSourcePolicyId?: string;
+  onStoredCredentialsReplacedChange?: jest.Mock;
+  onCredentialsChange?: jest.Mock;
 }
 
 function renderSection(props: RenderOptions = {}) {
@@ -211,6 +258,9 @@ function renderSection(props: RenderOptions = {}) {
           hasFailed={props.hasFailed ?? false}
           failedInstances={props.failedInstances ?? []}
           deployErrors={props.deployErrors}
+          secretSourcePolicyId={props.secretSourcePolicyId}
+          onStoredCredentialsReplacedChange={props.onStoredCredentialsReplacedChange}
+          onCredentialsChange={props.onCredentialsChange}
         />
       </React.Suspense>
     </I18nProvider>
@@ -693,6 +743,175 @@ describe('AgentBasedSection', () => {
         expect(
           screen.queryByTestId('agentBasedSection-resumeCredentialsCallout')
         ).not.toBeInTheDocument();
+      });
+    });
+
+    describe('stored secrets', () => {
+      const REFS = new Map([
+        ['access_key_id', { isSecretRef: true, id: 'r1' }],
+        ['secret_access_key', { isSecretRef: true, id: 'r2' }],
+      ]);
+
+      it('passes the stored fields to the static keys form and drops the re-enter callout', async () => {
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1' });
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+        expect(mockFetchSecretRefs).toHaveBeenCalledWith('pp-1');
+        expect(MockStaticKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([
+          'access_key_id',
+          'secret_access_key',
+        ]);
+        expect(
+          screen.queryByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).not.toBeInTheDocument();
+      });
+
+      it('only offers session_token as stored for temporary keys', async () => {
+        mockFetchSecretRefs.mockResolvedValue(
+          new Map([...REFS, ['session_token', { isSecretRef: true, id: 'r3' }]])
+        );
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'temporary_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1' });
+        await waitFor(() => expect(screen.getByTestId('temporary-keys-form')).toBeInTheDocument());
+        expect(MockTemporaryKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([
+          'access_key_id',
+          'secret_access_key',
+          'session_token',
+        ]);
+      });
+
+      it('does not look up secrets when no deployed policy survives cleanup', async () => {
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: undefined });
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+        expect(mockFetchSecretRefs).not.toHaveBeenCalled();
+        expect(MockStaticKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([]);
+        expect(
+          screen.getByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).toBeInTheDocument();
+      });
+
+      it('reports a replaced stored key so the parent redeploys, and clears it when emptied', async () => {
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        const onStoredCredentialsReplacedChange = jest.fn();
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1', onStoredCredentialsReplacedChange });
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByText('replace-secret'));
+        expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(true);
+        fireEvent.click(screen.getByText('clear-secret'));
+        expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(false);
+      });
+
+      it('reports a replaced session token for temporary keys and clears it when emptied', async () => {
+        mockFetchSecretRefs.mockResolvedValue(
+          new Map([...REFS, ['session_token', { isSecretRef: true, id: 'r3' }]])
+        );
+        const onStoredCredentialsReplacedChange = jest.fn();
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'temporary_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1', onStoredCredentialsReplacedChange });
+        await waitFor(() => expect(screen.getByTestId('temporary-keys-form')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByText('replace-session-token'));
+        expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(true);
+        fireEvent.click(screen.getByText('clear-session-token'));
+        expect(onStoredCredentialsReplacedChange).toHaveBeenLastCalledWith(false);
+      });
+
+      it('tells the parent no credentials are entered when the form reports none (cancel), not the previous ones', async () => {
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        const onCredentialsChange = jest.fn();
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1', onCredentialsChange });
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+
+        fireEvent.click(screen.getByText('replace-secret'));
+        expect(onCredentialsChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ method: 'static_keys', secret_access_key: 'NEW' })
+        );
+
+        // The replacement is cancelled: nothing entered, so the stale replacement is not resent.
+        fireEvent.click(screen.getByText('no-credentials'));
+        expect(onCredentialsChange).toHaveBeenLastCalledWith(undefined);
+      });
+
+      it('does not report a replacement when nothing is stored', async () => {
+        const onStoredCredentialsReplacedChange = jest.fn();
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'static_keys',
+        });
+        renderSection({ onStoredCredentialsReplacedChange });
+        await waitFor(() => expect(screen.getByTestId('static-keys-form')).toBeInTheDocument());
+        fireEvent.click(screen.getByText('replace-secret'));
+        expect(onStoredCredentialsReplacedChange).not.toHaveBeenCalled();
+      });
+
+      it('keeps asking for credentials when only some temporary-key fields are stored', async () => {
+        // The session token has no ref: its input stays empty and Next stays disabled, so the
+        // callout must stay.
+        mockFetchSecretRefs.mockResolvedValue(REFS);
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'temporary_keys',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1' });
+        await waitFor(() => expect(screen.getByTestId('temporary-keys-form')).toBeInTheDocument());
+        expect(MockTemporaryKeysForm.mock.calls.at(-1)?.[0].storedSecretFields).toEqual([
+          'access_key_id',
+          'secret_access_key',
+        ]);
+        expect(
+          screen.getByTestId('agentBasedSection-resumeCredentialsCallout')
+        ).toBeInTheDocument();
+      });
+
+      it('does not look up secrets for methods without secret keys', async () => {
+        setupMocks({
+          agentHostsMode: 'existing',
+          selectedAgentPolicyIds: ['p1'],
+          agentCredentialMethod: 'assume_role',
+          isEditMode: true,
+        });
+        renderSection({ secretSourcePolicyId: 'pp-1' });
+        await waitFor(() => expect(screen.getByTestId('assume-role-form')).toBeInTheDocument());
+        expect(screen.queryByTestId('static-keys-form')).not.toBeInTheDocument();
+        expect(mockFetchSecretRefs).not.toHaveBeenCalled();
       });
     });
 

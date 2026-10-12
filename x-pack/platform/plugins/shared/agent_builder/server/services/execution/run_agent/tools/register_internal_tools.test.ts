@@ -10,6 +10,7 @@ import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import { resolveAllowedSubagents } from '../../../agents/utils/resolve_allowed_subagents';
 import { registerInternalTools, type RegisterInternalToolsParams } from './register_internal_tools';
+import { createSubagentTool } from './run_subagent';
 
 jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
   resolveAllowedSubagents: jest.fn(),
@@ -17,7 +18,9 @@ jest.mock('../../../agents/utils/resolve_allowed_subagents', () => ({
 jest.mock('../utils/select_tools', () => ({
   builtinToolToExecutable: ({ tool }: { tool: { id: string } }) => ({ id: tool.id }),
 }));
-jest.mock('./run_subagent', () => ({ createSubagentTool: () => ({ id: 'run_subagent' }) }));
+jest.mock('./run_subagent', () => ({
+  createSubagentTool: jest.fn(() => ({ id: 'run_subagent' })),
+}));
 jest.mock('./send_message', () => ({
   createSendMessageTool: () => ({ id: 'send_message_to_agent' }),
 }));
@@ -66,6 +69,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     todoStateManager: {},
     selfClient: {},
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
     ...overrides,
   } as unknown as AgentHandlerContext;
   return { context, toolManager };
@@ -130,5 +134,29 @@ describe('registerInternalTools - subagents', () => {
     await register(context);
 
     expect(addedToolIds(toolManager)).not.toEqual(expect.arrayContaining(['run_subagent']));
+  });
+
+  it('registers only a transient-only run_subagent when the run stores nothing', async () => {
+    const { context, toolManager } = createContext({ conversationAccess: 'none' });
+
+    await register(context);
+
+    const ids = addedToolIds(toolManager);
+    expect(ids).toContain('run_subagent');
+    expect(ids).not.toContain('send_message_to_agent');
+    expect(ids).not.toContain('sleep');
+    expect(createSubagentTool).toHaveBeenCalledWith(
+      expect.objectContaining({ transientOnly: true })
+    );
+  });
+
+  it('registers the full sub-agent tool set when the run stores its conversation', async () => {
+    const { context } = createContext();
+
+    await register(context);
+
+    expect(createSubagentTool).toHaveBeenCalledWith(
+      expect.objectContaining({ transientOnly: false })
+    );
   });
 });

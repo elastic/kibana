@@ -51,7 +51,7 @@ describe('event_create tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
       licensing: {},
       uiSettingsClient: {},
@@ -71,7 +71,6 @@ describe('event_create tool', () => {
         symptom_hypothesis: 'Requests fail because the upstream dependency is unavailable.',
         summary: 'S',
         stream_names: ['logs.a'],
-        severity: '60-high',
         confidence: 0.8,
       },
       createMockToolContext()

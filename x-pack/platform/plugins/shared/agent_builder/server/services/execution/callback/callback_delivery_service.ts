@@ -6,9 +6,7 @@
  */
 
 import pRetry, { AbortError } from 'p-retry';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 
 const callbackRetryOptions = {
@@ -28,12 +26,6 @@ export class CallbackDeliveryService {
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
     this.actions = actions;
-  }
-
-  getCallbackUrl(execution: AgentExecution): string | undefined {
-    return execution.executionMode === AgentExecutionMode.conversation
-      ? execution.agentParams.callback?.url
-      : undefined;
   }
 
   validateCallbackUrl(callbackUrl: string): void {

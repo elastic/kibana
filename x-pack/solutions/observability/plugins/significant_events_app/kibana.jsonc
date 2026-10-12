@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/significant-events-app-plugin",
-  "owner": "@elastic/nightshift-sre-agent-team",
+  "owner": "@elastic/nightshift",
   "description": "Significant Events UI",
   "group": "observability",
   "visibility": "private",
