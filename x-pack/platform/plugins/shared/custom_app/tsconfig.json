@@ -13,7 +13,11 @@
     "@kbn/zod",
     "@kbn/custom-app-common",
     "@kbn/ui-actions-plugin",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/data-plugin",
+    "@kbn/search-types",
+    "@kbn/core-http-browser",
+    "@kbn/custom-content-renderer"
   ],
   "exclude": ["target/**/*"]
 }

@@ -9,10 +9,12 @@ import { z } from '@kbn/zod/v4';
 import {
   CUSTOM_APP_STATE_VERSION,
   MAX_CHILDREN_PER_NODE,
+  MAX_DATA_SOURCES,
   MAX_HEADING_LENGTH,
   MAX_NODE_COUNT,
   MAX_NODE_DEPTH,
   MAX_NODE_ID_LENGTH,
+  MAX_QUERY_LENGTH,
   MAX_TEXT_LENGTH,
 } from './constants';
 
@@ -21,6 +23,13 @@ const nodeIdSchema = z
   .min(1)
   .max(MAX_NODE_ID_LENGTH)
   .regex(/^[A-Za-z0-9_-]+$/);
+
+const dataSourceIdSchema = nodeIdSchema;
+
+export const esqlDataSourceSchema = z.object({
+  type: z.literal('esql'),
+  query: z.string().min(1).max(MAX_QUERY_LENGTH),
+});
 
 const spacingSchema = z.enum(['s', 'm', 'l']);
 
@@ -45,6 +54,15 @@ const calloutNodeSchema = z.object({
   color: z.enum(['primary', 'success', 'warning', 'danger']).default('primary'),
 });
 
+const statNodeSchema = z.object({
+  type: z.literal('stat'),
+  id: nodeIdSchema,
+  title: z.string().max(MAX_HEADING_LENGTH),
+  source: dataSourceIdSchema,
+  valueField: z.string().min(1).max(MAX_HEADING_LENGTH).optional(),
+  format: z.enum(['number', 'compact']).default('number'),
+});
+
 const stackFields = {
   type: z.literal('stack'),
   id: nodeIdSchema,
@@ -55,7 +73,8 @@ const stackFields = {
 type LeafNode =
   | z.output<typeof headingNodeSchema>
   | z.output<typeof textNodeSchema>
-  | z.output<typeof calloutNodeSchema>;
+  | z.output<typeof calloutNodeSchema>
+  | z.output<typeof statNodeSchema>;
 
 type StackNode = z.output<z.ZodObject<typeof stackFields>> & { children: AppNode[] };
 
@@ -78,6 +97,7 @@ export const nodeSchema = z.discriminatedUnion('type', [
   headingNodeSchema,
   textNodeSchema,
   calloutNodeSchema,
+  statNodeSchema,
   stackNodeSchema,
 ]) satisfies z.ZodType<AppNode>;
 
@@ -86,10 +106,21 @@ export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
   node.type === 'stack' ? node.children : [];
 
 /**
- * Enforces what a recursive schema cannot express: total size, depth and unique ids. Without
- * these bounds a single saved panel could carry an arbitrarily large tree.
+ * Enforces what a recursive schema cannot express: total size, depth, unique ids and that every
+ * node refers to a data source that exists. Without the bounds a single saved panel could carry
+ * an arbitrarily large tree.
  */
-const validateDocumentBounds = (document: { root: AppNode }, ctx: z.RefinementCtx): void => {
+const validateDocument = (
+  document: { root: AppNode; dataSources: Record<string, unknown> },
+  ctx: z.RefinementCtx
+): void => {
+  if (Object.keys(document.dataSources).length > MAX_DATA_SOURCES) {
+    ctx.addIssue({
+      code: 'custom',
+      message: `A document may hold at most ${MAX_DATA_SOURCES} data sources`,
+    });
+  }
+
   const seenIds = new Set<string>();
   let nodeCount = 0;
   const pending: Array<{ node: AppNode; depth: number }> = [{ node: document.root, depth: 1 }];
@@ -102,6 +133,13 @@ const validateDocumentBounds = (document: { root: AppNode }, ctx: z.RefinementCt
       ctx.addIssue({ code: 'custom', message: `Duplicate node id "${node.id}"` });
     }
     seenIds.add(node.id);
+
+    if (node.type === 'stat' && !(node.source in document.dataSources)) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `Node "${node.id}" refers to unknown data source "${node.source}"`,
+      });
+    }
 
     if (depth > MAX_NODE_DEPTH) {
       ctx.addIssue({
@@ -122,8 +160,14 @@ const validateDocumentBounds = (document: { root: AppNode }, ctx: z.RefinementCt
   }
 };
 
-export const appDocumentSchema = z.object({ root: nodeSchema }).superRefine(validateDocumentBounds);
+export const appDocumentSchema = z
+  .object({
+    dataSources: z.record(dataSourceIdSchema, esqlDataSourceSchema).default({}),
+    root: nodeSchema,
+  })
+  .superRefine(validateDocument);
 
+export type EsqlDataSource = z.output<typeof esqlDataSourceSchema>;
 export type AppDocument = z.output<typeof appDocumentSchema>;
 
 /** The panel's own state, without the titles and time range every panel shares. */

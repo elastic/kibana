@@ -6,12 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { customAppStateSchema } from '@kbn/custom-app-common';
 
 export const customAppEmbeddableSchema = z.object({
   ...customAppStateSchema.shape,
   ...serializedTitlesSchema.shape,
+  ...serializedTimeRangeSchema.shape,
 });
 
 export type CustomAppEmbeddableState = z.output<typeof customAppEmbeddableSchema>;

@@ -6,7 +6,7 @@
  */
 
 import { appDocumentSchema, customAppStateSchema, getNodeChildren } from './document_schema';
-import { MAX_NODE_COUNT, MAX_NODE_DEPTH } from './constants';
+import { MAX_DATA_SOURCES, MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_QUERY_LENGTH } from './constants';
 
 const stackOf = (id: string, children: unknown[] = []) => ({ type: 'stack', id, children });
 
@@ -22,6 +22,7 @@ describe('appDocumentSchema', () => {
       ]),
     });
 
+    expect(result.dataSources).toEqual({});
     expect(result.root).toEqual({
       type: 'stack',
       id: 'root',
@@ -85,6 +86,74 @@ describe('appDocumentSchema', () => {
     const result = appDocumentSchema.safeParse({ root: stackOf('root', chunks) });
     expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
       `A document may hold at most ${MAX_NODE_COUNT} nodes`,
+    ]);
+  });
+});
+
+describe('data sources and stat nodes', () => {
+  const statDocument = (overrides: Record<string, unknown> = {}) => ({
+    dataSources: { users: { type: 'esql', query: 'ROW active = 1284' } },
+    root: { type: 'stat', id: 'active', title: 'Active users', source: 'users', ...overrides },
+  });
+
+  it('parses a stat bound to an existing data source and applies the default format', () => {
+    const result = appDocumentSchema.parse(statDocument());
+    expect(result.root).toEqual({
+      type: 'stat',
+      id: 'active',
+      title: 'Active users',
+      source: 'users',
+      format: 'number',
+    });
+  });
+
+  it('rejects a stat that refers to a data source that does not exist', () => {
+    const result = appDocumentSchema.safeParse(statDocument({ source: 'missing' }));
+    expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
+      'Node "active" refers to unknown data source "missing"',
+    ]);
+  });
+
+  it('finds the unknown source of a stat nested in a stack', () => {
+    const result = appDocumentSchema.safeParse({
+      root: stackOf('root', [{ type: 'stat', id: 's', title: 't', source: 'nope' }]),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an empty query and a query over the length limit', () => {
+    const withQuery = (query: string) =>
+      appDocumentSchema.safeParse({
+        ...statDocument(),
+        dataSources: { users: { type: 'esql', query } },
+      }).success;
+
+    expect(withQuery('')).toBe(false);
+    expect(withQuery('x'.repeat(MAX_QUERY_LENGTH))).toBe(true);
+    expect(withQuery('x'.repeat(MAX_QUERY_LENGTH + 1))).toBe(false);
+  });
+
+  it('rejects a data source type other than esql', () => {
+    const result = appDocumentSchema.safeParse({
+      ...statDocument(),
+      dataSources: { users: { type: 'sql', query: 'SELECT 1' } },
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a document over the data source limit', () => {
+    const dataSources = Object.fromEntries(
+      Array.from({ length: MAX_DATA_SOURCES + 1 }, (_, index) => [
+        `s${index}`,
+        { type: 'esql', query: 'ROW a = 1' },
+      ])
+    );
+    const result = appDocumentSchema.safeParse({
+      dataSources,
+      root: { type: 'text', id: 'a', text: 'hi' },
+    });
+    expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
+      `A document may hold at most ${MAX_DATA_SOURCES} data sources`,
     ]);
   });
 });

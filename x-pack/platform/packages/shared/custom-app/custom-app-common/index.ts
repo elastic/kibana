@@ -9,11 +9,13 @@ export { CUSTOM_APP_EMBEDDABLE_TYPE, CUSTOM_APP_STATE_VERSION } from './constant
 export {
   appDocumentSchema,
   customAppStateSchema,
+  esqlDataSourceSchema,
   getNodeChildren,
   nodeSchema,
   type AppDocument,
   type AppNode,
   type AppNodeOfType,
   type AppNodeType,
+  type EsqlDataSource,
   type CustomAppState,
 } from './document_schema';

@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
 import { ADD_CUSTOM_APP_ACTION_ID } from '../common/constants';
+import { setServices } from './services';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
 }
 
 interface StartDeps {
+  data: DataPublicPluginStart;
   uiActions: UiActionsStart;
 }
 
@@ -29,7 +32,9 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     });
   }
 
-  start(_core: unknown, { uiActions }: StartDeps) {
+  start(core: CoreStart, { data, uiActions }: StartDeps) {
+    setServices(core, data.search.search);
+
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_APP_ACTION_ID, async () => {
       const { getAddCustomAppAction } = await import('./actions/add_custom_app_action');
       return getAddCustomAppAction();

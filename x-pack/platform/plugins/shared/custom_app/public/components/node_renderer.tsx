@@ -15,6 +15,7 @@ import {
   KbnSuccessCallout,
   KbnWarningCallout,
 } from '@kbn/ui-callout';
+import { StatNode } from './stat_node';
 
 const GUTTER_SIZES = { s: 's', m: 'm', l: 'l' } as const;
 
@@ -56,6 +57,8 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
         </Callout>
       );
     }
+    case 'stat':
+      return <StatNode node={node} />;
     case 'stack':
       return (
         <EuiFlexGroup

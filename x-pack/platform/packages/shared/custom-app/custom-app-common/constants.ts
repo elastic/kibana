@@ -16,3 +16,5 @@ export const MAX_NODE_DEPTH = 8;
 export const MAX_CHILDREN_PER_NODE = 50;
 export const MAX_HEADING_LENGTH = 200;
 export const MAX_TEXT_LENGTH = 5_000;
+export const MAX_DATA_SOURCES = 20;
+export const MAX_QUERY_LENGTH = 10_000;
