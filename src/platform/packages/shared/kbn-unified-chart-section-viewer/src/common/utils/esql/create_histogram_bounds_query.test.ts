@@ -121,6 +121,18 @@ describe('createHistogramBoundsQuery', () => {
     expect(createHistogramBoundsQuery({ metricItem, originalSource: 'metrics-*' })).toBeUndefined();
   });
 
+  it('omits NULLIFY when WHERE cannot name an extra column', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({}),
+      whereStatements: ['@timestamp IS NOT NULL', '1 == 1'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(boundsQuery?.esqlQuery.startsWith('SET ')).toBe(false);
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE @timestamp IS NOT NULL');
+    expect(boundsQuery?.esqlQuery).toContain('| WHERE 1 == 1');
+  });
+
   it('applies the user WHERE clauses before STATS', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({}),

@@ -11,6 +11,7 @@ import { esql, synth, BasicPrettyPrinter } from '@elastic/esql';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { isSingleSource } from '@kbn/esql-utils';
 import { firstNonNullable } from '../first_null_nullable';
+import { needsUnmappedFieldsNullify } from './needs_unmapped_fields_nullify';
 import { getMetricUniqueKey } from '../get_metric_unique_key';
 import type { HistogramBoundsQuery, ParsedMetricItem } from '../../../types';
 
@@ -70,9 +71,9 @@ export const createHistogramBoundsQuery = ({
     .map((statement) => statement.trim())
     .filter((statement) => statement.length > 0);
 
-  // `metrics_info` guarantees the metric field is mapped. WHERE can reference
-  // other fields that are missing on this index.
-  if (trimmedWhere.length > 0) {
+  // `metrics_info` guarantees the metric field is mapped. NULLIFY is only needed
+  // when WHERE can name a column this stream may not map.
+  if (needsUnmappedFieldsNullify({ whereStatements: trimmedWhere })) {
     query.addSetCommand('unmapped_fields', 'NULLIFY');
   }
 

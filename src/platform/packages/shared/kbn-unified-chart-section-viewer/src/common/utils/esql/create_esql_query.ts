@@ -11,6 +11,7 @@ import { esql } from '@elastic/esql';
 import { sanitazeESQLInput, isSingleSource } from '@kbn/esql-utils';
 import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
+import { needsUnmappedFieldsNullify } from './needs_unmapped_fields_nullify';
 import { firstNonNullable } from '../first_null_nullable';
 import type { ParsedMetricItem } from '../../../types';
 
@@ -63,9 +64,12 @@ export function createESQLQuery({
     return '';
   }
 
-  // Metric-specific streams can omit fields referenced by filters inherited from the parent query.
+  // The metric field is mapped on this stream. NULLIFY is only needed when inherited
+  // WHERE text or a breakdown field can name a column this stream may not map.
   const query = esql.ts(index);
-  query.addSetCommand('unmapped_fields', 'NULLIFY');
+  if (needsUnmappedFieldsNullify({ whereStatements, splitAccessors })) {
+    query.addSetCommand('unmapped_fields', 'NULLIFY');
+  }
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0
