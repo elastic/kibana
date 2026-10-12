@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/custom-app-plugin",
+  "owner": ["@elastic/kibana-dashboards"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Custom app embeddable: interactive, document-driven panels for dashboards",
+  "plugin": {
+    "id": "customApp",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["embeddable", "uiActions"]
+  }
+}
