@@ -119,8 +119,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const expectedScore = {
           calculated_level: 'Unknown',
           calculated_score: 21,
-          calculated_score_norm: 8.100601759,
-          category_1_score: 8.100601759,
+          calculated_score_norm: 8.7033136173,
+          category_1_score: 8.7033136173,
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
@@ -172,8 +172,8 @@ export default ({ getService }: FtrProviderContext): void => {
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 11.6779120635,
-            category_1_score: 8.100601759,
+            calculated_score_norm: 12.5105540488,
+            category_1_score: 8.7033136173,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 metadata: {
                   criticality_level: 'high_impact',
                 },
-                contribution: 3.5773103045,
+                contribution: 3.8072404316,
               },
             ],
           };
@@ -203,11 +203,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const [rawScore] = persistedScores;
 
+          // Each category score is rounded to 10 decimal places, so their sum can be off by ~1e-10.
           expect(
             rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_2_score!
           ).to.be.within(
-            persistedScoreByApi.calculated_score_norm! - 0.000000000000001,
-            persistedScoreByApi.calculated_score_norm! + 0.000000000000001
+            persistedScoreByApi.calculated_score_norm! - 0.000000001,
+            persistedScoreByApi.calculated_score_norm! + 0.000000001
           );
         });
 
@@ -225,8 +226,8 @@ export default ({ getService }: FtrProviderContext): void => {
           const expectedScore = {
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 8.100601759,
-            category_1_score: 8.100601759,
+            calculated_score_norm: 8.7033136173,
+            category_1_score: 8.7033136173,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',

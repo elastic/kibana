@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SIGNALS_INDEX, SIGNALS_INDEX_KEY } from '../common/constants';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './lib/entity_analytics/risk_score/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import { getDefaultConfigSettings } from '../common/config_settings';
@@ -39,7 +40,7 @@ export const createMockConfig = (): ConfigType => {
     enableUiSettingsValidations: false,
     entityAnalytics: {
       riskEngine: {
-        alertSampleSizePerShard: 10_000,
+        alertSampleSizePerShard: DEFAULT_ALERT_SAMPLE_SIZE,
       },
       assetCriticality: {
         csvUpload: {
