@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -26,6 +26,11 @@ import { useSignificantEventsAvailability } from './hooks/use_significant_events
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { SettingsPage } from './settings/page';
+import { NightshiftSetupPrompt } from './service_account/nightshift_setup_prompt';
+import {
+  isNightshiftSetUp,
+  useInvestigatorServiceAccount,
+} from './service_account/use_investigator_service_account';
 
 export function NightshiftPage(): React.ReactElement | null {
   const {
@@ -85,6 +90,14 @@ export function NightshiftPage(): React.ReactElement | null {
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
 
+  // Nightshift only works as its service account, so a space that is not set up shows the setup
+  // step instead of the app. A failed status read (e.g. missing privileges) does not block it.
+  const requiresSetup = nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
+  const serviceAccount = useInvestigatorServiceAccount();
+  const isSetupPending = requiresSetup && serviceAccount.isLoading;
+  const needsSetup =
+    requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
+
   useBreadcrumbs(
     [
       {
@@ -136,6 +149,25 @@ export function NightshiftPage(): React.ReactElement | null {
 
   if (isSettingsPage && !canManageAndConfigure) {
     return null;
+  }
+
+  if (isSetupPending || needsSetup) {
+    return (
+      <ObservabilityPageTemplate
+        data-test-subj="nightshiftPage"
+        pageHeader={{
+          pageTitle: i18n.translate('xpack.nightshift.setup.pageTitle', {
+            defaultMessage: 'Nightshift',
+          }),
+        }}
+      >
+        {isSetupPending ? (
+          <EuiLoadingSpinner size="xl" />
+        ) : (
+          <NightshiftSetupPrompt status={serviceAccount.data} canManage={canManageAndConfigure} />
+        )}
+      </ObservabilityPageTemplate>
+    );
   }
 
   return (

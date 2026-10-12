@@ -24,10 +24,11 @@ it('keeps the agent available when infrastructure exists without probing a model
       workflowsManagement: {
         management: {
           getClient: () => ({
-            getWorkflow: jest.fn().mockResolvedValue({ definition: {} }),
+            getWorkflow: jest.fn().mockResolvedValue({ definition: {}, enabled: true }),
           }),
         },
       } as never,
+      isServiceAccountExecutionEnabled: () => true,
     }),
   });
 

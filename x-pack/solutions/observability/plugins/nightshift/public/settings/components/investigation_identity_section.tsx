@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,81 +16,62 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import {
+  isNightshiftSetUp,
   useInvestigatorServiceAccount,
-  useSetInvestigatorServiceAccount,
-} from '../hooks/use_investigator_service_account';
+} from '../../service_account/use_investigator_service_account';
 import { SettingsSectionRow } from './settings_section';
 
-/** Lets an admin run this space's investigations as the Nightshift service account. */
-export const InvestigationIdentitySection = ({ canManage }: { canManage: boolean }) => {
+/** Shows the service account Nightshift runs as in this space. It is set up on first use. */
+export const InvestigationIdentitySection = () => {
   const status = useInvestigatorServiceAccount();
-  const setServiceAccount = useSetInvestigatorServiceAccount();
+  const isSetUp = isNightshiftSetUp(status.data);
 
-  const isBound = status.data?.installed === true && status.data.enabled === true;
-  const serviceAccountId = status.data?.serviceAccountId ?? 'kibana/nightshift_investigator';
-
-  const renderControl = () => {
+  const renderStatus = () => {
     if (status.isLoading) return <EuiLoadingSpinner size="m" />;
-    if (status.data && !status.data.serviceAccountsEnabled) {
-      return (
-        <KbnInfoCallout
-          size="s"
-          title={i18n.translate('xpack.nightshift.settings.serviceAccount.disabledCalloutTitle', {
-            defaultMessage: 'Service accounts are turned off in this deployment',
-          })}
-        />
-      );
-    }
+    if (!status.data) return null;
     return (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          {isBound ? (
+          {isSetUp ? (
             <EuiBadge color="success" iconType="check" data-test-subj="nightshiftServiceAccountOn">
               {i18n.translate('xpack.nightshift.settings.serviceAccount.onBadge', {
-                defaultMessage: 'Runs as service account',
+                defaultMessage: 'Set up',
               })}
             </EuiBadge>
           ) : (
-            <EuiBadge color="hollow" data-test-subj="nightshiftServiceAccountOff">
+            <EuiBadge color="warning" data-test-subj="nightshiftServiceAccountOff">
               {i18n.translate('xpack.nightshift.settings.serviceAccount.offBadge', {
-                defaultMessage: 'Runs as the requesting user',
+                defaultMessage: 'Not set up',
               })}
             </EuiBadge>
           )}
         </EuiFlexItem>
-        {isBound && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.nightshift.settings.serviceAccount.account"
+              defaultMessage="Account: {account} · Role: {role}"
+              values={{
+                account: <EuiCode>{status.data.serviceAccountId}</EuiCode>,
+                role: <EuiCode>nightshift_investigator</EuiCode>,
+              }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        {isSetUp && (
           <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.nightshift.settings.serviceAccount.boundAccount"
-                defaultMessage="Account: {account}"
-                values={{ account: <EuiCode>{serviceAccountId}</EuiCode> }}
-              />
+            <EuiText size="xs" color="subdued" data-test-subj="nightshiftServiceAccountSlack">
+              {status.data.slackThreadInstalled
+                ? i18n.translate('xpack.nightshift.settings.serviceAccount.slackOn', {
+                    defaultMessage: 'Slack thread replies also run as this account.',
+                  })
+                : i18n.translate('xpack.nightshift.settings.serviceAccount.slackOff', {
+                    defaultMessage: 'Slack thread replies are not set up in this space.',
+                  })}
             </EuiText>
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType={isBound ? 'user' : 'lock'}
-            color={isBound ? 'text' : 'primary'}
-            fill={!isBound}
-            isLoading={setServiceAccount.isLoading}
-            isDisabled={!canManage}
-            onClick={() => setServiceAccount.mutate(isBound ? 'disable' : 'enable')}
-            data-test-subj="nightshiftToggleServiceAccount"
-          >
-            {isBound
-              ? i18n.translate('xpack.nightshift.settings.serviceAccount.disableButton', {
-                  defaultMessage: 'Run as requesting user',
-                })
-              : i18n.translate('xpack.nightshift.settings.serviceAccount.enableButton', {
-                  defaultMessage: 'Enable service account',
-                })}
-          </EuiButton>
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
@@ -99,23 +79,19 @@ export const InvestigationIdentitySection = ({ canManage }: { canManage: boolean
   return (
     <SettingsSectionRow
       title={i18n.translate('xpack.nightshift.settings.serviceAccount.title', {
-        defaultMessage: 'Investigation identity',
+        defaultMessage: 'Service account',
       })}
       description={
         <p>
-          <FormattedMessage
-            id="xpack.nightshift.settings.serviceAccount.description"
-            defaultMessage="Run investigations in this space as the {account} service account instead of the user who starts them. Enabling creates the account and its role if they do not exist and requires the {privilege} cluster privilege."
-            values={{
-              account: <EuiCode>{serviceAccountId}</EuiCode>,
-              privilege: <EuiCode>manage_security</EuiCode>,
-            }}
-          />
+          {i18n.translate('xpack.nightshift.settings.serviceAccount.description', {
+            defaultMessage:
+              'Nightshift runs every investigation in this space as this service account, not as the user who starts it. What it can read and change is set by the account’s role.',
+          })}
         </p>
       }
       data-test-subj="nightshiftInvestigationIdentitySection"
     >
-      {renderControl()}
+      {renderStatus()}
     </SettingsSectionRow>
   );
 };

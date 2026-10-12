@@ -8,7 +8,10 @@
 import Boom from '@hapi/boom';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import { createInvestigatorServiceAccountService } from './investigator_service_account';
 
@@ -63,7 +66,7 @@ const setup = ({
 };
 
 describe('createInvestigatorServiceAccountService', () => {
-  it('creates the role and account, then installs the bound workflow in the space', async () => {
+  it('creates the role and account, then installs both bound workflows in the space', async () => {
     const { service, esClient, serviceAccounts, managedWorkflows } = setup();
 
     const status = await service.enable(request, SPACE_ID);
@@ -84,6 +87,18 @@ describe('createInvestigatorServiceAccountService', () => {
         workflowIdSuffix: SPACE_ID,
         values: { serviceAccountId: 'kibana/nightshift_investigator' },
       }
+    );
+    expect(managedWorkflows.install).toHaveBeenCalledWith(
+      'nightshiftInvestigations',
+      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
+      {
+        spaceId: SPACE_ID,
+        workflowIdSuffix: SPACE_ID,
+        values: { serviceAccountId: 'kibana/nightshift_investigator', spaceId: SPACE_ID },
+      }
+    );
+    expect(managedWorkflows.install.mock.calls[0][1]).toBe(
+      NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID
     );
     expect(status).toEqual(
       expect.objectContaining({
@@ -130,15 +145,14 @@ describe('createInvestigatorServiceAccountService', () => {
     });
   });
 
-  it('uninstalls the bound workflow on disable', async () => {
+  it('uninstalls both bound workflows on disable', async () => {
     const { service, managedWorkflows } = setup();
 
     await service.disable(request, SPACE_ID);
 
-    expect(managedWorkflows.uninstall).toHaveBeenCalledWith(
-      'nightshiftInvestigations',
+    expect(managedWorkflows.uninstall.mock.calls.map(([, id]) => id)).toEqual([
+      NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
       NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
-      { spaceId: SPACE_ID, workflowIdSuffix: SPACE_ID }
-    );
+    ]);
   });
 });

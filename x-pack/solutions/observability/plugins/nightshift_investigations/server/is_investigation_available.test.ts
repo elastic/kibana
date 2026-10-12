@@ -20,8 +20,9 @@ const logger = { warn } as never;
 const workflow = { enabled: true, valid: true, definition: {} };
 const agentBuilder = {} as never;
 const workflowsExtensions = {} as never;
+const getWorkflow = jest.fn();
 const workflowsManagement = {
-  management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
+  management: { getClient: () => ({ getWorkflow }) },
 } as never;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const getClient = jest.fn();
@@ -43,11 +44,36 @@ const createDependencies = (featureFlags = createFeatureFlagsMock(true)) => ({
   logger,
   workflowsExtensions,
   workflowsManagement,
+  isServiceAccountExecutionEnabled: () => true,
 });
 
 beforeEach(() => {
   jest.clearAllMocks();
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
+  getWorkflow.mockResolvedValue(workflow);
+});
+
+it('checks the bound investigation workflow of the space', async () => {
+  await expect(
+    isInvestigationInfrastructureAvailable({ ...createDependencies(), spaceId: 'obs' })
+  ).resolves.toBe(true);
+  expect(getWorkflow).toHaveBeenCalledWith('system-nightshift-investigation-bound-obs', 'obs');
+});
+
+it('returns false while service accounts are turned off', async () => {
+  await expect(
+    isInvestigationInfrastructureAvailable({
+      ...createDependencies(),
+      isServiceAccountExecutionEnabled: () => false,
+    })
+  ).resolves.toBe(false);
+  expect(getWorkflow).not.toHaveBeenCalled();
+});
+
+it('returns false while the bound workflow is disabled', async () => {
+  getWorkflow.mockResolvedValue({ ...workflow, enabled: false });
+
+  await expect(isInvestigationInfrastructureAvailable(createDependencies())).resolves.toBe(false);
 });
 
 it('returns true when every infrastructure requirement is available', async () => {

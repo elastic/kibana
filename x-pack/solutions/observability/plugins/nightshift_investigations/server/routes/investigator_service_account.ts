@@ -22,8 +22,12 @@ const DELEGATED_AUTHZ = {
 
 export const getInvestigatorServiceAccountRoute = createNightshiftInvestigationsServerRoute({
   endpoint: `GET ${ENDPOINT}`,
-  options: { access: 'internal', summary: 'Get the investigation service account binding' },
-  security: { authz: { requiredPrivileges: ['agentBuilder:write'] } },
+  options: {
+    access: 'internal',
+    summary: 'Get whether Nightshift is set up with its service account in this space',
+  },
+  // Readable by anyone who can read investigations, so every Nightshift user sees the setup step.
+  security: { authz: { requiredPrivileges: ['agentBuilder:read'] } },
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>
     getInvestigatorServiceAccountService().getStatus(request, getSpaceId(request)),
 });
@@ -32,7 +36,7 @@ export const enableInvestigatorServiceAccountRoute = createNightshiftInvestigati
   endpoint: `POST ${ENDPOINT}/_enable`,
   options: {
     access: 'internal',
-    summary: 'Run investigations in this space as the Nightshift service account',
+    summary: 'Set up Nightshift in this space with its service account',
   },
   security: DELEGATED_AUTHZ,
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>
@@ -43,7 +47,7 @@ export const disableInvestigatorServiceAccountRoute = createNightshiftInvestigat
   endpoint: `POST ${ENDPOINT}/_disable`,
   options: {
     access: 'internal',
-    summary: 'Run investigations in this space as the caller again',
+    summary: 'Remove the Nightshift service account setup from this space',
   },
   security: DELEGATED_AUTHZ,
   handler: async ({ request, getInvestigatorServiceAccountService, getSpaceId }) =>

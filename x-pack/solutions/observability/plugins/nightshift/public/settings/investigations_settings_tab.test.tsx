@@ -16,10 +16,7 @@ const mockCancel = jest.fn();
 const mockOpenCustomContext = jest.fn();
 let mockRunLimitGroups: readonly string[] = [];
 const mockKibanaServices = {
-  application: {
-    navigateToUrl: jest.fn(),
-    capabilities: { nightshift: { show: true, manage: true } },
-  },
+  application: { navigateToUrl: jest.fn() },
   http: {},
   overlays: { openConfirm: jest.fn() },
   appParams: { history: {} },

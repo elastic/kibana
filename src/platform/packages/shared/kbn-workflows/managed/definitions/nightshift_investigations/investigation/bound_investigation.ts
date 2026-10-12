@@ -9,38 +9,28 @@
 
 import INVESTIGATION_WORKFLOW_YAML from './investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
+import { renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation-bound';
+
+/** Document id of the bound investigation installed in a space (installed with `workflowIdSuffix`). */
+export const getNightshiftBoundInvestigationWorkflowId = (spaceId: string): string =>
+  `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${spaceId}`;
 
 export interface NightshiftBoundInvestigationTemplateValues extends ManagedWorkflowTemplateValues {
   /** The service account the investigation runs as, e.g. `kibana/nightshift_investigator`. */
   serviceAccountId: string;
 }
 
-const SETTINGS_BLOCK = /^settings:\n/m;
-
-/**
- * Renders the shared investigation YAML with `settings.run_as`, so a per-space install runs as
- * the bound service account instead of the user that starts the investigation.
- */
+/** Renders the investigation YAML with `settings.run_as` set to the bound service account. */
 export const renderBoundInvestigationYaml = ({
   serviceAccountId,
-}: NightshiftBoundInvestigationTemplateValues): string => {
-  if (typeof serviceAccountId !== 'string' || serviceAccountId.trim().length === 0) {
-    throw new Error('A bound Nightshift investigation requires a serviceAccountId');
-  }
-  if (!SETTINGS_BLOCK.test(INVESTIGATION_WORKFLOW_YAML)) {
-    throw new Error('The investigation workflow YAML has no top-level settings block');
-  }
-  return INVESTIGATION_WORKFLOW_YAML.replace(
-    SETTINGS_BLOCK,
-    `settings:\n  run_as: ${JSON.stringify(serviceAccountId)}\n`
-  );
-};
+}: NightshiftBoundInvestigationTemplateValues): string =>
+  renderRunAs(INVESTIGATION_WORKFLOW_YAML, serviceAccountId);
 
 /**
- * The investigation workflow, installed per space and bound to a service account. It shares its
- * YAML with the global `system-nightshift-investigation`, which keeps running as the caller.
+ * The investigation workflow, installed per space and bound to the Nightshift service account.
+ * Investigations only run through this copy; a space without it cannot run investigations.
  */
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,

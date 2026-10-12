@@ -400,6 +400,9 @@ function recoverTriggerTypeFromInput(
   return isTriggerType(ctx.trigger_type) ? ctx.trigger_type : undefined;
 }
 
+const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
+  'Nightshift is not set up in this space. An admin with manage_security must enable the Nightshift service account.';
+
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -420,6 +423,8 @@ export interface NightshiftInvestigationsClientDeps {
   uiSettings?: CoreStart['uiSettings'];
   isAvailable: (connectorId?: string) => Promise<boolean>;
   isInfrastructureAvailable: () => Promise<boolean>;
+  /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
+  isServiceAccountExecutionEnabled?: () => boolean;
 }
 
 export class NightshiftInvestigationsClient {
@@ -437,6 +442,7 @@ export class NightshiftInvestigationsClient {
   private readonly uiSettings?: CoreStart['uiSettings'];
   private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
   private readonly checkInfrastructureAvailability: () => Promise<boolean>;
+  private readonly isServiceAccountExecutionEnabled: () => boolean;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -453,6 +459,7 @@ export class NightshiftInvestigationsClient {
     this.uiSettings = deps.uiSettings;
     this.checkAvailability = deps.isAvailable;
     this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
+    this.isServiceAccountExecutionEnabled = deps.isServiceAccountExecutionEnabled ?? (() => false);
   }
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
@@ -542,26 +549,23 @@ export class NightshiftInvestigationsClient {
 
     const spaceId = this.getSpaceId();
 
-    // A space bound to a service account runs its own per-space copy; otherwise the global one,
-    // which runs as the caller.
-    const boundWorkflow = await this.workflowsManagement.management.getWorkflow(
-      getBoundInvestigationWorkflowId(spaceId),
+    // Investigations only run as the Nightshift service account, through the copy an admin binds
+    // in each space. There is no fallback that runs as the caller.
+    if (!this.isServiceAccountExecutionEnabled()) {
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
+    }
+    const workflowId = getBoundInvestigationWorkflowId(spaceId);
+    const workflow = await this.workflowsManagement.management.getWorkflow(
+      workflowId,
       spaceId,
       this.request
     );
-    const useBound = Boolean(boundWorkflow?.definition && boundWorkflow.enabled);
-    const workflowId = useBound
-      ? getBoundInvestigationWorkflowId(spaceId)
-      : NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
-    const workflow = useBound
-      ? boundWorkflow
-      : await this.workflowsManagement.management.getWorkflow(workflowId, spaceId, this.request);
 
-    if (!workflow?.definition) {
-      this.logger.error(
-        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
+    if (!workflow?.definition || !workflow.enabled) {
+      this.logger.warn(
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
       );
-      throw new InvestigationUnavailableError('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
     }
 
     switch (trigger_type) {

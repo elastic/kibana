@@ -66,12 +66,6 @@ const mockManagement = {
   runWorkflow: jest.fn(),
 };
 
-/** Resolves only the global investigation workflow, as in a space with no service account bound. */
-const mockGlobalWorkflowOnly = (workflow: unknown) =>
-  mockManagement.getWorkflow.mockImplementation(async (id: string) =>
-    id === NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID ? workflow : null
-  );
-
 const mockWorkflowsManagement = {
   management: mockManagement,
 } as unknown as WorkflowsServerPluginSetup;
@@ -121,6 +115,7 @@ const makeClient = (
     uiSettings: mockUiSettings,
     isAvailable: jest.fn().mockResolvedValue(true),
     isInfrastructureAvailable: jest.fn().mockResolvedValue(true),
+    isServiceAccountExecutionEnabled: () => true,
     ...overrides,
   });
 
@@ -417,7 +412,8 @@ describe('NightshiftInvestigationsClient.list()', () => {
 });
 
 describe('NightshiftInvestigationsClient.start()', () => {
-  const WORKFLOW_ID = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+  // Investigations only run on the space's copy bound to the Nightshift service account.
+  const WORKFLOW_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
   const mockWorkflow = { id: WORKFLOW_ID, enabled: true, valid: true, definition: { steps: [] } };
 
   const alertContext = {
@@ -525,12 +521,12 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('starts manual runs on the Nightshift investigation workflow', async () => {
     const investigationWorkflow = {
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
     };
-    mockGlobalWorkflowOnly(investigationWorkflow);
+    mockManagement.getWorkflow.mockResolvedValue(investigationWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-manual');
 
     const result = await makeClient().start({
@@ -540,18 +536,14 @@ describe('NightshiftInvestigationsClient.start()', () => {
       message: 'Why did payment timeouts increase?',
     });
 
-    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(
-      NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-      SPACE_ID,
-      mockRequest
-    );
+    expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID, mockRequest);
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
       availability: mockAgentAvailability,
     });
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
+      expect.objectContaining({ id: WORKFLOW_ID }),
       SPACE_ID,
       expect.objectContaining({
         message: 'Why did payment timeouts increase?',
@@ -565,7 +557,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -601,7 +593,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('truncates a long prompt rather than storing it whole as the headline', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -624,7 +616,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
 
   it('keeps an explicit subject summary over the prompt', async () => {
     mockManagement.getWorkflow.mockResolvedValue({
-      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      id: WORKFLOW_ID,
       enabled: true,
       valid: true,
       definition: { steps: [] },
@@ -667,7 +659,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
   });
 
   it('keeps significant event attribution on the common investigation workflow', async () => {
-    mockGlobalWorkflowOnly(mockWorkflow);
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-sig');
 
     await makeClient().start({
@@ -679,52 +671,34 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(mockManagement.getWorkflow).toHaveBeenCalledWith(WORKFLOW_ID, SPACE_ID, mockRequest);
   });
 
-  it('runs on the bound per-space workflow when a service account is bound', async () => {
-    const boundWorkflowId = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
-    const boundWorkflow = { id: boundWorkflowId, enabled: true, valid: true, definition: {} };
-    mockManagement.getWorkflow.mockImplementation(async (id: string) =>
-      id === boundWorkflowId ? boundWorkflow : mockWorkflow
-    );
-    mockManagement.runWorkflow.mockResolvedValue('exec-bound');
+  it('refuses to start while service accounts are turned off', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
 
-    await makeClient().start({
-      title: 'Latency is too high',
-      subject: { type: 'significant_event', id: 'event-1' },
-      trigger_type: 'manual',
-    });
-
-    expect(mockManagement.getWorkflow).toHaveBeenCalledTimes(1);
-    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: boundWorkflowId }),
-      SPACE_ID,
-      expect.anything(),
-      expect.anything(),
-      'nightshift-investigations'
-    );
+    await expect(
+      makeClient({ isServiceAccountExecutionEnabled: () => false }).start({
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toBeInstanceOf(InvestigationUnavailableError);
+    expect(mockManagement.getWorkflow).not.toHaveBeenCalled();
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
-  it('falls back to the global workflow while the bound workflow is disabled', async () => {
-    const boundWorkflowId = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
-    mockManagement.getWorkflow.mockImplementation(async (id: string) =>
-      id === boundWorkflowId
-        ? { id: boundWorkflowId, enabled: false, valid: true, definition: {} }
-        : mockWorkflow
-    );
-    mockManagement.runWorkflow.mockResolvedValue('exec-global');
+  it.each([
+    ['not set up', null],
+    ['disabled', { id: WORKFLOW_ID, enabled: false, valid: true, definition: { steps: [] } }],
+  ])('refuses to start while the space is %s', async (_, boundWorkflow) => {
+    mockManagement.getWorkflow.mockResolvedValue(boundWorkflow);
 
-    await makeClient().start({
-      title: 'Latency is too high',
-      subject: { type: 'significant_event', id: 'event-1' },
-      trigger_type: 'manual',
-    });
-
-    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
-      expect.objectContaining({ id: WORKFLOW_ID }),
-      SPACE_ID,
-      expect.anything(),
-      expect.anything(),
-      'nightshift-investigations'
-    );
+    await expect(
+      makeClient().start({
+        title: 'Latency is too high',
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+      })
+    ).rejects.toThrow(/enable the Nightshift service account/);
+    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
   });
 
   it('persists an explicit trigger_type into the workflow context', async () => {

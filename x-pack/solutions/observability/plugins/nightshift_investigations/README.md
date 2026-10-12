@@ -26,28 +26,47 @@ These API privileges are not scoped to Nightshift: they cover every agentic inve
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
 
-## Running investigations as a service account (POC)
+## Service account (required, POC)
 
-By default the investigation workflow (`system-nightshift-investigation`) is installed once in the global space and runs as whoever starts it. An admin can bind a space to the `kibana/nightshift_investigator` service account instead:
+Nightshift runs investigations only as its service account, `kibana/nightshift_investigator`. There is no fallback that runs them as the user who starts them. A space can use Nightshift only after an admin sets it up:
 
 ```yaml
 xpack.security.serviceAccounts.enabled: true
 xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
 ```
 
+Until a space is set up, the Nightshift app shows a setup step in place of its pages:
+- Users with Nightshift manage and configure privileges get an **Enable service account** button.
+- Other users are told to ask an administrator.
+- If service accounts are turned off, the setup step says which setting to change.
+
+The button calls:
+
 ```
 POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
-GET  /internal/nightshift/investigations/service_account
-POST /internal/nightshift/investigations/service_account/_disable
+GET  /internal/nightshift/investigations/service_account           # status, agentBuilder:read
+POST /internal/nightshift/investigations/service_account/_disable  # teardown, no UI
 ```
 
-`_enable` runs with the caller's privileges. It creates the `nightshift_investigator` role and service account when missing (existing ones are reused unchanged), then installs `system-nightshift-investigation-bound-<spaceId>` in the caller's space with `settings.run_as` set to the account. The bound copy shares its YAML with the global workflow. The workflow's binding to the account can only be created with an authenticated `manage_security` request, so it cannot happen at startup. On later boots the dynamic-workflow upgrade reuses the existing binding without a request.
+`_enable` runs with the caller's privileges:
+1. It creates the `nightshift_investigator` role and service account if they are missing. Existing ones are reused unchanged.
+2. It installs two workflows in the caller's space, both with `settings.run_as` set to the account:
+   - `system-nightshift-investigation-bound-<spaceId>`, which uses the same YAML as `system-nightshift-investigation`.
+   - `system-nightshift-slack-thread-bound-<spaceId>`, whose investigation call targets the space's bound investigation.
 
-While the bound workflow is installed and enabled, `POST /internal/nightshift/investigations` starts it instead of the global one. The investigation, its Agent Builder conversation, and every `kibana.request` step run as the service account; `executed_by` still records the user who started it.
+Running `_enable` again repairs a space whose setup was removed.
 
-**Known gap:** the Agent Builder hook workflows on the investigation agent (`system-nightshift-sandbox-materialize-workspace`, `system-nightshift-agent-optimize`, `system-nightshift-decision-tree-hydrate`) do not run as the account. Agent Builder starts them with the service account's scoped request, and the workflows engine unwraps that to the original caller's request (`getWorkflowOriginalRequest`) unless the run inherits through a `workflow.execute` step with `run-as-mode: inherit`. Hooks are not steps, so they run as the user who started the investigation.
+A workflow can only be bound to the account from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings without a request. The global `system-nightshift-investigation` and `system-nightshift-slack-thread` are no longer installed, and the boot-time orphan cleanup removes copies left from earlier versions.
 
-The role is deliberately broad for the POC (Kibana `all` on every space, read on observability data). Bindings are per space, so the account only acts where an admin bound it.
+**Effects**
+- `POST /internal/nightshift/investigations`, automatic significant-event investigations, and the investigation agent's Agent Builder availability all require the bound workflow and `xpack.security.serviceAccounts.enabled`.
+- The investigation, its Agent Builder conversation, and every `kibana.request` step run as the service account. `executed_by` still records the user who started it.
+
+**Known gaps**
+- **Agent Builder hook workflows.** `system-nightshift-sandbox-materialize-workspace`, `system-nightshift-agent-optimize` and `system-nightshift-decision-tree-hydrate` run as the user who started the investigation. Agent Builder starts them with the service account's scoped request, and the workflows engine unwraps that to the original caller (`getWorkflowOriginalRequest`). It keeps the service account only through a `workflow.execute` step with `run-as-mode: inherit`, and hooks are not steps.
+- **Chat-started investigations.** The `streams-investigation-management` skill starts `system-nightshift-investigation` by id through `execute_workflow`. That id is no longer installed, and the per-space id includes the space, which the static skill text cannot name.
+- **Deleted account.** If the account is force-deleted, every run fails with a token exchange error. Recovery: delete the leftover token, then run `_disable` and `_enable` again.
+- **Broad role.** The role is deliberately broad for the POC: Kibana `all` on every space, plus read on observability data.
 
 ## Notifications
 

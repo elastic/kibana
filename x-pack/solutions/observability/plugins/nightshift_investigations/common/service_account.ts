@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-/** Whether investigations in a space run as the Nightshift service account. */
+/**
+ * Whether Nightshift is set up in a space. Investigations run only as the Nightshift service
+ * account, so a space is usable once its bound investigation workflow is installed and enabled.
+ */
 export interface InvestigatorServiceAccountStatus {
   serviceAccountsEnabled: boolean;
   serviceAccountId: string;
   workflowId: string;
   installed: boolean;
   enabled: boolean | null;
+  /** The bound Slack thread workflow, which continues investigations from Slack replies. */
+  slackThreadInstalled: boolean;
 }

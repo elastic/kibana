@@ -14,15 +14,15 @@ import {
   type UseQueryResult,
 } from '@kbn/react-query';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
-import { isHttpClientError } from '../../common/http_error';
-import { useKibana } from '../../hooks/use_kibana';
+import { isHttpClientError } from '../common/http_error';
+import { useKibana } from '../hooks/use_kibana';
 
 const QUERY_KEY = ['nightshift.investigatorServiceAccount'] as const;
 
 const toError = (error: unknown): Error =>
   error instanceof Error ? error : new Error(String(error));
 
-/** Reads whether investigations in the current space run as the Nightshift service account. */
+/** Reads whether Nightshift is set up with its service account in the current space. */
 export const useInvestigatorServiceAccount = (): UseQueryResult<
   InvestigatorServiceAccountStatus,
   Error
@@ -44,40 +44,42 @@ export const useInvestigatorServiceAccount = (): UseQueryResult<
   });
 };
 
-/** Binds (`enable`) or unbinds (`disable`) the current space to the Nightshift service account. */
-export const useSetInvestigatorServiceAccount = (): UseMutationResult<
+/** Sets up Nightshift in the current space: creates the service account and binds its workflows. */
+export const useSetUpNightshiftServiceAccount = (): UseMutationResult<
   InvestigatorServiceAccountStatus,
   unknown,
-  'enable' | 'disable'
+  void
 > => {
   const { notifications, nightshiftInvestigations } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
   const queryClient = useQueryClient();
 
-  return useMutation<InvestigatorServiceAccountStatus, unknown, 'enable' | 'disable'>({
-    mutationFn: async (action) => {
+  return useMutation<InvestigatorServiceAccountStatus, unknown, void>({
+    mutationFn: async () => {
       if (!investigationsClient) {
         throw new Error('Nightshift investigations plugin is unavailable');
       }
-      return action === 'enable'
-        ? investigationsClient.fetch(
-            'POST /internal/nightshift/investigations/service_account/_enable',
-            { signal: null }
-          )
-        : investigationsClient.fetch(
-            'POST /internal/nightshift/investigations/service_account/_disable',
-            { signal: null }
-          );
+      return investigationsClient.fetch(
+        'POST /internal/nightshift/investigations/service_account/_enable',
+        { signal: null }
+      );
     },
     onSuccess: (status) => {
       queryClient.setQueryData(QUERY_KEY, status);
     },
     onError: (error) => {
       notifications.toasts.addError(toError(error), {
-        title: i18n.translate('xpack.nightshift.settings.serviceAccount.saveErrorToastTitle', {
-          defaultMessage: 'Failed to change the investigation service account',
+        title: i18n.translate('xpack.nightshift.serviceAccount.setupErrorToastTitle', {
+          defaultMessage: 'Failed to set up the Nightshift service account',
         }),
       });
     },
   });
 };
+
+/**
+ * Nightshift is usable in a space once service accounts are on and its bound investigation
+ * workflow is installed and enabled.
+ */
+export const isNightshiftSetUp = (status: InvestigatorServiceAccountStatus | undefined): boolean =>
+  status?.serviceAccountsEnabled === true && status.installed === true && status.enabled === true;

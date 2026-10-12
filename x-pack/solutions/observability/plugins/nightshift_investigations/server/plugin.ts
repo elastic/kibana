@@ -27,7 +27,6 @@ import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
-import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
@@ -584,6 +583,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
     };
   }
@@ -603,6 +603,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         };
       },
     });
@@ -629,6 +630,7 @@ export class NightshiftInvestigationsPlugin
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
+      isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
       isAvailable: (connectorId) =>
         isInvestigationRunAvailable({
           request,
@@ -641,6 +643,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
       isInfrastructureAvailable: () =>
         isInvestigationInfrastructureAvailable({
@@ -653,9 +656,13 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
     });
   };
+
+  private isServiceAccountExecutionEnabled = (): boolean =>
+    this.security?.serviceAccounts.isEnabled() ?? false;
 
   private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {
     if (!this.coreStart || !this.workflowsExtensionsStart) {
@@ -739,7 +746,9 @@ export class NightshiftInvestigationsPlugin
     const client = await workflowsExtensions.initManagedWorkflowsClient(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
-    await installInvestigationWorkflow({ client });
+    // The investigation and Slack thread workflows are installed per space, bound to the
+    // Nightshift service account, when an admin enables it (see lib/service_account). Not
+    // installing their global copies here lets ready() remove any left from earlier versions.
     if (this.cortexEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });
