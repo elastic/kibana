@@ -7,7 +7,8 @@
 
 import { getPlaywrightTagsFor, tags } from '@kbn/scout';
 
-export const API_ENGINE_TAG = tags.deploymentAgnostic;
+// Other serverless projects hide the alerting v2 features, so no role can be granted them there.
+export const API_ENGINE_TAG = [...tags.stateful.all, ...tags.serverless.observability.complete];
 
 export const UI_TAG = [
   ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
