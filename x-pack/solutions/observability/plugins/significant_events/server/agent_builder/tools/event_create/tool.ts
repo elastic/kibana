@@ -10,7 +10,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { significantEventSchema } from '@kbn/significant-events-schema';
+import {
+  SEVERITY_CONTRACT_RULE,
+  significantEventSchema,
+  severitySchema,
+} from '@kbn/significant-events-schema';
 import { lazySchema } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
@@ -33,10 +37,14 @@ const createEventSchema = lazySchema(() =>
       title: true,
       symptom_hypothesis: true,
       summary: true,
-      severity: true,
       confidence: true,
     })
-    .extend({ slugs: sourceSlugsSchema })
+    .extend({
+      slugs: sourceSlugsSchema,
+      severity: severitySchema
+        .optional()
+        .describe(`${SEVERITY_CONTRACT_RULE}\n\nOmit to store "low".`),
+    })
 );
 
 export function createEventTool({

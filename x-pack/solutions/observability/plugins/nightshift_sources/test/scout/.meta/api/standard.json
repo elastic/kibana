@@ -1,5 +1,5 @@
 {
-  "sha1": "f26c609726df59a81574cc9a1494283d267aff25",
+  "sha1": "9fb1836cec653c09aa81a1c72b72f97a841b737f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -192,7 +192,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
+        "line": 84,
         "column": 31
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
+        "line": 84,
         "column": 31
       }
     },
@@ -224,7 +224,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
+        "line": 84,
         "column": 31
       }
     },
@@ -240,7 +240,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
+        "line": 84,
         "column": 31
       }
     },
@@ -256,7 +256,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
+        "line": 84,
         "column": 31
       }
     },
@@ -272,7 +272,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 99,
+        "line": 84,
         "column": 31
       }
     },
@@ -288,7 +288,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 107,
+        "line": 92,
         "column": 24
       }
     },
@@ -304,8 +304,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 114,
-        "column": 24
+        "line": 100,
+        "column": 56
       }
     },
     {
@@ -320,8 +320,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 122,
-        "column": 5
+        "line": 109,
+        "column": 25
       }
     },
     {
@@ -336,8 +336,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 116,
+        "column": 28
+      }
+    },
+    {
+      "id": "bd16983193fab33-535fcc0a7953b91",
+      "title": "POST /internal/nightshift/sources validation accepts METADATA on the source command and keeps it in the view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
+        "line": 123,
+        "column": 73
       }
     },
     {
@@ -352,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 134,
-        "column": 76
+        "line": 133,
+        "column": 5
       }
     },
     {
@@ -368,7 +384,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 144,
+        "line": 141,
         "column": 13
       }
     },
@@ -384,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 151,
-        "column": 13
+        "line": 149,
+        "column": 14
       }
     },
     {
@@ -400,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 158,
-        "column": 19
+        "line": 157,
+        "column": 28
       }
     },
     {
@@ -416,8 +432,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 172,
-        "column": 27
+        "line": 166,
+        "column": 89
       }
     },
     {
@@ -432,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 180,
-        "column": 40
+        "line": 181,
+        "column": 7
       }
     }
   ]

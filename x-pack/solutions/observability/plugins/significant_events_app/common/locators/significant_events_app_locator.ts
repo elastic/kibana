@@ -17,9 +17,7 @@ export type SignificantEventsAppTab =
   | 'knowledge_indicators'
   | 'queries'
   | 'detections'
-  | 'significant_events'
-  | 'cortex'
-  | 'decision_trees';
+  | 'significant_events';
 
 /**
  * Builds locations for Significant Events management tabs.

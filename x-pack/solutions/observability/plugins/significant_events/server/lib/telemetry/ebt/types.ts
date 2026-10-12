@@ -6,7 +6,7 @@
  */
 
 import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
 
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
@@ -152,6 +152,8 @@ interface AgentToolEventWriteProps {
   written: boolean;
   source_ids: string[];
   error_message?: string;
+  /** Tier actually stored. Present only when written is true. */
+  severity?: Severity;
 }
 
 interface AgentToolEventSearchProps {

@@ -13,14 +13,11 @@ const SIGNIFICANT_EVENTS_TABS = [
   'queries',
   'detections',
   SIGNIFICANT_EVENTS_TAB,
-  'cortex',
-  'decision_trees',
-  'memory',
 ] as const;
 
 export type SignificantEventsTabId = (typeof SIGNIFICANT_EVENTS_TABS)[number];
 
-/** True for every Significant Events tab id, including tabs hidden behind a feature flag. */
+/** True for every Significant Events tab id. */
 export function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
   return SIGNIFICANT_EVENTS_TABS.includes(value as SignificantEventsTabId);
 }

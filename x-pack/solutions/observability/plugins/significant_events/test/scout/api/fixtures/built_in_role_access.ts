@@ -100,7 +100,7 @@ export const seedSignificantEvent = async (esClient: EsClient, eventId: string):
       group_hash: eventId,
       rule: { id: eventId, version: 1 },
       alert: { id: eventId, status: 'active' },
-      data: { event_id: eventId, title: 'Built-in role access check', stream_names: [] },
+      data: { event_id: eventId, title: 'Built-in role access check', source_ids: [] },
     },
   });
 };

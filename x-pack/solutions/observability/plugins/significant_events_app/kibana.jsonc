@@ -19,7 +19,7 @@
       "significantEvents",
       "unifiedSearch",
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
+    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
     "requiredBundles": ["esql", "kibanaReact", "stackConnectors"],
     "extraPublicDirs": ["common"],
   },

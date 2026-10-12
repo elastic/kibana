@@ -20,10 +20,10 @@ describe('SignificantEventsAppLocatorDefinition', () => {
     });
   });
 
-  it('builds a path for the cortex tab', async () => {
-    const { path } = await locator.getLocation({ tab: 'cortex' });
+  it('builds a path for the queries tab', async () => {
+    const { path } = await locator.getLocation({ tab: 'queries' });
 
-    expect(path).toBe('/cortex');
+    expect(path).toBe('/queries');
   });
 
   it('serializes scalar query params', async () => {
