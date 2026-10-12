@@ -187,6 +187,8 @@ const SENSITIVE_KEY_SUFFIXES = [
   'secrets',
   'secretkey',
   'secretaccesskey',
+  // SigV4 signature: `Signature=<hex>` (the `Credential=` half is covered by `credential`)
+  'signature',
 ];
 const SENSITIVE_KEY_FRAGMENTS = [
   'apikey', // api_key, x-api-key, x-goog-api-key
@@ -194,6 +196,7 @@ const SENSITIVE_KEY_FRAGMENTS = [
   'privatekey',
   'passphrase',
   'clientassertion',
+  'subscriptionkey', // Ocp-Apim-Subscription-Key (Azure APIM)
 ];
 // `*token` keys that carry counts or vocabulary markers rather than credentials
 const NON_SECRET_TOKEN_KEYS = new Set([
@@ -282,6 +285,22 @@ const COOKIE_VALUE = /[^\r\n"'}]+/y;
 const SCALAR_VALUE = /[^\s"',}]+/y;
 const NUMERIC_VALUE = /^-?\d+(?:\.\d+)?$/;
 
+// A rest-of-line consumption (`cookie:` / `invalid_token:`) must not swallow a following sensitive
+// key: in `invalid_token: abc123, password: "hunter2"` the consumed span would include
+// `password: ` and stop before the quote, leaving the password value exposed after `[redacted]`
+// (the keyed pass never re-reads a consumed span). Stop before the next sensitive key so the keyed
+// pass redacts that key's own value.
+const stopBeforeNextSensitiveKey = (text: string, start: number, candidateEnd: number): number => {
+  const pattern = new RegExp(KEY_VALUE_PATTERN.source, KEY_VALUE_PATTERN.flags);
+  pattern.lastIndex = start;
+  let match = pattern.exec(text);
+  while (match !== null && match.index < candidateEnd) {
+    if (isSensitiveKey(match[1])) return match.index;
+    match = pattern.exec(text);
+  }
+  return candidateEnd;
+};
+
 // Returns the end (exclusive) of the secret value starting at `start`.
 const findSecretValueEnd = (text: string, key: string, start: number): number => {
   QUOTE_OPENER.lastIndex = start;
@@ -306,11 +325,13 @@ const findSecretValueEnd = (text: string, key: string, start: number): number =>
     return start + matchLength(AUTHORIZATION_VALUE, text, start);
   }
   if (normalized.endsWith('cookie') || normalized === 'cookies') {
-    return start + matchLength(COOKIE_VALUE, text, start);
+    return stopBeforeNextSensitiveKey(text, start, start + matchLength(COOKIE_VALUE, text, start));
   }
   // a bare `credentials` / `invalid_token` value that is not prose may be a multi-word secret
   // (`admin letmein`, `Basic abc==`, a passphrase): redact the rest of the line, not one token
-  if (PROSE_KEYS.has(normalized)) return start + matchLength(COOKIE_VALUE, text, start);
+  if (PROSE_KEYS.has(normalized)) {
+    return stopBeforeNextSensitiveKey(text, start, start + matchLength(COOKIE_VALUE, text, start));
+  }
   const length = matchLength(SCALAR_VALUE, text, start);
   // numeric values under token-COUNT keys (`num_token: 5`) are not credentials
   if (isTokenCountKey(key) && NUMERIC_VALUE.test(text.slice(start, start + length))) return start;
@@ -384,12 +405,28 @@ const redactKeyedSecrets = (text: string): string => {
   return result + text.slice(cursor);
 };
 
+// Credentials that appear with no key and no scheme in front of them (upstream prose, log lines,
+// provider error bodies). Each pattern is anchored on the provider's own token format so prose and
+// ordinary text cannot match.
+const BARE_TOKEN_PATTERNS: RegExp[] = [
+  /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g, // AWS access key id
+  /\bgh[pousr]_[A-Za-z0-9]{36}\b/g, // GitHub token
+  /\bxox[baprs]-[A-Za-z0-9-]{10,}/g, // Slack token
+  /\bya29\.[A-Za-z0-9_-]+/g, // Google OAuth access token
+  /\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]+/g, // bare JWT
+];
+
+const redactBareTokens = (text: string): string =>
+  BARE_TOKEN_PATTERNS.reduce((acc, pattern) => acc.replace(pattern, REDACTED), text);
+
 const redactUpstreamSecrets = (text: string): string =>
   redactKeyedSecrets(
-    text
-      .replace(/(\b[a-z][a-z0-9+.-]*:\/\/[^\s:@\/"']+:)[^\s@/"']+@/gi, `$1${REDACTED}@`)
-      .replace(/Bearer\s+[^\s"'\\]+/gi, `Bearer ${REDACTED}`)
-      .replace(/sk-[A-Za-z0-9_-]{8,}/g, REDACTED)
+    redactBareTokens(
+      text
+        .replace(/(\b[a-z][a-z0-9+.-]*:\/\/[^\s:@\/"']+:)[^\s@/"']+@/gi, `$1${REDACTED}@`)
+        .replace(/Bearer\s+[^\s"'\\]+/gi, `Bearer ${REDACTED}`)
+        .replace(/sk-[A-Za-z0-9_-]{8,}/g, REDACTED)
+    )
   );
 
 // Replaces the WHOLE value (scalar, object or array) of a sensitive key. The text pass in
@@ -437,7 +474,12 @@ export const truncateUpstreamBody = (
 ): string => {
   const text = redactUpstreamSecrets(stringifyUpstreamBody(body));
   const marker = '... [truncated]';
-  return text.length > maxLength ? `${text.slice(0, maxLength - marker.length)}${marker}` : text;
+  if (text.length <= maxLength) return text;
+  // A cap below the marker length must still cap: `text.slice(0, maxLength - marker.length)` with a
+  // negative argument would drop the tail and then append the marker (length > maxLength).
+  const cap = Math.max(0, maxLength);
+  if (cap <= marker.length) return marker.slice(0, cap);
+  return `${text.slice(0, cap - marker.length)}${marker}`;
 };
 
 /**

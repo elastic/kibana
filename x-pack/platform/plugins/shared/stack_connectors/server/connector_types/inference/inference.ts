@@ -57,6 +57,12 @@ import {
   truncateUpstreamBody,
 } from './helpers';
 
+// 4xx are the caller's fault, 5xx the provider's. A 429 without the `quota` marker is a transient
+// provider rate limit, not a user quota error (the quota carve-out is thrown earlier by
+// `detectandThrowUserError`), so it stays framework-side.
+const errorSourceForStatus = (statusCode: number): TaskErrorSource =>
+  statusCode >= 500 || statusCode === 429 ? TaskErrorSource.FRAMEWORK : TaskErrorSource.USER;
+
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   // Not using Axios for requests, but errors may be Axios-shaped or Elasticsearch client ResponseError-shaped.
   // Must never throw, otherwise the original (upstream) error is lost.
@@ -240,7 +246,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
               }; upstream body stream failed: ${buildInferenceErrorMessage(cause)}`
             )
           ),
-          response.statusCode < 500 ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
+          errorSourceForStatus(response.statusCode)
         );
       }
       detectandThrowUserError(error);
@@ -249,7 +255,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       }${error ? `: ${error}` : ''}`;
       throw createTaskRunError(
         new Error(truncateUpstreamBody(message)),
-        response.statusCode < 500 ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK
+        errorSourceForStatus(response.statusCode)
       );
     }
 
@@ -391,7 +397,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       // TODO: const usageMetadata = response?.data?.usageMetadata;
       return response;
     } catch (err) {
-      this.logger.error(`error perform inference endpoint API: ${err}`);
+      this.logger.error(`error perform inference endpoint API: ${buildInferenceErrorMessage(err)}`);
       throw err;
     }
   }

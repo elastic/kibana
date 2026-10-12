@@ -13,6 +13,17 @@ import {
   truncateUpstreamBody,
 } from './helpers';
 
+// Fixtures for credentials that carry no key (or a key the sensitive-key lists did not cover) and
+// would otherwise reach logs and error messages verbatim.
+const SIGV4_SIGNATURE = 'fe5f80f77d5fa3beca038a248ff027d0445342fe2855ddc963176630326f1024';
+const AWS_ACCESS_KEY_ID = 'AKIAIOSFODNN7EXAMPLE';
+const SLACK_TOKEN = 'xoxb-123456789012-098765432109-AbCdEfGhIjKlMnOpQrStUvWx';
+const BARE_JWT =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+const AZURE_SUBSCRIPTION_KEY = '0123456789abcdef0123456789abcdef';
+const GITHUB_TOKEN = `ghp_${'a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8'}`;
+const GOOGLE_OAUTH_TOKEN = `ya29.${'a0AfH6SMBx0ZQqT9LrF1kD2mN3pQ4rS5tU6vW7xY'}`;
+
 describe('eventSourceStreamIntoObservable', () => {
   it('emits SSE events from the stream', async () => {
     const messages = [JSON.stringify({ foo: 'bar' }), '42'];
@@ -118,6 +129,17 @@ describe('truncateUpstreamBody', () => {
     circular.self = circular;
     expect(() => truncateUpstreamBody(circular)).not.toThrow();
   });
+
+  it('still caps when maxLength is below the truncation marker length', () => {
+    const body = 'z'.repeat(50);
+    for (const maxLength of [0, 5, 13, 14]) {
+      expect(truncateUpstreamBody(body, maxLength)).toHaveLength(maxLength);
+    }
+    expect(truncateUpstreamBody(body, 5)).toBe('... [');
+
+    const message = buildInferenceErrorMessage({ message: body, statusCode: 500 });
+    expect(truncateUpstreamBody(message, 5).length).toBeLessThanOrEqual(5);
+  });
 });
 
 describe('upstream credential redaction', () => {
@@ -164,6 +186,24 @@ describe('upstream credential redaction', () => {
     ["{'token':'ZZSECRET9", 'ZZSECRET9'],
     ['{"api_key":"ZZSECRET9', 'ZZSECRET9'],
     ['{"password":"ZZSECRET9', 'ZZSECRET9'],
+    // credentials that arrive bare, with no key and no scheme in front of them
+    [
+      `Authorization: AWS4-HMAC-SHA256 Credential=${AWS_ACCESS_KEY_ID}/20261012/us-east-1/bedrock/aws4_request, SignedHeaders=host;x-amz-date, Signature=${SIGV4_SIGNATURE}`,
+      SIGV4_SIGNATURE,
+    ],
+    [`Signature=${SIGV4_SIGNATURE}`, SIGV4_SIGNATURE],
+    [`the request was signed with key ${AWS_ACCESS_KEY_ID}`, AWS_ACCESS_KEY_ID],
+    [`Error: request signed for ASIA${'B'.repeat(16)} was rejected`, `ASIA${'B'.repeat(16)}`],
+    [`Slack API rejected the call: invalid_auth, token ${SLACK_TOKEN}`, SLACK_TOKEN],
+    [`upstream said: token expired, presented ${BARE_JWT}`, BARE_JWT],
+    [`Ocp-Apim-Subscription-Key: ${AZURE_SUBSCRIPTION_KEY}`, AZURE_SUBSCRIPTION_KEY],
+    [`git push failed: bad credentials at ${GITHUB_TOKEN}`, GITHUB_TOKEN],
+    [`google api rejected token ${GOOGLE_OAUTH_TOKEN}`, GOOGLE_OAUTH_TOKEN],
+    // a rest-of-line consumption must not swallow the next key and leave its value dangling
+    ['invalid_token: abc123, password: "hunter2"', 'hunter2'],
+    ['cookie: session=abc123; password="hunter2"', 'hunter2'],
+    [`invalid_token: abc123, api_key: ${AZURE_SUBSCRIPTION_KEY}`, AZURE_SUBSCRIPTION_KEY],
+    [`Cookie: a=b; Signature=${SIGV4_SIGNATURE}`, SIGV4_SIGNATURE],
   ])('redacts %s', (input, secret) => {
     expect(truncateUpstreamBody(input)).not.toContain(secret);
   });
