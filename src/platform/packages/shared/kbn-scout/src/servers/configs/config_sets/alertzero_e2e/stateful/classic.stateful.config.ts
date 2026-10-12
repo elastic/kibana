@@ -27,6 +27,11 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *   and answers 404 while it is off, which is the default. The setting is `scope: 'namespace'`;
  *   `uiSettings.overrides` is applied by the UI settings client of every space, so the override
  *   turns it on for the test space.
+ * - the `endpointForensicAnalysisSkill` securitySolution experimental feature. The managed
+ *   `system-security-forensics-endpoint-analysis` Worker is hidden until the
+ *   `endpoint-forensic-analysis` Agent Builder skill is registered, and the forensics workflow
+ *   that proposes Isolate runs that skill. The Defend endpoint package is not preinstalled: the
+ *   isolation spec installs it while seeding hosts (`indexHostsAndAlerts`).
  * - the Workflows UI, `ai.agent` workflow steps and Agent Builder experimental features the
  *   Attack Discovery review and forensics workflows rely on.
  *
@@ -40,13 +45,37 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  */
 const pinnedConnectorId = process.env.ALERTZERO_E2E_AI_CONNECTOR?.trim();
 
+const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
+const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill'];
+
+/**
+ * Kibana reads a single `enableExperimental` value, so a value already set by a base config set
+ * is merged into, not repeated.
+ */
+const withExperimentalFeatures = (baseArgs: string[]): string[] => {
+  const features = new Set<string>(REQUIRED_EXPERIMENTAL_FEATURES);
+  baseArgs
+    .filter((arg) => arg.startsWith(ENABLE_EXPERIMENTAL_ARG))
+    .forEach((arg) => {
+      (JSON.parse(arg.slice(ENABLE_EXPERIMENTAL_ARG.length)) as string[]).forEach((feature) =>
+        features.add(feature)
+      );
+    });
+  return [
+    ...baseArgs.filter((arg) => !arg.startsWith(ENABLE_EXPERIMENTAL_ARG)),
+    `${ENABLE_EXPERIMENTAL_ARG}${JSON.stringify([...features])}`,
+  ];
+};
+
 export const servers: ScoutServerConfig = {
   ...eisConfig,
   kbnTestServer: {
     ...eisConfig.kbnTestServer,
     serverArgs: [
-      ...eisConfig.kbnTestServer.serverArgs,
-      ...serviceAccountsServerArgs,
+      ...withExperimentalFeatures([
+        ...eisConfig.kbnTestServer.serverArgs,
+        ...serviceAccountsServerArgs,
+      ]),
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',

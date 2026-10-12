@@ -34,6 +34,18 @@ describe('alertzero_e2e config set', () => {
     expect(args).toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
   });
 
+  it('enables endpointForensicAnalysisSkill, or the forensics Worker is never listed and no Isolate proposal can exist', () => {
+    expect(args).toContain(
+      '--xpack.securitySolution.enableExperimental=["endpointForensicAnalysisSkill"]'
+    );
+  });
+
+  it('passes enableExperimental exactly once', () => {
+    expect(args.filter((arg) => arg.includes('securitySolution.enableExperimental'))).toHaveLength(
+      1
+    );
+  });
+
   describe('default AI connector', () => {
     const ENV = 'ALERTZERO_E2E_AI_CONNECTOR';
     const original = process.env[ENV];
