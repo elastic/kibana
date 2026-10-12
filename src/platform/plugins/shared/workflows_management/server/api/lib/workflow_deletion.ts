@@ -9,12 +9,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { StorageClientBulkIndexOccMetadata } from '@kbn/storage-adapter';
-import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
+import {
+  ExecutionSearchIncompleteError,
+  hasNonTerminalExecution,
 } from '@kbn/workflows-execution-engine/server';
 
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -24,7 +26,6 @@ import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow
 import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 import type { DeleteWorkflowsResponse } from '../workflows_management_api';
-import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
 
 type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 interface WorkflowHit {
@@ -39,41 +40,30 @@ const hasRunningExecutions = async (
   document: WorkflowProperties | undefined,
   spaceId: string,
   deps: {
+    logger: Logger;
     workflowExecutionsDataClient: WorkflowExecutionsDataClient;
-    getWorkflowExecutions: (
-      params: SearchWorkflowExecutionsParams,
-      executionSpaceId: string
-    ) => Promise<WorkflowExecutionListDto>;
+    stepExecutionsDataClient: StepExecutionsDataClient;
   }
 ): Promise<boolean> => {
-  if (document?.managed === true && document.spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
-    // Global definitions execute in callers' concrete spaces; deletion must check every space.
-    const executions = await deps.workflowExecutionsDataClient.search({
-      query: {
-        bool: {
-          filter: [
-            { term: { workflowId: id } },
-            { terms: { status: [...NonTerminalExecutionStatuses] } },
-          ],
-        },
+  const globalManaged = document?.managed === true && document.spaceId === GLOBAL_WORKFLOW_SPACE_ID;
+  try {
+    return await hasNonTerminalExecution(
+      {
+        logger: deps.logger,
+        workflowExecutionsDataClient: deps.workflowExecutionsDataClient,
+        stepExecutionsDataClient: deps.stepExecutionsDataClient,
       },
-      size: 1,
-      _source: false,
-      allow_partial_search_results: false,
-    });
-    if (executions.timed_out || executions._shards.failed > 0) {
+      { workflowId: id, spaceId: globalManaged ? undefined : spaceId }
+    );
+  } catch (error) {
+    if (error instanceof ExecutionSearchIncompleteError) {
       throw new WorkflowConflictError(
         'Cannot delete the workflow: the active execution search was incomplete.',
         id
       );
     }
-    return executions.hits.hits.length > 0;
+    throw error;
   }
-  const executions = await deps.getWorkflowExecutions(
-    { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-    spaceId
-  );
-  return executions.total > 0;
 };
 
 const concurrencyMetadata = (hit: WorkflowHit): StorageClientBulkIndexOccMetadata =>
@@ -294,10 +284,6 @@ const hardDeleteWorkflows = async (
     stepExecutionsDataClient: StepExecutionsDataClient;
     taskScheduler: WorkflowTaskScheduler | null;
     logger: Logger;
-    getWorkflowExecutions: (
-      params: SearchWorkflowExecutionsParams,
-      sp: string
-    ) => Promise<WorkflowExecutionListDto>;
   }
 ): Promise<DeleteWorkflowsResponse> => {
   const { workflowExecutionsDataClient, stepExecutionsDataClient, taskScheduler, logger } = deps;
@@ -608,10 +594,6 @@ export const deleteWorkflows = async (params: {
   stepExecutionsDataClient: StepExecutionsDataClient;
   taskScheduler: WorkflowTaskScheduler | null;
   logger: Logger;
-  getWorkflowExecutions: (
-    p: SearchWorkflowExecutionsParams,
-    sp: string
-  ) => Promise<WorkflowExecutionListDto>;
 }): Promise<DeleteWorkflowsResponse> => {
   if (params.guardedDelete) return deleteBoundWorkflow(params.guardedDelete, params);
   if (params.guardedBatch) {
@@ -643,7 +625,6 @@ export const deleteWorkflows = async (params: {
     stepExecutionsDataClient,
     taskScheduler,
     logger,
-    getWorkflowExecutions,
   } = params;
   const failures: Array<{ id: string; error: string }> = [];
   const client = storage.getClient();
@@ -674,7 +655,6 @@ export const deleteWorkflows = async (params: {
       stepExecutionsDataClient,
       taskScheduler,
       logger,
-      getWorkflowExecutions,
     });
   }
 

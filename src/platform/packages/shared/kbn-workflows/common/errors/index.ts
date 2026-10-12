@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export {
+  ES_MAX_RESULT_WINDOW,
+  WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE,
+  WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE,
+  WorkflowHistoryPaginationError,
+} from './workflow_history_pagination_error';
 export { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
 export { WorkflowExecutionInvalidStatusError } from './workflow_execution_invalid_status_error';
 export { WorkflowDisabledError } from './workflow_disabled_error';

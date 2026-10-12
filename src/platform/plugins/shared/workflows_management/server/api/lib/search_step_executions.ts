@@ -9,11 +9,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { StepExecutionsDataClient } from '@kbn/workflows-execution-engine/server';
-
-import { buildTimeRangeFilter } from './build_time_range_filter';
+import { searchSteps } from '@kbn/workflows-execution-engine/server';
 
 export interface StepExecutionListResult {
   results: EsWorkflowStepExecution[];
@@ -53,53 +51,6 @@ export interface SearchStepExecutionsParams {
   startedBefore?: string;
 }
 
-function buildMustQueries(params: {
-  workflowExecutionId?: string;
-  workflowId?: string;
-  stepId?: string;
-  stepType?: string;
-  spaceId: string;
-  additionalQuery?: estypes.QueryDslQueryContainer;
-  startedAfter?: string;
-  startedBefore?: string;
-}): estypes.QueryDslQueryContainer[] {
-  const mustQueries: estypes.QueryDslQueryContainer[] = [{ term: { spaceId: params.spaceId } }];
-  if (params.workflowExecutionId !== undefined) {
-    mustQueries.push({ term: { workflowRunId: params.workflowExecutionId } });
-  }
-  if (params.workflowId !== undefined) {
-    mustQueries.push({ term: { workflowId: params.workflowId } });
-  }
-  if (params.stepId !== undefined) {
-    mustQueries.push({ term: { stepId: params.stepId } });
-  }
-  if (params.stepType !== undefined) {
-    mustQueries.push({ term: { stepType: params.stepType } });
-  }
-  if (params.additionalQuery) {
-    mustQueries.push(params.additionalQuery);
-  }
-  const startedAtRange = buildTimeRangeFilter(
-    'startedAt',
-    params.startedAfter,
-    params.startedBefore
-  );
-  if (startedAtRange) {
-    mustQueries.push(startedAtRange);
-  }
-  return mustQueries;
-}
-
-function getTotalFromResponse(
-  response: { hits: { total?: number | { value: number }; hits: unknown[] } },
-  isPaginated: boolean,
-  resultsLength: number
-): number {
-  if (!isPaginated) return resultsLength;
-  const total = response.hits.total;
-  return typeof total === 'number' ? total : (total as { value: number } | undefined)?.value ?? 0;
-}
-
 export const searchStepExecutions = async ({
   stepExecutionsDataClient,
   logger,
@@ -121,58 +72,32 @@ export const searchStepExecutions = async ({
     throw new Error('Either workflowExecutionId or workflowId must be provided');
   }
 
-  try {
-    logger.debug('Searching step executions');
-
-    const mustQueries = buildMustQueries({
-      workflowExecutionId,
+  const pageResult = await searchSteps(
+    {
+      logger,
+      workflowExecutionsDataClient: undefined as never,
+      stepExecutionsDataClient,
+    },
+    {
+      spaceId,
+      executionId: workflowExecutionId,
       workflowId,
       stepId,
       stepType,
-      spaceId,
-      additionalQuery,
       startedAfter,
       startedBefore,
-    });
-
-    const isPaginated = page !== undefined || size !== undefined;
-    const pageSize = size ?? (isPaginated ? 100 : 1000);
-    const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
-
-    const sourceFilter = sourceIncludes?.length
-      ? { includes: sourceIncludes }
-      : sourceExcludes?.length
-      ? { excludes: sourceExcludes }
-      : undefined;
-
-    const response = await stepExecutionsDataClient.search({
-      query: { bool: { must: mustQueries } },
-      ...(sourceFilter ? { _source: sourceFilter } : {}),
+      includeFields: sourceIncludes,
+      includeInput: sourceExcludes?.includes('input') ? false : undefined,
+      includeOutput: sourceExcludes?.includes('output') ? false : undefined,
+      page,
+      size,
       sort,
-      from,
-      size: pageSize,
-      track_total_hits: isPaginated,
-    });
-
-    const results = response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
-
-    const total = getTotalFromResponse(response, isPaginated, results.length);
-    logger.debug(`Found ${results.length} step executions`);
-
-    return {
-      results,
-      total,
-      ...(isPaginated && page !== undefined && { page, size: pageSize }),
-    };
-  } catch (error) {
-    if (isResponseError(error) && error.body?.error?.type === 'index_not_found_exception') {
-      return {
-        results: [],
-        total: 0,
-        ...(page !== undefined && size !== undefined && { page, size }),
-      };
     }
-    logger.error(`Failed to search step executions: ${error}`);
-    throw error;
+  );
+
+  if (additionalQuery) {
+    throw new Error('additionalQuery is no longer applied by searchStepExecutions');
   }
+
+  return pageResult;
 };

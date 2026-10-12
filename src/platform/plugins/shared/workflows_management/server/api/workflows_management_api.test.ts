@@ -94,7 +94,7 @@ describe('WorkflowsManagementApi', () => {
       );
     jest.spyOn(access, 'readFilter').mockResolvedValue({ match_all: {} });
     jest.spyOn(access, 'getProfileId').mockResolvedValue('test-profile');
-    jest.spyOn(access, 'executionFilter').mockResolvedValue({ match_all: {} });
+    jest.spyOn(access, 'getExecutionVisibility').mockResolvedValue({ access: 'all' });
     mockWorkflowsService = {
       getAccessControl: jest.fn().mockResolvedValue(access),
       getWorkflow: jest.fn().mockResolvedValue({
@@ -199,7 +199,7 @@ describe('WorkflowsManagementApi', () => {
           includeDeleted: true,
         });
         expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
-          { ...params, accessControlFilter: allowed ? undefined : { match_none: {} } },
+          { ...params, visibility: allowed ? undefined : { access: 'deny' } },
           'default'
         );
         expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
@@ -279,10 +279,10 @@ describe('WorkflowsManagementApi', () => {
       await api.getWorkflowExecutions(params, 'default');
 
       expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
-        { ...params, accessControlFilter: undefined },
+        { ...params, visibility: undefined },
         'default'
       );
-      expect(access.executionFilter).not.toHaveBeenCalled();
+      expect(access.getExecutionVisibility).not.toHaveBeenCalled();
       await api.searchStepExecutions(params, 'default');
       expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(params, 'default');
       expect(access.assertAccess).not.toHaveBeenCalled();
@@ -290,15 +290,15 @@ describe('WorkflowsManagementApi', () => {
 
     it('keeps the space filter for cross-workflow history', async () => {
       const access = await mockWorkflowsService.getAccessControl();
-      const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };
-      jest.mocked(access.executionFilter).mockResolvedValue(filter);
+      const visibility = { access: 'exclude' as const, workflowIds: ['hidden'] };
+      jest.mocked(access.getExecutionVisibility).mockResolvedValue(visibility);
 
       await api.getWorkflowExecutions({ request: mockRequest }, 'default');
 
-      expect(access.executionFilter).toHaveBeenCalledWith('default', mockRequest);
+      expect(access.getExecutionVisibility).toHaveBeenCalledWith('default', mockRequest);
       expect(mockWorkflowsService.getWorkflow).not.toHaveBeenCalled();
       expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
-        { request: mockRequest, accessControlFilter: filter },
+        { request: mockRequest, visibility },
         'default'
       );
     });

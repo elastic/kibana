@@ -9,7 +9,6 @@
 
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
-import { fromKueryExpression, KQLSyntaxError, toElasticsearchQuery } from '@kbn/es-query';
 import type {
   ExecutionStatus,
   ExecutionType,
@@ -177,20 +176,8 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             trackTotalHits,
           } = request.query;
 
-          let esQuery;
-          if (kql) {
-            try {
-              esQuery = toElasticsearchQuery(fromKueryExpression(kql));
-            } catch (err) {
-              if (err instanceof KQLSyntaxError) {
-                return response.badRequest({ body: { message: `Invalid KQL: ${err.message}` } });
-              }
-              throw err;
-            }
-          }
-
           const params: SearchExecutionsViewParams = {
-            query: esQuery,
+            kql,
             statuses: parseArray(statuses) as ExecutionStatus[] | undefined,
             executionTypes: parseArray(executionTypes) as ExecutionType[] | undefined,
             executedBy: parseArray(executedBy),

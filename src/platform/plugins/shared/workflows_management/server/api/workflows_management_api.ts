@@ -55,7 +55,10 @@ import type {
   WorkflowPartialDetailDto,
   WorkflowSortField,
 } from '@kbn/workflows/types/v1';
-import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionVisibility,
+  WorkflowsExecutionEnginePluginStart,
+} from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from '@kbn/workflows-execution-engine/server/repositories/logs_repository';
 import type {
   ExecutionLogsParams,
@@ -1092,23 +1095,32 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
+  /** Workflow ACL scope for execution list and search reads. */
+  public async getExecutionVisibility(
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<ExecutionVisibility> {
+    const access = await this.workflowsService.getAccessControl();
+    return access.getExecutionVisibility(spaceId, request);
+  }
+
   public async getWorkflowExecutions(
     params: SearchWorkflowExecutionsParams & { request: KibanaRequest },
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
     const access = await this.workflowsService.getAccessControl();
-    let accessControlFilter: estypes.QueryDslQueryContainer | undefined;
+    let visibility: ExecutionVisibility | undefined;
     if (params.workflowId) {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
       if (workflow && !(await access.checkAccess(workflow, 'read', params.request))) {
-        accessControlFilter = { match_none: {} };
+        visibility = { access: 'deny' };
       }
     } else {
-      accessControlFilter = await access.executionFilter(spaceId, params.request);
+      visibility = await access.getExecutionVisibility(spaceId, params.request);
     }
-    return this.workflowsService.getWorkflowExecutions({ ...params, accessControlFilter }, spaceId);
+    return this.workflowsService.getWorkflowExecutions({ ...params, visibility }, spaceId);
   }
 
   public async searchExecutionsView(
@@ -1117,7 +1129,7 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowExecutionListDto> {
     const access = await this.workflowsService.getAccessControl();
     return this.workflowsService.searchExecutionsView(
-      { ...params, accessControlFilter: await access.executionFilter(spaceId, params.request) },
+      { ...params, visibility: await access.getExecutionVisibility(spaceId, params.request) },
       spaceId
     );
   }
@@ -1405,7 +1417,7 @@ export class WorkflowsManagementApi {
     const access = await this.workflowsService.getAccessControl();
     return this.workflowsService.listWaitingForInputSteps(spaceId, {
       ...params,
-      accessControlFilter: await access.executionFilter(spaceId, params.request),
+      visibility: await access.getExecutionVisibility(spaceId, params.request),
     });
   }
 
@@ -1476,7 +1488,7 @@ export class WorkflowsManagementApi {
     const access = await this.workflowsService.getAccessControl();
     return this.workflowsService.listProcessedWaitForInputSteps(spaceId, {
       ...params,
-      accessControlFilter: await access.executionFilter(spaceId, params.request),
+      visibility: await access.getExecutionVisibility(spaceId, params.request),
     });
   }
 
@@ -1491,7 +1503,7 @@ export class WorkflowsManagementApi {
     const access = await this.workflowsService.getAccessControl();
     return this.workflowsService.listProcessedWaitForInputFacets(spaceId, {
       ...options,
-      accessControlFilter: await access.executionFilter(spaceId, options.request),
+      visibility: await access.getExecutionVisibility(spaceId, options.request),
     });
   }
 
@@ -1508,7 +1520,7 @@ export class WorkflowsManagementApi {
       ...options,
       accessControlFilter: await access.readFilter(options?.request),
       ...(options?.includeExecutionStats
-        ? { executionAccessFilter: await access.executionFilter(spaceId, options.request) }
+        ? { executionVisibility: await access.getExecutionVisibility(spaceId, options.request) }
         : {}),
     });
   }

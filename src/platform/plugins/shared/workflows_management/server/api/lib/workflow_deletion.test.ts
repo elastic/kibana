@@ -81,8 +81,6 @@ const makeExecutionsDataAccess = () => {
   return { workflowExecutionsDataClient, stepExecutionsDataClient };
 };
 
-const noopExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
-
 describe('deleteWorkflows', () => {
   beforeEach(() => jest.clearAllMocks());
 
@@ -100,7 +98,6 @@ describe('deleteWorkflows', () => {
         ...makeExecutionsDataAccess(),
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
         assertCanDelete,
       })
     ).rejects.toThrow('Access revoked');
@@ -125,7 +122,6 @@ describe('deleteWorkflows', () => {
         ...makeExecutionsDataAccess(),
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       })
     ).rejects.toThrow('Set acknowledgeAclLoss=true');
     expect(client.delete).not.toHaveBeenCalled();
@@ -149,7 +145,6 @@ describe('deleteWorkflows', () => {
       ...dataClients,
       taskScheduler: null,
       logger,
-      getWorkflowExecutions: noopExecutions,
     });
     expect(result.deleted).toBe(1);
     expect(client.delete).toHaveBeenCalledWith(expect.objectContaining({ id: 'private-workflow' }));
@@ -192,7 +187,6 @@ describe('deleteWorkflows', () => {
           ...dataClients,
           taskScheduler: null,
           logger,
-          getWorkflowExecutions: noopExecutions,
         })
       ).rejects.toThrow('A workflow changed during deletion');
       expect(client.delete).not.toHaveBeenCalled();
@@ -217,7 +211,6 @@ describe('deleteWorkflows', () => {
         stepExecutionsDataClient,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result.deleted).toBe(1);
@@ -255,7 +248,6 @@ describe('deleteWorkflows', () => {
         stepExecutionsDataClient,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result.deleted).toBe(1);
@@ -277,7 +269,6 @@ describe('deleteWorkflows', () => {
         stepExecutionsDataClient,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result).toEqual({
@@ -301,7 +292,6 @@ describe('deleteWorkflows', () => {
         stepExecutionsDataClient,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result).toEqual({
@@ -332,7 +322,6 @@ describe('deleteWorkflows', () => {
           ...makeExecutionsDataAccess(),
           taskScheduler: null,
           logger,
-          getWorkflowExecutions: noopExecutions,
         });
 
         expect(result.deleted).toBe(1);
@@ -360,7 +349,6 @@ describe('deleteWorkflows', () => {
         ...dataClients,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result).toEqual({
@@ -402,7 +390,6 @@ describe('deleteWorkflows', () => {
         ...dataClients,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result.successfulIds).toEqual(['public', 'private', 'legacy']);
@@ -463,7 +450,6 @@ describe('deleteWorkflows', () => {
           ...dataClients,
           taskScheduler: null,
           logger,
-          getWorkflowExecutions: noopExecutions,
         })
       ).rejects.toThrow('Private workflows remain soft-deleted and disabled');
 
@@ -493,7 +479,6 @@ describe('deleteWorkflows', () => {
           stepExecutionsDataClient,
           taskScheduler: null,
           logger,
-          getWorkflowExecutions: noopExecutions,
         });
 
         expect(client.delete.mock.invocationCallOrder[0]).toBeLessThan(
@@ -541,7 +526,12 @@ describe('deleteWorkflows', () => {
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
       const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
-      const getWorkflowExecutions = jest.fn().mockResolvedValue({ total: 1, results: [{}] });
+      jest.mocked(workflowExecutionsDataClient.search).mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        hits: { hits: [{ _id: 'run' }], total: { value: 1 } },
+      } as never);
       client.bulk
         .mockResolvedValueOnce({
           items: [{ index: { _id: 'wf-1', status: 200 } }],
@@ -560,7 +550,6 @@ describe('deleteWorkflows', () => {
           stepExecutionsDataClient,
           taskScheduler: null,
           logger,
-          getWorkflowExecutions,
         })
       ).rejects.toThrow('Cannot force-delete workflows with running executions');
 
@@ -584,7 +573,6 @@ describe('deleteWorkflows', () => {
         stepExecutionsDataClient,
         taskScheduler: null,
         logger,
-        getWorkflowExecutions: noopExecutions,
       });
 
       expect(result.failures).toHaveLength(1);
@@ -598,8 +586,8 @@ describe('deleteWorkflows', () => {
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
       const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
-      const getWorkflowExecutions = jest
-        .fn()
+      jest
+        .mocked(workflowExecutionsDataClient.search)
         .mockRejectedValue(new Error('execution lookup failed'));
       client.bulk
         .mockResolvedValueOnce({
@@ -619,7 +607,6 @@ describe('deleteWorkflows', () => {
           stepExecutionsDataClient,
           taskScheduler: null,
           logger,
-          getWorkflowExecutions,
         })
       ).rejects.toThrow('execution lookup failed');
 
@@ -688,7 +675,6 @@ describe('deleteWorkflows', () => {
             ...dataClients,
             taskScheduler: null,
             logger,
-            getWorkflowExecutions: noopExecutions,
           })
         ).rejects.toThrow(message);
 
@@ -734,7 +720,6 @@ describe('deleteWorkflows', () => {
               ...dataClients,
               taskScheduler: null,
               logger,
-              getWorkflowExecutions: noopExecutions,
             });
 
             expect(result).toEqual({ total: 1, deleted: 1, successfulIds: ['wf-1'], failures: [] });
@@ -791,7 +776,6 @@ describe('deleteWorkflows', () => {
             ...dataClients,
             taskScheduler: null,
             logger,
-            getWorkflowExecutions: noopExecutions,
           });
         return { client, deleteByQuery, run };
       };
@@ -877,7 +861,6 @@ describe('bound workflow deletion OCC', () => {
       ...makeExecutionsDataAccess(),
       taskScheduler: null,
       logger,
-      getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),
       guardedDelete: { id: 'bound', document, seqNo: 7, primaryTerm: 1, deleteDocument },
     };
     return { client, params, deleteDocument };
@@ -977,7 +960,6 @@ describe('bound workflow deletion OCC', () => {
       hits: { hits: [{ _index: 'executions', _id: 'running-child-in-concrete-space' }] },
     });
     await expect(deleteWorkflows(params)).rejects.toThrow('running executions');
-    expect(params.getWorkflowExecutions).not.toHaveBeenCalled();
     expect(params.workflowExecutionsDataClient.search).toHaveBeenCalledWith({
       query: {
         bool: {
@@ -1066,7 +1048,12 @@ describe('bound workflow deletion OCC', () => {
 
   it('checks executions again after disabling and restores with OCC', async () => {
     const { client, params, deleteDocument } = setup(true);
-    params.getWorkflowExecutions.mockResolvedValue({ total: 1, results: [] });
+    jest.mocked(params.workflowExecutionsDataClient.search).mockResolvedValue({
+      took: 0,
+      timed_out: false,
+      _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+      hits: { hits: [{ _id: 'run' }], total: { value: 1 } },
+    } as never);
     await expect(deleteWorkflows(params)).rejects.toThrow('running executions');
     expect(deleteDocument).not.toHaveBeenCalled();
     expect(client.index).toHaveBeenNthCalledWith(

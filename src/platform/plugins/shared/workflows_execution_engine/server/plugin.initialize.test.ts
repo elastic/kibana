@@ -72,6 +72,8 @@ describe('WorkflowsExecutionEnginePlugin — executions DAL lifecycle', () => {
     });
 
     expect(mockDataClientBundleInitStart).toHaveBeenCalledTimes(1);
+    expect(startContract.executions.getExecution).toEqual(expect.any(Function));
+    expect(startContract.executions.searchSteps).toEqual(expect.any(Function));
     expect(startContract.__internalStorage.workflowExecutionsDataClient).toBeDefined();
     expect(startContract.__internalStorage.stepExecutionsDataClient).toBeDefined();
   });

@@ -8,7 +8,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import type {
   EsWorkflowExecution,
   EsWorkflowStepExecution,
@@ -16,13 +15,11 @@ import type {
 } from '@kbn/workflows';
 import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import type {
-  GetStepExecutionsByIdsOptions,
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
 } from '@kbn/workflows-execution-engine/server';
-import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows-execution-engine/server';
+import { getExecution } from '@kbn/workflows-execution-engine/server';
 import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
-import { WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT } from '../../../common';
 
 interface GetWorkflowExecutionParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
@@ -45,52 +42,25 @@ export const getWorkflowExecution = async ({
   includeOutput = false,
   omitStepExecutions = false,
 }: GetWorkflowExecutionParams): Promise<WorkflowExecutionDto | null> => {
-  try {
-    // Use mget by id for O(1) lookup performance instead of search
-    // This is critical for reducing ES CPU load from frequent UI polling
-    const { items } = await workflowExecutionsDataClient.getByIds([workflowExecutionId]);
-    const doc = items[0]?.document;
-
-    // Verify spaceId matches for security/multi-tenancy
-    if (!doc || doc.spaceId !== spaceId) {
-      return null;
+  const read = await getExecution(
+    { logger, workflowExecutionsDataClient, stepExecutionsDataClient },
+    {
+      executionId: workflowExecutionId,
+      spaceId,
+      includeInput,
+      includeOutput,
+      omitSteps: omitStepExecutions,
     }
-
-    const sourceExcludes: string[] = [];
-    if (!includeInput) sourceExcludes.push('input');
-    if (!includeOutput) sourceExcludes.push('output');
-
-    let stepExecutions: EsWorkflowStepExecution[] = [];
-    if (!omitStepExecutions) {
-      try {
-        stepExecutions = await getStepExecutionsByWorkflowExecution({
-          stepExecutionsDataClient,
-          workflowExecutionId,
-          stepExecutionIds: doc.stepExecutionIds,
-          maxSteps: WORKFLOW_EXECUTION_EMBEDDED_STEPS_MAX_COUNT,
-          sourceExcludes: sourceExcludes as GetStepExecutionsByIdsOptions['sourceExcludes'],
-        });
-      } catch (error) {
-        if (!isMaximumResponseSizeExceededError(error)) {
-          throw error;
-        }
-        logger.warn(
-          `Failed to get workflow execution ${workflowExecutionId} with steps: Elasticsearch response exceeded the maximum size Kibana can process`
-        );
-      }
-    }
-
-    return transformToWorkflowExecutionDetailDto(workflowExecutionId, doc, stepExecutions, logger);
-  } catch (error) {
-    if (isMaximumResponseSizeExceededError(error)) {
-      logger.warn(
-        `Workflow execution document ${workflowExecutionId} exceeded the maximum response size Kibana can process`
-      );
-    } else {
-      logger.error(`Failed to get workflow execution ${workflowExecutionId}: ${error}`);
-    }
-    throw error;
+  );
+  if (!read) {
+    return null;
   }
+  return transformToWorkflowExecutionDetailDto(
+    workflowExecutionId,
+    read.execution,
+    read.steps,
+    logger
+  );
 };
 
 function transformToWorkflowExecutionDetailDto(

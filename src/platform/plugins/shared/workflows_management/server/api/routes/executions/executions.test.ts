@@ -365,7 +365,7 @@ describe('Execution Routes', () => {
       expect(handler('GET', path)).toBeDefined();
     });
 
-    it('should call api.searchExecutionsView with converted kql and structured sort', async () => {
+    it('should call api.searchExecutionsView with the kql string and structured sort', async () => {
       mockApi.searchExecutionsView.mockResolvedValue({
         results: [],
         page: 1,
@@ -388,7 +388,7 @@ describe('Execution Routes', () => {
 
       expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: expect.objectContaining({ bool: expect.any(Object) }),
+          kql: 'status: completed',
           sortField: 'startedAt',
           sortOrder: 'desc',
           page: 2,
@@ -413,12 +413,15 @@ describe('Execution Routes', () => {
       await h(mockContext, { query: { page: 1, size: 25 } } as any, mockResponse as any);
 
       expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
-        expect.objectContaining({ query: undefined, sortField: undefined, sortOrder: undefined }),
+        expect.objectContaining({ kql: undefined, sortField: undefined, sortOrder: undefined }),
         'default'
       );
     });
 
-    it('should return bad request for invalid KQL syntax', async () => {
+    it('should return bad request when the engine rejects invalid KQL', async () => {
+      mockApi.searchExecutionsView.mockRejectedValue(
+        Object.assign(new Error('Invalid KQL: Expected'), { statusCode: 400 })
+      );
       const h = handler('GET', path)!;
       const request = {
         query: {
@@ -428,10 +431,13 @@ describe('Execution Routes', () => {
 
       await h(mockContext, request as any, mockResponse as any);
 
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        expect.objectContaining({ kql: 'status:' }),
+        'default'
+      );
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: expect.stringContaining('Invalid KQL') },
       });
-      expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
     });
 
     it('should return bad request when searchExecutionsView throws a query validation error', async () => {

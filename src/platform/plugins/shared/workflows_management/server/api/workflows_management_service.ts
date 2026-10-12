@@ -51,6 +51,7 @@ import type {
   WorkflowPartialDetailDto,
 } from '@kbn/workflows/types/v1';
 import type {
+  ExecutionVisibility,
   LogSearchResult,
   WorkflowExecutionsDataClient,
   WorkflowsExecutionEnginePluginStart,
@@ -113,8 +114,9 @@ import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } f
 
 export interface SearchExecutionsViewParams {
   request?: KibanaRequest;
-  accessControlFilter?: estypes.QueryDslQueryContainer;
-  query?: estypes.QueryDslQueryContainer;
+  visibility?: ExecutionVisibility;
+  /** KQL compiled by the execution engine. Invalid KQL throws `statusCode: 400`. */
+  kql?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
@@ -134,7 +136,7 @@ export interface SearchExecutionsViewParams {
 
 export interface SearchWorkflowExecutionsParams {
   request?: KibanaRequest;
-  accessControlFilter?: estypes.QueryDslQueryContainer;
+  visibility?: ExecutionVisibility;
   workflowId?: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
@@ -527,7 +529,7 @@ export class WorkflowsService {
       includeManagedExecutionStats?: boolean;
       request?: KibanaRequest;
       accessControlFilter?: estypes.QueryDslQueryContainer;
-      executionAccessFilter?: estypes.QueryDslQueryContainer;
+      executionVisibility?: ExecutionVisibility;
     }
   ): Promise<WorkflowStatsDto> {
     await this.ensureInitialized();
@@ -593,7 +595,7 @@ export class WorkflowsService {
       perPage?: number;
       includeReasoning?: boolean;
       request?: KibanaRequest;
-      accessControlFilter?: estypes.QueryDslQueryContainer;
+      visibility?: ExecutionVisibility;
     } = {}
   ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
@@ -607,7 +609,7 @@ export class WorkflowsService {
       perPage?: number;
       includeReasoning?: boolean;
       request?: KibanaRequest;
-      accessControlFilter?: estypes.QueryDslQueryContainer;
+      visibility?: ExecutionVisibility;
     } & ProcessedWaitForInputFilters = {}
   ): Promise<WaitForInputListResult> {
     await this.ensureInitialized();
@@ -620,7 +622,7 @@ export class WorkflowsService {
     options: {
       maxBuckets?: number;
       request?: KibanaRequest;
-      accessControlFilter?: estypes.QueryDslQueryContainer;
+      visibility?: ExecutionVisibility;
     } = {}
   ): Promise<ProcessedWaitForInputFacets> {
     await this.ensureInitialized();

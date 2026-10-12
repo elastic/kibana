@@ -22,6 +22,7 @@ import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { WorkflowExecutionReadApi } from './public_api/types';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -87,6 +88,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   scheduleWorkflow: ScheduleWorkflow;
   bulkScheduleWorkflow: BulkScheduleWorkflow;
   triggerEvents: TriggerEventsContract;
+  /** Execution reads. Callers pass criteria and a visibility scope; the engine builds the query. */
+  executions: WorkflowExecutionReadApi;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {

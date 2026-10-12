@@ -111,7 +111,7 @@ describe('WorkflowAccessControlService', () => {
         .spyOn(core.security.authc, 'getCurrentUser')
         .mockReturnValue(securityServiceMock.createMockAuthenticatedUser({ roles: ['superuser'] }));
       expect(await service.readFilter(request)).toEqual({ match_all: {} });
-      expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
+      expect(await service.getExecutionVisibility('default', request)).toEqual({ access: 'all' });
       for (let index = 0; index < 100; index++) {
         const result = await service.toDto({ ...document, id: String(index) }, request);
         expect(result.permissions.read).toBe(true);
@@ -243,7 +243,7 @@ describe('WorkflowAccessControlService', () => {
       expect(result.access_control).toEqual(document.access_control);
       expect(result.permissions).toEqual({ read: true, execute: false, edit: false, manage: true });
       expect(await service.readFilter(request)).toEqual({ match_all: {} });
-      expect(await service.executionFilter('default', request)).toEqual({ match_all: {} });
+      expect(await service.getExecutionVisibility('default', request)).toEqual({ access: 'all' });
       expect(core.elasticsearch.client.asInternalUser.openPointInTime).not.toHaveBeenCalled();
     });
 
@@ -727,7 +727,9 @@ describe('WorkflowAccessControlService', () => {
       .mocked(client.openPointInTime)
       .mockResolvedValue({ id: 'pit', _shards: { total: 1, successful: 1, failed: 0 } });
     jest.mocked(client.search).mockRejectedValue(new Error('Search failed'));
-    await expect(service.executionFilter('default', request)).rejects.toThrow('Search failed');
+    await expect(service.getExecutionVisibility('default', request)).rejects.toThrow(
+      'Search failed'
+    );
     expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });
   });
 
@@ -753,19 +755,19 @@ describe('WorkflowAccessControlService', () => {
     });
 
     const [first, second] = await Promise.all([
-      service.executionFilter('default', request),
-      service.executionFilter('default', request),
+      service.getExecutionVisibility('default', request),
+      service.getExecutionVisibility('default', request),
     ]);
     await service.permissions(document, request);
 
-    expect(first).toEqual({ bool: { must_not: [{ terms: { workflowId: ['hidden-workflow'] } }] } });
+    expect(first).toEqual({ access: 'exclude', workflowIds: ['hidden-workflow'] });
     expect(second).toBe(first);
     expect(client.openPointInTime).toHaveBeenCalledTimes(1);
     expect(client.search).toHaveBeenCalledTimes(1);
     expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
 
-    await service.executionFilter('another-space', request);
-    await service.executionFilter('default', httpServerMock.createKibanaRequest());
+    await service.getExecutionVisibility('another-space', request);
+    await service.getExecutionVisibility('default', httpServerMock.createKibanaRequest());
     expect(client.search).toHaveBeenCalledTimes(3);
     expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledTimes(2);
   });
@@ -813,8 +815,9 @@ describe('WorkflowAccessControlService', () => {
         },
       });
 
-      await expect(service.executionFilter('default', request)).resolves.toEqual({
-        bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] },
+      await expect(service.getExecutionVisibility('default', request)).resolves.toEqual({
+        access: 'exclude',
+        workflowIds: ['hidden'],
       });
       expect(client.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -844,7 +847,7 @@ describe('WorkflowAccessControlService', () => {
         hits: { hits: [] },
       });
 
-      await expect(service.executionFilter('default', request)).rejects.toThrow(
+      await expect(service.getExecutionVisibility('default', request)).rejects.toThrow(
         'Could not determine workflow execution access from incomplete results.'
       );
       expect(client.openPointInTime).toHaveBeenCalledWith(

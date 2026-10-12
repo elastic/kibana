@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Elasticsearch default `index.max_result_window` for from/size pagination. */
-export const ES_MAX_RESULT_WINDOW = 10_000;
-
-export const WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE = `Workflow history pagination exceeds the maximum result window of ${ES_MAX_RESULT_WINDOW} entries.`;
-
-export const WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE = `Workflow execution step pagination exceeds the maximum result window of ${ES_MAX_RESULT_WINDOW} entries.`;
-
-/**
- * Thrown when from/size pagination would exceed Elasticsearch's max result window.
- */
-export class WorkflowHistoryPaginationError extends Error {
-  constructor(message = WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE) {
-    super(message);
-    this.name = 'WorkflowHistoryPaginationError';
-  }
-}
+export {
+  ES_MAX_RESULT_WINDOW,
+  WORKFLOW_EXECUTION_STEPS_PAGINATION_EXCEEDED_MESSAGE,
+  WORKFLOW_HISTORY_PAGINATION_EXCEEDED_MESSAGE,
+  WorkflowHistoryPaginationError,
+} from '@kbn/workflows/common/errors';

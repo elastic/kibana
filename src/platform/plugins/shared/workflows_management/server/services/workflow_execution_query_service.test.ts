@@ -1218,8 +1218,8 @@ describe('WorkflowExecutionQueryService', () => {
     ) =>
       ({
         aggregations: {
-          channel: { buckets: channelBuckets },
-          respondedBy: { buckets: respondedByBuckets },
+          'hitl.channel': { buckets: channelBuckets },
+          'hitl.respondedBy': { buckets: respondedByBuckets },
         },
       } as any);
 
@@ -1240,8 +1240,8 @@ describe('WorkflowExecutionQueryService', () => {
         { exists: { field: 'hitl.respondedAt' } },
       ]);
       expect(args.query.bool.minimum_should_match).toBe(1);
-      expect(args.aggs.channel.terms).toEqual({ field: 'hitl.channel', size: 50 });
-      expect(args.aggs.respondedBy.terms).toEqual({ field: 'hitl.respondedBy', size: 50 });
+      expect(args.aggs['hitl.channel'].terms).toEqual({ field: 'hitl.channel', size: 50 });
+      expect(args.aggs['hitl.respondedBy'].terms).toEqual({ field: 'hitl.respondedBy', size: 50 });
     });
 
     it('honours a custom maxBuckets cap on both terms aggs', async () => {
@@ -1250,8 +1250,8 @@ describe('WorkflowExecutionQueryService', () => {
       await service.listProcessedWaitForInputFacets('default', { maxBuckets: 5 });
 
       const args = mockEsClient.search.mock.calls[0][0] as any;
-      expect(args.aggs.channel.terms.size).toBe(5);
-      expect(args.aggs.respondedBy.terms.size).toBe(5);
+      expect(args.aggs['hitl.channel'].terms.size).toBe(5);
+      expect(args.aggs['hitl.respondedBy'].terms.size).toBe(5);
     });
 
     it('maps agg buckets into { value, count } arrays preserving the agg count order', async () => {

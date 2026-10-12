@@ -10,7 +10,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
-  EsWorkflowExecution,
   WorkflowAggsDto,
   WorkflowDetailDto,
   WorkflowExecutionHistoryModel,
@@ -19,6 +18,14 @@ import type {
 } from '@kbn/workflows';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
 import type { WorkflowListItemDto, WorkflowSortField } from '@kbn/workflows/types/v1';
+import type {
+  ExecutionVisibility,
+  StepExecutionsDataClient,
+} from '@kbn/workflows-execution-engine/server';
+import {
+  getDailyExecutionCounts,
+  getLatestExecutionByWorkflow,
+} from '@kbn/workflows-execution-engine/server';
 
 import type { WorkflowSearchDeps } from './types';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -265,7 +272,7 @@ export class WorkflowSearchService {
       includeManagedExecutionStats?: boolean;
       request?: KibanaRequest;
       accessControlFilter?: estypes.QueryDslQueryContainer;
-      executionAccessFilter?: estypes.QueryDslQueryContainer;
+      executionVisibility?: ExecutionVisibility;
     }
   ): Promise<WorkflowStatsDto> {
     const statsFilter = buildWorkflowFilters({
@@ -301,7 +308,7 @@ export class WorkflowSearchService {
     if (options?.includeExecutionStats) {
       workflowsStats.executions = await this.getExecutionHistoryStats(spaceId, {
         includeManagedExecutions: options.includeManagedExecutionStats === true,
-        accessControlFilter: options.executionAccessFilter,
+        visibility: options.executionVisibility,
       });
     }
 
@@ -372,156 +379,37 @@ export class WorkflowSearchService {
     spaceId: string,
     options?: {
       includeManagedExecutions?: boolean;
-      accessControlFilter?: estypes.QueryDslQueryContainer;
+      visibility?: ExecutionVisibility;
     }
   ) {
-    try {
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-      const response = await this.deps.workflowExecutionsDataClient.search({
-        size: 0,
-        query: {
-          bool: {
-            must: [
-              { range: { createdAt: { gte: thirtyDaysAgo.toISOString() } } },
-              ...(options?.accessControlFilter ? [options.accessControlFilter] : []),
-              { term: { spaceId } },
-            ],
-            ...(options?.includeManagedExecutions
-              ? {}
-              : { must_not: [{ term: { managed: true } }] }),
-          },
-        },
-        aggs: {
-          daily_stats: {
-            date_histogram: {
-              field: 'createdAt',
-              calendar_interval: 'day',
-              format: 'yyyy-MM-dd',
-            },
-            aggs: {
-              completed: { filter: { term: { status: 'completed' } } },
-              failed: { filter: { term: { status: 'failed' } } },
-              cancelled: { filter: { term: { status: 'cancelled' } } },
-            },
-          },
-        },
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const buckets = (response.aggregations as any)?.daily_stats?.buckets || [];
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return buckets.map((bucket: any) => ({
-        date: bucket.key_as_string,
-        timestamp: bucket.key,
-        completed: bucket.completed.doc_count,
-        failed: bucket.failed.doc_count,
-        cancelled: bucket.cancelled.doc_count,
-      }));
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.deps.logger.error('Failed to get execution history stats', { error: error as Error });
-      } else {
-        this.deps.logger.warn(
-          `Executions index not found when fetching execution history stats: ${
-            (error as Error).message
-          }`
-        );
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+    return getDailyExecutionCounts(
+      {
+        logger: this.deps.logger,
+        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+        stepExecutionsDataClient: {} as StepExecutionsDataClient,
+      },
+      {
+        spaceId,
+        since: since.toISOString(),
+        visibility: options?.visibility,
+        includeManaged: options?.includeManagedExecutions,
       }
-      return [];
-    }
+    );
   }
 
   private async getRecentExecutionsForWorkflows(
     workflowIds: string[],
     spaceId: string
   ): Promise<Record<string, WorkflowExecutionHistoryModel[]>> {
-    if (workflowIds.length === 0) {
-      return {};
-    }
-
-    try {
-      const response = await this.deps.workflowExecutionsDataClient.search({
-        size: 0,
-        query: {
-          bool: {
-            must: [
-              { terms: { workflowId: workflowIds } },
-              {
-                bool: {
-                  should: [
-                    { term: { spaceId } },
-                    { bool: { must_not: { exists: { field: 'spaceId' } } } },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          workflows: {
-            terms: {
-              field: 'workflowId',
-              size: workflowIds.length,
-            },
-            aggs: {
-              recent_executions: {
-                top_hits: {
-                  size: 1,
-                  sort: [{ finishedAt: { order: 'desc' } }],
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const result: Record<string, WorkflowExecutionHistoryModel[]> = {};
-
-      if (response.aggregations?.workflows && 'buckets' in response.aggregations.workflows) {
-        const buckets = response.aggregations.workflows.buckets as Array<{
-          key: string;
-          recent_executions: {
-            hits: {
-              hits: Array<{ _source: EsWorkflowExecution }>;
-            };
-          };
-        }>;
-
-        buckets.forEach((bucket) => {
-          const workflowId = bucket.key;
-          const hits = bucket.recent_executions.hits.hits;
-
-          if (hits.length > 0) {
-            const execution = hits[0]._source;
-            result[workflowId] = [
-              {
-                id: execution.id,
-                workflowId: execution.workflowId,
-                workflowName: execution.workflowDefinition?.name || 'Unknown Workflow',
-                status: execution.status,
-                startedAt: execution.startedAt,
-                finishedAt: execution.finishedAt || execution.startedAt,
-                duration:
-                  execution.finishedAt && execution.startedAt
-                    ? new Date(execution.finishedAt).getTime() -
-                      new Date(execution.startedAt).getTime()
-                    : null,
-              },
-            ];
-          }
-        });
-      }
-
-      return result;
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.deps.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
-      }
-      return {};
-    }
+    return getLatestExecutionByWorkflow(
+      {
+        logger: this.deps.logger,
+        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+        stepExecutionsDataClient: {} as StepExecutionsDataClient,
+      },
+      { workflowIds, spaceId }
+    );
   }
 }

@@ -36,6 +36,7 @@ import type {
 } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import type { ExecutionVisibility } from '@kbn/workflows-execution-engine/server';
 import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type { WorkflowCrudService } from './workflow_crud_service';
 import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
@@ -105,7 +106,7 @@ export class WorkflowAccessControlService {
   private readonly profileIds = new WeakMap<KibanaRequest, Promise<string | undefined>>();
   private readonly executionFilters = new WeakMap<
     KibanaRequest,
-    Map<string, Promise<estypes.QueryDslQueryContainer>>
+    Map<string, Promise<ExecutionVisibility>>
   >();
 
   constructor(
@@ -224,12 +225,15 @@ export class WorkflowAccessControlService {
     });
   }
 
-  /** Applies workflow ACLs to Kibana execution queries, not direct Elasticsearch reads. */
-  async executionFilter(
+  /**
+   * Workflow ACL for execution reads. The engine applies this scope and does not derive it.
+   * Admin, or a space with no hidden workflows, is `all`. Hidden workflow ids are `exclude`.
+   */
+  async getExecutionVisibility(
     spaceId: string,
     request?: KibanaRequest
-  ): Promise<estypes.QueryDslQueryContainer> {
-    if (!request) return this.buildExecutionFilter(spaceId);
+  ): Promise<ExecutionVisibility> {
+    if (!request) return this.buildExecutionVisibility(spaceId);
     let filters = this.executionFilters.get(request);
     if (!filters) {
       filters = new Map();
@@ -237,17 +241,17 @@ export class WorkflowAccessControlService {
     }
     let filter = filters.get(spaceId);
     if (!filter) {
-      filter = this.buildExecutionFilter(spaceId, request);
+      filter = this.buildExecutionVisibility(spaceId, request);
       filters.set(spaceId, filter);
     }
     return filter;
   }
 
-  private async buildExecutionFilter(
+  private async buildExecutionVisibility(
     spaceId: string,
     request?: KibanaRequest
-  ): Promise<estypes.QueryDslQueryContainer> {
-    if (await this.isAdmin(request)) return { match_all: {} };
+  ): Promise<ExecutionVisibility> {
+    if (await this.isAdmin(request)) return { access: 'all' };
     const profileId = request ? await this.getProfileId(request) : undefined;
     const client = this.core.elasticsearch.client.asInternalUser;
     let pitId: string;
@@ -260,7 +264,7 @@ export class WorkflowAccessControlService {
       });
       pitId = snapshot.id;
     } catch (error) {
-      if (isIndexNotFoundError(error)) return { match_all: {} };
+      if (isIndexNotFoundError(error)) return { access: 'all' };
       throw error;
     }
     const hiddenIds: string[] = [];
@@ -299,11 +303,7 @@ export class WorkflowAccessControlService {
     } finally {
       await client.closePointInTime({ id: pitId });
     }
-    const excluded: estypes.QueryDslQueryContainer[] = [];
-    for (let offset = 0; offset < hiddenIds.length; offset += 10000) {
-      excluded.push({ terms: { workflowId: hiddenIds.slice(offset, offset + 10000) } });
-    }
-    return excluded.length ? { bool: { must_not: excluded } } : { match_all: {} };
+    return hiddenIds.length ? { access: 'exclude', workflowIds: hiddenIds } : { access: 'all' };
   }
 
   async update(

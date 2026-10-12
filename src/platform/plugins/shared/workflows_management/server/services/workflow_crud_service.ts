@@ -25,7 +25,6 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
-  NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
@@ -35,6 +34,7 @@ import {
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+import { hasNonTerminalExecution } from '@kbn/workflows-execution-engine/server';
 
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
@@ -1212,11 +1212,15 @@ export class WorkflowCrudService {
         if (accountId) {
           await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
           if (options?.force) {
-            const executions = await this.deps.executionQueryService.getWorkflowExecutions(
-              { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-              spaceId
+            const running = await hasNonTerminalExecution(
+              {
+                logger: this.deps.logger,
+                workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
+                stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
+              },
+              { workflowId: id, spaceId }
             );
-            if (executions.total > 0) {
+            if (running) {
               throw new WorkflowConflictError(
                 `Cannot force-delete workflow with running executions: ${id}`,
                 id
@@ -1351,8 +1355,6 @@ export class WorkflowCrudService {
       stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
-      getWorkflowExecutions: (params, sp) =>
-        this.deps.executionQueryService.getWorkflowExecutions(params, sp),
     });
   }
 
