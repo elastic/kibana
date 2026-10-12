@@ -144,6 +144,7 @@ export async function sendWaitForApprovalNotifications({
   rejectLabel,
   resumeLinks,
   spaceId,
+  workflowId,
   executionId,
   renderTemplate,
   connectorExecutor,
@@ -155,6 +156,7 @@ export async function sendWaitForApprovalNotifications({
   rejectLabel: string;
   resumeLinks: WaitForApprovalResumeLinks;
   spaceId: string;
+  workflowId: string;
   executionId: string;
   renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
@@ -197,8 +199,8 @@ export async function sendWaitForApprovalNotifications({
   }
 
   const emailConfig = channels.email;
-  const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
   if (emailConfig?.['connector-id']) {
+    const emailTo = renderHitlEmailAddresses(emailConfig.to, renderTemplate);
     assertRenderedHitlEmailRecipients(emailTo);
     const result = await connectorExecutor.execute({
       connectorType: 'email',
@@ -215,7 +217,7 @@ export async function sendWaitForApprovalNotifications({
           'approval'
         ),
         message: buildDefaultHitlApprovalEmailMessage(linkParams),
-        footerLinkPath: buildHitlExecutionFooterPath({ spaceId, executionId }),
+        footerLinkPath: buildHitlExecutionFooterPath({ spaceId, workflowId, executionId }),
       }),
       abortController,
     });

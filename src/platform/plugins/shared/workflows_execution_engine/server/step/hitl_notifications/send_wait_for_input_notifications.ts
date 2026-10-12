@@ -188,8 +188,8 @@ export async function sendWaitForInputNotifications({
   }
 
   const emailConfig = channels.email;
-  const emailTo = renderHitlEmailAddresses(emailConfig?.to, renderTemplate);
   if (emailConfig?.['connector-id']) {
+    const emailTo = renderHitlEmailAddresses(emailConfig.to, renderTemplate);
     assertRenderedHitlEmailRecipients(emailTo);
     const message =
       emailConfig.message != null

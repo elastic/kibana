@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import type { HitlEmailChannelSchema } from '@kbn/workflows';
 import { DEFAULT_HITL_INPUT_OPEN_FORM_LABEL } from '@kbn/workflows';
+import type { z } from '@kbn/zod/v4';
+import { buildWorkflowExecutionAppPath } from '../../utils/get_kibana_url';
 
-export interface HitlEmailChannelConfig {
-  'connector-id': string;
-  to: string[];
-  cc?: string[];
-  bcc?: string[];
-  subject?: string;
-}
+export type HitlEmailChannelConfig = z.infer<typeof HitlEmailChannelSchema>;
 
 /** `kibanaFooterLink.path` relative to `publicBaseUrl` (pathname + search). */
 export function absoluteUrlToKibanaFooterPath(absoluteUrl: string, kibanaUrl: string): string {
@@ -31,34 +27,17 @@ export function absoluteUrlToKibanaFooterPath(absoluteUrl: string, kibanaUrl: st
   return `${pathname}${target.search}`;
 }
 
-function hitlInputEmailSubject(): string {
-  return i18n.translate('workflowsExecutionEngine.hitlNotifications.inputRequiredTitle', {
-    defaultMessage: 'Input required',
-  });
-}
-
-function hitlApprovalEmailSubject(): string {
-  return i18n.translate('workflowsExecutionEngine.hitlNotifications.approvalRequiredTitle', {
-    defaultMessage: 'Approval required',
-  });
-}
-
-function hitlEmailFooterLinkText(): string {
-  return i18n.translate('workflowsExecutionEngine.hitlNotifications.viewInKibanaLinkText', {
-    defaultMessage: 'View in Kibana',
-  });
-}
-
 /** Safe execution UI path for approval email footers (must not mutate via approve/reject). */
 export function buildHitlExecutionFooterPath({
   spaceId,
+  workflowId,
   executionId,
 }: {
   spaceId: string;
+  workflowId: string;
   executionId: string;
 }): string {
-  const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-  return `${spacePrefix}/app/workflows/executions/${executionId}`;
+  return buildWorkflowExecutionAppPath(spaceId, workflowId, executionId);
 }
 
 export function buildDefaultHitlInputEmailMessage({
@@ -125,7 +104,7 @@ export function buildHitlEmailConnectorInput({
     message,
     kibanaFooterLink: {
       path: footerLinkPath,
-      text: hitlEmailFooterLinkText(),
+      text: 'View in Kibana',
     },
   };
 }
@@ -138,5 +117,5 @@ export function resolveHitlEmailSubject(
     return configuredSubject;
   }
 
-  return kind === 'input' ? hitlInputEmailSubject() : hitlApprovalEmailSubject();
+  return kind === 'input' ? 'Input required' : 'Approval required';
 }

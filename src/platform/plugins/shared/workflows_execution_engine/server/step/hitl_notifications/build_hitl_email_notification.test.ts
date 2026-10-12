@@ -39,15 +39,23 @@ describe('build_hitl_email_notification', () => {
 
   describe('buildHitlExecutionFooterPath', () => {
     it('omits space prefix for the default space', () => {
-      expect(buildHitlExecutionFooterPath({ spaceId: 'default', executionId: 'exec-1' })).toBe(
-        '/app/workflows/executions/exec-1'
-      );
+      expect(
+        buildHitlExecutionFooterPath({
+          spaceId: 'default',
+          workflowId: 'workflow-1',
+          executionId: 'exec-1',
+        })
+      ).toBe('/app/workflows/workflow-1?executionId=exec-1&tab=executions');
     });
 
     it('includes space prefix for non-default spaces', () => {
-      expect(buildHitlExecutionFooterPath({ spaceId: 'security', executionId: 'exec-1' })).toBe(
-        '/s/security/app/workflows/executions/exec-1'
-      );
+      expect(
+        buildHitlExecutionFooterPath({
+          spaceId: 'security',
+          workflowId: 'workflow-1',
+          executionId: 'exec-1',
+        })
+      ).toBe('/s/security/app/workflows/workflow-1?executionId=exec-1&tab=executions');
     });
   });
 

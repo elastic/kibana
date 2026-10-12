@@ -89,6 +89,7 @@ describe('send_wait_for_approval_notifications', () => {
       rejectLabel: 'Decline',
       resumeLinks,
       spaceId: 'default',
+      workflowId: 'workflow-1',
       executionId: 'exec-1',
       renderTemplate: (template: string) => template,
       abortController: new AbortController(),
@@ -207,7 +208,7 @@ describe('send_wait_for_approval_notifications', () => {
           message:
             'Approve change?\n\n[Approve](https://kibana.example/approve)  [Decline](https://kibana.example/reject)',
           kibanaFooterLink: {
-            path: '/app/workflows/executions/exec-1',
+            path: '/app/workflows/workflow-1?executionId=exec-1&tab=executions',
             text: 'View in Kibana',
           },
         },
