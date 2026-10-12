@@ -65,10 +65,17 @@ dataset execution:
 
 Read it as follows:
 
-- `n` is the number of examples scored **in that execution**, so at `repetitions: 3` there are
-  three summaries per dataset. The spread *between* them is the run-to-run noise above; `ci95` is
-  the resolution limit *within* one of them (`areDistinguishable` requires the two arms' CI bands
-  not to overlap before a difference may be called real).
+- `repetitions` does not multiply the summaries. The executor loops every repetition inside a
+  single `runExperiment` call
+  (`x-pack/platform/packages/shared/kbn-evals/src/kibana_evals_executor/client.ts:194`) against the
+  one score sink `createEvaluateDataset` creates
+  (`src/evaluators/dataset_evaluator.ts:343`), and `logRunSummary` runs once per dataset — so
+  `repetitions: 3` still logs one line per evaluator, and there is no per-repetition breakdown to
+  compare. `n` is the number of scored example-runs pooled across all repetitions
+  (`examples × repetitions`, minus `N/A`), and `ci95` is computed over that same pooled set
+  (`src/score_stats.ts:36`), so it carries both within-run and run-to-run variance rather than
+  reporting them separately (`areDistinguishable` requires the two arms' CI bands not to overlap
+  before a difference may be called real).
 - `SATURATED(no signal)` means every score was identical and at an extreme: that evaluator
   discriminated nothing in this run, so it cannot show improvement. Write "saturated" — never
   "+0.0".
