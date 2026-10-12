@@ -199,6 +199,11 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   uiam?: boolean;
   /** Configure ES serverless with UIAM OAuth support (starts an additional uiam-oauth container) */
   uiamOAuth?: boolean;
+  /**
+   * ISO-8601 lifetime of the ephemeral tokens UIAM issues, such as service account exchange tokens
+   * (UIAM accepts PT1M to PT5M, default PT5M). Shorten it to exercise token renewal in tests.
+   */
+  uiamEphemeralTokenExpiration?: string;
   /** Configuration for a linked project in Cross Project Search (CPS) mode */
   linkedProject?: { projectId: string; port: number };
 }
@@ -1041,10 +1046,12 @@ async function startServerlessContainers(
   log.info(`[runServerlessCluster] Pulling Docker image(s) for: ${esServerlessImage}...`);
   await Promise.all([
     setupDockerImage({ log, image: esServerlessImage }),
+    // Builds the containers with every option, so an invalid one fails before any container starts.
     ...(options.uiam
-      ? getUiamContainers({ includeOAuth: options.uiamOAuth }).map(({ image }) =>
-          setupDockerImage({ log, image })
-        )
+      ? getUiamContainers({
+          includeOAuth: options.uiamOAuth,
+          ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
+        }).map(({ image }) => setupDockerImage({ log, image }))
       : []),
   ]);
   log.info(`[runServerlessCluster] Docker image(s) ready (${elapsed()})`);
@@ -1077,7 +1084,10 @@ async function startServerlessContainers(
   // Starting them in parallel risks uiam connecting to CosmosDB before the
   // pgcosmos extension is ready, causing a fatal (non-retried) 503 on startup.
   if (options.uiam) {
-    for (const container of getUiamContainers({ includeOAuth: options.uiamOAuth })) {
+    for (const container of getUiamContainers({
+      includeOAuth: options.uiamOAuth,
+      ephemeralTokenExpiration: options.uiamEphemeralTokenExpiration,
+    })) {
       nodeNames.push(await runUiamContainer(log, container));
     }
   }

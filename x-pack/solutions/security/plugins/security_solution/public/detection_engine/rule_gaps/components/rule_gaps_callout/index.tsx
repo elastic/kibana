@@ -23,7 +23,7 @@ import { GapRangeValue } from '../../constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SecurityPageName, EXCLUDED_GAP_REASONS_KEY } from '../../../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../../../common/components/link_to';
-import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../../../rule_management_ui/components/rules_table/constants';
 import {
   RULE_GAPS_CALLOUT_DASHBOARD,
   RULE_GAPS_CALLOUT_MONITORING_TAB,

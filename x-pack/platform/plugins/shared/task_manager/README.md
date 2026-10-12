@@ -123,6 +123,11 @@ export class Plugin {
         // default. See "Task priority" below.
         priority: TaskPriority.Deferrable,
 
+        // Optional, allows `runSoon({ priority })` and a run result's `priority` to change the
+        // stored priority of an existing instance of this type. Defaults to false.
+        // See "Changing an existing task's priority" below.
+        allowPriorityOverride: false,
+
         // The maximum number tasks of this type that can be run concurrently per Kibana instance.
         // Setting this value will force Task Manager to poll for this task type seperatly from other task types which
         // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
@@ -200,6 +205,23 @@ task type that sets the field at all is counted by the `task_priority_check` int
 will fail until its snapshot is updated. That failure is deliberate: it exists so ResponseOps
 reviews the change.
 
+#### Changing an existing task's priority
+
+A task's priority is normally fixed when it is scheduled. `ensureScheduled` does not change the
+priority of a task that already exists. A task type that needs to raise or lower the priority of an
+existing instance, for example to promote a background task while a user waits on it and demote it
+afterwards, must opt in with `allowPriorityOverride: true` on its definition. It can then:
+
+- Pass `runSoon(id, { priority })`. The new priority is written in the same version-checked update
+  as `runAt`, so a concurrent change is reported as a conflict instead of being overwritten. If
+  `priority` is omitted, the stored priority is kept.
+- Return `priority` from a successful run (see [Task result](#task-result)) to set the priority of
+  its next run.
+
+For task types that have not opted in, `runSoon(id, { priority })` throws, and a `priority` returned
+from a run is ignored with a warning. Elevated priority is not reset automatically, so a task type
+that promotes an instance is responsible for demoting it once nothing is waiting on it.
+
 #### Deprecated priority names
 
 The members used to be named after their position in the claim ordering. The old names remain as
@@ -243,6 +265,7 @@ The task runner's `run` method is expected to return a promise that resolves to 
 | schedule | Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule. | { interval: string }    |
 | error    | Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.                   | Error                   |
 | state    | Optional, this will be passed into the next run of the task, if this is a recurring task.                                                     | Record<string, unknown> |
+| priority | Optional. The priority of the task's next run. Applied only when the task type sets `allowPriorityOverride`; otherwise ignored with a warning. | TaskPriority            |
 
 ### Examples
 
@@ -436,7 +459,7 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   schedule: (taskInstance: TaskInstanceWithDeprecatedFields, options?: ScheduleOptions) => {
     // ...
   },
-  runSoon: (taskId: string, force?: boolean) =>  {
+  runSoon: (taskId: string, forceOrOptions?: boolean | RunSoonOptions) =>  {
     // ...
   },
   bulkEnable: (taskIds: string[], runSoon: boolean = true) => {
@@ -559,6 +582,8 @@ Use `runSoon` to instruct TaskManager to run an existing task as soon as possibl
 Pass `runSoon(id, { requestImmediateClaim: true })` to also request a best-effort extra claim cycle on background task nodes, instead of waiting for the next poll. `runSoon` refreshes the task update but does not wait for the request to be delivered; if delivery fails, regular polling claims the task. Requests are throttled to one admitted nudge per 500ms per node, and ignored while Task Manager is backing off from Elasticsearch errors. `xpack.task_manager.claim_nudge.enabled: false` turns this off.
 
 The extra cycle may claim any eligible task, not just this one, so a task that needs a delay before running must encode it in its own eligibility or rescheduling logic. The `kibana.task_manager.claim_nudge.count` metric counts successful opted-in `runSoon` calls.
+
+Pass `runSoon(id, { priority })` to also change the task's stored priority. This requires `allowPriorityOverride: true` on the task type and throws otherwise. See [Changing an existing task's priority](#changing-an-existing-tasks-priority). The legacy boolean form `runSoon(id, true)` is equivalent to `runSoon(id, { force: true })`.
 
 ```js
 export class Plugin {
@@ -942,6 +967,64 @@ createTaskRunner({ taskInstance, fakeRequest}: RunContext) {
   };
 },
 ```
+
+### Service account scope
+
+Instead of an API key, a task can run as the service account bound to a workload. This requires service accounts to be enabled (`xpack.security.serviceAccounts.enabled`).
+
+The task type lists the workload types its tasks can run as, which its plugin registers with `core.security.serviceAccounts.registerWorkloadType`. It also passes in the plugin's `withScopedRequestForWorkload`: Core scopes workload calls to the plugin that registered the workload type, so Task Manager can't make that call itself:
+
+```js
+public setup(core: CoreSetup, plugins: { taskManager }) {
+  taskManager.registerTaskDefinitions({
+    myWorkflowTask: {
+      title: 'My workflow task',
+      runAs: {
+        // At least one. Must match /^[a-z0-9_]+$/, and `task_identity` is reserved.
+        workloadTypes: ['my_workflow'],
+        withScopedRequest: async (params, fn) => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.security.serviceAccounts.withScopedRequestForWorkload(params, fn);
+        },
+      },
+      createTaskRunner,
+    },
+  });
+}
+```
+
+To schedule a task as a workload, pass `runAs` on the task instance. No `request` is needed, and Task Manager doesn't create an API key for the task, even if a `request` is passed:
+
+```js
+const task = await taskManager.schedule({
+  taskType: 'myWorkflowTask',
+  schedule: { interval: '5m' },
+  params,
+  runAs: {
+    workloadType: 'my_workflow',
+    workloadId: workflow.id,
+    spaceId,
+    // The service account the workload is expected to be bound to, or `null` for whichever is bound.
+    expectedServiceAccountId: binding.serviceAccountId,
+  },
+});
+```
+
+Scheduling throws if service accounts are disabled, if the Encrypted Saved Objects plugin can't encrypt, if the task type doesn't list `workloadType`, or if a `runAs` field is invalid.
+
+Task Manager stores `runAs` as the task's `credential` (with `type: 'service_account'`), together with a random value in the encrypted `encryptedCredential` field. `credential` is part of that field's AAD, so `encryptedCredential` can't be decrypted once `credential` is changed outside Task Manager.
+
+`runAs` is set only when the task is created:
+
+- Update APIs and middleware can't change it.
+- `ensureScheduled` throws a conflict error (409) if the existing task's `runAs` doesn't match the call's, including when only one of them has a `runAs`.
+- `bulkSchedule` throws a conflict error (409) for a `runAs` task whose id already exists, and for a task that would overwrite an existing task with a `credential`. `schedule` never overwrites an existing task.
+
+To catch these conflicts, check `error.statusCode === 409`, which all three APIs set. `bulkSchedule` throws a saved-object error payload rather than an `Error`, so `SavedObjectsErrorHelpers.isConflictError` doesn't detect its conflicts.
+
+To change `runAs`, remove the task and schedule it again.
+
+This version of Kibana doesn't run these tasks yet: the task runner reports an error for any task that has a `credential`.
 
 ### API Key Invalidation
 

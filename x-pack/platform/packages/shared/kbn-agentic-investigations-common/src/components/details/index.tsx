@@ -19,6 +19,8 @@ export {
   type EscalationFlyoutHeaderProps,
 } from './escalation_flyout_header';
 export { OverviewTab, type OverviewTabProps } from './details_flyout_tab_contents';
+export { WhatsHappenedBlock, type WhatsHappenedBlockProps } from './whats_happened_block';
+export { EscalationOverviewTab, type EscalationOverviewTabProps } from './escalation_overview_tab';
 export { StatusToggle, type StatusToggleProps } from './status_toggle';
 export { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
 export {

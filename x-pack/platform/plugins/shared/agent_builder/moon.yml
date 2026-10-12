@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/inference-plugin'
   - '@kbn/agent-builder-server'
+  - '@kbn/isomer'
   - '@kbn/agent-builder-skill-loader'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-visualizations'

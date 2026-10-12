@@ -28,7 +28,6 @@ const item: PolicyExecutionHistoryItem = {
   alerts: [],
   action_group_count: 1,
   workflows: [],
-  error: null,
 };
 
 const createMocks = () => {
@@ -165,7 +164,6 @@ describe('ListActionPolicyExecutionsRoute', () => {
       page: 4,
       per_page: 25,
       total: 137,
-      search_matches: null,
     });
   });
 

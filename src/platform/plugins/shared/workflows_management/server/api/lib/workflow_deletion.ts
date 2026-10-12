@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { StorageClientBulkIndexOccMetadata } from '@kbn/storage-adapter';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
-import { buildWorkflowFilters } from '@kbn/workflows/server';
+import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   StepExecutionsDataClient,
   WorkflowExecutionsDataClient,
@@ -33,6 +33,48 @@ interface WorkflowHit {
   _seq_no?: number;
   _primary_term?: number;
 }
+
+const hasRunningExecutions = async (
+  id: string,
+  document: WorkflowProperties | undefined,
+  spaceId: string,
+  deps: {
+    workflowExecutionsDataClient: WorkflowExecutionsDataClient;
+    getWorkflowExecutions: (
+      params: SearchWorkflowExecutionsParams,
+      executionSpaceId: string
+    ) => Promise<WorkflowExecutionListDto>;
+  }
+): Promise<boolean> => {
+  if (document?.managed === true && document.spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
+    // Global definitions execute in callers' concrete spaces; deletion must check every space.
+    const executions = await deps.workflowExecutionsDataClient.search({
+      query: {
+        bool: {
+          filter: [
+            { term: { workflowId: id } },
+            { terms: { status: [...NonTerminalExecutionStatuses] } },
+          ],
+        },
+      },
+      size: 1,
+      _source: false,
+      allow_partial_search_results: false,
+    });
+    if (executions.timed_out || executions._shards.failed > 0) {
+      throw new WorkflowConflictError(
+        'Cannot delete the workflow: the active execution search was incomplete.',
+        id
+      );
+    }
+    return executions.hits.hits.length > 0;
+  }
+  const executions = await deps.getWorkflowExecutions(
+    { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+    spaceId
+  );
+  return executions.total > 0;
+};
 
 const concurrencyMetadata = (hit: WorkflowHit): StorageClientBulkIndexOccMetadata =>
   hit._seq_no !== undefined && hit._primary_term !== undefined
@@ -258,13 +300,7 @@ const hardDeleteWorkflows = async (
     ) => Promise<WorkflowExecutionListDto>;
   }
 ): Promise<DeleteWorkflowsResponse> => {
-  const {
-    workflowExecutionsDataClient,
-    stepExecutionsDataClient,
-    taskScheduler,
-    logger,
-    getWorkflowExecutions,
-  } = deps;
+  const { workflowExecutionsDataClient, stepExecutionsDataClient, taskScheduler, logger } = deps;
   const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
 
   const privateIds = hits
@@ -295,11 +331,13 @@ const hardDeleteWorkflows = async (
   try {
     executionChecks = await Promise.all(
       foundIds.map(async (id) => {
-        const executions = await getWorkflowExecutions(
-          { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-          spaceId
+        const hasRunning = await hasRunningExecutions(
+          id,
+          hits.find((hit) => hit._id === id)?._source,
+          spaceId,
+          deps
         );
-        return { id, hasRunning: executions.total > 0 };
+        return { id, hasRunning };
       })
     );
   } catch (error) {
@@ -508,11 +546,7 @@ const deleteBoundWorkflow = async (
     let retainPrivateAcl = false;
     try {
       // Retain the check after disabling to catch executions started after the preflight.
-      const executions = await params.getWorkflowExecutions(
-        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-        params.spaceId
-      );
-      if (executions.total > 0) {
+      if (await hasRunningExecutions(id, document, params.spaceId, params)) {
         throw new WorkflowConflictError(
           `Cannot force-delete workflow with running executions: ${id}`,
           id

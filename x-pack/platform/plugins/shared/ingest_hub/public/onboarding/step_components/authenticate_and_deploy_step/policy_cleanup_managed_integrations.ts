@@ -14,6 +14,7 @@ import {
 
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
+import { detectSecretRefs } from './secret_refs';
 import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
@@ -147,7 +148,6 @@ export async function updateManagedIntegrationsPolicy(
 
   const { staticKeys } = authenticateAndDeployStep;
   const pkgVarNames = getPackageVarNames(pkgInfo as { vars?: Array<{ name: string }> });
-  const vars = buildPackageVars(globalRegion, staticKeys, pkgVarNames);
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
   const policyNamespace = existingNamespace ?? namespace;
@@ -165,6 +165,19 @@ export async function updateManagedIntegrationsPolicy(
     rawConnector == null || typeof rawConnector !== 'string'
       ? rawConnector
       : ({ enabled: true, cloud_connector_id: rawConnector } as const);
+
+  // The PUT is a full replace, so credentials the user did not retype must be sent back as the
+  // policy's own secret refs or Fleet deletes the stored secrets. Not applicable once the policy
+  // authenticates through a cloud connector.
+  const vars = buildPackageVars(
+    globalRegion,
+    staticKeys,
+    pkgVarNames,
+    undefined,
+    cloudConnector
+      ? undefined
+      : authenticateAndDeployStep.existingSecretRefs ?? detectSecretRefs(existingGetResult.item)
+  );
 
   await sendUpdateAgentlessPolicy(policyId, {
     name: policyName,

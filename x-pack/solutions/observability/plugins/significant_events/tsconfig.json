@@ -48,6 +48,7 @@
     "@kbn/alerting-plugin",
     "@kbn/alerting-v2-plugin",
     "@kbn/alerting-v2-schemas",
+    "@kbn/alerting-v2-constants",
     "@kbn/logging",
     "@kbn/workflows-management-plugin",
     "@kbn/spaces-plugin",

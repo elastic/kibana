@@ -147,7 +147,9 @@ export const EscalationsPage: React.FC = () => {
         `,
       }}
     >
-      <EuiFlexGroup gutterSize="l" direction="column" wrap>
+      {/* No `wrap`: a wrapping column sizes each line to its widest content and lets a
+          wide row push the page past the viewport. Same fix as the conversations page. */}
+      <EuiFlexGroup gutterSize="l" direction="column">
         <EuiFlexItem grow={false}>
           <EscalationsPageHeader
             isLoading={isLoading}
