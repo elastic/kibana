@@ -17,7 +17,7 @@ import {
   updateColorModePalette,
 } from './assignments';
 
-const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });
+const palettes = getKbnPalettes({ name: 'borealis', darkMode: false });
 const rules: ColorMapping.Assignment['rules'] = [{ type: 'match', pattern: 'a' }];
 
 const defaultAssignment = (index: number): ColorMapping.Assignment => ({
@@ -52,41 +52,31 @@ const gradientConfig = (steps: ColorMapping.ColorStep[]): ColorMapping.Config =>
   colorMode: { type: 'gradient', steps, sort: 'desc' },
 });
 
-describe('color mapping - assignments', () => {
+describe('Color mapping assignments', () => {
   describe('isAssignmentColorCustomized', () => {
     describe('categorical mode', () => {
       const config = categoricalConfig([]);
 
-      it('returns false for the palette default color at its index', () => {
-        expect(isAssignmentColorCustomized(defaultAssignment(2), 2, config, palettes)).toBe(false);
-      });
-
-      it('wraps the default color index by palette size', () => {
-        const paletteSize = palettes.get(KbnPalette.Default).colors().length;
-        expect(
-          isAssignmentColorCustomized(defaultAssignment(0), paletteSize, config, palettes)
-        ).toBe(false);
+      it('returns false for a color from the active palette regardless of index', () => {
+        expect(isAssignmentColorCustomized(defaultAssignment(2), config, palettes)).toBe(false);
+        expect(isAssignmentColorCustomized(defaultAssignment(5), config, palettes)).toBe(false);
       });
 
       it('returns true for a custom color code', () => {
-        expect(isAssignmentColorCustomized(customAssignment, 0, config, palettes)).toBe(true);
+        expect(isAssignmentColorCustomized(customAssignment, config, palettes)).toBe(true);
       });
 
       it('returns true for a color from another palette', () => {
         const assignment: ColorMapping.Assignment = {
           rules,
-          color: { type: 'categorical', paletteId: KbnPalette.Kibana7, colorIndex: 0 },
+          color: { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 0 },
         };
-        expect(isAssignmentColorCustomized(assignment, 0, config, palettes)).toBe(true);
-      });
-
-      it('returns true for a categorical color at the wrong index', () => {
-        expect(isAssignmentColorCustomized(defaultAssignment(5), 0, config, palettes)).toBe(true);
+        expect(isAssignmentColorCustomized(assignment, config, palettes)).toBe(true);
       });
 
       it('ignores a stale touched flag', () => {
         const assignment: ColorMapping.Assignment = { ...defaultAssignment(0), touched: true };
-        expect(isAssignmentColorCustomized(assignment, 0, config, palettes)).toBe(false);
+        expect(isAssignmentColorCustomized(assignment, config, palettes)).toBe(false);
       });
     });
 
@@ -94,7 +84,7 @@ describe('color mapping - assignments', () => {
       it('returns false since assignment colors come from the gradient steps', () => {
         const config = gradientConfig([gradientStep(0)]);
         const assignment: ColorMapping.Assignment = { rules, color: { type: 'gradient' } };
-        expect(isAssignmentColorCustomized(assignment, 0, config, palettes)).toBe(false);
+        expect(isAssignmentColorCustomized(assignment, config, palettes)).toBe(false);
       });
     });
   });
@@ -129,6 +119,22 @@ describe('color mapping - assignments', () => {
       expect(hasCustomColors(config, palettes)).toBe(true);
     });
 
+    it('stays false when a non-sequential index remains after a delete', () => {
+      // Deleting a middle assignment leaves gaps in the color index sequence (removeAssignment
+      // splices without re-indexing). Those survivors are still auto colors, not customizations.
+      const config = categoricalConfig([defaultAssignment(0), defaultAssignment(2)]);
+      expect(hasCustomColors(config, palettes)).toBe(false);
+    });
+
+    it('stays false for a freshly added assignment after another was recolored', () => {
+      // Recolor the first assignment, then add a new one: the new assignment restarts at index 0
+      // (no categorical sibling to continue from) but is still an auto color of the active palette.
+      const config = categoricalConfig([customAssignment, defaultAssignment(0)]);
+      expect(hasCustomColors(config, palettes)).toBe(true); // from the recolored one only
+      const autoOnly = categoricalConfig([defaultAssignment(3), defaultAssignment(0)]);
+      expect(hasCustomColors(autoOnly, palettes)).toBe(false);
+    });
+
     it('returns false when every gradient step uses the palette default', () => {
       const config = gradientConfig([gradientStep(0), gradientStep(1)]);
       expect(hasCustomColors(config, palettes)).toBe(false);
@@ -136,6 +142,11 @@ describe('color mapping - assignments', () => {
 
     it('returns true when any gradient step has a custom color', () => {
       const config = gradientConfig([gradientStep(0), { type: 'colorCode', colorCode: '#ff0000' }]);
+      expect(hasCustomColors(config, palettes)).toBe(true);
+    });
+
+    it('returns true when any gradient step uses a color at the wrong index', () => {
+      const config = gradientConfig([gradientStep(0), gradientStep(2)]);
       expect(hasCustomColors(config, palettes)).toBe(true);
     });
   });
@@ -188,11 +199,20 @@ describe('color mapping - assignments', () => {
   });
 
   describe('updateColorModePalette', () => {
-    it('resets gradient steps to the new palette without a touched flag', () => {
+    it('resets gradient steps to the new palette without a touched flag when not preserving changes', () => {
       const colorMode = gradientConfig([{ type: 'colorCode', colorCode: '#ff0000' }]).colorMode;
       expect(updateColorModePalette(colorMode, KbnPalette.Kibana7, false)).toEqual({
         type: 'gradient',
         steps: [{ type: 'categorical', paletteId: KbnPalette.Kibana7, colorIndex: 0 }],
+        sort: 'desc',
+      });
+    });
+
+    it('keeps gradient steps when preserving changes', () => {
+      const colorMode = gradientConfig([{ type: 'colorCode', colorCode: '#ff0000' }]).colorMode;
+      expect(updateColorModePalette(colorMode, KbnPalette.Kibana7, true)).toEqual({
+        type: 'gradient',
+        steps: [{ type: 'colorCode', colorCode: '#ff0000' }],
         sort: 'desc',
       });
     });

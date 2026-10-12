@@ -11,11 +11,11 @@ import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 
 /**
- * Returns `true` when an assignment's color differs from the palette default for its index.
+ * Returns `true` when an assignment's color is a deliberate user choice (a custom color code or a
+ * color from a different palette) rather than an auto color drawn from the active palette.
  */
 export function isAssignmentColorCustomized(
   assignment: ColorMapping.Assignment,
-  index: number,
   config: ColorMapping.Config,
   palettes: KbnPalettes
 ): boolean {
@@ -26,14 +26,14 @@ export function isAssignmentColorCustomized(
     return false;
   }
   const { color } = assignment;
-  // Categorical mode: the default is the color that `updateAssignmentsPalette` assigns.
-  // A color code, a color from another palette, or a different index counts as custom.
-  const palette = palettes.get(config.paletteId);
-  return !(
-    color.type === 'categorical' &&
-    color.paletteId === config.paletteId &&
-    color.colorIndex === index % palette.colors().length
-  );
+  // Categorical mode: an auto-assigned color is a categorical color drawn from the active
+  // palette. The editor rotates the color index as assignments are added and removed, so the
+  // index carries no "was this customized" signal (it is unrecoverable after a splice). Only a
+  // color code or a color from a different palette is a deliberate user choice.
+  if (color.type !== 'categorical') {
+    return true;
+  }
+  return palettes.get(color.paletteId).id !== palettes.get(config.paletteId).id;
 }
 
 /**
@@ -66,8 +66,8 @@ export function hasCustomColors(config: ColorMapping.Config, palettes: KbnPalett
       isGradientStepCustomized(step, index, config.paletteId)
     );
   }
-  return config.assignments.some((assignment, index) =>
-    isAssignmentColorCustomized(assignment, index, config, palettes)
+  return config.assignments.some((assignment) =>
+    isAssignmentColorCustomized(assignment, config, palettes)
   );
 }
 
@@ -81,7 +81,7 @@ export function updateAssignmentsPalette(
   const palette = palettes.get(paletteId);
   return config.assignments.map((assignment, index) => {
     const { rules, color } = assignment;
-    if (preserveColorChanges && isAssignmentColorCustomized(assignment, index, config, palettes)) {
+    if (preserveColorChanges && isAssignmentColorCustomized(assignment, config, palettes)) {
       return { rules, color };
     } else {
       const newColor: ColorMapping.Assignment['color'] =
