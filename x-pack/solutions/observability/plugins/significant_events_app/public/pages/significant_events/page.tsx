@@ -205,7 +205,7 @@ export function SignificantEventsPage() {
       {
         id: SIGNIFICANT_EVENTS_TAB,
         label: i18n.translate('xpack.significantEventsApp.significantEventsTab', {
-          defaultMessage: 'Significant Events',
+          defaultMessage: 'Significant events',
         }),
         href: router.link('/{tab}', { path: { tab: SIGNIFICANT_EVENTS_TAB } }),
         isSelected: tab === SIGNIFICANT_EVENTS_TAB,
@@ -316,7 +316,7 @@ export function SignificantEventsPage() {
                 })}
                 text={i18n.translate('xpack.significantEventsApp.statusErrorBannerBody', {
                   defaultMessage:
-                    'Manual triggers stay disabled until status can be loaded. Open Settings to retry, or refresh the page.',
+                    'Manual triggers stay disabled until status can be loaded. Open settings to retry, or refresh the page.',
                 })}
                 actionProps={
                   canManageAndConfigure && detectionSettingsHref
@@ -348,7 +348,7 @@ export function SignificantEventsPage() {
               <EuiSpacer />
             </>
           )}
-          <RunLimitsBanner />
+          {!isBlocked && <RunLimitsBanner />}
           {canShow && (
             <KiGenerationProvider onFailed={onOnboardingFailed}>
               {tab === 'streams' && <StreamsView />}

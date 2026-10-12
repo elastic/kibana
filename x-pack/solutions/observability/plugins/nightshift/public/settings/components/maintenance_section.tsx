@@ -122,7 +122,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
         description={<p>{SECTION_DESCRIPTION}</p>}
         data-test-subj="streams-settings-maintenance-section"
       >
-        <DetectionPausedCallout canManageAndConfigure={canManage} />
+        <DetectionPausedCallout />
         {isError && (
           <>
             <KbnDangerCallout
@@ -253,7 +253,7 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                     })
                   : i18n.translate('xpack.nightshift.settings.maintenance.pauseConfirmBody', {
                       defaultMessage:
-                        'This disables all Significant Events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',
+                        'This disables all significant events managed workflows, cancels their in-flight executions, and disables the alerting rules backing knowledge indicator queries. No data is deleted.',
                     })}
               </p>
             </EuiText>

@@ -29,7 +29,7 @@ export const PausedActivityCallout = ({
     failureCount > 0
       ? i18n.translate('xpack.significantEventsApp.pausedBannerPartialFailures', {
           defaultMessage:
-            'Some maintenance operations could not be completed. Check Settings and the Kibana server logs for details.',
+            'Some maintenance operations could not be completed. Check settings and the Kibana server logs for details.',
         })
       : undefined;
 

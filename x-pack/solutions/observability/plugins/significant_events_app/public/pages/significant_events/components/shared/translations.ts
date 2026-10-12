@@ -11,7 +11,7 @@ import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
   'xpack.significantEventsApp.findSignificantEventsLabel',
   {
-    defaultMessage: 'Find Significant Events',
+    defaultMessage: 'Find significant events',
   }
 );
 
@@ -19,7 +19,7 @@ export const FIND_SIGNIFICANT_EVENTS_LABEL = i18n.translate(
 export const ACTIVITY_PAUSED_TOOLTIP = i18n.translate(
   'xpack.significantEventsApp.activityPausedTooltip',
   {
-    defaultMessage: 'Significant Events activity is paused. Resume it in Settings.',
+    defaultMessage: 'Significant events activity is paused. Resume it in settings.',
   }
 );
 
