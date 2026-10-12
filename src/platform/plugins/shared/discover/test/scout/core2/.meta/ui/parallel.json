@@ -1,5 +1,5 @@
 {
-  "sha1": "8f0fe0de597862701dc9c1beb1e9edc42b726e9e",
+  "sha1": "1656a557f18342b879ce87940fb192d53af2d3dd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,46 @@
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/global.setup.ts",
         "line": 7,
         "column": 1
+      }
+    },
+    {
+      "id": "785a7d29d403cfa-66af52657e98f78",
+      "title": "Discover inline data view editing discards field edits without changing the shared inline view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
+        "line": 38,
+        "column": 88
+      }
+    },
+    {
+      "id": "785a7d29d403cfa-b375f0fa9863fb6",
+      "title": "Discover inline data view editing keeps filters editable after changing the view and saving",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/adhoc_data_view_editing.spec.ts",
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -469,8 +509,8 @@
       }
     },
     {
-      "id": "bd77256838a819d-9aa607b80d4bd6c",
-      "title": "Discover session panels on Dashboard shares one inline data view across API-created tabs after saving in Discover and reloading the dashboard",
+      "id": "bd77256838a819d-01aa9a7368c0a8c",
+      "title": "Discover session panels on Dashboard preserves a cell-action filter across panels sharing an inline view after dashboard reload",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -508,8 +548,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/discover_session_dashboard_reload.spec.ts",
-        "line": 141,
-        "column": 27
+        "line": 140,
+        "column": 6
       }
     },
     {
@@ -1012,21 +1052,12 @@
       "title": "Internal Discover session on Dashboard loads an internally saved session through Content Management in a linked dashboard panel",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-serverless-observability_logs_essentials",
-        "@cloud-serverless-observability_logs_essentials"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core2/ui/parallel_tests/internal_discover_session_dashboard.spec.ts",
-        "line": 26,
-        "column": 7
+        "line": 24,
+        "column": 35
       }
     },
     {

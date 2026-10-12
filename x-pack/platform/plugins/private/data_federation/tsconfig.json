@@ -22,6 +22,8 @@
     "@kbn/kibana-react-plugin",
     "@kbn/app-header",
     "@kbn/core-doc-links-browser",
+    "@kbn/core-ui-settings-server",
+    "@kbn/management-settings-ids",
     "@kbn/ui-callout",
     "@kbn/storybook",
     "@kbn/i18n-react",
@@ -32,7 +34,9 @@
     "@kbn/licensing-types",
     "@kbn/license-api-guard-plugin",
     "@kbn/esql-language",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics"
   ],
   "exclude": [
     "target/**/*",

@@ -32,6 +32,7 @@ import type {
   SecretReference,
   SecretPath,
 } from '../../types';
+import { PackagePolicyRequestError } from '../../errors';
 import { appContextService } from '../app_context';
 import { packagePolicyService } from '../package_policy';
 
@@ -63,12 +64,19 @@ export async function extractAndWriteSecrets(opts: {
   const secretsToCreate = secretPaths.filter(
     (secretPath) => !!secretPath.value.value && !secretPath.value.value.isSecretRef
   );
+  // Vars that already carry a secret ref (e.g. reusing the credentials of a sibling policy) are
+  // left in place; they must still be tracked so deleting the sibling does not delete the secret.
+  const providedSecretRefs = secretPaths.filter(
+    (secretPath) => !!secretPath.value.value?.isSecretRef
+  );
 
   const hasCloudConnectorSecretReferences =
     packagePolicy.supports_cloud_connector &&
     packagePolicy.cloud_connector_id &&
     cloudConnectorsSecretReferences.length;
 
+  // The refs of a cloud connector belong to the connector, which may have just been created and
+  // is not referenced by any package policy yet: they are accepted as they are.
   if (hasCloudConnectorSecretReferences) {
     return { packagePolicy, secretReferences: cloudConnectorsSecretReferences };
   }
@@ -93,8 +101,35 @@ export async function extractAndWriteSecrets(opts: {
         }
         return [...acc, { id: secret.id }];
       }, []),
+      ...providedSecretRefs.flatMap((secretPath) =>
+        secretPath.value.value.ids
+          ? secretPath.value.value.ids.map((id: string) => ({ id }))
+          : [{ id: secretPath.value.value.id }]
+      ),
     ],
   };
+}
+
+/**
+ * A request may carry refs to existing secrets (to reuse the credentials of a sibling policy).
+ * Secret ids are not credentials of their own, so a ref is only accepted when a package policy the
+ * caller can see already references that secret: this stops a request from pointing a policy at
+ * an arbitrary secret id.
+ */
+export async function assertSecretIdsReusable(soClient: SavedObjectsClientContract, ids: string[]) {
+  if (ids.length === 0) return;
+
+  const referenced = new Set(
+    (await findPackagePoliciesUsingSecrets({ soClient, ids })).map(({ id }) => id)
+  );
+  const unusable = ids.filter((id) => !referenced.has(id));
+  if (unusable.length > 0) {
+    throw new PackagePolicyRequestError(
+      `Cannot reuse secret reference(s) [${unusable.join(
+        ', '
+      )}]: they are not referenced by a package policy you can access`
+    );
+  }
 }
 
 /**
@@ -213,13 +248,17 @@ export async function deleteSecretsIfNotReferenced(opts: {
   // When true, skip the compiled .fleet-policies check (the caller guarantees those docs are
   // already removed). The package-policy SO check still runs to guard against shared secrets.
   skipCompiledPolicyCheck?: boolean;
+  // When true, look for package policies referencing the secrets in every Space. Secrets are
+  // global, so a policy in another Space can reference one; `soClient` must then be unscoped.
+  checkAllSpaces?: boolean;
 }): Promise<void> {
-  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck } = opts;
+  const { esClient, soClient, ids, agentPolicyIds, skipCompiledPolicyCheck, checkAllSpaces } = opts;
   const logger = appContextService.getLogger();
 
   const packagePoliciesUsingSecrets = await findPackagePoliciesUsingSecrets({
     soClient,
     ids,
+    ...(checkAllSpaces ? { spaceId: '*' } : {}),
   });
 
   if (packagePoliciesUsingSecrets.length) {
@@ -290,14 +329,17 @@ export async function deleteSecretsIfNotReferenced(opts: {
 export async function findPackagePoliciesUsingSecrets(opts: {
   soClient: SavedObjectsClientContract;
   ids: string[];
+  /** Pass '*' with an unscoped client to look across all Spaces; defaults to the client's Space. */
+  spaceId?: string;
 }): Promise<Array<{ id: string; policyIds: string[] }>> {
-  const { soClient, ids } = opts;
+  const { soClient, ids, spaceId } = opts;
   const packagePolicies = await packagePolicyService.list(soClient, {
     kuery: `ingest-package-policies.secret_references.id: (${ids
       .map((id) => `"${escapeQuotes(id)}"`)
       .join(' or ')})`,
     perPage: SO_SEARCH_LIMIT,
     page: 1,
+    ...(spaceId ? { spaceId } : {}),
   });
 
   if (!packagePolicies.total) {
@@ -338,6 +380,15 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   return res;
 }
 
+const secretIds = (ref: { id?: string; ids?: string[] } | undefined): string[] =>
+  ref?.ids ?? (ref?.id ? [ref.id] : []);
+
+function sameSecretIds(a: unknown, b: unknown): boolean {
+  const aIds = secretIds(a as { id?: string; ids?: string[] });
+  const bIds = secretIds(b as { id?: string; ids?: string[] });
+  return aIds.length === bIds.length && aIds.every((id) => bIds.includes(id));
+}
+
 export function diffSecretPaths(
   oldPaths: SecretPath[],
   newPaths: SecretPath[]
@@ -361,6 +412,12 @@ export function diffSecretPaths(
           toDelete.push(oldPath);
         } else {
           noChange.push(newPath);
+          // The var now points at a different secret (e.g. several policies were switched to one
+          // shared secret): the old one is no longer used by this policy and may be unreferenced.
+          // It is only a candidate; deletion still checks that no other policy references it.
+          if (!sameSecretIds(oldPath.value.value, newPath.value.value)) {
+            toDelete.push(oldPath);
+          }
         }
       } else {
         // value explicitly cleared (null/undefined) — old secret must be deleted

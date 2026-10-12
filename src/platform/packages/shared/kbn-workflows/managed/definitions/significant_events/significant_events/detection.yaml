@@ -271,25 +271,26 @@ steps:
         # One immutable detection per transition. detection_id is minted fresh for every detection
         # ({rule}-{execution}); latest-per-rule reads regroup by rule_uuid. No lifecycle fields
         # and no cross-pipeline handoff fields — change_point_type/p_value are top-level.
+        # Written through Kibana, which persists as its internal user: the workflow's credentials
+        # need the Nightshift manage privilege, not Elasticsearch write on the data stream.
         if: "${{ steps.compute_write_gate.output.is_transition }}"
-        type: elasticsearch.request
+        type: kibana.request
         with:
           method: POST
-          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          path: "/s/{{ variables.spaceId }}/internal/significant_events/detections"
+          headers:
+            x-elastic-internal-origin: "kibana"
           body:
-            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - "{{ variables.spaceId }}"
-            detection_id: "{{ foreach.item.key }}-{{ execution.id }}"
-            rule_uuid: "{{ foreach.item.key }}"
-            rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
-            stream_name: "{{ foreach.item.stream.buckets[0].key }}"
-            change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
-            p_value: "${{ steps.compute_transition.output.detection_p_value }}"
-            severity_score: "${{ foreach.item.severity_score }}"
-            alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
-            workflow_execution_id: "{{ execution.id }}"
+            detections:
+              - detection_id: "{{ foreach.item.key }}-{{ execution.id }}"
+                rule_uuid: "{{ foreach.item.key }}"
+                rule_name: "{{ foreach.item.rule_name.top[0].metrics | entries | map: 'value' | first | default: 'unknown' }}"
+                stream_name: "{{ foreach.item.stream.buckets[0].key }}"
+                change_point_type: "{{ steps.compute_rule_context.output.change_point_type }}"
+                p_value: "${{ steps.compute_transition.output.detection_p_value }}"
+                severity_score: "${{ foreach.item.severity_score }}"
+                alert_index: "{{ steps.run_change_point_aggregation.output.alertIndex }}"
+                workflow_execution_id: "{{ execution.id }}"
         on-failure:
           continue: true
 
@@ -303,16 +304,15 @@ steps:
         # No idempotency guard: foreach_rule visits each rule once per run and markers are
         # intentionally append-per-scan touch records.
         if: "${{ steps.compute_rule_context.output.has_rule_uuid and steps.check_last_detection.error == null and steps.compute_write_gate.output.is_transition == false }}"
-        type: elasticsearch.request
+        type: kibana.request
         with:
           method: POST
-          path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+          path: "/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_scanned"
+          headers:
+            x-elastic-internal-origin: "kibana"
           body:
-            "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-            kibana:
-              space_ids:
-                - "{{ variables.spaceId }}"
-            rule_uuid: "{{ foreach.item.key }}"
+            rule_uuids:
+              - "{{ foreach.item.key }}"
             scanned_by: "{{ execution.id }}"
         on-failure:
           continue: true

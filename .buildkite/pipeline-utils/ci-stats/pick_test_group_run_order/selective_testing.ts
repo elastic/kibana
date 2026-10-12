@@ -35,7 +35,8 @@ export async function resolveSelectiveTestingContext(
     changedFiles,
     strategy: 'git',
     includeDownstream: true,
-    ignorePatterns: [], // might want to exclude metadata/text changes in the future
+    // Documentation files (README, *.md, CHANGELOG*) can't affect runtime behaviour.
+    ignorePatterns: ['**/README*', '**/*.md', '**/CHANGELOG*'],
     ignoreUncategorizedChanges: true,
   }).catch((error) => {
     console.error('Error getting affected packages', error);

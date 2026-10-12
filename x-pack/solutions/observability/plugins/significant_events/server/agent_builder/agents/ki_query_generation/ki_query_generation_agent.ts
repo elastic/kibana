@@ -10,9 +10,10 @@ import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import { significantEventsAgentPrompt } from '@kbn/nightshift-ai';
 import { SCS_AGENT_BUILDER_TOOL_IDS } from '../../../lib/semantic_code_search_grounding/semantic_code_search_tools';
 import { KI_QUERY_GENERATION_SKILL_ID } from '../../skills/ki_query_generation';
+import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../common/constants';
 import groundingInstructions from './instructions.md.text';
 
-export const KI_QUERY_GENERATION_AGENT_ID = 'significant-events.ki-query-generation';
+export { KI_QUERY_GENERATION_AGENT_ID };
 export const KI_QUERY_GENERATION_AGENT_TYPE_ID = 'platform.sig_events.ki-query-generation-type';
 
 export const kiQueryGenerationAgentType = {
