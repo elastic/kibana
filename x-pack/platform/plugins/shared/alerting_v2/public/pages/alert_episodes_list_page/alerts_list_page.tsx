@@ -53,18 +53,20 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
+  EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
   EpisodeRuleCell,
   EpisodeRuleTagsCell,
   EpisodeSeverityCell,
-  EpisodeSourceCell,
+  EpisodeConnectorCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
 import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
 import { DEFAULT_EPISODES_TABLE_SORT } from './utils/episodes_table_config';
 import { useEpisodesTableConfig } from './hooks/use_episodes_table_config';
 import { experimentalBadge } from '../../components/experimental_badge';
+import { NewAlertingExperienceBanner } from './new_alerting_experience_banner';
 import { RuleSummaryFlyoutContainer } from '../../components/rule/flyouts/rule_summary/rule_summary_flyout_container';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingLocators } from '../../application/locator_context';
@@ -116,9 +118,14 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = {
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_ASSIGNEES,
   }),
-  source: ({ column }) => ({
+  alerting_source: ({ column }) => ({
     ...column,
     displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE,
+    isSortable: false,
+  }),
+  source: ({ column }) => ({
+    ...column,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_SOURCE_CONNECTOR,
     isSortable: false,
   }),
 };
@@ -455,6 +462,7 @@ const AlertsListPageContent = () => {
         <AlertEpisodeDetailsFlyout
           episodeId={hit.flattened['episode.id'] as string}
           groupHash={hit.flattened.group_hash as string | undefined}
+          sourceId={hit.flattened.source_id as string | undefined}
           onClose={closeFlyout}
           actions={episodeActions}
           getRuleDetailsHref={(ruleId) => getRuleDetailsHref(ruleId) ?? ''}
@@ -560,9 +568,10 @@ const AlertsListPageContent = () => {
   const externalCustomRenderers = useMemo<CustomCellRenderer>(
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
+      alerting_source: (props) => <EpisodeSourceCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
-      source: (props) => <EpisodeSourceCell {...props} />,
+      source: (props) => <EpisodeConnectorCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
       rule_tags: (props) => (
         <EpisodeRuleTagsCell {...props} rulesCache={rulesCache} isLoadingRules={isLoadingRules} />
@@ -617,6 +626,7 @@ const AlertsListPageContent = () => {
         menu={alertsMenu}
       />
       <EuiSpacer size="m" />
+      <NewAlertingExperienceBanner />
 
       <EuiFlexGroup
         direction="column"

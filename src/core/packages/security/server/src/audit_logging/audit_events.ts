@@ -31,6 +31,14 @@ export interface AuditKibana {
     name?: string;
   };
   /**
+   * Workload a service account is bound to as part of this event.
+   */
+  workload?: {
+    plugin_id: string;
+    type: string;
+    id: string;
+  };
+  /**
    * Name of authentication provider associated with a login event.
    */
   authentication_provider?: string;

@@ -25,6 +25,100 @@ export const ENABLED_SWITCH_LABEL = i18n.translate(
   }
 );
 
+/* -------------------------------------------------------------------------- */
+/* Threat intel supply (Hunt Watch)                                           */
+/* -------------------------------------------------------------------------- */
+
+export const THREAT_INTEL_SUPPLY_SECTION_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.sectionTitle',
+  { defaultMessage: 'Threat intel supply' }
+);
+
+export const THREAT_INTEL_SUPPLY_SECTION_SUBTITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.sectionSubtitle',
+  {
+    defaultMessage:
+      'These workflows feed Hunt Watch. Ingest and enrich are shared across all spaces.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_INGEST_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.ingestLabel',
+  { defaultMessage: 'Ingest' }
+);
+
+export const THREAT_INTEL_SUPPLY_ENRICH_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.enrichLabel',
+  { defaultMessage: 'Enrich' }
+);
+
+export const THREAT_INTEL_SUPPLY_ATTRIBUTE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.attributeLabel',
+  { defaultMessage: 'Attribute alerts to reports' }
+);
+
+export const THREAT_INTEL_SUPPLY_SCOPE_DEPLOYMENT = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.scopeDeployment',
+  { defaultMessage: 'Deployment' }
+);
+
+export const THREAT_INTEL_SUPPLY_SCOPE_SPACE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.scopeSpace',
+  { defaultMessage: 'This space' }
+);
+
+export const THREAT_INTEL_SUPPLY_ON = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.on',
+  { defaultMessage: 'On' }
+);
+
+export const THREAT_INTEL_SUPPLY_OFF = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.off',
+  { defaultMessage: 'Off' }
+);
+
+export const THREAT_INTEL_SUPPLY_IN_USE_ELSEWHERE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.inUseElsewhere',
+  { defaultMessage: 'In use in other spaces' }
+);
+
+export const THREAT_INTEL_SUPPLY_RESTORE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.restoreLabel',
+  { defaultMessage: 'Restore threat intel supply' }
+);
+
+export const THREAT_INTEL_SUPPLY_DRIFT_MESSAGE = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.driftMessage',
+  {
+    defaultMessage:
+      'Hunt Watch is on, but one or more threat intel supply workflows are off. Restore supply, or turn Hunt off.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_EMBEDDING = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateEmbedding',
+  {
+    defaultMessage:
+      'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_HARD_GATE_BLOCKED = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateBlocked',
+  {
+    defaultMessage:
+      'Threat intel reports are not ready in this deployment. Finish threat intel bootstrap before turning Hunt on.',
+  }
+);
+
+export const THREAT_INTEL_SUPPLY_STATUS_ERROR = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.statusError',
+  {
+    defaultMessage:
+      'Unable to check threat intel supply readiness. Retry later, or refresh the page before turning Hunt on.',
+  }
+);
+
 export const VIEW_EXECUTIONS = i18n.translate('xpack.alertzero.watches.settings.viewExecutions', {
   defaultMessage: 'View executions',
 });
@@ -126,6 +220,14 @@ export const MODELS_LABEL = i18n.translate('xpack.alertzero.watches.settings.mod
   defaultMessage: 'Models',
 });
 
+export const NO_MODEL_REASON_PLAIN = i18n.translate(
+  'xpack.alertzero.watches.settings.worker.blockingReason.noModelPlain',
+  {
+    defaultMessage:
+      'Some AI-powered steps in this Worker may not be configured. Check Feature settings below.',
+  }
+);
+
 /* -------------------------------------------------------------------------- */
 /* Section headings                                                           */
 /* -------------------------------------------------------------------------- */
@@ -208,6 +310,14 @@ export const TRIGGER_EVERY = i18n.translate('xpack.alertzero.watches.settings.tr
 export const TRIGGER_HELP_TEXT = i18n.translate(
   'xpack.alertzero.watches.settings.trigger.helpText',
   { defaultMessage: 'How often this Worker runs. Applies to this Worker only.' }
+);
+
+export const TRIGGER_HELP_READ_ONLY_4H = i18n.translate(
+  'xpack.alertzero.watches.settings.trigger.helpTextReadOnly4h',
+  {
+    defaultMessage:
+      'Hunt Watch runs every 4 hours on a fixed schedule. The interval cannot be changed.',
+  }
 );
 
 export const TRIGGER_LABEL = i18n.translate('xpack.alertzero.watches.settings.trigger.label', {
