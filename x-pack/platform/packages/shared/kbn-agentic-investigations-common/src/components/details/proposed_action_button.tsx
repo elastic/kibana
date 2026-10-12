@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiToolTip, euiTextTruncate, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import {
   ApprovalModal,
@@ -117,87 +117,136 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
       getEmptyValue()
     );
 
+    // Same truncation-with-tooltip pattern as `GroupedAttachmentRow`: the full title is only
+    // worth a tooltip once the row is actually too narrow to show it.
+    const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
+    const { width: titleWidth } = useResizeObserver(titleElement, 'width');
+    const [isTitleTruncated, setIsTitleTruncated] = useState(false);
+
+    useEffect(() => {
+      setIsTitleTruncated(
+        titleElement ? titleElement.scrollWidth > titleElement.clientWidth : false
+      );
+    }, [titleElement, titleWidth, proposal.title]);
+
     const { euiTheme } = useEuiTheme();
     const borderStyle = `1px solid ${euiTheme.colors.backgroundLightText}`;
+
+    // A native button styled like a "What's happened" row (`GroupedAttachmentRow`), rather than a
+    // clickable `EuiPanel` — that lifts and casts a shadow on hover, which sits oddly next to the
+    // flat background tint the rows above it use.
+    const rowStyles = css`
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      column-gap: ${euiTheme.size.s};
+      align-items: center;
+      box-sizing: border-box;
+      inline-size: 100%;
+      padding: ${euiTheme.size.base};
+      border: 0;
+      border-radius: 0;
+      background: ${euiTheme.colors.emptyShade};
+      color: inherit;
+      font: inherit;
+      text-align: start;
+      cursor: ${isInteractive ? 'pointer' : 'default'};
+      transition: background 0.15s ease;
+
+      &:first-child {
+        border: ${borderStyle};
+        border-radius: ${euiTheme.size.m} ${euiTheme.size.m} 0 0;
+      }
+
+      &:not(:first-child):not(:last-child) {
+        border-left: ${borderStyle};
+        border-right: ${borderStyle};
+        border-bottom: ${borderStyle};
+      }
+
+      &:last-child {
+        border: ${borderStyle};
+        border-top: 0;
+        border-radius: 0 0 ${euiTheme.size.m} ${euiTheme.size.m};
+      }
+
+      /* Must come after first/last so a lone item gets a full border and radius */
+      &:only-child {
+        border: ${borderStyle};
+        border-radius: ${euiTheme.size.m};
+      }
+
+      ${isInteractive
+        ? `
+      &:hover,
+      &:focus-visible {
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      }
+      `
+        : ''}
+
+      &:focus-visible {
+        outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+        outline-offset: -${euiTheme.focus.width};
+      }
+    `;
+
+    const textStyles = css`
+      display: flex;
+      flex-direction: column;
+      gap: ${euiTheme.size.xs};
+      min-inline-size: 0;
+    `;
+
+    const titleStyles = css`
+      display: block;
+      ${euiTextTruncate()}
+    `;
+
+    const titleNode = (
+      <span ref={setTitleElement} css={titleStyles}>
+        <EuiText size="s" component="span">
+          <strong>{proposal.title}</strong>
+        </EuiText>
+      </span>
+    );
+
     return (
       <>
-        <EuiPanel
-          hasBorder={false}
-          hasShadow={false}
-          paddingSize="m"
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel({
             title: proposal.title,
             status: badge.label,
           })}
           data-test-subj={dataTestSubj}
-          css={css({
-            borderRadius: 0,
-            '&:first-child': {
-              borderRadius: `${euiTheme.size.m} ${euiTheme.size.m} 0 0`,
-              border: borderStyle,
-            },
-            '&:not(:first-child):not(:last-child)': {
-              borderLeft: borderStyle,
-              borderRight: borderStyle,
-              borderBottom: borderStyle,
-            },
-            '&:last-child': {
-              border: borderStyle,
-              borderTop: 'none',
-              borderRadius: `0 0 ${euiTheme.size.m} ${euiTheme.size.m}`,
-            },
-            // Must come after first/last so a lone item gets a full border and radius
-            '&:only-child': {
-              border: borderStyle,
-              borderRadius: euiTheme.size.m,
-            },
-            cursor: isInteractive ? 'pointer' : 'default',
-            ...(isInteractive
-              ? { '&:hover': { backgroundColor: euiTheme.colors.backgroundBaseSubdued } }
-              : {}),
-          })}
+          css={rowStyles}
           onClick={openModal}
-          onKeyDown={(event: React.KeyboardEvent) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              openModal();
-            }
-          }}
         >
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFlexGroup
-                alignItems="center"
-                justifyContent="spaceBetween"
-                gutterSize="s"
-                responsive={false}
+          <span css={textStyles}>
+            {isTitleTruncated ? (
+              <EuiToolTip
+                content={proposal.title}
+                position="top"
+                anchorProps={{ css: css({ display: 'block', minInlineSize: 0 }) }}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s">
-                    <strong>{proposal.title}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ProposedActionStatusBadge
-                    color={badge.color}
-                    iconType={badge.iconType}
-                    label={badge.label}
-                    isLoading={badge.isLoading}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            {caption && (
-              <EuiFlexItem>
-                <EuiText size="xs" color="subdued">
-                  {caption}
-                </EuiText>
-              </EuiFlexItem>
+                {titleNode}
+              </EuiToolTip>
+            ) : (
+              titleNode
             )}
-          </EuiFlexGroup>
-        </EuiPanel>
+            {caption && (
+              <EuiText size="xs" color="subdued" component="span">
+                {caption}
+              </EuiText>
+            )}
+          </span>
+          <ProposedActionStatusBadge
+            color={badge.color}
+            iconType={badge.iconType}
+            label={badge.label}
+            isLoading={badge.isLoading}
+          />
+        </button>
 
         {isModalOpen && (
           <ApprovalModal
