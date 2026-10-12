@@ -193,4 +193,47 @@ test.describe('Flyout System - push flyouts', { tag: ['@local-stateful-classic']
         .toBeGreaterThan(viewportWidth * 0.6);
     });
   });
+
+  /**
+   * https://github.com/elastic/eui/issues/9969, fixed by https://github.com/elastic/eui/pull/10199
+   *
+   * A resizable flyout opened at a remembered pixel width scaled with the container like a
+   * percentage, and reported every clamp through `onResize`, so a narrow window overwrote the
+   * remembered width and the flyout never grew back.
+   */
+  test('elastic/eui#9969: a system push flyout opened at a remembered width keeps it across window resizes', async ({
+    page,
+    pageObjects,
+  }) => {
+    const app = pageObjects.flyoutSystem;
+    const viewport = page.viewportSize()!;
+    let storedWidth = 0;
+
+    await test.step('resize System push C and reopen it at the remembered width', async () => {
+      await app.openPushFlyout('System push C');
+      await app.dragPushFlyoutEdgeTo('System push C', viewport.width * 0.3);
+      await expect(app.pushStoredWidth()).not.toHaveText(NONE);
+      storedWidth = parseInt(await app.pushStoredWidth().innerText(), 10);
+
+      await app.closePushFlyout('System push C');
+      await app.openPushFlyout('System push C');
+      await expect.poll(() => app.pushFlyoutWidth('System push C')).toBeCloseTo(storedWidth, -1);
+    });
+
+    // Narrow enough that 90% of the window is about 5% less than the remembered width.
+    await test.step('a narrow window clamps the flyout but keeps the remembered width', async () => {
+      await page.setViewportSize({
+        width: Math.round((storedWidth / 0.9) * 0.95),
+        height: viewport.height,
+      });
+      await expect.poll(() => app.pushFlyoutWidth('System push C')).toBeLessThan(storedWidth - 10);
+      await expect(app.pushStoredWidth()).toHaveText(`${storedWidth}px`);
+    });
+
+    await test.step('restoring the window brings the flyout back to the remembered width', async () => {
+      await page.setViewportSize(viewport);
+      await expect.poll(() => app.pushFlyoutWidth('System push C')).toBeCloseTo(storedWidth, -1);
+      await expect(app.pushStoredWidth()).toHaveText(`${storedWidth}px`);
+    });
+  });
 });
