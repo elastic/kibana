@@ -20,7 +20,7 @@ import type {
   BoostProfileType,
   BoostRule,
 } from '../../../common/types';
-import { PROFILE_TYPE_LABELS, formatBoost } from '../format';
+import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount } from '../format';
 import { DeleteProfileModal } from './delete_profile_modal';
 import { ProfileFlyout } from './profile_flyout';
 
@@ -166,20 +166,21 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       render: (type: BoostProfile['type']) => PROFILE_TYPE_LABELS[type],
     },
     {
-      field: 'dataSourceCount',
-      name: i18n.translate('xpack.boost.profilesTab.dataSourcesColumn', {
-        defaultMessage: 'Data sources',
-      }),
-      width: '12%',
-      sortable: true,
-      dataType: 'number',
-    },
-    {
       field: 'ruleCount',
       name: i18n.translate('xpack.boost.profilesTab.rulesColumn', { defaultMessage: 'Rules' }),
       width: '12%',
       sortable: true,
       dataType: 'number',
+    },
+    {
+      // Spelled out ("3 indices") so the count reads on its own; it still sorts numerically.
+      field: 'dataSourceCount',
+      name: i18n.translate('xpack.boost.profilesTab.appliesToColumn', {
+        defaultMessage: 'Applies to',
+      }),
+      width: '12%',
+      sortable: true,
+      render: (count: number, { type }: ProfileRow) => formatDataSourceCount(type, count),
     },
     {
       field: 'minBoost',
