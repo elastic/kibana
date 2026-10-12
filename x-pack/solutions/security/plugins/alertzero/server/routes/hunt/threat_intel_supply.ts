@@ -149,7 +149,7 @@ export const registerHuntThreatIntelSupplyRoutes = ({
                   'xpack.alertzero.huntThreatIntelSupplyRestoreReportsIndexUnmanagedErrorMessage',
                   {
                     defaultMessage:
-                      'The threat reports index exists without its template. Delete the index and restart Kibana to recreate it, then try again.',
+                      'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it, then try again.',
                   }
                 )
               : i18n.translate('xpack.alertzero.huntThreatIntelSupplyRestoreHardGateErrorMessage', {

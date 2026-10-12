@@ -51,7 +51,7 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
   huntSupplyReportsIndexUnmanaged: () =>
     i18n.translate('xpack.alertzero.huntSupplyReportsIndexUnmanagedErrorMessage', {
       defaultMessage:
-        'The threat reports index exists without its template. Delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
+        'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
     }),
   huntSupplyNotInstalled: () =>
     i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
