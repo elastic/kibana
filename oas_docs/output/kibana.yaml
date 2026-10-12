@@ -185171,7 +185171,7 @@ components:
       type: object
       properties:
         fill:
-          default: gradient
+          default: solid
           description: 'Area fill type: solid or gradient.'
           enum:
             - solid
