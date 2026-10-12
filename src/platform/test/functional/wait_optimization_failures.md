@@ -90,6 +90,12 @@ These observations are local recording checks, not CI failures or evidence of av
 - **Capture failure is unobserved time.** Errors, stalls, and long sampling gaps are excluded from unchanged-screen totals. A failed full group1 run with a timed-out chart-types setup and a subsequently closed browser produced partial diagnostic artifacts; it is excluded from baselines. The next full run passed all 41 tests, but still had 31.7 seconds of unobserved capture gaps in 196.6 seconds, so its 79.6 seconds of detected unchanged screen is an observed lower bound. A viewport-view capture experiment produced blank headless frames and was reverted after image inspection.
 - **Failed initialization must still close the browser.** Chrome capture-connection failures and unsupported Firefox recording have cleanup regressions. Wait artifacts are written even if video finalization fails.
 
+## Passing integration test with stale generated schema artifacts
+
+[Build 520897, Checks](https://buildkite.com/elastic/kibana-pull-request/builds/520897#01a13246-0f90-4b76-bfd1-a413a45e7eff) passed the workflow schema integration test but failed its clean-tree check: generation changed `generated/index.json`, `generated/strict/schema.json`, and `generated/template/schema.json` in `kbn-workflow-step-schema-cli`. CI auto-committed the three artifacts as `ad66f6ab4a15`. Local generation matched that commit byte-for-byte, and repeating the exact integration command after incorporating it passed with no tracked changes. This evidence establishes stale committed artifacts; it does not establish a nondeterministic generator defect.
+
+Run `node scripts/jest_integration --config src/platform/packages/private/kbn-workflow-step-schema-cli/integration_tests/jest.integration.config.js` when this check reports drift. Review and commit the generated schemas together with their manifest hashes, then repeat the command and check `git status --short`. A passing test alone does not satisfy a check that also requires a clean working tree.
+
 ## Checks to run before submitting another optimization
 
 1. Audit every caller of a changed shared helper, including negative actions, repeated calls to open/ensure helpers, inline editors, remote/CCS paths, accessibility tests, and applications with fixed chrome. Preserve existing timeout and matching contracts unless a caller migration is intentional.
