@@ -7,8 +7,8 @@
 ## Canonical usage
 
 1. **Navigation that should look like a button.** Put `href` (and `target`, if any) directly on the `EuiButton` / `EuiButtonEmpty` and drop the inner `EuiLink`. EUI renders a single `<a>` and adds a secure `rel` for `target="_blank"`.
-2. **External destination / new tab.** Signal it with `iconType="external"` and `iconSide="right"`, the Kibana convention for external-link buttons (do not use `popout`). The button does **not** add `EuiLink`'s screen-reader-only "opens in a new tab" text, so do not add `aria-label` to compensate (it would replace the visible label); if that announcement matters more than button styling, use a plain `EuiLink` instead.
-3. **Button-shaped action props.** `actionProps.primary` (rendered as `EuiButton`) and `actionProps.secondary` (rendered as `EuiButtonEmpty`) take the same button props, so apply the same pattern there; never pass an `EuiLink` as `children`.
+2. **External destination / new tab.** Buttons have no `external` prop like `EuiLink`, but they support icons like every other EUI button: add `iconType="external"` and `iconSide="right"` (the pattern the EUI team recommends, and the existing Kibana convention). The button does **not** add `EuiLink`'s screen-reader-only "opens in a new tab" text, so do not add `aria-label` to compensate (it would replace the visible label); if that announcement matters more than button styling, use a plain `EuiLink` instead.
+3. **Button-shaped action props.** `actionProps` is an object with `primary` (rendered as `EuiButton`) and `secondary` (rendered as `EuiButtonEmpty`) keys, each taking that button's props. `href` and `target` already pass through, so only the icon is missing: add `iconType: 'external'` and `iconSide: 'right'` to the action. Never pass an `EuiLink` as `children`.
 4. **Link that should look like a link.** Use `EuiLink` on its own, without a button wrapper. With `target="_blank"` it shows the external icon and announces the new tab by itself.
 
 ## Examples
@@ -26,6 +26,13 @@
     primary: {
       children: 'Some link',
       href: '/',
+      iconType: 'external',
+      iconSide: 'right',
+    },
+    secondary: {
+      children: learnMoreLabel,
+      href: docsUrl,
+      target: '_blank',
       iconType: 'external',
       iconSide: 'right',
     },
@@ -53,7 +60,4 @@
   title={title}
   actionProps={{ primary: { children: <EuiLink href={docsUrl}>{label}</EuiLink> } }}
 />;
-
-// WRONG — onClick + window.open instead of href: no link semantics, no middle-click / copy link
-<EuiButton onClick={() => window.open(docsUrl, '_blank')}>{learnMoreLabel}</EuiButton>;
 ```
