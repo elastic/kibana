@@ -146,3 +146,48 @@ for (const [name, tester] of [tsTester, babelTester]) {
     });
   });
 }
+
+const [tsParserName, tsRuleTester] = tsTester;
+
+// Oxlint doesn't run `react/jsx-uses-react` next to this rule, so the rule marks the JSX pragma
+// and `Fragment` as used itself. These cases use the tester configured with `ecmaFeatures.jsx`.
+describe(`${tsParserName} JSX`, () => {
+  tsRuleTester.run('@kbn/imports/no_unused_imports', rules.no_unused_imports, {
+    valid: [
+      {
+        filename: 'foo.tsx',
+        code: fmt`
+          /** @jsx jsx */
+          import { jsx } from '@emotion/react'
+          export const a = <div />
+        `,
+      },
+      {
+        filename: 'foo.tsx',
+        code: fmt`
+          import { Fragment } from 'react'
+          export const a = <></>
+        `,
+      },
+    ],
+
+    invalid: [
+      {
+        filename: 'foo.tsx',
+        code: fmt`
+          import { unused } from 'x'
+          export const a = <div />
+        `,
+        errors: [
+          {
+            line: 1,
+            message: 'All imports from "x" are unused and should be removed',
+          },
+        ],
+        output: fmt`
+          export const a = <div />
+        `,
+      },
+    ],
+  });
+});

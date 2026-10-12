@@ -9,12 +9,9 @@
 
 import { dirname } from 'path';
 import type { CreateOnceRule } from '@oxlint/plugins';
-import type { ImportResolver } from '@kbn/import-resolver';
-import type { ModuleId, RepoSourceClassifier } from '@kbn/repo-source-classifier';
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 import { formatSuggestions } from '../helpers/report';
@@ -30,22 +27,15 @@ export const NoGroupCrossingImportsRule: CreateOnceRule = {
     },
   },
   createOnce(context) {
-    let resolver: ImportResolver;
-    let classifier: RepoSourceClassifier;
-    let ownDirname: string;
-    let self: ModuleId;
-    let relativePath: string;
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const classifier = getRepoSourceClassifier(resolver);
+      const sourcePath = context.physicalFilename;
+      const ownDirname = dirname(sourcePath);
+      const self = classifier.classify(sourcePath);
+      const relativePath = sourcePath.replace(REPO_ROOT, '').replace(/^\//, '');
 
-    return {
-      before() {
-        resolver = getImportResolver(context);
-        classifier = getRepoSourceClassifier(resolver);
-        const sourcePath = getSourcePath(context);
-        ownDirname = dirname(sourcePath);
-        self = classifier.classify(sourcePath);
-        relativePath = sourcePath.replace(REPO_ROOT, '').replace(/^\//, '');
-      },
-      ...visitAllImportStatements((req, { node }) => {
+      return (req, { node }) => {
         if (
           req === null ||
           // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
@@ -81,7 +71,7 @@ export const NoGroupCrossingImportsRule: CreateOnceRule = {
           });
           return;
         }
-      }),
-    };
+      };
+    });
   },
 };

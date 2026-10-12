@@ -10,12 +10,10 @@
 import Path from 'path';
 
 import type { CreateOnceRule } from '@oxlint/plugins';
-import type { ImportResolver } from '@kbn/import-resolver';
 import { getRelativeImportReq, getPackageRelativeImportReq } from '@kbn/import-resolver';
 
 import { report } from '../helpers/report';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 
 export const UniformImportsRule: CreateOnceRule = {
@@ -38,24 +36,15 @@ export const UniformImportsRule: CreateOnceRule = {
   },
 
   createOnce(context) {
-    let preserveFileExtensions: boolean;
-    let resolver: ImportResolver;
-    let sourcePath: string;
-    let sourceDirname: string;
-    let ownPackageId: string | null;
+    return visitAllImportStatements(() => {
+      const [options] = context.options as Array<{ preserveFileExtensions?: boolean } | undefined>;
+      const preserveFileExtensions = options?.preserveFileExtensions === true;
+      const resolver = getImportResolver(context);
+      const sourcePath = context.physicalFilename;
+      const sourceDirname = Path.dirname(sourcePath);
+      const ownPackageId = resolver.getPackageIdForPath(sourcePath);
 
-    return {
-      before() {
-        const [options] = context.options as Array<
-          { preserveFileExtensions?: boolean } | undefined
-        >;
-        preserveFileExtensions = options?.preserveFileExtensions === true;
-        resolver = getImportResolver(context);
-        sourcePath = getSourcePath(context);
-        sourceDirname = Path.dirname(sourcePath);
-        ownPackageId = resolver.getPackageIdForPath(sourcePath);
-      },
-      ...visitAllImportStatements((req, { node, type }) => {
+      return (req, { node, type }) => {
         if (!req) {
           return;
         }
@@ -111,7 +100,7 @@ export const UniformImportsRule: CreateOnceRule = {
           });
           return;
         }
-      }),
-    };
+      };
+    });
   },
 };

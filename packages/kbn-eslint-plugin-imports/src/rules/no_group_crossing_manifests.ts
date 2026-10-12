@@ -8,47 +8,35 @@
  */
 
 import { join } from 'path';
-import type { Context, CreateOnceRule } from '@oxlint/plugins';
+import type { Context, CreateOnceRule, DiagnosticData } from '@oxlint/plugins';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { SomeNode } from '../helpers/ast';
-import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { isImportableFrom } from '../helpers/groups';
 import { formatSuggestions } from '../helpers/report';
 
-interface PluginInfo {
-  id: string;
-  pluginId: string;
-  group: ModuleGroup;
-  visibility: ModuleVisibility;
-}
-
-interface ManifestViolation {
-  currentPlugin: PluginInfo;
-  offendingDependencies: PluginInfo[];
-  manifestPath: string;
-}
-
 /**
- * Find the plugins that the manifest of the plugin owning the linted file depends on across
- * group boundaries. Returns `null` when the file isn't part of a plugin or there are none.
+ * Build the report data for the plugins that the manifest of the plugin owning the linted file
+ * depends on across group boundaries. Returns `null` when the file isn't part of a plugin or there
+ * are none.
  */
-function findManifestViolation(context: Context): ManifestViolation | null {
-  const sourcePath = getSourcePath(context);
+function getManifestViolationData(context: Context): DiagnosticData | null {
   const resolver = getImportResolver(context);
   const classifier = getRepoSourceClassifier(resolver);
-  const moduleId = classifier.classify(sourcePath);
+  const moduleId = classifier.classify(context.physicalFilename);
 
   if (moduleId.manifest?.type !== 'plugin') {
     return null;
   }
 
+  const manifestPath = join(moduleId.pkgInfo!.pkgDir, 'kibana.jsonc')
+    .replace(REPO_ROOT, '')
+    .replace(/^\//, '');
   const allPlugins = getPackages(REPO_ROOT).filter(getPluginPackagesFilter());
   const currentPluginInfo = moduleId.manifest.plugin;
-  const offendingDependencies: PluginInfo[] = [];
+  const violations: string[] = [];
   // check all the dependencies in the manifest, looking for plugin violations
   [
     ...(currentPluginInfo.requiredPlugins ?? []),
@@ -61,26 +49,28 @@ function findManifestViolation(context: Context): ManifestViolation | null {
       // at this point, we know the dependency is a plugin
       const { id, group, visibility } = dependency;
       if (!isImportableFrom(moduleId, group, visibility)) {
-        offendingDependencies.push({ id, pluginId, group, visibility });
+        violations.push(
+          `⚠ Illegal dependency on manifest: Plugin "${currentPluginInfo.id}" (package: "${
+            moduleId.pkgInfo!.pkgId
+          }"; group: "${
+            moduleId.group
+          }") depends on "${pluginId}" (package: "${id}"; group: ${group}/${visibility}). File: ${manifestPath}`
+        );
       }
     }
   });
 
-  if (!offendingDependencies.length) {
+  if (!violations.length) {
     return null;
   }
 
   return {
-    currentPlugin: {
-      id: moduleId.pkgInfo!.pkgId,
-      pluginId: currentPluginInfo.id,
-      group: moduleId.group,
-      visibility: moduleId.visibility,
-    },
-    offendingDependencies,
-    manifestPath: join(moduleId.pkgInfo!.pkgDir, 'kibana.jsonc')
-      .replace(REPO_ROOT, '')
-      .replace(/^\//, ''),
+    violations: violations.join('\n'),
+    suggestion: formatSuggestions([
+      `Please review the dependencies in your plugin's manifest (kibana.jsonc).`,
+      `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
+      `Address the conflicting dependencies by refactoring the code`,
+    ]),
   };
 }
 
@@ -95,20 +85,24 @@ export const NoGroupCrossingManifestsRule: CreateOnceRule = {
   },
   createOnce(context) {
     // `undefined` until the file declares a plugin entry point, then the manifest check result
-    let violation: ManifestViolation | null | undefined;
+    let violationData: DiagnosticData | null | undefined;
 
     const reportManifestViolation = (node: SomeNode) => {
-      if (violation === undefined) {
-        violation = findManifestViolation(context);
+      if (violationData === undefined) {
+        violationData = getManifestViolationData(context);
       }
-      if (violation) {
-        reportViolation({ context, node, ...violation });
+      if (violationData) {
+        context.report({
+          node,
+          messageId: 'ILLEGAL_MANIFEST_DEPENDENCY',
+          data: violationData,
+        });
       }
     };
 
     return {
       before() {
-        violation = undefined;
+        violationData = undefined;
       },
       FunctionDeclaration(node) {
         // complain in exported plugin() function
@@ -136,33 +130,3 @@ export const NoGroupCrossingManifestsRule: CreateOnceRule = {
     };
   },
 };
-
-interface ReportViolationParams extends ManifestViolation {
-  context: Context;
-  node: SomeNode;
-}
-
-const reportViolation = ({
-  context,
-  node,
-  currentPlugin,
-  offendingDependencies,
-  manifestPath,
-}: ReportViolationParams) =>
-  context.report({
-    node,
-    messageId: 'ILLEGAL_MANIFEST_DEPENDENCY',
-    data: {
-      violations: [
-        ...offendingDependencies.map(
-          ({ id, pluginId, group, visibility }) =>
-            `⚠ Illegal dependency on manifest: Plugin "${currentPlugin.pluginId}" (package: "${currentPlugin.id}"; group: "${currentPlugin.group}") depends on "${pluginId}" (package: "${id}"; group: ${group}/${visibility}). File: ${manifestPath}`
-        ),
-      ].join('\n'),
-      suggestion: formatSuggestions([
-        `Please review the dependencies in your plugin's manifest (kibana.jsonc).`,
-        `Relocate this module to a different group, and/or make sure it has the right 'visibility'.`,
-        `Address the conflicting dependencies by refactoring the code`,
-      ]),
-    },
-  });

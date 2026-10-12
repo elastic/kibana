@@ -26,29 +26,31 @@ export const NoDirectHandlebarsImportRule: CreateOnceRule = {
   },
 
   createOnce(context) {
-    return visitAllImportStatements((req, { node }) => {
-      if (!req) {
-        return;
-      }
-
+    return visitAllImportStatements(() => {
       // Skip the rule for files within the kbn-handlebars package itself
       const { filename } = context;
       if (filename.includes('/kbn-handlebars/') || filename.includes('\\kbn-handlebars\\')) {
-        return;
+        return false;
       }
 
-      // Check for direct imports from 'handlebars' package
-      if (req === 'handlebars' || req.startsWith('handlebars/')) {
-        // Replace 'handlebars' with '@kbn/handlebars' in the import request
-        const correctImport = req.replace(/^handlebars/, '@kbn/handlebars');
+      return (req, { node }) => {
+        if (!req) {
+          return;
+        }
 
-        report(context, {
-          node,
-          message:
-            'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
-          correctImport,
-        });
-      }
+        // Check for direct imports from 'handlebars' package
+        if (req === 'handlebars' || req.startsWith('handlebars/')) {
+          // Replace 'handlebars' with '@kbn/handlebars' in the import request
+          const correctImport = req.replace(/^handlebars/, '@kbn/handlebars');
+
+          report(context, {
+            node,
+            message:
+              'Do not import directly from "handlebars". Use the custom Handlebars from "@kbn/handlebars" instead.',
+            correctImport,
+          });
+        }
+      };
     });
   },
 };

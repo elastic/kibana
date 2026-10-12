@@ -22,52 +22,23 @@ export type Importer =
   | ESTree.CallExpression
   | ESTree.ImportExpression;
 
-type MaybeNode = SomeNode | null | undefined;
-type NodeOfType<Type extends SomeNode['type']> = Extract<SomeNode, { type: Type }>;
-
-export const isIdentifier = (node: MaybeNode): node is NodeOfType<'Identifier'> =>
-  node?.type === 'Identifier';
-
-export const isStringLiteral = (node: MaybeNode): node is ESTree.StringLiteral =>
-  node?.type === 'Literal' && typeof node.value === 'string';
-
-export const isTemplateLiteral = (node: MaybeNode): node is ESTree.TemplateLiteral =>
-  node?.type === 'TemplateLiteral';
-
-export const isCallExpression = (node: MaybeNode): node is ESTree.CallExpression =>
-  node?.type === 'CallExpression';
-
-export const isVariableDeclaration = (node: MaybeNode): node is ESTree.VariableDeclaration =>
-  node?.type === 'VariableDeclaration';
-
-export const isObjectPattern = (node: MaybeNode): node is ESTree.ObjectPattern =>
-  node?.type === 'ObjectPattern';
-
-export const isImportDeclaration = (node: MaybeNode): node is ESTree.ImportDeclaration =>
-  node?.type === 'ImportDeclaration';
-
-export const isExportNamedDeclaration = (node: MaybeNode): node is ESTree.ExportNamedDeclaration =>
-  node?.type === 'ExportNamedDeclaration';
-
-export const isImportSpecifier = (node: MaybeNode): node is ESTree.ImportSpecifier =>
-  node?.type === 'ImportSpecifier';
-
-export const isExportSpecifier = (node: MaybeNode): node is ESTree.ExportSpecifier =>
-  node?.type === 'ExportSpecifier';
+/** `Literal` covers every literal value, so the `type` check alone doesn't narrow to a string */
+export const isStringLiteral = (node: SomeNode): node is ESTree.StringLiteral =>
+  node.type === 'Literal' && typeof node.value === 'string';
 
 /** Type-only imports/exports are erased before anything runs, so runtime rules skip them */
 export const isTypeOnlyImport = (importer: Importer): boolean => {
-  if (isImportDeclaration(importer)) {
+  if (importer.type === 'ImportDeclaration') {
     return (
       importer.importKind === 'type' ||
-      importer.specifiers.some((s) => isImportSpecifier(s) && s.importKind === 'type')
+      importer.specifiers.some((s) => s.type === 'ImportSpecifier' && s.importKind === 'type')
     );
   }
 
-  if (isExportNamedDeclaration(importer)) {
+  if (importer.type === 'ExportNamedDeclaration') {
     return (
       importer.exportKind === 'type' ||
-      importer.specifiers.some((s) => isExportSpecifier(s) && s.exportKind === 'type')
+      importer.specifiers.some((s) => s.type === 'ExportSpecifier' && s.exportKind === 'type')
     );
   }
 

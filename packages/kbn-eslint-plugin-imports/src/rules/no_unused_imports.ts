@@ -14,7 +14,6 @@ import type {
   ESTree,
   Fix,
   Fixer,
-  Location,
   Range,
   Scope,
   SourceCode,
@@ -22,22 +21,10 @@ import type {
 } from '@oxlint/plugins';
 
 import type { SomeNode } from '../helpers/ast';
-import { isImportDeclaration } from '../helpers/ast';
 import { RUNNING_IN_EDITOR } from '../helpers/running_in_editor';
 
 /** Matches the JSX pragma comment that `react/jsx-uses-react` reads: an `@jsx` tag and a name */
 const JSX_PRAGMA_COMMENT = /@jsx\s+([^\s]+)/;
-
-function findImportParent(def: Definition): ESTree.ImportDeclaration | undefined {
-  let cursor: SomeNode | null = def.node;
-  while (cursor) {
-    if (isImportDeclaration(cursor)) {
-      return cursor;
-    }
-    cursor = cursor.parent;
-  }
-  return;
-}
 
 function isEslintUsed(variable: Variable & { eslintUsed?: boolean }) {
   return !!variable.eslintUsed;
@@ -61,11 +48,10 @@ function findUnusedImportDefs(globalScope: Scope) {
       }
 
       for (const def of variable.defs) {
-        const importParent = findImportParent(def);
-        if (importParent) {
+        if (def.parent?.type === 'ImportDeclaration') {
           unused.push({
             def,
-            importParent,
+            importParent: def.parent,
           });
         }
       }
@@ -95,17 +81,6 @@ export const NoUnusedImportsRule: CreateOnceRule = {
   createOnce(context) {
     let source: SourceCode;
     let jsxPragma: string | undefined;
-    let hasImportSpecifiers: boolean;
-
-    function getRange(nodeA: { loc: Location }, nodeB: { loc: Location } | number = nodeA): Range {
-      const nodeBLoc = typeof nodeB === 'number' ? nodeB : nodeB.loc;
-      return [
-        source.getIndexFromLoc(nodeA.loc.start),
-        typeof nodeBLoc === 'number'
-          ? source.getIndexFromLoc(nodeA.loc.end) + nodeBLoc
-          : source.getIndexFromLoc(nodeBLoc.end),
-      ];
-    }
 
     function report(node: SomeNode, msg: string, fix: (fixer: Fixer) => IterableIterator<Fix>) {
       context.report({
@@ -144,10 +119,6 @@ export const NoUnusedImportsRule: CreateOnceRule = {
       before() {
         source = context.sourceCode;
         jsxPragma = undefined;
-        hasImportSpecifiers = false;
-      },
-      ImportDeclaration(node) {
-        hasImportSpecifiers ||= node.specifiers.length > 0;
       },
       JSXOpeningElement: markJsxPragmaAsUsed,
       JSXOpeningFragment: markJsxPragmaAsUsed,
@@ -156,6 +127,9 @@ export const NoUnusedImportsRule: CreateOnceRule = {
       },
       'Program:exit': (node) => {
         // only import specifiers can be unused imports, so skip the costly scope analysis without them
+        const hasImportSpecifiers = node.body.some(
+          (statement) => statement.type === 'ImportDeclaration' && statement.specifiers.length > 0
+        );
         if (!hasImportSpecifiers) {
           return;
         }
@@ -177,16 +151,15 @@ export const NoUnusedImportsRule: CreateOnceRule = {
               `All imports from "${importParent.source.value}" are unused and should be removed`,
               function* (fixer) {
                 // remove entire import including trailing newline if it's detected
+                const [start, end] = importParent.range;
                 const textPlus1 = source.getText(importParent, 0, 1);
-                const range = getRange(importParent, textPlus1.endsWith('\n') ? 1 : importParent);
+                const range: Range = [start, textPlus1.endsWith('\n') ? end + 1 : end];
 
                 // if the import is preceeded by one or more eslint/tslint disable comments then remove them
                 for (const comment of source.getCommentsBefore(importParent)) {
                   if (isTsOrEslintIgnore(comment)) {
-                    const cRange = getRange(comment);
-                    yield fixer.removeRange(
-                      source.text[cRange[1]] !== '\n' ? cRange : getRange(comment, 1)
-                    );
+                    const [cStart, cEnd] = comment.range;
+                    yield fixer.removeRange([cStart, source.text[cEnd] === '\n' ? cEnd + 1 : cEnd]);
                   }
                 }
 
@@ -200,9 +173,8 @@ export const NoUnusedImportsRule: CreateOnceRule = {
                 `${def.name.name} is unused and should be removed`,
                 function* (fixer) {
                   const nextToken = source.getTokenAfter(def.node);
-                  yield fixer.removeRange(
-                    getRange(def.node, nextToken?.value === ',' ? nextToken : undefined)
-                  );
+                  const end = nextToken?.value === ',' ? nextToken.range[1] : def.node.range[1];
+                  yield fixer.removeRange([def.node.range[0], end]);
                 }
               );
             }

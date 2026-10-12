@@ -53,7 +53,7 @@ import { produce } from 'immer-v9';
 
 The custom rule `@kbn/imports/no_redux_toolkit_v2_imports` flags any import of v2 default packages and auto-fixes them to v1 aliases. It runs in Oxlint and is enabled per-path in `.oxlint/imports.mts` for all plugins and packages that currently use RTK v1.
 
-When your plugin migrates to v2, remove its entry from the override list in `.oxlint/imports.mts` to lift the restriction for that code path.
+When your plugin migrates to v2, remove its directory from the `REDUX_TOOLKIT_V1_DIRS` list in `.oxlint/imports.mts` to lift the restriction for that code path.
 
 ## Migrating your plugin
 

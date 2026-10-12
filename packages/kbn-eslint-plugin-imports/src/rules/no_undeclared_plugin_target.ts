@@ -8,13 +8,10 @@
  */
 
 import type { CreateOnceRule } from '@oxlint/plugins';
-import type { ImportResolver } from '@kbn/import-resolver';
-import type { ModuleId } from '@kbn/repo-source-classifier';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 
 import { isTypeOnlyImport } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 
@@ -72,28 +69,24 @@ export const NoUndeclaredPluginTargetRule: CreateOnceRule = {
     },
   },
   createOnce(context) {
-    let resolver: ImportResolver;
-    let self: ModuleId;
-    let ownPkgId: string | null;
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const classifier = getRepoSourceClassifier(resolver);
+      const sourcePath = context.physicalFilename;
 
-    return {
-      before() {
-        resolver = getImportResolver(context);
-        const classifier = getRepoSourceClassifier(resolver);
-        const sourcePath = getSourcePath(context);
+      const self = classifier.classify(sourcePath);
 
-        self = classifier.classify(sourcePath);
-        ownPkgId = resolver.getPackageIdForPath(sourcePath);
-      },
-      ...visitAllImportStatements((req, { node, importer }) => {
+      // Guard 1: only validate browser and common code — these are the types that
+      // go through the browser bundler and are affected by __kbnBundles__ resolution.
+      // Server code, non-package code (CLI tools, build scripts), test fixtures, and
+      // tooling all resolve imports via Node.js module resolution and are never
+      // subject to target validation.
+      if (self.type !== 'browser package' && self.type !== 'common package') return false;
+
+      const ownPkgId = resolver.getPackageIdForPath(sourcePath);
+
+      return (req, { node, importer }) => {
         if (!req) return;
-
-        // Guard 1: only validate browser and common code — these are the types that
-        // go through the browser bundler and are affected by __kbnBundles__ resolution.
-        // Server code, non-package code (CLI tools, build scripts), test fixtures, and
-        // tooling all resolve imports via Node.js module resolution and are never
-        // subject to target validation.
-        if (self.type !== 'browser package' && self.type !== 'common package') return;
 
         // Guard 2: skip type-only imports (erased before bundling)
         if (isTypeOnlyImport(importer)) return;
@@ -138,7 +131,7 @@ export const NoUndeclaredPluginTargetRule: CreateOnceRule = {
             },
           });
         }
-      }),
-    };
+      };
+    });
   },
 };

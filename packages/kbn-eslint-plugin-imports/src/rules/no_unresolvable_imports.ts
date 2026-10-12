@@ -9,10 +9,8 @@
 
 import Path from 'path';
 import type { CreateOnceRule } from '@oxlint/plugins';
-import type { ImportResolver } from '@kbn/import-resolver';
 
 import { report } from '../helpers/report';
-import { getSourcePath } from '../helpers/source';
 import { getImportResolver } from '../get_import_resolver';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
@@ -23,22 +21,18 @@ export const NoUnresolvableImportsRule: CreateOnceRule = {
     },
   },
   createOnce(context) {
-    let resolver: ImportResolver;
-    let sourceDirname: string;
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const sourceDirname = Path.dirname(context.physicalFilename);
 
-    return {
-      before() {
-        resolver = getImportResolver(context);
-        sourceDirname = Path.dirname(getSourcePath(context));
-      },
-      ...visitAllImportStatements((req, { node }) => {
+      return (req, { node }) => {
         if (req !== null && !resolver.resolve(req, sourceDirname)) {
           report(context, {
             node,
             message: `Unable to resolve import [${req}]`,
           });
         }
-      }),
-    };
+      };
+    });
   },
 };

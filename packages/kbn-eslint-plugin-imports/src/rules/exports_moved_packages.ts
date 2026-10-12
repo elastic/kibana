@@ -7,19 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CreateOnceRule, ESTree, Range, SourceCode, Token } from '@oxlint/plugins';
+import type { CreateOnceRule, ESTree, Range, SourceCode } from '@oxlint/plugins';
 
 import type { Importer, SomeNode } from '../helpers/ast';
-import {
-  isCallExpression,
-  isExportNamedDeclaration,
-  isExportSpecifier,
-  isImportDeclaration,
-  isImportSpecifier,
-  isObjectPattern,
-  isStringLiteral,
-  isVariableDeclaration,
-} from '../helpers/ast';
+import { isStringLiteral } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 
 export interface MovedExportsRule {
@@ -42,10 +33,28 @@ interface BadImport extends Imported {
 
 function findDeclaration(node: SomeNode) {
   let cursor: SomeNode | null = node;
-  while (cursor && !isVariableDeclaration(cursor)) {
+  while (cursor && cursor.type !== 'VariableDeclaration') {
     cursor = cursor.parent;
   }
   return cursor;
+}
+
+// get the range for the entire "import", expanding require()/import() to their
+// entire variable declaration and including the trailing newline if we can
+// identify it
+function getRangeWithNewline(
+  source: SourceCode,
+  importer: Importer | ESTree.VariableDeclaration
+): Range {
+  if (importer.type === 'CallExpression' || importer.type === 'ImportExpression') {
+    const declaration = findDeclaration(importer);
+    if (declaration) {
+      return getRangeWithNewline(source, declaration);
+    }
+  }
+
+  const [start, end] = importer.range;
+  return source.getText(importer, 0, 1).endsWith('\n') ? [start, end + 1] : [start, end];
 }
 
 function getBadImports(imported: Imported[], rules: MovedExportsRule[]): BadImport[] {
@@ -75,13 +84,13 @@ function inspectImports(
   rules: MovedExportsRule[]
 ): undefined | { importCount: number; allBadImports: BadImport[] } {
   // get import names from require() and await import() calls
-  if (isCallExpression(importer) || importer.type === 'ImportExpression') {
+  if (importer.type === 'CallExpression' || importer.type === 'ImportExpression') {
     const declaration = findDeclaration(importer);
     if (!declaration || !declaration.declarations[0]) {
       return;
     }
     const declarator = declaration.declarations[0];
-    if (!isObjectPattern(declarator.id)) {
+    if (declarator.id.type !== 'ObjectPattern') {
       return;
     }
 
@@ -110,21 +119,20 @@ function inspectImports(
   }
 
   // get import names from import {} and export {} from
-  if (isImportDeclaration(importer) || isExportNamedDeclaration(importer)) {
-    const type = isExportNamedDeclaration(importer)
-      ? importer.exportKind === 'type'
-        ? 'export type'
-        : 'export'
-      : importer.importKind === 'type'
-      ? 'import type'
-      : 'import';
+  if (importer.type === 'ImportDeclaration' || importer.type === 'ExportNamedDeclaration') {
+    let type: Imported['type'];
+    if (importer.type === 'ExportNamedDeclaration') {
+      type = importer.exportKind === 'type' ? 'export type' : 'export';
+    } else {
+      type = importer.importKind === 'type' ? 'import type' : 'import';
+    }
 
     const specifiers: SomeNode[] = importer.specifiers;
     return {
       importCount: specifiers.length,
       allBadImports: getBadImports(
         specifiers.flatMap((specifier): Imported | never[] => {
-          if (isImportSpecifier(specifier)) {
+          if (specifier.type === 'ImportSpecifier') {
             const name = isStringLiteral(specifier.imported)
               ? specifier.imported.value
               : specifier.imported?.type === 'Identifier'
@@ -139,7 +147,7 @@ function inspectImports(
             };
           }
 
-          if (isExportSpecifier(specifier)) {
+          if (specifier.type === 'ExportSpecifier') {
             const name = isStringLiteral(specifier.exported)
               ? specifier.exported.value
               : specifier.exported?.type === 'Identifier'
@@ -193,36 +201,12 @@ export const ExportsMovedPackagesRule: CreateOnceRule = {
   },
 
   createOnce(context) {
-    let rules: MovedExportsRule[];
-    let source: SourceCode;
+    return visitAllImportStatements(() => {
+      // `meta.schema` validates the options, which Oxlint only types as JSON values
+      const [rules] = context.options as unknown as ReadonlyArray<MovedExportsRule[]>;
+      const source = context.sourceCode;
 
-    // get the range for the entire "import", expanding require()/import() to their
-    // entire variable declaration and including the trailing newline if we can
-    // idenitify it
-    function getRangeWithNewline(importer: Importer | ESTree.VariableDeclaration): Range {
-      if (isCallExpression(importer) || importer.type === 'ImportExpression') {
-        const declaration = findDeclaration(importer);
-        if (declaration) {
-          return getRangeWithNewline(declaration);
-        }
-      }
-
-      const text = source.getText(importer, 0, 1);
-      const range = getRange(importer);
-      return text.endsWith('\n') ? [range[0], range[1] + 1] : range;
-    }
-
-    function getRange(nodeA: SomeNode | Token, nodeB: SomeNode | Token = nodeA): Range {
-      return [source.getIndexFromLoc(nodeA.loc.start), source.getIndexFromLoc(nodeB.loc.end)];
-    }
-
-    return {
-      before() {
-        // `meta.schema` validates the options, which Oxlint only types as JSON values
-        [rules] = context.options as unknown as ReadonlyArray<MovedExportsRule[]>;
-        source = context.sourceCode;
-      },
-      ...visitAllImportStatements((req, { importer }) => {
+      return (req, { importer }) => {
         if (!req) {
           return;
         }
@@ -269,7 +253,7 @@ export const ExportsMovedPackagesRule: CreateOnceRule = {
             )
             .join('\n'),
           *fix(fixer) {
-            const importerRange = getRangeWithNewline(importer);
+            const importerRange = getRangeWithNewline(source, importer);
 
             // insert new require() calls
             for (const [type, badProps] of groupedBadImports) {
@@ -321,15 +305,15 @@ export const ExportsMovedPackagesRule: CreateOnceRule = {
               for (const bp of allBadImports) {
                 const nextToken = source.getTokenAfter(bp.node);
                 if (nextToken?.value === ',') {
-                  yield fixer.removeRange(getRange(bp.node, nextToken));
+                  yield fixer.removeRange([bp.node.range[0], nextToken.range[1]]);
                 } else {
-                  yield fixer.removeRange(getRange(bp.node));
+                  yield fixer.remove(bp.node);
                 }
               }
             }
           },
         });
-      }),
-    };
+      };
+    });
   },
 };

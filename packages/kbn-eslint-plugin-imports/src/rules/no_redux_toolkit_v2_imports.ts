@@ -43,12 +43,13 @@ export const NoReduxToolkitV2ImportsRule: CreateOnceRule = {
   },
 
   createOnce(context) {
-    return {
-      before() {
-        // Skip bundler infrastructure files that intentionally reference v2
-        return !INFRA_PATH_PATTERNS.some((pattern) => pattern.test(context.filename));
-      },
-      ...visitAllImportStatements((req, { node }) => {
+    return visitAllImportStatements(() => {
+      // Skip bundler infrastructure files that intentionally reference v2
+      if (INFRA_PATH_PATTERNS.some((pattern) => pattern.test(context.filename))) {
+        return false;
+      }
+
+      return (req, { node }) => {
         if (!req) {
           return;
         }
@@ -66,7 +67,7 @@ export const NoReduxToolkitV2ImportsRule: CreateOnceRule = {
             return;
           }
         }
-      }),
-    };
+      };
+    });
   },
 };

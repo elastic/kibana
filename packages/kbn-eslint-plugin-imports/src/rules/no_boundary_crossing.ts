@@ -10,12 +10,10 @@
 import Path from 'path';
 
 import type { CreateOnceRule } from '@oxlint/plugins';
-import type { ImportResolver } from '@kbn/import-resolver';
-import type { ModuleId, ModuleType, RepoSourceClassifier } from '@kbn/repo-source-classifier';
+import type { ModuleType } from '@kbn/repo-source-classifier';
 
 import { isTypeOnlyImport } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 import { formatSuggestions, toList } from '../helpers/report';
@@ -43,23 +41,20 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
     },
   },
   createOnce(context) {
-    let resolver: ImportResolver;
-    let classifier: RepoSourceClassifier;
-    let ownDirname: string;
-    let self: ModuleId;
-    let importable: ModuleType[] | typeof ANY;
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const classifier = getRepoSourceClassifier(resolver);
+      const sourcePath = context.physicalFilename;
+      const ownDirname = Path.dirname(sourcePath);
 
-    return {
-      before() {
-        resolver = getImportResolver(context);
-        classifier = getRepoSourceClassifier(resolver);
-        const sourcePath = getSourcePath(context);
-        ownDirname = Path.dirname(sourcePath);
+      const self = classifier.classify(sourcePath);
+      const importable = IMPORTABLE_FROM[self.type];
+      // nothing to check in files which can import from anywhere
+      if (importable === ANY) {
+        return false;
+      }
 
-        self = classifier.classify(sourcePath);
-        importable = IMPORTABLE_FROM[self.type];
-      },
-      ...visitAllImportStatements((req, { node, importer, type }) => {
+      return (req, { node, importer }) => {
         if (
           req === null ||
           // we can ignore imports using the ?raw (replacing legacy raw-loader), they will need to be resolved but can be managed on a case by case basis
@@ -76,10 +71,6 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
         }
 
         const imported = classifier.classify(result.absolute);
-
-        if (importable === ANY) {
-          return;
-        }
 
         if (!importable.includes(imported.type)) {
           context.report({
@@ -101,7 +92,7 @@ export const NoBoundaryCrossingRule: CreateOnceRule = {
           });
           return;
         }
-      }),
-    };
+      };
+    });
   },
 };

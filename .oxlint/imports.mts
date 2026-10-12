@@ -152,12 +152,55 @@ const importsRules: DummyRuleMap = {
   '@kbn/imports/no_undeclared_plugin_target': 'error',
 };
 
-const EVALS_SUITES_DIR = 'x-pack/solutions/security/packages';
+// ESLint ran these rules on the extensions it lints; keep them off `.cjs`, `.mts`, etc.
+const ESLINT_LINTED_FILES = '**/*.{js,mjs,ts,tsx}';
+
+const SECURITY_PACKAGES_DIR = 'x-pack/solutions/security/packages';
+
+/**
+ * Redux Toolkit v1 enforcement.
+ * These directories still use RTK v1 aliased packages (redux-toolkit-v1, react-redux-v7, etc.).
+ * When a plugin/package migrates to RTK v2, remove its entry here.
+ * See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx
+ */
+const REDUX_TOOLKIT_V1_DIRS = [
+  'src/platform/packages/private/kbn-ambient-common-types',
+  'src/platform/packages/shared/kbn-coloring',
+  'src/platform/packages/shared/kbn-test-jest-helpers',
+  'src/platform/packages/shared/kbn-lens-embeddable-utils',
+  'src/platform/packages/shared/shared-ux',
+  'src/platform/plugins/shared/data_view_management',
+  'src/platform/plugins/shared/expressions',
+  'src/platform/plugins/shared/unified_doc_viewer',
+  'src/platform/plugins/shared/workflows_management',
+  'x-pack/platform/plugins/private/canvas',
+  'x-pack/platform/plugins/private/cross_cluster_replication',
+  'x-pack/platform/plugins/private/monitoring',
+  'x-pack/platform/plugins/private/remote_clusters',
+  'x-pack/platform/plugins/private/rollup',
+  'x-pack/platform/plugins/shared/agent_builder',
+  'x-pack/platform/plugins/shared/content_connectors',
+  'x-pack/platform/plugins/shared/fleet',
+  'x-pack/platform/plugins/shared/index_management',
+  'x-pack/platform/plugins/shared/lens',
+  'x-pack/platform/plugins/shared/license_management',
+  'x-pack/platform/plugins/shared/maps',
+  'x-pack/platform/plugins/shared/osquery',
+  'x-pack/platform/plugins/shared/searchprofiler',
+  'x-pack/platform/plugins/shared/streams_app',
+  'x-pack/solutions/observability/plugins/apm',
+  'x-pack/solutions/observability/plugins/synthetics',
+  'x-pack/solutions/observability/plugins/uptime',
+  'x-pack/solutions/search/plugins/enterprise_search',
+  'x-pack/solutions/security/packages/data-table',
+  'x-pack/solutions/security/packages/expandable-flyout',
+  'x-pack/solutions/security/plugins/security_solution',
+  'x-pack/solutions/security/plugins/timelines',
+];
 
 export const importsOverrides: OxlintOverride[] = [
   {
-    // ESLint ran these rules on the extensions it lints; keep them off `.cjs`, `.mts`, etc.
-    files: ['**/*.{js,mjs,ts,tsx}'],
+    files: [ESLINT_LINTED_FILES],
     rules: importsRules,
   },
   {
@@ -201,10 +244,10 @@ export const importsOverrides: OxlintOverride[] = [
   {
     // functional-tests packages intentionally import from test-helper packages (e.g. @kbn/evals, @kbn/scout)
     files: [
-      `${EVALS_SUITES_DIR}/kbn-evals-suite-alert-analysis-workflow/**/*.{js,mjs,ts,tsx}`,
-      `${EVALS_SUITES_DIR}/kbn-evals-suite-attack-discovery-fp-tp/**/*.{js,mjs,ts,tsx}`,
-      `${EVALS_SUITES_DIR}/kbn-evals-suite-security-alert-triage/**/*.{js,mjs,ts,tsx}`,
-    ],
+      'kbn-evals-suite-alert-analysis-workflow',
+      'kbn-evals-suite-attack-discovery-fp-tp',
+      'kbn-evals-suite-security-alert-triage',
+    ].map((suite) => `${SECURITY_PACKAGES_DIR}/${suite}/${ESLINT_LINTED_FILES}`),
     rules: {
       '@kbn/imports/no_boundary_crossing': 'off',
     },
@@ -212,7 +255,7 @@ export const importsOverrides: OxlintOverride[] = [
   {
     // Plain CJS scripts use Node built-ins via require() which the import
     // resolver cannot statically resolve — disable the unresolvable rule.
-    files: [`${EVALS_SUITES_DIR}/kbn-evals-suite-lead-generation/scripts/**/*.js`],
+    files: [`${SECURITY_PACKAGES_DIR}/kbn-evals-suite-lead-generation/scripts/**/*.js`],
     rules: {
       '@kbn/imports/no_unresolvable_imports': 'off',
     },
@@ -233,46 +276,7 @@ export const importsOverrides: OxlintOverride[] = [
     },
   },
   {
-    /**
-     * Redux Toolkit v1 enforcement.
-     * These paths still use RTK v1 aliased packages (redux-toolkit-v1, react-redux-v7, etc.).
-     * When a plugin/package migrates to RTK v2, remove its entry here.
-     * See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx
-     */
-    files: [
-      'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
-      'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/index_management/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/lens/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/license_management/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/maps/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/searchprofiler/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/streams_app/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/observability/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/observability/plugins/uptime/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/search/plugins/enterprise_search/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/data-table/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/expandable-flyout/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
-    ],
+    files: REDUX_TOOLKIT_V1_DIRS.map((dir) => `${dir}/${ESLINT_LINTED_FILES}`),
     rules: {
       '@kbn/imports/no_redux_toolkit_v2_imports': 'error',
     },

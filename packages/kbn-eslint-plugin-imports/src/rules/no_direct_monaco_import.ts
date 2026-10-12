@@ -34,11 +34,7 @@ export const NoDirectMonacoImportRule: CreateOnceRule = {
   },
 
   createOnce(context) {
-    return visitAllImportStatements((req, { node }) => {
-      if (!req) {
-        return;
-      }
-
+    return visitAllImportStatements(() => {
       // Skip rule for files within @kbn/monaco and @kbn/code-editor themselves
       const filename = context.filename;
       if (
@@ -48,27 +44,33 @@ export const NoDirectMonacoImportRule: CreateOnceRule = {
         (filename.includes('/code_editor/impl/') && !filename.includes('/node_modules/')) ||
         (filename.includes('\\code_editor\\impl\\') && !filename.includes('\\node_modules\\'))
       ) {
-        return;
+        return false;
       }
 
-      // Warn on any import from @kbn/monaco (root or subpath)
-      if (req === '@kbn/monaco' || req.startsWith('@kbn/monaco/')) {
-        context.report({
-          node,
-          messageId: 'noMonacoImport',
-          data: { source: req },
-        });
-        return;
-      }
+      return (req, { node }) => {
+        if (!req) {
+          return;
+        }
 
-      // Warn on @kbn/code-editor subpath imports (anything beyond the package root)
-      if (req.startsWith('@kbn/code-editor/')) {
-        context.report({
-          node,
-          messageId: 'noCodeEditorSubpathImport',
-          data: { source: req },
-        });
-      }
+        // Warn on any import from @kbn/monaco (root or subpath)
+        if (req === '@kbn/monaco' || req.startsWith('@kbn/monaco/')) {
+          context.report({
+            node,
+            messageId: 'noMonacoImport',
+            data: { source: req },
+          });
+          return;
+        }
+
+        // Warn on @kbn/code-editor subpath imports (anything beyond the package root)
+        if (req.startsWith('@kbn/code-editor/')) {
+          context.report({
+            node,
+            messageId: 'noCodeEditorSubpathImport',
+            data: { source: req },
+          });
+        }
+      };
     });
   },
 };

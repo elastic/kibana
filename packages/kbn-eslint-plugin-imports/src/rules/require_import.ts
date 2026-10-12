@@ -57,13 +57,11 @@ export const RequireImportRule: CreateOnceRule = {
   },
 
   createOnce(context) {
-    let mappedOptions: ObjectModuleConfig[];
-
     return {
-      before() {
+      'Program:exit': (node) => {
         const requiredImports = context.options as ModuleConfig[];
 
-        mappedOptions = requiredImports.map((config) => {
+        const mappedOptions: ObjectModuleConfig[] = requiredImports.map((config) => {
           if (typeof config === 'string') {
             return {
               module: config,
@@ -72,8 +70,7 @@ export const RequireImportRule: CreateOnceRule = {
           }
           return config;
         });
-      },
-      'Program:exit': (node) => {
+
         mappedOptions.forEach((option) => {
           switch (option.as) {
             case ReferenceModuleAs.typeReference:
