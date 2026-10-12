@@ -18,6 +18,10 @@ export {
   initializeRegisteredLanguagesTheme,
   defaultThemesResolvers,
 } from './src/monaco_imports';
+export type {
+  KbnMonacoThemeColorsOverride,
+  KbnMonacoLanguageThemeResolver,
+} from './src/languages/theming';
 
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/editor/editor.api.js';

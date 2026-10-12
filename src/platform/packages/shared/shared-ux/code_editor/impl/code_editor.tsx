@@ -68,9 +68,11 @@ export interface CodeEditorProps
   options?: Omit<monaco.editor.IStandaloneEditorConstructionOptions, 'editContext' | 'theme'>;
 
   /**
-   * Specifies an override for the theme used by the editor, it's the responsibility of the caller to ensure the theme is valid.
-   * By default themes are applied taking into account the current eui theme and specification of language tokens defined by the language itself,
-   * in such a way that scopes are applied to the language tokens.
+   * The id of a theme to use instead of the default. Register it with
+   * {@link monaco.editor.registerKbnCodeEditorThemeVariant}: a variant layers its own `colors` over the
+   * Kibana theme and keeps everything else — the shared rules and every language's scoped token
+   * colors. A theme defined by hand with `monaco.editor.defineTheme` replaces all of that, so
+   * while it is active, scoped languages anywhere on the page lose their syntax colors.
    */
   themeOverride?: monaco.editor.IStandaloneEditorConstructionOptions['theme'];
 

@@ -85,6 +85,13 @@ so this isolates syntax colours by language rather than by editor.
   colours haven't. That render's colours are, by definition, the palette registered on the previous
   consistent render, so it is a no-op and a switch registers exactly once — the builders are never
   even called for it. Builders return a shared object: spread it before changing anything.
+- Two orthogonal extension points. A language's `languageThemeResolver` contributes **rules**
+  (token colours, scoped to that language); `monaco.editor.registerKbnCodeEditorThemeVariant(id, colors)`
+  contributes **colors** (editor chrome) under a new theme id, inheriting the shared rules and every
+  language namespace. `codeEditorTransparentTheme` is the built-in variant. A consumer that wants
+  its own chrome registers a variant and passes the id as `CodeEditor`'s `themeOverride`; a theme
+  defined by hand with `monaco.editor.defineTheme` replaces all of that and, while active, leaves
+  scoped languages anywhere on the page without syntax colours.
 - Language ids matching `/\b(comment|string|regex|regexp)\b/` are rejected for scoping because
   Monaco derives token types from these words in the token string.
 
