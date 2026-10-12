@@ -38,12 +38,16 @@ const toApiError = (error: unknown, action: string): ExecutionError =>
 export const getTriageHeadroomStepDefinition = ({ getTaskManager }: AlertTriageStepDependencies) =>
   createServerStepDefinition({
     ...triageHeadroomStepCommonDefinition,
-    handler: async ({ input, contextManager }) => {
+    handler: async ({ input, contextManager, logger }) => {
       try {
         const headroom = await readHeadroom({
           readTmLagMs: () => readWorkflowRunLagMs(getTaskManager(), Date.now()),
           countInFlight: async () => {
-            const live = await listLiveExecutionIds(contextManager, input.batch_workflow_id);
+            const live = await listLiveExecutionIds(
+              contextManager,
+              input.batch_workflow_id,
+              logger
+            );
             if (live === undefined) throw new Error('Live batches could not be read');
             return live.size;
           },
@@ -65,7 +69,7 @@ export const getTriageHeadroomStepDefinition = ({ getTaskManager }: AlertTriageS
 export const getTriagePlanSweepStepDefinition = () =>
   createServerStepDefinition({
     ...triagePlanSweepStepCommonDefinition,
-    handler: async ({ input, contextManager }) => {
+    handler: async ({ input, contextManager, logger }) => {
       try {
         const { headroom: given } = input;
         // `ok` without its slots is not a usable answer, so it is treated as unknown.
@@ -93,7 +97,7 @@ export const getTriagePlanSweepStepDefinition = () =>
                 now - input.lookback_hours * 60 * 60 * 1000
               ),
             listLiveExecutionIds: () =>
-              listLiveExecutionIds(contextManager, input.batch_workflow_id),
+              listLiveExecutionIds(contextManager, input.batch_workflow_id, logger),
             tagAlerts: tagAlerts(contextManager),
           },
           {

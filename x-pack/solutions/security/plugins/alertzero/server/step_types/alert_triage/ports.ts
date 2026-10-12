@@ -79,7 +79,8 @@ const toTriageAlert = ({ _id, _source = {} }: AlertHit): TriageAlert => {
 
 export const listLiveExecutionIds = async (
   { callKibanaApi }: KibanaApi,
-  batchWorkflowId: string
+  batchWorkflowId: string,
+  logger?: Pick<StepHandlerContext['logger'], 'warn'>
 ): Promise<Set<string> | undefined> => {
   try {
     const statuses = LIVE_STATUSES.map((status) => `statuses=${status}`).join('&');
@@ -90,7 +91,12 @@ export const listLiveExecutionIds = async (
       )}/executions?${statuses}&size=100`,
     });
     return Array.isArray(body?.results) ? new Set(body.results.map(({ id }) => id)) : undefined;
-  } catch {
+  } catch (error) {
+    logger?.warn(
+      `Could not list live executions of ${batchWorkflowId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
     return undefined;
   }
 };

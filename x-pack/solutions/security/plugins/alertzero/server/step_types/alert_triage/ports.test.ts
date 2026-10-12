@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tagAlerts } from './ports';
+import { listLiveExecutionIds, tagAlerts } from './ports';
 
 const tagWith = (body: Record<string, unknown>) => {
   const callKibanaApi = jest.fn().mockResolvedValue({ status: 200, headers: {}, body });
@@ -45,5 +45,30 @@ describe('tagAlerts', () => {
     await expect(
       tagWith({ updated: 1, timed_out: false, failures: [{ cause: { type: 'x' } }] }).run()
     ).rejects.toThrow('not fully applied');
+  });
+});
+
+describe('listLiveExecutionIds', () => {
+  it('lists the live execution ids of the batch workflow', async () => {
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { results: [{ id: 'e1' }, { id: 'e2' }] },
+    });
+
+    await expect(listLiveExecutionIds({ callKibanaApi }, 'batch')).resolves.toEqual(
+      new Set(['e1', 'e2'])
+    );
+  });
+
+  // The sweep treats an unreadable list as "unknown" and starts nothing, so a permission failure
+  // would otherwise be indistinguishable from a transient one.
+  it('logs why the live executions could not be read and reports them unknown', async () => {
+    const callKibanaApi = jest.fn().mockRejectedValue(new Error('HTTP 403: Forbidden'));
+    const logger = { warn: jest.fn() };
+
+    await expect(listLiveExecutionIds({ callKibanaApi }, 'batch', logger)).resolves.toBeUndefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('HTTP 403: Forbidden'));
   });
 });
