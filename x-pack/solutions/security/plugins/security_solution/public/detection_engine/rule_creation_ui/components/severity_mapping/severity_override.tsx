@@ -14,6 +14,7 @@ import {
   EuiFormLabel,
   EuiIcon,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
@@ -50,6 +51,11 @@ export function SeverityOverride({
   mapping,
   indices,
 }: SeverityOverrideProps) {
+  const checkboxLabelId = useGeneratedHtmlId({ prefix: 'severityMappingOverrideLabel' });
+  const checkboxDescriptionId = useGeneratedHtmlId({
+    prefix: 'severityMappingOverrideDescription',
+  });
+
   const severityMappingLabel = useMemo(() => {
     return (
       <div>
@@ -64,17 +70,27 @@ export function SeverityOverride({
               checked={isMappingChecked}
               disabled={isDisabled}
               onChange={onSeverityMappingChecked}
+              aria-labelledby={checkboxLabelId}
+              aria-describedby={checkboxDescriptionId}
             />
           </EuiFlexItem>
-          <EuiFlexItem>{i18n.SEVERITY_MAPPING}</EuiFlexItem>
+          <EuiFlexItem id={checkboxLabelId}>{i18n.SEVERITY_MAPPING}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <NestedContent>
-          <EuiText size="xs">{i18n.SEVERITY_MAPPING_DESCRIPTION}</EuiText>
+          <EuiText size="xs" id={checkboxDescriptionId}>
+            {i18n.SEVERITY_MAPPING_DESCRIPTION}
+          </EuiText>
         </NestedContent>
       </div>
     );
-  }, [onSeverityMappingChecked, isDisabled, isMappingChecked]);
+  }, [
+    onSeverityMappingChecked,
+    isDisabled,
+    isMappingChecked,
+    checkboxLabelId,
+    checkboxDescriptionId,
+  ]);
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
 

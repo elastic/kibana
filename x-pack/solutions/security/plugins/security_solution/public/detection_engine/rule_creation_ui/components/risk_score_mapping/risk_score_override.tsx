@@ -17,6 +17,7 @@ import {
   EuiFormLabel,
   EuiIcon,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { EsFieldSelector } from '@kbn/securitysolution-autocomplete';
@@ -62,6 +63,11 @@ export function RiskScoreOverride({
   idAria,
   isDisabled,
 }: RiskScoreOverrideProps) {
+  const checkboxLabelId = useGeneratedHtmlId({ prefix: 'riskScoreMappingOverrideLabel' });
+  const checkboxDescriptionId = useGeneratedHtmlId({
+    prefix: 'riskScoreMappingOverrideDescription',
+  });
+
   const riskScoreMappingLabel = useMemo(() => {
     return (
       <div>
@@ -76,17 +82,27 @@ export function RiskScoreOverride({
               checked={isMappingChecked}
               onChange={onToggleMappingChecked}
               disabled={isDisabled}
+              aria-labelledby={checkboxLabelId}
+              aria-describedby={checkboxDescriptionId}
             />
           </EuiFlexItem>
-          <EuiFlexItem>{i18n.RISK_SCORE_MAPPING}</EuiFlexItem>
+          <EuiFlexItem id={checkboxLabelId}>{i18n.RISK_SCORE_MAPPING}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
         <NestedContent>
-          <EuiText size="xs">{i18n.RISK_SCORE_MAPPING_DESCRIPTION}</EuiText>
+          <EuiText size="xs" id={checkboxDescriptionId}>
+            {i18n.RISK_SCORE_MAPPING_DESCRIPTION}
+          </EuiText>
         </NestedContent>
       </div>
     );
-  }, [isDisabled, isMappingChecked, onToggleMappingChecked]);
+  }, [
+    isDisabled,
+    isMappingChecked,
+    onToggleMappingChecked,
+    checkboxLabelId,
+    checkboxDescriptionId,
+  ]);
 
   const describedByIds = useMemo(() => (idAria ? [idAria] : undefined), [idAria]);
   const selectedField = useMemo(() => getFieldTypeByMapping(mapping, indices), [mapping, indices]);
