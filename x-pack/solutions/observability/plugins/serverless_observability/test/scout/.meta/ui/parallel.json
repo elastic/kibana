@@ -1,5 +1,5 @@
 {
-  "sha1": "347f345c681d738eef07ca86e0e876353a8c734e",
+  "sha1": "e9b7af9d0e80e67a3ff9ede7aa73cfd211bca125",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -9,12 +9,11 @@
       "title": "Serverless Observability Navigation - Complete tier body renders expected body nav items with working links",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 17,
+        "line": 18,
         "column": 25
       }
     },
@@ -23,12 +22,11 @@
       "title": "Serverless Observability Navigation - Complete tier body clicking body nav items sets the active link and navigates",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 19
       }
     },
@@ -37,12 +35,11 @@
       "title": "Serverless Observability Navigation - Complete tier body footer-panel children navigate to the expected pages",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 147,
+        "line": 148,
         "column": 99
       }
     },
@@ -51,12 +48,11 @@
       "title": "Serverless Observability Navigation - Complete tier body Management landing renders cards navigation",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 207,
+        "line": 208,
         "column": 11
       }
     },
@@ -65,12 +61,11 @@
       "title": "Serverless Observability Navigation - Complete tier body navigates between apps without a full page reload (SPA) and restores via logo",
       "expectedStatus": "passed",
       "tags": [
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 213,
+        "line": 214,
         "column": 26
       }
     },
