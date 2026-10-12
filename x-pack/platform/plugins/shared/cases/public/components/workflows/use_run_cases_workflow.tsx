@@ -9,11 +9,7 @@ import { useCallback, useState } from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import type { RunWorkflowExecutor } from '@kbn/workflows-ui';
 import type { CasesUI } from '../../containers/types';
-import {
-  untaggedCaseWorkflowFilter,
-  untaggedCaseWorkflowComparator,
-  useCanRunCaseWorkflow,
-} from './use_run_case_workflow';
+import { useCaseWorkflowFilters, useCanRunCaseWorkflow } from './use_run_case_workflow';
 import { useRunWorkflowOnCases } from './use_run_workflow_on_cases';
 
 interface UseRunCasesWorkflowResult {
@@ -41,6 +37,7 @@ interface UseRunCasesWorkflowResult {
  */
 export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
   const canRunWorkflow = useCanRunCaseWorkflow();
+  const { filterWorkflow, sortWorkflow } = useCaseWorkflowFilters();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCases, setSelectedCases] = useState<CasesUI>([]);
@@ -64,7 +61,7 @@ export const useRunCasesWorkflow = (): UseRunCasesWorkflowResult => {
     closeModal,
     selectedCases,
     runWorkflow,
-    filterWorkflow: untaggedCaseWorkflowFilter,
-    sortWorkflow: untaggedCaseWorkflowComparator,
+    filterWorkflow,
+    sortWorkflow,
   };
 };

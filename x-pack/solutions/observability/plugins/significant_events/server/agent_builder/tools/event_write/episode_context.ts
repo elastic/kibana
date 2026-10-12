@@ -25,6 +25,19 @@ export const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] =
   return [...new Set(uuids)];
 };
 
+export const confirmedSignals = (signals: SignalEntry[] | undefined): SignalEntry[] =>
+  (signals ?? []).filter(({ verdict }) => verdict === 'confirms');
+
+/** Find-or-create identity: confirmed rules when any exist, else every rule. */
+export const extractDedupIdentity = (
+  signals: SignalEntry[] | undefined
+): { ruleUuids: string[]; confirmedOnly: boolean } => {
+  const confirmed = extractRuleUuids(confirmedSignals(signals));
+  return confirmed.length > 0
+    ? { ruleUuids: confirmed, confirmedOnly: true }
+    : { ruleUuids: extractRuleUuids(signals), confirmedOnly: false };
+};
+
 export const extractRuleUuidsFromEvents = (
   events: Array<Pick<SignificantEvent, 'signals'> | undefined>
 ): Set<string> => new Set(events.flatMap((event) => extractRuleUuids(event?.signals)));

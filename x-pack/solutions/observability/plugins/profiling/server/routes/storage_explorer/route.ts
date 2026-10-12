@@ -19,6 +19,7 @@ import { getHostAndDistinctProbabilisticCount } from './get_host_distinct_probab
 import { allIndices, getIndicesStats, getNodesStats, symbolsIndices } from './get_indices_stats';
 import { getStorageDetailsGroupedByIndex } from './get_storage_details_grouped_by_index';
 import { getStorageDetailsPerIndex } from './get_storage_details_per_index';
+import { PROFILING_API_PRIVILEGE } from '../../feature';
 
 export function registerStorageExplorerRoute({
   router,
@@ -30,7 +31,7 @@ export function registerStorageExplorerRoute({
       path: paths.StorageExplorerSummary,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: {
@@ -120,7 +121,7 @@ export function registerStorageExplorerRoute({
       path: paths.StorageExplorerHostStorageDetails,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: {
@@ -171,7 +172,7 @@ export function registerStorageExplorerRoute({
       path: paths.StorageExplorerIndicesStorageDetails,
       security: {
         authz: {
-          requiredPrivileges: ['profiling'],
+          requiredPrivileges: [PROFILING_API_PRIVILEGE],
         },
       },
       validate: {

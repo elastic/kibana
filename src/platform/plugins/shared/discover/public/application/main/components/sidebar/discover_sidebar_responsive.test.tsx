@@ -179,6 +179,7 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
+    onRemoveFields: jest.fn(),
     selectedDataView: dataView,
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
@@ -441,6 +442,12 @@ describe('discover responsive sidebar', function () {
     const selectedFields = screen.getByTestId('fieldListGroupedSelectedFields');
     await user.click(within(selectedFields).getByTestId('fieldToggle-extension'));
     expect(props.onRemoveField).toHaveBeenCalledWith('extension');
+  });
+  it('should allow restarting selected fields', async function () {
+    const { user } = await renderComponent(props);
+    await user.click(screen.getByTestId('fieldListGroupedSelectedFields-deselectSelectedFields'));
+    expect(props.onRemoveFields).toHaveBeenCalledWith(['extension']);
+    expect(props.onRemoveField).not.toHaveBeenCalled();
   });
   it('should allow adding filters', async function () {
     const { user } = await renderComponent(props);

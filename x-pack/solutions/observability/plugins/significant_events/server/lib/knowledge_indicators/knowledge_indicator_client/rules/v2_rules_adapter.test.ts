@@ -250,7 +250,7 @@ describe('RulesAdapterV2', () => {
 
       expect(result).toEqual({ createdIds: ['rule-1'] });
       expect(mock.bulkCreateRules).toHaveBeenCalledWith({
-        rules: [
+        items: [
           expect.objectContaining({
             id: 'rule-1',
             enabled: true,
@@ -460,7 +460,7 @@ describe('RulesAdapterV2', () => {
       ).resolves.toEqual({ createdIds: ['rule-new'] });
 
       expect(mock.bulkCreateRules).toHaveBeenCalledTimes(2);
-      const retryRules = mock.bulkCreateRules.mock.calls[1][0].rules as Array<{ id: string }>;
+      const retryRules = mock.bulkCreateRules.mock.calls[1][0].items as Array<{ id: string }>;
       expect(retryRules.map(({ id }) => id)).toEqual(['rule-new']);
       expect(mock.updateRule).toHaveBeenCalledTimes(1);
       expect(mock.updateRule).toHaveBeenCalledWith({

@@ -25,26 +25,26 @@ import {
 import { alertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import type {
   ActionPolicyWorkflowPayload,
+  ActionPolicyWorkflowPayloadAlert,
   ActionPolicyWorkflowPayloadRule,
-  AlertEpisode,
 } from './types';
 
 const examplePayload: Required<ActionPolicyWorkflowPayload> = {
   id: 'group-1',
   policyId: 'policy-1',
   groupKey: {},
-  episodes: [],
+  alerts: [],
   rules: {},
 };
 
-const exampleEpisode: Required<AlertEpisode> = {
+const exampleAlert: Required<ActionPolicyWorkflowPayloadAlert> = {
   last_event_timestamp: '2026-01-22T07:10:00.000Z',
   rule_id: 'rule-1',
   source: 'internal',
   space_id: 'default',
   group_hash: 'hash-1',
-  episode_id: 'episode-1',
-  episode_status: 'active',
+  alert_id: 'alert-1',
+  alert_status: 'active',
   severity: 'critical',
   data: {},
 };
@@ -53,10 +53,10 @@ const exampleRuleValue: Required<ActionPolicyWorkflowPayloadRule> = {
   name: 'CPU spike',
 };
 
-const episodeItemSchema = (schema: JsonSchema): JsonSchema => {
-  const items = schema.properties?.episodes?.items;
+const alertItemSchema = (schema: JsonSchema): JsonSchema => {
+  const items = schema.properties?.alerts?.items;
   if (items == null || Array.isArray(items)) {
-    throw new Error('expected episodes.items to be a single object schema');
+    throw new Error('expected alerts.items to be a single object schema');
   }
   return items;
 };
@@ -119,11 +119,11 @@ describe('alertingV2NotificationGroup builtin workflow input definition', () => 
     );
   });
 
-  it('exposes every AlertEpisode field on episode items', () => {
+  it('exposes every ActionPolicyWorkflowPayloadAlert field on alert items', () => {
     expectSchemaKeysMatchType(
-      Object.keys(episodeItemSchema(schema).properties ?? {}),
-      Object.keys(exampleEpisode),
-      'AlertEpisode'
+      Object.keys(alertItemSchema(schema).properties ?? {}),
+      Object.keys(exampleAlert),
+      'ActionPolicyWorkflowPayloadAlert'
     );
   });
 
@@ -135,18 +135,18 @@ describe('alertingV2NotificationGroup builtin workflow input definition', () => 
     );
   });
 
-  it('allows null rule_id on episode items (AlertEpisode.rule_id is RuleId | null)', () => {
-    expect(episodeItemSchema(schema).properties?.rule_id?.type).toEqual(['string', 'null']);
+  it('allows null rule_id on alert items (ActionPolicyWorkflowPayloadAlert.rule_id is RuleId | null)', () => {
+    expect(alertItemSchema(schema).properties?.rule_id?.type).toEqual(['string', 'null']);
   });
 
-  it('locks episode_status enum to AlertEpisodeStatus', () => {
-    expect([...(episodeItemSchema(schema).properties?.episode_status?.enum ?? [])].sort()).toEqual(
+  it('locks alert_status enum to AlertEpisodeStatus', () => {
+    expect([...(alertItemSchema(schema).properties?.alert_status?.enum ?? [])].sort()).toEqual(
       Object.values(alertEpisodeStatus).sort()
     );
   });
 
   it('locks severity enum to AlertEventSeverity', () => {
-    expect([...(episodeItemSchema(schema).properties?.severity?.enum ?? [])].sort()).toEqual(
+    expect([...(alertItemSchema(schema).properties?.severity?.enum ?? [])].sort()).toEqual(
       Object.values(alertEventSeverity).sort()
     );
   });

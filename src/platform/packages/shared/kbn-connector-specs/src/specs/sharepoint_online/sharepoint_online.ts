@@ -214,17 +214,19 @@ export const SharepointOnline: ConnectorSpec = {
       scope: 'read',
       description:
         'List all SharePoint sites the connector has access to. With app-only (client credentials) auth, returns all sites via /sites/getAllSites. With delegated (authorization code) auth, falls back to /sites?search= because getAllSites requires application permissions. Use this to discover site IDs needed by getSite, getSitePages, getSiteDrives, getSiteLists, and getSiteListItems.',
-      input: z
-        .object({
-          search: z
-            .string()
-            .max(SHAREPOINT_MAX_SEARCH_LENGTH)
-            .optional()
-            .describe(
-              'Optional search keyword to filter sites by name. Only used with delegated auth (oauth_authorization_code) where /sites/getAllSites is unavailable. With app-only auth this field is ignored. Omit or pass "*" for a wildcard that returns all accessible sites.'
-            ),
-        })
-        .optional(),
+      input: lazySchema(() =>
+        z
+          .object({
+            search: z
+              .string()
+              .max(SHAREPOINT_MAX_SEARCH_LENGTH)
+              .optional()
+              .describe(
+                'Optional search keyword to filter sites by name. Only used with delegated auth (oauth_authorization_code) where /sites/getAllSites is unavailable. With app-only auth this field is ignored. Omit or pass "*" for a wildcard that returns all accessible sites.'
+              ),
+          })
+          .optional()
+      ),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as { search?: string } | undefined;
@@ -315,7 +317,7 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: z.any(),
+      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const typedInput = input as {
           siteId: string;
@@ -720,7 +722,7 @@ export const SharepointOnline: ConnectorSpec = {
           body: z.any().optional().describe('Request body (for POST)'),
         })
       ),
-      output: z.any(),
+      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const typedInput = input as {
           method: 'GET' | 'POST';
@@ -788,7 +790,7 @@ export const SharepointOnline: ConnectorSpec = {
             ),
         })
       ),
-      output: z.any(),
+      output: lazySchema(() => z.any()),
       handler: async (ctx, input) => {
         const typedInput = input as {
           query: string;

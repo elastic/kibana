@@ -19,7 +19,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedRelative } from '@kbn/i18n-react';
 import type { ListInvestigationItem } from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { SEVERITY_DOT_COLOR } from '../common/severity';
+import { SEVERITY_DOT_COLOR, type SeverityDotColor } from '../common/severity';
 import { nightshiftBackgroundTransition } from '../common/transition';
 import {
   getInvestigationRunTimeLabel,
@@ -178,7 +178,7 @@ function EntityChips({
   severityColorKey,
 }: {
   entities?: Array<{ name: string; type?: string }>;
-  severityColorKey: 'danger' | 'warning' | 'primary' | 'success';
+  severityColorKey: SeverityDotColor | 'primary';
 }): React.ReactElement | null {
   const { euiTheme } = useEuiTheme();
 
@@ -186,7 +186,11 @@ function EntityChips({
 
   const visible = entities.slice(0, MAX_VISIBLE_ENTITY_CHIPS);
   const overflow = entities.length - visible.length;
-  const dotColor = euiTheme.colors[severityColorKey];
+  // Badge color names (risk/neutral) live on `colors.severity`, not the top-level palette.
+  const dotColor =
+    severityColorKey === 'primary'
+      ? euiTheme.colors.primary
+      : euiTheme.colors.severity[severityColorKey];
 
   return (
     <EuiFlexItem grow={false}>

@@ -11,7 +11,7 @@ import { groupHashSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH } from './constants';
 
 export const alertEpisodeStatusSchema = z.union([
-  z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert episode is fully recovered'),
+  z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert is fully recovered'),
   z
     .literal(ALERT_EPISODE_STATUS.PENDING)
     .describe('Breached but below the consecutive-breaches threshold'),

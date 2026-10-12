@@ -137,6 +137,39 @@ export const translations = {
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
     defaultMessage: 'Write a new query, or select a recently or starred query.',
   }),
+  previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
+    defaultMessage: 'ES|QL Query Results',
+  }),
+  previewEmptyTitle: i18n.translate('xpack.esqlViews.managementPage.previewEmptyTitle', {
+    defaultMessage: 'No results yet',
+  }),
+  previewEmptyDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.previewEmptyDescription',
+    {
+      defaultMessage: 'Run the query above to preview its results here.',
+    }
+  ),
+  previewLoadingTitle: i18n.translate('xpack.esqlViews.managementPage.previewLoadingTitle', {
+    defaultMessage: 'Running ES|QL query',
+  }),
+  previewGridLoadingTitle: i18n.translate(
+    'xpack.esqlViews.managementPage.previewGridLoadingTitle',
+    {
+      defaultMessage: 'Loading preview results',
+    }
+  ),
+  previewNoResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewNoResultsTitle', {
+    defaultMessage: 'No results found',
+  }),
+  previewNoResultsDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.previewNoResultsDescription',
+    {
+      defaultMessage: 'The query ran successfully but returned no results.',
+    }
+  ),
+  previewErrorTitle: i18n.translate('xpack.esqlViews.managementPage.previewErrorTitle', {
+    defaultMessage: 'Unable to preview query results',
+  }),
   nameRequiredErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameRequiredErrorMessage',
     {

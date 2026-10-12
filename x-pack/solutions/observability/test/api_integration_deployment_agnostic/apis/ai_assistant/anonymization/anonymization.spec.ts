@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
 import type { LlmProxy, LlmResponseSimulator } from '../utils/create_llm_proxy';
 import { createLlmProxy } from '../utils/create_llm_proxy';
 import { setAdvancedSettings } from '../utils/advanced_settings';
