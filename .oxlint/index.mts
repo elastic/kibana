@@ -72,9 +72,7 @@ export default defineConfig<OxlintConfig>({
   categories: {
     correctness: 'off',
   },
-  settings: {
-    ...playwrightSettings,
-  },
+  settings: playwrightSettings,
   rules: {
     ...javascriptRules,
     ...typescriptRules,

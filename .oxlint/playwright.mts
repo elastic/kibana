@@ -9,19 +9,10 @@
 
 import type { OxlintConfig, OxlintOverride } from 'oxlint';
 
-/**
- * Scout tests: the middle globs expand `TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB` from
- * @kbn/scout-info, which `.eslintrc.js` uses for its Scout overrides. In oxlint, `**` inside
- * `{}` alternatives matches a single path segment, so the outer alternation is split.
- */
-const SCOUT_ROOT_GLOBS = [
-  '**/kbn-scout*/src/playwright/**',
-  '{src/platform,src/core}/{plugins,packages}/**/test/scout{_*,}/**',
-  'x-pack/**/{plugins,packages}/**/test/scout{_*,}/**',
-  '{examples,x-pack/examples}/**/test/scout{_*,}/**',
-  'src/core/test/scout{_*,}/**',
-  'packages/**/test/scout{_*,}/**',
-];
+import { SCOUT_TEST_FILE_GLOBS } from './scout.mts';
+
+/** Scout test suites plus the Scout framework's own Playwright code. */
+const PLAYWRIGHT_FILE_GLOBS = ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS];
 
 export const playwrightSettings: OxlintConfig['settings'] = {
   playwright: {
@@ -33,7 +24,7 @@ export const playwrightSettings: OxlintConfig['settings'] = {
 
 export const playwrightOverrides: OxlintOverride[] = [
   {
-    files: SCOUT_ROOT_GLOBS.map((glob) => `${glob}/*.ts`),
+    files: PLAYWRIGHT_FILE_GLOBS,
     excludeFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
     rules: {
       // `plugin:playwright/recommended`
@@ -42,7 +33,6 @@ export const playwrightOverrides: OxlintOverride[] = [
       'playwright/no-networkidle': 'error',
       'playwright/no-skipped-test': 'warn',
       'playwright/no-unused-locators': 'error',
-      'playwright/no-useless-not': 'warn',
       'playwright/no-wait-for-navigation': 'error',
       'playwright/no-wait-for-timeout': 'warn',
       'playwright/prefer-locator': 'warn',
@@ -93,7 +83,6 @@ export const playwrightOverrides: OxlintOverride[] = [
       'playwright/prefer-equality-matcher': 'error',
       'playwright/prefer-hooks-in-order': 'error',
       'playwright/prefer-hooks-on-top': 'error',
-      'playwright/prefer-native-locators': 'warn',
       'playwright/prefer-strict-equal': 'error',
       'playwright/prefer-to-be': 'error',
       'playwright/prefer-to-contain': 'error',
@@ -106,7 +95,7 @@ export const playwrightOverrides: OxlintOverride[] = [
   },
   {
     // no-export only applies to spec files — fixture/helper modules legitimately export
-    files: SCOUT_ROOT_GLOBS.map((glob) => `${glob}/*.spec.ts`),
+    files: PLAYWRIGHT_FILE_GLOBS.map((glob) => glob.replace(/\*\.ts$/, '*.spec.ts')),
     rules: {
       'playwright/no-export': 'error',
     },

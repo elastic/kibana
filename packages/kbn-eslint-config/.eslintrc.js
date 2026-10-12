@@ -28,8 +28,9 @@ module.exports = {
     '@kbn/eslint-plugin-i18n',
     '@kbn/eslint-plugin-alerting-v2',
     '@kbn/eslint-plugin-kbn-ui',
-    // `@elastic/eui/*` and `depend/*` rules run in oxlint (.oxlint/eui.mts, .oxlint/depend.mts).
-    // The plugins stay registered so `eslint-disable` directives naming their rules resolve.
+    // `@elastic/eui/*` and `depend/*` rules run in oxlint (.oxlint/eui.mts, .oxlint/depend.mts),
+    // except the fixable warning below. The plugins stay registered so `eslint-disable`
+    // directives naming their rules resolve.
     '@elastic/eui',
     'eslint-plugin-depend',
     'prettier',
@@ -195,6 +196,10 @@ module.exports = {
     'no-new-func': 'error',
     'no-implied-eval': 'error',
     'no-prototype-builtins': 'error',
+
+    // Autofixable warning kept in ESLint: `--fix` here applies error fixes only, while oxlint
+    // `--fix` also rewrites warnings, which CI's auto-fix pass would commit across the repo.
+    '@elastic/eui/no-deprecated-icon-aliases': 'warn',
   },
 
 };
