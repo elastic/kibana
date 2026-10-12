@@ -44,14 +44,17 @@ export interface WorkspaceEdgeState {
   width: number;
 }
 
-export interface WorkspaceState {
-  isInitialized: boolean;
+export interface WorkspaceSnapshot {
   nodesById: Record<string, WorkspaceNodeState>;
   nodeIds: string[];
   edgesById: Record<string, WorkspaceEdgeState>;
   edgeIds: string[];
   blocklistedNodesById: Record<string, WorkspaceNodeState>;
   blocklistedNodeIds: string[];
+}
+
+export interface WorkspaceState extends WorkspaceSnapshot {
+  isInitialized: boolean;
 }
 
 const initialWorkspaceState: WorkspaceState = {
@@ -65,13 +68,16 @@ const initialWorkspaceState: WorkspaceState = {
 };
 
 export const initializeWorkspace = actionCreator('INITIALIZE_WORKSPACE');
-export const workspaceChanged = actionCreator<WorkspaceState>('WORKSPACE_CHANGED');
+export const workspaceChanged = actionCreator<WorkspaceSnapshot>('WORKSPACE_CHANGED');
 export const submitSearch = actionCreator<string>('SUBMIT_SEARCH');
 
 export const workspaceReducer = reducerWithInitialState(initialWorkspaceState)
   .case(reset, () => initialWorkspaceState)
   .case(initializeWorkspace, (state) => ({ ...state, isInitialized: true }))
-  .case(workspaceChanged, (_state, workspace) => workspace)
+  .case(workspaceChanged, (state, workspace) => ({
+    ...workspace,
+    isInitialized: state.isInitialized,
+  }))
   .build();
 
 export const workspaceSelector = (state: GraphState) => state.workspace;
@@ -80,7 +86,7 @@ export const workspaceInitializedSelector = createSelector(
   (workspace: WorkspaceState) => workspace.isInitialized
 );
 
-export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
+export const createWorkspaceState = (workspace: Workspace): WorkspaceSnapshot => {
   const blocklistedNodes = (workspace.blocklistedNodes ?? []) as WorkspaceNode[];
   const nodesById = Object.fromEntries(workspace.nodes.map((node) => [node.id, toNodeState(node)]));
   const edgesById = Object.fromEntries(
@@ -103,7 +109,6 @@ export const createWorkspaceState = (workspace: Workspace): WorkspaceState => {
   );
 
   return {
-    isInitialized: true,
     nodesById,
     nodeIds: workspace.nodes.map(({ id }) => id),
     edgesById,

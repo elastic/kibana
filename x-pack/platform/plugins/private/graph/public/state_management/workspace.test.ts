@@ -13,6 +13,7 @@ import { fillWorkspace } from './persistence';
 import { createMockGraphStore } from './mocks';
 import {
   createWorkspaceState,
+  initializeWorkspace,
   registerWorkspaceListeners,
   submitSearch,
   workspaceChanged,
@@ -99,7 +100,6 @@ describe('workspace state', () => {
     } as unknown as Workspace;
 
     expect(createWorkspaceState(workspace)).toEqual({
-      isInitialized: true,
       nodesById: {
         parent: {
           id: 'parent',
@@ -154,7 +154,24 @@ describe('workspace state', () => {
 
     environment.store.dispatch(workspaceChanged(snapshot));
 
-    expect(environment.store.getState().workspace).toEqual(snapshot);
+    expect(environment.store.getState().workspace).toEqual({
+      ...snapshot,
+      isInitialized: false,
+    });
+  });
+
+  it('preserves explicit initialization when storing workspace snapshots', () => {
+    const environment = createMockGraphStore({});
+    const snapshot = createWorkspaceState({
+      nodes: [],
+      edges: [],
+      blocklistedNodes: [],
+    } as unknown as Workspace);
+
+    environment.store.dispatch(initializeWorkspace());
+    environment.store.dispatch(workspaceChanged(snapshot));
+
+    expect(workspaceInitializedSelector(environment.store.getState())).toBe(true);
   });
 });
 
