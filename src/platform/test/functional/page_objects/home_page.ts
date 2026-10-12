@@ -98,8 +98,9 @@ export class HomePageObject extends FtrService {
   async addSampleDataSet(id: string): Promise<void> {
     await this.openSampleDataAccordion();
     if ((await this.getSampleDataSetStatus(id)) === 'installed') return;
+    this.log.debug(`Attempting to add sample data: ${id}`);
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(`addSampleDataSet${id}`);
-    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
+    await this.retry.waitForWithTimeout(`${id} sample data to be installed`, 120_000, async () => {
       return (await this.getSampleDataSetStatus(id)) === 'installed';
     });
     await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
@@ -108,22 +109,12 @@ export class HomePageObject extends FtrService {
   async removeSampleDataSet(id: string): Promise<void> {
     await this.openSampleDataAccordion();
     if ((await this.getSampleDataSetStatus(id)) === 'not_installed') return;
+    this.log.debug(`Attempting to remove sample data: ${id}`);
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(`removeSampleDataSet${id}`);
-    await this.retry.waitFor(`${id} sample data to be removed`, async () => {
+    await this.retry.waitForWithTimeout(`${id} sample data to be removed`, 120_000, async () => {
       return (await this.getSampleDataSetStatus(id)) === 'not_installed';
     });
     await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
-  }
-
-  // loading action is either uninstall and install
-  async _waitForSampleDataLoadingAction(id: string) {
-    const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    await this.retry.try(async () => {
-      // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
-      // before action is complete
-      this.log.debug(`Waiting for loading spinner to be deleted for sampleDataSetCard${id}`);
-      await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
-    });
   }
 
   async launchSampleDiscover(id: string) {
