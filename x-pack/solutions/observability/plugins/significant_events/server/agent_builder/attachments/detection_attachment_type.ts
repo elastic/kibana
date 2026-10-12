@@ -41,7 +41,7 @@ const toLifecycleDetection = (detection: Detection): LifecycleDetection | undefi
 
 export const formatDetectionAsText = (detection: LifecycleDetection): string => {
   return [
-    `Significant Events detection "${detection.rule_name}"`,
+    `Significant events detection "${detection.rule_name}"`,
     `Detection ID: ${detection.detection_id}`,
     `Stream: ${detection.stream_name}`,
     `Change point: ${detection.change_point_type}`,
@@ -132,7 +132,7 @@ export const createSignificantEventDetectionAttachmentType = ({
       }),
     }),
     getAgentDescription: () =>
-      'A Significant Events detection attachment represents a change-point observation from an alerting rule on a stream. Use it as authoritative context about the attached detection when answering questions.',
+      'A significant events detection attachment represents a change-point observation from an alerting rule on a stream. Use it as authoritative context about the attached detection when answering questions.',
     getTools: () => [],
   };
 };

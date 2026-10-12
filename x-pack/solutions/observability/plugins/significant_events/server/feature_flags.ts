@@ -105,14 +105,14 @@ export function registerFeatureFlags(
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.sigEventsIndexPatternsSettingsName', {
-              defaultMessage: 'Significant Events index patterns',
+              defaultMessage: 'Significant events index patterns',
             }) as string,
             value: DEFAULT_INDEX_PATTERNS,
             description: i18n.translate(
               'xpack.significantEvents.sigEventsIndexPatternsSettingsDescription',
               {
                 defaultMessage:
-                  'Comma-separated list of index patterns used for Significant Events stream filtering and analysis.',
+                  'Comma-separated list of index patterns used for significant events stream filtering and analysis.',
               }
             ),
             type: 'string',
@@ -129,14 +129,14 @@ export function registerFeatureFlags(
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.scheduledSigEventsDiscoveryEnabledName', {
-              defaultMessage: 'Scheduled Significant Events discovery enabled',
+              defaultMessage: 'Scheduled significant events discovery enabled',
             }) as string,
             value: false,
             description: i18n.translate(
               'xpack.significantEvents.scheduledSigEventsDiscoveryEnabledDescription',
               {
                 defaultMessage:
-                  'When enabled, Significant Events detection and discovery run automatically in this Kibana space.',
+                  'When enabled, significant events detection and discovery run automatically in this Kibana space.',
               }
             ),
             type: 'boolean',
@@ -152,7 +152,7 @@ export function registerFeatureFlags(
               name: i18n.translate(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionIntervalMinutesName',
                 {
-                  defaultMessage: 'Scheduled Significant Events detection interval (minutes)',
+                  defaultMessage: 'Scheduled significant events detection interval (minutes)',
                 }
               ) as string,
               value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES,
@@ -160,7 +160,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionIntervalMinutesDescription',
                 {
                   defaultMessage:
-                    'How often scheduled Significant Events detection runs in this Kibana space.',
+                    'How often scheduled significant events detection runs in this Kibana space.',
                 }
               ),
               type: 'number',
@@ -177,7 +177,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesName',
                 {
                   defaultMessage:
-                    'Scheduled Significant Events detection bucket interval (minutes)',
+                    'Scheduled significant events detection bucket interval (minutes)',
                 }
               ) as string,
               value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES,
@@ -185,7 +185,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionBucketIntervalMinutesDescription',
                 {
                   defaultMessage:
-                    'Outer date-histogram bucket width for the critical analysis profile in scheduled Significant Events change-point detection. Must be at least 1 minute (MATCH rules emit closed-minute points). Default-severity rules keep a fixed 5-minute profile.',
+                    'Outer date-histogram bucket width for the critical analysis profile in scheduled significant events change-point detection. Must be at least 1 minute (MATCH rules emit closed-minute points). Default-severity rules keep a fixed 5-minute profile.',
                 }
               ),
               type: 'number',
@@ -204,7 +204,7 @@ export function registerFeatureFlags(
               name: i18n.translate(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesName',
                 {
-                  defaultMessage: 'Scheduled Significant Events detection lookback (minutes)',
+                  defaultMessage: 'Scheduled significant events detection lookback (minutes)',
                 }
               ) as string,
               value: DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES,
@@ -212,7 +212,7 @@ export function registerFeatureFlags(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryDetectionLookbackMinutesDescription',
                 {
                   defaultMessage:
-                    'Critical analysis lookback (minutes) for scheduled Significant Events change-point detection. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets. Default-severity rules keep a fixed 125-minute profile.',
+                    'Critical analysis lookback (minutes) for scheduled significant events change-point detection. Must be a multiple of the detection bucket interval yielding between 22 and 1000 buckets. Default-severity rules keep a fixed 125-minute profile.',
                 }
               ),
               type: 'number',
@@ -227,7 +227,7 @@ export function registerFeatureFlags(
             name: i18n.translate(
               'xpack.significantEvents.scheduledSigEventsDiscoveryTargetCoverageMinutesName',
               {
-                defaultMessage: 'Scheduled Significant Events target coverage (minutes)',
+                defaultMessage: 'Scheduled significant events target coverage (minutes)',
               }
             ) as string,
             value: DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES,
@@ -250,7 +250,7 @@ export function registerFeatureFlags(
             name: i18n.translate(
               'xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesName',
               {
-                defaultMessage: 'Scheduled Significant Events review interval (minutes)',
+                defaultMessage: 'Scheduled significant events review interval (minutes)',
               }
             ) as string,
             value: DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES,
@@ -258,7 +258,7 @@ export function registerFeatureFlags(
               'xpack.significantEvents.scheduledSigEventsDiscoveryReviewIntervalMinutesDescription',
               {
                 defaultMessage:
-                  'How often scheduled Significant Events discovery review runs in this Kibana space.',
+                  'How often scheduled significant events discovery review runs in this Kibana space.',
               }
             ),
             type: 'number',
@@ -273,7 +273,7 @@ export function registerFeatureFlags(
             name: i18n.translate(
               'xpack.significantEvents.scheduledSigEventsDiscoveryDiscoveryBatchSizeName',
               {
-                defaultMessage: 'Scheduled Significant Events discovery batch size',
+                defaultMessage: 'Scheduled significant events discovery batch size',
               }
             ) as string,
             value: DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE,
@@ -299,7 +299,7 @@ export function registerFeatureFlags(
             name: i18n.translate(
               'xpack.significantEvents.scheduledSigEventsDiscoveryMaxReviewPassesName',
               {
-                defaultMessage: 'Scheduled Significant Events review passes',
+                defaultMessage: 'Scheduled significant events review passes',
               }
             ) as string,
             value: DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES,
@@ -326,7 +326,7 @@ export function registerFeatureFlags(
               name: i18n.translate(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleDetectionThresholdName',
                 {
-                  defaultMessage: 'Significant Events flaky rule detection threshold',
+                  defaultMessage: 'Significant events flaky rule detection threshold',
                 }
               ) as string,
               value: DEFAULT_SIG_EVENTS_FLAKY_RULE_DETECTION_THRESHOLD,
@@ -353,7 +353,7 @@ export function registerFeatureFlags(
               name: i18n.translate(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleProbeAfterMinutesName',
                 {
-                  defaultMessage: 'Significant Events flaky rule probe (minutes)',
+                  defaultMessage: 'Significant events flaky rule probe (minutes)',
                 }
               ) as string,
               value: DEFAULT_SIG_EVENTS_FLAKY_RULE_PROBE_AFTER_MINUTES,
@@ -380,7 +380,7 @@ export function registerFeatureFlags(
               name: i18n.translate(
                 'xpack.significantEvents.scheduledSigEventsDiscoveryFlakyRuleExemptSeverityScoreName',
                 {
-                  defaultMessage: 'Significant Events flaky rule severity exemption',
+                  defaultMessage: 'Significant events flaky rule severity exemption',
                 }
               ) as string,
               value: DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE,
@@ -474,14 +474,14 @@ export function registerFeatureFlags(
           [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.sigEventsTuningConfigName', {
-              defaultMessage: 'Significant Events tuning',
+              defaultMessage: 'Significant events tuning',
             }),
             value: JSON.stringify(DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG),
             description: i18n.translate(
               'xpack.significantEvents.sigEventsTuningConfigDescription',
               {
                 defaultMessage:
-                  'JSON configuration for Significant Events tuning parameters including sample sizes, ratios, TTLs, and search thresholds.',
+                  'JSON configuration for significant events tuning parameters including sample sizes, ratios, TTLs, and search thresholds.',
               }
             ),
             type: 'json',

@@ -14,7 +14,9 @@ import {
 } from '@kbn/significant-events-schema';
 
 type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
-  Partial<Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius'>>;
+  Partial<
+    Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius' | 'confidence'>
+  >;
 
 export const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
@@ -114,7 +116,12 @@ export const mergeEpisodeContext = (
     stream_names: SignificantEvent['stream_names'];
   },
   submittedTimestamp: string
-): { streamNames: string[]; causalFeatures: CausalFeature[]; blastRadius: BlastRadiusEntry[] } => {
+): {
+  streamNames: string[];
+  causalFeatures: CausalFeature[];
+  blastRadius: BlastRadiusEntry[];
+  confidence: number;
+} => {
   const contexts: EpisodeContextSource[] = [
     ...priorDocs,
     { ...submitted, '@timestamp': submittedTimestamp },
@@ -146,10 +153,19 @@ export const mergeEpisodeContext = (
     b: { entry: { feature_id: string } }
   ) => a.entry.feature_id.localeCompare(b.entry.feature_id);
 
+  const confidences = contexts.flatMap((ctx) =>
+    ctx.confidence === undefined ? [] : [ctx.confidence]
+  );
+  const confidence =
+    confidences.length === 0
+      ? 0
+      : confidences.reduce((acc, value) => acc + value, 0) / confidences.length;
+
   return {
     streamNames: [...streamNames].sort(),
     causalFeatures: [...causal.values()].sort(byFeatureId).map(({ entry }) => entry),
     blastRadius: [...blast.values()].sort(byFeatureId).map(({ entry }) => entry),
+    confidence,
   };
 };
 

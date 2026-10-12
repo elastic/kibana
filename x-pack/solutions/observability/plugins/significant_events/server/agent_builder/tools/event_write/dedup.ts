@@ -193,6 +193,7 @@ export const resolveDedupSkips = (
           skipped: true,
           reason: 'existing_active_event',
           existing_event_id: existingEventId,
+          severity: duplicate.severity,
         };
         continue;
       }
