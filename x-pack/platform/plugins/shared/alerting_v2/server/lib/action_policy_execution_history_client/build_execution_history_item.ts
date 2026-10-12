@@ -147,11 +147,11 @@ export function buildExecutionHistoryItem(
   const ruleCount = relevantRuleIds.length;
   const rules = relevantRuleIds
     .slice(0, MAX_EMBEDDED_RULES_PER_ITEM)
-    .map((id) => ({ id, name: ruleNames.get(id) ?? null }));
+    .map((id) => ({ id, name: ruleNames.get(id) }));
 
   const workflows = (dispatcher.workflow_ids ?? [])
     .filter(isString)
-    .map((id) => ({ id, name: workflowNames.get(id) ?? null }));
+    .map((id) => ({ id, name: workflowNames.get(id) }));
 
   const alertIds = (dispatcher.alert_ids ?? []).filter(isString);
   const alerts = alertIds.slice(0, MAX_EMBEDDED_ALERTS_PER_ITEM).map((id) => ({ id }));
@@ -161,7 +161,7 @@ export function buildExecutionHistoryItem(
 
   return {
     dispatched_at: timestamp,
-    policy: { id: policyId, name: policyNames.get(policyId) ?? null },
+    policy: { id: policyId, name: policyNames.get(policyId) },
     outcome: toPolicyExecutionOutcome(action),
     alert_count: Number(dispatcher.alert_count ?? 0),
     alerts,
@@ -172,7 +172,7 @@ export function buildExecutionHistoryItem(
     failure_reason: failureReason as DispatchFailureReason | undefined,
     error:
       errorMessage !== undefined
-        ? { message: errorMessage, stack_trace: event.error?.stack_trace ?? null }
-        : null,
+        ? { message: errorMessage, stack_trace: event.error?.stack_trace }
+        : undefined,
   };
 }

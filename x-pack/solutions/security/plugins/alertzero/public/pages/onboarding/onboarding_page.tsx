@@ -12,13 +12,13 @@ import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
-import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { ONBOARDING_CONTENT_MAX_WIDTH } from './constants';
 import { OnboardingEnableFooter } from './onboarding_enable_footer';
+import { NoModelCallout } from './no_model_callout';
 import { OnboardingIntro } from './onboarding_intro';
 import { useEnableWorkers } from './use_enable_workers';
 import { useWorkerSelection } from './use_worker_selection';
@@ -49,6 +49,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
     workerEnabled,
     enabledCount,
     canModifyWorkers,
+    isModelMissing,
     toggleWorker,
   } = useWorkerSelection();
   const { handleEnableAndContinue, isSaving } = useEnableWorkers(
@@ -116,13 +117,20 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
           </>
         )}
 
+        {isModelMissing ? (
+          <>
+            <NoModelCallout />
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+
         <WorkerSelectionList
           workers={workers}
           serverWorkers={serverWorkers}
           workerEnabled={workerEnabled}
           enabledCount={enabledCount}
           isSaving={isSaving}
-          canModifyWorkers={canModifyWorkers}
+          isLocked={!canModifyWorkers || isModelMissing}
           onToggle={toggleWorker}
         />
       </div>
@@ -132,10 +140,13 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         totalCount={availableWorkerIds.length}
         isSaving={isSaving}
         isEnableDisabled={
-          availableWorkerIds.length === 0 || enabledCount === 0 || !canModifyWorkers
+          availableWorkerIds.length === 0 ||
+          enabledCount === 0 ||
+          !canModifyWorkers ||
+          isModelMissing
         }
         onEnable={handleEnableAndContinue}
-        onBack={() => application.navigateToApp(SECURITY_APP_ID)}
+        onBack={() => setStep('intro')}
       />
     </AlertZeroPageSection>
   );

@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
@@ -18,7 +19,11 @@ import { css } from '@emotion/react';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
-import { DISABLED_ACTIONS_WARNING_TITLE, RULE_FORM_RETURN_TITLE } from '../translations';
+import {
+  DISABLED_ACTIONS_WARNING_TITLE,
+  RULE_FORM_RETURN_TITLE,
+  CLASSIC_RULES_BADGE_LABEL,
+} from '../translations';
 import type { RuleFormData } from '../types';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
@@ -114,6 +119,10 @@ export const RulePage = (props: RulePageProps) => {
             <EuiSpacer />
             <EuiFlexItem grow={false} className="eui-fullWidth">
               <RulePageNameInput />
+              <EuiSpacer size="s" />
+              <EuiBadge color="hollow" data-test-subj="classicRulesBadge">
+                {CLASSIC_RULES_BADGE_LABEL}
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageTemplate.Header>
