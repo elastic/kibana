@@ -58,7 +58,7 @@ import { installRegisteredWorkerForRequest } from './managed_workflows/worker_re
 import { WatchesService } from './services/watches/watches_service';
 import { WorkersService } from './services/workers/workers_service';
 import { createGetWorkerBlockingReasons } from './services/workers/worker_blocking_reasons';
-import { ConversationProposalsService } from './services/conversation_proposals/conversation_proposals_service';
+import { InvestigationQueueService } from './services/investigation_queue/investigation_queue_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
 import { ScanFailuresService } from './services/scan_failures/scan_failures_service';
 import { ActionsService } from './services/actions/actions_service';
@@ -98,7 +98,7 @@ export class AlertZeroPlugin
   private watchesService?: WatchesService;
   private actionsService?: ActionsService;
   private workersService?: WorkersService;
-  private conversationProposalsService?: ConversationProposalsService;
+  private investigationQueueService?: InvestigationQueueService;
   private proposals?: AlertZeroStartDependencies['proposals'];
   private agentBuilderConversations?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
@@ -280,7 +280,7 @@ export class AlertZeroPlugin
       getSpaceId: (request) => this.getSpaceId(request),
       getWatchesService: () => this.requireWatchesService(),
       getWorkersService: () => this.requireWorkersService(),
-      getConversationProposalsService: () => this.requireConversationProposalsService(),
+      getInvestigationQueueService: () => this.requireInvestigationQueueService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
       getHuntServices: () => this.requireHuntServices(),
@@ -331,7 +331,7 @@ export class AlertZeroPlugin
       return undefined;
     });
 
-    this.conversationProposalsService = new ConversationProposalsService(
+    this.investigationQueueService = new InvestigationQueueService(
       proposals.getProposalsService(),
       agentBuilder,
       this.logger,
@@ -430,8 +430,8 @@ export class AlertZeroPlugin
     return this.requireStarted(this.workersService, 'Workers service');
   }
 
-  private requireConversationProposalsService(): ConversationProposalsService {
-    return this.requireStarted(this.conversationProposalsService, 'ConversationProposalsService');
+  private requireInvestigationQueueService(): InvestigationQueueService {
+    return this.requireStarted(this.investigationQueueService, 'InvestigationQueueService');
   }
 
   private requireAgentBuilderConversations(): NonNullable<

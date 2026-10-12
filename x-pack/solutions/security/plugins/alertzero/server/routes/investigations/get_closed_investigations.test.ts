@@ -9,20 +9,20 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { RouteDependencies } from '../register_routes';
 import { createRouteContextMock } from '../route_context.mock';
-import { registerGetProposalsByCategoryRoute } from './get_proposals_by_category';
+import { registerGetClosedInvestigationsRoute } from './get_closed_investigations';
 
-const makeDeps = (conversationProposalsService: unknown) => {
+const makeDeps = (investigationQueueService: unknown) => {
   const addVersion = jest.fn();
   const router = {
     versioned: {
       get: jest.fn().mockReturnValue({ addVersion }),
     },
   };
-  registerGetProposalsByCategoryRoute({
+  registerGetClosedInvestigationsRoute({
     router: router as unknown as RouteDependencies['router'],
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
-    getConversationProposalsService: () => conversationProposalsService,
+    getInvestigationQueueService: () => investigationQueueService,
   } as unknown as RouteDependencies);
 
   const handler = addVersion.mock.calls[0][1] as (
@@ -40,94 +40,88 @@ const makeDeps = (conversationProposalsService: unknown) => {
   return { handler, validateQuery };
 };
 
-describe('registerGetProposalsByCategoryRoute', () => {
+describe('registerGetClosedInvestigationsRoute', () => {
   it('returns 404 when the per-space setting is off', async () => {
-    const listByCategory = jest.fn();
-    const { handler } = makeDeps({ listByCategory });
+    const listClosed = jest.fn();
+    const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
       createRouteContextMock({ settingEnabled: false }),
       httpServerMock.createKibanaRequest({
-        params: { category: 'respond' },
-        query: { size: '10', from: '0' },
+        query: { size: '25', from: '0' },
       }),
       response
     );
 
     expect(response.notFound).toHaveBeenCalled();
-    expect(listByCategory).not.toHaveBeenCalled();
+    expect(listClosed).not.toHaveBeenCalled();
   });
 
-  it('delegates to listByCategory with the correct category, size, from, and spaceId', async () => {
-    const listByCategory = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
-    const { handler } = makeDeps({ listByCategory });
+  it('delegates to listClosed with the correct size, from and spaceId', async () => {
+    const listClosed = jest.fn().mockResolvedValue({ investigations: [], total: 0 });
+    const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
       createRouteContextMock(),
       httpServerMock.createKibanaRequest({
-        path: '/internal/alertzero/proposals/category/respond',
-        params: { category: 'respond' },
-        query: { size: '10', from: '0' },
+        path: '/internal/alertzero/investigations/closed',
+        query: { size: '25', from: '0' },
       }),
       response
     );
 
-    expect(listByCategory).toHaveBeenCalledWith('respond', expect.anything(), 'default', {
-      size: '10',
+    expect(listClosed).toHaveBeenCalledWith(expect.anything(), 'default', {
+      size: '25',
       from: '0',
     });
-    expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 0 } });
+    expect(response.ok).toHaveBeenCalledWith({ body: { investigations: [], total: 0 } });
   });
 
   it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
-    const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
+    const { validateQuery } = makeDeps({ listClosed: jest.fn() });
 
     expect(validateQuery({ size: '0', from: '0' })).toEqual({ value: { size: 0, from: 0 } });
   });
 
   it('returns the group total on a size=0 page', async () => {
-    const listByCategory = jest.fn().mockResolvedValue({ proposals: [], total: 17 });
-    const { handler } = makeDeps({ listByCategory });
+    const listClosed = jest.fn().mockResolvedValue({ investigations: [], total: 42 });
+    const { handler } = makeDeps({ listClosed });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
       createRouteContextMock(),
-      httpServerMock.createKibanaRequest({
-        params: { category: 'respond' },
-        query: { size: 0, from: 0 },
-      }),
+      httpServerMock.createKibanaRequest({ query: { size: 0, from: 0 } }),
       response
     );
 
-    expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 17 } });
+    expect(response.ok).toHaveBeenCalledWith({ body: { investigations: [], total: 42 } });
   });
 
   it('rejects a negative size', () => {
-    const { validateQuery } = makeDeps({ listByCategory: jest.fn() });
+    const { validateQuery } = makeDeps({ listClosed: jest.fn() });
 
     expect(validateQuery({ size: '-1', from: '0' })).toEqual({ error: expect.any(String) });
   });
 
-  it('returns 500 when listByCategory throws', async () => {
+  it('returns 500 when listClosed throws', async () => {
     const { handler } = makeDeps({
-      listByCategory: jest.fn().mockRejectedValue(new Error('ES down')),
+      listClosed: jest.fn().mockRejectedValue(new Error('ES down')),
     });
     const response = httpServerMock.createResponseFactory();
 
     await handler(
       createRouteContextMock(),
       httpServerMock.createKibanaRequest({
-        params: { category: 'respond' },
-        query: { size: '10', from: '0' },
+        query: { size: '25', from: '0' },
       }),
       response
     );
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 500,
-      body: { message: 'Failed to get proposals by category' },
+      body: { message: 'Failed to get closed investigations' },
     });
   });
 });

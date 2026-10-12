@@ -29,15 +29,15 @@ import {
   useInvestigationClosePreview,
 } from '@kbn/agentic-investigations-plugin/public';
 import {
-  useProposalsByCategory,
-  useProposalsByCategoryCount,
-  useClosedProposals,
-  useClosedProposalsCount,
-} from '../../hooks/use_proposals_api';
+  useOpenInvestigationsByCategory,
+  useOpenInvestigationsByCategoryCount,
+  useClosedInvestigations,
+  useClosedInvestigationsCount,
+} from '../../hooks/use_investigation_queue_api';
 import { CATEGORY_PAGE_SIZE, CLOSED_PAGE_SIZE } from './queue/use_queue_section';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { useRunningSummary } from '../../hooks/use_running_summary';
-import type { ProposalItem } from '../../../common/proposals/list';
+import type { InvestigationQueueItem, ProposalItem } from '../../../common/investigations/queue';
 import { ConversationsPage } from './conversations_page';
 
 jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
@@ -124,17 +124,17 @@ jest.mock('@kbn/agentic-investigations-common', () => {
       ),
   };
 });
-jest.mock('../../hooks/use_proposals_api');
+jest.mock('../../hooks/use_investigation_queue_api');
 jest.mock('../../hooks/use_proposal_charts_summary');
 jest.mock('../../hooks/use_running_summary');
 jest.mock('../../components/proposals_trend_chart', () => ({
   ProposalsTrendChartRow: () => null,
 }));
 
-const mockUseProposalsByCategory = useProposalsByCategory as jest.Mock;
-const mockUseProposalsByCategoryCount = useProposalsByCategoryCount as jest.Mock;
-const mockUseClosedProposals = useClosedProposals as jest.Mock;
-const mockUseClosedProposalsCount = useClosedProposalsCount as jest.Mock;
+const mockUseProposalsByCategory = useOpenInvestigationsByCategory as jest.Mock;
+const mockUseProposalsByCategoryCount = useOpenInvestigationsByCategoryCount as jest.Mock;
+const mockUseClosedProposals = useClosedInvestigations as jest.Mock;
+const mockUseClosedProposalsCount = useClosedInvestigationsCount as jest.Mock;
 const mockUseProposalChartsSummary = useProposalChartsSummary as jest.Mock;
 const mockUseRunningSummary = useRunningSummary as jest.Mock;
 const mockUseApproveProposal = useApproveProposal as jest.Mock;
@@ -156,9 +156,41 @@ const fetchNextPage: Record<string, jest.Mock> = {};
  * while disabled, which is what makes the badge's source observable. `total` is the
  * whole bucket and the pages only what was asked for, so the fake keeps them apart.
  */
+const toQueueItem = ({
+  conversationId,
+  conversationTitle,
+  conversationAgentId,
+  conversationAssignees,
+  entityIds,
+  ...proposal
+}: ProposalItem): InvestigationQueueItem => {
+  const isClosed = Boolean(proposal.decidedAt);
+  return {
+    id: conversationId,
+    title: conversationTitle,
+    agentId: conversationAgentId,
+    createdAt: proposal.createdAt,
+    updatedAt: proposal.decidedAt ?? proposal.createdAt,
+    status: isClosed ? 'closed' : 'open',
+    assignees: conversationAssignees,
+    entityIds,
+    ...(isClosed
+      ? {}
+      : {
+          category: proposal.category,
+          newestProposalAt: proposal.createdAt,
+          pendingProposalCount: 1,
+          leadProposal: { ...proposal, conversationId },
+        }),
+  };
+};
+
+const stableData = new Map<string, unknown>();
+
 const mockProposals = (groups: Record<string, ProposalItem[]>) => {
+  stableData.clear();
   const count = (all: ProposalItem[], enabled: boolean) => ({
-    data: enabled ? { proposals: [], total: all.length } : undefined,
+    data: enabled ? { investigations: [], total: all.length } : undefined,
     isLoading: false,
     error: undefined,
   });
@@ -176,11 +208,19 @@ const mockProposals = (groups: Record<string, ProposalItem[]>) => {
         error: undefined,
       };
     }
-    return {
-      data: {
-        pages: [{ proposals: all.slice(0, firstPageSize), total: all.length }],
+    // Stable across renders, like React Query's data: the page derives objects from it, and a
+    // fresh copy each render would restart the effects that watch them.
+    const key = `${bucket}:${firstPageSize}`;
+    if (!stableData.has(key)) {
+      stableData.set(key, {
+        pages: [
+          { investigations: all.slice(0, firstPageSize).map(toQueueItem), total: all.length },
+        ],
         pageParams: [undefined],
-      },
+      });
+    }
+    return {
+      data: stableData.get(key),
       fetchNextPage: fetchNextPage[bucket],
       hasNextPage: all.length > firstPageSize,
       isFetchingNextPage: false,
@@ -425,12 +465,12 @@ describe('ConversationsPage details flyout', () => {
   });
 
   it('marks the cards of the open conversation, not just the clicked one', async () => {
-    const sibling: ProposalItem = { ...proposal, id: 'prop-2', comment: 'Second proposal.' };
-    mockProposals({ investigate: [proposal, sibling] });
+    const sibling: ProposalItem = { ...proposal, id: 'prop-2', category: 'respond' };
+    mockProposals({ investigate: [proposal], respond: [sibling] });
 
     renderPage('/?selectedConversationId=inv-1');
 
-    // Both rows belong to the conversation the flyout is showing.
+    // The investigation sits in two categories, and both cards belong to the one the flyout shows.
     const cards = screen.getAllByRole('button', { name: 'Impossible travel — exec account' });
     expect(cards).toHaveLength(2);
     cards.forEach((card) => expect(card).toHaveAttribute('aria-current', 'true'));
@@ -753,7 +793,7 @@ describe('ConversationsPage idle state', () => {
       data:
         category === 'investigate'
           ? undefined
-          : { pages: [{ proposals: [], total: 0 }], pageParams: [undefined] },
+          : { pages: [{ investigations: [], total: 0 }], pageParams: [undefined] },
       fetchNextPage: jest.fn(),
       hasNextPage: false,
       isFetchingNextPage: false,
@@ -789,7 +829,12 @@ describe('ConversationsPage idle state', () => {
 describe('ConversationsPage queue sections', () => {
   const closedProposal = { ...proposal, id: 'prop-c', decidedAt: '2024-01-02T00:00:00Z' };
   const bucketOf = (size: number, overrides: Partial<ProposalItem> = {}) =>
-    Array.from({ length: size }, (_, i) => ({ ...proposal, id: `prop-${i}`, ...overrides }));
+    Array.from({ length: size }, (_, i) => ({
+      ...proposal,
+      id: `prop-${i}`,
+      conversationId: `inv-${i}`,
+      ...overrides,
+    }));
 
   it('starts Closed collapsed and runs no rows query', () => {
     mockProposals({ closed: [closedProposal] });
@@ -918,7 +963,9 @@ describe('ConversationsPage queue sections', () => {
           }
         : {
             data: {
-              pages: [{ proposals: category === 'respond' ? [proposal] : [], total: 1 }],
+              pages: [
+                { investigations: category === 'respond' ? [toQueueItem(proposal)] : [], total: 1 },
+              ],
               pageParams: [undefined],
             },
             fetchNextPage: jest.fn(),
@@ -942,7 +989,7 @@ describe('ConversationsPage queue sections', () => {
     // promise rows that are never coming.
     mockProposals({});
     mockUseClosedProposalsCount.mockReturnValue({
-      data: { proposals: [], total: 3 },
+      data: { investigations: [], total: 3 },
       isLoading: false,
       error: undefined,
     });
@@ -967,12 +1014,14 @@ describe('ConversationsPage impact pills', () => {
   const hostProposal: ProposalItem = {
     ...proposal,
     id: 'prop-host',
+    conversationId: 'inv-host',
     conversationTitle: 'Host investigation',
     entityIds: ['host-1'],
   };
   const userProposal: ProposalItem = {
     ...proposal,
     id: 'prop-user',
+    conversationId: 'inv-user',
     conversationTitle: 'User investigation',
     entityIds: ['user-1'],
   };

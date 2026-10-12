@@ -9,21 +9,26 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { InfiniteData, QueryFilters } from '@kbn/react-query';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { ProposalsPageResponse } from '../../../../common/proposals/list';
+import type { InvestigationsPageResponse } from '../../../../common/investigations/queue';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys } from '../../../query_keys';
-import { useProposalsByCategory } from '../../../hooks/use_proposals_api';
+import { useOpenInvestigationsByCategory } from '../../../hooks/use_investigation_queue_api';
 import { useDropDecidedProposal } from './use_drop_decided_proposal';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const row = (id: string) => ({ id } as ProposalsPageResponse['proposals'][number]);
+const row = (id: string, pendingProposalCount = 1) =>
+  ({
+    id: `conv-${id}`,
+    leadProposal: { id },
+    pendingProposalCount,
+  } as InvestigationsPageResponse['investigations'][number]);
 
-const pagesOf = (...ids: string[]): InfiniteData<ProposalsPageResponse> => ({
-  pages: [{ proposals: ids.map(row), total: ids.length }],
+const pagesOf = (...ids: string[]): InfiniteData<InvestigationsPageResponse> => ({
+  pages: [{ investigations: ids.map((id) => row(id)), total: ids.length }],
   pageParams: [undefined],
 });
 
@@ -39,50 +44,81 @@ const setup = () => {
   return { queryClient, drop: result.current };
 };
 
-const rowsIn = (queryClient: QueryClient, category: string) =>
+const itemsIn = (queryClient: QueryClient, category: string) =>
   queryClient
-    .getQueryData<InfiniteData<ProposalsPageResponse>>(queryKeys.proposals.byCategory(category))
-    ?.pages.flatMap(({ proposals }) => proposals.map(({ id }) => id));
+    .getQueryData<InfiniteData<InvestigationsPageResponse>>(
+      queryKeys.proposals.byCategory(category)
+    )
+    ?.pages.flatMap(({ investigations }) => investigations);
 
-const countIn = (queryClient: QueryClient, category: string) =>
-  queryClient.getQueryData<ProposalsPageResponse>(queryKeys.proposals.byCategoryCount(category))
-    ?.total;
+const leadIdsIn = (queryClient: QueryClient, category: string) =>
+  itemsIn(queryClient, category)?.map(({ leadProposal }) => leadProposal?.id);
 
 describe('useDropDecidedProposal', () => {
-  it('takes the decided row out of the queue it was in', async () => {
+  it('keeps the investigation in its queue but stops offering the decided proposal', async () => {
     const { queryClient, drop } = setup();
     queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), pagesOf('a', 'b', 'c'));
+
+    await act(() => drop('b'));
+
+    expect(itemsIn(queryClient, 'respond')?.map(({ id }) => id)).toEqual([
+      'conv-a',
+      'conv-b',
+      'conv-c',
+    ]);
+    expect(leadIdsIn(queryClient, 'respond')).toEqual(['a', undefined, 'c']);
+    expect(itemsIn(queryClient, 'respond')?.[1].pendingProposalCount).toBe(0);
+  });
+
+  it('counts the other pending proposals down by one', async () => {
+    const { queryClient, drop } = setup();
+    queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), {
+      pages: [{ investigations: [row('a'), row('b', 3)], total: 2 }],
+      pageParams: [undefined],
+    });
+
+    await act(() => drop('b'));
+
+    expect(itemsIn(queryClient, 'respond')?.[1].pendingProposalCount).toBe(2);
+  });
+
+  it('leaves the totals alone, since no investigation leaves a queue', async () => {
+    const { queryClient, drop } = setup();
+    queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), pagesOf('a', 'b'));
     queryClient.setQueryData(queryKeys.proposals.byCategoryCount('respond'), {
-      proposals: [],
+      investigations: [],
       total: 12,
     });
 
     await act(() => drop('b'));
 
-    expect(rowsIn(queryClient, 'respond')).toEqual(['a', 'c']);
-    expect(countIn(queryClient, 'respond')).toBe(11);
+    expect(
+      queryClient.getQueryData<InvestigationsPageResponse>(
+        queryKeys.proposals.byCategoryCount('respond')
+      )?.total
+    ).toBe(12);
+    expect(
+      queryClient.getQueryData<InfiniteData<InvestigationsPageResponse>>(
+        queryKeys.proposals.byCategory('respond')
+      )?.pages[0].total
+    ).toBe(2);
   });
 
   it('leaves the buckets it was not in alone', async () => {
     const { queryClient, drop } = setup();
     queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), pagesOf('a'));
     queryClient.setQueryData(queryKeys.proposals.byCategory('investigate'), pagesOf('b'));
-    queryClient.setQueryData(queryKeys.proposals.byCategoryCount('investigate'), {
-      proposals: [],
-      total: 7,
-    });
 
     await act(() => drop('a'));
 
-    expect(rowsIn(queryClient, 'investigate')).toEqual(['b']);
-    expect(countIn(queryClient, 'investigate')).toBe(7);
+    expect(leadIdsIn(queryClient, 'investigate')).toEqual(['b']);
   });
 
   it('survives the refetch the decision itself kicked off', async () => {
     // Mounts the real query on purpose: an invalidation with no observer never
     // refetches, and would pass whether or not the refetch is cancelled.
     const http = {
-      get: jest.fn().mockResolvedValue({ proposals: [row('a'), row('b')], total: 2 }),
+      get: jest.fn().mockResolvedValue({ investigations: [row('a'), row('b')], total: 2 }),
     };
     useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
       typeof useKibana
@@ -97,7 +133,7 @@ describe('useDropDecidedProposal', () => {
 
     const { result } = renderHook(
       () => ({
-        query: useProposalsByCategory('respond', {
+        query: useOpenInvestigationsByCategory('respond', {
           firstPageSize: 10,
           step: 10,
           enabled: true,
@@ -116,13 +152,12 @@ describe('useDropDecidedProposal', () => {
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
 
-    expect(rowsIn(queryClient, 'respond')).toEqual(['a']);
+    expect(leadIdsIn(queryClient, 'respond')).toEqual(['a', undefined]);
   });
 
   it('cancels only its own bucket, since the decision refreshes the others too', async () => {
-    // Cancelling the whole proposals root aborted Closed, the other counts and the
-    // header along with the bucket being dropped from, so none of them updated until
-    // the next poll.
+    // Cancelling the whole proposals root aborted Closed, the counts and the header
+    // along with the bucket being settled, so none of them updated until the next poll.
     const { queryClient, drop } = setup();
     queryClient.setQueryData(queryKeys.proposals.byCategory('respond'), pagesOf('a', 'b'));
     const cancelQueries = jest.spyOn(queryClient, 'cancelQueries');
@@ -135,7 +170,6 @@ describe('useDropDecidedProposal', () => {
 
     expect(calls.map(([filters]) => filters?.queryKey)).toEqual([
       queryKeys.proposals.byCategory('respond'),
-      queryKeys.proposals.byCategoryCount('respond'),
     ]);
   });
 });

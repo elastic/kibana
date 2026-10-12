@@ -9,17 +9,17 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 import { z } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
-  ALERTZERO_PROPOSALS_CLOSED_URL,
+  ALERTZERO_INVESTIGATIONS_CLOSED_URL,
   INTERNAL_API_ACCESS,
 } from '@kbn/alertzero-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
-import type { ProposalsPageResponse } from '../../../common/proposals/list';
+import type { InvestigationsPageResponse } from '../../../common/investigations/queue';
 import {
   MAX_QUEUE_PAGE_SIZE,
   MAX_QUEUE_REACH,
   fitsQueueReach,
-} from '../../../common/proposals/list';
+} from '../../../common/investigations/queue';
 import type { RouteDependencies } from '../register_routes';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
@@ -30,38 +30,38 @@ const PROPOSALS_API_PRIVILEGE_READ = ApiPrivileges.read('proposals');
 
 // `size: 0` is a count-only read: a collapsed accordion needs the group total
 // without paying for its rows.
-const GetClosedProposalsQuery = z
+const GetClosedInvestigationsQuery = z
   .object({
     size: z.coerce.number().int().min(0).max(MAX_QUEUE_PAGE_SIZE).default(25),
     from: z.coerce.number().int().min(0).max(MAX_QUEUE_REACH).default(0),
   })
   .refine(fitsQueueReach, { message: `from + size must not exceed ${MAX_QUEUE_REACH}` });
 
-export const registerGetClosedProposalsRoute = ({
+export const registerGetClosedInvestigationsRoute = ({
   router,
   logger,
   getSpaceId,
-  getConversationProposalsService,
+  getInvestigationQueueService,
 }: RouteDependencies) => {
   router.versioned
     .get({
-      path: ALERTZERO_PROPOSALS_CLOSED_URL,
+      path: ALERTZERO_INVESTIGATIONS_CLOSED_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ, PROPOSALS_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Get proposals decided in the last 72 hours',
+      summary: 'Get investigations closed in the last 72 hours',
       description:
-        'Returns proposals that stopped awaiting a human decision in the last 72 h, including expired ones. Sorted by decidedAt desc.',
+        'Returns investigations closed in the last 72 h that received at least one proposal, most recently updated first. Investigations have no closed-at timestamp, so updated_at stands in for it.',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetClosedProposalsQuery),
+            query: buildRouteValidationWithZod(GetClosedInvestigationsQuery),
           },
         },
       },
@@ -69,7 +69,7 @@ export const registerGetClosedProposalsRoute = ({
         try {
           const { size, from } = request.query;
 
-          const body: ProposalsPageResponse = await getConversationProposalsService().listClosed(
+          const body: InvestigationsPageResponse = await getInvestigationQueueService().listClosed(
             request,
             getSpaceId(request),
             { size, from }
@@ -77,10 +77,12 @@ export const registerGetClosedProposalsRoute = ({
 
           return response.ok({ body });
         } catch (error) {
-          logger.error(error instanceof Error ? error : `Failed to get closed proposals: ${error}`);
+          logger.error(
+            error instanceof Error ? error : `Failed to get closed investigations: ${error}`
+          );
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get closed proposals' },
+            body: { message: 'Failed to get closed investigations' },
           });
         }
       })

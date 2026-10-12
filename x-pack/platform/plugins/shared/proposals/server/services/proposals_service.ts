@@ -37,6 +37,7 @@ import type {
   ProposalChartsSummaryResponse,
   ProposalDecision,
   ProposalFilters,
+  ProposalOrigin,
   ProposalStatus,
   ProposalUser,
   ProposalWithMetadata,
@@ -852,6 +853,101 @@ export class ProposalsService {
     return new Map(buckets.map(({ key, doc_count: count }) => [String(key), count]));
   }
 
+  /** Which of the conversations ever received a proposal from the origin, whatever its status. */
+  async findConversationsWithProposals(
+    { conversationIds, origin }: { conversationIds: string[]; origin: ProposalOrigin },
+    spaceId: string
+  ): Promise<Set<string>> {
+    const ids = [...new Set(conversationIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Set();
+    }
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              { origin, excludeSuperseded: false, excludeExpired: false },
+              spaceId
+            ),
+            { terms: { conversationId: ids } },
+          ],
+        },
+      },
+      aggs: {
+        by_conversation: { terms: { field: 'conversationId', size: ids.length } },
+      },
+    });
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    return new Set(buckets.map(({ key }) => String(key)));
+  }
+
+  /**
+   * Conversations holding a proposal in a category, whatever its status, ordered by their
+   * newest proposal. `lead` is the conversation's newest pending proposal and is absent
+   * when none is pending. Elasticsearch cannot offset a terms aggregation, so callers page
+   * over the returned list, bounded by `limit`.
+   */
+  async listConversationsByCategory(
+    { category, origin, limit }: { category: string; origin: ProposalOrigin; limit: number },
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<ConversationProposalGroup[]> {
+    const response = await this.deps.storage.search({
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: toFilterClauses(
+            { category, origin, excludeSuperseded: true, excludeExpired: false },
+            spaceId
+          ),
+        },
+      },
+      aggs: {
+        by_conversation: {
+          terms: { field: 'conversationId', size: limit, order: { newest: 'desc' } },
+          aggs: {
+            newest: { max: { field: 'createdAt' } },
+            pending: {
+              filter: { term: { status: 'pending' } },
+              aggs: {
+                lead: { top_hits: { size: 1, sort: [{ createdAt: { order: 'desc' } }] } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const buckets = response.aggregations?.by_conversation.buckets ?? [];
+    const groups = buckets.map(({ key, newest, pending }) => {
+      const hit = pending.lead.hits.hits[0];
+      return {
+        conversationId: String(key),
+        newestProposalAt: newest.value_as_string ?? '',
+        pendingCount: pending.doc_count,
+        proposal:
+          hit && hit._id !== undefined
+            ? toProposal(hit._id, hit._source as ProposalDocument)
+            : undefined,
+      };
+    });
+
+    const leads = groups.flatMap(({ proposal }) => (proposal ? [proposal] : []));
+    const withMetadata = await this.withMetadataBatch(leads, spaceId, request);
+    const metadataById = new Map(withMetadata.map((lead) => [lead.id, lead]));
+
+    return groups.map(({ conversationId, newestProposalAt, pendingCount, proposal }) => ({
+      conversationId,
+      newestProposalAt,
+      pendingCount,
+      ...(proposal ? { lead: metadataById.get(proposal.id) } : {}),
+    }));
+  }
+
   /** Resolves any proposal in a revision chain to its live revision using the root ID. */
   async getLatestRevision(
     id: string,
@@ -1184,6 +1280,15 @@ export class ProposalsService {
           : undefined,
     }));
   }
+}
+
+export interface ConversationProposalGroup {
+  conversationId: string;
+  /** Creation time of the conversation's newest proposal in the category, any status. */
+  newestProposalAt: string;
+  pendingCount: number;
+  /** The conversation's newest pending proposal in the category; absent when none is pending. */
+  lead?: ProposalWithMetadata;
 }
 
 export interface ReleaseGateParams {

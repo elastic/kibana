@@ -28,6 +28,10 @@ const outputSchema = z.object({
     .optional()
     .describe('Why the step wrote nothing.'),
   summary: z.string().optional().describe('Reading written to metadata.summary.'),
+  description: z
+    .string()
+    .optional()
+    .describe('One-line card text written to metadata.description.'),
 });
 
 export const summarizeInvestigationStepCommonDefinition: CommonStepDefinition<

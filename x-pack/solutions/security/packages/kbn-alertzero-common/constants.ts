@@ -46,12 +46,13 @@ export const ALERTZERO_WORKER_URL_TEMPLATE = `${ALERTZERO_WORKERS_URL}/{workerId
 export const buildWorkerUrl = (workerId: string) =>
   `${ALERTZERO_WORKERS_URL}/${encodeURIComponent(workerId)}`;
 
-/** Pending proposals for a single action category. */
-export const ALERTZERO_PROPOSALS_CATEGORY_URL =
-  `${ALERTZERO_INTERNAL_URL}/proposals/category/{category}` as const;
+/** Open investigations holding a pending proposal in a single action category. */
+export const ALERTZERO_INVESTIGATIONS_CATEGORY_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/category/{category}` as const;
 
-/** Proposals decided in the last 72 h (any non-pending status, including expired). */
-export const ALERTZERO_PROPOSALS_CLOSED_URL = `${ALERTZERO_INTERNAL_URL}/proposals/closed` as const;
+/** Investigations closed in the last 72 h. */
+export const ALERTZERO_INVESTIGATIONS_CLOSED_URL =
+  `${ALERTZERO_INTERNAL_URL}/investigations/closed` as const;
 
 /** Action catalog — category-scoped discovery of installed action workflows. */
 export const ALERTZERO_ACTIONS_URL = `${ALERTZERO_INTERNAL_URL}/actions` as const;
@@ -341,6 +342,9 @@ export const ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID = 'alertzero_agentic' as con
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;
+
+/** Longest one-line description stored on an investigation for its queue card. */
+export const INVESTIGATION_DESCRIPTION_MAX_LENGTH = 120;
 export const TEMPLATE_ID_ESCALATION = 'escalation' as const;
 
 export const API_VERSIONS = {
