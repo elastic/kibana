@@ -17,8 +17,9 @@ import {
  * Approved sources seeded into `.kibana-threat-intel-sources` on first boot.
  *
  * Fetch URLs live in `common/threat_intel/catalog_source_urls.ts`, not in the
- * sources index. This is a fixed, approved catalog containing only Elastic
- * Security Labs. Operators can only list and enable / disable entries.
+ * sources index. This fixed, approved catalog contains Elastic Security Labs
+ * reporting and CISA's CC0-licensed KEV data. Operators can only list and
+ * enable / disable entries.
  */
 interface DefaultSource {
   id: string;
@@ -33,6 +34,13 @@ interface DefaultSource {
 }
 
 export const DEFAULT_SOURCES: readonly DefaultSource[] = [
+  {
+    id: 'kev:cisa-known-exploited-vulnerabilities',
+    adapter_type: 'kev',
+    name: 'CISA Known Exploited Vulnerabilities',
+    tags: ['vulnerability', 'cisa', 'kev', 'government'],
+    enabled: true,
+  },
   {
     id: 'vendor_api:elastic-security-labs',
     adapter_type: 'rss',

@@ -75,16 +75,18 @@ const run = async ({
 
 describe('DEFAULT_SOURCES approved catalog', () => {
   const APPROVED_ENDPOINTS: Record<string, string> = {
+    'kev:cisa-known-exploited-vulnerabilities':
+      'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
   };
 
-  it('contains only the Elastic Security Labs source ID and URL', () => {
+  it('contains only the approved CISA KEV and Elastic Security Labs source IDs and URLs', () => {
     expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly one source enabled', () => {
-    expect(DEFAULT_SOURCES).toHaveLength(1);
-    expect(DEFAULT_SOURCES[0].enabled).toBe(true);
+  it('ships exactly two sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(2);
+    expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 
   it('dispatches Elastic Security Labs through the RSS adapter while preserving its stable ID', () => {

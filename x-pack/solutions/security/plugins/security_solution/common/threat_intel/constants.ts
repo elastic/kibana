@@ -70,14 +70,17 @@ export const GLOBAL_SPACE_ID = '*' as const;
  */
 export const MAX_URL_LENGTH = 2048;
 
-export const FETCH_ADAPTER_TYPES = ['rss'] as const;
+export const FETCH_ADAPTER_TYPES = ['rss', 'kev'] as const;
 export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
 
 /**
  * Stable document ids for the fixed, code-authoritative source catalog. Keep in
  * sync with `DEFAULT_SOURCES` in server setup seeding.
  */
-export const APPROVED_CATALOG_SOURCE_IDS = ['vendor_api:elastic-security-labs'] as const;
+export const APPROVED_CATALOG_SOURCE_IDS = [
+  'kev:cisa-known-exploited-vulnerabilities',
+  'vendor_api:elastic-security-labs',
+] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);
 

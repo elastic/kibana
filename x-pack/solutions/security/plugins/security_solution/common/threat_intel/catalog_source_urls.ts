@@ -15,6 +15,9 @@ import type { APPROVED_CATALOG_SOURCE_IDS } from './constants';
  * and list routes resolve the fetch URL from this map by stable source id.
  */
 export const CATALOG_SOURCE_URLS = {
+  // CC0: https://www.cisa.gov/sites/default/files/licenses/kev/license.txt
+  'kev:cisa-known-exploited-vulnerabilities':
+    'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
   'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
 } as const satisfies Record<(typeof APPROVED_CATALOG_SOURCE_IDS)[number], string>;
 
