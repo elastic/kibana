@@ -19,6 +19,8 @@ import { getExceptionsMetrics } from './exceptions/get_metrics';
 import { exceptionsMetricsSchema } from './exceptions/schema';
 import { valueListsMetricsSchema } from './value_lists/schema';
 import { getValueListsMetrics } from './value_lists/get_metrics';
+import { watchlistMetricsSchema } from './watchlists/schema';
+import { getWatchlistMetrics } from './watchlists/get_watchlist_metrics';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 
@@ -29,6 +31,7 @@ export interface UsageData {
   riskEngineMetrics: {};
   exceptionsMetrics: {};
   valueListsMetrics: {};
+  watchlistMetrics: {};
 }
 
 export const registerCollector: RegisterCollector = ({
@@ -309,6 +312,7 @@ export const registerCollector: RegisterCollector = ({
       riskEngineMetrics: riskEngineMetricsSchema,
       exceptionsMetrics: exceptionsMetricsSchema,
       valueListsMetrics: valueListsMetricsSchema,
+      watchlistMetrics: watchlistMetricsSchema,
     },
     isReady: () => true,
     fetch: async ({ esClient }: CollectorFetchContext): Promise<UsageData> => {
@@ -320,6 +324,7 @@ export const registerCollector: RegisterCollector = ({
         riskEngineMetrics,
         exceptionsMetrics,
         valueListsMetrics,
+        watchlistMetrics,
       ] = await Promise.allSettled([
         getDetectionsMetrics({
           eventLogIndex,
@@ -338,6 +343,7 @@ export const registerCollector: RegisterCollector = ({
         getRiskEngineMetrics({ esClient, logger, riskEngineIndexPatterns }),
         getExceptionsMetrics({ esClient, logger, savedObjectsClient }),
         getValueListsMetrics({ esClient, logger }),
+        getWatchlistMetrics({ savedObjectsClient, logger }),
       ]);
       return {
         detectionMetrics: detectionMetrics.status === 'fulfilled' ? detectionMetrics.value : {},
@@ -346,6 +352,7 @@ export const registerCollector: RegisterCollector = ({
         riskEngineMetrics: riskEngineMetrics.status === 'fulfilled' ? riskEngineMetrics.value : {},
         exceptionsMetrics: exceptionsMetrics.status === 'fulfilled' ? exceptionsMetrics.value : {},
         valueListsMetrics: valueListsMetrics.status === 'fulfilled' ? valueListsMetrics.value : {},
+        watchlistMetrics: watchlistMetrics.status === 'fulfilled' ? watchlistMetrics.value : {},
       };
     },
   });

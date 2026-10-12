@@ -7,20 +7,28 @@
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 import {
   registerStatusReportTask,
   getEntityRiskScoreDistribution,
   getEntitySourceDistribution,
+  getResolutionRulesState,
   getResolutionState,
 } from './status_report_task';
 import { createAssetManagerClient } from './factories';
 import {
   ENTITY_STORE_METADATA_USAGE_EVENT,
+  ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_USAGE_EVENT,
 } from '../telemetry/events';
+import { RESOLUTION_RULE_CONFIGS, ResolutionRulesClient } from '../domain/resolution/rules';
+import {
+  RESOLUTION_RULE_IDS,
+  RESOLUTION_RULE_KINDS,
+} from '../../common/domain/resolution_rules/constants';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
 import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
@@ -42,6 +50,15 @@ const createAssetManagerClientMock = createAssetManagerClient as jest.Mock;
 const NAMESPACE = 'default';
 const METADATA_INDEX = getMetadataEntitiesDataStreamName(NAMESPACE);
 const LATEST_INDEX = getLatestEntitiesIndexName(NAMESPACE);
+
+const EMAIL_RULE_DISABLED_OVERRIDE = {
+  attributes: {
+    id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+    kind: RESOLUTION_RULE_KINDS.SAME_FIELD,
+    managed: true,
+    enabled: false,
+  },
+};
 
 const makeEsqlResponse = (values: Array<Array<number | null>>) => ({
   columns: [
@@ -629,6 +646,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
   let getStatus: jest.Mock;
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let withContextSpy: jest.Mock;
+  let soFind: jest.Mock;
 
   // Drives the task the way task-manager does: register, grab the definition,
   // build the runner and run it once.
@@ -645,6 +663,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
             createInternalRepository: jest.fn().mockReturnValue({
               find: jest.fn().mockResolvedValue({ saved_objects: [{ id: 'engine' }], total: 1 }),
             }),
+            getScopedClient: jest.fn().mockReturnValue({ find: soFind }),
           },
         },
         {},
@@ -668,6 +687,7 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     logger = loggerMock.create();
     reportEvent = jest.fn();
     withContextSpy = jest.fn(<T>(_ctx: unknown, fn: () => T) => fn());
+    soFind = jest.fn().mockResolvedValue({ saved_objects: [] });
     getStatus = jest.fn().mockResolvedValue({ status: ENTITY_STORE_STATUS.NOT_INSTALLED });
     // Store-usage counts carry a `query`; the metadata-datastream count does not.
     count = jest.fn(async (params: { query?: unknown }) =>
@@ -1013,5 +1033,58 @@ describe('status report task — usage, resolution state & metadata telemetry', 
     expect(failingUsageCall?.[1].baseScoreDistribution).toEqual({});
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('source_boom'));
+  });
+
+  it('reports the resolution rules state once per namespace', async () => {
+    soFind.mockResolvedValue({ saved_objects: [EMAIL_RULE_DISABLED_OVERRIDE] });
+
+    await runStatusReportTask();
+
+    const rulesStateCalls = reportEvent.mock.calls.filter(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT.eventType
+    );
+    expect(rulesStateCalls).toHaveLength(1);
+    expect(rulesStateCalls[0][1].namespace).toBe(NAMESPACE);
+    expect(rulesStateCalls[0][1].rules).toHaveLength(RESOLUTION_RULE_CONFIGS.length);
+    expect(rulesStateCalls[0][1].rules).toContainEqual({
+      id: RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH,
+      enabled: false,
+      defaultEnabled: true,
+    });
+  });
+
+  it('keeps reporting other events when the resolution rules lookup fails', async () => {
+    soFind.mockRejectedValue(new Error('so_boom'));
+
+    await expect(runStatusReportTask()).resolves.toEqual({ state: { namespace: NAMESPACE } });
+
+    const reportedRulesState = reportEvent.mock.calls.some(
+      ([eventType]) => eventType === ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT.eventType
+    );
+    expect(reportedRulesState).toBe(false);
+    expect(reportEvent).toHaveBeenCalledWith(
+      ENTITY_STORE_METADATA_USAGE_EVENT.eventType,
+      expect.any(Object)
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('so_boom'));
+  });
+});
+
+describe('getResolutionRulesState', () => {
+  it('returns every rule with its effective and default enabled state', async () => {
+    const soClient = {
+      find: jest.fn().mockResolvedValue({ saved_objects: [EMAIL_RULE_DISABLED_OVERRIDE] }),
+    } as unknown as SavedObjectsClientContract;
+    const rulesClient = new ResolutionRulesClient(soClient, NAMESPACE, loggerMock.create());
+
+    const rules = await getResolutionRulesState(rulesClient);
+
+    expect(rules).toEqual(
+      RESOLUTION_RULE_CONFIGS.map(({ id, defaultEnabled }) => ({
+        id,
+        enabled: id === RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH ? false : defaultEnabled,
+        defaultEnabled,
+      }))
+    );
   });
 });
