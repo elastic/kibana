@@ -89,14 +89,16 @@ export async function getAllEnvironments({
     },
   };
 
-  const resp = await apmEventClient.search(operationName, params);
+  const { aggregations } = await apmEventClient.search(operationName, params);
+  if (!aggregations) return [];
 
-  const environments = uniq([
-    ...(resp.aggregations?.environments.buckets.map((bucket) => bucket.key as string) ?? []),
-    ...(resp.aggregations?.otelEnvironments.buckets.map((bucket) => bucket.key as string) ?? []),
-  ]);
+  const environments = uniq(
+    [...aggregations.environments.buckets, ...aggregations.otelEnvironments.buckets].map(
+      ({ key }) => key as string
+    )
+  );
 
-  if ((resp.aggregations?.missingEnvironments?.doc_count ?? 0) > 0) {
+  if ((aggregations.missingEnvironments?.doc_count ?? 0) > 0) {
     environments.push(ENVIRONMENT_NOT_DEFINED.value);
   }
 

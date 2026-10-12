@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
-import { uniq } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { KIND } from '@kbn/apm-types/es_fields';
 import {
@@ -19,6 +20,16 @@ import {
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
 import { ENVIRONMENT_FIELDS } from '../../../common/utils/environment_query';
+
+interface EnvironmentAggregations {
+  environments: estypes.AggregationsStringTermsAggregate;
+  otel_environments: estypes.AggregationsStringTermsAggregate;
+  missing_environments: estypes.AggregationsFilterAggregate;
+}
+
+function getBucketKeys({ buckets }: estypes.AggregationsStringTermsAggregate): string[] {
+  return Array.isArray(buckets) ? buckets.map(({ key }) => String(key)) : [];
+}
 
 /**
  * Returns environments for a service across both APM-processed and unprocessed
@@ -45,7 +56,7 @@ export async function getUnifiedEnvironments({
   const index = [indices.transaction, indices.span].filter(Boolean).join(',');
   if (!index) return [];
 
-  const response = await esClient.search({
+  const response = await esClient.search<never, EnvironmentAggregations>({
     index,
     size: 0,
     track_total_hits: false,
@@ -95,17 +106,15 @@ export async function getUnifiedEnvironments({
     },
   });
 
-  type TermsBuckets = { buckets: Array<{ key: string }> } | undefined;
-  const buckets = (response.aggregations?.environments as TermsBuckets)?.buckets ?? [];
-  const otelBuckets = (response.aggregations?.otel_environments as TermsBuckets)?.buckets ?? [];
+  const { aggregations } = response;
+  if (!aggregations) return [];
 
-  const environments = uniq([...buckets, ...otelBuckets].map((b) => b.key as Environment)).sort();
+  const environments = uniq([
+    ...getBucketKeys(aggregations.environments),
+    ...getBucketKeys(aggregations.otel_environments),
+  ]).sort() as Environment[];
 
-  const missingCount =
-    (response.aggregations?.missing_environments as { doc_count: number } | undefined)?.doc_count ??
-    0;
-
-  if (missingCount > 0) {
+  if (aggregations.missing_environments.doc_count > 0) {
     environments.push(ENVIRONMENT_NOT_DEFINED.value as Environment);
   }
 

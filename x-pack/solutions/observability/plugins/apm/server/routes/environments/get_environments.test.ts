@@ -56,7 +56,7 @@ describe('getEnvironments', () => {
     expect(result).toEqual(['ENVIRONMENT_NOT_DEFINED']);
   });
 
-  it('handles undefined unsetValuesForField', async () => {
+  it('handles a missing hit total from the unset-environment check', async () => {
     const apmEventClient = createMockApmEventClient({ serviceEnvironments: ['dev', 'test'] });
     const result = await getEnvironments({ ...baseArgs, apmEventClient });
     expect(result).toEqual(['dev', 'test']);

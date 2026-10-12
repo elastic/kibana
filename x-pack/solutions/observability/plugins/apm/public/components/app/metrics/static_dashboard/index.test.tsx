@@ -201,10 +201,10 @@ describe('JsonMetricsDashboard', () => {
 });
 
 describe('getFilters', () => {
-  const field = (name: string) => ({ name, type: 'string' } as unknown as DataViewField);
+  const createField = (name: string) => ({ name, type: 'string' } as unknown as DataViewField);
 
   function createDataView(fieldNames: string[]) {
-    const fields = new Map(fieldNames.map((name) => [name, field(name)]));
+    const fields = new Map(fieldNames.map((name) => [name, createField(name)]));
     return {
       id: 'test-data-view-id',
       getFieldByName: (name: string) => fields.get(name),

@@ -9,7 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { KIND } from '@kbn/apm-types/es_fields';
 import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values';
-import { PROCESSOR_EVENT, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
+import {
+  PROCESSOR_EVENT,
+  RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getServiceSchemaType } from './get_service_schema_type';
 
@@ -149,7 +154,9 @@ describe('getServiceSchemaType', () => {
         ...baseParams,
         environment: ENVIRONMENT_ALL_VALUE,
       });
-      expect(JSON.stringify(getFilterClauses(esClient, 0))).not.toContain(SERVICE_ENVIRONMENT);
+      const serializedFilters = JSON.stringify(getFilterClauses(esClient, 0));
+      expect(serializedFilters).not.toContain(SERVICE_ENVIRONMENT);
+      expect(serializedFilters).not.toContain(RESOURCE_ATTRIBUTES_DEPLOYMENT_ENVIRONMENT_NAME);
     });
 
     it('adds an environment filter for a specific environment', async () => {
