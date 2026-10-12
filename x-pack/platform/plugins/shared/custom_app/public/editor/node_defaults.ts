@@ -65,6 +65,8 @@ export const createDefaultNode = (
         query: DEFAULT_QUERY,
         title: i18n.translate('xpack.customApp.defaults.stat', { defaultMessage: 'Stat' }),
       };
+    case 'chart':
+      return { type, id, query: DEFAULT_QUERY };
     case 'table':
       return { type, id, query: DEFAULT_QUERY, onRowClick: [] };
     case 'key_value':

@@ -27,6 +27,8 @@ export const getInterpolatedText = (
     case 'stat':
     case 'flyout':
       return [{ prop: 'title', text: node.title }];
+    case 'chart':
+      return node.title === undefined ? [] : [{ prop: 'title', text: node.title }];
     default:
       return [];
   }
@@ -34,7 +36,10 @@ export const getInterpolatedText = (
 
 /** The ES|QL query a node runs, if it shows data. */
 export const getNodeQuery = (node: AppNode): string | undefined =>
-  node.type === 'stat' || node.type === 'table' || node.type === 'key_value'
+  node.type === 'stat' ||
+  node.type === 'chart' ||
+  node.type === 'table' ||
+  node.type === 'key_value'
     ? node.query
     : undefined;
 

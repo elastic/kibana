@@ -63,12 +63,13 @@ Components:
 - stack { direction: "vertical" | "horizontal", children }: lays out its children. Use horizontal for a row of filters.
 - heading { text }, text { text }, callout { title, text?, color: "primary" | "success" | "warning" | "danger" }.
 - stat { title, query }: one number, the FIRST column of the FIRST row of its query.
+- chart { query, title?, chartType?: "bar" | "line" | "area" | "donut" }: a chart of its query. Leave chartType out and Lens picks the chart from the columns: for a time series return a date column then the numbers; for a breakdown return a category then a number. Name the columns in the query so the chart reads well.
 - table { query, columns?: [{ field, label? }], onRowClick: [] }: every row of its query, sortable and paged.
 - key_value { query, fields?: [column names] }: every row of its query (up to 25), each as a group of fields.
 - select { label, bind, options: [{ value, label? }] }, button_group { label, bind, options } (at most 10 options; a select takes up to 50), search { label, bind, placeholder? }: inputs that set a value.
 - flyout { title, children }: a side panel that an action opens.
 
-Data: each stat, table and key_value carries its OWN ES|QL "query"; there is no shared data source. Choose columns and rename them inside the query (KEEP, EVAL, RENAME, STATS ... AS). Do not set sizes, spacing, colours or number formats: the app decides how it looks. Use the ES|QL tools available to you to check a query before you use it. Queries may use ?_tstart and ?_tend for the dashboard's time range.
+Data: each stat, chart, table and key_value carries its OWN ES|QL "query"; there is no shared data source. Choose columns and rename them inside the query (KEEP, EVAL, RENAME, STATS ... AS). Do not set sizes, spacing, colours or number formats: the app decides how it looks. Use the ES|QL tools available to you to check a query before you use it. Queries may use ?_tstart and ?_tend for the dashboard's time range.
 
 Values: "state" declares the values that change as people use the app: { "name": { "type": "string" | "number" | "boolean", "default": ... } }. A name is letters, digits and underscores. A query uses a value as ?name, for example WHERE service.name == ?service, and text may show it as {{state.name}}. An input's "bind" is the name of a STRING value, which must be declared; for a select or button group its default must be one of its option values. A value that nothing sets is pointless, so declare only what an input binds to or a row click sets.
 

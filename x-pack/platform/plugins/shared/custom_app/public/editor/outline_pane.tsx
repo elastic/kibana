@@ -47,6 +47,8 @@ const summarize = (node: AppNode): string => {
     case 'stat':
     case 'flyout':
       return node.title;
+    case 'chart':
+      return node.title ?? node.query.split('\n')[0];
     case 'select':
     case 'button_group':
     case 'search':

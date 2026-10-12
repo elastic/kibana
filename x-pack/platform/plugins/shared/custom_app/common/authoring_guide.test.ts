@@ -30,6 +30,7 @@ describe('the authoring guide', () => {
     'text',
     'callout',
     'stat',
+    'chart',
     'table',
     'key_value',
     'select',

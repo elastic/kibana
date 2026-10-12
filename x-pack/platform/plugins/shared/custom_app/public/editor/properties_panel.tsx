@@ -58,7 +58,35 @@ const labels = {
   title: i18n.translate('xpack.customApp.editor.fieldTitle', { defaultMessage: 'Title' }),
   label: i18n.translate('xpack.customApp.editor.fieldLabel', { defaultMessage: 'Label' }),
   startsAs: i18n.translate('xpack.customApp.editor.fieldStartsAs', { defaultMessage: 'Starts as' }),
+  chartType: i18n.translate('xpack.customApp.editor.fieldChartType', {
+    defaultMessage: 'Chart type',
+  }),
 };
+
+const chartTypeOptions = [
+  {
+    value: 'auto' as const,
+    text: i18n.translate('xpack.customApp.editor.chartTypeAuto', {
+      defaultMessage: 'Automatic',
+    }),
+  },
+  {
+    value: 'bar' as const,
+    text: i18n.translate('xpack.customApp.editor.chartTypeBar', { defaultMessage: 'Bar' }),
+  },
+  {
+    value: 'line' as const,
+    text: i18n.translate('xpack.customApp.editor.chartTypeLine', { defaultMessage: 'Line' }),
+  },
+  {
+    value: 'area' as const,
+    text: i18n.translate('xpack.customApp.editor.chartTypeArea', { defaultMessage: 'Area' }),
+  },
+  {
+    value: 'donut' as const,
+    text: i18n.translate('xpack.customApp.editor.chartTypeDonut', { defaultMessage: 'Donut' }),
+  },
+];
 
 const sections = {
   content: i18n.translate('xpack.customApp.editor.sectionContent', { defaultMessage: 'Content' }),
@@ -230,6 +258,36 @@ export const PropertiesPanel = ({
                 query={node.query}
                 state={document.state}
                 onChange={(query) => onChange<'stat'>({ query })}
+              />
+            </Section>
+          </Sections>
+        );
+      case 'chart':
+        return (
+          <Sections>
+            <Section title={sections.content}>
+              <InterpolatedTextField
+                label={labels.title}
+                value={node.title ?? ''}
+                maxLength={MAX_HEADING_LENGTH}
+                stateKeys={stateKeys}
+                onChange={(title) => onChange<'chart'>({ title: title === '' ? undefined : title })}
+              />
+              <EuiSpacer size="s" />
+              <SelectField<'auto' | NonNullable<AppNodeOfType<'chart'>['chartType']>>
+                label={labels.chartType}
+                value={node.chartType ?? 'auto'}
+                options={chartTypeOptions}
+                onChange={(chartType) =>
+                  onChange<'chart'>({ chartType: chartType === 'auto' ? undefined : chartType })
+                }
+              />
+            </Section>
+            <Section title={sections.data}>
+              <QueryField
+                query={node.query}
+                state={document.state}
+                onChange={(query) => onChange<'chart'>({ query })}
               />
             </Section>
           </Sections>

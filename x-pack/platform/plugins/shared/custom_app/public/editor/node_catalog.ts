@@ -76,6 +76,15 @@ const ENTRIES: Record<AppNodeType, Omit<NodeCatalogEntry, 'type'>> = {
     group: 'data',
     isContainer: false,
   },
+  chart: {
+    label: i18n.translate('xpack.customApp.catalog.chart.label', { defaultMessage: 'Chart' }),
+    description: i18n.translate('xpack.customApp.catalog.chart.description', {
+      defaultMessage: 'A chart of a query, drawn by Lens from its columns.',
+    }),
+    iconType: 'visBarVertical',
+    group: 'data',
+    isContainer: false,
+  },
   table: {
     label: i18n.translate('xpack.customApp.catalog.table.label', { defaultMessage: 'Table' }),
     description: i18n.translate('xpack.customApp.catalog.table.description', {

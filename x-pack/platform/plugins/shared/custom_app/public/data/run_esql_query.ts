@@ -7,9 +7,9 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { fetchEsqlData } from '@kbn/custom-content-renderer';
 import type { RunQuery } from './data_layer';
+import { toEsqlVariables } from './esql_variables';
 
 /**
  * Runs a source's ES|QL with the panel's time range, filters and query. The query text is never
@@ -19,17 +19,6 @@ import type { RunQuery } from './data_layer';
 export const createRunEsqlQuery =
   ({ search, http }: { search: ISearchGeneric; http: HttpStart }): RunQuery =>
   async (query, { context, state }, signal) => {
-    const stateVariables = Object.entries(state).map(
-      ([key, value]): ESQLControlVariable => ({
-        key,
-        type: ESQLVariableType.VALUES,
-        // ES|QL accepts a JSON boolean as a parameter; the dashboard variable type only lists
-        // the kinds its controls can produce.
-        value: value as ESQLControlVariable['value'],
-      })
-    );
-    const dashboardVariables = (context.esqlVariables ?? []).filter(({ key }) => !(key in state));
-
     const { columns, values } = await fetchEsqlData(
       search,
       http,
@@ -41,7 +30,7 @@ export const createRunEsqlQuery =
         projectRouting: context.projectRouting,
         query: context.query,
         filters: context.filters,
-        esqlVariables: [...dashboardVariables, ...stateVariables],
+        esqlVariables: toEsqlVariables(context, state),
       }
     );
     return { columns, rows: values };

@@ -6,7 +6,7 @@
  */
 
 import { appDocumentSchema, customAppStateSchema } from './document_schema';
-import { getNodeChildren } from './node_tree';
+import { collectQueries, getInterpolatedText, getNodeChildren } from './node_tree';
 import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_QUERY_LENGTH } from './constants';
 
 const stackOf = (id: string, children: unknown[] = []) => ({ type: 'stack', id, children });
@@ -87,6 +87,41 @@ describe('appDocumentSchema', () => {
     expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
       `A document may hold at most ${MAX_NODE_COUNT} nodes`,
     ]);
+  });
+});
+
+describe('chart nodes', () => {
+  const chartDocument = (overrides: Record<string, unknown> = {}) => ({
+    root: { type: 'chart', id: 'trend', query: 'ROW a = 1', ...overrides },
+  });
+
+  it('needs only a query: the chart is suggested from its columns', () => {
+    expect(appDocumentSchema.parse(chartDocument()).root).toEqual({
+      type: 'chart',
+      id: 'trend',
+      query: 'ROW a = 1',
+    });
+  });
+
+  it('takes a heading and one of a few chart types', () => {
+    const result = appDocumentSchema.parse(chartDocument({ title: 'Orders', chartType: 'line' }));
+
+    expect(result.root).toMatchObject({ title: 'Orders', chartType: 'line' });
+  });
+
+  it('refuses a chart type it does not know, and a missing or empty query', () => {
+    expect(appDocumentSchema.safeParse(chartDocument({ chartType: 'radar' })).success).toBe(false);
+    expect(appDocumentSchema.safeParse(chartDocument({ query: '' })).success).toBe(false);
+    expect(appDocumentSchema.safeParse(chartDocument({ query: undefined })).success).toBe(false);
+  });
+
+  it('runs its own query, interpolates its heading and is checked for state references', () => {
+    const parsed = appDocumentSchema.parse(chartDocument({ title: 'Orders' }));
+    expect(collectQueries(parsed.root)).toEqual({ trend: 'ROW a = 1' });
+    expect(getInterpolatedText(parsed.root)).toEqual([{ prop: 'title', text: 'Orders' }]);
+
+    const unknownKey = appDocumentSchema.safeParse(chartDocument({ title: '{{state.nope}}' }));
+    expect(unknownKey.success).toBe(false);
   });
 });
 

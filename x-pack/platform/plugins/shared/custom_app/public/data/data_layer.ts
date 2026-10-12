@@ -41,6 +41,11 @@ export interface DataLayer {
    * function that ends the declaration; a query nobody shows is neither run nor refreshed.
    */
   acquire: (id: string) => () => void;
+  /**
+   * What the panel was last refreshed with: the time range, filters and query a dashboard offers.
+   * For a component that fetches through something other than this layer, such as a chart.
+   */
+  context$: BehaviorSubject<FetchContext | undefined>;
   /** True until the first fetch has settled, and while any source is running. */
   loading$: BehaviorSubject<boolean | undefined>;
   /** The query of each component that shows data, by the id of the component. */
@@ -82,6 +87,7 @@ export const createDataLayer = ({
   const running = new Set<string>();
   const parameterNames = new Map<string, { query: string; names: string[] }>();
   const loading$ = new BehaviorSubject<boolean | undefined>(true);
+  const context$ = new BehaviorSubject<FetchContext | undefined>(undefined);
 
   let queries: Record<string, string> = {};
   let state: StateValues = {};
@@ -155,6 +161,7 @@ export const createDataLayer = ({
   return {
     getSource$,
     loading$,
+    context$,
     acquire: (id) => {
       const entry = entries.get(id) ?? { readers: 0, appliedValues: {} };
       entries.set(id, entry);
@@ -192,6 +199,7 @@ export const createDataLayer = ({
     },
     refresh: (next) => {
       context = next;
+      context$.next(next);
       startAll();
       publishLoading();
     },

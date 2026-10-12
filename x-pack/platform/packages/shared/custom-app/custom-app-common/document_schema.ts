@@ -104,6 +104,19 @@ const statNodeSchema = z.object({
   query: querySchema,
 });
 
+/** What the chart looks like is picked from the shape of the result unless the author chooses. */
+const CHART_TYPES = ['bar', 'line', 'area', 'donut'] as const;
+
+const chartNodeSchema = z.object({
+  type: z.literal('chart'),
+  id: nodeIdSchema,
+  /** A heading above the chart. */
+  title: z.string().max(MAX_HEADING_LENGTH).optional(),
+  query: querySchema,
+  /** Left out, the chart is suggested from the columns of the query, as Discover does. */
+  chartType: z.enum(CHART_TYPES).optional(),
+});
+
 const tableNodeSchema = z.object({
   type: z.literal('table'),
   id: nodeIdSchema,
@@ -182,6 +195,7 @@ type LeafNode =
   | z.output<typeof textNodeSchema>
   | z.output<typeof calloutNodeSchema>
   | z.output<typeof statNodeSchema>
+  | z.output<typeof chartNodeSchema>
   | z.output<typeof tableNodeSchema>
   | z.output<typeof keyValueNodeSchema>
   | z.output<typeof selectNodeSchema>
@@ -219,6 +233,7 @@ export const nodeSchema = z.discriminatedUnion('type', [
   textNodeSchema,
   calloutNodeSchema,
   statNodeSchema,
+  chartNodeSchema,
   tableNodeSchema,
   keyValueNodeSchema,
   selectNodeSchema,

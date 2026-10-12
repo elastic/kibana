@@ -7,13 +7,17 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 
 interface Services {
   core: CoreStart;
   search: ISearchGeneric;
   embeddable: EmbeddableStart;
+  dataViews: DataViewsPublicPluginStart;
+  lens: LensPublicStart;
   /** Absent when Agent Builder is not available, in which case nothing offers chat. */
   agentBuilder: AgentBuilderPluginStart | undefined;
 }
@@ -24,9 +28,11 @@ export const setServices = (
   core: CoreStart,
   search: ISearchGeneric,
   embeddable: EmbeddableStart,
+  dataViews: DataViewsPublicPluginStart,
+  lens: LensPublicStart,
   agentBuilder: AgentBuilderPluginStart | undefined
 ) => {
-  services = { core, search, embeddable, agentBuilder };
+  services = { core, search, embeddable, dataViews, lens, agentBuilder };
 };
 
 export const getServices = (): Services => {

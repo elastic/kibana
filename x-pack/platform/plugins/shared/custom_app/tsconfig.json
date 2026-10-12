@@ -26,7 +26,12 @@
     "@kbn/agent-builder-browser",
     "@kbn/shared-ux-ai-components",
     "@kbn/presentation-util",
-    "@kbn/presentation-util-plugin"
+    "@kbn/presentation-util-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/visualization-utils",
+    "@kbn/field-types",
+    "@kbn/expressions-plugin"
   ],
   "exclude": ["target/**/*"]
 }

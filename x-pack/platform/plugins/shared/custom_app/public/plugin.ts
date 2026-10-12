@@ -8,6 +8,8 @@
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
@@ -24,7 +26,9 @@ interface SetupDeps {
 
 interface StartDeps {
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
+  lens: LensPublicStart;
   uiActions: UiActionsStart;
   agentBuilder?: AgentBuilderPluginStart;
 }
@@ -37,8 +41,11 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     });
   }
 
-  start(core: CoreStart, { data, embeddable, uiActions, agentBuilder }: StartDeps) {
-    setServices(core, data.search.search, embeddable, agentBuilder);
+  start(
+    core: CoreStart,
+    { data, dataViews, embeddable, lens, uiActions, agentBuilder }: StartDeps
+  ) {
+    setServices(core, data.search.search, embeddable, dataViews, lens, agentBuilder);
 
     uiActions.registerActionAsync<EmbeddableApiContext>(ADD_CUSTOM_APP_ACTION_ID, async () => {
       const { getAddCustomAppAction } = await import('./actions/add_custom_app_action');

@@ -16,6 +16,7 @@ import {
   KbnWarningCallout,
 } from '@kbn/ui-callout';
 import { useStateValues } from '../runtime/app_runtime_context';
+import { ChartNode } from './chart_node';
 import { ButtonGroupNode } from './button_group_node';
 import { FlyoutNode } from './flyout_node';
 import { KeyValueNode } from './key_value_node';
@@ -70,6 +71,8 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
     }
     case 'stat':
       return <StatNode node={node} />;
+    case 'chart':
+      return <ChartNode node={node} />;
     case 'table':
       return <TableNode node={node} />;
     case 'key_value':
