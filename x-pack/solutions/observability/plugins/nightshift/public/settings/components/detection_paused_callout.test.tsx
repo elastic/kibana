@@ -28,7 +28,7 @@ const renderCallout = () =>
   );
 
 describe('DetectionPausedCallout', () => {
-  it('shows the page-level paused status with attribution', () => {
+  it('shows Settings-specific paused copy without directing users back to Settings', () => {
     mockMaintenanceStatus = {
       data: {
         state: 'paused',
@@ -46,13 +46,14 @@ describe('DetectionPausedCallout', () => {
     renderCallout();
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
-    expect(callout).toHaveTextContent(
-      'Detection process is paused by achyut@elastic.co · 168 rules and 14 automations disabled.'
-    );
-    expect(callout).not.toHaveTextContent('Nightshift activity is stopped across the deployment');
+    expect(callout).toHaveTextContent('Detection is paused by achyut@elastic.co');
+    expect(callout).toHaveTextContent('Nightshift activity is stopped across the deployment');
+    expect(callout).toHaveTextContent('Manual triggers are blocked.');
+    expect(callout).not.toHaveTextContent('resume from settings');
+    expect(callout).not.toHaveTextContent('Nightshift Manage engines privilege');
   });
 
-  it('keeps automatic pauses compact', () => {
+  it('keeps the feature-flag note without a Settings redirect', () => {
     mockMaintenanceStatus = {
       data: { state: 'paused', updatedBy: MAINTENANCE_FEATURE_FLAG_ACTOR },
     };
@@ -61,7 +62,8 @@ describe('DetectionPausedCallout', () => {
 
     const callout = screen.getByTestId('streams-settings-maintenance-paused-status');
     expect(callout).toHaveTextContent('Paused automatically because Nightshift was turned off');
-    expect(callout).not.toHaveTextContent('Turning Nightshift back on does not resume activity');
+    expect(callout).toHaveTextContent('Turning Nightshift back on does not resume activity');
+    expect(callout).not.toHaveTextContent('Resume from settings');
   });
 
   it('does not render while detection activity is enabled', () => {
