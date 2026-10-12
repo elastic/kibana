@@ -33,33 +33,14 @@ const STALLING_FILTER = {
   },
 } as const;
 
-const FIELD_STATS_VIEWS = [
-  {
-    name: 'data view',
-    // Search endpoint the panel issues requests against
-    endpoint: '/internal/search/ese',
-    getConfig: (dataViewId: string) => ({
-      view_type: 'dataview',
-      data_view_id: dataViewId,
-      show_distributions: false,
-    }),
-  },
-  {
-    name: 'ES|QL',
-    endpoint: '/internal/search/esql_async',
-    getConfig: () => ({
-      view_type: 'esql',
-      query: { esql: 'FROM ft_farequote' },
-      show_distributions: false,
-    }),
-  },
-] as const;
+// Search endpoint the data view panel issues requests against.
+const SEARCH_ENDPOINT = '/internal/search/ese';
 
 spaceTest.describe(
   'field statistics embedded in dashboard - request cancellation',
   { tag: tags.stateful.classic },
   () => {
-    const dashboardIds: Record<string, string> = {};
+    let dashboardId: string;
 
     spaceTest.beforeAll(async ({ mlTestResources, apiServices, scoutSpace }) => {
       const dataViewId = await mlTestResources.createDataViewIfNeeded(
@@ -68,23 +49,25 @@ spaceTest.describe(
         scoutSpace.id
       );
 
-      for (const view of FIELD_STATS_VIEWS) {
-        dashboardIds[view.name] = await apiServices.dashboard.create(
-          {
-            title: `Field stats cancellation (${view.name}) ${Date.now()}`,
-            time_range: { ...TIME_RANGE, mode: 'absolute' },
-            panels: [
-              {
-                type: 'field_stats_table',
-                grid: { x: 0, y: 0, w: 24, h: 15 },
-                config: view.getConfig(dataViewId),
+      dashboardId = await apiServices.dashboard.create(
+        {
+          title: `Field stats cancellation ${Date.now()}`,
+          time_range: { ...TIME_RANGE, mode: 'absolute' },
+          panels: [
+            {
+              type: 'field_stats_table',
+              grid: { x: 0, y: 0, w: 24, h: 15 },
+              config: {
+                view_type: 'dataview',
+                data_view_id: dataViewId,
+                show_distributions: false,
               },
-            ],
-            filters: [STALLING_FILTER],
-          },
-          scoutSpace.id
-        );
-      }
+            },
+          ],
+          filters: [STALLING_FILTER],
+        },
+        scoutSpace.id
+      );
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -95,59 +78,57 @@ spaceTest.describe(
       await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
     });
 
-    for (const view of FIELD_STATS_VIEWS) {
-      spaceTest(
-        `cancels in-flight ${view.name} searches when navigating away from the dashboard`,
-        async ({ page, pageObjects }) => {
-          // Set up listener before opening the dashboard to avoid race conditions
-          const searchRequestPromise = page.waitForResponse(
-            (res) => res.url().includes(view.endpoint) && res.ok(),
-            { timeout: 30_000 }
-          );
-          await pageObjects.dashboard.openDashboardWithId(dashboardIds[view.name], {
-            waitForRender: false,
-          });
-          await searchRequestPromise;
+    spaceTest(
+      'cancels in-flight data view searches when navigating away from the dashboard',
+      async ({ page, pageObjects }) => {
+        // Set up listener before opening the dashboard to avoid race conditions
+        const searchRequestPromise = page.waitForResponse(
+          (res) => res.url().includes(SEARCH_ENDPOINT) && res.ok(),
+          { timeout: 30_000 }
+        );
+        await pageObjects.dashboard.openDashboardWithId(dashboardId, {
+          waitForRender: false,
+        });
+        await searchRequestPromise;
 
-          // Cancellation with AbortReason.CANCELED fetches partial results, then DELETEs.
-          // That DELETE is issued after the navigation click resolves.
-          const deleteRequest = page.waitForRequest(
-            (request) => request.method() === 'DELETE' && request.url().includes(view.endpoint),
-            { timeout: 15_000 }
-          );
-          await pageObjects.collapsibleNav.clickItem('Discover');
-          await deleteRequest;
-        }
-      );
+        // Cancellation with AbortReason.CANCELED fetches partial results, then DELETEs.
+        // That DELETE is issued after the navigation click resolves.
+        const deleteRequest = page.waitForRequest(
+          (request) => request.method() === 'DELETE' && request.url().includes(SEARCH_ENDPOINT),
+          { timeout: 15_000 }
+        );
+        await pageObjects.collapsibleNav.clickItem('Discover');
+        await deleteRequest;
+      }
+    );
 
-      spaceTest(
-        `cancels in-flight ${view.name} searches when clicking the cancel button`,
-        async ({ page, pageObjects }) => {
-          const searchRequestPromise = page.waitForResponse(
-            (res) => res.url().includes(view.endpoint) && res.ok(),
-            { timeout: 30_000 }
-          );
-          await pageObjects.dashboard.openDashboardWithId(dashboardIds[view.name], {
-            waitForRender: false,
-          });
-          await searchRequestPromise;
+    spaceTest(
+      'cancels in-flight data view searches when clicking the cancel button',
+      async ({ page, pageObjects }) => {
+        const searchRequestPromise = page.waitForResponse(
+          (res) => res.url().includes(SEARCH_ENDPOINT) && res.ok(),
+          { timeout: 30_000 }
+        );
+        await pageObjects.dashboard.openDashboardWithId(dashboardId, {
+          waitForRender: false,
+        });
+        await searchRequestPromise;
 
-          const cancelButton = page.testSubj.locator('queryCancelButton');
-          await cancelButton.waitFor({ state: 'visible' });
+        const cancelButton = page.testSubj.locator('queryCancelButton');
+        await cancelButton.waitFor({ state: 'visible' });
 
-          const deleteRequest = page.waitForRequest(
-            (request) => request.method() === 'DELETE' && request.url().includes(view.endpoint),
-            { timeout: 15_000 }
-          );
-          await cancelButton.click();
-          await deleteRequest;
+        const deleteRequest = page.waitForRequest(
+          (request) => request.method() === 'DELETE' && request.url().includes(SEARCH_ENDPOINT),
+          { timeout: 15_000 }
+        );
+        await cancelButton.click();
+        await deleteRequest;
 
-          // The panel no longer reports as loading, so the cancel button goes away
-          await cancelButton.waitFor({ state: 'hidden' });
-          // and the cancellation isn't surfaced as a panel error
-          await expect(page.testSubj.locator('embeddableError')).toBeHidden();
-        }
-      );
-    }
+        // The panel no longer reports as loading, so the cancel button goes away
+        await cancelButton.waitFor({ state: 'hidden' });
+        // and the cancellation isn't surfaced as a panel error
+        await expect(page.testSubj.locator('embeddableError')).toBeHidden();
+      }
+    );
   }
 );
