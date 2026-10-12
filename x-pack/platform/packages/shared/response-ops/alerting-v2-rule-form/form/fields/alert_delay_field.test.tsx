@@ -183,8 +183,8 @@ describe('AlertDelayField', () => {
     expect(values.stateTransition?.recoveringCount).toBe(3);
 
     expect(mapFormValuesToUpdateRequest(values).state_transition).toEqual({
-      pending: { count: 0 },
-      recovering: { count: 3 },
+      pending: { count: 0, timeframe: null, operator: null },
+      recovering: { count: 3, timeframe: null, operator: null },
     });
   });
 

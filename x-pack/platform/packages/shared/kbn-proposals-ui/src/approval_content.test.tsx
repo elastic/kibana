@@ -277,6 +277,14 @@ describe('ApprovalContent', () => {
     ).toBeInTheDocument();
   });
 
+  it('shows why the proposal expired', () => {
+    const reason =
+      "The rule was deleted after this proposal was created, so this tuning can't be applied.";
+    renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
+
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
+  });
+
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {
     renderContent({
       alwaysAllow: {

@@ -118,6 +118,15 @@ describe('When using the ArtifactListPage component', () => {
       expect(getByTestId('testPage-list-loader')).toBeTruthy();
     });
 
+    it('should not open flyout when show=view is present in the URL', async () => {
+      history.push('somepage?show=view&itemId=123');
+
+      const { queryByTestId } = await renderWithListData();
+
+      expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+      expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+    });
+
     it(`should show cards with results`, async () => {
       const { findAllByTestId, getByTestId } = await renderWithListData();
 
@@ -197,6 +206,125 @@ describe('When using the ArtifactListPage component', () => {
         expect(getByTestId('testPage-simpleTable-cardDeleteAction')).toBeInTheDocument();
       });
 
+      it('should open the view flyout when the name is clicked', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          allowCardEditAction: false,
+          allowCardCreateAction: false,
+          allowCardDeleteAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+        expect(history.location.search).toMatch(/show=view/);
+        expect(history.location.search).toMatch(/itemId=/);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-title')).toHaveTextContent(/Generated Exception/);
+        });
+        expect(getByTestId('testPage-viewFlyout-lastUpdated')).toHaveTextContent(
+          /Last updated: Apr 20, 2020 @ 15:25:31/
+        );
+        expect(getByTestId('testPage-viewFlyout-os-osBadge-windows')).toHaveTextContent('Windows');
+        expect(getByTestId('testPage-viewFlyout-updatedByAvatar')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-description')).toHaveTextContent(
+          'created by ExceptionListItemGenerator'
+        );
+        expect(getByTestId('testPage-viewFlyout-definitionTitle')).toHaveTextContent('Definition');
+        expect(getByTestId('viewModeComponent')).toBeInTheDocument();
+        expect(getByTestId('testPage-viewFlyout-policyAssignmentTitle')).toHaveTextContent(
+          'Policy assignment'
+        );
+        expect(getByTestId('testPage-viewFlyout-policyAssignment-global')).toHaveTextContent(
+          'Applied globally.'
+        );
+      });
+
+      it('should open the view flyout from the show=view URL without the edit form', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        expect(queryByTestId('testPage-flyout')).not.toBeInTheDocument();
+        expect(queryByTestId('formMock')).not.toBeInTheDocument();
+      });
+
+      it('should not open the view flyout when show=view has no itemId', async () => {
+        history.push('somepage?show=view');
+
+        const { queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        expect(queryByTestId('testPage-viewFlyout-loader')).not.toBeInTheDocument();
+      });
+
+      it('should disable the artifact from the view flyout and refresh the list', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeEnabled();
+        });
+
+        const listCallsBeforeToggle = mockedApi.responseProvider.trustedAppsList.mock.calls.length;
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-enabledSwitch'));
+
+        await waitFor(() => {
+          expect(mockedApi.responseProvider.trustedAppUpdate).toHaveBeenCalled();
+          expect(mockedApi.responseProvider.trustedAppsList.mock.calls.length).toBeGreaterThan(
+            listCallsBeforeToggle
+          );
+        });
+
+        const updateRequest = mockedApi.responseProvider.trustedAppUpdate.mock.calls[0][0];
+        const updateBody = JSON.parse(updateRequest.body as string);
+
+        expect(updateBody.tags).toEqual(expect.arrayContaining([DISABLED_ARTIFACT_TAG]));
+      });
+
+      it('should show a read-only enabled switch in the view flyout without write privilege', async () => {
+        const { getAllByTestId, getByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+          showEnabledColumn: true,
+          allowCardEditAction: false,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout-enabledSwitch')).toBeDisabled();
+        });
+      });
+
+      it('should close the view flyout and clear the view URL params', async () => {
+        history.push('somepage?show=view&itemId=123');
+
+        const { getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getByTestId('euiFlyoutCloseButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
+      });
+
       it('should display the Edit flyout when table edit action is clicked', async () => {
         const { getByTestId, getAllByTestId } = await renderWithListData({
           showAsSimpleTable: true,
@@ -206,6 +334,34 @@ describe('When using the ArtifactListPage component', () => {
         await userEvent.click(getByTestId('testPage-simpleTable-cardEditAction'));
 
         expect(getByTestId('testPage-flyout')).toBeTruthy();
+      });
+
+      it('should close the view flyout when delete succeeds', async () => {
+        const { getAllByTestId, getByTestId, queryByTestId } = await renderWithListData({
+          showAsSimpleTable: true,
+        });
+
+        await userEvent.click(getAllByTestId('testPage-simpleTable-columnName')[0]);
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-viewFlyout')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-viewFlyout-takeActionButton'));
+        await userEvent.click(getByTestId('testPage-viewFlyout-cardDeleteAction'));
+
+        await waitFor(() => {
+          expect(getByTestId('testPage-deleteModal')).toBeInTheDocument();
+        });
+
+        await userEvent.click(getByTestId('testPage-deleteModal-submitButton'));
+
+        await waitFor(() => {
+          expect(queryByTestId('testPage-viewFlyout')).not.toBeInTheDocument();
+          expect(queryByTestId('testPage-deleteModal')).not.toBeInTheDocument();
+        });
+        expect(history.location.search).not.toMatch(/show=view/);
+        expect(history.location.search).not.toMatch(/itemId=/);
       });
 
       it('should display the Delete modal when table delete action is clicked', async () => {

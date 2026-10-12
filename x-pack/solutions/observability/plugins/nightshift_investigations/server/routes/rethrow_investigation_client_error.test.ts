@@ -12,6 +12,7 @@ import {
 } from '@kbn/significant-events-schema';
 import {
   InvestigationConflictError,
+  InvalidNotificationDestinationError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
   InvestigationMetadataMissingError,
@@ -32,6 +33,7 @@ const mapStatusCode = (error: Error): number => {
 
 describe('rethrowInvestigationClientError', () => {
   it.each([
+    [new InvalidNotificationDestinationError('Unsupported notification type'), 400],
     [new InvestigationNotFoundError('investigation-1'), 404],
     [new InvestigationMetadataMissingError('investigation-1'), 400],
     [new InvestigationConflictError('Conflict'), 409],

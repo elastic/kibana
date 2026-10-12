@@ -14,14 +14,20 @@ import { getEsqlInstructions } from './prompts/instructions_template';
 import type { EsqlLoadedDocumentation } from './documentation';
 import { EsqlDocEntry } from './documentation';
 
+// followed by a blank line, so that the prompt is unchanged when there is no additional context
+const formatAdditionalContext = (additionalContext?: string): string =>
+  additionalContext ? `<additional-context>\n${additionalContext}\n</additional-context>\n\n` : '';
+
 export const createRequestDocumentationPrompt = ({
   nlQuery,
   resource,
   documentation,
+  additionalContext,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
   documentation: EsqlLoadedDocumentation;
+  additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
@@ -42,7 +48,7 @@ ${getDocumentationSection({ resource, documentation })}`,
 ${nlQuery}
 </user-query>
 
-${formatResourceWithSampledValues({ resource })}
+${formatAdditionalContext(additionalContext)}${formatResourceWithSampledValues({ resource })}
 
 Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
     ],
@@ -54,9 +60,11 @@ Now, based on that information, request documentation from the ES|QL handbook to
 export const createRequestDocumentationPromptNoResource = ({
   nlQuery,
   documentation,
+  additionalContext,
 }: {
   nlQuery: string;
   documentation: EsqlLoadedDocumentation;
+  additionalContext?: string;
 }): BaseMessageLike[] => {
   return [
     [
@@ -76,7 +84,9 @@ ${getDocumentationSection({ documentation })}`,
 ${nlQuery}
 </user-query>
 
-Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
+${formatAdditionalContext(
+  additionalContext
+)}Now, based on that information, request documentation from the ES|QL handbook to help you get the right information needed to generate a query.`,
     ],
   ];
 };
