@@ -39,7 +39,8 @@ export const registerEntityCaseCountsRoute = ({
         validate: {
           request: {
             body: buildRouteValidationWithZod(
-              z.object({ entity_ids: z.array(z.string().max(500)).max(100) })
+              // An id is at most as long as an entity attachment's `attachmentId`.
+              z.object({ entity_ids: z.array(z.string().max(1000)).max(100) })
             ),
           },
         },
