@@ -8,6 +8,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
@@ -51,10 +52,20 @@ function AskAiButton({
   styles: VisorStyles;
 }) {
   const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
+  const hoverIconCss = css`
+    &:hover,
+    &:focus,
+    &:focus-visible {
+      .euiIcon,
+      .euiIcon [fill]:not([fill='none']) {
+        fill: url(#${gradientId}) !important;
+      }
+    }
+  `;
 
   return (
     <>
-      {isSelected && <SvgAiGradientDefs gradientId={gradientId} colors={colors} />}
+      <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
       <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
         <EuiButtonIcon
           iconType={SparklesIcon}
@@ -69,9 +80,8 @@ function AskAiButton({
           data-test-subj="esqlVisorAskAiButton"
           css={[
             styles.modeIconButton,
-            isSelected && styles.aiButtonSparkleHover,
-            isSelected && styles.aiButtonSelected,
-            isSelected && iconGradientCss,
+            isSelected ? styles.aiButtonSelected : styles.aiButtonSparkleHover,
+            isSelected ? iconGradientCss : hoverIconCss,
           ]}
         />
       </EuiToolTip>
