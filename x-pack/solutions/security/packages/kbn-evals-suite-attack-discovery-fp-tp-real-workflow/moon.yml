@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/workflows'
   - '@kbn/core'
+  - '@kbn/scout'
 tags:
   - functional-tests
   - package
