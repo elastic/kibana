@@ -134,6 +134,6 @@ describe('RelatedEpisodesGroupSubsection', () => {
     );
 
     expect(screen.getByTestId('alertingV2RelatedEpisodesGroupEmpty')).toBeInTheDocument();
-    expect(screen.getByText('No other episodes in this group.')).toBeInTheDocument();
+    expect(screen.getByText('No other alerts in this group.')).toBeInTheDocument();
   });
 });

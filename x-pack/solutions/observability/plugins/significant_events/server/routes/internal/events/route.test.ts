@@ -45,7 +45,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       request: {},
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
-        getEventClient: () => eventClient,
+        getEventSearchClient: () => eventClient,
         getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ rulesClient }),
       }),
@@ -53,7 +53,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
     } as never);
 
     expect(mockCleanupStaleEvents).toHaveBeenCalledWith({
-      eventClient,
+      eventSearchClient: eventClient,
       rulesClient,
       candidateRuleIds: ['rule-1'],
       alertEventsClient: undefined,

@@ -175,6 +175,50 @@ export class SyntheticsMonitorClient {
 
     return { failedPolicyUpdates, publicSyncErrors };
   }
+  /**
+   * Creates the package policies of the given monitors for a single private location,
+   * without touching their other locations.
+   */
+  async addPrivateLocationPackagePolicies({
+    monitors,
+    locationId,
+    allPrivateLocations,
+    spaceId,
+  }: {
+    monitors: Array<{ monitor: MonitorFields; id: string }>;
+    locationId: string;
+    allPrivateLocations: SyntheticsPrivateLocations;
+    spaceId: string;
+  }) {
+    const paramsBySpace = await this.syntheticsService.getSyntheticsParams({ spaceId });
+    const maintenanceWindows = await this.syntheticsService.getMaintenanceWindows(spaceId);
+
+    const privateConfigs: PrivateConfig[] = [];
+    for (const monitorObj of monitors) {
+      const { formattedConfig, params } = await this.formatConfigWithParams(
+        monitorObj,
+        spaceId,
+        paramsBySpace
+      );
+      privateConfigs.push({
+        config: {
+          ...formattedConfig,
+          locations: formattedConfig.locations.filter(
+            (loc) => !loc.isServiceManaged && loc.id === locationId
+          ),
+        },
+        globalParams: params,
+      });
+    }
+
+    return this.privateLocationAPI.createPackagePolicies(
+      privateConfigs,
+      allPrivateLocations,
+      spaceId,
+      maintenanceWindows
+    );
+  }
+
   async deleteMonitors(monitors: SyntheticsMonitorWithId[], spaceId: string) {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 

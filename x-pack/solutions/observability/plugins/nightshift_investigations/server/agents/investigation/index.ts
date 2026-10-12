@@ -6,7 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
-import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
+import type {
+  AgentBaseConfiguration,
+  AgentConfigContext,
+  AgentTypeDefinition,
+} from '@kbn/agent-builder-server/agents';
+import type { Logger } from '@kbn/core/server';
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import {
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -64,7 +69,31 @@ interface InvestigationAgentTypeOptions {
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
   telemetryConnectorId?: string;
+  /** Resolves the space's custom context block, appended to the instructions on every run. */
+  getCustomContextInstructions?: (ctx: AgentConfigContext) => Promise<string>;
+  logger?: Logger;
 }
+
+const appendCustomContext = async ({
+  instructions: baseInstructions,
+  ctx,
+  getCustomContextInstructions,
+  logger,
+}: {
+  instructions: string;
+  ctx: AgentConfigContext;
+  getCustomContextInstructions: (ctx: AgentConfigContext) => Promise<string>;
+  logger?: Logger;
+}): Promise<string> => {
+  try {
+    const customContext = await getCustomContextInstructions(ctx);
+    return customContext ? `${baseInstructions.trimEnd()}\n\n${customContext}\n` : baseInstructions;
+  } catch (error) {
+    // Custom context only refines the prompt, so failing to read it must not block a run.
+    logger?.warn(`Failed to load custom context for space "${ctx.spaceId}": ${error.message}`);
+    return baseInstructions;
+  }
+};
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
@@ -77,12 +106,10 @@ export const getInvestigationAgentType = ({
   memoryEnabled = false,
   decisionTreesEnabled = false,
   telemetryConnectorId,
-}: InvestigationAgentTypeOptions): AgentTypeDefinition => ({
-  id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
-  name: INVESTIGATION_AGENT_NAME,
-  description: INVESTIGATION_AGENT_DESCRIPTION,
-  avatar_icon: 'logoElastic',
-  baseConfiguration: {
+  getCustomContextInstructions,
+  logger,
+}: InvestigationAgentTypeOptions): AgentTypeDefinition => {
+  const baseConfiguration = {
     instructions: fillContextInstructions({
       includeDecisionTrees: sandboxEnabled && decisionTreesEnabled,
       includeMemory: sandboxEnabled && memoryEnabled,
@@ -116,8 +143,26 @@ export const getInvestigationAgentType = ({
     ...(cortexEnabled || memoryEnabled
       ? { post_execution_workflow_ids: [NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID] }
       : {}),
-  },
-});
+  } satisfies AgentBaseConfiguration;
+
+  return {
+    id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+    name: INVESTIGATION_AGENT_NAME,
+    description: INVESTIGATION_AGENT_DESCRIPTION,
+    avatar_icon: 'logoElastic',
+    baseConfiguration: getCustomContextInstructions
+      ? async (ctx) => ({
+          ...baseConfiguration,
+          instructions: await appendCustomContext({
+            instructions: baseConfiguration.instructions,
+            ctx,
+            getCustomContextInstructions,
+            logger,
+          }),
+        })
+      : baseConfiguration,
+  };
+};
 
 export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
@@ -127,6 +172,8 @@ export const registerInvestigationAgentType = (
     memoryEnabled = false,
     decisionTreesEnabled = false,
     telemetryConnectorId,
+    getCustomContextInstructions,
+    logger,
   }: InvestigationAgentTypeOptions
 ): void => {
   agentBuilder.agents.registerType(
@@ -136,6 +183,8 @@ export const registerInvestigationAgentType = (
       memoryEnabled,
       decisionTreesEnabled,
       telemetryConnectorId,
+      getCustomContextInstructions,
+      logger,
     })
   );
 };

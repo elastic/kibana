@@ -54,9 +54,10 @@ export const classifyError = (err: unknown): string => {
   // points operators at Settings Resume instead of "try again in a moment".
   if (
     err instanceof SignificantEventsPausedError ||
+    message.includes('Significant events activity is paused') ||
     message.includes('Significant Events activity is paused')
   ) {
-    return 'Significant Events activity is paused. Resume it in Settings before starting new activity.';
+    return 'Significant events activity is paused. Resume it in settings before starting new activity.';
   }
   if (statusCode === 409 || message.includes('Could not acquire lock')) {
     return 'Another stream operation is in progress. Try again in a moment.';
