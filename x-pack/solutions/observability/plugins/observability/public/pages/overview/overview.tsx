@@ -27,13 +27,17 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import React, { useEffect, useMemo } from 'react';
 import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { AlertingNavPromo } from '../../nav/alerting_nav_tour';
 import { DATA_SECTIONS, DataSections, type DataSectionsApps } from './components/data_sections';
 import { HeaderActions } from './components/header_actions/header_actions';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
@@ -53,7 +57,11 @@ const addDataButtonLabel = i18n.translate('xpack.observability.home.addData', {
 });
 
 export function OverviewPage() {
-  const { http, observabilityAIAssistant, kibanaVersion, serverless, share } = useKibana().services;
+  const kibanaServices = useKibana().services;
+  const { http, observabilityAIAssistant, kibanaVersion, serverless, share, application } =
+    kibanaServices;
+  const showUnifiedAlertingPromo =
+    application.capabilities.navLinks?.[OBSERVABILITY_ALERTING_APP_ID] === true;
 
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
@@ -197,6 +205,9 @@ export function OverviewPage() {
       pageSectionProps={{ paddingSize: 'none' }}
     >
       <AppHeader title={pageTitle} menu={menu} />
+      {showUnifiedAlertingPromo ? (
+        <AlertingNavPromo coreStart={kibanaServices} source="overview" />
+      ) : null}
       <EuiPageSection
         paddingSize="l"
         restrictWidth={false}

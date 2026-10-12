@@ -67,6 +67,10 @@ jest.mock('./components/observability_onboarding_callout', () => ({
   ObservabilityOnboardingCallout: () => <div data-test-subj="overviewOnboardingCallout" />,
 }));
 
+jest.mock('../../nav/alerting_nav_tour', () => ({
+  AlertingNavPromo: () => <div data-test-subj="alertingNavPromoFloatingAnchor" />,
+}));
+
 const { usePluginContext } = jest.requireMock('../../hooks/use_plugin_context');
 const { useHasData } = jest.requireMock('../../hooks/use_has_data');
 const { useDatePickerContext } = jest.requireMock('../../hooks/use_date_picker_context');
@@ -103,6 +107,14 @@ function renderOverview() {
 
 describe('OverviewPage header', () => {
   beforeEach(() => {
+    mockUseKibanaReturnValue.services.application.capabilities = {
+      ...mockUseKibanaReturnValue.services.application.capabilities,
+      navLinks: {
+        ...mockUseKibanaReturnValue.services.application.capabilities.navLinks,
+        observabilityAlerting: false,
+      },
+    };
+
     usePluginContext.mockReturnValue({
       appMountParameters: {
         setHeaderActionMenu: () => {},
@@ -163,6 +175,26 @@ describe('OverviewPage header', () => {
     expect(screen.getByTestId('obltOverviewPageLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('overviewHeaderActions')).not.toBeInTheDocument();
     expect(screen.queryByTestId('o11yOverviewPageAddDataButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingNavPromoFloatingAnchor')).not.toBeInTheDocument();
+  });
+
+  it('shows the Unified Alerting promo when the Alerting app is available', () => {
+    mockUseKibanaReturnValue.services.application.capabilities = {
+      ...mockUseKibanaReturnValue.services.application.capabilities,
+      navLinks: {
+        ...mockUseKibanaReturnValue.services.application.capabilities.navLinks,
+        observabilityAlerting: true,
+      },
+    };
+    useHasData.mockReturnValue({
+      hasDataMap: completeHasDataMap({
+        apm: { hasData: true, status: FETCH_STATUS.SUCCESS },
+      }),
+    });
+
+    renderOverview();
+
+    expect(screen.getByTestId('alertingNavPromoFloatingAnchor')).toBeInTheDocument();
   });
 
   it('keeps the time picker out of the header when data is present', async () => {
