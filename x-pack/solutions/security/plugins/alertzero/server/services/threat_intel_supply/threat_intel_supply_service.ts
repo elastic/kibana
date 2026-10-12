@@ -72,9 +72,10 @@ export class ThreatIntelSupplyService {
 
   /**
    * Turns on ingest, enrich and the space's attribute workflow. If any step throws,
-   * the flips this call made are undone (globals only when no other space hunts, and nothing
-   * when Hunt is already on in this space) so a failed enable leaves supply as it was, then the
-   * original error is rethrown.
+   * the flips this call made are undone (globals only when no other space hunts) so a failed
+   * enable leaves supply as it was, then the original error is rethrown. The undo only applies
+   * to the first enable: when Hunt is already on in this space, as on Restore, supply is left
+   * as it is.
    */
   async ensureSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
     const targets = [
@@ -134,10 +135,18 @@ export class ThreatIntelSupplyService {
       return;
     }
 
+    // Resolved once, lazily, so ingest and enrich get the same answer and the space walk
+    // happens at most once.
+    let otherSpaceHunting: boolean | undefined;
+    const isOtherSpaceHunting = async (): Promise<boolean> => {
+      otherSpaceHunting ??= await this.isHuntEnabledInOtherSpace(spaceId);
+      return otherSpaceHunting;
+    };
+
     for (const { workflowId, workflowSpaceId } of [...flipped].reverse()) {
       try {
         const isGlobal = workflowSpaceId === GLOBAL_WORKFLOW_SPACE_ID;
-        if (isGlobal && (await this.isHuntEnabledInOtherSpace(spaceId))) {
+        if (isGlobal && (await isOtherSpaceHunting())) {
           continue;
         }
         await this.deps.management.updateWorkflow(

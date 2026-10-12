@@ -554,6 +554,21 @@ interface BulkScriptedUpsert {
   upsert: Record<string, unknown>;
 }
 
+/**
+ * Rejects when the task is aborted during the wait, so a hung wait cannot outlast the task
+ * timeout. An already-aborted signal is left to the run loop's own abort handling.
+ */
+const raceWithSignal = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> => {
+  if (signal.aborted) {
+    return promise;
+  }
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(new Error('task aborted'));
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
+  });
+};
+
 export const registerPromoteThreatIndicatorsTask = ({
   taskManager,
   coreSetup,
@@ -606,15 +621,17 @@ export const registerPromoteThreatIndicatorsTask = ({
       },
       createTaskRunner: ({ taskInstance, signal }: RunContext) => ({
         run: async () => {
+          const previousState = (taskInstance.state ?? {}) as PromoteThreatIndicatorsState;
+
           try {
-            await getBootstrapReady();
+            await raceWithSignal(getBootstrapReady(), signal);
           } catch (err) {
             logger.warn(
               `Skipping threat indicator promotion until threat intel bootstrap completes: ${
                 (err as Error).message
               }`
             );
-            return { state: (taskInstance.state ?? {}) as PromoteThreatIndicatorsState };
+            return { state: previousState };
           }
 
           // Catch spaces created after boot before scanning reports. Failures
@@ -626,7 +643,6 @@ export const registerPromoteThreatIndicatorsTask = ({
             );
           });
 
-          const previousState = (taskInstance.state ?? {}) as PromoteThreatIndicatorsState;
           const lower = previousState.lastSyncedAt ?? LOOKBACK_ON_FIRST_RUN;
 
           const [coreStart] = await coreSetup.getStartServices();

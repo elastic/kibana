@@ -611,6 +611,37 @@ describe('promote task runner', () => {
     });
   });
 
+  describe('when the task is aborted while waiting for bootstrap', () => {
+    const run = async () => {
+      const controller = new AbortController();
+      const { definition, esClient } = setupRunner(
+        [{ hits: { hits: [reportHit('r-1')] } }],
+        () => new Promise<void>(() => {})
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+          signal: controller.signal,
+        })
+      );
+      const pending = runner.run();
+      controller.abort();
+      return { result: await pending, esClient };
+    };
+
+    it('returns the previous state instead of timing out', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+  });
+
   it('holds the cursor when the run is aborted mid-scan', async () => {
     const controller = new AbortController();
     controller.abort();

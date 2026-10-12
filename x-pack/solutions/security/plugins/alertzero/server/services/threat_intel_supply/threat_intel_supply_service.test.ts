@@ -209,10 +209,23 @@ describe('ThreatIntelSupplyService', () => {
       expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
     });
 
+    it('still rethrows the original error when the Hunt status check fails', async () => {
+      getWorkflowStatus.mockRejectedValueOnce(new Error('status unavailable'));
+      expect(await ensureWithMissingAttribute()).toBeInstanceOf(ThreatIntelSupplyNotInstalledError);
+    });
+
     it('keeps globals on when this call flipped them but another space has Hunt on', async () => {
       huntEnabledBySpace.set(SPACE_B, true);
       await ensureWithMissingAttribute();
       expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
+    });
+
+    it('checks the other spaces once when undoing both globals', async () => {
+      await ensureWithMissingAttribute();
+      const otherSpaceChecks = getWorkflowStatus.mock.calls.filter(
+        ([, options]) => options.workflowIdSuffix === SPACE_B
+      );
+      expect(otherSpaceChecks).toHaveLength(1);
     });
 
     describe('when an undo step fails', () => {
