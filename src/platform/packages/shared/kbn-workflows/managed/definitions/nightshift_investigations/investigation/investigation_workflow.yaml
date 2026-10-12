@@ -44,6 +44,41 @@ triggers:
           type: string
           maxLength: 500
           description: Optional chat model connector or inference endpoint id for this run.
+        notificationDestinations:
+          type: array
+          maxItems: 5
+          description: Destinations that receive investigation lifecycle messages.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              - type
+              - connector_id
+              - params
+            properties:
+              type:
+                type: string
+                minLength: 1
+                maxLength: 100
+              connector_id:
+                type: string
+                minLength: 1
+                maxLength: 500
+              params:
+                type: object
+                additionalProperties: true
+                description: Connector-specific destination properties, validated by the notification handler at runtime. Limited to 4096 JSON characters, three container levels, and 20 entries per object or array.
+              automation_id:
+                type: string
+                maxLength: 500
+              automation_name:
+                type: string
+                maxLength: 500
+        investigation_id:
+          type: string
+          description: >
+            Existing investigation to continue, in its own conversation. Defaults to a new
+            investigation keyed by the workflow execution ID.
       required:
         - message
         - title
@@ -68,13 +103,16 @@ steps:
 
   # Creates the record if needed before lifecycle emission, so a running investigation is always
   # visible. The server derives attributes from the execution document; retries cover startup races.
+  # A run continuing an existing investigation reopens it instead and gets back its conversation.
   - name: persist_investigation_started
     type: kibana.request
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/_ensure'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/_ensure'
       headers:
         x-elastic-internal-origin: 'kibana'
+      body:
+        execution_id: '{{ execution.id }}'
     on-failure:
       retry:
         max-attempts: 3
@@ -85,11 +123,19 @@ steps:
     type: kibana.request
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'running'
+    on-failure:
+      continue: true
+
+  - name: notify_started
+    type: nightshift.sendNotifications
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: started
     on-failure:
       continue: true
 
@@ -101,13 +147,12 @@ steps:
     aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
-    create-conversation: true
-    public-conversation: true
     timeout: 1800s
     with:
       # Correlates the workflow and generated agent executions for live progress lookup.
       metadata:
         workflow_execution_id: '{{ execution.id }}'
+      conversation_id: '${{ steps.persist_investigation_started.output.conversation_id }}'
       message: |
         {{ inputs.message }}
 
@@ -584,7 +629,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: PATCH
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -603,6 +648,72 @@ steps:
         delay: 5s
         strategy: exponential
 
+  # The canvas: one attachment per investigation, keyed by its ID, that each successful run
+  # replaces. A failed run leaves the previous canvas as it was.
+  - name: render_investigation_canvas
+    type: data.set
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      investigation_canvas_id: '{{ inputs.investigation_id | default: execution.id }}'
+      investigation_canvas: |
+        ## {{ steps.investigate.output.structured_output.title }}
+
+        {{ steps.investigate.output.structured_output.summary }}
+        {% if steps.investigate.output.structured_output.conclusion %}
+        ### Conclusion
+
+        {{ steps.investigate.output.structured_output.conclusion }}
+        {% endif %}
+        {% if steps.investigate.output.structured_output.recommendations and steps.investigate.output.structured_output.recommendations.size > 0 %}
+        ### Recommendations
+
+        {% for recommendation in steps.investigate.output.structured_output.recommendations %}- {{ recommendation.title }}
+        {% endfor %}
+        {% endif %}
+
+  # Looked up rather than attempted, so a run with no canvas yet does not log a failed update.
+  # Deleted attachments are included because their IDs cannot be reused.
+  - name: list_conversation_attachments
+    type: ai.attachment.list
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      conversation_id: '${{ steps.investigate.output.conversation_id }}'
+      include_deleted: true
+    on-failure:
+      continue: true
+
+  - name: find_investigation_canvas
+    type: data.set
+    if: '${{ steps.investigate.error == null and steps.list_conversation_attachments.error == null }}'
+    with:
+      investigation_canvas_matches: "${{ steps.list_conversation_attachments.output.attachments | where: 'id', variables.investigation_canvas_id }}"
+
+  # A canvas the user deleted stays deleted.
+  - name: update_investigation_canvas
+    type: ai.attachment.update
+    if: '${{ variables.investigation_canvas_matches.first.active == true }}'
+    with:
+      conversation_id: '${{ steps.investigate.output.conversation_id }}'
+      attachment_id: '{{ variables.investigation_canvas_id }}'
+      data:
+        content: '{{ variables.investigation_canvas }}'
+    on-failure:
+      continue: true
+
+  - name: add_investigation_canvas
+    type: ai.attachment.add
+    if: '${{ variables.investigation_canvas_matches.size == 0 }}'
+    with:
+      conversation_id: '${{ steps.investigate.output.conversation_id }}'
+      id: '{{ variables.investigation_canvas_id }}'
+      type: text
+      description: 'Investigation findings'
+      render_inline: true
+      data:
+        content: '{{ variables.investigation_canvas }}'
+    on-failure:
+      continue: true
+
   # Writes failure status when the agent step errors. Retry before continuing so the failure event
   # is still emitted even when the record cannot be updated.
   - name: persist_investigation_failed
@@ -610,7 +721,7 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: PATCH
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -631,7 +742,7 @@ steps:
     if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
@@ -644,11 +755,30 @@ steps:
     if: '${{ steps.investigate.error != null }}'
     with:
       method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ execution.id }}/lifecycle_events'
+      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
         status: 'failed'
+    on-failure:
+      continue: true
+
+  - name: notify_completed
+    type: nightshift.sendNotifications
+    if: '${{ steps.investigate.error == null }}'
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: completed
+    on-failure:
+      continue: true
+
+  - name: notify_failed
+    type: nightshift.sendNotifications
+    if: '${{ steps.investigate.error != null }}'
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      phase: failed
+      reason: "${{ steps.investigate.error.message | default: 'Investigation failed' | truncate: 10000 }}"
     on-failure:
       continue: true
 

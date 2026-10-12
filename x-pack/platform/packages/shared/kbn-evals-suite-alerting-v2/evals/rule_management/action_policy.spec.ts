@@ -59,7 +59,7 @@ evaluate.describe(
                     'The first-turn response composes the rule AND proactively asks whether the user wants to set up (email) notifications for it — proactive means the assistant raises notifications itself; merely complying after the user brings it up on turn 2 does not satisfy this.',
                     'After the user accepts notifications, the assistant loads the action-policy-management skill to own workflow + action policy setup (rather than composing those from the rule-management skill alone).',
                     'The assistant does not claim that no email connector is configured — one exists in the environment and should be discovered (e.g. via platform.workflows.get_connectors).',
-                    'The action policy uses per_episode grouping and on_status_change throttle.',
+                    'The action policy uses per_alert grouping and on_status_change throttle.',
                     'The final manage_action_policy call ends with a validate operation, and validation succeeds (after corrective retries if needed).',
                     'The assistant never claims the rule, workflow, or action policy has been created, saved, or activated — it directs the user to save in order Rule → Workflow → Action Policy via the attachment action buttons.',
                   ],

@@ -71,6 +71,7 @@ const searchApi: ApiRegistryDefinition = {
     properties: { query: { $ref: './_types.json#/$defs/QueryContainer', 'x-found-in': 'body' } },
   },
   destructive: false,
+  readOnly: true,
 };
 
 describe('createDescribeApiTypeTool', () => {
@@ -228,6 +229,7 @@ describe('createDescribeApiTypeTool', () => {
         method: 'GET',
         path: '/',
         destructive: false,
+        readOnly: true,
       })
     );
 
@@ -255,6 +257,7 @@ describe('createDescribeApiTypeTool', () => {
           properties: { timeout: { $ref: '../outside.json#/$defs/Duration' } },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 

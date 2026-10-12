@@ -136,6 +136,12 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
     options.addArguments('disable-dev-shm-usage');
   }
 
+  if (process.env.KIBANA_TEST_IPV6_ONLY === 'true') {
+    // Chrome needs this even though the agent maps localhost to ::1; see setup_ipv6_only.sh.
+    // The address must be bracketed or the rule parser silently drops it.
+    options.addArguments('host-resolver-rules=MAP localhost [::1]');
+  }
+
   if (headlessBrowser === '1') {
     // Using the new headless mode (instead of `options.headless()`)
     // See: https://www.selenium.dev/blog/2023/headless-is-going-away/

@@ -381,7 +381,7 @@ describe('Attachment Routes', () => {
           id: 'conv-1',
           events: [expect.objectContaining({ type: 'attachment_added' })],
         }),
-        { access: 'converse' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -738,7 +738,7 @@ describe('Attachment Routes', () => {
             }),
           ],
         }),
-        { access: 'converse' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -921,7 +921,7 @@ describe('Attachment Routes', () => {
       expect(result.body.attachment).toBeDefined();
       expect(mockConversationsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'conv-1' }),
-        { access: 'converse' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -984,7 +984,7 @@ describe('Attachment Routes', () => {
       expect(result.body.attachment.current_version).toBe(1);
       expect(mockConversationsClient.update).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'conv-1' }),
-        { access: 'converse' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 

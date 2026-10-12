@@ -32,12 +32,16 @@ Three declarative parts add secondary content to the header. Declare them as `He
 ```
 
 - **`Header.MetaBlock`** — a compact key/value pair, rendered through `@kbn/flyout-meta-blocks`. `title` is the key, rendered bold. `children` is the value, and can hold rich content such as links. The rest of the `MetaBlock` props are also accepted. Use meta blocks for provenance, such as timestamps, owners, or authors.
-- **`Header.Badge`** — a status label, rendered through `EuiBadge`. `children` is the label, and the rest of `EuiBadgeProps` is accepted except the control props (`onClick`, `onClickAriaLabel`, `iconOnClick`, `iconOnClickAriaLabel`, `href`, `target`, `rel`). Badges are labels, not controls. Labels wider than 200px are truncated with an ellipsis.
+- **`Header.Badge`** — a status label, rendered through `EuiBadge`. `children` is the label, and the rest of `EuiBadgeProps` is accepted except `iconOnClick` and `iconOnClickAriaLabel`: the icon is decorative, so the badge is a single target rather than two. Labels wider than 200px are truncated with an ellipsis.
 - **`Header.InfoBlock`** — a titled value in a responsive grid, rendered through `@kbn/flyout-info-blocks`. `title` is a plain string label and `children` is the value. The rest of the `InfoBlockItem` props are also accepted, including `size` and `color` for emphasizing a headline figure. The number of columns depends on the number of blocks.
 
 All three also take an optional `id`. It identifies the part internally, is generated when omitted, and is not rendered as a DOM id. `data-test-subj` and any `data-*` attributes are passed through to the rendered element.
 
 **Badge overflow.** Up to five badges render inline. With more than five, the first four render inline and the rest collapse behind a `+N more` badge, which opens them in a popover.
+
+**Badges as labels or controls.** A badge is a label by default. Pass `href` (with `target`/`rel`) or `onClick` with `onClickAriaLabel` to make the whole badge navigate or act, which EUI renders as an `<a>` or a `<button>`.
+
+**Badge tooltips.** `toolTipContent` wraps the badge in an `EuiToolTip`, positioned by `toolTipPosition`. A tooltipped badge that is not a link or button gets a tab stop, so keyboard users can open the tooltip. Give it an `aria-label` and `role="img"` so screen readers announce it.
 
 All three groups live in the header's collapsible region. They animate away when the header collapses on scroll, and they never show when `collapsed` is set. Put content that must stay visible in the title or the tab bar.
 
@@ -45,7 +49,7 @@ All three groups live in the header's collapsible region. They animate away when
 
 ### Scroll behavior
 
-When the user scrolls the flyout body, the header collapses to a compact row that shows only the title and its icon. The title shrinks to an `xs` heading on one line, truncated with an ellipsis. If the title is a plain string, hovering shows the full text in a tooltip. The description, meta blocks, badges, and info blocks slide away, giving the space to the body. The title row, the tab bar, and the divider stay in place in both states.
+When the user scrolls the flyout body, the header collapses to a compact row that shows only the title and its icon. The title shrinks to an `xs` heading on one line, truncated with an ellipsis. A string title shows its full text in a native tooltip on hover. A `ReactNode` title gets no native tooltip, so its own tooltip is not covered. The description, meta blocks, badges, and info blocks slide away, giving the space to the body. The title row, the tab bar, and the divider stay in place in both states.
 
 Scrolling back to the top restores the full header with the same animation in reverse. With `prefers-reduced-motion`, the change is instant.
 

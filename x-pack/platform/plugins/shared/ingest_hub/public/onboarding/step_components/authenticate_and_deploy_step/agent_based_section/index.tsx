@@ -27,6 +27,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { AgentCredentialVars } from '../package_inputs';
+import { fetchPackagePolicySecretRefs, useExistingSecretRefs } from '../secret_refs';
 
 import { useOnboardingFlow } from '../../../onboarding_flow_context';
 import { DeploymentModeAccordion } from '../section_accordion';
@@ -37,6 +38,9 @@ import type { AgentCredentialMethod } from './credential_method_selector';
 import { SharedCredentialsForm } from './shared_credentials_form';
 import { AssumeRoleForm } from './assume_role_form';
 import { AgentPolicyPanel } from './agent_policy_panel';
+
+const STATIC_KEY_FIELDS = ['access_key_id', 'secret_access_key'] as const;
+const TEMPORARY_KEY_FIELDS = ['access_key_id', 'secret_access_key', 'session_token'] as const;
 
 // ── Props ─────────────────────────────────────────────────────────────────────
 
@@ -53,6 +57,16 @@ interface AgentBasedSectionProps {
   failedInstances: string[];
   /** Per-instance error message from the last deploy attempt, keyed by instanceId. */
   deployErrors?: Record<string, string>;
+  /**
+   * Deployed package policy whose stored secrets the key forms offer to keep. Undefined when none
+   * survives a pending cleanup, in which case the keys must be entered again.
+   */
+  secretSourcePolicyId?: string;
+  /**
+   * Called with true while the user has replaced a stored key, so the parent treats the
+   * deployment as changed and Next redeploys instead of skipping the update.
+   */
+  onStoredCredentialsReplacedChange?: (replaced: boolean) => void;
   /** When false, AWS credential entry is skipped — use for packages that declare no credential vars. Defaults to true. */
   requiresCredentials?: boolean;
 }
@@ -67,6 +81,8 @@ export function AgentBasedSection({
   hasFailed,
   failedInstances,
   deployErrors,
+  secretSourcePolicyId,
+  onStoredCredentialsReplacedChange,
   requiresCredentials = true,
 }: AgentBasedSectionProps) {
   const location = useLocation();
@@ -88,6 +104,40 @@ export function AgentBasedSection({
 
   // ── Credential method ──────────────────────────────────────────────────────
   const credentialMethod = persistedCredentialMethod;
+
+  // Keys are never persisted, but the deployed package policies still hold them as secrets: the
+  // forms offer to keep them instead of asking again (resume, or Back then forward).
+  const isKeysMethod = credentialMethod === 'static_keys' || credentialMethod === 'temporary_keys';
+  const { existingSecretRefs, isLoading: isStoredSecretsLoading } = useExistingSecretRefs(
+    // Only the key methods have secrets to keep.
+    isKeysMethod ? secretSourcePolicyId : undefined,
+    fetchPackagePolicySecretRefs
+  );
+  const storedStaticFields = useMemo(
+    () => STATIC_KEY_FIELDS.filter((field) => isKeysMethod && existingSecretRefs.has(field)),
+    [isKeysMethod, existingSecretRefs]
+  );
+  const storedTemporaryFields = useMemo(
+    () => TEMPORARY_KEY_FIELDS.filter((field) => isKeysMethod && existingSecretRefs.has(field)),
+    [isKeysMethod, existingSecretRefs]
+  );
+  // Any stored field means typing replaces something and the parent must redeploy; the re-enter
+  // callout goes away only when every field of the selected method is stored.
+  const storedFields =
+    credentialMethod === 'temporary_keys' ? storedTemporaryFields : storedStaticFields;
+  const requiredFieldCount =
+    credentialMethod === 'temporary_keys' ? TEMPORARY_KEY_FIELDS.length : STATIC_KEY_FIELDS.length;
+  const hasStoredSecrets = storedFields.length > 0;
+  const hasAllStoredSecrets = storedFields.length === requiredFieldCount;
+  // Typing into a stored field replaces it; the parent must then redeploy.
+  const notifyStoredCredentialsReplaced = (
+    creds: { access_key_id: string; secret_access_key: string; session_token?: string } | undefined
+  ) => {
+    if (!hasStoredSecrets) return;
+    onStoredCredentialsReplacedChange?.(
+      Boolean(creds?.access_key_id || creds?.secret_access_key || creds?.session_token)
+    );
+  };
   const [isCredentialReady, setIsCredentialReady] = useState(() => {
     if (!requiresCredentials) return true;
     // For methods backed by persisted text fields, initialize ready from stored values.
@@ -401,7 +451,7 @@ export function AgentBasedSection({
                 <EuiSpacer size="m" />
 
                 {/* Resume callout — credentials are never persisted; user must re-enter them. */}
-                {isEditMode && !isCredentialReady && (
+                {isEditMode && !isCredentialReady && !hasAllStoredSecrets && (
                   <>
                     <KbnWarningCallout
                       announceOnMount
@@ -429,24 +479,37 @@ export function AgentBasedSection({
 
                 {/* Credential fields */}
                 <Suspense fallback={<EuiLoadingSpinner />}>
-                  {credentialMethod === 'static_keys' && (
+                  {isKeysMethod && isStoredSecretsLoading && <EuiLoadingSpinner />}
+                  {credentialMethod === 'static_keys' && !isStoredSecretsLoading && (
                     <LazyAwsStaticKeysForm
+                      storedSecretFields={storedStaticFields}
                       onReadyChange={setIsCredentialReady}
                       onFieldsChange={(creds) => {
+                        notifyStoredCredentialsReplaced(creds);
                         setStaticKeyCreds(creds ?? undefined);
-                        notifyCredentialChange('static_keys', {
-                          staticCreds: creds ?? undefined,
-                        });
+                        // No credentials entered (cleared, or the stored ones were kept): tell the
+                        // parent so, instead of letting it fall back to the previous values.
+                        if (creds) {
+                          notifyCredentialChange('static_keys', { staticCreds: creds });
+                        } else {
+                          onCredentialsChange?.(undefined);
+                        }
                       }}
                       data-test-subj="agentBasedSection-directAccessKeysForm"
                     />
                   )}
-                  {credentialMethod === 'temporary_keys' && (
+                  {credentialMethod === 'temporary_keys' && !isStoredSecretsLoading && (
                     <LazyAwsTemporaryKeysForm
+                      storedSecretFields={storedTemporaryFields}
                       onReadyChange={setIsCredentialReady}
                       onFieldsChange={(creds) => {
+                        notifyStoredCredentialsReplaced(creds);
                         setTemporaryKeyCreds(creds ?? undefined);
-                        notifyCredentialChange('temporary_keys', { tempCreds: creds ?? undefined });
+                        if (creds) {
+                          notifyCredentialChange('temporary_keys', { tempCreds: creds });
+                        } else {
+                          onCredentialsChange?.(undefined);
+                        }
                       }}
                       data-test-subj="agentBasedSection-temporaryKeysForm"
                     />

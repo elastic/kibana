@@ -6,6 +6,7 @@
  */
 
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import {
   BaseCreateProps,
   ResponseFields,
@@ -27,18 +28,20 @@ import {
  */
 export type RuleToImport = z.infer<typeof RuleToImport>;
 export type RuleToImportInput = z.input<typeof RuleToImport>;
-export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
-  ResponseFields.partial().extend({
-    rule_id: RuleSignatureId,
-    /*
-      Overriding `required_fields` from ResponseFields because
-      in ResponseFields `required_fields` has the output type,
-      but for importing rules, we need to use the input type.
-      Otherwise importing rules without the "ecs" property in
-      `required_fields` will fail.
-    */
-    required_fields: z.array(RequiredFieldInput).optional(),
-  })
+export const RuleToImport = lazySchema(() =>
+  BaseCreateProps.and(TypeSpecificCreateProps).and(
+    ResponseFields.partial().extend({
+      rule_id: RuleSignatureId,
+      /*
+              Overriding `required_fields` from ResponseFields because
+              in ResponseFields `required_fields` has the output type,
+              but for importing rules, we need to use the input type.
+              Otherwise importing rules without the "ecs" property in
+              `required_fields` will fail.
+            */
+      required_fields: z.array(RequiredFieldInput).optional(),
+    })
+  )
 );
 
 /**
@@ -51,8 +54,10 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
  */
 export type ValidatedRuleToImport = z.infer<typeof ValidatedRuleToImport>;
 export type ValidatedRuleToImportInput = z.input<typeof ValidatedRuleToImport>;
-export const ValidatedRuleToImport = RuleToImport.and(
-  z.object({
-    version: RuleVersion,
-  })
+export const ValidatedRuleToImport = lazySchema(() =>
+  RuleToImport.and(
+    z.object({
+      version: RuleVersion,
+    })
+  )
 );

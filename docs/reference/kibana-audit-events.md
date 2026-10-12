@@ -341,6 +341,37 @@ To ensure that a record of every operation is persisted even in case of an unexp
 Workflow events (`workflow_*`) are logged after the operation finishes, with `event.outcome` of `success` or `failure`. When no user request is available (for example a human-in-the-loop wait, timeout, or system cancel), the message actor is `System`. Managed workflows append `[managed=true]` to the message, plus `originalWorkflowId`, `ownerPlugin`, `space`, and `reason` when those values are present.
 ::::
 
+### Category: iam
+#### Type: creation
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_create` {applies_to}`stack: preview 9.6+` | `success` | User has created service account [id=x, name=y]. Logged after the account exists, so the event carries the id the backend assigned. |
+| | `failure` | Failed attempt to create service account [name=y]: the user is not authorized. The name is omitted when it did not pass validation. |
+| | `unknown` | Failed attempt to create service account [id=x, name=y], which might have been left behind. The create failed after writing to {{es}} and {{kib}} could not confirm that it removed the partially created account. Refer to the {{kib}} server logs. |
+
+#### Type: change
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_workload_bind` {applies_to}`stack: preview 9.6+` | `unknown` | User is binding service account [id=x] to workload [plugin/type/id]. Binding a workload that is already bound to a different account also writes a `service_account_workload_unbind` event for that account first. |
+| | `failure` | Failed attempt to bind service account [id=x] to workload [plugin/type/id]: the user is not authorized. |
+| `service_account_workload_unbind` {applies_to}`stack: preview 9.6+` | `unknown` | User is unbinding service account [id=x] from workload [plugin/type/id]. When the workload has no binding, or the stored binding failed integrity verification, the message drops `[id=x]` and `user.target` is omitted. |
+| | `failure` | Failed attempt to unbind service account from workload [plugin/type/id]: the user is not authorized. |
+
+#### Type: deletion
+
+| **Action** | **Outcome** | **Description** |
+| --- | --- | --- |
+| `service_account_delete` {applies_to}`stack: preview 9.6+` | `unknown` | User is deleting service account [id=x]. A forced delete, which skips the check for bound workloads and leaves their bindings behind, appends `[force=true]` to the message. |
+| | `failure` | Failed attempt to delete service account [id=x]: the user is not authorized. A forced delete appends `[force=true]` to this message too. |
+
+::::{note}
+Following ECS, every event in this category has two values in `event.type`: the type it is listed under and `user`, for example `[user, creation]`. An `ignore_filters` rule that matches on `types` has to list both.
+
+Across the `service_account_*` events, `failure` means the user was not authorized. Other errors, such as a missing license or encryption key or an invalid request, leave no event. Binding and delete events follow the convention for writes: `unknown` is logged once the user is authorized and before the write, so it records the attempt, not the result. It is also written when an unbind matches no binding or a delete names no account, and a write that later fails or is refused leaves no further event. Refer to the {{kib}} server logs for write errors. A delete refused because workloads are still bound to the account leaves no event. `service_account_create` is logged after the operation instead, because the backend assigns the id.
+::::
+
 ### Category: web
 
 | **Action** | **Outcome** | **Description** |
@@ -366,9 +397,9 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | **Field** | **Description** |
 | --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
-| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication` |
-| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion` |
-| `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`<br><br>Possible values: `success`, `failure`, `unknown`<br> |
+| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam` |
+| `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`user` |
+| `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`, unless the event's own description says otherwise (for example `service_account_create` is logged after the operation)<br><br>Possible values: `success`, `failure`, `unknown`<br> |
 
 ### User fields
 
@@ -379,6 +410,8 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | `user.email` | Email address of the user at the time of the event, when provided by the identity source. |
 | `user.full_name` | Full name of the user at the time of the event, when provided by the identity source. |
 | `user.roles[]` | Set of user roles at the time of the event.<br>Example: `[kibana_admin, reporting_user]` |
+| `user.target.id` | ID of the service account the event targets.<br>Example: `kibana/nightshift-relay` |
+| `user.target.name` | Name of the service account the event targets.<br>Example: `nightshift-relay` |
 
 
 ### Kibana fields
@@ -389,6 +422,9 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | `kibana.session_id` | ID of the user session associated with the event.<br>Each login attempt results in a unique session id. |
 | `kibana.saved_object.type` | Type of saved object associated with the event.<br>Example: `dashboard` |
 | `kibana.saved_object.id` | ID of the saved object associated with the event. |
+| `kibana.workload.plugin_id` | ID of the plugin that owns the workload a service account is bound to as part of the event.<br>Example: `workflowsManagement` |
+| `kibana.workload.type` | Type of the workload.<br>Example: `workflow` |
+| `kibana.workload.id` | ID of the workload. |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |
