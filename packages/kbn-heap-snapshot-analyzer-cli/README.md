@@ -405,9 +405,9 @@ Output sections:
   snapshot was captured with allocation tracking. Walks each live
   node's allocation-time call stack to the first plugin frame, so
   schema libraries roll up to the plugin that triggered them.
-- **Allocated by Module (allocation site)** — same walk, reports
-  third-party `node_modules` libraries (zod, joi, require-in-the-middle,
-  etc.). Tells you *where the allocator code lives*.
+- **Allocated by Module (allocation site)** — same walk, reports the first
+  package frame, including third-party libraries and Kibana packages. Tells
+  you *where the allocator code lives*.
 - **Allocated by Package (allocation site)** — same walk, reports
   `@kbn/*` Kibana packages, skipping library frames so wrapper packages
   get credit for the library bytes they trigger (e.g. `@kbn/connector-schemas`
@@ -425,9 +425,11 @@ Choose the view based on the question:
 - **What physical kind of memory changed?** Start with the V8 node-type
   breakdown to distinguish strings, arrays, compiled code, objects, and other
   runtime structures.
-- **Which package or plugin dominates memory now?** Use the retained tables.
-  Retained boundaries can contain nested boundaries owned by other packages,
-  so do not add rows together or subtract them from total heap size.
+- **Which package or plugin is assigned live memory now?** Use the retained
+  tables. Each node is assigned once using direct package evidence and
+  dominator propagation. Package rows plus the unattributed row sum to the
+  root-retained heap; plugin rows form a separate partition. These are
+  attribution estimates, not the bytes that would be freed by removing code.
 - **What would disappear if a package were absent?** Use counterfactual
   `Saved`. This models an independent removal scenario for each package.
   Results can overlap and are not additive; increasing `--counterfactual=N`

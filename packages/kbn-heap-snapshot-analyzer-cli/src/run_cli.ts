@@ -26,6 +26,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
+import { aggregateAttributedBytes } from './attributed_bytes';
 import type {
   SourceAttribution,
   SourceDiffReport,
@@ -1639,39 +1640,24 @@ export function runHeapSnapshotAnalyzerCli(): void {
     process.exit(0);
   }
 
-  // --- Aggregate per-package retained bytes (boundary-aware to avoid
-  // triple-counting nested subtrees) ---
+  // --- Partition live node bytes by final attribution. Summing retained
+  // subtrees at ownership boundaries double-counts bytes when a child has a
+  // different owner than its dominator parent (including the unattributed
+  // root). Self sizes are disjoint, so these totals reconcile to totalSelf. ---
   const pkgCount = pkgNames.length;
-  const pkgPackageBytes = new Float64Array(pkgCount);
-  const pluginPluginBytes = new Float64Array(pkgCount);
+  const { packages: pkgPackageBytes, unattributed: unattrPackage } = aggregateAttributedBytes(
+    selfSize,
+    nodePkgPackage,
+    pkgCount
+  );
+  const { packages: pluginPluginBytes, unattributed: unattrPlugins } = aggregateAttributedBytes(
+    selfSize,
+    nodePkgPlugins,
+    pkgCount
+  );
 
-  function aggregateBoundary(modeArr: Int32Array, target: Float64Array): number {
-    // Returns total retained bytes that fell outside any package (root subtree share with no owner).
-    let unattr = 0;
-    const rootPid = modeArr[0];
-    if (rootPid === -1) {
-      unattr += retained[0];
-    } else {
-      target[rootPid] += retained[0];
-    }
-    for (let i = 1; i < nodeCount; i++) {
-      const pid = modeArr[i];
-      const d = idom[i];
-      const parentPid = d >= 0 && d < nodeCount ? modeArr[d] : -2;
-      if (pid === parentPid) continue;
-      if (pid === -1) unattr += retained[i];
-      else target[pid] += retained[i];
-    }
-    return unattr;
-  }
-
-  const unattrPackage = aggregateBoundary(nodePkgPackage, pkgPackageBytes);
-  const unattrPlugins = aggregateBoundary(nodePkgPlugins, pluginPluginBytes);
-
-  // Alloc-site aggregation is allocation-driven, not retention-driven, so
-  // `aggregateBoundary` (which de-duplicates via dominator parent ownership)
-  // would systematically under-count: each node carries its allocator
-  // independently of who dominates it. We sum self_size directly per plugin.
+  // Allocation attribution is independent of dominator ownership: each node
+  // carries its allocator, so sum self_size directly per allocation frame.
   const pluginAllocBytes = new Float64Array(pkgCount);
   // Same idea for by-module attribution (first package frame, including
   // node_modules libraries — zod, joi, etc. dominate this view).
@@ -1861,22 +1847,21 @@ export function runHeapSnapshotAnalyzerCli(): void {
   );
 
   // Per-module / per-package allocation rows (only meaningful when allocation
-  // tracking is on). Modules = third-party node_modules libs. Packages =
+  // tracking is on). Modules = first package frame. Packages =
   // @kbn/* Kibana packages, attributed via the caller walk so wrappers get
   // credit for library bytes they trigger.
   const moduleAllocRows: PackageAllocRow[] = [];
   const pkgAllocRows: PackageAllocRow[] = [];
   if (allocAttributable) {
     for (let i = 0; i < pkgCount; i++) {
-      if (pkgIsLibrary[i]) {
-        if (pkgAllocBytes[i] === 0) continue;
+      if (pkgAllocBytes[i] !== 0) {
         moduleAllocRows.push({
           package: pkgNames[i],
           allocBytes: pkgAllocBytes[i],
           allocPct: rootRetained > 0 ? (pkgAllocBytes[i] / rootRetained) * 100 : 0,
         });
-      } else {
-        if (pkgCallerBytes[i] === 0) continue;
+      }
+      if (!pkgIsLibrary[i] && pkgCallerBytes[i] !== 0) {
         pkgAllocRows.push({
           package: pkgNames[i],
           allocBytes: pkgCallerBytes[i],
@@ -2000,7 +1985,7 @@ export function runHeapSnapshotAnalyzerCli(): void {
   // --- Per-package table ---
   out.write('=== Retained by Package ===\n');
   out.write(
-    'Retained: bytes attributed via direct evidence + dominator propagation.\n' +
+    'Retained: exclusive live bytes attributed via direct evidence + dominator propagation.\n' +
       "Saved: counterfactual — bytes that become unreachable if this package's\n" +
       'directly-owned nodes were removed (independent of attribution; "-" if not\n' +
       'in top-N counterfactual scope).\n\n'
@@ -2048,7 +2033,7 @@ export function runHeapSnapshotAnalyzerCli(): void {
   out.write('=== Retained by Plugin (rolled up to product domain) ===\n');
   out.write(
     'Plugins-mode propagates attribution to the nearest plugin ancestor in the\n' +
-      'dominator tree, so shared infra rolls up to the plugin that holds it alive.\n\n'
+      'dominator tree. Each live node contributes to one plugin or unattributed.\n\n'
   );
   out.write(tableHdr('Plugin'));
   out.write(tableSep);
@@ -2159,12 +2144,12 @@ export function runHeapSnapshotAnalyzerCli(): void {
       );
     }
 
-    // --- Per-module allocation-site table (third-party libraries) ---
+    // --- Per-module allocation-site table (first package frame) ---
     writeAllocTable(
       `=== Allocated by Module (allocation site${filterSuffix}) ===\n`,
       "Walks each live node's allocation-time call stack to the first\n" +
-        'package frame and reports rows for third-party `node_modules` libraries\n' +
-        '(zod, joi, require-in-the-middle, etc.). Shows where allocator code lives.\n' +
+        'package frame, including third-party libraries and Kibana packages.\n' +
+        'Shows where allocator code lives.\n' +
         'For "which Kibana code triggered these allocations" see the Allocated\n' +
         'by Package table below.\n' +
         'Self bytes only — no Saved column (counterfactual is a graph property).\n' +
@@ -2247,8 +2232,8 @@ export function runHeapSnapshotAnalyzerCli(): void {
       '   code that bypasses the JS allocator.\n' +
       '\n' +
       '5. **Allocated by Module (allocation site)** — same alloc-site walk, but\n' +
-      '   reports rows for third-party `node_modules` libraries (zod, joi,\n' +
-      '   require-in-the-middle, etc.). Tells you *where the allocator code lives*.\n' +
+      '   reports the first package frame, including third-party libraries and\n' +
+      '   Kibana packages. Tells you *where the allocator code lives*.\n' +
       '\n' +
       '6. **Allocated by Package (allocation site)** — same alloc-site walk, but\n' +
       '   reports rows for `@kbn/*` Kibana packages, skipping library frames so\n' +
