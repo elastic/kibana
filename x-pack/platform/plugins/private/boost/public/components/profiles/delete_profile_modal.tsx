@@ -8,6 +8,7 @@
 import React, { Fragment, useMemo } from 'react';
 import {
   EuiAccordion,
+  EuiCode,
   EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
@@ -26,6 +27,7 @@ import { resolveRule, sortRules } from '../../../common/resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from '../../../common/types';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteProfile } from '../../hooks/use_boost_state';
+import { formatDataSourceCount } from '../format';
 
 interface DeleteProfileModalProps {
   profile: BoostProfile;
@@ -85,9 +87,6 @@ export const DeleteProfileModal = ({
   }, [name, rules, profiles, dataSources]);
 
   const affectedCount = deletedRules.reduce((total, { affected }) => total + affected.length, 0);
-  // A lone rule with affected data sources starts open, so the common case needs no click.
-  const rulesWithAffected = deletedRules.filter(({ affected }) => affected.length > 0);
-  const openRuleName = rulesWithAffected.length === 1 ? rulesWithAffected[0].name : undefined;
 
   const listTitleId = useGeneratedHtmlId({ prefix: 'deletedRulesTitle' });
 
@@ -140,8 +139,8 @@ export const DeleteProfileModal = ({
         deletedRules.length > 0
           ? i18n.translate('xpack.boost.deleteProfileModal.confirmWithRules', {
               defaultMessage:
-                'Delete {profileCount, plural, one {# profile} other {# profiles}} and {ruleCount, plural, one {# rule} other {# rules}}',
-              values: { profileCount: 1, ruleCount: deletedRules.length },
+                'Delete profile and {ruleCount, plural, one {# rule} other {# rules}}',
+              values: { ruleCount: deletedRules.length },
             })
           : i18n.translate('xpack.boost.profilesTab.deleteModalConfirm', {
               defaultMessage: 'Delete profile',
@@ -185,18 +184,17 @@ export const DeleteProfileModal = ({
                 {affected.length > 0 ? (
                   <EuiAccordion
                     id={`${accordionIdPrefix}-${ruleName}`}
-                    initialIsOpen={ruleName === openRuleName}
                     buttonContent={<EuiText size="s">{ruleName}</EuiText>}
                     buttonProps={{ paddingSize: 's' }}
                     extraAction={<AffectedCountBadge count={affected.length} type={type} />}
-                    css={{ paddingInline: euiTheme.size.s }}
+                    css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.base }}
                     data-test-subj={`deletedRule-${ruleName}`}
                   >
                     {/* Indented by the accordion arrow's width and gap, so the content lines up
                         with the rule name above it. */}
                     <div
                       css={{
-                        paddingBlockEnd: euiTheme.size.s,
+                        paddingBlock: euiTheme.size.s,
                         paddingInlineStart: `calc(${euiTheme.size.l} + ${euiTheme.size.xs})`,
                       }}
                     >
@@ -204,11 +202,14 @@ export const DeleteProfileModal = ({
                     </div>
                   </EuiAccordion>
                 ) : (
-                  // Matches an accordion button's padding and line height, so rule names align.
+                  // Matches an accordion's padding, line height, and chevron indent, so rule
+                  // names line up whether or not the rule expands.
                   <EuiText
                     size="s"
                     css={{
-                      padding: euiTheme.size.s,
+                      paddingBlock: `calc(${euiTheme.size.s} * 2)`,
+                      paddingInlineStart: `calc(${euiTheme.size.base} + ${euiTheme.size.l} + ${euiTheme.size.xs})`,
+                      paddingInlineEnd: euiTheme.size.base,
                       lineHeight: euiTheme.size.l,
                     }}
                     data-test-subj={`deletedRule-${ruleName}`}
@@ -243,11 +244,10 @@ interface AffectedCountBadgeProps {
 }
 
 const AffectedCountBadge = ({ count, type }: AffectedCountBadgeProps) => {
-  const label = formatAffectedCount(type, count);
   return (
-    <EuiToolTip content={label} display="flex" disableScreenReaderOutput>
-      <EuiNotificationBadge color="subdued" role="img" aria-label={label} tabIndex={0}>
-        {count}
+    <EuiToolTip content={formatAffectedCount(type, count)} display="flex">
+      <EuiNotificationBadge color="subdued">
+        {formatDataSourceCount(type, count)}
       </EuiNotificationBadge>
     </EuiToolTip>
   );
@@ -260,21 +260,11 @@ interface AffectedTableProps {
 }
 
 /**
- * The affected data sources, grouped by the rule each will now use. Built from flex layout with
- * table roles, so the borders sit only between groups.
+ * The affected data sources and the rule each will now use. Built from flex layout with table
+ * roles, so the borders sit only between rows.
  */
 const AffectedTable = ({ ruleName, affected, type }: AffectedTableProps) => {
   const { euiTheme } = useEuiTheme();
-
-  const groups = useMemo(() => {
-    const namesByRule = new Map<string, string[]>();
-    affected.forEach(({ name, nextRule = '' }) =>
-      namesByRule.set(nextRule, [...(namesByRule.get(nextRule) ?? []), name])
-    );
-    return [...namesByRule.entries()]
-      .map(([nextRule, names]) => ({ nextRule, names }))
-      .sort((a, b) => a.nextRule.localeCompare(b.nextRule));
-  }, [affected]);
 
   return (
     <div
@@ -309,27 +299,21 @@ const AffectedTable = ({ ruleName, affected, type }: AffectedTableProps) => {
           </EuiFormLabel>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {groups.map(({ nextRule, names }, index) => (
+      {affected.map(({ name, nextRule }) => (
         <EuiFlexGroup
-          key={nextRule}
+          key={name}
           role="row"
           gutterSize="s"
           responsive={false}
-          // Borders separate groups only, so the last group doesn't double the panel's border.
-          css={{
-            paddingBlock: euiTheme.size.xs,
-            borderBlockStart: index > 0 ? euiTheme.border.thin : undefined,
-          }}
+          css={{ paddingBlock: euiTheme.size.xs }}
         >
           <EuiFlexItem role="cell">
-            <EuiText size="s">
-              {names.map((name) => (
-                <div key={name}>{name}</div>
-              ))}
+            <EuiText size="xs">
+              <EuiCode>{name}</EuiCode>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem role="cell">
-            <EuiText size="s">{nextRule}</EuiText>
+            <EuiText size="xs">{nextRule}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       ))}
