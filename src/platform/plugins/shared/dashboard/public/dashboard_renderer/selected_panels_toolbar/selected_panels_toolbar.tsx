@@ -25,6 +25,10 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 
+const clearSelectionLabel = i18n.translate('dashboard.selectedPanelsToolbar.clearSelectionLabel', {
+  defaultMessage: 'Clear selection (Esc)',
+});
+
 /** Floating toolbar shown while panels are selected; exposes the bulk actions available for the selection */
 export const SelectedPanelsToolbar = () => {
   const dashboardApi = useDashboardApi();
@@ -41,11 +45,6 @@ export const SelectedPanelsToolbar = () => {
   }, [dashboardApi]);
 
   if (viewMode !== 'edit' || selectedPanelIds.length === 0) return null;
-
-  const clearSelectionLabel = i18n.translate(
-    'dashboard.selectedPanelsToolbar.clearSelectionAriaLabel',
-    { defaultMessage: 'Clear selection' }
-  );
 
   return (
     <EuiPanel

@@ -45,6 +45,15 @@ const KEEP_SELECTION_SELECTOR = [
   '.embPanel--selectPanel',
 ].join(', ');
 
+/** Escape pressed while focus is here belongs to that element (close a menu / flyout, leave an input) */
+const ESCAPE_OWNED_BY_TARGET_SELECTOR = [
+  '[data-euiportal]',
+  'input',
+  'textarea',
+  'select',
+  '[contenteditable="true"]',
+].join(', ');
+
 const toRect = (a: { x: number; y: number }, b: { x: number; y: number }): SelectionRect => ({
   left: Math.min(a.x, b.x),
   top: Math.min(a.y, b.y),
@@ -62,7 +71,7 @@ const getPanelElement = (ref: React.Ref<HTMLDivElement>): HTMLDivElement | null 
  * Handles the mouse gestures used to select dashboard panels:
  * - modifier + click anywhere on a panel toggles it, without the panel content reacting to the click
  * - modifier + drag draws a rectangle and adds every panel it touches to the selection
- * - a plain click outside the selected panels clears the selection
+ * - a plain click outside the selected panels, or pressing Escape, clears the selection
  * Returns the rectangle currently being drawn, if any, so the caller can render it.
  */
 export const usePanelSelectionGestures = ({
@@ -109,6 +118,15 @@ export const usePanelSelectionGestures = ({
       if (target.closest(KEEP_SELECTION_SELECTOR)) return;
       const panelId = findPanelId(target);
       if (panelId && dashboardApi.selectedPanelIds$.value.includes(panelId)) return;
+      dashboardApi.clearPanelSelection();
+    };
+
+    const onDocumentKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (!dashboardApi.selectedPanelIds$.value.length) return;
+      // Let open menus, flyouts and text inputs consume their own Escape first
+      const target = e.target instanceof HTMLElement ? e.target : null;
+      if (target?.closest(ESCAPE_OWNED_BY_TARGET_SELECTOR)) return;
       dashboardApi.clearPanelSelection();
     };
 
@@ -163,10 +181,12 @@ export const usePanelSelectionGestures = ({
     root.addEventListener('mousedown', onRootMouseDown, { capture: true });
     document.addEventListener('mousedown', onDocumentMouseDown, { capture: true });
     document.addEventListener('click', onDocumentClick, { capture: true });
+    document.addEventListener('keydown', onDocumentKeyDown);
     return () => {
       root.removeEventListener('mousedown', onRootMouseDown, { capture: true });
       document.removeEventListener('mousedown', onDocumentMouseDown, { capture: true });
       document.removeEventListener('click', onDocumentClick, { capture: true });
+      document.removeEventListener('keydown', onDocumentKeyDown);
       setMarqueeRect(undefined);
     };
   }, [layoutRef, panelRefs, enabled, dashboardApi]);
