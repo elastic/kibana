@@ -78,7 +78,7 @@ export interface GrantUiamApiKeyRequestBody {
   description: string;
   /** Indicates whether this is an internal API key. */
   internal: boolean;
-  /** Optional expiration time for the API key (e.g., '1d', '7d'). */
+  /** Optional expiration time for the API key as an ISO-8601 duration (e.g., 'PT4H', 'P7D'). */
   expiration?: string;
   /** Role assignments that define access and resource limits for the API key. */
   role_assignments: {
@@ -494,7 +494,7 @@ export class UiamService implements UiamServicePublic {
 
     if (unsafe.grantedApiKeyDefaultExpiration) {
       this.#logger.warn(
-        `\`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration\` is set to [${unsafe.grantedApiKeyDefaultExpiration}]: internal API keys granted without an explicit expiration will expire. This setting is intended only for short-lived test projects and must not be used in production or long-lived projects, as rules and other background tasks relying on these API keys will fail once the keys expire.`
+        `\`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration\` is set to [${unsafe.grantedApiKeyDefaultExpiration.toISOString()}]: internal API keys granted without an explicit expiration will expire. This setting is intended only for short-lived test projects and must not be used in production or long-lived projects, as rules and other background tasks relying on these API keys will fail once the keys expire.`
       );
     }
     this.#dispatcher = this.#createFetchDispatcher();
@@ -692,7 +692,8 @@ export class UiamService implements UiamServicePublic {
     );
 
     try {
-      const expiration = params.expiration ?? this.#config.unsafe.grantedApiKeyDefaultExpiration;
+      const expiration =
+        params.expiration ?? this.#config.unsafe.grantedApiKeyDefaultExpiration?.toISOString();
       const body: GrantUiamApiKeyRequestBody = {
         description: params.name,
         internal: true,

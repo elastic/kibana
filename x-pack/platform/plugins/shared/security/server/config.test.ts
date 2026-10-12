@@ -1966,11 +1966,11 @@ describe('config schema', () => {
             },
           },
           { serverless: true }
-        ).uiam.unsafe?.grantedApiKeyDefaultExpiration
-      ).toBe('4h');
+        ).uiam.unsafe?.grantedApiKeyDefaultExpiration?.asMilliseconds()
+      ).toBe(14_400_000);
     });
 
-    it.each([0, -1, '', '0h', '-1h', '14400', 'invalid'])(
+    it.each([0, -1, Infinity, -Infinity, NaN, '0h', '-1h', 'invalid'])(
       'rejects invalid UIAM unsafe API key default expiration %s',
       (grantedApiKeyDefaultExpiration) => {
         expect(() =>

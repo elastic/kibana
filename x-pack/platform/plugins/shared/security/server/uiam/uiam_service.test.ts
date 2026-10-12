@@ -1068,7 +1068,7 @@ describe('UiamService', () => {
         expect(logger.warn).toHaveBeenCalledTimes(1);
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringContaining(
-            '`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration` is set to [4h]'
+            '`xpack.security.uiam.unsafe.grantedApiKeyDefaultExpiration` is set to [PT4H]'
           )
         );
       });
@@ -1081,7 +1081,7 @@ describe('UiamService', () => {
 
         expect(fetchSpy).toHaveBeenCalledTimes(1);
         expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toEqual(
-          expect.objectContaining({ description: 'test-key', expiration: '4h' })
+          expect.objectContaining({ description: 'test-key', expiration: 'PT4H' })
         );
       });
 

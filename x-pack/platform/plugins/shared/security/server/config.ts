@@ -384,18 +384,18 @@ export const ConfigSchema = schema.object({
       ),
       unsafe: schema.maybe(
         schema.object({
+          // Default expiration for internal API keys granted via UIAM without an explicit expiration,
+          // mirroring `xpack.security.cloud.credential.mint_expiration` in Elasticsearch. Intended
+          // ONLY for short-lived test projects, so that internal API keys orphaned after the project
+          // is deleted expire instead of accumulating against the org-wide limit. Must not be set in
+          // any other project: rules, tasks, and anything else relying on these keys will break
+          // once the keys expire.
           grantedApiKeyDefaultExpiration: schema.maybe(
-            schema.string({
+            schema.duration({
               validate(value) {
-                if (/^\d+$/.test(value)) {
-                  return 'the value must include a time unit, e.g. "4h".';
-                }
-                try {
-                  if (schema.duration().validate(value).asMilliseconds() <= 0) {
-                    return 'the value must be a positive duration.';
-                  }
-                } catch (err) {
-                  return err.message;
+                const milliseconds = value.asMilliseconds();
+                if (!Number.isFinite(milliseconds) || milliseconds <= 0) {
+                  return 'the value must be a positive, finite duration.';
                 }
               },
             })
