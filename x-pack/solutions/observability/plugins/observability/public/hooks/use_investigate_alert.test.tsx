@@ -7,7 +7,8 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, fireEvent, renderHook, waitFor, within } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type {
   NightshiftInvestigationsRepositoryClient,
@@ -27,6 +28,7 @@ const mockLocator = {
   getRedirectUrl: jest.fn(({ investigationId }: { investigationId: string }) =>
     investigationId ? `/app/nightshift?investigationId=${investigationId}` : ''
   ),
+  navigate: jest.fn(),
 } as unknown as InvestigationLocator;
 
 let queryClient: QueryClient;
@@ -68,8 +70,13 @@ describe('useInvestigateAlert', () => {
       defaultOptions: { queries: { retry: false } },
       logger: { log: () => {}, warn: () => {}, error: () => {} },
     });
+    const { analytics, i18n, theme, userProfile } = coreMock.createStart();
     useKibanaMock.mockReturnValue({
       services: {
+        analytics,
+        i18n,
+        theme,
+        userProfile,
         http: { basePath: { get: () => '' } },
         share: {
           url: {
@@ -350,9 +357,38 @@ describe('useInvestigateAlert', () => {
         },
       })
     );
-    expect(addSuccess).toHaveBeenCalledWith({ title: 'Investigation started' });
+    expect(addSuccess).toHaveBeenCalledWith({
+      title: 'Investigation started',
+      text: expect.any(Function),
+    });
+    expect(mockLocator.getRedirectUrl).toHaveBeenCalledWith({ investigationId: 'investigation-1' });
     expect(result.current.investigateActionLabel).toBe('Investigating…');
     expect(result.current.isInvestigating).toBe(true);
+  });
+
+  it('links the started toast to the investigation on the Nightshift homepage', async () => {
+    const { result } = renderInvestigateAlert();
+    await waitFor(() => expect(result.current.showInvestigateAction).toBe(true));
+
+    await act(() => result.current.handleInvestigate());
+
+    const [{ text: mountText }] = addSuccess.mock.calls[0];
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const unmount = mountText(container);
+    const link = await within(container).findByTestId('alertInvestigationStartedViewLink');
+
+    expect(link).toHaveTextContent('View investigation');
+    expect(link).toHaveAttribute('href', '/app/nightshift?investigationId=investigation-1');
+
+    act(() => fireEvent.click(link));
+    expect(mockLocator.navigate).toHaveBeenCalledWith({ investigationId: 'investigation-1' });
+    expect(
+      JSON.parse(window.localStorage.getItem(VIEWED_INVESTIGATIONS_STORAGE_KEY) || '[]')
+    ).toEqual(['investigation-1']);
+
+    unmount();
+    container.remove();
   });
 
   it('reports start failures', async () => {

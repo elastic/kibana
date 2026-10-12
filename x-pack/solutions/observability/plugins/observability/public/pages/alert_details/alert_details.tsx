@@ -56,6 +56,8 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { HeaderActions } from './components/header_actions';
+import { useAlertInvestigationHeaderActions } from './components/alert_investigation_actions';
+import { useInvestigateAlert } from '../../hooks/use_investigate_alert';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
@@ -120,6 +122,11 @@ export function AlertDetails() {
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
 
   const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
+  const investigation = useInvestigateAlert({
+    alertId: alertDetail?.formatted.fields['kibana.alert.uuid'] as string | undefined,
+    ebtElement: 'alertDetailsPageActions',
+  });
+  const investigationHeaderActions = useAlertInvestigationHeaderActions(investigation);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
 
   const ruleId = alertDetail?.formatted.fields[ALERT_RULE_UUID];
@@ -542,6 +549,7 @@ export function AlertDetails() {
             onUpdate={onUpdate}
             rule={rule}
             refetch={refetch}
+            investigation={investigation}
           />,
           ...(AlertAskAiAgentButton && alertDetail?.formatted.fields['kibana.alert.uuid']
             ? [
@@ -551,6 +559,7 @@ export function AlertDetails() {
                 />,
               ]
             : []),
+          ...investigationHeaderActions,
         ],
         bottomBorder: false,
         'data-test-subj': rule?.ruleTypeId || 'alertDetailsPageTitle',
