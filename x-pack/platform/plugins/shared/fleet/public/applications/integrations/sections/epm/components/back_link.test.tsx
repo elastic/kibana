@@ -62,7 +62,7 @@ describe('BackLink', () => {
 
   it('renders back to collection link when the return path names a known collection', async () => {
     const appId = 'observabilityOnboarding';
-    const path = '?search=nginx&collection=nginx';
+    const path = '?search=nginx&collection=redis';
     const queryParams = new URLSearchParams();
     queryParams.set('returnAppId', appId);
     queryParams.set('returnPath', path);
@@ -70,9 +70,9 @@ describe('BackLink', () => {
     const { getByText } = renderBackLink(
       <BackLink queryParams={queryParams} integrationsPath="/browse" />
     );
-    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
+    expect(getByText('Back to Redis collection')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(getByText('Back to Nginx collection'));
+      fireEvent.click(getByText('Back to Redis collection'));
     });
     await waitFor(() => {
       expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
@@ -83,7 +83,7 @@ describe('BackLink', () => {
 
   it('renders back to collection when returnPath is a full path containing a known collection', async () => {
     const appId = 'integrations';
-    const path = '/browse?collection=nginx';
+    const path = '/browse?collection=redis';
     const queryParams = new URLSearchParams();
     queryParams.set('returnAppId', appId);
     queryParams.set('returnPath', path);
@@ -91,9 +91,9 @@ describe('BackLink', () => {
     const { getByText } = renderBackLink(
       <BackLink queryParams={queryParams} integrationsPath="/browse" />
     );
-    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
+    expect(getByText('Back to Redis collection')).toBeInTheDocument();
     await act(async () => {
-      fireEvent.click(getByText('Back to Nginx collection'));
+      fireEvent.click(getByText('Back to Redis collection'));
     });
     await waitFor(() => {
       expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {

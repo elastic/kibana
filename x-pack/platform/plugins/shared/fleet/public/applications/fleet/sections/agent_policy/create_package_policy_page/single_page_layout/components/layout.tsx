@@ -29,6 +29,9 @@ import type {
   RegistryPolicyTemplate,
 } from '../../../../../types';
 import { PackageIcon } from '../../../../../components';
+import { useGroupPackage } from '../../../../../../../hooks/use_group_package';
+import { GROUP_QUERYPARAM } from '../../../../../../../../common/services';
+import { GroupSchemaToggle } from '../../../../../../integrations/sections/epm/screens/group/schema_toggle';
 import type { EditPackagePolicyFrom } from '../../types';
 
 const AgentPolicyName = styled(EuiDescriptionListDescription)`
@@ -91,6 +94,12 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       [from]
     );
 
+    // PROTOTYPE: when coming from an integration group (`?group=<name>`), show the group's title + icon.
+    // Read window.location directly: this layout is also rendered outside a router.
+    const groupName =
+      new URLSearchParams(window.location.search).get(GROUP_QUERYPARAM) ?? undefined;
+    const { group } = useGroupPackage(isAdd ? groupName : undefined);
+
     const pageTitle = useMemo(() => {
       if ((isAdd || isEdit || isUpgrade) && packageInfo) {
         let pageTitleText = (
@@ -98,7 +107,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
             id="xpack.fleet.createPackagePolicy.pageTitleWithPackageName"
             defaultMessage="Add {packageName} integration"
             values={{
-              packageName: integrationInfo?.title || packageInfo.title,
+              packageName: group?.title || integrationInfo?.title || packageInfo.title,
             }}
           />
         );
@@ -128,13 +137,22 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <PackageIcon
-                packageName={packageInfo?.name || ''}
-                integrationName={integrationInfo?.name}
-                version={packageInfo?.version || ''}
-                icons={integrationInfo?.icons || packageInfo?.icons}
-                size="xl"
-              />
+              {group ? (
+                <PackageIcon
+                  packageName={group.name}
+                  version={group.version}
+                  icons={group.icons}
+                  size="xl"
+                />
+              ) : (
+                <PackageIcon
+                  packageName={packageInfo?.name || ''}
+                  integrationName={integrationInfo?.name}
+                  version={packageInfo?.version || ''}
+                  icons={integrationInfo?.icons || packageInfo?.icons}
+                  size="xl"
+                />
+              )}
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -203,6 +221,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       integrationInfo?.name,
       integrationInfo?.title,
       packageInfo,
+      group,
       defaultPolicyData?.name,
       isAdd,
       isEdit,
@@ -261,6 +280,11 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>{pageTitle}</EuiFlexItem>
+        {group && (
+          <EuiFlexItem>
+            <GroupSchemaToggle groupName={group.name} currentPackageName={packageInfo?.name} />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiText color="subdued" size="s">
             {pageDescription}

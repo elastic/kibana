@@ -761,7 +761,7 @@ describe('EPM index template install', () => {
             settings: {},
           },
         },
-        'logs-package.dataset@custom': {
+        'logs-package.dataset.otel@custom': {
           _meta: {
             managed: true,
             managed_by: 'fleet',
@@ -773,7 +773,7 @@ describe('EPM index template install', () => {
             settings: {},
           },
         },
-        'logs-package.dataset@package': {
+        'logs-package.dataset.otel@package': {
           _meta: {
             managed: true,
             managed_by: 'fleet',
@@ -916,7 +916,7 @@ describe('EPM index template install', () => {
             settings: {},
           },
         },
-        'metrics-package.dataset@custom': {
+        'metrics-package.dataset.otel@custom': {
           _meta: {
             managed: true,
             managed_by: 'fleet',
@@ -928,7 +928,7 @@ describe('EPM index template install', () => {
             settings: {},
           },
         },
-        'metrics-package.dataset@package': {
+        'metrics-package.dataset.otel@package': {
           _meta: {
             managed: true,
             managed_by: 'fleet',

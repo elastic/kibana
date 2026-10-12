@@ -438,6 +438,8 @@ export type RegistrySearchResult = Pick<
   | 'discovery'
   | 'deprecated'
   | 'group'
+  | 'schemas'
+  | 'requires' // PROTOTYPE: integration group child versions, and hiding a child's input/content deps
 >;
 
 // from /categories

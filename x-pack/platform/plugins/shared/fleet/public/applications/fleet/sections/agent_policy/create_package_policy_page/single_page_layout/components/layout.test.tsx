@@ -37,6 +37,10 @@ jest.mock('../../../../../layouts', () => ({
   ),
 }));
 
+jest.mock('../../../../../../../hooks/use_group_package', () => ({
+  useGroupPackage: () => ({ group: undefined }),
+}));
+
 jest.mock('../../../../../components', () => ({
   PackageIcon: () => null,
 }));
