@@ -34,8 +34,10 @@ const SLACK_MESSAGE_EXCLUSIONS = [
 // One investigation per message, so concurrent messages in a channel do not share a subject.
 const SLACK_SUBJECT_ID = '{{ event.connectorId }}:{{ event.channel }}:{{ event.messageId }}';
 
-const SLACK_MESSAGE_PROMPT =
-  'Slack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: 4000 }}';
+// See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
+export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
+
+const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.sender }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
 
 type AlertRow = Extract<NightshiftTriggerRow, { kind: 'alert' }>;
 type SlackRow = Extract<NightshiftTriggerRow, { kind: 'slack' }>;

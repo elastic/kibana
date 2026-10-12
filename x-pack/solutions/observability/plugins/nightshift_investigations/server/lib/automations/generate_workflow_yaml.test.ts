@@ -7,7 +7,9 @@
 
 import { parse } from 'yaml';
 import { evaluateKql } from '@kbn/eval-kql';
-import { generateWorkflowYaml } from './generate_workflow_yaml';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
+import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
+import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
 const baseAutomation = (): NightshiftAutomationAttributes => ({
@@ -207,6 +209,13 @@ describe('generateWorkflowYaml', () => {
         event: { workspace: 'T1', channel: 'C1', sender: 'U1', text: 'hello', ...event },
       });
     };
+
+    it('leaves room in the step message limit for the largest template plus the Slack text', () => {
+      const headingAllowance = 200;
+      expect(
+        MAX_PROMPT_TEMPLATE_LENGTH + headingAllowance + SLACK_MESSAGE_TEXT_LIMIT
+      ).toBeLessThanOrEqual(MAX_TEXT_LENGTH);
+    });
 
     it('emits a slack2.message trigger on the Elastic Slack app connector', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', slackAutomation(slackRow())));
