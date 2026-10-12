@@ -41,8 +41,6 @@ export {
   HJsonLang,
   PromQLLang,
   // esql
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
   ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
   // console
   getParsedRequestsProvider,
