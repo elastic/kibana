@@ -24,8 +24,7 @@ type ComparisonProps = Pick<
   | 'consumer'
   | 'ariaLabelledBy'
   | 'dataView'
-  | 'columnsMeta'
-  | 'isPlainRecord'
+  | 'dataSource'
   | 'selectedFieldNames'
   | 'selectedDocIds'
   | 'forceShowAllFields'
@@ -43,8 +42,7 @@ export const TanStackCompareDocuments = ({
   consumer,
   ariaLabelledBy,
   dataView,
-  columnsMeta,
-  isPlainRecord,
+  dataSource,
   selectedFieldNames,
   selectedDocIds: initialSelectedDocIds,
   forceShowAllFields,
@@ -95,7 +93,7 @@ export const TanStackCompareDocuments = ({
   );
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
-    columnsMeta,
+    dataSource,
     selectedFieldNames,
     selectedDocIds,
     showAllFields: forceShowAllFields || showAllFields,
@@ -111,7 +109,7 @@ export const TanStackCompareDocuments = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <ComparisonControls
-              isPlainRecord={isPlainRecord}
+              dataSource={dataSource}
               selectedDocIds={selectedDocIds}
               showDiff={showDiff}
               diffMode={diffMode}
@@ -162,7 +160,7 @@ export const TanStackCompareDocuments = ({
       <TanStackComparisonTable
         ariaLabelledBy={ariaLabelledBy}
         dataView={dataView}
-        columnsMeta={columnsMeta}
+        dataSource={dataSource}
         fieldFormats={fieldFormats}
         comparisonFields={comparisonFields}
         selectedDocIds={selectedDocIds}

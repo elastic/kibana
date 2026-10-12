@@ -14,15 +14,18 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { InTableSearchCellContext } from '@kbn/data-grid-in-table-search';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { formatFieldStringValueWithHighlights, getIgnoredReason } from '@kbn/discover-utils';
+import {
+  formatFieldStringValueWithHighlights,
+  getIgnoredReason,
+  getDataViewFieldFromDataSource,
+} from '@kbn/discover-utils';
 import { shouldShowFieldFilterInOutActions } from '@kbn/unified-doc-viewer/utils/should_show_field_filter_actions';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import type { DataSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { flattenedToNestedDocument, MAX_TREE_VALUES } from '../utils/build_document_tree';
 import type { JsonModeSettings } from '../types';
@@ -40,36 +43,30 @@ const treeExpansionStore = new WeakMap<EsHitRecord, TreeExpansionState>();
 export interface SourceDocumentJsonModeProps {
   row: DataTableRecord;
   dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
   jsonModeSettings?: JsonModeSettings;
   /** When set, the JSON tree is filtered to these fields; empty = whole document. */
   selectedColumns?: string[];
   onFilter?: DocViewFilterFn;
-  isPlainRecord?: boolean;
 }
 
 export const SourceDocumentJsonMode = ({
   row,
   dataView,
-  columnsMeta,
+  dataSource,
   shouldShowFieldHandler,
   fieldFormats,
   jsonModeSettings,
   selectedColumns,
   onFilter: onFilterProp,
-  isPlainRecord: isPlainRecordProp,
 }: SourceDocumentJsonModeProps) => {
   const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
     useContext(InTableSearchCellContext);
-  const {
-    onFilter: contextOnFilter,
-    hideFilteringOnComputedColumns,
-    isPlainRecord: contextIsPlainRecord,
-  } = useContext(UnifiedDataTableContext);
+  const { onFilter: contextOnFilter, hideFilteringOnComputedColumns } =
+    useContext(UnifiedDataTableContext);
   const onFilter = onFilterProp ?? contextOnFilter;
-  const isPlainRecord = isPlainRecordProp ?? contextIsPlainRecord;
 
   const hideNulls = jsonModeSettings?.hideNulls ?? false;
   const wrapLines = jsonModeSettings?.wrapLines ?? true;
@@ -80,11 +77,7 @@ export const SourceDocumentJsonMode = ({
     (node) => {
       const { path, value, isArrayItem } = node;
       const fieldName = fieldNameFromPath(path);
-      const field = getDataViewFieldOrCreateFromColumnMeta({
-        dataView,
-        fieldName,
-        columnMeta: columnsMeta?.[fieldName],
-      });
+      const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName });
       if (
         !shouldShowFieldFilterInOutActions({
           dataViewField: field,
@@ -97,7 +90,7 @@ export const SourceDocumentJsonMode = ({
         return [];
       }
       // For array items, we wrap the value in an array so it's filtered by using MV_CONTAINS.
-      const filterValue = isPlainRecord && isArrayItem ? [value] : value;
+      const filterValue = dataSource?.kind === 'esql' && isArrayItem ? [value] : value;
       return [
         {
           id: 'filterFor',
@@ -121,7 +114,7 @@ export const SourceDocumentJsonMode = ({
         },
       ];
     },
-    [dataView, columnsMeta, onFilter, hideFilteringOnComputedColumns, isPlainRecord, row]
+    [dataView, dataSource, onFilter, hideFilteringOnComputedColumns, row]
   );
 
   const initialTreeState = useMemo(() => treeExpansionStore.get(row.raw), [row]);
@@ -135,7 +128,6 @@ export const SourceDocumentJsonMode = ({
   const { tree: documentTree, truncated } = flattenedToNestedDocument({
     row,
     dataView,
-    columnsMeta,
     shouldShowFieldHandler,
     hideNulls,
     selectedColumns,

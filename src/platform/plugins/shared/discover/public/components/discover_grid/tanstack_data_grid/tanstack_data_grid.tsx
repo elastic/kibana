@@ -53,7 +53,7 @@ import {
 } from '@elastic/eui';
 import type { EuiDataGridRefProps } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord, DataTableColumnsMeta, RowControlProps } from '@kbn/discover-utils';
+import type { DataTableRecord, RowControlProps } from '@kbn/discover-utils';
 import {
   getShouldShowFieldHandler,
   calcFieldCounts,
@@ -61,10 +61,11 @@ import {
   formatFieldValueText,
   formatHitReact,
   canPrependTimeFieldColumn,
+  getDataViewFieldFromDataSource,
   getVisibleColumns,
   prepareDataViewForEditing,
 } from '@kbn/discover-utils';
-import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, getFieldIconType } from '@kbn/field-utils';
 import { i18n } from '@kbn/i18n';
 import {
   SourceDocument,
@@ -114,7 +115,7 @@ import {
   type UseDataGridColumnsCellActionsProps,
 } from '@kbn/cell-actions';
 import type { AggregateQuery } from '@kbn/es-query';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { columnToFieldBase, type DataSource } from '@kbn/data-source';
 import {
   getTanStackDataGridStyles,
   CONTROL_COL_WIDTH,
@@ -165,12 +166,11 @@ declare module '@tanstack/react-table' {
 export interface TanStackDataGridProps {
   rows: DataTableRecord[];
   columns: string[];
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   externalCustomRenderers?: UnifiedDataTableProps['externalCustomRenderers'];
   dataView: DataView;
   query?: AggregateQuery;
   showTimeCol: boolean;
-  isPlainRecord?: boolean;
   showColumnTokens?: boolean;
 
   sort?: SortOrder[];
@@ -782,7 +782,7 @@ const SummaryCellContent = React.memo(
     dataView,
     shouldShowFieldHandler,
     fieldFormats,
-    columnsMeta,
+    dataSource,
     isCompressed,
     maxEntries,
   }: {
@@ -791,7 +791,7 @@ const SummaryCellContent = React.memo(
     maxEntries: number;
     shouldShowFieldHandler: (fieldName: string) => boolean;
     fieldFormats: ReturnType<typeof useDiscoverServices>['fieldFormats'];
-    columnsMeta: DataTableColumnsMeta | undefined;
+    dataSource: DataSource | undefined;
     isCompressed: boolean;
   }) => {
     const filteredRow = useMemo(() => filterNullFields(row), [row]);
@@ -804,7 +804,7 @@ const SummaryCellContent = React.memo(
         shouldShowFieldHandler={shouldShowFieldHandler}
         maxEntries={maxEntries}
         fieldFormats={fieldFormats}
-        columnsMeta={columnsMeta}
+        dataSource={dataSource}
         isCompressed={isCompressed}
       />
     );
@@ -820,7 +820,7 @@ const CustomDataCell = React.memo(
     colIndex,
     dataView,
     fieldFormats,
-    columnsMeta,
+    dataSource,
     isCompressed,
   }: {
     Renderer: CustomCellRenderer[string];
@@ -830,7 +830,7 @@ const CustomDataCell = React.memo(
     colIndex: number;
     dataView: DataView;
     fieldFormats: DataGridCellValueElementProps['fieldFormats'];
-    columnsMeta: DataTableColumnsMeta | undefined;
+    dataSource: DataSource | undefined;
     isCompressed: boolean;
   }) => {
     const [cellProps, setCellProps] = useState<
@@ -846,7 +846,7 @@ const CustomDataCell = React.memo(
           colIndex={colIndex}
           dataView={dataView}
           fieldFormats={fieldFormats}
-          columnsMeta={columnsMeta}
+          dataSource={dataSource}
           isCompressed={isCompressed}
           isDetails={false}
           isExpandable={false}
@@ -863,12 +863,11 @@ const CustomDataCell = React.memo(
 const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
   rows,
   columns,
-  columnsMeta,
+  dataSource,
   externalCustomRenderers,
   dataView,
   query,
   showTimeCol,
-  isPlainRecord,
   showColumnTokens,
   sort = [],
   onSort,
@@ -939,6 +938,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
 
   const scrollKey = dataView.id ?? dataView.title;
   const timeFieldName = dataView.timeFieldName;
+  const isPlainRecord = dataSource?.kind === 'esql';
 
   // ── Find in table ──
   const [inTableSearch, setInTableSearch] = useRestorableState('inTableSearch', undefined);
@@ -978,15 +978,8 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
   );
 
   const shouldPrependTimeFieldColumn = useMemo(
-    () =>
-      canPrependTimeFieldColumn(
-        displayedColumns,
-        timeFieldName,
-        columnsMeta,
-        showTimeCol,
-        Boolean(isPlainRecord)
-      ),
-    [columnsMeta, displayedColumns, isPlainRecord, showTimeCol, timeFieldName]
+    () => canPrependTimeFieldColumn(displayedColumns, timeFieldName, dataSource, showTimeCol),
+    [dataSource, displayedColumns, showTimeCol, timeFieldName]
   );
 
   const isJsonMode = documentsDisplayMode === 'json';
@@ -1019,14 +1012,13 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
       const shouldPrependTime = canPrependTimeFieldColumn(
         nextColumns,
         timeFieldName,
-        columnsMeta,
-        showTimeCol,
-        Boolean(isPlainRecord)
+        dataSource,
+        showTimeCol
       );
 
       onSetColumns?.(nextColumns, !shouldPrependTime);
     },
-    [columnsMeta, effectiveColumns, isPlainRecord, onSetColumns, showTimeCol, timeFieldName]
+    [dataSource, effectiveColumns, onSetColumns, showTimeCol, timeFieldName]
   );
 
   // ── Row selection ──
@@ -1218,13 +1210,9 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         value,
         fieldFormats,
         dataView,
-        field: getDataViewFieldOrCreateFromColumnMeta({
-          dataView,
-          fieldName,
-          columnMeta: columnsMeta?.[fieldName],
-        }),
+        field: getDataViewFieldFromDataSource({ dataView, dataSource, fieldName }),
       }),
-    [columnsMeta, dataView, fieldFormats]
+    [dataSource, dataView, fieldFormats]
   );
   const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
@@ -1239,9 +1227,9 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         shouldShowFieldHandler,
         maxDocFieldsDisplayed,
         fieldFormats,
-        columnsMeta
+        dataSource
       ).flatMap(([, , fieldName]) => (fieldName ? [fieldName] : [])),
-    [columnsMeta, dataView, fieldFormats, maxDocFieldsDisplayed, shouldShowFieldHandler]
+    [dataSource, dataView, fieldFormats, maxDocFieldsDisplayed, shouldShowFieldHandler]
   );
   const findMatches = useMemo(
     () =>
@@ -1569,16 +1557,12 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     (field, value, mode) =>
       onFilter?.(
         typeof field === 'string'
-          ? getDataViewFieldOrCreateFromColumnMeta({
-              dataView,
-              fieldName: field,
-              columnMeta: columnsMeta?.[field],
-            }) ?? field
+          ? getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: field }) ?? field
           : field,
         value,
         mode
       ),
-    [columnsMeta, dataView, onFilter]
+    [dataSource, dataView, onFilter]
   );
   const onFilterRef = useRef(onFilter ? onFilterWithField : undefined);
   onFilterRef.current = onFilter ? onFilterWithField : undefined;
@@ -1595,13 +1579,13 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     }
     return effectiveColumns.map(
       (columnName) =>
-        getDataViewFieldOrCreateFromColumnMeta({
+        getDataViewFieldFromDataSource({
           dataView,
+          dataSource,
           fieldName: columnName,
-          columnMeta: columnsMeta?.[columnName],
         })?.toSpec() ?? { name: '', type: '', aggregatable: false, searchable: false }
     );
-  }, [cellActionsTriggerId, effectiveColumns, dataView, columnsMeta]);
+  }, [cellActionsTriggerId, effectiveColumns, dataView, dataSource]);
   const allCellActionsMetadata = useMemo(
     () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
     [dataView, cellActionsMetadata]
@@ -1637,9 +1621,8 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
-        isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
-        columnsMeta,
+        dataSource,
         documentsDisplayMode,
         jsonModeSettings: jsonModeSettingsState,
         selectedColumns: columns,
@@ -1647,14 +1630,13 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     [
       closeCellPopover,
       columns,
-      columnsMeta,
+      dataSource,
       dataGridDensity,
       dataView,
       displayedRows,
       documentsDisplayMode,
       externalCustomRenderers,
       fieldFormats,
-      isPlainRecord,
       jsonModeSettingsState,
       shouldShowFieldHandler,
       maxDocFieldsDisplayed,
@@ -1676,10 +1658,10 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         dataView,
         columnId,
         fieldFormats,
-        columnsMeta,
+        dataSource,
         options,
       }),
-    [columnsMeta, dataView, fieldFormats, rows]
+    [dataSource, dataView, fieldFormats, rows]
   );
 
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -1813,13 +1795,12 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
           <SourceDocumentJsonMode
             row={row.original}
             dataView={dataView}
-            columnsMeta={columnsMeta}
+            dataSource={dataSource}
             shouldShowFieldHandler={shouldShowFieldHandler}
             fieldFormats={fieldFormats}
             jsonModeSettings={jsonModeSettingsState}
             selectedColumns={columns}
             onFilter={onFilter}
-            isPlainRecord={isPlainRecord}
           />
         ) : externalCustomRenderers?.[SOURCE_COLUMN_ID] ? (
           <CustomDataCell
@@ -1830,7 +1811,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
             colIndex={effectiveColumns.indexOf(SOURCE_COLUMN_ID)}
             dataView={dataView}
             fieldFormats={fieldFormats}
-            columnsMeta={columnsMeta}
+            dataSource={dataSource}
             isCompressed={dataGridDensity === DataGridDensity.COMPACT}
           />
         ) : (
@@ -1839,7 +1820,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
             dataView={dataView}
             shouldShowFieldHandler={shouldShowFieldHandler}
             fieldFormats={fieldFormats}
-            columnsMeta={columnsMeta}
+            dataSource={dataSource}
             isCompressed={dataGridDensity === DataGridDensity.COMPACT}
             maxEntries={maxDocFieldsDisplayed}
           />
@@ -1849,10 +1830,10 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     if (isSummaryMode) {
       // Same check as UnifiedDataTable, e.g. no time column when an ES|QL query drops it.
       if (shouldPrependTimeFieldColumn && timeFieldName) {
-        const timeField = getDataViewFieldOrCreateFromColumnMeta({
+        const timeField = getDataViewFieldFromDataSource({
           dataView,
+          dataSource,
           fieldName: timeFieldName,
-          columnMeta: columnsMeta?.[timeFieldName],
         });
         const formatTimeValue = (value: unknown) =>
           formatFieldValueForText({
@@ -1881,7 +1862,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                   colIndex={0}
                   dataView={dataView}
                   fieldFormats={fieldFormats}
-                  columnsMeta={columnsMeta}
+                  dataSource={dataSource}
                   isCompressed={dataGridDensity === DataGridDensity.COMPACT}
                 />
               );
@@ -1905,10 +1886,10 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
           continue;
         }
         const isTimeField = colId === timeFieldName;
-        const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+        const dataViewField = getDataViewFieldFromDataSource({
           dataView,
+          dataSource,
           fieldName: colId,
-          columnMeta: columnsMeta?.[colId],
         });
         const formatValue = (value: unknown) =>
           formatFieldValueForText({
@@ -1921,7 +1902,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         const columnIsSortable =
           isSortEnabled &&
           isSortable({
-            isPlainRecord,
+            dataSource,
             columnName: colId,
             columnSchema,
             dataViewField,
@@ -1978,7 +1959,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                   colIndex={colIndex}
                   dataView={dataView}
                   fieldFormats={fieldFormats}
-                  columnsMeta={columnsMeta}
+                  dataSource={dataSource}
                   isCompressed={dataGridDensity === DataGridDensity.COMPACT}
                 />
               );
@@ -1997,7 +1978,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
 
     return defs;
   }, [
-    columnsMeta,
+    dataSource,
     externalCustomRenderers,
     dataGridDensity,
     dataView,
@@ -2011,7 +1992,6 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
     onFilter,
     settings,
     shouldShowFieldHandler,
-    isPlainRecord,
     timeFieldName,
     rowAdditionalLeadingControls,
     headerRowHeightLines,
@@ -2105,10 +2085,10 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
         return;
       }
 
-      const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+      const dataViewField = getDataViewFieldFromDataSource({
         dataView,
+        dataSource,
         fieldName: columnId,
-        columnMeta: columnsMeta?.[columnId],
       });
       const headerLabel = getColumnDisplayName(
         columnId,
@@ -2137,7 +2117,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
       table,
       displayedRows,
       dataView,
-      columnsMeta,
+      dataSource,
       settings?.columns,
       densityCfg.fontSize,
       densityCfg.cellPadding,
@@ -2454,8 +2434,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
           consumer={consumer}
           ariaLabelledBy={ariaLabelledBy}
           dataView={dataView}
-          columnsMeta={columnsMeta}
-          isPlainRecord={Boolean(isPlainRecord)}
+          dataSource={dataSource}
           selectedFieldNames={effectiveColumns}
           selectedDocIds={selectedDocIds}
           forceShowAllFields={isSummaryMode}
@@ -3062,10 +3041,10 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                     !isControl && !isSelect && !isSummary && Boolean(onSetColumns);
                   const isDragging = dragState.dragging === colId;
                   const isDragOver = dragState.over === colId && dragState.dragging !== colId;
-                  const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+                  const dataViewField = getDataViewFieldFromDataSource({
                     dataView,
+                    dataSource,
                     fieldName: colId,
-                    columnMeta: columnsMeta?.[colId],
                   });
                   const columnDisplayName = getColumnDisplayName(
                     colId,
@@ -3189,12 +3168,11 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                             columnIndex,
                             visibleColumnIds: effectiveColumns,
                             dataView,
-                            columnsMeta,
+                            dataSource,
                             settings,
                             columnSizing,
                             isSummaryMode,
                             isSortEnabled: headerSortEnabled,
-                            isPlainRecord,
                             sort,
                             onSort,
                             persistVisibleColumns,
@@ -3216,8 +3194,10 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
                             (() => {
                               const fieldName = header.column.columnDef.meta?.fieldName;
                               if (!fieldName) return null;
-                              if (columnsMeta) {
-                                const iconType = getTextBasedColumnIconType(columnsMeta[fieldName]);
+                              if (dataSource?.kind === 'esql') {
+                                const esqlColumn = dataSource.getColumn(fieldName);
+                                const iconType =
+                                  esqlColumn && getFieldIconType(columnToFieldBase(esqlColumn));
                                 if (iconType && iconType !== 'unknown') {
                                   return (
                                     <FieldIcon type={iconType} css={styles.headerCellFieldIcon} />
@@ -3309,7 +3289,7 @@ const TanStackDataGridComponent: React.FC<TanStackDataGridProps> = ({
           currentExpandedDoc &&
           typeof renderDocumentView === 'function' && (
             <span className="dscTable__flyout">
-              {renderDocumentView(currentExpandedDoc, displayedRows, displayedColumns, columnsMeta)}
+              {renderDocumentView(currentExpandedDoc, displayedRows, displayedColumns, dataSource)}
             </span>
           )}
       </div>

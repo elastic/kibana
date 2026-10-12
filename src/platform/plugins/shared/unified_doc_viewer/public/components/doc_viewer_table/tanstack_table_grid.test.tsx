@@ -43,7 +43,7 @@ const buildFieldRow = (name: string, value: string, isPinned = false) =>
     }),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     isPinned,
-    columnsMeta: {},
+    dataSource: undefined,
   });
 
 const mockRows: FieldRow[] = [buildFieldRow('fieldA', 'valueA'), buildFieldRow('fieldB', 'valueB')];

@@ -39,7 +39,6 @@ it('renders selected documents with TanStack and can change the comparison base'
       consumer="discover"
       ariaLabelledBy="documentsAriaLabel"
       dataView={dataViewMock}
-      isPlainRecord={false}
       selectedFieldNames={['bytes']}
       selectedDocIds={docs.map(({ id }) => id)}
       forceShowAllFields={false}

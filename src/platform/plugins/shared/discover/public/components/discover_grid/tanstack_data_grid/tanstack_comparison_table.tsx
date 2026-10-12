@@ -19,8 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { formatFieldValueReact } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { formatFieldValueReact, getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { isEqual } from 'lodash';
 import {
   COMPARISON_ADDED_SEGMENT_CLASS,
@@ -44,7 +43,7 @@ interface ComparisonRow {
 
 type TanStackComparisonTableProps = Pick<
   CompareDocumentsProps,
-  'ariaLabelledBy' | 'dataView' | 'columnsMeta' | 'fieldFormats'
+  'ariaLabelledBy' | 'dataView' | 'dataSource' | 'fieldFormats'
 > & {
   comparisonFields: string[];
   selectedDocIds: string[];
@@ -58,7 +57,7 @@ type TanStackComparisonTableProps = Pick<
 export const TanStackComparisonTable = ({
   ariaLabelledBy,
   dataView,
-  columnsMeta,
+  dataSource,
   fieldFormats,
   comparisonFields,
   selectedDocIds,
@@ -85,11 +84,7 @@ export const TanStackComparisonTable = ({
         size: 200,
         cell: ({ row }) => {
           const { fieldName } = row.original;
-          const field = getDataViewFieldOrCreateFromColumnMeta({
-            dataView,
-            fieldName,
-            columnMeta: columnsMeta?.[fieldName],
-          });
+          const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName });
           return (
             <strong data-test-subj="unifiedDataTableComparisonFieldName">
               {field?.displayName ?? fieldName}
@@ -181,11 +176,7 @@ export const TanStackComparisonTable = ({
               const { fieldName } = row.original;
               const value = doc.flattened[fieldName];
               const baseValue = baseDoc?.flattened[fieldName];
-              const field = getDataViewFieldOrCreateFromColumnMeta({
-                dataView,
-                fieldName,
-                columnMeta: columnsMeta?.[fieldName],
-              });
+              const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName });
               const activeDiffMode = showDiff ? diffMode : undefined;
               if (!activeDiffMode || activeDiffMode === 'basic') {
                 return (
@@ -231,7 +222,7 @@ export const TanStackComparisonTable = ({
     ],
     [
       baseDoc,
-      columnsMeta,
+      dataSource,
       dataView,
       diffMode,
       docMap,

@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,12 +21,10 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  MAINTENANCE_FEATURE_FLAG_ACTOR,
-  type SignificantEventsMaintenanceStatus,
-} from '@kbn/significant-events-plugin/common';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
@@ -43,128 +40,54 @@ const SECTION_DESCRIPTION = i18n.translate('xpack.nightshift.settings.maintenanc
     'Controls detection activity across all spaces, including knowledge indicator extraction, query alerting, rule creation, and significant event discovery. Existing data always persists.',
 });
 
-function PausedSummary({ status }: { status: SignificantEventsMaintenanceStatus }) {
-  const { updatedBy, lastSummary } = status;
-  const pausedByFeatureFlag = updatedBy === MAINTENANCE_FEATURE_FLAG_ACTOR;
-  const workflowsDisabled = lastSummary?.workflowsDisabled ?? 0;
-  const rulesDisabled = lastSummary?.rulesDisabled ?? 0;
-  const failureCount = lastSummary?.partialFailures.length ?? 0;
-  const hasCounts = workflowsDisabled > 0 || rulesDisabled > 0;
+const ActivityCount = ({ label, dataTestSubj }: { label: string; dataTestSubj: string }) => (
+  <EuiFlexItem grow={false} data-test-subj={dataTestSubj}>
+    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="xs" color="subdued">
+          <p>{label}</p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);
 
+const ActivityCounts = ({
+  automationsDisabled,
+  rulesDisabled,
+}: {
+  automationsDisabled: number;
+  rulesDisabled: number;
+}) => {
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="xs"
-      data-test-subj="streams-settings-maintenance-paused-status"
+      alignItems="flexStart"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj="streams-settings-maintenance-activity-counts"
     >
-      <EuiFlexItem>
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="pause" color="warning" size="s" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs">
-              <strong>
-                {i18n.translate('xpack.nightshift.settings.maintenance.pausedTitle', {
-                  defaultMessage: 'Detection engine is paused',
-                })}
-              </strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-
-      {updatedBy && !pausedByFeatureFlag && (
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.nightshift.settings.maintenance.pausedBy"
-                defaultMessage="Paused by {pausedBy}."
-                values={{ pausedBy: <strong>{updatedBy}</strong> }}
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
-
-      {hasCounts && (
-        <>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>
-                    {i18n.translate(
-                      'xpack.nightshift.settings.maintenance.pausedAutomationsSummary',
-                      {
-                        defaultMessage:
-                          '{count, plural, one {# automation paused} other {# automations paused}}',
-                        values: { count: workflowsDisabled },
-                      }
-                    )}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="xs">
-                  <p>
-                    {i18n.translate('xpack.nightshift.settings.maintenance.pausedRulesSummary', {
-                      defaultMessage: '{count, plural, one {# rule paused} other {# rules paused}}',
-                      values: { count: rulesDisabled },
-                    })}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </>
-      )}
-
-      {pausedByFeatureFlag && (
-        <EuiFlexItem>
-          <EuiText size="xs" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.nightshift.settings.maintenance.pausedByFeatureFlag"
-                defaultMessage="Paused automatically because Nightshift was turned off. Activity stays paused until you resume it. The alerting rules backing knowledge indicator queries were left running."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      )}
-
-      {failureCount > 0 && (
-        <EuiFlexItem>
-          <EuiCallOut
-            announceOnMount
-            size="s"
-            color="warning"
-            iconType="warning"
-            data-test-subj="streams-settings-maintenance-partial-failures"
-            title={
-              <FormattedMessage
-                id="xpack.nightshift.settings.maintenance.partialFailures"
-                defaultMessage="{failureCount, plural, one {# maintenance operation} other {# maintenance operations}} could not be completed. Check the Kibana server logs for details. Pause again while paused re-sweeps disable/cancel."
-                values={{ failureCount }}
-              />
-            }
-          />
-        </EuiFlexItem>
-      )}
+      <ActivityCount
+        dataTestSubj="streams-settings-maintenance-automations-disabled"
+        label={i18n.translate('xpack.nightshift.settings.maintenance.automationsDisabledSummary', {
+          defaultMessage:
+            '{automationsDisabled, plural, one {# automation disabled} other {# automations disabled}}',
+          values: { automationsDisabled },
+        })}
+      />
+      <ActivityCount
+        dataTestSubj="streams-settings-maintenance-rules-disabled"
+        label={i18n.translate('xpack.nightshift.settings.maintenance.rulesDisabledSummary', {
+          defaultMessage: '{rulesDisabled, plural, one {# rule disabled} other {# rules disabled}}',
+          values: { rulesDisabled },
+        })}
+      />
     </EuiFlexGroup>
   );
-}
+};
 
 export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   const { data: status, isLoading, isError, refetch } = useMaintenanceStatus();
@@ -177,6 +100,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
   const paused = status?.state === 'paused';
   const isMutating = isPausing || isResuming;
   const statusReady = !isLoading && !isError && status !== undefined;
+  const activityCounts = {
+    automationsDisabled: status?.lastSummary?.workflowsDisabled ?? 0,
+    rulesDisabled: status?.lastSummary?.rulesDisabled ?? 0,
+  };
 
   const onConfirm = () => {
     setIsModalOpen(false);
@@ -196,84 +123,69 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
       >
         {isError && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               announceOnMount
               size="s"
-              color="danger"
-              iconType="error"
               data-test-subj="streams-settings-maintenance-status-error"
               title={i18n.translate('xpack.nightshift.settings.maintenance.statusErrorTitle', {
                 defaultMessage: 'Could not load maintenance status',
               })}
-            >
-              <p>
-                {i18n.translate('xpack.nightshift.settings.maintenance.statusErrorBody', {
-                  defaultMessage:
-                    'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
-                })}
-              </p>
-              <EuiButton
-                size="s"
-                onClick={() => refetch()}
-                data-test-subj="streams-settings-maintenance-status-retry"
-              >
-                {i18n.translate('xpack.nightshift.settings.maintenance.statusRetry', {
-                  defaultMessage: 'Retry',
-                })}
-              </EuiButton>
-            </EuiCallOut>
+              text={i18n.translate('xpack.nightshift.settings.maintenance.statusErrorBody', {
+                defaultMessage:
+                  'Pause and Resume are unavailable until status can be loaded. Activity controls stay disabled while status is unknown.',
+              })}
+              actionProps={{
+                primary: {
+                  children: i18n.translate('xpack.nightshift.settings.maintenance.statusRetry', {
+                    defaultMessage: 'Retry',
+                  }),
+                  onClick: () => void refetch(),
+                  'data-test-subj': 'streams-settings-maintenance-status-retry',
+                },
+              }}
+            />
             <EuiSpacer />
           </>
         )}
         {status?.featureSettingsUnavailable && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               announceOnMount
               size="s"
-              color="warning"
-              iconType="warning"
               data-test-subj="streams-settings-maintenance-feature-settings-unavailable"
               title={i18n.translate(
                 'xpack.nightshift.settings.maintenance.featureSettingsUnavailableTitle',
                 { defaultMessage: 'Some activity settings could not be loaded' }
               )}
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.nightshift.settings.maintenance.featureSettingsUnavailableBody',
-                  {
-                    defaultMessage:
-                      'Scheduled discovery and continuous onboarding status may be incomplete. Pause and Resume still work; refresh or retry if those toggles look wrong.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate(
+                'xpack.nightshift.settings.maintenance.featureSettingsUnavailableBody',
+                {
+                  defaultMessage:
+                    'Scheduled discovery and continuous onboarding status may be incomplete. Pause and Resume still work; refresh or retry if those toggles look wrong.',
+                }
+              )}
+            />
             <EuiSpacer />
           </>
         )}
         {!canManage && statusReady && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               size="s"
-              color="primary"
-              iconType="lock"
               data-test-subj="streams-settings-maintenance-no-manage"
               title={i18n.translate('xpack.nightshift.settings.maintenance.noManageTitle', {
                 defaultMessage: 'Administrator access required',
               })}
-            >
-              <p>
-                {i18n.translate('xpack.nightshift.settings.maintenance.noManageBody', {
-                  defaultMessage:
-                    'You can view pause status, but pausing or resuming requires the Nightshift Manage engines privilege.',
-                })}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate('xpack.nightshift.settings.maintenance.noManageBody', {
+                defaultMessage:
+                  'You can view pause status, but pausing or resuming requires the Nightshift Manage engines privilege.',
+              })}
+            />
             <EuiSpacer />
           </>
         )}
-        <EuiFlexGroup responsive={false}>
+        <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streams-settings-maintenance-toggle-button"
@@ -283,6 +195,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               isLoading={isMutating || isLoading}
               isDisabled={!canManage || !statusReady || isMutating}
               onClick={() => setIsModalOpen(true)}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.OPEN_DETECTION_ENGINE_CONFIRMATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             >
               {isLoading
                 ? i18n.translate('xpack.nightshift.settings.maintenance.loadingButton', {
@@ -297,13 +213,12 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
                   })}
             </EuiButton>
           </EuiFlexItem>
+          {(isPausing || paused) && (
+            <EuiFlexItem grow={false}>
+              <ActivityCounts {...activityCounts} />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
-        {paused && status && (
-          <>
-            <EuiSpacer size="s" />
-            <PausedSummary status={status} />
-          </>
-        )}
       </SettingsSectionRow>
 
       {isModalOpen && statusReady && (
@@ -346,6 +261,10 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
             <EuiButtonEmpty
               data-test-subj="streams-settings-maintenance-confirm-cancel"
               onClick={() => setIsModalOpen(false)}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_DETECTION_ENGINE_CHANGE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             >
               {i18n.translate('xpack.nightshift.settings.maintenance.confirmCancel', {
                 defaultMessage: 'Cancel',
@@ -357,6 +276,12 @@ export function MaintenanceSection({ canManage }: { canManage: boolean }) {
               iconType={paused ? 'play' : 'pause'}
               data-test-subj="streams-settings-maintenance-confirm-button"
               onClick={onConfirm}
+              {...getEbtProps({
+                action: paused
+                  ? NIGHTSHIFT_EBT_ACTIONS.RESUME_DETECTION_ENGINE
+                  : NIGHTSHIFT_EBT_ACTIONS.PAUSE_DETECTION_ENGINE,
+                element: NIGHTSHIFT_EBT_ELEMENTS.SETTINGS,
+              })}
             >
               {paused
                 ? i18n.translate('xpack.nightshift.settings.maintenance.resumeConfirmButton', {

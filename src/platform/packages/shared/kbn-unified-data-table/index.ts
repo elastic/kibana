@@ -18,12 +18,8 @@ export {
   RowHeightSettings,
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
-export {
-  UnifiedDataTableAdditionalDisplaySettings,
-  type UnifiedDataTableAdditionalDisplaySettingsProps,
-} from './src/components/data_table_additional_display_settings';
+export { UnifiedDataTableAdditionalDisplaySettings } from './src/components/data_table_additional_display_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
-export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
 export {
   ROWS_HEIGHT_OPTIONS,
   DataGridDensity,
@@ -74,9 +70,8 @@ export {
 } from './src/components/build_copy_column_button';
 export { buildEditFieldButton } from './src/components/build_edit_field_button';
 export { isSortable } from './src/hooks/use_sorting';
-export { getSchemaByKbnType, getSchemaDetectors } from './src/components/data_table_schema';
+export { getSchemaByKbnType } from './src/components/data_table_schema';
 export { convertValueToString } from './src/utils/convert_value_to_string';
-export { CompareDocuments } from './src/components/compare_documents';
 export { ComparisonControls } from './src/components/compare_documents/comparison_controls';
 export { useComparisonFields } from './src/components/compare_documents/hooks/use_comparison_fields';
 export {
@@ -111,10 +106,7 @@ export {
 
 export { type EuiDataGridRefProps } from '@elastic/eui';
 
-export {
-  TanStackCellActionsBubble,
-  type TanStackCellActionsBubbleProps,
-} from './src/components/tanstack_cell_actions/tanstack_cell_actions_bubble';
+export { TanStackCellActionsBubble } from './src/components/tanstack_cell_actions/tanstack_cell_actions_bubble';
 export {
   TANSTACK_CELL_ACTIONS_CLASS,
   tanStackCellActionsStyles,

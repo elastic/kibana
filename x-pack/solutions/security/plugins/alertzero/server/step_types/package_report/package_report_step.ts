@@ -12,6 +12,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
+import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
 import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
 import {
@@ -42,7 +43,10 @@ export interface PackageReportStepDependencies {
    * bound to the space the step runs in. Defaults to treating every host as unenrolled when not
    * provided (e.g. no Fleet plugin).
    */
-  getResolveHostEnrollment?: (spaceId: string) => RunPackageReportDeps['resolveHostEnrollment'];
+  getResolveHostEnrollment?: (
+    spaceId: string,
+    esClient: ElasticsearchClient
+  ) => RunPackageReportDeps['resolveHostEnrollment'];
   /**
    * Defaults to the real `mget`-backed rehydrator built from the step's own scoped client, so
    * the calling user's privileges apply. Overridable for tests and Fleet-less deployments.
@@ -51,6 +55,15 @@ export interface PackageReportStepDependencies {
     esClient: ElasticsearchClient,
     logger?: Logger
   ) => RunPackageReportDeps['rehydrateProcessSelectors'];
+  /**
+   * Kibana's internal-user ES client, for `loadReportHuntContext`'s read of
+   * `.kibana-threat-reports`. The hunt worker's service-account role grants it no privilege on
+   * that index at all (not even via an exact-name grant), so the step's own scoped client cannot
+   * read it: a wildcard search there resolves to zero matched indices and returns an empty,
+   * error-free result rather than a 403, which is indistinguishable from a genuinely missing
+   * report. Optional so a caller without CoreStart wired up still packages (no enrichment).
+   */
+  getInternalEsClient?: () => ElasticsearchClient;
   logger?: Logger;
 }
 
@@ -70,6 +83,7 @@ export const getPackageReportStepDefinition = ({
   isContextEngineEnabled,
   getResolveHostEnrollment = () => defaultResolveHostEnrollment,
   getRehydrateProcessSelectors = makeRehydrateProcessSelectors,
+  getInternalEsClient,
   logger,
 }: PackageReportStepDependencies) =>
   createServerStepDefinition({
@@ -94,7 +108,7 @@ export const getPackageReportStepDefinition = ({
 
         const listRespondActions: RunPackageReportDeps['listRespondActions'] = async (sid) => {
           try {
-            const listed = await getActionsService().list(sid, request, ['respond']);
+            const listed = await getActionsService().list(sid, request, ['respond', 'investigate']);
             return { ok: true, actions: listed.actions };
           } catch {
             return { ok: false, reason: 'catalog_error' };
@@ -107,12 +121,17 @@ export const getPackageReportStepDefinition = ({
           isContextEngineEnabled: () => isContextEngineEnabled(request),
         });
 
-        const rehydrateProcessSelectors = getRehydrateProcessSelectors(
-          context.contextManager.getScopedEsClient(),
-          logger
-        );
+        const scopedEsClient = context.contextManager.getScopedEsClient();
+        const rehydrateProcessSelectors = getRehydrateProcessSelectors(scopedEsClient, logger);
 
         const countExistingProposals = createExistingProposalsCounter({
+          proposalsService: getHuntServices().getProposalsService(),
+          spaceId,
+          request,
+          logger,
+        });
+
+        const hasOpenProposal = createOpenProposalChecker({
           proposalsService: getHuntServices().getProposalsService(),
           spaceId,
           request,
@@ -127,13 +146,20 @@ export const getPackageReportStepDefinition = ({
           huntStatus: input.huntStatus,
           hasConfirmedHit: input.hasConfirmedHit,
           expectedSseCount: input.expectedSseCount,
+          coordinator: {
+            reportIntentTargets: input.reportIntentTargets,
+            behaviors: input.behaviors,
+          },
           attachments: conversation.attachments,
           deps: {
             listRespondActions,
             writeCoverageKis,
-            resolveHostEnrollment: getResolveHostEnrollment(spaceId),
+            resolveHostEnrollment: getResolveHostEnrollment(spaceId, scopedEsClient),
             rehydrateProcessSelectors,
             countExistingProposals,
+            getEsReportContextClient: getInternalEsClient,
+            logger,
+            hasOpenProposal,
           },
         });
 

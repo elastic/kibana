@@ -12,8 +12,8 @@ import type { EuiListGroupItemProps } from '@elastic/eui';
 import { EuiHorizontalRule, EuiListGroup, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import type { ToastsStart } from '@kbn/core/public';
 import {
   SOURCE_COLUMN,
@@ -33,12 +33,11 @@ export interface BuildTanStackColumnHeaderActionsParams {
   columnIndex: number;
   visibleColumnIds: string[];
   dataView: DataView;
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   settings?: UnifiedDataTableSettings;
   columnSizing: Record<string, number>;
   isSummaryMode: boolean;
   isSortEnabled: boolean;
-  isPlainRecord?: boolean;
   sort: SortOrder[];
   onSort?: (sort: SortOrder[]) => void;
   persistVisibleColumns: (columns: string[]) => void;
@@ -197,12 +196,11 @@ export const buildTanStackColumnHeaderActionGroups = ({
   columnIndex,
   visibleColumnIds,
   dataView,
-  columnsMeta,
+  dataSource,
   settings,
   columnSizing,
   isSummaryMode,
   isSortEnabled,
-  isPlainRecord,
   sort,
   onSort,
   persistVisibleColumns,
@@ -218,10 +216,10 @@ export const buildTanStackColumnHeaderActionGroups = ({
   hasEditDataViewPermission,
   onActionComplete,
 }: BuildTanStackColumnHeaderActionsParams): EuiListGroupItemProps[][] => {
-  const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+  const dataViewField = getDataViewFieldFromDataSource({
     dataView,
+    dataSource,
     fieldName: columnId,
-    columnMeta: columnsMeta?.[columnId],
   });
   const columnDisplayName = getColumnDisplayName(
     columnId,
@@ -233,7 +231,7 @@ export const buildTanStackColumnHeaderActionGroups = ({
   const columnIsSortable =
     isSortEnabled &&
     isSortable({
-      isPlainRecord,
+      dataSource,
       columnName: columnId,
       columnSchema,
       dataViewField,

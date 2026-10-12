@@ -16,7 +16,6 @@ import {
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataSource } from '@kbn/data-source';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
 import type { CascadedDocumentsContext } from '../../application/main/components/layout/cascaded_documents';
@@ -59,7 +58,6 @@ export interface DiscoverGridProps extends UnifiedDataTableProps {
    */
   gridImplementation?: DiscoverGridImplementation;
   onChangeGridImplementation?: (implementation: DiscoverGridImplementation) => void;
-  dataSource?: DataSource;
 }
 
 /**
@@ -148,7 +146,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     });
 
     const isCascadedDocumentsAvailable =
-      props.isPlainRecord && !!cascadedDocumentsContext?.availableCascadeGroups.length;
+      dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
     const externalAdditionalControls = useMemo(() => {
       const additionalControls: ReactNode[] = [];
@@ -218,12 +216,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           {...sharedGridProps}
           rows={props.rows ?? []}
           columns={props.columns}
-          columnsMeta={props.columnsMeta}
+          dataSource={dataSource}
           externalCustomRenderers={props.externalCustomRenderers}
           dataView={props.dataView}
           query={isOfAggregateQueryType(query) ? query : undefined}
           showTimeCol={props.showTimeCol}
-          isPlainRecord={props.isPlainRecord}
           sort={props.sort}
           onSort={props.onSort}
           isSortEnabled={props.isSortEnabled}
@@ -288,6 +285,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         customGridColumnsConfiguration={customGridColumnsConfiguration}
         {...props}
         {...sharedGridProps}
+        dataSource={dataSource}
       />
     );
   }

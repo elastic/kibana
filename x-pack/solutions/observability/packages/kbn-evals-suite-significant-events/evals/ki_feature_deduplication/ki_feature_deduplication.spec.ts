@@ -15,6 +15,7 @@ import {
   type AnalysisTarget,
   type SimilarFeatureHit,
   featuresPrompt,
+  compactInferenceDocuments,
 } from '@kbn/nightshift-ai';
 import { tags } from '@kbn/scout';
 import {
@@ -26,7 +27,6 @@ import {
   type Example,
 } from '@kbn/evals';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { compactInferenceDocuments } from '@kbn/significant-events-plugin/server';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import { cleanSignificantEventsDataStreams } from '../../src/data_generators/replay';

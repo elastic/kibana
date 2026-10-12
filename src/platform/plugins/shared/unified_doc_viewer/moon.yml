@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/discover-utils'
+  - '@kbn/data-source'
   - '@kbn/i18n-react'
   - '@kbn/i18n'
   - '@kbn/unified-doc-viewer'
@@ -66,6 +67,7 @@ dependsOn:
   - '@kbn/apm-shared'
   - '@kbn/ui-callout'
   - '@kbn/unified-data-table'
+  - '@kbn/genai-common'
 tags:
   - plugin
   - prod

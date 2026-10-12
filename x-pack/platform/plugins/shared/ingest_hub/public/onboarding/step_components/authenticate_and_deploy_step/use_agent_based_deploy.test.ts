@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -38,6 +38,12 @@ jest.mock('./agent_based_section/credential_method_selector', () => ({
 
 jest.mock('./policy_cleanup_agent_based', () => ({
   cleanupAgentBasedPolicies: jest.fn(),
+  updateAgentBasedPolicy: jest.fn(),
+}));
+
+jest.mock('./secret_refs', () => ({
+  ...jest.requireActual('./secret_refs'),
+  fetchPackagePolicySecretRefs: jest.fn(),
 }));
 
 jest.mock('./use_onboarding_so', () => ({
@@ -58,7 +64,8 @@ import {
   extractErrorMessage,
 } from './agent_based_deploy';
 import { useOnboardingSO } from './use_onboarding_so';
-import { cleanupAgentBasedPolicies } from './policy_cleanup_agent_based';
+import { cleanupAgentBasedPolicies, updateAgentBasedPolicy } from './policy_cleanup_agent_based';
+import { fetchPackagePolicySecretRefs } from './secret_refs';
 
 import { useAgentBasedDeploy } from './use_agent_based_deploy';
 
@@ -72,6 +79,8 @@ const mockDeployNewAgentPolicy = deployNewAgentPolicy as jest.Mock;
 const mockBuildAgentBasedInstanceStatuses = buildAgentBasedInstanceStatuses as jest.Mock;
 const mockExtractErrorMessage = extractErrorMessage as jest.Mock;
 const mockCleanupAgentBasedPolicies = cleanupAgentBasedPolicies as jest.Mock;
+const mockUpdateAgentBasedPolicy = updateAgentBasedPolicy as jest.Mock;
+const mockFetchSecretRefs = fetchPackagePolicySecretRefs as jest.Mock;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -998,5 +1007,306 @@ describe('useAgentBasedDeploy — cleanup orchestration', () => {
     expect(updateDetectAndReviewStep).toHaveBeenCalledWith(
       expect.objectContaining({ pendingCleanupPolicyIds: {} })
     );
+  });
+});
+
+describe('useAgentBasedDeploy — kept secret refs', () => {
+  const KEPT_REFS = new Map([['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }]]);
+
+  function setupFlow(
+    agentCredentialMethod: string,
+    {
+      policyIdsByInstance = { serviceA: 'pkg-policy-A' } as Record<string, string>,
+      pendingCleanupPolicyIds = { serviceX: 'pkg-policy-X' } as Record<string, string>,
+    } = {}
+  ) {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance,
+        pendingCleanupPolicyIds,
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'agent-policy-1',
+        selectedAgentPolicyIds: ['agent-policy-1'],
+        agentCredentialMethod,
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseSessionStorage.mockReturnValue([{ globalRegion: '', serviceVars: {} }, jest.fn()]);
+    mockUseOnboardingSO.mockReturnValue({
+      createDeployment: mockCreateDeployment,
+      updateDeployment: mockUpdateDeployment,
+      persistDeploymentId: mockPersistDeploymentId,
+    });
+    mockBuildAgentBasedInstanceStatuses.mockReturnValue({});
+    mockExtractErrorMessage.mockReturnValue('error');
+    mockBuildAgentBasedTargets.mockReturnValue([groupA, groupB]);
+    mockCleanupAgentBasedPolicies.mockResolvedValue({ toDelete: [], toUpdate: [] });
+    mockFetchSecretRefs.mockResolvedValue(KEPT_REFS);
+    mockDeployToExistingAgentPolicies.mockResolvedValue({
+      packagePolicyIdsByInstance: { serviceB: 'pkg-policy-B' },
+      failedInstances: [],
+      errorsByInstance: {},
+    });
+  });
+
+  async function deploy() {
+    const rendered = renderHook(() => useAgentBasedDeploy());
+    await act(async () => {
+      await rendered.result.current.handleDeploy();
+    });
+    return rendered;
+  }
+
+  it('reads the refs of a deployed policy before cleanup runs and hands them to the deploy only', async () => {
+    setupFlow('static_keys');
+    await deploy();
+
+    expect(mockFetchSecretRefs).toHaveBeenCalledWith('pkg-policy-A');
+    expect(mockCleanupAgentBasedPolicies).toHaveBeenCalledTimes(1);
+    expect(mockFetchSecretRefs.mock.invocationCallOrder[0]).toBeLessThan(
+      mockCleanupAgentBasedPolicies.mock.invocationCallOrder[0]
+    );
+    const deployOpts = mockDeployToExistingAgentPolicies.mock.calls[0][1];
+    expect(deployOpts.authenticateAndDeployStep.existingSecretRefs).toEqual(KEPT_REFS);
+    // Cleanup updates policies in place and reads each policy's own refs.
+    expect(
+      mockCleanupAgentBasedPolicies.mock.calls[0][0].authenticateAndDeployStep
+    ).not.toHaveProperty('existingSecretRefs');
+  });
+
+  it('skips the lookup when the static keys were typed in full', async () => {
+    setupFlow('static_keys');
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    act(() => {
+      result.current.setAgentCredentials({
+        method: 'static_keys',
+        access_key_id: 'AKID',
+        secret_access_key: 'SECRET',
+      });
+    });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockFetchSecretRefs).not.toHaveBeenCalled();
+    const deployOpts = mockDeployToExistingAgentPolicies.mock.calls[0][1];
+    expect(deployOpts.authenticateAndDeployStep.existingSecretRefs).toBeUndefined();
+  });
+
+  it('still looks up refs for temporary keys typed without a session token', async () => {
+    setupFlow('temporary_keys');
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    act(() => {
+      result.current.setAgentCredentials({
+        method: 'temporary_keys',
+        access_key_id: 'AKID',
+        secret_access_key: 'SECRET',
+        session_token: '',
+      });
+    });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    expect(mockFetchSecretRefs).toHaveBeenCalledWith('pkg-policy-A');
+  });
+
+  it('takes the refs from a policy that cleanup keeps, not one it deletes', async () => {
+    setupFlow('static_keys', {
+      policyIdsByInstance: { serviceX: 'pkg-policy-X', serviceA: 'pkg-policy-A' },
+    });
+    await deploy();
+
+    expect(mockFetchSecretRefs).toHaveBeenCalledTimes(1);
+    expect(mockFetchSecretRefs).toHaveBeenCalledWith('pkg-policy-A');
+  });
+
+  it('has no refs to reuse when every deployed policy is being removed', async () => {
+    mockFetchSecretRefs.mockImplementation(async (id?: string) => (id ? KEPT_REFS : new Map()));
+    setupFlow('static_keys', { policyIdsByInstance: { serviceX: 'pkg-policy-X' } });
+    await deploy();
+
+    expect(mockFetchSecretRefs).not.toHaveBeenCalledWith('pkg-policy-X');
+    const deployOpts = mockDeployToExistingAgentPolicies.mock.calls[0][1];
+    expect(deployOpts.authenticateAndDeployStep.existingSecretRefs.size).toBe(0);
+  });
+
+  it('does not carry a session token into a policy deployed with static keys', async () => {
+    mockFetchSecretRefs.mockResolvedValue(
+      new Map([
+        ['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }],
+        ['session_token', { isSecretRef: true as const, id: 'ref-token' }],
+      ])
+    );
+    setupFlow('static_keys');
+    await deploy();
+
+    const refs = mockDeployToExistingAgentPolicies.mock.calls[0][1].authenticateAndDeployStep
+      .existingSecretRefs as Map<string, unknown>;
+    expect([...refs.keys()]).toEqual(['secret_access_key']);
+  });
+
+  it('keeps the session token for temporary keys', async () => {
+    mockFetchSecretRefs.mockResolvedValue(
+      new Map([['session_token', { isSecretRef: true as const, id: 'ref-token' }]])
+    );
+    setupFlow('temporary_keys');
+    await deploy();
+
+    const refs = mockDeployToExistingAgentPolicies.mock.calls[0][1].authenticateAndDeployStep
+      .existingSecretRefs as Map<string, unknown>;
+    expect([...refs.keys()]).toEqual(['session_token']);
+  });
+
+  it('a dirty update stores typed keys once: the first package policy gets them, the rest use its refs', async () => {
+    const groupC = {
+      groupId: 'aws-3',
+      instanceIds: ['serviceC'],
+      members: [],
+      isDuplicateGroup: false,
+    };
+    mockBuildAgentBasedTargets.mockReturnValue([groupA, groupC]);
+    const FULL_REFS = new Map([
+      ['access_key_id', { isSecretRef: true as const, id: 'ref-akid' }],
+      ['secret_access_key', { isSecretRef: true as const, id: 'ref-1' }],
+    ]);
+    mockFetchSecretRefs.mockResolvedValue(FULL_REFS);
+    mockUpdateAgentBasedPolicy.mockResolvedValue(undefined);
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: { serviceA: 'pkg-policy-A', serviceC: 'pkg-policy-C' },
+        isDirty: true,
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+        agentCredentialMethod: 'static_keys',
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    act(() => {
+      result.current.setAgentCredentials({
+        method: 'static_keys',
+        access_key_id: 'AKID',
+        secret_access_key: 'SECRET',
+      });
+    });
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    const updates = mockUpdateAgentBasedPolicy.mock.calls.map(([policyId, , opts]) => ({
+      policyId,
+      opts,
+    }));
+    expect(updates.map((u) => u.policyId)).toEqual(['pkg-policy-A', 'pkg-policy-C']);
+    expect(updates[0].opts.agentCredentials).toEqual(
+      expect.objectContaining({ access_key_id: 'AKID', secret_access_key: 'SECRET' })
+    );
+    expect(updates[0].opts.authenticateAndDeployStep.existingSecretRefs).toBeUndefined();
+    expect(mockFetchSecretRefs).toHaveBeenCalledWith('pkg-policy-A');
+    expect(updates[1].opts.agentCredentials).toEqual(
+      expect.objectContaining({ method: 'static_keys', access_key_id: '', secret_access_key: '' })
+    );
+    expect(updates[1].opts.authenticateAndDeployStep.existingSecretRefs).toEqual(FULL_REFS);
+  });
+
+  it('updates the package policies one at a time on a dirty redeploy', async () => {
+    const groupC = {
+      groupId: 'aws-3',
+      instanceIds: ['serviceC'],
+      members: [],
+      isDuplicateGroup: false,
+    };
+    const groupD = {
+      groupId: 'aws-4',
+      instanceIds: ['serviceD'],
+      members: [],
+      isDuplicateGroup: false,
+    };
+    mockBuildAgentBasedTargets.mockReturnValue([groupA, groupC, groupD]);
+    const started: string[] = [];
+    const releases: Array<() => void> = [];
+    mockUpdateAgentBasedPolicy.mockImplementation(
+      (policyId: string) =>
+        new Promise<void>((resolve) => {
+          started.push(policyId);
+          releases.push(resolve);
+        })
+    );
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: [], dataFormat: 'ecs' as const },
+      authenticateAndDeployStep: {},
+      detectAndReviewStep: {
+        policyIdsByInstance: {
+          serviceA: 'pkg-policy-A',
+          serviceC: 'pkg-policy-C',
+          serviceD: 'pkg-policy-D',
+        },
+        isDirty: true,
+      },
+      updateDetectAndReviewStep: jest.fn(),
+      removeDeployInstances: jest.fn(),
+      getLatestFailedInstances: jest.fn().mockReturnValue([]),
+      awsServicesMap: new Map(),
+      agentBasedDeployment: {
+        agentHostsMode: 'existing' as const,
+        agentPolicyId: 'existing-policy-id',
+        selectedAgentPolicyIds: ['existing-policy-id'],
+        agentCredentialMethod: 'assume_role',
+      },
+      setAgentBasedDeployment: jest.fn(),
+    });
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    let finished: Promise<unknown> = Promise.resolve();
+    await act(async () => {
+      finished = result.current.handleDeploy();
+      for (let i = 0; i < 3; i++) {
+        await waitFor(() => expect(started).toHaveLength(i + 1));
+        await new Promise((r) => setImmediate(r));
+        expect(started).toHaveLength(i + 1);
+        releases[i]();
+      }
+      await finished;
+    });
+
+    expect(started).toEqual(['pkg-policy-A', 'pkg-policy-C', 'pkg-policy-D']);
+  });
+
+  it('exposes the surviving policy for the credential forms', () => {
+    setupFlow('static_keys', {
+      policyIdsByInstance: { serviceX: 'pkg-policy-X', serviceA: 'pkg-policy-A' },
+    });
+    const { result } = renderHook(() => useAgentBasedDeploy());
+    expect(result.current.secretSourcePolicyId).toBe('pkg-policy-A');
+  });
+
+  it.each(['shared_credentials', 'assume_role'])('skips the lookup for %s', async (method) => {
+    setupFlow(method);
+    await deploy();
+
+    expect(mockFetchSecretRefs).not.toHaveBeenCalled();
+    const deployOpts = mockDeployToExistingAgentPolicies.mock.calls[0][1];
+    expect(deployOpts.authenticateAndDeployStep.existingSecretRefs).toBeUndefined();
   });
 });

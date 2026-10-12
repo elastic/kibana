@@ -237,7 +237,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
-      cascadedColumnsMeta,
+      cascadedLeafDataSource,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -347,10 +347,9 @@ export const ESQLDataCascadeLeafCell = React.memo(
         <TanStackDataGrid
           rows={cellData}
           columns={selectedColumns}
-          columnsMeta={cascadedColumnsMeta}
+          dataSource={cascadedLeafDataSource}
           dataView={dataView}
           showTimeCol={showTimeCol ?? false}
-          isPlainRecord
           sort={EMPTY_SORT}
           isSortEnabled={false}
           loadingState={DataLoadingState.loaded}
@@ -375,7 +374,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
 
     return (
       <UnifiedDataTable
-        isPlainRecord
         dataView={dataView}
         showTimeCol={showTimeCol}
         services={services}
@@ -387,7 +385,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
-        columnsMeta={cascadedColumnsMeta}
+        dataSource={cascadedLeafDataSource}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}

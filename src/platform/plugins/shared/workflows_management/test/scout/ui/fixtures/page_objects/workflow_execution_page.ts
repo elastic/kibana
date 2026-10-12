@@ -25,7 +25,9 @@ export class WorkflowExecutionPage {
   public readonly copyServiceAccountId: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.executionPanel = this.page.testSubj.locator('workflowExecutionPanel');
+    this.executionPanel = this.page.testSubj
+      .locator('workflowExecutionFlyout')
+      .or(this.page.testSubj.locator('workflowExecutionPanel'));
     this.serviceAccountIdentity = this.page.testSubj.locator('workflowServiceAccountName');
     this.serviceAccountBadges = this.page.testSubj
       .locator('workflowServiceAccountResolved')
@@ -47,9 +49,10 @@ export class WorkflowExecutionPage {
    * Wait for the execution view to load (URL contains executionId and panel is visible).
    * Useful after triggering a workflow execution from any entry point.
    */
-  async waitForExecutionView() {
-    await this.page.waitForURL('**/workflows/*?executionId=*');
-    await this.executionPanel.waitFor({ state: 'visible' });
+  async waitForExecutionView(timeout?: number) {
+    // executionId can follow other query params (`?tab=executions&executionId=`).
+    await this.page.waitForURL(/\/workflows\/[^/?#]+.*[?&]executionId=/, { timeout });
+    await this.executionPanel.waitFor({ state: 'visible', timeout });
   }
 
   /**
@@ -69,9 +72,11 @@ export class WorkflowExecutionPage {
     status: 'completed' | 'failed' | 'running' | 'cancelled',
     timeout: number
   ) {
-    await this.waitForExecutionView();
+    await this.waitForExecutionView(timeout);
     const withStatus = (s: string) =>
-      this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`));
+      this.executionPanel
+        .locator(`[data-execution-status="${s}"]`)
+        .or(this.executionPanel.and(this.page.locator(`[data-execution-status="${s}"]`)));
 
     const expectedPanel = withStatus(status);
 
@@ -93,6 +98,17 @@ export class WorkflowExecutionPage {
     } else {
       await expectedPanel.waitFor({ state: 'visible', timeout });
     }
+
+    await this.dismissToasts();
+  }
+
+  /** Success toasts sit over the flyout and block clicks on the step tree. */
+  private async dismissToasts(): Promise<void> {
+    await this.page.evaluate(() => {
+      document.querySelectorAll('.euiGlobalToastList').forEach((node) => {
+        node.remove();
+      });
+    });
   }
 
   /**
@@ -105,7 +121,7 @@ export class WorkflowExecutionPage {
       // Find the last step button in the tree — when execution fails, the last
       // executed step is the one that errored.
       const stepButtons = this.executionPanel.locator(
-        'button:has(span[data-test-subj="workflowStepName"])'
+        '[role="treeitem"]:has([data-test-subj="workflowStepName"]), button:has([data-test-subj="workflowStepName"])'
       );
       const count = await stepButtons.count();
       if (count === 0) {
@@ -134,16 +150,41 @@ export class WorkflowExecutionPage {
    */
   async expandStepsTree() {
     while (true) {
-      const collapsedLocators = await this.executionPanel
-        .locator('button[aria-expanded="false"]')
+      const flyoutChevrons = await this.executionPanel
+        .locator('[data-test-subj="workflowStepTreeChevron"][aria-expanded="false"]')
         .all();
+      if (flyoutChevrons.length) {
+        await flyoutChevrons[0].scrollIntoViewIfNeeded();
+        await flyoutChevrons[0].click();
+      } else {
+        const collapsedLocators = await this.executionPanel
+          .locator('button[aria-expanded="false"]:has(.euiTreeView__expansionArrow)')
+          .all();
 
-      if (!collapsedLocators.length) {
-        break;
+        if (!collapsedLocators.length) {
+          break;
+        }
+        await collapsedLocators[0].scrollIntoViewIfNeeded();
+        await collapsedLocators[0]
+          .locator('.euiTreeView__expansionArrow[role=presentation]')
+          .click();
       }
-      await collapsedLocators[0].scrollIntoViewIfNeeded();
-      await collapsedLocators[0].locator('.euiTreeView__expansionArrow[role=presentation]').click();
     }
+  }
+
+  /**
+   * Tree rows whose step name matches. The flyout uses treeitem rows; the previous panel used buttons.
+   */
+  stepsByName(name: string | RegExp): Locator {
+    const nameMatch = this.page.locator('[data-test-subj="workflowStepName"]', { hasText: name });
+    return this.executionPanel.locator('[role="treeitem"], button').filter({ has: nameMatch });
+  }
+
+  /**
+   * Input, output, or error section in the open step detail.
+   */
+  getStepResultSection(type: 'input' | 'output' | 'error'): Locator {
+    return this.executionPanel.locator(`[data-test-subj="workflowStepDataSection_${type}"]`);
   }
 
   /**
@@ -155,6 +196,60 @@ export class WorkflowExecutionPage {
    * @throws Error if any node in the path is not found
    */
   async getStep(path: string): Promise<Locator> {
+    const tree = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
+    await tree.waitFor({ state: 'visible' });
+    const usesFlyoutTree =
+      (await tree.locator('[data-test-subj="workflowStepTreeNode"]').count()) > 0;
+    return usesFlyoutTree ? this.getFlyoutStep(path) : this.getLegacyStep(path);
+  }
+
+  private async getFlyoutStep(path: string): Promise<Locator> {
+    const nodes = path.split('>').map((substring) => substring.trim());
+    let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
+
+    for (let i = 0; i < nodes.length; i++) {
+      const currentNode = nodes[i];
+      const allListItems = await parentLocator
+        .locator('> [data-test-subj="workflowStepTreeNode"]')
+        .all();
+      let found = false;
+
+      for (const listItem of allListItems) {
+        const rowName = listItem.locator(
+          '> [data-test-subj="step-execution-tree-item-label"] [data-test-subj="workflowStepName"]'
+        );
+        const branchName = listItem.locator(
+          '> [data-test-subj="workflowStepExecutionTreeBranchRow"] [data-test-subj="workflowStepName"]'
+        );
+        const nameLocator = (await rowName.count()) > 0 ? rowName : branchName;
+        const stepName = (await nameLocator.textContent())?.trim();
+
+        if (stepName === currentNode) {
+          found = true;
+          if (i === nodes.length - 1) {
+            await this.dismissToasts();
+            const treeItem = listItem.locator(
+              '> [data-test-subj="step-execution-tree-item-label"] [role="treeitem"]'
+            );
+            return (await treeItem.count()) > 0 ? treeItem : nameLocator;
+          }
+
+          parentLocator = listItem.locator('> [data-test-subj="workflowStepTreeIndentGuide"]');
+          break;
+        }
+      }
+
+      if (!found) {
+        throw new Error(
+          `Step not found: "${currentNode}" in path "${path}" (failed at level ${i + 1})`
+        );
+      }
+    }
+
+    throw new Error(`Failed to navigate step path: ${path}`);
+  }
+
+  private async getLegacyStep(path: string): Promise<Locator> {
     const nodes = path.split('>').map((substring) => substring.trim());
     let parentLocator = this.executionPanel.locator('[data-test-subj="workflowStepExecutionTree"]');
 
@@ -199,6 +294,28 @@ export class WorkflowExecutionPage {
    * @returns A promise that resolves to the parsed JSON result
    */
   async getStepResultJson<TOutput = unknown>(type: 'input' | 'output' | 'error'): Promise<TOutput> {
+    const legacyDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
+    if (await legacyDetails.isVisible()) {
+      return this.getLegacyStepResultJson(type);
+    }
+
+    const section = this.getStepResultSection(type);
+    await section.waitFor({ state: 'visible' });
+    // EuiCodeBlock puts data-test-subj on the <code> element itself.
+    const code = section.locator('[data-test-subj="workflowStepResultJsonCode"]');
+    if (!(await code.isVisible())) {
+      await section.locator('[data-test-subj="workflowStepDataViewToggle"]').click();
+      await this.page.testSubj.locator('workflowViewMode_json').click();
+      await code.waitFor({ state: 'visible' });
+    }
+
+    const stringValue = (await code.innerText()).trim();
+    return JSON.parse(stringValue) as TOutput;
+  }
+
+  private async getLegacyStepResultJson<TOutput = unknown>(
+    type: 'input' | 'output' | 'error'
+  ): Promise<TOutput> {
     const workflowStepExecutionDetails = this.page.testSubj.locator('workflowStepExecutionDetails');
 
     await workflowStepExecutionDetails
