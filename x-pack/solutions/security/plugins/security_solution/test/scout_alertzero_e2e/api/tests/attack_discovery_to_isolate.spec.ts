@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mkdirSync, writeFileSync } from 'fs';
 import { expect } from '@kbn/scout-security/api';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
@@ -30,6 +31,12 @@ import {
 import type { SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
+
+// Media capture hook (run_scout.sh's SCOUT_KEEP_STACK path): when ORCA_MEDIA_EJECT=1 this spec
+// ejects the ids the off-board capture script needs, and the seeded host is left in place so the
+// live stack can still be photographed after the run. Opt-in and off for every other consumer.
+const MEDIA_EJECT = process.env.ORCA_MEDIA_EJECT === '1';
+const MEDIA_FACTS_DIR = '/tmp/orca-media';
 
 interface EndpointAction {
   id: string;
@@ -72,7 +79,9 @@ apiTest.describe(
       await attempt(async () => {
         if (api) await resetWorker(api, WORKER_ID);
       });
-      await attempt(async () => cleanupHosts?.());
+      // Media ejection (ORCA_MEDIA_EJECT=1) needs the seeded host to survive the run: the capture
+      // script photographs the live stack after this spec, and the host it releases is this one.
+      if (!MEDIA_EJECT) await attempt(async () => cleanupHosts?.());
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
       });
@@ -206,6 +215,27 @@ apiTest.describe(
         );
         expect(action.agents.length).toBeGreaterThan(0);
         await completeHostAction({ esClient, config, action: action as never });
+
+        // Media capture hook (run_scout.sh's SCOUT_KEEP_STACK path, ORCA_MEDIA_EJECT=1): eject the
+        // ids the off-board capture script needs and leave the seeded host in place so the live
+        // stack can still be photographed after this run. Opt-in; a normal run is unchanged.
+        if (MEDIA_EJECT) {
+          mkdirSync(MEDIA_FACTS_DIR, { recursive: true });
+          writeFileSync(
+            `${MEDIA_FACTS_DIR}/facts.json`,
+            JSON.stringify(
+              {
+                investigateProposalId: investigate.id,
+                isolateProposalId: isolate.id,
+                hostId: hosts.hosts[0].agentId,
+                hostName: hosts.hosts[0].hostname,
+                startedAt,
+              },
+              null,
+              2
+            )
+          );
+        }
       }
     );
   }
