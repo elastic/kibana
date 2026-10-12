@@ -7,7 +7,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agent-builder-browser",
-    "@kbn/agent-builder-common",
     "@kbn/agent-builder-elastic-ai-index-ki-types",
     "@kbn/agent-builder-plugin",
     "@kbn/app-header",
@@ -33,7 +32,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
-    "@kbn/llm-trace-waterfall",
     "@kbn/management-settings-ids",
     "@kbn/nightshift-investigations-plugin",
     "@kbn/nightshift-shared",
