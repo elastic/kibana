@@ -18,11 +18,13 @@ const getContentPaddingCss = (euiTheme: EuiThemeComputed) => ({
 /**
  * Shared page body for AlertZero routes. Keeps title/content snug under chrome
  * without clobbering EuiPageSection base flex styles — padding is applied
- * via `contentProps` on the inner wrapper.
+ * via `contentProps` on the inner wrapper. Grows by default so pinned footers sit at the bottom of
+ * the viewport on tall screens.
  */
 export const AlertZeroPageSection: React.FC<AlertZeroPageSectionProps> = ({
   children,
   contentProps,
+  grow = true,
   ...rest
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -32,6 +34,7 @@ export const AlertZeroPageSection: React.FC<AlertZeroPageSectionProps> = ({
   return (
     <EuiPageSection
       paddingSize="none"
+      grow={grow}
       contentProps={{
         ...restContentProps,
         css: contentCss ? [paddingCss, contentCss] : paddingCss,

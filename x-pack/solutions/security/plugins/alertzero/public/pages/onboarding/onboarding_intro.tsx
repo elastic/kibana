@@ -27,7 +27,6 @@ export const OnboardingIntro: React.FC<Props> = ({ onContinue, continueDisabledR
 
   return (
     <AlertZeroPageSection
-      grow
       contentProps={{
         css: css`
           display: flex;
