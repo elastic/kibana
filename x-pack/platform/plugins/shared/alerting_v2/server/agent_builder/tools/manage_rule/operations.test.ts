@@ -1601,7 +1601,7 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops, undefined, soClient);
 
       expect(soClient.bulkGet).not.toHaveBeenCalled();
-      expect(result.data.artifacts).toEqual([]);
+      expect(result.data).not.toHaveProperty('artifacts');
     });
   });
 

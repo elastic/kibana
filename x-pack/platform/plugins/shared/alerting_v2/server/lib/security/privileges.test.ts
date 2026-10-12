@@ -50,7 +50,7 @@ describe('registerFeaturePrivileges', () => {
 
     expect(rulesFeature.category).toEqual({
       id: 'alerting',
-      label: 'Alerting V2',
+      label: 'Universal Alerting',
       order: 1000,
       euiIconType: 'watchesApp',
     });
