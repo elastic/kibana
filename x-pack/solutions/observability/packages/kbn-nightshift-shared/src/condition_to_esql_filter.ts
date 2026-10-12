@@ -169,6 +169,7 @@ const toFilterAst = (condition: Condition, negated: boolean): ESQLSingleAstItem 
   if (isFilterCondition(condition)) {
     return filterLeafToAst(condition, negated);
   }
+  // De Morgan's Laws: when negating, flip operators and negate children
   if (isAndCondition(condition)) {
     return condition.and.map((child) => toFilterAst(child, negated)).reduce(negated ? or : and);
   }
@@ -193,6 +194,7 @@ const toFilterAst = (condition: Condition, negated: boolean): ESQLSingleAstItem 
  */
 export const conditionToESQLFilterAst = (condition: Condition): ESQLSingleAstItem => {
   const ast = toFilterAst(condition, false);
-  // `esql.exp` re-parses spliced ASTs as text: a bare OR would bind looser than a surrounding AND
+  // Parenthesize OR expressions to preserve precedence: esql.exp re-parses spliced ASTs as text,
+  // so bare OR would bind looser than surrounding AND, causing incorrect grouping.
   return ast.type === 'function' && ast.name === 'or' ? Builder.expression.parens(ast) : ast;
 };
