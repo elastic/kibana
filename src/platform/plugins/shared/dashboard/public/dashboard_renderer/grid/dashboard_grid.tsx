@@ -42,13 +42,14 @@ export const DashboardGrid = () => {
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef] =
+  const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef, selectedPanelIds] =
     useBatchedPublishingSubjects(
       dashboardApi.expandedPanelId$,
       dashboardApi.settings.useMargins$,
       dashboardApi.viewMode$,
       dashboardInternalApi.gridLayout$,
-      dashboardInternalApi.dashboardContainerRef$
+      dashboardInternalApi.dashboardContainerRef$,
+      dashboardApi.selectedPanelIds$
     );
 
   useEffect(() => {
@@ -216,6 +217,7 @@ export const DashboardGrid = () => {
         'dshLayout--editing': viewMode === 'edit',
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+        'dshLayout--selectionMode': viewMode === 'edit' && selectedPanelIds.length > 0,
       })}
       css={styles.dashboard}
     >
@@ -248,6 +250,15 @@ const dashboardGridStyles = {
       // Hide hover actions when dashboard has an overlay
       '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
         visibility: 'hidden !important' as 'hidden',
+      },
+      // While panels are selected, every panel acts as a selection item
+      '&.dshLayout--selectionMode .dshDashboardGrid__item, &.dshLayout--selectionMode .dshDashboardGrid__item .embPanel *':
+        {
+          cursor: 'pointer',
+        },
+      // ... and cannot be resized (same approach the grid uses for `.kbnGrid--static`)
+      '&.dshLayout--selectionMode .kbnGridPanel--resizeHandle': {
+        display: 'none',
       },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded

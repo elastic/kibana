@@ -28,12 +28,7 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
-import {
-  apiCanLockHoverActions,
-  apiCanSelectPanels,
-  apiHasParentApi,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
@@ -44,6 +39,7 @@ import {
   DEFAULT_QUICK_ACTIONS,
   EmbeddableRendererContext,
 } from '../../embeddable_renderer_context';
+import { getSelectionApi } from './get_selection_api';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -110,10 +106,7 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const selectionApi = useMemo(
-    () => (apiHasParentApi(api) && apiCanSelectPanels(api.parentApi) ? api.parentApi : undefined),
-    [api]
-  );
+  const selectionApi = useMemo(() => getSelectionApi(api), [api]);
 
   const [
     title,
@@ -353,8 +346,11 @@ export const PresentationPanelHoverActions = ({
   );
 
   const isSelected = Boolean(api?.uuid && selectedPanelIds.includes(api.uuid));
+  const canSelect = Boolean(selectionApi && api?.uuid && viewMode === 'edit');
+  // While any panel is selected, the hover bar of every panel only offers the checkbox
+  const isSelectionMode = canSelect && selectedPanelIds.length > 0;
   const selectCheckbox =
-    selectionApi && api?.uuid && viewMode === 'edit' ? (
+    selectionApi && api?.uuid && canSelect ? (
       <EuiToolTip
         content={
           isSelected
@@ -406,6 +402,31 @@ export const PresentationPanelHoverActions = ({
   const showContextMenu = useMemo(() => {
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
+
+  if (isSelectionMode) {
+    return (
+      <div
+        className={classNames('embPanel__hoverActions', className)}
+        data-test-subj={`hover-actions-${api.uuid}`}
+      >
+        <span
+          css={css`
+            align-items: center;
+          `}
+        >
+          {/* keep the drag handle mounted (but hidden) so its registration with the grid is preserved */}
+          <span
+            css={css`
+              display: none;
+            `}
+          >
+            {dragHandle}
+          </span>
+          {selectCheckbox}
+        </span>
+      </div>
+    );
+  }
 
   return (
     <>

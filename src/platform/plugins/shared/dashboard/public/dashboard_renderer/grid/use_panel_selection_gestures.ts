@@ -38,6 +38,14 @@ const IGNORED_TARGET_SELECTOR = [
   '[role="button"]',
 ].join(', ');
 
+/**
+ * In selection mode (at least one panel selected) every click inside the grid is a selection gesture,
+ * except on the checkbox itself and on content rendered in portals.
+ */
+const SELECTION_MODE_IGNORED_TARGET_SELECTOR = ['.embPanel__hoverActions', '[data-euiportal]'].join(
+  ', '
+);
+
 /** Clicks on these elements never clear the current selection */
 const KEEP_SELECTION_SELECTOR = [
   '[data-euiportal]',
@@ -71,6 +79,8 @@ const getPanelElement = (ref: React.Ref<HTMLDivElement>): HTMLDivElement | null 
  * Handles the mouse gestures used to select dashboard panels:
  * - modifier + click anywhere on a panel toggles it, without the panel content reacting to the click
  * - modifier + drag draws a rectangle and adds every panel it touches to the selection
+ * - once at least one panel is selected (selection mode), plain clicks and drags inside the grid behave
+ *   the same way, so panels act as selection items and their content does not react
  * - a plain click outside the selected panels, or pressing Escape, clears the selection
  * Returns the rectangle currently being drawn, if any, so the caller can render it.
  */
@@ -131,12 +141,21 @@ export const usePanelSelectionGestures = ({
     };
 
     const onRootMouseDown = (e: MouseEvent) => {
-      if (e.button !== 0 || !isSelectionModifier(e)) return;
+      if (e.button !== 0) return;
+      const hasModifier = isSelectionModifier(e);
+      const isSelectionMode = dashboardApi.selectedPanelIds$.value.length > 0;
+      if (!hasModifier && !isSelectionMode) return;
       const target = e.target as HTMLElement;
-      if (target.closest(IGNORED_TARGET_SELECTOR)) return;
+      if (
+        target.closest(
+          isSelectionMode ? SELECTION_MODE_IGNORED_TARGET_SELECTOR : IGNORED_TARGET_SELECTOR
+        )
+      ) {
+        return;
+      }
 
       e.preventDefault(); // no text selection or native drag
-      e.stopPropagation(); // charts, maps and the grid drag handles never see this mousedown
+      e.stopPropagation(); // charts, maps and the grid drag/resize handles never see this mousedown
 
       const start = { x: e.clientX, y: e.clientY };
       const startPanelId = findPanelId(target);
@@ -159,7 +178,12 @@ export const usePanelSelectionGestures = ({
         suppressNextClick = true;
 
         if (!isMarquee) {
-          if (startPanelId) dashboardApi.togglePanelSelection(startPanelId);
+          if (startPanelId) {
+            dashboardApi.togglePanelSelection(startPanelId);
+          } else if (!hasModifier) {
+            // plain click on the grid background while in selection mode
+            dashboardApi.clearPanelSelection();
+          }
           return;
         }
 
