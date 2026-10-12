@@ -12,7 +12,7 @@ import type { ColorMapping } from '.';
 import {
   hasCustomColors,
   isAssignmentColorCustomized,
-  isGradientStepCustomized,
+  isColorCustomized,
   updateAssignmentsPalette,
   updateColorModePalette,
 } from './assignments';
@@ -89,22 +89,25 @@ describe('Color mapping assignments', () => {
     });
   });
 
-  describe('isGradientStepCustomized', () => {
-    it('returns false for the palette default step at its index', () => {
-      expect(isGradientStepCustomized(gradientStep(2), 2, KbnPalette.Default)).toBe(false);
+  describe('isColorCustomized', () => {
+    it('returns false for a categorical color from the active palette regardless of index', () => {
+      expect(isColorCustomized(gradientStep(2), KbnPalette.Default, palettes)).toBe(false);
+      // add/remove reshuffle the color index, so a mismatched index is not a customization.
+      expect(isColorCustomized(gradientStep(5), KbnPalette.Default, palettes)).toBe(false);
     });
 
-    it('returns true for a custom color code step', () => {
-      const step: ColorMapping.ColorStep = { type: 'colorCode', colorCode: '#ff0000' };
-      expect(isGradientStepCustomized(step, 0, KbnPalette.Default)).toBe(true);
+    it('returns true for a custom color code', () => {
+      expect(
+        isColorCustomized({ type: 'colorCode', colorCode: '#ff0000' }, KbnPalette.Default, palettes)
+      ).toBe(true);
     });
 
-    it('returns true for a step from another palette', () => {
-      expect(isGradientStepCustomized(gradientStep(0), 0, KbnPalette.Kibana7)).toBe(true);
+    it('returns true for a color from another palette', () => {
+      expect(isColorCustomized(gradientStep(0), KbnPalette.Kibana7, palettes)).toBe(true);
     });
 
-    it('returns true for a step at the wrong index', () => {
-      expect(isGradientStepCustomized(gradientStep(5), 0, KbnPalette.Default)).toBe(true);
+    it('resolves palette aliases before comparing', () => {
+      expect(isColorCustomized(gradientStep(0), KbnPalette.Amsterdam, palettes)).toBe(false);
     });
   });
 
@@ -145,9 +148,11 @@ describe('Color mapping assignments', () => {
       expect(hasCustomColors(config, palettes)).toBe(true);
     });
 
-    it('returns true when any gradient step uses a color at the wrong index', () => {
+    it('stays false when a gradient step index is non-sequential after add/remove', () => {
+      // Adding or removing a step reshuffles the step indices (add inserts with a trailing index,
+      // remove splices without re-indexing). Those steps are still auto colors, not customizations.
       const config = gradientConfig([gradientStep(0), gradientStep(2)]);
-      expect(hasCustomColors(config, palettes)).toBe(true);
+      expect(hasCustomColors(config, palettes)).toBe(false);
     });
   });
 

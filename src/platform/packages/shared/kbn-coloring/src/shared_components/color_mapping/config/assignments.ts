@@ -11,6 +11,21 @@ import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 
 /**
+ * Returns `true` when a color is a deliberate user choice: a fixed color code or a categorical color
+ * drawn from a palette other than the active one.
+ */
+export function isColorCustomized(
+  color: ColorMapping.CategoricalColor | ColorMapping.ColorCode | ColorMapping.GradientColor,
+  activePaletteId: KbnPaletteId,
+  palettes: KbnPalettes
+): boolean {
+  if (color.type !== 'categorical') {
+    return true;
+  }
+  return palettes.get(color.paletteId).id !== palettes.get(activePaletteId).id;
+}
+
+/**
  * Returns `true` when an assignment's color is a deliberate user choice (a custom color code or a
  * color from a different palette) rather than an auto color drawn from the active palette.
  */
@@ -19,39 +34,12 @@ export function isAssignmentColorCustomized(
   config: ColorMapping.Config,
   palettes: KbnPalettes
 ): boolean {
-  // Gradient mode: assignment colors are computed from `colorMode.steps` and the editor
-  // shows them as read-only swatches, so they are never custom. Custom colors in this mode
-  // live on the steps (see `isGradientStepCustomized`).
+  // Gradient mode: assignment colors are computed from `colorMode.steps` and the editor shows them
+  // as read-only swatches, so they are never custom. Custom colors in this mode live on the steps.
   if (config.colorMode.type === 'gradient') {
     return false;
   }
-  const { color } = assignment;
-  // Categorical mode: an auto-assigned color is a categorical color drawn from the active
-  // palette. The editor rotates the color index as assignments are added and removed, so the
-  // index carries no "was this customized" signal (it is unrecoverable after a splice). Only a
-  // color code or a color from a different palette is a deliberate user choice.
-  if (color.type !== 'categorical') {
-    return true;
-  }
-  return palettes.get(color.paletteId).id !== palettes.get(config.paletteId).id;
-}
-
-/**
- * Returns `true` when a gradient color step differs from the palette default for its index.
- */
-export function isGradientStepCustomized(
-  step: ColorMapping.ColorStep,
-  index: number,
-  paletteId: KbnPaletteId
-): boolean {
-  // The default step is the one `updateColorModePalette` writes on a palette reset: the
-  // config palette's color at the step's position. No wrap-around, since a gradient has at
-  // most 3 steps. Unlike assignments, step colors are user-editable in gradient mode.
-  return !(
-    step.type === 'categorical' &&
-    step.paletteId === paletteId &&
-    step.colorIndex === index
-  );
+  return isColorCustomized(assignment.color, config.paletteId, palettes);
 }
 
 /**
@@ -60,15 +48,14 @@ export function isGradientStepCustomized(
 export function hasCustomColors(config: ColorMapping.Config, palettes: KbnPalettes): boolean {
   // `specialAssignments` are deliberately skipped: the default "other" color is `loop`, which
   // would always look custom, and switching palette or mode never rewrites them anyway.
-  // Gradient mode: only the steps can be custom. Categorical mode: only the assignments.
-  if (config.colorMode.type === 'gradient') {
-    return config.colorMode.steps.some((step, index) =>
-      isGradientStepCustomized(step, index, config.paletteId)
-    );
-  }
-  return config.assignments.some((assignment) =>
-    isAssignmentColorCustomized(assignment, config, palettes)
-  );
+  // The customizable colors are the gradient steps in gradient mode, the assignment colors in
+  // categorical mode.
+  const colors =
+    config.colorMode.type === 'gradient'
+      ? config.colorMode.steps
+      : config.assignments.map((assignment) => assignment.color);
+
+  return colors.some((color) => isColorCustomized(color, config.paletteId, palettes));
 }
 
 export function updateAssignmentsPalette(
