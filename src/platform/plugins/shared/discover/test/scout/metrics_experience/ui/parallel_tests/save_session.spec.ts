@@ -119,14 +119,18 @@ spaceTest.describe(
         await expect(
           metricsExperience.breakdownSelector.getToggleWithSelection(FIRST_DIMENSION)
         ).toBeHidden();
+        // The sort toolbar only renders for a metrics (TS) query. Check the default sort while the
+        // default time range still has data, so the grid is not empty.
+        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        await expect(metricsExperience.grid).toBeVisible();
+        // The sort lives in the new session's state, so it must not carry over from the saved one.
+        await expect(metricsExperience.sortDirectionAsc).toHaveAttribute('aria-pressed', 'true');
         // Move away from the saved range so the restore below is observable.
         await datePicker.setAbsoluteRange({
           from: 'Jul 1, 2025 @ 00:00:00.000',
           to: 'Sep 30, 2025 @ 23:59:59.000',
         });
         await discover.waitUntilSearchingHasFinished();
-        // The sort lives in the new session's state, so it must not carry over from the saved one.
-        await expect(metricsExperience.sortDirectionAsc).toHaveAttribute('aria-pressed', 'true');
       });
 
       await spaceTest.step('load the saved search', async () => {
