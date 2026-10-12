@@ -22,7 +22,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-utils', () => ({
-  canAccessAlertingV2Rules: (...args: unknown[]) => mockCanAccessAlertingV2Rules(...args),
+  canAccessAlertingV2Rules: () => mockCanAccessAlertingV2Rules(),
 }));
 
 const defaultServices = () => ({
