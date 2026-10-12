@@ -45,6 +45,7 @@ const EmbeddableFieldStatsTableWrapper = (
     searchString,
     extendedColumns,
     progress,
+    cancelled,
     overallStats,
     overallStatsProgress,
     setLastRefresh,
@@ -100,7 +101,7 @@ const EmbeddableFieldStatsTableWrapper = (
       extendedColumns={extendedColumns}
       showPreviewByDefault={props?.showPreviewByDefault}
       onChange={onTableUpdate}
-      loading={progress < 100}
+      loading={progress < 100 && !cancelled}
       overallStatsRunning={overallStatsProgress.isRunning}
       totalCount={totalCount}
       renderFieldName={props.renderFieldName}

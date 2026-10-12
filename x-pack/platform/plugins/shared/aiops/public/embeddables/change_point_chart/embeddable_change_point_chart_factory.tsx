@@ -149,18 +149,13 @@ export const getChangePointChartEmbeddableFactory = (
       });
 
       // Starting a new load lifts a previous cancellation. Besides `fetch$`, the panel
-      // refetches whenever one of its configuration subjects changes.
+      // refetches whenever one of its data inputs changes. `viewType` and `maxSeriesToPlot`
+      // only affect presentation and don't trigger a refetch, so they must not start a load.
       const fetchSubscription = merge(
         fetch$(api),
-        ...[
-          api.viewType,
-          api.dataViewId,
-          api.fn,
-          api.metricField,
-          api.splitField,
-          api.partitions,
-          api.maxSeriesToPlot,
-        ].map((subject: Observable<unknown>) => subject.pipe(skip(1)))
+        ...[api.dataViewId, api.fn, api.metricField, api.splitField, api.partitions].map(
+          (subject: Observable<unknown>) => subject.pipe(skip(1))
+        )
       ).subscribe(() => requestCancellationManager.startLoad());
 
       const ChangePointDetectionComponent = getChangePointDetectionComponent(

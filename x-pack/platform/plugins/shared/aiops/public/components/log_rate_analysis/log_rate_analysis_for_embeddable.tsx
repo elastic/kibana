@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, type FC } from 'react';
+import React, { useEffect, useMemo, useState, type FC } from 'react';
 
 import type { TimeRange } from '@kbn/es-query';
 import type { RequestCancellationManager } from '@kbn/presentation-publishing';
@@ -54,10 +54,9 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
   const { searchQuery } = useSearch({ dataView, savedSearch: null }, appState, true);
 
   const isStreamRunning = useAppSelector((s) => s.stream.isRunning);
-  const hasDocumentCountStats = useAppSelector(
-    (s) => s.logRateAnalysis.documentStats.documentCountStats !== undefined
-  );
-  const isLoading = isStreamRunning || !hasDocumentCountStats;
+  // Tracks the active document count request, previous results are retained while refetching.
+  const [isDocumentCountLoading, setIsDocumentCountLoading] = useState(true);
+  const isLoading = isStreamRunning || isDocumentCountLoading;
 
   useEffect(
     function reportLoadingState() {
@@ -84,6 +83,7 @@ export const LogRateAnalysisForEmbeddable: FC<LogRateAnalysisForEmbeddableProps>
         timeRange={timeRangeParsed}
         esSearchQuery={searchQuery}
         requestCancellationManager={requestCancellationManager}
+        onLoadingChange={setIsDocumentCountLoading}
       />
       <LogRateAnalysisContent
         esSearchQuery={searchQuery}

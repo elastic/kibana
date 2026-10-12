@@ -272,7 +272,7 @@ export const useESQLOverallStatsData = (
 
         // The panel was cancelled and no new load has started yet, don't start requests.
         if (requestCancellationManager?.signal.aborted) {
-          setOverallStatsProgress({ isRunning: false });
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
           return;
         }
 
@@ -324,7 +324,7 @@ export const useESQLOverallStatsData = (
 
         // `runRequest` resolves with `null` when the request was cancelled.
         if (!columnsResp) {
-          setOverallStatsProgress({ isRunning: false });
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
           return;
         }
 
@@ -391,7 +391,7 @@ export const useESQLOverallStatsData = (
           );
 
           if (requestCancellationManager?.signal.aborted) {
-            setOverallStatsProgress({ isRunning: false });
+            setOverallStatsProgress({ isRunning: false, cancelled: true });
             return;
           }
 
@@ -507,7 +507,7 @@ export const useESQLOverallStatsData = (
         }
       } catch (error) {
         if (error.name === 'AbortError') {
-          setOverallStatsProgress({ isRunning: false });
+          setOverallStatsProgress({ isRunning: false, cancelled: true });
           setQueryHistoryStatus(false);
           return;
         }

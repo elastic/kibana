@@ -679,8 +679,6 @@ export const useESQLDataVisualizerData = (
     (q?: AggregateQuery) => {
       // When user submits a new query
       // resets all current requests and other data
-      // Also lifts a previous cancellation of the panel
-      input.requestCancellationManager?.resumeAfterCancellation();
       if (cancelOverallStatsRequest) {
         cancelOverallStatsRequest();
       }
@@ -692,7 +690,7 @@ export const useESQLDataVisualizerData = (
       setMetricConfigs(defaults.metricConfigs);
       setNonMetricConfigs(defaults.nonMetricConfigs);
     },
-    [cancelFieldStatsRequest, cancelOverallStatsRequest, input.requestCancellationManager]
+    [cancelFieldStatsRequest, cancelOverallStatsRequest]
   );
 
   useEffect(() => {
@@ -706,6 +704,8 @@ export const useESQLDataVisualizerData = (
   return {
     totalCount,
     progress: combinedProgress,
+    // The table shouldn't keep showing a loading state for a cancelled fetch
+    cancelled: Boolean(overallStatsProgress.cancelled || fieldStatsProgress.cancelled),
     overallStatsProgress,
     configs,
     // Column with action to lens, data view editor, etc

@@ -63,7 +63,7 @@ export const useESQLFieldStatsData = <T extends Column>({
 
         // The panel was cancelled and no new load has started yet, don't start requests.
         if (requestCancellationManager?.signal.aborted) {
-          setFetchState({ isRunning: false });
+          setFetchState({ isRunning: false, cancelled: true });
           return;
         }
 
@@ -142,7 +142,7 @@ export const useESQLFieldStatsData = <T extends Column>({
           });
         } catch (e) {
           if (e.name === 'AbortError') {
-            setFetchState({ isRunning: false });
+            setFetchState({ isRunning: false, cancelled: true });
           } else {
             const title = i18n.translate(
               'xpack.dataVisualizer.index.errorFetchingESQLFieldStatisticsMessage',

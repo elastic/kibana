@@ -185,7 +185,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       // The panel was cancelled and no new load has started yet, don't start requests.
       // Note this must not mark the fetch as loaded, that would report the panel as rendered.
       if (requestCancellationManager?.signal.aborted) {
-        setFetchState({ isRunning: false });
+        setFetchState({ isRunning: false, cancelled: true });
         return;
       }
 
@@ -404,7 +404,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         },
         error: (error) => {
           if (error.name === 'AbortError') {
-            setFetchState({ isRunning: false });
+            setFetchState({ isRunning: false, cancelled: true });
             return;
           }
 

@@ -99,7 +99,7 @@ export function useFieldStatsSearchStrategy(
 
     // The panel was cancelled and no new load has started yet, don't start requests.
     if (requestCancellationManager?.signal.aborted) {
-      setFetchState({ isRunning: false });
+      setFetchState({ isRunning: false, cancelled: true });
       return;
     }
 
@@ -213,7 +213,7 @@ export function useFieldStatsSearchStrategy(
     const onError = (error: any) => {
       // Cancelled requests are not errors
       if (error?.name === 'AbortError') {
-        setFetchState({ isRunning: false });
+        setFetchState({ isRunning: false, cancelled: true });
         return;
       }
 

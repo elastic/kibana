@@ -42,7 +42,8 @@ export const useData = (
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment },
   requestCancellationManager?: RequestCancellationManager,
-  projectRoutingOverride?: string
+  projectRoutingOverride?: string,
+  onDocumentCountLoadingChange?: (isLoading: boolean) => void
 ) => {
   const { executionContext, uiSettings, cps } = useAiopsAppContext();
   const { projectRouting } = useProjectRouting(cps, projectRoutingOverride);
@@ -113,7 +114,8 @@ export const useData = (
     lastRefresh,
     changePointsByDefault,
     requestCancellationManager,
-    projectRoutingOverride
+    projectRoutingOverride,
+    onDocumentCountLoadingChange
   );
 
   useEffect(() => {

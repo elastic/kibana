@@ -632,6 +632,8 @@ export const useDataVisualizerGridData = (
 
   return {
     progress: combinedProgress,
+    // The table shouldn't keep showing a loading state for a cancelled fetch
+    cancelled: Boolean(overallStatsProgress.cancelled || strategyResponse.progress.cancelled),
     overallStatsProgress,
     configs,
     fieldsCount: configs.length,
