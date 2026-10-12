@@ -69,7 +69,13 @@ describe('alertAnalysisSkill', () => {
 
     it('bounds corroboration to one call per evidence source with a single window widening', () => {
       expect(alertAnalysisSkill.content).toContain('Bound corroboration');
-      expect(alertAnalysisSkill.content).toContain('168h at most once');
+      // One initial lookup at the default window plus at most one widened retry at
+      // 168h — the retry must be an allowed second call, not a contradiction of
+      // the per-call budget (the old text said "at most one call (widen ... once)").
+      expect(alertAnalysisSkill.content).toContain(
+        "at most one 'security.alert-analysis.get-related-alerts' call at the default time window, plus at most one widened retry at 168h"
+      );
+      expect(alertAnalysisSkill.content).not.toContain('168h at most once');
       expect(alertAnalysisSkill.content).toContain(
         'Stop corroborating as soon as the evidence supports a disposition'
       );

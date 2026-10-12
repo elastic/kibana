@@ -85,7 +85,7 @@ Use this skill when:
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score'.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
 - Do NOT use platform.core.generate_esql, platform.core.execute_esql, platform.core.search, other platform.core index/exploration tools, or workflow tools for alert inventory, count, or related-alert correlation — no speculative index discovery or raw search. Those platform tools can cross Kibana spaces; 'security.alerts' stays scoped to the current space.
-- Bound corroboration: at most one 'security.alert-analysis.get-related-alerts' call (widen the time window to 168h at most once), one 'security.security_labs_search' call per indicator or technique, and one 'security.entity_risk_score' call per entity. Stop corroborating as soon as the evidence supports a disposition.
+- Bound corroboration: at most one 'security.alert-analysis.get-related-alerts' call at the default time window, plus at most one widened retry at 168h when the initial lookup returned insufficient evidence; one 'security.security_labs_search' call per indicator or technique, and one 'security.entity_risk_score' call per entity. Stop corroborating as soon as the evidence supports a disposition.
 - Once the final analysis and disposition are written, make no further tool calls.
 
 ## Best Practices
