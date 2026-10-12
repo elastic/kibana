@@ -104,6 +104,36 @@ describe('useAnonymizationSettings', () => {
     expect(addDanger).toHaveBeenCalled();
   });
 
+  it('reverts local state and reports failure when core resolves false instead of rejecting', async () => {
+    // Core's UiSettingsClient#update() catches a failed write and returns false (after showing
+    // its own error toast), so the hook's catch block never runs for it.
+    client.set = jest.fn().mockResolvedValueOnce(false);
+    const { result } = renderHook(() => useAnonymizationSettings());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    let isSaved: boolean | undefined;
+    await act(async () => {
+      isSaved = await result.current.setMaskingEnabled(true);
+    });
+
+    expect(isSaved).toBe(false);
+    expect(result.current.maskingEnabled).toBe(false);
+    expect(addDanger).not.toHaveBeenCalled();
+  });
+
+  it('reports success when the write is saved', async () => {
+    const { result } = renderHook(() => useAnonymizationSettings());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    let isSaved: boolean | undefined;
+    await act(async () => {
+      isSaved = await result.current.setMaskingEnabled(true);
+    });
+
+    expect(isSaved).toBe(true);
+    expect(result.current.maskingEnabled).toBe(true);
+  });
+
   it('refreshes a stale persisted built-in pattern to the current code-level default on load', async () => {
     // Simulates an environment that saved `ai:anonymizationSettings` before a built-in
     // pattern was fixed in code: the persisted rule keeps its old, now-stale `pattern`,

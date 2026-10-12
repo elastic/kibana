@@ -72,7 +72,8 @@ export interface NewCustomPattern {
 /**
  * Loads, mutates and persists the `ai:anonymizationSettings` advanced setting for the
  * Anonymization Settings management page. Every mutator persists immediately (no separate
- * save step), reverting local state and surfacing a toast if the write fails.
+ * save step), reverting local state and surfacing a toast if the write fails, and resolves to
+ * whether the write succeeded.
  *
  * NER rules are intentionally left untouched by every mutator here: they are never rendered
  * or edited from this page, only carried through unchanged.
@@ -96,7 +97,7 @@ export function useAnonymizationSettings() {
   }, [reload]);
 
   const persist = useCallback(
-    async (next: AnonymizationSettings) => {
+    async (next: AnonymizationSettings): Promise<boolean> => {
       const previous = value;
       setValue(next);
       try {
@@ -111,7 +112,13 @@ export function useAnonymizationSettings() {
         // toggle appears to revert after a reload even though the raw value did persist.
         // Sending the string ourselves keeps every representation (local cache, server
         // storage, next reload's bootstrap payload) consistently a JSON string.
-        await settings.client.set(aiAnonymizationSettings, JSON.stringify(next));
+        const isSaved = await settings.client.set(aiAnonymizationSettings, JSON.stringify(next));
+        if (!isSaved) {
+          // `set()` resolves to `false` (it does not reject) when the write fails, and core has
+          // already shown its own error toast, so only the optimistic state needs reverting.
+          setValue(previous);
+        }
+        return isSaved;
       } catch (e) {
         setValue(previous);
         notifications.toasts.addDanger({
@@ -120,6 +127,7 @@ export function useAnonymizationSettings() {
           }),
           text: e instanceof Error ? e.message : String(e),
         });
+        return false;
       }
     },
     [settings, notifications, value]

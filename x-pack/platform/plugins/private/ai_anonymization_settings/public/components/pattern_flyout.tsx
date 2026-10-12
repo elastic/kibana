@@ -43,7 +43,8 @@ interface PatternFlyoutProps {
   pattern?: RegexAnonymizationRule;
   /** All other currently-enabled rules, used so the inline tester reflects the full pipeline. */
   enabledRules: RegexAnonymizationRule[];
-  onSave: (pattern: NewCustomPattern) => Promise<void>;
+  /** Resolves to whether the pattern was saved; the flyout stays open when it was not. */
+  onSave: (pattern: NewCustomPattern) => Promise<boolean>;
   onClose: () => void;
 }
 
@@ -123,8 +124,15 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave({ name: name.trim(), entityClass, pattern: regexPattern.trim(), enabled });
-      onClose();
+      const isSaved = await onSave({
+        name: name.trim(),
+        entityClass,
+        pattern: regexPattern.trim(),
+        enabled,
+      });
+      if (isSaved) {
+        onClose();
+      }
     } finally {
       setIsSaving(false);
     }

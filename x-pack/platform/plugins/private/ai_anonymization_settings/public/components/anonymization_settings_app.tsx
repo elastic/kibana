@@ -135,13 +135,8 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     setFlyoutPattern(undefined);
   };
 
-  const handleSavePattern = async (pattern: Parameters<typeof addCustomPattern>[0]) => {
-    if (flyoutPattern?.id) {
-      await updateCustomPattern(flyoutPattern.id, pattern);
-    } else {
-      await addCustomPattern(pattern);
-    }
-  };
+  const handleSavePattern = (pattern: Parameters<typeof addCustomPattern>[0]) =>
+    flyoutPattern?.id ? updateCustomPattern(flyoutPattern.id, pattern) : addCustomPattern(pattern);
 
   return (
     <div data-test-subj="aiAnonymizationSettingsPage">
