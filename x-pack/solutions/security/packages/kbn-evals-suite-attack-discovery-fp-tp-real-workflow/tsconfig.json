@@ -12,5 +12,6 @@
     "@kbn/tooling-log",
     "@kbn/workflows",
     "@kbn/core",
+    "@kbn/scout",
   ]
 }
