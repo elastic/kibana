@@ -48,7 +48,8 @@ export const registerEntityCaseCountsRoute = ({
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const [coreStart, { security }] = await getStartServices();
+          const [coreStart, { security, cases }] = await getStartServices();
+          if (!cases) throw new Error('The cases plugin is not available');
           if (!(await canReadSecurityCases(security, request))) {
             return response.forbidden({
               body: { message: 'User is not authorized to read Security cases.' },
@@ -59,7 +60,12 @@ export const registerEntityCaseCountsRoute = ({
           const repository = coreStart.savedObjects.createInternalRepository([
             CASE_ATTACHMENT_TYPE,
           ]);
-          const counts = await fetchEntityCaseCounts(repository, spaceId, request.body.entity_ids);
+          const counts = await fetchEntityCaseCounts(
+            repository,
+            await cases.getCasesClientWithRequest(request),
+            spaceId,
+            request.body.entity_ids
+          );
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {
           logger.error(`Failed to count cases of entities: ${err}`);

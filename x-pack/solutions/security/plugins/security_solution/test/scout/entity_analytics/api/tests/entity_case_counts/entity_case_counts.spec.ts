@@ -9,6 +9,7 @@ import type { ApiServicesFixture, SamlAuth } from '@kbn/scout-security';
 import { apiTest, ELASTIC_INTERNAL_ORIGIN_HEADER, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import { SECURITY_ENTITY_ATTACHMENT_TYPE, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { CaseStatuses } from '@kbn/cases-components';
 import { API_VERSIONS } from '../../../../../../common/constants';
 import { ENTITY_CASE_COUNTS_INTERNAL_URL } from '../../../../../../common/entity_analytics/entity_analytics/constants';
 
@@ -22,21 +23,32 @@ const OTHER_SPACE_ID = 'scout-entity-case-counts';
 const CASE_TAG = 'scout-entity-case-counts';
 const ENTITY_ID = 'host:scout-case-counts-1';
 const ENTITY_WITHOUT_CASES = 'host:scout-case-counts-none';
+const ENTITY_WITH_CLOSED_CASE = 'host:scout-case-counts-closed';
 
 type CasesApi = ApiServicesFixture['cases'];
 type CommentParams = Parameters<CasesApi['comments']['create']>[1];
 
 // The Scout cases client types comments with the legacy attachment union, which predates
 // unified reference attachments like `security.entity`.
-const ENTITY_ATTACHMENT = {
-  type: SECURITY_ENTITY_ATTACHMENT_TYPE,
-  attachmentId: ENTITY_ID,
-  metadata: { entityName: 'scout-case-counts-1', entityType: 'host' },
-  owner: SECURITY_SOLUTION_OWNER,
-} as unknown as CommentParams;
+const buildEntityAttachment = (entityId: string) =>
+  ({
+    type: SECURITY_ENTITY_ATTACHMENT_TYPE,
+    attachmentId: entityId,
+    metadata: { entityName: entityId, entityType: 'host' },
+    owner: SECURITY_SOLUTION_OWNER,
+  } as unknown as CommentParams);
+
+interface CaseOptions {
+  entityId?: string;
+  status?: CaseStatuses;
+  spaceId?: string;
+}
 
 /** Creates a Security case in the space with the entity attached; returns its id. */
-const createCaseWithEntity = async (cases: CasesApi, spaceId?: string): Promise<string> => {
+const createCaseWithEntity = async (
+  cases: CasesApi,
+  { entityId = ENTITY_ID, status = CaseStatuses.open, spaceId }: CaseOptions = {}
+): Promise<string> => {
   const { data: created } = await cases.create(
     {
       title: `Scout entity case counts – ${spaceId ?? 'default'}`,
@@ -48,7 +60,14 @@ const createCaseWithEntity = async (cases: CasesApi, spaceId?: string): Promise<
     },
     spaceId
   );
-  await cases.comments.create(created.id, ENTITY_ATTACHMENT, spaceId);
+  const { data: attached } = await cases.comments.create(
+    created.id,
+    buildEntityAttachment(entityId),
+    spaceId
+  );
+  if (status !== CaseStatuses.open) {
+    await cases.update([{ id: created.id, version: attached.version, status }], spaceId);
+  }
   return created.id;
 };
 
@@ -66,11 +85,11 @@ const asUserWith = async (samlAuth: SamlAuth, feature: Record<string, string[]>)
 
 const CASES_READER = { siemV5: ['read'], securitySolutionCasesV3: ['read'] };
 
-/** The request of the counts of both entities, with a user's cookie. */
+/** The request of the counts of every test entity, with a user's cookie. */
 const buildRequest = (cookieHeader: Record<string, string>) => ({
   headers: { ...cookieHeader, ...HEADERS },
   responseType: 'json' as const,
-  body: { entity_ids: [ENTITY_ID, ENTITY_WITHOUT_CASES] },
+  body: { entity_ids: [ENTITY_ID, ENTITY_WITHOUT_CASES, ENTITY_WITH_CLOSED_CASE] },
 });
 
 apiTest.describe(
@@ -79,12 +98,19 @@ apiTest.describe(
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.spaces.create({ id: OTHER_SPACE_ID, name: OTHER_SPACE_ID });
-      // Default space: the entity in two cases, one of them with two attachments.
+      // Default space: the entity in two open cases, one of them with two attachments, one in
+      // progress and one closed. The other entity only in a closed case.
       const caseId = await createCaseWithEntity(apiServices.cases);
-      await apiServices.cases.comments.create(caseId, ENTITY_ATTACHMENT);
+      await apiServices.cases.comments.create(caseId, buildEntityAttachment(ENTITY_ID));
       await createCaseWithEntity(apiServices.cases);
+      await createCaseWithEntity(apiServices.cases, { status: CaseStatuses['in-progress'] });
+      await createCaseWithEntity(apiServices.cases, { status: CaseStatuses.closed });
+      await createCaseWithEntity(apiServices.cases, {
+        entityId: ENTITY_WITH_CLOSED_CASE,
+        status: CaseStatuses.closed,
+      });
       // The other space: one case.
-      await createCaseWithEntity(apiServices.cases, OTHER_SPACE_ID);
+      await createCaseWithEntity(apiServices.cases, { spaceId: OTHER_SPACE_ID });
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -93,7 +119,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'counts the distinct cases of each entity in the space',
+      'counts the distinct open and in-progress cases of each entity in the space',
       async ({ apiClient, samlAuth }) => {
         const response = await apiClient.post(
           ENTITY_CASE_COUNTS_INTERNAL_URL,
@@ -101,7 +127,7 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body).toStrictEqual({ [ENTITY_ID]: 2 });
+        expect(response.body).toStrictEqual({ [ENTITY_ID]: 3 });
       }
     );
 
