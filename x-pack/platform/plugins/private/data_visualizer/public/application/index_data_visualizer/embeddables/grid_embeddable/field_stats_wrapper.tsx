@@ -18,7 +18,6 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
-import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 import type {
   FieldStatisticTableEmbeddableProps,
   ESQLDataVisualizerGridEmbeddableState,
