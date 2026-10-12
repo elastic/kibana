@@ -344,20 +344,6 @@ export const WORKERS_EMPTY_TITLE = i18n.translate(
 );
 
 /* -------------------------------------------------------------------------- */
-/* Workers section (Watch detail)                                             */
-/* -------------------------------------------------------------------------- */
-
-export const WORKERS_SECTION_TITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.workers.sectionTitle',
-  { defaultMessage: 'Workers' }
-);
-
-export const WORKERS_SECTION_SUBTITLE = i18n.translate(
-  'xpack.alertzero.watches.settings.workers.sectionSubtitle',
-  { defaultMessage: 'Workers tagged as this Watch' }
-);
-
-/* -------------------------------------------------------------------------- */
 /* Alert Triage Worker extras                                                 */
 /* -------------------------------------------------------------------------- */
 

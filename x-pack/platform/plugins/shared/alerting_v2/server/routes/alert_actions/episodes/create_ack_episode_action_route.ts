@@ -16,7 +16,7 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateAckEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
   pathSuffix: '_ack',
-  summary: 'Acknowledge an alert episode',
+  summary: 'Acknowledge an alert',
   bodySchema: createAckEpisodeActionBodySchema,
   oasOperationObject: createAckEpisodeActionOasExamples,
   access: 'public' as const,

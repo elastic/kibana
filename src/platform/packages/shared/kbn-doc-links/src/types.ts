@@ -497,6 +497,7 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    compareAlertingSystems: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;

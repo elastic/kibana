@@ -59,7 +59,7 @@ describe('MaintenanceSection', () => {
 
     expect(screen.getByRole('alertdialog')).toHaveTextContent('Pause detection engine?');
     expect(screen.getByRole('alertdialog')).toHaveTextContent(
-      'This disables all Significant Events managed workflows'
+      'This disables all significant events managed workflows'
     );
     const confirmButton = screen.getByTestId('streams-settings-maintenance-confirm-button');
     expect(confirmButton).toHaveTextContent('Pause');
