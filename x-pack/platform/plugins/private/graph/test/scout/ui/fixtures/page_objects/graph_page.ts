@@ -461,9 +461,13 @@ export class GraphPage {
    * first; click each non-keep node via its own `graph-selected-<label>`
    * selector to avoid stale list-index handles.
    */
-  async isolateEdge(labels: string[]) {
+  async isolateNodes(labels: string[]) {
     await this.selectNodes(labels);
     await this.invertSelectionButton.click();
     await this.removeSelectionButton.click();
+  }
+
+  async isolateEdge(from: string, to: string) {
+    await this.isolateNodes([from, to]);
   }
 }
