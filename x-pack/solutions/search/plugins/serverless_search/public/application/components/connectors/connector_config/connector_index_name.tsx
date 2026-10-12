@@ -49,12 +49,17 @@ export const ConnectorIndexName: React.FC<ConnectorIndexNameProps> = ({
       setShowSyncCallOut(false);
       if (inputName && inputName !== connector.index_name) {
         const body = { index_name: inputName };
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/index_name`, {
-          body: JSON.stringify(body),
-        });
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/index_name`,
+          {
+            body: JSON.stringify(body),
+          }
+        );
       }
       if (sync) {
-        await http.post(`/internal/serverless_search/connectors/${connector.id}/sync`);
+        await http.post(
+          `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/sync`
+        );
         setShowSyncCallOut(true);
       }
       return inputName;

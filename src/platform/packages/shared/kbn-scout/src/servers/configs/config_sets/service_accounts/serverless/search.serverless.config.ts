@@ -11,11 +11,16 @@ import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as uiamConfig } from '../../uiam_local/serverless/search.serverless.config';
-import { serviceAccountsServerArgs } from '../shared';
+import { serviceAccountsServerArgs, serviceAccountsUiamEphemeralTokenExpiration } from '../shared';
 
 // Reuse the local UIAM stack with service accounts enabled for Serverless integration tests.
 export const servers: ScoutServerConfig = {
   ...uiamConfig,
+  esServerlessOptions: {
+    ...uiamConfig.esServerlessOptions,
+    uiam: true,
+    uiamEphemeralTokenExpiration: serviceAccountsUiamEphemeralTokenExpiration,
+  },
   kbnTestServer: {
     ...uiamConfig.kbnTestServer,
     serverArgs: [

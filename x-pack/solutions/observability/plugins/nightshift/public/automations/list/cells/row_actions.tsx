@@ -39,10 +39,13 @@ export const AutomationActions = ({
       button={
         <EuiToolTip content={allActionsLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesVertical"
+            iconType="ellipsis"
             color="primary"
             aria-label={allActionsLabel}
-            onClick={() => setIsOpen((open) => !open)}
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
+              setIsOpen((open) => !open);
+            }}
             data-test-subj={`automationActions-${automation.id}`}
           />
         </EuiToolTip>
@@ -53,7 +56,8 @@ export const AutomationActions = ({
           <EuiContextMenuItem
             key="clone"
             icon="copy"
-            onClick={() => {
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
               setIsOpen(false);
               onClone();
             }}
@@ -65,7 +69,8 @@ export const AutomationActions = ({
             key="delete"
             icon="trash"
             color="danger"
-            onClick={() => {
+            onClick={(event: React.MouseEvent) => {
+              event.stopPropagation();
               setIsOpen(false);
               onDelete();
             }}

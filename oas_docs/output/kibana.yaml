@@ -3682,6 +3682,7 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  maxLength: 100000
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
@@ -4164,6 +4165,7 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  maxLength: 100000
                   type: string
                 project_routing:
                   description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
@@ -8869,16 +8871,14 @@ paths:
                           - id: workflow-1
                             type: workflow
                         enabled: true
-                        group_by: null
-                        grouping_mode: per_alert
+                        grouping:
+                          mode: per_alert
                         id: action-policy-1
                         matcher:
                           tags:
                             - production
                         name: Notify on production alerts
-                        snoozed_until: null
                         throttle:
-                          interval: null
                           strategy: on_status_change
                         updated_at: '2026-01-15T12:00:00.000Z'
                         updated_by:
@@ -8997,7 +8997,8 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_alert
+                  grouping:
+                    mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -9022,16 +9023,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10039,16 +10038,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10158,7 +10155,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
+        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"matcher": {"tags": ["prod"]}}` to change one leaf while leaving its siblings alone. Send `null` to clear a field, again at any level: `{"matcher": {"expression": null}}` clears a single leaf, while `{"matcher": null}` clears a whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-action-policies AND read_alerting-v2-rules.
       operationId: patch-alerting-v2-action-policies-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -10182,9 +10179,13 @@ paths:
           application/json:
             examples:
               updateActionPolicyRequest:
-                summary: Rename and update the description
+                summary: Rename the policy and clear the matcher expression, keeping its tags
                 value:
                   description: Updated description.
+                  matcher:
+                    expression: null
+                    tags:
+                      - production
                   name: Notify on production alerts (updated)
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_action_policy'
@@ -10204,16 +10205,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts (updated)
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10379,7 +10378,8 @@ paths:
                   destinations:
                     - id: workflow-1
                       type: workflow
-                  grouping_mode: per_alert
+                  grouping:
+                    mode: per_alert
                   matcher:
                     tags:
                       - production
@@ -10404,16 +10404,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10436,16 +10434,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10602,16 +10598,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: false
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10772,16 +10766,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -10962,8 +10954,8 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
@@ -10971,7 +10963,6 @@ paths:
                     name: Notify on production alerts
                     snoozed_until: '2026-01-16T12:00:00.000Z'
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -11132,16 +11123,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -11302,16 +11291,14 @@ paths:
                       - id: workflow-1
                         type: workflow
                     enabled: true
-                    group_by: null
-                    grouping_mode: per_alert
+                    grouping:
+                      mode: per_alert
                     id: action-policy-1
                     matcher:
                       tags:
                         - production
                     name: Notify on production alerts
-                    snoozed_until: null
                     throttle:
-                      interval: null
                       strategy: on_status_change
                     updated_at: '2026-01-15T12:00:00.000Z'
                     updated_by:
@@ -12255,6 +12242,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertAlreadyAcknowledged:
+                  summary: The alert is already acknowledged, so the request would change nothing
+                  value:
+                    code: INVALID_ALERT_STATE_TRANSITION
+                    details:
+                      action_type: ack
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] is already acknowledged.'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert is already acknowledged.
         '500':
           content:
             application/json:
@@ -12533,6 +12537,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertAssigneeUnchanged:
+                  summary: The alert is already assigned to the requested user
+                  value:
+                    code: ALERT_ACTION_NO_OP
+                    details:
+                      action_type: assign
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] is already assigned to [u_abc123].'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert already carries the requested assignee.
         '500':
           content:
             application/json:
@@ -12813,6 +12834,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertTagsUnchanged:
+                  summary: The alert already carries exactly the requested tags
+                  value:
+                    code: ALERT_ACTION_NO_OP
+                    details:
+                      action_type: tag
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] already has these tags.'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert already carries exactly the requested tags.
         '500':
           content:
             application/json:
@@ -12943,6 +12981,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
           description: Indicates the alert episode was not found.
+        '409':
+          content:
+            application/json:
+              examples:
+                alertNotAcknowledged:
+                  summary: The alert is not acknowledged, so the request would change nothing
+                  value:
+                    code: INVALID_ALERT_STATE_TRANSITION
+                    details:
+                      action_type: unack
+                      alert_id: episode-1
+                      group_hash: 98058cb569017ecb6b08b554ecbcb2524ff7dd8971828f4f2e5939c1e6667e56
+                    error: Conflict
+                    message: '[episode-1] must be acknowledged first before it can be unacknowledged.'
+              schema:
+                $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_error_response'
+          description: Indicates the alert is not acknowledged.
         '500':
           content:
             application/json:
@@ -13101,7 +13156,6 @@ paths:
                         alerts:
                           - id: episode-1
                         dispatched_at: '2026-01-15T12:05:00.000Z'
-                        error: null
                         outcome: success
                         policy:
                           id: action-policy-1
@@ -13115,7 +13169,6 @@ paths:
                             name: Notify oncall
                     page: 1
                     per_page: 20
-                    search_matches: null
                     total: 1
               schema:
                 $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_policy_execution_history_response'
@@ -13297,10 +13350,8 @@ paths:
                   value:
                     items:
                       - ended_at: '2026-01-15T12:00:01.250Z'
-                        error: null
                         id: execution-1
                         outcome: success
-                        reason: null
                         rule:
                           id: rule-1
                           version: 3
@@ -15328,6 +15379,8 @@ paths:
                       tags:
                         - production
                         - infra
+                      template:
+                        id: host-cpu-high
                     no_data:
                       strategy: keep_last
                     query:
@@ -15454,7 +15507,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        [Required authorization] Route required privileges: manage_alerting-v2-rules.
+        Apply a partial update. A field you omit keeps its stored value, and that applies at every level: send `{"metadata": {"name": "Disk pressure"}}` to change one leaf while leaving its siblings alone. Send `null` to clear a field, again at any level: `{"metadata": {"description": null}}` clears a single leaf, while `{"grouping": null}` clears a whole object. Lists and variant objects are replaced as a unit rather than merged, since a partly-sent variant could never be valid. The merged result is validated as a whole, so a patch that would leave the resource invalid is rejected with a `400` and nothing is stored.<br/><br/>[Required authorization] Route required privileges: manage_alerting-v2-rules.
       operationId: patch-alerting-v2-rules-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -15478,11 +15531,12 @@ paths:
           application/json:
             examples:
               updateRuleRequest:
-                summary: Update a rule name and description
+                summary: Rename a rule and clear its tags, leaving the rest of the metadata intact
                 value:
                   metadata:
                     description: Updated description.
                     name: Host CPU high (updated)
+                    tags: null
             schema:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_update_rule'
       responses:
@@ -46467,6 +46521,8 @@ paths:
                 type: object
                 properties:
                   is_action_secrets_storage_enabled:
+                    type: boolean
+                  is_fips_enabled:
                     type: boolean
                   is_secrets_storage_enabled:
                     type: boolean
@@ -135529,9 +135585,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update an existing private location's label.
+        Update an existing private location's label or agent policy.
         You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
         When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+        When a private location's agent policy is changed, the package policies of all monitors using this location are deleted and recreated on the new agent policy. Monitors stop running on the previous agents until agents on the new policy pick them up. The new agent policy must be available in all spaces of the private location and must not be used by another private location.
       operationId: put-private-location
       parameters:
         - description: The unique identifier of the private location to be updated.
@@ -135550,15 +135607,23 @@ paths:
                   {
                     "label": "Updated Private Location Name"
                   }
+              putPrivateLocationRequestExample2:
+                description: Move a private location to another agent policy.
+                value: |-
+                  {
+                    "agentPolicyId": "new-agent-policy-id"
+                  }
             schema:
               type: object
               properties:
+                agentPolicyId:
+                  description: The ID of the Fleet agent policy to move the private location to.
+                  minLength: 1
+                  type: string
                 label:
                   description: A new label for the private location. Must be at least 1 character long.
                   minLength: 1
                   type: string
-              required:
-                - label
         required: true
       responses:
         '200':
@@ -135584,7 +135649,8 @@ paths:
                 $ref: '#/components/schemas/Synthetics_getPrivateLocation'
           description: A successful response.
         '400':
-          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+          description: |
+            If the `label` is shorter than 1 character, or the `agentPolicyId` is not available in the current space, does not cover all spaces of the private location, or is already used by another private location, the API will return a 400 Bad Request response with a corresponding error message.
         '404':
           description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
       summary: Update a private location
@@ -151940,21 +152006,60 @@ components:
         propertyName: type
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
-    Kibana_HTTP_APIs_alerting_action_policy_grouping_mode:
-      anyOf:
-        - description: one notification per alert lifecycle (default).
-          enum:
-            - per_alert
-          type: string
-        - description: a single notification for all matching alerts.
+    Kibana_HTTP_APIs_alerting_action_policy_grouping:
+      discriminator:
+        mapping:
+          all: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_all'
+          per_alert: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_alert'
+          per_field: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_field'
+        propertyName: mode
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_alert'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_all'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_per_field'
+    Kibana_HTTP_APIs_alerting_action_policy_grouping_all:
+      additionalProperties: false
+      description: a single notification for all matching alerts.
+      type: object
+      properties:
+        mode:
           enum:
             - all
           type: string
-        - description: group by specified `groupBy` fields.
+      required:
+        - mode
+    Kibana_HTTP_APIs_alerting_action_policy_grouping_per_alert:
+      additionalProperties: false
+      description: one notification per alert lifecycle (default).
+      type: object
+      properties:
+        mode:
+          enum:
+            - per_alert
+          type: string
+      required:
+        - mode
+    Kibana_HTTP_APIs_alerting_action_policy_grouping_per_field:
+      additionalProperties: false
+      description: group by the specified `fields`.
+      type: object
+      properties:
+        fields:
+          description: The fields alerts are grouped by. At least one is required, and no other mode accepts them.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          minItems: 1
+          type: array
+        mode:
           enum:
             - per_field
           type: string
-      description: 'The grouping mode: per_alert groups by alert lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
+      required:
+        - mode
+        - fields
     Kibana_HTTP_APIs_alerting_action_policy_list_response:
       additionalProperties: false
       description: Paginated list of action policies.
@@ -151994,7 +152099,7 @@ components:
           description: The actor who created the action policy.
           nullable: true
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Omitted when the policy has none.
           type: string
         destinations:
           description: The list of destinations.
@@ -152004,79 +152109,40 @@ components:
         enabled:
           description: Whether the action policy is enabled.
           type: boolean
-        group_by:
-          description: The fields used to group alerts, or null for no grouping.
-          items:
-            type: string
-          nullable: true
-          type: array
-        grouping_mode:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
-          nullable: true
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: How matched alerts are batched into notifications. Omitted when none is set, which groups per alert.
         id:
           description: The unique identifier for the action policy.
           type: string
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
-          nullable: true
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone."
               maxLength: 4096
-              nullable: true
+              minLength: 1
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
-              nullable: true
+              minItems: 1
               type: array
         name:
           description: The name of the action policy.
           type: string
         snoozed_until:
-          description: The ISO datetime until which the policy is snoozed, or null if not snoozed.
-          nullable: true
+          description: The ISO datetime until which the policy is snoozed. Omitted when the policy is not snoozed.
           type: string
         throttle:
-          additionalProperties: false
-          description: The throttle configuration for notifications.
-          nullable: true
-          type: object
-          properties:
-            interval:
-              description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
-              maxLength: 32
-              nullable: true
-              type: string
-            strategy:
-              anyOf:
-                - description: notify only on alert status transitions (default for `per_alert`).
-                  enum:
-                    - on_status_change
-                  type: string
-                - description: notify on transitions and at regular intervals.
-                  enum:
-                    - per_status_interval
-                  type: string
-                - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
-                  enum:
-                    - time_interval
-                  type: string
-                - description: notify on every evaluation cycle (high volume).
-                  enum:
-                    - every_time
-                  type: string
-              description: The throttle strategy.
-          required:
-            - interval
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
+          description: The throttle configuration for notifications. Omitted when none is set.
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
@@ -152090,46 +152156,79 @@ components:
       required:
         - id
         - name
-        - description
         - enabled
         - destinations
-        - matcher
-        - group_by
-        - grouping_mode
-        - throttle
-        - snoozed_until
         - created_by
         - created_at
         - updated_by
         - updated_at
     Kibana_HTTP_APIs_alerting_action_policy_throttle:
+      discriminator:
+        mapping:
+          every_time: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_every_time'
+          on_status_change: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_on_status_change'
+          per_status_interval: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_per_status_interval'
+          time_interval: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_time_interval'
+        propertyName: strategy
+      oneOf:
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_on_status_change'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_per_status_interval'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_time_interval'
+        - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle_every_time'
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_every_time:
       additionalProperties: false
+      description: notify on every evaluation cycle (high volume).
+      type: object
+      properties:
+        strategy:
+          enum:
+            - every_time
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_on_status_change:
+      additionalProperties: false
+      description: notify only on alert status transitions (default for `per_alert`).
+      type: object
+      properties:
+        strategy:
+          enum:
+            - on_status_change
+          type: string
+      required:
+        - strategy
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_per_status_interval:
+      additionalProperties: false
+      description: notify on transitions and at regular intervals.
       type: object
       properties:
         interval:
-          description: The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.
+          description: The throttle interval duration (e.g. 5m, 1h) that sets the notification cadence.
           maxLength: 32
-          nullable: true
           type: string
         strategy:
-          anyOf:
-            - description: notify only on alert status transitions (default for `per_alert`).
-              enum:
-                - on_status_change
-              type: string
-            - description: notify on transitions and at regular intervals.
-              enum:
-                - per_status_interval
-              type: string
-            - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
-              enum:
-                - time_interval
-              type: string
-            - description: notify on every evaluation cycle (high volume).
-              enum:
-                - every_time
-              type: string
-          description: The throttle strategy.
+          enum:
+            - per_status_interval
+          type: string
+      required:
+        - strategy
+        - interval
+    Kibana_HTTP_APIs_alerting_action_policy_throttle_time_interval:
+      additionalProperties: false
+      description: notify at regular intervals regardless of status (default for `all`/`per_field`).
+      type: object
+      properties:
+        interval:
+          description: The throttle interval duration (e.g. 5m, 1h) that sets the notification cadence.
+          maxLength: 32
+          type: string
+        strategy:
+          enum:
+            - time_interval
+          type: string
+      required:
+        - strategy
+        - interval
     Kibana_HTTP_APIs_alerting_actor:
       additionalProperties: false
       description: Identity that performed the write.
@@ -152157,7 +152256,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 ack actions to create.
+          description: List of 1 to 100 ack actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_ack_alerts_item'
           maxItems: 100
@@ -152187,7 +152286,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 activate actions to create.
+          description: List of 1 to 100 activate actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_activate_alerts_item'
           maxItems: 100
@@ -152218,7 +152317,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 assign actions to create.
+          description: List of 1 to 100 assign actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_assign_alerts_item'
           maxItems: 100
@@ -152270,10 +152369,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         enabled:
           default: true
@@ -152309,9 +152409,7 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-          nullable: true
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
         time_field:
           default: '@timestamp'
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
@@ -152398,7 +152496,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 deactivate actions to create.
+          description: List of 1 to 100 deactivate actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_deactivate_alerts_item'
           maxItems: 100
@@ -152524,7 +152622,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 tag actions to create.
+          description: List of 1 to 100 tag actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_tag_alerts_item'
           maxItems: 100
@@ -152548,7 +152646,7 @@ components:
       type: object
       properties:
         items:
-          description: List of 1 to 100 unack actions to create.
+          description: List of 1 to 100 unack actions to create, each for a different `alert_id`.
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_bulk_unack_alerts_item'
           maxItems: 100
@@ -152586,8 +152684,9 @@ components:
       type: object
       properties:
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          minLength: 1
           type: string
         destinations:
           description: The list of destinations. At least one is required.
@@ -152596,35 +152695,27 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        group_by:
-          description: The fields used to group alerts.
-          items:
-            maxLength: 256
-            minLength: 1
-            type: string
-          maxItems: 16
-          type: array
-        grouping_mode:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone."
               maxLength: 4096
-              nullable: true
+              minLength: 1
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
-              nullable: true
+              minItems: 1
               type: array
         name:
           description: The name of the action policy.
@@ -152633,10 +152724,9 @@ components:
           type: string
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications.
+          description: 'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.'
       required:
         - name
-        - description
         - destinations
     Kibana_HTTP_APIs_alerting_new_activate_alert_action:
       additionalProperties: false
@@ -152677,10 +152767,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
@@ -152706,9 +152797,7 @@ components:
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
-          allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
-          nullable: true
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
         time_field:
           default: '@timestamp'
           description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
@@ -152763,17 +152852,16 @@ components:
           type: string
         error:
           additionalProperties: false
-          nullable: true
+          description: Failure details. Omitted when the dispatch did not fail.
           type: object
           properties:
             message:
               type: string
             stack_trace:
-              nullable: true
+              description: Omitted when the source recorded no trace.
               type: string
           required:
             - message
-            - stack_trace
         failure_reason:
           enum:
             - missing_api_key
@@ -152795,7 +152883,7 @@ components:
             id:
               type: string
             name:
-              nullable: true
+              description: Omitted when the referenced resource could not be resolved.
               type: string
           required:
             - id
@@ -152810,7 +152898,7 @@ components:
               id:
                 type: string
               name:
-                nullable: true
+                description: Omitted when the referenced resource could not be resolved.
                 type: string
             required:
               - id
@@ -152823,7 +152911,7 @@ components:
               id:
                 type: string
               name:
-                nullable: true
+                description: Omitted when the referenced resource could not be resolved.
                 type: string
             required:
               - id
@@ -152839,7 +152927,6 @@ components:
         - rules
         - rule_count
         - workflows
-        - error
     Kibana_HTTP_APIs_alerting_policy_execution_history_response:
       additionalProperties: false
       type: object
@@ -152858,8 +152945,7 @@ components:
           type: integer
         search_matches:
           additionalProperties: false
-          description: Per-type match counts for the active search. Null when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
-          nullable: true
+          description: Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.
           type: object
           properties:
             is_truncated:
@@ -152885,14 +152971,14 @@ components:
         - page
         - per_page
         - total
-        - search_matches
     Kibana_HTTP_APIs_alerting_put_action_policy:
       additionalProperties: false
       type: object
       properties:
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          minLength: 1
           type: string
         destinations:
           description: The list of destinations. At least one is required.
@@ -152901,38 +152987,27 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        enabled:
-          description: Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state; otherwise it becomes the new stored value.
-          type: boolean
-        group_by:
-          description: The fields used to group alerts.
-          items:
-            maxLength: 256
-            minLength: 1
-            type: string
-          maxItems: 16
-          type: array
-        grouping_mode:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
+        grouping:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
         matcher:
           additionalProperties: false
-          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts.
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. At least one of `tags` and `expression` must be set, so an empty `matcher` is rejected. Omit `matcher` entirely for a catch-all policy that applies to all alerts.
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to match on `tags` alone."
               maxLength: 4096
-              nullable: true
+              minLength: 1
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
-              nullable: true
+              minItems: 1
               type: array
         name:
           description: The name of the action policy.
@@ -152941,10 +153016,9 @@ components:
           type: string
         throttle:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications.
+          description: 'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.'
       required:
         - name
-        - description
         - destinations
     Kibana_HTTP_APIs_alerting_rule_artifact:
       additionalProperties: false
@@ -152980,6 +153054,16 @@ components:
           type: string
       required:
         - segment
+    Kibana_HTTP_APIs_alerting_rule_breach_patch:
+      additionalProperties: false
+      description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.
+      type: object
+      properties:
+        segment:
+          description: ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause.
+          maxLength: 10000
+          minLength: 1
+          type: string
     Kibana_HTTP_APIs_alerting_rule_execution:
       additionalProperties: false
       type: object
@@ -152990,17 +153074,16 @@ components:
           type: string
         error:
           additionalProperties: false
-          nullable: true
+          description: Failure details. Omitted on a successful run, or when the failure was unclassified.
           type: object
           properties:
             message:
               type: string
             stack_trace:
-              nullable: true
+              description: Omitted when the source recorded no trace.
               type: string
           required:
             - message
-            - stack_trace
         id:
           type: string
         outcome:
@@ -153009,7 +153092,7 @@ components:
             - failure
           type: string
         reason:
-          nullable: true
+          description: Why the run ended the way it did. Omitted when the source recorded no reason.
           type: string
         rule:
           additionalProperties: false
@@ -153018,13 +153101,12 @@ components:
             id:
               type: string
             version:
+              description: The rule version this run executed. Omitted until the rule executor emits its own event; the `task-run` event does not carry one.
               maximum: 9007199254740991
               minimum: -9007199254740991
-              nullable: true
               type: integer
           required:
             - id
-            - version
         space_id:
           type: string
         started_at:
@@ -153056,8 +153138,6 @@ components:
         - ended_at
         - timings
         - outcome
-        - reason
-        - error
     Kibana_HTTP_APIs_alerting_rule_executions_response:
       additionalProperties: false
       type: object
@@ -153096,9 +153176,24 @@ components:
             minLength: 1
             type: string
           maxItems: 16
+          minItems: 1
           type: array
       required:
         - fields
+    Kibana_HTTP_APIs_alerting_rule_grouping_patch:
+      additionalProperties: false
+      description: Grouping configuration.
+      type: object
+      properties:
+        fields:
+          description: Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 16
+          minItems: 1
+          type: array
     Kibana_HTTP_APIs_alerting_rule_list_response:
       additionalProperties: false
       description: Paginated list of rules.
@@ -153130,18 +153225,20 @@ components:
       properties:
         builder:
           additionalProperties: false
-          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
           type: object
           properties:
             type:
               description: Rule builder type.
               maxLength: 64
+              minLength: 1
               type: string
           required:
             - type
         description:
-          description: Human-readable description of the rule.
+          description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
           maxLength: 1024
+          minLength: 1
           type: string
         name:
           description: Rule name (must be unique within the space).
@@ -153168,6 +153265,55 @@ components:
           type: array
       required:
         - name
+    Kibana_HTTP_APIs_alerting_rule_metadata_patch:
+      additionalProperties: false
+      description: Rule metadata.
+      type: object
+      properties:
+        builder:
+          additionalProperties: false
+          description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
+          nullable: true
+          type: object
+          properties:
+            type:
+              description: Rule builder type.
+              maxLength: 64
+              minLength: 1
+              type: string
+          required:
+            - type
+        description:
+          description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
+          maxLength: 1024
+          minLength: 1
+          nullable: true
+          type: string
+        name:
+          description: Rule name (must be unique within the space).
+          maxLength: 256
+          minLength: 1
+          type: string
+        routing_tags:
+          description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          nullable: true
+          type: array
+        tags:
+          description: Tags for categorization, e.g. ["production", "infra"].
+          items:
+            maxLength: 128
+            minLength: 1
+            type: string
+          maxItems: 20
+          minItems: 1
+          nullable: true
+          type: array
     Kibana_HTTP_APIs_alerting_rule_no_data:
       description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.
       discriminator:
@@ -153255,6 +153401,21 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_breach'
       required:
         - base
+    Kibana_HTTP_APIs_alerting_rule_query_patch:
+      additionalProperties: false
+      description: ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.
+      type: object
+      properties:
+        base:
+          description: ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.
+          maxLength: 10000
+          minLength: 1
+          type: string
+        breach:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_breach_patch'
+          description: Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.
+          nullable: true
     Kibana_HTTP_APIs_alerting_rule_recovery:
       description: When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
       discriminator:
@@ -153330,10 +153491,11 @@ components:
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           type: array
         created_at:
           description: ISO timestamp when the rule was created.
@@ -153365,7 +153527,62 @@ components:
               type: string
           description: Whether the rule creates alerts (`alert`) or only stores matching events (`signal`).
         metadata:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
+          additionalProperties: false
+          description: Rule metadata.
+          type: object
+          properties:
+            builder:
+              additionalProperties: false
+              description: Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.
+              type: object
+              properties:
+                type:
+                  description: Rule builder type.
+                  maxLength: 64
+                  minLength: 1
+                  type: string
+              required:
+                - type
+            description:
+              description: Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.
+              maxLength: 1024
+              minLength: 1
+              type: string
+            name:
+              description: Rule name (must be unique within the space).
+              maxLength: 256
+              minLength: 1
+              type: string
+            routing_tags:
+              description: Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              type: array
+            tags:
+              description: Tags for categorization, e.g. ["production", "infra"].
+              items:
+                maxLength: 128
+                minLength: 1
+                type: string
+              maxItems: 20
+              minItems: 1
+              type: array
+            template:
+              additionalProperties: false
+              description: The rule template this rule was created from.
+              type: object
+              properties:
+                id:
+                  description: Id of the rule template.
+                  type: string
+              required:
+                - id
+          required:
+            - name
         no_data:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
         query:
@@ -153424,6 +153641,20 @@ components:
           type: string
       required:
         - every
+    Kibana_HTTP_APIs_alerting_rule_schedule_patch:
+      additionalProperties: false
+      description: Execution schedule configuration.
+      type: object
+      properties:
+        every:
+          description: Execution interval, e.g. 1m, 5m, 1h.
+          maxLength: 32
+          type: string
+        lookback:
+          description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
+          maxLength: 32
+          nullable: true
+          type: string
     Kibana_HTTP_APIs_alerting_rule_state_transition:
       additionalProperties: false
       description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
@@ -153435,6 +153666,21 @@ components:
         recovering:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering'
           description: Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.
+    Kibana_HTTP_APIs_alerting_rule_state_transition_patch:
+      additionalProperties: false
+      description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
+      type: object
+      properties:
+        pending:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_pending_patch'
+          description: Delay before a match opens an alert.
+          nullable: true
+        recovering:
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_recovering_patch'
+          description: Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.
+          nullable: true
     Kibana_HTTP_APIs_alerting_rule_state_transition_pending:
       additionalProperties: false
       type: object
@@ -153453,6 +153699,28 @@ components:
         timeframe:
           description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
           maxLength: 32
+          type: string
+    Kibana_HTTP_APIs_alerting_rule_state_transition_pending_patch:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          description: Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.
+          maximum: 1000
+          minimum: 0
+          nullable: true
+          type: integer
+        operator:
+          description: When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.
+          enum:
+            - and
+            - or
+          nullable: true
+          type: string
+        timeframe:
+          description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
+          maxLength: 32
+          nullable: true
           type: string
     Kibana_HTTP_APIs_alerting_rule_state_transition_recovering:
       additionalProperties: false
@@ -153473,6 +153741,28 @@ components:
           description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
           maxLength: 32
           type: string
+    Kibana_HTTP_APIs_alerting_rule_state_transition_recovering_patch:
+      additionalProperties: false
+      type: object
+      properties:
+        count:
+          description: Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.
+          maximum: 1000
+          minimum: 0
+          nullable: true
+          type: integer
+        operator:
+          description: When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.
+          enum:
+            - and
+            - or
+          nullable: true
+          type: string
+        timeframe:
+          description: Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.
+          maxLength: 32
+          nullable: true
+          type: string
     Kibana_HTTP_APIs_alerting_snooze_action_policy_request:
       additionalProperties: false
       type: object
@@ -153489,8 +153779,10 @@ components:
       type: object
       properties:
         description:
-          description: A description of the action policy.
+          description: A description of the action policy. Absent when the policy has none; send `null` on PATCH to clear it.
           maxLength: 1024
+          minLength: 1
+          nullable: true
           type: string
         destinations:
           description: The list of destinations. At least one is required.
@@ -153499,38 +153791,31 @@ components:
           maxItems: 10
           minItems: 1
           type: array
-        group_by:
-          description: The fields used to group alerts.
-          items:
-            maxLength: 256
-            minLength: 1
-            type: string
-          maxItems: 16
-          nullable: true
-          type: array
-        grouping_mode:
+        grouping:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping_mode'
-          description: The grouping mode for alert notifications.
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_grouping'
+          description: 'How matched alerts are batched into notifications. Absent falls back to `per_alert`; send `null` on PATCH to clear it. The mode decides the rest of the block, so a PATCH replaces it whole: send the complete mode variant rather than a single field.'
           nullable: true
         matcher:
           additionalProperties: false
-          description: 'Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. When `matcher` is `null`, or when both `tags` and `expression` are empty, the policy applies to all alerts. <br/><br/> Updating `matcher` replaces it entirely: to change `tags` without dropping `expression`, resend the current `expression` value.'
+          description: Selects the alerts this policy applies to. Set `tags` to match alerts from rules with those routing tags. Set `expression` to a KQL query, which will be evaluated against each alert. <br/><br/> If you set both `tags` and `expression`, an alert must match the tags and the expression for the policy to apply. Omit `matcher` to keep the stored matcher, or set it to `null` for a catch-all policy that applies to all alerts. An empty `matcher` names no leaf and so changes nothing; clearing the last of `tags` and `expression` clears the matcher itself, which is also a catch-all.
           nullable: true
           type: object
           properties:
             expression:
-              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` or set it to `null` to match on `tags` alone."
+              description: "A KQL query that's evaluated against each alert. Supported fields are: `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and your rule's query output columns under `data.*` (for example, `data.host.name`). Referencing other fields won't work. Omit `matcher.expression` to keep the stored expression, or set it to `null` to clear it and match on `tags` alone."
               maxLength: 4096
+              minLength: 1
               nullable: true
               type: string
             tags:
-              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. Omit `matcher.tags` or set it to `null` to match on `matcher.expression` alone.
+              description: Routing tags this policy should match. The policy applies to alerts from any rule whose `metadata.routing_tags` include at least one of these tags. An empty array is not accepted. Omit `matcher.tags` to keep the stored tags, or set it to `null` to clear them and match on `matcher.expression` alone.
               items:
                 maxLength: 128
                 minLength: 1
                 type: string
               maxItems: 50
+              minItems: 1
               nullable: true
               type: array
         name:
@@ -153541,89 +153826,48 @@ components:
         throttle:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_action_policy_throttle'
-          description: The throttle configuration for notifications.
+          description: 'The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field.'
           nullable: true
     Kibana_HTTP_APIs_alerting_update_rule:
       additionalProperties: false
       type: object
       properties:
         artifacts:
-          description: Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.
+          description: 'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.'
           items:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_artifact'
           maxItems: 100
+          minItems: 1
           nullable: true
           type: array
         grouping:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping_patch'
+          description: Grouping configuration.
           nullable: true
         metadata:
-          additionalProperties: false
-          type: object
-          properties:
-            builder:
-              additionalProperties: false
-              nullable: true
-              type: object
-              properties:
-                type:
-                  description: Rule builder type.
-                  maxLength: 64
-                  type: string
-              required:
-                - type
-            description:
-              description: Human-readable description of the rule.
-              maxLength: 1024
-              type: string
-            name:
-              description: Rule name (must be unique within the space).
-              maxLength: 256
-              minLength: 1
-              type: string
-            routing_tags:
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              nullable: true
-              type: array
-            tags:
-              items:
-                maxLength: 128
-                minLength: 1
-                type: string
-              maxItems: 20
-              minItems: 1
-              nullable: true
-              type: array
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata_patch'
         no_data:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_no_data'
+          description: What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.
+          nullable: true
         query:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query_patch'
         recovery:
-          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+          allOf:
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_recovery'
+          description: When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.
+          nullable: true
         schedule:
-          additionalProperties: false
-          type: object
-          properties:
-            every:
-              description: Execution interval, e.g. 1m, 5m, 1h.
-              maxLength: 32
-              type: string
-            lookback:
-              description: Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.
-              maxLength: 32
-              type: string
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule_patch'
         state_transition:
           allOf:
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition'
+            - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_state_transition_patch'
+          description: Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.
           nullable: true
         time_field:
-          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`. If omitted, the existing value is kept.
+          description: Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.
           maxLength: 256
           minLength: 1
           type: string
