@@ -8,7 +8,7 @@
  */
 
 import type { UserEvent } from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { act, fireEvent, screen } from '@testing-library/react';
 import type { Context } from '../../public/components/field_editor_context';
 import type { Props } from '../../public/components/field_editor_flyout_content';
 import type { TestDoc } from './helpers';
@@ -184,6 +184,13 @@ const getActions = (user: UserEvent) => {
     await user.selectOptions(select, value);
   };
 
+  const saveField = async () => {
+    await act(async () => {
+      fireEvent.click(screen.getByText('Save'));
+      jest.advanceTimersByTime(0);
+    });
+  };
+
   const loadCustomDocument = setDocumentId;
   const fields = createFieldEditorFields({
     getTypeValue: getTypeValueFromLabel,
@@ -206,6 +213,7 @@ const getActions = (user: UserEvent) => {
     loadCustomDocument,
     loadDocumentsFromCluster,
     pinFieldAt,
+    saveField,
     setDocumentId,
     setFilterFieldsValue,
     toggleFormRow,

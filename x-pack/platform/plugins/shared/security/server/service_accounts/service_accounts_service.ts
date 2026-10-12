@@ -14,7 +14,10 @@ import type {
 } from '@kbn/core/server';
 import { SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { CheckPrivilegesWithRequest } from '@kbn/security-plugin-types-server';
+import type {
+  AuditServiceSetup,
+  CheckPrivilegesWithRequest,
+} from '@kbn/security-plugin-types-server';
 
 import {
   SERVICE_ACCOUNT_WORKLOAD_BINDING_TYPE,
@@ -42,6 +45,7 @@ export interface ServiceAccountsServiceStartParams {
   /** The UIAM service, when UIAM is configured for this deployment. */
   uiam?: UiamServicePublic;
   checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  audit: AuditServiceSetup;
   cloudProjectContext?: CloudProjectContext;
   clusterClient: IClusterClient;
   savedObjects: SavedObjectsServiceStart;
@@ -66,6 +70,7 @@ export class ServiceAccountsService {
     license,
     uiam,
     checkPrivilegesWithRequest,
+    audit,
     cloudProjectContext,
     clusterClient,
     savedObjects,
@@ -111,6 +116,7 @@ export class ServiceAccountsService {
         license,
         uiam,
         checkPrivilegesWithRequest,
+        audit,
         cloudProjectContext,
         getCurrentUser,
       });
@@ -122,6 +128,7 @@ export class ServiceAccountsService {
         license,
         clusterClient,
         checkPrivilegesWithRequest,
+        audit,
         credentialStore: new ServiceAccountCredentialStore({
           client: savedObjects.getUnsafeInternalClient({
             includedHiddenTypes: [SERVICE_ACCOUNT_CREDENTIAL_TYPE],
@@ -160,6 +167,7 @@ export class ServiceAccountsService {
         backend,
         store,
         checkPrivilegesWithRequest,
+        audit,
       }),
       workloads: new ServiceAccountWorkloadBindings({
         logger: bindingsLogger,
@@ -167,6 +175,7 @@ export class ServiceAccountsService {
         store,
         backend,
         checkPrivilegesWithRequest,
+        audit,
         getCurrentUser,
         getCurrentUserProfileId,
         getSpaceId,

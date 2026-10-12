@@ -37,7 +37,6 @@ describe('external_vis_context', () => {
         timeInterval: 'auto',
         breakdownField: undefined,
         columns: [],
-        isPlainRecord: true,
         table: tableMock,
       });
 
