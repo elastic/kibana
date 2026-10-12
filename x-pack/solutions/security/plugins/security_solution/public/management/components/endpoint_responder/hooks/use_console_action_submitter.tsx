@@ -373,7 +373,7 @@ export const useConsoleActionSubmitter = <
       }
 
       // Response action failures
-      if (actionDetails.errors) {
+      if (!actionDetails.wasSuccessful) {
         return (
           <ResultComponent
             showAs={actionDetails.wasCanceled ? 'canceled' : 'failure'}
