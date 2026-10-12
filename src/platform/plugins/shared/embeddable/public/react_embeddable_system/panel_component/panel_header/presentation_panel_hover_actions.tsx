@@ -416,9 +416,13 @@ export const PresentationPanelHoverActions = ({
     return contextMenuPanels.some(({ items }) => items?.length);
   }, [contextMenuPanels]);
 
+  // The two branches below use different keys so the bar is remounted when selection mode toggles:
+  // reusing the same element would animate it from "forced visible" to hidden through the delayed
+  // hover-out transition and briefly flash the full set of actions on every panel.
   if (isSelectionMode) {
     return (
       <div
+        key="selectionMode"
         className={classNames('embPanel__hoverActions', className)}
         data-test-subj={`hover-actions-${api.uuid}`}
       >
@@ -445,6 +449,7 @@ export const PresentationPanelHoverActions = ({
     <>
       {api && (quickActionElements.length || showContextMenu) && (
         <div
+          key="default"
           className={classNames('embPanel__hoverActions', className)}
           data-test-subj={`hover-actions-${api.uuid}`}
         >
