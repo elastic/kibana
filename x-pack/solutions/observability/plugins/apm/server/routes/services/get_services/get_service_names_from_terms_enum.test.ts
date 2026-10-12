@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import { WrappedElasticsearchClientError } from '@kbn/observability-utils-server/es/unwrap_es_response';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getServiceNamesFromTermsEnum } from './get_service_names_from_terms_enum';

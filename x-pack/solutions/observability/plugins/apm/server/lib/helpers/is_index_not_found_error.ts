@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
 
 export function isIndexNotFoundError(error: unknown): boolean {
   const elasticsearchError =
-    error instanceof WrappedElasticsearchClientError ? error.originalError : error;
+    typeof error === 'object' && error !== null && 'originalError' in error
+      ? error.originalError
+      : error;
 
   return (
     elasticsearchError instanceof errors.ResponseError &&
