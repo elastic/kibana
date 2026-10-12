@@ -431,7 +431,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
           wrap
           css={controlsRowCss}
         >
-          <EuiFlexItem grow={false} css={dateRangeItemCss}>
+          <EuiFlexItem grow css={dateRangeItemCss}>
             <AlertingDateRangePicker
               from={dateRange.dateStart}
               to={dateRange.dateEnd}

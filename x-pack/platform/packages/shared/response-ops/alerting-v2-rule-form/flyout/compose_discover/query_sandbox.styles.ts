@@ -21,20 +21,15 @@ const sandboxRootCss = css`
   container-type: inline-size;
 `;
 
-// Pinned to the right edge of the row.
 const searchItemCss = css`
-  margin-left: auto;
-
   @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    margin-left: 0;
     order: 1;
   }
 `;
 
+// Takes the free space so the time field sits flush against Search.
 const dateRangeItemCss = css`
-  @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    flex-grow: 1;
-  }
+  min-width: 0;
 `;
 
 const timeFieldSelectCss = css`
@@ -54,6 +49,11 @@ const loadingCenterCss = css`
 
 const editorBodyCss = css`
   overflow: auto;
+
+  /* Line numbers are one step smaller than the code, as in Discover's editor. */
+  .monaco-editor .margin-view-overlays .line-numbers {
+    font-size: 12px;
+  }
 `;
 
 export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
