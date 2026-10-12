@@ -99,6 +99,14 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
       resolved = input.input;
     }
 
+    // A column often holds a number, such as an id or a count; a text value takes it as text.
+    if (
+      declaration.type === 'string' &&
+      (typeof resolved === 'number' || typeof resolved === 'boolean')
+    ) {
+      resolved = String(resolved);
+    }
+
     const rejection = rejectValue(key, declaration, resolved);
     if (rejection) {
       dropped.push(rejection);

@@ -8,13 +8,15 @@
 export {
   CUSTOM_APP_EMBEDDABLE_TYPE,
   CUSTOM_APP_STATE_VERSION,
+  MAX_HEADING_LENGTH,
+  MAX_QUERY_LENGTH,
   MAX_STATE_STRING_LENGTH,
+  MAX_TEXT_LENGTH,
 } from './constants';
 export {
   actionSchema,
   appDocumentSchema,
   customAppStateSchema,
-  esqlDataSourceSchema,
   nodeSchema,
   stateDeclarationSchema,
   stateKeySchema,
@@ -23,7 +25,6 @@ export {
   type AppNode,
   type AppNodeOfType,
   type AppNodeType,
-  type EsqlDataSource,
   type StateDeclaration,
   type CustomAppState,
 } from './document_schema';
@@ -34,10 +35,28 @@ export {
   type StateValue,
 } from './interpolation';
 export {
+  collectQueries,
   getInterpolatedText,
   getNodeActions,
   getNodeBinding,
   getNodeChildren,
-  getNodeSourceId,
+  getNodeQuery,
 } from './node_tree';
 export { getStateDefaults } from './state_defaults';
+export {
+  addNode,
+  createNodeId,
+  createStateKey,
+  duplicateNode,
+  findNode,
+  moveNode,
+  pruneUnusedValues,
+  removeNode,
+  removeStateKey,
+  setStateDeclaration,
+  stateKeyForColumn,
+  updateNode,
+  type MutationResult,
+  type NodeLocation,
+} from './document_mutations';
+export { getDocumentIssues, type DocumentIssue } from './document_issues';

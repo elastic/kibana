@@ -6,9 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, merge, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
@@ -21,6 +22,7 @@ import {
   timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
+  type HasEditCapabilities,
   type HasTypeDisplayName,
   type PublishesDataLoading,
   type PublishesWritableTimeRange,
@@ -28,12 +30,15 @@ import {
 import {
   CUSTOM_APP_EMBEDDABLE_TYPE,
   CUSTOM_APP_STATE_VERSION,
+  collectQueries,
   type AppDocument,
 } from '@kbn/custom-app-common';
 import type { CustomAppEmbeddableState } from '../server';
+import { AppFrame } from './components/app_frame';
 import { NodeRenderer } from './components/node_renderer';
 import { createDataLayer } from './data/data_layer';
 import { DataLayerContext } from './data/data_layer_context';
+import type { HasCustomAppDocument } from './has_custom_app_document';
 import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { createRunEsqlQuery } from './data/run_esql_query';
@@ -41,6 +46,8 @@ import { getServices } from './services';
 
 export type CustomAppApi = DefaultEmbeddableApi<CustomAppEmbeddableState> &
   HasTypeDisplayName &
+  HasEditCapabilities &
+  HasCustomAppDocument &
   PublishesDataLoading &
   PublishesWritableTimeRange;
 
@@ -55,11 +62,16 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
     const timeRangeManager = initializeTimeRangeManager(initialState);
     const document$ = new BehaviorSubject<AppDocument>(initialState.document);
 
+    // What the editor's Preview button shows on the panel instead of the saved document. It is
+    // not part of the panel's state, so previewing never marks the dashboard as changed.
+    const previewDocument$ = new BehaviorSubject<AppDocument | undefined>(undefined);
+    const renderedDocument$ = new BehaviorSubject<AppDocument>(initialState.document);
+
     const dataLayer = createDataLayer({
       runQuery: createRunEsqlQuery({ search, http: core.http }),
       getParameterNames: (query) => getESQLQueryVariables(query),
     });
-    dataLayer.setSources(initialState.document.dataSources);
+    dataLayer.setQueries(collectQueries(initialState.document.root));
     const runtime = createAppRuntime(initialState.document);
     // Emits the defaults straight away, then every change a user makes.
     const stateSubscription = runtime.state$.subscribe(dataLayer.setState);
@@ -102,22 +114,55 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       ...timeRangeManager.api,
       dataLoading$: dataLayer.loading$,
       serializeState,
+      isEditingEnabled: () => true,
+      getDocument: () => document$.getValue(),
+      onEdit: async ({ returnFocus } = {}) => {
+        const flyoutRef = openLazyFlyout({
+          core,
+          parentApi,
+          returnFocus,
+          flyoutProps: { focusedPanelId: uuid, size: 760, minWidth: 520 },
+          loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+            const { EditorFlyout } = await import('./editor/editor_flyout');
+            return (
+              <EditorFlyout
+                initialDocument={document$.getValue()}
+                ariaLabelledBy={ariaLabelledBy}
+                onPreview={(document) => previewDocument$.next(document)}
+                onCancel={closeFlyout}
+                onSave={(document) => {
+                  document$.next(document);
+                  closeFlyout();
+                }}
+              />
+            );
+          },
+        });
+        flyoutRef.onClose.then(() => previewDocument$.next(undefined));
+      },
       getTypeDisplayName: () =>
         i18n.translate('xpack.customApp.embeddable.typeDisplayName', {
           defaultMessage: 'Custom app',
         }),
     });
 
-    // Discarding unsaved changes swaps the document; the runtime and the sources follow it.
-    const documentSubscription = document$.pipe(skip(1)).subscribe((document) => {
-      runtime.setDocument(document);
-      dataLayer.setSources(document.dataSources);
-    });
+    // The panel shows the preview while there is one, and the saved document otherwise.
+    const renderedSubscription = combineLatest([document$, previewDocument$])
+      .pipe(map(([document, preview]) => preview ?? document))
+      .subscribe((document) => renderedDocument$.next(document));
+
+    // Whichever document is shown, the runtime and the sources follow it.
+    const documentSubscription = renderedDocument$
+      .pipe(distinctUntilChanged(), skip(1))
+      .subscribe((document) => {
+        runtime.setDocument(document);
+        dataLayer.setQueries(collectQueries(document.root));
+      });
 
     return {
       api,
       Component: function CustomAppEmbeddableComponent() {
-        const [document] = useBatchedPublishingSubjects(document$);
+        const [document] = useBatchedPublishingSubjects(renderedDocument$);
 
         // Subscribed here rather than when the panel is built so that the nodes below, whose
         // effects run first, have already declared the sources they read when the first fetch
@@ -132,6 +177,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
           () => () => {
             stateSubscription.unsubscribe();
             documentSubscription.unsubscribe();
+            renderedSubscription.unsubscribe();
             dataLayer.destroy();
           },
           []
@@ -140,7 +186,9 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
         return (
           <AppRuntimeContext.Provider value={runtime}>
             <DataLayerContext.Provider value={dataLayer}>
-              <NodeRenderer node={document.root} />
+              <AppFrame>
+                <NodeRenderer node={document.root} />
+              </AppFrame>
             </DataLayerContext.Provider>
           </AppRuntimeContext.Provider>
         );

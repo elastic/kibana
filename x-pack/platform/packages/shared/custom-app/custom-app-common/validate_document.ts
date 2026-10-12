@@ -6,20 +6,13 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { MAX_DATA_SOURCES, MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_STATE_KEYS } from './constants';
+import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_STATE_KEYS } from './constants';
 import type { AppNode, StateDeclaration } from './document_schema';
 import { findStateReferences, hasMalformedReference } from './interpolation';
-import {
-  getInterpolatedText,
-  getNodeActions,
-  getNodeBinding,
-  getNodeChildren,
-  getNodeSourceId,
-} from './node_tree';
+import { getInterpolatedText, getNodeActions, getNodeBinding, getNodeChildren } from './node_tree';
 
 interface DocumentToValidate {
   state: Record<string, StateDeclaration>;
-  dataSources: Record<string, unknown>;
   root: AppNode;
 }
 
@@ -56,7 +49,11 @@ const collectNodes = (
     }
 
     if (seenIds.has(node.id)) {
-      ctx.addIssue({ code: 'custom', message: `Duplicate node id "${node.id}"` });
+      ctx.addIssue({
+        code: 'custom',
+        message: `Duplicate node id "${node.id}"`,
+        params: { nodeId: node.id },
+      });
     }
     seenIds.add(node.id);
     nodes.push(node);
@@ -72,39 +69,38 @@ const collectNodes = (
 
 /**
  * Enforces what the node schemas cannot express: size limits, unique ids, and that everything a
- * node refers to (data sources, state keys, flyouts) exists and is used with the right type.
+ * node refers to (state keys, flyouts) exists and is used with the right type.
  * Without the bounds a single saved panel could carry an arbitrarily large tree.
  */
 export const validateDocument = (document: DocumentToValidate, ctx: z.RefinementCtx): void => {
-  const { state, dataSources } = document;
-  const issue = (message: string) => ctx.addIssue({ code: 'custom', message });
+  const { state } = document;
+  const issue = (message: string, nodeId?: string) =>
+    ctx.addIssue({
+      code: 'custom',
+      message,
+      ...(nodeId === undefined ? {} : { params: { nodeId } }),
+    });
 
   if (Object.keys(state).length > MAX_STATE_KEYS) {
     issue(`A document may hold at most ${MAX_STATE_KEYS} state keys`);
   }
-  if (Object.keys(dataSources).length > MAX_DATA_SOURCES) {
-    issue(`A document may hold at most ${MAX_DATA_SOURCES} data sources`);
-  }
-
   const { nodes, withinLimits } = collectNodes(document.root, ctx);
   if (!withinLimits) return;
 
   const flyoutIds = new Set(nodes.filter(({ type }) => type === 'flyout').map(({ id }) => id));
 
   nodes.forEach((node) => {
-    const sourceId = getNodeSourceId(node);
-    if (sourceId !== undefined && !(sourceId in dataSources)) {
-      issue(`Node "${node.id}" refers to unknown data source "${sourceId}"`);
-    }
-
     const binding = getNodeBinding(node);
     if (binding !== undefined) {
       const declaration = state[binding];
-      if (!declaration) {
-        issue(`Node "${node.id}" binds unknown state key "${binding}"`);
+      if (binding === '') {
+        // Reported as too short.
+      } else if (!declaration) {
+        issue(`Node "${node.id}" binds unknown state key "${binding}"`, node.id);
       } else if (declaration.type !== 'string') {
         issue(
-          `Node "${node.id}" binds state key "${binding}" (${declaration.type}); an input needs a string key`
+          `Node "${node.id}" binds state key "${binding}" (${declaration.type}); an input needs a string key`,
+          node.id
         );
       }
     }
@@ -112,18 +108,23 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
     if (node.type === 'select' || node.type === 'button_group') {
       const seen = new Set<string>();
       node.options.forEach(({ value }) => {
-        if (seen.has(value)) issue(`Node "${node.id}" has the option "${value}" more than once`);
+        if (seen.has(value)) {
+          issue(`Node "${node.id}" has the option "${value}" more than once`, node.id);
+        }
         seen.add(value);
       });
     }
 
     getInterpolatedText(node).forEach(({ prop, text }) => {
       if (hasMalformedReference(text)) {
-        issue(`Node "${node.id}" has a malformed reference in "${prop}"; use {{state.<key>}}`);
+        issue(
+          `Node "${node.id}" has a malformed reference in "${prop}"; use {{state.<key>}}`,
+          node.id
+        );
       }
       findStateReferences(text)
         .filter((key) => !(key in state))
-        .forEach((key) => issue(`Node "${node.id}" refers to unknown state key "${key}"`));
+        .forEach((key) => issue(`Node "${node.id}" refers to unknown state key "${key}"`, node.id));
     });
 
     getNodeActions(node).forEach(({ event, actions }) => {
@@ -131,23 +132,23 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
 
       actions.forEach((action) => {
         if (action.type === 'openFlyout' && !flyoutIds.has(action.flyout)) {
-          issue(`Node "${node.id}" opens "${action.flyout}", which is not a flyout`);
+          issue(`Node "${node.id}" opens "${action.flyout}", which is not a flyout`, node.id);
         }
         if (action.type !== 'setState') return;
 
         const declaration = state[action.key];
         if (!declaration) {
-          issue(`Node "${node.id}" sets unknown state key "${action.key}"`);
+          issue(`Node "${node.id}" sets unknown state key "${action.key}"`, node.id);
           return;
         }
 
         const { value } = action;
         if (typeof value === 'object') {
           if ('fromColumn' in value && !allowed.fromColumn) {
-            issue(`Node "${node.id}": fromColumn is not valid in ${event}`);
+            issue(`Node "${node.id}": fromColumn is not valid in ${event}`, node.id);
           }
           if ('fromInput' in value && !allowed.fromInput) {
-            issue(`Node "${node.id}": fromInput is only valid on input nodes`);
+            issue(`Node "${node.id}": fromInput is only valid on input nodes`, node.id);
           }
         } else if (typeof value !== declaration.type) {
           issue(

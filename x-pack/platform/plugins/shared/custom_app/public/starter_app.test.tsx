@@ -18,8 +18,8 @@ const SERVICES: ReadonlyArray<[string, number]> = [
 ];
 
 /** Answers the starter document's two queries the way Elasticsearch would. */
-const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (source, { state }) => {
-  if (source.query === SERVICES_QUERY) {
+const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (query, { state }) => {
+  if (query === SERVICES_QUERY) {
     const needle = String(state.nameFilter);
     const minimum = Number(state.minErrors);
     const matching = SERVICES.filter(
@@ -33,7 +33,7 @@ const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (sour
       rows: matching.map(([service, errors]) => [service, errors]),
     } satisfies SourceData;
   }
-  if (source.query === SERVICE_DETAIL_QUERY) {
+  if (query === SERVICE_DETAIL_QUERY) {
     const [service, errors] = SERVICES.find(([name]) => name === state.service) ?? [];
     return {
       columns: [
@@ -44,12 +44,12 @@ const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (sour
       rows: service ? [[service, errors, `${service}-team`]] : [],
     } satisfies SourceData;
   }
-  throw new Error(`Unexpected query: ${source.query}`);
+  throw new Error(`Unexpected query: ${query}`);
 });
 
 // Kibana's Jest setup gives every generated id the same value, so with two form rows on the
 // page their labels cannot be told apart; the select is the only combobox, so find it by role.
-const queriesRun = () => runQuery.mock.calls.map(([source]) => source.query);
+const queriesRun = () => runQuery.mock.calls.map(([query]) => query);
 
 describe('the starter app', () => {
   beforeEach(() => runQuery.mockClear());
@@ -70,7 +70,7 @@ describe('the starter app', () => {
 
     expect(await screen.findByRole('heading', { name: 'Service cart' })).toBeInTheDocument();
     expect(await screen.findByText('cart-team')).toBeInTheDocument();
-    const detailRun = runQuery.mock.calls.find(([source]) => source.query === SERVICE_DETAIL_QUERY);
+    const detailRun = runQuery.mock.calls.find(([query]) => query === SERVICE_DETAIL_QUERY);
     expect(detailRun?.[1].state).toMatchObject({ service: 'cart' });
   });
 
@@ -144,7 +144,7 @@ describe('the starter app', () => {
       await userEvent.click(screen.getByRole('button', { name: 'search' }));
       await screen.findByText('search-team');
 
-      const servicesRun = runQuery.mock.calls.filter(([source]) => source.query === SERVICES_QUERY);
+      const servicesRun = runQuery.mock.calls.filter(([query]) => query === SERVICES_QUERY);
       expect(servicesRun[servicesRun.length - 1][1].state).toMatchObject({ minErrors: '10' });
     });
   });

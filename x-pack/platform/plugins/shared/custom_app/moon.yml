@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/custom-content-renderer'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
+  - '@kbn/esql'
+  - '@kbn/presentation-util'
 tags:
   - plugin
   - prod

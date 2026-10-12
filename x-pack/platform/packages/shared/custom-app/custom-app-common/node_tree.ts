@@ -32,10 +32,10 @@ export const getInterpolatedText = (
   }
 };
 
-/** The data source a node reads, if any. */
-export const getNodeSourceId = (node: AppNode): string | undefined =>
+/** The ES|QL query a node runs, if it shows data. */
+export const getNodeQuery = (node: AppNode): string | undefined =>
   node.type === 'stat' || node.type === 'table' || node.type === 'key_value'
-    ? node.source
+    ? node.query
     : undefined;
 
 /** The state key an input node reads and writes, if it is one. */
@@ -58,4 +58,13 @@ export const getNodeActions = (
     default:
       return [];
   }
+};
+
+/** Every query in the tree, by the id of the node that runs it. */
+export const collectQueries = (root: AppNode): Record<string, string> => {
+  const query = getNodeQuery(root);
+  return {
+    ...(query === undefined ? {} : { [root.id]: query }),
+    ...Object.assign({}, ...getNodeChildren(root).map(collectQueries)),
+  };
 };

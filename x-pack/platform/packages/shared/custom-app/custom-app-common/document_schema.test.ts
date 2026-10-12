@@ -7,7 +7,7 @@
 
 import { appDocumentSchema, customAppStateSchema } from './document_schema';
 import { getNodeChildren } from './node_tree';
-import { MAX_DATA_SOURCES, MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_QUERY_LENGTH } from './constants';
+import { MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_QUERY_LENGTH } from './constants';
 
 const stackOf = (id: string, children: unknown[] = []) => ({ type: 'stack', id, children });
 
@@ -23,15 +23,13 @@ describe('appDocumentSchema', () => {
       ]),
     });
 
-    expect(result.dataSources).toEqual({});
     expect(result.state).toEqual({});
     expect(result.root).toEqual({
       type: 'stack',
       id: 'root',
       direction: 'vertical',
-      gap: 'm',
       children: [
-        { type: 'heading', id: 'title', text: 'Hello', size: 'm' },
+        { type: 'heading', id: 'title', text: 'Hello' },
         { type: 'callout', id: 'note', title: 'Heads up', color: 'primary' },
       ],
     });
@@ -92,28 +90,46 @@ describe('appDocumentSchema', () => {
   });
 });
 
-describe('data sources and stat nodes', () => {
+describe('queries and stat nodes', () => {
   const statDocument = (overrides: Record<string, unknown> = {}) => ({
-    dataSources: { users: { type: 'esql', query: 'ROW active = 1284' } },
-    root: { type: 'stat', id: 'active', title: 'Active users', source: 'users', ...overrides },
+    root: {
+      type: 'stat',
+      id: 'active',
+      title: 'Active users',
+      query: 'ROW active = 1284',
+      ...overrides,
+    },
   });
 
-  it('parses a stat bound to an existing data source and applies the default format', () => {
+  it('parses a stat with its own query', () => {
     const result = appDocumentSchema.parse(statDocument());
     expect(result.root).toEqual({
       type: 'stat',
       id: 'active',
       title: 'Active users',
-      source: 'users',
-      format: 'number',
+      query: 'ROW active = 1284',
     });
   });
 
-  it('rejects a stat that refers to a data source that does not exist', () => {
-    const result = appDocumentSchema.safeParse(statDocument({ source: 'missing' }));
-    expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
-      'Node "active" refers to unknown data source "missing"',
-    ]);
+  it('rejects a stat with no query, an empty one, or one over the length limit', () => {
+    const withQuery = (query: unknown) =>
+      appDocumentSchema.safeParse(statDocument({ query })).success;
+
+    expect(withQuery(undefined)).toBe(false);
+    expect(withQuery('')).toBe(false);
+    expect(withQuery('x'.repeat(MAX_QUERY_LENGTH))).toBe(true);
+    expect(withQuery('x'.repeat(MAX_QUERY_LENGTH + 1))).toBe(false);
+  });
+
+  it('gives every data component its own query, in a stack too', () => {
+    const result = appDocumentSchema.safeParse({
+      root: stackOf('root', [
+        { type: 'stat', id: 's', title: 't', query: 'ROW a = 1' },
+        { type: 'table', id: 'table', query: 'ROW b = 2' },
+        { type: 'key_value', id: 'facts', query: 'ROW c = 3' },
+      ]),
+    });
+    expect(result.success).toBe(true);
   });
 
   it('reports structural issues first, then reference issues in document order', () => {
@@ -121,54 +137,11 @@ describe('data sources and stat nodes', () => {
       issuesOf({
         root: stackOf('root', [
           { type: 'text', id: 'dup', text: 'a' },
-          { type: 'stat', id: 'second', title: 't', source: 'nope' },
+          { type: 'search', id: 'find', label: 'Find', bind: 'nope' },
           { type: 'text', id: 'dup', text: 'b' },
         ]),
       })
-    ).toEqual(['Duplicate node id "dup"', 'Node "second" refers to unknown data source "nope"']);
-  });
-
-  it('finds the unknown source of a stat nested in a stack', () => {
-    const result = appDocumentSchema.safeParse({
-      root: stackOf('root', [{ type: 'stat', id: 's', title: 't', source: 'nope' }]),
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects an empty query and a query over the length limit', () => {
-    const withQuery = (query: string) =>
-      appDocumentSchema.safeParse({
-        ...statDocument(),
-        dataSources: { users: { type: 'esql', query } },
-      }).success;
-
-    expect(withQuery('')).toBe(false);
-    expect(withQuery('x'.repeat(MAX_QUERY_LENGTH))).toBe(true);
-    expect(withQuery('x'.repeat(MAX_QUERY_LENGTH + 1))).toBe(false);
-  });
-
-  it('rejects a data source type other than esql', () => {
-    const result = appDocumentSchema.safeParse({
-      ...statDocument(),
-      dataSources: { users: { type: 'sql', query: 'SELECT 1' } },
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects a document over the data source limit', () => {
-    const dataSources = Object.fromEntries(
-      Array.from({ length: MAX_DATA_SOURCES + 1 }, (_, index) => [
-        `s${index}`,
-        { type: 'esql', query: 'ROW a = 1' },
-      ])
-    );
-    const result = appDocumentSchema.safeParse({
-      dataSources,
-      root: { type: 'text', id: 'a', text: 'hi' },
-    });
-    expect(result.success ? [] : result.error.issues.map(({ message }) => message)).toEqual([
-      `A document may hold at most ${MAX_DATA_SOURCES} data sources`,
-    ]);
+    ).toEqual(['Duplicate node id "dup"', 'Node "find" binds unknown state key "nope"']);
   });
 });
 
@@ -176,8 +149,6 @@ const issuesOf = (input: unknown): string[] => {
   const result = appDocumentSchema.safeParse(input);
   return result.success ? [] : result.error.issues.map(({ message }) => message);
 };
-
-const SOURCES = { orders: { type: 'esql', query: 'FROM orders | LIMIT 10' } };
 
 describe('state declarations', () => {
   const withState = (state: unknown) => ({
@@ -272,12 +243,11 @@ describe('table, flyout and key_value nodes', () => {
       service: { type: 'string', default: '' },
       limit: { type: 'number', default: 1 },
     },
-    dataSources: SOURCES,
     root: {
       type: 'stack',
       id: 'root',
       children: [
-        { type: 'table', id: 'orders-table', source: 'orders', onRowClick },
+        { type: 'table', id: 'orders-table', query: 'FROM orders | LIMIT 10', onRowClick },
         { type: 'flyout', id: 'detail', title: 'Detail', children: [] },
       ],
     },
@@ -292,32 +262,14 @@ describe('table, flyout and key_value nodes', () => {
       ])
     );
     const [table] = getNodeChildren(result.root);
-    expect(table).toMatchObject({ type: 'table', source: 'orders' });
+    expect(table).toMatchObject({ type: 'table', query: 'FROM orders | LIMIT 10' });
   });
 
-  it('defaults a table to no actions and the flyout to size m', () => {
+  it('defaults a table to no actions', () => {
     const result = appDocumentSchema.parse(tableDoc([]));
     const [table, flyout] = getNodeChildren(result.root);
     expect(table).toMatchObject({ onRowClick: [] });
-    expect(flyout).toMatchObject({ size: 'm', children: [] });
-  });
-
-  it('rejects an unknown data source on a table and a key_value', () => {
-    expect(
-      issuesOf({
-        root: {
-          type: 'stack',
-          id: 'root',
-          children: [
-            { type: 'table', id: 't', source: 'x' },
-            { type: 'key_value', id: 'kv', source: 'y' },
-          ],
-        },
-      })
-    ).toEqual([
-      'Node "t" refers to unknown data source "x"',
-      'Node "kv" refers to unknown data source "y"',
-    ]);
+    expect(flyout).toMatchObject({ children: [] });
   });
 
   it('finds a flyout nested inside another container', () => {
@@ -366,12 +318,12 @@ describe('table, flyout and key_value nodes', () => {
 
   it('rejects more table columns than the limit', () => {
     const columns = Array.from({ length: 51 }, (_, index) => ({ field: `c${index}` }));
-    expect(
-      issuesOf({
-        dataSources: SOURCES,
-        root: { type: 'table', id: 't', source: 'orders', columns },
-      })
-    ).not.toEqual([]);
+    const table = (list: unknown[]) => ({
+      root: { type: 'table', id: 't', query: 'ROW 1', columns: list },
+    });
+
+    expect(issuesOf(table(columns.slice(0, 50)))).toEqual([]);
+    expect(issuesOf(table(columns))).not.toEqual([]);
   });
 
   it('validates flyout content like any other node', () => {
@@ -381,10 +333,10 @@ describe('table, flyout and key_value nodes', () => {
           type: 'flyout',
           id: 'f',
           title: 'Detail',
-          children: [{ type: 'key_value', id: 'kv', source: 'missing' }],
+          children: [{ type: 'search', id: 'find', label: 'Find', bind: 'ghost' }],
         },
       })
-    ).toEqual(['Node "kv" refers to unknown data source "missing"']);
+    ).toEqual(['Node "find" binds unknown state key "ghost"']);
   });
 });
 

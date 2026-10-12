@@ -19,7 +19,9 @@
     "@kbn/core-http-browser",
     "@kbn/custom-content-renderer",
     "@kbn/esql-types",
-    "@kbn/esql-utils"
+    "@kbn/esql-utils",
+    "@kbn/esql",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

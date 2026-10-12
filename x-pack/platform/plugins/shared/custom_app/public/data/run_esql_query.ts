@@ -18,7 +18,7 @@ import type { RunQuery } from './data_layer';
  */
 export const createRunEsqlQuery =
   ({ search, http }: { search: ISearchGeneric; http: HttpStart }): RunQuery =>
-  async (source, { context, state }, signal) => {
+  async (query, { context, state }, signal) => {
     const stateVariables = Object.entries(state).map(
       ([key, value]): ESQLControlVariable => ({
         key,
@@ -33,7 +33,7 @@ export const createRunEsqlQuery =
     const { columns, values } = await fetchEsqlData(
       search,
       http,
-      source.query,
+      query,
       context.timeRange,
       signal,
       {

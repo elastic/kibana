@@ -30,8 +30,6 @@ const nodeIdSchema = z
   .max(MAX_NODE_ID_LENGTH)
   .regex(/^[A-Za-z0-9_-]+$/);
 
-const dataSourceIdSchema = nodeIdSchema;
-
 /** A valid ES|QL parameter name, so a state key can be used as `?key` in a query. */
 export const stateKeySchema = z
   .string()
@@ -54,10 +52,8 @@ export const stateDeclarationSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('boolean'), default: z.boolean() }),
 ]);
 
-export const esqlDataSourceSchema = z.object({
-  type: z.literal('esql'),
-  query: z.string().min(1).max(MAX_QUERY_LENGTH),
-});
+/** An ES|QL query. A component that shows data carries its own. */
+const querySchema = z.string().min(1).max(MAX_QUERY_LENGTH);
 
 /** The closed set of things a user interaction can do. */
 const setStateActionSchema = z.object({
@@ -81,13 +77,10 @@ export const actionSchema = z.discriminatedUnion('type', [
 
 const actionsSchema = z.array(actionSchema).max(MAX_ACTIONS_PER_EVENT);
 
-const spacingSchema = z.enum(['s', 'm', 'l']);
-
 const headingNodeSchema = z.object({
   type: z.literal('heading'),
   id: nodeIdSchema,
   text: z.string().max(MAX_HEADING_LENGTH),
-  size: spacingSchema.default('m'),
 });
 
 const textNodeSchema = z.object({
@@ -108,15 +101,13 @@ const statNodeSchema = z.object({
   type: z.literal('stat'),
   id: nodeIdSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
-  source: dataSourceIdSchema,
-  valueField: z.string().min(1).max(MAX_HEADING_LENGTH).optional(),
-  format: z.enum(['number', 'compact']).default('number'),
+  query: querySchema,
 });
 
 const tableNodeSchema = z.object({
   type: z.literal('table'),
   id: nodeIdSchema,
-  source: dataSourceIdSchema,
+  query: querySchema,
   /** Names the table for screen readers. */
   caption: z.string().max(MAX_HEADING_LENGTH).optional(),
   /** Defaults to every column of the result, shown as text. */
@@ -125,7 +116,6 @@ const tableNodeSchema = z.object({
       z.object({
         field: z.string().min(1).max(MAX_HEADING_LENGTH),
         label: z.string().max(MAX_HEADING_LENGTH).optional(),
-        format: z.enum(['text', 'number', 'date']).default('text'),
       })
     )
     .max(MAX_TABLE_COLUMNS)
@@ -170,7 +160,7 @@ const searchNodeSchema = z.object({
 const keyValueNodeSchema = z.object({
   type: z.literal('key_value'),
   id: nodeIdSchema,
-  source: dataSourceIdSchema,
+  query: querySchema,
   /** Defaults to every column of the first row. */
   fields: z.array(z.string().min(1).max(MAX_HEADING_LENGTH)).max(MAX_KEY_VALUE_FIELDS).optional(),
 });
@@ -179,14 +169,12 @@ const stackFields = {
   type: z.literal('stack'),
   id: nodeIdSchema,
   direction: z.enum(['vertical', 'horizontal']).default('vertical'),
-  gap: spacingSchema.default('m'),
 };
 
 const flyoutFields = {
   type: z.literal('flyout'),
   id: nodeIdSchema,
   title: z.string().max(MAX_HEADING_LENGTH),
-  size: z.enum(['s', 'm', 'l']).default('m'),
 };
 
 type LeafNode =
@@ -247,12 +235,10 @@ export const getNodeChildren = (node: AppNode): readonly AppNode[] =>
 export const appDocumentSchema = z
   .object({
     state: z.record(stateKeySchema, stateDeclarationSchema).default({}),
-    dataSources: z.record(dataSourceIdSchema, esqlDataSourceSchema).default({}),
     root: nodeSchema,
   })
   .superRefine(validateDocument);
 
-export type EsqlDataSource = z.output<typeof esqlDataSourceSchema>;
 export type StateDeclaration = z.output<typeof stateDeclarationSchema>;
 export type AppDocument = z.output<typeof appDocumentSchema>;
 

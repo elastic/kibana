@@ -69,6 +69,27 @@ describe('createAppRuntime', () => {
       expect(runtime.state$.getValue().compact).toBe(true);
     });
 
+    it('takes a number or a true/false from a column as text for a text value', () => {
+      const runtime = createAppRuntime(document);
+
+      runtime.run([setState('service', { fromColumn: 'id' })], { row: { id: 42 } });
+      expect(runtime.state$.getValue().service).toBe('42');
+
+      runtime.run([setState('service', { fromColumn: 'ok' })], { row: { ok: true } });
+      expect(runtime.state$.getValue().service).toBe('true');
+    });
+
+    it('does not turn text into a number or a boolean', () => {
+      const runtime = createAppRuntime(document);
+
+      const { dropped } = runtime.run([setState('compact', { fromColumn: 'c' })], {
+        row: { c: 'yes' },
+      });
+
+      expect(dropped).toEqual(['"compact" expects a boolean but got string']);
+      expect(runtime.state$.getValue().compact).toBe(false);
+    });
+
     it('drops a value of the wrong type and says why, leaving the state alone', () => {
       const runtime = createAppRuntime(document);
 

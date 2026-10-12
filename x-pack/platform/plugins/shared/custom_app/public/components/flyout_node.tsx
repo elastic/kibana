@@ -37,7 +37,7 @@ export const FlyoutNode = ({ node, children }: FlyoutNodeProps) => {
   return (
     <EuiFlyout
       ownFocus
-      size={node.size}
+      size="m"
       onClose={() => runtime.run([{ type: 'closeFlyout' }])}
       aria-labelledby={titleId}
       data-node-id={node.id}

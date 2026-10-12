@@ -9,6 +9,6 @@
     "id": "customApp",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["embeddable", "data", "uiActions"]
+    "requiredPlugins": ["embeddable", "data", "esql", "uiActions"]
   }
 }

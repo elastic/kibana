@@ -18,7 +18,6 @@ const DETAIL: SourceData = {
 
 const document = appDocumentSchema.parse({
   state: { service: { type: 'string', default: 'checkout' } },
-  dataSources: { detail: { type: 'esql', query: 'FROM x | WHERE s == ?service' } },
   root: {
     type: 'stack',
     id: 'root',
@@ -30,7 +29,7 @@ const document = appDocumentSchema.parse({
         title: 'Service {{state.service}}',
         children: [
           { type: 'text', id: 'inside', text: 'inside the flyout' },
-          { type: 'key_value', id: 'kv', source: 'detail' },
+          { type: 'key_value', id: 'kv', query: 'FROM x | WHERE s == ?service' },
         ],
       },
       { type: 'text', id: 'after', text: 'after' },

@@ -9,10 +9,10 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
-import { ADD_CUSTOM_APP_ACTION_ID } from '../common/constants';
+import { ADD_CUSTOM_APP_ACTION_ID, VIEW_CUSTOM_APP_SOURCE_ACTION_ID } from '../common/constants';
 import { setServices } from './services';
 
 interface SetupDeps {
@@ -40,5 +40,14 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       return getAddCustomAppAction();
     });
     uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_CUSTOM_APP_ACTION_ID);
+
+    uiActions.registerActionAsync<EmbeddableApiContext>(
+      VIEW_CUSTOM_APP_SOURCE_ACTION_ID,
+      async () => {
+        const { getViewSourceAction } = await import('./actions/view_source_action');
+        return getViewSourceAction();
+      }
+    );
+    uiActions.attachAction(ON_OPEN_PANEL_MENU, VIEW_CUSTOM_APP_SOURCE_ACTION_ID);
   }
 }

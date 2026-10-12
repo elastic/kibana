@@ -108,4 +108,49 @@ describe('NodeRenderer', () => {
       expect(container.querySelector('img, b')).toBeNull();
     });
   });
+
+  describe('layout', () => {
+    const state = { q: { type: 'string', default: '' } };
+    const stackOf = (direction: string, children: unknown[]) =>
+      appDocumentSchema.parse({
+        state,
+        root: { type: 'stack', id: 'root', direction, children },
+      }).root;
+
+    const search = { type: 'search', id: 'find', label: 'Find', bind: 'q' };
+    const select = {
+      type: 'select',
+      id: 'pick',
+      label: 'Pick',
+      bind: 'q',
+      options: [{ value: 'a' }],
+    };
+
+    const renderLayout = (root: AppNode) =>
+      renderWithRuntime(
+        <NodeRenderer node={root} />,
+        appDocumentSchema.parse({ state, root: { type: 'text', id: 'x', text: 'x' } })
+      );
+
+    it('draws a row of inputs as a filter bar', () => {
+      renderLayout(stackOf('horizontal', [search, select]));
+
+      expect(screen.getByTestId('customAppFilterBar')).toBeInTheDocument();
+    });
+
+    it('does not make a filter bar of a row that holds anything else', () => {
+      renderLayout(stackOf('horizontal', [search, { type: 'text', id: 't', text: 'hi' }]));
+      expect(screen.queryByTestId('customAppFilterBar')).not.toBeInTheDocument();
+    });
+
+    it('does not make a filter bar of a column of inputs, or of an empty row', () => {
+      renderLayout(stackOf('vertical', [search, select]));
+      expect(screen.queryByTestId('customAppFilterBar')).not.toBeInTheDocument();
+    });
+
+    it('does not make a filter bar of an empty row', () => {
+      renderLayout(stackOf('horizontal', []));
+      expect(screen.queryByTestId('customAppFilterBar')).not.toBeInTheDocument();
+    });
+  });
 });

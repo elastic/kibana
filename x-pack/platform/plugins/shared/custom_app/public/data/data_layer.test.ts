@@ -25,9 +25,9 @@ interface Call {
 /** A runQuery whose results the test settles by hand. */
 const createControlledRunner = () => {
   const calls: Call[] = [];
-  const runQuery: RunQuery = (source, request, signal) =>
+  const runQuery: RunQuery = (query, request, signal) =>
     new Promise<SourceData>((resolve, reject) => {
-      calls.push({ resolve, reject, signal, query: source.query, request });
+      calls.push({ resolve, reject, signal, query, request });
     });
   return { runQuery, calls };
 };
@@ -38,16 +38,16 @@ const getParameterNames = (query: string) =>
 
 const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-const sources = {
-  users: { type: 'esql', query: 'ROW users = 1' },
-  errors: { type: 'esql', query: 'ROW errors = 2' },
-  byService: { type: 'esql', query: 'FROM logs | WHERE service == ?service' },
+const queries = {
+  users: 'ROW users = 1',
+  errors: 'ROW errors = 2',
+  byService: 'FROM logs | WHERE service == ?service',
 } as const;
 
 const setup = () => {
   const { runQuery, calls } = createControlledRunner();
   const layer = createDataLayer({ runQuery, getParameterNames });
-  layer.setSources(sources);
+  layer.setQueries(queries);
   return { layer, calls };
 };
 
@@ -119,7 +119,7 @@ describe('createDataLayer', () => {
       expect(calls).toHaveLength(2);
     });
 
-    it('only refreshes the sources being read', () => {
+    it('only refreshes the queries being read', () => {
       const { layer, calls } = setup();
       layer.acquire('users');
       layer.refresh(context);
@@ -208,7 +208,7 @@ describe('createDataLayer', () => {
       expect(calls[1].request.context).toBe(context);
     });
 
-    it('reports an error for a source the document does not define', () => {
+    it('reports an error for a component with no query', () => {
       const { layer, calls } = setup();
       layer.refresh(context);
 
@@ -217,7 +217,7 @@ describe('createDataLayer', () => {
       expect(calls).toHaveLength(0);
       expect(layer.getSource$('ghost').getValue()).toEqual({
         status: 'error',
-        message: 'Unknown data source "ghost"',
+        message: 'There is no query for "ghost"',
       });
     });
   });
@@ -233,7 +233,7 @@ describe('createDataLayer', () => {
       expect(calls[0].request.state).toEqual({ service: 'checkout', limit: 5 });
     });
 
-    it('re-runs only the sources whose query uses a value that changed', () => {
+    it('re-runs only the queries whose query uses a value that changed', () => {
       const { layer, calls } = setup();
       layer.setState({ service: 'checkout', limit: 5 });
       layer.refresh(context);
@@ -294,14 +294,14 @@ describe('createDataLayer', () => {
     });
   });
 
-  describe('sources', () => {
+  describe('queries', () => {
     it('re-runs a source being read when its query changes, and leaves the others', () => {
       const { layer, calls } = setup();
       layer.refresh(context);
       layer.acquire('users');
       layer.acquire('errors');
 
-      layer.setSources({ ...sources, users: { type: 'esql', query: 'ROW users = 2' } });
+      layer.setQueries({ ...queries, users: 'ROW users = 2' });
 
       expect(calls.slice(2).map(({ query }) => query)).toEqual(['ROW users = 2']);
     });
@@ -322,7 +322,7 @@ describe('createDataLayer', () => {
       expect(layer.loading$.getValue()).toBe(false);
     });
 
-    it('reports loading while sources run and stops when all settle', async () => {
+    it('reports loading while queries run and stops when all settle', async () => {
       const { layer, calls } = setup();
       layer.refresh(context);
       layer.acquire('users');

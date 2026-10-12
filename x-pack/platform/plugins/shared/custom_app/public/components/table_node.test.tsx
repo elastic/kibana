@@ -11,13 +11,18 @@ import { appDocumentSchema } from '@kbn/custom-app-common';
 import type { SourceData } from '../data/data_layer';
 import { renderApp } from './test_utils';
 
-const data = (columns: string[], rows: unknown[][]): SourceData => ({
-  columns: columns.map((name) => ({ name, type: 'keyword' })),
+/** A column is a name, or a name and the type the query says it holds. */
+const data = (columns: Array<string | [string, string]>, rows: unknown[][]): SourceData => ({
+  columns: columns.map((column) =>
+    typeof column === 'string'
+      ? { name: column, type: 'keyword' }
+      : { name: column[0], type: column[1] }
+  ),
   rows,
 });
 
 const SERVICES = data(
-  ['service', 'errors'],
+  ['service', ['errors', 'long']],
   [
     ['checkout', 12345],
     ['cart', 3],
@@ -28,12 +33,11 @@ const SERVICES = data(
 const documentWith = (table: Record<string, unknown> = {}, root: unknown = undefined) =>
   appDocumentSchema.parse({
     state: { service: { type: 'string', default: '' } },
-    dataSources: { services: { type: 'esql', query: 'ROW 1' } },
     root: root ?? {
       type: 'stack',
       id: 'root',
       children: [
-        { type: 'table', id: 'table', source: 'services', ...table },
+        { type: 'table', id: 'table', query: 'ROW 1', ...table },
         { type: 'flyout', id: 'detail', title: 'Detail', children: [] },
       ],
     },
@@ -54,26 +58,56 @@ const render = (table: Record<string, unknown>, result: SourceData = SERVICES) =
   renderApp(documentWith(table), async () => result);
 
 describe('TableNode', () => {
-  it('shows every column of the result as text when none are configured', async () => {
+  it('shows every column of the result when none are configured', async () => {
     await render({});
 
     expect(await screen.findByText('checkout')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /service/ })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /errors/ })).toBeInTheDocument();
-    expect(screen.getByText('12345')).toBeInTheDocument();
+    expect(screen.getByText('12,345')).toBeInTheDocument();
   });
 
-  it('applies configured labels and formats', async () => {
+  it('applies configured headings', async () => {
     await render({
       columns: [
         { field: 'service', label: 'Service name' },
-        { field: 'errors', label: 'Error count', format: 'number' },
+        { field: 'errors', label: 'Error count' },
       ],
     });
 
     expect(await screen.findByRole('columnheader', { name: /Service name/ })).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Error count/ })).toBeInTheDocument();
-    expect(screen.getByText('12,345')).toBeInTheDocument();
+  });
+
+  describe('formatting follows the type the query says a column holds', () => {
+    it('shows numbers with separators, and other text as it is', async () => {
+      await render({});
+
+      expect(await screen.findByText('12,345')).toBeInTheDocument();
+      expect(screen.getByText('checkout')).toBeInTheDocument();
+    });
+
+    it('shows a number-like text column as the text it is', async () => {
+      await render({}, data(['code'], [['00042']]));
+
+      expect(await screen.findByText('00042')).toBeInTheDocument();
+    });
+
+    it('shows a date column as a date', async () => {
+      await render({}, data([['seen', 'date']], [['2026-10-12T08:30:00.000Z']]));
+
+      const cell = await screen.findByText(/2026/);
+      expect(cell.textContent).not.toBe('2026-10-12T08:30:00.000Z');
+    });
+
+    it.each(['integer', 'double', 'unsigned_long', 'float'])(
+      'treats %s as a number',
+      async (type) => {
+        await render({}, data([['n', type]], [[1234]]));
+
+        expect(await screen.findByText('1,234')).toBeInTheDocument();
+      }
+    );
   });
 
   it('can show a subset of the columns', async () => {
@@ -93,7 +127,7 @@ describe('TableNode', () => {
   });
 
   it('sorts a column in both directions, numbers by magnitude', async () => {
-    await render({ columns: [{ field: 'service' }, { field: 'errors', format: 'number' }] });
+    await render({ columns: [{ field: 'service' }, { field: 'errors' }] });
     await screen.findByText('checkout');
 
     await userEvent.click(screen.getByRole('button', { name: /errors/ }));

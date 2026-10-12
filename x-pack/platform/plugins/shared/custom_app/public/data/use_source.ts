@@ -10,7 +10,7 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { SourceState } from './data_layer';
 import { useDataLayer } from './data_layer_context';
 
-/** Reads a data source. The source runs for as long as the calling node is mounted. */
+/** Reads the data of a component. Its query runs for as long as the component is mounted. */
 export const useSource = (id: string): SourceState => {
   const layer = useDataLayer();
   useEffect(() => layer.acquire(id), [layer, id]);

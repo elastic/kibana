@@ -8,7 +8,7 @@
 import React, { type ReactElement } from 'react';
 import { act, render, type RenderResult } from '@testing-library/react';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
+import { appDocumentSchema, collectQueries, type AppDocument } from '@kbn/custom-app-common';
 import { createDataLayer, type DataLayer, type RunQuery } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
 import { createAppRuntime, type AppRuntime } from '../runtime/app_runtime';
@@ -47,7 +47,7 @@ export const renderApp = async (
 ): Promise<{ runtime: AppRuntime; layer: DataLayer } & RenderResult> => {
   const runtime = createAppRuntime(document);
   const layer = createDataLayer({ runQuery, getParameterNames });
-  layer.setSources(document.dataSources);
+  layer.setQueries(collectQueries(document.root));
   runtime.state$.subscribe(layer.setState);
 
   const view = render(

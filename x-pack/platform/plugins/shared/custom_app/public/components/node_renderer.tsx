@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { interpolate, type AppNode } from '@kbn/custom-app-common';
 import {
@@ -24,7 +24,8 @@ import { SelectNode } from './select_node';
 import { StatNode } from './stat_node';
 import { TableNode } from './table_node';
 
-const GUTTER_SIZES = { s: 's', m: 'm', l: 'l' } as const;
+const isInput = (node: AppNode): boolean =>
+  node.type === 'search' || node.type === 'select' || node.type === 'button_group';
 
 const CALLOUTS = {
   primary: KbnInfoCallout,
@@ -49,7 +50,7 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
   switch (node.type) {
     case 'heading':
       return (
-        <EuiTitle size={node.size} data-node-id={node.id}>
+        <EuiTitle size="s" data-node-id={node.id}>
           <h3>{text(node.text)}</h3>
         </EuiTitle>
       );
@@ -91,13 +92,18 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
           </EuiFlexGroup>
         </FlyoutNode>
       );
-    case 'stack':
-      return (
+    case 'stack': {
+      const isRow = node.direction === 'horizontal';
+      // A row of inputs reads as a toolbar for what is below it, so it is drawn as one.
+      const isFilterBar = isRow && node.children.length > 0 && node.children.every(isInput);
+      const group = (
         <EuiFlexGroup
-          direction={node.direction === 'vertical' ? 'column' : 'row'}
-          gutterSize={GUTTER_SIZES[node.gap]}
+          direction={isRow ? 'row' : 'column'}
+          // Stacked things get room to breathe; things side by side belong together, so sit closer.
+          gutterSize={isRow ? 'm' : 'l'}
+          alignItems={isFilterBar ? 'flexEnd' : 'stretch'}
           responsive={false}
-          wrap={node.direction === 'horizontal'}
+          wrap={isRow}
           data-node-id={node.id}
         >
           {node.children.map((child) =>
@@ -105,13 +111,27 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
             child.type === 'flyout' ? (
               <NodeRenderer key={child.id} node={child} />
             ) : (
-              <EuiFlexItem key={child.id} grow={node.direction === 'horizontal'}>
+              <EuiFlexItem key={child.id} grow={isRow}>
                 <NodeRenderer node={child} />
               </EuiFlexItem>
             )
           )}
         </EuiFlexGroup>
       );
+      return isFilterBar ? (
+        <EuiPanel
+          color="subdued"
+          paddingSize="s"
+          hasShadow={false}
+          borderRadius="m"
+          data-test-subj="customAppFilterBar"
+        >
+          {group}
+        </EuiPanel>
+      ) : (
+        group
+      );
+    }
     default:
       return <UnsupportedNode node={node} />;
   }

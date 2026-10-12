@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { FetchContext } from '@kbn/presentation-publishing';
-import type { EsqlDataSource, StateValue } from '@kbn/custom-app-common';
+import type { StateValue } from '@kbn/custom-app-common';
 
 export interface SourceData {
   columns: ReadonlyArray<{ name: string; type: string }>;
@@ -28,23 +28,24 @@ export interface SourceRequest {
 }
 
 export type RunQuery = (
-  source: EsqlDataSource,
+  query: string,
   request: SourceRequest,
   signal: AbortSignal
 ) => Promise<SourceData>;
 
 export interface DataLayer {
-  /** The live state of one data source. The same subject is returned for the same id. */
+  /** The live state of one component's data. The same subject is returned for the same id. */
   getSource$: (id: string) => BehaviorSubject<SourceState>;
   /**
-   * Declares that a mounted node reads a source, which makes it run. Returns the function that
-   * ends the declaration; a source nobody reads is neither run nor refreshed.
+   * Declares that a mounted component shows its data, which makes its query run. Returns the
+   * function that ends the declaration; a query nobody shows is neither run nor refreshed.
    */
   acquire: (id: string) => () => void;
   /** True until the first fetch has settled, and while any source is running. */
   loading$: BehaviorSubject<boolean | undefined>;
-  setSources: (sources: Record<string, EsqlDataSource>) => void;
-  /** Replaces the state. Only the sources that use a changed value run again. */
+  /** The query of each component that shows data, by the id of the component. */
+  setQueries: (queries: Record<string, string>) => void;
+  /** Replaces the state. Only the queries that use a changed value run again. */
   setState: (state: StateValues) => void;
   /** Runs every source that is being read, superseding any run in flight. */
   refresh: (context: FetchContext) => void;
@@ -64,9 +65,9 @@ const toMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
 /**
- * Owns the data of a panel. A source runs while a node reads it, however many nodes do, and a
- * source that fails does not affect the others. State changes re-run only the sources whose query
- * uses a parameter whose value changed.
+ * Owns the data of a panel. A component's query runs while the component is shown, and one that
+ * fails does not affect the others. State changes re-run only the queries that use a parameter
+ * whose value changed.
  */
 export const createDataLayer = ({
   runQuery,
@@ -82,7 +83,7 @@ export const createDataLayer = ({
   const parameterNames = new Map<string, { query: string; names: string[] }>();
   const loading$ = new BehaviorSubject<boolean | undefined>(true);
 
-  let sources: Record<string, EsqlDataSource> = {};
+  let queries: Record<string, string> = {};
   let state: StateValues = {};
   let context: FetchContext | undefined;
 
@@ -118,9 +119,9 @@ export const createDataLayer = ({
 
     stop(id, entry);
     const state$ = getSource$(id);
-    const source = sources[id];
-    if (!source) {
-      state$.next({ status: 'error', message: `Unknown data source "${id}"` });
+    const query = queries[id];
+    if (query === undefined) {
+      state$.next({ status: 'error', message: `There is no query for "${id}"` });
       publishLoading();
       return;
     }
@@ -128,13 +129,13 @@ export const createDataLayer = ({
     const controller = new AbortController();
     entry.controller = controller;
     entry.appliedValues = Object.fromEntries(
-      namesUsedBy(id, source.query).map((name) => [name, state[name]])
+      namesUsedBy(id, query).map((name) => [name, state[name]])
     );
     running.add(id);
     state$.next({ status: 'loading' });
     publishLoading();
 
-    runQuery(source, { context, state }, controller.signal)
+    runQuery(query, { context, state }, controller.signal)
       .then((data) => {
         if (!controller.signal.aborted) state$.next({ status: 'success', data });
       })
@@ -171,21 +172,19 @@ export const createDataLayer = ({
         publishLoading();
       };
     },
-    setSources: (next) => {
-      const previous = sources;
-      sources = next;
+    setQueries: (next) => {
+      const previous = queries;
+      queries = next;
       entries.forEach((_entry, id) => {
-        const before = previous[id];
-        const after = next[id];
-        if (before?.query !== after?.query) start(id);
+        if (previous[id] !== next[id]) start(id);
       });
     },
     setState: (next) => {
       state = next;
       entries.forEach((entry, id) => {
-        const source = sources[id];
-        if (!source || entry.readers === 0) return;
-        const changed = namesUsedBy(id, source.query).some(
+        const query = queries[id];
+        if (query === undefined || entry.readers === 0) return;
+        const changed = namesUsedBy(id, query).some(
           (name) => state[name] !== entry.appliedValues[name]
         );
         if (changed) start(id);

@@ -16,7 +16,7 @@ jest.mock('@kbn/custom-content-renderer', () => ({ fetchEsqlData: jest.fn() }));
 const search = jest.fn();
 const http = {};
 const signal = new AbortController().signal;
-const source = { type: 'esql', query: 'FROM logs | WHERE service == ?service' } as const;
+const QUERY = 'FROM logs | WHERE service == ?service';
 
 const dashboardVariable = (key: string, value: string): ESQLControlVariable => ({
   key,
@@ -26,7 +26,7 @@ const dashboardVariable = (key: string, value: string): ESQLControlVariable => (
 
 const run = (context: Partial<FetchContext>, state: Record<string, string | number | boolean>) =>
   createRunEsqlQuery({ search, http } as never)(
-    source,
+    QUERY,
     { context: context as FetchContext, state },
     signal
   );
@@ -56,7 +56,7 @@ describe('createRunEsqlQuery', () => {
     const data = await run(context, {});
 
     const { query, timeRange, abortSignal, options } = lastCall();
-    expect(query).toBe(source.query);
+    expect(query).toBe(QUERY);
     expect(timeRange).toBe(context.timeRange);
     expect(abortSignal).toBe(signal);
     expect(options).toMatchObject({
@@ -104,7 +104,7 @@ describe('createRunEsqlQuery', () => {
     await run({}, { service: hostile });
 
     const { query, options } = lastCall();
-    expect(query).toBe(source.query);
+    expect(query).toBe(QUERY);
 
     // What would reach Elasticsearch: the query is unchanged and the value is a named parameter.
     expect(getNamedParams(query, undefined, options.esqlVariables)).toEqual([{ service: hostile }]);

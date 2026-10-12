@@ -32,20 +32,14 @@ export const createDefaultDocument = (): AppDocument => ({
     nameFilter: { type: 'string', default: '' },
     minErrors: { type: 'string', default: '0' },
   },
-  dataSources: {
-    services: { type: 'esql', query: SERVICES_QUERY },
-    serviceDetail: { type: 'esql', query: SERVICE_DETAIL_QUERY },
-  },
   root: {
     type: 'stack',
     id: 'root',
     direction: 'vertical',
-    gap: 'm',
     children: [
       {
         type: 'heading',
         id: 'title',
-        size: 'm',
         text: i18n.translate('xpack.customApp.defaultDocument.title', {
           defaultMessage: 'Your custom app',
         }),
@@ -62,7 +56,6 @@ export const createDefaultDocument = (): AppDocument => ({
         type: 'stack',
         id: 'filters',
         direction: 'horizontal',
-        gap: 'm',
         children: [
           {
             type: 'search',
@@ -110,13 +103,13 @@ export const createDefaultDocument = (): AppDocument => ({
       {
         type: 'table',
         id: 'services-table',
-        source: 'services',
+        query: SERVICES_QUERY,
         caption: i18n.translate('xpack.customApp.defaultDocument.tableCaption', {
           defaultMessage: 'Services and their error counts',
         }),
         columns: [
-          { field: 'service', label: 'Service', format: 'text' },
-          { field: 'errors', label: 'Errors', format: 'number' },
+          { field: 'service', label: 'Service' },
+          { field: 'errors', label: 'Errors' },
         ],
         onRowClick: [
           { type: 'setState', key: 'service', value: { fromColumn: 'service' } },
@@ -132,8 +125,7 @@ export const createDefaultDocument = (): AppDocument => ({
           // placeholder.
           values: { service: '{{state.service}}' },
         }),
-        size: 'm',
-        children: [{ type: 'key_value', id: 'service-detail', source: 'serviceDetail' }],
+        children: [{ type: 'key_value', id: 'service-detail', query: SERVICE_DETAIL_QUERY }],
       },
     ],
   },

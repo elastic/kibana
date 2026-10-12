@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiInMemoryTable, EuiLink, type EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiPanel, type EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { AppNodeOfType } from '@kbn/custom-app-common';
@@ -29,8 +29,28 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50];
 interface ColumnConfig {
   field: string;
   label?: string;
-  format: CellFormat;
 }
+
+const NUMBER_TYPES = new Set([
+  'long',
+  'integer',
+  'short',
+  'byte',
+  'double',
+  'float',
+  'half_float',
+  'scaled_float',
+  'unsigned_long',
+]);
+const DATE_TYPES = new Set(['date', 'date_nanos']);
+
+/** How a column is shown follows from what the query says it holds, so authors need not say. */
+const formatOf = (type: string | undefined): CellFormat =>
+  type !== undefined && NUMBER_TYPES.has(type)
+    ? 'number'
+    : type !== undefined && DATE_TYPES.has(type)
+    ? 'date'
+    : 'text';
 
 const toItems = ({ columns, rows }: SourceData): Item[] =>
   rows.map((row, index) => ({
@@ -42,9 +62,9 @@ const TableContent = ({ node, data }: { node: AppNodeOfType<'table'>; data: Sour
   const runtime = useAppRuntime();
   const [dropped, setDropped] = useState<string[]>([]);
 
-  const columns: ColumnConfig[] =
-    node.columns ?? data.columns.map(({ name }) => ({ field: name, format: 'text' }));
+  const columns: ColumnConfig[] = node.columns ?? data.columns.map(({ name }) => ({ field: name }));
   const known = new Set(data.columns.map(({ name }) => name));
+  const typeOf = (field: string) => data.columns.find(({ name }) => name === field)?.type;
   const missing = columns.map(({ field }) => field).filter((field) => !known.has(field));
   if (missing.length > 0) return <MissingColumn columns={missing} />;
 
@@ -52,28 +72,31 @@ const TableContent = ({ node, data }: { node: AppNodeOfType<'table'>; data: Sour
   const handleRowClick = (row: Row) => setDropped(runtime.run(node.onRowClick, { row }).dropped);
 
   const tableColumns: Array<EuiBasicTableColumn<Item>> = columns.map(
-    ({ field, label, format }, position) => ({
-      field,
-      name: label ?? field,
-      sortable: (item: Item) => toSortValue(item.values[field], format),
-      render: (_value: unknown, item: Item) => {
-        const text = formatValue(item.values[field], format);
-        // A real control in the first cell, so the row action is reachable by keyboard; the row
-        // click covers the pointer.
-        return isClickable && position === 0 ? (
-          <EuiLink
-            onClick={(event: React.MouseEvent) => {
-              event.stopPropagation();
-              handleRowClick(item.values);
-            }}
-          >
-            {text}
-          </EuiLink>
-        ) : (
-          text
-        );
-      },
-    })
+    ({ field, label }, position) => {
+      const format = formatOf(typeOf(field));
+      return {
+        field,
+        name: label ?? field,
+        sortable: (item: Item) => toSortValue(item.values[field], format),
+        render: (_value: unknown, item: Item) => {
+          const text = formatValue(item.values[field], format);
+          // A real control in the first cell, so the row action is reachable by keyboard; the row
+          // click covers the pointer.
+          return isClickable && position === 0 ? (
+            <EuiLink
+              onClick={(event: React.MouseEvent) => {
+                event.stopPropagation();
+                handleRowClick(item.values);
+              }}
+            >
+              {text}
+            </EuiLink>
+          ) : (
+            text
+          );
+        },
+      };
+    }
   );
 
   return (
@@ -122,13 +145,13 @@ const TableContent = ({ node, data }: { node: AppNodeOfType<'table'>; data: Sour
 
 export const TableNode = ({ node }: { node: AppNodeOfType<'table'> }) => {
   const layer = useDataLayer();
-  const state = useSource(node.source);
+  const state = useSource(node.id);
 
   return (
-    <div data-node-id={node.id}>
+    <EuiPanel hasBorder hasShadow={false} paddingSize="s" data-node-id={node.id}>
       <DataState state={state} onRetry={layer.retry}>
         {(data) => <TableContent node={node} data={data} />}
       </DataState>
-    </div>
+    </EuiPanel>
   );
 };
