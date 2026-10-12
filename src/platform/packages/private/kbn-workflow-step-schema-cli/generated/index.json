@@ -1012,11 +1012,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "581028e7a6e1c4178ef5ce1bea7d92de6de99a9983bf7d793bd167a1ea230f1e"
+      "sha256": "2ecbcecb9e21cb888066f981297351f94d0a89c593b6140947c374d455476c8e"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "f7d7eda7a7fdf1af5494813a49bd6ecdcc35cd4467e2eb8c3cac27f8e746a319"
+      "sha256": "9ae1b6df15e6023e2866f5665ab589e0bc6203682a201d15199904c3d1c48903"
     }
   }
 }
