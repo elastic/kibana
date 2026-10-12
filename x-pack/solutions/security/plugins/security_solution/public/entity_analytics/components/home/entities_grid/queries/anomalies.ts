@@ -86,7 +86,8 @@ const anomalyCountEnricher: PageEnricher = {
     const rows = await runQuery(buildAnomalyCountEnrichQuery(args, pageRows));
 
     const byId = new Map(rows.map((r) => [getEntityId(r), getNumber(r, ANOMALY_COUNT_FIELD)]));
-    return new Map(entityIds.map((id) => [id, { [ANOMALY_COUNT_FIELD]: byId.get(id) ?? 0 }]));
+    // No anomalies reads as null, as in the sort queries.
+    return new Map(entityIds.map((id) => [id, { [ANOMALY_COUNT_FIELD]: byId.get(id) ?? null }]));
   },
 };
 

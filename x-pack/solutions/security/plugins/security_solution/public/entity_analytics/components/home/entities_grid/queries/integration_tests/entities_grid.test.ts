@@ -290,14 +290,31 @@ describe('entities grid on Elasticsearch', () => {
 
     it('counts the anomaly records of the installed jobs', async () => {
       expect(await fetchColumnValues('anomaly_count')).toEqual({
-        'host:h1': { anomaly_count: 0 },
+        'host:h1': { anomaly_count: null },
         'host:h2': { anomaly_count: 1 },
-        'host:h3': { anomaly_count: 0 },
-        'service:payments': { anomaly_count: 0 },
+        'host:h3': { anomaly_count: null },
+        'service:payments': { anomaly_count: null },
         'user:alice@okta': { anomaly_count: 2 },
-        'user:bob@okta': { anomaly_count: 0 },
+        'user:bob@okta': { anomaly_count: null },
       });
     });
+
+    it.each(Object.entries(VIEW_SIZES))(
+      'gives an entity the same anomaly count sorted by it as enriched, on %s',
+      async (_view, viewSize) => {
+        const sorted = await fetchAllPages(
+          cluster.runQuery,
+          { ...BASE_ARGS, sort: { field: 'anomaly_count', direction: 'desc' } },
+          viewSize
+        );
+        const enriched = await fetchColumnValues('anomaly_count');
+        expect(
+          Object.fromEntries(sorted.map((row) => [row['entity.id'], row.anomaly_count]))
+        ).toEqual(
+          Object.fromEntries(Object.entries(enriched).map(([id, { anomaly_count: n }]) => [id, n]))
+        );
+      }
+    );
 
     it('sizes each group with its records', async () => {
       expect(await fetchColumnValues('group_size')).toEqual({
