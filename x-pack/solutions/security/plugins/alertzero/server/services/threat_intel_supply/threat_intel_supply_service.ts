@@ -70,31 +70,69 @@ export class ThreatIntelSupplyService {
     }
   }
 
+  /**
+   * Turns on ingest, enrich and the space's attribute workflow. If any step throws,
+   * the flips this call made are undone (globals only when no other space hunts) so a
+   * failed enable leaves supply as it was, then the original error is rethrown.
+   */
   async ensureSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
-    await this.setWorkflowEnabled({
-      workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
-      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      enabled: true,
-      request,
-      huntSpaceId: spaceId,
-      installIfMissing: true,
-    });
-    await this.setWorkflowEnabled({
-      workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
-      workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
-      enabled: true,
-      request,
-      huntSpaceId: spaceId,
-      installIfMissing: true,
-    });
-    await this.setWorkflowEnabled({
-      workflowId: attributeWorkflowIdForSpace(spaceId),
-      workflowSpaceId: spaceId,
-      enabled: true,
-      request,
-      huntSpaceId: spaceId,
-      installIfMissing: true,
-    });
+    const targets = [
+      {
+        workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+        workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      },
+      {
+        workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+        workflowSpaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      },
+      { workflowId: attributeWorkflowIdForSpace(spaceId), workflowSpaceId: spaceId },
+    ];
+    const flipped: typeof targets = [];
+
+    try {
+      for (const target of targets) {
+        const changed = await this.setWorkflowEnabled({
+          ...target,
+          enabled: true,
+          request,
+          huntSpaceId: spaceId,
+          installIfMissing: true,
+        });
+        if (changed) {
+          flipped.push(target);
+        }
+      }
+    } catch (error) {
+      await this.undoEnsure(flipped, spaceId, request);
+      throw error;
+    }
+  }
+
+  private async undoEnsure(
+    flipped: ReadonlyArray<{ workflowId: string; workflowSpaceId: string }>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    for (const { workflowId, workflowSpaceId } of [...flipped].reverse()) {
+      try {
+        const isGlobal = workflowSpaceId === GLOBAL_WORKFLOW_SPACE_ID;
+        if (isGlobal && (await this.isHuntEnabledInOtherSpace(spaceId))) {
+          continue;
+        }
+        await this.deps.management.updateWorkflow(
+          workflowId,
+          { enabled: false },
+          workflowSpaceId,
+          request
+        );
+      } catch (undoError) {
+        this.deps.logger.error(
+          `Failed to undo threat intel supply workflow ${workflowId} after a failed ensure: ${
+            undoError instanceof Error ? undoError.message : String(undoError)
+          }`
+        );
+      }
+    }
   }
 
   async teardownSupplyForSpace(spaceId: string, request: KibanaRequest): Promise<void> {
@@ -205,7 +243,7 @@ export class ThreatIntelSupplyService {
     /** Space whose Hunt enable/teardown triggered this call (used for owner install). */
     huntSpaceId: string;
     installIfMissing: boolean;
-  }): Promise<void> {
+  }): Promise<boolean> {
     let existing = await this.deps.management.getWorkflow(workflowId, workflowSpaceId, request);
     if (!existing && installIfMissing) {
       const installer = this.deps.getWorkflowInstaller?.();
@@ -220,14 +258,15 @@ export class ThreatIntelSupplyService {
     if (!existing) {
       // Disable/teardown: missing doc is already off. Enable still needs install.
       if (!enabled) {
-        return;
+        return false;
       }
       throw new ThreatIntelSupplyNotInstalledError(workflowId);
     }
     if (existing.enabled === enabled) {
-      return;
+      return false;
     }
     await this.deps.management.updateWorkflow(workflowId, { enabled }, workflowSpaceId, request);
+    return true;
   }
 
   private async readWorkflowStatus(

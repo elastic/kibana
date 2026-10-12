@@ -559,6 +559,7 @@ export const registerPromoteThreatIndicatorsTask = ({
   coreSetup,
   logger,
   getReconcileAttributeWorkflows,
+  getBootstrapReady,
 }: {
   taskManager: TaskManagerSetupContract;
   /**
@@ -577,6 +578,11 @@ export const registerPromoteThreatIndicatorsTask = ({
    * setup to a runtime slot that start fills when the supply flag is on.
    */
   getReconcileAttributeWorkflows: () => Promise<void>;
+  /**
+   * Resolves once index templates are installed. Writing earlier would auto-create the
+   * indicator index without its strict mapping, so a rejection skips this run.
+   */
+  getBootstrapReady: () => Promise<void>;
 }): void => {
   taskManager.registerTaskDefinitions({
     [PROMOTE_THREAT_INDICATORS_TASK_TYPE]: {
@@ -600,6 +606,17 @@ export const registerPromoteThreatIndicatorsTask = ({
       },
       createTaskRunner: ({ taskInstance, signal }: RunContext) => ({
         run: async () => {
+          try {
+            await getBootstrapReady();
+          } catch (err) {
+            logger.warn(
+              `Skipping threat indicator promotion until threat intel bootstrap completes: ${
+                (err as Error).message
+              }`
+            );
+            return { state: (taskInstance.state ?? {}) as PromoteThreatIndicatorsState };
+          }
+
           // Catch spaces created after boot before scanning reports. Failures
           // here must not block promotion — install is idempotent and the next
           // 15m pass will retry.
