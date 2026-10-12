@@ -17,7 +17,9 @@ import { DiscoverAppMenu } from './discover_app_menu';
 import { EpisodeDetailsPage } from './episode_details_page';
 import { ExecutionHistoryPage } from './execution_history_page';
 import { RuleBuilderPage } from './rule_builder_page';
+import { RuleDetailsPage } from './rule_details_page';
 import { RuleFormPage } from './rule_form_page';
+import { RuleLibraryPage } from './rule_library_page';
 import { RulesListPage } from './rules_list_page';
 import { ThresholdBuilderPage } from './threshold_builder_page';
 
@@ -30,7 +32,9 @@ export { DiscoverAppMenu } from './discover_app_menu';
 export { EpisodeDetailsPage } from './episode_details_page';
 export { ExecutionHistoryPage } from './execution_history_page';
 export { RuleBuilderPage } from './rule_builder_page';
+export { RuleDetailsPage } from './rule_details_page';
 export { RuleFormPage } from './rule_form_page';
+export { RuleLibraryPage } from './rule_library_page';
 export { RulesListPage } from './rules_list_page';
 export { ThresholdBuilderPage } from './threshold_builder_page';
 export { OBSERVABILITY_MOUNT_CONFIG } from './alerting_mount_config';
@@ -46,7 +50,9 @@ export type AlertingPageObjects = PageObjects & {
   episodeDetails: EpisodeDetailsPage;
   executionHistory: ExecutionHistoryPage;
   ruleBuilder: RuleBuilderPage;
+  ruleDetails: RuleDetailsPage;
   ruleForm: RuleFormPage;
+  ruleLibrary: RuleLibraryPage;
   rulesList: RulesListPage;
   thresholdBuilder: ThresholdBuilderPage;
 };
@@ -70,7 +76,9 @@ export const extendPageObjects = (
     episodeDetails: createLazyPageObject(EpisodeDetailsPage, page, kbnUrl, mountConfig),
     executionHistory: createLazyPageObject(ExecutionHistoryPage, page, kbnUrl, mountConfig),
     ruleBuilder: createLazyPageObject(RuleBuilderPage, page),
+    ruleDetails: createLazyPageObject(RuleDetailsPage, page),
     ruleForm: createLazyPageObject(RuleFormPage, page, discoverAppMenu, mountConfig),
+    ruleLibrary: createLazyPageObject(RuleLibraryPage, page, mountConfig),
     rulesList: createLazyPageObject(RulesListPage, page, mountConfig),
     thresholdBuilder: createLazyPageObject(ThresholdBuilderPage, page),
   };

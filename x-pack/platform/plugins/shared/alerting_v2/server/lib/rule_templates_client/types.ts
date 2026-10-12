@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { FindRuleTemplatesSortField, RuleTemplateData } from '@kbn/alerting-v2-schemas';
+import type {
+  CreateRuleData,
+  FindRuleTemplatesSortField,
+  RuleTemplateData,
+} from '@kbn/alerting-v2-schemas';
 
 /**
  * Stored attributes of an `engine: "v2"` rule template. Reads go through Zod
@@ -26,4 +30,10 @@ export interface FindRuleTemplatesArgs {
 
 export interface GetRuleTemplateArgs {
   id: string;
+}
+
+export interface InstallRuleTemplateArgs {
+  id: string;
+  /** The rule to create, usually the template defaults plus the user's edits. */
+  data: CreateRuleData;
 }

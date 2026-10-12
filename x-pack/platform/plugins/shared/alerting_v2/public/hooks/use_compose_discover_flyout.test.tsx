@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -162,6 +163,92 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
       expect(mockNavigateToUrl).toHaveBeenCalledWith(REDIRECT_PATH);
       expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
     });
+  });
+});
+
+describe('useComposeDiscoverFlyout — create from template wiring', () => {
+  const template = {
+    id: 'template-1',
+    engine: 'v2',
+    rule: {
+      kind: 'signal',
+      metadata: { name: 'CPU usage' },
+      time_field: '@timestamp',
+      schedule: { every: '1m', lookback: '5m' },
+      query: { base: 'FROM logs-*' },
+    },
+  } as unknown as RuleTemplateResponse;
+
+  const openFromTemplate = async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplateFlyout(template);
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    capturedFlyoutProps = {};
+    hookApi = undefined;
+    mockCreateMutate.mockImplementation((_vars, opts) => opts?.onSuccess?.());
+  });
+
+  it('saves the edited rule through the install API for the opened template', async () => {
+    await openFromTemplate();
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, templateId: 'template-1' },
+      expect.any(Object)
+    );
+  });
+
+  it('does not carry the template over to a rule created afterwards', async () => {
+    await openFromTemplate();
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, templateId: undefined },
+      expect.any(Object)
+    );
+  });
+
+  it('does not carry the template over after the flyout is closed', async () => {
+    await openFromTemplate();
+    act(() => {
+      (capturedFlyoutProps.onClose as () => void)();
+    });
+    await waitFor(() => {
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+    });
+    act(() => {
+      hookApi!.openCreateFlyout();
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ templateId: undefined }),
+      expect.any(Object)
+    );
+  });
+
+  it('creates without a template when the flyout was not opened from one', async () => {
+    await renderAndOpenCreate();
+    callOnCreateRule();
+
+    expect(mockCreateMutate).toHaveBeenCalledWith(
+      { payload: { metadata: { name: 'My rule' } }, templateId: undefined },
+      expect.any(Object)
+    );
   });
 });
 

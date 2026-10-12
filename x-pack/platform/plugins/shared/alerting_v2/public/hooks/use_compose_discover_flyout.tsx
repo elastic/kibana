@@ -80,6 +80,8 @@ export const useComposeDiscoverFlyout = ({
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
+  // Set while the flyout authors a rule from a rule template, so saving installs it from there.
+  const [templateId, setTemplateId] = useState<string | undefined>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
 
   const openInEsql = useCallback((rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
@@ -146,10 +148,12 @@ export const useComposeDiscoverFlyout = ({
     setTargetRule(null);
     setBuilderType(null);
     setInitialBuilderState(undefined);
+    setTemplateId(undefined);
   }, []);
 
   const closeAndRedirect = useCallback(() => {
     setFlyoutOpen(false);
+    setTemplateId(undefined);
     if (createSuccessRedirectPath) {
       application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
     }
@@ -157,6 +161,7 @@ export const useComposeDiscoverFlyout = ({
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
+    setTemplateId(undefined);
     setFlyoutMode('create');
     setBuilderType(null);
     setFlyoutOpen(true);
@@ -175,12 +180,14 @@ export const useComposeDiscoverFlyout = ({
           }),
         });
         setTargetRule(null);
+        setTemplateId(undefined);
         setFlyoutMode('create');
         setBuilderType(null);
         setFlyoutOpen(true);
         return;
       }
       setTargetRule(null);
+      setTemplateId(undefined);
       setFlyoutMode('create');
       setBuilderType(type);
       setInitialBuilderState(undefined);
@@ -191,6 +198,7 @@ export const useComposeDiscoverFlyout = ({
 
   const openRuleFlyout = useCallback(
     (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+      setTemplateId(undefined);
       const result = resolveBuilderMode(rule);
       if (result === 'esql') {
         openInEsql(rule, mode);
@@ -221,6 +229,7 @@ export const useComposeDiscoverFlyout = ({
     (template: RuleTemplateResponse) => {
       const syntheticRule = templateToSyntheticRule(template);
       const result = resolveBuilderMode(syntheticRule);
+      setTemplateId(template.id);
       if (result !== 'esql' && result !== 'esql-fallback') {
         setTargetRule(syntheticRule);
         setFlyoutMode('create');
@@ -246,7 +255,7 @@ export const useComposeDiscoverFlyout = ({
       initialBuilderState={initialBuilderState}
       onSwitchToEsql={builderType ? requestSwitchToEsql : undefined}
       onCreateRule={(payload) =>
-        createRuleMutation.mutate({ payload }, { onSuccess: closeAndRedirect })
+        createRuleMutation.mutate({ payload, templateId }, { onSuccess: closeAndRedirect })
       }
       onUpdateRule={(id, payload) =>
         updateRuleMutation.mutate({ id, payload }, { onSuccess: closeFlyout })

@@ -9,11 +9,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData, RuleResponse, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { RuleTemplatesApi } from '../services/rule_templates_api';
 import { createHookTestProviders } from '../test_utils/test_providers';
 import { useInstallRuleTemplate } from './use_install_rule_template';
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('../services/rules_api');
+jest.mock('../services/rule_templates_api');
 jest.mock('./invalidate_rules_content_list', () => ({
   invalidateRulesContentList: jest.fn(() => Promise.resolve()),
 }));
@@ -58,6 +60,7 @@ const createWrapper = () => createHookTestProviders();
 
 describe('useInstallRuleTemplate', () => {
   const mockCreateRule = jest.fn();
+  const mockInstallRuleTemplate = jest.fn();
   const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
@@ -74,6 +77,9 @@ describe('useInstallRuleTemplate', () => {
       if (service === RulesApi) {
         return { createRule: mockCreateRule, disableRule: mockDisableRule } as any;
       }
+      if (service === RuleTemplatesApi) {
+        return { installRuleTemplate: mockInstallRuleTemplate } as any;
+      }
       if (service === 'notifications') {
         return {
           toasts: { addSuccess: mockAddSuccess, addError: mockAddError, addDanger: mockAddDanger },
@@ -89,15 +95,16 @@ describe('useInstallRuleTemplate', () => {
     });
   });
 
-  it('creates a disabled rule from the template payload via useCreateRule', async () => {
-    mockCreateRule.mockResolvedValue(mockRuleResponse);
+  it('installs a disabled rule from the template payload via the install API', async () => {
+    mockInstallRuleTemplate.mockResolvedValue(mockRuleResponse);
     mockDisableRule.mockResolvedValue({ ...mockRuleResponse, enabled: false });
     const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
 
     result.current.mutate(mockTemplate);
 
     await waitFor(() => {
-      expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
+      expect(mockInstallRuleTemplate).toHaveBeenCalledWith('template-1', mockCreatePayload);
+      expect(mockCreateRule).not.toHaveBeenCalled();
       expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
       expect(mockAddSuccess).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -111,7 +118,7 @@ describe('useInstallRuleTemplate', () => {
       );
       expect(mockAddError).not.toHaveBeenCalled();
     });
-    expect(mockCreateRule.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(mockInstallRuleTemplate.mock.invocationCallOrder[0]).toBeLessThan(
       mockDisableRule.mock.invocationCallOrder[0]
     );
     expect(mockDisableRule.mock.invocationCallOrder[0]).toBeLessThan(
@@ -121,7 +128,7 @@ describe('useInstallRuleTemplate', () => {
 
   it('shows an error toast when install fails', async () => {
     const error = new Error('Network down');
-    mockCreateRule.mockRejectedValue(error);
+    mockInstallRuleTemplate.mockRejectedValue(error);
     const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
 
     result.current.mutate(mockTemplate);
@@ -137,7 +144,7 @@ describe('useInstallRuleTemplate', () => {
   });
 
   it('shows that the rule was created but could not be disabled', async () => {
-    mockCreateRule.mockResolvedValue(mockRuleResponse);
+    mockInstallRuleTemplate.mockResolvedValue(mockRuleResponse);
     mockDisableRule.mockRejectedValue(new Error('disable failed'));
     const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
 
