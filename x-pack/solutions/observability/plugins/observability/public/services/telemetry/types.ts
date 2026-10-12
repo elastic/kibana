@@ -9,12 +9,16 @@ import type { RootSchema } from '@kbn/core-analytics-browser';
 
 export type TelemetryServiceStart = ITelemetryClient;
 
+export type UnifiedAlertingPromoSource = 'alerts' | 'overview';
+
 export interface ITelemetryClient {
   reportRelatedAlertsLoaded(count: number): void;
   reportAlertDetailsPageView(ruleType: string): void;
   reportAlertAddedToCase(newCaseCreated: boolean, from: string, ruleTypeId: string): void;
   reportLinkedDashboardViewed(ruleTypeId: string): void;
   reportSuggestedDashboardAdded(ruleTypeId: string): void;
+  reportUnifiedAlertingPromoTakeTour(source: UnifiedAlertingPromoSource): void;
+  reportUnifiedAlertingPromoDismiss(source: UnifiedAlertingPromoSource): void;
 }
 
 export enum TelemetryEventTypes {
@@ -23,6 +27,8 @@ export enum TelemetryEventTypes {
   ALERT_ADDED_TO_CASE = 'Alert Added to Case',
   LINKED_DASHBOARD_VIEW = 'Linked Dashboard View',
   SUGGESTED_DASHBOARD_ADDED = 'Suggested Dashboard Added',
+  UNIFIED_ALERTING_PROMO_TAKE_TOUR = 'Unified Alerting Promo Take Tour',
+  UNIFIED_ALERTING_PROMO_DISMISS = 'Unified Alerting Promo Dismiss',
 }
 
 interface RelatedAlertsLoadedParams {
@@ -69,16 +75,33 @@ interface SuggestedDashboardAddedEvent {
   schema: RootSchema<SuggestedDashboardAddedParams>;
 }
 
+interface UnifiedAlertingPromoParams {
+  source: UnifiedAlertingPromoSource;
+}
+
+interface UnifiedAlertingPromoTakeTourEvent {
+  eventType: TelemetryEventTypes.UNIFIED_ALERTING_PROMO_TAKE_TOUR;
+  schema: RootSchema<UnifiedAlertingPromoParams>;
+}
+
+interface UnifiedAlertingPromoDismissEvent {
+  eventType: TelemetryEventTypes.UNIFIED_ALERTING_PROMO_DISMISS;
+  schema: RootSchema<UnifiedAlertingPromoParams>;
+}
+
 export type TelemetryEvent =
   | AlertDetailsPageViewEvent
   | RelatedAlertsLoadedEvent
   | AlertAddedToCaseEvent
   | LinkedDashboardViewEvent
-  | SuggestedDashboardAddedEvent;
+  | SuggestedDashboardAddedEvent
+  | UnifiedAlertingPromoTakeTourEvent
+  | UnifiedAlertingPromoDismissEvent;
 
 export type TelemetryEventParams =
   | RelatedAlertsLoadedParams
   | AlertDetailsPageViewParams
   | AlertAddedToCaseParams
   | LinkedDashboardViewParams
-  | SuggestedDashboardAddedParams;
+  | SuggestedDashboardAddedParams
+  | UnifiedAlertingPromoParams;

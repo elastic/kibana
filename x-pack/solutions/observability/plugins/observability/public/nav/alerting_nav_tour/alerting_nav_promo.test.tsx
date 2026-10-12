@@ -18,20 +18,31 @@ import {
   ALERTING_NAV_START_TOUR_EVENT,
   ALERTING_NAV_TOUR_STORAGE_KEY,
 } from './alerting_nav_tour_state';
+import { TelemetryEventTypes } from '../../services/telemetry/types';
 
 jest.mock('./assets/alerting_promo_light.webp', () => 'promo-light.webp');
 jest.mock('./assets/alerting_promo_dark.webp', () => 'promo-dark.webp');
 
-const renderPromo = ({ toursEnabled = true }: { toursEnabled?: boolean } = {}) => {
+const renderPromo = ({
+  toursEnabled = true,
+  source = 'alerts',
+}: {
+  toursEnabled?: boolean;
+  source?: 'alerts' | 'overview';
+} = {}) => {
+  const reportEvent = jest.fn();
   const coreStart = {
     notifications: { tours: { isEnabled: () => toursEnabled } },
+    analytics: { reportEvent },
   } as unknown as CoreStart;
 
-  return render(
+  const result = render(
     <EuiThemeProvider>
-      <AlertingNavPromo coreStart={coreStart} />
+      <AlertingNavPromo coreStart={coreStart} source={source} />
     </EuiThemeProvider>
   );
+
+  return { ...result, reportEvent };
 };
 
 describe('AlertingNavPromo', () => {
@@ -46,30 +57,37 @@ describe('AlertingNavPromo', () => {
     expect(screen.getByRole('region', { name: 'Unified Alerting app' })).toBeInTheDocument();
   });
 
-  it('hides the promo after dismiss and keeps it hidden after remount', () => {
-    const { unmount } = renderPromo();
+  it('hides the promo after dismiss, reports telemetry, and keeps it hidden after remount', () => {
+    const { unmount, reportEvent } = renderPromo({ source: 'overview' });
 
     fireEvent.click(screen.getByTestId(ALERTING_NAV_PROMO_DISMISS_TEST_ID));
     expect(screen.queryByTestId('alertingNavPromoFloatingAnchor')).not.toBeInTheDocument();
     expect(window.localStorage.getItem(ALERTING_NAV_TOUR_STORAGE_KEY)).toContain(
       '"isDismissed":true'
     );
+    expect(reportEvent).toHaveBeenCalledWith(TelemetryEventTypes.UNIFIED_ALERTING_PROMO_DISMISS, {
+      source: 'overview',
+    });
 
     unmount();
     renderPromo();
     expect(screen.queryByTestId('alertingNavPromoFloatingAnchor')).not.toBeInTheDocument();
   });
 
-  it('dismisses the promo and dispatches the start-tour event when Take tour is clicked', () => {
+  it('dismisses the promo, reports telemetry, and dispatches the start-tour event when Take tour is clicked', () => {
     const onStart = jest.fn();
     window.addEventListener(ALERTING_NAV_START_TOUR_EVENT, onStart);
 
-    renderPromo();
+    const { reportEvent } = renderPromo({ source: 'alerts' });
     fireEvent.click(screen.getByTestId(ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID));
 
     expect(screen.queryByTestId('alertingNavPromoFloatingAnchor')).not.toBeInTheDocument();
     expect(window.localStorage.getItem(ALERTING_NAV_TOUR_STORAGE_KEY)).toContain(
       '"isDismissed":true'
+    );
+    expect(reportEvent).toHaveBeenCalledWith(
+      TelemetryEventTypes.UNIFIED_ALERTING_PROMO_TAKE_TOUR,
+      { source: 'alerts' }
     );
     expect(onStart).toHaveBeenCalledTimes(1);
 

@@ -18,16 +18,26 @@ import {
   DEFAULT_ALERTING_NAV_TOUR_STATE,
 } from './alerting_nav_tour_state';
 import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
+import {
+  TelemetryEventTypes,
+  type UnifiedAlertingPromoSource,
+} from '../../services/telemetry/types';
 
 const PROMO_REGION_LABEL = i18n.translate('xpack.observability.alertingNavTour.promo.regionLabel', {
   defaultMessage: 'Unified Alerting app',
 });
 
+interface AlertingNavPromoProps {
+  coreStart: CoreStart;
+  /** Surface that hosts the promo — included in Take tour / Dismiss telemetry. */
+  source: UnifiedAlertingPromoSource;
+}
+
 /**
- * Floating Unified Alerting promo for the Alerts landing route.
+ * Floating Unified Alerting promo for route trees that opt in (Alerts, Overview).
  * Mount inside that route tree so visibility follows React Router — not history patching.
  */
-export const AlertingNavPromo: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
+export const AlertingNavPromo: React.FC<AlertingNavPromoProps> = ({ coreStart, source }) => {
   const { euiTheme } = useEuiTheme();
   const isTourEnabled = coreStart.notifications.tours.isEnabled();
   const [persisted = DEFAULT_ALERTING_NAV_TOUR_STATE, setPersisted] =
@@ -37,17 +47,23 @@ export const AlertingNavPromo: React.FC<{ coreStart: CoreStart }> = ({ coreStart
     );
 
   const dismiss = useCallback(() => {
+    coreStart.analytics.reportEvent(TelemetryEventTypes.UNIFIED_ALERTING_PROMO_DISMISS, {
+      source,
+    });
     setPersisted({ isDismissed: true });
-  }, [setPersisted]);
+  }, [coreStart.analytics, setPersisted, source]);
 
   const takeTour = useCallback(() => {
     if (!isTourEnabled) {
       return;
     }
+    coreStart.analytics.reportEvent(TelemetryEventTypes.UNIFIED_ALERTING_PROMO_TAKE_TOUR, {
+      source,
+    });
     // Opting into the tour dismisses the promo so it does not return after Finish/Skip.
     setPersisted({ isDismissed: true });
     window.dispatchEvent(new Event(ALERTING_NAV_START_TOUR_EVENT));
-  }, [isTourEnabled, setPersisted]);
+  }, [coreStart.analytics, isTourEnabled, setPersisted, source]);
 
   if (persisted.isDismissed) {
     return null;

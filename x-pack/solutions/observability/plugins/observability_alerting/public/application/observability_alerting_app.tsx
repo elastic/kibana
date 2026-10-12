@@ -188,7 +188,7 @@ export const ObservabilityAlertingApp = ({
             createActions={createObservabilityEpisodeActions}
             manageRulesHref={manageRulesHref}
           />
-          <AlertingNavPromo coreStart={coreStart} />
+          <AlertingNavPromo coreStart={coreStart} source="alerts" />
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>

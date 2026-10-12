@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import type { ITelemetryClient } from './types';
+import type { ITelemetryClient, UnifiedAlertingPromoSource } from './types';
 import { TelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
@@ -41,6 +41,18 @@ export class TelemetryClient implements ITelemetryClient {
   reportSuggestedDashboardAdded(ruleTypeId: string): void {
     this.analytics.reportEvent(TelemetryEventTypes.SUGGESTED_DASHBOARD_ADDED, {
       rule_type_id: ruleTypeId,
+    });
+  }
+
+  reportUnifiedAlertingPromoTakeTour(source: UnifiedAlertingPromoSource): void {
+    this.analytics.reportEvent(TelemetryEventTypes.UNIFIED_ALERTING_PROMO_TAKE_TOUR, {
+      source,
+    });
+  }
+
+  reportUnifiedAlertingPromoDismiss(source: UnifiedAlertingPromoSource): void {
+    this.analytics.reportEvent(TelemetryEventTypes.UNIFIED_ALERTING_PROMO_DISMISS, {
+      source,
     });
   }
 }

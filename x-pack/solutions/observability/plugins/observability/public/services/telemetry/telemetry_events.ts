@@ -72,9 +72,31 @@ const linkedDashboardView: TelemetryEvent = {
   },
 };
 
+const unifiedAlertingPromoSourceSchema = {
+  source: {
+    type: 'keyword' as const,
+    _meta: {
+      description: 'Surface that showed the Unified Alerting promo (alerts or overview)',
+      optional: false,
+    },
+  },
+};
+
+const unifiedAlertingPromoTakeTour: TelemetryEvent = {
+  eventType: TelemetryEventTypes.UNIFIED_ALERTING_PROMO_TAKE_TOUR,
+  schema: unifiedAlertingPromoSourceSchema,
+};
+
+const unifiedAlertingPromoDismiss: TelemetryEvent = {
+  eventType: TelemetryEventTypes.UNIFIED_ALERTING_PROMO_DISMISS,
+  schema: unifiedAlertingPromoSourceSchema,
+};
+
 export const events: TelemetryEvent[] = [
   relatedAlertsLoaded,
   alertDetailsPageView,
   alertAddedToCase,
   linkedDashboardView,
+  unifiedAlertingPromoTakeTour,
+  unifiedAlertingPromoDismiss,
 ];
