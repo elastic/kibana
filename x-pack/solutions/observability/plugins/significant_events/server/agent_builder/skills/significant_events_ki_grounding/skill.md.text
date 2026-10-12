@@ -40,7 +40,7 @@ Response shape: `{ "knowledge_indicators": [...], "page": 1, "per_page": 100, "r
 Example: platform_core_execute_esql call (with required modifications applied)
 ```json
 {
-  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where> | SORT @timestamp DESC | LIMIT 5",
+  "query": "FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <predicate> | SORT @timestamp DESC | LIMIT 5",
   "time_range": { "from": "<detection @timestamp - 15m>", "to": "now" }
 }
 ```
@@ -93,7 +93,7 @@ This context may support or reject an incident match when rows are sparse. Detec
 
 ### Rules for every query (Steps 3 and 4)
 
-These apply to every `platform_core_execute_esql` call; the steps below add only what is specific to them. Examples in both steps use the same placeholders: `<source>` is the KI query's `FROM` target; `<where>` is the KI query's own `WHERE` clauses, which Step 4 splits into `<scope>` (field conditions selecting the operation) and `<failure>` (the rest).
+These apply to every `platform_core_execute_esql` call; the steps below add only what is specific to them. Examples in both steps use the same placeholders: `<source>` is the KI query's `FROM` target; `<predicate>` is the condition of the KI query's `WHERE`, without the keyword (examples always write `WHERE` explicitly, and every filter needs it); Step 4 splits `<predicate>` into `<scope>` (field conditions selecting the operation) and `<failure>` (the rest), both conditions without the keyword.
 
 1. **Dispatch.** Send the checks in parallel waves of up to 10 calls, one call per check, all in the same response; the wave size is `min(remaining checks, 10)`. Never run one check and wait before sending the rest. Dispatch as many waves as needed: the wave size is not a cap on rules.
 2. **Per rule, unconditional.** Every rule gets its own queries, derived from its own KI query. Never skip a rule because of overlap with other rules, expected grouping or any downstream reasoning, and never reuse another rule's figures. Queries with identical bodies and the same `time_range` run once and the result counts for each rule involved.
@@ -112,11 +112,12 @@ One sample per rule proves whether its failure is happening now. Take the KI que
 - No contradiction follow-ups or retries.
 
 ```
-KI query:                    FROM <source> METADATA _id, _source | <where> | LIMIT <existing lower cap>
-Good (executed, rows):       FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where> | SORT @timestamp DESC | LIMIT 5
-Good (executed, aggregate):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where> | STATS ... | LIMIT 2
-Good (stored):               FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <where>
-Avoid: KEEP projection, METADATA, or any edit to <where>, field names or <source>
+KI query:                    FROM <source> METADATA _id, _source | WHERE <predicate> | LIMIT <existing lower cap>
+Good (executed, rows):       FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <predicate> | SORT @timestamp DESC | LIMIT 5
+Good (executed, aggregate):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <predicate> | STATS ... | LIMIT 2
+Good (stored):               FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <predicate>
+Avoid: KEEP projection, METADATA, or any edit to <predicate>, field names or <source>
+Avoid: a condition as its own pipe, e.g. | MATCH_PHRASE(...)   -- parse error; every filter is WHERE <condition>
 Avoid: no ?_tstart/?_tend filter or no time_range         -- unbounded scans time out
 Avoid: storing the executed SORT/LIMIT tail or the tool result's rewritten query
 ```
@@ -132,22 +133,24 @@ The sample proves a failure exists, not how bad it is. For every rule whose samp
 | Profile | Question | Queries | `time_range` | Read |
 |---|---|---|---|---|
 | `population` | What share of lines in scope fail? | `failed` = `<scope>` + `<failure>`; `total` = `<scope>` only | last 15m–1h | the failing share of log lines; it equals the share of attempts, and "every attempt fails" only when the scope isolates one line per attempt |
-| `breakdown` | How many services are hit, out of how many? | `COUNT(*) BY service.name` with `<scope>` + `<failure>` (`affected`), and with `<scope>` only (`total`), each `SORT ... DESC \| LIMIT 20` | last 15m–1h | the number of rows is the number of services (a full 20 means at least 20, which is breadth even when the total is unknown), and the counts show whether one dominates |
-| `trend` | Still happening, since when? | `<failure>` counted per time bucket, under 20 rows | up to 6h | first and latest bucket against now: steady, rising, or ended |
+| `breakdown` | How many services are hit, out of how many? | `COUNT(*) BY service.name` with `<scope>` + `<failure>` (`affected`), and with `<scope>` only (`total`), each `SORT ... DESC \| LIMIT 100` | last 15m–1h | the number of rows is the number of services (a full 100 means at least 100, which is breadth even when the total is unknown), and the counts show whether one dominates |
+| `trend` | Still happening, since when? | `<failure>` counted per bucket with `BUCKET(@timestamp, 100, ?_tstart, ?_tend)` (the engine picks the span, at most 100 rows), and its `earliest` and `latest` occurrence | 24h for the buckets; up to 14d for `earliest`/`latest` | the latest bucket and `latest` against now: steady, rising, or ended (a stream that went silent shows as `latest` far from now); `earliest` is when the failure was first seen in the window, so onset is "since at least" that time |
 
-- **Aggregate, never rows.** `STATS` returning at most 20 rows. Count `<failure>` from its own `WHERE`, not inside `STATS`.
+- **Aggregate, never rows.** `STATS` returning at most 100 rows. Count `<failure>` from its own `WHERE`, not inside `STATS`.
 - **Breakdown is by `service.name`**: how many services the failure reaches. If the stream has no `service.name` column, skip `breakdown` and say so; never substitute another field.
 - **No isolating scope**: skip `total` and report the failing count without a share.
 
 ```
-Good (population): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | <failure> | STATS failed = COUNT(*)
-Good (population): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | STATS total = COUNT(*)
-Good (breakdown):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | <failure> | STATS affected = COUNT(*) BY service.name | SORT affected DESC | LIMIT 20
-Good (breakdown):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | STATS total = COUNT(*) BY service.name | SORT total DESC | LIMIT 20
-Good (trend):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | <scope> | <failure> | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, <interval>) | SORT bucket ASC
+Good (population): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS failed = COUNT(*)
+Good (population): FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | STATS total = COUNT(*)
+Good (breakdown):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS affected = COUNT(*) BY service.name | SORT affected DESC | LIMIT 100
+Good (breakdown):  FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | STATS total = COUNT(*) BY service.name | SORT total DESC | LIMIT 100
+Good (trend):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 100, ?_tstart, ?_tend) | SORT bucket ASC
+Good (trend):      FROM <source> | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE <scope> | WHERE <failure> | STATS earliest = MIN(@timestamp), latest = MAX(@timestamp)
 Avoid: BY <function>(<text field>) or any field other than service.name   -- never derive a dimension from message text
 Avoid: STATS x = COUNT(<text condition>)          -- times out; put the condition in its own WHERE
 Avoid: no ?_tstart/?_tend filter, or no STATS/LIMIT   -- unbounded scans time out
+Avoid: reserved words as column names (first, last)   -- parse error; use earliest, latest
 ```
 
 Keep the figures: Step 5 writes them into the signal's `description`.
