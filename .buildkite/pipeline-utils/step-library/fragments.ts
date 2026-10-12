@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'yaml';
+import { renderSteps } from './render.ts';
+import { normalizeSemantics } from './semantic_normalization.ts';
 import { cpsTests } from './steps/cps_testing.ts';
 import type { Step } from './types.ts';
+import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
 
 export interface Fragment {
   // Path under `.buildkite/pipelines/` without the extension. Also the snapshot name.
@@ -74,3 +80,12 @@ export const FRAGMENTS: readonly Fragment[] = [
   yamlFragment('pull_request/warm_start_memory_bench'),
   yamlFragment('pull_request/workflows_oom_testing'),
 ];
+
+// The parsed, semantically normalized document of a fragment: from its TypeScript function once it
+// has one, from its YAML file until then.
+export const loadFragmentDocument = (fragment: Fragment): unknown =>
+  normalizeSemantics(
+    fragment.steps
+      ? parse(renderSteps(fragment.steps(), { header: true }))
+      : parse(fs.readFileSync(path.join(getKibanaDir(), fragment.yamlPath), 'utf8'))
+  );

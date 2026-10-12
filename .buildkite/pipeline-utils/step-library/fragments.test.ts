@@ -13,27 +13,16 @@
 
 import fs from 'fs';
 import path from 'path';
-import { parse } from 'yaml';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
-import { FRAGMENTS } from './fragments.ts';
-import type { Fragment } from './fragments.ts';
-import { renderSteps } from './render.ts';
-import { normalizeSemantics } from './semantic_normalization.ts';
+import { FRAGMENTS, loadFragmentDocument } from './fragments.ts';
 
 const root = getKibanaDir();
-
-const loadDocument = (fragment: Fragment): unknown =>
-  normalizeSemantics(
-    fragment.steps
-      ? parse(renderSteps(fragment.steps(), { header: true }))
-      : parse(fs.readFileSync(path.join(root, fragment.yamlPath), 'utf8'))
-  );
 
 describe('pull_request fragments', () => {
   it.each(FRAGMENTS.map((fragment) => [fragment.name, fragment] as const))(
     '%s',
     (_name, fragment) => {
-      expect(loadDocument(fragment)).toMatchSnapshot();
+      expect(loadFragmentDocument(fragment)).toMatchSnapshot();
     }
   );
 
