@@ -66,3 +66,12 @@ export {
   LazyConnectedCloseInvestigationModal,
   LazyConnectedEscalationModal,
 } from './conversation_templates/shared/lazy_connected_components';
+
+export { LazyEvidenceView, type EvidenceViewProps } from './evidence';
+export type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
+export {
+  registerInvestigationAttachmentRenderer,
+  type InvestigationAttachmentContentProps,
+  type InvestigationAttachmentRenderer,
+  type InvestigationAttachmentVariant,
+} from './investigation_attachments';

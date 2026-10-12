@@ -6,6 +6,7 @@
  */
 
 export {
+  assertUiamCredential,
   getUiamAuthorizationHeaderFromRequest,
   getUiamCredentialsFromRequest,
 } from './get_uiam_credentials';

@@ -32,10 +32,10 @@ describe('ActionPoliciesApi', () => {
   });
 
   describe('listActionPolicies', () => {
-    it('sends the filter and search query params to the internal list path', async () => {
+    it('sends the filter and search query params to the list path', async () => {
       await api.listActionPolicies({ page: 2, filter: 'enabled: true', search: 'cpu' });
 
-      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
+      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
         query: {
           page: 2,
           per_page: undefined,
@@ -50,7 +50,7 @@ describe('ActionPoliciesApi', () => {
     it('omits empty filter and search values', async () => {
       await api.listActionPolicies({ filter: '', search: '' });
 
-      expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/action_policies', {
+      expect(http.get).toHaveBeenCalledWith('/api/alerting/v2/action_policies', {
         query: expect.objectContaining({ filter: undefined, search: undefined }),
       });
     });
@@ -117,10 +117,10 @@ describe('ActionPoliciesApi', () => {
     it('forwards the trimmed matcher as a query parameter', async () => {
       http.get.mockResolvedValue([]);
 
-      await api.fetchRuleEventFields('  episode_id: "abc"  ');
+      await api.fetchRuleEventFields('  alert_id: "abc"  ');
 
       expect(http.get).toHaveBeenCalledWith('/internal/alerting/v2/suggestions/rule_event_fields', {
-        query: { matcher: 'episode_id: "abc"' },
+        query: { matcher: 'alert_id: "abc"' },
       });
     });
 

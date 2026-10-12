@@ -31,13 +31,11 @@ const ActionsSection = () => {
 describe('AutomationActionsSection', () => {
   beforeEach(() => onSlackActionChange.mockClear());
 
-  it('always shows the Learnings row', () => {
+  it('prompts to add an action when there is none', () => {
     render(<ActionsSection />);
 
-    expect(screen.getByText('Learnings')).toBeInTheDocument();
-    expect(
-      screen.getByText('Nightshift updates knowledge, decision trees, and memories on each run.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Choose what happens when this automation runs.')).toBeInTheDocument();
+    expect(screen.queryByText('Learnings')).not.toBeInTheDocument();
   });
 
   it('adds, edits, and removes a Slack action', async () => {
@@ -64,5 +62,24 @@ describe('AutomationActionsSection', () => {
     fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
     expect(screen.getByTestId('automationAddAction')).toBeInTheDocument();
+  });
+
+  it('shows a locked reply-in-thread action without edit or remove controls', () => {
+    render(
+      <I18nProvider>
+        <AutomationActionsSection
+          slackAction={{ target: 'thread', destination: '' }}
+          onSlackActionChange={onSlackActionChange}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Post in Slack')).toBeInTheDocument();
+    expect(
+      screen.getByText('Nightshift replies in the thread of the triggering message.')
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId('automationRemoveSlackAction')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('automationSlackDestination')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('automationAddAction')).not.toBeInTheDocument();
   });
 });

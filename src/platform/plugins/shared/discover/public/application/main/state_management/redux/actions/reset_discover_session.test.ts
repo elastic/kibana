@@ -18,6 +18,10 @@ import * as tabsActions from './tabs';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { dataViewWithNoTimefieldMock } from '../../../../../__mocks__/data_view_no_timefield';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
+import { mockControlState } from '../../../../../__mocks__/esql_controls';
+import { DataSourceType } from '../../../../../../common/data_sources';
+import * as resolveEsqlSourceModule from '../../../data_fetching/resolve_esql_source';
 
 const markUnsavedTabs = (internalState: InternalStateStore, tabIds: string[]) =>
   internalState.dispatch(
@@ -246,5 +250,41 @@ describe('resetDiscoverSession', () => {
     expect(
       selectTabRuntimeState(runtimeStateManager, updatedDiscoverSession.tabs[0].id)
     ).toBeDefined();
+  });
+
+  it('resolves an ES|QL tab with its control variables', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewWithTimefieldMock],
+    });
+    const persistedTab = getPersistedTabMock({
+      dataView: dataViewWithTimefieldMock,
+      services,
+      appStateOverrides: {
+        query: { esql: 'FROM logs-* | WHERE host == ?foo' },
+        dataSource: { type: DataSourceType.Esql },
+      },
+      attributesOverrides: { controlGroupState: mockControlState },
+    });
+    const resolveSpy = jest
+      .spyOn(resolveEsqlSourceModule, 'resolveEsqlSource')
+      .mockResolvedValue(await createResolvedMockEsqlSource());
+
+    await toolkit.initializeTabs({
+      persistedDiscoverSession: createDiscoverSessionMock({ id: 'test-id', tabs: [persistedTab] }),
+    });
+    await toolkit.initializeSingleTab({ tabId: persistedTab.id, skipWaitForDataFetching: true });
+    resolveSpy.mockClear();
+
+    await toolkit.internalState.dispatch(internalStateActions.resetDiscoverSession()).unwrap();
+
+    expect(resolveSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esql: 'FROM logs-* | WHERE host == ?foo',
+        esqlVariables: [{ key: 'foo', type: 'values', value: 'bar' }],
+      })
+    );
+    resolveSpy.mockRestore();
   });
 });

@@ -57,7 +57,12 @@ import {
   type RawAppStatePayload,
 } from './actions';
 import { DEFAULT_EXPANDED_DOC_OWNER } from './constants';
-import { type HasUnsavedChangesResult, selectTab } from './selectors';
+import {
+  type HasUnsavedChangesResult,
+  selectAllTabs,
+  selectRecentlyClosedTabs,
+  selectTab,
+} from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 import type { DiscoverSearchSessionManager } from '../discover_search_session';
 import { createEsqlDataSource } from '../../../../../common/data_sources';
@@ -72,6 +77,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
+  draftSessionTitle: undefined,
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
@@ -185,6 +191,14 @@ const internalStateSliceDef = createSlice({
       state.tabs.unsafeCurrentId = action.payload.selectedTabId;
       state.persistedDiscoverSession =
         action.payload.updatedDiscoverSession ?? state.persistedDiscoverSession;
+    },
+
+    setPersistedDiscoverSession: (state, action: PayloadAction<DiscoverSession>) => {
+      state.persistedDiscoverSession = action.payload;
+    },
+
+    setDraftSessionTitle: (state, action: PayloadAction<string | undefined>) => {
+      state.draftSessionTitle = action.payload;
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -647,22 +661,32 @@ const createMiddleware = (options: InternalStateDependencies) => {
   >;
 
   startListening({
-    actionCreator: internalStateSlice.actions.setTabs,
-    effect: throttle<InternalStateListenerEffect<typeof internalStateSlice.actions.setTabs>>(
-      (action, listenerApi) => {
-        const discoverSession =
-          action.payload.updatedDiscoverSession ?? listenerApi.getState().persistedDiscoverSession;
+    matcher: isAnyOf(
+      internalStateSlice.actions.setTabs,
+      internalStateSlice.actions.setDraftSessionTitle
+    ),
+    effect: throttle<
+      ListenerEffect<
+        UnknownAction,
+        DiscoverInternalState,
+        InternalStateDispatch,
+        InternalStateDependencies
+      >
+    >(
+      (_action, listenerApi) => {
+        const state = listenerApi.getState();
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
         const getTabInternalState = (tabId: string) =>
           selectTabRuntimeInternalState({
             runtimeStateManager,
-            tabState: selectTab(listenerApi.getState(), tabId),
+            tabState: selectTab(state, tabId),
             services,
           });
         void tabsStorageManager.persistLocally(
-          action.payload,
+          { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
           getTabInternalState,
-          discoverSession?.id
+          state.persistedDiscoverSession?.id,
+          state.draftSessionTitle
         );
       },
       MIDDLEWARE_THROTTLE_MS,

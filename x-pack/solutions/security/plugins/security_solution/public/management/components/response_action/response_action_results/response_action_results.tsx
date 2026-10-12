@@ -1,0 +1,216 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useMemo } from 'react';
+import type { EuiTextColorProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiText, EuiHorizontalRule, EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { getAgentActionState } from './utils';
+import { FormattedDate } from '../../../../common/components/formatted_date';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import { MemoryDumpResponseActionOutputResult } from '../../memory_dump_response_action_output_result';
+import { CancelActionResults } from '../../cancel_action_results';
+import { RunscriptActionResult } from './components/runscript_results';
+import { ScanResults } from './components/scan_results';
+import { EndpointUploadActionResult } from '../../endpoint_upload_action_result';
+import { GetFileResults } from './components/get_file_results';
+import { IsolationResults } from './components/isolation_results';
+import type { ResponseActionResultsProps } from './types';
+import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
+import { OUTPUT_MESSAGES } from '../../endpoint_response_actions_list/translations';
+import { KeyValueDisplay } from '../../key_value_display';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import { RunningProcessesActionResults } from './components/processes_results';
+import { ExecuteResults } from './components/execute_results';
+import {
+  isCancelAction,
+  isExecuteAction,
+  isGetFileAction,
+  isKillProcessAction,
+  isMemoryDumpAction,
+  isProcessesAction,
+  isRunScriptAction,
+  isScanAction,
+  isSuspendProcessAction,
+  isUploadAction,
+} from '../../../../../common/endpoint/service/response_actions/type_guards';
+
+/**
+ * Display the results of a response action
+ */
+export const ResponseActionResults = memo<ResponseActionResultsProps>(
+  ({ action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
+    const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const agents = useMemo(() => {
+      return agentId ? [agentId] : action.agents;
+    }, [action.agents, agentId]);
+
+    const isMultiAgent = agents.length > 1;
+    const command = action.command;
+    const consoleCommandName = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+
+    if (agentId && !action.agents.includes(agentId)) {
+      window.console.warn(
+        `ResponseActionResults: Agent id [${agentId}] not in list of agents for action [${command} - ${action.id}]`
+      );
+      return <></>;
+    }
+
+    return (
+      <EuiText data-test-subj={getTestId()} size={textSize}>
+        {/* eslint-disable-next-line complexity */}
+        {agents.map((hostAgentId, index) => {
+          const agentActionState = getAgentActionState(action, hostAgentId);
+          const hostName = action.hosts[hostAgentId]?.name ?? hostAgentId;
+          const hostStatusMessage = !agentActionState.isCompleted
+            ? OUTPUT_MESSAGES.isPending(consoleCommandName)
+            : agentActionState.wasCanceled
+            ? OUTPUT_MESSAGES.wasCanceled(consoleCommandName)
+            : agentActionState.wasSuccessful
+            ? OUTPUT_MESSAGES.wasSuccessful(consoleCommandName)
+            : action.isExpired
+            ? OUTPUT_MESSAGES.hasExpired(consoleCommandName)
+            : OUTPUT_MESSAGES.hasFailed(consoleCommandName);
+          const hostStatusMessageColor: EuiTextColorProps['color'] = !agentActionState.isCompleted
+            ? 'warning'
+            : agentActionState.wasCanceled
+            ? 'default'
+            : agentActionState.wasSuccessful
+            ? 'success'
+            : 'danger';
+          const hostStatusDisplay = (
+            <EuiTextColor data-test-subj={getTestId('hostStatus')} color={hostStatusMessageColor}>
+              {hostStatusMessage}
+            </EuiTextColor>
+          );
+
+          return (
+            <div data-test-subj={getTestId('hostStatusAndResults')} key={hostAgentId}>
+              {isMultiAgent ? (
+                <>
+                  <KeyValueDisplay name={hostName} value={hostStatusDisplay} />
+                  {agentActionState.isCompleted && (
+                    <div>
+                      {OUTPUT_MESSAGES.expandSection.completedAt}{' '}
+                      <FormattedDate
+                        fieldName={i18n.translate(
+                          'xpack.securitySolution.responseAction.responseActionResults.hostCompletedAt',
+                          { defaultMessage: 'Completed' }
+                        )}
+                        value={agentActionState.completedAt}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                hostStatusDisplay
+              )}
+
+              {agentActionState.isCompleted && (
+                <>
+                  <EuiSpacer />
+
+                  {(command === 'isolate' || command === 'unisolate') && (
+                    <IsolationResults
+                      action={action}
+                      agentId={hostAgentId}
+                      data-test-subj={getTestId('isolatationResults')}
+                    />
+                  )}
+
+                  {(isKillProcessAction(action) || isSuspendProcessAction(action)) && (
+                    <KillSuspendProcessActionResult
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('killSuspendProcessResults')}
+                    />
+                  )}
+
+                  {isProcessesAction(action) && (
+                    <RunningProcessesActionResults
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('processesResults')}
+                    />
+                  )}
+
+                  {isGetFileAction(action) && (
+                    <GetFileResults
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('getFileResults')}
+                    />
+                  )}
+
+                  {isExecuteAction(action) && (
+                    <ExecuteResults
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('executeResults')}
+                    />
+                  )}
+
+                  {isUploadAction(action) && (
+                    <EndpointUploadActionResult
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('uploadResults')}
+                    />
+                  )}
+
+                  {isScanAction(action) && (
+                    <ScanResults
+                      action={action}
+                      agentId={hostAgentId}
+                      data-test-subj={getTestId('scanResults')}
+                    />
+                  )}
+
+                  {isRunScriptAction(action) && (
+                    <RunscriptActionResult
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('runscriptResults')}
+                    />
+                  )}
+
+                  {isCancelAction(action) && (
+                    <CancelActionResults
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('cancelResults')}
+                    />
+                  )}
+
+                  {isMemoryDumpAction(action) && (
+                    <MemoryDumpResponseActionOutputResult
+                      action={action}
+                      agentId={hostAgentId}
+                      textSize={textSize}
+                      data-test-subj={getTestId('memoryDumpResults')}
+                    />
+                  )}
+                </>
+              )}
+
+              {isMultiAgent && index !== agents.length - 1 && <EuiHorizontalRule margin="l" />}
+            </div>
+          );
+        })}
+      </EuiText>
+    );
+  }
+);
+ResponseActionResults.displayName = 'ResponseActionResults';
