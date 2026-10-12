@@ -23,22 +23,21 @@ import {
 import { compatibilityFromNodesInfo, type NodesInfo } from './nodes_version_compatibility';
 import { virtualClock } from './state_action_machine.test_helpers';
 
-// `satisfies` keeps the optional intervals as `number` where the tests read them.
-const config = {
+const config: NodesVersionConfig = {
   kibanaVersion: '8.10.0',
   ignoreVersionMismatch: false,
   healthCheckInterval: 2500,
   healthCheckFailureInterval: 500,
   healthCheckStartupInterval: 100,
   healthCheckRetry: 2,
-} satisfies NodesVersionConfig;
+};
 
 const compatible: NodesInfo = { nodes: { a: { version: '8.10.0', ip: '1.1.1.1', name: 'a' } } };
 /** Reachable cluster, wrong version: not compatible, but not a failing health check. */
 const incompatible: NodesInfo = { nodes: { a: { version: '7.0.0', ip: '1.1.1.1', name: 'a' } } };
 const requestError = new Error('boom');
 
-// The version model never reads `completedAt`; the driver schedules from it.
+// The version model ignores `completedAt`.
 const ok = (nodes: NodesInfo): NodesVersionResult => ({ ok: true, value: nodes, completedAt: 0 });
 const fail = (error: Error): NodesVersionResult => ({ ok: false, error, completedAt: 0 });
 

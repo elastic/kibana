@@ -82,7 +82,7 @@ describe('run turns every failure of an action into an ok: false result', () => 
       return 'value';
     };
     // The first action is due at once (10) and completes at 15, so with delay 90 the
-    // second is due at 105, not 100: the 5ms the request took adds to the period.
+    // second is due at 105.
     const [initial, first, second] = await take(run(recorder(action, 90), clock), 3);
 
     expect([initial.dueAt, first.dueAt, second.dueAt]).toEqual([10, 105, 200]);
@@ -189,8 +189,8 @@ describe('run', () => {
   it('does not act once aborted during a wait, even with a sleep that ignores the signal', async () => {
     const controller = new AbortController();
     const request = jest.fn(async () => 1);
-    // Sleeps ignore the signal and cannot reject, as a virtual clock does; the
-    // abort lands while the machine is waiting.
+    // This sleep ignores the signal, as a virtual clock does; the abort lands
+    // while the machine is waiting.
     const clock = { now: () => 0, sleep: async () => controller.abort() };
 
     const steps = run(counter(request, Infinity), clock, controller.signal);

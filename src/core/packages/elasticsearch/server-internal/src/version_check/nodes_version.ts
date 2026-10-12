@@ -97,7 +97,7 @@ const nextControlState = (
   compatibility: NodesVersionCompatibility
 ): NodesVersionControlState => {
   if (state.controlState === 'STARTUP' && !compatibility.isCompatible) {
-    // A request error before the cluster was ever compatible is still startup.
+    // Until the cluster is first compatible, neither an error nor an incompatible answer ends startup.
     return 'STARTUP';
   }
   // An incompatible but reachable cluster is NORMAL: only request errors are FAILING.
