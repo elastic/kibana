@@ -9,9 +9,9 @@ import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 /*
- * Below this container width the controls row cannot fit Search, the date picker, the 250px
- * time field and the ES|QL menu on one line. Search and the date picker then grow to fill the
- * first row alongside the menu, and the time field takes its own full-width second row.
+ * Below this container width the controls row cannot fit the date picker, the 250px time field
+ * and Search on one line. The date picker then grows to fill the first row alongside Search, and
+ * the time field takes its own full-width second row.
  */
 const COMPACT_CONTROLS_MAX_WIDTH = '560px';
 
@@ -21,16 +21,19 @@ const sandboxRootCss = css`
   container-type: inline-size;
 `;
 
+// Pinned to the right edge of the row.
 const searchItemCss = css`
+  margin-left: auto;
+
   @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    flex-grow: 1;
+    margin-left: 0;
+    order: 1;
   }
 `;
 
-// Takes twice Search's share of the free space so the Search button stays the smaller of the two.
 const dateRangeItemCss = css`
   @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    flex-grow: 2;
+    flex-grow: 1;
   }
 `;
 
@@ -42,14 +45,6 @@ const timeFieldSelectCss = css`
     width: auto;
     flex: 1 1 100%;
     order: 2;
-  }
-`;
-
-const esqlMenuItemCss = css`
-  margin-left: auto;
-
-  @container (max-width: ${COMPACT_CONTROLS_MAX_WIDTH}) {
-    order: 1;
   }
 `;
 
@@ -128,7 +123,6 @@ export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
     dateRangeItemCss,
     controlsRowCss,
     timeFieldSelectCss,
-    esqlMenuItemCss,
     loadingCenterCss,
     resultsSectionCss,
   };
