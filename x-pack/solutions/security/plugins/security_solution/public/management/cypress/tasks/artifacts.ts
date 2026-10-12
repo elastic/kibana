@@ -302,7 +302,7 @@ export const blocklistFormSelectors = {
     cy.getByTestSubj('blocklist-form-field-select').click();
     cy.getByTestSubj('blocklist-form-file.Ext.code_signature').click();
   },
-  selectField: (field: 'file.path' | 'file.path.caseless' | 'file.name') => {
+  selectField: (field: 'file.path' | 'file.path.caseless' | 'file.name' | 'file.name.caseless') => {
     cy.getByTestSubj('blocklist-form-field-select').click();
     cy.getByTestSubj(`blocklist-form-${field}`).click();
   },
