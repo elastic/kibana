@@ -144,17 +144,19 @@ export const registerHuntThreatIntelSupplyRoutes = ({
           return response.ok({ body });
         } catch (error) {
           if (error instanceof ThreatIntelSupplyHardGateError) {
-            return response.badRequest({
-              body: {
-                message: i18n.translate(
-                  'xpack.alertzero.huntThreatIntelSupplyRestoreHardGateErrorMessage',
+            const message = error.reasonCodes.includes('reports_index_unmanaged')
+              ? i18n.translate(
+                  'xpack.alertzero.huntThreatIntelSupplyRestoreReportsIndexUnmanagedErrorMessage',
                   {
                     defaultMessage:
-                      'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
+                      'The threat reports index exists without its template. Delete the index and restart Kibana to recreate it, then try again.',
                   }
-                ),
-              },
-            });
+                )
+              : i18n.translate('xpack.alertzero.huntThreatIntelSupplyRestoreHardGateErrorMessage', {
+                  defaultMessage:
+                    'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
+                });
+            return response.badRequest({ body: { message } });
           }
           if (error instanceof ThreatIntelSupplyHuntDisabledError) {
             return response.badRequest({

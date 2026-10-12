@@ -48,6 +48,11 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
       defaultMessage:
         'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
     }),
+  huntSupplyReportsIndexUnmanaged: () =>
+    i18n.translate('xpack.alertzero.huntSupplyReportsIndexUnmanagedErrorMessage', {
+      defaultMessage:
+        'The threat reports index exists without its template. Delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
+    }),
   huntSupplyNotInstalled: () =>
     i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
       defaultMessage:

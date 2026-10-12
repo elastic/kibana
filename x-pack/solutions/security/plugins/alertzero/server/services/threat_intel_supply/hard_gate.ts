@@ -89,8 +89,9 @@ const checkEmbeddingEndpoints = async (
 
 /**
  * Hard-gate for enabling Continuous Threat Hunt: readiness `blocked` (reports
- * index missing / unreadable / created without its template) or `embedding_endpoint_unavailable`. Does not
- * gate on GenAI enrich connector or usable-report count.
+ * index missing / unreadable / created without its template) or
+ * `embedding_endpoint_unavailable`. Does not gate on GenAI enrich connector or
+ * usable-report count.
  */
 export const evaluateHuntSupplyHardGate = async ({
   esClient,

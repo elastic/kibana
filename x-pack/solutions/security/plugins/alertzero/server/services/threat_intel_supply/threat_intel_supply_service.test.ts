@@ -202,6 +202,29 @@ describe('ThreatIntelSupplyService', () => {
       await ensureWithMissingAttribute();
       expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(true);
     });
+
+    describe('when an undo step fails', () => {
+      // Undo runs in reverse, so enrich is undone first; its other-space Hunt check fails.
+      beforeEach(() => {
+        getWorkflowStatus.mockRejectedValueOnce(new Error('status unavailable'));
+      });
+
+      it('still rethrows the original error', async () => {
+        expect(await ensureWithMissingAttribute()).toBeInstanceOf(
+          ThreatIntelSupplyNotInstalledError
+        );
+      });
+
+      it('leaves the workflow whose undo failed on', async () => {
+        await ensureWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID)?.enabled).toBe(true);
+      });
+
+      it('still undoes the remaining flips', async () => {
+        await ensureWithMissingAttribute();
+        expect(workflows.get(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)?.enabled).toBe(false);
+      });
+    });
   });
 
   it('enables ingest in the global space when ensuring supply', async () => {
