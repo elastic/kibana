@@ -15,6 +15,7 @@ import {
 } from '../../screens/threat_intelligence/timeline';
 import {
   BARCHART_TIMELINE_BUTTON,
+  FLYOUT_BLOCK_MORE_ACTIONS_BUTTON,
   FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
   INDICATOR_TYPE_CELL,
 } from '../../screens/threat_intelligence/indicators';
@@ -22,10 +23,15 @@ import {
 const ADD_TO_TIMELINE_ACTION =
   '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]';
 
+/**
+ * On this branch the indicator flyout renders only the first few cell actions inline,
+ * so add-to-timeline has to be reached through the "more actions" popover.
+ */
 const clickFlyoutAddToTimelineAction = (selector: string) => {
   cy.get(selector).filter(':visible').first().scrollIntoView();
   cy.get(selector).filter(':visible').first().realHover();
 
+  cy.get(FLYOUT_BLOCK_MORE_ACTIONS_BUTTON).should('be.visible').click();
   cy.get(ADD_TO_TIMELINE_ACTION).should('be.visible').click();
 };
 
