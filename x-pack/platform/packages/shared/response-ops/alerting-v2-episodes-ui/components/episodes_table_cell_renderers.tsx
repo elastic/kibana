@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiCode,
   EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiSkeletonText,
@@ -17,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
@@ -34,6 +37,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
+import { useEpisodeSource } from '../source_labels';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -60,6 +64,60 @@ const getEpisodeGroupingFromRow = (
     groupingFields: ruleGroupingFields,
     groupingData: parseEpisodeDataJson(episode.episode_data),
   };
+};
+
+/** `source` written on events of native v2 rules; it carries no information worth showing. */
+const NATIVE_RULE_SOURCE = 'internal';
+
+/** The connector an alert came from: its icon, when one exists, followed by its name. */
+const EpisodeConnectorSource = ({ source }: { source: string }) => {
+  const IconComponent = ConnectorIconsMap.get(`.${source}`);
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {IconComponent && (
+        <EuiFlexItem grow={false}>
+          <Suspense fallback={null}>
+            <EuiIcon
+              type={IconComponent}
+              size="m"
+              aria-hidden={true}
+              data-test-subj="episodeConnectorSourceIcon"
+            />
+          </Suspense>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="episodeConnectorSourceName">{source}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Where an episode came from: the connector for alerts ingested from an external source,
+ * otherwise the alerting system (Classic or Universal).
+ */
+export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
+  const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
+  const { source } = row.flattened as unknown as AlertEpisode;
+
+  if (typeof source === 'string' && source && source !== NATIVE_RULE_SOURCE) {
+    return <EpisodeConnectorSource source={source} />;
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {icon && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} size="m" data-test-subj="episodeSourceIcon" aria-hidden={true} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="episodeSourceCell">{label}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {

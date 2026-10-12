@@ -365,7 +365,7 @@ export function QuickSearchVisor({
             appName="esqlEditorVisor"
             dataTestSubj="esqlVisorKQLQueryInput"
             onChangeQueryInputFocus={setIsKqlFocused}
-            size="s"
+            size={isInline ? 's' : undefined}
             isClearable={false}
           />
         </div>

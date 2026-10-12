@@ -7,25 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SamlAuth } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { spaceTest as test } from '../fixtures';
 import { getDummyWorkflowYaml } from '../fixtures/workflows';
 
-// Local SAML synthesizes `elastic_<role>` / `test <role>`, while Cloud logs in as a real QA account.
-const resolveUser = async (samlAuth: SamlAuth, role: string) => {
-  const { username, full_name: fullName, email } = await samlAuth.session.getUserData(role);
-  return { username, displayName: fullName || email || username };
-};
-
 test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
   let workflowId: string | undefined;
   let ownerHeaders: Record<string, string>;
+  let owner: { username: string; displayName: string };
+  let viewer: { username: string; displayName: string };
 
-  test.beforeAll(async ({ scoutSpace }) => {
+  test.beforeAll(async ({ scoutSpace, samlAuth }) => {
     await scoutSpace.uiSettings.set({ [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: true });
+    // Resolve real identities from the live session — local SAML synthesizes
+    // `elastic_<role>` / `test <role>`, while Cloud authenticates real QA accounts.
+    // getUserData also activates each profile so it appears in the access picker.
+    const {
+      username: ownerUsername,
+      full_name: ownerFullName,
+      email: ownerEmail,
+    } = await samlAuth.session.getUserData('editor');
+    owner = { username: ownerUsername, displayName: ownerFullName || ownerEmail || ownerUsername };
+    const {
+      username: viewerUsername,
+      full_name: viewerFullName,
+      email: viewerEmail,
+    } = await samlAuth.session.getUserData('viewer');
+    viewer = {
+      username: viewerUsername,
+      displayName: viewerFullName || viewerEmail || viewerUsername,
+    };
   });
 
   test.beforeEach(async () => {
@@ -63,11 +76,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     samlAuth,
   }, testInfo) => {
     test.setTimeout(120_000);
-    // Activate the recipient profile so it is available in the access picker.
-    await samlAuth.asInteractiveUser('viewer');
     ownerHeaders = (await samlAuth.asInteractiveUser('editor')).cookieHeader;
-    const owner = await resolveUser(samlAuth, 'editor');
-    const viewer = await resolveUser(samlAuth, 'viewer');
     await browserAuth.loginAsPrivilegedUser();
     const editor = pageObjects.workflowEditor;
     await editor.gotoNewWorkflow();
@@ -126,9 +135,7 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
     }) => {
       test.setTimeout(120_000);
       const editor = pageObjects.workflowEditor;
-      await samlAuth.asInteractiveUser('editor');
       ownerHeaders = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
-      const executor = await resolveUser(samlAuth, 'editor');
       await browserAuth.loginAsAdmin();
       await editor.gotoNewWorkflow();
       await editor.setYamlEditorValue(
@@ -140,8 +147,8 @@ test.describe('Workflow access dialog', { tag: tags.stateful.classic }, () => {
       await editor.gotoWorkflow(workflowId);
       await editor.openAccessDialog();
       await editor.setAccessMode('private');
-      await editor.addAccessUser(executor.displayName);
-      await editor.setAccessRole(executor.username, 'executor');
+      await editor.addAccessUser(owner.displayName);
+      await editor.setAccessRole(owner.username, 'executor');
       await editor.saveAccess();
       await browserAuth.loginAsPrivilegedUser();
       await editor.gotoWorkflow(workflowId);

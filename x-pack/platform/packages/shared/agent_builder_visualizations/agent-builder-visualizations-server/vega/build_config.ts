@@ -74,7 +74,7 @@ export const buildVegaConfig = async ({
     try {
       validationError = await validateEsqlQuery(
         providedEsql,
-        buildServerESQLCallbacks({ client: esClient.asCurrentUser })
+        buildServerESQLCallbacks({ esClient, logger })
       );
     } catch {
       // Couldn't validate, keep it.
