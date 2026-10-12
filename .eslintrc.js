@@ -621,6 +621,8 @@ module.exports = {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
+        '@kbn/imports/no_redux_toolkit_middleware_spread': 'warn',
+        '@kbn/imports/no_redux_toolkit_state_reassignment': 'warn',
         '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         'no-restricted-modules': [
           'error',
