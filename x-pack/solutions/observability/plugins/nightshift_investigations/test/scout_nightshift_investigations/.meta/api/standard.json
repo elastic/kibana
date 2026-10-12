@@ -1,5 +1,5 @@
 {
-  "sha1": "0260a55678cbd040ea726ccfb5cd4541f1b21d6a",
+  "sha1": "40e9bc097e99d87013b340d4a4528962c288b9e6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -101,35 +101,33 @@
       }
     },
     {
+      "id": "1f3cbb59d6dcdbd-ffb443a89bd0593",
+      "title": "POST /internal/nightshift/investigations/{id}/_ensure authorization returns 403 for a user without agentBuilder:write",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation_authorization.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
       "id": "573fcc9ed716f81-5e449208c3a1a7a",
       "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 404 when no live investigation workflow run names the investigation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 25,
-        "column": 8
-      }
-    },
-    {
-      "id": "573fcc9ed716f81-b1ea6b020216604",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 403 for a user without agentBuilder:write",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 29,
-        "column": 7
+        "line": 20,
+        "column": 13
       }
     },
     {
@@ -286,8 +284,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 79,
-        "column": 47
+        "line": 88,
+        "column": 55
       }
     },
     {
@@ -300,8 +298,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 108,
-        "column": 16
+        "line": 117,
+        "column": 31
       }
     },
     {
@@ -314,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 169,
-        "column": 13
+        "line": 174,
+        "column": 12
       }
     },
     {
@@ -328,8 +326,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
-        "line": 191,
-        "column": 14
+        "line": 199,
+        "column": 33
       }
     },
     {

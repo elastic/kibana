@@ -88,7 +88,6 @@ import {
 } from './saved_objects';
 import { createSandboxSecretsClient } from './sandbox_secrets';
 import { createCustomContextClient } from './custom_context';
-import { deleteAllInvestigations } from './lib/delete_all_investigations';
 import { createInvestigationSweepRepository, SavedObjectInvestigationRepository } from './storage';
 import {
   registerInvestigationReconciliationTask,
@@ -564,11 +563,7 @@ export class NightshiftInvestigationsPlugin
 
     return {
       getInvestigationsClient: this.getInvestigationsClient,
-      deleteAllInvestigations: () =>
-        deleteAllInvestigations({
-          sweepRepository: investigationSweepRepository,
-          agenticInvestigations: this.agenticInvestigations,
-        }),
+      deleteAllInvestigations: () => investigationSweepRepository.deleteAllAcrossSpaces(),
       isInvestigationAvailable: (request) =>
         isInvestigationRunAvailable({
           request,

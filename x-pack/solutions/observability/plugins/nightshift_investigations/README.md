@@ -68,7 +68,7 @@ The workflow's concurrency key is `investigation:<id>` with a `queue` strategy, 
 
 Readers use the shared query API: the Nightshift landing page (list, severity counts, cards from `agenticInvestigations.InvestigationCard`, Agent Builder's conversation details flyout for one investigation), the significant-event flyout (`@kbn/investigation-output`), the alert "Investigate" action (list by `subject_id=<alert id>`), and significant events' investigation status route.
 
-`deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space and, through `agenticInvestigations.deleteSubjectInvestigationDataAcrossSpaces()`, the subjects, claims, impact, and hypotheses of every investigation with subjects. The Agent Builder conversations stay; Agent Builder has no cross-space delete.
+`deleteAllInvestigations()` on the start contract deletes the legacy saved objects in every space. It leaves the investigation conversations and their shared data (subjects, claims, impact, hypotheses) alone: Agent Builder has no cross-space delete, and the shared data has no owner that would limit a sweep to Nightshift's investigations.
 
 ### One identity per investigation
 
