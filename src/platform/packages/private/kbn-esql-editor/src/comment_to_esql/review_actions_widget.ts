@@ -13,7 +13,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
-const WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
+export const REVIEW_ACTIONS_WIDGET_ID = 'ESQL_COMMENT_REVIEW_ACTIONS_WIDGET';
 // Buttons (~30px) plus 8px breathing room above so they don't sit flush against the inserted code.
 const ZONE_HEIGHT_PX = 38;
 const ZONE_PADDING_TOP_PX = 8;
@@ -57,7 +57,7 @@ export class ReviewActionsWidget implements monaco.editor.IContentWidget {
   }
 
   public getId(): string {
-    return WIDGET_ID;
+    return REVIEW_ACTIONS_WIDGET_ID;
   }
 
   public getDomNode(): HTMLElement {

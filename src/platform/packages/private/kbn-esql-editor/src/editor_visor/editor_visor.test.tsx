@@ -422,13 +422,13 @@ describe('Quick search visor', () => {
       await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
     });
 
-    it('restoreNlPrompt restores the submitted prompt and focuses the input', async () => {
+    it('restoreNlPrompt returns to natural language with the submitted prompt focused', async () => {
       (corePluginMock.http.post as jest.Mock).mockResolvedValue({
         content: 'FROM logs | LIMIT 10',
       });
       const onNlResult = jest.fn();
       const visorRef = React.createRef<QuickSearchVisorApi>();
-      const { getByTestId } = renderWithI18n(
+      const { getByTestId, queryByTestId } = renderWithI18n(
         <KibanaContextProvider services={enterpriseServices}>
           <QuickSearchVisor ref={visorRef} {...props} onNlResult={onNlResult} />
         </KibanaContextProvider>
@@ -440,10 +440,14 @@ describe('Quick search visor', () => {
       });
       await waitFor(() => expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10'));
       expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('');
-      act(() => getByTestId('esqlVisorNLQueryInput').blur());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorModeKql'));
+      });
+      expect(queryByTestId('esqlVisorNLQueryInput')).not.toBeInTheDocument();
 
       act(() => visorRef.current?.restoreNlPrompt());
 
+      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
       expect(getByTestId('esqlVisorNLQueryInput')).toHaveValue('show me logs');
       expect(getByTestId('esqlVisorNLQueryInput')).toHaveFocus();
     });

@@ -16,6 +16,7 @@ import React, {
   useState,
 } from 'react';
 import type { ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
@@ -265,7 +266,11 @@ export const QuickSearchVisor = forwardRef<QuickSearchVisorApi, QuickSearchVisor
       ref,
       () => ({
         restoreNlPrompt: () => {
-          restoreNlPrompt();
+          // The input is unmounted in KQL mode; render synchronously so it can take focus
+          flushSync(() => {
+            setVisorMode(VisorMode.NaturalLanguage);
+            restoreNlPrompt();
+          });
           nlInputRef.current?.focus();
         },
       }),

@@ -42,13 +42,18 @@ import React, {
   useState,
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import { QuerySource } from '@kbn/esql-types';
 import { DEFAULT_HISTOGRAM_BAR_TARGET } from '@kbn/data-service';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
-import { useCommentToEsql, useGhostLineHint, useVisorNlToEsql } from './comment_to_esql';
+import {
+  REVIEW_ACTIONS_WIDGET_ID,
+  useCommentToEsql,
+  useGhostLineHint,
+  useVisorNlToEsql,
+} from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
@@ -704,7 +709,11 @@ const ESQLEditorInternal = function ESQLEditor({
   // Non-inline visors are owned by the parent
   const inlineVisorRef = useRef<QuickSearchVisorApi>(null);
   const visorNlOnReject = useCallback(() => {
-    inlineVisorRef.current?.restoreNlPrompt();
+    if (inlineVisorRef.current) {
+      // Clicking the editor closes the visor and makes it inert; reopen before focusing it
+      flushSync(() => setIsVisorOpen(true));
+      inlineVisorRef.current.restoreNlPrompt();
+    }
     onVisorNlResultRejected?.();
   }, [onVisorNlResultRejected]);
 
@@ -909,7 +918,11 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
-                    if (isVisorOpenRef.current) {
+                    // Keep / Undo on a generated query is not a click into the query
+                    const isReviewAction =
+                      e.target.type === monaco.editor.MouseTargetType.CONTENT_WIDGET &&
+                      e.target.detail === REVIEW_ACTIONS_WIDGET_ID;
+                    if (isVisorOpenRef.current && !isReviewAction) {
                       setIsVisorOpen(false);
                     }
                     if (enableResourceBrowser) {
