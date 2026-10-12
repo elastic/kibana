@@ -83,7 +83,7 @@ const useStyles = () => {
   return {
     ...staticStyles,
     tabs: css`
-      padding-left: ${euiTheme.size.s};
+      padding-left: ${euiTheme.size.base};
     `,
   };
 };
@@ -275,7 +275,7 @@ export function renderApp(
   rendering: RenderingService
 ) {
   if (redirectOnMissingCapabilities(application)) {
-    return () => {};
+    return () => { };
   }
 
   const badges = getBadges(application);
