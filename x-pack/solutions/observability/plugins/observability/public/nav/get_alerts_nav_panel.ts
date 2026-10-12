@@ -26,8 +26,8 @@ const ALERTS_ICON = 'warning';
 /** Classic Observability alerts label for nav and global search. */
 export const getObservabilityAlertsLinkTitle = (alertingV2Enabled: boolean): string =>
   alertingV2Enabled
-    ? i18n.translate('xpack.observability.nav.alertsV1', {
-        defaultMessage: 'Alerts (V1)',
+    ? i18n.translate('xpack.observability.nav.alertsClassic', {
+        defaultMessage: 'Alerts (Classic)',
       })
     : i18n.translate('xpack.observability.alertsLinkTitle', {
         defaultMessage: 'Alerts',
