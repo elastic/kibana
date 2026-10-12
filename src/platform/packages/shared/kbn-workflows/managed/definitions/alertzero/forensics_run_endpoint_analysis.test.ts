@@ -12,8 +12,11 @@ import {
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW,
   ALERTZERO_FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID,
 } from '.';
-import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import FORENSICS_ENDPOINT_ANALYSIS_YAML from './forensics_endpoint_analysis.yaml';
+import {
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
+  ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
+} from './forensics_proposal_gate';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -1270,9 +1273,9 @@ describe('Endpoint analysis run', () => {
       };
       const inputs = proposeAction?.inputs;
 
-      // The bridge, not the gate: it owns `origin`, so containment proposals
-      // land in the queue AlertZero actually reads.
-      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID);
+      // The forensics gate wraps the bridge, so `origin` is still stamped there and
+      // containment proposals land in the queue AlertZero actually reads.
+      expect(proposeAction?.['workflow-id']).toBe(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID);
       expect(inputs?.confidence).toBe("{{ foreach.item.confidence | default: '' }}");
       // A missing title stores the action's own name, so two isolates of different
       // hosts share one queue label. The prompt tells the model to name the target.
@@ -1402,6 +1405,105 @@ describe('Endpoint analysis run', () => {
       expect(evaluate(gate, when(true, true, 0))).toBe(false);
       expect(evaluate(gate, when(false, true))).toBe(false);
       expect(evaluate(gate, when(true, false))).toBe(false);
+    });
+
+    // The investigation used to stay open after the last containment decision. The
+    // gate closes it once every proposal on the investigation is settled, so each
+    // dispatch goes through the gate (still async: this run must not park on the
+    // approval window) and tells it which investigation to close and how many
+    // proposals to wait for.
+    describe('closes the investigation once every proposal is decided', () => {
+      const gate = parse(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.yaml) as {
+        triggers?: Array<{
+          inputs?: {
+            required?: string[];
+            properties?: Record<string, unknown>;
+            additionalProperties?: boolean;
+          };
+        }>;
+      };
+      const dispatch = stepByName('propose_action');
+      const inputs = (dispatch?.with as { inputs?: Record<string, unknown> })?.inputs ?? {};
+
+      it('dispatches the gate asynchronously by its registered id', () => {
+        expect(dispatch?.type).toBe('workflow.executeAsync');
+        expect((dispatch?.with as { 'workflow-id'?: string })?.['workflow-id']).toBe(
+          ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.id
+        );
+      });
+
+      // The gate's own declared trigger schema is what the dispatch is checked against,
+      // not a copy of it, so a change to either side fails here rather than at runtime.
+      it('satisfies the gate trigger schema', () => {
+        const gateInputs = gate.triggers?.[0]?.inputs;
+        const provided = Object.keys(inputs);
+        const declared = Object.keys(gateInputs?.properties ?? {});
+
+        expect((gateInputs?.required ?? []).filter((key) => !provided.includes(key))).toEqual([]);
+        expect(gateInputs?.additionalProperties).toBe(false);
+        expect(provided.filter((key) => !declared.includes(key))).toEqual([]);
+      });
+
+      it('closes the investigation it proposed on', () => {
+        expect(inputs.investigationConversationId).toBe(inputs.conversationId);
+        expect(inputs.closureSummary).toBeUndefined();
+      });
+
+      // The barrier counts every proposal on the investigation, and this one already
+      // holds at least the approved handoff that requested the analysis. A barrier of
+      // just this run's actions would be met before the siblings finished queueing.
+      it('baselines the creation barrier on the proposals already there', () => {
+        const count = stepByName('count_existing_proposals');
+        expect(count?.type).toBe('kibana.request');
+        expect(count?.with).toMatchObject({
+          method: 'GET',
+          path: '/s/{{ workflow.spaceId }}/internal/proposals',
+          headers: { 'elastic-api-version': '1' },
+          query: {
+            conversationId: '{{ steps.resolve_request.output.investigation_id }}',
+            size: 1,
+          },
+        });
+        expect(count?.['on-failure']).toEqual({ continue: true });
+        expect(count?.if).toBe(stepByName('propose_actions')?.if);
+
+        const names = allSteps.map(({ name }) => name);
+        expect(names.indexOf('count_existing_proposals')).toBeLessThan(
+          names.indexOf('resolve_expected_proposals')
+        );
+        expect(names.indexOf('resolve_expected_proposals')).toBeLessThan(
+          names.indexOf('propose_actions')
+        );
+
+        expect(inputs.expectedProposalCount).toBe(
+          '${{ steps.resolve_expected_proposals.output.count }}'
+        );
+        const expected = String(stepByName('resolve_expected_proposals')?.with?.count);
+        const when = (total: number | undefined, recommended: number) => ({
+          steps: {
+            count_existing_proposals: total === undefined ? { error: {} } : { output: { total } },
+            forensic_analysis: {
+              output: {
+                structured_output: {
+                  recommendedActions: Array.from({ length: recommended }, () => ({})),
+                },
+              },
+            },
+          },
+        });
+        expect(evaluate(expected, when(1, 2))).toBe(3);
+        expect(evaluate(expected, when(0, 2))).toBe(2);
+        // A failed count falls back to this run's own actions rather than blocking.
+        expect(evaluate(expected, when(undefined, 2))).toBe(2);
+      });
+
+      it('tells the analyst the investigation will close on the last decision', () => {
+        const message = String(
+          (stepByName('journal_proposals_queued')?.with as { inputs?: { message?: string } })
+            ?.inputs?.message
+        );
+        expect(message).toContain('closes once every proposal');
+      });
     });
 
     // A rejected dispatch used to be swallowed, and the findings alone then closed
