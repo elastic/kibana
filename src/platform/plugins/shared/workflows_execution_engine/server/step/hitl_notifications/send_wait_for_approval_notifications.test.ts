@@ -46,7 +46,7 @@ describe('send_wait_for_approval_notifications', () => {
     it('returns true when an HTTP destination is configured', () => {
       expect(
         hasExternalHitlChannels({
-          http: { url: 'https://hooks.example/hitl', body: 'ping' },
+          http: { url: 'https://hooks.example/hitl' },
         })
       ).toBe(true);
     });
