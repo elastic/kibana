@@ -400,8 +400,9 @@ export const RuleDetailsPage = connector(
       ruleIndex = rule.index;
     }
 
+    // Only the first load shows a spinner. A refresh keeps the callout in place to avoid layout jumps.
     const ruleError = useMemo(() => {
-      return ruleLoading ? (
+      return isLoading ? (
         <EuiFlexItem>
           <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
         </EuiFlexItem>
@@ -422,7 +423,7 @@ export const RuleDetailsPage = connector(
       lastExecutionStatus,
       lastExecutionDate,
       lastExecutionMessage,
-      ruleLoading,
+      isLoading,
       rule?.immutable,
       rule?.name,
       ruleIndex,
