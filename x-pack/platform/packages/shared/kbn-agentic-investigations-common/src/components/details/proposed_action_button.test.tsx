@@ -23,7 +23,6 @@ const mockProposal: ApprovalProposal = {
   comment: 'Isolate the host to cut off the replayed session.',
   impact: 'critical',
   status: 'pending',
-  expired: false,
   category: 'Response action',
   action: { name: 'Isolate cfo-mbp-14 — host isolation', reversible: false },
 };
@@ -192,7 +191,7 @@ describe('ProposedActionButton', () => {
   describe('an expired proposal', () => {
     // Nobody decided it — the gate timed out — so it carries no `decision` at all, unlike the
     // decided cases above.
-    const expiredProposal: ApprovalProposal = { ...mockProposal, expired: true };
+    const expiredProposal: ApprovalProposal = { ...mockProposal, status: 'expired' };
 
     it('shows an Expired badge instead of Needs review, though nobody ever decided it', () => {
       renderButton({ proposal: expiredProposal });
@@ -212,12 +211,6 @@ describe('ProposedActionButton', () => {
       expect(within(dialog).getByText('Expired')).toBeInTheDocument();
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
       expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
-    });
-
-    it('also reads status: expired settled ahead of its deadline, not just a computed expiry', () => {
-      renderButton({ proposal: { ...mockProposal, expired: false, status: 'expired' } });
-
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
     });
   });
 });

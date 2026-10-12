@@ -60,7 +60,7 @@ describe('activateHandler', () => {
         source: alertEvent.source,
         type: alertEventType.alert,
         space_id: alertEvent.space_id,
-        episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+        alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
         severity: alertEvent.severity,
       });
     });
@@ -77,8 +77,8 @@ describe('activateHandler', () => {
 
     it('omits episode.status_count on the synthetic event — mirroring the director on any → active transition', () => {
       const prepared = activateHandler.prepare(buildItem());
-      expect(prepared.ruleEvent?.episode).toBeDefined();
-      expect(prepared.ruleEvent?.episode?.status_count).toBeUndefined();
+      expect(prepared.ruleEvent?.alert).toBeDefined();
+      expect(prepared.ruleEvent?.alert?.status_count).toBeUndefined();
     });
 
     it('defaults rule version to 1 when the alert event omits it', () => {
@@ -95,7 +95,7 @@ describe('activateHandler', () => {
   });
 
   describe('precondition: rejects only when the episode is already active', () => {
-    it('rejects activate with INVALID_EPISODE_STATE_TRANSITION (409) when episode_status is active', () => {
+    it('rejects activate with INVALID_ALERT_STATE_TRANSITION (409) when episode_status is active', () => {
       try {
         activateHandler.prepare(
           buildItem(buildAlertEvent({ episode_status: alertEpisodeStatus.active }))
@@ -108,8 +108,8 @@ describe('activateHandler', () => {
           code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
           details: {
             group_hash: 'group-1',
-            episode_id: 'episode-1',
-            episode_status: alertEpisodeStatus.active,
+            alert_id: 'episode-1',
+            alert_status: alertEpisodeStatus.active,
             action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
           },
         });

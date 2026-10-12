@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import {
   alertEpisodeStatus,
@@ -17,6 +16,7 @@ import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getCannotActivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
+import { noOpConflict } from './no_op_conflict';
 
 type ActivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -40,14 +40,12 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.conflict(getCannotActivateEpisodeMessage(alertEvent.episode_id), {
+  throw noOpConflict({
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-    details: {
-      group_hash: alertEvent.group_hash,
-      episode_id: alertEvent.episode_id,
-      episode_status: status,
-      action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-    },
+    message: getCannotActivateEpisodeMessage(alertEvent.episode_id),
+    alertEvent,
+    actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+    details: { alert_status: status },
   });
 };
 
@@ -92,7 +90,7 @@ export const activateHandler: ActionHandler<ActivateAlertActionBody> = {
       source: alertEvent.source,
       type: alertEventType.alert,
       space_id: alertEvent.space_id,
-      episode: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
+      alert: { id: alertEvent.episode_id, status: alertEpisodeStatus.active },
       severity: alertEvent.severity ?? undefined,
     });
 

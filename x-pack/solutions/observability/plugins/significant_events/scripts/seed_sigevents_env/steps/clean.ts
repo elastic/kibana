@@ -9,7 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { StreamQuery } from '@kbn/significant-events-schema';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE, type StreamQuery } from '@kbn/significant-events-schema';
 import type { SeedContext } from '../types';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { kibanaRequest } from '../lib/kibana';
@@ -85,12 +85,27 @@ async function cleanDetectionAndEventHistory(
   );
   await deleteByQuery(
     esClient,
-    '.significant_events-events',
+    '.rule-events',
     {
       bool: {
         filter: [
-          { terms: { 'signals.metadata.rule_uuid': ruleIds } },
-          { term: { 'kibana.space_ids': space } },
+          { terms: { 'data.signals.metadata.rule_uuid': ruleIds } },
+          { term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE } },
+          { term: { space_id: space } },
+        ],
+      },
+    },
+    log
+  );
+  await deleteByQuery(
+    esClient,
+    '.rule-events',
+    {
+      bool: {
+        filter: [
+          { term: { type: 'signal' } },
+          { terms: { 'rule.id': ruleIds } },
+          { term: { space_id: space } },
         ],
       },
     },
@@ -121,10 +136,6 @@ export async function cleanSeedData(
   const ruleIds = allQueries.map((query) =>
     computeRuleId(ctx.streamName, query.id, query.esql.query)
   );
-
-  if (queryIds.length > 0) {
-    await deleteByQuery(esClient, '.rule-events', { terms: { 'rule.id': ruleIds } }, log);
-  }
 
   await cleanDetectionAndEventHistory(esClient, ruleIds, ctx.space, log);
 

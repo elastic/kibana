@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 export class RulesListPage {
   public readonly tagsFilterButton: Locator;
@@ -21,7 +22,7 @@ export class RulesListPage {
   /** Heading tab for this (v2) Rules page; hidden alongside v1RulesTab when only one would show. */
   public readonly v2RulesTab: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
     this.selectAllRulesButton = this.page.testSubj.locator('selectAllRulesButton');
     this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');
@@ -34,7 +35,7 @@ export class RulesListPage {
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/rules');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.rules}`);
   }
 
   tagsFilterOption(tag: string) {

@@ -862,12 +862,12 @@ describe('RulesListTableContainer', () => {
         {
           ...mockRules[0],
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [], version: 1 },
+          metadata: { name: 'Rule Three', tags: [] },
         },
         {
           ...mockRules[1],
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [], version: 1 },
+          metadata: { name: 'Rule Four', tags: [] },
         },
       ] as RuleApiResponse[];
 

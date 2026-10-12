@@ -1,5 +1,5 @@
 {
-  "sha1": "95463214e97ab5ce4dc1e7a05fcacd7d4c3e5f2b",
+  "sha1": "5a9fc2b19686ab204fba3e84b4f4b728711794bd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -411,7 +411,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 44,
+        "line": 45,
         "column": 9
       }
     },
@@ -427,7 +427,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/streams_header.spec.ts",
-        "line": 56,
+        "line": 57,
         "column": 26
       }
     },

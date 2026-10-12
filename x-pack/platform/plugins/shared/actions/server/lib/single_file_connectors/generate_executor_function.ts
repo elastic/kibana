@@ -12,6 +12,8 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
+  isSelectedActionEnabled,
+  type SelectedActions,
 } from '@kbn/connector-specs';
 import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
 import type {
@@ -139,6 +141,13 @@ export const generateExecutorFunction = ({
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const selectedActions = config.selectedActions as SelectedActions;
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }

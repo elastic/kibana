@@ -78,6 +78,11 @@ export interface IntegrationCardItem {
   isCollectionCard?: boolean;
   groupMembers?: IntegrationCardItem[];
   searchableContent?: string;
+  // Services bundled behind a single tile (e.g. AWS onboarding). Used to tell the user which
+  // service their search matched, since those services have no tile of their own.
+  searchMembers?: Array<{ name: string; title: string }>;
+  // Set at render time when the current search term matched `searchMembers`: every match, in order.
+  searchMemberMatch?: { memberTitles: string[]; collectionTitle: string };
   isQuickstart?: boolean;
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;

@@ -41,7 +41,7 @@ export type DataFormat = 'ecs' | 'otel';
 /**
  * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
  * unified ECS template.
- *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml), uses S3SourceBuckets
+ *   - `'otel'`           — OTel multi-signal template (otel_logs-cloudformation.yaml)
  *   - `'crowdstrike_fdr'`— CrowdStrike FDR dedicated template
  */
 export type EcfDedicatedTemplate = 'otel' | 'crowdstrike_fdr';
@@ -162,6 +162,29 @@ export interface AwsServiceMatrixEntry {
    * this gate they would inherit managed_integration and be POSTed to Fleet with an unknown input.
    */
   ecfOnly?: boolean;
+  /**
+   * Inputs ECF can route for this service. Distinct from `inputs` (the manifest-derived superset
+   * the agent-based path can use): e.g. WAF supports only S3 under ECF but S3 + CloudWatch
+   * under agent-based. Absent means ECF can route every input in `inputs`.
+   */
+  ecfInputs?: string[];
+  /**
+   * The ECF-minimal settings view (trigger ARN vars only). Present on services whose deployment
+   * methods are all `ecf`. The entry-level `requiredConfig` / `optionalConfig` / `dataStreams` /
+   * `inputs` keep the full manifest-derived values; `applyDeploymentMethodView` swaps this view
+   * in when the selected deployment method calls for it.
+   */
+  ecfSettings?: EcfSettingsView;
+  /** Set by `applyDeploymentMethodView` when the entry currently carries the ECF-minimal view. */
+  settingsScope?: 'ecf';
+}
+
+/** ECF-minimal slice of a matrix entry: only the S3 / CloudWatch trigger ARN vars. */
+export interface EcfSettingsView {
+  requiredConfig: string[] | undefined;
+  dataStreams: string[];
+  inputs: string[] | undefined;
+  defaultEnabledInputs: string[];
 }
 
 /**
@@ -184,6 +207,8 @@ type AwsServiceStaticEntry = Omit<
   | 'name'
   | 'varDefsByInput'
   | 'varDefsByDataStream'
+  | 'ecfSettings'
+  | 'settingsScope'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   showInUI?: boolean;
@@ -295,21 +320,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     // firewall_metrics has no agentless support yet (tracked: elastic/integrations#19301).
     excludedDataStreams: ['firewall_metrics'],
   },
-  {
-    id: 'firewall_otel',
-    name: 'AWS Network Firewall',
-    category: 'security_identity_compliance',
-    dataFormat: 'otel',
-    policyTemplate: 'firewall',
-    ecfDataStream: 'firewall_logs',
-    excludedDataStreams: ['firewall_metrics'],
-    deploymentMethods: [{ method: 'ecf', preferred: true }],
-    ecfOnly: true,
-    packageName: 'aws',
-    ecfLogType: 'networkfirewall',
-    ecfDedicatedTemplate: 'otel',
-    inputs: ['aws-s3'],
-  },
   // aws_securityhub replaces securityhub policy template in aws (legacy)
   {
     id: 'aws_securityhub',
@@ -322,8 +332,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
     ecfLogType: 'waf',
-    // ECF only supports S3 for WAF; CloudWatch input is intentionally excluded.
-    inputs: ['aws-s3'],
+    // ECF only supports S3 for WAF; agent-based can still use CloudWatch.
+    ecfInputs: ['aws-s3'],
   },
   {
     id: 'waf_otel',
@@ -595,8 +605,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Cost and Usage Report (CUR 2.0)',
     category: 'cloud_financial_management',
     packageName: 'aws_billing',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['metrics'],
   },
 
   // ── amazon_security_lake package — Security, Identity & Compliance ────────
@@ -605,8 +613,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'Amazon Security Lake',
     category: 'security_identity_compliance',
     packageName: 'amazon_security_lake',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['logs'],
   },
 ];
 
@@ -774,25 +780,29 @@ function buildDeploymentMethods(
 }
 
 /**
- * For ECF-only services, restrict requiredConfig to trigger vars (bucket_arn / log_group_arn)
- * and collapse the dataStreams list to the single ecfDataStream when one is declared.
- * Returns undefined when not applicable (non-ECF service).
+ * Derive the ECF-minimal settings view for ECF-only services: requiredConfig is restricted to the
+ * trigger vars (bucket_arn / log_group_arn) of the inputs ECF can route, and the dataStreams list
+ * collapses to the single ecfDataStream when one is declared.
+ * Returns undefined when not applicable (non-ECF service). The full manifest-derived fields on the
+ * entry are left untouched — see `applyDeploymentMethodView`.
  */
-function applyEcfOnlyConfig(
+function deriveEcfSettings(
   entry: AwsServiceStaticEntry,
   deploymentMethods: DeploymentMethodEntry[],
   varDefsByInput: Record<string, Record<string, RegistryVarsEntry>>,
   inputs: string[] | undefined,
-  dataStreams: string[]
-):
-  | { requiredConfig: string[] | undefined; optionalConfig: undefined; dataStreams: string[] }
-  | undefined {
+  dataStreams: string[],
+  defaultEnabledInputs: string[]
+): EcfSettingsView | undefined {
   if (!deploymentMethods.length || !deploymentMethods.every((m) => m.method === 'ecf')) {
     return undefined;
   }
 
   const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
-  const effectiveInputSet = new Set(inputs ?? []);
+  const ecfInputs = entry.ecfInputs
+    ? (inputs ?? entry.ecfInputs).filter((i) => entry.ecfInputs!.includes(i))
+    : inputs;
+  const effectiveInputSet = new Set(ecfInputs ?? []);
   const ecfVarNames = [
     ...new Set(
       Object.entries(varDefsByInput)
@@ -804,15 +814,41 @@ function applyEcfOnlyConfig(
 
   // For OTel twins aliasing a multi-DS ECS PT, restrict to the single ecfDataStream so the
   // settings panel renders a simple single-ARN form instead of a multi-DS panel.
-  const resultDataStreams =
+  const ecfDataStreams =
     entry.ecfOnly && entry.ecfDataStream && dataStreams.includes(entry.ecfDataStream)
       ? [entry.ecfDataStream]
-      : dataStreams;
+      : [...dataStreams];
 
   return {
     requiredConfig: ecfVarNames.length > 0 ? ecfVarNames : undefined,
+    dataStreams: ecfDataStreams,
+    inputs: ecfInputs,
+    defaultEnabledInputs: entry.ecfInputs
+      ? defaultEnabledInputs.filter((i) => entry.ecfInputs!.includes(i))
+      : [...defaultEnabledInputs],
+  };
+}
+
+/**
+ * Select the settings view for the chosen deployment method. ECF-minimal (ARN only) applies when
+ * the service is deployed through ECF, i.e. any method but agent-based, and always for `ecfOnly`
+ * services (OTel twins), which have no agent-based settings of their own. Agent-based exposes the
+ * full manifest var set.
+ */
+export function applyDeploymentMethodView(
+  entry: AwsServiceMatrixEntry,
+  method: DeploymentMethod
+): AwsServiceMatrixEntry {
+  const ecf = entry.ecfSettings;
+  if (!ecf || (method === 'agent_based' && !entry.ecfOnly)) return entry;
+  return {
+    ...entry,
+    requiredConfig: ecf.requiredConfig,
     optionalConfig: undefined,
-    dataStreams: resultDataStreams,
+    dataStreams: ecf.dataStreams,
+    inputs: ecf.inputs,
+    defaultEnabledInputs: ecf.defaultEnabledInputs,
+    settingsScope: 'ecf',
   };
 }
 
@@ -874,13 +910,32 @@ export function buildAwsServiceMatrix(
           signalTypesSet.add(ptType as SignalType);
         }
 
+        // Detect input packages early so the all-package-DS fallback below is skipped.
+        // Without this, a PT with `input:` but no `data_streams` would pull in all package
+        // data_streams, making includedDsIds non-empty and bypassing the input-package branch.
+        const ptInputType = (pt as any)?.input as string | undefined;
+
         // When the PT doesn't list data_streams explicitly (e.g. single-PT packages like
         // aws_securityhub, aws_bedrock), fall back to all package-level data streams.
         // Packages like `aws` always list data_streams per PT, so the fallback never fires there.
-        const ptDataStreamIds: string[] =
-          (pt as any).data_streams?.length > 0
-            ? (pt as any).data_streams
-            : (packageInfo.data_streams ?? []).map((ds: any) => ds.path as string);
+        // Input packages have no data_streams at all — use an empty list so the input-package
+        // branch below runs instead of the regular DS loop.
+        //
+        // For multi-PT packages (e.g. amazon_security_lake), some data streams belong to other
+        // policy templates. Include only those NOT explicitly claimed by another PT so we don't
+        // send cross-PT stream keys that Fleet rejects as "stream not found".
+        const otherPtDataStreamIds = new Set<string>(
+          (packageInfo.policy_templates ?? [])
+            .filter((p: any) => p.name !== (pt as any).name)
+            .flatMap((p: any) => (p.data_streams ?? []) as string[])
+        );
+        const ptDataStreamIds: string[] = ptInputType
+          ? []
+          : (pt as any).data_streams?.length > 0
+          ? (pt as any).data_streams
+          : (packageInfo.data_streams ?? [])
+              .map((ds: any) => ds.path as string)
+              .filter((dsId) => !otherPtDataStreamIds.has(dsId));
         const includedDsIds = ptDataStreamIds.filter(
           (dsId) => !(excludedDataStreams ?? []).includes(dsId)
         );
@@ -889,6 +944,11 @@ export function buildAwsServiceMatrix(
         for (const dsId of includedDsIds) {
           const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === dsId);
           if (!ds) continue;
+          // Skip data streams with no stream definitions. Fleet's getStreamsForInputType also
+          // skips them, so they are never present in its streamsMap. Sending a stream key for
+          // such a data stream always produces "stream not found" (e.g. amazon_security_lake
+          // uses routing rules for most of its data streams — only `event` has a stream def).
+          if (!(ds as any).streams?.length) continue;
 
           dataStreams.push(dsId);
           if ((ds as any)?.type === 'logs' || (ds as any)?.type === 'metrics') {
@@ -925,7 +985,6 @@ export function buildAwsServiceMatrix(
         }
 
         // Input package: no data_streams on the PT; use a synthetic DS entry.
-        const ptInputType = (pt as any)?.input as string | undefined;
         if (includedDsIds.length === 0 && ptInputType) {
           const inputPkgInfo = computeInputPackageInfo(entry, pt, ptType, ptInputType);
           const syntheticDsId = entry.id;
@@ -1036,17 +1095,14 @@ export function buildAwsServiceMatrix(
     );
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
-    const ecfConfig = applyEcfOnlyConfig(
+    const ecfSettings = deriveEcfSettings(
       entry,
       deploymentMethods,
       varDefsByInput,
       inputs,
-      dataStreams
+      dataStreams,
+      defaultEnabledInputs
     );
-    if (ecfConfig) {
-      ({ requiredConfig, optionalConfig } = ecfConfig);
-      dataStreams.splice(0, dataStreams.length, ...ecfConfig.dataStreams);
-    }
 
     return {
       ...rest,
@@ -1071,6 +1127,7 @@ export function buildAwsServiceMatrix(
         (staticMethods ?? []).every((m) => m.method === 'agent_based'),
       badge,
       identityFederationSupported,
+      ecfSettings,
     } as AwsServiceMatrixEntry;
   });
 }
@@ -1083,17 +1140,19 @@ export function buildAwsServiceMatrix(
 export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsServiceMatrixEntry {
   const dsInfo = service.varDefsByDataStream?.[dsId];
   if (!dsInfo) return service;
-  // ECF-only services have their requiredConfig/optionalConfig already simplified to just the
-  // trigger vars (bucket_arn / log_group_arn) at entry level in buildAwsServiceMatrix.
+  // Entries carrying the ECF-minimal view (see applyDeploymentMethodView) have requiredConfig /
+  // optionalConfig simplified to just the trigger vars (bucket_arn / log_group_arn).
   // Preserve that simplification rather than reverting to the full per-DS manifest vars.
-  const isEcfOnly =
-    service.deploymentMethods.length > 0 &&
-    service.deploymentMethods.every((m) => m.method === 'ecf');
+  const isEcfOnly = service.settingsScope === 'ecf';
   return {
     ...service,
     dataStreams: [dsId],
     signalTypes: dsInfo.type ? [dsInfo.type] : service.signalTypes,
-    inputs: dsInfo.inputs,
+    // ECF can only route `ecfInputs`; the agent-based view keeps every manifest input.
+    inputs:
+      isEcfOnly && service.ecfInputs
+        ? dsInfo.inputs.filter((i) => service.ecfInputs!.includes(i))
+        : dsInfo.inputs,
     defaultEnabledInputs: isEcfOnly ? service.defaultEnabledInputs : dsInfo.defaultEnabledInputs,
     requiredConfig: isEcfOnly ? service.requiredConfig : dsInfo.requiredConfig,
     optionalConfig: isEcfOnly ? service.optionalConfig : dsInfo.optionalConfig,

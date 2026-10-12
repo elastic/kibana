@@ -124,6 +124,7 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
   workflowLogger: {},
+  eventQueue: undefined,
   nodesFactory: {},
   workflowExecutionGraph: {},
   esClient: {},

@@ -12,7 +12,7 @@ import { buildRulePayload } from './rule_mappers';
 describe('buildRulePayload', () => {
   const minimalData: Partial<RuleAttachmentData> = {
     kind: 'signal',
-    metadata: { name: 'Host CPU high', version: 1 },
+    metadata: { name: 'Host CPU high' },
     schedule: { every: '5m' },
     query: { base: 'FROM logs-*' },
   };
@@ -24,12 +24,20 @@ describe('buildRulePayload', () => {
 
     expect(result).toEqual({
       kind: 'signal',
-      metadata: { name: 'Host CPU high', version: 1 },
+      metadata: { name: 'Host CPU high' },
       schedule: { every: '5m' },
       query: { base: 'FROM logs-*' },
-      state_transition: null,
       time_field: DEFAULT_TIME_FIELD,
     });
+  });
+
+  it('drops the server-managed metadata.template', () => {
+    const result = buildRulePayload({
+      ...minimalData,
+      metadata: { name: 'Host CPU high', template: { id: 'template-1' } },
+    });
+
+    expect(result.metadata).toEqual({ name: 'Host CPU high' });
   });
 
   it('uses provided time_field over the default', () => {

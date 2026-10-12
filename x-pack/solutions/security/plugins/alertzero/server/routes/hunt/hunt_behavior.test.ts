@@ -48,8 +48,9 @@ const makeDeps = () => {
 
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
-  const uiSettingsClient = { get: jest.fn() };
+  const uiSettingsClient = { get: jest.fn().mockResolvedValue(true) };
   const context = {
+    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: uiSettingsClient },

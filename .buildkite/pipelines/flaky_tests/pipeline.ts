@@ -61,8 +61,9 @@ const MAX_COUNT_PER_CONFIG = 50;
 const scoutDiscoveryTarget = getTrackedBranch() === 'main' ? 'local' : 'local-stateful-only';
 
 /**
- * Cypress group steps use `n2-4-virt` and a larger disk for `defend_workflows` suites. Command steps
- * inherit the same defaults unless `agentQueue` / `diskSizeGb` are set on the config entry.
+ * Cypress group steps use `n2-4-virt` for `defend_workflows` suites. Command steps inherit the same
+ * defaults unless `agentQueue` / `diskSizeGb` are set on the config entry. `diskSizeGb: undefined`
+ * uses the agent image default; set a number to override it.
  */
 function defaultCypressFlakyAgentOptions(pathHint: string): {
   agentQueue: string;
@@ -71,7 +72,7 @@ function defaultCypressFlakyAgentOptions(pathHint: string): {
   const defendWorkflows = pathHint.includes('defend_workflows');
   return {
     agentQueue: defendWorkflows ? 'n2-4-virt' : 'n2-4-spot',
-    diskSizeGb: defendWorkflows ? 120 : 110,
+    diskSizeGb: undefined,
   };
 }
 

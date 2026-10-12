@@ -38,14 +38,14 @@ const toInputDetections = (events: Array<Partial<SignificantEvent>>): Array<Part
 const LEDGER_DB_CASCADE_EVENT_ID = 'transactionhistory__frontend-transactionhistory-read-timeout';
 
 const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
-  status: 'open',
+  status: 'active',
   event_id: LEDGER_DB_CASCADE_EVENT_ID,
   title: 'Ledger services — connection refused across balance, history, and payment paths',
   symptom_hypothesis:
     'SQLState 08001 connection refused from transactionhistory to PostgreSQL is blocking ledger reads and cascading to frontend balance, history, payment, and deposit paths.',
   summary:
     'Frontend requests to transactionhistory, balancereader, and ledgerwriter fail with connection refused on the observed paths. Cache errors affect balance and transaction-history lookups, while transactionhistory also reports SQLState 08001. Users cannot view account balances or transaction history and cannot submit payments or deposits. Onset ~14:30 UTC with no sign of recovery.',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.82,
   stream_names: ['logs'],
   signals: [
@@ -252,13 +252,13 @@ const LEDGER_DB_CASCADE_RULE_UUIDS = (LEDGER_DB_CASCADE_EVENT.signals ?? [])
 
 /** Benign login spike — must stay a SEPARATE event from the failure cascade and from signup. */
 const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
-  status: 'dismissed',
+  status: 'inactive',
   event_id: 'userservice__successful-user-login',
   title: 'Authentication — successful login volume increase',
   symptom_hypothesis: 'Successful login activity increased without an observed failure.',
   summary:
     'Successful login events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.35,
   signals: [
     {
@@ -284,13 +284,13 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
 
 /** Benign signup spike — must stay a SEPARATE event from the failure cascade and from login. */
 const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
-  status: 'dismissed',
+  status: 'inactive',
   event_id: 'userservice__new-account-created',
   title: 'Authentication — new account creation volume increase',
   symptom_hypothesis: 'New account creation activity increased without an observed failure.',
   summary:
     'New account-creation events increased around 14:30 UTC. All sampled events completed successfully, with no observed error signature or blocked user task.',
-  severity: '20-low',
+  severity: 'low',
   confidence: 0.35,
   signals: [
     {
@@ -315,14 +315,14 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
 };
 
 const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
-  status: 'open',
+  status: 'active',
   event_id: 'frontend__balancereader-connection-refused',
   title: 'Balance reader — account balance lookup connectivity failure',
   symptom_hypothesis:
     'Account balance reads fail because the frontend cannot reach balancereader on its balance endpoint.',
   summary:
     'The frontend returns connection-refused errors to balancereader:8080 on /balances. Users who reach this path cannot view account balances. Evidence is confined to this lookup path rather than a multi-service cascade.',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.68,
   stream_names: ['logs'],
   signals: [
@@ -451,8 +451,8 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 1,
         },
         {
-          id: 'open-active-cascade',
-          text: 'Sets status=open with severity=80-critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
+          id: 'active-cascade',
+          text: 'Sets status=active with severity=critical for the cascade event because active database-connectivity failures broadly break core customer balance, transaction-history, payment, and deposit journeys. Bases critical severity on demonstrated customer impact and scope, without requiring PII exposure or a fixed downstream-service count.',
           score: 3,
         },
         {
@@ -471,8 +471,8 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
-          id: 'open-confirmed-cascade',
-          text: 'Keeps the cascade event open at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
+          id: 'active-confirmed-cascade',
+          text: 'Keeps the cascade event active at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
           score: 2,
         },
       ],
@@ -487,7 +487,7 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     output: {
       expected_ground_truth:
-        'open 60-high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
+        'active high event for confirmed balance-lookup connection refused despite weak p_value and stationary change_point_type',
       expected_confirmed_rule_uuids: {
         [BALANCE_READER_WEAK_DETECTION_EVENT.event_id!]: ['3c4bf4f9-9ed9-567f-be35-332eb79ee76a'],
       },
@@ -495,7 +495,7 @@ export const discovery: DatasetConfig['discovery'] = [
       criteria: [
         {
           id: 'weak-detection-strong-severity',
-          text: 'Sets severity=60-high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at 40-medium or 20-low.',
+          text: 'Sets severity=high because grounding confirms connection-refused errors block account-balance lookups. Weak p_value and stationary change_point_type must not cap severity at medium or low.',
           score: 3,
         },
         {
@@ -514,105 +514,6 @@ export const discovery: DatasetConfig['discovery'] = [
       difficulty: 'hard',
       failure_domain: 'balancereader',
       failure_mode: 'weak_detection_strong_evidence',
-    },
-    snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
-  },
-  {
-    // Positive fixture for the grounding skill's rate gate: a chronic failure pattern seeded at a
-    // steady rate before and after the change point. Mechanism is present (rows found, on-topic)
-    // but not newly elevated, so the correct verdict is inconclusive and the event must not be
-    // promoted as a fresh high-severity incident.
-    input: {
-      scenario_id: 'ledger-chronic-background-noise',
-      stream_name: 'logs',
-      detections: [
-        {
-          detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
-          rule_name: 'User Service Payment Token Cache Refresh Errors',
-          rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
-          stream_name: 'logs',
-          change_point_type: 'non_stationary',
-          p_value: 0.004,
-        },
-      ],
-      chronic_seed: {
-        phrase: 'PaymentTokenCacheRefreshError',
-        service: 'userservice',
-        rate_per_minute: 4,
-        duration_minutes: 240,
-        detection_offset_minutes: 30,
-        ki_title: 'User Service Payment Token Cache Refresh Errors',
-        ki_description:
-          'Detects payment token cache refresh failures in userservice (PaymentTokenCacheRefreshError with connection reset). Failed refreshes are retried; sustained elevation would indicate token distribution degradation.',
-      },
-    },
-    output: {
-      expected_ground_truth:
-        'The matching failure logs run at the same steady rate (~4/min) for hours before and after the change point — a chronic background pattern, not a new incident. Correct outcome: the rate aggregate runs after the on-topic sample, the verdict is inconclusive (rate-flat), and the event is dismissed at 20-low with the background rate noted in assessment_note — a rate-flat background pattern is verified-not-new, never "plausibly unverified", so it must not stay open at any severity; no topology is attached.',
-      expected_significant_events: [
-        {
-          status: 'dismissed',
-          event_id: 'userservice__payment-token-cache-refresh-background',
-          title: 'User service — payment token cache refresh errors at background rate',
-          symptom_hypothesis:
-            'Payment token cache refresh errors occur at a steady background rate, indicating a chronic condition rather than a newly elevated failure.',
-          summary:
-            'Matching failure logs appear at similar pre/post rates around the change point; the mechanism is present but not newly elevated.',
-          severity: '20-low',
-          confidence: 0.4,
-          stream_names: ['logs'],
-          signals: [
-            {
-              type: 'detection',
-              stream_name: 'logs',
-              verdict: 'inconclusive',
-              description:
-                'Found: matching failure logs at similar pre/post rates (~4/min). Impact: not a newly elevated failure.',
-              metadata: {
-                detection_id: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44-det',
-                rule_name: 'User Service Payment Token Cache Refresh Errors',
-                rule_uuid: 'e7c1a2d0-4f3b-5a86-9d21-6b0f5c9e8a44',
-                change_point_type: 'non_stationary',
-                p_value: 0.004,
-              },
-            },
-          ],
-          causal_features: [],
-          blast_radius: [],
-        },
-      ],
-      criteria: [
-        {
-          id: 'chronic-rate-aggregate-ran',
-          text: 'Runs the pre/post rate aggregate after the on-topic failure sample (two execute_esql calls for the rule: a bounded row sample, then a STATS aggregate splitting counts at the detection timestamp with time_range from t-60m to now).',
-          score: 3,
-        },
-        {
-          id: 'chronic-rate-flat-inconclusive',
-          text: 'Sets verdict=inconclusive for the rule because pre and post rates are similar (~4/min on both sides of the change point); does not set confirms on mere row presence.',
-          score: 3,
-        },
-        {
-          id: 'chronic-not-promoted-high',
-          text: 'Writes the event as dismissed at 20-low (never open at any severity) with a description and assessment_note stating the rate is not newly elevated.',
-          score: 3,
-        },
-        {
-          id: 'chronic-no-topology-on-inconclusive',
-          text: 'Emits empty causal_features and blast_radius because no signal has verdict=confirms.',
-          score: 2,
-        },
-        {
-          id: 'chronic-description-template',
-          text: 'The signal description follows the background-rate form — names the found failure signature and states the rate is similar pre/post (not a newly elevated failure) — instead of an outage-style Impact.',
-          score: 1,
-        },
-      ],
-    },
-    metadata: {
-      difficulty: 'medium',
-      failure_domain: 'userservice',
-      failure_mode: 'chronic_background_rate',
     },
     snapshot_source: { snapshot_name: 'ledger-db-disconnect' },
   },

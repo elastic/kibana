@@ -32,6 +32,7 @@ import {
   createConversationNotFoundError,
   createRequestAbortedError,
   isAttachmentEvent,
+  resumeExecutionId,
   roundUserMessageEventId,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
@@ -40,6 +41,7 @@ import {
   createRound,
   createConversationClientMock,
 } from '../../../test_utils';
+import { nextResumeIndex } from '../../conversation/client/rounds_to_events';
 import type { ConversationWithOperation } from './conversations';
 import {
   appendResumeExecution$,
@@ -357,6 +359,48 @@ describe('conversations utils', () => {
 
       expect(conversationClient.create).not.toHaveBeenCalled();
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
+    });
+
+    it('passes appendRefresh to the append on UPDATE, and leaves the default otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const persist = (appendRefresh?: false) =>
+        persistUserMessage({
+          conversation,
+          conversationClient,
+          eventId: 'round-1::user_message',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+          appendRefresh,
+        });
+
+      await persist(false);
+      await persist();
+
+      const [[, withRefresh], [, withDefault]] = conversationClient.appendEvents.mock.calls;
+      expect(withRefresh).toEqual({ access: 'converse', source: 'execution', refresh: false });
+      expect(withDefault).toEqual({ access: 'converse', source: 'execution' });
+    });
+
+    it('ignores appendRefresh on CREATE: the create still refreshes', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+
+      await persistUserMessage({
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+        appendRefresh: false,
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     });
 
     it('falls back to appendEvents when CREATE races another writer (conversationAlreadyExists)', async () => {
@@ -745,6 +789,19 @@ describe('conversations utils', () => {
           },
         },
       ] as never,
+    });
+
+    it('derives the same execution index telemetry reports, so the two cannot drift', () => {
+      // `nextResumeIndex` is the single source of the index: this write path stamps it into
+      // the event ids, and `buildExecutionTelemetry` reports it. A divergence would silently
+      // mislabel which execution a billing record belongs to.
+      const conversation = pausedConversation();
+
+      expect(nextResumeIndex(conversation, 'round-1')).toBe(1);
+      expect(resumeExecutionId('round-1', nextResumeIndex(conversation, 'round-1'))).toBe(
+        'round-1::execution::1'
+      );
+      expect(nextResumeIndex(conversation, 'some-other-round')).toBe(0);
     });
 
     const followUpRound = () => ({

@@ -6,40 +6,74 @@
  */
 
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { ProfilingStatus } from '@kbn/profiling-utils';
-import { areCloudResourcesSetup } from '../../../common/cloud_setup';
-import type { SetupState } from '../../../common/setup';
-import { areResourcesSetup } from '../../../common/setup';
+import type {
+  EnabledProfilingSchemasStatus,
+  ProfilingSchemasStatus,
+  UniversalProfilingSchemaStatus,
+  UniversalProfilingStatus,
+} from '@kbn/profiling-utils';
+import { createGetOtelStatusService } from '../../otel/services/status';
+import { createGetStatusService as createGetUniversalProfilingStatusService } from '../../universal_profiling/services/status';
+import { isServerless } from '../../utils/is_serverless';
 import type { RegisterServicesParams } from '../register_services';
-import { getCloudSetupState, getSelfManagedSetupState } from '../setup_state';
 
-export interface HasSetupParams {
+export interface ProfilingStatusParams {
   soClient: SavedObjectsClientContract;
   esClient: IScopedClusterClient;
   spaceId?: string;
+  abortSignal?: AbortSignal;
 }
 
-function toProfilingStatus(setupState: SetupState, hasSetup: boolean): ProfilingStatus {
-  return {
-    profiling_enabled: setupState.profiling.enabled,
-    has_setup: hasSetup,
-    has_data: setupState.data.available,
-    pre_8_9_1_data: setupState.resources.pre_8_9_1_data,
-  };
-}
+const toUniversalProfilingSchemaStatus = ({
+  has_setup: hasSetup,
+  has_data: hasData,
+  pre_8_9_1_data: hasLegacyData,
+}: UniversalProfilingStatus): UniversalProfilingSchemaStatus => ({
+  isAvailable: true,
+  hasSetup,
+  hasData,
+  hasLegacyData,
+});
 
-export function createGetStatusService(params: RegisterServicesParams) {
-  return async ({ esClient, soClient, spaceId }: HasSetupParams): Promise<ProfilingStatus> => {
-    const setupStateParams = { ...params, esClient, soClient, spaceId };
+const UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS: UniversalProfilingSchemaStatus = {
+  isAvailable: false,
+  hasSetup: false,
+  hasData: false,
+  hasLegacyData: false,
+};
 
-    if (params.deps.cloud?.isCloudEnabled) {
-      const setupState = await getCloudSetupState(setupStateParams);
-      params.logger.debug(() => `Cloud set up state: ${JSON.stringify(setupState, null, 2)}`);
-      return toProfilingStatus(setupState, areCloudResourcesSetup(setupState));
+export function createGetProfilingStatusService(params: RegisterServicesParams) {
+  const { buildFlavor, createProfilingEsClient, logger } = params;
+  const getOtelStatus = createGetOtelStatusService(params);
+  const getUniversalProfilingStatus = createGetUniversalProfilingStatusService(params);
+  const isUniversalProfilingAvailable = !isServerless(buildFlavor);
+
+  return async ({
+    esClient,
+    soClient,
+    spaceId,
+    abortSignal,
+  }: ProfilingStatusParams): Promise<ProfilingSchemasStatus> => {
+    const client = createProfilingEsClient({ esClient: esClient.asInternalUser, abortSignal });
+    const { profiling } = await client.universalProfiling.status();
+
+    if (!profiling.enabled) {
+      return { isEnabled: false };
     }
 
-    const setupState = await getSelfManagedSetupState(setupStateParams);
-    params.logger.debug(() => `Self-managed set up state: ${JSON.stringify(setupState, null, 2)}`);
-    return toProfilingStatus(setupState, areResourcesSetup(setupState));
+    const universalProfilingPromise = isUniversalProfilingAvailable
+      ? getUniversalProfilingStatus({ esClient, soClient, spaceId, abortSignal }).then(
+          toUniversalProfilingSchemaStatus
+        )
+      : Promise.resolve(UNAVAILABLE_UNIVERSAL_PROFILING_SCHEMA_STATUS);
+
+    const [otel, universalProfiling] = await Promise.all([
+      getOtelStatus({ esClient, abortSignal }),
+      universalProfilingPromise,
+    ]);
+
+    const status: EnabledProfilingSchemasStatus = { isEnabled: true, otel, universalProfiling };
+    logger.debug(() => `Profiling status: ${JSON.stringify(status, null, 2)}`);
+    return status;
   };
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "970dc0c93f9d3068ec97c4272be791a1a46781f6",
+  "sha1": "347f345c681d738eef07ca86e0e876353a8c734e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 151,
+        "line": 147,
         "column": 99
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 211,
+        "line": 207,
         "column": 11
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 217,
+        "line": 213,
         "column": 26
       }
     },

@@ -21,6 +21,7 @@ import {
   taskSchemaV12,
   taskSchemaV13,
   taskSchemaV14,
+  taskSchemaV15,
 } from '../schemas/task';
 
 import { InstanceTaskCost } from '../../task';
@@ -187,10 +188,32 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     },
   },
   '14': {
-    changes: [],
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          credential: {
+            properties: {
+              type: { type: 'keyword', ignore_above: 1024 },
+              workloadType: { type: 'keyword', ignore_above: 1024 },
+              workloadId: { type: 'keyword', ignore_above: 1024 },
+              spaceId: { type: 'keyword', ignore_above: 1024 },
+              expectedServiceAccountId: { type: 'keyword', ignore_above: 1024 },
+            },
+          },
+        },
+      },
+    ],
     schemas: {
       forwardCompatibility: taskSchemaV14.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV14,
+    },
+  },
+  '15': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: taskSchemaV15.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV15,
     },
   },
 };

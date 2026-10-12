@@ -39,6 +39,7 @@ import {
   QUERY_PERFORMANCE_PHRASE_QUERY_COUNT,
   QUERY_PERFORMANCE_QUERY_RANGE_SECONDS,
   QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND,
+  QUERY_PERFORMANCE_APPROXIMATION,
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
@@ -76,6 +77,7 @@ type FilterOperation = '+' | '-' | '_exists_';
 enum FieldUsageEventName {
   dataTableSelection = 'dataTableSelection',
   dataTableRemoval = 'dataTableRemoval',
+  dataTableClearSelectedFields = 'dataTableClearSelectedFields',
   filterAddition = 'filterAddition',
 }
 
@@ -88,6 +90,7 @@ interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
   [FIELD_USAGE_FILTER_OPERATION]?: FilterOperation;
+  [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
 }
 
 interface QueryFieldsUsageEventData {
@@ -112,6 +115,7 @@ interface QueryPerformanceEventData {
   [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: string[];
   [QUERY_PERFORMANCE_FETCH_TYPE]: QueryPerformanceFetchType;
   [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: string | undefined;
+  [QUERY_PERFORMANCE_APPROXIMATION]: boolean | undefined;
 }
 
 type QueryPerformanceFetchType = 'fetchTextBased' | 'fetchDocuments';
@@ -124,6 +128,7 @@ interface QueryPerformanceTrackerParams {
 
 interface QueryPerformanceReportEventParams {
   requestAdapter: RequestAdapter | undefined;
+  approximation?: boolean;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -235,6 +240,36 @@ export class ScopedDiscoverEBTManager {
       fieldName,
       fieldsMetadata,
     });
+  }
+
+  public async trackDataTableClearSelectedFields({
+    fieldNames,
+    fieldsMetadata,
+  }: {
+    fieldNames: string[];
+    fieldsMetadata: FieldsMetadataPublicStart | undefined;
+  }) {
+    if (!this.reportEvent || fieldNames.length === 0) {
+      return;
+    }
+
+    const eventData: FieldUsageEventData = {
+      [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName.dataTableClearSelectedFields,
+    };
+
+    if (fieldsMetadata) {
+      const fields = await this.getFieldsFromMetadata({
+        fieldsMetadata,
+        fieldNames,
+      });
+
+      const categorizedFields = fieldNames.map((fieldName) =>
+        fields[fieldName]?.short ? fieldName : NON_ECS_FIELD
+      );
+      eventData[QUERY_FIELDS_USAGE_FIELD_NAMES] = [...new Set(categorizedFields)];
+    }
+
+    this.reportEvent(FIELD_USAGE_EVENT_TYPE, eventData);
   }
 
   public async trackFilterAddition({
@@ -420,7 +455,7 @@ export class ScopedDiscoverEBTManager {
     let reported = false;
 
     return {
-      reportEvent: ({ requestAdapter }: QueryPerformanceReportEventParams) => {
+      reportEvent: ({ requestAdapter, approximation }: QueryPerformanceReportEventParams) => {
         if (reported || (!this.reportPerformanceEvent && !this.reportEvent)) {
           return;
         }
@@ -463,6 +498,7 @@ export class ScopedDiscoverEBTManager {
           [QUERY_PERFORMANCE_MULTI_MATCH_TYPES]: mergedAnalysis.rawTypes,
           [QUERY_PERFORMANCE_FETCH_TYPE]: fetchType,
           [QUERY_PERFORMANCE_QUERY_SOURCE_COMMAND]: querySourceCommand,
+          [QUERY_PERFORMANCE_APPROXIMATION]: approximation,
         };
 
         this.reportEvent?.(QUERY_PERFORMANCE_EVENT_TYPE, eventData);

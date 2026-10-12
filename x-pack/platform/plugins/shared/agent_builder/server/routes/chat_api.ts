@@ -5,12 +5,27 @@
  * 2.0.
  */
 
+import path from 'node:path';
+import { validate as uuidValidate } from 'uuid';
 import { schema } from '@kbn/config-schema';
 import type { Observable } from 'rxjs';
 import { firstValueFrom, toArray } from 'rxjs';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import type { ChatRequestBodyPayload, ChatConverseResponse } from '../../common/http_api/chat';
+import {
+  agentBuilderDefaultAgentId,
+  agentIdMaxLength,
+  CHAT_MESSAGE_MAX_LENGTH,
+  CONVERSATION_ID_MAX_LENGTH,
+  createNonInteractiveConfig,
+} from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type {
+  ChatRequestBodyPayload,
+  ChatConverseResponse,
+  ChatMessageRequestBodyPayload,
+  ChatMessageResponse,
+} from '../../common/http_api/chat';
 import { ChatTriggerMode } from '../../common/http_api/chat';
 import { chatApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -19,6 +34,7 @@ import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
 import { getConverseHelpers, filterEventsNativeApiEvents } from './converse_helpers';
 import { findConversationEvent } from '../services/execution/utils/chat_response';
+import { buildChatMessageResponseFromEvents } from '../services/execution/utils/chat_message_response';
 import { conversePayloadSchema } from './chat';
 
 export const chatPayloadSchema = conversePayloadSchema.extends({
@@ -34,6 +50,74 @@ export const chatPayloadSchema = conversePayloadSchema.extends({
   ),
 });
 
+/**
+ * Body of `POST /api/chat/message`. Deliberately minimal: `schema.object` rejects unknown keys, so
+ * the converse options (`connector_id`, `attachments`, `prompts`, `_execution_mode`, ...) are 400s
+ * rather than silently ignored.
+ */
+export const chatMessagePayloadSchema = schema.object({
+  message: schema.string({
+    minLength: 1,
+    maxLength: CHAT_MESSAGE_MAX_LENGTH,
+    meta: { description: 'The user message to send to the agent.' },
+  }),
+  agent_id: schema.string({
+    defaultValue: agentBuilderDefaultAgentId,
+    minLength: 1,
+    maxLength: agentIdMaxLength,
+    meta: {
+      description:
+        'The ID of the agent to send the message to. Defaults to the default Elastic AI agent.',
+    },
+  }),
+  conversation_id: schema.maybe(
+    schema.string({
+      maxLength: CONVERSATION_ID_MAX_LENGTH,
+      validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
+      meta: {
+        description:
+          'The ID of an existing conversation to continue. Omit it to start a new conversation; the response carries the ID to reuse on the next call.',
+      },
+    })
+  ),
+});
+
+/** Success body of `POST /api/chat/message`; lazy because core builds response schemas on demand. */
+export const chatMessageResponseSchema = () =>
+  schema.object({
+    conversation_id: schema.string({
+      meta: {
+        description:
+          'The conversation the message was added to: the one requested, or the one created for it.',
+      },
+    }),
+    answer: schema.string({
+      meta: {
+        description:
+          "The agent's final text answer. Empty when the agent finished without a message.",
+      },
+    }),
+    // Optional so the common case is a two-field body; present only when at least one prompt
+    // was declined.
+    declined_prompts: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          tool_id: schema.string({ meta: { description: 'The tool whose call was declined.' } }),
+          message: schema.string({
+            meta: { description: 'The explanation the agent received in place of the prompt.' },
+          }),
+        }),
+        {
+          minSize: 1,
+          meta: {
+            description:
+              'The prompts that the endpoint declined. In an interactive conversation, these prompts pause the agent until the user answers. Examples are tool confirmations, questions to the user, and destructive API approvals. This endpoint has no user, so it declines each prompt and tells the agent why. The property is absent if the agent raised no prompts.',
+          },
+        }
+      )
+    ),
+  });
+
 /** Events-native chat API */
 export function registerChatApiRoutes({
   router,
@@ -43,9 +127,75 @@ export function registerChatApiRoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const { validateConfigurationOverrides, maybeExecuteAgent } = getConverseHelpers({
+  const { validateConfigurationOverrides, maybeExecuteAgent, executeAgent } = getConverseHelpers({
     getInternalServices,
   });
+
+  router.versioned
+    .post({
+      path: `${chatApiPath}/message`,
+      security: {
+        authz: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
+      },
+      access: 'public',
+      summary: 'Send a message and get the answer',
+      description:
+        'Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.\n\n' +
+        'The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.\n\n' +
+        'The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.',
+      options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
+        tags: ['oas-tag:agent builder'],
+        availability: {
+          stability: 'experimental',
+          since: '9.6.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/chat_message.yaml'),
+        },
+        validate: {
+          request: { body: chatMessagePayloadSchema },
+          response: {
+            200: {
+              body: chatMessageResponseSchema,
+              description:
+                'The agent answered; the conversation ID identifies where the exchange was stored.',
+            },
+          },
+        },
+      },
+      wrapHandler(
+        async (ctx, request, response) => {
+          const {
+            message,
+            agent_id: agentId,
+            conversation_id: conversationId,
+          } = request.body as ChatMessageRequestBodyPayload;
+          const { execution: executionService } = getInternalServices();
+          const { events$ } = await executeAgent({
+            payload: { agent_id: agentId, conversation_id: conversationId, input: message },
+            request,
+            executionService,
+            interactive: createNonInteractiveConfig(),
+            autoCreateConversationWithId: false,
+          });
+
+          const events = await firstValueFrom(events$.pipe(toArray()));
+
+          return response.ok<ChatMessageResponse>({
+            body: buildChatMessageResponseFromEvents(events),
+          });
+        },
+        { featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID }
+      )
+    );
 
   router.versioned
     .post({
@@ -63,7 +213,7 @@ export function registerChatApiRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },
@@ -115,7 +265,7 @@ export function registerChatApiRoutes({
         },
         tags: ['oas-tag:agent builder'],
         availability: {
-          stability: 'experimental',
+          stability: 'tech_preview',
           since: '9.6.0',
         },
       },

@@ -13,11 +13,11 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
 } from '@elastic/eui';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/src/types';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-export type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 export type { DataGridDensity } from './constants';
 
 /**
@@ -49,7 +49,7 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource?: DataSource;
 };
 
 export type CustomCellRenderer = Record<string, FunctionComponent<DataGridCellValueElementProps>>;
