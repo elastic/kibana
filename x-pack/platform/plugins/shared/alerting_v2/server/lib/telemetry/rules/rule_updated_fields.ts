@@ -63,8 +63,12 @@ const collectChangedPaths = (
   }
 };
 
-/** Bumped by every write, so they never describe what the user changed. */
-const EXCLUDED_PATHS: ReadonlySet<string> = new Set(['version', 'updated_at']);
+/**
+ * Bumped by the server rather than set by the caller, so they never describe what the user
+ * changed. `version` and `updated_at` move on every write, `metadata.revision` on every write
+ * that changes the rule's content.
+ */
+const EXCLUDED_PATHS: ReadonlySet<string> = new Set(['version', 'updated_at', 'metadata.revision']);
 
 /** Dotted paths whose values differ between two rule responses, in path order. */
 export const collectRuleUpdatedFields = (previous: RuleResponse, next: RuleResponse): string[] => {

@@ -87,7 +87,7 @@ const mockManagedRule = {
   metadata: {
     name: 'Detection Rule',
     tags: [],
-    builder_type: 'security.detection.query',
+    builder: { type: 'security.detection.query' },
     ownership: { managed: true, solution: 'security', domain: 'detection' },
   },
   schedule: { every: '5m' },
@@ -792,13 +792,13 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('quickEditRule-rule-unmanaged')).toBeInTheDocument();
     });
 
-    it('hides edit, delete, run, and clone actions for a managed rule', () => {
+    it('hides edit, delete, run, and clone actions for a managed rule', async () => {
       renderMixed();
 
-      // With no write affordances and no read-only extras (no onViewChangeHistory, no
-      // detailsHref), RuleActionsMenu returns null, so the menu button itself is absent.
-      expect(screen.queryByTestId('ruleActionsButton-rule-managed')).not.toBeInTheDocument();
-      // Individually, none of the write action elements are in the DOM.
+      // The menu stays because View details is a read, but it offers no write action.
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-managed'));
+
+      expect(await screen.findByTestId('viewRuleDetails-rule-managed')).toBeInTheDocument();
       expect(screen.queryByTestId('editRule-rule-managed')).not.toBeInTheDocument();
       expect(screen.queryByTestId('deleteRule-rule-managed')).not.toBeInTheDocument();
       expect(screen.queryByTestId('runRule-rule-managed')).not.toBeInTheDocument();
@@ -827,7 +827,7 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleEnabledSwitch-rule-unmanaged')).toBeInTheDocument();
     });
 
-    it('shows a type label badge with the builder_type for a managed rule', () => {
+    it('shows a type label badge with the builder type for a managed rule', () => {
       renderMixed();
 
       expect(screen.getByTestId('managedRuleTypeBadge-rule-managed')).toHaveTextContent(
@@ -835,13 +835,13 @@ describe('RulesListTable', () => {
       );
     });
 
-    it('falls back to "Managed" in the type label when builder_type is absent', () => {
+    it('falls back to "Managed" in the type label when builder is absent', () => {
       const managedRuleNoType = {
         ...mockManagedRule,
         id: 'rule-managed-notype',
         metadata: {
           ...mockManagedRule.metadata,
-          builder_type: undefined,
+          builder: undefined,
         },
       };
       renderTable({ items: [managedRuleNoType] as any, totalItemCount: 1 });

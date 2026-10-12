@@ -1,5 +1,5 @@
 {
-  "sha1": "db561f190b69bb48c436ca7c2cddfe0a37feecc1",
+  "sha1": "fef26e15684c356dc5ac71cb95a6a2c07ad94e7f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 74,
+        "line": 76,
         "column": 22
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 29
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 97,
+        "line": 99,
         "column": 18
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 114,
+        "line": 116,
         "column": 3
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 122,
+        "line": 124,
         "column": 61
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 153,
+        "line": 155,
         "column": 38
       }
     },
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 179,
+        "line": 181,
         "column": 14
       }
     },
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 214,
+        "line": 218,
         "column": 27
       }
     },
@@ -117,7 +117,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/actions.spec.ts",
-        "line": 221,
+        "line": 223,
         "column": 14
       }
     },
@@ -130,7 +130,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 81,
+        "line": 83,
         "column": 7
       }
     },
@@ -143,7 +143,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 95,
+        "line": 97,
         "column": 74
       }
     },
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 113,
+        "line": 115,
         "column": 49
       }
     },
@@ -169,7 +169,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 123,
+        "line": 125,
         "column": 85
       }
     },
@@ -182,7 +182,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 136,
+        "line": 138,
         "column": 24
       }
     },
@@ -195,7 +195,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 163,
+        "line": 165,
         "column": 27
       }
     },
@@ -208,7 +208,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 171,
+        "line": 173,
         "column": 26
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 193,
+        "line": 195,
         "column": 5
       }
     },
@@ -234,7 +234,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 211,
+        "line": 213,
         "column": 4
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 232,
+        "line": 234,
         "column": 7
       }
     },
@@ -260,7 +260,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 245,
+        "line": 247,
         "column": 14
       }
     },
@@ -273,7 +273,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 260,
+        "line": 262,
         "column": 16
       }
     },
@@ -286,7 +286,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 268,
+        "line": 270,
         "column": 3
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 320,
+        "line": 322,
         "column": 52
       }
     },
@@ -312,7 +312,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 326,
+        "line": 328,
         "column": 11
       }
     },
@@ -325,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 335,
+        "line": 337,
         "column": 20
       }
     },
@@ -338,7 +338,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 87,
+        "line": 89,
         "column": 7
       }
     },
@@ -351,7 +351,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 102,
+        "line": 104,
         "column": 82
       }
     },
@@ -364,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 110,
+        "line": 112,
         "column": 12
       }
     },
@@ -377,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 125,
+        "line": 127,
         "column": 12
       }
     },
@@ -390,7 +390,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 147,
+        "line": 149,
         "column": 26
       }
     },
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 164,
+        "line": 166,
         "column": 12
       }
     },
@@ -416,7 +416,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 182,
+        "line": 184,
         "column": 12
       }
     },
@@ -429,7 +429,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 203,
+        "line": 205,
         "column": 11
       }
     },
@@ -442,7 +442,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 225,
+        "line": 227,
         "column": 7
       }
     },
@@ -455,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 264,
+        "line": 266,
         "column": 25
       }
     },
@@ -468,7 +468,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 270,
+        "line": 272,
         "column": 7
       }
     },
@@ -481,7 +481,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 291,
+        "line": 293,
         "column": 15
       }
     },
@@ -494,7 +494,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 317,
+        "line": 319,
         "column": 6
       }
     },
@@ -507,7 +507,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/fetch.spec.ts",
-        "line": 337,
+        "line": 339,
         "column": 36
       }
     },
@@ -520,7 +520,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 105,
+        "line": 107,
         "column": 14
       }
     },
@@ -533,7 +533,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 133,
+        "line": 135,
         "column": 54
       }
     },
@@ -546,7 +546,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 136,
+        "line": 138,
         "column": 51
       }
     },
@@ -559,7 +559,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 138,
+        "line": 140,
         "column": 11
       }
     },
@@ -572,7 +572,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 145,
+        "line": 147,
         "column": 24
       }
     },
@@ -585,7 +585,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 152,
+        "line": 154,
         "column": 73
       }
     },
@@ -598,7 +598,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 165,
+        "line": 167,
         "column": 14
       }
     },
@@ -611,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 177,
+        "line": 179,
         "column": 7
       }
     },
@@ -624,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 190,
+        "line": 192,
         "column": 5
       }
     },
@@ -637,7 +637,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 211,
+        "line": 213,
         "column": 20
       }
     },
@@ -650,7 +650,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 234,
+        "line": 236,
         "column": 81
       }
     },
@@ -663,7 +663,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 257,
+        "line": 259,
         "column": 26
       }
     },
@@ -676,7 +676,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 277,
+        "line": 279,
         "column": 16
       }
     },
@@ -689,7 +689,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 298,
+        "line": 300,
         "column": 81
       }
     },
@@ -702,7 +702,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 316,
+        "line": 318,
         "column": 32
       }
     },
@@ -715,8 +715,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 97,
-        "column": 1
+        "line": 104,
+        "column": 18
       }
     },
     {
@@ -728,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 106,
+        "line": 110,
         "column": 6
       }
     },
@@ -741,7 +741,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 114,
+        "line": 118,
         "column": 32
       }
     },
@@ -754,7 +754,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 121,
+        "line": 125,
         "column": 16
       }
     },
@@ -767,7 +767,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 132,
+        "line": 136,
         "column": 20
       }
     },
@@ -780,7 +780,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 144,
+        "line": 148,
         "column": 26
       }
     },
@@ -793,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 158,
+        "line": 162,
         "column": 20
       }
     },
@@ -806,7 +806,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 168,
+        "line": 172,
         "column": 15
       }
     },
@@ -819,7 +819,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/off_states.spec.ts",
-        "line": 180,
+        "line": 184,
         "column": 7
       }
     },
@@ -832,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 70,
+        "line": 72,
         "column": 58
       }
     },
@@ -845,7 +845,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 16
       }
     },
@@ -858,7 +858,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 125,
+        "line": 127,
         "column": 16
       }
     },
@@ -871,7 +871,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 154,
+        "line": 156,
         "column": 15
       }
     },
@@ -884,7 +884,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 201,
+        "line": 203,
         "column": 16
       }
     }

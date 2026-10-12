@@ -100,7 +100,7 @@ describe('utils', () => {
     });
 
     it('maps routing tags into saved object attributes', () => {
-      const data: CreateRuleData = {
+      const data: ResolvedCreateRuleData = {
         ...baseCreateData,
         metadata: { name: 'test-rule', routing_tags: ['sre'] },
       };
@@ -826,6 +826,8 @@ describe('utils', () => {
       );
 
       expect(result.artifacts).toBeUndefined();
+    });
+
     it('clears the stored query when the resolved update data carries query: null (execution-time type)', () => {
       // An execution-time builder type may switch from a write-time type that
       // compiled and stored a query. The null sentinel tells buildUpdateRuleAttributes
@@ -840,7 +842,7 @@ describe('utils', () => {
 
       // Simulate resolveExecutionTimeUpdate returning query: null.
       const updateData: ResolvedUpdateRuleData = {
-        metadata: { builder_type: 'exec_time_type', builder_fields: { index: 'logs-*' } },
+        metadata: { builder: { type: 'exec_time_type' }, builder_fields: { index: 'logs-*' } },
         query: null,
       };
 
@@ -1050,13 +1052,7 @@ describe('utils', () => {
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata).toEqual({
-        name: 'test-rule',
-        description: undefined,
-        tags: undefined,
-        routing_tags: undefined,
-        builder: { type: 'threshold' },
-      });
+      expect(result.metadata.builder).toEqual({ type: 'threshold' });
     });
 
     it('sets metadata.builder to undefined when builder_type is absent from SO attributes', () => {
@@ -1064,13 +1060,7 @@ describe('utils', () => {
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata).toEqual({
-        name: 'test-rule',
-        description: undefined,
-        tags: undefined,
-        routing_tags: undefined,
-        builder: undefined,
-      });
+      expect(result.metadata.builder).toBeUndefined();
     });
 
     it('exposes the persisted version counter on the rule', () => {
@@ -1592,12 +1582,18 @@ describe('utils', () => {
         ...stored,
         updatedAt: '2099-01-01T00:00:00.000Z',
         updatedBy: { profile_uid: 'some-other-user' },
+        version: 99,
         metadata: {
           ...stored.metadata,
-          version: 99,
           revision: 99,
         },
       };
+      expect(computeNextRevision(next, stored)).toBe(2);
+    });
+
+    it('does NOT bump when only enabled differs (a PUT replace that toggles the rule)', () => {
+      // A PUT body can carry `enabled`; turning a rule on or off is not an edit.
+      const next = { ...stored, enabled: !stored.enabled };
       expect(computeNextRevision(next, stored)).toBe(2);
     });
 
@@ -1733,7 +1729,8 @@ describe('utils', () => {
 
   describe('buildUpdateRuleAttributes — revision (step 4.2)', () => {
     const baseExisting = createRuleSoAttributes({
-      metadata: { name: 'rule-1', version: 1, revision: 3, signature_id: 'sig-1' },
+      version: 1,
+      metadata: { name: 'rule-1', revision: 3, signature_id: 'sig-1' },
     });
     const baseUpdateServerFields = {
       updatedBy: { profile_uid: 'user-2' },
@@ -1769,10 +1766,10 @@ describe('utils', () => {
       expect(result.metadata.revision).toBe(4);
     });
 
-    it('version (metadata.version) still increments independently of revision', () => {
+    it('the root version still increments independently of revision', () => {
       // No-op update: revision stays, version still moves.
       const noOpResult = buildUpdateRuleAttributes(baseExisting, {}, baseUpdateServerFields);
-      expect(noOpResult.metadata.version).toBe(2);
+      expect(noOpResult.version).toBe(2);
       expect(noOpResult.metadata.revision).toBe(3);
     });
 

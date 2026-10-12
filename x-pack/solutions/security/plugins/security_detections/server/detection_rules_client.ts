@@ -267,7 +267,7 @@ function projectFields(rule: DetectionRuleResponse, fields: string[]): Detection
  *
  * A rule is in scope when:
  *   1. Its `metadata.ownership` matches the DETECTION_OWNERSHIP fragment.
- *   2. Its `metadata.builder_type` resolves through the alias map to a known
+ *   2. Its `metadata.builder.type` resolves through the alias map to a known
  *      public type alias.
  *
  * The second check excludes detection rules whose type was written by a newer
@@ -290,7 +290,7 @@ function isInScope(rule: RuleResponse): boolean {
     return false;
   }
 
-  const builderType = rule.metadata?.builder_type;
+  const builderType = rule.metadata?.builder?.type;
   if (!builderType || !BUILDER_TYPE_ID_TO_ALIAS[builderType]) {
     return false;
   }
@@ -410,7 +410,7 @@ export class DetectionRulesClient {
     // RULE_TYPE_IMMUTABLE is the detection-side code; RULE_VERSION_CONFLICT is
     // reserved for optimistic-concurrency conflicts and must not be reused here
     // (a client that retries on OCC would loop forever on a type-change attempt).
-    const storedPublicType = BUILDER_TYPE_ID_TO_ALIAS[existing.metadata?.builder_type ?? ''];
+    const storedPublicType = BUILDER_TYPE_ID_TO_ALIAS[existing.metadata?.builder?.type ?? ''];
     if (storedPublicType !== props.type) {
       throw Boom.conflict(
         `Cannot change rule type from '${storedPublicType}' to '${props.type}'. ` +
@@ -431,14 +431,10 @@ export class DetectionRulesClient {
 
     const frameworkData = toFrameworkReplace({ ...withDefaults, version }, storedSource);
 
-    // Grab the concurrency token from the framework result.
-    const occVersion = (existing as RuleResponse & { version?: string }).version;
-
     const result = await this.framework.updateRule({
       id,
       data: frameworkData,
       options: {
-        version: occVersion,
         validateBuilderFields: true,
       },
     });
@@ -473,7 +469,7 @@ export class DetectionRulesClient {
   ): Promise<DetectionRuleResponse> {
     // Step 1: Read and scope-check.
     const existing = await this.getInScopeRule(id);
-    const storedPublicType = BUILDER_TYPE_ID_TO_ALIAS[existing.metadata?.builder_type ?? ''];
+    const storedPublicType = BUILDER_TYPE_ID_TO_ALIAS[existing.metadata?.builder?.type ?? ''];
     const storedSource = existing.metadata?.source as RuleSource;
 
     // rule_id immutability: if the patch includes rule_id, it must match the stored value.
@@ -551,9 +547,7 @@ export class DetectionRulesClient {
     // Step 5: Convert and write.
     // The merged result has all fields fully resolved; build the patched input.
     const patchedInput = buildPatchedInput(merged, patch, storedSource);
-    const occVersion = (existing as RuleResponse & { version?: string }).version;
 
-    // The concurrency token goes to options.version (not inside the data body).
     // The framework's updateRuleDataSchema is strict and rejects a top-level version key.
     const frameworkData = toFrameworkPatch(patchedInput);
 
@@ -561,7 +555,6 @@ export class DetectionRulesClient {
       id,
       data: frameworkData,
       options: {
-        version: occVersion,
         validateBuilderFields: true,
       },
     });
@@ -763,7 +756,7 @@ export class DetectionRulesClient {
 
     if (!isInScope(rule)) {
       // Log a warning for the rollback case (known detection rule, unknown type).
-      const builderType = rule.metadata?.builder_type;
+      const builderType = rule.metadata?.builder?.type;
       const knownType = builderType ? BUILDER_TYPE_ID_TO_ALIAS[builderType] : undefined;
       if (
         rule.metadata?.ownership &&

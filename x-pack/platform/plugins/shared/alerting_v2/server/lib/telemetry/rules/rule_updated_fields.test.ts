@@ -109,6 +109,19 @@ describe('collectRuleUpdatedFields', () => {
     expect(collectRuleUpdatedFields(previous, next)).toEqual([]);
   });
 
+  it('never reports metadata.revision', () => {
+    const next = createRuleResponse({
+      ...previous,
+      metadata: {
+        ...previous.metadata,
+        name: 'renamed',
+        revision: previous.metadata.revision + 1,
+      },
+    });
+
+    expect(collectRuleUpdatedFields(previous, next)).toEqual(['metadata.name']);
+  });
+
   it('returns paths in sorted order', () => {
     const next = createRuleResponse({
       ...previous,

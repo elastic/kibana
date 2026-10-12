@@ -18,7 +18,7 @@
  */
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CoreSetup, IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { AlertingServerStart } from '@kbn/alerting-v2-plugin/server';
 import { DetectionRulesClient } from '../../detection_rules_client';
@@ -31,9 +31,11 @@ import {
 import type { DetectionsPluginStartDeps } from '../types';
 
 /** Path parameter schema for a single rule. */
-const ruleIdParamsSchema = z.object({
-  id: z.string().min(1).describe('The object id of the rule.'),
-});
+const ruleIdParamsSchema = lazySchema(() =>
+  z.object({
+    id: z.string().min(1).describe('The object id of the rule.'),
+  })
+);
 
 /**
  * Registers `GET /api/detection_engine/v2/rules/{id}`.

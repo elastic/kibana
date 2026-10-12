@@ -27,6 +27,7 @@ import {
   apiTest,
   expect,
   DETECTION_HEADERS,
+  INTERNAL_ORIGIN_HEADER,
   DETECTION_V2_RULES,
   DETECTION_V2_TAGS,
   getDetectionRuleUrl,
@@ -75,10 +76,11 @@ apiTest.describe('Detection Engine v2 — fetch routes', { tag: '@local-stateful
     // flag on.  The server config no longer uses a globalOverride.
     const adminCredentials = await requestAuth.getApiKeyForAdmin();
     const adminHeaders = { ...DETECTION_HEADERS, ...adminCredentials.apiKeyHeader };
-    await apiClient.post(GLOBAL_SETTINGS_API, {
-      headers: adminHeaders,
+    const settingsResponse = await apiClient.post(GLOBAL_SETTINGS_API, {
+      headers: { ...adminHeaders, ...INTERNAL_ORIGIN_HEADER },
       body: { changes: { [ALERTING_V2_ENABLED_SETTING]: true } },
     });
+    expect(settingsResponse).toHaveStatusCode(200);
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
