@@ -141,7 +141,7 @@ export const registerPersistenceListeners = (
           deps,
           workspace,
           savedWorkspace: action.payload,
-          state,
+          getState: listenerApi.getState,
           selectedDatasource,
         }),
         new Promise<undefined>((resolve) => {
@@ -159,13 +159,13 @@ function showModal({
   deps,
   workspace,
   savedWorkspace,
-  state,
+  getState,
   selectedDatasource,
 }: {
   deps: GraphStoreDependencies;
   workspace: Workspace;
   savedWorkspace: GraphWorkspaceSavedObject;
-  state: GraphState;
+  getState: () => GraphState;
   selectedDatasource: IndexpatternDatasource;
 }): Promise<string | undefined> {
   let resolveSavedObjectId: (id?: string) => void;
@@ -181,14 +181,15 @@ function showModal({
     const canSaveData =
       deps.savePolicy === 'configAndData' ||
       (deps.savePolicy === 'configAndDataWithConsent' && userHasConfirmedSaveWorkspaceData);
+    const currentState = getState();
     reduxStateToSavedWorkspace(
       savedWorkspace,
       {
-        workspace: state.workspace,
-        urlTemplates: templatesSelector(state),
-        advancedSettings: settingsSelector(state),
+        workspace: currentState.workspace,
+        urlTemplates: templatesSelector(currentState),
+        advancedSettings: settingsSelector(currentState),
         selectedIndex: selectedDatasource,
-        selectedFields: selectedFieldsSelector(state),
+        selectedFields: selectedFieldsSelector(currentState),
       },
       canSaveData
     );
@@ -210,7 +211,7 @@ function showModal({
           text,
           'data-test-subj': 'saveGraphSuccess',
         });
-        if (savedWorkspace.id !== metaDataSelector(state).savedObjectId) {
+        if (savedWorkspace.id !== metaDataSelector(currentState).savedObjectId) {
           deps.changeUrl(getEditPath(savedWorkspace));
         }
       }

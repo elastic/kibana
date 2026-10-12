@@ -28,6 +28,7 @@ import {
 import { settingsSelector } from './advanced_settings';
 import { openSaveModal } from '../services/save_modal';
 import { saveSavedWorkspace } from '../helpers/saved_workspace_utils';
+import { workspaceChanged } from './workspace';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 // mocking random id generator function
@@ -153,6 +154,40 @@ describe('persistence listeners', () => {
       expect(env.mockedDeps.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(metaDataSelector(env.store.getState()).savedObjectId).toEqual('123');
       expect(env.mockedDeps.changeUrl).toHaveBeenCalledWith(expect.stringContaining('123'));
+    });
+
+    it('serializes the latest workspace snapshot when saving is confirmed', async () => {
+      env.store.dispatch(saveWorkspace({} as GraphWorkspaceSavedObject));
+      env.store.dispatch(
+        workspaceChanged({
+          nodesById: {
+            latest: {
+              id: 'latest',
+              x: 1,
+              y: 2,
+              label: 'Latest',
+              color: 'black',
+              scaledSize: 1,
+              data: { field: 'field', term: 'latest' },
+            },
+          },
+          nodeIds: ['latest'],
+          edgesById: {},
+          edgeIds: [],
+          blocklistedNodesById: {},
+          blocklistedNodeIds: [],
+        })
+      );
+
+      await (openSaveModal as jest.Mock).mock.calls[0][0].saveWorkspace({}, true);
+
+      expect(reduxStateToSavedWorkspace).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          workspace: expect.objectContaining({ nodeIds: ['latest'] }),
+        }),
+        true
+      );
     });
 
     it('should not save data if user does not give consent in the modal', async () => {
