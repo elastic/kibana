@@ -29,6 +29,7 @@ export type TriggerFormValues =
   | {
       kind: 'alert';
       ruleNamePattern: string;
+      ruleNames: string[];
       ruleTags: string[];
       alertStatus: AlertStatus;
     }
@@ -78,7 +79,7 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
     return { kind, channels: [], users: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleTags: [], alertStatus: 'any' };
+    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [], alertStatus: 'any' };
   }
   if (kind === 'cron') {
     return { kind, cronExpression: DEFAULT_CRON, timezone: DEFAULT_TIMEZONE };
@@ -115,6 +116,7 @@ const parseDaysOfWeek = (field: string): number[] =>
 
 export const toAutomationFormValues = (automation: Automation): AutomationFormValues => {
   const row = automation.trigger.rows[0];
+  const [completion] = automation.completions;
   const schedule = row?.kind === 'schedule' ? row : undefined;
   const cronFields = schedule?.cronExpression?.split(' ') ?? [];
   const isHourly = schedule?.schedulePreset === 'hourly';
@@ -124,6 +126,7 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
       ? {
           kind: 'alert',
           ruleNamePattern: row.ruleNamePattern ?? '',
+          ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
           alertStatus: row.alertStatus ?? 'any',
         }
@@ -165,12 +168,10 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     instructions: automation.execution.promptTemplate ?? '',
     mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:
-      automation.completion.action === 'post_to_slack'
+      completion?.action === 'post_to_slack'
         ? {
-            target:
-              SLACK_TARGETS.find((target) => target === automation.completion.targetMode) ??
-              'channel',
-            destination: automation.completion.destination ?? '',
+            target: SLACK_TARGETS.find((target) => target === completion.targetMode) ?? 'channel',
+            destination: completion.destination ?? '',
           }
         : undefined,
     isEnabled: automation.isEnabled,

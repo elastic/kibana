@@ -1,5 +1,5 @@
 {
-  "sha1": "79ef89eaf0297bd1983b84bff7503f10408daa9f",
+  "sha1": "292786ce302abe40bda51f2a05461deb215cfcdb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -257,8 +257,8 @@
       }
     },
     {
-      "id": "6a78981f96ca304-9b8bdbc9e8d75a4",
-      "title": "Episode details — action policy history tab mounts the episode-scoped policy history tab from the details route",
+      "id": "6a78981f96ca304-eff0e3a81352b7e",
+      "title": "Alert details — action policy history tab mounts the episode-scoped policy history tab from the details route",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

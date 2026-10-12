@@ -6,6 +6,10 @@
  */
 
 import { SecurityPageName } from '@kbn/deeplinks-security';
+import {
+  REVIEW_GATED_AUTONOMY_LEVELS,
+  WORKER_AUTONOMY_LEVELS,
+} from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
 
 export const ALERTZERO_FEATURE_ID = 'alertzero' as const;
 export const ALERTZERO_PLUGIN_NAME = 'AlertZero' as const;
@@ -82,6 +86,38 @@ export const WRITE_HUNT_EVIDENCE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/write_hunt_e
 /** Failed managed scans in the trailing 24 hours, folded onto Workers. */
 export const ALERTZERO_SCAN_FAILURES_URL = `${ALERTZERO_INTERNAL_URL}/scan-failures` as const;
 
+/** Read-only Hunt Watch threat-intel supply status for the current space. */
+export const HUNT_THREAT_INTEL_SUPPLY_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/threat_intel_supply` as const;
+
+/** Re-enable drifted TI supply while Continuous Threat Hunt is on. */
+export const HUNT_THREAT_INTEL_SUPPLY_RESTORE_URL =
+  `${HUNT_THREAT_INTEL_SUPPLY_URL}/restore` as const;
+
+export type HuntThreatIntelSupplyScope = 'deployment' | 'space';
+export type HuntThreatIntelSupplyWorkflowKey = 'ingest' | 'enrich' | 'attribute';
+
+export interface HuntThreatIntelSupplyWorkflowStatus {
+  key: HuntThreatIntelSupplyWorkflowKey;
+  workflowId: string;
+  enabled: boolean;
+  installed: boolean;
+  scope: HuntThreatIntelSupplyScope;
+  inUseElsewhere?: boolean;
+}
+
+export interface HuntThreatIntelSupplyHardGate {
+  ok: boolean;
+  reasonCodes: string[];
+}
+
+export interface HuntThreatIntelSupplyStatus {
+  workflows: HuntThreatIntelSupplyWorkflowStatus[];
+  hardGate: HuntThreatIntelSupplyHardGate;
+  drift: boolean;
+  huntEnabled: boolean;
+}
+
 export interface ScanFailureWorker {
   workerId: string;
   watchId: string;
@@ -124,14 +160,13 @@ export const SYSTEM_SECURITY_WATCH_IDS = [
  * watch, composed with per-callable gates and the org-wide floor. Only the *selected* level varies
  * per watch. See https://github.com/elastic/security-team/issues/18718.
  */
-export const WATCH_AUTONOMY_LEVELS = ['manual', 'assisted', 'supervised'] as const;
+export const WATCH_AUTONOMY_LEVELS = WORKER_AUTONOMY_LEVELS;
 
 /**
  * The review-gated subset of the dial: every action passes a human review gate, so the Worker
- * offers no unattended (supervised) level. Declared once here so narrowing the shared scale can
- * never leave these declarations behind.
+ * offers no unattended (supervised) level.
  */
-export const WATCH_AUTONOMY_REVIEW_GATED = ['manual', 'assisted'] as const;
+export const WATCH_AUTONOMY_REVIEW_GATED = REVIEW_GATED_AUTONOMY_LEVELS;
 
 /**
  * Presentation metadata for the managed watch catalog.

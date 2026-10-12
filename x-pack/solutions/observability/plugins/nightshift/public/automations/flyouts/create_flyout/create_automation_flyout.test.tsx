@@ -12,6 +12,7 @@ import { CreateAutomationFlyout } from './create_automation_flyout';
 import { useCreateAutomation } from '../../hooks/use_automations';
 
 jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
+jest.mock('../../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 
 const mockUseCreateAutomation = useCreateAutomation as jest.Mock;
 
@@ -86,7 +87,7 @@ describe('CreateAutomationFlyout', () => {
           isEnabled: false,
           trigger: { rows: [{ kind: 'alert' }] },
           execution: { promptTemplate: 'Find the root cause', reasoningMode: 'investigate' },
-          completion: {},
+          completions: [],
           runtime: { dailyDispatchLimit: 20 },
         },
         expect.objectContaining({ onSuccess: expect.any(Function) })

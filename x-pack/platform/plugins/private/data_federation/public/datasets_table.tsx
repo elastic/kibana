@@ -173,6 +173,7 @@ export const DatasetsTable: FunctionComponent<DatasetsTableProps> = ({
               fill
               color="primary"
               data-test-subj="dataSetsSetsCreateButton"
+              data-telemetry-id="dataFederation-datasets-createButton"
               {...createDatasetNav}
             >
               {mainTranslations.columns.dataSets.addButtonLabel}

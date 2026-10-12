@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GenAiMessage } from './get_genai_fields';
+import type { GenAiMessage } from '@kbn/genai-common';
 import { isRecord, parseNestedJson, unwrapToolResponse } from './parse_genai_value';
 
 export interface GenAiTextBlock {
