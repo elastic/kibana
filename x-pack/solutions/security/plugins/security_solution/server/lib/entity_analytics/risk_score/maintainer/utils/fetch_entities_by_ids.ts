@@ -14,6 +14,8 @@ interface FetchEntitiesByIdsParams {
   entityIds: string[];
   logger: ScopedLogger;
   errorContext: string;
+  /** Throw on lookup failure so an empty fallback cannot route the page through entity creation without criticality or watchlist modifiers. */
+  strict?: boolean;
 }
 
 const normalizeWatchlists = (value: unknown): string[] => {
@@ -63,6 +65,7 @@ export const fetchEntitiesByIds = async ({
   entityIds,
   logger,
   errorContext,
+  strict = false,
 }: FetchEntitiesByIdsParams): Promise<Map<string, RiskScoreModifierEntity>> => {
   const entityMap = new Map<string, RiskScoreModifierEntity>();
 
@@ -93,6 +96,9 @@ export const fetchEntitiesByIds = async ({
       searchAfter = nextSearchAfter;
     } while (searchAfter !== undefined);
   } catch (error) {
+    if (strict) {
+      throw error;
+    }
     logger.warn(`${errorContext}: ${error}`);
   }
 

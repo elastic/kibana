@@ -53,30 +53,36 @@ export const buildScoreDocuments = (params: BuildScoreDocumentsParams): IngestSc
   } = params;
 
   const scores = evaluatorResults.flatMap((result) =>
-    result.scores.map((score) => ({
-      example: {
-        id: example.id,
-        index: example.index,
-        ...(example.input ? { input: example.input } : {}),
-        dataset: { id: example.dataset.id, name: example.dataset.name },
-      },
-      task: {
-        ...(task.traceId ? { trace_id: task.traceId } : {}),
-        repetition_index: task.repetitionIndex,
-        ...(task.output ? { output: task.output } : {}),
-      },
-      evaluator: {
-        name: composeScoreName(result.evaluator.name, score.name),
-        ...(result.evaluator.version ? { version: result.evaluator.version } : {}),
-        ...(score.score !== undefined ? { score: score.score } : {}),
-        ...(score.label !== undefined ? { label: score.label } : {}),
-        ...(score.explanation !== undefined ? { explanation: score.explanation } : {}),
-        ...(score.metadata ? { metadata: score.metadata } : {}),
-        ...(score.traceId !== undefined ? { trace_id: score.traceId } : {}),
-        ...(result.evaluator.kind ? { kind: result.evaluator.kind } : {}),
-        ...(result.evaluator.model ? { model: result.evaluator.model } : {}),
-      },
-    }))
+    result.scores.map((score) => {
+      // A score that declares its own direction is compared by it; the rest share the
+      // evaluator's, which is all that existed before scores could differ.
+      const direction = score.direction ?? result.evaluator.direction;
+      return {
+        example: {
+          id: example.id,
+          index: example.index,
+          ...(example.input ? { input: example.input } : {}),
+          dataset: { id: example.dataset.id, name: example.dataset.name },
+        },
+        task: {
+          ...(task.traceId ? { trace_id: task.traceId } : {}),
+          repetition_index: task.repetitionIndex,
+          ...(task.output ? { output: task.output } : {}),
+        },
+        evaluator: {
+          name: composeScoreName(result.evaluator.name, score.name),
+          ...(result.evaluator.version ? { version: result.evaluator.version } : {}),
+          ...(score.score !== undefined ? { score: score.score } : {}),
+          ...(score.label !== undefined ? { label: score.label } : {}),
+          ...(score.explanation !== undefined ? { explanation: score.explanation } : {}),
+          ...(score.metadata ? { metadata: score.metadata } : {}),
+          ...(score.traceId !== undefined ? { trace_id: score.traceId } : {}),
+          ...(result.evaluator.kind ? { kind: result.evaluator.kind } : {}),
+          ...(result.evaluator.model ? { model: result.evaluator.model } : {}),
+          ...(direction ? { direction } : {}),
+        },
+      };
+    })
   );
 
   return {

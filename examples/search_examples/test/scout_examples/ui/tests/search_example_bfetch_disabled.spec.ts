@@ -18,16 +18,16 @@ test.describe('Search example with bfetch disabled', { tag: '@local-stateful-cla
     await kbnClient.uiSettings.update({ 'bfetch:disable': true });
   });
 
-  test.afterAll(async ({ kbnClient }) => {
-    await kbnClient.uiSettings.unset('bfetch:disable');
-  });
-
   test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     const { searchExamples } = pageObjects;
     await browserAuth.loginAsViewer();
     await searchExamples.gotoSearch();
     await searchExamples.configureSearchDemo();
     await page.components.toast().closeAll();
+  });
+
+  test.afterAll(async ({ kbnClient }) => {
+    await kbnClient.uiSettings.unset('bfetch:disable');
   });
 
   test('should have an other bucket', async ({ pageObjects }) => {

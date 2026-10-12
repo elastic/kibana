@@ -19,7 +19,7 @@ import {
 import type { SequenceFormValues } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../../services/rules_api';
 import { ruleKeys } from '../../hooks/query_key_factory';
-import { paths } from '../../constants';
+import { useAlertingLocators } from '../../application/locator_context';
 
 export const DEFAULT_SEQUENCE_RULE_NAME = i18n.translate(
   'xpack.alertingV2.sequenceBuilder.defaultRuleName',
@@ -31,10 +31,10 @@ const getDefaultFormValues = (): FormValues => ({
   metadata: { name: DEFAULT_SEQUENCE_RULE_NAME, enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'standalone', breach: { query: '' }, recovery: { query: '' } },
-  recoveryStrategy: undefined,
+  query: { base: '', breach: { segment: '' } },
+  recovery: undefined,
   grouping: undefined,
-  noDataStrategy: 'none',
+  noData: { strategy: 'ignore' },
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -54,9 +54,8 @@ export const useSequenceBuilderForm = () => {
 
 export const useSequenceBuilderState = () => {
   const rulesApi = useService(RulesApi);
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
+  const { rulesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
 
   const [seqValues, setSeqValues] = useState<SequenceFormValues>(DEFAULT_SEQUENCE_FORM_VALUES);
@@ -82,19 +81,17 @@ export const useSequenceBuilderState = () => {
         const merged: FormValues = {
           ...formValues,
           kind: 'alert',
-          query: {
-            format: 'standalone',
-            breach: { query: queryData.breachQuery },
-            ...(queryData.recoveryQuery ? { recovery: { query: queryData.recoveryQuery } } : {}),
-          },
+          query: { base: queryData.breachQuery, breach: { segment: '' } },
           grouping:
             queryData.groupingFields.length > 0 ? { fields: queryData.groupingFields } : undefined,
           schedule: {
             ...formValues.schedule,
             lookback: queryData.lookbackString,
           },
-          noDataStrategy: 'none',
-          recoveryStrategy: undefined,
+          noData: { strategy: 'ignore' },
+          recovery: queryData.recoveryQuery
+            ? { strategy: 'query', query: queryData.recoveryQuery }
+            : undefined,
         };
 
         const payload = composeFormToCreateRequest(merged, 'sequence');
@@ -109,7 +106,7 @@ export const useSequenceBuilderState = () => {
           })
         );
 
-        navigateToUrl(basePath.prepend(paths.ruleList));
+        rulesLocators.navigateSync({});
       } catch (err) {
         notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
           title: i18n.translate('xpack.alertingV2.sequenceBuilder.saveError', {
@@ -120,7 +117,7 @@ export const useSequenceBuilderState = () => {
         setIsSaving(false);
       }
     },
-    [rulesApi, navigateToUrl, basePath, notifications, queryClient]
+    [rulesApi, rulesLocators, notifications, queryClient]
   );
 
   return {

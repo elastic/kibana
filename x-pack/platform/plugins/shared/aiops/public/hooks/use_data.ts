@@ -41,10 +41,11 @@ export const useData = (
   barTarget: number = DEFAULT_BAR_TARGET,
   changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment },
-  requestCancellationManager?: RequestCancellationManager
+  requestCancellationManager?: RequestCancellationManager,
+  projectRoutingOverride?: string
 ) => {
   const { executionContext, uiSettings, cps } = useAiopsAppContext();
-  const { projectRouting } = useProjectRouting(cps);
+  const { projectRouting } = useProjectRouting(cps, projectRoutingOverride);
 
   useExecutionContext(executionContext, {
     name: AIOPS_PLUGIN_ID,
@@ -111,7 +112,8 @@ export const useData = (
     selectedSignificantItemStatsRequest,
     lastRefresh,
     changePointsByDefault,
-    requestCancellationManager
+    requestCancellationManager,
+    projectRoutingOverride
   );
 
   useEffect(() => {
@@ -164,18 +166,24 @@ export const useData = (
   };
 };
 
-function useProjectRouting(cps?: CPSPluginStart): { projectRouting: ProjectRouting | undefined } {
+function useProjectRouting(
+  cps?: CPSPluginStart,
+  projectRoutingOverride?: string
+): { projectRouting: ProjectRouting | undefined } {
   const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(
-    cps?.cpsManager?.getProjectRouting()
+    projectRoutingOverride ?? cps?.cpsManager?.getProjectRouting()
   );
 
   useEffect(() => {
     const subscription = cps?.cpsManager?.getProjectRouting$()?.subscribe((newRouting) => {
+      if (projectRoutingOverride) {
+        return;
+      }
       setProjectRouting(newRouting);
     });
 
     return () => subscription?.unsubscribe();
-  }, [cps?.cpsManager]);
+  }, [cps?.cpsManager, projectRoutingOverride]);
 
   return { projectRouting };
 }

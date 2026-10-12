@@ -52,6 +52,7 @@ function parseVaultConfig() {
 }
 
 // CI notify triage uses this OpenRouter model.
+// Model must support OpenAI-style tool calling with `tool_choice` on OpenRouter.
 const TRIAGE_OPENROUTER_MODEL = 'google/gemini-3.7-flash';
 
 /**
@@ -79,10 +80,14 @@ function buildOpenrouterConnectorFromVault() {
 
   return {
     config: {
-      apiUrl: `${baseUrl}/chat/completions`,
-      defaultModel: TRIAGE_OPENROUTER_MODEL,
+      provider: 'openai',
+      taskType: 'chat_completion',
+      providerConfig: {
+        model_id: TRIAGE_OPENROUTER_MODEL,
+        url: `${baseUrl}/chat/completions`,
+      },
     },
-    secrets: { apiKey },
+    secrets: { providerSecrets: { api_key: apiKey } },
   };
 }
 

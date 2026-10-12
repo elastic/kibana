@@ -11,6 +11,7 @@ import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import type { JsonValue } from '@kbn/utility-types';
 import { resolveKibanaStepTypeAlias } from '@kbn/workflows';
+import { isYamlValidationMarkerOwner } from '@kbn/workflows-yaml';
 import type {
   BuiltHoverContext,
   HoverContext,
@@ -22,7 +23,6 @@ import type {
 import { getMonacoConnectorHandler } from './provider_registry';
 import { getPathAtOffset, getTriggerNodes } from '../../../../../common/lib/yaml';
 import { performComputation } from '../../../../entities/workflows/store/workflow_detail/utils/computation';
-import { isYamlValidationMarkerOwner } from '../../../../features/validate_workflow_yaml/model/types';
 import { triggerSchemas } from '../../../../trigger_schemas';
 import type {
   ExecutionContext,

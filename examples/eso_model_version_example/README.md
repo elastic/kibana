@@ -13,4 +13,4 @@ In `examples/eso_model_version_example/server/plugin.ts` the model versions are 
 
 Lastly, use the plugin UI to get a sense for how the objects are migrated - you can query the raw documents and then decrypted the migrated objects.
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.

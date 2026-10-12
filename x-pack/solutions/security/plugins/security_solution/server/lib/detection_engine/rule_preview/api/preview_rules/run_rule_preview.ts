@@ -256,9 +256,11 @@ export const runRulePreview = async (
 
     let invocationStartTime;
 
+    // Use the scoped (space-aware) client, not internalUserEsClient — the internal client is
+    // origin-only and cannot fan out to CPS linked projects. See https://github.com/elastic/kibana/issues/284670
     const dataViewsService = await dataViews.dataViewsServiceFactory(
       savedObjectsClient,
-      internalUserEsClient
+      scopedClusterClientWithCps.asCurrentUser
     );
 
     while (invocationCount > 0 && !isAborted) {

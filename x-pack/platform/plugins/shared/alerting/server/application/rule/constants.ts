@@ -50,7 +50,9 @@ export const MISSING_UIAM_API_KEY_TAG = i18n.translate('xpack.alerting.missingUi
   defaultMessage: 'Missing Elastic Cloud API Key',
 });
 
-/**
- * Feature flag for provisioning UIAM API keys for alerting rules
- */
-export const PROVISION_UIAM_API_KEYS_FEATURE_FLAG = 'alerting.rules.provisionUiamApiKeys';
+export const LEGACY_MISSING_UIAM_API_KEY_TAG = i18n.translate(
+  'xpack.alerting.legacyMissingUiamApiKeyTag',
+  {
+    defaultMessage: 'Missing Universal Api Key',
+  }
+);

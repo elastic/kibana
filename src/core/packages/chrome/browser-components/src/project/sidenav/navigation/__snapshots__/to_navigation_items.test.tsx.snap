@@ -528,9 +528,9 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home",
     "href": "/jom/app/security/get_started",
-    "iconType": "logoSecurity",
+    "iconType": "home",
     "id": "security_solution_home",
-    "label": "Security",
+    "label": "Home",
     "sections": undefined,
   },
   Object {

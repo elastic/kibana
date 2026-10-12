@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
+import { routeId } from '../../zod_query';
 import { getSavedObjectKqlFilter } from '../../common';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -17,12 +18,12 @@ import { privateLocationSavedObjectName } from '../../../../common/saved_objects
 
 export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined> = () => ({
   method: 'DELETE',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
   validate: {},
   validation: {
     request: {
-      params: schema.object({
-        locationId: schema.string({ minLength: 1, maxLength: 1024 }),
+      params: z.strictObject({
+        id: routeId,
       }),
     },
   },
@@ -40,7 +41,7 @@ export const deletePrivateLocationRoute: SyntheticsRestApiRouteFactory<undefined
 
     await migrateLegacyPrivateLocations(internalSOClient, server.logger);
 
-    const { locationId } = request.params as { locationId: string };
+    const { id: locationId } = request.params;
 
     const { locations } = await getPrivateLocationsAndAgentPolicies(
       savedObjectsClient,

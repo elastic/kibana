@@ -96,7 +96,11 @@ describe('setupDependencies', () => {
       getStepGraph: jest.fn().mockReturnThis(),
       topologicalOrder: ['entry-node'],
       getNode: jest.fn().mockReturnValue({ id: 'entry-node' }),
-      getNodeStack: jest.fn().mockReturnValue(['entry-node']),
+      getNodeStack: jest.fn().mockReturnValue([]),
+      getAllNodes: jest.fn().mockReturnValue([]),
+      getEdges: jest.fn().mockReturnValue([]),
+      getInnerStepIds: jest.fn().mockReturnValue(new Set()),
+      getWorkflowLevelTimeout: jest.fn(),
     };
     (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest
       .fn()

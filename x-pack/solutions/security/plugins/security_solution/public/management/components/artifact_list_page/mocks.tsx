@@ -10,7 +10,7 @@ import React from 'react';
 import { waitFor, within } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import userEvent, { type UserEvent } from '@testing-library/user-event';
-import type { ArtifactFormComponentProps } from './types';
+import type { ArtifactFormComponentProps, ArtifactViewModeComponentProps } from './types';
 import type { ArtifactListPageProps } from './artifact_list_page';
 import { ArtifactListPage } from './artifact_list_page';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
@@ -114,16 +114,35 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   const renderArtifactListPage = (props: Partial<ArtifactListPageProps> = {}) => {
+    const { showAsSimpleTable, showEnabledColumn, ViewModeComponent, CardDecorator, ...baseProps } =
+      props;
+
+    const sharedProps = {
+      apiClient,
+      ArtifactFormComponent:
+        FormComponentMock as unknown as ArtifactListPageProps['ArtifactFormComponent'],
+      labels,
+      'data-test-subj': 'testPage',
+      ...baseProps,
+    };
+
+    // Narrow the XOR so Partial test overrides can include `showEnabledColumn`.
     renderResult = mockedContext.render(
-      <ArtifactListPage
-        apiClient={apiClient}
-        ArtifactFormComponent={
-          FormComponentMock as unknown as ArtifactListPageProps['ArtifactFormComponent']
-        }
-        labels={labels}
-        data-test-subj="testPage"
-        {...props}
-      />
+      showAsSimpleTable ? (
+        <ArtifactListPage
+          {...sharedProps}
+          showAsSimpleTable
+          showEnabledColumn={showEnabledColumn}
+          ViewModeComponent={
+            ViewModeComponent ??
+            (({ item }: ArtifactViewModeComponentProps) => (
+              <div data-test-subj="viewModeComponent">{item.name}</div>
+            ))
+          }
+        />
+      ) : (
+        <ArtifactListPage {...sharedProps} CardDecorator={CardDecorator} />
+      )
     );
 
     return renderResult;

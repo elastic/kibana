@@ -12,12 +12,11 @@ const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
 import { getLicenseInfoForFunctions } from '@kbn/language-documentation';
-import type { FunctionDefinition, MultipleLicenseInfo } from '@kbn/language-documentation';
-import type { ESDocsKeywordType } from '../lib/elasticsearch_definitions';
-import {
-  listDocDefinitionFiles,
-  readElasticsearchDefinitions,
-} from '../lib/elasticsearch_definitions';
+import type { MultipleLicenseInfo } from '@kbn/language-documentation';
+import { functionDefinitions } from '@elastic/esql-definitions/functions';
+import { operatorDefinitions } from '@elastic/esql-definitions/operators';
+import { functionDocs } from '@elastic/esql-definitions/function-docs';
+import { operatorDocs } from '@elastic/esql-definitions/operator-docs';
 import { OUTPUT_DIR } from './constants';
 
 interface DocsSectionContent {
@@ -28,97 +27,53 @@ interface DocsSectionContent {
 
 (function () {
   try {
-    const pathToElasticsearch = process.argv[2];
-    if (!pathToElasticsearch) {
-      throw new Error('Path to Elasticsearch must be provided as the first argument.');
-    }
-
-    // Define function types and their corresponding output files
     const functionTypes = [
       { fnType: 'scalar', outputFile: 'scalar_functions.tsx' },
       { fnType: 'agg', outputFile: 'aggregation_functions.tsx' },
-      {
-        fnType: 'time_series_agg',
-        outputFile: 'timeseries_aggregation_functions.tsx',
-      },
+      { fnType: 'time_series_agg', outputFile: 'timeseries_aggregation_functions.tsx' },
       { fnType: 'grouping', outputFile: 'grouping_functions.tsx' },
       { fnType: 'operator', outputFile: 'operators.tsx' },
     ];
 
-    // Process each function type
-    functionTypes.forEach(({ fnType, outputFile }) => {
-      const functionDocs = loadFunctionDocs({
-        pathToElasticsearch,
-        fnType,
-        keywordType: fnType === 'operator' ? 'operators' : 'functions',
-      });
-
-      writeFunctionDocs(functionDocs, path.join(OUTPUT_DIR, outputFile));
-    });
+    for (const { fnType, outputFile } of functionTypes) {
+      const docs = loadFunctionDocs(fnType);
+      writeFunctionDocs(docs, path.join(OUTPUT_DIR, outputFile));
+    }
   } catch (error) {
     process.stderr.write(`${error.stack ?? error.message}\n`);
     process.exit(1);
   }
 })();
 
-function loadFunctionDocs({
-  pathToElasticsearch,
-  fnType,
-  keywordType,
-}: {
-  pathToElasticsearch: string;
-  fnType: string;
-  keywordType: ESDocsKeywordType;
-}) {
-  const fnDefinitions = readElasticsearchDefinitions<FunctionDefinition>({
-    pathToElasticsearch,
-    keywordType,
-    language: 'esql',
-  });
-  const fnDefinitionsMap = new Map(fnDefinitions.map((fn) => [fn.name, fn]));
-  const ESFunctionDefinitions = Array.from(fnDefinitionsMap.values());
-
+function loadFunctionDocs(fnType: string): Map<string, DocsSectionContent> {
   const docs = new Map<string, DocsSectionContent>();
-  const docsFiles = listDocDefinitionFiles({
-    pathToElasticsearch,
-    keywordType,
-    language: 'esql',
-    fileType: 'docs',
-  });
 
-  // Iterate over each file in the directories
-  for (const file of docsFiles) {
-    // Ensure we only process .md files
-    if (path.extname(file) === '.md') {
-      const functionDefinition = ESFunctionDefinitions.find(
-        (def) => def.name === path.basename(file, '.md')
-      );
+  if (fnType === 'operator') {
+    for (const op of operatorDefinitions) {
+      if (op.snapshotOnly) continue;
 
-      if (
-        !functionDefinition ||
-        functionDefinition.snapshot_only ||
-        functionDefinition.type !== fnType
-      ) {
-        continue;
-      }
+      const doc = operatorDocs[op.name];
+      if (!doc?.markdown) continue;
 
-      // Read the file content
-      const content = fs.readFileSync(file, 'utf-8');
-      const baseFunctionName = path.basename(file, '.md');
+      const displayName = `${op.titleName ?? op.name}${op.operator ? ` (${op.operator})` : ''}`;
 
-      // Get the function name from the file name by removing the .md extension
-      const functionName = `${
-        functionDefinition.titleName ? functionDefinition.titleName : baseFunctionName
-      }${functionDefinition.operator ? ` (${functionDefinition.operator})` : ''}`;
+      docs.set(displayName, {
+        description: doc.markdown,
+        preview: op.preview,
+        license: getLicenseInfoForFunctions(op as any),
+      });
+    }
+  } else {
+    for (const fn of functionDefinitions) {
+      if (fn.snapshotOnly || fn.type !== fnType) continue;
 
-      // Find corresponding function definition for license information
-      const fnDefinition = fnDefinitionsMap.get(baseFunctionName);
+      const doc = functionDocs[fn.name];
+      if (!doc?.markdown) continue;
 
-      // Add the function name and content to the map
-      docs.set(functionName, {
-        description: content,
-        preview: functionDefinition.preview,
-        license: getLicenseInfoForFunctions(fnDefinition),
+      docs.set(fn.name, {
+        description: doc.markdown,
+        preview: fn.preview,
+        license: getLicenseInfoForFunctions(fn as any),
       });
     }
   }
@@ -126,12 +81,9 @@ function loadFunctionDocs({
   return docs;
 }
 
-function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathToDocsFile: string) {
-  const codeStrings = Array.from(functionDocs.entries()).map(([name, doc]) => {
-    const defaultMessage = doc.description
-      .replace(/^.*\n/, '') // remove first line (comment from ES)
-      .replaceAll('`', '\\`')
-      .replace(/(\{[^}]*\})/g, "'$1'"); // wrap JSON objects in single quotes to escape them
+function writeFunctionDocs(docsMap: Map<string, DocsSectionContent>, pathToDocsFile: string) {
+  const codeStrings = Array.from(docsMap.entries()).map(([name, doc]) => {
+    const defaultMessage = doc.description.replaceAll('`', '\\`').replace(/(\{[^}]*\})/g, "'$1'");
     return `
   const foo =
   // Do not edit manually... automatically generated by scripts/generate_esql_docs.ts

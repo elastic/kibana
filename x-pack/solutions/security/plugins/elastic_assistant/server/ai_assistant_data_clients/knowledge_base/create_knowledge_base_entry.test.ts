@@ -172,7 +172,7 @@ describe('createKnowledgeBaseEntry', () => {
         logger,
         telemetry,
       })
-    ).rejects.toThrowError('Test error');
+    ).rejects.toThrow('Test error');
   });
 
   test('it rejects a private entry when the user has no profile UID', async () => {
@@ -189,7 +189,7 @@ describe('createKnowledgeBaseEntry', () => {
     });
 
     await expect(createEntry).rejects.toBeInstanceOf(BadRequestError);
-    await expect(createEntry).rejects.toThrowError(
+    await expect(createEntry).rejects.toThrow(
       'Cannot persist a private knowledge base entry without a user profile UID'
     );
     expect(esClient.create).not.toHaveBeenCalled();

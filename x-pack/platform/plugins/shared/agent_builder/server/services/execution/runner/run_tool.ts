@@ -23,7 +23,7 @@ import type {
   ScopedRunnerRunInternalToolParams,
 } from '@kbn/agent-builder-server/runner';
 import { generateFakeToolCallId } from '@kbn/agent-builder-genai-utils/langchain';
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult, createNonInteractiveDeclinedResult } from '@kbn/agent-builder-server';
 import type {
   InternalToolDefinition,
   ToolHandlerCallContext,
@@ -127,7 +127,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
       if (interactivityDisabled) {
         return {
           results: [
-            createErrorResult(
+            createNonInteractiveDeclinedResult(
               'Agent running in non-interactive mode, user input not available - execution was declined'
             ),
           ],
@@ -235,7 +235,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     if (interactivityDisabled) {
       runToolReturn = {
         results: [
-          createErrorResult(
+          createNonInteractiveDeclinedResult(
             'Agent running in non-interactive mode, user input not available - execution was declined'
           ),
         ],
@@ -398,6 +398,7 @@ const reportToolCallTelemetry = ({
         agentId: agentContext?.agentId,
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
+        origin: agentContext?.origin,
         toolId,
         toolType,
         toolCallId,
@@ -411,6 +412,7 @@ const reportToolCallTelemetry = ({
         agentId: agentContext?.agentId,
         conversationId: agentContext?.conversationId,
         executionId: agentContext?.executionId,
+        origin: agentContext?.origin,
         toolId,
         toolType,
         toolCallId,

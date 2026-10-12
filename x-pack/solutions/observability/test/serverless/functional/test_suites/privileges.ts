@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           return await privilege.getVisibleText();
         })
       );
-      expect(privileges.length).to.be(15);
+      expect(privileges.length).to.be(16);
       expect(text).to.eql([
         'Discover\nAll\nRead\nNone',
         'Dashboard\nAll\nRead\nNone',
@@ -65,9 +65,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Cases\nAll\nRead\nNone',
         'Machine Learning\nAll\nRead\nNone',
         'SLOs\nAll\nRead\nNone',
-        'Observability Alerts\nAll\nRead\nNone',
+        'Classic Observability Alerts\nAll\nRead\nNone',
         'Workflows\nAll\nRead\nNone',
         'Observability AI Assistant\nAll\nNone',
+        'Nightshift\nAll\nRead\nNone',
       ]);
     });
 

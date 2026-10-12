@@ -8,7 +8,10 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
-import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
+import {
+  CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+  ACTION_SAVED_OBJECT_TYPE,
+} from '../constants/saved_objects';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 
 describe('createUnsecuredInboundSavedObjectsClient', () => {
@@ -27,7 +30,10 @@ describe('createUnsecuredInboundSavedObjectsClient', () => {
     expect(getStartServices).toHaveBeenCalledTimes(1);
     expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(expect.any(Object), {
       excludedExtensions: [SECURITY_EXTENSION_ID],
-      includedHiddenTypes: [ACTION_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [
+        ACTION_SAVED_OBJECT_TYPE,
+        CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE,
+      ],
     });
   });
 });

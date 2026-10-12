@@ -24,6 +24,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
     'target/kibana-fleet/**/*.png'
     'target/test-metrics/*'
     'target/test-suites-ci-plan.json'
+    'target/cypress-results/**/*.ndjson'
     'test/**/screenshots/diff/*.png'
     'test/**/screenshots/failure/*.png'
     'test/**/screenshots/session/*.png'
@@ -80,7 +81,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
-    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 
   if [[ -d 'target/agent_diagnostics' ]]; then

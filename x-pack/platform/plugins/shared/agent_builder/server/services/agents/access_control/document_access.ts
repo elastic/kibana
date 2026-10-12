@@ -19,6 +19,7 @@ import {
   hasAgentReadAccess,
   hasAgentUseAccess,
   hasAgentWriteAccess,
+  matchesAccessControlEntry,
 } from './authorization';
 import type { AgentProperties } from '../persisted/client/storage';
 
@@ -40,7 +41,7 @@ export const normalizeAccessControl = (
   entries: source.access_control?.entries ?? source.acl?.entries ?? [],
 });
 
-const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
+export const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined
     ? { id: source.created_by_id, username: source.created_by_name }
     : undefined;
@@ -147,8 +148,8 @@ export const redactAccessControlForCaller = <T extends { access_control?: AgentA
     ...definition,
     access_control: {
       ...definition.access_control,
-      entries: definition.access_control.entries.filter(
-        (entry) => entry.type === 'user' && user.username && entry.name === user.username
+      entries: definition.access_control.entries.filter((entry) =>
+        matchesAccessControlEntry(entry, user)
       ),
     },
   };

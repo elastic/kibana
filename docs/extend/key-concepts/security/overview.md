@@ -37,6 +37,12 @@ Saved object types that hold sensitive data (credentials, API keys, secrets) can
 
 See [Encrypted Saved Objects](./encrypted-saved-objects.md).
 
+## Bounded string schemas
+
+Route schemas that accept unbounded strings let a caller send arbitrarily large input into request validation and on to Elasticsearch, which is a denial-of-service surface. `@kbn/config-schema` and `@kbn/zod` ship semantic string helpers with shared default length bounds, plus a reporting mode for measuring an existing route before enforcing a limit.
+
+See [Bounded string schemas](./bounded-string-schemas.md).
+
 ## Audit logging
 
 Audit logging records security-relevant events — authentication outcomes, authorization decisions, saved object access — so Kibana activity can be monitored and reviewed after an incident. It complements Elasticsearch audit logging.

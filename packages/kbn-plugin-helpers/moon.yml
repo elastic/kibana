@@ -18,15 +18,12 @@ project:
   sourceRoot: packages/kbn-plugin-helpers
 dependsOn:
   - '@kbn/dev-utils'
-  - '@kbn/optimizer'
   - '@kbn/rspack-optimizer'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
   - '@kbn/repo-info'
-  - '@kbn/jest-serializers'
   - '@kbn/repo-packages'
-  - '@kbn/stdio-dev-helpers'
   - '@kbn/utils'
 tags:
   - shared-server

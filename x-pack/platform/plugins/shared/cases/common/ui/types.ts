@@ -58,13 +58,10 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
   alerts: {
-    enabled?: boolean;
-    isExperimental?: boolean;
     read?: boolean;
     all?: boolean;
   };
   metrics: SingleCaseMetricsFeature[];
-  events?: { enabled: boolean };
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -96,11 +93,6 @@ export interface CasesUiConfigType {
   };
   runWorkflows: {
     enabled: boolean;
-  };
-  casesRedesign: {
-    list: boolean;
-    details: boolean;
-    settings: boolean;
   };
 }
 
@@ -178,6 +170,8 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
+  | 'extractObservables'
+  | 'workflowTags'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

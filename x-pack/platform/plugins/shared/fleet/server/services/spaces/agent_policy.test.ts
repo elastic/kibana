@@ -87,7 +87,7 @@ describe('updateAgentPolicySpaces', () => {
     });
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).not.toBeCalled();
+    ).not.toHaveBeenCalled();
   });
 
   it('does nothing if feature flag is not enabled', async () => {
@@ -106,7 +106,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).not.toBeCalled();
+    ).not.toHaveBeenCalled();
   });
 
   it('allow to change spaces', async () => {
@@ -124,7 +124,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).toBeCalledWith(
+    ).toHaveBeenCalledWith(
       [
         { id: 'policy1', type: 'fleet-agent-policies' },
         { id: 'package-policy-1', type: 'fleet-package-policies' },
@@ -137,7 +137,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       jest.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension()).bulkUpdate
-    ).toBeCalledWith([
+    ).toHaveBeenCalledWith([
       {
         id: 'token1',
         type: 'fleet-uninstall-tokens',
@@ -172,9 +172,77 @@ describe('updateAgentPolicySpaces', () => {
         currentSpaceId: 'default',
         authorizedSpaces: ['test', 'default'],
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       /Agent policies using reusable integration policies cannot be moved to a different space./
     );
+  });
+
+  describe('with Synthetics package policies', () => {
+    beforeEach(() => {
+      jest.mocked(packagePolicyService.findAllForAgentPolicy).mockResolvedValue([
+        {
+          id: 'synthetics-package-policy',
+          policy_ids: ['policy1'],
+          package: { name: 'synthetics' },
+        },
+      ] as any);
+    });
+
+    it('throws when moving the policy to a different space', async () => {
+      await expect(
+        updateAgentPolicySpaces({
+          agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['test'] },
+          currentSpaceId: 'default',
+          authorizedSpaces: ['test', 'default'],
+        })
+      ).rejects.toThrow(
+        /Agent policies used by Synthetics private locations cannot be moved to a different space./
+      );
+      expect(
+        appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
+      ).not.toHaveBeenCalled();
+    });
+
+    it('allows moving the policy with force', async () => {
+      await updateAgentPolicySpaces({
+        agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['test'] },
+        currentSpaceId: 'default',
+        authorizedSpaces: ['test', 'default'],
+        options: { force: true },
+      });
+
+      expect(
+        appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
+      ).toHaveBeenCalledWith(
+        [
+          { id: 'policy1', type: 'fleet-agent-policies' },
+          { id: 'synthetics-package-policy', type: 'fleet-package-policies' },
+        ],
+        ['test'],
+        ['default'],
+        { namespace: 'default', refresh: 'wait_for' }
+      );
+    });
+
+    it('allows adding a space without removing the existing one', async () => {
+      await updateAgentPolicySpaces({
+        agentPolicy: { id: 'policy1', name: 'Policy 1', space_ids: ['default', 'test'] },
+        currentSpaceId: 'default',
+        authorizedSpaces: ['test', 'default'],
+      });
+
+      expect(
+        appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
+      ).toHaveBeenCalledWith(
+        [
+          { id: 'policy1', type: 'fleet-agent-policies' },
+          { id: 'synthetics-package-policy', type: 'fleet-package-policies' },
+        ],
+        ['test'],
+        [],
+        { namespace: 'default', refresh: 'wait_for' }
+      );
+    });
   });
 
   it('throw when trying to change a managed policies space', async () => {
@@ -197,7 +265,7 @@ describe('updateAgentPolicySpaces', () => {
         currentSpaceId: 'default',
         authorizedSpaces: ['test', 'default'],
       })
-    ).rejects.toThrowError(/Cannot update hosted agent policy policy1 space/);
+    ).rejects.toThrow(/Cannot update hosted agent policy policy1 space/);
   });
 
   it('throw when trying to add a space with missing permissions', async () => {
@@ -213,7 +281,7 @@ describe('updateAgentPolicySpaces', () => {
         currentSpaceId: 'default',
         authorizedSpaces: ['default'],
       })
-    ).rejects.toThrowError(/Not enough permissions to create policies in space test/);
+    ).rejects.toThrow(/Not enough permissions to create policies in space test/);
   });
 
   it('throw when trying to remove a space with missing permissions', async () => {
@@ -229,7 +297,7 @@ describe('updateAgentPolicySpaces', () => {
         currentSpaceId: 'default',
         authorizedSpaces: ['test'],
       })
-    ).rejects.toThrowError(/Not enough permissions to remove policies from space default/);
+    ).rejects.toThrow(/Not enough permissions to remove policies from space default/);
   });
 
   it('throw when policy name already exists on another space', async () => {
@@ -249,6 +317,6 @@ describe('updateAgentPolicySpaces', () => {
         currentSpaceId: 'default',
         authorizedSpaces: ['default', 'test'],
       })
-    ).rejects.toThrowError(/Name already exists/);
+    ).rejects.toThrow(/Name already exists/);
   });
 });

@@ -7,6 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { spaceTest } from '../../../common/ui/fixtures';
-export { LOGS, LOGS_EXPERIENCE_TAGS } from './constants';
-export { setupLogsExperience, teardownLogsExperience } from './setup';
+import type { ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { createLazyPageObject } from '@kbn/scout';
+import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
+import { spaceTest as spaceBaseTest } from '../../../common/ui/fixtures';
+import { LogsExperiencePage } from './page_objects';
+
+export interface LogsExperienceTestFixtures {
+  pageObjects: DiscoverPageObjects & {
+    logsExperience: LogsExperiencePage;
+  };
+}
+
+export const spaceTest = spaceBaseTest.extend<
+  LogsExperienceTestFixtures,
+  ScoutParallelWorkerFixtures
+>({
+  pageObjects: async ({ pageObjects, page }, use) => {
+    const extendedPageObjects: LogsExperienceTestFixtures['pageObjects'] = {
+      ...pageObjects,
+      logsExperience: createLazyPageObject(
+        LogsExperiencePage,
+        page,
+        pageObjects.dataGrid,
+        pageObjects.discover
+      ),
+    };
+
+    await use(extendedPageObjects);
+  },
+});
+
+export { LOGS, LOGS_EXPERIENCE_TAGS, PUSH_FLYOUT_VIEWPORT } from './constants';
+export {
+  createNonLogsDiscoverSession,
+  deleteLogsExperienceData,
+  setupLogsExperience,
+  teardownLogsExperience,
+} from './setup';

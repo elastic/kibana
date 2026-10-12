@@ -6,11 +6,11 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { EuiButton } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
 import { KibanaContentListPage } from '@kbn/content-list-page';
@@ -112,15 +112,9 @@ const labels = {
   }),
 };
 
-const CreateMapButton = ({ isReadOnly }: { isReadOnly: boolean }) =>
-  isReadOnly ? null : (
-    <EuiButton fill iconType="plusCircle" onClick={navigateToNewMap} data-test-subj="newItemButton">
-      <FormattedMessage
-        id="xpack.maps.mapListing.createMapButtonLabel"
-        defaultMessage="Create map"
-      />
-    </EuiButton>
-  );
+const createMapLabel = i18n.translate('xpack.maps.mapListing.createMapButtonLabel', {
+  defaultMessage: 'Create map',
+});
 
 interface Props {
   history: ScopedHistory;
@@ -172,6 +166,22 @@ const MapsListViewComp = ({ history }: Props) => {
     [isReadOnly]
   );
 
+  const menu = useMemo<AppHeaderMenu | undefined>(() => {
+    if (isReadOnly) {
+      return undefined;
+    }
+
+    return {
+      primaryActionItem: {
+        id: 'createMap',
+        label: createMapLabel,
+        iconType: 'plusCircle',
+        testId: 'newItemButton',
+        run: navigateToNewMap,
+      },
+    };
+  }, [isReadOnly]);
+
   return (
     <ContentListClientProvider
       id="map"
@@ -179,10 +189,7 @@ const MapsListViewComp = ({ history }: Props) => {
       {...{ labels, isReadOnly, findItems, services, features, item }}
     >
       <KibanaContentListPage data-test-subj={PAGE_DATA_TEST_SUBJ}>
-        <KibanaContentListPage.Header
-          title={APP_NAME}
-          actions={<CreateMapButton isReadOnly={isReadOnly} />}
-        />
+        <AppHeader title={APP_NAME} menu={menu} />
         <KibanaContentListPage.Section>
           <MapList />
         </KibanaContentListPage.Section>

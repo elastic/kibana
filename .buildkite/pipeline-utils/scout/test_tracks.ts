@@ -9,7 +9,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { SCOUT_TEST_TRACKS_ROOT } from './paths';
+import { SCOUT_TEST_TRACKS_ROOT } from './paths.ts';
 
 export interface ScoutTestLane {
   number: number;
@@ -24,6 +24,8 @@ export interface ScoutTestLane {
     buildkite: {
       agentQueue: string;
     };
+    // Only set on lanes of combined tracks (see `--combineShortLanes` of `scout create-test-tracks`)
+    loadGroups?: Array<{ configSet: string; loads: string[] }>;
   };
 }
 
@@ -49,7 +51,8 @@ export interface ScoutTestTrack {
       arch: string;
       domain: string;
     };
-    server: {
+    // Not set on combined tracks, whose lanes list their server config sets in `loadGroups`
+    server?: {
       configSet: string;
     };
   };

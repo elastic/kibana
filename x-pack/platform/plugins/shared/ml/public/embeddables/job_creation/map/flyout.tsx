@@ -18,13 +18,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSkeletonText,
   useEuiTheme,
 } from '@elastic/eui';
 import { getTitle } from '@kbn/presentation-publishing';
 import type { MapApi } from '@kbn/maps-plugin/public';
+import { loadMlServerInfo } from '../../../application/services/ml_server_info';
 import { Layer } from './map_vis_layer_selection_flyout/layer';
 import type { LayerResult } from '../../../application/jobs/new_job/job_from_map';
 import { VisualizationExtractor } from '../../../application/jobs/new_job/job_from_map';
+import { useMlFromLensKibanaContext } from '../common/context';
 
 interface Props {
   embeddable: MapApi;
@@ -33,19 +36,45 @@ interface Props {
 
 export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: {
+      mlServices: { mlApi },
+    },
+  } = useMlFromLensKibanaContext();
   const [layerResults, setLayerResults] = useState<LayerResult[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const visExtractor = new VisualizationExtractor();
-    visExtractor
-      .getResultLayersFromEmbeddable(embeddable)
-      .then(setLayerResults)
-      .catch((error) => {
+    let cancelled = false;
+
+    async function fetchLayerResults() {
+      setIsLoading(true);
+      try {
+        await loadMlServerInfo(mlApi);
+        const visExtractor = new VisualizationExtractor();
+        const results = await visExtractor.getResultLayersFromEmbeddable(embeddable);
+        if (cancelled) {
+          return;
+        }
+        setLayerResults(results);
+        setIsLoading(false);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
         // eslint-disable-next-line no-console
         console.error('Layers could not be extracted from embeddable', error);
         onClose();
-      });
-  }, [embeddable, onClose]);
+      }
+    }
+
+    void fetchLayerResults();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embeddable]);
 
   return (
     <>
@@ -68,9 +97,11 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={{ backgroundColor: euiTheme.colors.lightestShade }}>
-        {layerResults.map((layer, i) => (
-          <Layer key={`${layer.layerId}`} layer={layer} layerIndex={i} embeddable={embeddable} />
-        ))}
+        <EuiSkeletonText lines={4} isLoading={isLoading}>
+          {layerResults.map((layer, i) => (
+            <Layer key={`${layer.layerId}`} layer={layer} layerIndex={i} embeddable={embeddable} />
+          ))}
+        </EuiSkeletonText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">

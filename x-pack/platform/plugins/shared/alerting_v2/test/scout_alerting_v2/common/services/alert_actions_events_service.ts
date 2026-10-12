@@ -20,6 +20,10 @@ export interface AlertActionsFilter {
   actionTypes?: ReadonlyArray<AlertAction['action_type']>;
 }
 
+export interface AlertActionsCleanUpFilter {
+  ruleId?: string;
+}
+
 /**
  * Test-time direct-index accessor for the alerting_v2 `.alert-actions` data
  * stream. This bypasses the plugin's public HTTP surface — use it when a
@@ -34,8 +38,11 @@ export interface AlertActionsEventsService {
   find: (filter?: AlertActionsFilter) => Promise<AlertAction[]>;
   /** Polls `find(...)` until at least `min` matching actions exist. */
   waitForAtLeast: (min: number, filter?: AlertActionsFilter) => Promise<void>;
-  /** Removes every document from the `.alert-actions` data stream. */
-  cleanUp: () => Promise<void>;
+  /**
+   * Removes documents from the `.alert-actions` data stream.
+   * Pass `ruleId` to delete only that run's actions; omit it to wipe the stream.
+   */
+  cleanUp: (filter?: AlertActionsCleanUpFilter) => Promise<void>;
 }
 
 export const getAlertActionsEventsService = ({
@@ -84,12 +91,12 @@ export const getAlertActionsEventsService = ({
       })
       .toBeGreaterThanOrEqual(min);
 
-  const cleanUp: AlertActionsEventsService['cleanUp'] = () =>
+  const cleanUp: AlertActionsEventsService['cleanUp'] = (filter = {}) =>
     measurePerformanceAsync(log, `dataStream[${ALERT_ACTIONS_DATA_STREAM}].cleanUp`, async () => {
       await esClient.deleteByQuery(
         {
           index: ALERT_ACTIONS_DATA_STREAM,
-          query: { match_all: {} },
+          query: filter.ruleId ? { term: { rule_id: filter.ruleId } } : { match_all: {} },
           refresh: true,
           wait_for_completion: true,
           conflicts: 'proceed',

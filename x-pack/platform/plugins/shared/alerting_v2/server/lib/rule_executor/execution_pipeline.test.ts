@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { asSpaceId } from '@kbn/core-spaces-common';
+
 import { RuleExecutionPipeline } from './execution_pipeline';
 import type { RulePipelineState, RuleExecutionStep } from './types';
 import type { RuleExecutionMiddleware } from './middleware';
@@ -426,7 +428,7 @@ describe('RuleExecutionPipeline', () => {
 
       const input = createRuleExecutionPipelineInput({
         ruleId: 'rule-42',
-        spaceId: 'space-1',
+        spaceId: asSpaceId('space-1'),
         executionUuid: executionId,
       });
       await pipeline.execute(input);
@@ -438,7 +440,7 @@ describe('RuleExecutionPipeline', () => {
         ruleEventsGenerated: 7,
         rule: {
           ruleId: 'rule-42',
-          spaceId: 'space-1',
+          spaceId: asSpaceId('space-1'),
           kind: 'signal',
           tags: ['security', 'siem'],
         },

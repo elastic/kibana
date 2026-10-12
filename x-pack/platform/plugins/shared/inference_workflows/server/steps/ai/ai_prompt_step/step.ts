@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { validateReasoningEffort } from '@kbn/inference-common';
 import { AiPromptStepCommonDefinition } from '../../../../common/steps/ai';
 import type { InferenceWorkflowsStartDeps } from '../../../types';
 import { AI_PROMPT_FEATURE_ID } from '../ai_feature_ids';
@@ -18,21 +19,54 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
     handler: async (context) => {
       const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
-      const resolvedConnectorId = await resolveConnectorId(
-        context.config['connector-id'],
-        inference,
-        context.contextManager.getFakeRequest(),
-        { featureId: AI_PROMPT_FEATURE_ID, searchInferenceEndpoints }
-      );
+      const connectorIdByFeature = context.config['connector-id-by-feature'];
+      const connectorId = context.config['connector-id'];
+      const request = context.contextManager.getFakeRequest();
 
+      let resolvedConnectorId: string;
+
+      if (connectorIdByFeature) {
+        if (connectorId) {
+          throw new Error(
+            'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.'
+          );
+        }
+        const feature = searchInferenceEndpoints.features.get(connectorIdByFeature);
+        if (feature && feature.taskType !== 'chat_completion') {
+          throw new Error(
+            `Feature "${connectorIdByFeature}" is not a chat completion feature (task type "${feature.taskType}"). connector-id-by-feature requires a feature with task type "chat_completion".`
+          );
+        }
+        const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
+          connectorIdByFeature,
+          request
+        );
+        if (endpoints.length === 0) {
+          throw new Error(`No connector available for feature "${connectorIdByFeature}".`);
+        }
+        resolvedConnectorId = endpoints[0].connectorId;
+      } else {
+        resolvedConnectorId = await resolveConnectorId(connectorId, inference, request, {
+          featureId: AI_PROMPT_FEATURE_ID,
+          searchInferenceEndpoints,
+        });
+      }
+
+      const reasoningLevel = context.config['reasoning-level'];
       const chatModel = await inference.getChatModel({
         connectorId: resolvedConnectorId,
         request: context.contextManager.getFakeRequest(),
         chatModelOptions: {
           temperature: context.input.temperature,
           maxRetries: 0,
+          ...(reasoningLevel !== undefined ? { reasoning: { effort: reasoningLevel } } : {}),
         },
       });
+
+      if (reasoningLevel !== undefined) {
+        validateReasoningEffort(chatModel.getConnector(), reasoningLevel);
+      }
+
       const modelInput = [
         ...(context.input.systemPrompt
           ? [{ role: 'system', content: context.input.systemPrompt }]

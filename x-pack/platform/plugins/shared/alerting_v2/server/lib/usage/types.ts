@@ -31,13 +31,17 @@ export interface AlertingV2Usage {
   count_with_grouping?: number;
   avg_grouping_fields_count?: number | null;
   min_created_at?: string | null;
-  count_by_query_format?: { composed?: number; standalone?: number };
-  count_by_recovery_strategy?: { no_breach?: number; query?: number; none?: number };
+  count_by_recovery_strategy?: {
+    no_breach?: number;
+    condition?: number;
+    query?: number;
+    manual?: number;
+  };
   count_by_no_data_strategy?: {
-    last_known_status?: number;
-    emit?: number;
-    recover?: number;
-    none?: number;
+    ignore?: number;
+    keep_last?: number;
+    resolve?: number;
+    alert?: number;
   };
 
   // execution stats
@@ -53,7 +57,6 @@ export interface AlertingV2Usage {
   action_policies_count?: number;
   action_policies_unique_workflow_count?: number;
   action_policies_count_with_matcher?: number;
-  action_policies_count_agent_builder_assisted?: number;
   action_policies_count_with_group_by?: number;
   action_policies_avg_group_by_fields_count?: number | null;
   action_policies_count_by_throttle_interval?: NameValuePair[];

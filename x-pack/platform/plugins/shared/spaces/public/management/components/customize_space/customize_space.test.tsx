@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { asSpaceId } from '@kbn/core-spaces-common';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { CustomizeSpace } from './customize_space';
@@ -32,7 +33,7 @@ test('renders correctly', () => {
 
 test('allows title prop', () => {
   const space = {
-    id: 'space-3',
+    id: asSpaceId('space-3'),
     name: 'Space 3',
     initials: 'S3',
     color: '#FEEDED',
@@ -55,7 +56,7 @@ test('allows title prop', () => {
 
 test('updates identifier, initials and color when name is changed', () => {
   const space = {
-    id: 'space-1',
+    id: asSpaceId('space-1'),
     name: 'Space 1',
     initials: 'S1',
     color: '#ABCDEF',
@@ -75,7 +76,7 @@ test('updates identifier, initials and color when name is changed', () => {
 
   expect(changeHandler).toHaveBeenCalledWith({
     ...space,
-    id: 'space-2',
+    id: asSpaceId('space-2'),
     name: 'Space 2',
     initials: 'S2',
     color: '#BFDBFF',
@@ -84,7 +85,7 @@ test('updates identifier, initials and color when name is changed', () => {
 
 test('does not update custom identifier, initials or color name is changed', () => {
   const space = {
-    id: 'space-1',
+    id: asSpaceId('space-1'),
     name: 'Space 1',
     initials: 'S1',
     color: '#ABCDEF',

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { MaintenanceWindowAttributes } from '@kbn/maintenance-windows-plugin/common';
+import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
+import { MaintenanceWindowStatus } from '@kbn/maintenance-windows-plugin/common';
 import { Frequency } from '@kbn/rrule';
 
 export const getMockMaintenanceWindow = (
-  overwrites?: Partial<MaintenanceWindowAttributes>
-): MaintenanceWindowAttributes => {
+  overwrites?: Partial<MaintenanceWindow>
+): MaintenanceWindow => {
   return {
+    id: 'test-id',
     title: 'test-title',
     duration: 60 * 60 * 1000,
     enabled: true,
@@ -20,7 +22,7 @@ export const getMockMaintenanceWindow = (
       dtstart: '2023-02-26T00:00:00.000Z',
       freq: Frequency.WEEKLY,
       count: 2,
-    } as MaintenanceWindowAttributes['rRule'],
+    } as MaintenanceWindow['rRule'],
     schedule: {
       custom: {
         start: '2023-02-26T00:00:00.000Z',
@@ -47,6 +49,11 @@ export const getMockMaintenanceWindow = (
     createdBy: 'test-user',
     updatedBy: 'test-user',
     expirationDate: new Date().toISOString(),
+    // MV5 domain model: v1 selected with no filter. `enabled` lives here (domain type).
+    scope: { alerting: { enabled: true } },
+    status: MaintenanceWindowStatus.Upcoming,
+    eventStartTime: null,
+    eventEndTime: null,
     ...overwrites,
   };
 };

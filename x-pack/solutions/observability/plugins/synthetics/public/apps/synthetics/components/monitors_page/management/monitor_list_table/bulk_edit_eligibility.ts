@@ -58,3 +58,21 @@ export const isMonitorBulkEditable = (
   }
   return true;
 };
+
+/**
+ * Eligibility for the bulk enable/disable action specifically.
+ *
+ * Unlike other bulk edits, the enable/disable toggle is an operational change
+ * the server also allows on project/terraform monitors (an `enabled`-only patch,
+ * reconciled back to source on the next push) — mirroring the per-row switch.
+ * So origin is NOT a disqualifier here; only the public-location capability is.
+ */
+export const isMonitorBulkStatusEditable = (
+  monitor: EncryptedSyntheticsSavedMonitor,
+  canUsePublicLocations: boolean
+): boolean => {
+  if (monitorUsesPublicLocations(monitor) && !canUsePublicLocations) {
+    return false;
+  }
+  return true;
+};

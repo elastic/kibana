@@ -6,7 +6,6 @@
  */
 
 import type { SearchRequest, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { PolicyExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
@@ -14,12 +13,13 @@ import {
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
+  type ActionPolicyEventAction,
 } from '../../../dispatcher/steps/constants';
 
 /**
  * Filter inputs shared by the action-policy event queries.
  *
- * `outcomes` narrows `event.action` to the provided actions (`dispatched` |
+ * `actions` narrows `event.action` to the provided actions (`dispatched` |
  * `throttled` | `dispatch_failed`). When omitted or empty, all three are
  * matched. `policyIds` /
  * `ruleIds`, when provided, must match an entry in the nested
@@ -32,7 +32,11 @@ export interface BuildActionPolicyEventsQueryParams {
   spaceId: string;
   /** Inclusive lower bound applied to `@timestamp`. */
   startDate: string;
-  outcomes?: PolicyExecutionOutcome[];
+  /** Inclusive upper bound applied to `@timestamp`. Unbounded when omitted. */
+  endDate?: string;
+  /** Sort direction on `@timestamp`. Defaults to `desc` (newest first). */
+  sortOrder?: 'asc' | 'desc';
+  actions?: ActionPolicyEventAction[];
   policyIds?: string[];
   ruleIds?: string[];
   /**
@@ -43,11 +47,11 @@ export interface BuildActionPolicyEventsQueryParams {
    */
   mandatoryRuleIds?: string[];
   /**
-   * Episode filter. Applied as an AND clause: the event must reference at
-   * least one of these episode ids in the top-level
-   * `kibana.alerting_v2.dispatcher.episode_ids` keyword array.
+   * Alert filter. Applied as an AND clause: the event must reference at
+   * least one of these alert ids in the top-level
+   * `kibana.alerting_v2.dispatcher.alert_ids` keyword array.
    */
-  episodeIds?: string[];
+  alertIds?: string[];
 }
 
 /**
@@ -94,7 +98,7 @@ export const buildFindActionPolicyEventsQuery = (
  * privilege (`executionHistory.read`) is the sole gate; see spec §6.4.
  *
  * `track_total_hits: true` is set so callers see precise counts (the list
- * `totalEvents` and the "new events since" badge depend on exact totals).
+ * `total` and the "new events since" badge depend on exact totals).
  */
 const buildBaseActionPolicyEventsQuery = (
   params: BuildActionPolicyEventsQueryParams
@@ -102,8 +106,15 @@ const buildBaseActionPolicyEventsQuery = (
   const filters: QueryDslQueryContainer[] = [
     { term: { 'event.provider': ACTION_POLICY_EVENT_PROVIDER } },
     { term: { 'kibana.space_ids': params.spaceId } },
-    { range: { '@timestamp': { gte: params.startDate } } },
-    actionFilter(params.outcomes),
+    {
+      range: {
+        '@timestamp': {
+          gte: params.startDate,
+          ...(params.endDate && { lte: params.endDate }),
+        },
+      },
+    },
+    actionFilter(params.actions),
   ];
 
   const idFilter = buildIdFilter(params.policyIds, params.ruleIds);
@@ -115,28 +126,28 @@ const buildBaseActionPolicyEventsQuery = (
     filters.push(buildMandatoryRuleClause(params.mandatoryRuleIds));
   }
 
-  if (params.episodeIds && params.episodeIds.length > 0) {
-    filters.push({ terms: { 'kibana.alerting_v2.dispatcher.episode_ids': params.episodeIds } });
+  if (params.alertIds && params.alertIds.length > 0) {
+    filters.push({ terms: { 'kibana.alerting_v2.dispatcher.alert_ids': params.alertIds } });
   }
 
   return {
     query: { bool: { filter: filters } },
-    sort: [{ '@timestamp': { order: 'desc' } }],
+    sort: [{ '@timestamp': { order: params.sortOrder ?? 'desc' } }],
     track_total_hits: true,
   };
 };
 
-const actionFilter = (outcomes: PolicyExecutionOutcome[] | undefined): QueryDslQueryContainer => {
-  const actions =
-    outcomes && outcomes.length > 0
-      ? outcomes
+const actionFilter = (actions: ActionPolicyEventAction[] | undefined): QueryDslQueryContainer => {
+  const matched =
+    actions && actions.length > 0
+      ? actions
       : [
           ACTION_POLICY_EVENT_ACTIONS.DISPATCHED,
           ACTION_POLICY_EVENT_ACTIONS.THROTTLED,
           ACTION_POLICY_EVENT_ACTIONS.DISPATCH_FAILED,
         ];
 
-  return { terms: { 'event.action': actions } };
+  return { terms: { 'event.action': matched } };
 };
 
 /**

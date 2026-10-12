@@ -12,15 +12,18 @@ import {
   MAX_USER_ACTION_SEARCH_LENGTH,
   MAX_USER_ACTION_AUTHOR_LENGTH,
   MAX_USER_ACTION_AUTHORS_FILTER_LENGTH,
+  MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+  NO_ACTION_SOURCE_FILTERING_KEYWORD,
 } from '../../../constants';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
+import { ActionSourceTypeRt } from '../../domain/user_action/source/v1';
 import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import {
   CaseUserActionInjectedDeprecatedIdsRt,
   CaseUserActionBasicRt,
   UserActionsRt,
 } from '../../domain/user_action/v1';
-import type { AttachmentsV2 } from '../../domain';
+import type { UnifiedAttachment } from '../../domain/attachment/v2';
 
 export type UserActionWithResponse<T> = T & { id: string; version: string } & rt.TypeOf<
     typeof CaseUserActionInjectedIdsRt
@@ -76,6 +79,12 @@ const UserActionFindRequestTypes = {
 const UserActionFindRequestTypesRt = rt.keyof(UserActionFindRequestTypes);
 export type UserActionFindRequestTypes = rt.TypeOf<typeof UserActionFindRequestTypesRt>;
 
+const UserActionFindRequestSourcesRt = rt.union([
+  ActionSourceTypeRt,
+  rt.literal(NO_ACTION_SOURCE_FILTERING_KEYWORD),
+]);
+export type UserActionFindRequestSources = rt.TypeOf<typeof UserActionFindRequestSourcesRt>;
+
 export const UserActionFindRequestRt = rt.intersection([
   rt.exact(
     rt.partial({
@@ -108,6 +117,12 @@ export const UserActionInternalFindRequestRt = rt.intersection([
         min: 1,
         max: MAX_USER_ACTION_SEARCH_LENGTH,
       }),
+      sources: limitedArraySchema({
+        codec: UserActionFindRequestSourcesRt,
+        fieldName: 'sources',
+        min: 0,
+        max: MAX_USER_ACTION_SOURCES_FILTER_LENGTH,
+      }),
     })
   ),
   paginationSchema({ maxPerPage: MAX_USER_ACTIONS_PER_PAGE }),
@@ -125,5 +140,5 @@ export const UserActionFindResponseRt = rt.strict({
 export type UserActionFindResponse = rt.TypeOf<typeof UserActionFindResponseRt>;
 
 export interface UserActionInternalFindResponse extends UserActionFindResponse {
-  latestAttachments: AttachmentsV2;
+  latestAttachments: UnifiedAttachment[];
 }

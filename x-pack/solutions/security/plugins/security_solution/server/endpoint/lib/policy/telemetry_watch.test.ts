@@ -94,7 +94,7 @@ describe('Telemetry config watcher', () => {
 
     telemetryConfigEmitter.next(true);
 
-    expect(mockWatch).toBeCalledTimes(1);
+    expect(mockWatch).toHaveBeenCalledTimes(1);
 
     telemetryWatcher.stop();
     telemetryConfigProvider.stop();
@@ -127,7 +127,7 @@ describe('Telemetry config watcher', () => {
 
     await telemetryWatcher.watch(true); // manual trigger
 
-    expect(packagePolicyServiceMock.list).toBeCalledTimes(3);
+    expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(3);
 
     // Assert: on the first call to packagePolicy.list, we asked for page 1
     expect(packagePolicyServiceMock.list.mock.calls[0][1].page).toBe(1);
@@ -151,7 +151,7 @@ describe('Telemetry config watcher', () => {
 
       await telemetryWatcher.watch(true);
 
-      expect(packagePolicyServiceMock.list).toBeCalledTimes(2);
+      expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(2);
       const expectedParams = {
         page: 1,
         perPage: 100,
@@ -170,7 +170,7 @@ describe('Telemetry config watcher', () => {
 
       await telemetryWatcher.watch(true);
 
-      expect(packagePolicyServiceMock.list).toBeCalledTimes(5);
+      expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(5);
       expect(mockedLogger.warn).toHaveBeenCalledTimes(1);
       expect(mockedLogger.error).not.toHaveBeenCalled();
     });

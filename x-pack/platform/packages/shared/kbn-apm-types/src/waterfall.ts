@@ -23,4 +23,6 @@ export type WaterfallGetErrorMarkerHref = (params: {
   errorGroupId: string;
   traceId?: string;
   transactionId?: string;
+  /** OTel-native error documents only carry `span.id`, never `transaction.id`. */
+  spanId?: string;
 }) => string;

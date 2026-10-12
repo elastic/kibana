@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
@@ -15,7 +16,7 @@ test.describe('License Management — accessibility', { tag: '@local-stateful-cl
   test('license management pages meet a11y requirements', async ({ page, browserAuth }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('management/stack/license_management');
-    await page.testSubj.locator('licenseText').waitFor({ state: 'visible' });
+    await page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title).waitFor({ state: 'visible' });
 
     const expectNoA11yViolations = async (exclude?: string[]) => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS, exclude });

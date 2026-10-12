@@ -10,6 +10,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     // required plugins
     "@kbn/licensing-plugin",
     "@kbn/management-plugin",

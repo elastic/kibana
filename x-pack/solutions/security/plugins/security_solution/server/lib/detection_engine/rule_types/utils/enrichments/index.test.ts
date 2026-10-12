@@ -30,10 +30,10 @@ const mockIsIndexExist = isIndexExist as jest.Mock;
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
-    getEuidFromObject: jest.fn(),
+    getEuidFromObjectForSearch: jest.fn(),
   },
 }));
-const mockGetEuidFromObject = euid.getEuidFromObject as jest.Mock;
+const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as jest.Mock;
 
 const hostEnrichmentResponse = [
   {
@@ -131,7 +131,7 @@ describe('enrichEvents', () => {
   });
   afterEach(() => {
     mockIsIndexExist.mockClear();
-    mockGetEuidFromObject.mockReset();
+    mockGetEuidForSearch.mockReset();
   });
 
   describe(`with entityAnalyticsEntityStoreV2 = false`, () => {
@@ -334,7 +334,7 @@ describe('enrichEvents', () => {
       entityStoreCrudClient = {
         listEntities: mockListEntities,
       } as unknown as EntityStoreCRUDClient;
-      mockGetEuidFromObject.mockImplementation(
+      mockGetEuidForSearch.mockImplementation(
         (entityType: string, source: Record<string, { name?: string } | undefined>) => {
           const name = source?.[entityType]?.name;
           return name ? `${entityType}:${name}` : undefined;
@@ -478,6 +478,11 @@ describe('enrichEvents', () => {
 
       expect(enrichedEvents).toEqual([
         createAlert('1', {
+          'kibana.alert.entity.id': [
+            'host:host name 1',
+            'user:user name 1',
+            'service:service name 1',
+          ],
           host: {
             name: 'host name 1',
             risk: {
@@ -501,6 +506,7 @@ describe('enrichEvents', () => {
           },
         }),
         createAlert('2', {
+          'kibana.alert.entity.id': ['service:service name 2'],
           service: {
             name: 'service name 2',
             risk: {
@@ -565,6 +571,11 @@ describe('enrichEvents', () => {
 
       expect(enrichedEvents).toEqual([
         createAlert('1', {
+          'kibana.alert.entity.id': [
+            'host:host name 1',
+            'user:user name 1',
+            'service:service name 1',
+          ],
           ...createEntity('user', 'user name 1'),
           ...createEntity('host', 'host name 1'),
           ...createEntity('service', 'service name 1'),
@@ -573,6 +584,7 @@ describe('enrichEvents', () => {
           'service.asset.criticality': 'high',
         }),
         createAlert('2', {
+          'kibana.alert.entity.id': ['host:user name 1'],
           ...createEntity('host', 'user name 1'),
         }),
       ]);
@@ -641,6 +653,7 @@ describe('enrichEvents', () => {
 
       expect(enrichedEvents).toEqual([
         createAlert('1', {
+          'kibana.alert.entity.id': ['host:host name 1', 'user:user name 1'],
           host: {
             name: 'host name 1',
           },
@@ -653,6 +666,7 @@ describe('enrichEvents', () => {
           },
         }),
         createAlert('2', {
+          'kibana.alert.entity.id': ['user:user name 2'],
           user: {
             name: 'user name 2',
             risk: {

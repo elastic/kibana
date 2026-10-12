@@ -99,6 +99,7 @@ export const ConfigSectionTitle: FC<{ title: string }> = ({ title }) => (
 );
 
 export interface StepDefineFormProps {
+  dataViewPicker?: JSX.Element;
   overrides?: StepDefineExposedState;
   onChange(s: StepDefineExposedState): void;
   searchItems: SearchItems;
@@ -117,9 +118,10 @@ export const EmptyStepDefineForm: FC<EmptyStepDefineFormProps> = ({
 }) => (
   <div data-test-subj="transformStepDefineEmptyForm">
     <EuiForm>
-      {dataViewPicker}
-
       <ConfigSectionTitle title="Source data" />
+
+      {dataViewPicker}
+      <EuiSpacer size="m" />
 
       <EuiFormRow
         fullWidth
@@ -442,6 +444,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     <div data-test-subj="transformStepDefineForm">
       <EuiForm>
         <ConfigSectionTitle title="Source data" />
+
+        {props.dataViewPicker}
+        <EuiSpacer size="m" />
 
         {hasValidTimeField && (
           <EuiFormRow

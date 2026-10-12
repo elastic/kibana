@@ -13,8 +13,10 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
-import { CONNECTOR_ID } from '@kbn/connector-schemas/jira-service-management';
+import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/jira-service-management';
+import type { CreateAlertParams } from '@kbn/connector-schemas/jira-service-management';
 import { JiraServiceManagementConnector } from './connector';
+import { renderParameterTemplates } from './render_template_variables';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
@@ -116,6 +118,70 @@ describe('JiraServiceManagementConnector', () => {
       data: { message: 'hello', alias },
       connectorUsageCollector,
     });
+  });
+
+  it('calls request without modifying the message when it is less than 130 characters when creating an alert', async () => {
+    const message = 'a'.repeat(129);
+    await connector.createAlert({ message }, connectorUsageCollector);
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
+      data: { message },
+      connectorUsageCollector,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('calls request without modifying the message when it is equal to 130 characters when creating an alert', async () => {
+    const message = 'a'.repeat(130);
+    await connector.createAlert({ message }, connectorUsageCollector);
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
+      data: { message },
+      connectorUsageCollector,
+    });
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('calls request with a truncated message when it is greater than 130 characters when creating an alert', async () => {
+    const message = 'a'.repeat(131);
+    await connector.createAlert({ message }, connectorUsageCollector);
+
+    expect(requestMock.mock.calls[0][0]).toEqual({
+      ...ignoredRequestFields,
+      ...defaultCreateAlertExpect,
+      data: { message: 'a'.repeat(130) },
+      connectorUsageCollector,
+    });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'connector "1" message length 131 exceeds 130 and has been truncated'
+    );
+  });
+
+  it('truncates a Mustache-expanded message that exceeds 130 characters when creating an alert', async () => {
+    const rendered = renderParameterTemplates(
+      logger,
+      {
+        subAction: SUB_ACTION.CreateAlert,
+        subActionParams: { message: '{{rule.name}} {{rule.name}}' },
+      },
+      { rule: { name: 'a'.repeat(100) } }
+    );
+
+    await connector.createAlert(
+      rendered.subActionParams as CreateAlertParams,
+      connectorUsageCollector
+    );
+
+    expect(requestMock.mock.calls[0][0].data.message).toEqual(
+      `${'a'.repeat(100)} ${'a'.repeat(29)}`
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      'connector "1" message length 201 exceeds 130 and has been truncated'
+    );
   });
 
   it('calls request with the sha256 hash of the alias when it is greater than 512 characters when creating an alert', async () => {

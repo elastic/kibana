@@ -427,6 +427,74 @@ describe('validateAgentPolicyOutputForIntegration', () => {
     );
   });
 
+  it('should allow an OTel-only integration to be added to a policy using an otlp output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'otlp',
+    } as any);
+
+    await validateAgentPolicyOutputForIntegration(
+      savedObjectsClientMock.create(),
+      {
+        name: 'Agent policy',
+        data_output_id: 'otlp-output',
+      } as any,
+      {
+        inputs: [{ type: 'otelcol', enabled: true }],
+      } as any,
+      'test_otel_dynamic'
+    );
+  });
+
+  it('should not allow a beats integration to be added to a policy using an otlp output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'otlp',
+    } as any);
+
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'OTel policy',
+          data_output_id: 'otlp-output',
+        } as any,
+        {
+          inputs: [{ type: 'logfile', enabled: true }],
+        } as any,
+        'filetest'
+      )
+    ).rejects.toThrow(
+      'Integration "filetest" cannot be added to agent policy "OTel policy" because it uses output type "otlp".'
+    );
+  });
+
+  it('should not allow a mixed OTel+beats integration to be added to a policy using an otlp output', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'otlp',
+    } as any);
+
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'OTel policy',
+          data_output_id: 'otlp-output',
+        } as any,
+        {
+          inputs: [
+            { type: 'otelcol', enabled: true },
+            { type: 'logfile', enabled: true },
+          ],
+        } as any,
+        'mixed_package'
+      )
+    ).rejects.toThrow(
+      'Integration "mixed_package" cannot be added to agent policy "OTel policy" because it uses output type "otlp".'
+    );
+  });
+
   it('should not allow non-local ES output to be added or edited to an agentless policy', async () => {
     mockHasLicence(true);
     mockedOutputService.get.mockResolvedValue({

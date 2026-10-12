@@ -25,6 +25,10 @@
  */
 export const RESOLUTION_RULE_IDS = {
   EMAIL_EXACT_MATCH: 'email_exact_match',
+  WINDOWS_SID_BRIDGE: 'windows_sid_bridge',
+  ENTRA_GUID_BRIDGE: 'entra_guid_bridge',
+  CROWDSTRIKE_SID_BRIDGE: 'crowdstrike_sid_bridge',
+  UPN_CROSS_FIELD_BRIDGE: 'upn_cross_field_bridge',
   RELATED_USER_ALIAS_RESOLUTION: 'related_user_alias_resolution',
 } as const;
 
@@ -32,6 +36,7 @@ export type ResolutionRuleId = (typeof RESOLUTION_RULE_IDS)[keyof typeof RESOLUT
 
 export const RESOLUTION_RULE_KINDS = {
   SAME_FIELD: 'same_field',
+  CROSS_FIELD: 'cross_field',
   RELATED_USER_ALIAS_RESOLUTION: 'related_user_alias_resolution',
 } as const;
 

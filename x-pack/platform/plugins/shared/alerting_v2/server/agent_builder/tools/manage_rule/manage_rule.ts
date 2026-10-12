@@ -11,9 +11,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import { ALERTING_TOOL_IDS, DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_TOOL_IDS,
+  DASHBOARD_ARTIFACT_TYPE,
+  RUNBOOK_ARTIFACT_TYPE,
+} from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
-import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -69,13 +73,13 @@ ${generateRuleOperationsUsageList()}`,
         currentAttachment?.versions.at(-1)?.data ?? {};
       ruleId = currentAttachment?.origin;
 
-      const { data: updatedData, queryColumns } = await executeRuleOperations(
-        currentData,
-        operations,
-        esClient,
-        savedObjectsClient,
-        { isNew }
-      );
+      const {
+        data: updatedData,
+        queryColumns,
+        warnings,
+      } = await executeRuleOperations(currentData, operations, esClient, savedObjectsClient, {
+        isNew,
+      });
 
       // Pre-assign a stable rule ID so that action policies can reference it
       // via `rule.id` before the rule is persisted. The UI will use this ID
@@ -88,8 +92,11 @@ ${generateRuleOperationsUsageList()}`,
 
       const dashboards = (updatedData.artifacts ?? [])
         .filter((artifact) => artifact.type === DASHBOARD_ARTIFACT_TYPE)
-        .map((artifact) => artifact.data.dashboardId)
+        .map((artifact) => artifact.data.dashboard_id)
         .filter((dashboardId): dashboardId is string => typeof dashboardId === 'string');
+      const runbookAttached = (updatedData.artifacts ?? []).some(
+        (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+      );
 
       const attachmentInput = {
         id: attachmentId,
@@ -130,10 +137,15 @@ ${generateRuleOperationsUsageList()}`,
                 name: updatedData.metadata?.name,
                 kind: updatedData.kind,
                 schedule: updatedData.schedule,
-                query: updatedData.query ? getBreachEsqlQuery(updatedData.query) : undefined,
+                query: updatedData.query,
+                time_field: updatedData.time_field,
+                recovery: updatedData.recovery,
+                no_data: updatedData.no_data,
                 ...(dashboards.length > 0 ? { dashboards } : {}),
+                ...(runbookAttached ? { runbookAttached: true } : {}),
               },
               ...(queryColumns ? { queryColumns } : {}),
+              ...(warnings && warnings.length > 0 ? { warnings } : {}),
             },
           },
         ],

@@ -11,6 +11,8 @@ import { EuiDraggable } from '@elastic/eui';
 
 import type { ListConversationsResponseItem } from '../../../../../../../common/http_api/conversations';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
+import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { getConversationTemplateIcon } from '../../../../../hooks/use_conversation_template_display';
 import { ConversationListItemRow } from './conversation_list_item_row';
 import { deriveDisplayStatus } from './derive_display_status';
 
@@ -31,10 +33,11 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
   routeConversationId,
   onItemClick,
 }) => {
-  const { activeStreams, byConversationId } = useStreamingContext();
+  const { activeStreams } = useStreamingContext();
+  const { conversationTemplatesService } = useAgentBuilderServices();
+  const icon = getConversationTemplateIcon(conversationTemplatesService, conversation.template_id);
   const isStreaming = activeStreams.has(conversation.id);
-  const hasError = Boolean(byConversationId[conversation.id]?.error);
-  const status = deriveDisplayStatus(conversation, isStreaming, hasError, isActive);
+  const status = deriveDisplayStatus(conversation, isStreaming, isActive);
 
   return (
     <EuiDraggable
@@ -55,6 +58,7 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
         read={conversation.read}
         isPinned={conversation.pinned}
         permissions={conversation.permissions}
+        icon={icon}
       />
     </EuiDraggable>
   );

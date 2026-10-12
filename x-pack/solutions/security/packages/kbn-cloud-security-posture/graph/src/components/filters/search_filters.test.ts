@@ -21,13 +21,38 @@ import type {
 } from '@kbn/es-query/src/filters/build_filters';
 import { omit } from 'lodash';
 import {
+  getEuidDslFilterBasedOnDocument,
+  getEuidNamespaceSourceFields,
+  getEuidNamespaceSourcePrefix,
+  getEntityIdentifiersFromDocument,
+} from '@kbn/entity-store/common/domain/euid';
+import {
+  getEntityFilterSpec,
+  type EuidFilterApi,
+} from '../popovers/node_expand/get_entity_expand_items';
+import {
   CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
   addFilter,
   containsFilter,
   removeFilter,
+  buildNamespaceSourceFilters,
+  buildEntityDslFilter,
+  buildFieldsDsl,
+  isEuidDslTranslatable,
+  addEntityFilter,
+  containsEntityFilter,
+  removeEntityFilter,
 } from './search_filters';
 
 const dataViewId = 'test-data-view';
+
+// The real Entity Store EUID logic, so filters below are built from the actual definitions.
+const euidApi: EuidFilterApi = {
+  dsl: { getEuidFilterBasedOnDocument: getEuidDslFilterBasedOnDocument },
+  getEuidNamespaceSourceFields,
+  getNamespaceSourcePrefix: getEuidNamespaceSourcePrefix,
+  getEntityIdentifiersFromDocument,
+};
 
 const buildFilterMock = (key: string, value: string, controlledBy?: string) => ({
   meta: {
@@ -641,6 +666,609 @@ describe('search_filters', () => {
         expect(newFilters).toHaveLength(1);
         expect(newFilters[0]).toEqual(otherFilter);
       });
+    });
+  });
+
+  describe('buildNamespaceSourceFilters', () => {
+    it('emits a single phrase filter for a single observed value', () => {
+      const filters = buildNamespaceSourceFilters('data_stream.dataset', 'gcp.audit', 'logs-*');
+      expect(filters).toHaveLength(1);
+      expect(filters[0].meta.type).toBe('phrase');
+      expect(filters[0].query).toEqual({ match_phrase: { 'data_stream.dataset': 'gcp.audit' } });
+    });
+
+    it('emits a phrases filter for multiple observed values', () => {
+      const filters = buildNamespaceSourceFilters(
+        'data_stream.dataset',
+        ['gcp.audit', 'gcp.firewall'],
+        'logs-*'
+      );
+      expect(filters).toHaveLength(1);
+      expect(filters[0].meta.type).toBe('phrases');
+    });
+
+    it('returns empty array when all values are empty strings', () => {
+      expect(buildNamespaceSourceFilters('data_stream.dataset', '')).toHaveLength(0);
+      expect(buildNamespaceSourceFilters('data_stream.dataset', ['', ''])).toHaveLength(0);
+    });
+  });
+
+  describe('buildEntityDslFilter with namespace source values', () => {
+    // The real Entity Store resolver, bound to `user` — both DSL fixtures below are user
+    // entities. Using it rather than a stub means these tests fail if the definition's
+    // namespace sources or their `splitBy` change.
+    const getUserNamespacePrefix = (field: string, observedValue: string) =>
+      getEuidNamespaceSourcePrefix('user', field, observedValue);
+
+    // The shape the Entity Store's `getEuidDslFilterBasedOnDocument` really returns for a GCP
+    // user resolved at ranking position 1 (user.id, no user.email). The `prefix` clause is part
+    // of that contract — `data_stream.dataset` is a `firstChunkOfField` source, so the builder
+    // reverses the namespace by prefix. Translating it away is this module's job, not the
+    // Entity Store's, so the fixture keeps it.
+    const GCP_DSL = {
+      bool: {
+        filter: [
+          { term: { 'user.id': 'alice@example.com' } },
+          {
+            bool: {
+              should: [
+                { term: { 'event.module': 'gcp' } },
+                { prefix: { 'data_stream.dataset': 'gcp' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        must: [{ bool: { must_not: [{ exists: { field: 'user.email' } }] } }],
+      },
+    };
+
+    const entityId = 'user:alice@example.com@gcp';
+
+    /** Sub-filters of the top-level AND, which is what the filter bar renders as chips. */
+    const andParams = (filter: Filter | undefined): Filter[] => filter?.meta.params as Filter[];
+
+    it('wraps the whole expression in an AND owned by the entity id', () => {
+      const filter = buildEntityDslFilter(
+        entityId,
+        GCP_DSL,
+        dataViewId,
+        {
+          'data_stream.dataset': 'gcp.audit',
+        },
+        getUserNamespacePrefix
+      );
+
+      expect(filter?.meta).toMatchObject({
+        type: FILTERS.COMBINED,
+        relation: BooleanRelation.AND,
+        controlledBy: `${CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER}:${entityId}`,
+        index: dataViewId,
+      });
+    });
+
+    it('never puts the entity id anywhere the filter bar renders', () => {
+      // The entity id is an internal `<euid>|<role>` handle. In `key` it left single-clause
+      // filters with a non-field key and no chip rendered at all; in `alias` it replaced the
+      // chip label with the raw handle. Neither is user-facing text.
+      const roleScopedId = `${entityId}|actor`;
+      const filter = buildEntityDslFilter(roleScopedId, GCP_DSL, dataViewId, {
+        'data_stream.dataset': 'gcp.audit',
+      });
+
+      expect(filter?.meta.alias).toBeUndefined();
+      expect(filter?.meta.key).not.toBe(roleScopedId);
+    });
+
+    it('keeps the field name in meta.key for a single-clause identity so the chip renders', () => {
+      // Single-field identities (generic, service) collapse to one leaf filter whose `key` is the
+      // field the bar draws the chip from — it must survive.
+      const genericId = 'projects/your-project-id/buckets/euid-demo-bucket';
+      const filter = buildEntityDslFilter(
+        genericId,
+        { bool: { filter: [{ term: { 'entity.target.id': genericId } }] } },
+        dataViewId
+      );
+
+      expect(filter).toMatchObject({
+        meta: {
+          type: 'phrase',
+          key: 'entity.target.id',
+          field: 'entity.target.id',
+          controlledBy: `${CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER}:${genericId}`,
+        },
+        query: { match_phrase: { 'entity.target.id': genericId } },
+      });
+      expect(filter?.meta.alias).toBeUndefined();
+    });
+
+    it('finds and removes a single-clause entity filter by its entity id', () => {
+      const genericId = 'projects/your-project-id/buckets/euid-demo-bucket';
+      const added = addEntityFilter(dataViewId, [], genericId, {
+        bool: { filter: [{ term: { 'entity.target.id': genericId } }] },
+      });
+
+      expect(containsEntityFilter(added, genericId)).toBe(true);
+      expect(removeEntityFilter(added, genericId)).toHaveLength(0);
+    });
+
+    describe('combining several entity filters', () => {
+      // Clicking "show this entity's actions" on an actor and then "show actions done to this
+      // entity" on a target is additive: the analyst wants both sets of events. Emitting them as
+      // sibling top-level filters ANDs them, which returns their intersection — usually empty,
+      // since one event rarely satisfies an actor identity clause and a target identity clause
+      // at once.
+      const targetId = 'projects/your-project-id/buckets/euid-demo-bucket|target';
+      const targetDsl = {
+        bool: { filter: [{ term: { 'entity.target.id': 'projects/p/buckets/b1' } }] },
+      };
+
+      const addBoth = () => {
+        const afterActor = addEntityFilter(dataViewId, [], entityId, GCP_DSL, {
+          'data_stream.dataset': 'gcp.audit',
+        });
+        return addEntityFilter(dataViewId, afterActor, targetId, targetDsl);
+      };
+
+      it('ORs a second entity filter with the first instead of ANDing them', () => {
+        const filters = addBoth();
+
+        expect(filters).toHaveLength(1);
+        expect(filters[0].meta).toMatchObject({
+          type: FILTERS.COMBINED,
+          relation: BooleanRelation.OR,
+        });
+        expect(filters[0].meta.params).toHaveLength(2);
+      });
+
+      it('keeps both entity filters findable once nested in the OR', () => {
+        const filters = addBoth();
+
+        expect(containsEntityFilter(filters, entityId)).toBe(true);
+        expect(containsEntityFilter(filters, targetId)).toBe(true);
+      });
+
+      it('unwraps the OR when one of the two is removed', () => {
+        const remaining = removeEntityFilter(addBoth(), entityId);
+
+        expect(remaining).toHaveLength(1);
+        expect(isCombinedFilter(remaining[0])).toBe(false);
+        expect(containsEntityFilter(remaining, targetId)).toBe(true);
+        expect(containsEntityFilter(remaining, entityId)).toBe(false);
+      });
+
+      it('drops the filter entirely when both are removed', () => {
+        const filters = addBoth();
+
+        expect(removeEntityFilter(removeEntityFilter(filters, entityId), targetId)).toHaveLength(0);
+      });
+
+      it('replaces rather than duplicates when the same entity is toggled twice', () => {
+        const filters = addBoth();
+        const readded = addEntityFilter(dataViewId, filters, targetId, targetDsl);
+
+        expect(readded[0].meta.params).toHaveLength(2);
+      });
+    });
+
+    it('renders the identity clause as a phrase filter and the guard as a negated exists', () => {
+      const filter = buildEntityDslFilter(
+        entityId,
+        GCP_DSL,
+        dataViewId,
+        {
+          'data_stream.dataset': 'gcp.audit',
+        },
+        getUserNamespacePrefix
+      );
+
+      const [identity, , guard] = andParams(filter);
+
+      expect(identity).toMatchObject({
+        meta: { type: 'phrase', key: 'user.id', negate: false },
+        query: { match_phrase: { 'user.id': 'alice@example.com' } },
+      });
+      expect(guard).toMatchObject({
+        meta: { type: 'exists', key: 'user.email', negate: true },
+        query: { exists: { field: 'user.email' } },
+      });
+    });
+
+    it('replaces the prefix clause with an exact phrase filter on the observed dataset', () => {
+      const filter = buildEntityDslFilter(
+        entityId,
+        GCP_DSL,
+        dataViewId,
+        {
+          'data_stream.dataset': 'gcp.audit',
+        },
+        getUserNamespacePrefix
+      );
+      const [, namespaceArm] = andParams(filter);
+
+      // The namespace disjunction survives as an OR of two ordinary phrase filters — both
+      // expressible with the filter bar's `is` operator.
+      expect(namespaceArm.meta).toMatchObject({
+        type: FILTERS.COMBINED,
+        relation: BooleanRelation.OR,
+      });
+
+      const orParams = namespaceArm.meta.params as Filter[];
+      expect(orParams).toHaveLength(2);
+      expect(orParams[0]).toMatchObject({
+        meta: { type: 'phrase', key: 'event.module' },
+        query: { match_phrase: { 'event.module': 'gcp' } },
+      });
+      expect(orParams[1]).toMatchObject({
+        meta: { type: 'phrase', key: 'data_stream.dataset' },
+        query: { match_phrase: { 'data_stream.dataset': 'gcp.audit' } },
+      });
+    });
+
+    it('uses an is-one-of (phrases) filter when several dataset values were observed', () => {
+      const filter = buildEntityDslFilter(
+        entityId,
+        GCP_DSL,
+        dataViewId,
+        {
+          'data_stream.dataset': ['gcp.audit', 'gcp.firewall'],
+        },
+        getUserNamespacePrefix
+      );
+      const [, namespaceArm] = andParams(filter);
+      const orParams = namespaceArm.meta.params as Filter[];
+
+      expect(orParams[1]).toMatchObject({
+        meta: {
+          type: 'phrases',
+          key: 'data_stream.dataset',
+          params: ['gcp.audit', 'gcp.firewall'],
+        },
+        query: {
+          bool: {
+            should: [
+              { match_phrase: { 'data_stream.dataset': 'gcp.audit' } },
+              { match_phrase: { 'data_stream.dataset': 'gcp.firewall' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      });
+    });
+
+    it('drops the prefix clause when the dataset was not observed, collapsing the OR', () => {
+      const filter = buildEntityDslFilter(entityId, GCP_DSL, dataViewId);
+      const params = andParams(filter);
+
+      // With only `event.module` left in the disjunction there is nothing to OR, so it is
+      // emitted as a plain sibling phrase filter rather than a single-entry combined filter.
+      expect(params).toHaveLength(3);
+      expect(params[1]).toMatchObject({
+        meta: { type: 'phrase', key: 'event.module' },
+        query: { match_phrase: { 'event.module': 'gcp' } },
+      });
+      expect(JSON.stringify(filter)).not.toContain('data_stream.dataset');
+    });
+
+    it('never emits a clause the filter bar cannot represent', () => {
+      const withObserved = buildEntityDslFilter(
+        entityId,
+        GCP_DSL,
+        dataViewId,
+        {
+          'data_stream.dataset': 'gcp.audit',
+        },
+        getUserNamespacePrefix
+      );
+      const withoutObserved = buildEntityDslFilter(entityId, GCP_DSL, dataViewId);
+
+      // `prefix` has no counterpart among is / is one of / exists, so it must never survive
+      // translation regardless of whether an observed value was available to replace it.
+      for (const filter of [withObserved, withoutObserved]) {
+        expect(JSON.stringify(filter)).not.toContain('"prefix"');
+      }
+    });
+
+    describe('an entity type with several prefix arms for one field', () => {
+      // Okta's namespace evaluation lists both `okta` and `entityanalytics_okta` as source values,
+      // so the builder emits a prefix arm for each against the same field. Okta documents carry no
+      // `event.module`, which makes the substituted `data_stream.dataset` arm the only thing
+      // holding the namespace clause up.
+      const OKTA_DSL = {
+        bool: {
+          filter: [
+            { term: { 'user.name': 'alice@example.com' } },
+            {
+              bool: {
+                should: [
+                  { term: { 'event.module': 'okta' } },
+                  { prefix: { 'data_stream.dataset': 'okta' } },
+                  { term: { 'event.module': 'entityanalytics_okta' } },
+                  { prefix: { 'data_stream.dataset': 'entityanalytics_okta' } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      };
+
+      const oktaId = 'user:alice@example.com@okta';
+      const observed = { 'data_stream.dataset': 'entityanalytics_okta.user' };
+
+      const namespaceArm = (filter: Filter | undefined) =>
+        (filter?.meta.params as Filter[])[1].meta.params as Filter[];
+
+      it('substitutes the observed value only into the arm whose prefix it matches', () => {
+        const arms = namespaceArm(
+          buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId, observed, getUserNamespacePrefix)
+        );
+
+        // `entityanalytics_okta.user` does not start with `okta`, so that arm must be dropped
+        // rather than take a value it would never have matched.
+        const datasetArms = arms.filter((a) => a.meta.key === 'data_stream.dataset');
+        expect(datasetArms).toHaveLength(1);
+        expect(datasetArms[0].query).toEqual({
+          match_phrase: { 'data_stream.dataset': 'entityanalytics_okta.user' },
+        });
+      });
+
+      it('rejects a value that only shares a string prefix with the arm', () => {
+        // `okta_legacy.system` starts with `okta` but its first chunk is `okta_legacy`, so it
+        // belongs to a different namespace. A naive `startsWith` test would substitute it into the
+        // `okta*` arm and silently widen the filter to an entity the user never asked about.
+        const filter = buildEntityDslFilter(
+          oktaId,
+          OKTA_DSL,
+          dataViewId,
+          { 'data_stream.dataset': 'okta_legacy.system' },
+          getUserNamespacePrefix
+        );
+
+        expect(JSON.stringify(filter)).not.toContain('okta_legacy.system');
+        expect(JSON.stringify(filter)).not.toContain('data_stream.dataset');
+      });
+
+      it('does not emit the same clause twice when arms collapse onto one value', () => {
+        const arms = namespaceArm(
+          buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId, observed, getUserNamespacePrefix)
+        );
+        const rendered = arms.map((a) => JSON.stringify(a.query));
+
+        expect(new Set(rendered).size).toBe(rendered.length);
+      });
+
+      it('keeps the namespace clause matchable, which dropping every prefix would not', () => {
+        const withObserved = buildEntityDslFilter(
+          oktaId,
+          OKTA_DSL,
+          dataViewId,
+          observed,
+          getUserNamespacePrefix
+        );
+        const withoutObserved = buildEntityDslFilter(oktaId, OKTA_DSL, dataViewId);
+
+        // Without substitution the disjunction is only `event.module` phrases, and no Okta
+        // document has that field — the filter would return nothing at all.
+        expect(JSON.stringify(withObserved)).toContain('entityanalytics_okta.user');
+        expect(JSON.stringify(withoutObserved)).not.toContain('data_stream.dataset');
+      });
+    });
+  });
+
+  describe('condition-based namespaces (unmodeled clause shapes)', () => {
+    // Namespaces resolved by a whenClause condition rather than `sourceMatchesAny` go through
+    // streamlang's `conditionToQueryDsl`, which differs from the array-shaped DSL every other
+    // fixture here produces in two ways: `must_not` is a bare object, and the tree contains
+    // `match` / `terms` clauses that have no filter-bar operator.
+    it('normalises a bare-object must_not instead of throwing', () => {
+      // `conditionToQueryDsl` emits this for `neq` and for `exists: false`. Before normalising,
+      // the destructuring default did not apply (the value is not `undefined`) and `.map` threw
+      // `TypeError: mustNot.map is not a function`.
+      const dsl = {
+        bool: {
+          filter: [{ term: { 'user.name': 'jdoe' } }],
+          must_not: { exists: { field: 'user.email' } },
+        },
+      };
+
+      expect(() => buildEntityDslFilter('user:jdoe@local', dsl, dataViewId)).not.toThrow();
+      expect(buildEntityDslFilter('user:jdoe@local', dsl, dataViewId)).toBeDefined();
+    });
+
+    it('treats a bare-object must_not exists as a guard, exactly as the array form', () => {
+      const bare = buildEntityDslFilter(
+        'user:jdoe@local',
+        {
+          bool: {
+            filter: [{ term: { 'user.name': 'jdoe' } }],
+            must_not: { exists: { field: 'user.email' } },
+          },
+        },
+        dataViewId
+      );
+      const arrayed = buildEntityDslFilter(
+        'user:jdoe@local',
+        {
+          bool: {
+            filter: [{ term: { 'user.name': 'jdoe' } }],
+            must_not: [{ exists: { field: 'user.email' } }],
+          },
+        },
+        dataViewId
+      );
+
+      expect(bare).toEqual(arrayed);
+    });
+
+    it('fails closed on match/terms clauses rather than dropping them', () => {
+      // The `local` gate's real shape: a `match` constraint the filter bar cannot express. Emitting
+      // only the translatable part would produce a filter matching every `jdoe` on any host.
+      const dsl = {
+        bool: {
+          filter: [
+            { term: { 'user.name': 'jdoe' } },
+            { bool: { must: [{ match: { 'event.kind': 'asset' } }] } },
+          ],
+        },
+      };
+
+      expect(isEuidDslTranslatable(dsl)).toBe(false);
+      expect(buildEntityDslFilter('user:jdoe@local', dsl, dataViewId)).toBeUndefined();
+    });
+
+    it('accepts the fully-modeled shapes', () => {
+      expect(
+        isEuidDslTranslatable({
+          bool: {
+            filter: [{ term: { 'user.email': 'a@b.c' } }],
+            should: [{ prefix: { 'data_stream.dataset': 'okta' } }, { exists: { field: 'x' } }],
+            must_not: { exists: { field: 'user.id' } },
+          },
+        })
+      ).toBe(true);
+    });
+
+    it('falls back to the resolved identity for a local-namespace user, rather than no filter', () => {
+      // End-to-end: a real local user resolved through the real builder. `getEntityFilterSpec` must
+      // hand back a `resolvedIdentity` spec, because a `dsl` spec here would translate to something
+      // wider than the entity — and `addEntityFilter` would drop it, making the action dead.
+      const spec = getEntityFilterSpec(
+        'user:jdoe@host-abc123@local',
+        { 'user.name': 'jdoe', 'host.id': 'host-abc123' },
+        euidApi,
+        'actor'
+      );
+
+      expect(spec?.kind).toBe('resolvedIdentity');
+    });
+
+    it('resolved identity includes only the EUID identity fields, not collected attributes', () => {
+      // A local user entity record may carry user.id, user.domain etc. as collected attributes.
+      // Including them in an AND filter would drop events that lack those fields. Only the two
+      // fields the localNamespaceGate actually requires (user.name + host.id) should be emitted.
+      const spec = getEntityFilterSpec(
+        'user:jdoe@host-abc123@local',
+        {
+          'user.name': 'jdoe',
+          'host.id': 'host-abc123',
+          'user.id': 'S-1-5-19',
+          'user.domain': 'NT AUTHORITY',
+        },
+        euidApi,
+        'actor'
+      );
+
+      expect(spec?.kind).toBe('resolvedIdentity');
+      if (spec?.kind !== 'resolvedIdentity') return;
+      expect(Object.keys(spec.fields)).toEqual(['user.name', 'host.id']);
+    });
+
+    it('buildFieldsDsl ANDs all identity fields so the resolved identity is not over-broad', () => {
+      // The resolvedIdentity path calls buildFieldsDsl before emitting through addEntityFilter.
+      // Verify the resulting DSL is a bool.filter (AND), not a bool.should (OR).
+      const dsl = buildFieldsDsl({ 'user.name': 'jdoe', 'host.id': 'host-abc123' });
+      const filter = buildEntityDslFilter('user:jdoe@host-abc123@local', dsl, dataViewId);
+
+      // Two identity fields → buildEntityDslFilter emits a combined AND filter (not OR).
+      // A combined OR chip would match every jdoe on any host, or every event from host-abc123.
+      expect(filter).toMatchObject({
+        meta: { type: 'combined', relation: BooleanRelation.AND },
+      });
+      const combined = filter as CombinedFilter;
+      expect(combined.meta.params).toHaveLength(2);
+      expect(combined.meta.params[0]).toMatchObject({
+        query: { match_phrase: { 'user.name': 'jdoe' } },
+      });
+      expect(combined.meta.params[1]).toMatchObject({
+        query: { match_phrase: { 'host.id': 'host-abc123' } },
+      });
+    });
+  });
+
+  describe('host entity filters', () => {
+    // Host has its own euidRanking (host.id outranks host.name), so its guards come from a
+    // different definition than the `user` cases above. Driving the real builder rather than a
+    // hand-written DSL fixture means these fail if `host.ts` changes.
+    const getHostNamespacePrefix = (field: string, observedValue: string) =>
+      getEuidNamespaceSourcePrefix('host', field, observedValue);
+
+    const buildHostFilter = (
+      sourceFields: Record<string, string | string[]>,
+      role: 'actor' | 'target'
+    ) => {
+      const spec = getEntityFilterSpec('host:h1', sourceFields, euidApi, role);
+      if (!spec || spec.kind !== 'dsl') throw new Error('expected a dsl spec');
+      return buildEntityDslFilter(
+        'host:h1',
+        spec.dsl,
+        dataViewId,
+        spec.namespaceSourceValues,
+        getHostNamespacePrefix
+      );
+    };
+
+    it('renders a single phrase chip when the top-ranked host.id is present', () => {
+      const filter = buildHostFilter(
+        { 'host.id': 'HW-1', 'host.name': 'web-1', 'data_stream.dataset': 'gcp.audit' },
+        'actor'
+      );
+
+      // host.id wins outright, so there is nothing to guard and no combined wrapper.
+      expect(filter).toMatchObject({
+        meta: { type: 'phrase', key: 'host.id', negate: false },
+        query: { match_phrase: { 'host.id': 'HW-1' } },
+      });
+    });
+
+    it('guards the higher-ranked host.id when the entity resolved via host.name', () => {
+      const filter = buildHostFilter(
+        { 'host.name': 'web-1', 'data_stream.dataset': 'gcp.audit' },
+        'actor'
+      );
+      const parts = filter?.meta.params as Filter[];
+
+      expect(filter?.meta).toMatchObject({
+        type: FILTERS.COMBINED,
+        relation: BooleanRelation.AND,
+      });
+      expect(parts[0]).toMatchObject({
+        meta: { type: 'phrase', key: 'host.name' },
+        query: { match_phrase: { 'host.name': 'web-1' } },
+      });
+      // Without this guard the filter would also match hosts that have a host.id, which resolve
+      // to a different entity.
+      expect(parts).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            meta: expect.objectContaining({ type: 'exists', key: 'host.id', negate: true }),
+          }),
+        ])
+      );
+    });
+
+    it('rewrites host identity fields to the target namespace for the target role', () => {
+      const filter = buildHostFilter(
+        { 'host.name': 'web-1', 'data_stream.dataset': 'gcp.audit' },
+        'target'
+      );
+      const serialized = JSON.stringify(filter);
+
+      expect(serialized).toContain('host.target.name');
+      expect(serialized).toContain('host.target.id');
+      expect(serialized).not.toContain('"host.name"');
+    });
+
+    it('emits no namespace clause, because host identity does not compose one', () => {
+      const filter = buildHostFilter(
+        { 'host.id': 'HW-1', 'data_stream.dataset': 'gcp.audit' },
+        'actor'
+      );
+
+      // Unlike `user`, the host EUID carries no entity.namespace, so a host filter is not scoped
+      // to the integration the event came from.
+      expect(JSON.stringify(filter)).not.toContain('data_stream.dataset');
+      expect(JSON.stringify(filter)).not.toContain('event.module');
     });
   });
 });

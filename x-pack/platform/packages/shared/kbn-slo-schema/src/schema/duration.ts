@@ -8,7 +8,6 @@
 import { either } from 'fp-ts/Either';
 import * as t from 'io-ts';
 
-import type { DurationUnit } from '../models/duration';
 import { Duration } from '../models/duration';
 
 const durationType = new t.Type<Duration, string, unknown>(
@@ -17,11 +16,7 @@ const durationType = new t.Type<Duration, string, unknown>(
   (input: unknown, context: t.Context) =>
     either.chain(t.string.validate(input, context), (value: string) => {
       try {
-        const decoded = new Duration(
-          parseInt(value.slice(0, -1), 10),
-          value.slice(-1) as DurationUnit
-        );
-        return t.success(decoded);
+        return t.success(Duration.fromString(value));
       } catch (err) {
         return t.failure(input, context);
       }

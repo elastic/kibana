@@ -42,7 +42,7 @@ describe('ExtendedBoundsParamEditor', () => {
       );
 
       expect(comp.children().props().isInvalid).toBeFalsy();
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
     });
 
     test('should change its validity due to passed props and show error if it is invalid', () => {
@@ -55,21 +55,21 @@ describe('ExtendedBoundsParamEditor', () => {
 
       expect(comp.children().props().error).toEqual(expect.any(String));
       expect(comp.children().props().isInvalid).toBeTruthy();
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
 
       // set valid bounds
       comp.setProps({ value: { min: 0, max: 10 } });
 
       expect(comp.props().error).toBeUndefined();
       expect(comp.children().props().isInvalid).toBeFalsy();
-      expect(defaultProps.setValidity).toBeCalledWith(true);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
 
       // set invalid bounds - min > max
       comp.setProps({ value: { min: 10, max: 2 } });
 
       expect(comp.children().props().error).toEqual(expect.any(String));
       expect(comp.children().props().isInvalid).toBeTruthy();
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
     });
 
     test('should set valid state after removing from the DOM tree', () => {
@@ -80,12 +80,12 @@ describe('ExtendedBoundsParamEditor', () => {
         />
       );
 
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
 
       comp.unmount();
 
-      expect(defaultProps.setValidity).lastCalledWith(true);
-      expect(defaultProps.setValidity).toBeCalledTimes(2);
+      expect(defaultProps.setValidity).toHaveBeenLastCalledWith(true);
+      expect(defaultProps.setValidity).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -101,11 +101,11 @@ describe('ExtendedBoundsParamEditor', () => {
       const minBound = comp.find('input').first();
       minBound.simulate('change', { target: { value: '2' } });
 
-      expect(defaultProps.setValue).lastCalledWith({ min: 2 });
+      expect(defaultProps.setValue).toHaveBeenLastCalledWith({ min: 2 });
 
       minBound.simulate('change', { target: { value: '' } });
 
-      expect(defaultProps.setValue).lastCalledWith({ min: '' });
+      expect(defaultProps.setValue).toHaveBeenLastCalledWith({ min: '' });
     });
 
     test('should set numeric "max" or an empty string on change event', () => {
@@ -120,11 +120,11 @@ describe('ExtendedBoundsParamEditor', () => {
       const maxBound = comp.find('input').last();
       maxBound.simulate('change', { target: { value: '30' } });
 
-      expect(defaultProps.setValue).toBeCalledWith({ min: 10, max: 30 });
+      expect(defaultProps.setValue).toHaveBeenCalledWith({ min: 10, max: 30 });
 
       maxBound.simulate('change', { target: { value: '' } });
 
-      expect(defaultProps.setValue).lastCalledWith({ min: 10, max: '' });
+      expect(defaultProps.setValue).toHaveBeenLastCalledWith({ min: 10, max: '' });
     });
   });
 });

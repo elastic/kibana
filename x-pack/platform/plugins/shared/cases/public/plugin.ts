@@ -183,11 +183,6 @@ export class CasesUiPlugin
         attachmentsEnabled: config?.attachments?.enabled ?? false,
         chatEnabled: config?.chat?.enabled ?? false,
         runWorkflowsEnabled: config?.runWorkflows?.enabled ?? false,
-        casesRedesign: {
-          list: config?.casesRedesign?.list ?? false,
-          details: config?.casesRedesign?.details ?? false,
-          settings: config?.casesRedesign?.settings ?? false,
-        },
       },
       api: createClientAPI({ http: core.http }),
       ui: {

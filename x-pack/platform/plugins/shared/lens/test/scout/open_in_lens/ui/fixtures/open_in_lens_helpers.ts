@@ -11,7 +11,7 @@ import {
   DATA_TEST_SUBJECTS,
   LOGSTASH_IN_RANGE_DATES,
   DATA_VIEW_ID,
-} from '../../../common/ui/fixtures/constants';
+} from '../../../common/fixtures/constants';
 import {
   getImportedDashboardId,
   type ImportedSavedObject,
@@ -28,7 +28,7 @@ interface LogstashOpenInLensSetupContext {
   };
   uiSettings: {
     setDefaultIndex: (dataViewName: string) => Promise<void>;
-    set: (values: Record<string, string>) => Promise<void>;
+    set: (values: Record<string, string | number>) => Promise<void>;
     unset?: (...keys: string[]) => Promise<unknown>;
     setDefaultTime: (range: { from: string; to: string }) => Promise<void>;
   };
@@ -41,7 +41,12 @@ interface OpenInLensSuiteSetupOptions {
   enableChartDebug?: boolean;
 }
 
-const OPEN_IN_LENS_UI_SETTINGS = ['defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults'];
+const OPEN_IN_LENS_UI_SETTINGS = [
+  'defaultIndex',
+  'dateFormat:tz',
+  'histogram:barTarget',
+  'timepicker:timeDefaults',
+];
 
 /** Sets common Logstash UI settings used by the open-in-Lens dashboard fixtures. */
 export async function setupLogstashOpenInLensDefaults({
@@ -49,7 +54,7 @@ export async function setupLogstashOpenInLensDefaults({
 }: LogstashOpenInLensSetupContext): Promise<void> {
   await uiSettings.setDefaultIndex(DATA_VIEW_ID.LOGSTASH);
   await uiSettings.setDefaultTime(LOGSTASH_IN_RANGE_DATES);
-  await uiSettings.set({ 'dateFormat:tz': 'UTC' });
+  await uiSettings.set({ 'dateFormat:tz': 'UTC', 'histogram:barTarget': 50 });
 }
 
 /** Unsets UI settings applied by `setupLogstashOpenInLensDefaults`. */

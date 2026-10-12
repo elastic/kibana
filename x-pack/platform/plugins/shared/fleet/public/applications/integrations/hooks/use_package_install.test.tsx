@@ -85,8 +85,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addErrorSpy).not.toBeCalled();
-      expect(addSuccessSpy).toBeCalled();
+      expect(addErrorSpy).not.toHaveBeenCalled();
+      expect(addSuccessSpy).toHaveBeenCalled();
 
       expect(res).toBeTruthy();
     });
@@ -103,8 +103,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addErrorSpy).not.toBeCalled();
-      expect(addSuccessSpy).toBeCalled();
+      expect(addErrorSpy).not.toHaveBeenCalled();
+      expect(addSuccessSpy).toHaveBeenCalled();
 
       expect(res).toBeTruthy();
     });
@@ -121,8 +121,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addSuccessSpy).not.toBeCalled();
-      expect(addErrorSpy).toBeCalled();
+      expect(addSuccessSpy).not.toHaveBeenCalled();
+      expect(addErrorSpy).toHaveBeenCalled();
 
       expect(res).toBeFalsy();
     });
@@ -164,8 +164,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addSuccessSpy).toBeCalled();
-      expect(addWarningSpy).not.toBeCalled();
+      expect(addSuccessSpy).toHaveBeenCalled();
+      expect(addWarningSpy).not.toHaveBeenCalled();
 
       expect(mockInvalidateQueries).toHaveBeenCalledWith(['test']);
       expect(mockInvalidateQueries).toHaveBeenCalledWith(['get-packages']);
@@ -183,9 +183,9 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addWarningSpy).toBeCalled();
-      expect(addSuccessSpy).not.toBeCalled();
-      expect(mockInvalidateQueries).not.toBeCalled();
+      expect(addWarningSpy).toHaveBeenCalled();
+      expect(addSuccessSpy).not.toHaveBeenCalled();
+      expect(mockInvalidateQueries).not.toHaveBeenCalled();
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   validateExtendedFieldsOnClose,
   validateCaseExtendedFields,
   resolveTemplateFieldsForClose,
+  resolveGlobalFieldsWithoutStaleMirrorRequired,
 } from './validators';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
@@ -799,7 +800,7 @@ describe('validators', () => {
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
+        'Invalid extended_fields: Unknown extended field key: "summary_as_keyword". No fields are available for this case'
       );
     });
 
@@ -949,7 +950,7 @@ describe('validators', () => {
           globalFields: makeGlobalFields(),
         })
       ).rejects.toThrow(
-        'extended_fields keys [summary_as_keyword] are not global (isGlobal) field definitions'
+        'Invalid extended_fields: Unknown extended field key: "summary_as_keyword". No fields are available for this case'
       );
 
       expect(templatesService.getTemplate).not.toHaveBeenCalled();
@@ -1124,6 +1125,78 @@ describe('validators', () => {
           ]),
         })
       ).resolves.toBeUndefined();
+    });
+
+    it('accepts a key from a $ref template field resolved against the field library', async () => {
+      const templateSOWithRef = makeTemplatesSO({ fields: [{ $ref: 'resolution' }] });
+      templatesService.getTemplate.mockResolvedValue(templateSOWithRef);
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'resolution',
+            owner: 'securitySolution',
+            definition: yamlStringify({
+              control: 'INPUT_TEXT',
+              name: 'resolution',
+              label: 'Resolution',
+              type: 'keyword',
+            }),
+          },
+        ],
+        total: 1,
+      });
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { resolution_as_keyword: 'Fixed the issue' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalFields: makeGlobalFields(),
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('rejects a truly unknown key even when a $ref field is resolved from the library', async () => {
+      const templateSOWithRef = makeTemplatesSO({ fields: [{ $ref: 'resolution' }] });
+      templatesService.getTemplate.mockResolvedValue(templateSOWithRef);
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'resolution',
+            owner: 'securitySolution',
+            definition: yamlStringify({
+              control: 'INPUT_TEXT',
+              name: 'resolution',
+              label: 'Resolution',
+              type: 'keyword',
+            }),
+          },
+        ],
+        total: 1,
+      });
+
+      await expect(
+        validateExtendedFieldsInRequest({
+          updateReq: {
+            id: 'case-1',
+            version: '1',
+            template: { id: 'tpl-1', version: 1 },
+            extended_fields: { truly_unknown_as_keyword: 'value' },
+          },
+          originalCase: makeOriginalCase(),
+          templatesService: templatesService as unknown as TemplatesService,
+          fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+          globalFields: makeGlobalFields(),
+        })
+      ).rejects.toThrow('Invalid extended_fields');
     });
   });
 
@@ -1643,6 +1716,163 @@ describe('validators', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to parse template "tpl-1"')
       );
+    });
+
+    it('resolves $ref fields against the field library and returns them as inline fields', async () => {
+      const templateSOWithRef = makeTemplatesSO({ fields: [{ $ref: 'resolution' }] });
+      templatesService.getTemplate.mockResolvedValue(templateSOWithRef);
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'resolution',
+            owner: 'securitySolution',
+            definition: yamlStringify({
+              control: 'INPUT_TEXT',
+              name: 'resolution',
+              label: 'Resolution',
+              type: 'keyword',
+              validation: { required_on_close: true },
+            }),
+          },
+        ],
+        total: 1,
+      });
+
+      const fields = await resolveTemplateFieldsForClose({
+        templateId: 'tpl-1',
+        templatesService: templatesService as unknown as TemplatesService,
+        fieldDefinitionsService: fieldDefinitionsService as unknown as FieldDefinitionsService,
+        logger,
+      });
+
+      expect(fields).toHaveLength(1);
+      expect(fields[0].name).toBe('resolution');
+      expect(fields[0].validation?.required_on_close).toBe(true);
+    });
+  });
+
+  describe('resolveGlobalFieldsWithoutStaleMirrorRequired', () => {
+    const makeDefinition = ({
+      name,
+      required = true,
+      legacyKey,
+      maxLength,
+    }: {
+      name: string;
+      required?: boolean;
+      legacyKey?: string;
+      maxLength?: number;
+    }) => ({
+      fieldDefinitionId: `fd-${name}`,
+      name,
+      owner: 'securitySolution',
+      isGlobal: true,
+      ...(legacyKey !== undefined ? { legacyKey } : {}),
+      definition: yamlStringify({
+        name,
+        type: 'keyword',
+        control: 'INPUT_TEXT',
+        label: name,
+        validation: {
+          ...(required ? { required: true } : {}),
+          ...(maxLength !== undefined ? { max_length: maxLength } : {}),
+        },
+      }),
+    });
+
+    const configuredField = (key: string): CustomFieldsConfiguration[number] => ({
+      key,
+      type: CustomFieldTypes.TEXT,
+      label: key,
+      required: true,
+    });
+
+    let fieldDefinitionsService: jest.Mocked<Pick<FieldDefinitionsService, 'getFieldDefinitions'>>;
+
+    const mockDefinitions = (fieldDefinitions: Array<ReturnType<typeof makeDefinition>>) => {
+      fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions,
+        total: fieldDefinitions.length,
+      });
+    };
+
+    const resolve = (customFieldsConfiguration?: CustomFieldsConfiguration) =>
+      resolveGlobalFieldsWithoutStaleMirrorRequired(
+        'securitySolution',
+        fieldDefinitionsService as unknown as FieldDefinitionsService,
+        customFieldsConfiguration
+      );
+
+    beforeEach(() => {
+      fieldDefinitionsService = {
+        getFieldDefinitions: jest.fn().mockResolvedValue({ fieldDefinitions: [], total: 0 }),
+      };
+    });
+
+    it('requests only global definitions', async () => {
+      await resolve();
+
+      expect(fieldDefinitionsService.getFieldDefinitions).toHaveBeenCalledWith('securitySolution', {
+        isGlobal: true,
+      });
+    });
+
+    it('keeps required on a definition that mirrors a configured v1 custom field', async () => {
+      mockDefinitions([makeDefinition({ name: 'risk_score', legacyKey: 'risk_key' })]);
+
+      const fields = await resolve([configuredField('risk_key')]);
+
+      expect(fields[0].validation?.required).toBe(true);
+    });
+
+    it('drops required from a definition whose v1 custom field is no longer configured', async () => {
+      mockDefinitions([makeDefinition({ name: 'risk_score', legacyKey: 'risk_key' })]);
+
+      const fields = await resolve([configuredField('another_key')]);
+
+      expect(fields[0].validation?.required).toBeUndefined();
+    });
+
+    it('drops required from a mirror when the owner has no configuration at all', async () => {
+      mockDefinitions([makeDefinition({ name: 'risk_score', legacyKey: 'risk_key' })]);
+
+      const fields = await resolve();
+
+      expect(fields[0].validation?.required).toBeUndefined();
+    });
+
+    it('keeps required on a native global field with no v1 counterpart', async () => {
+      // No legacyKey — the field was created in the field library and owns its own flag, so an
+      // absent configuration says nothing about it.
+      mockDefinitions([makeDefinition({ name: 'risk_score' })]);
+
+      const fields = await resolve();
+
+      expect(fields[0].validation?.required).toBe(true);
+    });
+
+    it('keeps the remaining validation of a stale mirror intact', async () => {
+      mockDefinitions([
+        makeDefinition({ name: 'risk_score', legacyKey: 'risk_key', maxLength: 3 }),
+      ]);
+
+      const [field] = await resolve();
+
+      expect(field.validation).toEqual({ max_length: 3 });
+      expect(field.name).toBe('risk_score');
+    });
+
+    it('preserves definition order and skips malformed definitions', async () => {
+      mockDefinitions([
+        makeDefinition({ name: 'first', legacyKey: 'first_key' }),
+        { ...makeDefinition({ name: 'broken' }), definition: '{invalid yaml: [unclosed' },
+        makeDefinition({ name: 'second' }),
+      ]);
+
+      const fields = await resolve();
+
+      expect(fields.map((field) => field.name)).toEqual(['first', 'second']);
     });
   });
 });

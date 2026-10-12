@@ -19,7 +19,7 @@ import { SkillLoadError } from './skill_load_error';
 const SKILL_FILE_NAME = 'SKILL.md';
 const MARKDOWN_EXTENSION = '.md';
 
-const REFERENCE_SEGMENT_REGEX = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
+const REFERENCE_SEGMENT_REGEX = /^[a-zA-Z0-9](?:[a-zA-Z0-9_-]*[a-zA-Z0-9])?$/;
 const RESERVED_ROOT_REFERENCE_NAME = 'skill';
 
 const frontmatterSchema = z.object({
@@ -27,6 +27,10 @@ const frontmatterSchema = z.object({
   description: z.string({ error: 'frontmatter "description" is required and must be a string' }),
   id: z.string().optional(),
   experimental: z.boolean().optional(),
+  uiSettingRequired: z
+    .string({ error: 'frontmatter "uiSettingRequired" must be a string' })
+    .min(1, 'frontmatter "uiSettingRequired" must be non-empty')
+    .optional(),
 });
 
 type SkillReferencedContent = NonNullable<SkillDefinition['referencedContent']>[number];
@@ -86,6 +90,7 @@ export const loadSkillFromDirectory = (
     basePath,
     description: frontmatter.description,
     experimental: frontmatter.experimental,
+    uiSettingRequired: frontmatter.uiSettingRequired,
     content: frontmatter.body,
     referencedContent: referencedContent.length ? referencedContent : undefined,
   };
@@ -115,6 +120,7 @@ interface ParsedFrontmatter {
   name: string;
   description: string;
   experimental?: boolean;
+  uiSettingRequired?: string;
   body: string;
 }
 
@@ -186,8 +192,8 @@ const collectReferencedContent = (
       throw new SkillLoadError(
         'invalid_reference_name',
         `loadSkillFromDirectory: reference file "${relativeFilePath}" has an invalid path segment ` +
-          `"${invalidSegment}". Segments must contain only lowercase letters, numbers, hyphens, ` +
-          `and underscores, and must start and end with a letter or number.`
+          `"${invalidSegment}". Segments must contain only letters, numbers, hyphens, and ` +
+          `underscores, and must start and end with a letter or number.`
       );
     }
 

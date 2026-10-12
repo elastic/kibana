@@ -75,8 +75,11 @@ export interface DateRangePickerProps {
   defaultValue?: string;
   /** Callback for when the time changes */
   onChange: (props: DateRangePickerOnChangeProps) => void;
-  /** Additional format string for parsing absolute dates (does not affect display). */
-  dateFormat?: string;
+  /**
+   * Additional moment format strings accepted when parsing absolute dates the
+   * user types, e.g. the Kibana `dateFormat` setting. Does not affect display.
+   */
+  inputDateFormats?: string[];
   /**
    * Locale used to recognise and generate named ranges, natural-language
    * durations/instants, and delimiters. English is always recognised
@@ -91,6 +94,10 @@ export interface DateRangePickerProps {
    * @default false
    */
   disabled?: boolean;
+  /**
+   * Tooltip shown on the control and time window buttons while `disabled` is true.
+   */
+  disabledTooltip?: React.ReactNode;
   /**
    * Shows the current value but prevents changing it: the control and time
    * window buttons can't be interacted with, but (unlike `disabled`) the

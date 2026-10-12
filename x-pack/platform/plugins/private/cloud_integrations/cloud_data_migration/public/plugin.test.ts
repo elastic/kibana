@@ -26,7 +26,7 @@ describe('Cloud Data Migration Plugin', () => {
           breadcrumbService,
         })
       ).toMatchInlineSnapshot(`undefined`);
-      expect(management.sections.section.data.registerApp).not.toBeCalled();
+      expect(management.sections.section.data.registerApp).not.toHaveBeenCalled();
     });
 
     it('returns expected public contract when cloud NOT enabled', () => {

@@ -1,0 +1,342 @@
+version: "1"
+name: Hunt Watch - hunt
+description: >
+  Runs the two-tier hunt for one report against the environment: searches for
+  the report's indicators, then derives and validates behavioral queries from
+  the report text. When something is confirmed, stages a finding and records
+  the hosts and users it touched as the Investigation's impact. Records the
+  run's results. Does not create the Investigation or write the run's
+  final summary; the Continuous Threat Hunt workflow handles those. Reports a
+  partial run rather than failing outright, and skips the hunt entirely if
+  the Investigation was never created.
+enabled: true
+tags: []
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        reportId:
+          type: string
+          description: Threat report id this hunt pass runs against (hunt:report:{reportId}).
+        investigationConversationId:
+          type: string
+          description: Conversation id of the report's Investigation (already created by the Worker).
+        runId:
+          type: string
+          description: >
+            Run id the Worker's fan-out minted for this sweep. Threaded
+            through to the coordinator so every child of one sweep shares
+            it, which is what the packaging barrier and the conclusion
+            dedupe key off.
+        trigger:
+          type: string
+          enum: [manual, scheduled]
+          default: scheduled
+          description: >
+            Passed straight through to the coordinator's own required
+            `trigger` field. The Worker's scheduled sweep passes `scheduled`;
+            a manual named rerun passes `manual`.
+        tier2_when:
+          type: string
+          enum: [on_hits, always, never]
+          default: on_hits
+      required:
+        - reportId
+        - investigationConversationId
+        - runId
+      additionalProperties: false
+outputs:
+  type: object
+  properties:
+    status:
+      type: string
+    stage:
+      type: string
+    reason:
+      type: string
+    # One clause the Worker's run conclusion quotes (the coordinator's
+    # `headline`), so the conclusion can say what the hunt found without
+    # re-deriving it from nested tier output inside a parallel branch body.
+    headline:
+      type: string
+    hit:
+      type: boolean
+    sse_count:
+      type: number
+    # The coordinator result a clean run cannot leave on an attachment (it attaches an SSE
+    # only for a confirmed hit). Packaging reads these to give the coverage KI a dataset hint
+    # (the datasets the report points at) and the executed Tier 2 query. Empty arrays, never absent, when the coordinator did not
+    # run or Tier 2 did not either.
+    report_intent_targets:
+      type: array
+      items:
+        type: string
+    behaviors:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
+steps:
+  # The coordinator's request body is snake_case (report_id, run_id, trigger)
+  # and does not know about Investigations; this step is the camelCase ->
+  # snake_case mapping layer so no other caller has to repeat it. The coordinator
+  # reads what to search (the space's default data view) itself; nothing here
+  # scopes the hunt.
+  - name: run_hunt_coordinator
+    type: kibana.request
+    # No Investigation to attach findings to (the Worker's find_or_create
+    # failed) means there is nothing useful this hunt can produce: skip the
+    # real coordinator call (and its Tier 2 spend) rather than hunt for a
+    # report that can never get a usable conclusion.
+    if: "${{ inputs.investigationConversationId != nil and inputs.investigationConversationId != empty }}"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/hunt_coordinator"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        report_id: "{{ inputs.reportId }}"
+        run_id: "{{ inputs.runId }}"
+        trigger: "{{ inputs.trigger }}"
+        tier2_when: "{{ inputs.tier2_when }}"
+    on-failure:
+      fallback:
+        - name: emit_coordinator_failed
+          type: workflow.output
+          status: completed
+          with:
+            status: failed
+            stage: hunt_coordinator
+            reason: "{{ steps.run_hunt_coordinator.error.message }}"
+
+  # Populated only when Tier 1 confirmed a hit: one entry per confirmed
+  # technique (a single report-scoped entry when Tier 2 produced none). No
+  # templated fields — `sse_mapper.ts` already built the full attachment_id
+  # and data payload server-side, this just fans out the upsert below over
+  # what the coordinator returned.
+  - name: attach_sse
+    type: foreach
+    if: "${{ steps.run_hunt_coordinator.output.sse != null }}"
+    foreach: "${{ steps.run_hunt_coordinator.output.sse }}"
+    steps:
+      - name: add_sse_attachment
+        type: ai.attachment.add
+        with:
+          conversation_id: "{{ inputs.investigationConversationId }}"
+          id: "{{ foreach.item.attachment_id }}"
+          type: security.significant_security_event
+          data: "${{ foreach.item.data }}"
+          description: Hunt Watch significant security event
+          render_inline: true
+        # Add-then-update, because `buildSseAttachmentId` is subject-stable by
+        # design: the id hashes (space, report, technique) with no run component so
+        # that re-hunting the same subject lands on the same card instead of adding
+        # one per sweep. `ai.attachment.add` is a create, so that rerun throws
+        # `AttachmentConflictError`. Swallowing it is what makes the rerun
+        # unpackageable: the surviving attachment still carries the first run's
+        # `run_id`, and `readCurrentRunState` matches on the current one, so the
+        # rerun reads as a run whose state is missing. Updating writes a new version
+        # carrying this run's payload, which is what makes the stable id work as the
+        # idempotency key it is documented to be. Folding `run_id` into the id would
+        # also stop the conflict, but by abandoning that idempotency.
+        #
+        # A failure for any other reason (validation, a conversation that vanished)
+        # also lands here, and the update fails in turn, which `continue`
+        # swallows. That is not silent, though: the coordinator
+        # only prepares an attachment for a confirmed hit, so packaging finds no
+        # current-run state and returns `run_incomplete`, which the Worker reports
+        # as a partial sweep. A genuinely broken attachment is visible there.
+        on-failure:
+          fallback:
+            - name: update_sse_attachment
+              type: ai.attachment.update
+              with:
+                conversation_id: "{{ inputs.investigationConversationId }}"
+                attachment_id: "{{ foreach.item.attachment_id }}"
+                data: "${{ foreach.item.data }}"
+                render_inline: true
+              on-failure:
+                continue: true
+
+  # Impact: the hosts and users this run confirmed, recorded on the Investigation
+  # (the landing page's Impact pills read it). The coordinator builds the list from
+  # the same SSE entries attached above, so it only exists on a confirmed hit, and
+  # caps it at 50: every sweep of a report merges onto the same Investigation, whose
+  # impact holds 100.
+  #
+  # The internal impact route, not the `investigations.attachImpact` step: impact
+  # is owner-only, and Agent Builder records the owner of the Investigation
+  # find_or_create minted over HTTP by profile uid, while a step's in-process
+  # request resolves to no profile uid, so the step is refused on every Hunt
+  # Investigation. Over `kibana.request` the identity resolves the same way it did
+  # at creation. The route runs the same attach as the step.
+  #
+  # Nothing below reads impact, so a failure continues; the results message says
+  # whether impact was recorded, or why not.
+  - name: attach_impact
+    type: kibana.request
+    if: "${{ steps.run_hunt_coordinator.output.impacted_entities != nil and steps.run_hunt_coordinator.output.impacted_entities != empty }}"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/investigations/impact"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        conversationId: "{{ inputs.investigationConversationId }}"
+        entities: "${{ steps.run_hunt_coordinator.output.impacted_entities }}"
+    on-failure:
+      continue: true
+
+  # Hunt results write-back: every completed hunt (hit or clean) gets exactly
+  # one message here. The narrative is built server-side by the coordinator
+  # (`build_hunt_narrative.ts`, returned as `narrative`) so it is deterministic,
+  # unit-tested, and identical for every caller; it has to be self-sufficient
+  # because the SSE attachment does not render everywhere yet, so the analyst
+  # must be able to read the whole hunt from the messages alone. Markdown, as
+  # every Investigation message is; literal block scalar so the narrative's own
+  # line breaks survive. The SSE count appended here is what the coordinator
+  # prepared -- whether each attachment landed is not observable from a
+  # foreach's output, and packaging's conclusion reports that.
+  #
+  # The impact line names a failed attach by its HTTP status, never the response
+  # body: an internal failure's message would land in the Investigation, where
+  # every later agent round reads it as user input. The execution keeps the body.
+  #
+  # Gated on the coordinator having answered at all, not on
+  # `completed_successfully`: that flag is false for an `incomplete_retryable`
+  # run too, which still has findings the analyst must see. Only the evidence
+  # write below keys off `completed_successfully`, so a retryable run keeps the
+  # report eligible without hiding what it found.
+  - name: write_hunt_results_message
+    type: workflow.execute
+    if: "${{ steps.run_hunt_coordinator.output != nil }}"
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ inputs.investigationConversationId }}"
+        message: |-
+          {% assign coordinator = steps.run_hunt_coordinator.output -%}
+          {{ coordinator.narrative }}
+          {% if coordinator.sse != null %}
+          _The coordinator prepared {{ coordinator.sse | size }} significant security event attachment{% if coordinator.sse.size != 1 %}s{% endif %} for this Investigation._
+          {%- endif %}
+          {% if steps.attach_impact.output != nil %}
+          _Recorded impact: {{ coordinator.impacted_entities | size }} host(s) and user(s)._
+          {%- elsif steps.attach_impact.error != nil %}
+          {%- assign impact_error = steps.attach_impact.error.message %}
+          _Could not record impact{% if impact_error contains 'HTTP 403:' %}: the Worker's identity lacks the Manage investigations privilege.{% elsif impact_error contains 'HTTP 404:' %}: the Worker's identity does not own this Investigation, or it no longer exists.{% elsif impact_error contains 'HTTP 400:' %}: it was rejected as invalid (an Investigation's impact holds at most 100 hosts and users).{% elsif impact_error contains 'HTTP 409:' %}: another writer updated it at the same time.{% else %}. See hunt execution {{ execution.id }}.{% endif %}_
+          {%- elsif coordinator.sse != null %}
+          _No impact recorded: the confirmed hits name no host or user._
+          {%- endif %}
+    on-failure:
+      continue: true
+
+  # `.kibana-threat-reports` is plugin-owned and hidden, so this runs as an internal route
+  # (asInternalUser) rather than a plain `elasticsearch.update`, which would run as whichever
+  # identity enabled the workflow and 403 for every non-superuser. Kept as its own step after
+  # `run_hunt_coordinator` succeeds, rather than folded into that route's own response path: the
+  # engine can fail the coordinator step (timeout, response-size cap) after its handler has
+  # already run, and a write from inside that handler would not be cancelled by that failure, so
+  # it would stamp a report the workflow itself goes on to report as a failed hunt. A separate
+  # downstream step only runs once the engine has confirmed the upstream step succeeded, which
+  # restores the ordering the removed `elasticsearch.update` step had by construction.
+  - name: write_evidence
+    type: kibana.request
+    if: "${{ steps.run_hunt_coordinator.output.completed_successfully == true }}"
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/alertzero/hunt/write_hunt_evidence"
+      headers:
+        kbn-xsrf: "true"
+        elastic-api-version: "1"
+        Content-Type: application/json
+      body:
+        reportId: "{{ inputs.reportId }}"
+        runId: "{{ inputs.runId }}"
+        hasConfirmedHit: "${{ steps.run_hunt_coordinator.output.has_confirmed_hit }}"
+        completeness: "{{ steps.run_hunt_coordinator.output.completeness }}"
+        totalHits: "${{ steps.run_hunt_coordinator.output.tier1.counts.total_hits }}"
+    on-failure:
+      continue: true
+
+  # `data.set` first, since `workflow.output`'s `with:` values are read, not
+  # templated with `{% if %}` blocks directly.
+  - name: resolve_result_status
+    type: data.set
+    with:
+      # `success` is reserved for `completeness == complete`: the run covered
+      # what it was asked to. Both incomplete kinds report `partial`, because
+      # packaging reads this field to decide whether the absence of a finding is
+      # a verdict about the environment, and neither kind supports that claim --
+      # `incomplete_retryable` left a transient gap and wrote no hunt evidence,
+      # `incomplete_final` left a gap that reproduces, so the report retires
+      # having never been fully searched. Gating on `completed_successfully`
+      # instead would call that second case a success, which is the same
+      # conflation this file avoids when stamping `last_hunt_status`.
+      # `failed`: the coordinator call itself failed or was skipped.
+      result_status: |-
+        {%- if steps.run_hunt_coordinator.output.completeness == "complete" -%}
+        success
+        {%- elsif steps.run_hunt_coordinator.output != nil -%}
+        partial
+        {%- else -%}
+        failed
+        {%- endif -%}
+      # A complete run has nothing to explain, so it renders empty -- the same
+      # output the previous shape produced for it (it fell through to a nil
+      # `error.message`). It gets an explicit branch rather than falling into
+      # the `else` so that the `else` can carry a real catch-all:
+      # `HuntCompleteness` is named rather than counted precisely so the list
+      # can grow, and a fourth value must not render `result_status: partial`
+      # with no reason beside it, which is the silent-gap shape this file is
+      # otherwise careful to avoid.
+      result_reason: |-
+        {%- if inputs.investigationConversationId == nil or inputs.investigationConversationId == empty -%}
+        no Investigation available (find_or_create failed upstream; hunt coordinator was not called)
+        {%- elsif steps.run_hunt_coordinator.output == nil -%}
+        {{ steps.run_hunt_coordinator.error.message }}
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "complete" -%}
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "incomplete_retryable" -%}
+        The hunt was incomplete but retryable ({{ steps.run_hunt_coordinator.output.message }}), so no hunt evidence was recorded and the report stays eligible for a later sweep.
+        {%- elsif steps.run_hunt_coordinator.output.completeness == "incomplete_final" -%}
+        The hunt left a gap a later run could not close ({{ steps.run_hunt_coordinator.output.message }}), so the report is retired without having been fully searched and its evidence is recorded as incomplete rather than clean.
+        {%- else -%}
+        The hunt reported a completeness this workflow does not recognise ({{ steps.run_hunt_coordinator.output.completeness }}: {{ steps.run_hunt_coordinator.output.message }}), so its result is not recorded as a clean verdict.
+        {%- endif -%}
+      result_headline: |-
+        {%- if steps.run_hunt_coordinator.output.headline != nil -%}
+        {{ steps.run_hunt_coordinator.output.headline }}
+        {%- else -%}
+        hunt did not run
+        {%- endif -%}
+      result_hit: "${{ steps.run_hunt_coordinator.output.has_confirmed_hit == true }}"
+      # `size` of a nil `sse` is 0 in this engine, and the `${{ }}` form keeps the
+      # native number; a `{% if %}` text block would render it as a string and
+      # fail the `sse_count: number` output validation.
+      result_sse_count: "${{ steps.run_hunt_coordinator.output.sse | size }}"
+      # `compact` turns a nil (coordinator skipped, or Tier 2 never ran) into `[]` and leaves a
+      # real array as is, so the declared array outputs never see a null.
+      result_report_intent_targets: "${{ steps.run_hunt_coordinator.output.report_intent_targets | compact }}"
+      # Only behaviors that executed carry a query worth packaging, and Tier 2 executes at most 20
+      # (it can validate more than it generates a query for). Filtering before the cap keeps an
+      # executed behavior from being dropped behind an unexecuted one, and keeps the array inside
+      # the packaging step's input limit.
+      result_behaviors: "${{ steps.run_hunt_coordinator.output.tier2.behaviors | compact | where: 'execution.executed', true | slice: 0, 20 }}"
+
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      status: "{{ variables.result_status }}"
+      stage: hunt
+      reason: "{{ variables.result_reason }}"
+      headline: "{{ variables.result_headline }}"
+      hit: "${{ variables.result_hit }}"
+      sse_count: "${{ variables.result_sse_count }}"
+      report_intent_targets: "${{ variables.result_report_intent_targets }}"
+      behaviors: "${{ variables.result_behaviors }}"

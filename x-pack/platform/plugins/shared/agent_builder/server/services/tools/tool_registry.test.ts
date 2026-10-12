@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+jest.mock('@elastic/schemas/es/tools/manifest.js', () => ({
+  esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
+}));
+
+jest.mock('@elastic/schemas/kibana/tools/manifest.js', () => ({
+  kibanaManifest: [{ id: 'cases.create' }],
+}));
+
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';
-import type { InternalToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalToolDefinition, RunApprovals } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
@@ -95,10 +103,11 @@ describe('ToolRegistryImpl', () => {
     const builtinProvider = createMockBuiltinProvider(builtinTools);
     const persistedProvider = createMockPersistedProvider(persistedTools);
     const healthClient = createMockHealthClient();
+    const runTool = jest.fn().mockResolvedValue({ results: [] });
 
     const registry = createToolRegistry({
       logger: loggerMock.create(),
-      getRunner: jest.fn() as any,
+      getRunner: (() => ({ runTool })) as any,
       builtinProvider,
       persistedProvider,
       request,
@@ -110,7 +119,7 @@ describe('ToolRegistryImpl', () => {
       experimentalFeaturesEnabled,
     });
 
-    return { registry, builtinProvider, persistedProvider };
+    return { registry, builtinProvider, persistedProvider, runTool };
   };
 
   describe('list', () => {
@@ -506,6 +515,25 @@ describe('ToolRegistryImpl', () => {
       });
       expect(await off.registry.has('normal-tool')).toBe(true);
       expect(await on.registry.has('normal-tool')).toBe(true);
+    });
+  });
+
+  describe('execute', () => {
+    const tool = availableTool({ id: 'my_tool' });
+
+    it.each<{ description: string; approvals?: RunApprovals }>([
+      {
+        description: 'a grant',
+        approvals: { autoApprovedApis: [{ target: 'elasticsearch', api: 'indices.create' }] },
+      },
+      { description: 'no grant', approvals: undefined },
+    ])('forwards $description to the runner unchanged', async ({ approvals }) => {
+      const { registry, runTool } = setup({ builtinTools: [tool] });
+
+      await registry.execute({ toolId: 'my_tool', toolParams: {}, approvals });
+
+      expect(runTool).toHaveBeenCalledTimes(1);
+      expect(runTool).toHaveBeenCalledWith(expect.objectContaining({ approvals }));
     });
   });
 });

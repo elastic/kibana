@@ -35,6 +35,8 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/css-utils'
   - '@kbn/shared-ux-utility'
+  - '@kbn/scout'
+  - '@kbn/repo-info'
 tags:
   - plugin
   - prod
@@ -46,7 +48,9 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
+    - '!test/plugins/**/*'
   jest-config:
     - jest.config.js
 tasks: {}

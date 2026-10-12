@@ -71,6 +71,7 @@ export const EPM_API_ROUTES = {
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  HAS_DATA_PATTERN: `${DATA_STREAM_API_ROOT}/data`,
   DEPRECATED_ILM_CHECK_PATTERN: `${INTERNAL_ROOT}/data_streams/deprecated_ilm_check`,
 };
 
@@ -113,6 +114,8 @@ export const CLOUD_CONNECTOR_API_ROUTES = {
   UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
   USAGE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}/usage`,
+  // Internal: UI-driven check, not part of the public cloud connector API (see render_template).
+  VERIFY_IAC_KEY_PATTERN: `${INTERNAL_ROOT}/cloud_connectors/{cloudConnectorId}/verify_iac_key`,
 };
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT = `${API_ROOT}/cloud_onboarding_deployments`;
@@ -144,6 +147,7 @@ export const OUTPUT_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/outputs/{outputId}`,
   CREATE_PATTERN: `${API_ROOT}/outputs`,
   GET_OUTPUT_HEALTH_PATTERN: `${API_ROOT}/outputs/{outputId}/health`,
+  GET_OUTPUT_AGENT_POLICY_COUNT_PATTERN: `${INTERNAL_ROOT}/outputs/{outputId}/agent_policy_count`,
   LOGSTASH_API_KEY_PATTERN: `${API_ROOT}/logstash_api_keys`,
 };
 
@@ -219,6 +223,8 @@ export const AGENT_API_ROUTES = {
   BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
   ROLLBACK_PATTERN: `${API_ROOT}/agents/{agentId}/rollback`,
   BULK_ROLLBACK_PATTERN: `${API_ROOT}/agents/bulk_rollback`,
+  RESTART_PATTERN: `${API_ROOT}/agents/{agentId}/restart`,
+  BULK_RESTART_PATTERN: `${API_ROOT}/agents/bulk_restart`,
   GENERATE_REPORT_PATTERN: `${INTERNAL_ROOT}/agents/reporting/generate`,
 };
 

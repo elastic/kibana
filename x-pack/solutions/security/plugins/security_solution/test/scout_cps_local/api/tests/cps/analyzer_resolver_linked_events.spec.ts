@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { apiTest, tags } from '@kbn/scout-security';
+import { apiTest, PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { EsClient } from '@kbn/scout-security';
 
@@ -60,8 +60,9 @@ const PROCESS_INDEX_MAPPINGS = {
 
 const PUBLIC_HEADERS = {
   'kbn-xsrf': 'security_solution',
-  'x-elastic-internal-origin': 'security_solution',
   'Content-Type': 'application/json;charset=UTF-8',
+  ...PUBLIC_API_HEADERS,
+  'x-elastic-internal-origin': 'security_solution',
 };
 
 const ENDPOINT_SCHEMA = {

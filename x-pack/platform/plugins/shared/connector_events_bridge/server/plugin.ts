@@ -44,7 +44,6 @@ export class ConnectorEventsBridgePlugin
         const [, startPlugins] = await core.getStartServices();
         return startPlugins.workflowsExtensions;
       },
-      logger: this.logger.get('workflowsEmitter'),
     });
 
     return {};

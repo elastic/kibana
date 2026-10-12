@@ -7,12 +7,7 @@
 
 import { tags, test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  VISIBLE_CHROME,
-  HIDDEN_CHROME,
-  FULL_SCREEN_MODE,
-  EXIT_FULL_SCREEN,
-} from '../fixtures/constants';
+import { VISIBLE_CHROME, HIDDEN_CHROME } from '../fixtures/constants';
 
 test.describe(
   'Maps',
@@ -26,30 +21,30 @@ test.describe(
       await pageObjects.maps.waitForRenderComplete();
     });
 
-    test('Full screen mode', async ({ page }) => {
-      const fullScreenBtn = page.getByTestId(FULL_SCREEN_MODE);
-      const exitFullScreenBtn = page.getByTestId(EXIT_FULL_SCREEN);
+    test('Full screen mode', async ({ page, pageObjects }) => {
       const visibleChrome = page.getByTestId(VISIBLE_CHROME);
       const hiddenChrome = page.getByTestId(HIDDEN_CHROME);
       const baseMapBtn = page.getByRole('button', { name: 'Basemap' });
 
-      await expect(fullScreenBtn).toBeVisible();
-      await expect(exitFullScreenBtn).toBeHidden();
+      await pageObjects.maps.revealFullScreenModeButton();
+      await expect(pageObjects.maps.fullScreenModeButton).toBeVisible();
+      await expect(pageObjects.maps.exitFullScreenButton).toBeHidden();
       await expect(visibleChrome).toBeVisible();
       await expect(hiddenChrome).toBeHidden();
       await expect(baseMapBtn).toBeVisible();
 
-      await fullScreenBtn.click();
+      await pageObjects.maps.clickFullScreenMode();
 
-      await expect(fullScreenBtn).toBeHidden();
-      await expect(exitFullScreenBtn).toBeVisible();
+      await expect(pageObjects.maps.fullScreenModeButton).toBeHidden();
+      await expect(pageObjects.maps.exitFullScreenButton).toBeVisible();
       await expect(visibleChrome).toBeHidden();
       await expect(hiddenChrome).toBeVisible();
       await expect(baseMapBtn).toBeVisible();
 
-      await exitFullScreenBtn.click();
+      await pageObjects.maps.exitFullScreenButton.click();
 
-      await expect(fullScreenBtn).toBeVisible();
+      await pageObjects.maps.revealFullScreenModeButton();
+      await expect(pageObjects.maps.fullScreenModeButton).toBeVisible();
     });
   }
 );

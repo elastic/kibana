@@ -6,20 +6,13 @@
  */
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import {
-  MAX_BULK_CREATE_ATTACHMENTS,
-  MAX_COMMENT_LENGTH,
-  MAX_FILENAME_LENGTH,
-} from '../../../constants';
+import { MAX_COMMENT_LENGTH, MAX_FILENAME_LENGTH } from '../../../constants';
 import { AttachmentType } from '../../domain/attachment/v1';
 import {
   AttachmentPatchRequestRt,
   AttachmentRequestRt,
   AttachmentsFindResponseRt,
-  BulkCreateAttachmentsRequestRt,
   BulkDeleteFileAttachmentsRequestRt,
-  BulkGetAttachmentsRequestRt,
-  BulkGetAttachmentsResponseRt,
   FindAttachmentsQueryParamsRt,
   PostFileAttachmentRequestRt,
 } from './v1';
@@ -27,10 +20,7 @@ import {
   AttachmentPatchRequestSchema,
   AttachmentRequestSchema,
   AttachmentsFindResponseSchema,
-  BulkCreateAttachmentsRequestSchema,
   BulkDeleteFileAttachmentsRequestSchema,
-  BulkGetAttachmentsRequestSchema,
-  BulkGetAttachmentsResponseSchema,
   FindAttachmentsQueryParamsSchema,
   PostFileAttachmentRequestSchema,
 } from '../../api_zod/attachment/v1';
@@ -319,192 +309,6 @@ describe('Attachments', () => {
 
     it('zod: strips unknown fields', () => {
       const result = FindAttachmentsQueryParamsSchema.safeParse({ ...defaultRequest, foo: 'bar' });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-  });
-
-  describe('BulkCreateAttachmentsRequestRt', () => {
-    const defaultRequest = [
-      {
-        comment: 'Solve this fast!',
-        type: AttachmentType.user,
-        owner: 'cases',
-      },
-    ];
-
-    it('has expected attributes in request', () => {
-      const query = BulkCreateAttachmentsRequestRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkCreateAttachmentsRequestRt.decode([
-        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
-      ]);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkCreateAttachmentsRequestSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkCreateAttachmentsRequestSchema.safeParse([
-        { comment: 'Solve this fast!', type: AttachmentType.user, owner: 'cases', foo: 'bar' },
-      ]);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    describe('errors', () => {
-      it(`throws error when attachments are more than ${MAX_BULK_CREATE_ATTACHMENTS}`, () => {
-        const comment = {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-        };
-        const attachments = Array(MAX_BULK_CREATE_ATTACHMENTS + 1).fill(comment);
-
-        expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode(attachments))).toContain(
-          `The length of the field attachments is too long. Array must be of length <= ${MAX_BULK_CREATE_ATTACHMENTS}.`
-        );
-      });
-
-      it(`no errors when empty array of attachments`, () => {
-        expect(PathReporter.report(BulkCreateAttachmentsRequestRt.decode([]))).toStrictEqual([
-          'No errors!',
-        ]);
-      });
-    });
-  });
-
-  describe('BulkGetAttachmentsRequestRt', () => {
-    it('has expected attributes in request', () => {
-      const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'] });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkGetAttachmentsRequestRt.decode({ ids: ['abc', 'xyz'], foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: { ids: ['abc', 'xyz'] },
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkGetAttachmentsRequestSchema.safeParse({ ids: ['abc', 'xyz'] });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkGetAttachmentsRequestSchema.safeParse({
-        ids: ['abc', 'xyz'],
-        foo: 'bar',
-      });
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
-    });
-  });
-
-  describe('BulkGetAttachmentsResponseRt', () => {
-    const defaultRequest = {
-      attachments: [
-        {
-          comment: 'Solve this fast!',
-          type: AttachmentType.user,
-          owner: 'cases',
-          id: 'basic-comment-id',
-          version: 'WzQ3LDFc',
-          created_at: '2020-02-19T23:06:33.798Z',
-          created_by: {
-            full_name: 'Leslie Knope',
-            username: 'lknope',
-            email: 'leslie.knope@elastic.co',
-          },
-          pushed_at: null,
-          pushed_by: null,
-          updated_at: null,
-          updated_by: null,
-        },
-      ],
-      errors: [
-        {
-          error: 'error',
-          message: 'not found',
-          status: 404,
-          savedObjectId: 'abc',
-        },
-      ],
-    };
-
-    it('has expected attributes in request', () => {
-      const query = BulkGetAttachmentsResponseRt.decode(defaultRequest);
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from request', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({ ...defaultRequest, foo: 'bar' });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from attachments', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({
-        ...defaultRequest,
-        attachments: [{ ...defaultRequest.attachments[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('removes foo:bar attributes from errors', () => {
-      const query = BulkGetAttachmentsResponseRt.decode({
-        ...defaultRequest,
-        errors: [{ ...defaultRequest.errors[0], foo: 'bar' }],
-      });
-
-      expect(query).toStrictEqual({
-        _tag: 'Right',
-        right: defaultRequest,
-      });
-    });
-
-    it('zod: has expected attributes in request', () => {
-      const result = BulkGetAttachmentsResponseSchema.safeParse(defaultRequest);
-      expect(result.success).toBe(true);
-      expect(result.data).toStrictEqual(defaultRequest);
-    });
-
-    it('zod: strips unknown fields', () => {
-      const result = BulkGetAttachmentsResponseSchema.safeParse({ ...defaultRequest, foo: 'bar' });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(defaultRequest);
     });

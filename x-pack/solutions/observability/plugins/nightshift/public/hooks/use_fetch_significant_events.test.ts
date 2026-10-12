@@ -23,12 +23,11 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   ({
     '@timestamp': '2026-01-01T00:00:00.000Z',
     event_id: 'evt-1',
-    event_uuid: 'evt-uuid-1',
-    status: 'open',
+    status: 'active',
     stream_names: ['service-a'],
     title: 'Event',
     summary: 'Summary',
-    severity: '40-medium',
+    severity: 'medium',
     confidence: 0.9,
     ...overrides,
   } as SignificantEvent);
@@ -36,6 +35,13 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 jest.mock('./use_kibana', () => ({
   useKibana: () => ({
     services: {
+      application: {
+        capabilities: {
+          nightshift: {
+            show: true,
+          },
+        },
+      },
       significantEvents: {
         significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
       },
@@ -150,7 +156,7 @@ describe('markEventInvestigationCompleteInCache', () => {
       ),
     } as unknown as QueryClient;
 
-    markEventInvestigationCompleteInCache(queryClient, 'evt-uuid-1', '2026-01-01T00:05:00.000Z');
+    markEventInvestigationCompleteInCache(queryClient, 'evt-1', '2026-01-01T00:05:00.000Z');
 
     expect(cache?.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
   });
@@ -184,12 +190,12 @@ describe('markEventInvestigationCompleteInCache', () => {
       ),
     } as unknown as QueryClient;
 
-    markEventInvestigationCompleteInCache(queryClient, 'evt-uuid-1', '2026-01-01T00:05:00.000Z');
+    markEventInvestigationCompleteInCache(queryClient, 'evt-1', '2026-01-01T00:05:00.000Z');
 
     mockSignificantEventsFetch.mockResolvedValueOnce({
       hits: [
         mockEvent({
-          event_uuid: 'evt-uuid-2',
+          event_id: 'evt-1',
           investigations: [
             {
               workflow_execution_id: 'exec-1',

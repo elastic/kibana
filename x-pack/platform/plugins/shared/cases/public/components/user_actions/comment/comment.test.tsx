@@ -174,7 +174,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('resolves a migrated external reference through the unified registry', async () => {
+    it('resolves an external reference through the unified registry', async () => {
       // A legacy external-reference delete payload whose type maps to a unified type
       // (endpoint -> security.endpoint) picks up the unified type's removal label.
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
@@ -631,6 +631,24 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('added a comment')).toBeInTheDocument();
+    });
+
+    it('appends the action source to the create event', () => {
+      const userAction = getUserAction(UserActionTypes.comment, UserActionActions.create, {
+        source: { type: 'agent', id: 'agent-1', name: 'Elastic AI Agent' },
+      });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        attachments: [basicCommentUnified],
+        userAction,
+      });
+
+      renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+      expect(screen.getByText(/added a comment/)).toBeInTheDocument();
+      expect(screen.getByTestId('user-action-via-source')).toHaveTextContent(
+        'via Elastic AI Agent'
+      );
     });
   });
 

@@ -14,12 +14,33 @@ import {
   ruleMigrationRouteHelpersFactory,
   splunkRuleWithResources,
 } from '../../../utils';
+import { createConnector, deleteConnector } from '../../../../detections_response/utils/connectors';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getResoucesPerMigrationFromES,
   getRuleMigrationFromES,
   getRulesPerMigrationFromES,
 } from '../../../utils/es_queries';
+
+/**
+ * This connector is created at runtime rather than relying on a preconfigured
+ * fixture, because MKI projects do not accept `--xpack.actions.preconfigured`
+ * as a Kibana server arg (it is an FTR-only mechanism). The apiUrl is
+ * deliberately unreachable so every inference call fails at the network layer:
+ * this test only needs a migration to reach `running` status, it must never
+ * make a real (billable) LLM call.
+ */
+const MOCK_BEDROCK_CONNECTOR = {
+  name: 'siem-migrations-mock-bedrock',
+  connector_type_id: '.bedrock',
+  config: {
+    apiUrl: 'https://mock-bedrock.invalid.example.com',
+  },
+  secrets: {
+    accessKey: 'mock-access-key',
+    secret: 'mock-secret-key',
+  },
+};
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -28,6 +49,16 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless @serverlessQA Delete API', () => {
     let migrationId: string;
+    let connectorId: string;
+
+    before(async () => {
+      connectorId = await createConnector(supertest, MOCK_BEDROCK_CONNECTOR);
+    });
+
+    after(async () => {
+      await deleteConnector(supertest, connectorId).expect(204);
+    });
+
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
       const response = await ruleMigrationRoutes.create({});
@@ -122,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
             migrationId,
             payload: {
               settings: {
-                connector_id: 'preconfigured-bedrock',
+                connector_id: connectorId,
               },
             },
           });
@@ -138,6 +169,14 @@ export default ({ getService }: FtrProviderContext) => {
             },
             { retries: 5 }
           );
+
+          /**
+           * Committed regression guard: if this ever resolves back to a
+           * hardcoded fixture id, this assertion fails loudly instead of the
+           * test silently passing against the wrong connector.
+           */
+          const runningStats = await ruleMigrationRoutes.stats({ migrationId });
+          expect(runningStats.body.last_execution?.connector_id).toEqual(connectorId);
 
           const deleteResponse = await ruleMigrationRoutes.delete({
             migrationId,

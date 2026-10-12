@@ -30,11 +30,23 @@ export interface SearchStepExecutionsParams {
   /** When set, search steps across all runs of a workflow. Use with optional stepId. */
   workflowId?: string;
   stepId?: string;
+  /** When set, only step executions of this type, e.g. `ai.agent`. */
+  stepType?: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
   spaceId: string;
   sourceExcludes?: string[];
+  /**
+   * When set, only these `_source` paths are returned. Takes precedence over `sourceExcludes`,
+   * for callers that need a couple of fields off documents whose `output` can be megabytes.
+   */
+  sourceIncludes?: string[];
   page?: number;
   size?: number;
+  /**
+   * Defaults to newest-first for workflow-level search. Single-run lists
+   * (execution detail) pass `startedAt:asc` so page 1 matches mget of `stepExecutionIds`.
+   */
+  sort?: 'startedAt:asc' | 'startedAt:desc';
   /** Datemath lower bound for filtering by startedAt. */
   startedAfter?: string;
   /** Datemath upper bound for filtering by startedAt. */
@@ -45,6 +57,7 @@ function buildMustQueries(params: {
   workflowExecutionId?: string;
   workflowId?: string;
   stepId?: string;
+  stepType?: string;
   spaceId: string;
   additionalQuery?: estypes.QueryDslQueryContainer;
   startedAfter?: string;
@@ -59,6 +72,9 @@ function buildMustQueries(params: {
   }
   if (params.stepId !== undefined) {
     mustQueries.push({ term: { stepId: params.stepId } });
+  }
+  if (params.stepType !== undefined) {
+    mustQueries.push({ term: { stepType: params.stepType } });
   }
   if (params.additionalQuery) {
     mustQueries.push(params.additionalQuery);
@@ -90,11 +106,14 @@ export const searchStepExecutions = async ({
   workflowExecutionId,
   workflowId,
   stepId,
+  stepType,
   additionalQuery,
   spaceId,
   sourceExcludes,
+  sourceIncludes,
   page,
   size,
+  sort = 'startedAt:desc',
   startedAfter,
   startedBefore,
 }: SearchStepExecutionsParams): Promise<StepExecutionListResult> => {
@@ -109,20 +128,27 @@ export const searchStepExecutions = async ({
       workflowExecutionId,
       workflowId,
       stepId,
+      stepType,
       spaceId,
       additionalQuery,
       startedAfter,
       startedBefore,
     });
 
-    const isPaginated = workflowId !== undefined && (page !== undefined || size !== undefined);
+    const isPaginated = page !== undefined || size !== undefined;
     const pageSize = size ?? (isPaginated ? 100 : 1000);
     const from = isPaginated && page !== undefined ? (page - 1) * pageSize : 0;
 
+    const sourceFilter = sourceIncludes?.length
+      ? { includes: sourceIncludes }
+      : sourceExcludes?.length
+      ? { excludes: sourceExcludes }
+      : undefined;
+
     const response = await stepExecutionsDataClient.search({
       query: { bool: { must: mustQueries } },
-      ...(sourceExcludes?.length ? { _source: { excludes: sourceExcludes } } : {}),
-      sort: 'startedAt:desc',
+      ...(sourceFilter ? { _source: sourceFilter } : {}),
+      sort,
       from,
       size: pageSize,
       track_total_hits: isPaginated,

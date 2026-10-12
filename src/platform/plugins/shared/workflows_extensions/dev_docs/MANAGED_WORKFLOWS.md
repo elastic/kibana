@@ -129,6 +129,8 @@ await managed.ready();
 
 If any `install` for the plugin was skipped or aborted incomplete this boot, `ready()` **skips destructive orphan cleanup** so still-desired docs are not force-deleted. Missing installs are retried on a later Kibana boot when the owner runs `install` → `ready` again. **Dynamic auto upgrades still run** once `ready()` itself has passed Elasticsearch readiness (they do not depend on the incomplete static `installedDocKeys` set). Logs WARN when orphan cleanup is skipped and again when upgrades proceed despite an incomplete install pass.
 
+When cleanup does run, each orphan is deleted on its own. A failure to remove one document, for example because it still has a non-terminal execution, is logged at error level and does not stop the others. That document is disabled so no new runs start, and a later boot deletes it.
+
 ### Granularity of tracking
 
 Reconciliation tracks installs at the **full document identity** level: `${workflowDocumentId}:${spaceId}`. The `workflowDocumentId` includes any suffix (e.g., `system-my-wf-us-east`). This means:
@@ -154,6 +156,14 @@ After `ready()`: the two instances that were not re-installed (`system-monitor-h
 Orphan reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their create/remove lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
 
 Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
+
+For installed workflows with `settings.run_as`, automatic upgrades may reuse the existing
+SA binding without a user request. This is limited to the registered owning plugin's
+code-defined upgrade: the persisted owner, definition ID, space, template values, and
+`run_as` must remain unchanged, and the binding must still match. The write uses optimistic
+concurrency control and never creates or repairs a binding. User-requested edits, initial
+binding, rebinding, and unbinding still require `manage_security` in addition to the normal
+Workflows privileges. Requestless deletion of a bound workflow remains unsupported.
 
 ## 4) Space-scoped vs global installs
 
@@ -185,6 +195,8 @@ This is the right choice for:
 - system-level workflows that don't need a per-space copy but still must respect per-space data boundaries at runtime
 - workflows that are space-agnostic (their behavior does not depend on the invoking space at all)
 
+> **Scheduled triggers are not supported for global workflows yet.** A scheduled run has no invoking space, so the platform never schedules a global workflow's `scheduled` triggers (it logs a warning instead). Use a space-scoped install per space if you need scheduled runs. Tracked in elastic/security-team#17380.
+
 ```ts
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
@@ -193,7 +205,42 @@ await managed.install(MY_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
 
 ### No default
 
-`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use `GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
+`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use
+`GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
+
+### Scoping raw request paths at runtime
+
+The `spaceId` above is about where the **workflow definition** lives and which space an
+*execution* is stamped with. It has no effect on the HTTP requests a workflow makes while it
+runs — that is a separate, step-level concern.
+
+A `kibana.request` step, and any `kibana.*` connector step using `with.request` or
+`with.form_data`, is not space-scoped by the engine. `kibana_action_step.ts` checks
+`cleanParams.request`, then `cleanParams.form_data`, and only its final `else` branch reaches
+`buildKibanaRequest`, whose connector lookup is what applies `applySpacePrefix`. All three shapes
+send their `path` verbatim:
+
+| Shape | Applies to |
+| --- | --- |
+| top-level `path` | `type: kibana.request` |
+| `with.request` object | any `kibana.*` type, including generated connectors |
+| `with.form_data` with a top-level `path` | any `kibana.*` type |
+
+An unprefixed path in any of these always hits the **default space**, no matter which space the
+execution belongs to — including a global (`'*'`) workflow executing on behalf of a named space.
+Because `/api/x` and `/s/default/api/x` behave identically, this fails silently in the default
+space and only reproduces when verified in a named non-default space.
+
+Prefix the path with the executing space, e.g. `/s/{{ workflow.spaceId }}/...`. `workflow.spaceId`
+is correct for most workflows, but it is not the only valid expression: a workflow that takes its
+target space as an input or a variable (`{{ inputs.space_id }}`, `{{ variables.spaceId }}`) should
+prefix with that instead — the requirement is that the segment resolves to the executing space,
+not that it is literally `workflow.spaceId`. Cluster-level routes that are not space-scoped (e.g.
+`/api/status`) are the deliberate exception.
+
+This bit the Security Alert Analysis workflow (elastic/kibana#287438): its note-writing steps used
+a bare `/api/note`, so every note was written to the default space regardless of which space the
+alert was in, and the workflow still reported success.
 
 ## 5) Workflow identity
 
@@ -286,7 +333,7 @@ Choosing rules of thumb:
 
 Key distinction: **static** workflows are declarative — the set installed at startup is the source of truth and anything not declared is cleaned up. **Dynamic** workflows are imperative — only explicit `uninstall` removes them during normal operation.
 
-> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, all managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. This ensures that uninstalling a plugin or deleting a definition leaves no dangling documents behind.
+> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. Each document is removed independently. A document that fails to delete, for example because it still has a non-terminal execution, is logged at error level, disabled, and retried on the next startup.
 
 ## 7) Authoring a definition
 
@@ -663,3 +710,4 @@ Because there is a **single persisted document** for a global workflow, any edit
 13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade).
 14. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
 15. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+16. Prefix every raw request path (`kibana.request`, `with.request`, `with.form_data`) with the executing space — see [Scoping raw request paths at runtime](#scoping-raw-request-paths-at-runtime). A cluster-level route is the deliberate exception.

@@ -339,6 +339,47 @@ export const pickExtendedFieldsDifferingFromDefaults = (
   return out;
 };
 
+export interface ExtendedFieldsDiff {
+  /** Sorted list of keys whose values changed (added, removed, or modified). */
+  changedFields: string[];
+}
+
+/**
+ * Computes which extended-field keys changed between two snapshots. Both maps are treated as
+ * `Record<string, unknown>` so the caller does not need to coerce SO values up front.
+ *
+ * Semantics:
+ * - An own key whose value is `undefined` counts as **absent** (consistent with readExplicitValue).
+ * - `''` is a real value distinct from absent — `absent → ''` and `'' → absent` both report a change.
+ * - Unknown types are coerced via String() so `5` and `'5'` compare equal (no spurious changes).
+ * - `changedFields` is alphabetically sorted for deterministic payloads.
+ */
+export const diffExtendedFields = (
+  previous: Record<string, unknown> | null | undefined,
+  next: Record<string, unknown> | null | undefined
+): ExtendedFieldsDiff => {
+  const prev = previous ?? {};
+  const nxt = next ?? {};
+
+  const allKeys = Array.from(new Set([...Object.keys(prev), ...Object.keys(nxt)])).sort();
+
+  const changedFields: string[] = [];
+
+  for (const key of allKeys) {
+    const hasPrev = Object.prototype.hasOwnProperty.call(prev, key) && prev[key] !== undefined;
+    const hasNext = Object.prototype.hasOwnProperty.call(nxt, key) && nxt[key] !== undefined;
+
+    const prevVal = hasPrev ? String(prev[key]) : undefined;
+    const nextVal = hasNext ? String(nxt[key]) : undefined;
+
+    if (prevVal !== nextVal) {
+      changedFields.push(key);
+    }
+  }
+
+  return { changedFields };
+};
+
 // ---------------------------------------------------------------------------
 // customFields → extended_fields adapter utilities
 //

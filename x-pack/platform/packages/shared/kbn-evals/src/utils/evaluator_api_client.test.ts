@@ -27,7 +27,7 @@ describe('EvaluatorApiClient', () => {
       { error: jest.fn() } as unknown as SomeDevLog
     );
     const [evaluator] = client.toEvaluators([
-      { name: 'tone', kind: 'LLM', connectorId: 'connector-1' },
+      { name: 'tone', kind: 'LLM', direction: 'maximize', connectorId: 'connector-1' },
     ]);
 
     expect(evaluator.getVersion?.()).toBeUndefined();

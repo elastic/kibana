@@ -55,7 +55,7 @@ describe('IntegrationDeprecation', () => {
 
     render(<IntegrationDeprecation />);
     expect(screen.getByText(DEPRECATION_TITLE)).toBeInTheDocument();
-    fireEvent.click(screen.getByText('Dismiss'));
+    fireEvent.click(screen.getByTestId('syntheticsIntegrationDeprecationCalloutDismissButton'));
     expect(screen.queryByText(DEPRECATION_TITLE)).not.toBeInTheDocument();
   });
 

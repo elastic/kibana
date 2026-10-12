@@ -60,7 +60,8 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
   searchParamsCompare: TParams | undefined,
   lastRefresh: number,
   changePointsByDefault = true,
-  requestCancellationManager?: RequestCancellationManager
+  requestCancellationManager?: RequestCancellationManager,
+  projectRoutingOverride?: string
 ): DocumentStats {
   const {
     data,
@@ -96,7 +97,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       abortCtrl.current =
         requestCancellationManager?.createChildController() ?? new AbortController();
 
-      const projectRouting = cps?.cpsManager?.getDefaultProjectRouting();
+      const projectRouting = projectRoutingOverride ?? cps?.cpsManager?.getDefaultProjectRouting();
       if (projectRouting) {
         if (searchParams) {
           searchParams.projectRouting = projectRouting;
@@ -190,7 +191,13 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     }
     // custom comparison
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.search, documentStatsCache, cacheKey, requestCancellationManager]);
+  }, [
+    data?.search,
+    documentStatsCache,
+    cacheKey,
+    requestCancellationManager,
+    projectRoutingOverride,
+  ]);
 
   useEffect(
     function getDocumentCountData() {

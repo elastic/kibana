@@ -25,7 +25,7 @@ import {
 } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
-import { useProjectPickerTour } from './use_project_picker_tour';
+import { useProjectPickerTour, TOUR_STORAGE_KEY } from './use_project_picker_tour';
 import { strings } from './strings';
 import {
   ProjectPickerButton,
@@ -36,6 +36,7 @@ import { ProjectPickerStateProvider } from './project_picker_update/state';
 import type { CPSProject, ProjectsData } from '../types';
 import { useProjectPickerState } from './project_picker_update/state';
 
+export { TOUR_STORAGE_KEY };
 export interface ProjectPickerProps
   extends Pick<
       ComponentProps<typeof ProjectPickerStateProvider>,
@@ -45,7 +46,11 @@ export interface ProjectPickerProps
       | 'fetchProjectsByRouting'
       | 'projectRoutingStrategy'
     >,
-    Pick<ComponentProps<typeof ProjectPickerFrame>, 'customHeaderContextMenuItems'> {
+    Pick<
+      ComponentProps<typeof ProjectPickerFrame>,
+      'customHeaderContextMenuItems' | 'maxBodyHeight'
+    >,
+    Pick<ComponentProps<typeof ProjectPickerButton>, 'customTooltipContent'> {
   isReadonly?: boolean;
   isDisabled?: boolean;
   settingsComponent?: React.ReactNode;
@@ -81,6 +86,8 @@ export const ProjectPicker = ({
   totalProjectCount,
   customHeaderContextMenuItems,
   projectRoutingStrategy,
+  maxBodyHeight = 400,
+  customTooltipContent,
 }: ProjectPickerProps) => {
   const [showPopover, setShowPopover] = useState(false);
   const styles = useMemoCss(projectPickerStyles);
@@ -148,7 +155,11 @@ export const ProjectPicker = ({
   const originProject = projects!.origin!;
 
   const projectPickerPopoverTriggerButton = (
-    <ProjectPickerButton size="s" onClick={() => setShowPopover(!showPopover)} />
+    <ProjectPickerButton
+      size="s"
+      onClick={() => setShowPopover(!showPopover)}
+      customTooltipContent={customTooltipContent}
+    />
   );
 
   const projectPickerPopover = (
@@ -164,7 +175,10 @@ export const ProjectPicker = ({
       hasArrow
       aria-label={strings.getProjectPickerPopoverTitle()}
     >
-      <ProjectPickerFrame customHeaderContextMenuItems={customHeaderContextMenuItems}>
+      <ProjectPickerFrame
+        customHeaderContextMenuItems={customHeaderContextMenuItems}
+        maxBodyHeight={maxBodyHeight}
+      >
         <ProjectPickerList />
       </ProjectPickerFrame>
     </EuiPopover>

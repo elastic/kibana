@@ -5,113 +5,65 @@
  * 2.0.
  */
 
-import type { QueryClient } from '@kbn/react-query';
-
-import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
-import type { ConversationsService } from '../../services/conversations/conversations_service';
+import type { InfiniteData, QueryClient } from '@kbn/react-query';
+import type {
+  ListConversationsResponse,
+  ListConversationsResponseItem,
+} from '../../../common/http_api/conversations';
 import { queryKeys } from '../query_keys';
 
-const agentConversationListKey = (agentId: string) => queryKeys.conversations.byAgent(agentId);
+type ConversationListCache = InfiniteData<ListConversationsResponse>;
 
-const buildSidebarConversationListRow = (p: {
-  id: string;
-  agent_id: string;
-  title: string;
-}): ListConversationsResponseItem => {
-  const t = new Date().toISOString();
-  return {
-    id: p.id,
-    agent_id: p.agent_id,
-    user: { id: '', username: '' },
-    title: p.title,
-    created_at: t,
-    updated_at: t,
-    permissions: { rename: true, delete: true, update_access_control: true },
-  };
-};
+const unpinnedKey = (agentId: string) =>
+  queryKeys.conversations.byAgent(agentId, { pinned: false });
+const pinnedKey = (agentId: string) => queryKeys.conversations.byAgent(agentId, { pinned: true });
 
-export const insertSidebarConversationListRow = async ({
-  queryClient,
-  conversationsService,
-  agentId,
-  conversationId,
-  title,
-}: {
-  queryClient: QueryClient;
-  conversationsService: ConversationsService;
-  agentId: string;
-  conversationId: string;
-  title: string;
-}): Promise<boolean> => {
-  const row = buildSidebarConversationListRow({
-    id: conversationId,
-    agent_id: agentId,
-    title,
-  });
-  const key = agentConversationListKey(agentId);
-
-  // Ensure the server list is in cache before we prepend — otherwise `cancelQueries`
-  // below kills the in-flight GET and the sidebar ends up showing only the new row.
-  if (queryClient.getQueryData<ListConversationsResponseItem[]>(key) === undefined) {
-    try {
-      await queryClient.fetchQuery({
-        queryKey: key,
-        queryFn: () => conversationsService.list({ agentId }),
+/**
+ * Walk every paged list variant whose key starts with queryKeys.conversations.list and apply
+ * `updater` to each page's `results` array. Updates `pagination.total` by `delta`.
+ */
+const applyToAllListVariants = (
+  queryClient: QueryClient,
+  updater: (results: ListConversationsResponseItem[]) => ListConversationsResponseItem[],
+  delta: number = 0
+) => {
+  queryClient.setQueriesData<ConversationListCache>(
+    { queryKey: queryKeys.conversations.list },
+    (prev) => {
+      if (!prev) return prev;
+      const newPages = prev.pages.map((page) => {
+        const newResults = updater(page.results);
+        // Only apply delta when results actually changed; otherwise a delete in
+        // the unpinned list would also decrement the pinned list's total.
+        if (newResults === page.results) return page;
+        return {
+          ...page,
+          pagination: { ...page.pagination, total: Math.max(0, page.pagination.total + delta) },
+          results: newResults,
+        };
       });
-    } catch {
-      // Proceed with the optimistic insert even if the prefetch fails — the next
-      // explicit refresh of the sidebar will pick up the server state.
+      const pagesChanged = newPages.some((p, i) => p !== prev.pages[i]);
+      return pagesChanged ? { ...prev, pages: newPages } : prev;
     }
-  }
-
-  await queryClient.cancelQueries({ queryKey: key });
-
-  let inserted = false;
-  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
-    if (prev?.some((c) => c.id === row.id)) {
-      return prev;
-    }
-    inserted = true;
-    return [row, ...(prev ?? [])];
-  });
-
-  return inserted;
+  );
 };
 
-export const removeSidebarConversationListRow = ({
-  queryClient,
-  agentId,
-  conversationId,
-}: {
-  queryClient: QueryClient;
-  agentId: string;
-  conversationId: string;
-}) => {
-  const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
-    if (!prev?.length) {
-      return prev;
-    }
-    return prev.filter((c) => c.id !== conversationId);
-  });
-};
-
+/**
+ * Update a conversation's fields in every paged list variant.
+ */
 export const patchConversationList = ({
   queryClient,
-  agentId,
   conversationId,
   values,
 }: {
   queryClient: QueryClient;
-  agentId: string;
+  agentId: string; // kept for call-site compatibility; patching is prefix-wide
   conversationId: string;
   values: Partial<ListConversationsResponseItem>;
 }) => {
-  const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
-    if (!prev?.length) return prev;
+  applyToAllListVariants(queryClient, (results) => {
     let changed = false;
-    const next = prev.map((c) => {
+    const next = results.map((c) => {
       if (c.id !== conversationId) return c;
       const hasChanges = (Object.keys(values) as Array<keyof ListConversationsResponseItem>).some(
         (k) => values[k] !== c[k]
@@ -120,6 +72,72 @@ export const patchConversationList = ({
       changed = true;
       return { ...c, ...values };
     });
-    return changed ? next : prev;
+    return changed ? next : results;
+  });
+};
+
+/**
+ * Move a conversation between the pinned and unpinned list caches.
+ * Called optimistically when the user pins or unpins a conversation.
+ */
+export const movePinnedConversationBetweenLists = ({
+  queryClient,
+  agentId,
+  conversationId,
+  pinned,
+}: {
+  queryClient: QueryClient;
+  agentId: string;
+  conversationId: string;
+  /** The new pinned state. */
+  pinned: boolean;
+}) => {
+  const sourceKey = pinned ? unpinnedKey(agentId) : pinnedKey(agentId);
+  const targetKey = pinned ? pinnedKey(agentId) : unpinnedKey(agentId);
+
+  let movedRow: ListConversationsResponseItem | undefined;
+
+  // Remove from source list.
+  queryClient.setQueryData<ConversationListCache>(sourceKey, (prev) => {
+    if (!prev) return prev;
+    const newPages = prev.pages.map((page) => {
+      const idx = page.results.findIndex((c) => c.id === conversationId);
+      if (idx === -1) return page;
+      movedRow = page.results[idx];
+      return {
+        ...page,
+        pagination: { ...page.pagination, total: Math.max(0, page.pagination.total - 1) },
+        results: [...page.results.slice(0, idx), ...page.results.slice(idx + 1)],
+      };
+    });
+    const pagesChanged = newPages.some((p, i) => p !== prev.pages[i]);
+    return pagesChanged ? { ...prev, pages: newPages } : prev;
+  });
+
+  if (!movedRow) {
+    // The conversation wasn't in any loaded page (it's on a page not yet
+    // fetched). Invalidate both lists so the server state is re-fetched on the
+    // next render rather than leaving the view permanently stale.
+    queryClient.invalidateQueries({ queryKey: sourceKey });
+    queryClient.invalidateQueries({ queryKey: targetKey });
+    return;
+  }
+  const row = { ...movedRow, pinned };
+
+  // Prepend to the first page of the target list, if it's cached.
+  queryClient.setQueryData<ConversationListCache>(targetKey, (prev) => {
+    if (!prev) return prev;
+    const [firstPage, ...rest] = prev.pages;
+    return {
+      ...prev,
+      pages: [
+        {
+          ...firstPage,
+          pagination: { ...firstPage.pagination, total: firstPage.pagination.total + 1 },
+          results: [row, ...firstPage.results],
+        },
+        ...rest,
+      ],
+    };
   });
 };

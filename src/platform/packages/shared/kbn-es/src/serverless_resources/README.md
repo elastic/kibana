@@ -6,6 +6,8 @@ The resources in this directory are used for seeding Elasticsearch Serverless im
 
 Roles are defined in `roles.yml` for each project under 'es' | 'oblt' | 'security' | 'workplaceai' folder respectively and intended to mock a Serverless deployment. It must be in sync with `elasticsearch-controller` defined roles and used in real (MKI) environments. In case of some differences tests may pass against Serverless snapshot environment but fail against MKI environments creating confusion.
 
+As in `elasticsearch-controller`, every customer-facing predefined role carries `_public: true` and `_reserved: true` metadata. Elasticsearch exposes only `_public` roles through the Query Role API, which Kibana uses to list them. Elasticsearch rejects these reserved metadata keys in role descriptors passed to its APIs (for example, API key creation), so test tooling reads the descriptors with `readRolesDescriptorsFromResource`, which drops them.
+
 ### Why `security_roles.json` is here?
 
 `security_roles.json` is a subset of defined in `roles.yml` roles in a JSON format and extended with necessary fields
@@ -73,9 +75,9 @@ The custom UIAM service entrypoint shell script (`run_java_with_custom_ca.sh`) i
 
 ## Overriding resources
 
-The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `yarn es serverless` command.
+The files found in this directory can be overwritten with customized versions by using the `--resources` option of the `pnpm es serverless` command.
 Assuming a customized `users` and `users_roles` are located in `/tmp/my_es/` directory and executing the below command from the root of Kibana, here is an example:
 
 ```shell
-yarn es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
+pnpm es serverless --resources=/tmp/my_es/users --resources=/tmp/my_es/users_roles
 ```

@@ -19,6 +19,7 @@ import type { Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
+import { FIPS_BASE_IMAGE } from '../../../lib/fips_config';
 
 const accessAsync = promisify(access);
 const linkAsync = promisify(link);
@@ -44,14 +45,14 @@ export async function runDockerGenerator(
   let baseImageName = '';
   if (flags.baseImage === 'ubi') baseImageName = 'redhat/ubi9-minimal:latest';
   /**
-   * Renovate config contains a regex manager to automatically update both Chainguard references
+   * Renovate config contains a regex manager to automatically update the Chainguard reference
    *
    * If this logic moves to another file or under another name, then the Renovate regex manager
    * for automatic Chainguard updates will break.
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:2e5daf640ce430f37c5f644dc39feab65934cdaee3c643927cca9e0730b1999a';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:a4e6bb74199419ada6a0c0cdfc0c0fe05a34e733b0fc9054a070c1743ab5c3ed';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -60,8 +61,7 @@ export async function runDockerGenerator(
   if (flags.serverless) imageFlavor += '-serverless';
   if (flags.fips) {
     imageFlavor += '-fips';
-    baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:05e9aa9aea927c3a208c3c7f76fab41420322e582b5f09dab2ce5852515c61aa';
+    baseImageName = FIPS_BASE_IMAGE;
   }
 
   // General docker var config

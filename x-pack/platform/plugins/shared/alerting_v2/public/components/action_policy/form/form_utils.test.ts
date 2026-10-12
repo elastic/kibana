@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
+import type { ActionPolicyResponse, PolicyMatcher } from '@kbn/alerting-v2-schemas';
 import { toCreatePayload, toFormState, toUpdatePayload } from './form_utils';
 
 describe('action policy form utils', () => {
   const state = {
     name: 'Policy',
     description: 'Description',
-    tags: [],
-    matcher: '',
-    groupingMode: 'per_episode' as const,
+    matcher: null as PolicyMatcher | null,
+    groupingMode: 'per_alert' as const,
     groupBy: [],
     throttleStrategy: 'on_status_change' as const,
     throttleInterval: '',
@@ -41,12 +40,12 @@ describe('action policy form utils', () => {
       expect(payload.destinations).toEqual([{ type: 'workflow', id: 'workflow-1' }]);
     });
 
-    it('includes groupingMode and throttle strategy, omits empty nullable fields', () => {
+    it('includes groupingMode and throttle strategy, omits null matcher', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_episode',
-        throttle: { strategy: 'on_status_change', interval: null },
+        grouping: { mode: 'per_alert' },
+        throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -63,70 +62,96 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_field',
-        group_by: ['host.name'],
+        grouping: { mode: 'per_field', fields: ['host.name'] },
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
 
-    it('emits interval: null for strategies that do not require it', () => {
+    // `null` is only a clear signal on PATCH, so a create omits an interval it cannot use.
+    it('omits the interval for strategies that do not require it', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'every_time',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'every_time', interval: null });
+      expect(payload.throttle).toEqual({ strategy: 'every_time' });
     });
 
-    it('emits interval: null when strategy does not need interval, even if state holds a stale value', () => {
+    it('omits the interval when the strategy does not need it, even if state holds a stale value', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'on_status_change',
         throttleInterval: '5m',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change' });
+    });
+
+    it('includes structured matcher when present', () => {
+      const payload = toCreatePayload({
+        ...state,
+        matcher: { expression: 'event.severity: critical' },
+      });
+
+      expect(payload.matcher).toEqual({ expression: 'event.severity: critical' });
+    });
+
+    it('omits matcher when only empty parts remain', () => {
+      expect(toCreatePayload({ ...state, matcher: {} })).not.toHaveProperty('matcher');
+    });
+
+    it('omits matcher when expression is whitespace-only', () => {
+      expect(toCreatePayload({ ...state, matcher: { expression: '   ' } })).not.toHaveProperty(
+        'matcher'
+      );
+    });
+
+    it('omits matcher when tags array is empty and expression is unset', () => {
+      expect(toCreatePayload({ ...state, matcher: { tags: [] } })).not.toHaveProperty('matcher');
+    });
+
+    it('omits an empty description rather than sending an empty string', () => {
+      expect(toCreatePayload({ ...state, description: '' })).not.toHaveProperty('description');
     });
   });
 
   describe('toUpdatePayload', () => {
     it('sends explicit null values for cleared nullable fields', () => {
-      expect(toUpdatePayload(state, 'WzEsMV0=')).toEqual({
-        version: 'WzEsMV0=',
+      expect(toUpdatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_episode',
-        tags: null,
+        grouping: { mode: 'per_alert' },
         matcher: null,
-        group_by: null,
-        throttle: { strategy: 'on_status_change', interval: null },
+        throttle: { strategy: 'on_status_change' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
 
+    it('normalizes an empty matcher object to null', () => {
+      const payload = toUpdatePayload({ ...state, matcher: {} });
+      expect(payload.matcher).toBeNull();
+    });
+
+    it('clears an emptied description with null', () => {
+      expect(toUpdatePayload({ ...state, description: '' }).description).toBeNull();
+    });
+
     it('preserves concrete nullable values', () => {
       expect(
-        toUpdatePayload(
-          {
-            ...state,
-            tags: ['production'],
-            matcher: 'event.severity: critical',
-            groupingMode: 'per_field',
-            groupBy: ['host.name'],
-            throttleStrategy: 'time_interval',
-            throttleInterval: '5m',
-          },
-          'WzEsMV0='
-        )
+        toUpdatePayload({
+          ...state,
+          matcher: { expression: 'event.severity: critical' },
+          groupingMode: 'per_field',
+          groupBy: ['host.name'],
+          throttleStrategy: 'time_interval',
+          throttleInterval: '5m',
+        })
       ).toEqual({
-        version: 'WzEsMV0=',
         name: 'Policy',
         description: 'Description',
-        grouping_mode: 'per_field',
-        tags: ['production'],
-        matcher: 'event.severity: critical',
-        group_by: ['host.name'],
+        grouping: { mode: 'per_field', fields: ['host.name'] },
+        matcher: { tags: null, expression: 'event.severity: critical' },
         throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
@@ -134,32 +159,28 @@ describe('action policy form utils', () => {
   });
 
   describe('toFormState', () => {
+    const severityMatcher: PolicyMatcher = { expression: 'data.severity : "critical"' };
+
     const baseResponse: ActionPolicyResponse = {
       id: 'policy-1',
-      version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
       enabled: true,
-      matcher: 'data.severity : "critical"',
-      group_by: ['host.name'],
-      tags: ['production'],
-      grouping_mode: 'per_field',
+      matcher: severityMatcher,
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
-      snoozed_until: null,
       destinations: [{ type: 'workflow', id: 'workflow-2' }],
-      created_by: 'elastic',
+      created_by: { profile_uid: 'elastic' },
       created_at: '2026-03-01T10:00:00.000Z',
-      updated_by: 'elastic',
+      updated_by: { profile_uid: 'elastic' },
       updated_at: '2026-03-01T10:00:00.000Z',
-      auth: { owner: 'elastic', created_by_user: true },
     };
 
     it('maps server response to form state', () => {
       expect(toFormState(baseResponse)).toEqual({
         name: 'Test Policy',
         description: 'A test policy',
-        tags: ['production'],
-        matcher: 'data.severity : "critical"',
+        matcher: severityMatcher,
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttleStrategy: 'time_interval',
@@ -169,27 +190,35 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('applies defaults when groupingMode and throttle are null', () => {
+    it('applies defaults when groupingMode and throttle are unset', () => {
       expect(
         toFormState({
           ...baseResponse,
-          grouping_mode: null,
-          throttle: null,
-          group_by: null,
-          tags: null,
+          grouping: undefined,
+          throttle: undefined,
         })
       ).toEqual({
         name: 'Test Policy',
         description: 'A test policy',
-        tags: [],
-        matcher: 'data.severity : "critical"',
-        groupingMode: 'per_episode',
+        matcher: severityMatcher,
+        groupingMode: 'per_alert',
         groupBy: [],
         throttleStrategy: 'on_status_change',
         throttleInterval: '',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
         inlineActions: [],
       });
+    });
+
+    it('leaves the interval blank for a strategy that does not take one', () => {
+      const formState = toFormState({
+        ...baseResponse,
+        grouping: { mode: 'all' },
+        throttle: { strategy: 'every_time' },
+      });
+
+      expect(formState.throttleStrategy).toBe('every_time');
+      expect(formState.throttleInterval).toBe('');
     });
   });
 });

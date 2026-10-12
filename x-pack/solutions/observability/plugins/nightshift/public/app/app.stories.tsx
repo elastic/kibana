@@ -43,8 +43,10 @@ const NightshiftLandingStory = ({
     <MockAppHeaderProvider>
       <EuiPageTemplate restrictWidth={false}>
         <NightshiftAppHeader
+          onManagementClick={noop}
+          managementHref="/app/significant_events/streams"
           onSettingsClick={noop}
-          settingsHref="/app/significant_events/settings"
+          settingsHref="/app/nightshift/settings"
         />
         <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
           <NightshiftApp />
@@ -122,9 +124,9 @@ export const OpenEventsOnly: Story = {
   },
 };
 
-export const DismissedEventInResolvedSection: Story = {
+export const InactiveEventInResolvedSection: Story = {
   args: {
-    scenario: 'dismissed',
+    scenario: 'inactive',
   },
 };
 

@@ -237,6 +237,26 @@ describe('transformBackfillParamToAdHocRun', () => {
     );
   });
 
+  test('should snapshot the UIAM api key id so the invalidation task can see the key is in use', () => {
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule({ uiamApiKey: Buffer.from('uiam-key-id:essu_secret').toString('base64') }),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).toEqual(expect.objectContaining({ uiamApiKeyId: 'uiam-key-id' }));
+  });
+
+  test('should not set a UIAM api key id for a raw user-created Cloud key, which carries none', () => {
+    const { adHocRunSO } = transformBackfillParamToAdHocRun(
+      getMockData(),
+      getMockRule({ uiamApiKey: 'essu_user_created_key', uiamApiKeyExternal: true }),
+      [],
+      'default'
+    );
+    expect(adHocRunSO).not.toHaveProperty('uiamApiKeyId');
+  });
+
   test('should not set the externality verdict for a framework-granted UIAM api key', () => {
     const { adHocRunSO } = transformBackfillParamToAdHocRun(
       getMockData(),

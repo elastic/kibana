@@ -72,12 +72,29 @@ describe('HomePage', () => {
   const navigateToApp = jest.fn();
   const isInTrial = jest.fn();
 
-  const mockServices = ({ cloud = { isInTrial } }: { cloud?: object | null } = {}) => {
+  const mockServices = ({
+    cloud = { isInTrial },
+    canMonitorAllIndices = true,
+    hasIndexManagement = true,
+  }: {
+    cloud?: object | null;
+    canMonitorAllIndices?: boolean;
+    hasIndexManagement?: boolean;
+  } = {}) => {
     mockUseKibana.mockReturnValue({
       services: {
         cloud,
-        application: { navigateToApp },
-        docLinks: { links: { enterpriseSearch: { vectorDatabaseGetStarted: DOCS_URL } } },
+        application: {
+          navigateToApp,
+          capabilities: { vectordbIndexStats: { canMonitorAllIndices } },
+        },
+        chrome: {
+          navLinks: {
+            has: (id: string) =>
+              id === 'management:index_management' ? hasIndexManagement : false,
+          },
+        },
+        docLinks: { links: { enterpriseSearch: { vectorDatabaseFullTextSearch: DOCS_URL } } },
       },
     });
   };
@@ -145,6 +162,34 @@ describe('HomePage', () => {
       render(<HomePage />);
 
       expect(screen.queryByTestId('trialUsageBadge')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the vectors stat', () => {
+    it('is hidden while Elasticsearch cannot report dense vector counts on stateless', () => {
+      render(<HomePage />);
+
+      expect(screen.queryByTestId('homePageDataCard-vectors')).not.toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
+    });
+  });
+
+  describe('the manage data action', () => {
+    it('is shown to a role that can reach Index Management', () => {
+      render(<HomePage />);
+
+      expect(screen.getByTestId('homePageDataCardDataManagement')).toBeInTheDocument();
+    });
+
+    it('is hidden from a role without Index Management', () => {
+      mockServices({ hasIndexManagement: false });
+
+      render(<HomePage />);
+
+      expect(screen.queryByTestId('homePageDataCardDataManagement')).not.toBeInTheDocument();
+      // the data card itself, and its stats, stay visible
+      expect(screen.getByTestId('homePageDataCard')).toBeInTheDocument();
+      expect(screen.getByTestId('homePageDataCard-totalIndices')).toBeInTheDocument();
     });
   });
 

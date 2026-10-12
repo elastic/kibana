@@ -12,6 +12,7 @@ import {
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import type { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { MAX_LENGTH_PER_WORKFLOW_TAG } from '@kbn/cases-plugin/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -56,6 +57,21 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
       expect(data).to.eql({ ...getConfigurationOutput(true), closure_type: 'close-by-pushing' });
+    });
+
+    it('should patch extractObservables from true to false', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { extractObservables: true } })
+      );
+      expect(configuration.extractObservables).to.be(true);
+
+      const updated = await updateConfiguration(supertest, configuration.id, {
+        extractObservables: false,
+        version: configuration.version,
+      });
+
+      expect(updated.extractObservables).to.be(false);
     });
 
     it('should patch a configuration with customFields', async () => {
@@ -136,6 +152,89 @@ export default ({ getService }: FtrProviderContext): void => {
         {
           version: configuration.version,
           observableTypes,
+        },
+        400
+      );
+    });
+
+    it('should patch a configuration with workflowTags', async () => {
+      const configuration = await createConfiguration(supertest);
+      expect(configuration.workflowTags).to.eql([]);
+
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        workflowTags: ['soc-triage'],
+      });
+
+      expect(updatedConfiguration.workflowTags).to.eql(['soc-triage']);
+    });
+
+    it('should preserve workflowTags when patching other attributes', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['soc-triage'] } })
+      );
+
+      await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        closure_type: 'close-by-pushing',
+      });
+
+      const [persisted] = await getConfiguration({ supertest });
+      expect(persisted.workflowTags).to.eql(['soc-triage']);
+    });
+
+    it('should preserve templates when patching only workflowTags', async () => {
+      const templates = [
+        {
+          key: 'test_template_1',
+          name: 'First test template',
+          description: 'This is a first test template',
+          tags: ['foo'],
+          caseFields: { title: 'Case from template', tags: ['sample'] },
+        },
+      ];
+
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: { templates: templates as ConfigurationPatchRequest['templates'] },
+        })
+      );
+
+      await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        workflowTags: ['soc-triage'],
+      });
+
+      const [persisted] = await getConfiguration({ supertest });
+      expect(persisted.workflowTags).to.eql(['soc-triage']);
+      expect(persisted.templates).to.eql(configuration.templates);
+    });
+
+    it('should clear workflowTags when patched with an empty array', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['soc-triage'] } })
+      );
+
+      const updatedConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        workflowTags: [],
+      });
+
+      expect(updatedConfiguration.workflowTags).to.eql([]);
+    });
+
+    it('should not patch a configuration with a workflow tag that is too long', async () => {
+      const configuration = await createConfiguration(supertest);
+
+      await updateConfiguration(
+        supertest,
+        configuration.id,
+        {
+          version: configuration.version,
+          workflowTags: ['a'.repeat(MAX_LENGTH_PER_WORKFLOW_TAG + 1)],
         },
         400
       );

@@ -7,6 +7,7 @@
 
 import type { LayerConfig } from './lens_attributes';
 import { LensAttributes } from './lens_attributes';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
@@ -23,6 +24,7 @@ import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 import type { XYVisualizationState } from '@kbn/lens-plugin/public';
 import type { Query } from '@kbn/es-query';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -594,6 +596,54 @@ describe('Lens Attribute', () => {
       const attributes = lnsAttr.getJSON();
 
       expect(attributes).toEqual(sampleAttributeWithReferenceLines);
+    });
+  });
+
+  describe('Annotation layers', function () {
+    it('adds a query-driven annotation layer, referencing its own data view', function () {
+      // Deliberately distinct from `layerConfig`'s own `mockDataView` (id
+      // `apm-*`) — using the same data view for both would let the
+      // annotation layer silently reuse the main layer's index pattern (or
+      // ad-hoc spec) without the test noticing.
+      const mockAlertsDataView = createStubDataView({
+        spec: { id: 'alerts-data-view', title: '.alerts-observability*' },
+      });
+
+      const annotation: EventAnnotationConfig = {
+        id: 'alerts-annotation',
+        type: 'query',
+        key: { type: 'point_in_time' },
+        filter: {
+          type: 'kibana_query',
+          query: 'kibana.alert.status: active',
+          language: 'kuery',
+        },
+        timeField: '@timestamp',
+        label: 'Alert',
+        color: '#BD271E',
+      };
+
+      lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType, undefined, [
+        { dataView: mockAlertsDataView, annotations: [annotation] },
+      ]);
+
+      const attributes = lnsAttr.getJSON();
+      const layers = (attributes.state.visualization as XYVisualizationState).layers;
+      const annotationLayer = layers.find((layer) => layer.layerType === 'annotations') as {
+        layerType: string;
+        annotations: EventAnnotationConfig[];
+        indexPatternId: string;
+      };
+
+      expect(annotationLayer).toBeDefined();
+      expect(annotationLayer.annotations).toEqual([annotation]);
+      expect(annotationLayer.indexPatternId).toEqual(mockAlertsDataView.id);
+      expect(annotationLayer.indexPatternId).not.toEqual(mockDataView.id);
+      // Both the main layer's data view and the annotation's own distinct
+      // one end up as separate ad-hoc entries, proving neither was dropped
+      // or collapsed into the other.
+      expect(attributes.state.adHocDataViews).toHaveProperty(mockDataView.id!);
+      expect(attributes.state.adHocDataViews).toHaveProperty(mockAlertsDataView.id!);
     });
   });
 });

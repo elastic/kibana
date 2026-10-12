@@ -832,7 +832,7 @@ describe('Run Scheduled Report Task', () => {
       fakeRequest: fakeRawRequest,
     } as unknown as RunContext);
 
-    await expect(() => taskRunner.run()).rejects.toThrowError('failure generating report');
+    await expect(() => taskRunner.run()).rejects.toThrow('failure generating report');
 
     expect(logger.error).toHaveBeenCalledWith(
       new Error(
@@ -912,7 +912,7 @@ describe('Run Scheduled Report Task', () => {
     } as unknown as RunContext);
 
     const runPromise = taskRunner.run();
-    const expectPromise = expect(runPromise).rejects.toThrowError('failure generating report');
+    const expectPromise = expect(runPromise).rejects.toThrow('failure generating report');
     // Advance past all retry delays
     for (let i = 0; i < 10; i++) {
       await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);

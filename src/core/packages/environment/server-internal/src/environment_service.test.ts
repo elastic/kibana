@@ -9,7 +9,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { type CoreContext, CriticalError } from '@kbn/core-base-server-internal';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
 
 import { EnvironmentService } from './environment_service';
@@ -155,29 +155,6 @@ describe('UuidService', () => {
         expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
           /Detected an unhandled Promise rejection: "something went wrong"/
         );
-      });
-    });
-
-    describe('uncaughtException warnings', () => {
-      it('logs warn for an uncaught exception with an Error', async () => {
-        await service.preboot({ analytics });
-
-        const err = new Error('something went wrong');
-        process.emit('uncaughtExceptionMonitor', err); // Types won't allow me to provide the `origin`
-
-        expect(logger.get('environment').warn).toHaveBeenCalledTimes(1);
-        expect(loggingSystemMock.collect(logger).warn[0][0]).toMatch(
-          /Detected an undefined: Error: something went wrong\n.*at /
-        );
-      });
-
-      it('does not log warn for an uncaught exception with a CriticalError', async () => {
-        await service.preboot({ analytics });
-
-        const err = new CriticalError('something went wrong', 'ERROR_CODE', 1234);
-        process.emit('uncaughtExceptionMonitor', err); // Types won't allow me to provide the `origin`
-
-        expect(logger.get('environment').warn).toHaveBeenCalledTimes(0);
       });
     });
   });

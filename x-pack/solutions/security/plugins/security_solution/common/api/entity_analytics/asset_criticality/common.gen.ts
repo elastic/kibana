@@ -28,11 +28,11 @@ export const AssetCriticalityRecordIdParts = lazySchema(() =>
     /**
      * The ID value of the asset.
      */
-    id_value: z.string(),
+    id_value: z.string().describe('The ID value of the asset.'),
     /**
      * The field representing the ID.
      */
-    id_field: IdField,
+    id_field: IdField.describe('The field representing the ID.'),
   })
 );
 export type AssetCriticalityRecordIdParts = z.infer<typeof AssetCriticalityRecordIdParts>;
@@ -111,7 +111,7 @@ export const AssetCriticalityRecord = lazySchema(() =>
       /**
        * The time the record was created or updated.
        */
-      '@timestamp': z.string().datetime(),
+      '@timestamp': z.string().datetime().describe('The time the record was created or updated.'),
     })
   )
 );

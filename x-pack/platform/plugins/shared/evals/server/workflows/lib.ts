@@ -16,6 +16,7 @@ import {
 } from '@kbn/evals-common';
 import type {
   CompareExperimentsResponse,
+  Direction,
   EvaluateResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
@@ -145,6 +146,7 @@ export const evaluateTrace = async (
         label: score.label,
         explanation: score.explanation,
         metadata: score.metadata,
+        ...(score.direction ? { direction: score.direction } : {}),
       })),
     }));
 
@@ -179,7 +181,13 @@ export const ingestScores = async (
 
 /** The snake_case evaluator-result shape used by the workflow step schemas. */
 export interface SnakeEvaluatorResult {
-  evaluator: { name: string; version?: string; kind?: 'llm' | 'code'; model?: Model };
+  evaluator: {
+    name: string;
+    version?: string;
+    kind?: 'llm' | 'code';
+    model?: Model;
+    direction?: Direction;
+  };
   scores: Array<{
     name: string;
     score?: number | null;
@@ -187,6 +195,7 @@ export interface SnakeEvaluatorResult {
     explanation?: string | null;
     metadata?: Record<string, unknown>;
     trace_id?: string | null;
+    direction?: Direction;
   }>;
 }
 
@@ -201,6 +210,7 @@ export const toRunnerEvaluatorResults = (results: SnakeEvaluatorResult[]): Evalu
       explanation: score.explanation,
       metadata: score.metadata,
       traceId: score.trace_id,
+      ...(score.direction ? { direction: score.direction } : {}),
     })),
   }));
 

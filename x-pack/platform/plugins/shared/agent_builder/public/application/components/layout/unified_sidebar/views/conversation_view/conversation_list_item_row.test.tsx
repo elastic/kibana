@@ -33,6 +33,7 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
           agentId="agent-1"
           conversationId={conversationId}
           title="My conversation"
+          icon="comment"
           isActive={false}
           routeConversationId={conversationId}
           permissions={{

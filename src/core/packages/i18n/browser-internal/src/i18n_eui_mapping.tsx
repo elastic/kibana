@@ -1310,6 +1310,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiQuickSelect.applyButton': i18n.translate('core.euiQuickSelect.applyButton', {
       defaultMessage: 'Apply',
     }),
+    'euiTimeWindowButtons.label': i18n.translate('core.euiTimeWindowButtons.label', {
+      defaultMessage: 'Time window controls',
+      description: 'ARIA legend for the SuperDatePicker time window shift and zoom buttons',
+    }),
     'euiTimeWindowButtons.invalidShiftLabel': i18n.translate(
       'core.euiTimeWindowButtons.invalidShiftLabel',
       { defaultMessage: 'Cannot shift invalid time window' }
@@ -1531,12 +1535,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiSelectable.placeholderName': i18n.translate('core.euiSelectable.placeholderName', {
       defaultMessage: 'Filter options',
     }),
-    'euiSelectableListItem.checkedOption': i18n.translate(
-      'core.euiSelectableListItem.checkedOption',
-      {
-        defaultMessage: 'Checked option.',
-      }
-    ),
     'euiSelectableListItem.excludedOption': i18n.translate(
       'core.euiSelectableListItem.excludedOption',
       {
@@ -1891,5 +1889,22 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{position} of {total}',
         values: { position, total },
       }),
+    'euiFlyoutMenu.back.tooltip': ({ previousPage }: EuiValues) =>
+      i18n.translate('core.euiFlyoutMenu.back.tooltip', {
+        defaultMessage: 'Back to {previousPage}',
+        values: { previousPage },
+      }),
+    'euiKeyboardShortcuts.cmd': i18n.translate('core.euiKeyboardShortcuts.cmd', {
+      defaultMessage: 'Cmd',
+    }),
+    'euiKeyboardShortcuts.copyDescription': i18n.translate(
+      'core.euiKeyboardShortcuts.copyDescription',
+      {
+        defaultMessage: 'Copy the focused cell value',
+      }
+    ),
+    'euiKeyboardShortcuts.copyTitle': i18n.translate('core.euiKeyboardShortcuts.copyTitle', {
+      defaultMessage: 'C',
+    }),
   };
 };

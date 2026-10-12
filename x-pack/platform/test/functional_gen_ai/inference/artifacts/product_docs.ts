@@ -27,7 +27,8 @@ const sourceClusterIndex = process.env.KIBANA_SOURCE_INDEX;
 const embeddingClusterUrl = 'http://localhost:9220';
 const embeddingClusterUsername = 'elastic';
 const embeddingClusterPassword = 'changeme';
-const MIN_ARTIFACT_SIZE_BYTES = 3 * 1024 * 1024;
+const MIN_ARTIFACT_SIZE_BYTES = 4 * 1024 * 1024;
+const MIN_OPENAPI_ARTIFACT_SIZE_BYTES = 2 * 1024 * 1024;
 
 const getCombinedOpenApiArtifactZipFileName = (
   stackVersion: string,
@@ -51,9 +52,11 @@ const LOAD_ESQL_DOCS_SCRIPT = resolve(
   'x-pack/platform/plugins/shared/inference/scripts/load_esql_docs/index.js'
 );
 
-/** Connector used by load_esql_docs to enrich ES|QL docs (must exist in preconfigured connectors) */
-const ESQL_DOCS_CONNECTOR_ID =
-  process.env.ESQL_DOCS_CONNECTOR_ID || '.openai-gpt-4.1-chat_completion';
+/** Inference endpoint used by load_esql_docs to enrich ES|QL docs. */
+const ESQL_DOCS_INFERENCE_ID =
+  process.env.ESQL_DOCS_INFERENCE_ID ||
+  process.env.ESQL_DOCS_CONNECTOR_ID ||
+  '.openai-gpt-5.5-chat_completion';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -67,7 +70,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ensureEisEndpoints({
         es,
         log,
-        requiredInferenceIds: [inferenceId, openApiInferenceId],
+        requiredInferenceIds: [inferenceId, openApiInferenceId, ESQL_DOCS_INFERENCE_ID],
       });
     });
 
@@ -75,13 +78,13 @@ export default function ({ getService }: FtrProviderContext) {
       this.timeout(120 * 60 * 1000);
       const nodeBin = process.execPath;
 
-      it(`runs load_esql_docs with connectorId=${ESQL_DOCS_CONNECTOR_ID}`, async function () {
+      it(`runs load_esql_docs with inferenceId=${ESQL_DOCS_INFERENCE_ID}`, async function () {
         const kibanaUrl = formatUrl(config.get('servers.kibana'));
         const esUrl = formatUrl(config.get('servers.elasticsearch'));
 
         const loadEsqlDocsArgs = [
           LOAD_ESQL_DOCS_SCRIPT,
-          `--connectorId=${ESQL_DOCS_CONNECTOR_ID}`,
+          `--inferenceId=${ESQL_DOCS_INFERENCE_ID}`,
           `--kibana=${kibanaUrl}`,
           `--elasticsearch=${esUrl}`,
         ];
@@ -117,7 +120,10 @@ export default function ({ getService }: FtrProviderContext) {
       const nodeBin = process.execPath;
       const kbArtifactsDir = resolve(REPO_ROOT, 'build', 'kb-artifacts');
 
-      const waitForArtifactZipAtPath = async (artifactPath: string) => {
+      const waitForArtifactZipAtPath = async (
+        artifactPath: string,
+        minSizeBytes: number = MIN_ARTIFACT_SIZE_BYTES
+      ) => {
         await retry.waitForWithTimeout(
           `Artifact zip [${artifactPath}] should exist`,
           30 * 60 * 1000, // 30 minutes
@@ -132,14 +138,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const stats = await Fs.stat(artifactPath);
-        if (stats.size < MIN_ARTIFACT_SIZE_BYTES) {
+        if (stats.size < minSizeBytes) {
           throw new Error(
-            `Artifact zip '[${artifactPath}]' exists but is too small (${stats.size} bytes); expected at least ${MIN_ARTIFACT_SIZE_BYTES} bytes (failing immediately)`
+            `Artifact zip '[${artifactPath}]' exists but is too small (${stats.size} bytes); expected at least ${minSizeBytes} bytes (failing immediately)`
           );
         }
 
         log.info(
-          `Artifact zip [${artifactPath}] size check passed (${stats.size} bytes >= ${MIN_ARTIFACT_SIZE_BYTES} bytes)`
+          `Artifact zip [${artifactPath}] size check passed (${stats.size} bytes >= ${minSizeBytes} bytes)`
         );
       };
 
@@ -153,6 +159,8 @@ export default function ({ getService }: FtrProviderContext) {
         `--embeddingClusterUrl=${embeddingClusterUrl}`,
         `--embeddingClusterUsername=${embeddingClusterUsername}`,
         `--embeddingClusterPassword=${embeddingClusterPassword}`,
+        // Match security_labs.ts: pin output so CI upload finds zips under build/kb-artifacts
+        `--targetFolder=${kbArtifactsDir}`,
       ];
 
       const commands = [
@@ -270,6 +278,7 @@ export default function ({ getService }: FtrProviderContext) {
           `--embedding-cluster-username=${embeddingClusterUsername}`,
           `--embedding-cluster-password=${embeddingClusterPassword}`,
           `--inference-id=${openApiInferenceId}`,
+          `--targetFolder=${kbArtifactsDir}`,
         ];
 
         const cmd = `${nodeBin} ${openApiArgs.join(' ')}`;
@@ -316,8 +325,10 @@ export default function ({ getService }: FtrProviderContext) {
           stackDocsVersion,
           openApiInferenceId
         );
-        // waits for zip, then asserts size >= MIN_ARTIFACT_SIZE_BYTES (see waitForArtifactZipAtPath)
-        await waitForArtifactZipAtPath(resolve(kbArtifactsDir, openApiZipName));
+        await waitForArtifactZipAtPath(
+          resolve(kbArtifactsDir, openApiZipName),
+          MIN_OPENAPI_ARTIFACT_SIZE_BYTES
+        );
       });
     });
   });

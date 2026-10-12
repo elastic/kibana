@@ -16,10 +16,11 @@ import {
   getConflictModalContent,
   renderFieldName,
   showDelete,
+  Table as PersistedTable,
   TableWithoutPersist as Table,
 } from './table';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 
 const coreStart = coreMock.createStart();
 
@@ -282,5 +283,81 @@ describe('Table', () => {
     expect(showDelete(compositeRuntimeField)).toBe(false);
     // runtime field - composite definition
     expect(showDelete(compositeRuntimeDefinition)).toBe(true);
+  });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_data_view_create_delete.ts
+  // ('should have expected table headers')
+  describe('column headers', () => {
+    it('should render all 7 expected column headers', async () => {
+      renderTable();
+      await screen.findByText('Elastic');
+      const expectedHeaders = [
+        'Name',
+        'Type',
+        'Format',
+        'Searchable',
+        'Aggregatable',
+        'Excluded',
+        'Actions',
+      ];
+      expect(screen.getAllByRole('columnheader')).toHaveLength(expectedHeaders.length);
+      for (const header of expectedHeaders) {
+        expect(
+          screen.getByRole('columnheader', { name: new RegExp(header, 'i') })
+        ).toBeInTheDocument();
+      }
+    });
+  });
+
+  // Migrated from: src/platform/test/functional/apps/management/group1/_index_pattern_results_sort.ts
+  describe('sort order', () => {
+    beforeEach(() => {
+      window.localStorage.clear();
+    });
+
+    const renderPersistedTable = () =>
+      renderWithI18n(
+        <PersistedTable
+          deleteField={jest.fn()}
+          editField={jest.fn()}
+          indexPattern={indexPattern}
+          items={items}
+          openModal={overlayServiceMock.createStartContract().openModal}
+          startServices={coreStart}
+        />
+      );
+
+    const clickHeader = async (user: ReturnType<typeof userEvent.setup>, testSubj: string) => {
+      await user.click(within(screen.getByTestId(testSubj)).getByRole('button'));
+    };
+
+    const firstCell = (testSubj: string) => screen.getAllByTestId(testSubj)[0];
+
+    it('sorts by Name ascending by default and toggles to descending on header click', async () => {
+      const user = userEvent.setup();
+      renderPersistedTable();
+
+      const initialCells = await screen.findAllByTestId('indexedFieldName');
+      expect(initialCells[0]).toHaveTextContent('Elastic');
+      expect(initialCells[initialCells.length - 1]).toHaveTextContent('timestamp');
+
+      await clickHeader(user, 'tableHeaderCell_displayName_0');
+
+      const descCells = screen.getAllByTestId('indexedFieldName');
+      expect(descCells[0]).toHaveTextContent('timestamp');
+      expect(descCells[descCells.length - 1]).toHaveTextContent('Elastic');
+    });
+
+    it('sorts by Type ascending then descending on repeated header clicks', async () => {
+      const user = userEvent.setup();
+      renderPersistedTable();
+      await screen.findAllByTestId('indexedFieldType');
+
+      await clickHeader(user, 'tableHeaderCell_type_1');
+      expect(firstCell('indexedFieldType')).toHaveTextContent('date');
+
+      await clickHeader(user, 'tableHeaderCell_type_1');
+      expect(firstCell('indexedFieldType')).toHaveTextContent('text, long');
+    });
   });
 });

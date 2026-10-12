@@ -20,6 +20,7 @@ import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/se
 import type { ExceptionListClient, ListsApiRequestHandlerContext } from '@kbn/lists-plugin/server';
 import type { AlertsClient, IRuleDataService } from '@kbn/rule-registry-plugin/server';
 import type { EntityStoreCRUDClient as EntityStoreUpdateClient } from '@kbn/entity-store/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 
 import type { Readable } from 'stream';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -87,6 +88,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
   getRulesAuthz: () => DetectionRulesAuthz;
+  getMitreDataClient: () => MitreAttackDataClient | undefined;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

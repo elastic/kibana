@@ -6,6 +6,7 @@
  */
 import {
   extractParamReferences,
+  getParamsForSpace,
   monitorUsesGlobalParams,
   valueContainsParams,
 } from './param_utils';
@@ -16,6 +17,44 @@ import {
   MonitorTypeEnum,
   ScheduleUnit,
 } from '../../../common/runtime_types/monitor_management/monitor_configs';
+
+describe('getParamsForSpace', () => {
+  it('returns the space-specific params merged with globally-shared params', () => {
+    const paramsBySpace = {
+      space1: { LOCAL_KEY: 'local' },
+      '*': { GLOBAL_KEY: 'global' },
+    };
+
+    expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({
+      LOCAL_KEY: 'local',
+      GLOBAL_KEY: 'global',
+    });
+  });
+
+  it('falls back to globally-shared params when the space has no dedicated bucket', () => {
+    // Regression test for https://github.com/elastic/sdh-synthetics/issues/295:
+    // a "Share across spaces" param only ever lands in the '*' bucket, and
+    // getSyntheticsParams does not materialize a bucket for a space that has no
+    // space-specific params. A direct paramsBySpace[spaceId] lookup would return
+    // undefined and silently drop the shared param.
+    const paramsBySpace = { '*': { GLOBAL_KEY: 'global' } };
+
+    expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({ GLOBAL_KEY: 'global' });
+  });
+
+  it('lets globally-shared params win on key collision, matching getSyntheticsParams/normalizeConfigs', () => {
+    const paramsBySpace = {
+      space1: { SHARED_KEY: 'local' },
+      '*': { SHARED_KEY: 'global' },
+    };
+
+    expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({ SHARED_KEY: 'global' });
+  });
+
+  it('returns an empty object when there are no params at all', () => {
+    expect(getParamsForSpace({}, 'space1')).toEqual({});
+  });
+});
 
 describe('extractParamReferences', () => {
   it('extracts single param reference', () => {
@@ -206,6 +245,42 @@ describe('monitorUsesGlobalParams', () => {
     } as SyntheticsMonitor;
 
     expect(monitorUsesGlobalParams(monitor)).toBe(false);
+  });
+
+  it('detects params inside Kerberos/NTLM despite formatter skip list', () => {
+    const kerberosMonitor = {
+      ...baseMonitor,
+      [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.KERBEROS]: {
+        enabled: true,
+        auth_type: 'password',
+        username: 'svc',
+        password: '${kerberosPassword}',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        realm: '',
+        service_name: '',
+        enable_krb5_fast: false,
+      },
+    } as SyntheticsMonitor;
+
+    const ntlmMonitor = {
+      ...baseMonitor,
+      [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.NTLM]: {
+        enabled: true,
+        username: 'user',
+        password: '${ntlmPassword}',
+        domain: '',
+        workstation: '',
+      },
+    } as SyntheticsMonitor;
+
+    expect(monitorUsesGlobalParams(kerberosMonitor)).toBe(true);
+    expect(monitorUsesGlobalParams(kerberosMonitor, ['kerberosPassword'])).toBe(true);
+    expect(monitorUsesGlobalParams(kerberosMonitor, ['unrelated'])).toBe(false);
+    expect(monitorUsesGlobalParams(ntlmMonitor, ['ntlmPassword'])).toBe(true);
   });
 
   it('returns true when monitor has params in hosts field (TCP/ICMP)', () => {

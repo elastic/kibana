@@ -55,7 +55,6 @@ export interface FleetConfigType {
     };
   };
   iacProvisioner?: {
-    enabled: boolean;
     api?: {
       url?: string;
       tls?: {
@@ -107,6 +106,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
+    skipUploadPackageValidation?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];

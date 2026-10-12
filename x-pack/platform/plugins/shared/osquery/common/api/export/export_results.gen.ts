@@ -36,17 +36,35 @@ export const ExportRequestBody = lazySchema(() =>
       * An optional KQL filter appended (with AND) to the base action/schedule filter. The filter is wrapped in parentheses so it cannot override or escape the built-in action_id / schedule_id gate.
 
       */
-      kuery: z.string().nullable().optional(),
+      kuery: z
+        .string()
+        .nullable()
+        .optional()
+        .describe(
+          'An optional KQL filter appended (with AND) to the base action/schedule filter. The filter is wrapped in parentheses so it cannot override or escape the built-in action_id / schedule_id gate.\n'
+        ),
       /**
       * An optional allowlist of Elastic Agent IDs. When provided, only rows reported by the listed agents are included in the export.
 
       */
-      agentIds: z.array(z.string()).nullable().optional(),
+      agentIds: z
+        .array(z.string())
+        .nullable()
+        .optional()
+        .describe(
+          'An optional allowlist of Elastic Agent IDs. When provided, only rows reported by the listed agents are included in the export.\n'
+        ),
       /**
       * An optional array of Elasticsearch / Kibana SearchBar filter objects (the same `esFilters` payload used by the Discover UI). Each filter is applied as an additional AND clause. An invalid filter object causes a 400 response rather than silently returning unfiltered data.
 
       */
-      esFilters: z.array(z.object({}).catchall(z.unknown())).nullable().optional(),
+      esFilters: z
+        .array(z.object({}).catchall(z.unknown()))
+        .nullable()
+        .optional()
+        .describe(
+          'An optional array of Elasticsearch / Kibana SearchBar filter objects (the same `esFilters` payload used by the Discover UI). Each filter is applied as an additional AND clause. An invalid filter object causes a 400 response rather than silently returning unfiltered data.\n'
+        ),
     })
     .nullable()
 );
@@ -63,29 +81,50 @@ export const ExportNdjsonMetaRow = lazySchema(() =>
         /**
          * The action ID (live query) or schedule ID (scheduled query) that produced the results.
          */
-        action_id: z.string(),
+        action_id: z
+          .string()
+          .describe(
+            'The action ID (live query) or schedule ID (scheduled query) that produced the results.'
+          ),
         /**
          * The SQL query text, if it could be resolved from action details.
          */
-        query: z.string().nullable().optional(),
+        query: z
+          .string()
+          .nullable()
+          .optional()
+          .describe('The SQL query text, if it could be resolved from action details.'),
         /**
          * ISO 8601 timestamp of when the export was initiated.
          */
-        timestamp: z.string().datetime(),
+        timestamp: z
+          .string()
+          .datetime()
+          .describe('ISO 8601 timestamp of when the export was initiated.'),
         /**
          * Username of the Kibana user who triggered the export.
          */
-        exported_by: z.string(),
+        exported_by: z.string().describe('Username of the Kibana user who triggered the export.'),
         format: ExportFormat,
         /**
          * Total number of result rows included in this export.
          */
-        total_results: z.number().int(),
+        total_results: z
+          .number()
+          .int()
+          .describe('Total number of result rows included in this export.'),
         /**
       * For scheduled query exports only: the execution counter of the scheduled run that produced the results.
 
       */
-        execution_count: z.number().int().nullable().optional(),
+        execution_count: z
+          .number()
+          .int()
+          .nullable()
+          .optional()
+          .describe(
+            'For scheduled query exports only: the execution counter of the scheduled run that produced the results.\n'
+          ),
       })
       .optional(),
   })
@@ -101,34 +140,63 @@ export const ExportMetadata = lazySchema(() =>
     /**
      * The action ID (live query) or schedule ID (scheduled query) that produced the results.
      */
-    action_id: z.string(),
+    action_id: z
+      .string()
+      .describe(
+        'The action ID (live query) or schedule ID (scheduled query) that produced the results.'
+      ),
     /**
      * The SQL query text, if it could be resolved from action details.
      */
-    query: z.string().nullable().optional(),
+    query: z
+      .string()
+      .nullable()
+      .optional()
+      .describe('The SQL query text, if it could be resolved from action details.'),
     /**
      * ISO 8601 timestamp of when the export was initiated.
      */
-    timestamp: z.string().datetime(),
+    timestamp: z
+      .string()
+      .datetime()
+      .describe('ISO 8601 timestamp of when the export was initiated.'),
     /**
      * Username of the Kibana user who triggered the export.
      */
-    exported_by: z.string(),
+    exported_by: z.string().describe('Username of the Kibana user who triggered the export.'),
     format: ExportFormat,
     /**
      * Total number of result rows included in this export.
      */
-    total_results: z.number().int().nullable().optional(),
+    total_results: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe('Total number of result rows included in this export.'),
     /**
       * For scheduled query exports only: the execution counter of the scheduled run that produced the results.
 
       */
-    execution_count: z.number().int().nullable().optional(),
+    execution_count: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe(
+        'For scheduled query exports only: the execution counter of the scheduled run that produced the results.\n'
+      ),
     /**
       * For CSV exports with ECS mapping and zero hits: the column header row so an empty export is not a 0-byte file.
 
       */
-    csv_columns: z.array(z.string()).nullable().optional(),
+    csv_columns: z
+      .array(z.string())
+      .nullable()
+      .optional()
+      .describe(
+        'For CSV exports with ECS mapping and zero hits: the column header row so an empty export is not a 0-byte file.\n'
+      ),
   })
 );
 export type ExportMetadata = z.infer<typeof ExportMetadata>;

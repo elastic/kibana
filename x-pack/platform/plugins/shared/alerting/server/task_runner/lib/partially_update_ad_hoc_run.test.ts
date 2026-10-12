@@ -67,7 +67,7 @@ describe('partiallyUpdateAdHocRun', () => {
 
         await expect(
           partiallyUpdateAdHocRun(soClient, MockAdHocRunId, DefaultAttributes)
-        ).rejects.toThrowError('wops');
+        ).rejects.toThrow('wops');
       });
 
       test('should handle the version option', async () => {

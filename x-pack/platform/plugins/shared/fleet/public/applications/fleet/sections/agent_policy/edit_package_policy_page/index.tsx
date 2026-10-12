@@ -55,11 +55,12 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import {
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
+  inferVarGroupSelections,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
 import { useMultipleAgentPolicies } from '../../../hooks';
@@ -177,15 +178,18 @@ export const EditPackagePolicyForm = memo<{
   );
 
   // Derive var_group_selections from policy for edit mode
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
+    // The policy predates the package's var_groups: prefer inferring the selection
+    // from its populated vars over the first-visible-option default, so an existing
+    // configuration (e.g. direct access keys) is not presented as a different one
+    const defaults = computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+    const inferred = inferVarGroupSelections(varGroups, packagePolicy.vars);
+    return inferred ? { ...defaults, ...inferred } : defaults;
+  }, [packagePolicy.var_group_selections, packagePolicy.vars, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -631,7 +635,11 @@ export const EditPackagePolicyForm = memo<{
   });
 
   return (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="editPackagePolicy"
+    >
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />

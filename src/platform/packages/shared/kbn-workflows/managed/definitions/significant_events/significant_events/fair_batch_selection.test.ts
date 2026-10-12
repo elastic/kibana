@@ -42,6 +42,13 @@ const findStepRecursive = (steps: WorkflowStep[], name: string): WorkflowStep | 
   return undefined;
 };
 
+const hasStepLevelIfOnEsql = (steps: WorkflowStep[]): boolean =>
+  steps.some(
+    (step) =>
+      (step.type === 'elasticsearch.esql.query' && Boolean(step.if)) ||
+      (step.steps ? hasStepLevelIfOnEsql(step.steps) : false)
+  );
+
 describe('significant events fair batch selection', () => {
   it('denormalizes the rule severity onto detection documents', () => {
     const writeDetection = getStep(DETECTION_YAML, 'foreach_rule') as WorkflowStep & {
@@ -104,7 +111,7 @@ describe('significant events fair batch selection', () => {
     expect(backlog?.if).toBeUndefined();
     expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
-    expect(discovery.steps.some(({ if: stepIf }) => Boolean(stepIf))).toBe(false);
+    expect(hasStepLevelIfOnEsql(discovery.steps)).toBe(false);
   });
 
   it('keeps markers visible to the backlog dedup semijoin (rule filter is a should, not a bare terms)', () => {
@@ -147,27 +154,28 @@ describe('significant events fair batch selection', () => {
     const discovery = parse(DISCOVERY_YAML) as {
       triggers: Array<{
         type: string;
-        inputs?: Array<{ name: string; default: number; required: boolean }>;
+        inputs?: {
+          properties?: Record<string, { default?: number }>;
+          required?: string[];
+        };
       }>;
     };
 
     const manualTrigger = discovery.triggers.find((t) => t.type === 'manual');
-    const inputs = manualTrigger?.inputs ?? [];
+    const inputs = manualTrigger?.inputs?.properties ?? {};
 
-    const threshold = inputs.find((i) => i.name === 'flakyRuleDetectionThreshold');
+    const threshold = inputs.flakyRuleDetectionThreshold;
     expect(threshold).toBeDefined();
     expect(threshold?.default).toBe(10);
-    expect(threshold?.required).toBe(false);
 
-    const probe = inputs.find((i) => i.name === 'flakyRuleProbeAfterMinutes');
+    const probe = inputs.flakyRuleProbeAfterMinutes;
     expect(probe).toBeDefined();
     expect(probe?.default).toBe(360);
-    expect(probe?.required).toBe(false);
 
-    const exempt = inputs.find((i) => i.name === 'flakyRuleExemptSeverityScore');
+    const exempt = inputs.flakyRuleExemptSeverityScore;
     expect(exempt).toBeDefined();
     expect(exempt?.default).toBe(80);
-    expect(exempt?.required).toBe(false);
+    expect(manualTrigger?.inputs?.required).toBeUndefined();
   });
 
   it('passes the four positional params in the expected order', () => {

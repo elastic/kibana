@@ -15,3 +15,4 @@ export { useBulkUpdateArtifact } from './use_bulk_update_artifact';
 export { useBulkDeleteArtifact } from './use_bulk_delete_artifact';
 export { useGetUpdatedTags } from './use_get_updated_tags';
 export { useCanAssignArtifactPerPolicy } from './use_can_assign_artifact_per_policy';
+export { useArtifactActionsDisabled } from './use_artifact_actions_disabled';

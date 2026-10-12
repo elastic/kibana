@@ -164,4 +164,4 @@ export GITHUB_PR_NUMBER
 # Always delete-and-recreate so the comment surfaces at the bottom of the PR
 # thread after each build run, keeping it visible alongside newer activity.
 export EVAL_COMMENT_CLEAR_PREVIOUS=1
-ts-node .buildkite/scripts/steps/evals/post_eval_pr_comment.ts < "$MARKDOWN_FILE"
+node .buildkite/scripts/steps/evals/post_eval_pr_comment.ts < "$MARKDOWN_FILE"

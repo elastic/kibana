@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { seriesStatisticsEsqlGuidance } from './series_statistics_prompt';
+
 /**
  * Bind the source command to the index the caller grounded the request against.
  *
@@ -16,7 +18,7 @@
 const buildTargetIndexGuidance = (index: string) => `
 ## Read from the requested index
 
-The query **MUST** read from \`${index}\`. Use that name verbatim in the source command (\`FROM\` or \`TS\`), including any wildcards and any \`cluster:\` remote prefix.
+The query **MUST** read from \`${index}\`. Use that name verbatim in the source command (\`FROM\`, \`TS\`, or the \`index\` option of \`PROMQL\`), including any wildcards and any \`cluster:\` remote prefix.
 Do **NOT** substitute a pattern inferred from the request, from the field names, or from your own knowledge of common Elasticsearch schemas, even when it looks more specific or more idiomatic — a chart built on a pattern that matches no index silently renders empty.
 To restrict which documents are returned, add a \`WHERE\` clause; never narrow by changing the source.
 `;
@@ -32,50 +34,61 @@ You are generating an ES|QL query for a Kibana visualization. The query will be 
 
 For that purpose, follow these guidelines:
 ${index ? buildTargetIndexGuidance(index) : ''}
+## Existing visualization edits
+
+When given existing queries, modify only what the request asks to change. Keep their source indices and unrelated filters, aggregations, and limits. This preservation takes precedence over the defaults below, which apply to new queries and requested changes only. A chart title or presentation change is not a request to select a different data source. Change sources only when explicitly requested.
+
 ## Human-readable column aliases
 
 Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
 
-## Time picker compatibility
+## Time
 
-Visualization ES|QL must respond to the Lens time picker. If a time field exists, use the event-time field, typically \`@timestamp\`, \`timestamp\`, or another event date. Reference \`?_tstart\` and \`?_tend\` in the query.
-For time-series charts, pass \`?_tstart\` and \`?_tend\` to the bucket function.
-For categorical, metric, or any other charts that do not group by time, add a filter such as \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
-Do not hardcode absolute times or now()-based ranges.
-
-## Time Bucketing
+Use the event-time field. Do not hardcode times or \`now()\` ranges. On a time series, omit \`LIMIT\`, \`SORT\`, and \`DATE_TRUNC\`.
+\`PROMQL\` has no time field to filter or bucket on (see below).
 
 ### FROM
 
-For time series charts, use auto buckets: \`BUCKET(<time field>, 75, ?_tstart, ?_tend)\` or \`TBUCKET(75, ?_tstart, ?_tend)\`, not hardcoded intervals like \`DATE_TRUNC(1 hour, <time field>)\`.
-Omit \`LIMIT\` and \`SORT\`; the bucket range already bounds the results.
-
-e.g. for a normal index with FROM and BUCKET:
+\`@timestamp\` — \`TBUCKET(100, ?_tstart, ?_tend)\`. A timestamp \`WHERE\` is not needed. The bounds size the buckets; Kibana binds \`?_tstart\` / \`?_tend\` when the chart renders:
 
 \`\`\`esql
-FROM logs | STATS count = COUNT() BY bucket = BUCKET(timestamp, 75, ?_tstart, ?_tend)
+FROM logs | STATS count = COUNT() BY bucket = TBUCKET(100, ?_tstart, ?_tend)
 \`\`\`
+
+\`TBUCKET\` has no field argument; it always buckets \`@timestamp\`. Never write \`TBUCKET(@timestamp, …)\`.
+
+Any other date field:
+
+\`\`\`esql
+FROM orders | STATS count = COUNT() BY bucket = BUCKET(order_date, 100, ?_tstart, ?_tend)
+\`\`\`
+
+Charts that do not group by time: \`WHERE <time field> >= ?_tstart AND <time field> < ?_tend\`.
 
 ### TS
 
-The visualization framework automatically adds the correct time range to the query for time series when using TS,
-meaning you **do not need** to filter using TRANGE manually.
+Use \`TS\` only when the resource is marked \`is-tsds="true"\`; otherwise use \`FROM\`. With \`TS\`, bucket \`@timestamp\` exactly as with \`FROM\` and do not add \`TRANGE\`: the visualization framework adds the \`@timestamp\` range.
 
-The only exception when you should use the variables to manually filter the timeframe with TS is for TBUCKET,
+### PROMQL
 
-e.g.
+The visualization framework automatically applies the time range to \`PROMQL\` queries, and the step is derived from it,
+meaning you **do not need** to set the \`start\` and \`end\` options. Only set \`step\` when the user asks for a specific resolution, e.g.
 
 \`\`\`esql
-TS logs-tsds | STATS count = COUNT() BY bucket = TBUCKET(75, ?_tstart, ?_tend)
+PROMQL index=metrics-tsds request_rate=(sum by (host.name) (rate(http_requests_total)))
 \`\`\`
 
-Also omit \`LIMIT\` and \`SORT\` (same reasons as with FROM).
+The time bucket column of \`PROMQL\` is \`step\`, and it has no \`@timestamp\` column, so do not add a \`WHERE\` time filter, \`BUCKET\` or \`TBUCKET\` after \`PROMQL\`, also for charts that do not group by time.
+For time series charts, use the \`PROMQL\` command as is, without \`STATS\`: the chart uses \`step\` as its time axis.
+For metric and gauge charts or a ranking by label, use the single-value results patterns of the \`PROMQL\` documentation.
+
+${seriesStatisticsEsqlGuidance}
 
 ## Grouping dimensions (BY)
 
 Only \`BY\` dimensions the user asked for:
 
-- **Time series** default: group by the time bucket alone (e.g. \`BY bucket = TBUCKET(75, ?_tstart, ?_tend)\`). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
+- **Time series** default: group by the time bucket alone (or no \`by (...)\` in \`PROMQL\`). Do **not** add every TSDB \`ts_dimension\` such as \`host.name\`, \`service.name\`, or \`pod\` just because it appears in the mapping. Add it when the user explicitly asks for it (e.g. "per host", "by service", "split by region").
 - **Categorical charts**: \`BY\` only the category field(s) named in the request (plus no invented splits).
 - Index dimensions may be used in \`WHERE\` filters when the user scopes to a specific series; that is not a reason to put them in \`BY\`.
 

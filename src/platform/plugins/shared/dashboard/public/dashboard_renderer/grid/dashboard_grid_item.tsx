@@ -136,6 +136,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const renderedEmbeddable = useMemo(() => {
       const panelProps = {
+        isSharedItem: true,
         showBadges: true,
         showBorder,
         showShadow: false,

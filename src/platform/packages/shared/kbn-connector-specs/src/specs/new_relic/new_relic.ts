@@ -220,6 +220,7 @@ export const NewRelic: ConnectorSpec = {
   actions: {
     acknowledgeIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Acknowledge a New Relic AI issue by ID via aiIssuesAckIssue, claiming it and stopping escalation churn. Use listIssues first to find the issueId.',
       input: NewRelicAcknowledgeIssueInputSchema,
@@ -247,6 +248,7 @@ export const NewRelic: ConnectorSpec = {
 
     unacknowledgeIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Reverse the acknowledgment on a New Relic AI issue via aiIssuesUnackIssue, re-opening it for handoff or when remediation failed.',
       input: NewRelicUnacknowledgeIssueInputSchema,
@@ -274,6 +276,7 @@ export const NewRelic: ConnectorSpec = {
 
     resolveIssue: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Resolve and close a New Relic AI issue via aiIssuesResolveIssue. The terminal step of an auto-remediation workflow.',
       input: NewRelicResolveIssueInputSchema,
@@ -301,6 +304,7 @@ export const NewRelic: ConnectorSpec = {
 
     listIssues: {
       isTool: true,
+      scope: 'read',
       description:
         'List New Relic AI issues (deduplicated, correlated groups of incidents) for an account, filterable by state, priority, entity GUIDs, and time window. Defaults to the last 24 hours if no window is given. Drives triage and enrichment branching in a workflow. Returns nextCursor for pagination.',
       input: NewRelicListIssuesInputSchema,
@@ -369,6 +373,7 @@ export const NewRelic: ConnectorSpec = {
 
     listIncidents: {
       isTool: true,
+      scope: 'read',
       description:
         'List the individual New Relic incidents (condition violations) grouped under AI issues for an account, filterable by state, priority, entity GUIDs, and time window. Use for granular per-signal handling. Returns nextCursor for pagination.',
       input: NewRelicListIncidentsInputSchema,
@@ -430,6 +435,7 @@ export const NewRelic: ConnectorSpec = {
 
     createMutingRule: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a New Relic muting rule via alertsMutingRuleCreate to suppress alert notifications matching a condition, e.g. during a deploy or maintenance window. The core noise-control action.',
       input: NewRelicCreateMutingRuleInputSchema,
@@ -463,6 +469,7 @@ export const NewRelic: ConnectorSpec = {
 
     updateMutingRule: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Update an existing New Relic muting rule via alertsMutingRuleUpdate, e.g. to extend a maintenance window, without deleting and recreating it.',
       input: NewRelicUpdateMutingRuleInputSchema,
@@ -492,6 +499,7 @@ export const NewRelic: ConnectorSpec = {
 
     deleteMutingRule: {
       isTool: true,
+      scope: 'destroy',
       description:
         'Delete a New Relic muting rule via alertsMutingRuleDelete so alerting resumes when the suppression window closes. Pairs with createMutingRule.',
       input: NewRelicDeleteMutingRuleInputSchema,
@@ -510,6 +518,7 @@ export const NewRelic: ConnectorSpec = {
 
     listMutingRules: {
       isTool: true,
+      scope: 'read',
       description:
         'List existing New Relic muting rules for an account, so a workflow can check for an existing rule before creating or deleting one (idempotency).',
       input: NewRelicListMutingRulesInputSchema,
@@ -548,6 +557,7 @@ export const NewRelic: ConnectorSpec = {
 
     runNrqlQuery: {
       isTool: true,
+      scope: 'read',
       description:
         'Run an NRQL query against a New Relic account and return the results. The primary read path for metric, event-count, and health-check enrichment inside a workflow, e.g. "SELECT count(*) FROM Transaction SINCE 1 HOUR AGO".',
       input: NewRelicRunNrqlQueryInputSchema,
@@ -580,6 +590,7 @@ export const NewRelic: ConnectorSpec = {
 
     createDeploymentMarker: {
       isTool: true,
+      scope: 'write',
       description:
         'Record a deployment/change marker on a New Relic entity via changeTrackingCreateEvent, so alerts and dashboards correlate to the deploy. Closes the CI/CD-to-observability loop.',
       input: NewRelicCreateDeploymentMarkerInputSchema,
@@ -622,6 +633,7 @@ export const NewRelic: ConnectorSpec = {
 
     listAlertPolicies: {
       isTool: true,
+      scope: 'read',
       description:
         'List New Relic alert policies for an account, optionally filtered by a name substring, to resolve policy context or target a muting rule or condition action.',
       input: NewRelicListAlertPoliciesInputSchema,
@@ -666,6 +678,7 @@ export const NewRelic: ConnectorSpec = {
 
     listNrqlConditions: {
       isTool: true,
+      scope: 'read',
       description:
         'List the NRQL alert conditions under a New Relic alert policy, to audit existing conditions or pick one to reference.',
       input: NewRelicListNrqlConditionsInputSchema,
@@ -711,6 +724,7 @@ export const NewRelic: ConnectorSpec = {
 
     createAlertPolicy: {
       isTool: true,
+      scope: 'write',
       description:
         'Provision a new New Relic alert policy via alertsPolicyCreate, for as-code alerting setup from a workflow.',
       input: NewRelicCreateAlertPolicyInputSchema,
@@ -739,6 +753,7 @@ export const NewRelic: ConnectorSpec = {
 
     createNrqlCondition: {
       isTool: true,
+      scope: 'write',
       description:
         'Create a static NRQL alert condition under a New Relic alert policy via alertsNrqlConditionStaticCreate, completing the as-code condition path.',
       input: NewRelicCreateNrqlConditionInputSchema,

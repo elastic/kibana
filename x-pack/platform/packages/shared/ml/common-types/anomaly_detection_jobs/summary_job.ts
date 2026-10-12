@@ -128,7 +128,7 @@ export interface MlSummaryJob {
   latestTimestampSortValue?: number;
 
   /**
-   * The earlist of the timestamp of the earliest chronologically input document or the earliest bucket that was processed.
+   * The earliest of the timestamp of the earliest chronologically input document or the earliest bucket that was processed.
    */
   earliestStartTimestampMs?: number;
 
@@ -158,6 +158,11 @@ export interface MlSummaryJob {
    * Omitted when CPS is disabled.
    */
   projectRouting?: string | null;
+
+  /**
+   * Flag indicating whether the job is using UIAM for authentication.
+   */
+  isUiamEnabled?: boolean;
 
   /**
    * Advanced configuration option. Contains custom meta data about the job. For example, it can contain custom URL information.

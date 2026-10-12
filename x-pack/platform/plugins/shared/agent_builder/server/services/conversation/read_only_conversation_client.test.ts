@@ -35,6 +35,7 @@ describe('createConversationPublicClient', () => {
     publicClient = createConversationPublicClient({
       client: internalClient,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
+      source: 'server_api',
     });
   });
 
@@ -53,11 +54,44 @@ describe('createConversationPublicClient', () => {
       createEmptyConversation({ id: 'conv-1' }),
       createEmptyConversation({ id: 'conv-2' }),
     ].map(({ rounds, ...withoutRounds }) => withoutRounds);
-    internalClient.list.mockResolvedValue(conversations);
+    const listResult = { results: conversations, total: conversations.length };
+    internalClient.list.mockResolvedValue(listResult);
 
     const result = await publicClient.list({ agentId: 'agent-1' });
 
     expect(internalClient.list).toHaveBeenCalledWith({ agentId: 'agent-1' });
+    expect(result).toEqual(listResult);
+  });
+
+  it('delegates search() to the internal conversation client', async () => {
+    const conversations = [createEmptyConversation({ id: 'conv-1' })].map(
+      ({ rounds, ...withoutRounds }) => withoutRounds
+    );
+    const searchResult = { results: conversations, total: conversations.length };
+    internalClient.search.mockResolvedValue(searchResult);
+
+    const options = {
+      query: 'payment',
+      filter: 'attachment_type: alert',
+      sort: { field: 'created_at', order: 'desc' },
+    } as const;
+    const result = await publicClient.search(options);
+
+    expect(internalClient.search).toHaveBeenCalledWith(options);
+    expect(result).toEqual(searchResult);
+  });
+
+  it('delegates bulkGet() to the internal conversation client', async () => {
+    const conversations = new Map(
+      [createEmptyConversation({ id: 'conv-1' }), createEmptyConversation({ id: 'conv-2' })].map(
+        ({ rounds, ...withoutRounds }) => [withoutRounds.id, withoutRounds]
+      )
+    );
+    internalClient.bulkGet.mockResolvedValue(conversations);
+
+    const result = await publicClient.bulkGet(['conv-1', 'conv-2']);
+
+    expect(internalClient.bulkGet).toHaveBeenCalledWith(['conv-1', 'conv-2']);
     expect(result).toEqual(conversations);
   });
 
@@ -75,7 +109,8 @@ describe('createConversationPublicClient', () => {
           agent_id: agentBuilderDefaultAgentId,
           title: DEFAULT_CONVERSATION_TITLE,
           rounds: [],
-        })
+        }),
+        { source: 'server_api' }
       );
     });
 
@@ -87,13 +122,16 @@ describe('createConversationPublicClient', () => {
         accessControl: { access_mode: ConversationAccessControlMode.Private },
       });
 
-      expect(internalClient.create).toHaveBeenCalledWith({
-        agent_id: 'custom-agent',
-        id: 'conv-1',
-        title: 'My chat',
-        access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
-        rounds: [],
-      });
+      expect(internalClient.create).toHaveBeenCalledWith(
+        {
+          agent_id: 'custom-agent',
+          id: 'conv-1',
+          title: 'My chat',
+          access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
+          rounds: [],
+        },
+        { source: 'server_api' }
+      );
     });
 
     it('validates agent access before writing', async () => {
@@ -119,10 +157,53 @@ describe('createConversationPublicClient', () => {
     });
   });
 
-  it('does not expose update, delete, upsertRound, or exists methods', () => {
+  it('binds its source on every write', async () => {
+    internalClient.addCustomEvents.mockResolvedValue([]);
+    internalClient.patchMetadata.mockResolvedValue({
+      conversation: createEmptyConversation({ id: 'conv-1' }),
+      changedFields: ['status'],
+    });
+    internalClient.update.mockResolvedValue(createEmptyConversation({ id: 'conv-1' }));
+    const workflowClient = createConversationPublicClient({
+      client: internalClient,
+      agentRegistry: agentRegistry as unknown as AgentRegistry,
+      source: 'workflow',
+    });
+
+    await workflowClient.addEvents({ conversationId: 'conv-1', events: [] });
+    await workflowClient.patchMetadata('conv-1', { status: 'open' });
+    await workflowClient.update({ id: 'conv-1', title: 'Renamed' });
+
+    expect(internalClient.addCustomEvents).toHaveBeenCalledWith(
+      { id: 'conv-1', events: [] },
+      { source: 'workflow' }
+    );
+    expect(internalClient.patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { status: 'open' },
+      { access: 'owner', source: 'workflow' }
+    );
+    expect(internalClient.update).toHaveBeenCalledWith(
+      { id: 'conv-1', title: 'Renamed' },
+      { access: 'owner', retryOnConflict: true, source: 'workflow' }
+    );
+  });
+
+  it('does not expose delete, upsertRound, or exists methods', () => {
     const clientKeys = Object.keys(publicClient);
-    expect(clientKeys).toEqual(expect.arrayContaining(['get', 'list', 'create']));
-    expect(clientKeys).not.toContain('update');
+    expect(clientKeys).toEqual(
+      expect.arrayContaining([
+        'get',
+        'bulkGet',
+        'list',
+        'search',
+        'create',
+        'addAccessControlEntries',
+        'removeAccessControlEntries',
+        'patchMetadata',
+        'update',
+      ])
+    );
     expect(clientKeys).not.toContain('delete');
     expect(clientKeys).not.toContain('upsertRound');
     expect(clientKeys).not.toContain('exists');

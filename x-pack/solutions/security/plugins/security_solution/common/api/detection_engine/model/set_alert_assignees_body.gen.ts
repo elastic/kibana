@@ -32,7 +32,7 @@ export const SetAlertAssigneesBody = lazySchema(() =>
     /**
      * Details about the assignees to assign and unassign.
      */
-    assignees: AlertAssignees,
+    assignees: AlertAssignees.describe('Details about the assignees to assign and unassign.'),
     ids: AlertIds,
   })
 );

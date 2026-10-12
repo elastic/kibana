@@ -41,6 +41,12 @@ export const SUPPORTS_CLOUD_CONNECTORS_VAR_NAME = 'supports_cloud_connectors';
 // Renamed from supports_cloud_connectors in newer integrations (e.g. elastic/integrations#19828)
 export const SUPPORTS_IDENTITY_FEDERATION_VAR_NAME = 'supports_identity_federation';
 
+// LaunchDarkly kill switch (evaluated via `core.featureFlags`) for AWS identity federation in
+// var_groups: when false, var_group options with `provider: aws` (the aws `identity_federation`
+// credential_type option) are hidden from the package policy form. Default true.
+// Sibling flags for azure/gcp will be added as those packages migrate to var_groups.
+export const AWS_IDENTITY_FEDERATION_ENABLED_FLAG = 'fleet.awsIdentityFederationEnabled';
+
 // OTel Verifier package constants
 export const VERIFIER_PKG_NAME = 'verifier_otel';
 export const VERIFIER_POLICY_TEMPLATE = 'verifierreceiver';

@@ -39,6 +39,7 @@ import {
   getUngroupedReasonMessage,
   formatStepInformation,
 } from './message_utils';
+import { applyPendingCounts, filterPendingConfigsByThreshold } from './queries/helpers';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { getStepInformation, type StepInformation } from './queries/get_step_information';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
@@ -195,7 +196,13 @@ export class StatusRuleExecutor {
         upConfigs: {},
         staleDownConfigs,
         enabledMonitorQueryIds,
-        pendingConfigs: { ...prevPendingConfigs },
+        // No monitors were evaluated this round, so no location can count as a
+        // consecutive pending evaluation. Returning the still-existing (not
+        // deleted/relocated) entries here would skip `applyPendingCounts`,
+        // freezing `pendingCount` while still reporting the pending alert as
+        // active. Dropping them lets that alert recover like it would for a
+        // single disabled monitor among many, and resets the count on resume.
+        pendingConfigs: {},
         stalePendingConfigs,
         maxPeriod,
       };
@@ -221,7 +228,8 @@ export class StatusRuleExecutor {
       logger: this.logger,
     });
 
-    const { downConfigs, upConfigs, pendingConfigs, configStats } = currentStatus;
+    const { downConfigs, upConfigs, configStats } = currentStatus;
+    const pendingConfigs = applyPendingCounts(currentStatus.pendingConfigs, prevPendingConfigs);
 
     this.debug(
       `Found ${Object.keys(downConfigs).length} down configs, ${
@@ -255,6 +263,7 @@ export class StatusRuleExecutor {
 
     return {
       ...currentStatus,
+      pendingConfigs,
       staleDownConfigs,
       stalePendingConfigs,
       maxPeriod,
@@ -338,12 +347,29 @@ export class StatusRuleExecutor {
 
   async schedulePendingAlertPerConfigId({
     pendingConfigs,
+    pendingThreshold,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
-  }) {
+    pendingThreshold: number;
+  }): Promise<AlertPendingStatusConfigs> {
     const pendingConfigsById = getConfigsByIds(pendingConfigs);
+    const configsMeetingThreshold: AlertPendingStatusConfigs = {};
 
     for (const [configId, configs] of pendingConfigsById) {
+      // Gate on the monitor as a whole so a location that hasn't individually
+      // reached the threshold isn't silently dropped from the alert once a
+      // sibling location has — mirrors how down-alerts gate on an aggregate
+      // across all of a monitor's locations and then include all of them.
+      const meetsThreshold = configs.some(
+        (config) => (config.pendingCount ?? 1) >= pendingThreshold
+      );
+      if (!meetsThreshold) {
+        continue;
+      }
+      for (const config of configs) {
+        configsMeetingThreshold[`${config.configId}-${config.locationId}`] = config;
+      }
+
       const alertId = configId;
       const monitorSummary = this.getUngroupedPendingSummary({
         statusConfigs: configs,
@@ -359,24 +385,42 @@ export class StatusRuleExecutor {
         locationIds: configs.map(({ locationId }) => locationId),
       });
     }
+
+    return configsMeetingThreshold;
   }
 
   handlePendingMonitorAlert = async ({
     pendingConfigs,
   }: {
     pendingConfigs: AlertPendingStatusConfigs;
-  }) => {
-    if (this.params.condition?.alertOnNoData) {
-      if (this.params.condition?.groupBy && this.params.condition.groupBy !== 'locationId') {
-        await this.schedulePendingAlertPerConfigId({
-          pendingConfigs,
-        });
-      } else {
-        await this.schedulePendingAlertPerConfigIdPerLocation({
-          pendingConfigs,
-        });
-      }
+  }): Promise<AlertPendingStatusConfigs> => {
+    if (!this.params.condition?.alertOnNoData) {
+      return {};
     }
+
+    const { pendingThreshold } = getConditionType(this.params.condition);
+
+    if (this.params.condition?.groupBy && this.params.condition.groupBy !== 'locationId') {
+      return await this.schedulePendingAlertPerConfigId({
+        pendingConfigs,
+        pendingThreshold,
+      });
+    }
+
+    const configsMeetingThreshold = filterPendingConfigsByThreshold(
+      pendingConfigs,
+      pendingThreshold
+    );
+
+    if (isEmpty(configsMeetingThreshold)) {
+      return {};
+    }
+
+    await this.schedulePendingAlertPerConfigIdPerLocation({
+      pendingConfigs: configsMeetingThreshold,
+    });
+
+    return configsMeetingThreshold;
   };
 
   handleDownMonitorThresholdAlert = async ({
@@ -630,9 +674,13 @@ export class StatusRuleExecutor {
       grouping,
     };
 
+    const { pendingThreshold } = getConditionType(this.params.condition);
+
     // downThreshold and checks are only available for down alerts
     if ('downThreshold' in params) {
       context.downThreshold = params.downThreshold;
+    } else {
+      context.pendingThreshold = pendingThreshold;
     }
 
     if ('statusConfig' in params && 'checks' in params.statusConfig) {
@@ -699,13 +747,20 @@ export class StatusRuleExecutor {
       failedStepNumber,
     };
 
+    const evaluationThreshold = 'downThreshold' in params ? params.downThreshold : pendingThreshold;
+    let evaluationValue: number | undefined;
+    if (!('downThreshold' in params)) {
+      evaluationValue = params.statusConfig.pendingCount ?? 1;
+    }
+
     const alertDocument = getMonitorAlertDocument(
       updatedMonitorSummary,
       locationNames,
       locationIds,
       useLatestChecks,
-      'downThreshold' in params ? params.downThreshold : 1,
-      grouping
+      evaluationThreshold,
+      grouping,
+      evaluationValue
     );
 
     // Update context with step info if available

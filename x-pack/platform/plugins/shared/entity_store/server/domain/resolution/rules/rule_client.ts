@@ -19,6 +19,7 @@ import {
 export interface EffectiveResolutionRule {
   id: ResolutionRuleConfig['id'];
   kind: ResolutionRuleConfig['kind'];
+  description: string;
   managed: true;
   enabled: boolean;
 }
@@ -131,6 +132,7 @@ export class ResolutionRulesClient {
     return {
       id: config.id,
       kind: config.kind,
+      description: config.description,
       managed: true,
       enabled: enabledOverride ?? config.defaultEnabled,
     };

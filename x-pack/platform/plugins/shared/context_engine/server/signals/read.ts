@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   Signal,
   SignalGroup,
+  SignalTag,
   ListSignalGroupsResponse,
   ListSignalsResponse,
 } from '../../common/http_api/signals';
@@ -31,7 +32,7 @@ const SIGNAL_SOURCE_EXCLUDES = ['data.returned.columns'] as const;
 
 interface TagsAggregation {
   tags: {
-    buckets: Array<{ key: string; doc_count: number }>;
+    buckets: Array<{ key: SignalTag; doc_count: number }>;
   };
 }
 
@@ -74,7 +75,7 @@ export const getSignalGroups = async (
  */
 export const getSignalsByTag = async (
   esClient: ElasticsearchClient,
-  { spaceId, tag, from, size }: { spaceId: string; tag: string; from: number; size: number }
+  { spaceId, tag, from, size }: { spaceId: string; tag: SignalTag; from: number; size: number }
 ): Promise<ListSignalsResponse> => {
   const response = await esClient.search<Signal>({
     index: buildSignalsIndexName(spaceId),

@@ -32,6 +32,7 @@ export const createAttachmentListTool = ({
     'List all attachments in the conversation with their metadata. Use this to see what data is available.',
   schema: attachmentListSchema,
   tags: ['attachment'],
+  excludeFromMcp: true,
   handler: async ({ include_deleted: includeDeleted }) => {
     const attachments = includeDeleted ? attachmentManager.getAll() : attachmentManager.getActive();
 

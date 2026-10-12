@@ -7,10 +7,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import { UploadFileButton } from '../../../../../../../common/components';
 import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
@@ -55,7 +52,7 @@ const extractResources = (parsed: unknown): SentinelArmResource[] => {
 export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [resourcesToUpload, setResourcesToUpload] = useState<SentinelArmResource[]>();
-    const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
     const { rulesFileUpload } = useRuleMigrationVendorCopy(MigrationSource.SENTINEL);
 
     const createRules = useCallback(() => {
@@ -116,7 +113,7 @@ export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploa
             <EuiFilePicker
               isInvalid={validationError != null}
               id="rulesFilePicker"
-              ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+              ref={filePickerRef}
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">

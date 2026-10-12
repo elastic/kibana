@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema, queryIntSchema } from './common';
+import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   MAX_SEARCH_LENGTH,
@@ -17,14 +17,14 @@ import {
 } from './constants';
 
 /**
- * Id filter shared by the rule_ids and episode_ids query params.
+ * Id filter shared by the rule_ids and alert_ids query params.
  */
 const idFilterArraySchema = arrayOrSingleSchema(
   z.string().trim().min(1).max(ID_MAX_LENGTH),
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER
 );
 
-export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled', 'dispatch_failed']);
+export const policyExecutionOutcomeSchema = z.enum(['success', 'throttled', 'failure']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
 
 export const dispatchFailureReasonSchema = z.enum([
@@ -32,6 +32,7 @@ export const dispatchFailureReasonSchema = z.enum([
   'workflow_not_found',
   'workflow_disabled',
   'schedule_error',
+  'license_not_supported',
 ]);
 export type DispatchFailureReason = z.infer<typeof dispatchFailureReasonSchema>;
 
@@ -54,46 +55,53 @@ const sharedFilterFields = {
   rule_ids: idFilterArraySchema
     .optional()
     .describe(
-      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.'
+      'Explicit rule filter. Narrows events to those referencing at least one of the provided rule IDs. Also unions with the search filter if both are provided.'
     ),
-  outcome: policyExecutionOutcomeFilterSchema
+  outcomes: policyExecutionOutcomeFilterSchema
     .optional()
     .describe(
-      'Outcome filter. When omitted matches all outcomes. Pass one or more of "dispatched", "throttled", "dispatch_failed" to narrow.'
+      'Outcome filter. When omitted matches all outcomes. Pass one or more of "success", "throttled", "failure" to narrow.'
     ),
 };
 
 export const listPolicyExecutionHistoryRequestSchema = z
   .object({
     page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
-      .optional()
+      .default(1)
       .describe('Page number (1-indexed). Defaults to 1.'),
-    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
-      .optional()
-      .describe(
-        `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
-      ),
-    start_date: z.iso
+    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
+      .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
+      .describe(`Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}.`),
+    from: z.iso
       .datetime()
       .optional()
       .describe(
-        'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
+        'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
       ),
-    episode_ids: idFilterArraySchema
+    to: z.iso
+      .datetime()
+      .optional()
+      .describe('Inclusive ISO datetime upper bound on the event timestamp.'),
+    alert_ids: idFilterArraySchema
       .optional()
       .describe(
-        'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'
+        'Alert filter. Narrows events to those referencing at least one of the provided alert IDs.'
       ),
+    sort_field: z
+      .enum(['dispatched_at'])
+      .default('dispatched_at')
+      .describe('Sort field. Defaults to "dispatched_at".'),
+    sort_order: z
+      .enum(['asc', 'desc'])
+      .default('desc')
+      .describe('Sort direction. Defaults to "desc".'),
     ...sharedFilterFields,
   })
-  .refine(
-    ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
-      page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW,
-    {
-      message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
-      path: ['page'],
-    }
-  );
+  .strict()
+  .refine(({ page, per_page: perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
+    message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+    path: ['page'],
+  });
 
 /**
  * Request-side params for the list endpoint (snake_case API contract). All
@@ -106,57 +114,67 @@ export type ListPolicyExecutionHistoryRequest = z.infer<
 
 export const namedRefSchema = z.object({
   id: z.string(),
-  name: z.string().nullable().optional(),
+  name: z
+    .string()
+    .optional()
+    .describe('Omitted when the referenced resource could not be resolved.'),
 });
 
 // Defensive upper bounds to keep response payloads sane.
 const MAX_WORKFLOWS_PER_ITEM = 100;
 // Cap for the embedded `rules` array in each item. A broad Action Policy can
 // emit one event referencing thousands of rules; the response only carries a
-// bounded sample and clients rely on `total_rule_count` for the true count.
+// bounded sample and clients rely on `rule_count` for the true count.
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
-// Cap for the embedded `episodes` array in each item.
-export const MAX_EMBEDDED_EPISODES_PER_ITEM = 50;
+// Cap for the embedded `alerts` array in each item.
+export const MAX_EMBEDDED_ALERTS_PER_ITEM = 50;
 
-const episodeRefSchema = z.object({ id: z.string() });
+const alertRefSchema = z.object({ id: z.string() });
 
 export const policyExecutionHistoryItemSchema = z
   .object({
-    dispatched_at: z.string(),
+    dispatched_at: z.iso.datetime(),
     policy: namedRefSchema,
     outcome: policyExecutionOutcomeSchema,
-    episode_count: z.number(),
-    episodes: z
-      .array(episodeRefSchema)
-      .max(MAX_EMBEDDED_EPISODES_PER_ITEM)
-      .optional()
+    alert_count: z.number(),
+    alerts: z
+      .array(alertRefSchema)
+      .max(MAX_EMBEDDED_ALERTS_PER_ITEM)
       .describe(
-        'Episode ids referenced by this event, bounded to MAX_EMBEDDED_EPISODES_PER_ITEM. Use `episode_count` for the true total.'
+        `Alert IDs referenced by this event, bounded to ${MAX_EMBEDDED_ALERTS_PER_ITEM}. Empty when the event references no alerts. Use \`alert_count\` for the true total.`
       ),
     action_group_count: z.number(),
     rules: z
       .array(namedRefSchema)
       .max(MAX_EMBEDDED_RULES_PER_ITEM)
       .describe(
-        'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.'
+        `Rules referenced by this event, bounded to ${MAX_EMBEDDED_RULES_PER_ITEM}. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use \`rule_count\` for the full count.`
       ),
-    total_rule_count: z
+    rule_count: z
       .number()
       .describe(
-        'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
+        'Number of rules referenced by this event after search or rule-filter narrowing. Unlike `total` on a list response, this is an exact count and it can exceed `rules.length` when the embedded array is truncated to the cap.'
       ),
     workflows: z.array(namedRefSchema).max(MAX_WORKFLOWS_PER_ITEM),
     failure_reason: dispatchFailureReasonSchema.optional(),
-    error: z.object({ message: z.string() }).optional(),
+    error: z
+      .object({
+        message: z.string(),
+        stack_trace: z.string().optional().describe('Omitted when the source recorded no trace.'),
+      })
+      .optional()
+      .describe('Failure details. Omitted when the dispatch did not fail.'),
   })
   .meta({ id: 'alerting_policy_execution_history_item' });
 
 export type PolicyExecutionHistoryItem = z.infer<typeof policyExecutionHistoryItemSchema>;
 
 export const searchMatchCountsSchema = z.object({
-  policies: z.number().describe('Total policies matching the search.'),
-  rules: z.number().describe('Total rules matching the search.'),
-  cap: z.number().describe('Maximum number of policy/rule ids the server uses as a filter.'),
+  policies: z.number().describe(`Policies matching the search. ${ESTIMATED_COUNT_NOTE}`),
+  rules: z.number().describe(`Rules matching the search. ${ESTIMATED_COUNT_NOTE}`),
+  is_truncated: z
+    .boolean()
+    .describe('True when the server filter cap was reached and results may be truncated.'),
 });
 export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 
@@ -164,13 +182,16 @@ export const listPolicyExecutionHistoryResponseSchema = z
   .object({
     items: z.array(policyExecutionHistoryItemSchema),
     page: z.number().int().min(1),
-    // Allows 0 for count-only reads (per_page=0), unlike the rule executions response.
-    per_page: z.number().int().min(0),
-    total_events: z.number().int().nonnegative(),
+    per_page: z.number().int().min(1),
+    total: z
+      .number()
+      .int()
+      .nonnegative()
+      .describe(`The number of action policy events matching the query. ${ESTIMATED_COUNT_NOTE}`),
     search_matches: searchMatchCountsSchema
-      .nullable()
+      .optional()
       .describe(
-        'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
+        'Per-type match counts for the active search. Omitted when no search was provided. When is_truncated is true the server ID filter was capped and the result may be truncated.'
       ),
   })
   .meta({ id: 'alerting_policy_execution_history_response' });

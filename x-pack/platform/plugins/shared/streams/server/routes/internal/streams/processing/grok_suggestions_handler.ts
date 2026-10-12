@@ -13,7 +13,7 @@ import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { isOtelStream } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
 import {
@@ -46,11 +46,11 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
 }
 
 export const processingGrokSuggestionsSchema = z.object({
-  path: z.object({ name: z.string() }),
+  path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   body: z.object({
-    connector_id: z.string(),
-    field_name: z.string(),
-    sample_messages: z.array(z.string()),
+    connector_id: z.string().max(256),
+    field_name: z.string().max(256),
+    sample_messages: z.array(z.string().max(10000)).max(500),
   }),
 }) satisfies z.Schema<ProcessingGrokSuggestionsParams>;
 
