@@ -16,20 +16,43 @@ const CIRCLE_SIZE_PX = 32;
 
 export type GroupedAttachmentRowAction =
   | { kind: 'page'; href: string }
-  | { kind: 'flyout'; onClick: () => void };
+  | { kind: 'flyout'; onClick: () => void }
+  | { kind: 'expand'; isExpanded: boolean; onToggle: () => void };
 
 export interface GroupedAttachmentRowProps {
   iconType: IconType;
   iconColor: 'danger' | 'subdued';
   title: string;
   subtitle?: string;
-  action: GroupedAttachmentRowAction;
+  /** Absent, the row is static: no hover, no affordance, nothing to click. */
+  action?: GroupedAttachmentRowAction;
+  /** Rendered under the row's control, inside the same list item. */
   children?: React.ReactNode;
+  'data-test-subj'?: string;
 }
+
+const affordanceIconType = (action: GroupedAttachmentRowAction): IconType => {
+  switch (action.kind) {
+    case 'page':
+      return 'external';
+    case 'flyout':
+      return 'maximize';
+    case 'expand':
+      return action.isExpanded ? 'arrowUp' : 'arrowDown';
+  }
+};
 
 /** One row of a flyout grouped attachment card. */
 export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
-  ({ iconType, iconColor, title, subtitle, action, children }) => {
+  ({
+    iconType,
+    iconColor,
+    title,
+    subtitle,
+    action,
+    children,
+    'data-test-subj': dataTestSubj = 'groupedAttachmentRow',
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     const [titleElement, setTitleElement] = useState<HTMLSpanElement | null>(null);
@@ -48,11 +71,16 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
       color: inherit;
       text-align: start;
       text-decoration: none;
+    `;
+
+    // The expand caret stays visible so a collapsed body is discoverable; the open-elsewhere
+    // affordances only show on hover, as the row title already reads as the link.
+    const interactiveStyles = css`
       cursor: pointer;
       transition: background 0.15s ease;
 
       .groupedAttachmentRowAffordance {
-        opacity: 0;
+        opacity: ${action?.kind === 'expand' ? 1 : 0};
       }
 
       &:hover,
@@ -137,33 +165,58 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
             </span>
           ) : null}
         </span>
-        <EuiIcon
-          className="groupedAttachmentRowAffordance"
-          type={action.kind === 'page' ? 'external' : 'maximize'}
-          color="subdued"
-          aria-hidden={true}
-          data-test-subj="groupedAttachmentRowAffordance"
-        />
+        {action ? (
+          <EuiIcon
+            className="groupedAttachmentRowAffordance"
+            type={affordanceIconType(action)}
+            color="subdued"
+            aria-hidden={true}
+            data-test-subj="groupedAttachmentRowAffordance"
+          />
+        ) : null}
       </>
     );
 
+    const renderControl = (): React.ReactNode => {
+      if (!action) {
+        return <div css={rowStyles}>{content}</div>;
+      }
+      switch (action.kind) {
+        case 'page':
+          return (
+            <a
+              href={action.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={openInNewTabAriaLabel(title)}
+              css={[rowStyles, interactiveStyles]}
+            >
+              {content}
+            </a>
+          );
+        case 'flyout':
+          return (
+            <button type="button" onClick={action.onClick} css={[rowStyles, interactiveStyles]}>
+              {content}
+            </button>
+          );
+        case 'expand':
+          return (
+            <button
+              type="button"
+              onClick={action.onToggle}
+              aria-expanded={action.isExpanded}
+              css={[rowStyles, interactiveStyles]}
+            >
+              {content}
+            </button>
+          );
+      }
+    };
+
     return (
-      <li data-test-subj="groupedAttachmentRow">
-        {action.kind === 'page' ? (
-          <a
-            href={action.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={openInNewTabAriaLabel(title)}
-            css={rowStyles}
-          >
-            {content}
-          </a>
-        ) : (
-          <button type="button" onClick={action.onClick} css={rowStyles}>
-            {content}
-          </button>
-        )}
+      <li data-test-subj={dataTestSubj}>
+        {renderControl()}
         {children}
       </li>
     );

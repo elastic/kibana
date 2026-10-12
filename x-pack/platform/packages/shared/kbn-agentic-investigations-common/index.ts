@@ -72,11 +72,13 @@ export {
 export {
   FlyoutGroupedAttachments,
   createFlyoutGroupedAttachmentsRegistry,
+  GroupedAttachmentList,
   GroupedAttachmentRow,
   GroupedAttachmentsSection,
   type FlyoutGroupedAttachmentDefinition,
   type FlyoutGroupedAttachmentRendererProps,
   type FlyoutGroupedAttachmentsRegistry,
+  type GroupedAttachmentListProps,
   type GroupedAttachmentRowAction,
   type GroupedAttachmentRowProps,
   type GroupedAttachmentsSectionProps,

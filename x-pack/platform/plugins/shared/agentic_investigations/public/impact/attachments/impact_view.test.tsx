@@ -73,13 +73,38 @@ describe('ImpactView', () => {
       ],
     });
 
-    expect(screen.getAllByTestId('investigationImpactEntityRow')).toHaveLength(2);
+    const rows = screen.getAllByTestId('investigationImpactEntityRow');
+    expect(rows).toHaveLength(2);
     expect(screen.getByText('fin-dc-01')).toBeInTheDocument();
-    expect(screen.getByText('· host')).toBeInTheDocument();
+    expect(screen.getByText('host')).toBeInTheDocument();
     expect(screen.getByText('user-1')).toBeInTheDocument();
-    expect(screen.getByText('· user')).toBeInTheDocument();
-    expect(screen.queryByTestId('investigationImpactEntityFlyout')).not.toBeInTheDocument();
+    expect(screen.getByText('user')).toBeInTheDocument();
+    // Plain ids open nothing, so the rows are static.
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationImpactSummary')).not.toBeInTheDocument();
+  });
+
+  it('styles each entity like a grouped attachment row, with the entity store icon', () => {
+    renderView({
+      ...base,
+      entities: [
+        { id: 'host-1', name: 'fin-dc-01', type: 'host' },
+        { id: 'user:jsmith', name: 'jsmith' },
+        { id: 'svc-1', name: 'checkout', type: 'service' },
+        { id: 'thing-1', name: 'thing' },
+      ],
+    });
+
+    const rows = screen.getAllByTestId('investigationImpactEntityRow');
+    const iconOf = (row: HTMLElement) =>
+      row.querySelector('[data-euiicon-type]')?.getAttribute('data-euiicon-type');
+    expect(rows.map(iconOf)).toEqual(['storage', 'user', 'vectorTriangle', 'globe']);
+    expect(screen.getAllByTestId('groupedAttachmentRowTitle').map((el) => el.textContent)).toEqual([
+      'fin-dc-01',
+      'jsmith',
+      'checkout',
+      'thing',
+    ]);
   });
 
   it('opens the entity flyout when a row is clicked', () => {
@@ -94,9 +119,13 @@ describe('ImpactView', () => {
       open
     );
 
-    fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
+    fireEvent.click(screen.getByRole('button', { name: /cfo@corp/ }));
 
     expect(open).toHaveBeenCalledWith({ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' });
+    expect(screen.getByTestId('groupedAttachmentRowAffordance')).toHaveAttribute(
+      'data-euiicon-type',
+      'maximize'
+    );
   });
 
   it('leaves a named entity as text when it is not an entity-store id', () => {
@@ -111,8 +140,8 @@ describe('ImpactView', () => {
       open
     );
 
-    expect(screen.queryByTestId('investigationImpactEntityFlyout')).not.toBeInTheDocument();
-    expect(screen.getByText('· service')).toBeInTheDocument();
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByText('service')).toBeInTheDocument();
     expect(open).not.toHaveBeenCalled();
   });
 
@@ -127,14 +156,20 @@ describe('ImpactView', () => {
     });
 
     expect(screen.getAllByTestId('investigationImpactEntityRow')).toHaveLength(2);
-    expect(screen.queryByText('Latency doubled.')).not.toBeVisible();
+    expect(screen.queryByText('Latency doubled.')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('button', { name: /payments/ }));
+    const row = screen.getByRole('button', { name: /payments/ });
+    expect(row).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(row);
 
+    expect(row).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getByText('Latency doubled.')).toBeVisible();
+
+    fireEvent.click(row);
+    expect(screen.queryByText('Latency doubled.')).not.toBeInTheDocument();
   });
 
-  it('puts the caret before an entity-store entity with evidence, and opens it from its name', () => {
+  it('expands an entity-store entity with evidence, and opens the flyout from its body', () => {
     const open = jest.fn();
 
     renderView(
@@ -153,9 +188,11 @@ describe('ImpactView', () => {
       open
     );
 
-    const accordion = screen.getByTestId('investigationImpactEntityAccordion');
-    expect(accordion).toContainElement(screen.getByTestId('investigationImpactEntityFlyout'));
-    expect(screen.queryByText('Evidence')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationImpactEntityFlyout')).not.toBeInTheDocument();
+    expect(screen.queryByText('Errors tripled.')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+    expect(screen.getByText('Errors tripled.')).toBeVisible();
 
     fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
     expect(open).toHaveBeenCalledWith({
@@ -163,10 +200,6 @@ describe('ImpactView', () => {
       name: 'orders-api',
       type: 'service',
     });
-    expect(screen.queryByText('Errors tripled.')).not.toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { expanded: false }));
-    expect(screen.getByText('Errors tripled.')).toBeVisible();
   });
 
   it('keeps the inline render to entity badges', () => {
