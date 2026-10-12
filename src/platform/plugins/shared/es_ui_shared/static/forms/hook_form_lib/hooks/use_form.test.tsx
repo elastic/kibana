@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { render } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, getRandomString, TestBed } from '../shared_imports';
