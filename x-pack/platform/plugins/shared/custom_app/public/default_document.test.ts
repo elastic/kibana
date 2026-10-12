@@ -22,8 +22,11 @@ describe('createDefaultDocument', () => {
     expect(Parser.parse(query).errors).toEqual([]);
   });
 
-  it('parameterises the detail query with the state key the table row click fills', () => {
-    expect(getESQLQueryVariables(SERVICES_QUERY)).toEqual([]);
+  it('parameterises the queries with state keys the document declares', () => {
+    expect(getESQLQueryVariables(SERVICES_QUERY).sort()).toEqual(['minErrors', 'nameFilter']);
     expect(getESQLQueryVariables(SERVICE_DETAIL_QUERY)).toEqual(['service']);
+
+    const declared = Object.keys(createDefaultDocument().state);
+    expect(declared).toEqual(expect.arrayContaining(['minErrors', 'nameFilter', 'service']));
   });
 });

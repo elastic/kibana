@@ -38,8 +38,24 @@ export const getNodeSourceId = (node: AppNode): string | undefined =>
     ? node.source
     : undefined;
 
+/** The state key an input node reads and writes, if it is one. */
+export const getNodeBinding = (node: AppNode): string | undefined =>
+  node.type === 'select' || node.type === 'button_group' || node.type === 'search'
+    ? node.bind
+    : undefined;
+
 /** The actions a node can run, with the event that runs them. */
 export const getNodeActions = (
   node: AppNode
-): ReadonlyArray<{ event: string; actions: readonly Action[] }> =>
-  node.type === 'table' ? [{ event: 'onRowClick', actions: node.onRowClick }] : [];
+): ReadonlyArray<{ event: string; actions: readonly Action[] }> => {
+  switch (node.type) {
+    case 'table':
+      return [{ event: 'onRowClick', actions: node.onRowClick }];
+    case 'select':
+    case 'button_group':
+    case 'search':
+      return [{ event: 'onChange', actions: node.onChange }];
+    default:
+      return [];
+  }
+};

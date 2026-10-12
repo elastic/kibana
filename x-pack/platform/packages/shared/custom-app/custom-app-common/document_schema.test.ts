@@ -388,6 +388,101 @@ describe('table, flyout and key_value nodes', () => {
   });
 });
 
+describe('input nodes', () => {
+  const inputDoc = (input: Record<string, unknown>, state: Record<string, unknown> = {}) => ({
+    state: {
+      severity: { type: 'string', default: 'all' },
+      limit: { type: 'number', default: 1 },
+      ...state,
+    },
+    root: { id: 'input', label: 'Severity', bind: 'severity', ...input },
+  });
+
+  const select = (extra: Record<string, unknown> = {}) =>
+    inputDoc({
+      type: 'select',
+      options: [{ value: 'all', label: 'All' }, { value: 'high' }],
+      ...extra,
+    });
+
+  it('parses a select, a button group and a search bound to a string key', () => {
+    const select_ = appDocumentSchema.parse(select());
+    expect(select_.root).toMatchObject({ type: 'select', bind: 'severity', onChange: [] });
+
+    expect(
+      issuesOf(inputDoc({ type: 'button_group', options: [{ value: 'a' }, { value: 'b' }] }))
+    ).toEqual([]);
+    expect(issuesOf(inputDoc({ type: 'search', placeholder: 'Find a service' }))).toEqual([]);
+  });
+
+  it.each(['select', 'button_group', 'search'])(
+    'rejects a %s bound to an undeclared key',
+    (type) => {
+      expect(issuesOf(inputDoc({ type, bind: 'ghost', options: [{ value: 'a' }] }))).toEqual([
+        'Node "input" binds unknown state key "ghost"',
+      ]);
+    }
+  );
+
+  it.each(['select', 'button_group', 'search'])(
+    'rejects a %s bound to a non-string key',
+    (type) => {
+      expect(issuesOf(inputDoc({ type, bind: 'limit', options: [{ value: 'a' }] }))).toEqual([
+        'Node "input" binds state key "limit" (number); an input needs a string key',
+      ]);
+    }
+  );
+
+  it('requires at least one option and enforces the option limits', () => {
+    expect(issuesOf(select({ options: [] }))).not.toEqual([]);
+
+    const options = (count: number) =>
+      Array.from({ length: count }, (_, i) => ({ value: `v${i}` }));
+    expect(issuesOf(select({ options: options(50) }))).toEqual([]);
+    expect(issuesOf(select({ options: options(51) }))).not.toEqual([]);
+    expect(issuesOf(inputDoc({ type: 'button_group', options: options(10) }))).toEqual([]);
+    expect(issuesOf(inputDoc({ type: 'button_group', options: options(11) }))).not.toEqual([]);
+  });
+
+  it('rejects an option listed twice', () => {
+    expect(issuesOf(select({ options: [{ value: 'a' }, { value: 'b' }, { value: 'a' }] }))).toEqual(
+      ['Node "input" has the option "a" more than once']
+    );
+  });
+
+  describe('onChange', () => {
+    it('accepts fromInput there, and other actions after the bound write', () => {
+      expect(
+        issuesOf(
+          select({
+            onChange: [
+              { type: 'setState', key: 'severity', value: { fromInput: true } },
+              { type: 'closeFlyout' },
+            ],
+          })
+        )
+      ).toEqual([]);
+    });
+
+    it('rejects fromColumn, which only a table row can supply', () => {
+      expect(
+        issuesOf(
+          select({ onChange: [{ type: 'setState', key: 'severity', value: { fromColumn: 'a' } }] })
+        )
+      ).toEqual(['Node "input": fromColumn is not valid in onChange']);
+    });
+
+    it('rejects an undeclared key and a literal of the wrong type', () => {
+      expect(
+        issuesOf(select({ onChange: [{ type: 'setState', key: 'ghost', value: 'x' }] }))
+      ).toEqual(['Node "input" sets unknown state key "ghost"']);
+      expect(
+        issuesOf(select({ onChange: [{ type: 'setState', key: 'limit', value: 'x' }] }))
+      ).toEqual(['Node "input" sets state key "limit" (number) to a string']);
+    });
+  });
+});
+
 describe('customAppStateSchema', () => {
   const document = { root: { type: 'text', id: 'a', text: 'hi' } };
 

@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 import {
   CUSTOM_APP_STATE_VERSION,
   MAX_ACTIONS_PER_EVENT,
+  MAX_BUTTON_GROUP_OPTIONS,
+  MAX_INPUT_OPTIONS,
   MAX_CHILDREN_PER_NODE,
   MAX_HEADING_LENGTH,
   MAX_KEY_VALUE_FIELDS,
@@ -131,6 +133,40 @@ const tableNodeSchema = z.object({
   onRowClick: actionsSchema.default([]),
 });
 
+const inputOptionSchema = z.object({
+  value: z.string().max(MAX_STATE_STRING_LENGTH),
+  label: z.string().max(MAX_HEADING_LENGTH).optional(),
+});
+
+/**
+ * Inputs write the state key named by `bind`, then run `onChange`, where `fromInput` is the
+ * value just entered. Every input is bound to a string key.
+ */
+const inputFields = {
+  id: nodeIdSchema,
+  label: z.string().max(MAX_HEADING_LENGTH),
+  bind: stateKeySchema,
+  onChange: actionsSchema.default([]),
+};
+
+const selectNodeSchema = z.object({
+  type: z.literal('select'),
+  ...inputFields,
+  options: z.array(inputOptionSchema).min(1).max(MAX_INPUT_OPTIONS),
+});
+
+const buttonGroupNodeSchema = z.object({
+  type: z.literal('button_group'),
+  ...inputFields,
+  options: z.array(inputOptionSchema).min(1).max(MAX_BUTTON_GROUP_OPTIONS),
+});
+
+const searchNodeSchema = z.object({
+  type: z.literal('search'),
+  ...inputFields,
+  placeholder: z.string().max(MAX_HEADING_LENGTH).optional(),
+});
+
 const keyValueNodeSchema = z.object({
   type: z.literal('key_value'),
   id: nodeIdSchema,
@@ -159,7 +195,10 @@ type LeafNode =
   | z.output<typeof calloutNodeSchema>
   | z.output<typeof statNodeSchema>
   | z.output<typeof tableNodeSchema>
-  | z.output<typeof keyValueNodeSchema>;
+  | z.output<typeof keyValueNodeSchema>
+  | z.output<typeof selectNodeSchema>
+  | z.output<typeof buttonGroupNodeSchema>
+  | z.output<typeof searchNodeSchema>;
 
 type StackNode = z.output<z.ZodObject<typeof stackFields>> & { children: AppNode[] };
 type FlyoutNode = z.output<z.ZodObject<typeof flyoutFields>> & { children: AppNode[] };
@@ -194,6 +233,9 @@ export const nodeSchema = z.discriminatedUnion('type', [
   statNodeSchema,
   tableNodeSchema,
   keyValueNodeSchema,
+  selectNodeSchema,
+  buttonGroupNodeSchema,
+  searchNodeSchema,
   stackNodeSchema,
   flyoutNodeSchema,
 ]) satisfies z.ZodType<AppNode>;

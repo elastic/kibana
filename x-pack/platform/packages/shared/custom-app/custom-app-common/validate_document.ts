@@ -9,7 +9,13 @@ import type { z } from '@kbn/zod/v4';
 import { MAX_DATA_SOURCES, MAX_NODE_COUNT, MAX_NODE_DEPTH, MAX_STATE_KEYS } from './constants';
 import type { AppNode, StateDeclaration } from './document_schema';
 import { findStateReferences, hasMalformedReference } from './interpolation';
-import { getInterpolatedText, getNodeActions, getNodeChildren, getNodeSourceId } from './node_tree';
+import {
+  getInterpolatedText,
+  getNodeActions,
+  getNodeBinding,
+  getNodeChildren,
+  getNodeSourceId,
+} from './node_tree';
 
 interface DocumentToValidate {
   state: Record<string, StateDeclaration>;
@@ -20,6 +26,7 @@ interface DocumentToValidate {
 /** Where each action's `fromColumn` and `fromInput` values make sense. */
 const ACTION_VALUE_SOURCES: Record<string, { fromColumn: boolean; fromInput: boolean }> = {
   onRowClick: { fromColumn: true, fromInput: false },
+  onChange: { fromColumn: false, fromInput: true },
 };
 
 const collectNodes = (
@@ -88,6 +95,26 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
     const sourceId = getNodeSourceId(node);
     if (sourceId !== undefined && !(sourceId in dataSources)) {
       issue(`Node "${node.id}" refers to unknown data source "${sourceId}"`);
+    }
+
+    const binding = getNodeBinding(node);
+    if (binding !== undefined) {
+      const declaration = state[binding];
+      if (!declaration) {
+        issue(`Node "${node.id}" binds unknown state key "${binding}"`);
+      } else if (declaration.type !== 'string') {
+        issue(
+          `Node "${node.id}" binds state key "${binding}" (${declaration.type}); an input needs a string key`
+        );
+      }
+    }
+
+    if (node.type === 'select' || node.type === 'button_group') {
+      const seen = new Set<string>();
+      node.options.forEach(({ value }) => {
+        if (seen.has(value)) issue(`Node "${node.id}" has the option "${value}" more than once`);
+        seen.add(value);
+      });
     }
 
     getInterpolatedText(node).forEach(({ prop, text }) => {

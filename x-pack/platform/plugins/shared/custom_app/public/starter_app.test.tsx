@@ -20,12 +20,17 @@ const SERVICES: ReadonlyArray<[string, number]> = [
 /** Answers the starter document's two queries the way Elasticsearch would. */
 const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (source, { state }) => {
   if (source.query === SERVICES_QUERY) {
+    const needle = String(state.nameFilter);
+    const minimum = Number(state.minErrors);
+    const matching = SERVICES.filter(
+      ([service, errors]) => service.includes(needle) && errors >= minimum
+    );
     return {
       columns: [
         { name: 'service', type: 'keyword' },
         { name: 'errors', type: 'integer' },
       ],
-      rows: SERVICES.map(([service, errors]) => [service, errors]),
+      rows: matching.map(([service, errors]) => [service, errors]),
     } satisfies SourceData;
   }
   if (source.query === SERVICE_DETAIL_QUERY) {
@@ -42,6 +47,8 @@ const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async (sour
   throw new Error(`Unexpected query: ${source.query}`);
 });
 
+// Kibana's Jest setup gives every generated id the same value, so with two form rows on the
+// page their labels cannot be told apart; the select is the only combobox, so find it by role.
 const queriesRun = () => runQuery.mock.calls.map(([source]) => source.query);
 
 describe('the starter app', () => {
@@ -64,7 +71,7 @@ describe('the starter app', () => {
     expect(await screen.findByRole('heading', { name: 'Service cart' })).toBeInTheDocument();
     expect(await screen.findByText('cart-team')).toBeInTheDocument();
     const detailRun = runQuery.mock.calls.find(([source]) => source.query === SERVICE_DETAIL_QUERY);
-    expect(detailRun?.[1].state).toEqual({ service: 'cart' });
+    expect(detailRun?.[1].state).toMatchObject({ service: 'cart' });
   });
 
   it('shows another service when another row is picked after closing', async () => {
@@ -89,5 +96,56 @@ describe('the starter app', () => {
     await screen.findByText('checkout-team');
 
     expect(queriesRun().filter((query) => query === SERVICES_QUERY)).toHaveLength(1);
+  });
+
+  describe('filters', () => {
+    const servicesRuns = () => queriesRun().filter((query) => query === SERVICES_QUERY).length;
+
+    it('narrows the list by name, and runs only the services query again', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+      await screen.findByText('checkout');
+
+      await userEvent.type(screen.getByRole('searchbox', { name: 'Service name' }), 'che{Enter}');
+
+      await waitFor(() => expect(screen.queryByText('cart')).not.toBeInTheDocument());
+      expect(screen.getByText('checkout')).toBeInTheDocument();
+      expect(screen.queryByText('search')).not.toBeInTheDocument();
+      expect(servicesRuns()).toBe(2);
+      expect(queriesRun()).not.toContain(SERVICE_DETAIL_QUERY);
+    });
+
+    it('narrows the list by the minimum number of errors', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+      await screen.findByText('cart');
+
+      await userEvent.selectOptions(screen.getByRole('combobox'), '10');
+
+      await waitFor(() => expect(screen.queryByText('cart')).not.toBeInTheDocument());
+      expect(screen.getByText('checkout')).toBeInTheDocument();
+      expect(screen.getByText('search')).toBeInTheDocument();
+      expect(servicesRuns()).toBe(2);
+    });
+
+    it('does not run the services query again for a selection that is not a filter', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+
+      await userEvent.click(await screen.findByRole('button', { name: 'cart' }));
+      await screen.findByText('cart-team');
+
+      expect(servicesRuns()).toBe(1);
+    });
+
+    it('keeps the filters when a service is picked, and uses both in their own queries', async () => {
+      await renderApp(createDefaultDocument(), runQuery);
+      await screen.findByText('cart');
+      await userEvent.selectOptions(screen.getByRole('combobox'), '10');
+      await waitFor(() => expect(screen.queryByText('cart')).not.toBeInTheDocument());
+
+      await userEvent.click(screen.getByRole('button', { name: 'search' }));
+      await screen.findByText('search-team');
+
+      const servicesRun = runQuery.mock.calls.filter(([source]) => source.query === SERVICES_QUERY);
+      expect(servicesRun[servicesRun.length - 1][1].state).toMatchObject({ minErrors: '10' });
+    });
   });
 });

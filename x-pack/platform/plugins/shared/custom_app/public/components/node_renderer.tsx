@@ -16,8 +16,11 @@ import {
   KbnWarningCallout,
 } from '@kbn/ui-callout';
 import { useStateValues } from '../runtime/app_runtime_context';
+import { ButtonGroupNode } from './button_group_node';
 import { FlyoutNode } from './flyout_node';
 import { KeyValueNode } from './key_value_node';
+import { SearchNode } from './search_node';
+import { SelectNode } from './select_node';
 import { StatNode } from './stat_node';
 import { TableNode } from './table_node';
 
@@ -70,6 +73,12 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
       return <TableNode node={node} />;
     case 'key_value':
       return <KeyValueNode node={node} />;
+    case 'select':
+      return <SelectNode node={node} />;
+    case 'button_group':
+      return <ButtonGroupNode node={node} />;
+    case 'search':
+      return <SearchNode node={node} />;
     case 'flyout':
       return (
         <FlyoutNode node={node}>

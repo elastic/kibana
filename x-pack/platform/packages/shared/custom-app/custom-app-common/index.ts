@@ -33,5 +33,11 @@ export {
   interpolate,
   type StateValue,
 } from './interpolation';
-export { getInterpolatedText, getNodeActions, getNodeChildren, getNodeSourceId } from './node_tree';
+export {
+  getInterpolatedText,
+  getNodeActions,
+  getNodeBinding,
+  getNodeChildren,
+  getNodeSourceId,
+} from './node_tree';
 export { getStateDefaults } from './state_defaults';

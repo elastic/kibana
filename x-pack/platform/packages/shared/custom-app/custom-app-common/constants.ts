@@ -27,3 +27,5 @@ export const MAX_KEY_VALUE_FIELDS = 50;
 
 /** ES|QL reserves these parameter names for the query's time range. */
 export const RESERVED_STATE_KEYS: readonly string[] = ['_tstart', '_tend'];
+export const MAX_INPUT_OPTIONS = 50;
+export const MAX_BUTTON_GROUP_OPTIONS = 10;

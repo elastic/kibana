@@ -16,6 +16,7 @@ const SERVICES = `ROW data = ["checkout:12", "cart:3", "search:27", "payments:5"
 | EVAL errors = TO_INTEGER(errors)`;
 
 export const SERVICES_QUERY = `${SERVICES}
+| WHERE CONTAINS(service, ?nameFilter) AND errors >= TO_INTEGER(?minErrors)
 | KEEP service, errors
 | SORT errors DESC`;
 
@@ -26,7 +27,11 @@ export const SERVICE_DETAIL_QUERY = `${SERVICES}
 
 /** The starter content of a newly added panel. */
 export const createDefaultDocument = (): AppDocument => ({
-  state: { service: { type: 'string', default: '' } },
+  state: {
+    service: { type: 'string', default: '' },
+    nameFilter: { type: 'string', default: '' },
+    minErrors: { type: 'string', default: '0' },
+  },
   dataSources: {
     services: { type: 'esql', query: SERVICES_QUERY },
     serviceDetail: { type: 'esql', query: SERVICE_DETAIL_QUERY },
@@ -49,8 +54,58 @@ export const createDefaultDocument = (): AppDocument => ({
         type: 'text',
         id: 'intro',
         text: i18n.translate('xpack.customApp.defaultDocument.intro', {
-          defaultMessage: 'Select a service to see its details. Editing is coming soon.',
+          defaultMessage:
+            'Filter the services, then select one to see its details. Editing is coming soon.',
         }),
+      },
+      {
+        type: 'stack',
+        id: 'filters',
+        direction: 'horizontal',
+        gap: 'm',
+        children: [
+          {
+            type: 'search',
+            id: 'name-filter',
+            label: i18n.translate('xpack.customApp.defaultDocument.nameFilterLabel', {
+              defaultMessage: 'Service name',
+            }),
+            placeholder: i18n.translate('xpack.customApp.defaultDocument.nameFilterPlaceholder', {
+              defaultMessage: 'Search services',
+            }),
+            bind: 'nameFilter',
+            onChange: [],
+          },
+          {
+            type: 'select',
+            id: 'min-errors',
+            label: i18n.translate('xpack.customApp.defaultDocument.minErrorsLabel', {
+              defaultMessage: 'Errors',
+            }),
+            bind: 'minErrors',
+            options: [
+              {
+                value: '0',
+                label: i18n.translate('xpack.customApp.defaultDocument.minErrorsAny', {
+                  defaultMessage: 'Any',
+                }),
+              },
+              {
+                value: '10',
+                label: i18n.translate('xpack.customApp.defaultDocument.minErrors10', {
+                  defaultMessage: '10 or more',
+                }),
+              },
+              {
+                value: '20',
+                label: i18n.translate('xpack.customApp.defaultDocument.minErrors20', {
+                  defaultMessage: '20 or more',
+                }),
+              },
+            ],
+            onChange: [],
+          },
+        ],
       },
       {
         type: 'table',
