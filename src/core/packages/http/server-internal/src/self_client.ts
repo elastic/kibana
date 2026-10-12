@@ -395,7 +395,7 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     const authHeaders = this.request.isFakeRequest
       ? getFakeRequestAuthHeaders(this.request)
       : this.params.authRequestHeaders.get(this.request);
-    addHeaders(headers, authHeaders);
+    addHeaders(headers, this.withoutOwnClientAuthentication(authHeaders));
     if (options.forwardRequestHeaders) {
       addHeaders(headers, getForwardedRequestHeaders(this.request));
     }
@@ -408,13 +408,6 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     headers.delete('cookie');
     // Strip the internal-origin header from all self calls before optionally adding Core's marker below.
     headers.delete(X_ELASTIC_INTERNAL_ORIGIN_REQUEST);
-    const clientAuthentication = headers.get(ES_CLIENT_AUTHENTICATION_HEADER);
-    if (
-      clientAuthentication !== null &&
-      this.params.getOwnClientAuthenticationCheck?.()?.(clientAuthentication)
-    ) {
-      headers.delete(ES_CLIENT_AUTHENTICATION_HEADER);
-    }
     headers.set(KIBANA_VERSION_HEADER, this.params.kibanaVersion);
     headers.set(SELF_CALL_HEADER, 'true');
     headers.set('user-agent', `KibanaSelfHttpClient/${this.params.kibanaVersion}`);
@@ -436,6 +429,25 @@ class InternalHttpSelfScopedClient implements HttpSelfScopedClient {
     }
 
     return headers;
+  }
+
+  private withoutOwnClientAuthentication(authHeaders?: AuthHeaders): AuthHeaders | undefined {
+    const isOwnClientAuthentication = this.params.getOwnClientAuthenticationCheck?.();
+    if (!authHeaders || !isOwnClientAuthentication) {
+      return authHeaders;
+    }
+
+    const entries = Object.entries(authHeaders).flatMap(([name, value]) => {
+      if (name.toLowerCase() !== ES_CLIENT_AUTHENTICATION_HEADER) {
+        return [[name, value]];
+      }
+      const kept = (Array.isArray(value) ? value : [value]).filter(
+        (entry) => !isOwnClientAuthentication(entry)
+      );
+      return kept.length ? [[name, kept]] : [];
+    });
+
+    return Object.fromEntries(entries) as AuthHeaders;
   }
 
   /**

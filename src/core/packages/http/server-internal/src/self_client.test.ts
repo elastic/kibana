@@ -9,6 +9,7 @@
 
 import { NEVER } from 'rxjs';
 import type {
+  AuthHeaders,
   HttpSelfUnauthorizedErrorHandler,
   IAuthHeadersStorage,
   KibanaRequest,
@@ -69,7 +70,7 @@ const createClient = ({
   unauthorizedErrorHandler,
 }: {
   publicBaseUrl?: string | null;
-  authHeaders?: Record<string, string>;
+  authHeaders?: AuthHeaders;
   authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
@@ -952,6 +953,48 @@ describe('InternalHttpSelfScopedClient', () => {
       await self.asScoped(createRequest()).fetch('/api/status');
 
       expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+    });
+
+    it("strips every entry of Kibana's own client authentication from an array value", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: ['kibana-own-secret', 'kibana-own-secret'],
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+    });
+
+    it('relays only the upstream entry of a mixed array value', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: ['kibana-own-secret', 'upstream-secret'],
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+    });
+
+    it("strips Kibana's own client authentication regardless of header name case", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          'X-Client-Authentication': 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
     });
 
     it('leaves client authentication unchanged when no check is registered', async () => {
