@@ -55,7 +55,7 @@ still in progress at shutdown has `completed: false` and ends at shutdown.
 
 Inspect long lookup spans and their selectors, then correlate their stacks and
 surrounding retry/delay spans to identify candidates for investigation. This is
-an execution trace rather than a browser video; it measures the instrumented
+an execution trace in wait-only mode; it measures the instrumented
 operations and does not infer visual inactivity or prove that a wait is avoidable.
 Direct timers outside `common.sleep()` and the retry service are not captured.
 
@@ -76,3 +76,7 @@ waitRecording: {
 Custom wait helpers can use the lifecycle service's `recordWait(category, name,
 callback)` method. The callback's result and errors are preserved, and recording
 is disabled by default.
+
+To also record the browser viewport and detect unchanged-screen intervals, use
+`FTR_RECORD_VIDEO=1` instead. This enables wait recording without config edits;
+see the [video prerequisites, artifacts, and limitations](../../../../../packages/shared/kbn-test/README.mdx#recording-the-browser-and-detecting-unchanged-screens).

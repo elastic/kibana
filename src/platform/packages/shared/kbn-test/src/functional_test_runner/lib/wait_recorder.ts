@@ -133,6 +133,10 @@ export class WaitRecorder {
     private readonly now = () => performance.now()
   ) {}
 
+  public get elapsedMs(): number {
+    return this.elapsed();
+  }
+
   public attach(runner: Runner): void {
     runner.on('start', () => {
       this.startTime = this.now();
@@ -256,7 +260,7 @@ export class WaitRecorder {
     };
   }
 
-  public write(directory: string): string | undefined {
+  public write(directory: string, visualIntervals: readonly Interval[] = []): string | undefined {
     if (this.startTime === undefined) return;
     this.stop();
     mkdirSync(directory, { recursive: true });
@@ -265,6 +269,11 @@ export class WaitRecorder {
     const traceEvents = [
       ...this.runnables.map((span) => ({ ...span, category: span.type, name: span.title })),
       ...this.waits,
+      ...visualIntervals.map((span) => ({
+        ...span,
+        category: 'visualUnchanged',
+        name: 'Unchanged browser viewport',
+      })),
     ].map((span) => ({
       name: span.name,
       cat: span.category,
@@ -272,9 +281,16 @@ export class WaitRecorder {
       ts: span.startMs * 1000,
       dur: (span.endMs - span.startMs) * 1000,
       pid: process.pid,
-      tid: ['test', 'hook', 'sleep', 'retryDelay', 'retry', 'webdriverWait', 'lookup'].indexOf(
-        span.category
-      ),
+      tid: [
+        'test',
+        'hook',
+        'sleep',
+        'retryDelay',
+        'retry',
+        'webdriverWait',
+        'lookup',
+        'visualUnchanged',
+      ].indexOf(span.category),
       args: span,
     }));
     writeFileSync(join(directory, 'trace.json'), JSON.stringify({ traceEvents }) + '\n');

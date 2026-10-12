@@ -7,10 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FtrProviderContext } from '../../../../..';
+
 const config = () => ({
   testFiles: [require.resolve('./tests')],
   mochaReporter: { sendToCiStats: false },
   servers: { elasticsearch: { port: 1234 } },
+  services: {
+    videoCapture: ({ getService }: FtrProviderContext) => {
+      getService('lifecycle').browserVideoRecorder?.setCaptureFrame(async () =>
+        Buffer.from('fixture')
+      );
+      return {};
+    },
+  },
 });
 
 export = config;
