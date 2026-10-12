@@ -1009,7 +1009,7 @@ describe('UiamService', () => {
       const expectedRequestBody: GrantUiamApiKeyRequestBody = {
         description: 'test-key-with-exp',
         internal: true,
-        expiration: '7d',
+        expiration: 'P7D',
         role_assignments: {
           limit: {
             access: ['application'],
@@ -1093,7 +1093,7 @@ describe('UiamService', () => {
 
         expect(fetchSpy).toHaveBeenCalledTimes(1);
         expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toEqual(
-          expect.objectContaining({ description: 'test-key', expiration: '7d' })
+          expect.objectContaining({ description: 'test-key', expiration: 'P7D' })
         );
       });
     });
@@ -1114,6 +1114,17 @@ describe('UiamService', () => {
       );
 
       expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('rejects invalid expiration without calling UIAM', async () => {
+      await expect(
+        uiamService.grantApiKey(new HTTPAuthorizationHeader('Bearer', 'access-token'), {
+          name: 'test-key',
+          expiration: 'invalid',
+        })
+      ).rejects.toThrow('Failed to parse value as time value');
+
+      expect(fetchSpy).not.toHaveBeenCalled();
     });
 
     it('does not set expiration when none is specified and no default is configured', async () => {

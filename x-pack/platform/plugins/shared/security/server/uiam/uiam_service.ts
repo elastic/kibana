@@ -10,6 +10,7 @@ import { readFileSync } from 'fs';
 import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
+import { schema } from '@kbn/config-schema';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   deriveInternalCallerAttestation,
@@ -692,12 +693,13 @@ export class UiamService implements UiamServicePublic {
     );
 
     try {
-      const expiration =
-        params.expiration ?? this.#config.unsafe.grantedApiKeyDefaultExpiration?.toISOString();
+      const expiration = params.expiration
+        ? schema.duration().validate(params.expiration)
+        : this.#config.unsafe.grantedApiKeyDefaultExpiration;
       const body: GrantUiamApiKeyRequestBody = {
         description: params.name,
         internal: true,
-        ...(expiration ? { expiration } : {}),
+        ...(expiration ? { expiration: expiration.toISOString() } : {}),
         role_assignments: {
           // currently required  to downscope privileges
           limit: {
