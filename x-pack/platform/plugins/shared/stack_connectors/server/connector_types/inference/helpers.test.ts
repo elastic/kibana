@@ -454,6 +454,57 @@ describe('redaction of JSON embedded in error strings', () => {
     });
   });
 
+  describe('prose exemption for bare credentials / invalid_token keys', () => {
+    const secretValues: Array<[string, string, string[]]> = [
+      ['a Basic header value', 'Basic dmVyeXNlY3JldA==', ['dmVyeXNlY3JldA==']],
+      ['a prefixed token', 'token ghp_abcdefghijklmnopqrstuvwxyz1234567890', ['ghp_abcdef']],
+      ['a prefixed key', 'key abcdef1234567890XYZ', ['abcdef1234567890XYZ']],
+      ['a user and password pair', 'admin letmein', ['letmein']],
+      ['a passphrase', 'correcthorse battery staple', ['correcthorse', 'battery', 'staple']],
+      ['an upper-case word pair', 'TOPSECRET value', ['TOPSECRET']],
+      ['a function word before a secret with a digit', 'The hunter2', ['hunter2']],
+      ['a function word before a hyphenated secret', 'the abc-def-ghi', ['abc-def-ghi']],
+    ];
+    const keySpellings = ['credentials', 'invalid_token', 'invalidToken', 'invalid-token'];
+    const forms: Array<[string, (key: string, value: string) => string]> = [
+      ['colon', (key, value) => `${key}: ${value}`],
+      ['equals', (key, value) => `${key}=${value}`],
+      ['newline', (key, value) => `status [401]\n${key}: ${value}`],
+      ['tab', (key, value) => `${key}:\t${value}`],
+    ];
+
+    it.each(
+      keySpellings.flatMap((key) =>
+        forms.flatMap(([form, build]) =>
+          secretValues.map(
+            ([label, value, secrets]) =>
+              [`${label} under ${key} (${form})`, build(key, value), secrets] as const
+          )
+        )
+      )
+    )('redacts %s', (_label, input, secrets) => {
+      [truncateUpstreamBody(input), buildInferenceErrorMessage(new Error(input))].forEach(
+        (output) => {
+          secrets.forEach((secret) => expect(output).not.toContain(secret));
+          expect(output).toContain('[redacted]');
+        }
+      );
+    });
+
+    it.each(
+      keySpellings.flatMap((key) =>
+        forms.flatMap(([form, build]) =>
+          ['The access token expired', 'missing token', 'not provided'].map(
+            (value) => [`${key} (${form}): ${value}`, build(key, value)] as const
+          )
+        )
+      )
+    )('keeps the prose diagnostic %s readable', (_label, input) => {
+      expect(truncateUpstreamBody(input)).toBe(input);
+      expect(buildInferenceErrorMessage(new Error(input))).toContain(input);
+    });
+  });
+
   it('keeps numeric token COUNTS but redacts numbers under credential-style token keys', () => {
     const output = truncateUpstreamBody({
       usage: { prompt_tokens: 120, total_tokens: 200 },

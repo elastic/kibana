@@ -308,6 +308,9 @@ const findSecretValueEnd = (text: string, key: string, start: number): number =>
   if (normalized.endsWith('cookie') || normalized === 'cookies') {
     return start + matchLength(COOKIE_VALUE, text, start);
   }
+  // a bare `credentials` / `invalid_token` value that is not prose may be a multi-word secret
+  // (`admin letmein`, `Basic abc==`, a passphrase): redact the rest of the line, not one token
+  if (PROSE_KEYS.has(normalized)) return start + matchLength(COOKIE_VALUE, text, start);
   const length = matchLength(SCALAR_VALUE, text, start);
   // numeric values under token-COUNT keys (`num_token: 5`) are not credentials
   if (isTokenCountKey(key) && NUMERIC_VALUE.test(text.slice(start, start + length))) return start;
@@ -330,7 +333,11 @@ const isStructuralPosition = (text: string, index: number): boolean => {
 const PROSE_KEYS = new Set(['credentials', 'invalidtoken']);
 const PLACEHOLDER_VALUE =
   /\[(?:missing|none|null|empty|invalid|required|provided|not provided|not set|unset|omitted|hidden|expired)\]/iy;
-const PROSE_WORDS_VALUE = /[A-Za-z]{2,}[ \t]+[a-z]{2,}/y;
+// Prose must open with a function word and its second word must end at a word boundary, so
+// `credentials: admin letmein`, `credentials: Basic dmVy...==` and `invalid_token: The hunter2`
+// stay redacted.
+const PROSE_WORDS_VALUE =
+  /(?:the|an?|is|are|was|were|has|have|had|not|no|missing|invalid|expired|required|revoked|for|must|cannot|could|did|does|do)[ \t]+[a-z]{2,}(?![\w-])/iy;
 const BARE_KEY_GROUP_VALUE =
   /\{[ \t]*(?:reason|message|error|detail|details|status|code|type|description)[ \t]*:/iy;
 
