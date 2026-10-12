@@ -138,8 +138,9 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Entity Analytics executive brief: an AI-written summary generated on demand
    * from Entity Analytics signals (routes, task types, header button and flyout).
+   * PoC branch only: on by default so the CI cloud deployment shows it (do not merge).
    */
-  entityAnalyticsExecutiveBriefEnabled: false,
+  entityAnalyticsExecutiveBriefEnabled: true,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
