@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import type { ErrorResponse } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_ACTION_TYPE, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '../../lib/errors/error_codes';
 import {
+  getAlertAlreadyAcknowledgedMessage,
   getAlertEpisodeNotFoundMessage,
+  getAlertNotAcknowledgedMessage,
   getAlertSeriesNotFoundMessage,
+  getAssigneeUnchangedMessage,
   getEpisodeNotLatestMessage,
+  getTagsUnchangedMessage,
 } from '../../lib/errors/alert_error_messages';
 import { invalidResponseExample } from '../oas_utils';
 import type { OasExampleEntry } from '../oas_types';
@@ -58,6 +62,72 @@ export const ALERT_EPISODE_NOT_FOUND_RESPONSE: OasExampleEntry = {
     message: getAlertEpisodeNotFoundMessage(SAMPLE_EPISODE_ID),
     details: {
       alert_id: SAMPLE_EPISODE_ID,
+    },
+  } satisfies ErrorResponse,
+};
+
+export const SAMPLE_ASSIGNEE_UID = 'u_abc123';
+
+/** Shared 409 body for `_ack` on an alert that is already acknowledged. */
+export const ALERT_ALREADY_ACKNOWLEDGED_RESPONSE: OasExampleEntry = {
+  name: 'alertAlreadyAcknowledged',
+  summary: 'The alert is already acknowledged, so the request would change nothing',
+  value: {
+    code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    error: 'Conflict',
+    message: getAlertAlreadyAcknowledgedMessage(SAMPLE_EPISODE_ID),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      alert_id: SAMPLE_EPISODE_ID,
+      action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
+    },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body for `_unack` on an alert that is not acknowledged. */
+export const ALERT_NOT_ACKNOWLEDGED_RESPONSE: OasExampleEntry = {
+  name: 'alertNotAcknowledged',
+  summary: 'The alert is not acknowledged, so the request would change nothing',
+  value: {
+    code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    error: 'Conflict',
+    message: getAlertNotAcknowledgedMessage(SAMPLE_EPISODE_ID),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      alert_id: SAMPLE_EPISODE_ID,
+      action_type: ALERT_EPISODE_ACTION_TYPE.UNACK,
+    },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body for `_assign` with the assignee the alert already carries. */
+export const ALERT_ASSIGNEE_UNCHANGED_RESPONSE: OasExampleEntry = {
+  name: 'alertAssigneeUnchanged',
+  summary: 'The alert is already assigned to the requested user',
+  value: {
+    code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
+    error: 'Conflict',
+    message: getAssigneeUnchangedMessage(SAMPLE_EPISODE_ID, SAMPLE_ASSIGNEE_UID),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      alert_id: SAMPLE_EPISODE_ID,
+      action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
+    },
+  } satisfies ErrorResponse,
+};
+
+/** Shared 409 body for `_tag` with the set the alert already carries. */
+export const ALERT_TAGS_UNCHANGED_RESPONSE: OasExampleEntry = {
+  name: 'alertTagsUnchanged',
+  summary: 'The alert already carries exactly the requested tags',
+  value: {
+    code: ALERTING_ERROR_CODES.ALERT_ACTION_NO_OP,
+    error: 'Conflict',
+    message: getTagsUnchangedMessage(SAMPLE_EPISODE_ID),
+    details: {
+      group_hash: SAMPLE_GROUP_HASH,
+      alert_id: SAMPLE_EPISODE_ID,
+      action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
     },
   } satisfies ErrorResponse,
 };

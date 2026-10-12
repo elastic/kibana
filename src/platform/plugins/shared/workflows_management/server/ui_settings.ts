@@ -137,7 +137,7 @@ export const registerUISettings = (
         }
       ),
       schema: schema.boolean(),
-      value: false,
+      value: true,
       readonly: true,
       readonlyMode: 'ui',
       requiresPageReload: true,

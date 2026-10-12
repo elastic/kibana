@@ -20,6 +20,7 @@ export type NightshiftTriggerRow =
   | {
       kind: 'alert';
       ruleNamePattern?: string;
+      ruleNames?: string[];
       ruleNameMatchMode?: RuleNameMatchMode;
       alertStatus?: AlertStatus;
       tags?: string[];
@@ -53,7 +54,10 @@ export interface NightshiftAutomationExecution {
 export interface NightshiftAutomationCompletion {
   action?: CompletionAction;
   targetMode?: CompletionTargetMode;
+  /** Slack channel id or `#name` for `channel` mode. */
   destination?: string;
+  /** Slack connector to post through; defaults to the Elastic Slack app connector. */
+  connectorId?: string;
 }
 
 export interface NightshiftAutomationRuntime {

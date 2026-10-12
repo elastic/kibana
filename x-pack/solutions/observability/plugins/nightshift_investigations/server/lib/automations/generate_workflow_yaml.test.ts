@@ -107,6 +107,13 @@ describe('generateWorkflowYaml', () => {
       expect(yaml.triggers[0].on.condition).toBe('rule.tags: "k8s"');
     });
 
+    it('OR-joins exact rule names with tags', () => {
+      const automation = baseAutomation();
+      automation.trigger.rows = [{ kind: 'alert', ruleNames: ['Disk full'], tags: ['k8s'] }];
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.triggers[0].on.condition).toBe('(rule.name: "Disk full" OR rule.tags: "k8s")');
+    });
+
     it('OR-joins multiple tags', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [{ kind: 'alert', tags: ['k8s', 'prod'] }];
@@ -176,6 +183,58 @@ describe('generateWorkflowYaml', () => {
     it('omits message when promptTemplate is not set', () => {
       const yaml = parse(generateWorkflowYaml('auto-123', baseAutomation()));
       expect(yaml.steps[0].with.message).toBeUndefined();
+    });
+
+    it('copies a Slack channel destination onto the investigation with the default connector', () => {
+      const automation = baseAutomation();
+      automation.completion = {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: '#prod-alerts',
+      };
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations).toEqual([
+        {
+          type: 'slack',
+          connector_id: 'elastic-apps-slack',
+          params: { channel: '#prod-alerts' },
+          automation_id: 'auto-123',
+          automation_name: 'Test automation',
+        },
+      ]);
+    });
+
+    it('uses an explicit Slack connector when the automation names one', () => {
+      const automation = baseAutomation();
+      automation.completion = {
+        action: 'post_to_slack',
+        targetMode: 'channel',
+        destination: 'C0123456789',
+        connectorId: 'my-slack-bot',
+      };
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations[0]).toEqual(
+        expect.objectContaining({
+          connector_id: 'my-slack-bot',
+          params: { channel: 'C0123456789' },
+        })
+      );
+    });
+
+    it.each([
+      ['no completion', {}],
+      ['a silent completion', { action: 'silent', targetMode: 'channel', destination: '#x' }],
+      ['create_investigation', { action: 'create_investigation', destination: '#x' }],
+      [
+        'thread mode, which needs the Slack source',
+        { action: 'post_to_slack', targetMode: 'thread' },
+      ],
+      ['channel mode without a destination', { action: 'post_to_slack', targetMode: 'channel' }],
+    ] as const)('omits notificationDestinations for %s', (_label, completion) => {
+      const automation = baseAutomation();
+      automation.completion = { ...completion };
+      const yaml = parse(generateWorkflowYaml('auto-123', automation));
+      expect(yaml.steps[0].with.notificationDestinations).toBeUndefined();
     });
 
     it('does not include execution.id anywhere in the output', () => {

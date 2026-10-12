@@ -79,39 +79,53 @@ export type RuleKind = z.infer<typeof ruleKindSchema>;
 
 /** Metadata (required) */
 
+const METADATA_DESCRIPTION = 'Rule metadata.';
+const METADATA_NAME_DESCRIPTION = 'Rule name (must be unique within the space).';
+const METADATA_DESCRIPTION_DESCRIPTION =
+  'Human-readable description of the rule. Omit to leave it unset; send `null` on PATCH to clear it. An empty string is rejected.';
+const METADATA_TAGS_DESCRIPTION = 'Tags for categorization, e.g. ["production", "infra"].';
+const METADATA_ROUTING_TAGS_DESCRIPTION =
+  'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".';
+const METADATA_BUILDER_DESCRIPTION =
+  'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL; send `null` on PATCH to clear it.';
+
+const metadataNameSchema = z.string().min(1).max(MAX_NAME_LENGTH);
+const metadataDescriptionSchema = z.string().max(MAX_DESCRIPTION_LENGTH).trim().min(1);
+const metadataTagsSchema = tagsSchema.min(1);
+const metadataRoutingTagsSchema = tagsSchema.min(1);
+const metadataBuilderSchema = z
+  .object({ type: z.string().max(64).trim().min(1).describe('Rule builder type.') })
+  .strict();
+
 export const metadataSchema = z
   .object({
-    name: z
-      .string()
-      .min(1)
-      .max(MAX_NAME_LENGTH)
-      .describe('Rule name (must be unique within the space).'),
-    description: z
-      .string()
-      .max(MAX_DESCRIPTION_LENGTH)
-      .optional()
-      .describe('Human-readable description of the rule.'),
-    tags: tagsSchema
-      .min(1)
-      .optional()
-      .describe('Tags for categorization, e.g. ["production", "infra"].'),
-    routing_tags: tagsSchema
-      .min(1)
-      .optional()
-      .describe(
-        'Routing tags that link alerts from this rule to action policies. An action policy applies when its `matcher.tags` contains at least one of these tags. Only allowed when kind is "alert".'
-      ),
-    builder_type: z
-      .string()
-      .max(64)
-      .optional()
-      .describe(
-        'Identifies the rule builder that authored this rule (e.g. "threshold"). Absent for rules authored directly in ES|QL.'
-      ),
+    name: metadataNameSchema.describe(METADATA_NAME_DESCRIPTION),
+    description: metadataDescriptionSchema.optional().describe(METADATA_DESCRIPTION_DESCRIPTION),
+    tags: metadataTagsSchema.optional().describe(METADATA_TAGS_DESCRIPTION),
+    routing_tags: metadataRoutingTagsSchema.optional().describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+    builder: metadataBuilderSchema.optional().describe(METADATA_BUILDER_DESCRIPTION),
   })
   .strict()
-  .describe('Rule metadata.')
+  .describe(METADATA_DESCRIPTION)
   .meta({ id: 'alerting_rule_metadata' });
+
+/** The PATCH counterpart of {@link metadataSchema}: leaves move, and clear, independently. */
+const metadataPatchSchema = z
+  .object({
+    name: metadataNameSchema.optional().describe(METADATA_NAME_DESCRIPTION),
+    description: metadataDescriptionSchema
+      .nullable()
+      .optional()
+      .describe(METADATA_DESCRIPTION_DESCRIPTION),
+    tags: metadataTagsSchema.nullable().optional().describe(METADATA_TAGS_DESCRIPTION),
+    routing_tags: metadataRoutingTagsSchema
+      .nullable()
+      .optional()
+      .describe(METADATA_ROUTING_TAGS_DESCRIPTION),
+    builder: metadataBuilderSchema.nullable().optional().describe(METADATA_BUILDER_DESCRIPTION),
+  })
+  .strict()
+  .meta({ id: 'alerting_rule_metadata_patch', description: METADATA_DESCRIPTION });
 
 /** Schedule (required) */
 
@@ -123,16 +137,28 @@ export const scheduleEverySchema = durationSchema.superRefine((value, ctx) => {
   }
 });
 
+const SCHEDULE_DESCRIPTION = 'Execution schedule configuration.';
+const SCHEDULE_EVERY_DESCRIPTION = 'Execution interval, e.g. 1m, 5m, 1h.';
+const SCHEDULE_LOOKBACK_DESCRIPTION =
+  'Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.';
+
 export const scheduleSchema = z
   .object({
-    every: scheduleEverySchema.describe('Execution interval, e.g. 1m, 5m, 1h.'),
-    lookback: durationSchema
-      .optional()
-      .describe('Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.'),
+    every: scheduleEverySchema.describe(SCHEDULE_EVERY_DESCRIPTION),
+    lookback: durationSchema.optional().describe(SCHEDULE_LOOKBACK_DESCRIPTION),
   })
   .strict()
-  .describe('Execution schedule configuration.')
+  .describe(SCHEDULE_DESCRIPTION)
   .meta({ id: 'alerting_rule_schedule' });
+
+/** The PATCH counterpart of {@link scheduleSchema}. */
+const schedulePatchSchema = z
+  .object({
+    every: scheduleEverySchema.optional().describe(SCHEDULE_EVERY_DESCRIPTION),
+    lookback: durationSchema.nullable().optional().describe(SCHEDULE_LOOKBACK_DESCRIPTION),
+  })
+  .strict()
+  .meta({ id: 'alerting_rule_schedule_patch', description: SCHEDULE_DESCRIPTION });
 
 /** Query (required) */
 
@@ -159,17 +185,26 @@ export const esqlQuerySegmentSchema = z
     }
   });
 
+const BREACH_DESCRIPTION =
+  'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.';
+const BREACH_SEGMENT_DESCRIPTION =
+  "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause.";
+
 const breachSchema = z
   .object({
-    segment: esqlQuerySegmentSchema.describe(
-      "ES|QL clause appended to `query.base`, for example `WHERE avg_cpu > 0.85`. Don't include a `FROM` clause."
-    ),
+    segment: esqlQuerySegmentSchema.describe(BREACH_SEGMENT_DESCRIPTION),
   })
   .strict()
-  .describe(
-    'Optional ES|QL clause appended to `query.base`. If omitted, every row from `query.base` is a match, and a `no_data` strategy other than `ignore` then requires `no_data.query`.'
-  )
+  .describe(BREACH_DESCRIPTION)
   .meta({ id: 'alerting_rule_breach' });
+
+/** The PATCH counterpart of {@link breachSchema}. */
+const breachPatchSchema = z
+  .object({
+    segment: esqlQuerySegmentSchema.optional().describe(BREACH_SEGMENT_DESCRIPTION),
+  })
+  .strict()
+  .meta({ id: 'alerting_rule_breach_patch', description: BREACH_DESCRIPTION });
 
 /**
  * Composing re-parses both parts, so it repeats the error of whichever part is
@@ -180,11 +215,26 @@ const hasIssueOn = (
   ...fields: string[]
 ): boolean => issues.some((issue) => fields.some((field) => issue.path?.[0] === field));
 
+const QUERY_DESCRIPTION =
+  'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.';
+const QUERY_BASE_DESCRIPTION =
+  'ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.';
+
+/**
+ * The PATCH counterpart of {@link querySchema}. The composed-query check is deliberately absent:
+ * a patch may carry `breach` without `base`, so composition is only checkable once merged.
+ */
+const queryPatchSchema = z
+  .object({
+    base: esqlQuerySchema.optional().describe(QUERY_BASE_DESCRIPTION),
+    breach: breachPatchSchema.nullable().optional().describe(BREACH_DESCRIPTION),
+  })
+  .strict()
+  .meta({ id: 'alerting_rule_query_patch', description: QUERY_DESCRIPTION });
+
 export const querySchema = z
   .object({
-    base: esqlQuerySchema.describe(
-      'ES|QL query that specifies the data to evaluate. Must include a `FROM` clause. Kibana applies the time filter from `schedule.lookback` using `time_field`.'
-    ),
+    base: esqlQuerySchema.describe(QUERY_BASE_DESCRIPTION),
     breach: breachSchema.optional(),
   })
   .strict()
@@ -201,14 +251,15 @@ export const querySchema = z
       });
     }
   })
-  .describe(
-    'ES|QL query the rule evaluates. `base` is required. `breach` is an optional clause appended to it.'
-  )
+  .describe(QUERY_DESCRIPTION)
   .meta({ id: 'alerting_rule_query' });
 
 export type Query = z.infer<typeof querySchema>;
 
 /** Recovery (alert rules only) */
+
+const RECOVERY_DESCRIPTION =
+  'When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.';
 
 export const recoveryStrategySchema = z.enum(['no_breach', 'condition', 'query', 'manual']);
 export const recoveryStrategy = recoveryStrategySchema.enum;
@@ -251,9 +302,7 @@ export const recoverySchema = z
       )
       .meta({ id: 'alerting_rule_recovery_manual' }),
   ])
-  .describe(
-    'When an alert recovers. Required when `kind` is `alert`. Not allowed when `kind` is `signal`.'
-  )
+  .describe(RECOVERY_DESCRIPTION)
   .meta({ id: 'alerting_rule_recovery' });
 
 export type Recovery = z.infer<typeof recoverySchema>;
@@ -264,6 +313,9 @@ export type Recovery = z.infer<typeof recoverySchema>;
  * No-data strategy. `alert` is a valid stored and engine value, but the create
  * and update APIs reject it (see {@link isNoDataStrategyWritable}).
  */
+const NO_DATA_DESCRIPTION =
+  'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.';
+
 export const noDataStrategySchema = z.enum(['ignore', 'keep_last', 'resolve', 'alert']);
 export const noDataStrategy = noDataStrategySchema.enum;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
@@ -310,9 +362,7 @@ export const noDataSchema = z
       'Marks an existing alert `active` when the rule finds no data. It never opens an alert for a group that has not breached. Not accepted when creating or updating rules.'
     ),
   ])
-  .describe(
-    'What the rule does when a group has no data. Required when `kind` is `alert`. Not allowed when `kind` is `signal`. Any strategy other than `ignore` requires either `query.breach` or `no_data.query`, so that a group with no data can be told apart from one that stopped breaching.'
-  )
+  .describe(NO_DATA_DESCRIPTION)
   .meta({ id: 'alerting_rule_no_data' });
 
 export type NoData = z.infer<typeof noDataSchema>;
@@ -389,30 +439,50 @@ export const getRootEsqlQuery = (query: ReadableQuery): string => query.base;
 export const stateTransitionOperatorSchema = z.enum(['and', 'or']);
 export type StateTransitionOperator = z.infer<typeof stateTransitionOperatorSchema>;
 
+const STATE_TRANSITION_OPERATOR_DESCRIPTION =
+  'When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.';
+
+const stateTransitionCountSchema = z.number().int().min(0).max(MAX_CONSECUTIVE_BREACHES);
+
+interface StateTransitionPhaseOptions {
+  countDescription: string;
+  timeframeDescription: string;
+  metaId: string;
+}
+
+/**
+ * The PATCH counterpart of {@link stateTransitionPhaseSchema}. The "count or timeframe" check is
+ * deliberately absent: a patch setting one leaf relies on the other already being stored.
+ */
+const stateTransitionPhasePatchSchema = ({
+  countDescription,
+  timeframeDescription,
+  metaId,
+}: StateTransitionPhaseOptions) =>
+  z
+    .object({
+      count: stateTransitionCountSchema.nullable().optional().describe(countDescription),
+      timeframe: durationSchema.nullable().optional().describe(timeframeDescription),
+      operator: stateTransitionOperatorSchema
+        .nullable()
+        .optional()
+        .describe(STATE_TRANSITION_OPERATOR_DESCRIPTION),
+    })
+    .strict()
+    .meta({ id: `${metaId}_patch` });
+
 const stateTransitionPhaseSchema = ({
   countDescription,
   timeframeDescription,
   metaId,
-}: {
-  countDescription: string;
-  timeframeDescription: string;
-  metaId: string;
-}) =>
+}: StateTransitionPhaseOptions) =>
   z
     .object({
-      count: z
-        .number()
-        .int()
-        .min(0)
-        .max(MAX_CONSECUTIVE_BREACHES)
-        .optional()
-        .describe(countDescription),
+      count: stateTransitionCountSchema.optional().describe(countDescription),
       timeframe: durationSchema.optional().describe(timeframeDescription),
       operator: stateTransitionOperatorSchema
         .optional()
-        .describe(
-          'When both `count` and `timeframe` are set, `and` requires both and `or` requires either. Allowed only when both fields are present.'
-        ),
+        .describe(STATE_TRANSITION_OPERATOR_DESCRIPTION),
     })
     .strict()
     .check((ctx) => {
@@ -440,51 +510,87 @@ const stateTransitionPhaseSchema = ({
     })
     .meta({ id: metaId });
 
+const STATE_TRANSITION_DESCRIPTION =
+  'Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.';
+const PENDING_DESCRIPTION = 'Delay before a match opens an alert.';
+const RECOVERING_DESCRIPTION =
+  'Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.';
+
+const PENDING_PHASE_OPTIONS: StateTransitionPhaseOptions = {
+  countDescription:
+    'Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
+  timeframeDescription:
+    'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
+  metaId: 'alerting_rule_state_transition_pending',
+};
+
+const RECOVERING_PHASE_OPTIONS: StateTransitionPhaseOptions = {
+  countDescription:
+    'Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
+  timeframeDescription:
+    'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
+  metaId: 'alerting_rule_state_transition_recovering',
+};
+
 export const stateTransitionSchema = z
   .object({
-    pending: stateTransitionPhaseSchema({
-      countDescription:
-        'Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match.',
-      timeframeDescription:
-        'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
-      metaId: 'alerting_rule_state_transition_pending',
-    })
+    pending: stateTransitionPhaseSchema(PENDING_PHASE_OPTIONS)
       .optional()
-      .describe('Delay before a match opens an alert.'),
-    recovering: stateTransitionPhaseSchema({
-      countDescription:
-        'Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery.',
-      timeframeDescription:
-        'Duration the condition must hold, for example `5m`. Combine with `count` using `operator`.',
-      metaId: 'alerting_rule_state_transition_recovering',
-    })
+      .describe(PENDING_DESCRIPTION),
+    recovering: stateTransitionPhaseSchema(RECOVERING_PHASE_OPTIONS)
       .optional()
-      .describe(
-        'Delay before a recovered match closes the alert. Has no effect when `recovery.strategy` is `manual`.'
-      ),
+      .describe(RECOVERING_DESCRIPTION),
   })
   .strict()
-  .describe(
-    'Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes `active` or `inactive`. Allowed only when `kind` is `alert`.'
-  )
+  .describe(STATE_TRANSITION_DESCRIPTION)
   .meta({ id: 'alerting_rule_state_transition' });
+
+/** The PATCH counterpart of {@link stateTransitionSchema}. */
+const stateTransitionPatchSchema = z
+  .object({
+    pending: stateTransitionPhasePatchSchema(PENDING_PHASE_OPTIONS)
+      .nullable()
+      .optional()
+      .describe(PENDING_DESCRIPTION),
+    recovering: stateTransitionPhasePatchSchema(RECOVERING_PHASE_OPTIONS)
+      .nullable()
+      .optional()
+      .describe(RECOVERING_DESCRIPTION),
+  })
+  .strict()
+  .meta({
+    id: 'alerting_rule_state_transition_patch',
+    description: STATE_TRANSITION_DESCRIPTION,
+  });
 
 export type StateTransition = z.infer<typeof stateTransitionSchema>;
 
 /** Grouping (optional) */
 
+const GROUPING_DESCRIPTION = 'Grouping configuration.';
+const GROUPING_FIELDS_DESCRIPTION =
+  'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.';
+
+const groupingFieldsSchema = z
+  .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+  .min(1)
+  .max(MAX_GROUPING_FIELDS);
+
 export const groupingSchema = z
   .object({
-    fields: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .max(MAX_GROUPING_FIELDS)
-      .describe(
-        'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
-      ),
+    fields: groupingFieldsSchema.describe(GROUPING_FIELDS_DESCRIPTION),
   })
   .strict()
-  .describe('Grouping configuration.')
+  .describe(GROUPING_DESCRIPTION)
   .meta({ id: 'alerting_rule_grouping' });
+
+/** The PATCH counterpart of {@link groupingSchema}. */
+const groupingPatchSchema = z
+  .object({
+    fields: groupingFieldsSchema.optional().describe(GROUPING_FIELDS_DESCRIPTION),
+  })
+  .strict()
+  .meta({ id: 'alerting_rule_grouping_patch', description: GROUPING_DESCRIPTION });
 
 /** Artifacts (optional) */
 
@@ -524,8 +630,12 @@ const artifactSchema = z
   })
   .meta({ id: 'alerting_rule_artifact' });
 
+const ARTIFACTS_DESCRIPTION =
+  'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear.';
+
 const artifactsSchema = z
   .array(artifactSchema)
+  .min(1)
   .max(100)
   .check((ctx) => {
     const seen = new Set<string>();
@@ -542,36 +652,29 @@ const artifactsSchema = z
       seen.add(id);
     }
   })
-  .describe(
-    'Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present.'
-  );
+  .describe(ARTIFACTS_DESCRIPTION);
 
 /** Create rule API schema */
 
 const TIME_FIELD_DESCRIPTION =
   'Document field Kibana uses with `schedule.lookback` to time-filter `query.base`.';
-const TIME_FIELD_UPDATE_DESCRIPTION = `${TIME_FIELD_DESCRIPTION} If omitted, the existing value is kept.`;
-
 /**
  * Base schema without refinements - used for extending in response schema and
  * for introspection by the immutability classification meta-tests.
  * @internal
  */
+const timeFieldSchema = z.string().min(1).max(MAX_FIELD_NAME_LENGTH);
+
 export const createRuleDataBaseSchema = z
   .object({
     kind: ruleKindSchema,
     metadata: metadataSchema,
-    time_field: z
-      .string()
-      .min(1)
-      .max(MAX_FIELD_NAME_LENGTH)
-      .default(DEFAULT_TIME_FIELD)
-      .describe(TIME_FIELD_DESCRIPTION),
+    time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
     schedule: scheduleSchema,
     query: querySchema,
     recovery: recoverySchema.optional(),
     no_data: noDataSchema.optional(),
-    state_transition: stateTransitionSchema.optional().nullable(),
+    state_transition: stateTransitionSchema.optional(),
     grouping: groupingSchema.optional(),
     artifacts: artifactsSchema.optional(),
   })
@@ -780,32 +883,33 @@ export const IMMUTABLE_RULE_FIELDS = ['kind'] as const satisfies ReadonlyArray<
 
 export type ImmutableRuleField = (typeof IMMUTABLE_RULE_FIELDS)[number];
 
-/** Update rule API schema — all fields optional for partial updates */
+/**
+ * Request body schema for `PATCH /api/alerting/v2/rules/{id}`: the create schema with every field
+ * optional, nested objects replaced by their patch counterparts so leaves merge independently, and
+ * `null` accepted wherever the create schema allows a field to be absent. Unions and lists carry
+ * no patch counterpart — they are replaced as a unit, since a partly-sent variant could never be
+ * valid. {@link IMMUTABLE_RULE_FIELDS} are left out entirely, so a body naming one is rejected
+ * rather than ignored.
+ *
+ * Cross-field checks are deliberately absent — a sparse delta cannot satisfy them. The merged
+ * document is validated against {@link createRuleDataSchema} instead. The one refinement kept here
+ * reads a single field, and `no_data` is replaced as a unit, so the body always carries enough to
+ * decide it.
+ */
 export const updateRuleDataSchema = z
   .object({
-    metadata: metadataSchema
-      .partial()
-      .extend({
-        builder_type: z.string().max(64).optional().nullable(),
-        // `null` clears all tags (an empty array is rejected by `.min(1)`, and
-        // omitting `tags` preserves the existing ones on a partial update).
-        tags: tagsSchema.min(1).nullable().optional(),
-        routing_tags: tagsSchema.min(1).nullable().optional(),
-      })
-      .optional(),
-    time_field: z
-      .string()
-      .min(1)
-      .max(MAX_FIELD_NAME_LENGTH)
+    metadata: metadataPatchSchema.optional().describe(METADATA_DESCRIPTION),
+    time_field: timeFieldSchema.optional().describe(TIME_FIELD_DESCRIPTION),
+    schedule: schedulePatchSchema.optional().describe(SCHEDULE_DESCRIPTION),
+    query: queryPatchSchema.optional().describe(QUERY_DESCRIPTION),
+    recovery: recoverySchema.nullable().optional().describe(RECOVERY_DESCRIPTION),
+    no_data: noDataSchema.nullable().optional().describe(NO_DATA_DESCRIPTION),
+    state_transition: stateTransitionPatchSchema
+      .nullable()
       .optional()
-      .describe(TIME_FIELD_UPDATE_DESCRIPTION),
-    schedule: scheduleSchema.partial().optional(),
-    query: querySchema.optional(),
-    recovery: recoverySchema.optional(),
-    no_data: noDataSchema.optional(),
-    state_transition: stateTransitionSchema.optional().nullable(),
-    grouping: groupingSchema.optional().nullable(),
-    artifacts: artifactsSchema.optional().nullable(),
+      .describe(STATE_TRANSITION_DESCRIPTION),
+    grouping: groupingPatchSchema.nullable().optional().describe(GROUPING_DESCRIPTION),
+    artifacts: artifactsSchema.nullable().optional().describe(ARTIFACTS_DESCRIPTION),
   })
   .strict()
   .refine(isNoDataStrategyWritable, rejectAlertNoDataStrategy)
@@ -819,9 +923,16 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema
   .extend({
-    // `null` clears the field on write; the server stores that as absent, so a
-    // response never carries it.
-    state_transition: stateTransitionSchema.optional(),
+    // `template` is server-managed: it is returned but not accepted on write.
+    metadata: metadataSchema
+      .extend({
+        template: z
+          .object({ id: z.string().describe('Id of the rule template.') })
+          .strict()
+          .optional()
+          .describe('The rule template this rule was created from.'),
+      })
+      .describe('Rule metadata.'),
     id: z.string().describe('Unique rule identifier.'),
     version: z
       .number()
@@ -907,6 +1018,28 @@ export const ruleTagsResponseSchema = tagsResponseSchema
   .meta({ id: 'alerting_rule_tags_response' });
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
+
+/** Query parameters for the rule routing tags API. */
+export const ruleRoutingTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe(
+        'Prefix to filter routing tags by. Returns all most-used routing tags when omitted.'
+      ),
+  })
+  .strict();
+
+export type RuleRoutingTagsParams = z.infer<typeof ruleRoutingTagsParamsSchema>;
+
+/** Rule routing tags response schema. */
+export const ruleRoutingTagsResponseSchema = tagsResponseSchema
+  .describe('All unique routing tags across rules.')
+  .meta({ id: 'alerting_rule_routing_tags_response' });
+
+export type RuleRoutingTagsResponse = z.infer<typeof ruleRoutingTagsResponseSchema>;
 
 export const ruleIdSchema = entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`);
 
