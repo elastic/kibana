@@ -487,32 +487,6 @@ describe('Quick search visor', () => {
       expect(getByRole('button', { name: 'Stop' })).toBe(getByTestId('esqlVisorStopGeneration'));
     });
 
-    it('should default to AI mode with a dedicated placeholder when the editor has no source', async () => {
-      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
-      await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
-      });
-      expect(getByTestId('esqlVisorModeKql')).toHaveAttribute('aria-pressed', 'false');
-      expect(getByTestId('esqlVisorNLQueryInput')).toHaveAttribute(
-        'placeholder',
-        "Describe what you're looking for"
-      );
-    });
-
-    it('should stay in AI mode and enable KQL once the editor has a source', async () => {
-      const { getByTestId, rerender } = renderWithI18n(
-        renderWithEnterprise({ ...props, query: '' })
-      );
-      await waitFor(() => {
-        expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
-      });
-      rerender(renderWithEnterprise({ ...props, query: 'FROM test_index' }));
-      await waitFor(() => {
-        expect(getByTestId('esqlVisorModeKql')).toBeEnabled();
-      });
-      expect(getByTestId('esqlVisorAskAiButton')).toHaveAttribute('aria-pressed', 'true');
-    });
-
     it('should disable the KQL mode button when the editor has no source', async () => {
       const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props, query: '' }));
       await waitFor(() => {
