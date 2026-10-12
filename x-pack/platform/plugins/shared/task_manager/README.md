@@ -314,6 +314,11 @@ taskManager.registerTaskDefinitions({
 
 `runSoon(taskId)` wakes a yielded task before its delay elapses. The task id, stored API key, and user scope are unchanged across yields, and `attempts` resets to 0 because a yield is a successful run.
 
+Two consequences of that design are the task implementer's responsibility:
+
+- **Unbounded yields.** Task Manager does not cap how many times a task may yield. A runner that always yields keeps its document (and its stored API key, which is only invalidated when the document is deleted) alive forever. Build your own completion or stuck-task detection, e.g. a step counter or deadline in `state`.
+- **Retries and `maxAttempts`.** Because a yield resets `attempts`, the max-attempts circuit breaker only counts consecutive failures since the last yield. A task that alternates failing runs with yields is never removed by `maxAttempts`; detect and stop such loops in the task itself.
+
 Note: a yielded task is a regular `idle` task with a future `runAt`. If event-driven resume becomes a primary use case (yield until an external signal instead of a timestamp), a future iteration may introduce a dedicated task status (e.g. `waiting`) so suspended tasks are queryable and excluded from time-based claiming; that requires changes to claim queries, mappings, and monitoring, and is intentionally out of scope here.
 
 ### Force failing a task
