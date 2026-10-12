@@ -116,19 +116,16 @@ const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
 ].join('\n');
 
 /**
- * Manual autonomy: manual trigger only. Assisted/supervised: 4h (or configured)
- * schedule plus manual.
+ * Hunt always emits scheduled (locked 4h default) plus manual with optional reportIds.
+ * Autonomy is fixed Manual; the schedule still runs on its own.
  */
 export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
-  const triggers =
-    values.autonomyLevel === 'manual'
-      ? MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT
-      : [
-          '  - type: scheduled',
-          '    with:',
-          `      every: ${JSON.stringify(values.scheduleInterval)}`,
-          MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
-        ].join('\n');
+  const triggers = [
+    '  - type: scheduled',
+    '    with:',
+    `      every: ${JSON.stringify(values.scheduleInterval)}`,
+    MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
+  ].join('\n');
 
   return renderScheduledWorkerYaml(yaml, values)
     .replaceAll('__WORKER_TRIGGERS__', triggers)
