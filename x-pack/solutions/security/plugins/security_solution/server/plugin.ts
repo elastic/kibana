@@ -188,8 +188,12 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
+import {
+  registerSecurityManagedWorkflowOwner,
+  initSecurityManagedWorkflowsClient,
+} from './workflows/managed_workflows';
 import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
+import { ensureThreatIntelSupplyWorkflowsForSpace } from './workflows/threat_intel_workflow/install';
 import { SecuritySolutionEventBus } from './events/event_bus';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
@@ -1321,6 +1325,25 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alertzero?.registerAlertTriageAttachmentServiceProvider(
       getAlertAnalysisWorkflowRuleAttachmentService
     );
+
+    // Same push pattern: AlertZero Hunt ensure calls this when a required TI supply
+    // workflow document is missing (e.g. per-space attribute lag after space create).
+    if (plugins.alertzero && plugins.workflowsExtensions && this.threatIntelSupplyEnabled) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      const tiLogger = this.logger.get('threatIntel');
+      plugins.alertzero.registerThreatIntelSupplyWorkflowInstaller(async ({ spaceId }) => {
+        const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
+          workflowsExtensions
+        );
+        await ensureThreatIntelSupplyWorkflowsForSpace({
+          managedWorkflowsClient,
+          spaceId,
+        });
+        tiLogger.info(
+          `Installed threat intel supply workflows for space '${spaceId}' on Hunt ensure request`
+        );
+      });
+    }
 
     return {};
   }
