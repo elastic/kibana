@@ -131,4 +131,46 @@ describe('toExampleFieldKey', () => {
       RegExpSpy.mockRestore();
     }
   });
+
+  it.each([
+    ['a negated-word class escape', '[\\W]{3}'],
+    ['a negated-digit class escape', '[\\D]'],
+    ['a negated-space class escape', '[\\S]{2}'],
+    ['a newline class escape', '[\\n]'],
+    ['a tab class escape', '[\\t]{2}'],
+    ['a hex class escape', '[\\x41]'],
+    ['a non-word-boundary assertion', '\\Bfoo'],
+  ])(
+    'returns undefined for %s, which it would otherwise expand to a value that does not match',
+    (_, pattern) => {
+      expect(generateSampleForPattern(pattern)).toBeUndefined();
+    }
+  );
+
+  // Nothing checks a sample against the user's pattern at runtime (see the module doc), so this
+  // is what guarantees that whatever the generator returns really matches.
+  it.each([
+    'EMP-\\d+',
+    '[A-Z]{3}-\\d{4,6}',
+    '^CASE-[0-9]{6}$',
+    '\\bEMP-\\d{3}\\b',
+    '(?:ab|cd){2}',
+    '[\\w.-]+@[a-z]+\\.com',
+    'user_[a-f0-9]{8}',
+    '\\d{3}-\\d{2}-\\d{4}',
+    '[A-Za-z]+\\s[A-Za-z]+',
+    '(?<id>[A-Z]{2}\\d{4})',
+    'a{0,5}b',
+    'x?y*z+',
+    '\\D\\W\\S',
+    '[\\d\\W]{3}',
+    '[ -~]{4}',
+    '[\\.\\-]{2}',
+    '[b-d]{3}',
+  ])('only returns a value that matches the pattern: %s', (pattern) => {
+    const sample = generateSampleForPattern(pattern);
+
+    expect(sample).toBeDefined();
+    expect(new RegExp(pattern).test(sample as string)).toBe(true);
+  });
 });

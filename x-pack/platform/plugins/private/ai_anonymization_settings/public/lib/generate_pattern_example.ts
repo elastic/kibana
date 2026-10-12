@@ -99,7 +99,15 @@ const classifyCharClass = (content: string): AtomExpansion => {
   if (!match) {
     throw unsupportedPatternError('Unrecognized character class contents');
   }
-  return { once: match[1] ?? match[2] };
+  const [, escaped, literal] = match;
+  if (escaped !== undefined && /[A-Za-z0-9]/.test(escaped)) {
+    // `\W`, `\D`, `\S`, `\n`, `\x41` and the like stand for something other than the letter after
+    // the backslash, so that letter would not be in the class.
+    throw unsupportedPatternError(
+      `Unsupported escape sequence '\\${escaped}' in a character class`
+    );
+  }
+  return { once: escaped ?? literal };
 };
 
 /** Recursive-descent generator for the supported regex subset; see module doc for scope. */
@@ -248,8 +256,10 @@ class PatternExampleGenerator {
       case 'S':
         return { once: 'x' };
       case 'b':
-      case 'B':
         return { once: '' };
+      case 'B':
+        // A non-boundary can fail at the start or end of the example, which is a word edge.
+        throw unsupportedPatternError('The \\B assertion is not supported');
       case 'n':
         return { once: '\n' };
       case 't':
