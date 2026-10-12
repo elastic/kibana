@@ -1,5 +1,5 @@
 {
-  "sha1": "6ff7d14277f436e610d0a45271b192e258bda3cd",
+  "sha1": "488e02d8986471728308a2f01348230ca167c52c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/attack_discovery_to_isolate.spec.ts",
-        "line": 79,
+        "line": 89,
         "column": 53
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
-        "line": 37,
+        "line": 48,
         "column": 5
       }
     },
@@ -42,7 +42,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
-        "line": 46,
+        "line": 60,
         "column": 24
       }
     },
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
-        "line": 63,
+        "line": 76,
         "column": 14
       }
     },
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero_e2e/api/tests/worker_control.spec.ts",
-        "line": 81,
+        "line": 97,
         "column": 21
       }
     }

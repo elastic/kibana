@@ -10,6 +10,7 @@ import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
 import { completeHostAction } from '../../../scout/edr_response_actions/common/complete_host_action';
 import {
+  assertExecutionCompleted,
   apiTest,
   tags,
   testData,
@@ -23,7 +24,6 @@ import {
   resetWorker,
   seedAttackScenario,
   updateWorker,
-  assertExecutionCompleted,
   waitForExecution,
   waitForNewExecution,
 } from '../fixtures';

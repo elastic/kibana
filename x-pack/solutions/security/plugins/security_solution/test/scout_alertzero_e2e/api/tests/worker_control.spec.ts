@@ -23,10 +23,14 @@ import {
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
 
 /**
- * Worker control plane against the real server. Needs no model call: it proves the managed
- * catalog is installed (which requires service accounts and the alertzero, proposals and
- * agenticInvestigations plugins to be on) and that enabling a Worker is gated on a service
- * account.
+ * Worker control plane against the real server. Proves the managed catalog is installed
+ * (which requires service accounts and the alertzero, proposals and agenticInvestigations
+ * plugins to be on) and that enabling a Worker is gated on a service account. One test
+ * enables a worker, which Task Manager immediately runs for real as its service account —
+ * a model-calling run. That run may still be in flight when cleanup disables the worker
+ * and deletes its account, which can fail it after the fact; the run is accepted and left
+ * to finish on its own rather than waited on, because its outcome is not what this spec
+ * asserts.
  */
 apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.classic] }, () => {
   const serviceAccountIds: string[] = [];
