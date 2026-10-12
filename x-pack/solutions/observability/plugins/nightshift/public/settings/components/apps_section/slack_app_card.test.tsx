@@ -25,9 +25,11 @@ const withConnection = (overrides: Partial<ReturnType<typeof useRelayAppConnecti
     available: true,
     status: 'not_connected',
     error: undefined,
+    workspace: undefined,
     isMutating: false,
     retryStatusRequest: jest.fn(),
     connect: jest.fn(),
+    confirm: jest.fn(),
     disconnect: jest.fn(),
     ...overrides,
   });

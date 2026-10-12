@@ -82,6 +82,10 @@ const CREATE_MONITOR_LABEL = i18n.translate(
   }
 );
 
+const ALERTS_NEED_MONITOR = i18n.translate('xpack.synthetics.page_header.alertsNeedMonitor', {
+  defaultMessage: 'Create a monitor to set up alerts and rules.',
+});
+
 export interface SyntheticsAppHeaderMenuOptions {
   showDiagnostics?: boolean;
   showCreateMonitor?: boolean;
@@ -261,6 +265,7 @@ export function useSyntheticsAppHeaderMenu(
       testId: 'syntheticsAlertsRulesButton',
       order: order++,
       disableButton: !hasMonitors,
+      tooltipContent: hasMonitors ? undefined : ALERTS_NEED_MONITOR,
       items: alertItems,
     });
 
