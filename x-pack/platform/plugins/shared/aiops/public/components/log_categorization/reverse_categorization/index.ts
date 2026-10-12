@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { ReverseCategorizationFlyout } from './reverse_categorization_for_flyout';
+export {
+  ReverseCategorizationFlyout,
+  type ReverseCategorizationSearchScope,
+} from './reverse_categorization_for_flyout';

@@ -248,7 +248,12 @@ describe('Default cell actions ', () => {
                 dataViewMock
               ),
             onOpenInNewTab,
-            queryContext: { query: { esql: 'FROM logs-*' }, filters: [] },
+            queryContext: {
+              query: { esql: 'FROM logs-*' },
+              filters: [],
+              filterQuery: { language: 'kuery', query: 'host: a' },
+              timeRange: { from: 'now-1h', to: 'now' },
+            },
           }}
         >
           <ReverseCategorizeBtn
@@ -268,6 +273,8 @@ describe('Default cell actions ', () => {
           openInNewTab: onOpenInNewTab,
           query: { esql: 'FROM logs-*' },
           filters: [],
+          filterQuery: { language: 'kuery', query: 'host: a' },
+          timeRange: { from: 'now-1h', to: 'now' },
         })
       );
     });

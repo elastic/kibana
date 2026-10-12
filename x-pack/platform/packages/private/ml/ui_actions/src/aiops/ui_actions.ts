@@ -46,6 +46,10 @@ export interface ReverseCategorizeFieldContext {
   query?: Query | AggregateQuery;
   /** The filters applied to the originating panel or tab. */
   filters?: Filter[];
+  /** An additional KQL/Lucene query applied on top of `query`, e.g. a dashboard's query. */
+  filterQuery?: Query;
+  /** The time range of the originating panel or tab, when it differs from the global time range. */
+  timeRange?: TimeRange;
   projectRouting?: string;
 }
 

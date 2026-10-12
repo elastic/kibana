@@ -32,10 +32,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import dateMath from '@kbn/datemath';
 import {
+  buildCustomFilter,
   buildEmptyFilter,
   buildEsQuery,
+  FilterStateStore,
   isOfAggregateQueryType,
   isOfQueryType,
 } from '@kbn/es-query';
@@ -70,6 +73,15 @@ import { runEsqlCategorizeRequest } from './run_esql_categorize_request';
 
 type SparkLinesPerCategory = Record<string, Record<number, number>>;
 
+export interface ReverseCategorizationSearchScope {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  /** An additional KQL/Lucene query applied on top of `query`, e.g. a dashboard's query. */
+  filterQuery?: Query;
+  /** The time range of the panel or tab, when it differs from the global time range. */
+  timeRange?: TimeRange;
+}
+
 export interface ReverseCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
@@ -77,14 +89,21 @@ export interface ReverseCategorizationPageProps {
   fieldValue: string;
   /** Opens a query, with optional filters, in a new tab of the originating app (e.g. Discover). */
   openInNewTab?: ReverseCategorizeOpenInNewTab;
-  /** Query of the originating panel or tab. Falls back to the global query when not set. */
-  query?: Query | AggregateQuery;
-  /** Filters of the originating panel or tab. Only used together with `query`. */
-  filters?: Filter[];
+  /**
+   * The search scope of the panel or tab the flyout was opened from. Used instead of the global
+   * query state when it has a `query`.
+   */
+  searchScope?: ReverseCategorizationSearchScope;
   onClose: () => void;
 }
 
 const BAR_TARGET = 60;
+
+const isEmptyBoolQuery = ({ bool }: ReturnType<typeof buildEsQuery>): boolean =>
+  bool !== undefined &&
+  [bool.filter, bool.must, bool.must_not, bool.should].every((clauses) =>
+    Array.isArray(clauses) ? clauses.length === 0 : clauses === undefined
+  );
 
 export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = ({
   dataView,
@@ -92,8 +111,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   selectedField,
   fieldValue,
   openInNewTab,
-  query: originatingQuery,
-  filters: originatingFilters,
+  searchScope,
   onClose,
 }) => {
   const {
@@ -107,13 +125,58 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
 
   // Use the query and filters of the panel or tab the flyout was opened from. The global
   // query state is not the right source there, e.g. in a dashboard.
-  const { filters, query } = useMemo(() => {
-    if (originatingQuery !== undefined) {
-      return { query: originatingQuery, filters: originatingFilters ?? [] };
+  const {
+    filters: scopeFilters,
+    query,
+    filterQuery,
+  } = useMemo(() => {
+    if (searchScope?.query !== undefined) {
+      return {
+        query: searchScope.query,
+        filters: searchScope.filters ?? [],
+        filterQuery: searchScope.filterQuery,
+      };
     }
-    return getState();
-  }, [getState, originatingFilters, originatingQuery]);
+    return { ...getState(), filterQuery: undefined };
+  }, [getState, searchScope]);
   const isEsqlQuery = isOfAggregateQueryType(query);
+
+  // Express the additional query as a filter so it is applied to the analysis and carried
+  // into links alongside the other filters.
+  const filters = useMemo(() => {
+    if (filterQuery === undefined) {
+      return scopeFilters ?? [];
+    }
+    const filterQueryDsl = buildEsQuery(
+      dataView,
+      filterQuery,
+      [],
+      uiSettings ? getEsQueryConfig(uiSettings) : undefined
+    );
+    // An empty query, e.g. an empty dashboard query bar, builds a DSL with no clauses.
+    // Don't add a filter that has no effect.
+    if (isEmptyBoolQuery(filterQueryDsl)) {
+      return scopeFilters ?? [];
+    }
+    return [
+      ...(scopeFilters ?? []),
+      buildCustomFilter(
+        dataView.id ?? '',
+        filterQueryDsl,
+        false,
+        false,
+        null,
+        FilterStateStore.APP_STATE
+      ),
+    ];
+  }, [dataView, filterQuery, scopeFilters, uiSettings]);
+
+  const panelTimeRange = useMemo(() => {
+    const timeRange = searchScope?.timeRange;
+    const min = timeRange ? dateMath.parse(timeRange.from) : undefined;
+    const max = timeRange ? dateMath.parse(timeRange.to, { roundUp: true }) : undefined;
+    return min && max ? { min, max } : undefined;
+  }, [searchScope?.timeRange]);
   const [matchNotFound, setMatchNotFound] = useState(false);
 
   const mounted = useRef(false);
@@ -129,7 +192,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
   const [stateFromUrl] = usePageUrlState<LogCategorizationPageUrlState>(
     'logCategorization',
     getDefaultLogCategorizationAppState({
-      filters: filters ?? [],
+      filters,
       ...(isOfQueryType(query)
         ? {
             searchString: query.query,
@@ -139,7 +202,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
       searchQuery: buildEsQuery(
         dataView,
         isEsqlQuery ? [] : query ?? [],
-        filters ?? [],
+        filters,
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       ),
     })
@@ -199,7 +262,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     undefined,
     BAR_TARGET,
     undefined,
-    undefined,
+    panelTimeRange,
     undefined,
     esqlDocumentScope
   );
@@ -216,6 +279,13 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     [dataView.id, filterManager]
   );
 
+  // Links open Discover with the time range that was analysed.
+  const analysisTimeRange = useMemo(
+    () =>
+      earliest !== undefined && latest !== undefined ? { from: earliest, to: latest } : undefined,
+    [earliest, latest]
+  );
+
   const { openInDiscover } = useActions(
     dataView.id!,
     selectedField,
@@ -223,7 +293,7 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
     stateFromUrl,
     timefilter,
     onAddFilter,
-    undefined,
+    analysisTimeRange,
     onClose,
     query
   );
@@ -340,6 +410,8 @@ export const ReverseCategorizationFlyout: FC<ReverseCategorizationPageProps> = (
               },
             },
           },
+          // The filters and additional query of the originating panel or tab.
+          searchQuery,
         ],
       },
     };

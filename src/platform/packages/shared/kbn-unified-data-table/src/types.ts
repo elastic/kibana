@@ -101,6 +101,10 @@ export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;
 export interface UnifiedDataTableQueryContext {
   query?: Query | AggregateQuery;
   filters?: Filter[];
+  /** An additional KQL/Lucene query applied on top of `query`, e.g. a dashboard's query */
+  filterQuery?: Query;
+  /** The time range of the rows, when it differs from the global time range */
+  timeRange?: TimeRange;
 }
 
 /**

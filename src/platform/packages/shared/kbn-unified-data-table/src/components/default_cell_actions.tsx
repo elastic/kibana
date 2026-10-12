@@ -166,6 +166,8 @@ export const ReverseCategorizeBtn = ({
           openInNewTab: context.onOpenInNewTab,
           query: context.queryContext?.query,
           filters: context.queryContext?.filters,
+          filterQuery: context.queryContext?.filterQuery,
+          timeRange: context.queryContext?.timeRange,
         });
         dataGridRef?.current?.closeCellPopover();
       }}
