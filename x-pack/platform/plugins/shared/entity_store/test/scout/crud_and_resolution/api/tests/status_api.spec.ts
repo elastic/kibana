@@ -25,6 +25,9 @@ interface StatusEngineWithNonPriority {
   };
 }
 
+// A dual-process flag flip reaches the deployment's other Kibana instances on their 10s poll.
+const FLAG_PROPAGATION_POLL = { timeout: 30_000, intervals: [1_000] };
+
 apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
 
@@ -88,17 +91,23 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
   );
 
   apiTest('reports a nonPriority block only for types that run one', async ({ apiClient }) => {
-    const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
-      headers: defaultHeaders,
-      responseType: 'json',
-    });
-    expect(response.statusCode).toBe(200);
+    let withBlock: StatusEngineWithNonPriority[] = [];
 
     // `user` is the only type with a priority extraction gate today.
-    const withBlock: StatusEngineWithNonPriority[] = response.body.engines.filter(
-      (engine: { nonPriority?: unknown }) => 'nonPriority' in engine
-    );
-    expect(withBlock.map(({ type }) => type)).toStrictEqual(['user']);
+    await expect
+      .poll(async () => {
+        const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+          headers: defaultHeaders,
+          responseType: 'json',
+        });
+        expect(response.statusCode).toBe(200);
+
+        withBlock = response.body.engines.filter(
+          (engine: { nonPriority?: unknown }) => 'nonPriority' in engine
+        );
+        return withBlock.map(({ type }) => type);
+      }, FLAG_PROPAGATION_POLL)
+      .toStrictEqual(['user']);
 
     // Assert the shape, not the values: this suite accepts an already-installed store, so a
     // shared deployment may have configured the user engine before the test ran.
@@ -118,14 +127,19 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
         'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: false },
       });
 
-      const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
-        headers: defaultHeaders,
-        responseType: 'json',
-      });
-      expect(response.statusCode).toBe(200);
-      expect(
-        response.body.engines.filter((engine: { nonPriority?: unknown }) => 'nonPriority' in engine)
-      ).toStrictEqual([]);
+      await expect
+        .poll(async () => {
+          const response = await apiClient.get(ENTITY_STORE_ROUTES.public.STATUS, {
+            headers: defaultHeaders,
+            responseType: 'json',
+          });
+          expect(response.statusCode).toBe(200);
+
+          return response.body.engines.filter(
+            (engine: { nonPriority?: unknown }) => 'nonPriority' in engine
+          );
+        }, FLAG_PROPAGATION_POLL)
+        .toStrictEqual([]);
 
       await apiServices.core.settings({
         'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: true },
