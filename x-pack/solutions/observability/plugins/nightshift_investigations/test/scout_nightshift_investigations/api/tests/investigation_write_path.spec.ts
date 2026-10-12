@@ -7,8 +7,8 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
-import type { KibanaRole } from '@kbn/scout-oblt';
-import { NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
+import type { ApiServicesFixture, KibanaRole } from '@kbn/scout-oblt';
+import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
 import {
   apiTest,
   cancelRunsOf,
@@ -50,6 +50,9 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
   ],
 };
 
+const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean | null) =>
+  apiServices.core.settings({ 'feature_flags.overrides': { [NIGHTSHIFT_ENABLED_FLAG]: enabled } });
+
 /**
  * The investigation write path on Agent Builder conversations: starts land on an investigation
  * whose subjects the shared agentic investigations API reads. The agent runs against an LLM
@@ -64,7 +67,13 @@ apiTest.describe(
     let llm: Awaited<ReturnType<typeof startUnresponsiveLlm>>;
     let alertWorkflowId: string;
 
-    apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, kbnClient, apiServices, config }) => {
+      // Investigations are gated on the nightshift.enabled flag. The config set turns it on, but
+      // suites that toggle it at runtime reset the override, so turn it on again here. Overrides
+      // only work where coreApp.allowDynamicConfigOverrides is set (Scout's local configs).
+      if (!config.isCloud) {
+        await setNightshiftEnabled(apiServices, true);
+      }
       ({ cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_OPERATOR_ROLE));
       llm = await startUnresponsiveLlm();
       alertWorkflowId = await createAlertStartWorkflow(kbnClient, uniqueId('scout-alert-start'));
@@ -76,9 +85,12 @@ apiTest.describe(
       await cancelWorkflowRuns(kbnClient);
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
+    apiTest.afterAll(async ({ kbnClient, apiServices, config }) => {
       await deleteWorkflow(kbnClient, alertWorkflowId);
       llm.close();
+      if (!config.isCloud) {
+        await setNightshiftEnabled(apiServices, null);
+      }
     });
 
     apiTest(

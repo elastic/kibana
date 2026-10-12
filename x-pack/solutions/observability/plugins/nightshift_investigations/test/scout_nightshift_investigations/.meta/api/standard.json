@@ -1,5 +1,5 @@
 {
-  "sha1": "d4c019e49eb9bc0356939b85975a8762abe403db",
+  "sha1": "0260a55678cbd040ea726ccfb5cd4541f1b21d6a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -101,8 +101,8 @@
       }
     },
     {
-      "id": "573fcc9ed716f81-3479f2ebf69bc23",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure rejects a running investigation without a matching workflow execution",
+      "id": "573fcc9ed716f81-5e449208c3a1a7a",
+      "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 404 when no live investigation workflow run names the investigation",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -112,40 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 30,
-        "column": 7
-      }
-    },
-    {
-      "id": "573fcc9ed716f81-f8a9dad1a707c4a",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 409 when the investigation is already settled",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 39,
-        "column": 67
-      }
-    },
-    {
-      "id": "573fcc9ed716f81-bc2c7c3792e2319",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure returns 404 when no investigation record and no matching workflow execution exist",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 53,
-        "column": 27
+        "line": 25,
+        "column": 8
       }
     },
     {
@@ -160,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/ensure_investigation.spec.ts",
-        "line": 54,
-        "column": 67
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -305,6 +273,62 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation.spec.ts",
         "line": 83,
+        "column": 14
+      }
+    },
+    {
+      "id": "630943ff7e82a22-6348ef67781d494",
+      "title": "Nightshift investigations on Agent Builder conversations a manual start returns an investigation the shared API reads with its subject, in progress",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
+        "line": 79,
+        "column": 47
+      }
+    },
+    {
+      "id": "630943ff7e82a22-9d798d9a6e7713d",
+      "title": "Nightshift investigations on Agent Builder conversations a start sharing an alert with an open investigation continues it with the union of subjects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
+        "line": 108,
+        "column": 16
+      }
+    },
+    {
+      "id": "630943ff7e82a22-3bd9346ae68fbec",
+      "title": "Nightshift investigations on Agent Builder conversations a closed investigation is never continued",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
+        "line": 169,
+        "column": 13
+      }
+    },
+    {
+      "id": "630943ff7e82a22-a679fb89c830a9a",
+      "title": "Nightshift investigations on Agent Builder conversations a Slack thread investigation is found by its thread, on the route and in the shared list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/investigation_write_path.spec.ts",
+        "line": 191,
         "column": 14
       }
     },
