@@ -113,3 +113,9 @@ export {
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
 } from './src/nightshift_usage_ids';
+
+export {
+  SETTINGS_TAB_IDS,
+  type NightshiftSettingsLocatorParams,
+  type SettingsTabId,
+} from './src/settings';

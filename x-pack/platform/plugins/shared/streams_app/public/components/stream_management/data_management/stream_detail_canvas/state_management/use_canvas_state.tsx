@@ -108,6 +108,9 @@ export const useCanvasEvents = () => {
       selectTab: (flyoutTab: string) => {
         service.send({ type: 'flyout.tab', flyoutTab });
       },
+      changeSearchQuery: (query: string) => {
+        service.send({ type: 'search.change', query });
+      },
       updateNodePositions: (positions: Record<string, XYPosition>) => {
         service.send({ type: 'nodes.positions.change', positions });
       },

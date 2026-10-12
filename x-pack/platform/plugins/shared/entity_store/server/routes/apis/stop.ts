@@ -7,14 +7,16 @@
 
 import path from 'node:path';
 import { z, lazySchema } from '@kbn/zod/v4';
-import type { IKibanaResponse } from '@kbn/core-http-server';
+import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
-import type { EntityStorePluginRouter } from '../../types';
+import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
+import type { EngineStatus } from '../../domain/saved_objects';
+import { pairedQualifies } from './utils/process_status';
 
 const bodySchema = lazySchema(() =>
   z.object({
@@ -25,6 +27,54 @@ const bodySchema = lazySchema(() =>
       .describe('Entity types to stop. Defaults to all running types.'),
   })
 );
+
+type StopRequestBody = z.infer<typeof bodySchema>;
+
+const isStarted = (status: EngineStatus | null | undefined) => status === ENGINE_STATUS.STARTED;
+
+export async function handleStop(
+  ctx: EntityStoreRequestHandlerContext,
+  req: KibanaRequest<unknown, unknown, StopRequestBody>,
+  res: KibanaResponseFactory
+): Promise<IKibanaResponse> {
+  const {
+    logger,
+    assetManagerClient: assetManager,
+    entityMaintainersClient,
+    isDualProcessEnabled,
+  } = await ctx.entityStore;
+  const { entityTypes } = req.body;
+
+  logger.debug('Stop API invoked');
+
+  const [{ engines }, dualProcess] = await Promise.all([
+    assetManager.getStatus(),
+    isDualProcessEnabled(),
+  ]);
+  // `assetManager.stop` removes every process a type runs, so a type qualifies when any one of
+  // them is running. Reading `status` alone would report success while a `user` engine kept
+  // extracting through a non-priority process the internal route left started.
+  const startedTypes = new Set(
+    engines
+      .filter((engine) => pairedQualifies(engine, isStarted, dualProcess))
+      .map(({ type }) => type)
+  );
+  const toStop = entityTypes.filter((type) => startedTypes.has(type));
+
+  await Promise.all(toStop.map((type) => assetManager.stop(type)));
+
+  if (toStop.length > 0) {
+    const { engines: remainingEngines } = await assetManager.getStatus();
+    const anyStarted = remainingEngines.some((engine) =>
+      pairedQualifies(engine, isStarted, dualProcess)
+    );
+    if (!anyStarted) {
+      await entityMaintainersClient.stopAll(req);
+    }
+  }
+
+  return res.ok({ body: { ok: true } });
+}
 
 export function registerStop(router: EntityStorePluginRouter) {
   router.versioned
@@ -54,38 +104,6 @@ export function registerStop(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, 'examples/entity_store_stop.yaml'),
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
-        const entityStoreCtx = await ctx.entityStore;
-        const {
-          logger,
-          assetManagerClient: assetManager,
-          entityMaintainersClient,
-        } = entityStoreCtx;
-        const { entityTypes } = req.body;
-
-        logger.debug('Stop API invoked');
-
-        const { engines } = await assetManager.getStatus();
-        const startedTypes = new Set(
-          engines.filter((e) => e.status === ENGINE_STATUS.STARTED).map((e) => e.type)
-        );
-        const toStop = entityTypes.filter((type) => startedTypes.has(type));
-
-        await Promise.all(toStop.map((type) => assetManager.stop(type)));
-
-        if (toStop.length > 0) {
-          const { engines: remainingEngines } = await assetManager.getStatus();
-          const anyStarted = remainingEngines.some((e) => e.status === ENGINE_STATUS.STARTED);
-          if (!anyStarted) {
-            await entityMaintainersClient.stopAll(req);
-          }
-        }
-
-        return res.ok({
-          body: {
-            ok: true,
-          },
-        });
-      })
+      wrapMiddlewares(handleStop)
     );
 }

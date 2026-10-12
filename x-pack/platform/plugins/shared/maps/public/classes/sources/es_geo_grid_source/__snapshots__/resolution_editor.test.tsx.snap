@@ -6,7 +6,7 @@ exports[`should render 3 tick slider when renderAs is HEX 1`] = `
     display="columnCompressed"
     label="Resolution"
   >
-    <EuiRangeClass
+    <EuiRange
       compressed={true}
       max={3}
       min={1}
@@ -43,7 +43,7 @@ exports[`should render 4 tick slider when renderAs is GRID 1`] = `
     display="columnCompressed"
     label="Resolution"
   >
-    <EuiRangeClass
+    <EuiRange
       compressed={true}
       max={4}
       min={1}
@@ -86,7 +86,7 @@ exports[`should render 4 tick slider when renderAs is HEATMAP 1`] = `
     display="columnCompressed"
     label="Resolution"
   >
-    <EuiRangeClass
+    <EuiRange
       compressed={true}
       max={4}
       min={1}
@@ -129,7 +129,7 @@ exports[`should render 4 tick slider when renderAs is POINT 1`] = `
     display="columnCompressed"
     label="Resolution"
   >
-    <EuiRangeClass
+    <EuiRange
       compressed={true}
       max={4}
       min={1}
