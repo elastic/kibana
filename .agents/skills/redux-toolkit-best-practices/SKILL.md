@@ -1,6 +1,6 @@
 ---
 name: redux-toolkit-best-practices
-description: "Apply and review Redux Toolkit best practices in Kibana, including stores, slices, selectors, middleware, async logic, and RTK Query. Version-aware and focused on common anti-patterns and performance pitfalls. Invoke explicitly with /skill:redux-toolkit-best-practices."
+description: "Apply and review Redux Toolkit best practices"
 disable-model-invocation: true
 ---
 
