@@ -503,6 +503,55 @@ describe('createProposalSlotResolver', () => {
       expect(service.get).not.toHaveBeenCalled();
     });
 
+    it('is retried when the check itself is throttled, since it goes to Elasticsearch', async () => {
+      const assertCanRead = jest
+        .fn()
+        .mockRejectedValueOnce(transient())
+        .mockResolvedValue(undefined);
+      const { resolve, sleep } = resolver(createService(), { assertCanRead });
+
+      await expect(resolve({ subjectKey: SUBJECT })).resolves.toMatchObject({ kind: 'mint' });
+      expect(assertCanRead).toHaveBeenCalledTimes(2);
+      expect(sleep).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not remember a check that is still failing, so the next finding asks again', async () => {
+      // A blip must not lose the whole run: it fails closed and is not retried by the next sweep.
+      const assertCanRead = jest
+        .fn()
+        .mockRejectedValueOnce(transient())
+        .mockRejectedValueOnce(transient())
+        .mockRejectedValueOnce(transient())
+        .mockResolvedValue(undefined);
+      const { resolve } = resolver(createService(), { assertCanRead });
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('unavailable');
+      await expect(resolve({ subjectKey: 'another-subject' })).resolves.toMatchObject({
+        kind: 'mint',
+      });
+      expect(assertCanRead).toHaveBeenCalledTimes(4);
+    });
+
+    it('remembers a grant for the rest of the run', async () => {
+      const assertCanRead = jest.fn().mockResolvedValue(undefined);
+      const { resolve } = resolver(createService(), { assertCanRead });
+
+      await resolve({ subjectKey: SUBJECT });
+      await resolve({ subjectKey: 'another-subject' });
+
+      expect(assertCanRead).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not retry a real refusal', async () => {
+      const assertCanRead = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('forbidden'), { statusCode: 403 }));
+      const { resolve } = resolver(createService(), { assertCanRead });
+
+      await expect(resolve({ subjectKey: SUBJECT })).rejects.toThrow('forbidden');
+      expect(assertCanRead).toHaveBeenCalledTimes(1);
+    });
+
     it('stays refused for every later finding in the run', async () => {
       const { resolve, privileges } = resolver(createService(), {
         assertCanRead: async () => {

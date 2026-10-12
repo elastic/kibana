@@ -9,6 +9,10 @@ import { v5 as uuidv5 } from 'uuid';
 import type { ActionCatalogEntry, ActionSubjectKind } from '@kbn/alertzero-common';
 import type { JsonSchema } from '@kbn/workflows';
 import {
+  CONFIRMED_FINDING_CRITICALITY,
+  CRITICAL_FINDING_CRITICALITY,
+} from '../../../../../common/proposals/asset_criticality';
+import {
   MAX_SUMMARY_BULLETS_CHARS,
   MAX_SUMMARY_PROPOSAL_BULLETS,
 } from '../../../../../common/step_types/package_report';
@@ -272,7 +276,9 @@ export const buildActionInput = ({
       if (schemaHasProperty(schema, 'criticality_level')) {
         // A confirmed finding marks the identity high impact; a critical one goes one higher.
         actionInput.criticality_level =
-          state.severity === 'critical' ? 'extreme_impact' : 'high_impact';
+          state.severity === 'critical'
+            ? CRITICAL_FINDING_CRITICALITY
+            : CONFIRMED_FINDING_CRITICALITY;
       }
       return actionInput;
     }

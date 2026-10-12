@@ -14,12 +14,14 @@ import type { LiveProposal } from './resolve_proposal_slot';
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 
 /**
- * The revision after which packaging stops adding to a Proposal's comment. Every addition is a new
- * revision row and a new card in the owner's conversation, so with no limit a busy host would pile
- * revisions on a Proposal until its comment ran out of room. Worse, an analyst reading the
- * Proposal on revision N is refused when they decide it once N+1 has landed, which was rare while
- * only analysts revised. Past this, the journal line on the converging Investigation is the
- * pointer, and nothing is lost: the finding is still covered and still visible.
+ * The revision at which packaging stops adding to a Proposal's comment. Revision 1 is the
+ * original, so a Proposal nobody else has revised gets four automatic additions (1 to 2, 2 to 3,
+ * 3 to 4, 4 to 5) and then no more. Every addition is a new revision row and a new card in the
+ * owner's conversation, so with no limit a busy host would pile revisions on a Proposal until its
+ * comment ran out of room. Worse, an analyst reading the Proposal on revision N is refused when
+ * they decide it once N+1 has landed, which was rare while only analysts revised. Past this, the
+ * journal line on the converging Investigation is the pointer, and nothing is lost: the finding is
+ * still covered and still visible.
  */
 export const MAX_AUTOMATIC_REVISION = 5;
 type ProposalPrivileges = Pick<
@@ -36,7 +38,7 @@ type ProposalPrivileges = Pick<
  * - `already_mentioned`: the comment already names this Investigation.
  * - `not_revisable`: an analyst has already decided it, and `revise()` refuses a decided one.
  * - `too_long`: the line would push the comment past the length the service allows.
- * - `revision_limit`: the Proposal has already been revised {@link MAX_AUTOMATIC_REVISION} times.
+ * - `revision_limit`: the Proposal has reached revision {@link MAX_AUTOMATIC_REVISION}.
  * - `failed`: the revision was refused (including for want of the privilege to manage proposals)
  *   or errored. Never fatal: the duplicate was avoided either way, and the line is a courtesy to
  *   the analyst.

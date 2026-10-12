@@ -9,8 +9,9 @@ import { get, isEqual } from 'lodash';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import { ProposalNotFoundError } from '@kbn/proposals-plugin/server';
+import { ASSET_CRITICALITY_LEVELS } from '../../../../../common/proposals/asset_criticality';
 import { buildHuntProposalId } from '../common/hunt_proposal_id';
-import { retryTransient } from './retry_transient';
+import { isTransientError, retryTransient } from './retry_transient';
 
 type ProposalsService = ReturnType<ProposalsPluginStart['getProposalsService']>;
 type ProposalReader = Pick<
@@ -32,23 +33,15 @@ const MAX_GENERATIONS = 50;
  */
 const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id', 'id_field', 'id_value'] as const;
 
-/**
- * The levels an identity can be marked, weakest first. A finding for a critical report asks for
- * `extreme_impact` and any other confirmed finding for `high_impact`, so two Investigations can
- * want different levels for one user.
- */
-const CRITICALITY_LEVELS: readonly unknown[] = [
-  'low_impact',
-  'medium_impact',
-  'high_impact',
-  'extreme_impact',
-];
+/** Typed wide so a level read from an action input can be looked up without a cast at each use. */
+const LEVELS: readonly unknown[] = ASSET_CRITICALITY_LEVELS;
 
 /**
  * Whether a live Proposal already asks for at least the criticality a finding wants. A stronger
  * finding must not be absorbed by a weaker live Proposal: it would only add a link, and the analyst
  * would approve the lower level. A weaker finding is covered by a stronger Proposal. A level this
- * does not know is covered only by the same level, rather than guessed at.
+ * does not know is covered only by the same level, rather than guessed at. The levels, and their
+ * order, are `ASSET_CRITICALITY_LEVELS`: the same list the producer's two levels come from.
  */
 const coversCriticality = (
   wanted: Record<string, unknown> | undefined,
@@ -59,8 +52,8 @@ const coversCriticality = (
     return true;
   }
   const liveLevel = get(live, 'criticality_level');
-  const wantedRank = CRITICALITY_LEVELS.indexOf(wantedLevel);
-  const liveRank = CRITICALITY_LEVELS.indexOf(liveLevel);
+  const wantedRank = LEVELS.indexOf(wantedLevel);
+  const liveRank = LEVELS.indexOf(liveLevel);
   return wantedRank === -1 || liveRank === -1
     ? isEqual(liveLevel, wantedLevel)
     : liveRank >= wantedRank;
@@ -141,9 +134,9 @@ export type ResolveProposalSlot = (wanted: WantedProposal) => Promise<ProposalSl
  * see, so converging onto it would hide the finding. A finding then gets a Proposal of its own.
  *
  * What is read here belongs to other Investigations, so the request has to be allowed to read
- * proposals; the check is made once per run, before the first read. Each read is retried when it
- * fails in a way that could pass on a second try, because a run that cannot tell what exists
- * mints nothing and is not retried by the next sweep.
+ * proposals; the check is made before the first read and its answer kept for the run. Each read,
+ * that check included, is retried when it fails in a way that could pass on a second try, because
+ * a run that cannot tell what exists mints nothing and is not retried by the next sweep.
  */
 export const createProposalSlotResolver = ({
   proposalsService,
@@ -168,10 +161,30 @@ export const createProposalSlotResolver = ({
   now?: () => number;
   retry?: Parameters<typeof retryTransient>[1];
 }): ResolveProposalSlot => {
-  // Cached, so the privilege is looked up once per run however many findings it resolves. A
-  // refusal is cached too, and every later finding fails the same way.
-  let canRead: Promise<void> | undefined;
-  const ensureCanRead = () => (canRead ??= privileges.assertCanRead(request));
+  // Looked up once per run however many findings it resolves, but only a settled answer is kept:
+  // a grant, or a real refusal, which every later finding then fails with. The check goes to
+  // Elasticsearch, so a throttled one is retried like any other read, and one that is still
+  // failing is not remembered: the next finding asks again rather than losing the whole run to a
+  // blip that a run cannot recover from (its sweep does not retry it).
+  let granted = false;
+  let refusal: unknown;
+  const ensureCanRead = async () => {
+    if (granted) {
+      return;
+    }
+    if (refusal !== undefined) {
+      throw refusal;
+    }
+    try {
+      await retryTransient(() => privileges.assertCanRead(request), retry);
+      granted = true;
+    } catch (error) {
+      if (!isTransientError(error)) {
+        refusal = error;
+      }
+      throw error;
+    }
+  };
 
   return async ({ subjectKey, actionInput }) => {
     try {

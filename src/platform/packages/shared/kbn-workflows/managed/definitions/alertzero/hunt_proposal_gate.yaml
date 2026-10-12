@@ -159,12 +159,38 @@ steps:
   # A lost race is a Proposal under this id that belongs to a different conversation. Any other
   # failure (the gate itself ending in an error, a refused create) is left to read as it always
   # has, so a note is only written when it can say something true.
+  #
+  # Winning the id is not the same as covering the finding. Two findings for one subject share a
+  # target, since the target is what the id is derived from, but not necessarily a criticality: a
+  # critical report asks for `extreme_impact` and any other confirmed finding for `high_impact`. If
+  # the weaker one won, the stronger finding's request was never proposed, and a note saying it is
+  # "covered" would hide that. So the note compares the winner's level with this finding's, with
+  # the same ranking packaging uses when it resolves a slot (`ASSET_CRITICALITY_LEVELS`, which a
+  # test keeps in step with the list below), and says so when the winner asks for less. A level it
+  # does not know is covered only by the same level, rather than guessed at.
   - name: resolve_lost_race
     type: data.set
     with:
       lost_race: "${{ steps.fetch_existing_proposal.output.conversationId != nil and steps.fetch_existing_proposal.output.conversationId != empty and steps.fetch_existing_proposal.output.conversationId != inputs.conversationId }}"
       lost_race_note: |-
-        A Proposal for "{{ inputs.title | default: 'the proposed action' }}" was raised by [another Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ steps.fetch_existing_proposal.output.conversationId }}) at the same moment as this one, so no second Proposal was created and this finding is covered by that one. This Investigation stays open until an analyst closes it.
+        {%- assign levels = 'low_impact,medium_impact,high_impact,extreme_impact' | split: ',' -%}
+        {%- assign wanted = inputs.actionInput.criticality_level -%}
+        {%- assign won = steps.fetch_existing_proposal.output.actionInput.criticality_level -%}
+        {%- assign wantedRank = -1 -%}
+        {%- assign wonRank = -1 -%}
+        {%- for level in levels -%}
+          {%- if level == wanted -%}{%- assign wantedRank = forloop.index0 -%}{%- endif -%}
+          {%- if level == won -%}{%- assign wonRank = forloop.index0 -%}{%- endif -%}
+        {%- endfor -%}
+        {%- assign covered = true -%}
+        {%- if wanted != nil and wanted != empty -%}
+          {%- if wantedRank >= 0 and wonRank >= 0 -%}
+            {%- if wonRank < wantedRank -%}{%- assign covered = false -%}{%- endif -%}
+          {%- elsif wanted != won -%}
+            {%- assign covered = false -%}
+          {%- endif -%}
+        {%- endif -%}
+        A Proposal for "{{ inputs.title | default: 'the proposed action' }}" was raised by [another Investigation]({% if workflow.spaceId != 'default' %}/s/{{ workflow.spaceId }}{% endif %}/app/alertzero?selectedConversationId={{ steps.fetch_existing_proposal.output.conversationId }}) at the same moment as this one, {% if covered %}so no second Proposal was created and this finding is covered by that one.{% else %}but it asks for {{ won | default: 'no level' }} where this finding asks for {{ wanted }}, so the level this finding asks for was not proposed. A manual run targeting this report proposes it.{% endif %} This Investigation stays open until an analyst closes it.
 
   - name: journal_lost_race
     type: workflow.execute

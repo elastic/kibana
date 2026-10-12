@@ -163,7 +163,7 @@ describe('createAlsoRaisedByAppender', () => {
   describe('how many times it will revise one proposal', () => {
     // Every addition is a new revision and a new card on the owner's conversation, and an analyst
     // reading revision N is refused when they decide it once N+1 has landed.
-    it('stops once the proposal has been revised as often as it will, and leaves the pointer to the journal', async () => {
+    it('stops once the proposal reaches the limit revision, and leaves the pointer to the journal', async () => {
       const service = createService();
       const { append, privileges } = appender(service);
 
@@ -175,6 +175,18 @@ describe('createAlsoRaisedByAppender', () => {
       expect(outcome).toBe('revision_limit');
       expect(service.revise).not.toHaveBeenCalled();
       expect(privileges.canManage).not.toHaveBeenCalled();
+    });
+
+    it('means four automatic additions on a proposal nobody else has revised: 1 to 2 up to 4 to 5', async () => {
+      const outcomes = await Promise.all(
+        [1, 2, 3, 4, 5].map((revision) => {
+          const { append } = appender(createService());
+          return append({ live: live({ revision }), investigationConversationId: THIS_RUN });
+        })
+      );
+
+      expect(outcomes).toEqual(['revised', 'revised', 'revised', 'revised', 'revision_limit']);
+      expect(MAX_AUTOMATIC_REVISION).toBe(5);
     });
 
     it('still revises one below the limit', async () => {
