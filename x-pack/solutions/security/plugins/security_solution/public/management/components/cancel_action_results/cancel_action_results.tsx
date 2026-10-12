@@ -18,6 +18,7 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
 import { endpointActionResponseCodes } from '../endpoint_responder/lib/endpoint_action_response_codes';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 
 export interface CancelActionResultsProps {
   action: MaybeImmutable<ActionDetails>;
@@ -36,7 +37,15 @@ export const CancelActionResults = memo<CancelActionResultsProps>(
 
     return useMemo(() => {
       const agentId = _agentId || action.agents[0];
-      const agentActionState = action.agentState[agentId];
+
+      if (!action.agents.includes(agentId)) {
+        window.console.error(
+          `CancelActionResults component called with agentId [${agentId}] not in action.agents`
+        );
+        return <div data-test-subj={getTestId()} />;
+      }
+
+      const agentActionState = getAgentActionState(action, agentId);
       const agentActionResult =
         action.outputs?.[agentId] ??
         ({
@@ -45,13 +54,6 @@ export const CancelActionResults = memo<CancelActionResultsProps>(
           completedAt: action.completedAt,
           content: { code: '' } as ResponseActionCancelOutputContent,
         } as unknown as ActionResponseOutput<ResponseActionCancelOutputContent>);
-
-      if (!action.agents.includes(agentId)) {
-        window.console.error(
-          `CancelActionResults component called with agentId [${agentId}] not in action.agents`
-        );
-        return <div data-test-subj={getTestId()} />;
-      }
 
       let result: React.ReactNode;
 

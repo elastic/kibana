@@ -78,17 +78,12 @@ test.describe(
       const editor = pageObjects.workflowEditor;
       await editor.gotoWorkflow(workflowId);
       await editor.triggerAutocompleteAfter(`${yaml}\nsettings:\n  `, 'settings:\n  ');
-      const suggestions = editor.getYamlEditorSuggestWidget();
-      await expect(
-        suggestions.getByRole('option', { name: 'timezone', exact: true })
-      ).toBeVisible();
-      await expect(suggestions.getByRole('option', { name: 'run_as', exact: true })).toBeHidden();
+      await expect(editor.getYamlEditorSuggestionItem('timezone')).toBeVisible();
+      await expect(editor.getYamlEditorSuggestionItem('run_as')).toBeHidden();
 
       await editor.dismissYamlSuggestions();
       await editor.triggerAutocompleteAfter(`${yaml}\nsett`, 'sett');
-      await expect(
-        suggestions.getByRole('option', { name: 'settings', exact: true })
-      ).toBeVisible();
+      await expect(editor.getYamlEditorSuggestionItem('settings')).toBeVisible();
       await editor.acceptYamlSuggestion('settings');
       await expect.poll(() => editor.getYamlEditorValue()).toContain('settings:');
       expect(await editor.getYamlEditorValue()).not.toContain('run_as');
@@ -111,11 +106,7 @@ test.describe(
         `run_as: ${ACCOUNT_ID}`
       );
       await expect(editor.yamlEditor).toContainText(ACCOUNT_ID);
-      await expect(
-        editor
-          .getYamlEditorSuggestWidget()
-          .getByRole('option', { name: /Load more service accounts/ })
-      ).toBeHidden();
+      await expect(editor.getYamlEditorSuggestionItem('Load more service accounts')).toBeHidden();
       await editor.dismissYamlSuggestions();
       await page.clock.install();
       await editor.hoverServiceAccountId(ACCOUNT_ID);

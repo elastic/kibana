@@ -399,3 +399,113 @@ export function spaceAuditEvent({
     },
   };
 }
+
+export enum ServiceAccountAuditAction {
+  CREATE = 'service_account_create',
+  DELETE = 'service_account_delete',
+  WORKLOAD_BIND = 'service_account_workload_bind',
+  WORKLOAD_UNBIND = 'service_account_workload_unbind',
+}
+
+const serviceAccountAuditVerbs: Record<ServiceAccountAuditAction, VerbsTuple> = {
+  service_account_create: ['create', 'creating', 'created'],
+  service_account_delete: ['delete', 'deleting', 'deleted'],
+  service_account_workload_bind: ['bind', 'binding', 'bound'],
+  service_account_workload_unbind: ['unbind', 'unbinding', 'unbound'],
+};
+
+const serviceAccountAuditCategories: Record<
+  ServiceAccountAuditAction,
+  ArrayElement<EcsEvent['category']>
+> = {
+  service_account_create: 'iam',
+  service_account_delete: 'iam',
+  service_account_workload_bind: 'iam',
+  service_account_workload_unbind: 'iam',
+};
+
+const serviceAccountAuditTypes: Record<
+  ServiceAccountAuditAction,
+  ArrayElement<EcsEvent['type']>
+> = {
+  service_account_create: 'creation',
+  service_account_delete: 'deletion',
+  service_account_workload_bind: 'change',
+  service_account_workload_unbind: 'change',
+};
+
+export interface ServiceAccountAuditEventParams {
+  action: ServiceAccountAuditAction;
+  /**
+   * The account the event targets, recorded as ECS `user.target`. Omitted when it is unknown or
+   * cannot be trusted: an unbind addresses the binding by its coordinates and never reads the
+   * account it names, and a create that failed before validation may carry a name Kibana rejected.
+   */
+  serviceAccount?: { id?: string; name?: string };
+  /** The workload a binding event addresses. */
+  workload?: NonNullable<AuditEvent['kibana']>['workload'];
+  /**
+   * Whether a delete skips the check for bound workloads, which it leaves behind. Recorded in the
+   * message only.
+   */
+  force?: boolean;
+  outcome?: EcsEvent['outcome'];
+  error?: Error;
+}
+
+export function serviceAccountAuditEvent({
+  action,
+  serviceAccount,
+  workload,
+  force,
+  outcome,
+  error,
+}: ServiceAccountAuditEventParams): AuditEvent {
+  const target = serviceAccount
+    ? {
+        ...(serviceAccount.id ? { id: serviceAccount.id } : {}),
+        ...(serviceAccount.name ? { name: serviceAccount.name } : {}),
+      }
+    : undefined;
+  const targetAttributes = target
+    ? Object.entries(target).map(([key, value]) => `${key}=${value}`)
+    : [];
+  const accountDoc =
+    targetAttributes.length > 0
+      ? `service account [${targetAttributes.join(', ')}]`
+      : 'service account';
+  const workloadDoc = workload
+    ? ` ${action === ServiceAccountAuditAction.WORKLOAD_UNBIND ? 'from' : 'to'} workload [${
+        workload.plugin_id
+      }/${workload.type}/${workload.id}]`
+    : '';
+  const doc = `${accountDoc}${workloadDoc}${force ? ' [force=true]' : ''}`;
+
+  const [present, progressive, past] = serviceAccountAuditVerbs[action];
+  // An error with an `unknown` outcome is a failure whose cleanup could not be confirmed, so the
+  // object of the attempt may still exist.
+  const message = error
+    ? `Failed attempt to ${present} ${doc}${
+        outcome === 'unknown' ? ', which might have been left behind' : ''
+      }`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action,
+      category: [serviceAccountAuditCategories[action]],
+      // ECS gives an IAM event two types: the activity, and that a user (not a group) is managed.
+      type: ['user', serviceAccountAuditTypes[action]],
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    ...(targetAttributes.length > 0 ? { user: { target } } : {}),
+    ...(workload ? { kibana: { workload } } : {}),
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+}

@@ -276,7 +276,7 @@ export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = (
           artifacts:
             mapArtifacts(
               (rule.artifacts ?? []).filter((artifact) => artifact.id !== artifactIdPendingDelete)
-            ) ?? [],
+            ) ?? null,
         },
       },
       {
@@ -288,7 +288,7 @@ export const DashboardArtifactsSubsection: React.FC<RuleSummarySectionProps> = (
   }, [artifactIdPendingDelete, rule.artifacts, rule.id, updateRule]);
 
   const handleManageSave = useCallback(
-    (artifacts: RuleArtifactPayload) => {
+    (artifacts: RuleArtifactPayload | null) => {
       if (!rule.id) {
         return;
       }

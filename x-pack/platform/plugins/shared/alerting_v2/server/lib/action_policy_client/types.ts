@@ -18,7 +18,7 @@ export interface UpdateActionPolicyParams {
 
 export interface CreateActionPolicyParams {
   data: CreateActionPolicyDataInput;
-  options?: { id?: string; enabled?: boolean };
+  options?: { id?: string };
 }
 
 export interface SnoozeActionPolicyParams {
@@ -60,5 +60,10 @@ export interface FindActionPoliciesResponse {
 }
 
 export interface MatchActionPoliciesParams {
-  ruleTags?: string[];
+  routingTags?: string[];
+}
+
+export interface GetRoutingTagsParams {
+  search?: string;
+  policiesPerTag: number;
 }
