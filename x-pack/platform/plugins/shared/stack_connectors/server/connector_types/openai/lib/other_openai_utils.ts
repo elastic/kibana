@@ -59,6 +59,9 @@ const deepMergeDefaults = (
   const merged: Record<string, unknown> = { ...defaults };
   for (const [key, value] of Object.entries(overrides)) {
     if (key === '__proto__') continue;
+    // An explicitly-undefined request value (e.g. `temperature: undefined`) means "not set", so it
+    // must not erase the default. An explicit `null` is a real value and still wins.
+    if (value === undefined) continue;
     const base = merged[key];
     merged[key] =
       isPlainObject(base) && isPlainObject(value) ? deepMergeDefaults(base, value) : value;

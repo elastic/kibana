@@ -156,6 +156,76 @@ describe('OpenAI connector extraBody on the wire', () => {
     });
   });
 
+  describe('undefined and null request values', () => {
+    it('invokeAsyncIterator keeps the extraBody value when the request value is undefined', async () => {
+      const { consumerStream } = await createConnector(extraBody).invokeAsyncIterator(
+        { messages, temperature: undefined, timeout: 60000 },
+        usageCollector()
+      );
+      for await (const _ of consumerStream) {
+        // consume
+      }
+
+      expect(received[0].temperature).toBe(0.7);
+      expect(received[0].top_k).toBe(20);
+    });
+
+    it('invokeAsyncIterator lets an explicit request value win over extraBody', async () => {
+      const { consumerStream } = await createConnector(extraBody).invokeAsyncIterator(
+        { messages, temperature: 0, timeout: 60000 },
+        usageCollector()
+      );
+      for await (const _ of consumerStream) {
+        // consume
+      }
+
+      expect(received[0].temperature).toBe(0);
+    });
+
+    it('runApi keeps the extraBody value when the request value is undefined', async () => {
+      await createConnector(extraBody).runApi(
+        { body: JSON.stringify({ messages, temperature: undefined }) },
+        usageCollector()
+      );
+
+      expect(received[0].temperature).toBe(0.7);
+    });
+
+    it('runApi lets an explicit request value, including null, win over extraBody', async () => {
+      await createConnector(extraBody).runApi(
+        { body: JSON.stringify({ messages, temperature: 0 }) },
+        usageCollector()
+      );
+      expect(received[0].temperature).toBe(0);
+
+      await createConnector(extraBody).runApi(
+        { body: JSON.stringify({ messages, temperature: null }) },
+        usageCollector()
+      );
+      expect(received[1].temperature).toBeNull();
+    });
+
+    it('streamApi keeps the extraBody value when the request value is undefined', async () => {
+      const stream = await createConnector(extraBody).streamApi(
+        { body: JSON.stringify({ messages, temperature: undefined }), stream: true },
+        usageCollector()
+      );
+      await drain(stream as unknown as NodeJS.ReadableStream);
+
+      expect(received[0].temperature).toBe(0.7);
+    });
+
+    it('streamApi lets an explicit request value win over extraBody', async () => {
+      const stream = await createConnector(extraBody).streamApi(
+        { body: JSON.stringify({ messages, temperature: 0 }), stream: true },
+        usageCollector()
+      );
+      await drain(stream as unknown as NodeJS.ReadableStream);
+
+      expect(received[0].temperature).toBe(0);
+    });
+  });
+
   it('deep-merges nested objects, keeping request values', async () => {
     await createConnector({
       chat_template_kwargs: { enable_thinking: false, foo: 'bar' },
