@@ -22,7 +22,6 @@ import {
   EpisodeRuleCell,
   EpisodeRuleTagsCell,
   EpisodeSeverityCell,
-  EpisodeSourceCell,
 } from './episodes_table_cell_renderers';
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
@@ -85,6 +84,47 @@ describe('EpisodeSourceCell', () => {
 
     expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('zabbix');
     expect(screen.queryByTestId('episodeSourceIcon')).not.toBeInTheDocument();
+  });
+
+  describe('alert ingested from an external connector', () => {
+    const renderWithConnector = (connector: unknown) =>
+      renderWithI18n(
+        <EpisodeSourceCell
+          {...baseCellProps}
+          columnId="alerting_source"
+          row={makeRow({ source: connector })}
+        />
+      );
+
+    it('shows only the connector icon followed by its name for a known connector', () => {
+      renderWithConnector('zabbix');
+
+      expect(screen.getByTestId('episodeConnectorSourceIcon')).toBeInTheDocument();
+      expect(screen.getByTestId('episodeConnectorSourceName')).toHaveTextContent('zabbix');
+      expect(screen.queryByTestId('episodeSourceCell')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('episodeSourceIcon')).not.toBeInTheDocument();
+    });
+
+    it('shows only the connector name when there is no icon for it', () => {
+      renderWithConnector('my-custom-source');
+
+      expect(screen.getByTestId('episodeConnectorSourceName')).toHaveTextContent(
+        'my-custom-source'
+      );
+      expect(screen.queryByTestId('episodeConnectorSourceIcon')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('episodeSourceCell')).not.toBeInTheDocument();
+    });
+
+    it.each([['internal'], [''], [null], [undefined]])(
+      'falls back to the alerting system label when the source is %p',
+      (connector) => {
+        renderWithConnector(connector);
+
+        expect(screen.getByTestId('episodeSourceCell')).toHaveTextContent('Universal');
+        expect(screen.queryByTestId('episodeConnectorSourceIcon')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('episodeConnectorSourceName')).not.toBeInTheDocument();
+      }
+    );
   });
 });
 
@@ -825,36 +865,5 @@ describe('EpisodeRuleCell', () => {
     );
     expect(screen.getByText('Classic CPU Rule')).toBeInTheDocument();
     expect(screen.queryByRole('code')).not.toBeInTheDocument();
-  });
-});
-
-describe('EpisodeSourceCell', () => {
-  const renderSourceCell = (fields: Record<string, unknown>) =>
-    renderWithI18n(
-      <EpisodeSourceCell {...baseCellProps} columnId="source" row={makeRow(fields)} />
-    );
-
-  it('renders the connector icon for a known connector', () => {
-    renderSourceCell({ source: 'zabbix' });
-
-    expect(screen.getByTestId('episodeSourceCellIcon')).toBeInTheDocument();
-  });
-
-  it('renders the raw source text when there is no connector icon for it', () => {
-    renderSourceCell({ source: 'my-custom-source' });
-
-    expect(screen.getByText('my-custom-source')).toBeInTheDocument();
-  });
-
-  it('renders the raw text for the internal source of native v2 rules', () => {
-    renderSourceCell({ source: 'internal' });
-
-    expect(screen.getByText('internal')).toBeInTheDocument();
-  });
-
-  it.each([[''], [null], [undefined]])('renders nothing when the source is %p', (source) => {
-    const { container } = renderSourceCell({ source });
-
-    expect(container).toBeEmptyDOMElement();
   });
 });

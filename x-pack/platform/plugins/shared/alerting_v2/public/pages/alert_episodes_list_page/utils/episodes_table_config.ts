@@ -49,7 +49,6 @@ export const DEFAULT_EPISODES_TABLE_VISIBLE_COLUMNS: string[] = [
   'episode.status',
   'alerting_source',
   'severity',
-  'source',
   '@timestamp',
   'rule.id',
   'duration',
@@ -67,9 +66,8 @@ export const DEFAULT_EPISODES_TABLE_COLUMN_SETTINGS: EpisodesTableColumnSettings
   duration: { width: 110 },
   assignees: { width: 120 },
   'episode.status': { width: 110 },
-  alerting_source: { width: 110 },
+  alerting_source: { width: 140 },
   severity: { width: 100 },
-  source: { width: 100 },
 };
 
 export const DEFAULT_EPISODES_TABLE_CONFIG: EpisodesTableConfig = {

@@ -302,7 +302,6 @@ describe('AlertsListPage', () => {
       'episode.status',
       'alerting_source',
       'severity',
-      'source',
       '@timestamp',
       'rule.id',
       'duration',
@@ -312,18 +311,6 @@ describe('AlertsListPage', () => {
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
-  });
-
-  it('passes the source column renderer and unsortable header config to UnifiedDataTable', () => {
-    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
-    const customize = lastCall?.customGridColumnsConfiguration?.source;
-
-    expect(typeof lastCall?.externalCustomRenderers?.source).toBe('function');
-    expect(customize!({ column: { id: 'source', isSortable: true }, headerRowHeight: 1 })).toEqual({
-      id: 'source',
-      displayAsText: 'Source',
-      isSortable: false,
-    });
   });
 
   it.each([

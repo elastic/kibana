@@ -15,7 +15,6 @@ import {
   EuiIcon,
   EuiLink,
   EuiSkeletonText,
-  EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -67,8 +66,46 @@ const getEpisodeGroupingFromRow = (
   };
 };
 
+/** `source` written on events of native v2 rules; it carries no information worth showing. */
+const NATIVE_RULE_SOURCE = 'internal';
+
+/** The connector an alert came from: its icon, when one exists, followed by its name. */
+const EpisodeConnectorSource = ({ source }: { source: string }) => {
+  const IconComponent = ConnectorIconsMap.get(`.${source}`);
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {IconComponent && (
+        <EuiFlexItem grow={false}>
+          <Suspense fallback={null}>
+            <EuiIcon
+              type={IconComponent}
+              size="m"
+              aria-hidden={true}
+              data-test-subj="episodeConnectorSourceIcon"
+            />
+          </Suspense>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="episodeConnectorSourceName">{source}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+/**
+ * Where an episode came from: the connector for alerts ingested from an external source,
+ * otherwise the alerting system (Classic or Universal).
+ */
 export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
   const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
+  const { source } = row.flattened as unknown as AlertEpisode;
+
+  if (typeof source === 'string' && source && source !== NATIVE_RULE_SOURCE) {
+    return <EpisodeConnectorSource source={source} />;
+  }
+
   return (
     <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       {icon && (
@@ -168,29 +205,6 @@ export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
   const severity = row.flattened.severity as EpisodeSeverity | undefined | null;
 
   return <AlertEpisodeSeverityBadge severity={severity} />;
-};
-
-/** Origin of an episode: the connector icon when one exists for the source, its raw text otherwise. */
-export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
-  const { source } = row.flattened as unknown as AlertEpisode;
-
-  if (typeof source !== 'string' || !source) return null;
-
-  const IconComponent = ConnectorIconsMap.get(`.${source}`);
-  if (!IconComponent) return <EuiText size="xs">{source}</EuiText>;
-
-  return (
-    <EuiToolTip content={source}>
-      <Suspense fallback={null}>
-        <EuiIcon
-          type={IconComponent}
-          size="l"
-          aria-label={source}
-          data-test-subj="episodeSourceCellIcon"
-        />
-      </Suspense>
-    </EuiToolTip>
-  );
 };
 
 export interface EpisodeRuleCellProps extends CellRendererProps {
