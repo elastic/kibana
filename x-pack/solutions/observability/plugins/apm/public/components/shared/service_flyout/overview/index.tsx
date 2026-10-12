@@ -679,7 +679,7 @@ export function ServiceFlyoutOverview() {
           historyKey={flyoutHistoryKey}
           preferDocumentBasedCharts={preferDocumentBasedCharts}
           schema={selectedTransaction.schema}
-          indices={indices}
+          indicesSource={{ indices }}
           alertsCount={selectedTransaction.alertsCount}
         />
       )}

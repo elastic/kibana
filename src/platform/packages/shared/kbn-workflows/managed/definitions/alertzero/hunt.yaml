@@ -46,21 +46,36 @@ triggers:
         - runId
       additionalProperties: false
 outputs:
-  - name: status
-    type: string
-  - name: stage
-    type: string
-  - name: reason
-    type: string
-  # One clause the Worker's run conclusion quotes (the coordinator's
-  # `headline`), so the conclusion can say what the hunt found without
-  # re-deriving it from nested tier output inside a parallel branch body.
-  - name: headline
-    type: string
-  - name: hit
-    type: boolean
-  - name: sse_count
-    type: number
+  type: object
+  properties:
+    status:
+      type: string
+    stage:
+      type: string
+    reason:
+      type: string
+    # One clause the Worker's run conclusion quotes (the coordinator's
+    # `headline`), so the conclusion can say what the hunt found without
+    # re-deriving it from nested tier output inside a parallel branch body.
+    headline:
+      type: string
+    hit:
+      type: boolean
+    sse_count:
+      type: number
+    # The coordinator result a clean run cannot leave on an attachment (it attaches an SSE
+    # only for a confirmed hit). Packaging reads these to give the coverage KI a dataset hint
+    # (the datasets the report points at) and the executed Tier 2 query. Empty arrays, never absent, when the coordinator did not
+    # run or Tier 2 did not either.
+    report_intent_targets:
+      type: array
+      items:
+        type: string
+    behaviors:
+      type: array
+      items:
+        type: object
+        additionalProperties: true
 steps:
   # The coordinator's request body is snake_case (report_id, run_id, trigger)
   # and does not know about Investigations; this step is the camelCase ->
@@ -201,6 +216,7 @@ steps:
     if: "${{ steps.run_hunt_coordinator.output != nil }}"
     with:
       workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
       inputs:
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: |-
@@ -303,6 +319,14 @@ steps:
       # native number; a `{% if %}` text block would render it as a string and
       # fail the `sse_count: number` output validation.
       result_sse_count: "${{ steps.run_hunt_coordinator.output.sse | size }}"
+      # `compact` turns a nil (coordinator skipped, or Tier 2 never ran) into `[]` and leaves a
+      # real array as is, so the declared array outputs never see a null.
+      result_report_intent_targets: "${{ steps.run_hunt_coordinator.output.report_intent_targets | compact }}"
+      # Only behaviors that executed carry a query worth packaging, and Tier 2 executes at most 20
+      # (it can validate more than it generates a query for). Filtering before the cap keeps an
+      # executed behavior from being dropped behind an unexecuted one, and keeps the array inside
+      # the packaging step's input limit.
+      result_behaviors: "${{ steps.run_hunt_coordinator.output.tier2.behaviors | compact | where: 'execution.executed', true | slice: 0, 20 }}"
 
   - name: emit_result
     type: workflow.output
@@ -314,3 +338,5 @@ steps:
       headline: "{{ variables.result_headline }}"
       hit: "${{ variables.result_hit }}"
       sse_count: "${{ variables.result_sse_count }}"
+      report_intent_targets: "${{ variables.result_report_intent_targets }}"
+      behaviors: "${{ variables.result_behaviors }}"

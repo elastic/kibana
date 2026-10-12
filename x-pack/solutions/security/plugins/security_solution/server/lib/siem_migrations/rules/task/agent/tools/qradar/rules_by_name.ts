@@ -7,6 +7,7 @@
 
 import { tool } from '@langchain/core/tools';
 import * as z from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import type { RuleMigrationsDataClient } from '../../../../data/rule_migrations_data_client';
 
 const NAME = 'getRulesByName' as const;
@@ -14,9 +15,11 @@ const NAME = 'getRulesByName' as const;
 const DESCRIPTION =
   'Retrieves and returns rules by their names. Input should be a list of rule names';
 
-const SCHEMA = z.object({
-  names: z.array(z.string()).describe('A list of rule names to retrieve'),
-});
+const SCHEMA = lazySchema(() =>
+  z.object({
+    names: z.array(z.string()).describe('A list of rule names to retrieve'),
+  })
+);
 
 export const getRulesByNameGetter =
   (migrationId: string, rulesClient: RuleMigrationsDataClient) =>

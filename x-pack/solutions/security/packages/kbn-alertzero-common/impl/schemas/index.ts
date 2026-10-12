@@ -26,6 +26,7 @@ export {
 export {
   WatchAutonomyLevel,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,

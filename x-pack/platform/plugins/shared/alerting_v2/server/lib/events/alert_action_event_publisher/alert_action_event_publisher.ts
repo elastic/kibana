@@ -86,7 +86,7 @@ export class AlertActionEventPublisher implements AlertActionEventPublisherContr
   }
 
   public emitEpisodeActions(request: KibanaRequest, actions: readonly AlertActionDocument[]): void {
-    const context = { request };
+    const context: AlertingPublisherContext = { request, origin: 'user' };
     for (const action of actions) {
       const event = this.buildEvent(action);
       if (event) {

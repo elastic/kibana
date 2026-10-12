@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import pLimit from 'p-limit';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { Logger } from '@kbn/core/server';
 import type { IRulesManagementClient } from '../../knowledge_indicators/knowledge_indicator_client/rules/rules_management_client';
-import type { EventClient } from './event_client';
+import type { RuleEventsClient } from './rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { updateSignificantEventStatus } from './update_event_status';
 
 const EVENTS_BATCH_SIZE = 1000;
@@ -40,19 +40,19 @@ const getBackingRuleIds = (event: SignificantEventResponse): string[] => [
 ];
 
 const iterateActiveEventBatches = async function* ({
-  eventClient,
+  eventSearchClient,
   ruleUuids,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   ruleUuids?: string[];
 }): AsyncGenerator<SignificantEventResponse[]> {
-  let afterEventId: string | undefined;
+  let afterGroupHash: string | undefined;
 
   while (true) {
-    const result = await eventClient.findLatestByCurrentStateBatch({
+    const result = await eventSearchClient.findLatestByCurrentStateBatch({
       status: ['active'],
       ruleUuids,
-      afterEventId,
+      afterGroupHash,
       batchSize: EVENTS_BATCH_SIZE,
     });
 
@@ -62,11 +62,10 @@ const iterateActiveEventBatches = async function* ({
 
     yield result.hits;
 
-    const lastEvent = result.hits.at(-1);
-    if (result.hits.length < EVENTS_BATCH_SIZE || lastEvent === undefined) {
+    if (result.hits.length < EVENTS_BATCH_SIZE || result.lastGroupHash === undefined) {
       return;
     }
-    afterEventId = lastEvent.event_id;
+    afterGroupHash = result.lastGroupHash;
   }
 };
 
@@ -75,18 +74,17 @@ const iterateActiveEventBatches = async function* ({
  * empty array is a no-op.
  */
 export const cleanupStaleEvents = async ({
-  eventClient,
+  eventSearchClient,
   rulesClient,
   candidateRuleIds,
   alertEventsClient,
-  logger,
+  emitTrigger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   rulesClient: IRulesManagementClient;
   candidateRuleIds?: string[];
-  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable. */
-  alertEventsClient?: AlertEventsClientApi;
-  logger?: Logger;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
 }): Promise<CleanupStaleEventsResult> => {
   const uniqueCandidateRuleIds = candidateRuleIds
     ? [...new Set(candidateRuleIds)].filter(Boolean)
@@ -102,7 +100,7 @@ export const cleanupStaleEvents = async ({
   const updateLimit = pLimit(EVENT_STATUS_UPDATE_CONCURRENCY);
 
   for await (const events of iterateActiveEventBatches({
-    eventClient,
+    eventSearchClient,
     ruleUuids: uniqueCandidateRuleIds,
   })) {
     scanned += events.length;
@@ -127,12 +125,12 @@ export const cleanupStaleEvents = async ({
       staleEvents.map(({ event }) =>
         updateLimit(() =>
           updateSignificantEventStatus({
-            eventClient,
+            eventSearchClient,
             eventId: event.event_id,
             status: 'inactive',
             assessmentNote: STALE_EVENT_ASSESSMENT_NOTE,
             alertEventsClient,
-            logger,
+            emitTrigger,
           })
         )
       )
