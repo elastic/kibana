@@ -357,7 +357,7 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
       />
       <EuiSpacer size="m" />
       <EndpointParams inputs={inputs} />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="l" />
       <EuiAccordion
         id="kafkaOAuth2AdvancedSettings"
         data-test-subj="settingsOutputsFlyout.kafkaOAuth2AdvancedSettings"
@@ -492,6 +492,7 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
             testSubj="kafkaOAuth2ClientSecretFileInput"
           />
         )}
+        <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <TextSetting
@@ -577,6 +578,7 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
           input={inputs.kafkaOAuth2TlsServerNameOverrideInput}
           testSubj="kafkaOAuth2TlsServerNameOverrideInput"
         />
+        <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <TextSetting

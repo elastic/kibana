@@ -404,17 +404,36 @@ export function validateKafkaOAuth2TokenUrl(value: string) {
 }
 
 export function validateKafkaOAuth2EndpointParams(value: Array<{ key: string; value: string }>) {
-  const errors = value
-    .map((row, index) => ({ row, index }))
-    .filter(({ row }) => (row.key === '') !== (row.value === ''))
-    .map(({ row, index }) => ({
-      message: i18n.translate('xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsError', {
-        defaultMessage: 'Specify both the name and the value of the parameter',
-      }),
-      index,
-      hasKeyError: row.key === '',
-      hasValueError: row.value === '',
-    }));
+  const errors = value.flatMap((row, index) => {
+    // the server refuses a request body with a `__proto__` key
+    if (row.key === '__proto__') {
+      return [
+        {
+          message: i18n.translate(
+            'xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsReservedNameError',
+            { defaultMessage: '"__proto__" is a reserved name and cannot be used' }
+          ),
+          index,
+          hasKeyError: true,
+          hasValueError: false,
+        },
+      ];
+    }
+    if ((row.key === '') !== (row.value === '')) {
+      return [
+        {
+          message: i18n.translate(
+            'xpack.fleet.settings.outputForm.kafkaOAuth2EndpointParamsError',
+            { defaultMessage: 'Specify both the name and the value of the parameter' }
+          ),
+          index,
+          hasKeyError: row.key === '',
+          hasValueError: row.value === '',
+        },
+      ];
+    }
+    return [];
+  });
 
   return errors.length ? errors : undefined;
 }

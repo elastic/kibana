@@ -603,6 +603,17 @@ describe('Output form validation', () => {
           expect.objectContaining({ index: 1, hasKeyError: true, hasValueError: false }),
         ]);
       });
+
+      it('should flag the reserved name __proto__', () => {
+        expect(validateKafkaOAuth2EndpointParams([{ key: '__proto__', value: 'kafka' }])).toEqual([
+          {
+            message: '"__proto__" is a reserved name and cannot be used',
+            index: 0,
+            hasKeyError: true,
+            hasValueError: false,
+          },
+        ]);
+      });
     });
   });
 });

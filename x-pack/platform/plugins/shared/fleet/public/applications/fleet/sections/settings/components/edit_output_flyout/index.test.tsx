@@ -803,9 +803,6 @@ describe('EditOutputFlyout', () => {
         fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2AddEndpointParam'));
         change(utils, 'kafkaOAuth2EndpointParamName1', 'constructor');
         change(utils, 'kafkaOAuth2EndpointParamValue1', 'second');
-        fireEvent.click(utils.getByTestId('settingsOutputsFlyout.kafkaOAuth2AddEndpointParam'));
-        change(utils, 'kafkaOAuth2EndpointParamName2', '__proto__');
-        change(utils, 'kafkaOAuth2EndpointParamValue2', 'value');
         save(utils);
 
         await waitFor(() => {
@@ -814,11 +811,28 @@ describe('EditOutputFlyout', () => {
         const { endpoint_params: endpointParams } = (mockSendPutOutput.mock.calls[0][1] as any)
           .oauth2;
         // own properties, not inherited ones
-        expect(Object.keys(endpointParams).sort()).toEqual(['__proto__', 'constructor']);
+        expect(Object.keys(endpointParams)).toEqual(['constructor']);
         expect(endpointParams.constructor).toEqual(['first', 'second']);
-        expect(Object.getOwnPropertyDescriptor(endpointParams, '__proto__')?.value).toEqual([
-          'value',
-        ]);
+      });
+
+      it('should not save an endpoint parameter named __proto__ and explain why', async () => {
+        const { utils } = renderFlyout({
+          ...kafkaOutput,
+          auth_type: 'oauth2',
+          oauth2: oauth2Fields,
+          secrets: { oauth2: { client_secret: { id: 'secret-id' } } },
+        });
+
+        change(utils, 'kafkaOAuth2EndpointParamName0', '__proto__');
+        change(utils, 'kafkaOAuth2EndpointParamValue0', 'value');
+        save(utils);
+
+        await waitFor(() => {
+          expect(
+            utils.getByText('"__proto__" is a reserved name and cannot be used')
+          ).toBeInTheDocument();
+        });
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
       });
 
       it('should not parse claims left in the form after switching to client credentials', async () => {
