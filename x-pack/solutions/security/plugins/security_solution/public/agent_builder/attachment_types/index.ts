@@ -10,6 +10,7 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { CoreStart } from '@kbn/core/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
@@ -21,10 +22,7 @@ import type { Subscription } from 'rxjs';
 import type { AgenticInvestigationsPublicPluginStart } from '@kbn/agentic-investigations-plugin/public';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
-import {
-  ENABLE_NEW_FLYOUT_SETTING,
-  SecurityAgentBuilderAttachments,
-} from '../../../common/constants';
+import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { SecurityCanvasEmbeddedBundle } from '../components/security_redux_embedded_provider';
 import type { SecurityAgentBuilderChrome } from './entity_explore_navigation';
@@ -163,6 +161,7 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext,
   searchSession,
   uiSettings,
+  rendering,
   registerImpactEntityOpener,
 }: {
   attachments: AttachmentServiceStartContract;
@@ -174,27 +173,19 @@ export const registerEntityAttachment = ({
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
   uiSettings: IUiSettingsClient;
+  rendering?: CoreStart['rendering'];
   registerImpactEntityOpener?: AgenticInvestigationsPublicPluginStart['registerImpactEntityOpener'];
 }): void => {
-  registerImpactEntityOpener?.((entity) => {
-    void import(
-      /* webpackChunkName: "security_impact_entity_flyout" */
-      './open_impact_entity_flyout'
-    ).then(({ openImpactEntityFlyout }) =>
-      openImpactEntityFlyout({
-        entity,
-        overlays,
-        application,
-        agentBuilder,
-        chrome,
-        isNewFlyoutEnabled:
-          !experimentalFeatures.newFlyoutSystemDisabled &&
-          (uiSettings.get<boolean>(ENABLE_NEW_FLYOUT_SETTING, true) ?? false),
-        resolveSecurityCanvasContext,
-        searchSession,
-      })
-    );
-  });
+  if (rendering) {
+    registerImpactEntityOpener?.((entity) => {
+      void import(
+        /* webpackChunkName: "security_impact_entity_flyout" */
+        './open_impact_entity_flyout'
+      ).then(({ openImpactEntityFlyout }) =>
+        openImpactEntityFlyout({ entity, rendering, resolveSecurityCanvasContext })
+      );
+    });
+  }
 
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
