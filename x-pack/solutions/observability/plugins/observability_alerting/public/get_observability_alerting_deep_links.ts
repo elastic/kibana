@@ -12,6 +12,7 @@ import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
+  OBSERVABILITY_ALERTING_ALERTS_ORDER,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID,
   OBSERVABILITY_ALERTING_EXECUTION_HISTORY_PATH,
@@ -24,6 +25,8 @@ import {
 } from './constants';
 
 const SEARCHABLE_VISIBLE_IN: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+// Alerts is the only entry listed in the classic hamburger, next to the Observability app links.
+const ALERTS_VISIBLE_IN: AppDeepLinkLocations[] = [...SEARCHABLE_VISIBLE_IN, 'classicSideNav'];
 
 const canAccessDeepLink = (id: string, capabilities: Capabilities): boolean => {
   switch (id) {
@@ -64,7 +67,8 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
         defaultMessage: 'Alerts',
       }),
       path: OBSERVABILITY_ALERTING_ALERTS_PATH,
-      visibleIn: SEARCHABLE_VISIBLE_IN,
+      order: OBSERVABILITY_ALERTING_ALERTS_ORDER,
+      visibleIn: ALERTS_VISIBLE_IN,
       keywords: ['alerting', 'episodes', 'alerts', 'inbox'],
     },
     {
@@ -120,6 +124,6 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
 
   return deepLinks.map((link) => ({
     ...link,
-    visibleIn: canAccessDeepLink(link.id, capabilities) ? SEARCHABLE_VISIBLE_IN : [],
+    visibleIn: canAccessDeepLink(link.id, capabilities) ? link.visibleIn : [],
   }));
 };

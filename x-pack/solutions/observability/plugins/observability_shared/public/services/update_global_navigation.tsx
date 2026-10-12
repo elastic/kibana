@@ -46,13 +46,13 @@ export function updateGlobalNavigation({
   deepLinks,
   updater$,
   pricing,
-  showV1AlertsInGlobalSearch = true,
+  showV1Alerts = true,
 }: {
   capabilities: ApplicationStart['capabilities'];
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
   pricing: PricingServiceStart;
-  showV1AlertsInGlobalSearch?: boolean;
+  showV1Alerts?: boolean;
 }) {
   const isCompleteOverviewEnabled = pricing.isFeatureAvailable('observability:complete_overview');
   const hasObsCapabilities = hasObservabilityCapabilities(capabilities);
@@ -76,10 +76,10 @@ export function updateGlobalNavigation({
         case 'alerts':
           // Observability feature access only — cases-only users do not get alerts/rules nav.
           if (hasObsCapabilities) {
-            const alertsVisibleIn: AppDeepLinkLocations[] = ['classicSideNav', 'projectSideNav'];
-            if (showV1AlertsInGlobalSearch) {
-              alertsVisibleIn.push('globalSearch');
-            }
+            // The project side nav keeps the link so chrome can resolve the solution nav node.
+            const alertsVisibleIn: AppDeepLinkLocations[] = showV1Alerts
+              ? ['classicSideNav', 'projectSideNav', 'globalSearch']
+              : ['projectSideNav'];
             return { ...link, visibleIn: alertsVisibleIn };
           }
           return null;

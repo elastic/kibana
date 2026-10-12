@@ -389,7 +389,7 @@ describe('updateGlobalNavigation', () => {
         });
       });
 
-      it('excludes the alerts deep link from globalSearch when showV1AlertsInGlobalSearch is false', () => {
+      it('limits the alerts deep link to the project side nav when showV1Alerts is false', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
           logs: { show: true },
@@ -415,7 +415,7 @@ describe('updateGlobalNavigation', () => {
           deepLinks,
           updater$,
           pricing,
-          showV1AlertsInGlobalSearch: false,
+          showV1Alerts: false,
         });
 
         expect(callback).toHaveBeenCalledWith({
@@ -425,7 +425,7 @@ describe('updateGlobalNavigation', () => {
               title: 'Alerts',
               order: 8001,
               path: '/alerts',
-              visibleIn: ['classicSideNav', 'projectSideNav'],
+              visibleIn: ['projectSideNav'],
             },
           ],
           status: AppStatus.accessible,

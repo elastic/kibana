@@ -81,6 +81,7 @@ export class ObservabilityAlertingPlugin
           coreStart,
           alertingVTwo: depsStart.alertingVTwo,
           triggersActionsUi: depsStart.triggersActionsUi,
+          observabilityShared: depsStart.observabilityShared,
           params,
         });
       },
