@@ -15,9 +15,14 @@ import {
 
 const mockUseKibana = jest.fn();
 const mockToursIsEnabled = jest.fn(() => true);
+const mockCanAccessAlertingV2Rules = jest.fn(() => true);
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockUseKibana(),
+}));
+
+jest.mock('@kbn/alerting-v2-utils', () => ({
+  canAccessAlertingV2Rules: (...args: unknown[]) => mockCanAccessAlertingV2Rules(...args),
 }));
 
 const defaultServices = () => ({
@@ -46,6 +51,7 @@ describe('UniversalRulesIntroCallout', () => {
     window.localStorage.clear();
     jest.clearAllMocks();
     mockToursIsEnabled.mockReturnValue(true);
+    mockCanAccessAlertingV2Rules.mockReturnValue(true);
     mockUseKibana.mockReturnValue({
       services: defaultServices(),
     });
@@ -102,6 +108,13 @@ describe('UniversalRulesIntroCallout', () => {
 
   it('does not show the callout when hideAnnouncements is enabled', () => {
     mockToursIsEnabled.mockReturnValue(false);
+    renderCallout();
+
+    expect(screen.queryByTestId('universalRulesIntroCallout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the callout when the user cannot access Universal rules', () => {
+    mockCanAccessAlertingV2Rules.mockReturnValue(false);
     renderCallout();
 
     expect(screen.queryByTestId('universalRulesIntroCallout')).not.toBeInTheDocument();

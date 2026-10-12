@@ -11,6 +11,7 @@ import {
   ALERTING_V2_RULES_BASE_PATH,
   ALERTING_V2_RULES_TAB_ID,
 } from '@kbn/alerting-v2-constants';
+import { canAccessAlertingV2Rules } from '@kbn/alerting-v2-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -23,13 +24,14 @@ export const UNIVERSAL_RULES_INTRO_CALLOUT_DISMISSED_STORAGE_KEY =
  * Introduces Universal rules on the Classic rules list when both rule systems are available.
  */
 export const UniversalRulesIntroCallout = () => {
-  const { http, tabs, notifications } = useKibana().services;
+  const services = useKibana().services;
+  const { http, tabs, notifications } = services;
   const [isDismissed, setIsDismissed] = useLocalStorage<boolean>(
     UNIVERSAL_RULES_INTRO_CALLOUT_DISMISSED_STORAGE_KEY,
     false
   );
 
-  if (!notifications.tours.isEnabled() || isDismissed) {
+  if (!canAccessAlertingV2Rules(services) || !notifications.tours.isEnabled() || isDismissed) {
     return null;
   }
 
