@@ -195,7 +195,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          await this.initialize(core, dataViewsService);
+          await this.initializeOsqueryResources(core, dataViewsService);
         }
 
         // Upgrade integration into 1.6.0 and rollover if found 'generic' dataset - we do not want to wait for it
@@ -209,7 +209,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
             getPackagePolicyCreateCallback(
               core,
               this.osqueryAppContextService,
-              () => this.initialize(core, dataViewsService),
+              () => this.initializeOsqueryResources(core, dataViewsService),
               this.rruleSchedulingEnabled
             )
           );
@@ -237,8 +237,11 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.createActionService?.stop();
   }
 
-  async initialize(core: CoreStart, dataViewsService: DataViewsService): Promise<void> {
-    this.logger.debug('initialize');
+  async initializeOsqueryResources(
+    core: CoreStart,
+    dataViewsService: DataViewsService
+  ): Promise<void> {
+    this.logger.debug('initializeOsqueryResources');
     await initializeTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeTransforms(core.elasticsearch.client.asInternalUser, this.logger);
     await createDataViews(dataViewsService);
