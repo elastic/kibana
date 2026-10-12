@@ -1,5 +1,5 @@
 {
-  "sha1": "202fe99445eebb44c1db6161333973d65fe57f00",
+  "sha1": "f9c43056caacaadfbb971fec925c30129a6b4426",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -195,8 +195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
-        "line": 36,
-        "column": 15
+        "line": 18,
+        "column": 9
       }
     },
     {
@@ -208,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/create_uiam_service_account.spec.ts",
-        "line": 70,
-        "column": 16
+        "line": 48,
+        "column": 28
       }
     },
     {
@@ -221,8 +221,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 119,
-        "column": 25
+        "line": 112,
+        "column": 9
       }
     },
     {
@@ -234,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 151,
-        "column": 47
+        "line": 142,
+        "column": 16
       }
     },
     {
@@ -247,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 180,
-        "column": 16
+        "line": 169,
+        "column": 61
       }
     },
     {
@@ -260,8 +260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 239,
-        "column": 20
+        "line": 230,
+        "column": 11
       }
     },
     {
@@ -273,8 +273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 245,
-        "column": 28
+        "line": 236,
+        "column": 25
       }
     },
     {
@@ -286,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 267,
-        "column": 14
+        "line": 259,
+        "column": 25
       }
     },
     {
@@ -299,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 295,
-        "column": 28
+        "line": 288,
+        "column": 24
       }
     },
     {
@@ -312,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 349,
-        "column": 1
+        "line": 340,
+        "column": 11
       }
     },
     {
@@ -325,8 +325,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 362,
-        "column": 97
+        "line": 354,
+        "column": 9
       }
     },
     {
@@ -338,8 +338,99 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_service_account.spec.ts",
-        "line": 383,
-        "column": 16
+        "line": 372,
+        "column": 61
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-cb92917adf2ba4e",
+      "title": "Delete UIAM service accounts deletes an unbound account, which get and list stop returning",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 114,
+        "column": 23
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-ca55dd100b7e373",
+      "title": "Delete UIAM service accounts refuses to delete a bound account unless forced, and the workload stops running",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 144,
+        "column": 14
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-1f58d6e36271eb7",
+      "title": "Delete UIAM service accounts answers 404 for an account that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 210,
+        "column": 14
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-1a99e169da5bd27",
+      "title": "Delete UIAM service accounts refuses a caller without `manage_security`, and leaves the account in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 217,
+        "column": 19
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-595f1af39f9b5ff",
+      "title": "Delete UIAM service accounts refuses a credential UIAM did not issue, and leaves the account in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 240,
+        "column": 28
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-aec94ac18e69b90",
+      "title": "Delete UIAM service accounts refuses a service account caller, and leaves the account in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 269,
+        "column": 97
+      }
+    },
+    {
+      "id": "c3528339ea7f2f0-7c2819983317aa5",
+      "title": "Delete UIAM service accounts leaves a token issued before the delete valid until it expires",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/delete_uiam_service_account.spec.ts",
+        "line": 296,
+        "column": 28
       }
     },
     {
@@ -431,6 +522,45 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_service_account.spec.ts",
         "line": 195,
         "column": 20
+      }
+    },
+    {
+      "id": "45f512357f6e2f1-bdffa8fa0b2630f",
+      "title": "Execute UIAM service account workloads uses the account identity and permits only its own roles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_uiam_service_account.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "45f512357f6e2f1-14e67c7df963bee",
+      "title": "Execute UIAM service account workloads isolates workload bindings by space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_uiam_service_account.spec.ts",
+        "line": 99,
+        "column": 28
+      }
+    },
+    {
+      "id": "45f512357f6e2f1-148daa28dc29a05",
+      "title": "Execute UIAM service account workloads refuses an unauthorized caller before executing a workload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/execute_uiam_service_account.spec.ts",
+        "line": 121,
+        "column": 39
       }
     },
     {
@@ -574,6 +704,110 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_service_account.spec.ts",
         "line": 68,
         "column": 13
+      }
+    },
+    {
+      "id": "3626ea7464c7b98-22f3d95369834b4",
+      "title": "Classify real requests authenticated with a UIAM service account token classifies the request as that service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/principal_uiam_service_account.spec.ts",
+        "line": 28,
+        "column": 15
+      }
+    },
+    {
+      "id": "80aa0268a56d47d-1e8d60f2f8bd33f",
+      "title": "Renew UIAM service account workload tokens renews an expired token transparently on an existing scoped ES client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/renew_uiam_service_account.spec.ts",
+        "line": 67,
+        "column": 25
+      }
+    },
+    {
+      "id": "80aa0268a56d47d-1e952f1e2028566",
+      "title": "Renew UIAM service account workload tokens unbind denies renewal while leaving the issued token valid until expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/renew_uiam_service_account.spec.ts",
+        "line": 95,
+        "column": 31
+      }
+    },
+    {
+      "id": "af334755ac19d0d-3716897fb59daa5",
+      "title": "Workloads created by an Elasticsearch service account a direct caller creates a rule whose API key outlives the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
+        "line": 167,
+        "column": 25
+      }
+    },
+    {
+      "id": "af334755ac19d0d-9e68c5bf98f6afc",
+      "title": "Workloads created by an Elasticsearch service account a direct caller's rule can only read what the account's role can read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
+        "line": 197,
+        "column": 66
+      }
+    },
+    {
+      "id": "af334755ac19d0d-8ecc48f4057b84e",
+      "title": "Workloads created by an Elasticsearch service account a direct caller schedules a task with an API key owned by the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
+        "line": 211,
+        "column": 30
+      }
+    },
+    {
+      "id": "af334755ac19d0d-677bd9e7e9b3d06",
+      "title": "Workloads created by an Elasticsearch service account a workload running as the account creates a rule through the self client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
+        "line": 227,
+        "column": 21
+      }
+    },
+    {
+      "id": "af334755ac19d0d-a763d6c0e757d13",
+      "title": "Workloads created by an Elasticsearch service account a built-in service account gets a 400 that names the account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_service_accounts/api/tests/service_account_created_workloads.spec.ts",
+        "line": 242,
+        "column": 15
       }
     }
   ]

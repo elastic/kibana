@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import { ALERT_EPISODE_ACTION_TYPE, type CreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import {
   alertEpisodeStatus,
@@ -17,6 +16,7 @@ import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getCannotDeactivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
+import { noOpConflict } from './no_op_conflict';
 
 type DeactivateAlertActionBody = Extract<
   CreateAlertActionBody,
@@ -39,14 +39,12 @@ const assertEpisodeIsDeactivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.conflict(getCannotDeactivateEpisodeMessage(alertEvent.episode_id), {
+  throw noOpConflict({
     code: ALERTING_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-    details: {
-      group_hash: alertEvent.group_hash,
-      alert_id: alertEvent.episode_id,
-      alert_status: status,
-      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-    },
+    message: getCannotDeactivateEpisodeMessage(alertEvent.episode_id),
+    alertEvent,
+    actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+    details: { alert_status: status },
   });
 };
 
