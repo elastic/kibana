@@ -114,9 +114,7 @@ export const getFormattedFieldDiffGroups = (
         fieldDiffs: getFieldDiffsForThreshold(thresholdThreeWayDiff),
       };
     case 'required_fields':
-      const requiredFieldsThreeWayDiff = fields[
-        fieldName
-      ] as AllFieldsDiff['required_fields'];
+      const requiredFieldsThreeWayDiff = fields[fieldName] as AllFieldsDiff['required_fields'];
       return {
         shouldShowSubtitles: false,
         fieldDiffs: getFieldDiffsForRequiredFields(requiredFieldsThreeWayDiff),
