@@ -93,10 +93,10 @@ describe('proposalToInvestigation', () => {
           ...baseProposal,
           decidedAt: '2026-09-10T11:00:00.000Z',
           status,
-          title: 'Closure of 2 alerts as false positive',
+          title: 'Close 2 alerts as false positive',
           actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
         });
-        expect(result.title).toBe('Closure of 2 alerts as false positive');
+        expect(result.title).toBe('Close 2 alerts as false positive');
       }
     );
   });

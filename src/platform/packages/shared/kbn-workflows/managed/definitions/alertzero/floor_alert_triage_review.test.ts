@@ -167,12 +167,10 @@ describe('floor_alert_triage_review — proposal comment', () => {
   });
 
   it('titles the proposal with the alert count, singular or plural, so the queue card needs no action-specific label', () => {
-    expect(renderString(proposalInputs.title, context)).toBe(
-      'Closure of 3 alerts as false positive'
-    );
+    expect(renderString(proposalInputs.title, context)).toBe('Close 3 alerts as false positive');
     expect(
       renderString(proposalInputs.title, { ...context, variables: { fp_candidate_count: 1 } })
-    ).toBe('Closure of 1 alert as false positive');
+    ).toBe('Close 1 alert as false positive');
   });
 
   it('closes exactly the candidate ids it was given', () => {
