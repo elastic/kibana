@@ -30,6 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
+import { buildTesterRules } from '../lib/build_tester_rules';
 import { CUSTOM_PATTERN_ENTITY_CLASSES } from '../lib/entity_classes';
 import type { CustomPatternEntityClass } from '../lib/entity_classes';
 import type { NewCustomPattern } from '../hooks/use_anonymization_settings';
@@ -102,8 +103,8 @@ export const PatternFlyout: React.FC<PatternFlyoutProps> = ({
   );
 
   const testerRules = useMemo(
-    () => [draftRule, ...enabledRules.filter((rule) => rule.id !== pattern?.id)],
-    [draftRule, enabledRules, pattern?.id]
+    () => buildTesterRules(draftRule, enabledRules),
+    [draftRule, enabledRules]
   );
 
   // Demonstrates the pattern actually being edited, instead of only the fixed generic example:
