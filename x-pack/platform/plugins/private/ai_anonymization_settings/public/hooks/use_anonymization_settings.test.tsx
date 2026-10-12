@@ -134,6 +134,94 @@ describe('useAnonymizationSettings', () => {
     expect(result.current.maskingEnabled).toBe(true);
   });
 
+  describe('custom pattern workflow', () => {
+    // A fresh mount against the same client is what a page reload does: it reads back only what
+    // `set()` actually stored.
+    const reload = async () => {
+      const hook = renderHook(() => useAnonymizationSettings());
+      await waitFor(() => expect(hook.result.current.isLoading).toBe(false));
+      return hook.result;
+    };
+
+    const newPattern = {
+      name: 'Employee ID',
+      entityClass: 'URL' as const,
+      pattern: 'EMP-\\d+',
+      enabled: true,
+    };
+
+    it('saves a new custom pattern through the settings client and keeps it after a reload', async () => {
+      const { result } = renderHook(() => useAnonymizationSettings());
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+      await act(async () => {
+        await result.current.addCustomPattern(newPattern);
+      });
+
+      const stored = JSON.parse((client.set as jest.Mock).mock.calls[0][1]).rules;
+      expect(stored).toContainEqual(
+        expect.objectContaining({ ...newPattern, id: expect.any(String), builtIn: false })
+      );
+      const afterReload = await reload();
+      expect(afterReload.current.customPatterns).toEqual([expect.objectContaining(newPattern)]);
+    });
+
+    it('updates a custom pattern in place and keeps the edit after a reload', async () => {
+      const { result } = renderHook(() => useAnonymizationSettings());
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      await act(async () => {
+        await result.current.addCustomPattern(newPattern);
+      });
+      const [{ id }] = result.current.customPatterns;
+
+      await act(async () => {
+        await result.current.updateCustomPattern(id as string, {
+          ...newPattern,
+          pattern: 'EMP-\\d{4}',
+          enabled: false,
+        });
+      });
+
+      const afterReload = await reload();
+      expect(afterReload.current.customPatterns).toEqual([
+        expect.objectContaining({ id, pattern: 'EMP-\\d{4}', enabled: false }),
+      ]);
+    });
+
+    it('removes a custom pattern and keeps it removed after a reload', async () => {
+      const { result } = renderHook(() => useAnonymizationSettings());
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      await act(async () => {
+        await result.current.addCustomPattern(newPattern);
+      });
+      const [{ id }] = result.current.customPatterns;
+
+      await act(async () => {
+        await result.current.deleteCustomPattern(id as string);
+      });
+
+      const afterReload = await reload();
+      expect(afterReload.current.customPatterns).toEqual([]);
+    });
+
+    it('does not keep a custom pattern that failed to save, including after a reload', async () => {
+      const { result } = renderHook(() => useAnonymizationSettings());
+      await waitFor(() => expect(result.current.isLoading).toBe(false));
+      // Core resolves false for a failed write and leaves the stored value unchanged.
+      client.set = jest.fn().mockResolvedValue(false);
+
+      let isSaved: boolean | undefined;
+      await act(async () => {
+        isSaved = await result.current.addCustomPattern(newPattern);
+      });
+
+      expect(isSaved).toBe(false);
+      expect(result.current.customPatterns).toEqual([]);
+      const afterReload = await reload();
+      expect(afterReload.current.customPatterns).toEqual([]);
+    });
+  });
+
   it('refreshes a stale persisted built-in pattern to the current code-level default on load', async () => {
     // Simulates an environment that saved `ai:anonymizationSettings` before a built-in
     // pattern was fixed in code: the persisted rule keeps its old, now-stale `pattern`,
