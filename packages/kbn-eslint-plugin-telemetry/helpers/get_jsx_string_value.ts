@@ -7,32 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { decode } from 'he';
 import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import { AST_NODE_TYPES, parse } from '@typescript-eslint/typescript-estree';
-
-// The entity syntax typescript-estree decodes in JSX text and JSX attribute strings.
-const JSX_ENTITY = /&(?:#\d+|#x[\da-fA-F]+|[0-9a-zA-Z]+);/g;
-
-const decodedEntities = new Map<string, string>();
-
-const decodeEntity = (entity: string) => {
-  let decoded = decodedEntities.get(entity);
-  if (decoded === undefined) {
-    const { expression } = parse(`<>${entity}</>`, { jsx: true })
-      .body[0] as TSESTree.ExpressionStatement;
-    decoded = ((expression as TSESTree.JSXFragment).children[0] as TSESTree.JSXText).value;
-    decodedEntities.set(entity, decoded);
-  }
-  return decoded;
-};
+import { AST_NODE_TYPES } from '@typescript-eslint/typescript-estree';
 
 /**
  * Returns the text of a JSX text node or JSX attribute string with HTML entities such as `&nbsp;`
- * decoded. Oxlint keeps entities as written in `value`, so this decodes `raw` the way ESLint's
- * parsers did. JSX attribute strings have no escape sequences, so `raw` is the value plus quotes.
+ * decoded. Oxlint keeps entities as written in `value`, so this decodes `raw` like ESLint's parsers
+ * did. JSX attribute strings have no escape sequences, so `raw` is the value plus quotes.
  */
 export const getJsxStringValue = (node: TSESTree.JSXText | TSESTree.Literal): string =>
-  (node.type === AST_NODE_TYPES.JSXText ? node.raw : node.raw.slice(1, -1)).replace(
-    JSX_ENTITY,
-    decodeEntity
-  );
+  decode(node.type === AST_NODE_TYPES.JSXText ? node.raw : node.raw.slice(1, -1));
