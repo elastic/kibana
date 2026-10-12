@@ -90,6 +90,7 @@ export { MAINTENANCE_FEATURE_FLAG_ACTOR } from './maintenance/actors';
 export {
   getDetectionPausedCalloutBody,
   getDetectionPausedCalloutTitle,
+  getDetectionPausedSettingsCalloutBody,
   isPausedByFeatureFlag,
 } from './maintenance/paused_callout_copy';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
