@@ -34,7 +34,12 @@ const VERDICTS = [
 
 /** Every canonical verdict has its own switch case with exactly these steps, in order. */
 const CASE_STEPS = {
-  no_coverage: ['run_rule_creation'],
+  no_coverage: [
+    'run_rule_creation',
+    'resolve_creation_outcome',
+    'note_creation_failed',
+    'report_no_draft',
+  ],
   covered_disabled: ['propose_enable', 'report_unresolved_rule'],
   prebuilt_available: ['install_target', 'propose_install', 'report_missing_version'],
   covered_enabled: ['propose_confirm', 'report_unconfirmed_rule'],
@@ -42,6 +47,7 @@ const CASE_STEPS = {
 
 /** Every step that proposes a fix through the proposal gate, in switch order. */
 const PROPOSAL_STEPS = [
+  'report_no_draft',
   'propose_enable',
   'report_unresolved_rule',
   'propose_install',
@@ -207,6 +213,36 @@ describe('Detection Coverage review', () => {
       ]);
       expect(routeOf('report_unknown_verdict')).toContain('verdict != null');
       expect(routeOf('report_unknown_verdict')).toContain("verdict != ''");
+    });
+
+    // Rule Creation that ends without a proposal must not leave the analyst with nothing.
+    // A missing draft repeats on every run, so it becomes a report that a decision
+    // closes. A failed run can work next time, so it is noted and retried.
+    it('reports a missing draft, and notes a failed Rule Creation run', () => {
+      const outcome = withOf('resolve_creation_outcome') ?? {};
+      expect(String(outcome.no_draft)).toContain('steps.run_rule_creation.error == null');
+      expect(String(outcome.no_draft)).toContain(
+        "steps.run_rule_creation.output.skip_reason != ''"
+      );
+      expect(routeOf('report_no_draft')).toContain(
+        'steps.resolve_creation_outcome.output.no_draft == true'
+      );
+      expect(routeOf('note_creation_failed')).toContain('steps.run_rule_creation.error != null');
+      expect(inputsOf(stepByName('report_no_draft')).actionWorkflowId).toBeUndefined();
+    });
+
+    // A long report text must not push the structured attributes out of the check's input,
+    // so each text field is cut on its own and the attributes pass whole.
+    it('bounds the indicator text fields and keeps its attributes whole', () => {
+      const gapStep = withOf('gap') as unknown as { indicator: Record<string, string> };
+      expect(gapStep.indicator.content).toContain('truncate: 8000');
+      expect(gapStep.indicator.title).toContain('truncate: 2000');
+      expect(gapStep.indicator.attributes).toBe(
+        '${{ steps.read_ki.output.hits.hits[0]._source.attributes }}'
+      );
+      expect(String(withOf('coverage_check')?.message)).toContain(
+        '{{ steps.gap.output.indicator | json }}'
+      );
     });
 
     // A verdict the actions cannot honour must surface to the analyst, not vanish.
