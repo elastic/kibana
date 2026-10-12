@@ -6,6 +6,7 @@ plugins:
     - agent_builder_dashboards
     - alerting
     - alerting_v2
+    - alertzero
     - apm
     - automatic_import
     - banners

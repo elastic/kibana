@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/agentic-investigations-common",
@@ -37,5 +37,6 @@
     "@kbn/core-http-server-mocks",
     "@kbn/std",
     "@kbn/core-security-server",
+    "@kbn/scout-security",
   ]
 }

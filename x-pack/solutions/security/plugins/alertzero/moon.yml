@@ -48,6 +48,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/std'
   - '@kbn/core-security-server'
+  - '@kbn/scout-security'
 tags:
   - plugin
   - prod
@@ -59,6 +60,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
