@@ -15,8 +15,7 @@ import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 import { LONG_EXECUTION_TIMEOUT } from '../../fixtures/constants';
 import { getLongRunningCancellationWorkflowYaml } from '../../fixtures/workflows';
 
-// Failing: See https://github.com/elastic/kibana/issues/281015
-test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Workflow execution - Cancellation', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
@@ -27,7 +26,6 @@ test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful
 
   test('should cancel a single running execution from the execution details panel', async ({
     pageObjects,
-    page,
   }) => {
     const workflowName = `Scout cancel single ${Date.now()}`;
 
@@ -41,7 +39,7 @@ test.describe.skip('Workflow execution - Cancellation', { tag: [...tags.stateful
 
     await pageObjects.workflowExecution.waitForExecutionStatus(ExecutionStatus.RUNNING, 5000);
 
-    await page.testSubj.click('cancelExecutionButton');
+    await pageObjects.workflowExecution.cancelExecution();
 
     await pageObjects.workflowExecution.waitForExecutionStatus(ExecutionStatus.CANCELLED, 5000);
   });
