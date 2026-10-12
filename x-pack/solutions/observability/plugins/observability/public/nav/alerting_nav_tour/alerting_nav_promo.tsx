@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import useObservable from 'react-use/lib/useObservable';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
@@ -17,6 +18,7 @@ import {
   type AlertingNavTourPersistedState,
   DEFAULT_ALERTING_NAV_TOUR_STATE,
 } from './alerting_nav_tour_state';
+import { canOfferAlertingNavTour } from './can_offer_alerting_nav_tour';
 import { UnifiedAlertingPromoCard } from './unified_alerting_promo_card';
 
 const PROMO_REGION_LABEL = i18n.translate('xpack.observability.alertingNavTour.promo.regionLabel', {
@@ -29,7 +31,12 @@ const PROMO_REGION_LABEL = i18n.translate('xpack.observability.alertingNavTour.p
  */
 export const AlertingNavPromo: React.FC<{ coreStart: CoreStart }> = ({ coreStart }) => {
   const { euiTheme } = useEuiTheme();
-  const isTourEnabled = coreStart.notifications.tours.isEnabled();
+  // Re-evaluate when solution nav id changes (Classic ↔ project).
+  useObservable(
+    coreStart.chrome.getActiveSolutionNavId$(),
+    coreStart.chrome.getActiveSolutionNavId()
+  );
+  const canTakeTour = canOfferAlertingNavTour(coreStart);
   const [persisted = DEFAULT_ALERTING_NAV_TOUR_STATE, setPersisted] =
     useLocalStorage<AlertingNavTourPersistedState>(
       ALERTING_NAV_TOUR_STORAGE_KEY,
@@ -41,13 +48,13 @@ export const AlertingNavPromo: React.FC<{ coreStart: CoreStart }> = ({ coreStart
   }, [setPersisted]);
 
   const takeTour = useCallback(() => {
-    if (!isTourEnabled) {
+    if (!canTakeTour) {
       return;
     }
     // Opting into the tour dismisses the promo so it does not return after Finish/Skip.
     setPersisted({ isDismissed: true });
     window.dispatchEvent(new Event(ALERTING_NAV_START_TOUR_EVENT));
-  }, [isTourEnabled, setPersisted]);
+  }, [canTakeTour, setPersisted]);
 
   if (persisted.isDismissed) {
     return null;
@@ -70,7 +77,7 @@ export const AlertingNavPromo: React.FC<{ coreStart: CoreStart }> = ({ coreStart
       <UnifiedAlertingPromoCard
         onTakeTour={takeTour}
         onDismiss={dismiss}
-        showTakeTour={isTourEnabled}
+        showTakeTour={canTakeTour}
       />
     </div>
   );

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
@@ -22,9 +23,27 @@ import {
 jest.mock('./assets/alerting_promo_light.webp', () => 'promo-light.webp');
 jest.mock('./assets/alerting_promo_dark.webp', () => 'promo-dark.webp');
 
-const renderPromo = ({ toursEnabled = true }: { toursEnabled?: boolean } = {}) => {
+jest.mock('@kbn/alerting-v2-utils', () => ({
+  isAlertingV2Enabled: jest.fn(() => true),
+}));
+
+const { isAlertingV2Enabled } = jest.requireMock('@kbn/alerting-v2-utils') as {
+  isAlertingV2Enabled: jest.Mock;
+};
+
+const renderPromo = ({
+  toursEnabled = true,
+  solutionNavId = 'oblt' as string | null,
+}: {
+  toursEnabled?: boolean;
+  solutionNavId?: string | null;
+} = {}) => {
   const coreStart = {
     notifications: { tours: { isEnabled: () => toursEnabled } },
+    chrome: {
+      getActiveSolutionNavId: () => solutionNavId,
+      getActiveSolutionNavId$: () => new BehaviorSubject(solutionNavId),
+    },
   } as unknown as CoreStart;
 
   return render(
@@ -37,6 +56,7 @@ const renderPromo = ({ toursEnabled = true }: { toursEnabled?: boolean } = {}) =
 describe('AlertingNavPromo', () => {
   beforeEach(() => {
     window.localStorage.clear();
+    isAlertingV2Enabled.mockReturnValue(true);
   });
 
   it('shows the floating promo', () => {
@@ -78,6 +98,21 @@ describe('AlertingNavPromo', () => {
 
   it('hides Take tour when tours are disabled', () => {
     renderPromo({ toursEnabled: false });
+
+    expect(screen.getByTestId('alertingNavPromoFloatingAnchor')).toBeInTheDocument();
+    expect(screen.queryByTestId(ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('hides Take tour on Classic navigation', () => {
+    renderPromo({ solutionNavId: null });
+
+    expect(screen.getByTestId('alertingNavPromoFloatingAnchor')).toBeInTheDocument();
+    expect(screen.queryByTestId(ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('hides Take tour when Alerting v2 is disabled', () => {
+    isAlertingV2Enabled.mockReturnValue(false);
+    renderPromo();
 
     expect(screen.getByTestId('alertingNavPromoFloatingAnchor')).toBeInTheDocument();
     expect(screen.queryByTestId(ALERTING_NAV_PROMO_TAKE_TOUR_TEST_ID)).not.toBeInTheDocument();

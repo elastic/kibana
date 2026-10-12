@@ -7,9 +7,13 @@
 
 import React from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { act, render } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ApplicationStart } from '@kbn/core/public';
-import { AlertingNavGuidedTour, ANCHOR_TIMEOUT_MS } from './guided_tour';
+import {
+  AlertingNavGuidedTour,
+  ANCHOR_TIMEOUT_MS,
+  ALERTING_NAV_TOUR_TEST_ID_PREFIX,
+} from './guided_tour';
 import type { AlertingNavTourStep } from './tour_steps';
 
 const STEPS: AlertingNavTourStep[] = [
@@ -24,8 +28,44 @@ const STEPS: AlertingNavTourStep[] = [
   },
 ];
 
+const TWO_STEPS: AlertingNavTourStep[] = [
+  {
+    stepId: 'alerts',
+    title: 'Step A',
+    anchor: '[data-test-subj="anchor-a"]',
+    anchorPosition: 'rightCenter',
+    content: <span>{'Content A'}</span>,
+    appId: 'observabilityAlerting',
+    path: '/alerts',
+  },
+  {
+    stepId: 'rules',
+    title: 'Step B',
+    anchor: '[data-test-subj="anchor-b"]',
+    anchorPosition: 'rightCenter',
+    content: <span>{'Content B'}</span>,
+    appId: 'observabilityAlerting',
+    path: '/rules/v2',
+  },
+];
+
+/** EuiTourStep wraps/relocates anchors; keep them outside React's managed tree. */
+const mountDomAnchor = (testSubj: string): HTMLElement => {
+  const el = document.createElement('div');
+  el.setAttribute('data-test-subj', testSubj);
+  document.body.appendChild(el);
+  return el;
+};
+
 describe('AlertingNavGuidedTour', () => {
+  afterEach(() => {
+    document
+      .querySelectorAll('[data-test-subj="anchor-a"], [data-test-subj="anchor-b"]')
+      .forEach((el) => el.remove());
+  });
+
   it('expands the side nav and navigates to the active step app', () => {
+    mountDomAnchor('anchor-a');
     const navigateToApp = jest.fn().mockResolvedValue(undefined);
     const setIsCollapsed = jest.fn();
     render(
@@ -45,6 +85,41 @@ describe('AlertingNavGuidedTour', () => {
       path: '/alerts',
       deepLinkId: undefined,
     });
+  });
+
+  it('renders EuiTourStep and advances through mounted anchors with Next / Finish', async () => {
+    mountDomAnchor('anchor-a');
+    mountDomAnchor('anchor-b');
+    const navigateToApp = jest.fn().mockResolvedValue(undefined);
+    const onFinish = jest.fn();
+
+    render(
+      <EuiThemeProvider>
+        <AlertingNavGuidedTour
+          steps={TWO_STEPS}
+          isActive
+          onFinish={onFinish}
+          application={{ navigateToApp } as unknown as ApplicationStart}
+        />
+      </EuiThemeProvider>
+    );
+
+    expect(
+      await screen.findByTestId(`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-alerts`)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Content A')).toBeInTheDocument();
+    expect(screen.getByTestId(`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-next`)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId(`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-next`));
+
+    expect(
+      await screen.findByTestId(`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-rules`)
+    ).toBeInTheDocument();
+    expect(screen.getByText('Content B')).toBeInTheDocument();
+    expect(screen.getByTestId(`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-finish`)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId(`${ALERTING_NAV_TOUR_TEST_ID_PREFIX}-finish`));
+    await waitFor(() => expect(onFinish).toHaveBeenCalled());
   });
 
   it('skips a missing anchor after the timeout, then finishes', () => {

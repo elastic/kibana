@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
 import { ALERTING_NAV_START_TOUR_EVENT, AlertingNavTour } from './alerting_nav_tour';
@@ -19,10 +20,28 @@ jest.mock('./guided_tour', () => ({
     ) : null,
 }));
 
-const renderTour = ({ toursEnabled = true }: { toursEnabled?: boolean } = {}) => {
+jest.mock('@kbn/alerting-v2-utils', () => ({
+  isAlertingV2Enabled: jest.fn(() => true),
+}));
+
+const { isAlertingV2Enabled } = jest.requireMock('@kbn/alerting-v2-utils') as {
+  isAlertingV2Enabled: jest.Mock;
+};
+
+const renderTour = ({
+  toursEnabled = true,
+  solutionNavId = 'oblt' as string | null,
+}: {
+  toursEnabled?: boolean;
+  solutionNavId?: string | null;
+} = {}) => {
   const coreStart = {
     application: {},
-    chrome: { sideNav: { setIsCollapsed: jest.fn() } },
+    chrome: {
+      sideNav: { setIsCollapsed: jest.fn() },
+      getActiveSolutionNavId: () => solutionNavId,
+      getActiveSolutionNavId$: () => new BehaviorSubject(solutionNavId),
+    },
     notifications: { tours: { isEnabled: () => toursEnabled } },
   } as unknown as CoreStart;
 
@@ -30,6 +49,10 @@ const renderTour = ({ toursEnabled = true }: { toursEnabled?: boolean } = {}) =>
 };
 
 describe('AlertingNavTour', () => {
+  beforeEach(() => {
+    isAlertingV2Enabled.mockReturnValue(true);
+  });
+
   it('starts the tour from the window event', () => {
     renderTour();
 
@@ -45,6 +68,27 @@ describe('AlertingNavTour', () => {
 
   it('does not mount the tour when tours are disabled', () => {
     renderTour({ toursEnabled: false });
+
+    act(() => {
+      window.dispatchEvent(new Event(ALERTING_NAV_START_TOUR_EVENT));
+    });
+
+    expect(screen.queryByTestId('mockTourFinish')).not.toBeInTheDocument();
+  });
+
+  it('does not start the tour on Classic navigation', () => {
+    renderTour({ solutionNavId: null });
+
+    act(() => {
+      window.dispatchEvent(new Event(ALERTING_NAV_START_TOUR_EVENT));
+    });
+
+    expect(screen.queryByTestId('mockTourFinish')).not.toBeInTheDocument();
+  });
+
+  it('does not start the tour when Alerting v2 is disabled', () => {
+    isAlertingV2Enabled.mockReturnValue(false);
+    renderTour();
 
     act(() => {
       window.dispatchEvent(new Event(ALERTING_NAV_START_TOUR_EVENT));
