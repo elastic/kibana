@@ -63,3 +63,12 @@ export interface LocationAgentStats {
   isShardingActive: boolean;
   agents: AgentStat[];
 }
+
+/**
+ * Response of `GET …/private_locations/missing_complete_agents`: private
+ * locations with no active agent that can run browser monitors. Locations whose
+ * agents could not be listed are left out, so an unknown state never warns.
+ */
+export interface MissingCompleteAgentLocationsResponse {
+  locations: Array<{ id: string; label: string }>;
+}

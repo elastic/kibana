@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
-import { useAgentStats } from '../../settings/private_locations/hooks/use_agent_stats';
+import React, { useMemo } from 'react';
 import { useLocationMonitors } from '../../settings/private_locations/hooks/use_location_monitors';
-import {
-  BrowserCompleteAgentCallout,
-  locationLabelsWithoutCompleteAgent,
-} from './browser_complete_agent_callout';
+import { BrowserCompleteAgentCallout } from './browser_complete_agent_callout';
+import { useMissingCompleteAgentLocations } from './use_missing_complete_agent_locations';
 
 /** Overview banner for private locations whose browser monitors cannot run. */
 export const BrowserCompleteAgentOverviewCallout = () => {
-  const { byLocation, loading: statsLoading } = useAgentStats();
-  const { locationMonitors, loading: monitorsLoading } = useLocationMonitors();
-  const locationLabels = locationLabelsWithoutCompleteAgent(
-    [...byLocation.values()],
-    locationMonitors,
-    Boolean(statsLoading || monitorsLoading)
-  );
+  const { locations } = useMissingCompleteAgentLocations();
+  const { locationMonitors, loading } = useLocationMonitors();
+
+  const locationLabels = useMemo(() => {
+    if (!locations || loading) {
+      return [];
+    }
+    const browserLocationIds = new Set(
+      locationMonitors.filter(({ browserCount }) => browserCount > 0).map(({ id }) => id)
+    );
+    return locations.filter(({ id }) => browserLocationIds.has(id)).map(({ label }) => label);
+  }, [locations, locationMonitors, loading]);
 
   return <BrowserCompleteAgentCallout locationLabels={locationLabels} scope="locations" />;
 };
