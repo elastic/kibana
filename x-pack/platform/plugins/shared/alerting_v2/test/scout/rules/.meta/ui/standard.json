@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/.meta/ui/standard.json
   "sha1": "9b4e0dee53bfbacc653e4abeb7fb950624bdd94a",
+=======
+  "sha1": "18a66c1c20de6e5d99469afc12fbf93ba42fac60",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/.meta/ui/standard.json
   "testChannels": [
     "ci-on-commit"
   ],
@@ -159,9 +163,15 @@
         "@local-serverless-observability_complete"
       ],
       "location": {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/.meta/ui/standard.json
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
         "line": 130,
         "column": 10
+=======
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
+        "line": 135,
+        "column": 13
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/.meta/ui/standard.json
       }
     },
     {
@@ -179,7 +189,11 @@
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/.meta/ui/standard.json
       "id": "6e5410626ba22b5-4c4c58a6af68be9",
+=======
+      "id": "9c1881f2135d817-4c4c58a6af68be9",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/.meta/ui/standard.json
       "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder metadata opens in ES|QL mode",
       "expectedStatus": "passed",
       "tags": [
@@ -263,7 +277,11 @@
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/.meta/ui/standard.json
       "id": "8c1e63a2466954b-5cfaaa8b9382bbe",
+=======
+      "id": "516c7c0e6a63cda-5cfaaa8b9382bbe",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/.meta/ui/standard.json
       "title": "Rule routing tags — edit via ES|QL form replacing routing tags on the Actions step persists them and leaves tags alone",
       "expectedStatus": "passed",
       "tags": [
@@ -271,6 +289,7 @@
         "@local-serverless-observability_complete"
       ],
       "location": {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/.meta/ui/standard.json
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_routing_tags_edit.spec.ts",
         "line": 47,
         "column": 24
@@ -278,6 +297,15 @@
     },
     {
       "id": "6001c6336154732-a130c3dc63aa3dc",
+=======
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_routing_tags_edit.spec.ts",
+        "line": 53,
+        "column": 22
+      }
+    },
+    {
+      "id": "c00a5416f5250d2-a130c3dc63aa3dc",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/.meta/ui/standard.json
       "title": "Rule tags — edit via ES|QL form removing all tags persists (does not restore the old tags)",
       "expectedStatus": "passed",
       "tags": [

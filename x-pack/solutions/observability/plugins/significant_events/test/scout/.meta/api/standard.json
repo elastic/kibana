@@ -1,5 +1,5 @@
 {
-  "sha1": "74e56919159b841fa71abf40a81adaa64852352d",
+  "sha1": "7e2dd27a285ba179fb1c1b2a186d5b7a850189d4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,6 +21,134 @@
       }
     },
     {
+      "id": "abeb9fe1f06530f-e5b21509e0a097b",
+      "title": "Significant Events actions for the built-in editor role closes a significant event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 53,
+        "column": 59
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-7fbe722bd6b9cf3",
+      "title": "Significant Events actions for the built-in editor role writes and reads detections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 73,
+        "column": 17
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-992b8eb4e3c27e9",
+      "title": "Significant Events actions for the built-in editor role creates and deletes a knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-3e0f526b51804d4",
+      "title": "Significant Events actions for the built-in editor role creates a knowledge indicator from Agent Builder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 118,
+        "column": 67
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-5f0ccf52e91e47c",
+      "title": "Significant Events actions for the built-in admin role closes a significant event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 53,
+        "column": 59
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-c1dadaf647d548a",
+      "title": "Significant Events actions for the built-in admin role writes and reads detections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 73,
+        "column": 17
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-b65e5f481717ebf",
+      "title": "Significant Events actions for the built-in admin role creates and deletes a knowledge indicator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "abeb9fe1f06530f-60b8a3da4f110d2",
+      "title": "Significant Events actions for the built-in admin role creates a knowledge indicator from Agent Builder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 118,
+        "column": 67
+      }
+    },
+    {
       "id": "83c95f0c4329cc6-46bc6083876c76b",
       "title": "Significant Events read from .rule-events returns events to a Nightshift reader without Alerting v2 or index privileges",
       "expectedStatus": "passed",
@@ -32,8 +160,168 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/rule_events_read.spec.ts",
+        "line": 67,
+        "column": 42
+      }
+    },
+    {
+      "id": "2a468803071fdb7-c758af8fc5812c3",
+      "title": "Significant Events settings access for built-in roles denies settings changes to the viewer role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/settings_role_access.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "2a468803071fdb7-b3082f98a7aeff3",
+      "title": "Significant Events settings access for built-in roles denies settings changes to the editor role",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/settings_role_access.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "2a468803071fdb7-fb2228744cabc24",
+      "title": "Significant Events settings access for built-in roles allows the admin role to change settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/settings_role_access.spec.ts",
+        "line": 45,
+        "column": 40
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-dccf4d11a14b288",
+      "title": "Significant Events access for the built-in viewer role lists and opens significant events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "line": 54,
+        "column": 61
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-4ee7bde10ac0ab8",
+      "title": "Significant Events access for the built-in viewer role lists detections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 77,
-        "column": 25
+        "column": 41
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-45d2f690096d83e",
+      "title": "Significant Events access for the built-in viewer role lists knowledge indicators",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "line": 91,
+        "column": 20
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-d8c932ce34dd1b1",
+      "title": "Significant Events access for the built-in viewer role cannot update significant events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "line": 102,
+        "column": 7
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-d8d58e6a8dc6a1e",
+      "title": "Significant Events access for the built-in viewer role cannot write detections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "line": 117,
+        "column": 74
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-10d9db5b8574d3c",
+      "title": "Significant Events access for the built-in viewer role cannot create or delete knowledge indicators",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "line": 135,
+        "column": 76
+      }
+    },
+    {
+      "id": "8fa53ec6de3e70d-313c2178c6289b6",
+      "title": "Significant Events access for the built-in viewer role can search events but cannot create knowledge indicators from Agent Builder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "line": 146,
+        "column": 7
       }
     },
     {
@@ -48,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/pause_on_flag_off.spec.ts",
-        "line": 36,
-        "column": 31
+        "line": 123,
+        "column": 55
       }
     },
     {

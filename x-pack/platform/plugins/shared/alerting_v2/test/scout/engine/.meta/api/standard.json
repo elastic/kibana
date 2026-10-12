@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
   "sha1": "ea224b22293a3f875769a3ce1ce54ffa70601187",
+=======
+  "sha1": "9f966408ede7f126719c12e9baf84fa5c07ef075",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
   "testChannels": [
     "ci-on-commit"
   ],
@@ -465,7 +469,11 @@
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
       "id": "381b495daf02266-f031c12351371f0",
+=======
+      "id": "89aded2614076f0-f031c12351371f0",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
       "title": "Rule change history API list + detail: returns lean rows with server-side diffs and full snapshots on detail",
       "expectedStatus": "passed",
       "tags": [
@@ -473,13 +481,21 @@
         "@cloud-stateful-classic"
       ],
       "location": {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history_http.spec.ts",
+=======
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history_http.spec.ts",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
         "line": 29,
         "column": 71
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
       "id": "381b495daf02266-5c25cb3a2bbc6d8",
+=======
+      "id": "89aded2614076f0-5c25cb3a2bbc6d8",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
       "title": "Rule change history API detail: resolves an older event from the change id alone, without a rule id",
       "expectedStatus": "passed",
       "tags": [
@@ -487,13 +503,21 @@
         "@cloud-stateful-classic"
       ],
       "location": {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/rule_history_http.spec.ts",
+=======
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/rule_history_http.spec.ts",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
         "line": 96,
         "column": 47
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
       "id": "d2d098357d3068e-7f791e41745c742",
+=======
+      "id": "134d64c4c7ff58c-7f791e41745c742",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
       "title": "Rule change history create: logs a rule_create entry with sequence 1 and a RuleResponse-shaped snapshot",
       "expectedStatus": "passed",
       "tags": [
@@ -605,7 +629,11 @@
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/.meta/api/standard.json
       "id": "628e398f81b8b3d-14af16ecf5b4c6e",
+=======
+      "id": "2a3330f8808a2d4-14af16ecf5b4c6e",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/.meta/api/standard.json
       "title": "Agent Builder — alerting V2 SML type access limited privilege user can search alerting v2 rule and action policy SML types",
       "expectedStatus": "skipped",
       "tags": [

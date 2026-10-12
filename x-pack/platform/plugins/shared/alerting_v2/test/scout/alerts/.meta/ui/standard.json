@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/.meta/ui/standard.json
   "sha1": "b6bc7efe9bc8e2c2471586e224d09c2cdbe5109b",
+=======
+  "sha1": "292786ce302abe40bda51f2a05461deb215cfcdb",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/.meta/ui/standard.json
   "testChannels": [
     "ci-on-commit"
   ],
@@ -277,7 +281,11 @@
       }
     },
     {
+<<<<<<< HEAD:x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/.meta/ui/standard.json
       "id": "31c502415510d51-eff0e3a81352b7e",
+=======
+      "id": "6a78981f96ca304-eff0e3a81352b7e",
+>>>>>>> upstream/main:x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/.meta/ui/standard.json
       "title": "Alert details — action policy history tab mounts the episode-scoped policy history tab from the details route",
       "expectedStatus": "passed",
       "tags": [
