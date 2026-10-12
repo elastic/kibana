@@ -451,6 +451,106 @@ describe('IacProvisionerService', () => {
       /invalid render body/
     );
   });
+
+  describe('callbacks', () => {
+    const ONBOARDING_ID = '3f2b8c1e-5d4a-4e7b-9c0d-1a2b3c4d5e6f';
+    const CALLBACK = 'eyJ1cmwiOiJodHRwczovL3MzIiwiZmllbGRzIjp7IlBvbGljeSI6IlNFQ1JFVCJ9fQ==';
+    const REPORT = {
+      onboardingId: ONBOARDING_ID,
+      requestType: 'Create',
+      stackId:
+        'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d',
+      roleArn:
+        'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d',
+      accountId: '123456789012',
+      region: 'us-east-1',
+      receivedAt: '2026-10-09T12:00:00Z',
+    };
+
+    it('POSTs without a body and never logs the callback', async () => {
+      mockConfig();
+      const logger = mockLogger();
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(201, {
+          onboardingId: ONBOARDING_ID,
+          callback: CALLBACK,
+          expiresAt: '2026-10-09T14:00:00Z',
+        })
+      );
+
+      const ticket = await iacProvisionerService.createCallback();
+
+      expect(ticket.callback).toBe(CALLBACK);
+      const [url, init] = mockedFetch.mock.calls[0] as [string, any];
+      expect(url).toBe('https://iac-provisioner.example/api/v1/callbacks');
+      expect(init.method).toBe('POST');
+      expect(init.body).toBeUndefined();
+      expect(init.headers['Content-type']).toBeUndefined();
+      const allLogged = [...logger.info.mock.calls, ...logger.debug.mock.calls]
+        .flat()
+        .map(String)
+        .join(' ');
+      expect(allLogged).toContain(ONBOARDING_ID);
+      expect(allLogged).not.toContain(CALLBACK);
+    });
+
+    it('rejects a ticket without a callback', async () => {
+      mockConfig();
+      mockLogger();
+      mockedFetch.mockResolvedValueOnce(jsonResponse(201, { onboardingId: ONBOARDING_ID }));
+
+      await expect(iacProvisionerService.createCallback()).rejects.toThrow(/invalid callback body/);
+    });
+
+    it('GETs the report for the onboarding ID', async () => {
+      mockConfig();
+      mockLogger();
+      mockedFetch.mockResolvedValueOnce(jsonResponse(200, REPORT));
+
+      await expect(iacProvisionerService.getCallback(ONBOARDING_ID)).resolves.toEqual(REPORT);
+      expect(mockedFetch).toHaveBeenCalledWith(
+        `https://iac-provisioner.example/api/v1/callbacks/${ONBOARDING_ID}`,
+        expect.objectContaining({ method: 'GET', body: undefined })
+      );
+    });
+
+    it('resolves undefined while no report has arrived, without logging an error', async () => {
+      mockConfig();
+      const logger = mockLogger();
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(404, { errors: [{ code: 'callbacks.not_found', message: 'none' }] })
+      );
+
+      await expect(iacProvisionerService.getCallback(ONBOARDING_ID)).resolves.toBeUndefined();
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('maps a rejected report to IacProvisionerRequestError', async () => {
+      mockConfig();
+      mockLogger();
+      mockedFetch.mockResolvedValueOnce(
+        jsonResponse(422, {
+          errors: [{ code: 'callbacks.invalid_report', message: 'role is in another account' }],
+        })
+      );
+
+      const promise = iacProvisionerService.getCallback(ONBOARDING_ID);
+      await expect(promise).rejects.toThrow(IacProvisionerRequestError);
+      await promise.catch((error: IacProvisionerRequestError) => {
+        expect(error.errorCodes).toEqual(['callbacks.invalid_report']);
+      });
+    });
+
+    it('rejects a report missing the role ARN', async () => {
+      mockConfig();
+      mockLogger();
+      mockedFetch.mockResolvedValueOnce(jsonResponse(200, { ...REPORT, roleArn: undefined }));
+
+      await expect(iacProvisionerService.getCallback(ONBOARDING_ID)).rejects.toThrow(
+        /invalid callback report/
+      );
+    });
+  });
 });
 
 describe('parseIacProvisionerErrors', () => {

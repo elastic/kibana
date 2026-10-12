@@ -77,6 +77,8 @@ interface ManagedIntegrationsSectionProps {
    * the callout when there is no underlying service-var drift.
    */
   onReplaceFormDirtyChange?: (dirty: boolean) => void;
+  /** Lets a launched identity stack report its role back, so the identity is created for the user. */
+  stackCallback?: { ensureOnboardingDeploymentId: () => Promise<string | undefined> };
 }
 
 const NO_STORED_SECRET_FIELDS: NonNullable<ManagedIntegrationsSectionProps['storedSecretFields']> =
@@ -95,6 +97,7 @@ export function ManagedIntegrationsSection({
   isStoredSecretsLoading = false,
   isDirty = false,
   onReplaceFormDirtyChange,
+  stackCallback,
 }: ManagedIntegrationsSectionProps) {
   const { services } = useKibana<CoreStart & { cloud?: CloudSetupForCloudConnector }>();
   const {
@@ -383,6 +386,7 @@ export function ManagedIntegrationsSection({
                   onConnectorIdChange={handleIdentityFedConnectorChange}
                   onIacTemplateRecorded={handleIacTemplateRecorded}
                   initialConnectorId={initialConnectorId}
+                  stackCallback={stackCallback}
                 />
               ) : isStoredSecretsLoading ? (
                 <EuiLoadingSpinner />

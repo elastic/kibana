@@ -126,6 +126,8 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
   UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+  // Internal: drives the UI's wait for a launched stack, not part of the public API.
+  AWS_STACK_CALLBACK_PATTERN: `${INTERNAL_ROOT}/cloud_onboarding_deployments/{id}/aws_stack_callback`,
 };
 
 // IaC Provisioner API routes

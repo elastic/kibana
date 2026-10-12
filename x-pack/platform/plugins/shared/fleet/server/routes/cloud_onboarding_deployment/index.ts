@@ -24,6 +24,10 @@ import {
   UpdateCloudOnboardingDeploymentResponseSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentResponseSchema,
+  StartAwsStackCallbackRequestSchema,
+  StartAwsStackCallbackResponseSchema,
+  GetAwsStackCallbackRequestSchema,
+  GetAwsStackCallbackResponseSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
 import {
@@ -32,6 +36,8 @@ import {
   getCloudOnboardingDeploymentsByConnectorIdHandler,
   updateCloudOnboardingDeploymentHandler,
   deleteCloudOnboardingDeploymentHandler,
+  startAwsStackCallbackHandler,
+  getAwsStackCallbackHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -295,5 +301,91 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       deleteCloudOnboardingDeploymentHandler
+    );
+
+  // Both callback routes can end in a new cloud connector, so they need the privileges to create one.
+  const awsStackCallbackPrivileges = {
+    authz: {
+      requiredPrivileges: [
+        {
+          anyRequired: [
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+          ],
+        },
+      ],
+    },
+  };
+
+  // POST /internal/fleet/cloud_onboarding_deployments/{id}/aws_stack_callback
+  router.versioned
+    .post({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.AWS_STACK_CALLBACK_PATTERN,
+      access: 'internal',
+      security: awsStackCallbackPrivileges,
+      summary: 'Start an AWS stack callback',
+      description:
+        'Returns the stack parameters that make a launched CloudFormation stack report its role back, so Kibana creates the cloud connector.',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: StartAwsStackCallbackRequestSchema,
+          response: {
+            200: {
+              body: () => StartAwsStackCallbackResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            404: {
+              body: genericErrorResponse,
+              description: 'Not found, or callbacks are not enabled.',
+            },
+            409: {
+              body: genericErrorResponse,
+              description: 'A cloud connector is being created from an earlier stack.',
+            },
+            502: {
+              body: genericErrorResponse,
+              description: 'The IaC Provisioner failed.',
+            },
+          },
+        },
+      },
+      startAwsStackCallbackHandler
+    );
+
+  // GET /internal/fleet/cloud_onboarding_deployments/{id}/aws_stack_callback
+  router.versioned
+    .get({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.AWS_STACK_CALLBACK_PATTERN,
+      access: 'internal',
+      security: awsStackCallbackPrivileges,
+      summary: 'Get an AWS stack callback',
+      description:
+        'Returns the state of the stack callback, creating the cloud connector first if the stack has reported.',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetAwsStackCallbackRequestSchema,
+          response: {
+            200: {
+              body: () => GetAwsStackCallbackResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            404: {
+              body: genericErrorResponse,
+              description: 'Not found, or callbacks are not enabled.',
+            },
+            502: {
+              body: genericErrorResponse,
+              description: 'The IaC Provisioner failed.',
+            },
+          },
+        },
+      },
+      getAwsStackCallbackHandler
     );
 };

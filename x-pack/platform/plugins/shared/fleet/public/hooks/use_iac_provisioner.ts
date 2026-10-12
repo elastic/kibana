@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ENABLE_IAC_PROVISIONER_FLAG } from '../../common/constants';
+import {
+  ENABLE_AWS_STACK_CALLBACK_FLAG,
+  ENABLE_IAC_PROVISIONER_FLAG,
+} from '../../common/constants';
 
 import { useConfig, useStartServices } from '.';
 
@@ -29,4 +32,12 @@ export const useIacProvisioner = (): { isIacProvisionerEnabled: boolean } => {
     isIacProvisionerEnabled:
       isHosted && config.agentless?.enabled === true && isIacProvisionerFlagEnabled,
   };
+};
+
+/** Client-side mirror of the server's `isAwsStackCallbackEnabled()` gate. */
+export const useAwsStackCallbackEnabled = (): boolean => {
+  const { isIacProvisionerEnabled } = useIacProvisioner();
+  const { featureFlags } = useStartServices();
+  const isFlagEnabled = featureFlags.useBooleanValue(ENABLE_AWS_STACK_CALLBACK_FLAG, false);
+  return isIacProvisionerEnabled && isFlagEnabled;
 };

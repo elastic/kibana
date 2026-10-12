@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CloudProvider } from './cloud_connector';
+import type { AccountType, CloudProvider } from './cloud_connector';
 
 export type { CloudProvider };
 
@@ -34,6 +34,38 @@ export type CloudOnboardingDeploymentAuthMethod =
 export type CloudOnboardingDeploymentStatus = 'pending' | 'deploying' | 'succeeded' | 'failed';
 
 export type CloudOnboardingDeploymentServiceVars = Record<string, unknown>;
+
+/**
+ * - waiting: the stack has not reported back yet.
+ * - completing: a report arrived and the identity is being created; nothing else may create it.
+ * - completed: the identity exists (`connectorId`).
+ * - expired: the upload form expired before a report arrived.
+ * - failed: a report arrived but no identity could be created from it (`error`).
+ */
+export type AwsStackCallbackStatus = 'waiting' | 'completing' | 'completed' | 'expired' | 'failed';
+
+/**
+ * A launched CloudFormation stack that reports its role back to Kibana, so Kibana creates the
+ * identity itself. Holds no secret: the signed upload form only ever goes into the stack.
+ */
+export interface AwsStackCallback {
+  /** Matches the stack's report to this deployment. */
+  onboardingId: string;
+  status: AwsStackCallbackStatus;
+  startedAt: string;
+  /** When the stack's upload form expires. */
+  expiresAt: string;
+  /** Name for the identity Kibana creates. Derived from the account when empty. */
+  connectorName?: string;
+  accountType?: AccountType;
+  /** Template details of the launch, stored on the identity as at a manual Create. */
+  iac_key?: string | null;
+  iac_blueprint_id?: string | null;
+  iac_blueprint_version?: string | null;
+  connectorId?: string;
+  stackId?: string;
+  error?: string;
+}
 
 export interface CloudOnboardingDeployment {
   id: string;
@@ -67,6 +99,8 @@ export interface CloudOnboardingDeployment {
    * - agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role
    */
   authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+  /** Server-managed; not part of the REST item. */
+  awsStackCallback?: AwsStackCallback;
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;

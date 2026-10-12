@@ -216,6 +216,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',
+        'fleet:aws_stack_callback_check',
         'fleet:bump_agent_policies',
         'fleet:bump_agent_policies_by_id',
         'fleet:check-deleted-files-task',

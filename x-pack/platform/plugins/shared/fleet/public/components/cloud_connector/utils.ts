@@ -783,7 +783,7 @@ const getQuickCreateUrl = (artifactUrl: string, staticUrl: string | undefined): 
   return `${AWS_QUICK_CREATE_URL}?${templateUrlParam}`;
 };
 
-const setQuickCreateStackParams = (url: string, stackParams: StackParams): string =>
+export const setQuickCreateStackParams = (url: string, stackParams: StackParams): string =>
   Object.entries(stackParams).reduce((acc, [name, value]) => {
     const param = `param_${name}=${encodeURIComponent(value)}`;
     const existingParam = new RegExp(`([?&])param_${name}=[^&]*`);

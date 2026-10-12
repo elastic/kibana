@@ -23,7 +23,11 @@ import type {
   RenderIacTemplateRequest,
 } from '../../../../common/types/rest_spec/iac_provisioner';
 import type { CloudSetupForCloudConnector } from '../types';
-import { getStaticTemplate, getWorkloadIdentityFederationStackParams } from '../utils';
+import {
+  getStaticTemplate,
+  getWorkloadIdentityFederationStackParams,
+  setQuickCreateStackParams,
+} from '../utils';
 
 import { getRenderIntegrations, renderArtifactTemplate } from './render_artifact_template';
 
@@ -45,6 +49,14 @@ const CONSOLE_OPEN_FAILED_ERROR = i18n.translate(
   {
     defaultMessage:
       'The CloudFormation console could not be opened. Allow pop-ups for Kibana and try again.',
+  }
+);
+
+const STACK_CALLBACK_ERROR = i18n.translate(
+  'xpack.fleet.cloudConnector.iacProvisioner.stackCallbackError',
+  {
+    defaultMessage:
+      'Kibana could not prepare the stack to report back. Try again, or contact your administrator if the problem persists.',
   }
 );
 
@@ -112,7 +124,15 @@ export interface UseCloudConnectorTemplateParams {
    * set it was rendered for. Callers that write the connector at click time store all of it.
    */
   onTemplateRendered?: (rendered: TemplateRendered) => void;
+  /**
+   * Called after a render, before the console opens on it. The returned parameters are added to
+   * the new stack's quick-create link. A rejection stops the launch: the caller has no other way
+   * to learn about the stack. Not used for stack updates (`deploymentId`).
+   */
+  getLaunchStackParams?: (rendered: TemplateRendered) => Promise<StackParams | undefined>;
 }
+
+type StackParams = Readonly<Record<string, string>>;
 
 export type CloudConnectorLaunchButtonProps =
   /**
@@ -156,6 +176,7 @@ export const useCloudConnectorTemplate = ({
   deploymentId,
   staticTemplateFallback = true,
   onTemplateRendered,
+  getLaunchStackParams,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
@@ -247,11 +268,30 @@ export const useCloudConnectorTemplate = ({
       });
 
       switch (result.status) {
-        case 'rendered':
+        case 'rendered': {
+          const rendered: TemplateRendered = {
+            key: result.templateSha,
+            integrations: renderIntegrations,
+            blueprintId: result.blueprint.id,
+            blueprintVersion: result.blueprint.version,
+          };
+          let launchStackParams: StackParams | undefined;
+          if (getLaunchStackParams && !deploymentId) {
+            try {
+              launchStackParams = await getLaunchStackParams(rendered);
+            } catch {
+              cloudFormationTab?.close();
+              setTemplateGenerationError(STACK_CALLBACK_ERROR);
+              return;
+            }
+          }
+          const launchUrl = launchStackParams
+            ? setQuickCreateStackParams(result.launchUrl, launchStackParams)
+            : result.launchUrl;
           // Navigate first: the template details are only recorded (and callers only unblock)
           // for a template the user can actually see in the console. A pop-up blocker that ate
           // both tabs must not leave a digest on the connector for a stack that was never opened.
-          if (!navigateTo(result.launchUrl)) {
+          if (!navigateTo(launchUrl)) {
             setTemplateGenerationError(CONSOLE_OPEN_FAILED_ERROR);
             return;
           }
@@ -260,13 +300,9 @@ export const useCloudConnectorTemplate = ({
             iac_blueprint_id: result.blueprint.id,
             iac_blueprint_version: result.blueprint.version,
           });
-          onTemplateRendered?.({
-            key: result.templateSha,
-            integrations: renderIntegrations,
-            blueprintId: result.blueprint.id,
-            blueprintVersion: result.blueprint.version,
-          });
+          onTemplateRendered?.(rendered);
           return;
+        }
         case 'current':
           cloudFormationTab?.close();
           setTemplateAlreadyCurrent(TEMPLATE_ALREADY_CURRENT);
@@ -293,6 +329,7 @@ export const useCloudConnectorTemplate = ({
   }, [
     analytics,
     deploymentId,
+    getLaunchStackParams,
     integrations,
     onTemplateRendered,
     packageName,

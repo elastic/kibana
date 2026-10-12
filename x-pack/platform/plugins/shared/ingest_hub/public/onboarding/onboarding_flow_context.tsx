@@ -50,6 +50,11 @@ export interface AuthenticateAndDeployStepState {
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   pendingIacTemplate?: PendingIacTemplate;
   /**
+   * Deployment record created at Launch, before Deploy, so the launched stack has a record to
+   * report its role to. Deploy adopts it instead of creating another.
+   */
+  pendingOnboardingDeploymentId?: string;
+  /**
    * Secret refs already stored on deployed policies, for credentials the user chose to keep.
    * Never held in the provider: Deploy reads them fresh from Fleet just before it builds a policy
    * body, so a ref replaced by an earlier deploy is never reused.
@@ -103,6 +108,8 @@ interface PersistedAuthenticateAndDeployStep {
   connectorName?: string;
   authMethod?: CloudOnboardingDeploymentAuthMethod;
   accessKeyId?: string;
+  // Persisted so a reload while the stack is being created reuses the record it reports to.
+  pendingOnboardingDeploymentId?: string;
   deploymentMethod?: DeploymentMethod;
   // Deployment method the user had selected when they last continued from Step 2. Lives here (not
   // in the service-settings session key) because this provider stays mounted: react-use's
@@ -171,6 +178,7 @@ interface OnboardingFlowState {
   /** Update persisted authMethod in place without touching connectorId or staticKeys. */
   setAuthMethod: (method: CloudOnboardingDeploymentAuthMethod) => void;
   setPendingIacTemplate: (iac: PendingIacTemplate | undefined) => void;
+  setPendingOnboardingDeploymentId: (id: string | undefined) => void;
   setAgentBasedDeployment: (state: Partial<AgentBasedDeploymentState>) => void;
   agentBasedDeployment: AgentBasedDeploymentState;
   deploymentMethod: DeploymentMethod;
@@ -267,6 +275,15 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     [setPersistedAuthenticateAndDeployStep]
   );
 
+  const setPendingOnboardingDeploymentId = useCallback(
+    (id: string | undefined) => {
+      const next = { ...persistedAuthStepRef.current, pendingOnboardingDeploymentId: id };
+      persistedAuthStepRef.current = next;
+      setPersistedAuthenticateAndDeployStep(next);
+    },
+    [setPersistedAuthenticateAndDeployStep]
+  );
+
   const setStaticKeys = useCallback(
     (keys: AwsStaticKeyCredentials | undefined) => {
       setStaticKeysState(keys);
@@ -334,11 +351,17 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     (format: DataFormat) => {
       // A format change empties the selection (see above): the template details goes with it.
       setPendingIacTemplate(undefined);
+      // The record created at Launch holds the old format, which Deploy cannot change.
+      if (persistedAuthStepRef.current?.pendingOnboardingDeploymentId) {
+        const next = { ...persistedAuthStepRef.current, pendingOnboardingDeploymentId: undefined };
+        persistedAuthStepRef.current = next;
+        setPersistedAuthenticateAndDeployStep(next);
+      }
       // Clear selection atomically with the format change in one write — two separate
       // setPersistedServices calls would race because each closes over the same persistedServices.
       setPersistedServices({ ...persistedServices, dataFormat: format, selectedServiceIds: [] });
     },
-    [persistedServices, setPersistedServices]
+    [persistedServices, setPersistedServices, setPersistedAuthenticateAndDeployStep]
   );
 
   const [persistedDetectAndReviewStep, setPersistedDetectAndReviewStep] =
@@ -596,6 +619,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     staticKeys,
     authMethod: persistedAuthenticateAndDeployStep?.authMethod,
     pendingIacTemplate,
+    pendingOnboardingDeploymentId:
+      persistedAuthenticateAndDeployStep?.pendingOnboardingDeploymentId,
   };
 
   const agentBasedDeployment: AgentBasedDeploymentState = {
@@ -626,6 +651,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         clearStagedStaticKeys,
         setAuthMethod,
         setPendingIacTemplate,
+        setPendingOnboardingDeploymentId,
         setAgentBasedDeployment,
         agentBasedDeployment,
         deploymentMethod,

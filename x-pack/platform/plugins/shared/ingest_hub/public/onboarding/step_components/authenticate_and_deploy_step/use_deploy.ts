@@ -60,7 +60,8 @@ export interface UseDeployResult {
 
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
   const { services } = useKibana<CoreStart>();
-  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
+  const { createDeployment, adoptPendingDeployment, updateDeployment, persistDeploymentId } =
+    useOnboardingSO();
   const {
     servicesStep,
     authenticateAndDeployStep,
@@ -307,6 +308,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
     setIsDeploying,
     setFailedInstances,
     createDeployment,
+    adoptPendingDeployment,
     updateDeployment,
     persistDeploymentId,
     serviceStatuses: detectAndReviewStep.serviceStatuses,

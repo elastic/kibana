@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import type { CreateCloudOnboardingDeploymentRequest } from '@kbn/fleet-plugin/public';
 
 import type { AwsServiceMatrixEntry, DataFormat } from '../../aws_service_matrix';
 import type {
@@ -57,6 +58,8 @@ export interface UseMiDeployParams {
   setIsDeploying: (deploying: boolean) => void;
   setFailedInstances: (instances: string[]) => void;
   createDeployment: UseOnboardingSOResult['createDeployment'];
+  /** Tried before `createDeployment` on the initial deploy. */
+  adoptPendingDeployment?: UseOnboardingSOResult['adoptPendingDeployment'];
   updateDeployment: UseOnboardingSOResult['updateDeployment'];
   persistDeploymentId: UseOnboardingSOResult['persistDeploymentId'];
   serviceStatuses: Record<string, ServiceChipState>;
@@ -240,6 +243,7 @@ export function useMiDeploy({
   setIsDeploying,
   setFailedInstances,
   createDeployment,
+  adoptPendingDeployment,
   updateDeployment,
   persistDeploymentId,
   serviceStatuses,
@@ -639,20 +643,23 @@ export function useMiDeploy({
       let currentOnboardingDeploymentId = onboardingDeploymentId;
 
       if (isInitialDeploy && !currentOnboardingDeploymentId) {
+        const deploymentBody: CreateCloudOnboardingDeploymentRequest['body'] = {
+          provider: 'aws',
+          connectorId,
+          mechanisms: hasEcfServices ? ['managed_integration', 'ecf'] : ['managed_integration'],
+          services: selectedServiceIds,
+          serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
+            string,
+            Record<string, unknown>
+          >,
+          globalRegion,
+          dataFormat,
+          authMethod: connectorId ? 'identity_federation' : 'static_keys',
+        };
         currentOnboardingDeploymentId =
-          (await createDeployment({
-            provider: 'aws',
-            connectorId,
-            mechanisms: hasEcfServices ? ['managed_integration', 'ecf'] : ['managed_integration'],
-            services: selectedServiceIds,
-            serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
-              string,
-              Record<string, unknown>
-            >,
-            globalRegion,
-            dataFormat,
-            authMethod: connectorId ? 'identity_federation' : 'static_keys',
-          })) ?? undefined;
+          (await adoptPendingDeployment?.(deploymentBody)) ??
+          (await createDeployment(deploymentBody)) ??
+          undefined;
         if (currentOnboardingDeploymentId) {
           // Enter edit mode: add ?deploymentId= to URL so the format selector is locked
           // and any reload identifies this as a resumable deployment.
@@ -775,6 +782,7 @@ export function useMiDeploy({
       setIsDeploying,
       setFailedInstances,
       createDeployment,
+      adoptPendingDeployment,
       updateDeployment,
       persistDeploymentId,
       serviceStatuses,

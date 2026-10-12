@@ -32,6 +32,7 @@ jest.mock('../hooks/use_cloud_connector_template');
 jest.mock('../../../hooks', () => ({
   useIacProvisioner: jest.fn(),
   useStartServices: jest.fn(),
+  useAwsStackCallbackEnabled: jest.fn(() => false),
 }));
 jest.mock('../components/iac_key_check', () => ({ IacKeyCheck: jest.fn() }));
 

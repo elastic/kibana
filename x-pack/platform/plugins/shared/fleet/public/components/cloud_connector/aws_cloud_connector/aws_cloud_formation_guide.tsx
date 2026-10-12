@@ -22,6 +22,8 @@ export interface CloudFormationCloudCredentialsGuideProps {
   credentialType?: CloudFormationCredentialType;
   /** Whether the form below asks for an External ID next to the Role ARN. */
   hasExternalId?: boolean;
+  /** The stack reports its role back to Kibana, so there is nothing to copy from its outputs. */
+  reportsBack?: boolean;
 }
 
 export const CloudFormationCloudCredentialsGuide: React.FC<
@@ -30,6 +32,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
   accountType = ORGANIZATION_ACCOUNT,
   credentialType = 'identity_federation',
   hasExternalId = false,
+  reportsBack = false,
 }) => {
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
@@ -162,16 +165,30 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
               }}
             />
           </li>
-          <li>
-            <FormattedMessage
-              id="xpack.fleet.cloudConnector.aws.guide.steps.stackStatus"
-              defaultMessage="Once stack status is {createComplete} then click the Outputs tab"
-              values={{
-                createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
-              }}
-            />
-          </li>
-          <li>{lastStep}</li>
+          {reportsBack ? (
+            <li>
+              <FormattedMessage
+                id="xpack.fleet.cloudConnector.aws.guide.steps.stackReportsBack"
+                defaultMessage="Once stack status is {createComplete}, Kibana creates the identity from the stack. There is nothing to copy."
+                values={{
+                  createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
+                }}
+              />
+            </li>
+          ) : (
+            <>
+              <li>
+                <FormattedMessage
+                  id="xpack.fleet.cloudConnector.aws.guide.steps.stackStatus"
+                  defaultMessage="Once stack status is {createComplete} then click the Outputs tab"
+                  values={{
+                    createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
+                  }}
+                />
+              </li>
+              <li>{lastStep}</li>
+            </>
+          )}
         </ol>
       </EuiText>
     </div>

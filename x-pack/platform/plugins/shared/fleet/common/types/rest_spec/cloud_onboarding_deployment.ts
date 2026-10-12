@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { AccountType } from '../models/cloud_connector';
 import type {
+  AwsStackCallbackStatus,
   CloudOnboardingDeployment,
   CloudOnboardingDeploymentAuthMethod,
   CloudProvider,
@@ -60,4 +62,29 @@ export interface UpdateCloudOnboardingDeploymentRequest {
 
 export interface UpdateCloudOnboardingDeploymentResponse {
   item: CloudOnboardingDeployment;
+}
+
+export interface StartAwsStackCallbackRequest {
+  params: { id: string };
+  body: {
+    connectorName?: string;
+    accountType?: AccountType;
+    iac_key?: string | null;
+    iac_blueprint_id?: string | null;
+    iac_blueprint_version?: string | null;
+  };
+}
+
+export interface StartAwsStackCallbackResponse {
+  /** Quick-create stack parameters that make the stack report back. */
+  stackParams: { ElasticOnboardingId: string; ElasticCallback: string };
+  expiresAt: string;
+}
+
+export interface GetAwsStackCallbackResponse {
+  status: AwsStackCallbackStatus;
+  expiresAt: string;
+  connectorId?: string;
+  connectorName?: string;
+  error?: string;
 }

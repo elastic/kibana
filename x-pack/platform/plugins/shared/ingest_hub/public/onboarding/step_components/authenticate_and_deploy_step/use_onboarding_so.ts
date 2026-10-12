@@ -16,6 +16,7 @@ import type {
 } from '@kbn/fleet-plugin/public';
 import {
   sendCreateCloudOnboardingDeployment,
+  sendGetCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
 } from '@kbn/fleet-plugin/public';
 
@@ -37,13 +38,30 @@ export interface UseOnboardingSOResult {
    * Must be called before onContinue so the edit-mode guard fires before the next render.
    */
   persistDeploymentId: (deploymentId: string) => void;
+  /**
+   * The record a launched stack reports its role to, created on first use. Undefined when it
+   * could not be created; Launch then goes on without the stack reporting back, so no toast.
+   */
+  ensurePendingDeployment: (
+    params: CreateCloudOnboardingDeploymentRequest['body']
+  ) => Promise<string | undefined>;
+  /**
+   * For Deploy's initial create: takes over the record created at Launch, so the stack's
+   * identity and the deployment share one record. Null when there is none, or it was created for
+   * a region or data format Deploy cannot change; the caller then creates a new one.
+   */
+  adoptPendingDeployment: (
+    params: CreateCloudOnboardingDeploymentRequest['body']
+  ) => Promise<string | null>;
 }
 
 export function useOnboardingSO(): UseOnboardingSOResult {
   const { services } = useKibana<CoreStart>();
   const history = useHistory();
   const { integrationId } = useParams<{ integrationId: string }>();
-  const { updateDetectAndReviewStep } = useOnboardingFlow();
+  const { updateDetectAndReviewStep, authenticateAndDeployStep, setPendingOnboardingDeploymentId } =
+    useOnboardingFlow();
+  const { pendingOnboardingDeploymentId } = authenticateAndDeployStep;
 
   const createDeployment = useCallback(
     async (params: CreateCloudOnboardingDeploymentRequest['body']): Promise<string | null> => {
@@ -99,5 +117,56 @@ export function useOnboardingSO(): UseOnboardingSOResult {
     [updateDetectAndReviewStep, integrationId, history]
   );
 
-  return { createDeployment, updateDeployment, persistDeploymentId };
+  const ensurePendingDeployment = useCallback(
+    async (params: CreateCloudOnboardingDeploymentRequest['body']) => {
+      if (pendingOnboardingDeploymentId) {
+        return pendingOnboardingDeploymentId;
+      }
+      const resp = await sendCreateCloudOnboardingDeployment(params).catch(() => null);
+      const id = resp?.item?.id;
+      if (id) {
+        setPendingOnboardingDeploymentId(id);
+      }
+      return id;
+    },
+    [pendingOnboardingDeploymentId, setPendingOnboardingDeploymentId]
+  );
+
+  const adoptPendingDeployment = useCallback(
+    async (params: CreateCloudOnboardingDeploymentRequest['body']): Promise<string | null> => {
+      const id = pendingOnboardingDeploymentId;
+      if (!id) {
+        return null;
+      }
+      setPendingOnboardingDeploymentId(undefined);
+      try {
+        const { item } = await sendGetCloudOnboardingDeployment(id);
+        if (
+          (item.globalRegion ?? '') !== (params.globalRegion ?? '') ||
+          item.dataFormat !== params.dataFormat
+        ) {
+          return null;
+        }
+        await sendUpdateCloudOnboardingDeployment(id, {
+          mechanisms: params.mechanisms,
+          services: params.services,
+          serviceVars: params.serviceVars,
+          connectorId: params.connectorId ?? null,
+          authMethod: params.authMethod ?? null,
+        });
+        return id;
+      } catch {
+        return null;
+      }
+    },
+    [pendingOnboardingDeploymentId, setPendingOnboardingDeploymentId]
+  );
+
+  return {
+    createDeployment,
+    updateDeployment,
+    persistDeploymentId,
+    ensurePendingDeployment,
+    adoptPendingDeployment,
+  };
 }

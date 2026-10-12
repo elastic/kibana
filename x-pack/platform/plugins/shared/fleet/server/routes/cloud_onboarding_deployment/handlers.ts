@@ -5,13 +5,23 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import type { TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { CloudOnboardingDeployment } from '../../../common/types';
+import type {
+  CloudOnboardingDeployment,
+  GetAwsStackCallbackResponse,
+  StartAwsStackCallbackResponse,
+} from '../../../common/types';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
+import { IacProvisionerRequestError, IacProvisionerUnavailableError } from '../../errors';
+import { appContextService } from '../../services/app_context';
+import { checkAwsStackCallback, startAwsStackCallback } from '../../services/cloud_connectors';
 import { cloudOnboardingDeploymentService } from '../../services/cloud_onboarding_deployment';
+import { isAwsStackCallbackEnabled } from '../../services/utils/iac_provisioner';
 import type { FleetRequestHandler } from '../../types';
 import type {
   CreateCloudOnboardingDeploymentRequestSchema,
@@ -19,12 +29,15 @@ import type {
   GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
+  StartAwsStackCallbackRequestSchema,
+  GetAwsStackCallbackRequestSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
 
 function toResponseItem(deployment: CloudOnboardingDeployment) {
   // Omit null optional fields — the response schema uses schema.maybe() (undefined-or-value),
   // which does not accept null. Null is only used internally to clear a stored field.
-  const { connectorId, authMethod, ...rest } = deployment;
+  // awsStackCallback is server-managed and has its own internal route.
+  const { connectorId, authMethod, ...rest } = omit(deployment, 'awsStackCallback');
   return {
     ...rest,
     ...(connectorId != null ? { connectorId } : {}),
@@ -188,6 +201,78 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
       return response.notFound({
         body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
       });
+    }
+    throw error;
+  }
+};
+
+// A provider 401/403 must never reach the browser, where it would trip session-expiry handling.
+const isIacProvisionerFailure = (error: unknown) =>
+  error instanceof IacProvisionerRequestError || error instanceof IacProvisionerUnavailableError;
+
+export const startAwsStackCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof StartAwsStackCallbackRequestSchema.params>,
+  undefined,
+  TypeOf<typeof StartAwsStackCallbackRequestSchema.body>
+> = async (context, request, response) => {
+  if (!(await isAwsStackCallbackEnabled())) {
+    return response.notFound({ body: { message: 'AWS stack callbacks are not enabled' } });
+  }
+  const { internalSoClient } = await context.fleet;
+
+  try {
+    const body: StartAwsStackCallbackResponse = await startAwsStackCallback(
+      internalSoClient,
+      request.params.id,
+      request.body
+    );
+    return response.ok({ body });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+      });
+    }
+    if (isIacProvisionerFailure(error)) {
+      return response.customError({ statusCode: 502, body: { message: error.message } });
+    }
+    throw error;
+  }
+};
+
+/** Also advances the callback, so the UI sees the identity as soon as the stack reports. */
+export const getAwsStackCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof GetAwsStackCallbackRequestSchema.params>
+> = async (context, request, response) => {
+  if (!(await isAwsStackCallbackEnabled())) {
+    return response.notFound({ body: { message: 'AWS stack callbacks are not enabled' } });
+  }
+  const { internalSoClient } = await context.fleet;
+  const logger = appContextService.getLogger().get('awsStackCallback');
+
+  try {
+    const callback = await checkAwsStackCallback(internalSoClient, request.params.id, logger);
+    if (!callback) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} has no stack callback` },
+      });
+    }
+    const body: GetAwsStackCallbackResponse = {
+      status: callback.status,
+      expiresAt: callback.expiresAt,
+      ...(callback.connectorId ? { connectorId: callback.connectorId } : {}),
+      ...(callback.connectorName ? { connectorName: callback.connectorName } : {}),
+      ...(callback.error ? { error: callback.error } : {}),
+    };
+    return response.ok({ body });
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+      });
+    }
+    if (isIacProvisionerFailure(error)) {
+      return response.customError({ statusCode: 502, body: { message: error.message } });
     }
     throw error;
   }

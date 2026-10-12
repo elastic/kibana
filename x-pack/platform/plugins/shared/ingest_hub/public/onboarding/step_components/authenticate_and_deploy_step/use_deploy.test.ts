@@ -40,6 +40,7 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
   sendGetPackageInfoByKey: jest.fn(),
   sendCreateCloudOnboardingDeployment: jest.fn(),
+  sendGetCloudOnboardingDeployment: jest.fn(),
   sendUpdateCloudOnboardingDeployment: jest.fn(),
   sendGetAgentlessPolicy: jest.fn(),
   sendUpdateCloudConnector: jest.fn(),
@@ -154,6 +155,7 @@ import {
   sendGetAgentlessPolicy,
   sendGetPackageInfoByKey,
   sendCreateCloudOnboardingDeployment,
+  sendGetCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
   sendUpdateCloudConnector,
   sendVerifyCloudConnectorIacKey,
@@ -171,6 +173,7 @@ const mockSendGetAgentlessPolicy = sendGetAgentlessPolicy as jest.Mock;
 const mockCleanupManagedIntegrationsPolicies = cleanupManagedIntegrationsPolicies as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
+const mockSendGetCloudOnboardingDeployment = sendGetCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudOnboardingDeployment = sendUpdateCloudOnboardingDeployment as jest.Mock;
 const mockSendUpdateCloudConnector = sendUpdateCloudConnector as jest.Mock;
 const mockSendVerifyCloudConnectorIacKey = sendVerifyCloudConnectorIacKey as jest.Mock;
@@ -723,12 +726,15 @@ function setupMocks({
     | Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>
     | undefined,
   serviceVars = {} as Record<string, unknown>,
+  pendingOnboardingDeploymentId = undefined as string | undefined,
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
   authMethod?: string;
   staticKeys?: { access_key_id: string; secret_access_key: string };
   pendingIacTemplate?: PendingIacTemplate;
+  /** Record created at Launch for the identity stack to report to. */
+  pendingOnboardingDeploymentId?: string;
   globalRegion?: string;
   pkgVersion?: string;
   detectAndReviewStep?: Record<string, unknown>;
@@ -745,8 +751,15 @@ function setupMocks({
 
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
-    authenticateAndDeployStep: { connectorId, authMethod, staticKeys, pendingIacTemplate },
+    authenticateAndDeployStep: {
+      connectorId,
+      authMethod,
+      staticKeys,
+      pendingIacTemplate,
+      pendingOnboardingDeploymentId,
+    },
     setPendingIacTemplate: jest.fn(),
+    setPendingOnboardingDeploymentId: jest.fn(),
     clearStagedStaticKeys: jest.fn(),
     detectAndReviewStep: {
       isDeploying: false,
@@ -1500,6 +1513,61 @@ describe('useDeploy', () => {
       expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
         'so-dep-123',
         expect.objectContaining({ status: 'failed' })
+      );
+    });
+
+    it('adopts the record created at Launch instead of creating another', async () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        pendingOnboardingDeploymentId: 'pending-dep-id',
+      });
+      mockSendGetCloudOnboardingDeployment.mockResolvedValue({
+        item: { id: 'pending-dep-id', globalRegion: 'us-east-1' },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateCloudOnboardingDeployment).not.toHaveBeenCalled();
+      expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+        'pending-dep-id',
+        expect.objectContaining({
+          connectorId: 'connector-abc',
+          authMethod: 'identity_federation',
+          services: ['ec2'],
+          mechanisms: ['managed_integration'],
+        })
+      );
+      const flow = mockUseOnboardingFlow.mock.results[0].value;
+      expect(flow.setPendingOnboardingDeploymentId).toHaveBeenCalledWith(undefined);
+      const idUpdate = (flow.updateDetectAndReviewStep as jest.Mock).mock.calls.find(
+        ([u]: [Record<string, unknown>]) => 'onboardingDeploymentId' in u
+      )?.[0];
+      expect(idUpdate?.onboardingDeploymentId).toBe('pending-dep-id');
+    });
+
+    it('creates a new record when the one created at Launch is for another region', async () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        connectorId: 'connector-abc',
+        pendingOnboardingDeploymentId: 'pending-dep-id',
+      });
+      mockSendGetCloudOnboardingDeployment.mockResolvedValue({
+        item: { id: 'pending-dep-id', globalRegion: 'eu-west-1' },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+      await act(async () => {
+        await result.current.handleDeploy();
+      });
+
+      expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledTimes(1);
+      expect(mockSendUpdateCloudOnboardingDeployment).not.toHaveBeenCalledWith(
+        'pending-dep-id',
+        expect.anything()
       );
     });
 

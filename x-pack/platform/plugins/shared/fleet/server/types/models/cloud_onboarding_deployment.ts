@@ -87,6 +87,36 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
   ...SharedFields,
 });
 
+// ── V3: awsStackCallback ─────────────────────────────────────────────────────
+// Server-managed state of a launched AWS stack that reports its role back.
+// Not indexed: the background check scans and filters in memory.
+const AwsStackCallbackSchema = schema.object({
+  onboardingId: schema.string({ minLength: 1, maxLength: 64 }),
+  status: schema.oneOf([
+    schema.literal('waiting'),
+    schema.literal('completing'),
+    schema.literal('completed'),
+    schema.literal('expired'),
+    schema.literal('failed'),
+  ]),
+  startedAt: schema.string(),
+  expiresAt: schema.string(),
+  connectorName: schema.maybe(schema.string({ maxLength: 255 })),
+  accountType: schema.maybe(
+    schema.oneOf([schema.literal('single-account'), schema.literal('organization-account')])
+  ),
+  iac_key: schema.maybe(schema.nullable(schema.string())),
+  iac_blueprint_id: schema.maybe(schema.nullable(schema.string())),
+  iac_blueprint_version: schema.maybe(schema.nullable(schema.string())),
+  connectorId: schema.maybe(schema.string()),
+  stackId: schema.maybe(schema.string()),
+  error: schema.maybe(schema.string({ maxLength: 1024 })),
+});
+
+export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchemaV2.extends({
+  awsStackCallback: schema.maybe(AwsStackCallbackSchema),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

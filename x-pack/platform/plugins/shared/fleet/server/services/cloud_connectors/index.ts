@@ -22,6 +22,14 @@ export {
 } from './iac_integrations';
 
 export {
+  checkAwsStackCallback,
+  isAwsStackCallbackPending,
+  startAwsStackCallback,
+  type AwsStackCallbackStart,
+  type StartAwsStackCallbackOptions,
+} from './aws_stack_callback';
+
+export {
   getIacKeyOutcome,
   toUpgradeStatus,
   verifyCloudConnectorIacKey,

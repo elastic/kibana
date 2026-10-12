@@ -61,6 +61,7 @@ import {
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
+  CloudOnboardingDeploymentSchemaV3,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2149,6 +2150,17 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV2,
+          },
+        },
+        3: {
+          // Adds awsStackCallback (server-managed). Not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV3.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV3,
           },
         },
       },

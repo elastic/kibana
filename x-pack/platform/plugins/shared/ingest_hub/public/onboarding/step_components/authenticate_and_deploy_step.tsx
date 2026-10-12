@@ -80,7 +80,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     refetchAwsServiceMatrix,
   } = useOnboardingFlow();
   const { selectedServiceIds, dataFormat } = servicesStep;
-  const { createDeployment, updateDeployment, persistDeploymentId } = useOnboardingSO();
+  const { createDeployment, updateDeployment, persistDeploymentId, ensurePendingDeployment } =
+    useOnboardingSO();
 
   // Lock the deployment method toggle once any service has been deployed, or while cleanup is still
   // pending. Computed early so the auto-switch effect can respect it.
@@ -341,6 +342,38 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     otlpEndpoint,
     dataFormat,
   });
+
+  // ── Identity stack callback ───────────────────────────────────────────────────
+  // A launched identity stack reports its role to a deployment record, which Deploy later adopts.
+  // Only before the first deploy: afterwards the record exists and the identity is edited instead.
+  const ensureOnboardingDeploymentId = useCallback(
+    () =>
+      ensurePendingDeployment({
+        provider: 'aws',
+        mechanisms: hasAnyEcf ? ['managed_integration', 'ecf'] : ['managed_integration'],
+        services: selectedServiceIds,
+        serviceVars: toSOServiceVars(serviceVars, awsServicesMap ?? new Map()) as Record<
+          string,
+          Record<string, unknown>
+        >,
+        globalRegion,
+        dataFormat,
+        authMethod: 'identity_federation',
+      }),
+    [
+      ensurePendingDeployment,
+      hasAnyEcf,
+      selectedServiceIds,
+      serviceVars,
+      awsServicesMap,
+      globalRegion,
+      dataFormat,
+    ]
+  );
+  const stackCallback = useMemo(
+    () => (onboardingDeploymentId ? undefined : { ensureOnboardingDeploymentId }),
+    [onboardingDeploymentId, ensureOnboardingDeploymentId]
+  );
 
   // ── ECF-only SO persistence ───────────────────────────────────────────────────
   const [isSavingSO, setIsSavingSO] = useState(false);
@@ -834,6 +867,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           isStoredSecretsLoading={isStoredSecretsLoading}
           isDirty={isDirty}
           onReplaceFormDirtyChange={handleReplaceFormDirtyChange}
+          stackCallback={stackCallback}
         />
       )}
 

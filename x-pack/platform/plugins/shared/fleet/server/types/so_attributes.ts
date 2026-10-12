@@ -50,6 +50,7 @@ import type {
   VerificationStatus,
 } from '../../common/types/models/cloud_connector';
 import type {
+  AwsStackCallback,
   CloudOnboardingDeploymentAuthMethod,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
@@ -420,4 +421,6 @@ export interface CloudOnboardingDeploymentSOAttributes {
   agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
+  /** A launched AWS stack reporting its role back so the identity is created without pasting ARNs. Written only by the server. */
+  awsStackCallback?: AwsStackCallback;
 }

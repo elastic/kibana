@@ -28,6 +28,7 @@ import type { IacProvisionerConfig } from './utils/iac_provisioner';
 import { isIacProvisionerEnabled } from './utils/iac_provisioner';
 
 const RENDER_ENDPOINT = '/api/v1/render';
+const CALLBACKS_ENDPOINT = '/api/v1/callbacks';
 const REQUEST_TIMEOUT_MS = 30_000;
 
 /** undici reports TLS failures as `TypeError: fetch failed` with the OpenSSL reason on `cause`. */
@@ -70,15 +71,75 @@ export interface IacProvisionerRenderResponse {
   blueprint: { id: string; version: string };
 }
 
+export interface IacProvisionerCallbackTicket {
+  onboardingId: string;
+  /**
+   * Stack parameter value carrying a signed upload form. Embeds signing
+   * credentials — never log or store.
+   */
+  callback: string;
+  /** ISO 8601 UTC timestamp when the upload form expires. */
+  expiresAt: string;
+}
+
+/** What a launched stack reported, already checked by the provider against its stack. */
+export interface IacProvisionerCallbackReport {
+  onboardingId: string;
+  requestType: 'Create' | 'Update';
+  stackId: string;
+  roleArn: string;
+  accountId: string;
+  region: string;
+  receivedAt: string;
+}
+
 interface IacProvisionerErrorBody {
   code?: string;
   message?: string;
   errors?: Array<{ code?: string; message?: string }>;
 }
 
+interface IacProvisionerRequestOptions {
+  method?: 'GET' | 'POST';
+  body?: unknown;
+  /** Resolve a 404 to undefined instead of throwing, without logging it as a failure. */
+  notFoundAsUndefined?: boolean;
+}
+
 export interface IacProvisionerService {
   renderTemplate(request: IacProvisionerRenderRequest): Promise<IacProvisionerRenderResponse>;
+  /** Issues an upload form for a stack to report back with. */
+  createCallback(): Promise<IacProvisionerCallbackTicket>;
+  /** The stack's report, or undefined while none has arrived. */
+  getCallback(onboardingId: string): Promise<IacProvisionerCallbackReport | undefined>;
 }
+
+const isIacProvisionerCallbackTicket = (value: unknown): value is IacProvisionerCallbackTicket => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  return (
+    typeof body.onboardingId === 'string' &&
+    typeof body.callback === 'string' &&
+    typeof body.expiresAt === 'string'
+  );
+};
+
+const isIacProvisionerCallbackReport = (value: unknown): value is IacProvisionerCallbackReport => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+  const body = value as Record<string, unknown>;
+  return (
+    typeof body.onboardingId === 'string' &&
+    (body.requestType === 'Create' || body.requestType === 'Update') &&
+    typeof body.stackId === 'string' &&
+    typeof body.roleArn === 'string' &&
+    typeof body.accountId === 'string' &&
+    typeof body.region === 'string'
+  );
+};
 
 const isIacProvisionerRenderResponse = (value: unknown): value is IacProvisionerRenderResponse => {
   if (!value || typeof value !== 'object') {
@@ -130,11 +191,9 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
       }, integrations: ${JSON.stringify(request.integrations)}`
     );
 
-    const rendered = await this.request<IacProvisionerRenderResponse>(
-      RENDER_ENDPOINT,
-      request,
-      logger
-    );
+    const rendered = await this.request<IacProvisionerRenderResponse>(RENDER_ENDPOINT, logger, {
+      body: request,
+    });
     if (!isIacProvisionerRenderResponse(rendered)) {
       throw new IacProvisionerUnavailableError('provider returned an invalid render body');
     }
@@ -147,11 +206,46 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     return rendered;
   }
 
+  public async createCallback(): Promise<IacProvisionerCallbackTicket> {
+    const logger = appContextService.getLogger().get('IacProvisionerService');
+    const ticket = await this.request<IacProvisionerCallbackTicket>(CALLBACKS_ENDPOINT, logger);
+    if (!isIacProvisionerCallbackTicket(ticket)) {
+      throw new IacProvisionerUnavailableError('provider returned an invalid callback body');
+    }
+    // The callback embeds signing credentials — only the ID and expiry are loggable.
+    logger.debug(
+      `[IaC Provisioner] Callback ${ticket.onboardingId} issued, expires at ${ticket.expiresAt}`
+    );
+    return ticket;
+  }
+
+  public async getCallback(
+    onboardingId: string
+  ): Promise<IacProvisionerCallbackReport | undefined> {
+    const logger = appContextService.getLogger().get('IacProvisionerService');
+    const report = await this.request<IacProvisionerCallbackReport>(
+      `${CALLBACKS_ENDPOINT}/${encodeURIComponent(onboardingId)}`,
+      logger,
+      { method: 'GET', notFoundAsUndefined: true }
+    );
+    if (report === undefined) {
+      return undefined;
+    }
+    if (!isIacProvisionerCallbackReport(report)) {
+      throw new IacProvisionerUnavailableError('provider returned an invalid callback report');
+    }
+    return report;
+  }
+
   /**
-   * Shared POST with mTLS, timeout, and error mapping. Callers own
+   * Shared request with mTLS, timeout, and error mapping. Callers own
    * request/response logging so render can omit the signed artifact URL.
    */
-  private async request<T>(endpoint: string, body: unknown, logger: Logger): Promise<T> {
+  private async request<T>(
+    endpoint: string,
+    logger: Logger,
+    { method = 'POST', body, notFoundAsUndefined = false }: IacProvisionerRequestOptions = {}
+  ): Promise<T | undefined> {
     const traceId = apm.currentTransaction?.traceparent;
     const iacProvisionerConfig = appContextService.getConfig()?.iacProvisioner;
 
@@ -173,13 +267,14 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
 
     const url = `${iacProvisionerConfig.api.url}${endpoint}`;
     const headers = {
-      'Content-type': 'application/json',
+      ...(body !== undefined ? { 'Content-type': 'application/json' } : {}),
       ...(traceId ? { 'X-Request-ID': traceId } : {}),
       'x-elastic-internal-origin': 'Kibana',
     };
     logger.debug(
       `[IaC Provisioner] Request config ${this.createRequestConfigDebug(
         url,
+        method,
         headers,
         body,
         iacProvisionerConfig
@@ -194,14 +289,19 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     const timeout = setTimeout(() => abortController.abort(), REQUEST_TIMEOUT_MS);
     try {
       const response = await undiciFetch(url, {
-        method: 'POST',
+        method,
         headers,
-        body: JSON.stringify(body),
+        body: body !== undefined ? JSON.stringify(body) : undefined,
         signal: abortController.signal,
         dispatcher,
       });
 
       const latencyMs = Date.now() - startTime;
+      if (notFoundAsUndefined && response.status === 404) {
+        await response.body?.cancel();
+        logger.debug(`[IaC Provisioner] ${endpoint} not found after ${latencyMs}ms`);
+        return undefined;
+      }
       if (!response.ok) {
         throw await this.responseToError(response, logger, latencyMs, traceId);
       }
@@ -262,6 +362,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
    */
   private createRequestConfigDebug(
     url: string,
+    method: string,
     headers: Record<string, string>,
     request: unknown,
     iacProvisionerConfig: IacProvisionerConfig | undefined
@@ -269,7 +370,7 @@ class IacProvisionerServiceImpl implements IacProvisionerService {
     const tls = iacProvisionerConfig?.api?.tls;
     return JSON.stringify({
       url,
-      method: 'POST',
+      method,
       headers,
       timeoutMs: REQUEST_TIMEOUT_MS,
       body: request,

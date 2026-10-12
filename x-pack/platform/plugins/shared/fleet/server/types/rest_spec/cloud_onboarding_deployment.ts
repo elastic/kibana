@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from '../../../common/constants';
+
 // --- Shared primitives ---
 
 const EcfFamilySchema = schema.oneOf(
@@ -378,4 +380,49 @@ export const DeleteCloudOnboardingDeploymentRequestSchema = {
 
 export const DeleteCloudOnboardingDeploymentResponseSchema = schema.object({
   id: schema.string(),
+});
+
+// --- Internal: AWS stack callback ---
+
+const IacTemplateFieldSchema = (maxLength: number) =>
+  schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength })));
+
+export const StartAwsStackCallbackRequestSchema = {
+  params: OnboardingDeploymentIdParamSchema,
+  body: schema.object({
+    connectorName: schema.maybe(schema.string({ maxLength: 255 })),
+    accountType: schema.maybe(
+      schema.oneOf([schema.literal(SINGLE_ACCOUNT), schema.literal(ORGANIZATION_ACCOUNT)])
+    ),
+    // Same limits as the cloud connector's IaC fields, which these end up on.
+    iac_key: IacTemplateFieldSchema(512),
+    iac_blueprint_id: IacTemplateFieldSchema(255),
+    iac_blueprint_version: IacTemplateFieldSchema(64),
+  }),
+};
+
+export const StartAwsStackCallbackResponseSchema = schema.object({
+  stackParams: schema.object({
+    ElasticOnboardingId: schema.string(),
+    ElasticCallback: schema.string(),
+  }),
+  expiresAt: schema.string(),
+});
+
+export const GetAwsStackCallbackRequestSchema = {
+  params: OnboardingDeploymentIdParamSchema,
+};
+
+export const GetAwsStackCallbackResponseSchema = schema.object({
+  status: schema.oneOf([
+    schema.literal('waiting'),
+    schema.literal('completing'),
+    schema.literal('completed'),
+    schema.literal('expired'),
+    schema.literal('failed'),
+  ]),
+  expiresAt: schema.string(),
+  connectorId: schema.maybe(schema.string()),
+  connectorName: schema.maybe(schema.string()),
+  error: schema.maybe(schema.string()),
 });
