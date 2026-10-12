@@ -15,7 +15,6 @@ import type {
   GraphSavePolicy,
   GraphWorkspaceSavedObject,
   IndexPatternProvider,
-  WorkspaceNode,
   RuntimeGraph,
 } from '../../types';
 import type { OverlayStart, Capabilities } from '@kbn/core/public';

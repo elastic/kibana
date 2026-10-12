@@ -195,7 +195,6 @@ export class GraphPage {
     await expect(this.addFieldButton).toHaveAttribute('aria-disabled', 'false');
   }
 
-
   async addFields(fields: string[]) {
     await this.addFieldButton.click();
     await this.fieldSearchInput.waitFor({ state: 'visible' });
@@ -466,7 +465,5 @@ export class GraphPage {
     await this.selectNodes(labels);
     await this.invertSelectionButton.click();
     await this.removeSelectionButton.click();
-  }
-
   }
 }
