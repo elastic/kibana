@@ -1342,6 +1342,49 @@ steps:
       );
       expect(result).toEqual({ workflowExecutionId: 'test-exec-id' });
     });
+
+    it('refuses to run a workflow whose steps inherit a parent service account', async () => {
+      // Regression: the managed Attack Discovery runner is exposed as a manual-trigger
+      // workflow, but its first step delegates identity with run-as-mode: inherit and the
+      // workflow has no run_as. A standalone run always failed with 'Service account
+      // inheritance requires a parent executing as a service account' — and, worse, the
+      // created run cancelled the space's in-flight scheduled run via cancel-in-progress.
+      // It must now be refused before any execution is created.
+      const workflow = {
+        id: 'system-security-attack-discovery-worker',
+        name: 'Attack Discovery Runner',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Attack Discovery Runner',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'run_generation',
+              type: 'workflow.execute',
+              with: {
+                'workflow-id': 'system-security-attack-discovery-batched-generation',
+                'run-as-mode': 'inherit',
+              },
+            },
+          ],
+        },
+        yaml: 'name: Attack Discovery Runner',
+      } as WorkflowExecutionEngineModel;
+
+      await expect(
+        api.runWorkflowWithAlertPreprocessing({
+          workflow,
+          spaceId: 'default',
+          inputs: {},
+          request: mockRequest,
+          preprocessingContext: {} as AlertPreprocessingContext,
+        })
+      ).rejects.toThrow(/delegates its execution identity to a parent workflow/);
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
   });
 
   describe('executeWorkflow', () => {

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  requiresDelegatedIdentity,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
@@ -709,6 +710,15 @@ export class WorkflowsManagementApi {
     metadata?: Record<string, unknown>,
     isUserInteractive?: boolean
   ): Promise<string> {
+    if (requiresDelegatedIdentity(workflow)) {
+      throw new Error(
+        i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
+          defaultMessage:
+            "Workflow '{workflowId}' delegates its execution identity to a parent workflow and cannot be run standalone.",
+          values: { workflowId: workflow.id },
+        })
+      );
+    }
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
     }
