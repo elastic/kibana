@@ -132,7 +132,7 @@ The sample proves a failure exists, not how bad it is. For every rule whose samp
 
 | Profile | Question | Queries | `time_range` | Read |
 |---|---|---|---|---|
-| `population` | What share of lines in scope fail? | `failed` = `<scope>` + `<failure>`; `total` = `<scope>` only | last 15m–1h | the failing share of log lines; it equals the share of attempts, and "every attempt fails" only when the scope isolates one line per attempt |
+| `population` | What share of lines in scope fail? | `failed` = `<scope>` + `<failure>`; `total` = `<scope>` only | last 15m–1h | the failing share of log lines; it is the share of attempts only when the scope isolates one line per attempt, otherwise report it as a share of log lines, and every attempt failing means the operation is blocked only under that same condition |
 | `breakdown` | How many services are hit, out of how many? | `COUNT(*) BY service.name` with `<scope>` + `<failure>` (`affected`), and with `<scope>` only (`total`), each `SORT ... DESC \| LIMIT 100` | last 15m–1h | the number of rows is the number of services (a full 100 means at least 100, which is breadth even when the total is unknown), and the counts show whether one dominates |
 | `trend` | Still happening, since when? | `<failure>` counted per bucket with `BUCKET(@timestamp, 100, ?_tstart, ?_tend)` (the engine picks the span, at most 100 rows), and its `earliest` and `latest` occurrence | 24h for the buckets; up to 14d for `earliest`/`latest` | the latest bucket and `latest` against now: steady, rising, or ended (a stream that went silent shows as `latest` far from now); `earliest` is when the failure was first seen in the window, so onset is "since at least" that time |
 
