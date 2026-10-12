@@ -9,7 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { fetchConnectorById } from '..';
+import { fetchConnectorById } from './fetch_connectors';
 
 import type { Connector, ConnectorConfiguration, IngestPipelineParams } from '../types/connectors';
 

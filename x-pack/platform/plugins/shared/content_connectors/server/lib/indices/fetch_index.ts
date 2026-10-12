@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { FetchIndexResult } from '@kbn/search-connectors';
-import { fetchConnectorByIndexName } from '@kbn/search-connectors';
+import type { FetchIndexResult } from '@kbn/search-connectors/server';
+import { fetchConnectorByIndexName } from '@kbn/search-connectors/server';
 
 export async function fetchIndex(
   client: ElasticsearchClient,

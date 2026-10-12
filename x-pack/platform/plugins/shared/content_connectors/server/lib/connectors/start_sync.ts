@@ -7,13 +7,13 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { ConnectorConfiguration } from '@kbn/search-connectors';
+import type { ConnectorConfiguration } from '@kbn/search-connectors/server';
 import {
   SyncJobType,
   startConnectorSync,
   fetchConnectorById,
   isConfigEntry,
-} from '@kbn/search-connectors';
+} from '@kbn/search-connectors/server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
