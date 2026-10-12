@@ -387,7 +387,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           stackName: ecfSectionProps.stackNames[family] || defaultNames[family],
           templateVersion: version,
           ...(stackArn ? { stackArn } : {}),
-          ...(serviceIds.length > 0 ? { serviceIds } : {}),
+          serviceIds,
         };
       })
       .filter((s): s is NonNullable<typeof s> => s !== null);

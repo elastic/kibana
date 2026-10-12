@@ -156,7 +156,9 @@ export async function hydrateOnboardingSession(
             item.ecfStacks.filter((s) => s.stackArn).map((s) => [s.family, s.stackArn])
           ),
           launchedServiceIds: Object.fromEntries(
-            item.ecfStacks.filter((s) => s.serviceIds?.length).map((s) => [s.family, s.serviceIds])
+            item.ecfStacks
+              .filter((s) => s.serviceIds !== undefined)
+              .map((s) => [s.family, s.serviceIds])
           ),
         })
       );

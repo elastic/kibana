@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -145,6 +145,12 @@ export const useEcfDeployment = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [persistedLaunchStep?.launchedServiceIds]
   );
+  const [isUpdateOpenedByFamily, setIsUpdateOpenedByFamily] = useState<
+    Partial<Record<EcfTemplateFamily, boolean>>
+  >({});
+  const onUpdateOpened = useCallback((family: EcfTemplateFamily) => {
+    setIsUpdateOpenedByFamily((prev) => ({ ...prev, [family]: true }));
+  }, []);
   const stackArns = persistedLaunchStep?.stackArns ?? {};
 
   const { version: templateVersion } = useEcfTemplateVersion();
@@ -211,11 +217,16 @@ export const useEcfDeployment = ({
     return { unified: check('unified'), otel: check('otel'), crowdstrike: check('crowdstrike') };
   }, [launchedFamilies, launchedServiceIds, currentServiceIdsByFamily]);
 
-  const anyStale = Object.values(isStaleByFamily).some(Boolean);
+  // A stale family only blocks isDone if the user hasn't opened the update wizard for it yet.
+  const anyStaleBlockingDone = (['unified', 'otel', 'crowdstrike'] as const).some(
+    (f) => isStaleByFamily[f] && !isUpdateOpenedByFamily[f]
+  );
 
-  // A family is done only when launched AND a valid ARN has been provided.
+  // A family is done only when launched AND a valid ARN has been provided. A stale family
+  // where the user has opened the update wizard ("update opened") counts as unblocked so
+  // Next is enabled and the snapshot advances on click.
   const isDone =
-    !anyStale &&
+    !anyStaleBlockingDone &&
     (!hasEcfUnified ||
       (launchedFamilies.includes('unified') &&
         isEcfStackArnValid(stackArns.unified?.trim() ?? ''))) &&
@@ -331,12 +342,12 @@ export const useEcfDeployment = ({
   // Advances the launchedServiceIds snapshot to the current selection for all stale families.
   // Called by the parent on Next, so the SO is written with up-to-date service IDs.
   const advanceStaleSnapshots = () => {
-    const staleFamilies = (['unified', 'otel', 'crowdstrike'] as const).filter(
-      (f) => isStaleByFamily[f]
+    const familiesToAdvance = (['unified', 'otel', 'crowdstrike'] as const).filter(
+      (f) => isStaleByFamily[f] && isUpdateOpenedByFamily[f]
     );
-    if (staleFamilies.length === 0) return;
+    if (familiesToAdvance.length === 0) return;
     const updated: Partial<Record<EcfTemplateFamily, string[]>> = { ...launchedServiceIds };
-    for (const family of staleFamilies) {
+    for (const family of familiesToAdvance) {
       updated[family] = currentServiceIdsByFamily[family];
     }
     setPersistedLaunchStep({ ...persistedLaunchStep, launchedServiceIds: updated });
@@ -397,7 +408,9 @@ export const useEcfDeployment = ({
       stackVersions,
       stackArns,
       isStaleByFamily,
+      isUpdateOpenedByFamily,
       onLaunch,
+      onUpdateOpened,
       onStackNameChange,
       onStackArnChange,
     },
@@ -424,10 +437,14 @@ interface EcfFamilyPanelProps {
   stackArn: string;
   /** True when the current service selection differs from what was last launched. */
   isStale: boolean;
+  /** True when the user has clicked "Update stack" for this family. */
+  isUpdateOpened: boolean;
   /** Called whenever the user edits the stack ARN field. */
   onStackArnChange: (arn: string) => void;
   /** Deep-link to the AWS Console CloudFormation update wizard for this stack. Undefined when the ARN is not yet valid. */
   updateUrl: string | undefined;
+  /** Called when the user clicks "Update stack". */
+  onUpdateOpened: () => void;
 }
 
 interface EcfFamilyPanelPostLaunchProps {
@@ -438,9 +455,13 @@ interface EcfFamilyPanelPostLaunchProps {
   testSubjPrefix: string;
   stackArn: string;
   isStale: boolean;
+  /** True when the user has clicked "Update stack" and the update wizard was opened. */
+  isUpdateOpened: boolean;
   onStackArnChange: (arn: string) => void;
   /** Deep-link to the AWS Console CloudFormation update wizard for this stack. Undefined when the ARN is not yet valid. */
   updateUrl: string | undefined;
+  /** Called when the user clicks "Update stack" to open the AWS Console. */
+  onUpdateOpened: () => void;
 }
 
 /** Post-launch content for one ECF template family: stack name, version, stale callout (if applicable), and ARN field. */
@@ -452,11 +473,12 @@ const EcfFamilyPanelPostLaunch = ({
   testSubjPrefix,
   stackArn,
   isStale,
+  isUpdateOpened,
   onStackArnChange,
   updateUrl,
+  onUpdateOpened,
 }: EcfFamilyPanelPostLaunchProps) => {
   const [touched, setTouched] = useState(false);
-  const [isUpdateOpened, setIsUpdateOpened] = useState(false);
 
   const stackNameError = useMemo(() => {
     if (!touched || stackName === '' || STACK_NAME_REGEX.test(stackName)) return null;
@@ -532,7 +554,7 @@ const EcfFamilyPanelPostLaunch = ({
                 target="_blank"
                 isDisabled={!updateUrl}
                 color="warning"
-                onClick={() => setIsUpdateOpened(true)}
+                onClick={onUpdateOpened}
                 iconType="external"
                 iconSide="right"
                 size="s"
@@ -663,8 +685,10 @@ const EcfFamilyPanel = ({
   onStackNameChange,
   stackArn,
   isStale,
+  isUpdateOpened,
   onStackArnChange,
   updateUrl,
+  onUpdateOpened,
 }: EcfFamilyPanelProps) => {
   const isArnValid = isEcfStackArnValid(stackArn.trim());
 
@@ -711,8 +735,10 @@ const EcfFamilyPanel = ({
             testSubjPrefix={launchButtonTestSubj}
             stackArn={stackArn}
             isStale={isStale}
+            isUpdateOpened={isUpdateOpened}
             onStackArnChange={onStackArnChange}
             updateUrl={updateUrl}
+            onUpdateOpened={onUpdateOpened}
           />
         </>
       )}
@@ -741,7 +767,9 @@ interface EcfDeploymentSectionProps {
   stackVersions: Partial<Record<EcfTemplateFamily, string>>;
   stackArns: Partial<Record<EcfTemplateFamily, string>>;
   isStaleByFamily: Record<EcfTemplateFamily, boolean>;
+  isUpdateOpenedByFamily: Partial<Record<EcfTemplateFamily, boolean>>;
   onLaunch: (family: EcfTemplateFamily) => void;
+  onUpdateOpened: (family: EcfTemplateFamily) => void;
   onStackNameChange: (family: EcfTemplateFamily, name: string) => void;
   onStackArnChange: (family: EcfTemplateFamily, arn: string) => void;
 }
@@ -762,7 +790,9 @@ export const EcfDeploymentSection = ({
   stackVersions,
   stackArns,
   isStaleByFamily,
+  isUpdateOpenedByFamily,
   onLaunch,
+  onUpdateOpened,
   onStackNameChange,
   onStackArnChange,
 }: EcfDeploymentSectionProps) => {
@@ -774,7 +804,9 @@ export const EcfDeploymentSection = ({
   const hasEcfCrowdstrike = ecfCrowdstrikeServices.length > 0;
 
   const isDone =
-    !Object.values(isStaleByFamily).some(Boolean) &&
+    !(['unified', 'otel', 'crowdstrike'] as const).some(
+      (f) => isStaleByFamily[f] && !isUpdateOpenedByFamily[f]
+    ) &&
     (!hasEcfUnified ||
       (launchedFamilies.includes('unified') &&
         isEcfStackArnValid(stackArns.unified?.trim() ?? ''))) &&
@@ -911,8 +943,10 @@ export const EcfDeploymentSection = ({
                 onStackNameChange={(name) => onStackNameChange('unified', name)}
                 stackArn={stackArns.unified ?? ''}
                 isStale={isStaleByFamily.unified}
+                isUpdateOpened={isUpdateOpenedByFamily.unified ?? false}
                 onStackArnChange={(arn) => onStackArnChange('unified', arn)}
                 updateUrl={unifiedUpdateUrl}
+                onUpdateOpened={() => onUpdateOpened('unified')}
               />
             </>
           )}
@@ -940,8 +974,10 @@ export const EcfDeploymentSection = ({
                 onStackNameChange={(name) => onStackNameChange('otel', name)}
                 stackArn={stackArns.otel ?? ''}
                 isStale={isStaleByFamily.otel}
+                isUpdateOpened={isUpdateOpenedByFamily.otel ?? false}
                 onStackArnChange={(arn) => onStackArnChange('otel', arn)}
                 updateUrl={otelUpdateUrl}
+                onUpdateOpened={() => onUpdateOpened('otel')}
               />
             </>
           )}
@@ -968,8 +1004,10 @@ export const EcfDeploymentSection = ({
                 onStackNameChange={(name) => onStackNameChange('crowdstrike', name)}
                 stackArn={stackArns.crowdstrike ?? ''}
                 isStale={isStaleByFamily.crowdstrike}
+                isUpdateOpened={isUpdateOpenedByFamily.crowdstrike ?? false}
                 onStackArnChange={(arn) => onStackArnChange('crowdstrike', arn)}
                 updateUrl={crowdstrikeUpdateUrl}
+                onUpdateOpened={() => onUpdateOpened('crowdstrike')}
               />
             </>
           )}

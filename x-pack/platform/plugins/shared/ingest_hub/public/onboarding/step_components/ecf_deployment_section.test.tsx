@@ -114,7 +114,13 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
       otel: false,
       crowdstrike: false,
     } as React.ComponentProps<typeof EcfDeploymentSection>['isStaleByFamily'],
+    isUpdateOpenedByFamily: {} as React.ComponentProps<
+      typeof EcfDeploymentSection
+    >['isUpdateOpenedByFamily'],
     onLaunch: jest.fn() as React.ComponentProps<typeof EcfDeploymentSection>['onLaunch'],
+    onUpdateOpened: jest.fn() as React.ComponentProps<
+      typeof EcfDeploymentSection
+    >['onUpdateOpened'],
     onStackNameChange: jest.fn() as React.ComponentProps<
       typeof EcfDeploymentSection
     >['onStackNameChange'],
@@ -268,6 +274,31 @@ describe('useEcfDeployment', () => {
         })
       );
       expect(result.current.isDone).toBe(false);
+    });
+
+    it('is true when stale but the update wizard has been opened (unblocked)', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail')]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['vpcflow'] },
+        stackArns: { unified: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid' },
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      // Stale without update opened → still blocked
+      expect(result.current.isDone).toBe(false);
+      act(() => {
+        result.current.sectionProps.onUpdateOpened('unified');
+      });
+      // Stale but update opened → unblocked
+      expect(result.current.isDone).toBe(true);
     });
   });
 
@@ -444,7 +475,9 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{}}
             isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
+            onUpdateOpened={jest.fn()}
             onStackNameChange={jest.fn()}
             onStackArnChange={jest.fn()}
           />
@@ -586,7 +619,9 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{}}
             isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
+            onUpdateOpened={jest.fn()}
             onStackNameChange={(_family, name) =>
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
@@ -627,7 +662,9 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{}}
             isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
+            onUpdateOpened={jest.fn()}
             onStackNameChange={(_family, name) =>
               setStackNames((prev) => ({ ...prev, unified: name }))
             }
@@ -800,13 +837,44 @@ describe('EcfDeploymentSection', () => {
 
     it('shows "update opened" callout after the Update stack button is clicked', () => {
       const arn = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid';
-      renderSection({
-        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
-        launchedFamilies: ['unified'],
-        stackArns: { unified: arn },
-        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
-        unifiedUpdateUrl: 'https://console.aws.amazon.com/cloudformation/home#/stacks/update',
-      });
+
+      const UpdateOpenedWrapper = () => {
+        const [isUpdateOpenedByFamily, setIsUpdateOpenedByFamily] = React.useState<
+          Partial<Record<string, boolean>>
+        >({});
+        return (
+          <EcfDeploymentSection
+            ecfUnifiedConfigs={[unifiedConfig('cloudtrail')]}
+            ecfOtelConfigs={[]}
+            ecfCrowdstrikeServices={[]}
+            unifiedLaunchUrl="https://cf.aws/unified"
+            otelLaunchUrl={undefined}
+            crowdstrikeLaunchUrl={undefined}
+            unifiedUpdateUrl="https://console.aws.amazon.com/cloudformation/home#/stacks/update"
+            otelUpdateUrl={undefined}
+            crowdstrikeUpdateUrl={undefined}
+            globalRegion="us-east-1"
+            launchedFamilies={['unified'] as any}
+            stackNames={{}}
+            stackVersions={{}}
+            stackArns={{ unified: arn }}
+            isStaleByFamily={{ unified: true, otel: false, crowdstrike: false }}
+            isUpdateOpenedByFamily={isUpdateOpenedByFamily}
+            onUpdateOpened={(family) =>
+              setIsUpdateOpenedByFamily((prev) => ({ ...prev, [family]: true }))
+            }
+            onLaunch={jest.fn()}
+            onStackNameChange={jest.fn()}
+            onStackArnChange={jest.fn()}
+          />
+        );
+      };
+
+      render(
+        <I18nProvider>
+          <UpdateOpenedWrapper />
+        </I18nProvider>
+      );
       // Initially shows the stale callout
       expect(
         screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
@@ -937,7 +1005,7 @@ describe('useEcfDeployment staleness', () => {
     expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail']);
   });
 
-  it('advanceStaleSnapshots updates launchedServiceIds snapshot for all stale families', () => {
+  it('advanceStaleSnapshots updates launchedServiceIds snapshot for stale+updateOpened families', () => {
     mockGetEcfServiceConfigs.mockReturnValue([unifiedConfig('cloudtrail'), unifiedConfig('waf')]);
     const setter = makeSessionStorageMock({
       launchedFamilies: ['unified'],
@@ -952,10 +1020,14 @@ describe('useEcfDeployment staleness', () => {
         dataFormat: 'ecs' as const,
       })
     );
+    // Must open the update wizard before advanceStaleSnapshots will advance the snapshot.
+    act(() => {
+      result.current.sectionProps.onUpdateOpened('unified');
+    });
     act(() => {
       result.current.advanceStaleSnapshots();
     });
-    const persisted = setter.mock.calls[0][0];
+    const persisted = setter.mock.calls[setter.mock.calls.length - 1][0];
     expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail', 'waf']);
   });
 
