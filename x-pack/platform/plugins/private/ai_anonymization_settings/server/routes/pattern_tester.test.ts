@@ -7,6 +7,7 @@
 
 import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
 import { RegexWorkerService } from '@kbn/ai-anonymization-server';
 import type { AnonymizationWorkerConfig } from '@kbn/ai-anonymization-server';
 import { registerPatternTesterRoute } from './pattern_tester';
@@ -202,5 +203,15 @@ describe('registerPatternTesterRoute', () => {
         body: { message: expect.stringContaining('timed out') },
       })
     );
+  });
+
+  it('accepts every built-in rule so the settings page can test the patterns it ships', () => {
+    const { routeConfig } = setup();
+    const bodySchema = (routeConfig.validate as { body: { validate: (value: unknown) => unknown } })
+      .body;
+
+    DEFAULT_BUILTIN_REGEX_RULES.forEach((rule) => {
+      expect(() => bodySchema.validate({ input: {}, rules: [rule] })).not.toThrow();
+    });
   });
 });

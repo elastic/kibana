@@ -16,7 +16,7 @@ export const PATTERN_TESTER_ROUTE_PATH = '/internal/ai_anonymization_settings/pa
 const testRegexRuleSchema = schema.object({
   type: schema.literal('RegExp'),
   enabled: schema.boolean(),
-  pattern: schema.string({ maxLength: 2000 }),
+  pattern: schema.string({ maxLength: 5000 }),
   entityClass: schema.string({ maxLength: 100 }),
   id: schema.maybe(schema.string({ maxLength: 100 })),
   name: schema.maybe(schema.string({ maxLength: 200 })),
