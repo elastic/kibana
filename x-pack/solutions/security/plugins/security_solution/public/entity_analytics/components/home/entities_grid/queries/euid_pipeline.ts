@@ -9,8 +9,9 @@ import {
   getEuidEsqlEvaluation,
   getFieldEvaluationsEsql,
 } from '@kbn/entity-store/common/domain/euid';
+import { escapeStringValue } from '@kbn/esql-utils';
 import { ALLOWED_ENTITY_TYPES } from '../common';
-import { esc, indentForkBranch } from './esql';
+import { indentForkBranch } from './esql';
 
 // ── EUID query pipeline builders ─────────────────────────────────────────────
 
@@ -56,7 +57,9 @@ export const buildEuidStages = (): string[] => [
  * `IN` is null on a multi-value field, so each id is an `MV_CONTAINS`, which checks every value.
  */
 const buildStampedIdsCondition = (entityIds: readonly string[]): string =>
-  entityIds.map((id) => `MV_CONTAINS(\`kibana.alert.entity.id\`, ${esc(id)})`).join(' OR ');
+  entityIds
+    .map((id) => `MV_CONTAINS(\`kibana.alert.entity.id\`, ${escapeStringValue(id)})`)
+    .join(' OR ');
 
 export interface AlertEuidPipelineOptions {
   /** When set, the stamped branch keeps only alerts stamped with one of these entity ids. */

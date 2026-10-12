@@ -6,12 +6,13 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { escapeStringValue } from '@kbn/esql-utils';
 import type { EntityFilters } from '../common';
-import { buildFilterClause, esc, toList } from './esql';
+import { buildFilterClause, toList } from './esql';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
 const buildMvContainsExpression = (field: string, values: readonly string[]): string => {
-  const clauses = values.map((v) => `MV_CONTAINS(${field}, ${esc(v)})`);
+  const clauses = values.map((v) => `MV_CONTAINS(${field}, ${escapeStringValue(v)})`);
   return clauses.length === 1 ? clauses[0] : `(${clauses.join(' OR ')})`;
 };
 

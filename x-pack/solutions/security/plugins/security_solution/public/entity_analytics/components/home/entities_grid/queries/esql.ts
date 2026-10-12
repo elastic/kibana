@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { escapeStringValue } from '@kbn/esql-utils';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -44,15 +45,7 @@ export const buildAnomalyJobFilter = (jobIds: readonly string[]): string =>
 
 // ── primitives ───────────────────────────────────────────────────────────────
 
-export const esc = (s: string) =>
-  `"${s
-    .replace(/\\/g, '\\\\')
-    .replace(/"/g, '\\"')
-    .replace(/\n/g, '\\n')
-    .replace(/\r/g, '\\r')
-    .replace(/\t/g, '\\t')}"`;
-
-export const toList = (items: readonly string[]) => items.map(esc).join(', ');
+export const toList = (items: readonly string[]) => items.map(escapeStringValue).join(', ');
 
 /** Raw identity fields that EUIDs are built from. */
 const IDENTITY_SOURCE_FIELDS = [
@@ -129,7 +122,7 @@ export const buildCursorClause = (cursor: PageCursor | null): string[] => {
   if (cursor == null) return [];
   const { sortField, sortValue, entityId } = cursor;
   if (sortValue == null) {
-    return [`| WHERE ${sortField} IS NULL AND ${ENTITY_ID_FIELD} > ${esc(entityId)}`];
+    return [`| WHERE ${sortField} IS NULL AND ${ENTITY_ID_FIELD} > ${escapeStringValue(entityId)}`];
   }
   return [`| WHERE ${buildAfterValuePredicate(cursor, sortValue)} OR ${sortField} IS NULL`];
 };
@@ -140,15 +133,15 @@ export const buildAfterValuePredicate = (
   sortValue: string | number
 ): string => {
   const op = sortDirection === 'desc' ? '<' : '>';
-  const val = typeof sortValue === 'string' ? esc(sortValue) : String(sortValue);
-  return `(${sortField} ${op} ${val}) OR (${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${esc(
+  const val = typeof sortValue === 'string' ? escapeStringValue(sortValue) : String(sortValue);
+  return `(${sortField} ${op} ${val}) OR (${sortField} == ${val} AND ${ENTITY_ID_FIELD} > ${escapeStringValue(
     entityId
   )})`;
 };
 
 /** Keeps the entities after `afterId`, for pages sorted by `entity.id` alone. */
 export const buildAfterIdClause = (afterId: string | null): string[] =>
-  afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${esc(afterId)}`] : [];
+  afterId != null ? [`| WHERE ${ENTITY_ID_FIELD} > ${escapeStringValue(afterId)}`] : [];
 
 /** The order of every grid page, `field <dir> NULLS LAST, entity.id ASC`, and its limit. */
 export const buildSortSuffix = (field: string, direction: SortDir, limit: number): string[] => [
