@@ -18,7 +18,7 @@ import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server
 import { i18n } from '@kbn/i18n';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import {
-  createInvestigationOptimizeTelemetry,
+  createInvestigationMemoryTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
 import { CORTEX_AI_INDEX_DEST, CORTEX_AI_INDEX_ID } from '../../common/cortex';
@@ -178,7 +178,7 @@ export const runCortexOptimize = async ({
     inference: getInference(),
     savedObjects: getSavedObjects(),
     uiSettings: getUiSettings(),
-    telemetryMetadata: createInvestigationOptimizeTelemetry(interactionId),
+    telemetryMetadata: createInvestigationMemoryTelemetry(interactionId),
     logger,
   });
   if (!model) {

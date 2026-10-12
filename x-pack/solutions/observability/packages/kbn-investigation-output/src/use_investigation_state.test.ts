@@ -130,6 +130,37 @@ describe('useInvestigationState', () => {
       expect(mockGetExecution).toHaveBeenCalledWith('exec-1', { includeOutput: true });
     });
 
+    it('normalizes legacy persisted severity and hypothesis status values', async () => {
+      mockGetExecution.mockResolvedValue(
+        completedExecutionWithOutput({
+          structured_output: {
+            summary: 'Payment errors are elevated.',
+            severity: '60-high',
+            hypotheses: [
+              {
+                candidate: 'Payment service unavailable',
+                confidence: 0.9,
+                status: 'rejected',
+              },
+            ],
+          },
+        })
+      );
+      const http = createHttp();
+
+      const { result } = renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: false })
+      );
+
+      await waitFor(() => {
+        expect(result.current.status).toBe('complete');
+      });
+      expect(result.current.state).toMatchObject({
+        severity: 'high',
+        hypotheses: [expect.objectContaining({ status: 'dismissed' })],
+      });
+    });
+
     it('reads the result from the real agent step when a timeout wrapper shares its stepId', async () => {
       mockGetExecution.mockResolvedValue({
         status: 'completed',
@@ -330,6 +361,23 @@ describe('useInvestigationState', () => {
         FOLLOW_PATH,
         expect.objectContaining({ asResponse: true, rawResponse: true })
       );
+    });
+
+    it('encodes the resolved agent execution id as a single follow path segment', async () => {
+      mockFindAgentExecution.mockResolvedValue({
+        executionId: '../../security/example?query=value#fragment',
+      });
+      const http = createHttp();
+      renderHook(() =>
+        useInvestigationState({ http, workflowExecutionId: 'exec-1', isRunning: true })
+      );
+
+      await waitFor(() => {
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/agent_builder/executions/..%2F..%2Fsecurity%2Fexample%3Fquery%3Dvalue%23fragment/follow',
+          expect.objectContaining({ asResponse: true, rawResponse: true })
+        );
+      });
     });
 
     it('polls the find-by-metadata endpoint until it resolves an id, without calling follow in between', async () => {

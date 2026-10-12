@@ -88,7 +88,7 @@ Object {
   "prototypeHardening": true,
   "rateLimiter": Object {
     "elu": 0.8,
-    "enabled": true,
+    "enabled": false,
     "term": "medium",
   },
   "requestId": Object {

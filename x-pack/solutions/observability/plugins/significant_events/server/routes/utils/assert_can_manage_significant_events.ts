@@ -10,22 +10,46 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SignificantEventsServer } from '../../types';
 
-export const assertCanManageSignificantEvents = async ({
+interface PrivilegeCheckParams {
+  request: KibanaRequest;
+  server: Pick<SignificantEventsServer, 'security'>;
+}
+
+const hasNightshiftApiPrivilege = async ({
   request,
   server,
-}: {
-  request: KibanaRequest;
-  server: SignificantEventsServer;
-}): Promise<void> => {
+  privilege,
+}: PrivilegeCheckParams & { privilege: string }): Promise<boolean> => {
   const authz = server.security.authz;
   if (!authz) {
-    throw Boom.forbidden('Managing significant events requires the Nightshift manage privilege');
+    return false;
   }
 
   const result = await authz.checkPrivilegesDynamicallyWithRequest(request)({
-    kibana: [authz.actions.api.get(NIGHTSHIFT_API_PRIVILEGES.manage)],
+    kibana: [authz.actions.api.get(privilege)],
   });
-  if (!result.hasAllRequested) {
+  return result.hasAllRequested;
+};
+
+export const assertCanManageSignificantEvents = async (
+  params: PrivilegeCheckParams
+): Promise<void> => {
+  if (
+    !(await hasNightshiftApiPrivilege({ ...params, privilege: NIGHTSHIFT_API_PRIVILEGES.manage }))
+  ) {
     throw Boom.forbidden('Managing significant events requires the Nightshift manage privilege');
+  }
+};
+
+/** Whether the request holds `read_nightshift`, for paths that degrade instead of failing (attachments). */
+export const canReadSignificantEvents = (params: PrivilegeCheckParams): Promise<boolean> =>
+  hasNightshiftApiPrivilege({ ...params, privilege: NIGHTSHIFT_API_PRIVILEGES.read });
+
+/** Gates non-route reads (Agent Builder tools) the way `read_nightshift` gates routes. */
+export const assertCanReadSignificantEvents = async (
+  params: PrivilegeCheckParams
+): Promise<void> => {
+  if (!(await canReadSignificantEvents(params))) {
+    throw Boom.forbidden('Reading significant events requires the Nightshift read privilege');
   }
 };

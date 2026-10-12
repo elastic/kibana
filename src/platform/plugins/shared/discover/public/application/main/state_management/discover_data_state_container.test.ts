@@ -10,14 +10,8 @@
 import { BehaviorSubject, Subject } from 'rxjs';
 import { waitFor } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import {
-  dataViewMock,
-  esHitsMockWithSort,
-  buildDataViewMock,
-} from '@kbn/discover-utils/src/__mocks__';
-import { DataViewSource } from '@kbn/data-source';
-import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
+import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
+import { createResolvedMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 import { createDiscoverServicesMock, discoverServiceMock } from '../../../__mocks__/services';
 import { FetchStatus } from '../../types';
 import type { DataDocuments$ } from './discover_data_state_container';
@@ -199,26 +193,19 @@ describe('test getDataStateContainer', () => {
     unsubscribe();
   });
 
-  test('restores EsqlSource from the registry on fetch without resolveEsqlSource', async () => {
+  test('fetches with the EsqlSource set on the tab without resolving it again', async () => {
     const services = createDiscoverServicesMock();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true, services });
-    const shim = buildDataViewMock({
-      id: 'esql-from-logs',
-      title: 'logs-*',
-      type: ESQL_TYPE,
-      timeFieldName: '@timestamp',
-      isPersisted: false,
-    });
-    const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
-    (esqlSource as { id: string }).id = 'esql-from-logs';
-    services.dataSourceService.registerEsqlSource(esqlSource);
-
-    const { currentDataView$, currentDataSource$ } = selectTabRuntimeState(
+    const { esqlSource } = await createResolvedMockEsqlSource([], [], '@timestamp', 'FROM logs-*');
+    stateContainer.internalState.dispatch(
+      stateContainer.injectCurrentTab(internalStateActions.setDataSource)({
+        dataSource: esqlSource,
+      })
+    );
+    const { currentDataSource$ } = selectTabRuntimeState(
       stateContainer.runtimeStateManager,
       stateContainer.getCurrentTab().id
     );
-    currentDataView$.next(shim);
-    currentDataSource$.next(new DataViewSource(shim));
 
     const resolveSpy = jest.spyOn(resolveEsqlSourceModule, 'resolveEsqlSource');
     services.data.query.timefilter.timefilter.getTime = jest.fn(() => {

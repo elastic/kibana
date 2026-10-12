@@ -228,8 +228,29 @@ describe('getServiceIndexPatterns', () => {
           } as any,
         },
       });
-      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2-*']);
-      expect(getServiceIndexPatterns(entry, 'prod')).toEqual(['metrics-aws.ec2-prod']);
+      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2.otel-*']);
+      expect(getServiceIndexPatterns(entry, 'prod')).toEqual(['metrics-aws.ec2.otel-prod']);
+    });
+
+    it('does not append .otel twice when the dataset already ends with it', () => {
+      const entry = makeEntry({
+        dataFormat: 'otel',
+        packageName: 'aws_cloudwatch_input_otel',
+        varDefsByDataStream: {
+          ec2_otel: {
+            type: 'metrics',
+            dataset: undefined,
+            inputs: ['otelcol'],
+            defaultEnabledInputs: {},
+            varDefsByInput: {
+              otelcol: {
+                'data_stream.dataset': { type: 'text', default: 'aws.ec2.otel' } as any,
+              },
+            },
+          } as any,
+        },
+      });
+      expect(getServiceIndexPatterns(entry)).toEqual(['metrics-aws.ec2.otel-*']);
     });
 
     it('falls back to logs-packageName.*-* for OTel entry with no ecfLogType and no varDefsByDataStream', () => {

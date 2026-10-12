@@ -272,6 +272,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               approvalLabels={approvalLabels}
               shouldAutoResume={shouldAutoResume}
               waitingStepExecutionId={waitingStepExecutionId}
+              resumeExecutionId={resolvedExecutionId}
               hasResumeError={hasResumeError}
               onRetryResume={retryResume}
               childWorkflowExecution={selectedStepChildExecution}

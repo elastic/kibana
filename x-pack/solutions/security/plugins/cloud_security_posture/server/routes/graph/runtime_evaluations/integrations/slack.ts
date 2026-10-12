@@ -78,11 +78,13 @@ export const slackEvaluations = {
   entity.target.id = CASE(
     entity.target.id IS NOT NULL, entity.target.id,
     data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type == "file", slack.audit.entity.id,
+    data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type IN ("channel", "app", "workspace", "enterprise") AND slack.audit.entity.id IS NOT NULL, slack.audit.entity.id,
     null
   ),
   entity.target.name = CASE(
     entity.target.name IS NOT NULL, entity.target.name,
     data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type == "file", slack.audit.entity.name,
+    data_stream.dataset == "slack.audit" AND slack.audit.entity.entity_type IN ("channel", "app", "workspace", "enterprise") AND slack.audit.entity.name IS NOT NULL, slack.audit.entity.name,
     null
   )`,
     },

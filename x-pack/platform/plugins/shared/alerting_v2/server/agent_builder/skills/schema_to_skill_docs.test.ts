@@ -11,7 +11,10 @@ import {
   MATCHER_CONTEXT_FIELDS,
   POLICY_MATCHER_TAGS_MAX,
 } from '@kbn/alerting-v2-schemas';
-import type { ActionPolicyWorkflowPayload, AlertEpisode } from '../../lib/dispatcher/types';
+import type {
+  ActionPolicyWorkflowPayload,
+  ActionPolicyWorkflowPayloadAlert,
+} from '../../lib/dispatcher/types';
 import {
   generateApiSchemaDoc,
   generateOperationsDoc,
@@ -20,7 +23,7 @@ import {
   generateRuleOperationsDoc,
   generateRuleOperationsUsageList,
   generateRuleKindDoc,
-  generateEpisodeLifecycleDoc,
+  generateAlertLifecycleDoc,
   generateStateTransitionDoc,
   getDescribedVariants,
   generateRecoveryStrategyDoc,
@@ -43,26 +46,26 @@ import {
 } from './schema_to_skill_docs';
 
 /**
- * Drift-guard: if `ActionPolicyWorkflowPayload` / `AlertEpisode` gain or lose a
- * field, these maps cause a TypeScript compile error — forcing the generated
- * skill docs assertions to be updated in lockstep.
+ * Drift-guard: if `ActionPolicyWorkflowPayload` / `ActionPolicyWorkflowPayloadAlert`
+ * gain or lose a field, these maps cause a TypeScript compile error — forcing the
+ * generated skill docs assertions to be updated in lockstep.
  */
 const payloadKeyGuard: Record<keyof ActionPolicyWorkflowPayload, true> = {
   id: true,
   policyId: true,
   groupKey: true,
-  episodes: true,
+  alerts: true,
   rules: true,
 };
 
-const episodeKeyGuard: Record<keyof AlertEpisode, true> = {
+const alertKeyGuard: Record<keyof ActionPolicyWorkflowPayloadAlert, true> = {
   last_event_timestamp: true,
   rule_id: true,
   source: true,
   space_id: true,
   group_hash: true,
-  episode_id: true,
-  episode_status: true,
+  alert_id: true,
+  alert_status: true,
   severity: true,
   data: true,
 };
@@ -340,10 +343,10 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('##### `pending`');
       expect(doc).toContain('##### `recovering`');
       expect(doc).toContain(
-        '| `count` | integer | optional | Consecutive matches the alert episode spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive matches the alert spends in `pending` before it becomes `active` on the next match. For example, `2` opens it on the third consecutive match. Set to `0` to open it on the first match. (min: 0, max: 1000) |'
       );
       expect(doc).toContain(
-        '| `count` | integer | optional | Consecutive recoveries the alert episode spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
+        '| `count` | integer | optional | Consecutive recoveries the alert spends in `recovering` before it becomes `inactive` on the next recovery. For example, `2` closes it on the third consecutive recovery. Set to `0` to close it on the first recovery. (min: 0, max: 1000) |'
       );
     });
 
@@ -406,7 +409,7 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`grouping_mode`');
+      expect(doc).toContain('`grouping`');
       expect(doc).toContain('`throttle`');
     });
   });
@@ -483,7 +486,7 @@ describe('schema_to_skill_docs', () => {
 
     it('renders arrays whose items are referenced schemas', () => {
       expect(generateRuleSchemaDoc()).toContain(
-        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. (max items: 100) |'
+        '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear. (min items: 1, max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
         '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
@@ -495,16 +498,16 @@ describe('schema_to_skill_docs', () => {
         '| `grouping` | object | optional | Grouping configuration. |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
-        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+        '| `throttle` | { strategy: "on_status_change", ... } \\| { strategy: "per_status_interval", ... } \\| { strategy: "time_interval", ... } \\| { strategy: "every_time", ... } | optional | The throttle configuration for notifications. Absent when notifications are not throttled; send `null` on PATCH to clear it. The strategy decides the rest of the block, so a PATCH replaces it whole: send the complete strategy variant rather than a single field. |'
       );
     });
 
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `grouping_mode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
       );
-      expect(doc).not.toContain('per_episode groups by episode lifecycle');
+      expect(doc).not.toContain('An action policy destination configuration.');
     });
   });
 
@@ -571,14 +574,14 @@ describe('schema_to_skill_docs', () => {
     it('links sibling references without a ./references/ prefix', () => {
       const doc = generateNotificationsOverviewDoc();
       expect(doc).toContain('(./rule-kind.md)');
-      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).toContain('(./alert-lifecycle.md)');
       expect(doc).not.toContain('./references/');
     });
   });
 
-  describe('generateEpisodeLifecycleDoc', () => {
+  describe('generateAlertLifecycleDoc', () => {
     it('matches the reviewed skill-doc snapshot', () => {
-      expect(generateEpisodeLifecycleDoc()).toMatchSnapshot();
+      expect(generateAlertLifecycleDoc()).toMatchSnapshot();
     });
   });
 
@@ -616,7 +619,7 @@ describe('schema_to_skill_docs', () => {
 
     it('links sibling references without a ./references/ prefix', () => {
       const doc = generateRecoveryStrategyDoc();
-      expect(doc).toContain('(./episode-lifecycle.md)');
+      expect(doc).toContain('(./alert-lifecycle.md)');
       expect(doc).toContain('(./rule-kind.md)');
       expect(doc).not.toContain('./references/');
     });
@@ -683,7 +686,7 @@ describe('schema_to_skill_docs', () => {
       }
     });
 
-    it('enriches episode_status and severity with schema enum values', () => {
+    it('enriches alert_status and severity with schema enum values', () => {
       const doc = generateMatcherContextDoc();
       expect(doc).toContain('`active`');
       expect(doc).toContain('`critical`');
@@ -821,7 +824,7 @@ describe('schema_to_skill_docs', () => {
   describe('generateActionPolicyWorkflowPayloadDoc', () => {
     /**
      * Snapshot of the generated skill markdown for the action-policy → workflow
-     * dispatch payload (`ActionPolicyWorkflowPayload` / `AlertEpisode`).
+     * dispatch payload (`ActionPolicyWorkflowPayload` / `ActionPolicyWorkflowPayloadAlert`).
      *
      * This snapshot exists so reviewers can verify the LLM-facing docs look
      * correct — field names, types, required/optional flags, descriptions, and
@@ -840,9 +843,9 @@ describe('schema_to_skill_docs', () => {
       }
     });
 
-    it('documents every AlertEpisode field', () => {
+    it('documents every ActionPolicyWorkflowPayloadAlert field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
-      for (const field of Object.keys(episodeKeyGuard)) {
+      for (const field of Object.keys(alertKeyGuard)) {
         expect(doc).toContain(`\`${field}\``);
       }
     });
@@ -860,11 +863,11 @@ describe('schema_to_skill_docs', () => {
     it('adds data-field notes and an example without a separate Liquid cookbook', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('### `data`');
-      expect(doc).toContain('ep.data.host.name');
+      expect(doc).toContain('alert.data.host.name');
       expect(doc).toContain('| LIMIT 0');
       expect(doc).toContain('## Example');
       expect(doc).toContain('```yaml');
-      expect(doc).toContain('inputs.payload.rules[ep.rule_id].name');
+      expect(doc).toContain('inputs.payload.rules[alert.rule_id].name');
       expect(doc).not.toContain('## Liquid Templates');
       expect(doc).not.toContain('./references/');
     });
@@ -877,7 +880,7 @@ describe('schema_to_skill_docs', () => {
       ['manage_rule operation .describe()', generateRuleOperationsDoc],
       ['manage_rule operation usage list', generateRuleOperationsUsageList],
       ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
-      ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
+      ['generateEnumTable (alert status from spec)', generateAlertLifecycleDoc],
       ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
       ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
       ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],

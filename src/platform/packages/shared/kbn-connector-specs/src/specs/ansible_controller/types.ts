@@ -13,25 +13,29 @@ const MAX_STRING_LENGTH = 2048;
 const MAX_PAGE_SIZE = 100;
 const MAX_EXTRA_VARS_JSON_CHARS = 65536;
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 const paginationFields = {
-  page: z
-    .number()
-    .int()
-    .min(1)
-    .optional()
-    .default(1)
-    .describe('Page number for paginated results (default: 1).'),
-  pageSize: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_PAGE_SIZE)
-    .optional()
-    .default(25)
-    .describe(`Page size (default: 25, max: ${MAX_PAGE_SIZE}).`),
+  page: lazySchema(() =>
+    z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .default(1)
+      .describe('Page number for paginated results (default: 1).')
+  ),
+  pageSize: lazySchema(() =>
+    z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_PAGE_SIZE)
+      .optional()
+      .default(25)
+      .describe(`Page size (default: 25, max: ${MAX_PAGE_SIZE}).`)
+  ),
 };
 
 export const RequestInputSchema = lazySchema(() =>

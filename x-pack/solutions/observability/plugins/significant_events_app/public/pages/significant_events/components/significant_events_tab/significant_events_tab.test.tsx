@@ -166,13 +166,12 @@ jest.mock('./filter_popover', () => ({
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
   created_at: '2026-01-01T00:00:00.000Z',
-  event_uuid: 'version-2',
   event_id: 'event-1',
-  status: 'open',
+  status: 'active',
   stream_names: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
-  severity: '40-medium',
+  severity: 'medium',
   confidence: 0.8,
 };
 
@@ -201,6 +200,12 @@ describe('Significant Events timestamp rendering', () => {
     expect(screen.getByText(`formatted:${event.created_at}`)).toBeInTheDocument();
     expect(screen.queryByText(`formatted:${event['@timestamp']}`)).not.toBeInTheDocument();
   });
+
+  it('renders the canonical severity value', () => {
+    render(<SignificantEventFlyout event={{ ...event, severity: 'high' }} onClose={jest.fn()} />);
+
+    expect(screen.getByText('High')).toBeInTheDocument();
+  });
 });
 
 describe('SignificantEventFlyout actions menu', () => {
@@ -219,7 +224,7 @@ describe('SignificantEventFlyout actions menu', () => {
     });
   });
 
-  it('shows Dismiss and Close for an open event and opens the dismiss modal', () => {
+  it('shows Dismiss and Close for an active event and opens the dismiss modal', () => {
     // Use mockReturnValue (not Once) so re-renders triggered by fireEvent keep the same value.
     lifecycleMock.mockReturnValue({
       data: { events: [event], detections: [] },
@@ -232,43 +237,15 @@ describe('SignificantEventFlyout actions menu', () => {
 
     fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
 
-    expect(screen.getByText('Dismiss significant event')).toBeInTheDocument();
-    expect(screen.getByTestId('sigEventCloseButton')).toBeInTheDocument();
+    expect(screen.getByText('Mark significant event inactive')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Dismiss significant event'));
+    fireEvent.click(screen.getByText('Mark significant event inactive'));
 
     expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
   });
 
-  it('keeps Dismiss and Close enabled even when lifecycle returns empty events (event_id is always known)', () => {
-    // The update route resolves via event_id (findLatestByEventId), not event_uuid —
-    // lifecycle data is not required for close/dismiss to work correctly.
-    lifecycleMock.mockReturnValue({
-      data: { events: [], detections: [] },
-      isLoading: false,
-      isSuccess: true,
-      isError: false,
-      refetch: jest.fn(),
-    });
-    render(<SignificantEventFlyout event={event} onClose={jest.fn()} />);
-
-    fireEvent.click(screen.getByTestId('sigEventFlyoutActionsButton'));
-
-    const dismissItem = screen.getByText('Dismiss significant event').closest('button');
-    const closeItem = screen.getByTestId('sigEventCloseButton');
-
-    expect(dismissItem).not.toBeDisabled();
-    expect(closeItem).not.toBeDisabled();
-
-    // Clicking dismiss must open the modal since the action is enabled.
-    fireEvent.click(screen.getByText('Dismiss significant event'));
-    expect(screen.getByTestId('sigEventDismissModal')).toBeInTheDocument();
-  });
-
-  it('does not expose actions for an already dismissed event', () => {
-    render(
-      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={jest.fn()} />
-    );
+  it('does not expose actions for an inactive event', () => {
+    render(<SignificantEventFlyout event={{ ...event, status: 'inactive' }} onClose={jest.fn()} />);
 
     expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
   });
@@ -296,8 +273,8 @@ describe('selectedEvent deep link', () => {
   const defaultUrlState = {
     selectedEventId: event.event_id,
     openEventId: event.event_id,
-    statusFilter: ['open'],
-    severityFilter: ['80-critical', '60-high'],
+    statusFilter: ['active'],
+    severityFilter: ['critical', 'high'],
     streamFilter: [],
     serviceFilter: [],
     setFilters: jest.fn(),
@@ -432,7 +409,7 @@ describe('selectedEvent deep link', () => {
   });
 
   it('adapts status/severity/stream filters to the linked event once it resolves', () => {
-    // event is status:open, severity:40-medium, stream:logs.test
+    // event is status:active, severity:medium, stream:logs.test
     mockUseFetchSignificantEvents.mockReturnValue({
       ...emptyListResult,
       data: { hits: [event], total: 1 },
@@ -457,16 +434,16 @@ describe('selectedEvent deep link', () => {
       ...defaultUrlState,
       selectedEventId: undefined,
       openEventId: undefined,
-      statusFilter: ['closed'],
-      severityFilter: ['20-low'],
+      statusFilter: ['inactive'],
+      severityFilter: ['low'],
       streamFilter: ['logs.test'],
       serviceFilter: ['svc-checkout'],
     });
 
     render(<SignificantEventsTab />);
 
-    expect(lastFetchArgs().status).toEqual(['closed']);
-    expect(lastFetchArgs().severity).toEqual(['20-low']);
+    expect(lastFetchArgs().status).toEqual(['inactive']);
+    expect(lastFetchArgs().severity).toEqual(['low']);
     expect(lastFetchArgs().stream).toEqual(['logs.test']);
     expect(lastFetchArgs().topologyFeatureIds).toEqual(['svc-checkout']);
     expect(screen.getByTestId('significantEventsAppSignificantEventsTabButton')).toBeEnabled();

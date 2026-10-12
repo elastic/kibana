@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
-import type { Rule } from 'eslint';
+import type { CreateOnceRule, ESTree } from '@oxlint/plugins';
 
 const SEMANTIC_PACKAGE = '@kbn/ui-callout';
 
@@ -23,7 +22,7 @@ const COLOR_TO_WRAPPER: Record<string, string> = {
  * Returns the string value of a JSX attribute's value node, or undefined if
  * the value is not a simple string literal.
  */
-const getStringValue = (valueNode: TSESTree.JSXAttribute['value']): string | undefined => {
+const getStringValue = (valueNode: ESTree.JSXAttribute['value']): string | undefined => {
   if (!valueNode) return undefined;
   if (valueNode.type === 'Literal' && typeof valueNode.value === 'string') {
     return valueNode.value;
@@ -31,7 +30,7 @@ const getStringValue = (valueNode: TSESTree.JSXAttribute['value']): string | und
   return undefined;
 };
 
-export const PreferKbnUiCallout: Rule.RuleModule = {
+export const PreferKbnUiCallout: CreateOnceRule = {
   meta: {
     type: 'suggestion',
     docs: {
@@ -46,18 +45,17 @@ export const PreferKbnUiCallout: Rule.RuleModule = {
     },
     schema: [],
   },
-  create(context) {
+  createOnce(context) {
     return {
-      JSXOpeningElement(node: Rule.Node) {
-        const jsxNode = node as unknown as TSESTree.JSXOpeningElement;
-        if (jsxNode.name.type !== 'JSXIdentifier' || jsxNode.name.name !== 'EuiCallOut') {
+      JSXOpeningElement(node) {
+        if (node.name.type !== 'JSXIdentifier' || node.name.name !== 'EuiCallOut') {
           return;
         }
 
-        const hasSpread = jsxNode.attributes.some((attr) => attr.type === 'JSXSpreadAttribute');
+        const hasSpread = node.attributes.some((attr) => attr.type === 'JSXSpreadAttribute');
 
-        const colorAttr = jsxNode.attributes.find(
-          (attr): attr is TSESTree.JSXAttribute =>
+        const colorAttr = node.attributes.find(
+          (attr): attr is ESTree.JSXAttribute =>
             attr.type === 'JSXAttribute' &&
             attr.name.type === 'JSXIdentifier' &&
             attr.name.name === 'color'

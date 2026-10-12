@@ -6,6 +6,8 @@
  */
 
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
@@ -85,7 +87,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('{{semantic_memory_load_step}}');
   });
 
-  it('hydrates and reinforces decision trees when they are enabled', () => {
+  it('hydrates and reinforces decision trees through the combined workflows', () => {
     const base = staticBase(
       getInvestigationAgentType({
         sandboxEnabled: true,
@@ -94,14 +96,12 @@ describe('Nightshift investigation agent type', () => {
       })
     );
 
-    expect(base.workflow_ids).toEqual([
-      'system-nightshift-sandbox-materialize-workspace',
-      'system-nightshift-decision-tree-hydrate',
-    ]);
-    expect(base.post_execution_workflow_ids).toEqual([
-      'system-nightshift-agent-optimize',
-      'system-nightshift-decision-tree-reinforce',
-    ]);
+    // One pre-hook, not two: decision trees hydrate as a third parallel branch of the
+    // combined materialize workflow, which already carries the sandbox_id they need.
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
+    // One post-hook, not two: reinforcement is the tail phase of the combined optimize
+    // workflow. Listing both would reinforce every round twice.
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
     expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
     expect(base.instructions).not.toContain('{{decision_trees_load_step}}');
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
@@ -116,7 +116,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  it('drops the hydrate workflow when cortex is on but the sandbox is not configured', () => {
+  it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
     const base = staticBase(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
     );
@@ -138,5 +138,60 @@ describe('Nightshift investigation agent type', () => {
     );
 
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+  });
+
+  describe('custom context', () => {
+    const ctx = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-a' };
+    const CUSTOM_CONTEXT =
+      '**USER CONTEXT**\n<user_provided_context>\nRule out release regressions.\n</user_provided_context>';
+
+    const resolveBase = async (
+      getCustomContextInstructions: jest.Mock,
+      logger = loggerMock.create()
+    ): Promise<AgentBaseConfiguration> => {
+      const type = getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+        getCustomContextInstructions,
+        logger,
+      });
+      if (typeof type.baseConfiguration !== 'function') {
+        throw new Error('expected a dynamic base configuration');
+      }
+      return type.baseConfiguration(ctx);
+    };
+
+    const staticInstructions = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+    ).instructions;
+
+    it("appends the space's custom context to the instructions on every resolve", async () => {
+      const getCustomContextInstructions = jest.fn().mockResolvedValue(CUSTOM_CONTEXT);
+
+      const base = await resolveBase(getCustomContextInstructions);
+
+      expect(getCustomContextInstructions).toHaveBeenCalledWith(ctx);
+      expect(base.instructions).toBe(`${staticInstructions?.trimEnd()}\n\n${CUSTOM_CONTEXT}\n`);
+      expect(base.tools).toEqual(
+        staticBase(getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })).tools
+      );
+    });
+
+    it('keeps the base instructions when the space has no custom context', async () => {
+      const base = await resolveBase(jest.fn().mockResolvedValue(''));
+
+      expect(base.instructions).toBe(staticInstructions);
+    });
+
+    it('keeps the base instructions and logs a warning when custom context cannot be read', async () => {
+      const logger = loggerMock.create();
+
+      const base = await resolveBase(jest.fn().mockRejectedValue(new Error('boom')), logger);
+
+      expect(base.instructions).toBe(staticInstructions);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Failed to load custom context for space "space-a": boom'
+      );
+    });
   });
 });

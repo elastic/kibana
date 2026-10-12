@@ -11,7 +11,7 @@ import { AgentExecutionMode, isApiAutoApproved, ToolType } from '@kbn/agent-buil
 import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
+import { createErrorResult, createNonInteractiveDeclinedResult } from '@kbn/agent-builder-server';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { HttpSelfService } from '@kbn/core-http-server';
@@ -104,13 +104,12 @@ The response is the raw API response body.`,
         if (executionMode === AgentExecutionMode.standalone || !interactivity.enabled) {
           return {
             results: [
-              createErrorResult({
-                message:
-                  `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
+              createNonInteractiveDeclinedResult(
+                `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
                   `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation. ` +
                   `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run.`,
-                metadata: { target, api, method, path },
-              }),
+                { target, api, method, path }
+              ),
             ],
           };
         }

@@ -1,5 +1,5 @@
 {
-  "sha1": "b7d12297587689052a800495993d00741df76fb7",
+  "sha1": "4ebfb2b80160ca0827e5a1ae0743de074f5f1cd7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -448,6 +448,20 @@
       }
     },
     {
+      "id": "53fb651372c5eda-fbd5bf01128e709",
+      "title": "Stream data retention - updating failure store should reconcile an unchanged failure store definition",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
+        "line": 197,
+        "column": 83
+      }
+    },
+    {
       "id": "53fb651372c5eda-47ea8018ad86f69",
       "title": "Stream data retention - updating failure store should set failure store retention to different value than main retention",
       "expectedStatus": "passed",
@@ -459,8 +473,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
-        "line": 197,
-        "column": 83
+        "line": 224,
+        "column": 7
       }
     },
     {
@@ -475,8 +489,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
-        "line": 238,
-        "column": 46
+        "line": 268,
+        "column": 16
       }
     },
     {
@@ -491,8 +505,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
-        "line": 254,
-        "column": 9
+        "line": 287,
+        "column": 54
       }
     },
     {
@@ -507,8 +521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/failure_store.spec.ts",
-        "line": 282,
-        "column": 56
+        "line": 310,
+        "column": 59
       }
     },
     {

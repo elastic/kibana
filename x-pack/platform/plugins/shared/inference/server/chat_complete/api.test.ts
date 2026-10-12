@@ -34,6 +34,8 @@ import {
   chunkEvent,
   tokensEvent,
 } from '../test_utils';
+import { executeRegexRulesTask } from '@kbn/ai-anonymization-server';
+import type { AnonymizationRule, NamedEntityRecognitionRule } from '@kbn/ai-anonymization-common';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
 import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
@@ -1065,6 +1067,212 @@ describe('createChatCompleteApi', () => {
       expect(events).toHaveLength(2);
       expect(events[0].content).toBe('chunk-1');
       expect(events[1].content).toBe('chunk-2');
+    });
+  });
+
+  describe('anonymization instructions', () => {
+    const emailRule: AnonymizationRule = {
+      type: 'RegExp',
+      entityClass: 'EMAIL',
+      pattern: '([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
+      enabled: true,
+    };
+
+    // Runs the live anonymization path: enabled rules (as read from the `ai:anonymizationSettings`
+    // uiSetting) detected by the regex worker, with no policy-service inputs.
+    const createChatCompleteWithEmailRule = () => {
+      jest
+        .mocked(regexWorker.run)
+        .mockImplementation(async (payload) => executeRegexRulesTask(payload));
+
+      const callbackApiWithRules = createChatCompleteCallbackApi({
+        request,
+        namespace: 'default',
+        actions,
+        logger,
+        anonymizationRulesPromise: Promise.resolve([emailRule]),
+        regexWorker,
+        esClient: mockEsClient,
+        endpointIdCache,
+      });
+      return createChatCompleteApi({ callbackApi: callbackApiWithRules });
+    };
+
+    beforeEach(() => {
+      inferenceAdapter.chatComplete.mockReturnValue(of(chunkEvent('chunk-1')));
+    });
+
+    it('injects the anonymization instruction even when the request has no system prompt', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        // Deliberately no `system` prompt.
+        messages: [{ role: MessageRole.User, content: 'echo back claudia@example.com to me' }],
+        maxRetries: 0,
+      });
+
+      // Assert on the real outbound payload sent to the model.
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringContaining('### Anonymization'),
+          messages: [
+            expect.objectContaining({
+              role: MessageRole.User,
+              content: expect.stringMatching(/^echo back EMAIL_\w+ to me$/),
+            }),
+          ],
+        })
+      );
+    });
+
+    it('appends the instruction to an existing system prompt when something was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        system: 'You are a helpful assistant.',
+        messages: [{ role: MessageRole.User, content: 'echo back claudia@example.com to me' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringMatching(/^You are a helpful assistant\.[\s\S]*### Anonymization/),
+        })
+      );
+    });
+
+    it('does not add a system prompt when rules are enabled but nothing was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question without any email address' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: undefined })
+      );
+    });
+
+    it('leaves an existing system prompt untouched when nothing was anonymized', async () => {
+      await createChatCompleteWithEmailRule()({
+        connectorId: 'connectorId',
+        system: 'You are a helpful assistant.',
+        messages: [{ role: MessageRole.User, content: 'question without any email address' }],
+        maxRetries: 0,
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: 'You are a helpful assistant.' })
+      );
+    });
+  });
+
+  describe('NER anonymization', () => {
+    const NER_MODEL = 'test-ner-model';
+    const nerRule = (overrides: Partial<NamedEntityRecognitionRule> = {}): AnonymizationRule => ({
+      type: 'NER',
+      enabled: true,
+      modelId: NER_MODEL,
+      allowedEntityClasses: ['PER', 'ORG', 'LOC'],
+      timeoutSeconds: 30,
+      ...overrides,
+    });
+
+    // Stands in for the deployed model: like a real one it looks at each document it is given and
+    // reports the spans it recognises, so the test does not hard-code offsets.
+    const KNOWN_ENTITIES: Array<{ text: string; class_name: string }> = [
+      { text: 'Claudia', class_name: 'PER' },
+      { text: 'Elastic', class_name: 'ORG' },
+      { text: 'Berlin', class_name: 'LOC' },
+    ];
+    const fakeNerModel = async ({ docs }: { docs: Array<{ text_field: string }> }) => ({
+      inference_results: docs.map(({ text_field }) => ({
+        entities: KNOWN_ENTITIES.flatMap(({ text, class_name }) =>
+          [...text_field.matchAll(new RegExp(text, 'g'))].map((match) => ({
+            entity: text,
+            class_name,
+            class_probability: 0.99,
+            start_pos: match.index!,
+            end_pos: match.index! + text.length,
+          }))
+        ),
+      })),
+    });
+
+    const createChatCompleteWithRules = (rules: AnonymizationRule[]) =>
+      createChatCompleteApi({
+        callbackApi: createChatCompleteCallbackApi({
+          request,
+          namespace: 'default',
+          actions,
+          logger,
+          anonymizationRulesPromise: Promise.resolve(rules),
+          regexWorker,
+          esClient: mockEsClient,
+          endpointIdCache,
+        }),
+      });
+
+    // What the model is sent, as a single string per message.
+    const sentToModel = (): string[] =>
+      inferenceAdapter.chatComplete.mock.calls[0][0].messages.map((message) =>
+        String('content' in message ? message.content : '')
+      );
+
+    beforeEach(() => {
+      jest.mocked(regexWorker.run).mockResolvedValue([]);
+      mockEsClient.ml.inferTrainedModel.mockImplementation(fakeNerModel);
+      // The model "replies" by repeating back every placeholder it was sent.
+      inferenceAdapter.chatComplete.mockImplementation(({ messages }: { messages: any[] }) => {
+        const masks = messages.flatMap(
+          ({ content }) => String(content).match(/(?:PER|ORG|LOC)_[0-9a-f]{40}/g) ?? []
+        );
+        return of(chunkEvent(`Noted: ${masks.join(' | ')}`));
+      });
+    });
+
+    afterEach(() => {
+      mockEsClient.ml.inferTrainedModel.mockReset();
+    });
+
+    it('masks the entities the NER model finds before they reach the LLM, and restores them in the response', async () => {
+      const response = await createChatCompleteWithRules([nerRule()])({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'Claudia from Elastic is visiting Berlin' }],
+        maxRetries: 0,
+      });
+
+      expect(mockEsClient.ml.inferTrainedModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model_id: NER_MODEL,
+          docs: [{ text_field: 'Claudia from Elastic is visiting Berlin' }],
+          timeout: '30s',
+        })
+      );
+
+      const [userMessage] = sentToModel();
+      expect(userMessage).not.toMatch(/Claudia|Elastic|Berlin/);
+      expect(userMessage).toMatch(
+        /^PER_[0-9a-f]{40} from ORG_[0-9a-f]{40} is visiting LOC_[0-9a-f]{40}$/
+      );
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({ system: expect.stringContaining('### Anonymization') })
+      );
+
+      // The masks the LLM echoed back are replaced with the original values.
+      expect(response.content).toBe('Noted: Claudia | Elastic | Berlin');
+    });
+
+    it('rejects the request instead of sending unmasked content when inference against the NER model fails', async () => {
+      mockEsClient.ml.inferTrainedModel.mockRejectedValue(new Error('inference timed out'));
+
+      await expect(
+        createChatCompleteWithRules([nerRule()])({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'Claudia lives in Berlin' }],
+          maxRetries: 0,
+        })
+      ).rejects.toThrow(/Inference failed for NER model 'test-ner-model'/);
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
     });
   });
 });

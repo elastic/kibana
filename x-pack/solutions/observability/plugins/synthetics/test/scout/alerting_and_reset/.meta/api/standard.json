@@ -1,5 +1,5 @@
 {
-  "sha1": "3ab13fe430ee37c219e3d7de76e350a6e451b8c5",
+  "sha1": "37367ecb4202987f0dbaf53d8bedab03b7abea8a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -252,7 +252,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
-        "line": 184,
+        "line": 123,
         "column": 72
       }
     },
@@ -266,7 +266,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/api/tests/maintenance_windows.spec.ts",
-        "line": 203,
+        "line": 142,
         "column": 25
       }
     },
