@@ -8,7 +8,7 @@
 import type { MonitorErrorEvent } from './types';
 
 export const ERROR_THROTTLE_MS = 60 * 60 * 1000;
-export const MAX_THROTTLE_KEYS = 1000;
+export const MAX_THROTTLE_KEYS = 100;
 
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
 
