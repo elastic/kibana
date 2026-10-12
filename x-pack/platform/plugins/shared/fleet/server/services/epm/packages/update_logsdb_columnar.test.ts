@@ -13,11 +13,14 @@ import { FleetErrorWithStatusCode } from '../../../errors';
 import { appContextService } from '../../app_context';
 import * as templateModule from '../elasticsearch/template/template';
 
-import { getInstalledPackageWithAssets } from './get';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
+
+import { getInstallationObject, getInstalledPackageWithAssets } from './get';
 import {
   applyLogsdbColumnarIndexMode,
   getColumnarReadyDataStreams,
   getColumnarUnsupportedDataStreams,
+  setLogsdbColumnarChoice,
 } from './update_logsdb_columnar';
 
 // `prepareDataStreamTemplates` and the whole template-generation stack are deliberately left
@@ -25,6 +28,9 @@ import {
 // rather than a hand-written fixture. Only the side effects that would reach Elasticsearch or
 // saved objects outside of the mocked client are stubbed.
 jest.mock('../../app_context');
+jest.mock('../../audit_logging', () => ({
+  auditLoggingService: { writeCustomSoAuditLog: jest.fn() },
+}));
 jest.mock('./get');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
@@ -88,53 +94,53 @@ const nestedCausedByError = () => {
   return esError;
 };
 
-describe('applyLogsdbColumnarIndexMode', () => {
-  const savedObjectsClient = savedObjectsClientMock.create();
-  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-  const logger = loggerMock.create();
+const savedObjectsClient = savedObjectsClientMock.create();
+const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+const logger = loggerMock.create();
 
-  const mockInstalledPackage = (info: ReturnType<typeof packageInfo>) => {
-    jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
-      packageInfo: info,
-      paths: [FIELDS_PATH],
-      assetsMap: new Map([[FIELDS_PATH, Buffer.from(FIELDS_YAML, 'utf8')]]),
-      installation: { name: PKG_NAME, version: PKG_VERSION },
-    } as any);
-  };
+const mockInstalledPackage = (info: ReturnType<typeof packageInfo>) => {
+  jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
+    packageInfo: info,
+    paths: [FIELDS_PATH],
+    assetsMap: new Map([[FIELDS_PATH, Buffer.from(FIELDS_YAML, 'utf8')]]),
+    installation: { name: PKG_NAME, version: PKG_VERSION },
+  } as any);
+};
 
-  const packageComponentTemplateMappings = () => {
-    const call = esClient.cluster.putComponentTemplate.mock.calls.find(
-      ([params]: any) => params.name === COMPONENT_TEMPLATE
-    );
-    return (call?.[0] as any).body.template.mappings;
-  };
+const packageComponentTemplateMappings = () => {
+  const call = esClient.cluster.putComponentTemplate.mock.calls.find(
+    ([params]: any) => params.name === COMPONENT_TEMPLATE
+  );
+  return (call?.[0] as any).body.template.mappings;
+};
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+beforeEach(() => {
+  jest.clearAllMocks();
 
-    mockedAppContextService.getLogger.mockReturnValue(logger);
-    mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
-    // Keeps ILM resolution (and its saved-objects lookup) out of the template generation path.
-    mockedAppContextService.getConfig.mockReturnValue({
-      internal: { disableILMPolicies: true },
-    } as any);
+  mockedAppContextService.getLogger.mockReturnValue(logger);
+  mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+  // Keeps ILM resolution (and its saved-objects lookup) out of the template generation path.
+  mockedAppContextService.getConfig.mockReturnValue({
+    internal: { disableILMPolicies: true },
+  } as any);
 
-    jest.spyOn(templateModule, 'updateCurrentWriteIndices').mockResolvedValue(undefined);
+  jest.spyOn(templateModule, 'updateCurrentWriteIndices').mockResolvedValue(undefined);
 
-    esClient.indices.getIndexTemplate.mockResolvedValue({
-      index_templates: [
-        {
-          name: DATA_STREAM,
-          index_template: {
-            template: { settings: { index: {} }, mappings: {} },
-            composed_of: [],
-            index_patterns: '',
-          },
+  esClient.indices.getIndexTemplate.mockResolvedValue({
+    index_templates: [
+      {
+        name: DATA_STREAM,
+        index_template: {
+          template: { settings: { index: {} }, mappings: {} },
+          composed_of: [],
+          index_patterns: '',
         },
-      ],
-    } as any);
-  });
+      },
+    ],
+  } as any);
+});
 
+describe('applyLogsdbColumnarIndexMode', () => {
   it('writes the columnar mode and strips doc_values/store when enabling', async () => {
     mockInstalledPackage(packageInfo());
 
@@ -324,6 +330,88 @@ describe('applyLogsdbColumnarIndexMode', () => {
 
     expect(updatedDataStreams).toEqual([]);
     expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+});
+
+describe('setLogsdbColumnarChoice', () => {
+  const installation = (attributes: Record<string, unknown> = {}) =>
+    ({
+      id: PKG_NAME,
+      type: PACKAGES_SAVED_OBJECT_TYPE,
+      attributes: { name: PKG_NAME, version: PKG_VERSION, ...attributes },
+    } as any);
+
+  const setChoice = (enabled: boolean, extra: Record<string, unknown> = {}) =>
+    setLogsdbColumnarChoice({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName: PKG_NAME,
+      enabled,
+      ...extra,
+    });
+
+  it('stores the choice on the installation, then applies it to Elasticsearch', async () => {
+    jest.mocked(getInstallationObject).mockResolvedValue(installation());
+    mockInstalledPackage(packageInfo());
+
+    await expect(setChoice(true)).resolves.toEqual({ changed: true });
+
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, PKG_NAME, {
+      logsdb_columnar_enabled: true,
+    });
+    expect(
+      (esClient.indices.putIndexTemplate.mock.calls[0][0] as any).template.settings.index
+    ).toEqual({ mode: 'logsdb_columnar' });
+    // The stored state must describe what Fleet is applying: persist first, then write templates.
+    expect(savedObjectsClient.update.mock.invocationCallOrder[0]).toBeLessThan(
+      esClient.indices.putIndexTemplate.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('is a no-op when the stored choice already matches', async () => {
+    jest
+      .mocked(getInstallationObject)
+      .mockResolvedValue(installation({ logsdb_columnar_enabled: true }));
+
+    await expect(setChoice(true)).resolves.toEqual({ changed: false });
+
+    expect(getInstalledPackageWithAssets).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('uses the installation handed over by the caller instead of fetching it', async () => {
+    mockInstalledPackage(packageInfo());
+
+    await expect(setChoice(false, { installation: installation() })).resolves.toEqual({
+      changed: true,
+    });
+
+    expect(getInstallationObject).not.toHaveBeenCalled();
+    expect(savedObjectsClient.update).toHaveBeenCalledWith(PACKAGES_SAVED_OBJECT_TYPE, PKG_NAME, {
+      logsdb_columnar_enabled: false,
+    });
+  });
+
+  it('rejects enabling a package without a ready logs data stream before anything is written', async () => {
+    jest.mocked(getInstallationObject).mockResolvedValue(installation());
+    mockInstalledPackage(packageInfo('unsupported'));
+
+    await expect(setChoice(true)).rejects.toThrow(
+      /has no logs data stream that declares readiness/
+    );
+
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('throws when the package is not installed', async () => {
+    jest.mocked(getInstallationObject).mockResolvedValue(undefined);
+
+    await expect(setChoice(true)).rejects.toThrow(/is not installed/);
+
+    expect(savedObjectsClient.update).not.toHaveBeenCalled();
   });
 });
 

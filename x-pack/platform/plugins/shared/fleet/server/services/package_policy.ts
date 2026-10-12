@@ -185,6 +185,7 @@ import { sendTelemetryEvents } from './upgrade_sender';
 import {
   canDeployCustomPackageAsAgentlessOrThrow,
   handleExperimentalDatastreamFeatureOptIn,
+  handleLogsdbColumnarChoice,
   mapPackagePolicySavedObjectToPackagePolicy,
   preflightCheckPackagePolicy,
 } from './package_policies';
@@ -674,6 +675,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: enrichedPackagePolicy,
     });
 
+    // Apply the installation-level columnar index mode choice carried by the policy editor
+    await handleLogsdbColumnarChoice({
+      soClient,
+      esClient,
+      packagePolicy: enrichedPackagePolicy,
+    });
+
     const pkgInfo =
       options?.packageInfo ??
       (await getPackageInfo({
@@ -771,7 +779,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         {
           ...omit(enrichedPackagePolicy, 'cloud_connector_name', 'spaceIds'),
           ...(enrichedPackagePolicy.package
-            ? { package: omit(enrichedPackagePolicy.package, 'experimental_data_stream_features') }
+            ? {
+                package: omit(
+                  enrichedPackagePolicy.package,
+                  'experimental_data_stream_features',
+                  'logsdb_columnar'
+                ),
+              }
             : {}),
           inputs,
           ...(elasticsearchPrivileges && {
@@ -1125,7 +1139,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           attributes: {
             ...pkgPolicyWithoutId,
             ...(packagePolicy.package
-              ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+              ? {
+                  package: omit(
+                    packagePolicy.package,
+                    'experimental_data_stream_features',
+                    'logsdb_columnar'
+                  ),
+                }
               : {}),
             inputs,
             elasticsearch,
@@ -1262,7 +1282,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       id: packagePolicy.id,
       ...pkgPolicyWithoutId,
       ...(packagePolicy.package
-        ? { package: omit(packagePolicy.package, 'experimental_data_stream_features') }
+        ? {
+            package: omit(
+              packagePolicy.package,
+              'experimental_data_stream_features',
+              'logsdb_columnar'
+            ),
+          }
         : {}),
       inputs,
       elasticsearch,
@@ -1831,6 +1857,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       packagePolicy: restOfPackagePolicy,
     });
 
+    // Apply the installation-level columnar index mode choice carried by the policy editor
+    await handleLogsdbColumnarChoice({
+      soClient,
+      esClient,
+      packagePolicy: restOfPackagePolicy,
+    });
+
     // If the package version has increased, save the previous package policy revision.
     if (
       appContextService.getExperimentalFeatures().enablePackageRollback &&
@@ -1883,7 +1916,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           // The condition is derived from the package below, never taken from the request.
           ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
           ...(restOfPackagePolicy.package
-            ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
+            ? {
+                package: omit(
+                  restOfPackagePolicy.package,
+                  'experimental_data_stream_features',
+                  'logsdb_columnar'
+                ),
+              }
             : {}),
           inputs,
           ...(elasticsearchPrivileges && {
@@ -2333,6 +2372,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         if (!options?.fromBulkUpgrade) {
           // Handle component template/mappings updates for experimental features, e.g. synthetic source
           await handleExperimentalDatastreamFeatureOptIn({ soClient, esClient, packagePolicy });
+          // Apply the installation-level columnar index mode choice carried by the policy editor
+          await handleLogsdbColumnarChoice({ soClient, esClient, packagePolicy });
         }
 
         const targetAgentVersionCondition = pkgInfo?.conditions?.agent?.version;
@@ -2343,7 +2384,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           attributes: {
             ...omit(restOfPackagePolicy, 'cloud_connector_name', 'package_agent_version_condition'),
             ...(restOfPackagePolicy.package
-              ? { package: omit(restOfPackagePolicy.package, 'experimental_data_stream_features') }
+              ? {
+                  package: omit(
+                    restOfPackagePolicy.package,
+                    'experimental_data_stream_features',
+                    'logsdb_columnar'
+                  ),
+                }
               : {}),
             inputs,
             ...(elasticsearchPrivileges && {
@@ -2964,6 +3011,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           package: {
             ...newPP.package!,
             experimental_data_stream_features: newPolicy.package?.experimental_data_stream_features,
+            logsdb_columnar: newPolicy.package?.logsdb_columnar,
           },
           policy_id: newPolicy.policy_id ?? undefined,
           policy_ids: newPolicy.policy_ids ?? undefined,

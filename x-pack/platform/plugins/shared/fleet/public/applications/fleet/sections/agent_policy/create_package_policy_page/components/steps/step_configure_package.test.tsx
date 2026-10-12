@@ -419,6 +419,92 @@ describe('StepConfigurePackage', () => {
       ).toBeInTheDocument();
     });
   });
+
+  describe('columnar index mode switch', () => {
+    const SWITCH = 'columnarIndexModeSwitch';
+
+    // Package-level readiness plus one logs data stream that opts out of it.
+    const declareReadiness = (readiness: 'opt_in' | 'default' = 'opt_in') => {
+      packageInfo.elasticsearch = { logsdb_columnar: readiness };
+      packageInfo.data_streams = [
+        ...(packageInfo.data_streams ?? []),
+        {
+          ...packageInfo.data_streams![0],
+          dataset: 'nginx.error',
+          path: 'error',
+          elasticsearch: { logsdb_columnar: 'unsupported' },
+        },
+      ];
+    };
+
+    it('is hidden when no logs data stream declares readiness', () => {
+      render();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is hidden for input packages', () => {
+      declareReadiness();
+      packageInfo.type = 'input';
+      render();
+
+      expect(renderResult.queryByTestId(SWITCH)).not.toBeInTheDocument();
+    });
+
+    it('is shown above the inputs, off by default, with the unsupported data streams listed', async () => {
+      declareReadiness();
+      render();
+
+      const switchEl = renderResult.getByTestId(SWITCH);
+      expect(switchEl).not.toBeChecked();
+      expect(renderResult.getByTestId('columnarIndexModeUnsupportedDataStreams')).toHaveTextContent(
+        'nginx.error'
+      );
+
+      await renderResult.findByText('Collect logs from Nginx instances');
+      const html = renderResult.container.innerHTML;
+      expect(html.indexOf(SWITCH)).toBeLessThan(html.indexOf('Collect logs from Nginx instances'));
+    });
+
+    it('starts enabled when the package defaults to the columnar mode', () => {
+      declareReadiness('default');
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('starts from the choice stored on the installation over the package default', () => {
+      declareReadiness('default');
+      (packageInfo as any).installationInfo = { logsdb_columnar_enabled: false };
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).not.toBeChecked();
+    });
+
+    it('reflects the pending choice carried by the policy', () => {
+      declareReadiness();
+      packagePolicy.package = {
+        name: 'nginx',
+        title: 'Nginx',
+        version: '1.3.0',
+        logsdb_columnar: true,
+      };
+      render();
+
+      expect(renderResult.getByTestId(SWITCH)).toBeChecked();
+    });
+
+    it('sets package.logsdb_columnar on the policy when toggled', () => {
+      declareReadiness();
+      render();
+
+      fireEvent.click(renderResult.getByTestId(SWITCH));
+
+      expect(mockUpdatePackagePolicy).toHaveBeenCalledWith({
+        package: { name: 'nginx', title: 'Nginx', version: '1.3.0', logsdb_columnar: true },
+      });
+    });
+  });
 });
 
 describe('StepConfigurePackage with multiple inputs of same type but different ids', () => {

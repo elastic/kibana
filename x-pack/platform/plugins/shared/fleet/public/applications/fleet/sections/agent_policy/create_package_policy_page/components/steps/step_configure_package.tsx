@@ -25,6 +25,8 @@ import {
   getRegistryStreamWithDataStreamForInputType,
   getInputEffectiveName,
   buildInputKey,
+  getLogsdbColumnarReadiness,
+  isLogsdbColumnarReady,
 } from '../../../../../../../../common/services';
 import { isInputAllowedForDeploymentMode } from '../../../../../../../../common/services/agentless_policy_helper';
 
@@ -40,7 +42,7 @@ import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../
 import type { PackagePolicyValidationResults, VarGroupSelection } from '../../services';
 import { isInputCompatibleWithVarGroupSelections } from '../../services';
 
-import { PackagePolicyInputPanel } from './components';
+import { ColumnarIndexModeSwitch, PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
   packageInfo: PackageInfo;
@@ -86,11 +88,63 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
 
   const isSinglePolicyTemplate = packagePolicyTemplates.length === 1;
 
+  // Columnar index mode: one choice per installed integration, stored on the installation rather
+  // than on the policy. The toggle is offered when at least one logs data stream declares
+  // readiness; data streams marked `unsupported` are listed so the user knows why they stay on
+  // LogsDB.
+  const columnarReadyDataStreams = useMemo(
+    () =>
+      packageInfo.type === 'input'
+        ? []
+        : (packageInfo.data_streams ?? []).filter((dataStream) =>
+            isLogsdbColumnarReady(getLogsdbColumnarReadiness(packageInfo, dataStream))
+          ),
+    [packageInfo]
+  );
+  const columnarUnsupportedDataStreams = useMemo(
+    () =>
+      (packageInfo.data_streams ?? [])
+        .filter(
+          (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'unsupported'
+        )
+        .map((dataStream) => dataStream.dataset),
+    [packageInfo]
+  );
+  // The pending choice wins, then the one stored on the installation, then the package default.
+  const installationInfo =
+    'installationInfo' in packageInfo ? packageInfo.installationInfo : undefined;
+  const isColumnarIndexModeEnabled =
+    packagePolicy.package?.logsdb_columnar ??
+    installationInfo?.logsdb_columnar_enabled ??
+    columnarReadyDataStreams.some(
+      (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'default'
+    );
+  const toggleColumnarIndexMode = () =>
+    updatePackagePolicy({
+      package: {
+        name: packageInfo.name,
+        title: packageInfo.title,
+        version: packageInfo.version,
+        ...packagePolicy.package,
+        logsdb_columnar: !isColumnarIndexModeEnabled,
+      },
+    });
+
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>
         {!noTopRule && <EuiHorizontalRule margin="m" />}
+        {columnarReadyDataStreams.length > 0 && (
+          <>
+            <ColumnarIndexModeSwitch
+              checked={isColumnarIndexModeEnabled}
+              onChange={toggleColumnarIndexMode}
+              unsupportedDataStreams={columnarUnsupportedDataStreams}
+            />
+            <EuiHorizontalRule margin="m" />
+          </>
+        )}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
             const inputs = getNormalizedInputs(policyTemplate);

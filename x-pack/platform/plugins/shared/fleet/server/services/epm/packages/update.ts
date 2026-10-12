@@ -12,16 +12,12 @@ import type { ExperimentalIndexingFeature } from '../../../../common/types';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { Installation, UpdatePackageRequestSchema } from '../../../types';
-import { PackageNotFoundError } from '../../../errors';
+import { FleetError, PackageNotFoundError } from '../../../errors';
 
 import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallationObject, getPackageInfo } from './get';
-import {
-  applyLogsdbColumnarIndexMode,
-  assertLogsdbColumnarSupported,
-  getInstalledPackageOrThrow,
-} from './update_logsdb_columnar';
+import { setLogsdbColumnarChoice } from './update_logsdb_columnar';
 
 export interface NamespaceCustomizationDiff {
   addedNamespaces: string[];
@@ -38,7 +34,7 @@ export async function updatePackage(
     savedObjectsClient: SavedObjectsClientContract;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
-    /** Required to apply a `logsdb_columnar` change to the package's index templates. */
+    /** Required when `logsdb_columnar` is set: the change is applied to the index templates. */
     esClient?: ElasticsearchClient;
     logger?: Logger;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
@@ -77,22 +73,28 @@ export async function updatePackage(
   };
   const ilmPolicyChanges: IlmPolicyChange[] = [];
 
-  // The user's columnar choice is stored once per installation. Resolve it before anything is
-  // written so an unsupported package is rejected without leaving the saved object and the
-  // Elasticsearch templates out of sync.
-  let installedPackageWithAssets;
-  const isLogsdbColumnarChanged =
-    newLogsdbColumnar !== undefined &&
-    newLogsdbColumnar !== installedPackage.attributes.logsdb_columnar_enabled;
-
-  if (isLogsdbColumnarChanged) {
-    installedPackageWithAssets = await getInstalledPackageOrThrow(savedObjectsClient, pkgName);
-    assertLogsdbColumnarSupported({
+  // The user's columnar choice is stored once per installation and goes through the same path
+  // as the package policy editor. It runs before anything else is written so an unsupported
+  // package is rejected without leaving the saved object and the Elasticsearch templates out of
+  // sync.
+  if (newLogsdbColumnar !== undefined) {
+    if (!esClient || !logger) {
+      throw new FleetError(
+        `An Elasticsearch client and a logger are required to change logsdb_columnar for ${pkgName}`
+      );
+    }
+    const { changed } = await setLogsdbColumnarChoice({
+      savedObjectsClient,
+      esClient,
+      logger,
       pkgName,
-      packageInfo: installedPackageWithAssets.packageInfo,
-      enabled: newLogsdbColumnar!,
+      enabled: newLogsdbColumnar,
+      installation: installedPackage,
     });
-    updateAttrs.logsdb_columnar_enabled = newLogsdbColumnar;
+    if (changed) {
+      // The full-document replacement below spreads these attributes: keep them current.
+      installedPackage.attributes.logsdb_columnar_enabled = newLogsdbColumnar;
+    }
   }
 
   if (keepPoliciesUpToDate !== undefined) {
@@ -182,19 +184,6 @@ export async function updatePackage(
       installedPackage.id,
       updateAttrs
     );
-  }
-
-  // Apply the columnar change to Elasticsearch after the choice has been persisted, so the
-  // stored state always describes what Fleet is applying.
-  if (isLogsdbColumnarChanged && esClient && logger) {
-    await applyLogsdbColumnarIndexMode({
-      esClient,
-      savedObjectsClient,
-      logger,
-      pkgName,
-      enabled: newLogsdbColumnar!,
-      installedPackageWithAssets,
-    });
   }
 
   const packageInfo = await getPackageInfo({

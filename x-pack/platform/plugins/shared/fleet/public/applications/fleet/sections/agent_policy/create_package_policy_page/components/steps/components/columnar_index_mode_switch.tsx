@@ -42,9 +42,12 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiSwitch
           data-test-subj={COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ}
-          label={i18n.translate('xpack.fleet.integrations.settings.columnarIndexModeLabel', {
-            defaultMessage: 'Columnar index mode',
-          })}
+          label={i18n.translate(
+            'xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeLabel',
+            {
+              defaultMessage: 'Columnar index mode',
+            }
+          )}
           checked={checked}
           onChange={onChange}
           disabled={disabled}
@@ -55,7 +58,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
           size="s"
           alignment="middle"
           label={i18n.translate(
-            'xpack.fleet.integrations.settings.columnarIndexModeTechPreviewBadge',
+            'xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeTechPreviewBadge',
             { defaultMessage: 'Technical preview' }
           )}
         />
@@ -69,7 +72,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <FormattedMessage
-            id="xpack.fleet.integrations.settings.columnarIndexModeDescription"
+            id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeDescription"
             defaultMessage="Stores the integration's log data streams in the logsdb_columnar index mode: fields are stored once as doc values, with no inverted index except for text fields. Takes effect on the next rollover. Existing data is not rewritten."
           />
         </EuiFlexItem>
@@ -84,7 +87,7 @@ export const ColumnarIndexModeSwitch: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <span data-test-subj="columnarIndexModeUnsupportedDataStreams">
                 <FormattedMessage
-                  id="xpack.fleet.integrations.settings.columnarIndexModeUnsupportedDataStreams"
+                  id="xpack.fleet.createPackagePolicy.stepConfigure.columnarIndexModeUnsupportedDataStreams"
                   defaultMessage="These data streams do not support columnar storage and stay on LogsDB: {dataStreams}"
                   values={{ dataStreams: unsupportedDataStreams.join(', ') }}
                 />

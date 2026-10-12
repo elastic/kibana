@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
 
-import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
 import {
   COLUMNAR_INDEX_MODE_SWITCH_TEST_SUBJ,
@@ -16,7 +16,7 @@ import {
 } from './columnar_index_mode_switch';
 
 const render = (props: Partial<React.ComponentProps<typeof ColumnarIndexModeSwitch>> = {}) =>
-  createIntegrationsTestRendererMock().render(
+  createFleetTestRendererMock().render(
     <ColumnarIndexModeSwitch checked={false} onChange={jest.fn()} {...props} />
   );
 

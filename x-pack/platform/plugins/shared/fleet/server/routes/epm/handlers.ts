@@ -456,7 +456,9 @@ export const updatePackageHandler: FleetRequestHandler<
   }
 
   const body: UpdatePackageResponse = {
-    item: packageInfo,
+    // Same projection as the GET so the caller sees the stored choices (`installationInfo`)
+    // instead of the raw saved object.
+    item: soToInstallationInfo(packageInfo) as PackageInfo,
     ...(warnings && { warnings }),
   };
 
@@ -907,6 +909,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
       pending_upgrade_review: attributes.pending_upgrade_review,
       keep_policies_up_to_date: attributes.keep_policies_up_to_date,
+      logsdb_columnar_enabled: attributes.logsdb_columnar_enabled,
       namespace_customization_enabled_for: attributes.namespace_customization_enabled_for,
       namespace_customization_settings: attributes.namespace_customization_settings,
     };

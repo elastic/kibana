@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import pMap from 'p-map';
 
 import {
@@ -15,9 +20,10 @@ import {
   isLogsdbColumnarReady,
 } from '../../../../common/services';
 import type { ColumnarPackageInfo } from '../../../../common/services/columnar_index_mode';
-import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
+import { MAX_CONCURRENT_COMPONENT_TEMPLATES, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { FleetErrorWithStatusCode, PackageNotFoundError } from '../../../errors';
-import type { IndexTemplateEntry, RegistryDataStream } from '../../../types';
+import type { IndexTemplateEntry, Installation, RegistryDataStream } from '../../../types';
+import { auditLoggingService } from '../../audit_logging';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import {
   installComponentAndIndexTemplateForDataStream,
@@ -26,7 +32,7 @@ import {
 } from '../elasticsearch/template/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
 
-import { getInstalledPackageWithAssets } from './get';
+import { getInstallationObject, getInstalledPackageWithAssets } from './get';
 
 export type InstalledPackageWithAssets = NonNullable<
   Awaited<ReturnType<typeof getInstalledPackageWithAssets>>
@@ -131,6 +137,68 @@ export function assertLogsdbColumnarSupported({
 }
 
 /**
+ * Stores the user's installation-level `logsdb_columnar` choice and applies it to Elasticsearch.
+ *
+ * Shared by the update package API and the package policy editor so both behave the same: a
+ * no-op when the stored choice already matches, a 400 when enabling a package without a ready
+ * logs data stream, and nothing written until that check has passed. The choice is persisted
+ * before the templates are rewritten so the saved object always describes what Fleet is applying.
+ */
+export async function setLogsdbColumnarChoice({
+  savedObjectsClient,
+  esClient,
+  logger,
+  pkgName,
+  enabled,
+  installation,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  pkgName: string;
+  enabled: boolean;
+  /** The installation saved object when the caller already holds it; fetched otherwise. */
+  installation?: SavedObject<Installation>;
+}): Promise<{ changed: boolean }> {
+  const installedPackage =
+    installation ?? (await getInstallationObject({ savedObjectsClient, pkgName }));
+  if (!installedPackage) {
+    throw new PackageNotFoundError(`Error while updating package: ${pkgName} is not installed`);
+  }
+  if (installedPackage.attributes.logsdb_columnar_enabled === enabled) {
+    return { changed: false };
+  }
+
+  const installedPackageWithAssets = await getInstalledPackageOrThrow(savedObjectsClient, pkgName);
+  assertLogsdbColumnarSupported({
+    pkgName,
+    packageInfo: installedPackageWithAssets.packageInfo,
+    enabled,
+  });
+
+  auditLoggingService.writeCustomSoAuditLog({
+    action: 'update',
+    id: installedPackage.id,
+    name: installedPackage.attributes.name,
+    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+  });
+  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+    logsdb_columnar_enabled: enabled,
+  });
+
+  await applyLogsdbColumnarIndexMode({
+    esClient,
+    savedObjectsClient,
+    logger,
+    pkgName,
+    enabled,
+    installedPackageWithAssets,
+  });
+
+  return { changed: true };
+}
+
+/**
  * Applies a change of the installation-level `logsdb_columnar` choice to Elasticsearch.
  *
  * Every columnar-ready logs data stream of the package has its templates re-prepared with the
@@ -139,8 +207,9 @@ export function assertLogsdbColumnarSupported({
  * `installComponentAndIndexTemplateForDataStream` takes care of), then the write indices are
  * asked to roll over so the change takes effect — in both directions.
  *
- * Persisting the choice on the installation saved object is the caller's job (`updatePackage`);
- * it runs first so the stored state always reflects what Fleet is applying.
+ * Persisting the choice on the installation saved object is the caller's job
+ * (`setLogsdbColumnarChoice`); it runs first so the stored state always reflects what Fleet is
+ * applying.
  */
 export async function applyLogsdbColumnarIndexMode({
   esClient,

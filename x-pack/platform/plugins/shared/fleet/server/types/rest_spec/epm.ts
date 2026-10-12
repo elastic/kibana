@@ -182,6 +182,7 @@ export const InstallationInfoSchema = schema.object(
     previous_version: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
     rolled_back: schema.maybe(schema.boolean()),
     is_rollback_ttl_expired: schema.maybe(schema.boolean()),
+    logsdb_columnar_enabled: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'installation_info' } }
 );
