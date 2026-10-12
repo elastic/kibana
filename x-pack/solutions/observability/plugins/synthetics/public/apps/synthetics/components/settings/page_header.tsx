@@ -20,7 +20,6 @@ export type SettingsTabId =
   | 'alerting'
   | 'private-locations'
   | 'api-keys'
-  | 'advanced'
   | 'remote-clusters';
 
 export const getSettingsPageHeader = (
@@ -81,13 +80,6 @@ export const getSettingsPageHeader = (
         }),
         isSelected: tabId === 'api-keys',
         href: replaceTab('api-keys'),
-      },
-      {
-        label: i18n.translate('xpack.synthetics.settingsTabs.advanced', {
-          defaultMessage: 'Advanced',
-        }),
-        isSelected: tabId === 'advanced',
-        href: replaceTab('advanced'),
       },
       ...(!isServerless && isCCSEnabled
         ? [
