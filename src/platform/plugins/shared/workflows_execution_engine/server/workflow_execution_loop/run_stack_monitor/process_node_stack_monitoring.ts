@@ -50,8 +50,8 @@ export async function processNodeStackMonitoring(
     }
   }
 
-  // Poll ES on every monitor cycle so an external cancel is seen even if no flush runs during a long step.
-  await params.workflowExecutionState.refreshCancelState();
+  // Cancel is read from memory. The persistence flush loads the cancel fields from
+  // Elasticsearch; this pass must not, or every step waits on that read.
   await cancelWorkflowIfRequested(
     params.workflowExecutionState,
     monitoredStepExecutionRuntime,

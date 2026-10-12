@@ -56,7 +56,7 @@ describe('processNodeStackMonitoring', () => {
     await processNodeStackMonitoring(params as any, monitoredRuntime as any);
 
     expect(monitorFn).toHaveBeenCalledWith(monitoredRuntime);
-    expect(params.workflowExecutionState.refreshCancelState).toHaveBeenCalledTimes(1);
+    expect(params.workflowExecutionState.refreshCancelState).not.toHaveBeenCalled();
     expect(cancelWorkflowIfRequested).toHaveBeenCalled();
   });
 
@@ -82,7 +82,7 @@ describe('processNodeStackMonitoring', () => {
 
     await processNodeStackMonitoring(params as any, monitoredRuntime as any);
 
-    expect(params.workflowExecutionState.refreshCancelState).toHaveBeenCalledTimes(1);
+    expect(params.workflowExecutionState.refreshCancelState).not.toHaveBeenCalled();
     expect(params.nodesFactory.create).not.toHaveBeenCalled();
     expect(cancelWorkflowIfRequested).toHaveBeenCalled();
   });
