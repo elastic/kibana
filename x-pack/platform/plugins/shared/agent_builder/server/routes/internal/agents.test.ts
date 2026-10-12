@@ -13,16 +13,18 @@ import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
 import type {
   GetAgentAiIndicesResponse,
+  GetAgentModelResponse,
   ListAgentAiIndicesResponse,
 } from '../../../common/http_api/agents';
 
 type Handler = (ctx: unknown, req: unknown, res: unknown) => Promise<unknown>;
 
-describe('registerInternalAgentRoutes - agent AI indices', () => {
+describe('registerInternalAgentRoutes', () => {
   const handlers = new Map<string, Handler>();
   let mockList: jest.Mock;
   let mockGet: jest.Mock;
   let mockResolveBase: jest.Mock;
+  let mockGetForFeature: jest.Mock;
 
   const createMockContext = (contextEngineEnabled: boolean) => ({
     core: Promise.resolve({
@@ -82,6 +84,20 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
       agentType === 'chat' ? { ai_indices: ['elastic'] } : { ai_indices: ['another-one'] }
     );
 
+    mockGetForFeature = jest.fn().mockResolvedValue({
+      endpoints: [],
+      warnings: [],
+      soEntryFound: false,
+    });
+    const coreSetup = {
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([
+          {},
+          { searchInferenceEndpoints: { endpoints: { getForFeature: mockGetForFeature } } },
+        ]),
+    };
+
     const getInternalServices = jest.fn().mockReturnValue({
       agents: {
         getRegistry: jest.fn().mockResolvedValue({ list: mockList, get: mockGet }),
@@ -98,6 +114,7 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
 
     registerInternalAgentRoutes({
       router: mockRouter,
+      coreSetup,
       getInternalServices,
       logger: loggingSystemMock.createLogger(),
     } as unknown as RouteDependencies);
@@ -204,6 +221,93 @@ describe('registerInternalAgentRoutes - agent AI indices', () => {
           agent_type: 'chat',
         },
       ]);
+    });
+  });
+
+  describe('GET /agents/{id}/_model', () => {
+    const callModel = (id = 'chat-agent') =>
+      handlers.get(`${internalApiPath}/agents/{id}/_model`)!(
+        createMockContext(false),
+        { params: { id } },
+        mockResponse
+      ) as Promise<{
+        type: string;
+        body: GetAgentModelResponse;
+      }>;
+
+    const mockEndpointsByFeature = (endpointsByFeature: Record<string, string[]>) => {
+      mockGetForFeature.mockImplementation(async (featureId: string) => ({
+        endpoints: (endpointsByFeature[featureId] ?? []).map((connectorId) => ({
+          connectorId,
+          name: `${connectorId} name`,
+        })),
+        warnings: [],
+        soEntryFound: false,
+      }));
+    };
+
+    const mockAgentFeature = (inferenceFeatureId: string) => {
+      mockGet.mockResolvedValue({
+        id: 'chat-agent',
+        type: 'chat',
+        configuration: { tools: [], inference_feature_id: inferenceFeatureId },
+      });
+    };
+
+    it('registers the model route under the internal api path', () => {
+      expect(handlers.has(`${internalApiPath}/agents/{id}/_model`)).toBe(true);
+    });
+
+    it("reports the first model configured for the agent's inference feature", async () => {
+      mockAgentFeature('my_feature');
+      mockEndpointsByFeature({
+        my_feature: ['feature-1', 'feature-2'],
+        agent_builder: ['default'],
+      });
+
+      const result = await callModel();
+
+      expect(mockGet).toHaveBeenCalledWith('chat-agent');
+      expect(mockGetForFeature).toHaveBeenCalledWith('my_feature', expect.anything(), {
+        onlyReturnConfigured: true,
+      });
+      expect(result.body).toEqual({
+        inference_feature_id: 'my_feature',
+        connector: { id: 'feature-1', name: 'feature-1 name' },
+        source: 'agent_feature',
+      });
+    });
+
+    it('reports the default model when the agent feature has no model', async () => {
+      mockAgentFeature('my_feature');
+      mockEndpointsByFeature({ agent_builder: ['default'] });
+
+      const result = await callModel();
+
+      expect(result.body).toEqual({
+        inference_feature_id: 'my_feature',
+        connector: { id: 'default', name: 'default name' },
+        source: 'default',
+      });
+    });
+
+    it('reports the default model when the agent declares no feature', async () => {
+      mockEndpointsByFeature({ agent_builder: ['default'] });
+
+      const result = await callModel();
+
+      expect(result.body).toEqual({
+        connector: { id: 'default', name: 'default name' },
+        source: 'default',
+      });
+    });
+
+    it('omits the connector when no model resolves', async () => {
+      mockAgentFeature('my_feature');
+
+      const result = await callModel();
+
+      expect(result.body).toEqual({ inference_feature_id: 'my_feature', source: 'default' });
     });
   });
 });

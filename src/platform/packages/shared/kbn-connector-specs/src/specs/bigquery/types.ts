@@ -18,13 +18,15 @@ const MAX_PROJECT_ID_LENGTH = 200;
 const MAX_JOB_ID_LENGTH = 1024;
 const MAX_PAGE_TOKEN_LENGTH = 2048;
 
-const QuerySchema = z
-  .string()
-  .min(1)
-  .max(MAX_QUERY_LENGTH)
-  .describe(
-    'GoogleSQL query text to execute in BigQuery. Use fully-qualified table names such as `project.dataset.table`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.'
-  );
+const QuerySchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_QUERY_LENGTH)
+    .describe(
+      'GoogleSQL query text to execute in BigQuery. Use fully-qualified table names such as `project.dataset.table`. Prefer explicit date filters and LIMIT clauses for predictable cost and result size.'
+    )
+);
 
 const CommonQueryInputSchema = lazySchema(() =>
   z.object({

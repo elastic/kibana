@@ -213,6 +213,11 @@ export const AgentlessPackagePoliciesTable = ({
   const [flyoutOpenForPolicyId, setFlyoutOpenForPolicyId] = useState<string>();
   const [flyoutPackagePolicy, setFlyoutPackagePolicy] = useState<PackagePolicy>();
   const [flyoutAgentPolicy, setFlyoutAgentPolicy] = useState<AgentPolicy>();
+  const closeFlyout = () => {
+    setFlyoutOpenForPolicyId(undefined);
+    setFlyoutPackagePolicy(undefined);
+    setFlyoutAgentPolicy(undefined);
+  };
   useEffect(() => {
     // The agentless save flow sets openEnrollmentFlyout=<packagePolicyId> via
     // appendOnSaveQueryParamsToPath (AgentlessPolicy has no policy_ids, so
@@ -427,6 +432,7 @@ export const AgentlessPackagePoliciesTable = ({
                 <PackagePolicyActionsMenu
                   agentPolicies={agentPolicies}
                   packagePolicy={packagePolicy}
+                  agent={(agentPolicy?.id && agentsByPolicyId[agentPolicy.id]) || undefined}
                   showAddAgent={true}
                   upgradePackagePolicyHref={
                     agentPolicy
@@ -507,11 +513,7 @@ export const AgentlessPackagePoliciesTable = ({
       />
       {flyoutOpenForPolicyId && flyoutPackagePolicy && (
         <AgentlessEnrollmentFlyout
-          onClose={() => {
-            setFlyoutOpenForPolicyId(undefined);
-            setFlyoutPackagePolicy(undefined);
-            setFlyoutAgentPolicy(undefined);
-          }}
+          onClose={closeFlyout}
           policyId={flyoutPackagePolicy.policy_ids[0]}
           policyName={flyoutPackagePolicy.name}
           // package is always set for agentless policies (createAgentlessPolicy);
@@ -522,6 +524,7 @@ export const AgentlessPackagePoliciesTable = ({
           }}
           selectedInput={getSelectedInput(flyoutPackagePolicy)}
           agentPolicy={flyoutAgentPolicy}
+          packagePolicy={flyoutPackagePolicy}
           connectors={getConnectorsFromPackagePolicy(flyoutPackagePolicy)}
         />
       )}

@@ -166,9 +166,10 @@ const expectPanelForRole = async (
   await expectPanelLinks(nav, visible);
 };
 
+// Suite fails on MKI: https://github.com/elastic/kibana/issues/295308
 test.describe(
   'Observability Alerts nav — alerting v2',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ scoutSpace, kbnClient, config }) => {
       // Serverless Observability is already the observability project; solution
@@ -286,7 +287,7 @@ test.describe(
       });
     });
 
-    test('clicking Alerts loads Alert episodes when alerting v2 is enabled', async ({
+    test('clicking Alerts loads alerts when alerting v2 is enabled', async ({
       browserAuth,
       pageObjects,
       kbnClient,
@@ -298,7 +299,7 @@ test.describe(
         ALERTS_PANEL_ID,
         PANEL_LINKS.alerts
       );
-      await expectPageTitle(pageObjects.chrome.pageTitle, 'Alert episodes');
+      await expectPageTitle(pageObjects.chrome.pageTitle, 'Alerts');
     });
 
     test('clicking Rules loads Rules when alerting v2 is enabled', async ({

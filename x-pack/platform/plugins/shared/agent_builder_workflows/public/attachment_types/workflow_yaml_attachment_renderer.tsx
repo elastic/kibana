@@ -17,8 +17,7 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextProvider, useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows/common/constants';
+import { KibanaContextProvider, useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   useWorkflowsApi,
   useWorkflowsCapabilities,
@@ -133,8 +132,6 @@ const WorkflowYamlCanvasContent: React.FC<{
   const workflowApi = useWorkflowsApi();
   const { canCreateWorkflow, canUpdateWorkflow, canReadWorkflow } = useWorkflowsCapabilities();
   const { notifications } = useKibana<{ notifications: CoreStart['notifications'] }>().services;
-  // Same gate as the workflow library template page graph preview.
-  const showGraph = useUiSetting<boolean>(WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID, false);
 
   // Defer button registration past the initial mount cycle so the parent
   // flyout's clearing effect (which also fires on mount) doesn't overwrite
@@ -331,7 +328,7 @@ const WorkflowYamlCanvasContent: React.FC<{
     labels,
   ]);
 
-  return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} showGraph={showGraph} />;
+  return <WorkflowYamlCanvasPreview yaml={attachment.data.yaml} showGraph />;
 };
 
 export const createWorkflowYamlAttachmentUiDefinition = ({

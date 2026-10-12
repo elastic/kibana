@@ -6,8 +6,6 @@
  */
 
 import type { SchemaOutput } from './schema_output';
-import { remoteMonitorInfoSchema } from './zod/remote';
-
-export { remoteMonitorInfoSchema };
+import type { remoteMonitorInfoSchema } from './schemas/remote';
 
 export type RemoteMonitorInfo = SchemaOutput<typeof remoteMonitorInfoSchema>;

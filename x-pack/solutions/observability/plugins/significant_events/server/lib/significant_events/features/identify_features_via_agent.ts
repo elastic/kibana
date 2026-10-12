@@ -27,14 +27,15 @@ import {
 } from '@kbn/nightshift-shared';
 import {
   EMPTY_TOKENS,
+  buildFeatureIdentificationUserMessage,
+  parseFinalizedFeatures,
+  type RawFinalizeFeaturesParams,
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
 } from '@kbn/nightshift-ai';
 import { FEATURE_IDENTIFICATION_AGENT_ID } from '../../../agent_builder/agents/feature_identification';
 import { FINALIZE_FEATURES_TOOL_ID } from '../../../agent_builder/skills/feature_identification';
-import { parseFinalizedFeatures, type RawFinalizeFeaturesParams } from './parse_finalized_features';
-import { buildFeatureIdentificationUserMessage } from './build_user_message';
 import { chatTokenCountFromModelUsage } from './chat_token_count';
 
 export interface ExecuteFeatureIdentificationAgentOptions {

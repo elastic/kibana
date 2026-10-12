@@ -13,6 +13,7 @@ import {
   type CommonSearchOptions,
   type PaginatedSearchOptions,
   type PaginatedResponse,
+  throwOnBulkCreateErrors,
 } from '../query_utils';
 import {
   andWhere,
@@ -63,7 +64,7 @@ const detectionFilter = (): ESQLAstExpression =>
 export class DetectionClient {
   constructor(
     private readonly clients: {
-      dataStreamClient: DetectionDataStreamClient;
+      dataStreamClient: Pick<DetectionDataStreamClient, 'create'>;
       esClient: ElasticsearchClient;
       space: string;
     }
@@ -96,6 +97,18 @@ export class DetectionClient {
       idValues: detectionIds,
       chunkSize: PROCESSED_MARKER_CHUNK_SIZE,
     });
+  }
+
+  /** Appends detections and markers through the Core data stream client, which writes as `kibana_system`. */
+  async bulkCreate(documents: StoredDetection[]): Promise<void> {
+    if (documents.length === 0) {
+      return;
+    }
+    const response = await this.clients.dataStreamClient.create({
+      space: this.clients.space,
+      documents,
+    });
+    throwOnBulkCreateErrors(response);
   }
 
   async findById(detectionId: string): Promise<{ hits: Detection[] }> {

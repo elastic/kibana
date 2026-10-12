@@ -11,6 +11,7 @@ import {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
   getSourceCommandFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
 } from './get_index_pattern_from_query';
 
@@ -149,6 +150,77 @@ describe('getIndexPatternsFromESQLQuery', () => {
       indexPattern: '',
       indexPatternWithoutRemoteClusterPrefix: '',
     });
+  });
+});
+
+describe('getSourceCommandQueryFromESQLQuery', () => {
+  it('drops the commands after FROM', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery('FROM logs-* | WHERE a > 1 | STATS count() BY host')
+    ).toBe('FROM logs-*');
+  });
+
+  it('keeps TS and METADATA', () => {
+    expect(getSourceCommandQueryFromESQLQuery('TS metrics-* | STATS avg(cpu)')).toBe(
+      'TS metrics-*'
+    );
+    expect(getSourceCommandQueryFromESQLQuery('FROM logs-* METADATA _index | KEEP _index')).toBe(
+      'FROM logs-* METADATA _index'
+    );
+  });
+
+  it('leaves out SET headers, whose routing is passed separately', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'SET project_routing = "_alias:*"; FROM logs-* | STATS count()'
+      )
+    ).toBe('FROM logs-*');
+  });
+
+  it('reduces subqueries to their source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'FROM index1, (FROM index2 METADATA _id | WHERE a > 1 | KEEP a | LIMIT 10) | STATS count()'
+      )
+    ).toBe('FROM index1, (FROM index2 METADATA _id)');
+  });
+
+  it('reduces nested subqueries to their source command', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'FROM index1, (FROM index2, (FROM index3 | KEEP b) | DROP c) | LIMIT 5'
+      )
+    ).toBe('FROM index1, (FROM index2, (FROM index3))');
+  });
+
+  it('uses the index parameter of a PROMQL query, as the ES|QL editor does', () => {
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(
+      'PROMQL index=metrics-* step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+    );
+
+    expect(sourceQuery).toBe('FROM "metrics-*"');
+    expect(getIndexPatternFromESQLQuery(sourceQuery)).toBe('metrics-*');
+  });
+
+  it('uses the names of a quoted PROMQL index list', () => {
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'PROMQL index="metrics-a","metrics-b" step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('FROM "metrics-a,metrics-b"');
+  });
+
+  it('returns an empty string without a FROM or TS command', () => {
+    expect(getSourceCommandQueryFromESQLQuery('')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery(undefined)).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('ROW a = 1')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('FROM ')).toBe('');
+    expect(getSourceCommandQueryFromESQLQuery('FROM | LIMIT 10')).toBe('');
+    expect(
+      getSourceCommandQueryFromESQLQuery(
+        'PROMQL step=1m start=?_tstart end=?_tend (avg(cpu_usage))'
+      )
+    ).toBe('');
   });
 });
 

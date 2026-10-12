@@ -12,14 +12,19 @@ import {
   encodeUrlState,
   getInitialQueryText,
   getSortingConfigKey,
-  getSortingUrlConfigFromKey,
+  getSortDirectionsByFieldFromKey,
   mergeAndStringify,
   queryTextCodec,
   sortCodec,
 } from './url_codec';
+import type { SortDirectionsByField } from '../sorting';
 
 const initialSort = { field: 'title', direction: 'asc' as const };
-const validSortFields = new Set(['title', 'updatedAt']);
+const directions = (...values: Array<'asc' | 'desc'>) => new Set(values);
+const sortDirectionsByField: SortDirectionsByField = new Map([
+  ['title', directions('asc', 'desc')],
+  ['updatedAt', directions('asc', 'desc')],
+]);
 
 describe('url_codec', () => {
   describe('queryTextCodec', () => {
@@ -41,18 +46,23 @@ describe('url_codec', () => {
   describe('sortCodec', () => {
     it('encodes non-default sort', () => {
       expect(
-        sortCodec(validSortFields, initialSort).encode({ field: 'updatedAt', direction: 'desc' })
+        sortCodec(sortDirectionsByField, initialSort).encode({
+          field: 'updatedAt',
+          direction: 'desc',
+        })
       ).toEqual({ sort: 'updatedAt:desc' });
     });
 
     it('omits the resolved initial sort', () => {
-      expect(sortCodec(validSortFields, initialSort).encode(initialSort)).toEqual({
+      expect(sortCodec(sortDirectionsByField, initialSort).encode(initialSort)).toEqual({
         sort: undefined,
       });
     });
 
     it('decodes valid sort', () => {
-      expect(sortCodec(validSortFields, initialSort).decode({ sort: 'updatedAt:asc' })).toEqual({
+      expect(
+        sortCodec(sortDirectionsByField, initialSort).decode({ sort: 'updatedAt:asc' })
+      ).toEqual({
         field: 'updatedAt',
         direction: 'asc',
       });
@@ -62,29 +72,58 @@ describe('url_codec', () => {
       const onUnknown = jest.fn();
 
       expect(
-        sortCodec(validSortFields, initialSort, onUnknown).decode({ sort: 'foo:asc' })
+        sortCodec(sortDirectionsByField, initialSort, onUnknown).decode({ sort: 'foo:asc' })
       ).toBeUndefined();
-      expect(onUnknown).toHaveBeenCalledWith('foo');
+      expect(onUnknown).toHaveBeenCalledWith('foo:asc');
     });
 
     it('drops malformed sort and warns', () => {
       const onUnknown = jest.fn();
 
       expect(
-        sortCodec(validSortFields, initialSort, onUnknown).decode({ sort: 'updatedAt' })
+        sortCodec(sortDirectionsByField, initialSort, onUnknown).decode({ sort: 'updatedAt' })
       ).toBeUndefined();
       expect(onUnknown).toHaveBeenCalledWith('updatedAt');
+    });
+
+    it('drops a direction the field does not offer and warns', () => {
+      const onUnknown = jest.fn();
+      const offered: SortDirectionsByField = new Map([['accessedAt', directions('desc')]]);
+
+      expect(
+        sortCodec(offered, initialSort, onUnknown).decode({ sort: 'accessedAt:asc' })
+      ).toBeUndefined();
+      expect(onUnknown).toHaveBeenCalledWith('accessedAt:asc');
+    });
+
+    it('accepts the offered direction of a restricted field', () => {
+      const offered: SortDirectionsByField = new Map([['accessedAt', directions('desc')]]);
+
+      expect(sortCodec(offered, initialSort).decode({ sort: 'accessedAt:desc' })).toEqual({
+        field: 'accessedAt',
+        direction: 'desc',
+      });
     });
   });
 
   describe('state helpers', () => {
     it('decodes new-shape state', () => {
       expect(
-        decodeNewShape('?q=dashboard&sort=updatedAt%3Adesc', validSortFields, initialSort)
+        decodeNewShape('?q=dashboard&sort=updatedAt%3Adesc', sortDirectionsByField, initialSort)
       ).toEqual({
         queryText: 'dashboard',
         sort: { field: 'updatedAt', direction: 'desc' },
       });
+    });
+
+    it('ignores an unsupported direction in new-shape state', () => {
+      expect(
+        decodeNewShape(
+          '?q=dashboard&sort=accessedAt%3Aasc',
+          new Map([['accessedAt', directions('desc')]]),
+          initialSort
+        )
+      ).toEqual({ queryText: 'dashboard' });
     });
 
     it('encodes state and omits default slices', () => {
@@ -146,15 +185,63 @@ describe('url_codec', () => {
       const key = getSortingConfigKey(sorting);
 
       expect(getSortingConfigKey({ ...sorting, fields: [...sorting.fields].reverse() })).toBe(key);
-      expect(getSortingUrlConfigFromKey(key)).toEqual({
-        initialSort: { field: 'updatedAt', direction: 'desc' },
-        validSortFields: new Set(['title', 'updatedAt']),
-      });
+      expect(getSortDirectionsByFieldFromKey(key)).toEqual(
+        new Map([
+          ['title', directions('asc', 'desc')],
+          ['updatedAt', directions('asc', 'desc')],
+        ])
+      );
     });
 
     it('returns a primitive initial query text', () => {
       expect(getInitialQueryText({ initialSearch: 'hello' })).toBe('hello');
       expect(getInitialQueryText(true)).toBe('');
+    });
+
+    describe('offered sort options', () => {
+      const getOffered = (sorting: Parameters<typeof getSortingConfigKey>[0]) =>
+        getSortDirectionsByFieldFromKey(getSortingConfigKey(sorting));
+
+      it('offers only the allowed directions of a field', () => {
+        const offered = getOffered({
+          fields: [
+            { field: 'title', name: 'Name' },
+            { field: 'accessedAt', name: 'Recently viewed', allowedDirections: ['desc'] },
+          ],
+        });
+
+        expect(offered).toEqual(
+          new Map([
+            ['title', directions('asc', 'desc')],
+            ['accessedAt', directions('desc')],
+          ])
+        );
+      });
+
+      it('derives the offered options from `options` when `fields` is not set', () => {
+        const offered = getOffered({
+          options: [
+            { label: 'Name A-Z', field: 'title', direction: 'asc' },
+            { label: 'Newest', field: 'updatedAt', direction: 'desc' },
+          ],
+        });
+
+        expect(offered).toEqual(
+          new Map([
+            ['title', directions('asc')],
+            ['updatedAt', directions('desc')],
+          ])
+        );
+      });
+
+      it.each([
+        ['an empty key', ''],
+        ['an entry without a direction', 'title'],
+        ['an unknown direction', 'title:sideways'],
+        ['a field containing a colon', 'a:b:asc'],
+      ])('ignores %s', (_, key) => {
+        expect(getSortDirectionsByFieldFromKey(key)).toEqual(new Map());
+      });
     });
   });
 });

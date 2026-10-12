@@ -406,6 +406,15 @@ describe('getRegionOptions', () => {
     expect(getRegionOptions([])).toEqual([]);
   });
 
+  it('includes regions from a model blocked by the region policy', () => {
+    const ep = makeEndpoint('blocked', [{ csp: 'aws', region: 'us-east-1', geo: 'us' }]);
+    ep.metadata = { denied_by_region_policy: true, regions: ep.metadata?.regions };
+    expect(getRegionOptions([ep]).map(({ key }) => key)).toEqual([
+      'geo-us',
+      'region-aws-us-east-1',
+    ]);
+  });
+
   it('returns an empty array when the endpoint has no region metadata', () => {
     const ep = {
       inference_id: '.elser-2',

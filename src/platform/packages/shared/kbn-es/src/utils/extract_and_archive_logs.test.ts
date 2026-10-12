@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tmpdir } from 'os';
 import { join } from 'path';
 
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
@@ -189,5 +190,48 @@ describe('extractAndArchiveLogs', () => {
     ]);
 
     expect(Fsp.mkdir).toHaveBeenCalledWith(join(REPO_ROOT, '.es'), { recursive: true });
+  });
+});
+
+/** Stands in for `docker`: `ps` prints a container id, anything else writes to both streams. */
+const DOCKER_SHIM =
+  '#!/bin/sh\n' +
+  'if [ "$1" = "ps" ]; then\n' +
+  '  printf "abc123\\n"\n' +
+  'else\n' +
+  '  printf "stdout log\\n"\n' +
+  '  printf "stderr log\\n" >&2\n' +
+  'fi\n';
+
+describe('extractAndArchiveLogs (end to end)', () => {
+  // The cases above assert how `extractAndArchiveLogs` calls Docker. This one runs it for real
+  // against a `docker` shim on PATH, so a file descriptor wired to the wrong stream cannot pass.
+  const realFsp = jest.requireActual<typeof import('fs/promises')>('fs/promises');
+
+  test('archives both Docker output streams', async () => {
+    execa.mockImplementation(jest.requireActual('execa'));
+    Fsp.mkdir.mockImplementation(realFsp.mkdir);
+    Fsp.open.mockImplementation(realFsp.open);
+
+    const outputFolder = await realFsp.mkdtemp(join(tmpdir(), 'kbn-es-logs-'));
+    const originalPath = process.env.PATH;
+
+    try {
+      const dockerPath = join(outputFolder, 'docker');
+      await realFsp.writeFile(dockerPath, DOCKER_SHIM);
+      await realFsp.chmod(dockerPath, 0o755);
+      process.env.PATH = `${outputFolder}:${originalPath}`;
+
+      await expect(
+        extractAndArchiveLogs({ log, nodeNames: ['uiam'], outputFolder })
+      ).resolves.toEqual(['uiam-abc123.log']);
+
+      expect(await realFsp.readFile(join(outputFolder, 'uiam-abc123.log'), 'utf8')).toBe(
+        'stdout log\nstderr log\n'
+      );
+    } finally {
+      process.env.PATH = originalPath;
+      await realFsp.rm(outputFolder, { recursive: true, force: true });
+    }
   });
 });
