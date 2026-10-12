@@ -31,6 +31,8 @@ spaceTest.describe(
       await spaceTest.step('should display the header masking-enabled switch', async () => {
         const maskingSwitch = pageObjects.anonymizationSettings.getHeaderMaskingSwitch();
         await expect(maskingSwitch).toBeVisible();
+        // The visible label is a separate element, so the switch itself must carry the name.
+        await expect(maskingSwitch).toHaveAccessibleName('Masking enabled');
       });
 
       await spaceTest.step('should display the Tech Preview badge next to the title', async () => {

@@ -116,6 +116,10 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
     },
   ];
 
+  const maskingEnabledLabel = i18n.translate('xpack.aiAnonymizationSettings.maskingEnabledLabel', {
+    defaultMessage: 'Masking enabled',
+  });
+
   const techPreviewBadge = {
     label: i18n.translate('xpack.aiAnonymizationSettings.techPreviewBadge', {
       defaultMessage: 'Tech Preview',
@@ -145,11 +149,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
       <EuiPageSection paddingSize="l">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18n.translate('xpack.aiAnonymizationSettings.maskingEnabledLabel', {
-                defaultMessage: 'Masking enabled',
-              })}
-            </EuiText>
+            <EuiText size="s">{maskingEnabledLabel}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiIconTip
@@ -163,7 +163,7 @@ export const AnonymizationSettingsApp: React.FC<AnonymizationSettingsAppProps> =
           <EuiFlexItem grow={false}>
             <EuiSwitch
               showLabel={false}
-              label=""
+              label={maskingEnabledLabel}
               checked={maskingEnabled}
               disabled={!canEditAdvancedSettings}
               onChange={(e) => setMaskingEnabled(e.target.checked)}
