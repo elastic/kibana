@@ -822,6 +822,7 @@ const Header: FC<HeaderProps> = ({ fieldName, randomSampler, reload }) => (
       <EuiFlexItem grow={false}>
         {randomSampler ? <SamplingMenu randomSampler={randomSampler} reload={reload} /> : null}
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
 );
