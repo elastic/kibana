@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-private-runner-plugin",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Runs connector HTTP requests from Elastic Agents in customer private networks (private locations) through Fleet actions.",
+  "plugin": {
+    "id": "workflowsPrivateRunner",
+    "browser": false,
+    "server": true,
+    "requiredPlugins": ["fleet", "stackConnectors"],
+    "optionalPlugins": ["spaces"]
+  }
+}

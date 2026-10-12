@@ -1388,6 +1388,7 @@
     "@kbn/workflows-extensions-example": "workspace:*",
     "@kbn/workflows-library": "workspace:*",
     "@kbn/workflows-management-plugin": "workspace:*",
+    "@kbn/workflows-private-runner-plugin": "workspace:*",
     "@kbn/workflows-ui": "workspace:*",
     "@kbn/workflows-yaml": "workspace:*",
     "@kbn/workplace-ai-app": "workspace:*",

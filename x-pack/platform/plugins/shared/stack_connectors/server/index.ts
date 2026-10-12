@@ -15,6 +15,14 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
+export type { StackConnectorsPluginSetup } from './plugin';
+export type {
+  PrivateLocationExecuteParams,
+  PrivateLocationHttpRequest,
+  PrivateLocationHttpResponse,
+  PrivateLocationRunner,
+} from './private_location';
+
 export const plugin = async (initContext: PluginInitializerContext) => {
   const { StackConnectorsPlugin } = await import('./plugin');
   return new StackConnectorsPlugin(initContext);

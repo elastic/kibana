@@ -24,6 +24,7 @@ type HttpConnectorForm = ConnectorFormSchema & {
     hasProxy?: boolean;
     hasQueryParams?: boolean;
     queryParams?: Array<{ key: string; value: string }>;
+    hasPrivateLocation?: boolean;
   };
 };
 
@@ -50,6 +51,7 @@ export const formDeserializer = (data: ConnectorFormSchema): HttpConnectorForm =
     __internal__: {
       headers: configHeaders,
       hasProxy: !!data?.config?.proxyUrl,
+      hasPrivateLocation: !!data?.config?.privateLocation,
     },
   };
 };
@@ -73,8 +75,10 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
   // When the proxy section is not rendered (intermediate release: old connector without proxy
   // fields in the schema), hasProxy is undefined. In that case we skip proxy fields entirely
   // to avoid sending unknown fields to an older server schema that uses .strict().
-  const hasProxy = formData?.__internal__?.hasProxy;
-  const supportsProxy = hasProxy !== undefined;
+  const hasPrivateLocation = formData?.__internal__?.hasPrivateLocation ?? false;
+  // Private locations use the agent policy's proxy settings.
+  const hasProxy = formData?.__internal__?.hasProxy && !hasPrivateLocation;
+  const supportsProxy = formData?.__internal__?.hasProxy !== undefined;
 
   const queryParams = formData?.__internal__?.queryParams ?? [];
   const secretQueryParams = queryParams.reduce<Record<string, string>>((acc, { key, value }) => {
@@ -89,6 +93,7 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
     config: {
       ...formData.config,
       headers: isEmpty(configHeaders) ? null : configHeaders,
+      privateLocation: hasPrivateLocation ? formData.config?.privateLocation : undefined,
       ...(supportsProxy &&
         !hasProxy && {
           proxyUrl: null,

@@ -212,4 +212,56 @@ describe('HttpActionConnectorFields', () => {
     expect(screen.getByTestId('httpQueryParamValueInput')).toBeInTheDocument();
     expect(screen.getByTestId('httpAddQueryParamButton')).toBeInTheDocument();
   });
+
+  it('shows the agent policy field and hides the proxy section when the private location toggle is enabled', async () => {
+    render(
+      <ConnectorFormTestProvider
+        connector={connector}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpPrivateLocationSwitch')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('httpPrivateLocationText')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('httpPrivateLocationSwitch'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpPrivateLocationText')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('httpPrivateLocationCallout')).toBeInTheDocument();
+    expect(screen.queryByTestId('httpProxySwitch')).not.toBeInTheDocument();
+  });
+
+  it('shows the agent policy field when editing a connector with a private location', async () => {
+    render(
+      <ConnectorFormTestProvider
+        connector={{
+          ...connector,
+          config: { ...connector.config, privateLocation: 'internal-net' },
+        }}
+        serializer={formSerializer}
+        deserializer={formDeserializer}
+      >
+        <HttpActionConnectorFields
+          readOnly={false}
+          isEdit={true}
+          registerPreSubmitValidator={jest.fn()}
+        />
+      </ConnectorFormTestProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('httpPrivateLocationText')).toHaveValue('internal-net');
+    });
+  });
 });

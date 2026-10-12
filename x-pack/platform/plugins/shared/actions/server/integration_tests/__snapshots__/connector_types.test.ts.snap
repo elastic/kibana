@@ -1227,6 +1227,11 @@ Object {
       ],
       "default": null,
     },
+    "privateLocation": Object {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string",
+    },
     "proxyUrl": Object {
       "anyOf": Array [
         Object {
@@ -1497,6 +1502,11 @@ Object {
     "path": Object {
       "type": "string",
     },
+    "private_location": Object {
+      "maxLength": 256,
+      "minLength": 1,
+      "type": "string",
+    },
     "query": Object {
       "additionalProperties": Object {
         "anyOf": Array [
@@ -1655,6 +1665,11 @@ Object {
       "type": "string",
     },
     "path": Object {
+      "type": "string",
+    },
+    "private_location": Object {
+      "maxLength": 256,
+      "minLength": 1,
       "type": "string",
     },
     "query": Object {

@@ -2983,6 +2983,8 @@
       "@kbn/workflows-library/*": ["./src/platform/packages/shared/kbn-workflows-library/*"],
       "@kbn/workflows-management-plugin": ["./src/platform/plugins/shared/workflows_management"],
       "@kbn/workflows-management-plugin/*": ["./src/platform/plugins/shared/workflows_management/*"],
+      "@kbn/workflows-private-runner-plugin": ["./x-pack/platform/plugins/shared/workflows_private_runner"],
+      "@kbn/workflows-private-runner-plugin/*": ["./x-pack/platform/plugins/shared/workflows_private_runner/*"],
       "@kbn/workflows-ui": ["./src/platform/packages/shared/kbn-workflows-ui"],
       "@kbn/workflows-ui/*": ["./src/platform/packages/shared/kbn-workflows-ui/*"],
       "@kbn/workflows-yaml": ["./src/platform/packages/shared/kbn-workflows-yaml"],

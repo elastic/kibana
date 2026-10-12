@@ -96,6 +96,37 @@ export const PROXY_SWITCH_LABEL = i18n.translate(
   { defaultMessage: 'Proxy' }
 );
 
+export const PRIVATE_LOCATION_SWITCH_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.http.privateLocationSwitchLabel',
+  { defaultMessage: 'Send requests from a private location' }
+);
+
+export const PRIVATE_LOCATION_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.http.privateLocationLabel',
+  { defaultMessage: 'Agent policy ID' }
+);
+
+export const PRIVATE_LOCATION_HELP_TEXT = i18n.translate(
+  'xpack.stackConnectors.components.http.privateLocationHelpText',
+  {
+    defaultMessage:
+      'The ID of the Fleet agent policy whose Elastic Agents send the requests from inside your network.',
+  }
+);
+
+export const PRIVATE_LOCATION_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.http.error.requiredPrivateLocationText',
+  { defaultMessage: 'Agent policy ID is required.' }
+);
+
+export const PRIVATE_LOCATION_CALLOUT = i18n.translate(
+  'xpack.stackConnectors.components.http.privateLocationCallout',
+  {
+    defaultMessage:
+      'Proxy, TLS, and certificate settings come from the agent policy. SSL authentication, a custom CA, and certificate verification modes other than Full are not supported.',
+  }
+);
+
 export const PROXY_URL_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.http.error.requiredProxyUrlText',
   { defaultMessage: 'Proxy URL is required.' }
