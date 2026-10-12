@@ -11,18 +11,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { SyntheticsMaintenanceWindow } from '../../../hooks';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
 import { MwsAgentVersionWarningLine } from './mws_agent_version_warning_line';
-import { useSyncInterval } from './use_sync_interval';
 import { SyncNowLink } from './sync_now_link';
+import { MwsSyncOverdueNote } from './mws_sync_overdue_note';
 
 export const MwsCalloutContent = ({
   activeMWs,
   hasOutdatedAgent = false,
+  isSyncOverdue = false,
 }: {
   activeMWs: SyntheticsMaintenanceWindow[];
   hasOutdatedAgent?: boolean;
+  /** Swaps the "will update shortly" note for a warning that the private location sync is late. */
+  isSyncOverdue?: boolean;
 }) => {
-  const syncInterval = useSyncInterval();
-
   if (activeMWs.length) {
     return (
       <>
@@ -52,13 +53,17 @@ export const MwsCalloutContent = ({
             </span>
           ))}
           <EuiSpacer size="s" />
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
-              defaultMessage="It may take up to {syncInterval} {syncInterval, plural, one {minute} other {minutes}} for maintenance window changes to be applied to private location monitors. {syncNowLink}"
-              values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
-            />
-          </EuiText>
+          {isSyncOverdue ? (
+            <MwsSyncOverdueNote />
+          ) : (
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.synthetics.maintenanceWindowCallout.nextSyncNote"
+                defaultMessage="Private location monitors will update shortly. {syncNowLink}"
+                values={{ syncNowLink: <SyncNowLink /> }}
+              />
+            </EuiText>
+          )}
           {hasOutdatedAgent && <MwsAgentVersionWarningLine />}
         </EuiCallOut>
         <EuiSpacer size="s" />
