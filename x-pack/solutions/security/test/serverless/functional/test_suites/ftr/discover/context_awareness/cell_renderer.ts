@@ -15,8 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
 
-  // Failing: See https://github.com/elastic/kibana/issues/233484
-  describe.skip('cell renderer', () => {
+  describe('cell renderer', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       await PageObjects.common.navigateToApp('security', {
@@ -27,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('ES|QL mode', () => {
       it('should render alert workflow status badge', async () => {
         const state = getDiscoverESQLState(
-          `from ${SECURITY_SOLUTION_INDEX_PATTERN} | WHERE host.name == "siem-kibana" and event.kind != "signal"`
+          `from ${SECURITY_SOLUTION_INDEX_PATTERN} | WHERE host.name == "siem-kibana" and event.kind == "signal"`
         );
         await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
