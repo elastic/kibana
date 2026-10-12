@@ -1060,7 +1060,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.elf_model',
       {
         defaultMessage:
-          'Enable the machine learning model for ELF files. When disabled, blocklist, exceptionlist, and YARA scanning of ELF files continue. Default: true.',
+          'Enable the machine learning model for ELF files. When disabled (false), blocklist, exceptionlist, and YARA scanning of ELF files continue. Default: true.',
       }
     ),
   },
