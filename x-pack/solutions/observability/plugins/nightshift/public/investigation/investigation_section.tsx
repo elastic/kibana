@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -79,10 +78,10 @@ const getSectionPresentation = (id: InvestigationSectionId): SectionPresentation
           defaultMessage: 'Failed & cancelled',
         }),
       };
-    case '80-critical':
-    case '60-high':
-    case '40-medium':
-    case '20-low':
+    case 'critical':
+    case 'high':
+    case 'medium':
+    case 'low':
       return { ...anchors, title: getSeverityLabel(id), severity: id };
     default: {
       const exhaustive: never = id;
@@ -162,34 +161,25 @@ const SectionHeading = ({
   presentation: SectionPresentation;
   total: number;
   showCount: boolean;
-}): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {severity != null && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="dot" color={SEVERITY_DOT_COLOR[severity]} aria-hidden={true} />
-        </EuiFlexItem>
-      )}
+}): React.ReactElement => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiTitle size="xs">
+        <h2 id={headingId}>{title}</h2>
+      </EuiTitle>
+    </EuiFlexItem>
+    {showCount && (
       <EuiFlexItem grow={false}>
-        <EuiTitle
-          size="xs"
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-          `}
+        <EuiBadge
+          color={severity != null ? SEVERITY_DOT_COLOR[severity] : 'default'}
+          data-test-subj={`nightshiftInvestigationSectionCount-${id}`}
         >
-          <h2 id={headingId}>{title}</h2>
-        </EuiTitle>
+          {total}
+        </EuiBadge>
       </EuiFlexItem>
-      {showCount && (
-        <EuiFlexItem grow={false}>
-          <EuiBadge data-test-subj={`nightshiftInvestigationSectionCount-${id}`}>{total}</EuiBadge>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
-  );
-};
+    )}
+  </EuiFlexGroup>
+);
 
 const RetryCallout = ({
   presentation: { id, title },

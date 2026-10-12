@@ -6,6 +6,7 @@
 import Handlebars from 'handlebars';
 import {
   createProtoAccessControl,
+  isPrototypeConstructor,
   resultIsAllowed,
   // @ts-expect-error: Could not find a declaration file for module
 } from 'handlebars/dist/cjs/handlebars/internal/proto-access';
@@ -112,7 +113,11 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
         if (result == null) {
           return result;
         }
-        if (Object.hasOwn(parent, propertyName)) {
+        // Own properties are trusted context data, except for a prototype's own "constructor" back-reference
+        if (
+          Object.hasOwn(parent, propertyName) &&
+          !isPrototypeConstructor(parent, propertyName, result)
+        ) {
           return result;
         }
 
@@ -573,11 +578,23 @@ export class ElasticHandlebarsVisitor extends Handlebars.Visitor {
       if (name in this.container.partials) {
         this.container.partials[name] = render;
       }
-    } else {
+    } else if (typeof partialTemplate === 'function') {
       render = partialTemplate;
+    } else {
+      // Only template strings and functions are valid partials. Anything else (e.g. an AST-shaped object) must never be compiled.
+      throw new Handlebars.Exception(
+        `The partial ${name} could not be compiled: partials must be strings or functions returning strings`
+      );
     }
 
     let result = render(context, options);
+
+    // A function partial has already been invoked, so an empty result from it is a bug in that partial
+    if (result == null && typeof partialTemplate === 'function') {
+      throw new Handlebars.Exception(
+        `The partial ${name} returned no output: partials must return a string`
+      );
+    }
 
     if ('indent' in partial) {
       result =

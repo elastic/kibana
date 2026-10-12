@@ -109,6 +109,72 @@ describe('proposalAttachmentType', () => {
   });
 
   describe('format', () => {
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'pending' },
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+    ])('exposes its own proposal ID to the agent: %j', async (overrides) => {
+      const { type, get } = createType();
+      get.mockResolvedValue(proposal(overrides));
+
+      expect(await represent(type)).toEqual({
+        type: 'text',
+        value: expect.stringContaining('Proposal ID: proposal-1'),
+      });
+    });
+
+    it('exposes complete revision content and history without storage bookkeeping', async () => {
+      const { type, get } = createType();
+      const comment =
+        '**Create a rule**\n\nKeep this rationale and disabled-rule warning.\n\n| Index | `logs*` |';
+      const actionInput = {
+        name: 'Repeated failed logons',
+        index: ['logs*'],
+        query: 'event.category:authentication',
+        severity: 'medium',
+        risk_score: 47,
+        settings: { enabled: false },
+      };
+      get.mockResolvedValue(
+        proposal({
+          rootProposalId: 'root-1',
+          revision: 2,
+          supersedes: 'root-1',
+          supersededBy: 'proposal-3',
+          status: 'superseded',
+          comment,
+          actionInput,
+          actionWorkflowId: 'create-rule',
+          workflowExecutionId: 'internal-execution',
+          executionError: 'Previous execution failed',
+          decidedBy: { username: 'analyst', fullName: null, email: null },
+        })
+      );
+
+      const representation = await represent(type);
+      if (representation.type !== 'text') {
+        throw new Error('expected text representation');
+      }
+      const data = JSON.parse(representation.value.slice(representation.value.indexOf('{')));
+      expect(data).toMatchObject({
+        id: 'proposal-1',
+        rootProposalId: 'root-1',
+        revision: 2,
+        supersedes: 'root-1',
+        supersededBy: 'proposal-3',
+        status: 'superseded',
+        expired: false,
+        comment,
+        actionInput,
+        actionWorkflowId: 'create-rule',
+        executionError: 'Previous execution failed',
+        decidedBy: { username: 'analyst' },
+      });
+      expect(data).not.toHaveProperty('spaceId');
+      expect(data).not.toHaveProperty('conversationId');
+      expect(data).not.toHaveProperty('workflowExecutionId');
+    });
+
     it('should describe the proposal as it is now, not as it was attached', async () => {
       const { type, get } = createType();
       get.mockResolvedValue(proposal({ status: 'no_action', decision: 'dismissed' }));
@@ -136,6 +202,37 @@ describe('proposalAttachmentType', () => {
       // The gate can settle a proposal as expired before its deadline, so the
       // banner must not claim the deadline is what passed.
       expect(value).not.toContain('deadline has passed');
+    });
+
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+      { status: 'pending', supersededBy: 'proposal-2' },
+      { status: 'expired', supersededBy: 'proposal-2' },
+      { status: 'superseded' },
+    ])('describes replaced proposals as historical: %j', async (overrides) => {
+      const { type, get } = createType();
+      get.mockResolvedValue(proposal(overrides));
+
+      const representation = await represent(type);
+      expect(representation).toEqual({
+        type: 'text',
+        value: expect.stringContaining(
+          'REPLACED: this proposal is historical and cannot be acted on.'
+        ),
+      });
+      expect(representation).toEqual({
+        type: 'text',
+        value: expect.not.stringContaining('Awaiting a human decision'),
+      });
+      if (overrides.supersededBy) {
+        expect(representation).toEqual({
+          type: 'text',
+          value: expect.stringContaining('Replacement proposal ID: proposal-2.'),
+        });
+      }
+      expect(get).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, REQUEST);
     });
 
     it('should read the id from the payload when the attachment has no origin', async () => {

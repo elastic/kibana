@@ -7,8 +7,8 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
 1. **Load Cortex.** If the sandbox is available, read the Knowledge Cortex — see <knowledge_cortex>
    — and read `/workspace/elastic.md` with `nightshift_sandbox_view_file` for how to query cluster
-   telemetry from the sandbox.{{decision_trees_load_step}} Do not use memory tools or `ki_search`; Cortex is the only prior
-   knowledge source. Prior context may already tell you what kind of system this is and which
+   telemetry from the sandbox.{{decision_trees_load_step}}{{semantic_memory_load_step}} Do not use
+   memory tools or `ki_search`. Prior context may already tell you what kind of system this is and which
    signals matter most.
 
    Report progress: `summary` noting what prior context you found (or that none existed);
@@ -128,29 +128,29 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
    a severity handed to you in "Additional context", which was assigned before this investigation
    ran. Decide in order and stop at the first match:
 
-   - `80-critical` — a global outage affecting all or most customers; several distinct core
+   - `critical` — a global outage affecting all or most customers; several distinct core
      operations confirmed blocked at once (for example balance, history, and payment together); a
      mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the
      component can no longer perform its primary function — unless the block is confined to a
-     single endpoint or lookup path affecting only that one operation, which stays at `60-high`;
+     single endpoint or lookup path affecting only that one operation, which stays at `high`;
      or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-   - `60-high` — the affected operation fails or is blocked on the path you verified, or is broadly
+   - `high` — the affected operation fails or is blocked on the path you verified, or is broadly
      degraded, intermittent, or partially failing for a significant subset. A single endpoint or
      lookup path stays here even when every caller hits it.
-   - `40-medium` — minor confirmed degradation with limited reach, or your evidence never settled
-     whether the operation fails versus only slows. State that unresolved question in
+   - `medium` — minor confirmed degradation with limited reach, or your evidence never settled
+     whether the operation fails versus only slows. Record that unresolved question in
      `conclusion` so the tier is not read as "confirmed minor".
-   - `20-low` — confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a
+   - `low` — confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a
      non-issue. Say which of the two in `conclusion`, since "it broke and recovered" and "nothing
      was ever wrong" lead to different follow-ups.
 
-   Known-ongoing exception: cap an otherwise higher tier at `40-medium` only when your evidence
+   Known-ongoing exception: cap an otherwise higher tier at `medium` only when your evidence
    confirms the exact mechanism that Cortex documents as a known ongoing or transient background
    condition, at its documented rate. The cap does not apply to a different mechanism on the same
    component, and a clear rate step-up over that baseline lifts it.
 
-   Dismissing every hypothesis does not by itself mean `20-low`. A confirmed, unexplained failure
-   is rated on the impact you confirmed; only recovery or absence of impact earns `20-low`.
+   Dismissing every hypothesis does not by itself mean `low`. A confirmed, unexplained failure
+   is rated on the impact you confirmed; only recovery or absence of impact earns `low`.
 
    Tie-break: when two adjacent tiers both match the same evidence, choose the lower only when
    your evidence leaves genuinely unresolved whether the operation still completes.
@@ -163,7 +163,7 @@ moving to the next — see <reporting_progress> for exactly what to send and wor
 
    - Alert-triggered (the prompt contains `<alert_data>`): rate the situation the alert exposed,
      not the alert's own configured severity. An alert set to critical that turns out to be noise
-     is `20-low`; a warning that uncovers a blocked core operation is `60-high` or above.
+     is `low`; a warning that uncovers a blocked core operation is `high` or above.
    - Neither (free-form issue): nothing extra, rate what you found.
 
    Report progress: the final state, including the finished `conclusion`, `severity`,
@@ -573,7 +573,7 @@ not end the investigation. Keep working after calling it.
     }
   ],
   "conclusion": "The 14:02 deploy reduced the connection pool's max size, and orders-api exhausted the smaller pool under normal load.",
-  "severity": "60-high",
+  "severity": "high",
   "recommendations": [
     {
       "title": "Revert the pool-size config change, or raise it back above the previous value",

@@ -61,7 +61,6 @@ import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../shared/translations';
 import { SeverityBadge } from '../severity_badge/severity_badge';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useTriggerInvestigation } from '../../../../hooks/use_trigger_investigation';
-import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 import { useBlocksNewActivity } from '../../../../hooks/use_significant_events_maintenance';
 import { DismissEventModal } from './dismiss_event_modal';
 
@@ -72,17 +71,10 @@ const RUN_ARIA_LABEL = i18n.translate(
   }
 );
 
-const CLOSE_EVENT_ARIA_LABEL = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.closeEventButton.ariaLabel',
-  {
-    defaultMessage: 'Close this significant event',
-  }
-);
-
-const DISMISS_EVENT_ARIA_LABEL = i18n.translate(
+const MARK_EVENT_INACTIVE_ARIA_LABEL = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.dismissEventButton.ariaLabel',
   {
-    defaultMessage: 'Dismiss this significant event',
+    defaultMessage: 'Mark this significant event inactive',
   }
 );
 
@@ -133,40 +125,6 @@ const RunInvestigationCell = ({ event }: { event: SignificantEvent }) => {
   );
 };
 
-const CloseEventCell = ({ event }: { event: SignificantEvent }) => {
-  const {
-    core: {
-      application: {
-        capabilities: { nightshift },
-      },
-    },
-  } = useKibana();
-  const { canManage } = getNightshiftCapabilities(nightshift);
-  const { updateEventStatus, isUpdating } = useUpdateSignificantEvent();
-
-  if (!canManage || event.status !== 'open') {
-    return null;
-  }
-
-  return (
-    <EuiToolTip content={CLOSE_EVENT_ARIA_LABEL} disableScreenReaderOutput>
-      <EuiButtonIcon
-        iconType="cross"
-        aria-label={CLOSE_EVENT_ARIA_LABEL}
-        onClick={(e: React.MouseEvent) => {
-          e.stopPropagation();
-          if (!isUpdating) updateEventStatus({ eventId: event.event_id, status: 'closed' });
-        }}
-        isDisabled={isUpdating}
-        isLoading={isUpdating}
-        size="s"
-        color="danger"
-        data-test-subj="sigEventCloseIconButton"
-      />
-    </EuiToolTip>
-  );
-};
-
 const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
   const {
     core: {
@@ -178,16 +136,16 @@ const DismissEventCell = ({ event }: { event: SignificantEvent }) => {
   const { canManage } = getNightshiftCapabilities(nightshift);
   const [isDismissModalOpen, setIsDismissModalOpen] = useState(false);
 
-  if (!canManage || event.status !== 'open') {
+  if (!canManage || event.status !== 'active') {
     return null;
   }
 
   return (
     <>
-      <EuiToolTip content={DISMISS_EVENT_ARIA_LABEL} disableScreenReaderOutput>
+      <EuiToolTip content={MARK_EVENT_INACTIVE_ARIA_LABEL} disableScreenReaderOutput>
         <EuiButtonIcon
           iconType="eyeSlash"
-          aria-label={DISMISS_EVENT_ARIA_LABEL}
+          aria-label={MARK_EVENT_INACTIVE_ARIA_LABEL}
           onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             setIsDismissModalOpen(true);
@@ -354,14 +312,20 @@ export const getSignificantEventTableColumns = ({
       defaultMessage: 'Severity',
     }),
     width: '100px',
-    render: (severity: SignificantEvent['severity']) => (
-      <SeverityBadge score={Number.parseInt(severity, 10)} />
-    ),
+    render: (severity: SignificantEvent['severity']) => <SeverityBadge severity={severity} />,
   },
   {
     field: 'created_at',
     name: i18n.translate('xpack.significantEventsApp.significantEventsTab.createdAtColumn', {
       defaultMessage: 'Created at',
+    }),
+    width: '200px',
+    render: (timestamp: string) => formatTimestamp(timestamp),
+  },
+  {
+    field: '@timestamp',
+    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.lastUpdatedColumn', {
+      defaultMessage: 'Last updated',
     }),
     width: '200px',
     render: (timestamp: string) => formatTimestamp(timestamp),
@@ -377,9 +341,6 @@ export const getSignificantEventTableColumns = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DismissEventCell event={item} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <CloseEventCell event={item} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

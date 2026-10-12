@@ -20,9 +20,25 @@ export interface ESQLSourceInfoColumn {
 
 export interface ESQLSourceInfo {
   columns: ESQLSourceInfoColumn[];
+  /** Set when the query failed (e.g. invalid or partial query); the request is not cached. */
+  error?: { statusCode: number; message: string };
 }
 
-const sourceInfoCache = new LRUCache<string, Promise<ESQLSourceInfo>>({ max: 100 });
+/** A shared request, aborted only once every caller waiting on it has aborted. */
+interface SourceInfoRequest {
+  promise: Promise<ESQLSourceInfo>;
+  controller: AbortController;
+  waiters: number;
+  settled: boolean;
+}
+
+/** How long a source's schema is cached, like the ES|QL editor's fields cache: new fields show up without a reload. */
+export const ESQL_SOURCE_INFO_CACHE_TTL = 10 * 60 * 1000;
+
+const sourceInfoCache = new LRUCache<string, SourceInfoRequest>({
+  max: 100,
+  ttl: ESQL_SOURCE_INFO_CACHE_TTL,
+});
 
 /**
  * Strips the client-only `meta` field from ES|QL control variables and returns
@@ -34,9 +50,10 @@ export function buildEsqlSourceCacheKey(
   projectRouting: string | undefined,
   esqlVariables: ESQLControlVariable[] | undefined
 ): { cacheKey: string; cleanVariables: ESQLControlVariable[] | undefined } {
-  const cleanVariables = esqlVariables?.map(
-    ({ key, value, type }) => ({ key, value, type } as ESQLControlVariable)
-  );
+  // Use one representation for no variables in both source IDs and cache keys.
+  const cleanVariables = esqlVariables?.length
+    ? esqlVariables.map(({ key, value, type }) => ({ key, value, type } as ESQLControlVariable))
+    : undefined;
   return {
     cacheKey: JSON.stringify([query, projectRouting ?? null, cleanVariables ?? null]),
     cleanVariables,
@@ -54,6 +71,7 @@ export async function getESQLSourceInfo({
   timeRange,
   timeFieldName,
   esqlVariables,
+  signal,
 }: {
   query: string;
   http: HttpStart;
@@ -61,6 +79,8 @@ export async function getESQLSourceInfo({
   timeRange?: { from: string; to: string };
   timeFieldName?: string;
   esqlVariables?: ESQLControlVariable[];
+  /** Stops waiting; the request itself is aborted once all callers sharing it have aborted. */
+  signal?: AbortSignal;
 }): Promise<ESQLSourceInfo> {
   const { cacheKey, cleanVariables } = buildEsqlSourceCacheKey(
     query,
@@ -68,26 +88,85 @@ export async function getESQLSourceInfo({
     esqlVariables
   );
 
-  const cached = sourceInfoCache.get(cacheKey);
-  if (cached !== undefined) {
-    return cached;
+  let request = sourceInfoCache.get(cacheKey);
+  if (!request) {
+    const controller = new AbortController();
+    const promise = http
+      .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
+        body: JSON.stringify({
+          query,
+          projectRouting,
+          timeRange,
+          timeFieldName,
+          esqlVariables: cleanVariables,
+        }),
+        signal: controller.signal,
+      })
+      .then((info) => {
+        // Query errors are answered with 200 to keep the console clean; still fail, uncached.
+        if (info.error) {
+          throw new Error(info.error.message);
+        }
+        return info;
+      });
+    const newRequest: SourceInfoRequest = { promise, controller, waiters: 0, settled: false };
+    promise.then(
+      () => {
+        newRequest.settled = true;
+      },
+      () => {
+        newRequest.settled = true;
+        if (sourceInfoCache.get(cacheKey) === newRequest) {
+          sourceInfoCache.delete(cacheKey);
+        }
+      }
+    );
+    sourceInfoCache.set(cacheKey, newRequest);
+    request = newRequest;
   }
 
-  const pending = http
-    .post<ESQLSourceInfo>(SOURCE_INFO_ROUTE, {
-      body: JSON.stringify({
-        query,
-        projectRouting,
-        timeRange,
-        timeFieldName,
-        esqlVariables: cleanVariables,
-      }),
-    })
-    .catch((error) => {
-      sourceInfoCache.delete(cacheKey);
-      throw error;
-    });
+  return waitForRequest(request, cacheKey, signal);
+}
 
-  sourceInfoCache.set(cacheKey, pending);
-  return pending;
+function waitForRequest(
+  request: SourceInfoRequest,
+  cacheKey: string,
+  signal: AbortSignal | undefined
+): Promise<ESQLSourceInfo> {
+  request.waiters++;
+  if (!signal) {
+    return request.promise;
+  }
+
+  const release = () => {
+    request.waiters--;
+    if (request.waiters === 0 && !request.settled) {
+      request.controller.abort();
+      if (sourceInfoCache.get(cacheKey) === request) {
+        sourceInfoCache.delete(cacheKey);
+      }
+    }
+  };
+
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      release();
+      reject(new DOMException('The request was aborted', 'AbortError'));
+    };
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+    signal.addEventListener('abort', onAbort, { once: true });
+    request.promise.then(
+      (info) => {
+        signal.removeEventListener('abort', onAbort);
+        resolve(info);
+      },
+      (error) => {
+        signal.removeEventListener('abort', onAbort);
+        reject(error);
+      }
+    );
+  });
 }

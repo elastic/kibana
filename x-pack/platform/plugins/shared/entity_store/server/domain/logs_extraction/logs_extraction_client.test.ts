@@ -1776,6 +1776,61 @@ describe('LogsExtractionClient', () => {
       );
     });
   });
+
+  describe('updateTypeConfig', () => {
+    beforeEach(() => {
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue({
+        logExtractionConfig: { frequency: '10m' },
+        nonPriorityLogExtractionConfig: { frequency: '5m', samplingRate: null },
+      } as unknown as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
+    });
+
+    // The descriptor update deep-merges nested objects, so the block goes to the saved object
+    // untouched. Rebuilding it from a prior read would drop a concurrent writer's fields.
+    it('should pass each block through without reading the descriptor first', async () => {
+      await client.updateTypeConfig('user', {
+        nonPriorityOverride: { samplingRate: null },
+      });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+        nonPriorityLogExtractionConfig: { samplingRate: null },
+      });
+    });
+
+    it('should only write the blocks present in the request', async () => {
+      await client.updateTypeConfig('user', { logExtraction: { frequency: '30m' } });
+
+      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+        logExtractionConfig: { frequency: '30m' },
+      });
+    });
+
+    // `{}` does not recurse in mergeForUpdate, so writing it would replace the stored object.
+    it('should skip an empty block instead of writing it', async () => {
+      await client.updateTypeConfig('user', { nonPriorityOverride: {} });
+
+      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    it('should return the stored config read back after the write', async () => {
+      const result = await client.updateTypeConfig('user', {
+        nonPriorityOverride: { samplingRate: null },
+      });
+
+      expect(result).toEqual({
+        logExtractionConfig: { frequency: '10m' },
+        nonPriorityLogExtractionConfig: { frequency: '5m', samplingRate: null },
+      });
+    });
+
+    it('should propagate a not found error for an uninstalled engine', async () => {
+      mockEngineDescriptorClient.update.mockRejectedValue(new Error('Engine descriptor not found'));
+
+      await expect(
+        client.updateTypeConfig('user', { logExtraction: { frequency: '5m' } })
+      ).rejects.toThrow('Engine descriptor not found');
+    });
+  });
 });
 
 describe('LogsExtractionClient mid-slice resume', () => {

@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { BackgroundAgentCompleteStep as BackgroundAgentCompleteStepData } from '@kbn/agent-builder-common';
 import { ExecutionStatus, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
+import { useConversationFlyoutSessionProps } from '../../../../../hooks/use_conversation_flyout_session_props';
 import { StepLayout } from '../step_layout';
 import { JsonCodeBlock } from '../json_code_block';
 
@@ -48,6 +49,7 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const openFlyout = useCallback(() => setIsFlyoutOpen(true), []);
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+  const flyoutSessionProps = useConversationFlyoutSessionProps(flyoutTitle);
 
   const isFailure =
     step.status === ExecutionStatus.failed || step.status === ExecutionStatus.aborted;
@@ -100,7 +102,12 @@ const BackgroundAgentHeadline: React.FC<{ step: BackgroundAgentCompleteStepData 
         </EuiLink>
       </EuiFlexItem>
       {isFlyoutOpen && (
-        <EuiFlyout onClose={closeFlyout} aria-labelledby="backgroundAgentFlyoutTitle" size="m">
+        <EuiFlyout
+          onClose={closeFlyout}
+          aria-labelledby="backgroundAgentFlyoutTitle"
+          size="m"
+          {...flyoutSessionProps}
+        >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id="backgroundAgentFlyoutTitle">{flyoutTitle}</h2>

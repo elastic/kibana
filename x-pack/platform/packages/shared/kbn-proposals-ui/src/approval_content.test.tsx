@@ -56,6 +56,55 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
+  it.each<Partial<ApprovalProposal>>([
+    { status: 'superseded' },
+    { status: 'failed', decision: 'approved', supersededBy: 'successor' },
+    { status: 'expired', supersededBy: 'successor' },
+  ])(
+    'keeps a replaced proposal visible without pending or outcome instructions: %j',
+    (overrides) => {
+      renderContent({
+        proposal: {
+          ...baseProposal,
+          category: 'configure',
+          previousExecutionError: 'Prior failure',
+          ...overrides,
+        },
+        onDismiss: jest.fn(),
+      });
+      expect(screen.getByText('Block IP 10.0.0.4')).toBeInTheDocument();
+      expect(screen.getByText('Configure')).toBeInTheDocument();
+      expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-previous-failure')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-expired')).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+    }
+  );
+
+  it('restores the comment and disables decisions when replaced during dismissal', () => {
+    const onDismiss = jest.fn();
+    const { rerender } = renderContent({ onDismiss });
+    fireEvent.click(screen.getByTestId('approvalContent-dismiss'));
+    expect(screen.getByTestId('approvalContent-decline-form')).toBeInTheDocument();
+
+    rerender(
+      <ApprovalContent
+        {...baseProps}
+        proposal={{ ...baseProposal, status: 'superseded', supersededBy: 'successor' }}
+        onDismiss={onDismiss}
+      />
+    );
+
+    expect(screen.queryByTestId('approvalContent-decline-form')).not.toBeInTheDocument();
+    expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+    expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
   it('renders a caption derived from the proposal, e.g. category, reversibility and impact', () => {
     renderContent({
       proposal: {
@@ -146,16 +195,18 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
   });
 
-  it('colors the Approve button by the proposal tone: danger for high/critical impact', () => {
-    // `baseProposal` is `critical` impact, so the default render already covers this.
+  it('keeps the Approve button primary even for high/critical impact', () => {
+    // `baseProposal` is `critical` impact. The risk is conveyed by the caption and the Decline
+    // action; Approve itself stays the primary call to action rather than turning `danger`.
     renderContent();
-    expect(screen.getByTestId('approvalContent-confirm').className).toContain('danger');
+    const className = screen.getByTestId('approvalContent-confirm').className;
+    expect(className).toContain('primary');
+    expect(className).not.toContain('danger');
   });
 
   it('colors the Approve button primary for low/medium impact, not success', () => {
     // Regression check: the chat card's Approve button was once styled `success` here,
-    // independent of — and inconsistent with — the flyout modal's tone-derived `primary`. Both
-    // hosts now share this one derivation, so this covers both.
+    // independent of the flyout modal's `primary`. Both hosts share this one component.
     renderContent({ proposal: { ...baseProposal, impact: 'low' } });
     const className = screen.getByTestId('approvalContent-confirm').className;
     expect(className).toContain('primary');
@@ -224,6 +275,14 @@ describe('ApprovalContent', () => {
         'This proposal expired before a decision was made and can no longer be actioned.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('shows why the proposal expired', () => {
+    const reason =
+      "The rule was deleted after this proposal was created, so this tuning can't be applied.";
+    renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
+
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {

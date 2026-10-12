@@ -7,13 +7,13 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import user from '@testing-library/user-event';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getUiApi } from '.';
+import * as roleSelector from '../management/service_accounts/service_account_role_selector';
 
 const renderComponent = async ({
   enabled = true,
@@ -52,26 +52,40 @@ const renderComponent = async ({
 
 describe('getCreateServiceAccount UI API', () => {
   it('loads the standalone flyout and reports the created account', async () => {
-    const { core, account, onCreated } = await renderComponent();
-    expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
-    const selector = screen.getByRole('button', { name: 'Set privileges' });
-    await waitFor(() => expect(selector).toBeEnabled());
-    fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
-      target: { value: account.name },
-    });
-    await user.click(selector);
-    await user.click(await screen.findByTestId('roleOption-viewer'));
-    await user.keyboard('{Escape}');
-    await user.click(screen.getByTestId('createServiceAccountSubmit'));
-    expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
-      name: account.name,
-      roles: account.roles,
-    });
-    expect(onCreated).toHaveBeenCalledWith(account);
-    expect(core.http.get).toHaveBeenCalledWith(
-      '/api/security/role',
-      expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
-    );
+    const selector = jest
+      .spyOn(roleSelector, 'ServiceAccountRoleSelector')
+      .mockImplementation(({ onChange }) => (
+        <button
+          type="button"
+          data-test-subj="selectViewerRole"
+          onClick={() => onChange(['viewer'])}
+        >
+          Select roles
+        </button>
+      ));
+    try {
+      const { core, account, onCreated } = await renderComponent();
+      expect(await screen.findByTestId('createServiceAccountFlyout')).toBeVisible();
+      fireEvent.change(screen.getByTestId('serviceAccountNameInput'), {
+        target: { value: account.name },
+      });
+      fireEvent.click(screen.getByTestId('selectViewerRole'));
+      const submit = screen.getByTestId('createServiceAccountSubmit');
+      await waitFor(() => expect(submit).toBeEnabled());
+      fireEvent.click(submit);
+
+      await waitFor(() => expect(onCreated).toHaveBeenCalledWith(account));
+      expect(core.security.serviceAccounts.create).toHaveBeenCalledWith({
+        name: account.name,
+        roles: account.roles,
+      });
+      expect(core.http.get).toHaveBeenCalledWith(
+        '/api/security/role',
+        expect.objectContaining({ query: expect.objectContaining({ includeReservedRoles: true }) })
+      );
+    } finally {
+      selector.mockRestore();
+    }
   });
 
   it.each([
@@ -91,10 +105,11 @@ describe('getCreateServiceAccount UI API', () => {
     { roleManagementEnabled: true, canSaveRole: false },
   ])('gates standalone role-editor navigation (%j)', async (options) => {
     await renderComponent(options);
-    const selector = await screen.findByRole('button', { name: 'Set privileges' });
+    const selector = await screen.findByTestId('serviceAccountRolesSelector');
     await waitFor(() => expect(selector).toBeEnabled());
-    await user.click(selector);
-    const link = screen.queryByRole('link', { name: /Create new role/ });
+    fireEvent.click(selector);
+    await screen.findByText('Custom roles');
+    const link = screen.queryByTestId('createServiceAccountRoleLink');
     if (options.roleManagementEnabled && options.canSaveRole) {
       expect(link).toHaveAttribute('href', '/app/management/security/roles/edit');
     } else {
@@ -104,7 +119,7 @@ describe('getCreateServiceAccount UI API', () => {
 
   it('calls onClose when cancelling', async () => {
     const { onClose, core } = await renderComponent();
-    await user.click(await screen.findByRole('button', { name: 'Cancel' }));
+    fireEvent.click(await screen.findByTestId('createServiceAccountCancel'));
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(core.security.serviceAccounts.create).not.toHaveBeenCalled();
   });

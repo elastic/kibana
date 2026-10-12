@@ -22,6 +22,7 @@ import type {
   UiamOAuthClientResponse,
   UiamOAuthClientType,
   UiamOAuthConnectionResponse,
+  UiamProjectType,
   UiamResolvedUsersResponse,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
@@ -36,6 +37,7 @@ import {
   type UiamClientAuthentication,
 } from './get_client_authentication';
 import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
   UiamListServiceAccountsResponse,
@@ -56,6 +58,12 @@ interface CreateServiceAccountRequestBody {
   organization_id: string;
   /** A descriptive name for the service account. */
   name: string;
+  /** Free text of 1 to 1,000 characters. UIAM refuses an empty string. */
+  description?: string;
+  /** Type of the project the account belongs to. */
+  project_type: UiamProjectType;
+  /** ID of the project the account belongs to. */
+  project_id: string;
   /** The roles asked for; see {@link UiamRoleAssignments}. */
   role_assignments: UiamRoleAssignments;
   /** Principals allowed to exchange the service account's credentials for a token. */
@@ -244,9 +252,10 @@ export interface UiamServicePublic {
    * Exchanges an OAuth access token for an ephemeral UIAM token. Validates that the audience
    * returned by UIAM matches the expected Kibana server audience and throws if there is a mismatch.
    * @param accessToken The OAuth access token.
+   * @param spacePrefix The request's space prefix (e.g. `/s/marketing`), or an empty string.
    * @returns The ephemeral token.
    */
-  exchangeOAuthToken(accessToken: string): Promise<string>;
+  exchangeOAuthToken(accessToken: string, spacePrefix: string): Promise<string>;
 
   /**
    * Revokes a UIAM API key by its ID. Authenticates the call with the request's own UIAM
@@ -296,6 +305,15 @@ export interface UiamServicePublic {
    * `assumable_by` policy names this Kibana's project.
    */
   getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
+
+  /**
+   * Revokes one service account via the UIAM service. Authorized against the account's
+   * `assumable_by` policy, the same way as {@link getServiceAccount}.
+   *
+   * Revoking is a soft delete, and revoking an account again while UIAM still holds its record
+   * succeeds. Tokens exchanged before the revoke stay valid until they expire.
+   */
+  revokeServiceAccount(serviceAccountId: string): Promise<void>;
 
   /**
    * Exchanges a service account ID for an ephemeral access token via the UIAM service.
@@ -605,10 +623,10 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.exchangeOAuthToken}.
    */
-  async exchangeOAuthToken(accessToken: string): Promise<string> {
+  async exchangeOAuthToken(accessToken: string, spacePrefix: string): Promise<string> {
     this.#logger.debug('Attempting to exchange OAuth access token for ephemeral token.');
 
-    const expectedAudience = this.#kibanaServerResourceURL;
+    const expectedAudience = getProtectedResource(this.#kibanaServerResourceURL, spacePrefix);
     const url = new URL(`${this.#config.url}/uiam/api/v1/authentication/_authenticate`);
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
@@ -799,7 +817,8 @@ export class UiamService implements UiamServicePublic {
           ...this.#getClientAuthenticationHeaders(clientAuthentication),
           Authorization: authorization.toString(),
         },
-        body: JSON.stringify({ ...body, type: 'project' }),
+        // Kibana only creates organization service accounts scoped to its own project.
+        body: JSON.stringify({ ...body, type: 'organization', scope: 'project' }),
         dispatcher: this.#dispatcher,
       };
       const response = await UiamService.#parseUiamResponse(
@@ -879,6 +898,39 @@ export class UiamService implements UiamServicePublic {
       return response;
     } catch (err) {
       this.#logger.error(() => `Failed to get service account: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
+  }
+
+  /**
+   * See {@link UiamServicePublic.revokeServiceAccount}.
+   */
+  async revokeServiceAccount(serviceAccountId: string): Promise<void> {
+    try {
+      this.#logger.debug(`Attempting to revoke service account [${serviceAccountId}].`);
+
+      await UiamService.#parseUiamResponse(
+        await fetch(
+          `${this.#config.url}/uiam/api/v1/service-accounts/${encodeURIComponent(
+            serviceAccountId
+          )}`,
+          {
+            method: 'DELETE',
+            // No credential headers on purpose, for the same reason as `listServiceAccounts`.
+            headers: { 'User-Agent': this.#userAgentHeader },
+            // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
+            dispatcher: this.#dispatcher,
+          }
+        )
+      );
+
+      this.#logger.debug(`Successfully revoked service account [${serviceAccountId}].`);
+    } catch (err) {
+      this.#logger.error(
+        () =>
+          `Failed to revoke service account [${serviceAccountId}]: ${getDetailedErrorMessage(err)}`
+      );
 
       throw err;
     }

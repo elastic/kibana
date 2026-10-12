@@ -62,6 +62,7 @@ describe('installAutomationTemplateHandler', () => {
 
   const documentParams = {
     template: 'document_orchestration' as const,
+    name: 'flight-activity-docs',
     sourceIndex: 'loyalty-docs',
     titleField: 'title',
     bodyField: 'body',
@@ -94,10 +95,28 @@ describe('installAutomationTemplateHandler', () => {
     expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.document_orchestration);
   });
 
-  it('overwrites the attached workflow when its tag matches the template', async () => {
+  it('does not overwrite a tagged workflow whose name differs from the requested name', async () => {
+    // A differently-named tagged automation of the same template type must not be overwritten;
+    // the new name is a distinct automation and should be installed alongside the existing one.
     getWorkflow.mockResolvedValue({
       id: 'wf-existing',
-      name: 'Renamed orchestration',
+      name: 'different-automation-name',
+      tags: [AUTOMATION_TEMPLATE_TAGS.document_orchestration],
+    });
+
+    const result = await installAutomationTemplateHandler({
+      params: documentParams,
+      ...createDeps([{ type: 'workflow', value: 'wf-existing' }]),
+    });
+
+    expect(result.replaced).toBe(false);
+    expect(saveAutomationHandlerMock.mock.calls[0][0].params).not.toHaveProperty('workflowId');
+  });
+
+  it('overwrites an existing workflow whose name matches the requested name regardless of tag', async () => {
+    getWorkflow.mockResolvedValue({
+      id: 'wf-existing',
+      name: 'flight-activity-docs',
       tags: [AUTOMATION_TEMPLATE_TAGS.document_orchestration],
     });
 
@@ -120,7 +139,7 @@ describe('installAutomationTemplateHandler', () => {
   it('overwrites a workflow saved before the tag existed when the name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-by-name',
-      name: 'Document KI automation',
+      name: 'flight-activity-docs',
       tags: ['document-ki'],
     });
 
@@ -161,30 +180,37 @@ describe('installAutomationTemplateHandler', () => {
     await installAutomationTemplateHandler({
       params: {
         template: 'index_metadata',
-        sourceIndex: 'loyalty-docs',
-        categoryField: 'tier',
+        name: 'loyalty-index-metadata',
+        sources: [
+          { index: 'loyalty-docs', categoryField: 'tier' },
+          { index: 'flight-activity', categoryField: 'Loyalty Card' },
+        ],
       },
       ...createDeps([{ type: 'workflow', value: 'wf-orchestration' }]),
     });
 
     expect(saveAutomationHandlerMock.mock.calls[0][0].params).not.toHaveProperty('workflowId');
-    expect(saveAutomationHandlerMock.mock.calls[0][0].params.workflowYaml).toContain(
-      AUTOMATION_TEMPLATE_TAGS.index_metadata
-    );
+    const yaml = saveAutomationHandlerMock.mock.calls[0][0].params.workflowYaml;
+    expect(yaml).toContain(AUTOMATION_TEMPLATE_TAGS.index_metadata);
+    expect(yaml).toContain('"index":"loyalty-docs"');
+    expect(yaml).toContain('"index":"flight-activity"');
   });
 
-  it('overwrites the index metadata automation when its tag matches', async () => {
+  it('overwrites the index metadata automation when its name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-metadata',
-      name: 'Index metadata KI automation',
+      name: 'loyalty-index-metadata',
       tags: [AUTOMATION_TEMPLATE_TAGS.index_metadata],
     });
 
     await installAutomationTemplateHandler({
       params: {
         template: 'index_metadata',
-        sourceIndex: 'loyalty-docs',
-        categoryField: 'tier',
+        name: 'loyalty-index-metadata',
+        sources: [
+          { index: 'loyalty-docs', categoryField: 'tier' },
+          { index: 'flight-activity', categoryField: 'Loyalty Card' },
+        ],
       },
       ...createDeps([{ type: 'workflow', value: 'wf-metadata' }]),
     });
@@ -200,11 +226,13 @@ describe('installAutomationTemplateHandler', () => {
     await installAutomationTemplateHandler({
       params: {
         template: 'unit_profile',
+        name: 'loyalty-province-profile',
         unitIndex: 'loyalty-history',
         unitKey: 'Province',
         activityField: 'Enrollment Date',
         breakdownField: 'Loyalty Card',
         corpusFilter: '',
+        metricFields: [],
         maxUnits: 25,
       },
       ...createDeps([]),
@@ -215,21 +243,23 @@ describe('installAutomationTemplateHandler', () => {
     expect(yaml).toContain('unit_key: "Province"');
   });
 
-  it('overwrites the unit profile automation when its tag matches', async () => {
+  it('overwrites the unit profile automation when its name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-unit',
-      name: 'Unit profile KI automation',
+      name: 'loyalty-province-profile',
       tags: [AUTOMATION_TEMPLATE_TAGS.unit_profile],
     });
 
     const result = await installAutomationTemplateHandler({
       params: {
         template: 'unit_profile',
+        name: 'loyalty-province-profile',
         unitIndex: 'loyalty-history',
         unitKey: 'Province',
         activityField: 'Enrollment Date',
         breakdownField: 'Loyalty Card',
         corpusFilter: '',
+        metricFields: [],
         maxUnits: 25,
       },
       ...createDeps([{ type: 'workflow', value: 'wf-unit' }]),
@@ -247,7 +277,7 @@ describe('installAutomationTemplateHandler', () => {
     const kisYaml = `- ki_id: constraint-foo\n  ki:\n    type: constraint\n    title: "Foo constraint"\n    description: "desc"\n    content: "content"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from`;
 
     await installAutomationTemplateHandler({
-      params: { template: 'targeted_ki_writer', kis: kisYaml },
+      params: { template: 'targeted_ki_writer', name: 'loyalty-constraints', kis: kisYaml },
       ...createDeps([]),
     });
 
@@ -256,16 +286,16 @@ describe('installAutomationTemplateHandler', () => {
     expect(yaml).toContain('ki_id: constraint-foo');
   });
 
-  it('overwrites targeted_ki_writer when already attached', async () => {
+  it('overwrites targeted_ki_writer when its name matches', async () => {
     getWorkflow.mockResolvedValue({
       id: 'wf-ki-writer',
-      name: 'Targeted KI writer',
+      name: 'loyalty-constraints',
       tags: [AUTOMATION_TEMPLATE_TAGS.targeted_ki_writer],
     });
     const kisYaml = `- ki_id: constraint-foo\n  ki:\n    type: constraint\n    title: "T"\n    description: "D"\n    content: "C"\n    tags:\n      - constraint\n    references:\n      - uri: index://foo\n        relation: derived_from`;
 
     const result = await installAutomationTemplateHandler({
-      params: { template: 'targeted_ki_writer', kis: kisYaml },
+      params: { template: 'targeted_ki_writer', name: 'loyalty-constraints', kis: kisYaml },
       ...createDeps([{ type: 'workflow', value: 'wf-ki-writer' }]),
     });
 
@@ -288,6 +318,48 @@ describe('installAutomationTemplateHandler', () => {
     ).rejects.toThrow('workflow read failed');
 
     expect(saveAutomationHandlerMock).not.toHaveBeenCalled();
+  });
+
+  it('injects the provided name into the rendered workflow YAML', async () => {
+    await installAutomationTemplateHandler({
+      params: { ...documentParams, name: 'my-custom-automation' },
+      ...createDeps([]),
+    });
+
+    const yaml = saveAutomationHandlerMock.mock.calls[0][0].params.workflowYaml!;
+    expect(yaml).toMatch(/^name: "my-custom-automation"/m);
+  });
+
+  it('finds an existing automation by name and replaces it', async () => {
+    getWorkflow.mockResolvedValue({
+      id: 'wf-named',
+      name: 'flight-activity-docs',
+      tags: [],
+    });
+
+    const result = await installAutomationTemplateHandler({
+      params: documentParams,
+      ...createDeps([{ type: 'workflow', value: 'wf-named' }]),
+    });
+
+    expect(result.replaced).toBe(true);
+    expect(saveAutomationHandlerMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ workflowId: 'wf-named' }),
+      })
+    );
+  });
+
+  it('creates a new automation when no workflow with the given name exists', async () => {
+    getWorkflow.mockResolvedValue({ id: 'wf-other', name: 'other-automation', tags: [] });
+
+    const result = await installAutomationTemplateHandler({
+      params: documentParams,
+      ...createDeps([{ type: 'workflow', value: 'wf-other' }]),
+    });
+
+    expect(result.replaced).toBe(false);
+    expect(saveAutomationHandlerMock.mock.calls[0][0].params).not.toHaveProperty('workflowId');
   });
 
   it('checks write access before reading attached workflows', async () => {

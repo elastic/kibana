@@ -7,13 +7,12 @@
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
-import { stableStringify } from '@kbn/std';
 import { getNoDataEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { isEsqlUserError } from '../errors/esql_user_error';
 import { toQueryResponseSizeExceededError } from '../errors/query_response_size_exceeded_error';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import type { RuleExecutionInput } from './types';
-import { buildExecutionUuid, buildGroupHash } from './build_alert_events';
+import { buildGroupHash } from './build_alert_events';
 import { getQueryPayload } from './get_query_payload';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -68,7 +67,7 @@ export const detectDataPresence = async ({
       maxResponseSize,
     });
 
-    return collectGroupHashesFromRows({ rule, rows, input });
+    return collectGroupHashesFromRows({ rule, rows });
   } catch (error) {
     if (isMaximumResponseSizeExceededError(error)) {
       const sizeError = toQueryResponseSizeExceededError(error, 'data_presence', maxResponseSize);
@@ -89,39 +88,19 @@ export const detectDataPresence = async ({
 function collectGroupHashesFromRows({
   rule,
   rows,
-  input,
 }: {
   rule: RuleResponse;
   rows: Array<Record<string, unknown>>;
-  input: RuleExecutionInput;
 }): Set<string> {
-  const { ruleId, spaceId, scheduledAt } = input;
-
   if (rows.length === 0) {
     return new Set();
   }
 
   const groupingFields = rule.grouping?.fields ?? [];
-  const executionUuid = buildExecutionUuid({
-    ruleId,
-    spaceId,
-    scheduledTimestamp: scheduledAt,
-    suffix: 'no_data',
-  });
   const groupHashes = new Set<string>();
 
-  for (let i = 0; i < rows.length; i++) {
-    const rowDoc = rows[i];
-
-    const hash = buildGroupHash({
-      rowDoc,
-      groupKeyFields: groupingFields,
-      get fallbackSeed(): string {
-        return `${executionUuid}|row:${i}|${stableStringify(rowDoc)}`;
-      },
-    });
-
-    groupHashes.add(hash);
+  for (const rowDoc of rows) {
+    groupHashes.add(buildGroupHash({ rowDoc, groupKeyFields: groupingFields }));
   }
 
   return groupHashes;

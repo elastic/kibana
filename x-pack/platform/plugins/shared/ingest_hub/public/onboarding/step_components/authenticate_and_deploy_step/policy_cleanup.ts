@@ -75,6 +75,9 @@ export interface BuildPolicyBodyOpts {
   namespace: string;
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   servicesMap: Map<string, AwsServiceMatrixEntry>;
+  /** When set, use this cloud_connector on the policy instead of preserving the existing one.
+   *  Pass null to explicitly clear the connector (e.g. when switching to static keys). */
+  overrideCloudConnector?: string | null;
 }
 
 /** Build surviving members list and package name from surviving instance IDs. Returns null if no valid members. */

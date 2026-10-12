@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Detection } from '@kbn/significant-events-schema';
 import { DetectionClient } from './detection_client';
@@ -185,5 +187,49 @@ describe('DetectionClient', () => {
       expect(result.hits).toHaveLength(1);
       expect(result.hits[0].processed).toBe(true);
     });
+  });
+});
+
+describe('DetectionClient.bulkCreate', () => {
+  const createWriteClient = (items: BulkResponse['items']) => {
+    const create = jest.fn(
+      async (): Promise<BulkResponse> => ({ errors: items.length > 0, items, took: 1 })
+    );
+    const client = new DetectionClient({
+      dataStreamClient: { create },
+      esClient: elasticsearchServiceMock.createElasticsearchClient(),
+      space: 'space-a',
+    });
+    return { client, create };
+  };
+
+  it('writes every document in the client space through the data stream client', async () => {
+    const { client, create } = createWriteClient([]);
+    const documents = [
+      { '@timestamp': '2026-01-01T00:00:00.000Z', rule_uuid: 'rule-1', scanned_by: 'exec-1' },
+      { '@timestamp': '2026-01-01T00:00:00.000Z', detection_id: 'd-1', processed_by: 'exec-1' },
+    ];
+
+    await client.bulkCreate(documents);
+
+    expect(create).toHaveBeenCalledWith({ space: 'space-a', documents });
+  });
+
+  it('skips the request when there is nothing to write', async () => {
+    const { client, create } = createWriteClient([]);
+
+    await client.bulkCreate([]);
+
+    expect(create).not.toHaveBeenCalled();
+  });
+
+  it('throws when Elasticsearch rejects a document', async () => {
+    const { client } = createWriteClient([
+      { create: { _index: '.significant_events-detections', status: 403, error: { type: 'x' } } },
+    ]);
+
+    await expect(
+      client.bulkCreate([{ '@timestamp': '2026-01-01T00:00:00.000Z', rule_uuid: 'rule-1' }])
+    ).rejects.toThrow('Bulk create operation failed for 1 out of 1 items');
   });
 });

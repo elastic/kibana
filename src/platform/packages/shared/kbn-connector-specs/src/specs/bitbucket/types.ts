@@ -43,6 +43,7 @@ const branchName = () =>
 const commitHash = () =>
   z
     .string()
+    .max(40)
     .regex(/^[0-9a-fA-F]{7,40}$/, 'Must be a 7 to 40 character hexadecimal commit hash.')
     .describe(
       "The commit SHA (full 40-character hash preferred; at least 7 characters). Get it from getBranch, getCommit, listCommits, or a pull request's sourceCommit."

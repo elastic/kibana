@@ -17,50 +17,59 @@ const baseInput = {
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
-  severity: '60-high' as const,
+  severity: 'high' as const,
   confidence: 0.8,
 };
 
 describe('createEventToolHandler', () => {
   beforeEach(() => {
     (eventsWriteHandler as jest.Mock).mockResolvedValue({
-      event_uuid: 'event-1',
       event_id: 'agent-event-abcd1234',
-      status: 'open',
+      status: 'active',
       written: true,
     });
   });
 
-  it('defaults status to "open" when omitted', async () => {
-    await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput });
+  it('defaults status to "active" when omitted', async () => {
+    await createEventToolHandler({
+      eventSearchClient: {} as never,
+      eventInput: baseInput,
+      alertEventsClient: {} as never,
+    });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ input: expect.objectContaining({ status: 'open' }) })
+      expect.objectContaining({ input: expect.objectContaining({ status: 'active' }) })
     );
   });
 
   it('passes explicit status through', async () => {
     await createEventToolHandler({
-      eventClient: {} as never,
-      eventInput: { ...baseInput, status: 'dismissed' as const },
+      eventSearchClient: {} as never,
+      eventInput: { ...baseInput, status: 'inactive' as const },
+      alertEventsClient: {} as never,
     });
 
     expect(eventsWriteHandler).toHaveBeenCalledWith(
-      expect.objectContaining({ input: expect.objectContaining({ status: 'dismissed' }) })
+      expect.objectContaining({ input: expect.objectContaining({ status: 'inactive' }) })
     );
   });
 
-  it('returns event_uuid from the write result and acknowledged: true', async () => {
+  it('returns event_id from the write result and acknowledged: true', async () => {
     const result = await createEventToolHandler({
-      eventClient: {} as never,
+      eventSearchClient: {} as never,
       eventInput: baseInput,
+      alertEventsClient: {} as never,
     });
 
-    expect(result).toEqual({ event_uuid: 'event-1', acknowledged: true });
+    expect(result).toEqual({ event_id: 'agent-event-abcd1234', acknowledged: true });
   });
 
   it('passes a generated event_id so chat create is always-write snapshot', async () => {
-    await createEventToolHandler({ eventClient: {} as never, eventInput: baseInput });
+    await createEventToolHandler({
+      eventSearchClient: {} as never,
+      eventInput: baseInput,
+      alertEventsClient: {} as never,
+    });
 
     const delegatedInput = (eventsWriteHandler as jest.Mock).mock.calls[0][0].input;
     expect(delegatedInput.event_id).toEqual(expect.any(String));
@@ -74,7 +83,7 @@ describe('createEventToolHandler', () => {
     const logger = { error: jest.fn() } as never;
 
     await createEventToolHandler({
-      eventClient: {} as never,
+      eventSearchClient: {} as never,
       eventInput: baseInput,
       alertEventsClient,
       logger,
