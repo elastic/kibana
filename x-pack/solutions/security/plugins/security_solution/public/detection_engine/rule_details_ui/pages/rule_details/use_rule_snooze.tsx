@@ -8,7 +8,7 @@
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { noop } from 'lodash/fp';
-import moment from 'moment-timezone';
+import moment from 'moment';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
 import type { AppHeaderBadge } from '@kbn/app-header';
@@ -17,10 +17,63 @@ import type { Rule as AlertingRule } from '@kbn/triggers-actions-ui-plugin/publi
 import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useDateFormat, useKibana, useTimeZone } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
 import { useRuleSnoozeSettings } from '../../../rule_management/components/rule_snooze_badge/use_rule_snooze_settings';
 import * as i18n from './translations';
+
+type SnoozeSettings = ReturnType<typeof useRuleSnoozeSettings>['snoozeSettings'];
+
+const BADGE_TEST_SUBJ = 'ruleDetailsSnoozedBadge';
+
+/** Formats a date as locale month and day without the year, e.g. "Oct 15" ("October 15" for `LL`). */
+const formatMonthDay = (date: moment.Moment, format: 'll' | 'LL'): string =>
+  date
+    .format(format)
+    .replace(new RegExp(`(${date.format('YYYY')}|,)`, 'g'), '')
+    .trim();
+
+/**
+ * Mirrors the rules list snooze badge: an accent badge while snoozed (with the end day, or "Snoozed"
+ * when indefinite) and a hollow badge with the start day while a snooze is only scheduled.
+ */
+const getSnoozeBadge = (snoozeSettings: SnoozeSettings): AppHeaderBadge | undefined => {
+  if (!snoozeSettings) return undefined;
+
+  const { muteAll, isSnoozedUntil, snoozeSchedule } = snoozeSettings;
+
+  if (muteAll) {
+    return {
+      label: i18n.SNOOZED_BADGE,
+      color: 'accent',
+      tooltip: i18n.SNOOZED_INDEFINITELY,
+      'data-test-subj': BADGE_TEST_SUBJ,
+    };
+  }
+
+  if (isSnoozedUntil != null && moment(isSnoozedUntil).isAfter()) {
+    return {
+      label: formatMonthDay(moment(isSnoozedUntil), 'll'),
+      color: 'accent',
+      tooltip: i18n.SNOOZING_FOR(moment(isSnoozedUntil).fromNow(true)),
+      'data-test-subj': BADGE_TEST_SUBJ,
+    };
+  }
+
+  // Snoozes without an id are not scheduled snoozes.
+  const scheduledStarts = (snoozeSchedule ?? [])
+    .filter((snooze) => Boolean(snooze.id))
+    .map((snooze) => moment(snooze.rRule.dtstart));
+  if (scheduledStarts.length === 0) return undefined;
+
+  const nextStart = moment.min(scheduledStarts);
+  return {
+    label: formatMonthDay(nextStart, 'll'),
+    color: 'hollow',
+    tooltip: i18n.SNOOZE_SCHEDULED(formatMonthDay(nextStart, 'LL')),
+    'data-test-subj': BADGE_TEST_SUBJ,
+  };
+};
 
 interface UseRuleSnoozeProps {
   /** Rule's saved object id */
@@ -45,8 +98,6 @@ export const useRuleSnooze = ({
   } = useKibana().services;
   const { addError } = useAppToasts();
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const dateFormat = useDateFormat();
-  const timeZone = useTimeZone();
   const { snoozeSettings, error } = useRuleSnoozeSettings(ruleId);
   const invalidateFetchRuleSnoozeSettings = useInvalidateFetchRulesSnoozeSettingsQuery();
   const [alertingRule, setAlertingRule] = useState<AlertingRule | null>(null);
@@ -84,21 +135,7 @@ export const useRuleSnooze = ({
     [isLoading, isExistingRule, canEditRules, snoozeSettings, error, openSnoozeModal]
   );
 
-  const badge = useMemo<AppHeaderBadge | undefined>(() => {
-    if (!snoozeSettings) return undefined;
-
-    const { muteAll, isSnoozedUntil } = snoozeSettings;
-    const isSnoozedUntilFuture = isSnoozedUntil != null && moment(isSnoozedUntil).isAfter();
-    if (!muteAll && !isSnoozedUntilFuture) return undefined;
-
-    return {
-      label: i18n.SNOOZED_BADGE,
-      tooltip: muteAll
-        ? i18n.SNOOZED_INDEFINITELY
-        : i18n.SNOOZED_UNTIL(moment.tz(isSnoozedUntil, timeZone).format(dateFormat)),
-      'data-test-subj': 'ruleDetailsSnoozedBadge',
-    };
-  }, [snoozeSettings, timeZone, dateFormat]);
+  const badge = useMemo(() => getSnoozeBadge(snoozeSettings), [snoozeSettings]);
 
   const modal = alertingRule
     ? getRuleSnoozeModal({

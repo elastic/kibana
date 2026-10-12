@@ -6,6 +6,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
+import moment from 'moment';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -17,8 +18,6 @@ jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
-  useDateFormat: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-  useTimeZone: () => 'UTC',
 }));
 jest.mock('../../../rule_management/components/rule_snooze_badge/use_rule_snooze_settings');
 jest.mock('../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query', () => ({
@@ -107,29 +106,84 @@ describe('useRuleSnooze', () => {
     expect(result.current.badge).toBeUndefined();
   });
 
-  it('shows a "Snoozed" badge with the end date for a snoozed rule', () => {
+  it('shows an accent badge with the end day and the time left for a snoozed rule', () => {
+    const snoozedUntil = moment().add(3, 'days').add(1, 'hour');
     (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
-      snoozeSettings: {
-        ...unsnoozedSettings,
-        isSnoozedUntil: new Date('2099-01-02T03:04:05.000Z'),
-      },
+      snoozeSettings: { ...unsnoozedSettings, isSnoozedUntil: snoozedUntil.toDate() },
+    });
+    const { result } = renderUseRuleSnooze();
+
+    expect(result.current.badge).toEqual(
+      expect.objectContaining({
+        label: snoozedUntil
+          .format('ll')
+          .replace(`${snoozedUntil.format('YYYY')}`, '')
+          .replace(',', '')
+          .trim(),
+        color: 'accent',
+        tooltip: 'Notifications snoozing for 3 days',
+      })
+    );
+  });
+
+  it('shows an accent "Snoozed" badge for an indefinitely snoozed rule', () => {
+    (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
+      snoozeSettings: { ...unsnoozedSettings, muteAll: true },
     });
     const { result } = renderUseRuleSnooze();
 
     expect(result.current.badge).toEqual(
       expect.objectContaining({
         label: 'Snoozed',
-        tooltip: 'Rule notifications are snoozed until Jan 2, 2099 @ 03:04:05.000',
+        color: 'accent',
+        tooltip: 'Notifications snoozed indefinitely',
       })
     );
   });
 
-  it('shows a "Snoozed" badge for an indefinitely snoozed rule', () => {
+  it('shows a hollow badge with the start day for a snooze scheduled for later', () => {
+    const start = moment().add(5, 'days');
     (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
-      snoozeSettings: { ...unsnoozedSettings, muteAll: true },
+      snoozeSettings: {
+        ...unsnoozedSettings,
+        snoozeSchedule: [
+          {
+            id: 'schedule-id',
+            duration: 3600000,
+            rRule: { dtstart: start.toISOString(), tzid: 'UTC' },
+          },
+        ],
+      },
     });
     const { result } = renderUseRuleSnooze();
 
-    expect(result.current.badge?.tooltip).toBe('Rule notifications are snoozed indefinitely');
+    expect(result.current.badge).toEqual(
+      expect.objectContaining({
+        label: start
+          .format('ll')
+          .replace(`${start.format('YYYY')}`, '')
+          .replace(',', '')
+          .trim(),
+        color: 'hollow',
+        tooltip: expect.stringContaining('Notifications scheduled to snooze starting'),
+      })
+    );
+  });
+
+  it('ignores snoozes without an id when looking for a scheduled snooze', () => {
+    (useRuleSnoozeSettings as jest.Mock).mockReturnValue({
+      snoozeSettings: {
+        ...unsnoozedSettings,
+        snoozeSchedule: [
+          {
+            duration: 3600000,
+            rRule: { dtstart: moment().add(1, 'day').toISOString(), tzid: 'UTC' },
+          },
+        ],
+      },
+    });
+    const { result } = renderUseRuleSnooze();
+
+    expect(result.current.badge).toBeUndefined();
   });
 });

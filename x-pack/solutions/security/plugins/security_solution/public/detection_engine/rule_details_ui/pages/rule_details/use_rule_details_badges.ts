@@ -41,8 +41,8 @@ interface UseRuleDetailsBadgesProps {
 }
 
 /**
- * Builds the rule details header badges: enabled state (with enable/disable menu), deleted, modified,
- * snoozed, and, when rule changes history is enabled, the Elastic version and revision.
+ * Builds the rule details header badges: enabled state (with enable/disable menu), snoozed, modified,
+ * deleted, and, when rule changes history is enabled, the Elastic version and revision.
  */
 export const useRuleDetailsBadges = ({
   rule,
@@ -155,6 +155,9 @@ export const useRuleDetailsBadges = ({
       },
     ];
 
+    // Right after the enabled badge so the header never folds it into the "+N" overflow badge.
+    if (snoozeBadge) badges.push(snoozeBadge);
+
     if (rule && isCustomizedPrebuiltRule(rule)) {
       badges.push(
         doesBaseVersionExist
@@ -171,8 +174,6 @@ export const useRuleDetailsBadges = ({
             }
       );
     }
-
-    if (snoozeBadge) badges.push(snoozeBadge);
 
     return [...badges, ...versionBadges];
   }, [

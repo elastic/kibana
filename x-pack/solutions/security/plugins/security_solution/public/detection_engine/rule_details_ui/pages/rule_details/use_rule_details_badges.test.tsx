@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { MemoryRouter } from 'react-router-dom';
+import type { AppHeaderBadge } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SecurityAppHeader } from '../../../../common/components/app_header';
 import { TestProviders } from '../../../../common/mock';
@@ -48,9 +49,15 @@ interface RuleBadgesProps {
   rule: ReturnType<typeof mockRule> | null;
   isExistingRule?: boolean;
   ruleLoading?: boolean;
+  snoozeBadge?: AppHeaderBadge;
 }
 
-const RuleBadges = ({ rule, isExistingRule = true, ruleLoading = false }: RuleBadgesProps) => {
+const RuleBadges = ({
+  rule,
+  isExistingRule = true,
+  ruleLoading = false,
+  snoozeBadge,
+}: RuleBadgesProps) => {
   const badges = useRuleDetailsBadges({
     rule,
     ruleLoading,
@@ -58,6 +65,7 @@ const RuleBadges = ({ rule, isExistingRule = true, ruleLoading = false }: RuleBa
     hasActionsPrivileges: true,
     onRuleEnabledChange,
     startMlJobsIfNeeded,
+    snoozeBadge,
   });
   return <SecurityAppHeader title="Rule" badges={badges} />;
 };
@@ -207,5 +215,23 @@ describe('useRuleDetailsBadges', () => {
     renderHeader({ rule: null, ruleLoading: true });
 
     expect(screen.queryByTestId('ruleDetailsEnabledBadge')).not.toBeInTheDocument();
+  });
+
+  it('keeps the snooze badge visible next to the enabled badge when badges overflow', () => {
+    renderHeader({
+      rule: {
+        ...mockRule('rule-id'),
+        rule_source: {
+          type: 'external',
+          is_customized: true,
+          has_base_version: true,
+          customized_fields: [],
+        },
+      },
+      snoozeBadge: { label: 'Oct 15', color: 'accent' },
+    });
+
+    expect(screen.getByText('Oct 15')).toBeInTheDocument();
+    expect(screen.queryByText('Modified Elastic rule')).not.toBeInTheDocument();
   });
 });

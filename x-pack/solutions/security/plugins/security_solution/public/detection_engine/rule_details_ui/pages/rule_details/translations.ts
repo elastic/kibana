@@ -165,14 +165,20 @@ export const SNOOZED_BADGE = i18n.translate(
 export const SNOOZED_INDEFINITELY = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.snoozedIndefinitelyTooltip',
   {
-    defaultMessage: 'Rule notifications are snoozed indefinitely',
+    defaultMessage: 'Notifications snoozed indefinitely',
   }
 );
 
-export const SNOOZED_UNTIL = (date: string) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.snoozedUntilTooltip', {
-    defaultMessage: 'Rule notifications are snoozed until {date}',
-    values: { date },
+export const SNOOZING_FOR = (timeLeft: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.snoozingForTooltip', {
+    defaultMessage: 'Notifications snoozing for {timeLeft}',
+    values: { timeLeft },
+  });
+
+export const SNOOZE_SCHEDULED = (startDate: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.ruleDetails.snoozeScheduledTooltip', {
+    defaultMessage: 'Notifications scheduled to snooze starting {startDate}',
+    values: { startDate },
   });
 
 export const UNABLE_TO_LOAD_SNOOZE_SETTINGS = i18n.translate(
