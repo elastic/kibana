@@ -64,7 +64,7 @@ node scripts/jest_integration.js \
   loudly (a rendered `with:` that no longer validates) instead of silently
   degrading.
 - `kibana_request_fake.ts` — mocks `global.fetch`, which is what the built-in
-  `kibana.request` step type calls. Answers exactly the two paths the chain's
+  `kibana.request` step type calls. Answers exactly the paths the chain's
   `kibana.request` steps ever hit: the journal-note converse call, and the
   review's read-back of the proposal decision (`GET /internal/proposals/:id`),
   routed through the SAME `ProposalsService` instance the escalation gate
@@ -123,3 +123,14 @@ proposal settled `expired`/no decision and both the Investigation and the
 attack left open. Nothing here is wall-clock-dependent in real time — the
 suite runs in ~4s for this branch — so there was no reason to defer it to the
 unit layer.
+
+**Display text (`_find`) and the reopen guard**: covered, and pinned by content
+rather than presence. The seeded discovery's persisted title/summary
+deliberately differ from the review's `inputs.title`/`summary_markdown`, so the
+proposal title, the proposal comment and the Investigation title can only carry
+the `_find` text if the read actually happened (a `_find` that answers `data: []`
+turns them red). For `create_proposal.yaml`'s `autoApprove && reopened != true`
+guard, a `supervised` review of a CLOSED Investigation must park for a human, a
+`supervised` review of an OPEN one must auto-approve, and a `manual` one must
+park. `investigations.reopen`'s fake mirrors the shipped handler (status gate,
+`[Reopen] ` title prefix, the conversation's real title returned).

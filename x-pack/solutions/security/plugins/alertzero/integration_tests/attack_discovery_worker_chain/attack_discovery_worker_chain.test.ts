@@ -9,7 +9,11 @@ import { ExecutionStatus } from '@kbn/workflows';
 import {
   createAttackDiscoveryChainFixture,
   FAKE_ATTACK_DISCOVERY_ID,
+  FAKE_DISCOVERY_DISPLAY_SUMMARY,
+  FAKE_DISCOVERY_DISPLAY_TITLE,
   FAKE_INVESTIGATION_ID,
+  FAKE_REVIEW_INPUT_SUMMARY,
+  FAKE_REVIEW_INPUT_TITLE,
 } from './attack_discovery_chain_fixture';
 import type { AttackDiscoveryChainFixture } from './attack_discovery_chain_fixture';
 
@@ -229,6 +233,113 @@ describe('AlertZero Attack Discovery worker chain (review -> fp/tp analysis -> e
       expect(fixture.reviewExecution()?.status).toBe(ExecutionStatus.COMPLETED);
       expect(fixture.reviewOutput()).toMatchObject({ verdict: 'inconclusive' });
       expect(fixture.backend.knowledgeIndicators.size).toBe(1);
+    });
+  });
+
+  describe('display text read (`GET /api/attack_discovery/_find`)', () => {
+    // The fixture seeds a discovery whose persisted title/summary DIFFER from the
+    // review's `inputs.title` / `inputs.summary_markdown`. The review prefers the
+    // `_find` text and only falls back to the inputs, so these assertions fail if the
+    // `_find` answer is dropped, emptied or never read.
+    beforeEach(() => {
+      fixture.backend.queueAgentVerdict({
+        verdict: 'true_positive',
+        summary_markdown: 'Evidence supports the correlation.',
+        checks: [],
+        claims: {},
+      });
+    });
+
+    it('names the proposal, and the comment heads it, with the persisted discovery text', async () => {
+      await fixture.runReview();
+
+      const proposal = fixture.onlyProposal();
+      expect(proposal.title).toBe(FAKE_DISCOVERY_DISPLAY_TITLE);
+      expect(proposal.title).not.toBe(FAKE_REVIEW_INPUT_TITLE);
+      expect(proposal.comment).toContain(FAKE_DISCOVERY_DISPLAY_TITLE);
+      expect(proposal.comment).toContain(FAKE_DISCOVERY_DISPLAY_SUMMARY);
+      expect(proposal.comment).not.toContain(FAKE_REVIEW_INPUT_SUMMARY);
+    });
+
+    it('titles the Investigation with the persisted discovery text', async () => {
+      await fixture.runReview();
+
+      const [investigation] = fixture.backend.conversations.values();
+      expect(investigation.title).toBe(FAKE_DISCOVERY_DISPLAY_TITLE);
+    });
+
+    it('falls back to the persisted review inputs when the discovery cannot be read', async () => {
+      // An unseeded id: `_find` answers an empty `data` list. The analysis cannot
+      // load it either, so the run takes the failed arm, but the Investigation is
+      // opened first and carries whichever title the review resolved.
+      await fixture.runReview({ attack_discovery_id: 'does-not-exist' });
+
+      const [investigation] = fixture.backend.conversations.values();
+      expect(investigation.title).toBe(FAKE_REVIEW_INPUT_TITLE);
+    });
+  });
+
+  describe('autonomy-driven auto-approval on a re-review (`create_proposal.yaml` reopen guard)', () => {
+    // The fixture's action policy is `autonomy-dependent`, so `autonomy: supervised`
+    // makes the review request `autoApprove`. The AlertZero bridge forces that off when
+    // `investigations.reopen` actually reopened a closed Investigation: a human already
+    // closed it once, and skipping the gate would bypass them.
+    beforeEach(() => {
+      fixture.backend.queueAgentVerdict({
+        verdict: 'true_positive',
+        summary_markdown: 'Evidence supports the correlation.',
+        checks: [],
+        claims: {},
+      });
+    });
+
+    it('parks for a human when the Investigation was closed and had to be reopened', async () => {
+      fixture.backend.seedInvestigation({
+        id: FAKE_INVESTIGATION_ID,
+        status: 'closed',
+        title: 'Earlier review',
+      });
+
+      await fixture.runReview({ autonomy: 'supervised' });
+
+      expect(fixture.reviewExecution()?.status).toBe(ExecutionStatus.WAITING_FOR_CHILD);
+      const proposal = fixture.onlyProposal();
+      expect(proposal.status).toBe('pending');
+      expect(proposal.decision).toBeUndefined();
+      const investigation = fixture.backend.conversations.get(FAKE_INVESTIGATION_ID);
+      expect(investigation?.metadata.status).toBe('open');
+      expect(investigation?.title).toBe('[Reopen] Earlier review');
+    });
+
+    it('auto-approves without parking when the Investigation was already open', async () => {
+      fixture.backend.seedInvestigation({
+        id: FAKE_INVESTIGATION_ID,
+        status: 'open',
+        title: 'Earlier review',
+      });
+
+      await fixture.runReview({ autonomy: 'supervised' });
+
+      expect(fixture.reviewExecution()?.status).toBe(ExecutionStatus.COMPLETED);
+      const proposal = fixture.onlyProposal();
+      expect(proposal.decision).toBe('approved');
+      expect(proposal.status).toBe('succeeded');
+      expect(fixture.backend.conversations.get(FAKE_INVESTIGATION_ID)?.title).toBe(
+        'Earlier review'
+      );
+    });
+
+    it('still parks a manual-autonomy escalation on an open Investigation', async () => {
+      fixture.backend.seedInvestigation({
+        id: FAKE_INVESTIGATION_ID,
+        status: 'open',
+        title: 'Earlier review',
+      });
+
+      await fixture.runReview({ autonomy: 'manual' });
+
+      expect(fixture.reviewExecution()?.status).toBe(ExecutionStatus.WAITING_FOR_CHILD);
+      expect(fixture.onlyProposal().status).toBe('pending');
     });
   });
 
