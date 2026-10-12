@@ -51,7 +51,7 @@ spaceTest.describe('ES|QL Views privilege gating', { tag: tags.stateful.classic 
       await browserAuth.loginWithCustomRole(ESQL_VIEWS_READ_ONLY_ROLE);
       await esqlViews.goto();
 
-      const row = esqlViews.getViewRow(VIEW_NAME);
+      const row = await esqlViews.findViewRow(VIEW_NAME);
       await expect(row).toBeVisible();
       await expect(esqlViews.createButton).toBeHidden();
       await expect(row.getByTestId('esqlViewsActionsButton')).toBeHidden();
@@ -66,7 +66,7 @@ spaceTest.describe('ES|QL Views privilege gating', { tag: tags.stateful.classic 
       await browserAuth.loginWithCustomRole(ESQL_VIEWS_CREATE_ROLE);
       await esqlViews.goto();
 
-      const row = esqlViews.getViewRow(VIEW_NAME);
+      const row = await esqlViews.findViewRow(VIEW_NAME);
       await expect(row).toBeVisible();
       await expect(esqlViews.createButton).toBeVisible();
       await expect(row.getByTestId('esqlViewsActionsButton')).toBeVisible();
@@ -85,7 +85,7 @@ spaceTest.describe('ES|QL Views privilege gating', { tag: tags.stateful.classic 
       await browserAuth.loginWithCustomRole(ESQL_VIEWS_DELETE_ROLE);
       await esqlViews.goto();
 
-      const row = esqlViews.getViewRow(VIEW_NAME);
+      const row = await esqlViews.findViewRow(VIEW_NAME);
       await expect(row).toBeVisible();
       await expect(esqlViews.createButton).toBeHidden();
       await expect(row.getByRole('checkbox')).toBeVisible();

@@ -68,6 +68,11 @@ export class EsqlViewsPage {
       .filter({ has: this.page.getByRole('rowheader', { name, exact: true }) });
   }
 
+  async findViewRow(name: string): Promise<Locator> {
+    await this.search(name);
+    return this.getViewRow(name);
+  }
+
   async search(value: string): Promise<void> {
     await this.searchInput.press('ControlOrMeta+A');
     await this.searchInput.press('Backspace');
@@ -79,7 +84,10 @@ export class EsqlViewsPage {
 
   async reload(): Promise<void> {
     await this.reloadButton.click();
-    await this.reloadButton.waitFor({ state: 'visible' });
+    await this.reloadButton.and(this.page.locator('[disabled]')).waitFor({ state: 'visible' });
+    await this.reloadButton
+      .and(this.page.locator(':not([disabled])'))
+      .waitFor({ state: 'visible' });
   }
 
   async openCreateFlyout(): Promise<void> {
@@ -122,7 +130,8 @@ export class EsqlViewsPage {
   }
 
   async openRowActions(name: string): Promise<void> {
-    await this.getViewRow(name).getByTestId('esqlViewsActionsButton').click();
+    const row = await this.findViewRow(name);
+    await row.getByTestId('esqlViewsActionsButton').click();
   }
 
   async openEditFlyout(name: string): Promise<void> {
@@ -138,7 +147,8 @@ export class EsqlViewsPage {
   }
 
   async selectView(name: string): Promise<void> {
-    await this.getViewRow(name).getByRole('checkbox').check();
+    const row = await this.findViewRow(name);
+    await row.getByRole('checkbox').check();
   }
 
   async requestBulkDelete(): Promise<void> {
@@ -152,6 +162,7 @@ export class EsqlViewsPage {
   }
 
   async openInDiscover(name: string): Promise<void> {
-    await this.getViewRow(name).getByTestId('esqlViewsOpenInDiscoverAction').click();
+    const row = await this.findViewRow(name);
+    await row.getByTestId('esqlViewsOpenInDiscoverAction').click();
   }
 }

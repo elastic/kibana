@@ -26,7 +26,6 @@ const VIEW_NAMES = VIEWS.map(({ name }) => name);
 
 spaceTest.describe('ES|QL View deletion', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ esClient }) => {
-    await deleteEsqlViews(esClient, VIEW_NAMES);
     await Promise.all(VIEWS.map((view) => createEsqlView(esClient, view)));
   });
 
@@ -46,7 +45,7 @@ spaceTest.describe('ES|QL View deletion', { tag: tags.stateful.classic }, () => 
     await esqlViews.requestSingleDelete(singleView.name);
     await expect(esqlViews.deleteModal).toContainText(`Delete view "${singleView.name}"?`);
     await esqlViews.confirmDelete();
-    await expect(esqlViews.getViewRow(singleView.name)).toBeHidden();
+    await expect(await esqlViews.findViewRow(singleView.name)).toBeHidden();
     await expect.poll(() => getEsqlView(esClient, singleView.name)).toBeUndefined();
 
     await esqlViews.selectView(firstBulkView.name);
@@ -55,8 +54,8 @@ spaceTest.describe('ES|QL View deletion', { tag: tags.stateful.classic }, () => 
     await expect(esqlViews.deleteModal).toContainText('Delete 2 views?');
     await esqlViews.confirmDelete();
 
-    await expect(esqlViews.getViewRow(firstBulkView.name)).toBeHidden();
-    await expect(esqlViews.getViewRow(secondBulkView.name)).toBeHidden();
+    await expect(await esqlViews.findViewRow(firstBulkView.name)).toBeHidden();
+    await expect(await esqlViews.findViewRow(secondBulkView.name)).toBeHidden();
     await expect.poll(() => getEsqlView(esClient, firstBulkView.name)).toBeUndefined();
     await expect.poll(() => getEsqlView(esClient, secondBulkView.name)).toBeUndefined();
   });

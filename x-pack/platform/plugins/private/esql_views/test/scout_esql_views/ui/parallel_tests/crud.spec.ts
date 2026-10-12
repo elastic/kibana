@@ -18,10 +18,6 @@ const UPDATED_DESCRIPTION = 'Edited through the management UI';
 const UPDATED_QUERY = 'ROW value = 2';
 
 spaceTest.describe('ES|QL View create and edit', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ esClient }) => {
-    await deleteEsqlViews(esClient, [VIEW_NAME]);
-  });
-
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsAdmin();
     await pageObjects.esqlViews.goto();
@@ -43,7 +39,7 @@ spaceTest.describe('ES|QL View create and edit', { tag: tags.stateful.classic },
     await esqlViews.saveForm();
 
     await expect(esqlViews.formFlyout).toBeHidden();
-    await expect(esqlViews.getViewRow(VIEW_NAME)).toContainText(INITIAL_DESCRIPTION);
+    await expect(await esqlViews.findViewRow(VIEW_NAME)).toContainText(INITIAL_DESCRIPTION);
     await expect
       .poll(() => getEsqlView(esClient, VIEW_NAME))
       .toStrictEqual({
@@ -67,7 +63,7 @@ spaceTest.describe('ES|QL View create and edit', { tag: tags.stateful.classic },
     await esqlViews.saveForm();
 
     await expect(esqlViews.formFlyout).toBeHidden();
-    await expect(esqlViews.getViewRow(VIEW_NAME)).toContainText(UPDATED_DESCRIPTION);
+    await expect(await esqlViews.findViewRow(VIEW_NAME)).toContainText(UPDATED_DESCRIPTION);
     await expect
       .poll(() => getEsqlView(esClient, VIEW_NAME))
       .toStrictEqual({

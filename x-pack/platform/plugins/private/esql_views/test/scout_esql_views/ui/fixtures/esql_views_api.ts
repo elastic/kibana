@@ -17,10 +17,10 @@ export const createEsqlView = async (
   esClient: EsClient,
   { name, query, description }: TestEsqlView
 ): Promise<void> => {
-  await esClient.transport.request({
-    method: 'PUT',
-    path: `/_query/view/${encodeURIComponent(name)}`,
-    body: { query, description },
+  await esClient.esql.putView({
+    name,
+    query,
+    ...(description === undefined ? {} : { body: { description } }),
   });
 };
 

@@ -34,8 +34,6 @@ const VIEW_NAMES = [...INITIAL_VIEWS.map(({ name }) => name), RELOADED_VIEW.name
 
 spaceTest.describe('ES|QL Views table', { tag: tags.stateful.classic }, () => {
   spaceTest.beforeAll(async ({ esClient }) => {
-    await deleteEsqlViews(esClient, VIEW_NAMES);
-    await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
     await esClient.indices.create({ index: SOURCE_INDEX });
     await esClient.index({
       index: SOURCE_INDEX,
@@ -61,8 +59,8 @@ spaceTest.describe('ES|QL Views table', { tag: tags.stateful.classic }, () => {
       const { esqlViews, discover } = pageObjects;
       const [alphaView, betaView] = INITIAL_VIEWS;
 
-      await expect(esqlViews.getViewRow(alphaView.name)).toBeVisible();
-      await expect(esqlViews.getViewRow(betaView.name)).toBeVisible();
+      await expect(await esqlViews.findViewRow(alphaView.name)).toBeVisible();
+      await expect(await esqlViews.findViewRow(betaView.name)).toBeVisible();
 
       await esqlViews.search('alpha');
       await expect(esqlViews.getViewRow(alphaView.name)).toBeVisible();
@@ -71,7 +69,7 @@ spaceTest.describe('ES|QL Views table', { tag: tags.stateful.classic }, () => {
       await esqlViews.search('missing-view');
       await expect(esqlViews.noSearchResults).toBeVisible();
 
-      await esqlViews.search('');
+      await esqlViews.search(RELOADED_VIEW.name);
       await createEsqlView(esClient, RELOADED_VIEW);
       await expect(esqlViews.getViewRow(RELOADED_VIEW.name)).toBeHidden();
       await esqlViews.reload();
