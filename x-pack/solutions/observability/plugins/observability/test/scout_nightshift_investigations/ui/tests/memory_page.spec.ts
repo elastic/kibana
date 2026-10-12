@@ -275,10 +275,9 @@ test.describe(
      * Opens the Memory page by loading its route, the way a bookmark or a pasted
      * link does.
      *
-     * That used to bounce to Streams: the page builds its tab list from an
-     * availability query that is still pending on the first render, so `memory` was
-     * briefly not one of its tabs and an unknown tab is redirected to the first
-     * one. Loading the route directly and staying on it is the assertion.
+     * The Knowledge page redirects a tab it does not recognise, or one its
+     * availability query reports as off, to the first visible tab. Loading the
+     * route directly and staying on it is the assertion.
      */
     const gotoMemory = async (
       page: ScoutPage,
