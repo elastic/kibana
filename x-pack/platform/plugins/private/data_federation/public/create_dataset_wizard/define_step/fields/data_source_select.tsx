@@ -172,7 +172,7 @@ export function DataSourceSelect({
               {createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}{' '}
               <EuiLink
                 color="primary"
-                href={docLinks.links.dataFederation.authentication}
+                href={docLinks.links.dataFederation.grantReadAccess}
                 target="_blank"
                 external
                 data-test-subj="createDatasetDataSourceAuthenticationLearnMore"

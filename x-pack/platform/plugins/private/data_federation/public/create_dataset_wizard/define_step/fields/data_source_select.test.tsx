@@ -12,6 +12,18 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { DataSource } from '../../../../common';
 import { DataSourceSelect } from './data_source_select';
+import { docLinksMock } from '../../../doc_links_mock';
+
+const mockDocLinks = {
+  ...docLinksMock,
+  links: {
+    ...docLinksMock.links,
+    dataFederation: {
+      ...docLinksMock.links.dataFederation,
+      grantReadAccess: 'https://example.com/grant-read-access',
+    },
+  },
+};
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -19,13 +31,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
       dataSourcesClient: {
         add: jest.fn(),
       },
-      docLinks: {
-        links: {
-          dataFederation: {
-            authentication: 'https://example.com/authentication',
-          },
-        },
-      },
+      docLinks: mockDocLinks,
     },
   }),
 }));
@@ -98,7 +104,7 @@ describe('DataSourceSelect', () => {
     );
     expect(getByTestId('createDatasetDataSourceAuthenticationLearnMore')).toHaveAttribute(
       'href',
-      'https://example.com/authentication'
+      'https://example.com/grant-read-access'
     );
   });
 });

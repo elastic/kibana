@@ -17,6 +17,8 @@ import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues } from '../create_dataset_form_state';
 import { emptyDatasetFormValues } from '../dataset_form_initial_values';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
+import { docLinksMock } from '../../doc_links_mock';
+
 
 jest.mock('../../create_data_source_flyout', () => ({
   CreateDataSourceFlyout: ({
@@ -66,7 +68,7 @@ function Harness({
     <KibanaContextProvider
       services={{
         dataSourcesClient: { add },
-        docLinks: { links: { dataFederation: { authentication: '' } } },
+        docLinks: docLinksMock,
       }}
     >
       <FormProvider {...methods}>
