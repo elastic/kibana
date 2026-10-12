@@ -9,12 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppHeaderTab } from '@kbn/app-header';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { useSignificantEventsAppParams } from '../../hooks/use_significant_events_app_params';
 import { SignificantEventsPage } from './page';
-
-const mockNavigateToApp = jest.fn();
 
 jest.mock('../../hooks/use_developer_mode');
 jest.mock('../../hooks/use_kibana', () => ({
@@ -22,7 +19,6 @@ jest.mock('../../hooks/use_kibana', () => ({
     core: {
       application: {
         getUrlForApp: jest.fn(() => '/app/nightshift'),
-        navigateToApp: mockNavigateToApp,
         capabilities: {
           nightshift: {
             show: true,
@@ -80,9 +76,6 @@ jest.mock('../../hooks/use_significant_events_maintenance', () => ({
   }),
 }));
 jest.mock('../../components/page_template', () => ({
-  // A stub with a test subject of its own: the page returns this instead of the
-  // route's tab while a gated tab's availability query is still in flight, and
-  // "not redirected" alone would also pass if the page had rendered nothing.
   SignificantEventsAppLoading: () => <div data-test-subj="app-loading" />,
   SignificantEventsAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
     <div data-test-subj="app-header-tabs">
@@ -175,15 +168,5 @@ describe('SignificantEventsPage developer mode', () => {
 
     expect(screen.getByTestId('redirect-to')).toHaveTextContent('streams');
     expect(screen.queryByTestId('detections-tab-content')).not.toBeInTheDocument();
-  });
-
-  it('redirects legacy Knowledge tabs to Nightshift', () => {
-    setup({ tab: 'cortex', isDeveloperMode: false });
-
-    expect(screen.getByTestId('app-loading')).toBeInTheDocument();
-    expect(mockNavigateToApp).toHaveBeenCalledWith(NIGHTSHIFT_APP_ID, {
-      path: '/knowledge/cortex',
-      replace: true,
-    });
   });
 });

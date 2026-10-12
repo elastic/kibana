@@ -52,16 +52,9 @@ const significantEventsTabs = [
 ] as const;
 type SignificantEventsTabId = (typeof significantEventsTabs)[number];
 
-// Keep this redirect compatibility list local to avoid depending on Nightshift UI internals.
-const legacyKnowledgeTabs = ['cortex', 'memory', 'decision_trees'] as const;
-type LegacyKnowledgeTabId = (typeof legacyKnowledgeTabs)[number];
-
 function isValidSignificantEventsTab(value: string): value is SignificantEventsTabId {
   return significantEventsTabs.includes(value as SignificantEventsTabId);
 }
-
-const isLegacyKnowledgeTab = (value: string): value is LegacyKnowledgeTabId =>
-  legacyKnowledgeTabs.includes(value as LegacyKnowledgeTabId);
 
 export function SignificantEventsPage() {
   const {
@@ -73,7 +66,6 @@ export function SignificantEventsPage() {
     core: {
       application: {
         getUrlForApp,
-        navigateToApp,
         capabilities: { nightshift },
       },
       chrome,
@@ -150,15 +142,6 @@ export function SignificantEventsPage() {
     ]);
   }, [chrome]);
 
-  useEffect(() => {
-    if (isLegacyKnowledgeTab(tab)) {
-      void navigateToApp(NIGHTSHIFT_APP_ID, {
-        path: `/knowledge/${tab}`,
-        replace: true,
-      });
-    }
-  }, [navigateToApp, tab]);
-
   const allTabs = useMemo(
     () => [
       {
@@ -211,7 +194,7 @@ export function SignificantEventsPage() {
     [allTabs, isDeveloperMode]
   );
 
-  if (isAvailabilityLoading || isLegacyKnowledgeTab(tab)) {
+  if (isAvailabilityLoading) {
     return <SignificantEventsAppLoading />;
   }
 
