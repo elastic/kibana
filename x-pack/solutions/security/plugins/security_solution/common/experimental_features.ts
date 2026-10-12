@@ -136,6 +136,12 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsNewHomePageEnabled: true,
 
   /**
+   * Enables the Entity Analytics executive brief: an AI-written summary generated on demand
+   * from Entity Analytics signals (routes, task types, storage and inference feature).
+   */
+  entityAnalyticsExecutiveBriefEnabled: false,
+
+  /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.

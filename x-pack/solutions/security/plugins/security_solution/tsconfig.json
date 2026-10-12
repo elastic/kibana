@@ -187,6 +187,7 @@
     "@kbn/unified-field-list",
     "@kbn/resizable-layout",
     "@kbn/zod-helpers",
+    "@kbn/storage-adapter",
     "@kbn/core-http-common",
     "@kbn/search-errors",
     "@kbn/elastic-assistant-common",
