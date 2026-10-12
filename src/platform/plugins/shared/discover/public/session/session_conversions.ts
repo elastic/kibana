@@ -29,7 +29,6 @@ import {
   toStoredSearchSource,
 } from '../../common/session/search_and_table_mapping';
 import { toStoredTabTypeState } from '../../common/session/tab_type_state';
-import { getVisContextRequestData } from '../../common/session/get_vis_context_request_data';
 import type {
   DiscoverSessionInternalData,
   DiscoverSessionInternalResponse,
@@ -105,10 +104,7 @@ const fromApiTabToDiscoverTab = (apiTab: DiscoverSessionInternalData['tabs'][num
     ...tabFields,
     ...toStoredSessionSettings(apiTab),
     serializedSearchSource,
-    visContext: fromApiVisContext(
-      apiTab.vis_context,
-      getVisContextRequestData(apiTab, getInlineDataView(serializedSearchSource)?.id)
-    ),
+    visContext: fromApiVisContext(apiTab.vis_context),
     controlGroupJson: serializeEsqlControls(apiTab.control_panels),
     ...(tabTypeState !== undefined && { tabTypeState }),
   };
