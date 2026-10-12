@@ -207,6 +207,15 @@ const NON_SECRET_TOKEN_KEYS = new Set([
 
 const normalizeKey = (key: string): string => key.toLowerCase().replace(/[-_\s]/g, '');
 
+// A number is kept only under a key that names a token COUNT (`num_token`, `inputToken`,
+// `usage.total_token`, ...). A number under any other sensitive `*token` key (`access_token`,
+// `session_token`, `refresh_token`, ...) may be a credential and is redacted. Plural `*tokens`
+// keys are not sensitive at all (see `isSensitiveKey`).
+const COUNT_TOKEN_KEY =
+  /(?:^|[-_\s])(?:num|count|max|min|input|output|prompt|completion|total|cached|reasoning|next)[-_\s]?tokens?$/;
+const isTokenCountKey = (key: string): boolean =>
+  COUNT_TOKEN_KEY.test(key.replace(/([a-z\d])([A-Z])/g, '$1_$2').toLowerCase());
+
 const isSensitiveKey = (key: string): boolean => {
   const normalized = normalizeKey(key);
   if (NON_SECRET_TOKEN_KEYS.has(normalized)) return false;
@@ -298,9 +307,8 @@ const findSecretValueEnd = (text: string, key: string, start: number): number =>
     return start + matchLength(COOKIE_VALUE, text, start);
   }
   const length = matchLength(SCALAR_VALUE, text, start);
-  // numeric values under `*token` keys are counts (`num_token: 5`), not credentials
-  if (normalized.endsWith('token') && NUMERIC_VALUE.test(text.slice(start, start + length)))
-    return start;
+  // numeric values under token-COUNT keys (`num_token: 5`) are not credentials
+  if (isTokenCountKey(key) && NUMERIC_VALUE.test(text.slice(start, start + length))) return start;
   return start + length;
 };
 
@@ -310,6 +318,37 @@ const isStructuralPosition = (text: string, index: number): boolean => {
   let i = index - 1;
   while (i >= 0 && (text[i] === ' ' || text[i] === '\t')) i--;
   return i < 0 || /[\r\n{},&?;"']/.test(text[i]);
+};
+
+// Bare `credentials` / `invalid_token` also open ordinary prose ("Invalid credentials: { reason:
+// "expired" } please rotate", "credentials: [missing] for provider", "invalid_token: The access
+// token expired"). Only the bare (unquoted) key is exempted, and only when the value reads as a
+// placeholder, prose, or (for `credentials`) a group with an unquoted key. A quoted JSON key
+// position (`"credentials":{...}`) always redacts.
+const PROSE_KEYS = new Set(['credentials', 'invalidtoken']);
+const PLACEHOLDER_VALUE =
+  /\[(?:missing|none|null|empty|invalid|required|provided|not provided|not set|unset|omitted|hidden|expired)\]/iy;
+const PROSE_WORDS_VALUE = /[A-Za-z]{2,}[ \t]+[a-z]{2,}/y;
+const BARE_KEY_GROUP_VALUE =
+  /\{[ \t]*(?:reason|message|error|detail|details|status|code|type|description)[ \t]*:/iy;
+
+const isProseValue = (
+  text: string,
+  key: string,
+  match: RegExpExecArray,
+  valueStart: number
+): boolean => {
+  const normalized = normalizeKey(key);
+  if (!PROSE_KEYS.has(normalized)) return false;
+  if (/^\\*["']/.test(match[0].slice(key.length))) return false;
+  if (matchLength(PROSE_WORDS_VALUE, text, valueStart) > 0) return true;
+  if (normalized !== 'credentials') return false;
+  if (matchLength(PLACEHOLDER_VALUE, text, valueStart) > 0) return true;
+  // a group only counts as prose mid-sentence; at a key position it stays fail-closed
+  return (
+    !isStructuralPosition(text, match.index) &&
+    matchLength(BARE_KEY_GROUP_VALUE, text, valueStart) > 0
+  );
 };
 
 // `key: value`, `key=value`, `"key":"value"` and the escaped forms found in JSON embedded in a
@@ -326,6 +365,7 @@ const redactKeyedSecrets = (text: string): string => {
     if (!isSensitiveKey(key)) continue;
     if (normalizeKey(key) === 'token' && !isStructuralPosition(text, match.index)) continue;
     const valueStart = match.index + match[0].length;
+    if (isProseValue(text, key, match, valueStart)) continue;
     const valueEnd = findSecretValueEnd(text, key, valueStart);
     if (valueEnd <= valueStart) continue;
     result += `${text.slice(cursor, valueStart)}${REDACTED}`;
@@ -350,7 +390,7 @@ const redactSensitiveKeysReplacer = (key: string, value: unknown): unknown =>
   value !== null &&
   value !== undefined &&
   isSensitiveKey(key) &&
-  !(typeof value === 'number' && normalizeKey(key).endsWith('token'))
+  !(typeof value === 'number' && isTokenCountKey(key))
     ? REDACTED
     : value;
 

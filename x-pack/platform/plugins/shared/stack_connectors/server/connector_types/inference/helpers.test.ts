@@ -387,6 +387,33 @@ describe('redaction of JSON embedded in error strings', () => {
       ['client_assertion', '{"client_assertion":"eyJhbGciOi.zz"}', ['eyJhbGciOi.zz']],
       ['x-goog-api-key', 'x-goog-api-key: AIzaZZSECRET9', ['AIzaZZSECRET9']],
       ['access_key', 'access_key=AKIAZZSECRET9', ['AKIAZZSECRET9']],
+      ['numeric access_token', 'access_token: 12345678901234', ['12345678901234']],
+      ['numeric session_token', '{session_token: 12345678901234}', ['12345678901234']],
+      ['numeric refresh_token', 'refresh_token=12345', ['12345']],
+      ['numeric quoted id_token', '{"id_token":12345678901234}', ['12345678901234']],
+      [
+        'numeric escaped session_token',
+        'Error message: [{\\"session_token\\":987654321}]',
+        ['987654321'],
+      ],
+      ['numeric hf_token', 'hf_token: 12345678', ['12345678']],
+      [
+        'quoted credentials object',
+        '{"credentials":{"user":"alice","pass":"hunter2"}}',
+        ['alice', 'hunter2'],
+      ],
+      [
+        'credentials group with a secret key mid-sentence',
+        'Invalid credentials: { reason: "expired", password: "hunter2" } please rotate',
+        ['hunter2'],
+      ],
+      [
+        'credentials group at a key position',
+        '{"credentials": {"value":"zzsecret9"}}',
+        ['zzsecret9'],
+      ],
+      ['bare credentials with a secret value', 'credentials: zzsecret9', ['zzsecret9']],
+      ['bare invalid_token with a secret value', 'invalid_token: zzsecret9', ['zzsecret9']],
     ])('redacts %s', (_label, input, secrets) => {
       const output = redact(input);
       secrets.forEach((secret) => expect(output).not.toContain(secret));
@@ -406,23 +433,33 @@ describe('redaction of JSON embedded in error strings', () => {
       '{"error":{"message":"bad request","usage":{"prompt_tokens":120,"completion_tokens":80,"total_tokens":200}}}',
       'usage: {"prompt_tokens": 120, "max_tokens": 4096}',
       'num_token: 5, eos_token: 2',
+      'Invalid credentials: { reason: "expired" } please rotate',
+      '{"error":"credentials: [missing] for provider"}',
+      'invalid_token: The access token expired',
       'status [400]. Error message: [{\\"message\\":\\"unknown field\\",\\"total_tokens\\":200}]',
     ])('keeps ordinary body %s unchanged', (input) => {
       expect(redact(input)).toBe(input);
     });
   });
 
-  it('keeps numeric *_token values but still redacts string tokens', () => {
+  it('keeps numeric token COUNTS but redacts numbers under credential-style token keys', () => {
     const output = truncateUpstreamBody({
       usage: { prompt_tokens: 120, total_tokens: 200 },
-      access_token: 'zzsecret9',
+      access_token: 12345678901234,
+      session_token: 12345678901234,
       refresh_token: 12345,
       max_tokens: 4096,
     });
-    expect(output).not.toContain('zzsecret9');
     expect(output).toContain('"prompt_tokens":120');
     expect(output).toContain('"total_tokens":200');
     expect(output).toContain('"max_tokens":4096');
-    expect(output).toContain('"refresh_token":12345');
+    expect(output).toContain('"access_token":[redacted]');
+    expect(output).toContain('"session_token":[redacted]');
+    expect(output).toContain('"refresh_token":[redacted]');
+    expect(output).not.toContain('12345');
+  });
+
+  it('still redacts string tokens', () => {
+    expect(truncateUpstreamBody({ access_token: 'zzsecret9' })).not.toContain('zzsecret9');
   });
 });
