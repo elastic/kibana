@@ -18,6 +18,7 @@ import type {
   FieldDefinitionsService,
 } from '.';
 import type { AttachmentGetter } from './attachments/operations/get';
+import type { DeleteAttachmentArgs } from './attachments/types';
 import type { LicensingService } from './licensing';
 import type { EmailNotificationService } from './notifications/email_notification_service';
 import type { UserActionPersister } from './user_actions/operations/create';
@@ -186,7 +187,9 @@ type FakeAttachmentService = PublicMethodsOf<AttachmentService> & AttachmentServ
 export const createAttachmentServiceMock = (): AttachmentServiceMock => {
   const service: FakeAttachmentService = lazyObject({
     getter: createAttachmentGetterServiceMock(),
-    bulkDelete: jest.fn(),
+    bulkDelete: jest
+      .fn()
+      .mockImplementation(async ({ savedObjectIds }: DeleteAttachmentArgs) => savedObjectIds),
     create: jest.fn(),
     bulkCreate: jest.fn(),
     update: jest.fn(),

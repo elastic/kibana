@@ -73,6 +73,19 @@ export function useOnboardingDriftDetection({
       ? agentBasedDeployment.selectedAgentPolicyIds.slice().sort().join(',')
       : '';
 
+  // Readiness key for the only matrix entries drift compares: deployed, still-selected instances.
+  // awsServicesMap is rebuilt whenever any of the ten AWS package queries resolves, so keying the
+  // effect on the Map restarted the check on manifest arrivals it never reads — re-fetching the SO
+  // and unmounting the error callout, with its Retry button, while the user was acting on it.
+  const policyInstanceIds = Object.keys(policyIdsByInstance ?? {});
+  const comparedManifestsSettled =
+    awsServicesMap !== undefined &&
+    (serviceSettings?.instances ?? []).every(({ instanceId, serviceId }) => {
+      if (!policyInstanceIds.includes(instanceId)) return true;
+      const entry = awsServicesMap.get(serviceId);
+      return !entry || entry.isManifestLoaded || entry.isManifestError;
+    });
+
   useEffect(() => {
     let cancelled = false;
     const thisId = ++driftCheckIdRef.current;
@@ -81,12 +94,14 @@ export function useOnboardingDriftDetection({
     // effect re-runs with a loaded map).
     if (!onboardingDeploymentId || awsServicesMap === undefined) return;
     setDriftSettled(false);
-    setDriftCheckError(false);
     sendGetCloudOnboardingDeployment(onboardingDeploymentId)
       .then(({ item }) => {
         // cancelled guards against unmount (step navigated away); thisId guards against a
         // newer effect run superseding this one within the same hook instance.
         if (cancelled || thisId !== driftCheckIdRef.current) return;
+        // Cleared here, not before the fetch: an up-front reset unmounted the callout — and its
+        // Retry button — before the re-check had a result.
+        setDriftCheckError(false);
         if (!item) {
           // SO does not exist or was cleared — nothing to compare against; treat as clean.
           // Also clear persisted drift flags so stale session state doesn't re-trigger callout.
@@ -150,6 +165,7 @@ export function useOnboardingDriftDetection({
     return () => {
       cancelled = true;
     };
+    // awsServicesMap is captured from the closure, standing in the deps as comparedManifestsSettled.
     // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
     // service-var and region changes come from Step 2 navigation (full remount), not same-step
     // edits. Auth mutations (MI: connector swap; agent-based: credential method) and agent-based
@@ -157,7 +173,7 @@ export function useOnboardingDriftDetection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     onboardingDeploymentId,
-    awsServicesMap,
+    comparedManifestsSettled,
     connectorId,
     selectedAgentPoliciesKey,
     driftRetryKey,

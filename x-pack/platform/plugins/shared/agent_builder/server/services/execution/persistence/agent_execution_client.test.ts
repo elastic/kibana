@@ -44,7 +44,7 @@ describe('AgentExecutionClient', () => {
       await client.create(createParams);
 
       expect(mockStorageClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'exec-1', op_type: 'create' })
+        expect.objectContaining({ id: 'exec-1', op_type: 'create', refresh: false })
       );
     });
 

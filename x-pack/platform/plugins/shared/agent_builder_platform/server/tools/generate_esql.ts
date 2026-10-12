@@ -82,7 +82,7 @@ export const generateEsqlTool = ({
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
     description:
-      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+      'Generate an ES|QL query from a natural language query, including PromQL via the PROMQL source command. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
     annotations: {
       title: 'Generate ES|QL',
       readOnlyHint: true,
@@ -115,6 +115,7 @@ export const generateEsqlTool = ({
         includeViews: true,
         modelProvider,
         esClient: esClient.asCurrentUser,
+        internalEsClient: esClient.asInternalUser,
         logger,
         events,
       });

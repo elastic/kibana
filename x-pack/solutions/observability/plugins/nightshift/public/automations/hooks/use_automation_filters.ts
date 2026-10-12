@@ -12,6 +12,7 @@ import {
   countFilterValues,
   EMPTY_FILTERS,
   hasActiveFilters,
+  hasFilterSelections,
   matchesFilters,
   STATUS_ORDER,
   type AutomationFacets,
@@ -24,27 +25,48 @@ export const useAutomationFilters = (
 ) => {
   const [filters, setFilters] = useState<AutomationFilters>(EMPTY_FILTERS);
   const facets = automations.map(getFacets);
+  const options = {
+    statuses: countFilterValues(
+      facets.map(({ statuses }) => statuses),
+      STATUS_ORDER
+    ),
+    tags: countFilterValues(facets.map(({ tags }) => tags)),
+    authors: countFilterValues(facets.map(({ author }) => [author])),
+    triggers: countFilterValues(
+      facets.map(({ triggers }) => triggers),
+      TRIGGER_LABEL_ORDER
+    ),
+  };
+  const available = (selected: string[], candidates: Array<{ label: string }>) =>
+    selected.filter((value) => candidates.some(({ label }) => label === value));
+  const activeFilters: AutomationFilters = {
+    search: filters.search,
+    statuses: available(filters.statuses, options.statuses),
+    tags: available(filters.tags, options.tags),
+    authors: available(filters.authors, options.authors),
+    triggers: available(filters.triggers, options.triggers),
+  };
 
   return {
-    filters,
+    filters: activeFilters,
     setFilter: <K extends keyof AutomationFilters>(key: K, value: AutomationFilters[K]) =>
       setFilters((current) => ({ ...current, [key]: value })),
-    clearFilters: () => setFilters(EMPTY_FILTERS),
-    hasFilters: hasActiveFilters(filters),
+    showOnlyStatus: (status: string) =>
+      setFilters((current) => ({
+        ...current,
+        statuses: [status],
+        tags: [],
+        authors: [],
+        triggers: [],
+      })),
+    clearFilterSelections: () =>
+      setFilters((current) => ({ ...EMPTY_FILTERS, search: current.search })),
+    clearSearchAndFilters: () => setFilters(EMPTY_FILTERS),
+    hasFilterSelections: hasFilterSelections(activeFilters),
+    hasActiveFilters: hasActiveFilters(activeFilters),
     visibleAutomations: automations.filter((automation, index) =>
-      matchesFilters(automation, facets[index], filters)
+      matchesFilters(automation, facets[index], activeFilters)
     ),
-    options: {
-      statuses: countFilterValues(
-        facets.map(({ statuses }) => statuses),
-        STATUS_ORDER
-      ),
-      tags: countFilterValues(facets.map(({ tags }) => tags)),
-      authors: countFilterValues(facets.map(({ author }) => [author])),
-      triggers: countFilterValues(
-        facets.map(({ triggers }) => triggers),
-        TRIGGER_LABEL_ORDER
-      ),
-    },
+    options,
   };
 };

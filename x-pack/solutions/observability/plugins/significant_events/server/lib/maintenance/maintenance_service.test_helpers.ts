@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { MAX_BULK_ITEMS } from '@kbn/alerting-v2-schemas';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
@@ -17,7 +18,6 @@ import type { SignificantEventsServer } from '../../types';
 import type { KnowledgeIndicatorType } from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
-import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import { createSignificantEventsMaintenanceService } from './maintenance_service';
 
 export const REQUEST = { headers: {} } as KibanaRequest;
@@ -221,6 +221,17 @@ export function makeService(params?: {
   const getRuleBackedQueryLinks = jest.fn(async () =>
     (params?.ruleBackedRuleIds ?? []).map((rule_id) => ({ rule_id }))
   );
+  const internalRuleBackedRules = {
+    listRuleIds: jest.fn(async () => params?.ruleBackedRuleIds ?? []),
+    bulkDisableRules: jest.fn(async ({ ids }: { ids: string[] }) => {
+      if (ids.length > MAX_BULK_ITEMS) {
+        throw new Error(
+          `Received ${ids.length} rule ids, exceeding the maximum of ${MAX_BULK_ITEMS} per request.`
+        );
+      }
+      return { affected_count: ids.length, errors: [] };
+    }),
+  };
   const getStreamNamesWithKnowledgeIndicators = jest.fn(async () => params?.indicatorStreams ?? []);
   const findStreamNamesWithOwnedRules = jest.fn(async () => params?.ownedRuleStreams ?? []);
   const getStreamToQueryLinksMap = jest.fn(async (streamNames: string[]) =>
@@ -239,7 +250,6 @@ export function makeService(params?: {
     Object.entries(
       params?.dataStreams ?? {
         [DETECTIONS_DATA_STREAM]: 0,
-        [EVENTS_DATA_STREAM]: 0,
         [KNOWLEDGE_INDICATORS_DATA_STREAM]: 0,
       }
     )
@@ -386,6 +396,7 @@ export function makeService(params?: {
     logger: loggerMock.create(),
     server,
     getScopedClients: getScopedClients as unknown as GetScopedClients,
+    internalRuleBackedRules,
   });
 
   return {
@@ -395,6 +406,7 @@ export function makeService(params?: {
     getScopedClients,
     v2RulesClient,
     getRuleBackedQueryLinks,
+    internalRuleBackedRules,
     getStreamNamesWithKnowledgeIndicators,
     findStreamNamesWithOwnedRules,
     countKnowledgeIndicators,
