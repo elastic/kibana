@@ -28,8 +28,8 @@ interface WorkerDependencyNames {
 const strong = (chunks: React.ReactNode) => <strong>{chunks}</strong>;
 
 /**
- * A hard dependency: the dependent Worker only acts on records the provider writes, so while the
- * provider is off the dependent has nothing to do.
+ * While the provider Worker is off, the dependent Worker loses some or all of its work. Each
+ * entry's copy names only what is lost, since the dependent may still do the rest of its job.
  */
 export interface WorkerDependency {
   providerId: string;
@@ -94,6 +94,37 @@ export const WORKER_DEPENDENCIES: readonly WorkerDependency[] = [
         'xpack.alertzero.watches.workerDependencies.attackDiscoveryToEndpointAnalysis.dependentReason',
         {
           defaultMessage: '{providerName} is disabled — no attacks are handed off for analysis.',
+          values: { providerName },
+        }
+      ),
+  },
+  {
+    // Endpoint Analysis is the only reader of the `security.analyze_endpoint` records Attack
+    // Discovery's forensics handoff writes. False positives still close without it.
+    providerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+    dependentId: SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
+    disableBody: ({ providerName, dependentName }) => (
+      <FormattedMessage
+        id="xpack.alertzero.watches.workerDependencies.endpointAnalysisToAttackDiscovery.disableBody"
+        defaultMessage="<strong>{dependentName}</strong> is enabled and hands attacks it can't rule out as false positives to this Worker. While {providerName} is off, those handoffs aren't analyzed and their Investigations stay open."
+        values={{ providerName, dependentName, strong }}
+      />
+    ),
+    providerHeaderReason: ({ dependentName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.endpointAnalysisToAttackDiscovery.providerReason',
+        {
+          defaultMessage:
+            "{dependentName} is enabled but its handoffs aren't analyzed while this Worker is off.",
+          values: { dependentName },
+        }
+      ),
+    dependentHeaderReason: ({ providerName }) =>
+      i18n.translate(
+        'xpack.alertzero.watches.workerDependencies.endpointAnalysisToAttackDiscovery.dependentReason',
+        {
+          defaultMessage:
+            "{providerName} is disabled — attacks handed off for analysis aren't analyzed.",
           values: { providerName },
         }
       ),
@@ -168,12 +199,17 @@ const getStrandedDependentReasons = (
     message: dependency.providerHeaderReason(dependencyNames(dependency)),
   }));
 
-/** Every warning for a Worker's header, the no-model reason first because it stops the Worker outright. */
+/**
+ * Every warning for a Worker's header, the no-model reason first because it stops the Worker outright.
+ * Leave `includeBlocking` off for users who can't change Workers: the model check runs as the
+ * requesting user, so without connector access it reports no model in a space that has one.
+ */
 export const getWorkerWarningReasons = (
   worker: Pick<Worker, 'id' | 'blockingReasons'>,
-  enabledById: WorkerEnabledById
+  enabledById: WorkerEnabledById,
+  { includeBlocking }: { includeBlocking: boolean }
 ): WorkerWarningReason[] => [
-  ...getBlockingWarningReasons(worker, { withLink: false }),
+  ...(includeBlocking ? getBlockingWarningReasons(worker, { withLink: false }) : []),
   ...getDisabledProviderReasons(worker.id, enabledById),
   ...getStrandedDependentReasons(worker.id, enabledById),
 ];

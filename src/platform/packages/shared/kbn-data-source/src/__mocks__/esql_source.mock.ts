@@ -29,7 +29,7 @@ export const createMockEsqlSource = (
     name: 'mock',
     timeFieldName,
     projectRouting: undefined,
-    datasetKey: `esql:mock:${timeFieldName ?? ''}:`,
+    datasetId: `esql-mock-${timeFieldName ?? ''}`,
     references: [],
     fields: [],
     resultColumns,
