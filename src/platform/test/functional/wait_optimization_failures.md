@@ -73,7 +73,7 @@ These are useful failure patterns, but were not discovered in CI.
 
 The group1 visual audit exposed a local shared-helper defect, not a CI test failure: [browser log polling](../../packages/shared/kbn-ftr-common-functional-ui-services/services/remote/poll_for_log_entry.ts) used `repeat()` followed by `delay(ms)`, which delayed emissions but immediately restarted each request. Empty/filtered responses made this especially easy to miss. During Mocha execution, the full traced run made 73,138 log requests at 358.4/sec despite the configured 100 ms interval.
 
-Use the retry/repetition operator's delay to space subscriptions: `repeat({ delay: ms })`. Test empty and fully filtered responses, bound request counts under virtual time, verify slow requests do not overlap, preserve recovery timing, and unsubscribe cleanly. Six [regressions](../../packages/shared/kbn-ftr-common-functional-ui-services/services/remote/poll_for_log_entry.test.ts) and the full 41-test group1 rerun passed. Log requests fell to 1,023 at 5.8/sec. The runtime change is not a controlled benchmark because temporary tracing overhead scales with request volume.
+Use the retry/repetition operator's delay to space subscriptions: `repeat({ delay: ms })`. Test empty and fully filtered responses, bound request counts under virtual time, verify slow requests do not overlap, preserve recovery timing, and unsubscribe cleanly. Six [regressions](https://github.com/tylersmalley/kibana/blob/fix-ftr-browser-log-polling/src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/remote/poll_for_log_entry.test.ts) and the full 41-test group1 rerun passed. Log requests fell to 1,023 at 5.8/sec. The runtime change is not a controlled benchmark because temporary tracing overhead scales with request volume.
 
 ## Browser-recording validation
 
@@ -94,3 +94,5 @@ These observations are local recording checks, not CI failures or evidence of av
 6. When CI fails, capture the first failing action, expected/actual state, artifacts, commit, and job link. Separate subsequent setup cascades, known-main failures, and infrastructure failures. A successful retry is an observation, not a fix.
 
 Add future entries with the observed CI job, status, established cause or remaining uncertainty, implementation reference, and a concrete local check. Update pending local entries after their full-config reruns.
+
+The polling correction and its regressions are isolated in [PR #297174](https://github.com/elastic/kibana/pull/297174). They are not included in this optimization branch; the before/after measurements above describe the separate fix.
