@@ -6677,9 +6677,6 @@ importers:
       marge:
         specifier: 1.0.1
         version: 1.0.1
-      meow:
-        specifier: 14.1.0
-        version: 14.1.0
       mini-css-extract-plugin:
         specifier: 2.9.1
         version: 2.9.1(webpack@5.96.1)
