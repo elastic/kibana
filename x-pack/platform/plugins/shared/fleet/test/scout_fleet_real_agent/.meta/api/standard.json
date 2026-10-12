@@ -1,5 +1,5 @@
 {
-  "sha1": "3783d8a1260ede8df8afbf7a130f80e51e83c183",
+  "sha1": "473b65fc6c64f2f959c979ecaf2633cd85be13e1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,8 +13,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
-        "line": 101,
-        "column": 25
+        "line": 134,
+        "column": 7
       }
     },
     {
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
-        "line": 125,
+        "line": 158,
         "column": 16
       }
     },
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
-        "line": 165,
-        "column": 22
+        "line": 199,
+        "column": 26
       }
     },
     {
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
-        "line": 192,
+        "line": 225,
         "column": 19
       }
     },
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
-        "line": 203,
-        "column": 7
+        "line": 236,
+        "column": 24
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout_fleet_real_agent/api/tests/sentinel_policy_version.spec.ts",
-        "line": 247,
-        "column": 74
+        "line": 261,
+        "column": 11
       }
     }
   ]
