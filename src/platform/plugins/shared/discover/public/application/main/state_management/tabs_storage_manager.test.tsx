@@ -11,6 +11,7 @@ import { omit } from 'lodash';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../__mocks__/esql_controls';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import {
@@ -226,7 +227,10 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [mockRecentlyClosedTab],
     };
 
-    await tabsStorageManager.persistLocally(props, mockGetInternalState, 'testDiscoverSessionId');
+    await tabsStorageManager.persistLocally(props, mockGetInternalState, {
+      id: 'testDiscoverSessionId',
+      version: 'saved-version',
+    });
 
     expect(storage.set).toHaveBeenCalledWith(TABS_LOCAL_STORAGE_KEY, {
       userId: mockUserId,
@@ -234,6 +238,7 @@ describe('TabsStorageManager', () => {
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
       discoverSessionId: 'testDiscoverSessionId',
+      discoverSessionVersion: 'saved-version',
     });
   });
 
@@ -969,7 +974,7 @@ describe('TabsStorageManager', () => {
     ]);
   });
 
-  it('should load open tabs from storage when persisted discover session id matches stored session id', () => {
+  it.each([undefined, 'v1'])('restores drafts with stored version %s', (version) => {
     const {
       tabsStorageManager,
       urlStateStorage,
@@ -982,6 +987,7 @@ describe('TabsStorageManager', () => {
       userId: mockUserId,
       spaceId: mockSpaceId,
       discoverSessionId: matchingSessionId,
+      discoverSessionVersion: version,
       openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
       closedTabs: [toStoredTab(mockRecentlyClosedTab)],
     });
@@ -992,6 +998,7 @@ describe('TabsStorageManager', () => {
 
     const persistedDiscoverSession = {
       id: matchingSessionId,
+      version: 'v1',
       title: 'title',
       description: 'description',
       managed: false,
@@ -1010,6 +1017,39 @@ describe('TabsStorageManager', () => {
       recentlyClosedTabs: [toRestoredTab(mockRecentlyClosedTab)],
       updatedDiscoverSession: persistedDiscoverSession,
     });
+  });
+
+  it('opens the saved tabs when the session was saved elsewhere', () => {
+    const { tabsStorageManager, urlStateStorage, services } = create();
+    const savedTab = fromSavedSearchToSavedObjectTab({
+      tab: { id: 'saved-tab', label: 'Saved tab' },
+      savedSearch: savedSearchMock,
+      services,
+    });
+    const persistedDiscoverSession = createDiscoverSessionMock({
+      id: 'session',
+      version: 'v2',
+      tabs: [savedTab],
+    });
+    services.storage.set(TABS_LOCAL_STORAGE_KEY, {
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      discoverSessionId: persistedDiscoverSession.id,
+      discoverSessionVersion: 'v1',
+      openTabs: [toStoredTab(mockTab1), toStoredTab(mockTab2)],
+      closedTabs: [],
+    });
+    urlStateStorage.set(TAB_STATE_URL_KEY, { tabId: mockTab1.id });
+
+    const loadedProps = tabsStorageManager.loadLocally({
+      userId: mockUserId,
+      spaceId: mockSpaceId,
+      persistedDiscoverSession,
+      defaultTabState: DEFAULT_TAB_STATE,
+    });
+
+    expect(loadedProps.allTabs.map(({ id }) => id)).toEqual([savedTab.id]);
+    expect(loadedProps.outdatedSelectedTab?.id).toBe(mockTab1.id);
   });
 
   it('should load persisted tabs when persisted discover session id differs from stored session id', () => {

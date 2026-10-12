@@ -663,6 +663,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
   startListening({
     matcher: isAnyOf(
       internalStateSlice.actions.setTabs,
+      internalStateSlice.actions.setPersistedDiscoverSession,
       internalStateSlice.actions.setDraftSessionTitle
     ),
     effect: throttle<
@@ -685,7 +686,7 @@ const createMiddleware = (options: InternalStateDependencies) => {
         void tabsStorageManager.persistLocally(
           { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
           getTabInternalState,
-          state.persistedDiscoverSession?.id,
+          state.persistedDiscoverSession,
           state.draftSessionTitle
         );
       },

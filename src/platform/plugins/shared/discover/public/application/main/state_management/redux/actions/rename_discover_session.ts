@@ -37,8 +37,9 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
     // Rename the latest saved version, so changes saved elsewhere since this session was opened
     // are kept and the unsaved changes of the current tabs stay unsaved
     const {
-      session: { description, tabs, tags },
+      session: { description, tabs, tags, version },
     } = await services.discoverSessionService.get(id);
+    const isLatestSavedVersion = version === persistedDiscoverSession.version;
     const discoverSession = await services.discoverSessionService.save(
       { id, title: newTitle, description, tabs, tags },
       { copyOnSave: false }
@@ -56,6 +57,8 @@ export const renameDiscoverSession = createInternalStateAsyncThunk(
       internalStateSlice.actions.setPersistedDiscoverSession({
         ...persistedDiscoverSession,
         title: newTitle,
+        // A rename must not acknowledge tab changes saved elsewhere since this page was opened.
+        version: isLatestSavedVersion ? discoverSession.version : persistedDiscoverSession.version,
       })
     );
   }

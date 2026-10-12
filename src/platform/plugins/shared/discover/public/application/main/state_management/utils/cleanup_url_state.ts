@@ -8,14 +8,26 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { isEqual, isUndefined, omit, omitBy, pick } from 'lodash';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverServices } from '../../../../build_services';
-import type { DiscoverAppState } from '../redux';
+import type { DiscoverAppState, TabState } from '../redux';
 import { migrateLegacyQuery } from '../../../../utils/migrate_legacy_query';
 import { getMaxAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
 import { createDataViewDataSource, createEsqlDataSource } from '../../../../../common/data_sources';
-import { APP_STATE_URL_KEY } from '../../../../../common';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+} from '../../../../../common/constants';
+import {
+  ProfileStateType,
+  type ProfileStateMap,
+  type ProfileStateRegistry,
+} from '../../../../../common/context_awareness';
+import { isEqualState } from './state_comparators';
 
 export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   /**
@@ -124,3 +136,86 @@ export function getCurrentUrlState(stateStorage: IKbnUrlStateStorage, services: 
     {}
   );
 }
+
+/**
+ * After a session is saved elsewhere, clears URL state matching the old local draft,
+ * preserving links that carry different state.
+ */
+export const clearOutdatedTabUrlState = async ({
+  tab,
+  timeRestore,
+  urlStateStorage,
+  profileStateRegistry,
+}: {
+  tab: TabState;
+  timeRestore: boolean;
+  urlStateStorage: IKbnUrlStateStorage;
+  profileStateRegistry: ProfileStateRegistry;
+}): Promise<void> => {
+  const globalState = urlStateStorage.get<GlobalQueryStateFromUrl>(GLOBAL_STATE_URL_KEY);
+  const isDraftUrl = doesUrlMatchTab({
+    tab,
+    appState: urlStateStorage.get<DiscoverAppState>(APP_STATE_URL_KEY),
+    globalState,
+    profileState: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY),
+    profileStateRegistry,
+  });
+
+  if (!isDraftUrl) {
+    return;
+  }
+
+  const updates = [
+    urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true }),
+    urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
+  ];
+
+  if (timeRestore && globalState) {
+    updates.push(
+      urlStateStorage.set(GLOBAL_STATE_URL_KEY, omit(globalState, 'time', 'refreshInterval'), {
+        replace: true,
+      })
+    );
+  }
+
+  await Promise.all(updates);
+};
+
+// Checks whether the URL state matches the stored draft; it cannot tell a reload from an identical shared link.
+const doesUrlMatchTab = ({
+  tab,
+  appState,
+  globalState,
+  profileState,
+  profileStateRegistry,
+}: {
+  tab: TabState;
+  appState: DiscoverAppState | null;
+  globalState: GlobalQueryStateFromUrl | null;
+  profileState: ProfileStateMap | null;
+  profileStateRegistry: ProfileStateRegistry;
+}): boolean => {
+  const { timeRange: time, refreshInterval, filters } = tab.globalState;
+  const tabGlobalState = { time, refreshInterval, filters };
+  const profileUrlState = (profileStateMap: ProfileStateMap | undefined) =>
+    profileStateRegistry.pickStateByType({
+      profileStateMap,
+      stateTypes: [ProfileStateType.Url],
+      defaultsHandling: 'strip',
+    });
+
+  // A URL part that is absent carries nothing of its own, so it matches the draft.
+  const isSameAppState =
+    !appState || isEqualState(omitBy(appState, isUndefined), omitBy(tab.appState, isUndefined));
+  const isSameGlobalState =
+    !globalState ||
+    isEqualState(omitBy(globalState, isUndefined), omitBy(tabGlobalState, isUndefined));
+  // Only active profiles are written to the URL; inactive profiles can remain in the draft.
+  const activeProfileIds = Object.keys(profileState ?? {});
+  const isSameProfileState = isEqual(
+    profileUrlState(profileState ?? undefined),
+    profileUrlState(pick(tab.profileState, activeProfileIds))
+  );
+
+  return isSameAppState && isSameGlobalState && isSameProfileState;
+};

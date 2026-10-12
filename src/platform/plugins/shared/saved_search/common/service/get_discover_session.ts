@@ -25,6 +25,7 @@ export const getDiscoverSession = async (
       managed: so.item.managed,
       sharingSavedObjectProps: so.meta,
     }),
+    version: so.item.version,
     tags: deps.savedObjectsTagging
       ? deps.savedObjectsTagging.ui.getTagIdsFromReferences(so.item.references)
       : undefined,

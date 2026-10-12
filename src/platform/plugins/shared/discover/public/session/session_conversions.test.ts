@@ -170,7 +170,7 @@ const response: DiscoverSessionApiResponse = {
       esqlApiTab,
     ],
   },
-  meta: { managed: true },
+  meta: { managed: true, version: 'saved-version' },
 };
 
 describe('Discover session conversion and UI preparation', () => {
@@ -228,6 +228,7 @@ describe('Discover session conversion and UI preparation', () => {
         description: 'Operational logs',
         tags: ['tag-1'],
         managed: true,
+        version: 'saved-version',
       })
     );
     expect(session.tabs).toHaveLength(3);
