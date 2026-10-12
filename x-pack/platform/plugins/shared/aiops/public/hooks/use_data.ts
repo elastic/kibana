@@ -22,11 +22,11 @@ import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { ProjectRouting } from '@kbn/es-query';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
-import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useDocumentCountStats } from './use_document_count_stats';
 
 const DEFAULT_BAR_TARGET = 75;

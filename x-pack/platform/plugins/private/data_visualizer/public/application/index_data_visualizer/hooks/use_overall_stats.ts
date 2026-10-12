@@ -97,8 +97,12 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     getInitialProgress()
   );
 
-  const [initialAbortCtrl] = useState(() => requestCancellationManager?.createChildController() ?? new AbortController());
-  const [initialPopulatedFieldsAbortCtrl] = useState(() => requestCancellationManager?.createChildController() ?? new AbortController());
+  const [initialAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
+  const [initialPopulatedFieldsAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
   const abortCtrl = useRef(initialAbortCtrl);
   const populatedFieldsAbortCtrl = useRef(initialPopulatedFieldsAbortCtrl);
 
@@ -117,7 +121,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
-        populatedFieldsAbortCtrl.current = requestCancellationManager?.createChildController() ?? new AbortController();
+        populatedFieldsAbortCtrl.current =
+          requestCancellationManager?.createChildController() ?? new AbortController();
 
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
@@ -174,7 +179,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     try {
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
-      abortCtrl.current = requestCancellationManager?.createChildController() ?? new AbortController();
+      abortCtrl.current =
+        requestCancellationManager?.createChildController() ?? new AbortController();
 
       // The panel was cancelled and no new load has started yet, don't start requests.
       // Note this must not mark the fetch as loaded, that would report the panel as rendered.

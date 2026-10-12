@@ -83,7 +83,9 @@ export function useFieldStatsSearchStrategy(
     getInitialProgress()
   );
 
-  const [initialAbortCtrl] = useState(() => requestCancellationManager?.createChildController() ?? new AbortController());
+  const [initialAbortCtrl] = useState(
+    () => requestCancellationManager?.createChildController() ?? new AbortController()
+  );
   const abortCtrl = useRef(initialAbortCtrl);
   const searchSubscription$ = useRef<Subscription>();
   const retries$ = useRef<Subscription>();
@@ -92,7 +94,8 @@ export function useFieldStatsSearchStrategy(
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
     abortCtrl.current.abort();
-    abortCtrl.current = requestCancellationManager?.createChildController() ?? new AbortController();
+    abortCtrl.current =
+      requestCancellationManager?.createChildController() ?? new AbortController();
 
     // The panel was cancelled and no new load has started yet, don't start requests.
     if (requestCancellationManager?.signal.aborted) {
