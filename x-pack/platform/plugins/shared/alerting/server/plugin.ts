@@ -65,7 +65,7 @@ import type {
   AlertingPublisherContext,
 } from './lib/workflow_extensions/events';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
-import { registerAlertStatusWorkflowTriggerSetting } from './lib/events/alert_status_changed_setting';
+import type { AlertStatusChangedOptIn } from './lib/workflow_extensions/alert_status_changed_opt_in';
 import { AlertStatusChangedWorkflowSubscriber } from './lib/workflow_extensions/alert_status_changed_subscriber';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
@@ -184,6 +184,12 @@ export interface AlertingServerSetup {
   getConfig: () => AlertingRulesConfig;
   frameworkAlerts: PublicFrameworkAlertsService;
   getDataStreamAdapter: () => DataStreamAdapter;
+  /**
+   * Opts in to the `alerting.v1.alertStatusChanged` workflow trigger. Until a plugin opts in,
+   * rule runs build and publish no status change events. The caller owns its own enablement
+   * signal and answers per rule run through `isEnabled`.
+   */
+  enableAlertStatusChanged(optIn: AlertStatusChangedOptIn): void;
 }
 
 export interface AlertingServerStart {
@@ -271,6 +277,7 @@ export class AlertingPlugin {
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
   private alertingEventBus?: AsyncDomainEventBus<AlertingDomainEvent, AlertingPublisherContext>;
   private alertStatusChangedSubscriber?: AlertStatusChangedWorkflowSubscriber;
+  private readonly alertStatusChangedOptIns: AlertStatusChangedOptIn[] = [];
   private readonly disabledRuleTypes: Set<string>;
   private readonly enabledRuleTypes: Set<string> | null = null;
   private getRulesClientWithRequest?: (request: KibanaRequest) => Promise<RulesClientApi>;
@@ -517,10 +524,12 @@ export class AlertingPlugin {
         AlertingPublisherContext
       >(this.logger);
       registerTriggerDefinitions(plugins.workflowsExtensions);
-      registerAlertStatusWorkflowTriggerSetting(core.uiSettings);
     }
 
     return {
+      enableAlertStatusChanged: (optIn: AlertStatusChangedOptIn) => {
+        this.alertStatusChangedOptIns.push(optIn);
+      },
       registerConnectorAdapter: <
         RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
         ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
@@ -832,6 +841,7 @@ export class AlertingPlugin {
       apiKeyType: (this.config.rules.apiKeyType as ApiKeyType) ?? ApiKeyType.ES,
       shouldGrantUiam,
       alertingEventBus: this.alertingEventBus,
+      alertStatusChangedOptIns: this.alertStatusChangedOptIns,
     });
 
     if (this.alertingEventBus && plugins.workflowsExtensions) {

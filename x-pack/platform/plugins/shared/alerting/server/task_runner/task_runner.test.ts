@@ -51,7 +51,6 @@ import { alertsMock } from '../mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
@@ -112,7 +111,6 @@ import {
 import { ErrorWithType } from '../lib/error_with_type';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { alertStatusChangedV1EventSchema } from '../../common/workflows/triggers/alert_status_changed';
-import { ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID } from '../../common/workflows/triggers/alert_status_changed_setting';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 jest.mock('uuid', () => ({
@@ -4538,22 +4536,23 @@ describe('Task Runner', () => {
         opts.lastGroup !== undefined ? { group: opts.lastGroup } : null,
     });
 
+    // The opt-in that most tests use. It answers true unless a test says otherwise.
+    const isEnabled = jest.fn();
+
     const contextWithBus = () => ({
       ...taskRunnerFactoryInitializerParams,
       alertingEventBus: mockBus,
+      alertStatusChangedOptIns: [{ isEnabled }],
     });
 
     const createRunnerWithBus = (
       overrides: Partial<ConstructorParameters<typeof TaskRunner>[0]> = {}
     ) => createTaskRunner({ context: contextWithBus(), ...overrides });
 
-    const settingsClient = uiSettingsServiceMock.createClient();
-
     beforeEach(() => {
       mockBus.publish.mockClear();
-      settingsClient.get.mockReset();
-      settingsClient.get.mockResolvedValue(true);
-      uiSettingsService.asScopedToClient.mockReturnValue(settingsClient);
+      isEnabled.mockReset();
+      isEnabled.mockResolvedValue(true);
       ruleType.autoRecoverAlerts = true;
       ruleType.executor.mockResolvedValue({ state: {} });
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
@@ -4577,46 +4576,73 @@ describe('Task Runner', () => {
       ruleType.cancelAlertsOnRuleTimeout = true;
     });
 
-    describe('advanced setting gate', () => {
+    describe('opt-in gate', () => {
       const newAlertProcessed = () => {
         const alert = makeMockAlert({ id: 'alert-1', uuid: 'uuid-1', actionGroup: 'default' });
         alertsClient.getProcessedAlerts.mockImplementation((type: string) =>
           type === 'new' ? { 'alert-1': alert } : {}
         );
+        return alert;
       };
 
-      test('does not publish when the setting is off', async () => {
-        settingsClient.get.mockResolvedValue(false);
-        newAlertProcessed();
+      test('does no work when nobody has opted in', async () => {
+        const alert = newAlertProcessed();
+        const actionGroupSpy = jest.spyOn(alert, 'getScheduledActionOptions');
 
-        await createRunnerWithBus().run();
+        await createRunnerWithBus({
+          context: { ...contextWithBus(), alertStatusChangedOptIns: [] },
+        }).run();
 
-        expect(settingsClient.get).toHaveBeenCalledWith(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
+        // No snapshot of the action group, no opt-in to ask, and nothing published.
+        expect(actionGroupSpy).not.toHaveBeenCalled();
+        expect(isEnabled).not.toHaveBeenCalled();
         expect(mockBus.publish).not.toHaveBeenCalled();
       });
 
-      test('does not publish when reading the setting fails', async () => {
-        settingsClient.get.mockRejectedValue(new Error('saved objects unavailable'));
+      test('does not publish when the opt-in is not enabled', async () => {
+        isEnabled.mockResolvedValue(false);
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(isEnabled).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish).not.toHaveBeenCalled();
+      });
+
+      test('asks the opt-in with the rule request, so the answer can differ per space', async () => {
+        newAlertProcessed();
+
+        await createRunnerWithBus().run();
+
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+        const [, publishContext] = mockBus.publish.mock.calls[0];
+        expect(isEnabled).toHaveBeenCalledWith(publishContext.request);
+      });
+
+      test('publishes when any opt-in is enabled, even if an earlier check throws', async () => {
+        const failingCheck = jest.fn().mockRejectedValue(new Error('flag service unavailable'));
+        const enabledCheck = jest.fn().mockResolvedValue(true);
+        newAlertProcessed();
+
+        await createRunnerWithBus({
+          context: {
+            ...contextWithBus(),
+            alertStatusChangedOptIns: [{ isEnabled: failingCheck }, { isEnabled: enabledCheck }],
+          },
+        }).run();
+
+        expect(failingCheck).toHaveBeenCalledTimes(1);
+        expect(enabledCheck).toHaveBeenCalledTimes(1);
+        expect(mockBus.publish).toHaveBeenCalledTimes(1);
+      });
+
+      test('does not publish when every opt-in throws', async () => {
+        isEnabled.mockRejectedValue(new Error('flag service unavailable'));
         newAlertProcessed();
 
         await createRunnerWithBus().run();
 
         expect(mockBus.publish).not.toHaveBeenCalled();
-      });
-
-      test('reads the setting through a saved objects client that skips the security extension', async () => {
-        newAlertProcessed();
-
-        await createRunnerWithBus().run();
-
-        // The client is built from the rule's own request, so the read stays space scoped, and
-        // it skips the security extension so a rule owner without config access still reads it.
-        expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.objectContaining({ excludedExtensions: [SECURITY_EXTENSION_ID] })
-        );
-        expect(uiSettingsService.asScopedToClient).toHaveBeenCalled();
-        expect(settingsClient.get).toHaveBeenCalledWith(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
       });
 
       describe('when the rule is muted', () => {
@@ -4638,10 +4664,10 @@ describe('Task Runner', () => {
         });
       });
 
-      test('does not read the setting when no alert changed status', async () => {
+      test('does not ask the opt-in when no alert changed status', async () => {
         await createRunnerWithBus().run();
 
-        expect(settingsClient.get).not.toHaveBeenCalled();
+        expect(isEnabled).not.toHaveBeenCalled();
         expect(mockBus.publish).not.toHaveBeenCalled();
       });
     });

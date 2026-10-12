@@ -32,6 +32,7 @@ import type {
   AlertingDomainEvent,
   AlertingPublisherContext,
 } from '../lib/workflow_extensions/events';
+import type { AlertStatusChangedOptIn } from '../lib/workflow_extensions/alert_status_changed_opt_in';
 import type { AlertStatusChangedV1Payload } from '../../common/workflows/triggers';
 import type { IAlertsClient } from '../alerts_client/types';
 import type { Alert } from '../alert';
@@ -266,6 +267,12 @@ export interface TaskRunnerContext {
    * the workflow subscriber attaches in plugin.start and forwards them.
    */
   alertingEventBus?: EventBus<AlertingDomainEvent, AlertingPublisherContext>;
+  /**
+   * Opt-ins registered through `enableAlertStatusChanged`. While there are none, rule runs build
+   * and publish no status change events. The array is shared with the plugin, so opt-ins
+   * registered after the context is created still apply.
+   */
+  alertStatusChangedOptIns?: readonly AlertStatusChangedOptIn[];
 }
 
 export interface AsyncSearchClient<T extends AsyncSearchParams> {

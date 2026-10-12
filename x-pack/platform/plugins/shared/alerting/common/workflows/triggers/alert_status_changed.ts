@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
-import { ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID } from './alert_status_changed_setting';
 
 /**
  * Fires once per alert instance per genuine status change: when a rule produces a new
@@ -148,7 +147,7 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
     defaultMessage:
       'Fires once per alert instance when it becomes active or recovers. ' +
       'Ongoing alerts that have not changed status do not re-fire. ' +
-      'Technical preview: turn on the "Alert status workflow trigger" advanced setting in each space that uses it.',
+      'Technical preview: events are only sent after an integration, for example Nightshift, has opted in.',
   }),
   documentation: {
     details: i18n.translate(
@@ -160,13 +159,12 @@ export const alertStatusChangedV1TriggerDefinition: CommonTriggerDefinition<
           'Alerts that have not changed status produce no events. ' +
           'Only rules whose alerts recover automatically fire this trigger. ' +
           'Events are sent for every status change, even when the rule or alert is snoozed, muted, or in a maintenance window. ' +
-          'Events are only published in spaces where the "Alert status workflow trigger" ' +
-          'advanced setting ({settingId}) is on. It is off by default. ' +
+          'Events are only published after an integration, for example Nightshift, has opted in, and only for the spaces it enables. ' +
+          'Until then no events are sent. ' +
           'Workflows started by this trigger run with the API key of the rule that raised the alert, ' +
           'not the workflow author, and anyone who can create workflows in the space can subscribe to it. ' +
           'Rule names, tags, and ids from each event are also written to the workflow trigger log, ' +
           'which users with workflow execution read access in the space can view.',
-        values: { settingId: ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID },
       }
     ),
     examples: [

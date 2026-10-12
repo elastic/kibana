@@ -11,4 +11,3 @@ export {
   alertStatusChangedV1TriggerDefinition,
 } from './alert_status_changed';
 export type { AlertStatusChangedV1Payload } from './alert_status_changed';
-export { ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID } from './alert_status_changed_setting';

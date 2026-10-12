@@ -30,10 +30,7 @@ import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
-import {
-  ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID,
-  AlertStatusChangedTriggerId,
-} from '../common/workflows/triggers';
+import { AlertStatusChangedTriggerId } from '../common/workflows/triggers';
 import { AlertsService } from './alerts_service/alerts_service';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
@@ -123,23 +120,7 @@ describe('Alerting Plugin', () => {
           expect(usageCollectionSetup.registerCollector).toHaveBeenCalled();
         });
 
-        it('registers the alert status workflow trigger and its setting only when workflowsExtensions is present', async () => {
-          const registeredSettingIds = () =>
-            setupMocks.uiSettings.register.mock.calls.flatMap(([settings]) =>
-              Object.keys(settings)
-            );
-
-          // Without the workflowsExtensions plugin, nothing is registered.
-          plugin = new AlertingPlugin(
-            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
-          );
-          plugin.setup(setupMocks, mockPlugins);
-          await waitForSetupComplete(setupMocks);
-          expect(registeredSettingIds()).not.toContain(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
-
-          jest.clearAllMocks();
-
-          // With it, the trigger definition and the per-space setting are registered.
+        it('registers the alert status changed trigger definition when workflowsExtensions is present, whether or not anyone has opted in', async () => {
           const workflowsExtensions = workflowsExtensionsMock.createSetup();
           plugin = new AlertingPlugin(
             coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
@@ -149,7 +130,18 @@ describe('Alerting Plugin', () => {
           expect(workflowsExtensions.registerTriggerDefinition).toHaveBeenCalledWith(
             expect.objectContaining({ id: AlertStatusChangedTriggerId })
           );
-          expect(registeredSettingIds()).toContain(ALERT_STATUS_WORKFLOW_TRIGGER_SETTING_ID);
+        });
+
+        it('lets another plugin opt in to the alert status changed trigger', async () => {
+          plugin = new AlertingPlugin(
+            coreMock.createPluginInitializerContext<AlertingConfig>(generateAlertingConfig())
+          );
+          const setupContract = plugin.setup(setupMocks, mockPlugins);
+          await waitForSetupComplete(setupMocks);
+
+          expect(() =>
+            setupContract.enableAlertStatusChanged({ isEnabled: async () => true })
+          ).not.toThrow();
         });
 
         it('should initialize AlertsService if enableFrameworkAlerts config is true', async () => {

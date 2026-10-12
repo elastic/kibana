@@ -24,7 +24,7 @@ import type {
 } from './types';
 import { getDeleteRuleTaskRunResult } from './types';
 import { getExecutorServices } from './get_executor_services';
-import { isAlertStatusWorkflowTriggerEnabled } from '../lib/events/alert_status_changed_setting';
+import { isAlertStatusChangedEnabled } from '../lib/workflow_extensions/alert_status_changed_opt_in';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
@@ -527,9 +527,16 @@ export class TaskRunner<
     // ActionScheduler calls alert.unscheduleActions() once it has scheduled a per-alert action,
     // which clears getScheduledActionOptions(). Snapshot the action group of each new alert
     // (id -> group) now so the alertStatusChanged payload can still report it afterwards.
-    // Only done when the batch could be built; the per-space setting is still read later.
+    // Only done when the batch could be built, which needs at least one opt-in. The opt-ins
+    // themselves are asked later, once there is something to emit.
+    const hasAlertStatusChangedOptIns = (this.context.alertStatusChangedOptIns?.length ?? 0) > 0;
     const newAlertActionGroups = new Map<string, string>();
-    if (!this.cancelled && this.ruleType.autoRecoverAlerts && this.context.alertingEventBus) {
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      hasAlertStatusChangedOptIns
+    ) {
       for (const [id, alert] of Object.entries(alertsClient.getProcessedAlerts('new'))) {
         const actionGroup = alert.getScheduledActionOptions()?.actionGroup;
         if (actionGroup != null) {
@@ -595,19 +602,24 @@ export class TaskRunner<
     // completes. Cancelled runs collect and publish nothing on purpose: a run cancelled
     // for timeout is treated as a failed run, so its events are dropped (at most once).
     let alertStatusChangedBatch: RunRuleResult['alertStatusChangedBatch'];
-    if (!this.cancelled && this.ruleType.autoRecoverAlerts && this.context.alertingEventBus) {
+    if (
+      !this.cancelled &&
+      this.ruleType.autoRecoverAlerts &&
+      this.context.alertingEventBus &&
+      hasAlertStatusChangedOptIns
+    ) {
       const newAlerts = alertsClient.getProcessedAlerts('new');
       const recoveredAlerts = alertsClient.getProcessedAlerts('recovered');
       const newEntries = Object.entries(newAlerts);
       const recoveredEntries = Object.entries(recoveredAlerts);
 
-      // The per-space advanced setting is read only when there is something to emit, and after
-      // the executor has finished. While it is off, nothing is built or published.
+      // The opt-ins are asked only when there is something to emit, and after the executor has
+      // finished, with the rule's own request so the answer can differ per space. When none of
+      // them is enabled, nothing is built or published.
       if (
         (newEntries.length > 0 || recoveredEntries.length > 0) &&
-        (await isAlertStatusWorkflowTriggerEnabled({
-          uiSettings: this.context.uiSettings,
-          savedObjects: this.context.savedObjects,
+        (await isAlertStatusChangedEnabled({
+          optIns: this.context.alertStatusChangedOptIns ?? [],
           request: fakeRequest,
           logger: this.logger,
         }))
