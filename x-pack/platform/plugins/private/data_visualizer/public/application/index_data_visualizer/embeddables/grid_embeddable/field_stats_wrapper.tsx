@@ -16,6 +16,7 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import type { DatePickerDependencies } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { pick } from 'lodash';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import { getReasonIfFieldStatsUnavailableForQuery } from '../../utils/get_reason_fieldstats_unavailable_for_esql_query';
 import type {
@@ -43,10 +44,9 @@ function isFieldStatisticTableEmbeddableState(
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    // MATCH, QSTR, and TS queries still cannot be profiled. Other ES|QL queries can.
-    const unsupportedReason = getReasonIfFieldStatsUnavailableForQuery(props.esqlQuery);
-    return unsupportedReason ? (
-      <FieldStatsUnavailableMessage id={props.id} title={unsupportedReason} />
+    const isEsql = props.esqlQuery && isOfAggregateQueryType(props.esqlQuery);
+    return isEsql ? (
+      <FieldStatsUnavailableMessage id={props.id} />
     ) : (
       <EmbeddableESQLFieldStatsTableWrapper
         id={props.id}
