@@ -1,5 +1,5 @@
 {
-  "sha1": "d8c8309d31bfba74e0c9df8c12a88ac59ad78c51",
+  "sha1": "ed7ee8deb0d596d1b6b91c2836c2497214dde879",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -421,8 +421,8 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-79b9321af5a6eda",
-      "title": "Entity Store install / update API tests Should fail with feature flag disabled",
+      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
+      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -437,22 +437,6 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
-      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 81,
-        "column": 14
-      }
-    },
-    {
       "id": "d1ac35cbfabb8dd-a0ba708820e1b70",
       "title": "Entity Store install / update API tests Update on uninstalled store should return 404",
       "expectedStatus": "passed",
@@ -464,8 +448,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 92,
-        "column": 14
+        "line": 83,
+        "column": 4
       }
     },
     {
@@ -480,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 109,
-        "column": 7
+        "line": 100,
+        "column": 69
       }
     },
     {
@@ -496,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 115,
+        "column": 11
       }
     },
     {
@@ -512,8 +496,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 153,
-        "column": 7
+        "line": 145,
+        "column": 21
       }
     },
     {
@@ -528,8 +512,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 258,
-        "column": 13
+        "line": 249,
+        "column": 15
       }
     },
     {
@@ -544,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 266,
-        "column": 15
+        "line": 257,
+        "column": 13
       }
     },
     {
@@ -560,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 276,
-        "column": 21
+        "line": 267,
+        "column": 13
       }
     },
     {
@@ -576,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 290,
-        "column": 5
+        "line": 280,
+        "column": 22
       }
     },
     {
@@ -592,13 +576,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 295,
-        "column": 55
+        "line": 287,
+        "column": 4
       }
     },
     {
-      "id": "46bb8a3a58b1410-b5ad2fd90b66e1d",
-      "title": "Entity Store per entity-type log extraction config reports identical config for every engine when nothing is overridden",
+      "id": "46bb8a3a58b1410-f5452522a797eca",
+      "title": "Entity Store per entity-type log extraction config reports identical non-cadence config for every engine, and the built-in cadence per type, when nothing is overridden",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -624,8 +608,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 110,
-        "column": 70
+        "line": 121,
+        "column": 16
       }
     },
     {
@@ -640,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 131,
-        "column": 18
+        "line": 135,
+        "column": 67
       }
     },
     {
@@ -656,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 148,
-        "column": 63
+        "line": 151,
+        "column": 68
       }
     },
     {
@@ -672,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 160,
-        "column": 80
+        "line": 163,
+        "column": 96
       }
     },
     {
@@ -688,8 +672,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 206,
-        "column": 16
+        "line": 213,
+        "column": 23
       }
     },
     {
