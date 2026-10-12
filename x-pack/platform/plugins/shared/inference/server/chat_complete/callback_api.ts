@@ -6,7 +6,8 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCompleteOptions, AnonymizationRule, Model } from '@kbn/inference-common';
+import type { ChatCompleteOptions, Model } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import {
   createInferenceInternalError,
   createInferenceRequestError,
@@ -24,6 +25,11 @@ import { defer, forkJoin, from, identity, share, switchMap, catchError, throwErr
 import { withChatCompleteSpan } from '@kbn/inference-tracing';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { omit } from 'lodash';
+import { addAnonymizationInstruction, deanonymizeMessage } from '@kbn/ai-anonymization-server';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import type {
   InferenceAdapterChatCompleteOptions,
@@ -43,10 +49,6 @@ import {
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
-import { deanonymizeMessage } from './anonymization/deanonymize_message';
-import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
-import type { RegexWorkerService } from './anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from '../inference_client/anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import { prepareAnonymization } from './prepare_anonymization';
 import type { TokenUsageLogger } from '../token_usage';
@@ -67,6 +69,7 @@ interface CreateChatCompleteApiOptions {
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }
 
 type CreateChatCompleteApiOptionsKey =
@@ -124,6 +127,7 @@ export function createChatCompleteCallbackApi({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: CreateChatCompleteApiOptions) {
   return (
     {
@@ -154,6 +158,7 @@ export function createChatCompleteCallbackApi({
         isTokenUsageTrackingEnabled,
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId,
       })
     ).pipe(
       retryHoldingTokenCountEvents({
@@ -240,20 +245,20 @@ function createChatCompletePipeline({
           usePersistentReplacements: anonymization?.replacements?.usePersistentReplacements,
           requireReplacementsEncryptionKey: anonymization?.replacements?.requireEncryptionKey,
           saltPromise: anonymization?.saltPromise,
-          resolveEffectivePolicy: anonymization?.resolveEffectivePolicy,
           metadata,
           system,
           messages,
         })
       ).pipe(
-        switchMap(({ anonymization: preparedAnonymization, replacementsId, effectivePolicy }) => {
-          const systemWithAnonymizationInstructions = preparedAnonymization.system
-            ? addAnonymizationInstruction(
-                preparedAnonymization.system,
-                anonymizationRules,
-                effectivePolicy
-              )
-            : system;
+        switchMap(({ anonymization: preparedAnonymization, replacementsId }) => {
+          // Gate on whether anything was actually masked this turn, not on whether a system
+          // prompt happens to exist — a request with no system prompt can still anonymize
+          // entities in its messages, and the model still needs to be told what the
+          // placeholder tokens mean.
+          const baseSystem = preparedAnonymization.system ?? system;
+          const systemWithAnonymizationInstructions = preparedAnonymization.anonymizations.length
+            ? addAnonymizationInstruction(baseSystem ?? '', anonymizationRules)
+            : baseSystem;
 
           const spanModel = getSpanModel(modelName);
 
@@ -289,7 +294,7 @@ function createChatCompletePipeline({
                 stream,
               }).pipe(chunksIntoMessage({ toolOptions: { toolChoice, tools }, logger }));
             }
-          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }));
+          ).pipe(deanonymizeMessage({ ...preparedAnonymization, replacementsId }, logger));
         }),
         tokenUsageLogger
           ? handleTokenUsageLogging({
@@ -329,6 +334,7 @@ function resolveAndCreatePipeline({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: {
   connectorId: string;
   endpointIdCache: InferenceEndpointIdCache;
@@ -347,12 +353,14 @@ function resolveAndCreatePipeline({
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }) {
   return from(
     throwIfConnectorNotAllowed({
       connectorId,
       isDefaultConnectorOnly,
       getDefaultConnectorId,
+      resolveConnectorId,
       logger,
     }).then(() => endpointIdCache.has(connectorId))
   ).pipe(
@@ -502,11 +510,13 @@ async function throwIfConnectorNotAllowed({
   connectorId,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
   logger,
 }: {
   connectorId: string;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
   logger: Logger;
 }): Promise<void> {
   if (!isDefaultConnectorOnly || !getDefaultConnectorId) {
@@ -525,6 +535,14 @@ async function throwIfConnectorNotAllowed({
   }
   if (connectorId === defaultConnectorId) {
     return;
+  }
+  // a `.inference` stack connector id resolves to its underlying inference endpoint,
+  // which is what the default connector id refers to
+  if (defaultConnectorId && resolveConnectorId) {
+    const resolvedConnectorId = await resolveConnectorId(connectorId).catch(() => undefined);
+    if (resolvedConnectorId === defaultConnectorId) {
+      return;
+    }
   }
   throw createInferenceRequestError(
     `Connector "${connectorId}" is not allowed: Kibana is configured to only allow the default AI connector${

@@ -56,16 +56,6 @@ export const getRuleChangeHistoryEventParamsSchema = z
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
 /**
- * Query params for `GET …/change_history/rules/{change_id}`.
- *
- * `change_id` alone identifies the event; `rule_id` is here only because the
- * one read API `@kbn/change-history` exposes always filters on an object id.
- * Tracked for removal in https://github.com/elastic/kibana/issues/292882.
- */
-export const getRuleChangeHistoryEventQuerySchema = z.object({ rule_id: ruleIdSchema }).strict();
-export type GetRuleChangeHistoryEventQuery = z.infer<typeof getRuleChangeHistoryEventQuerySchema>;
-
-/**
  * Actor for a change-history row. Unattributed writes may carry an empty
  * `name` (the write path stores `username ?? ''`).
  */
@@ -120,9 +110,11 @@ export const ruleChangeHistoryListItemSchema = z.object({
   version: z
     .number()
     .int()
-    .nonnegative()
+    .min(1)
     .optional()
-    .describe('The rule version this change produced.'),
+    .describe(
+      'Monotonically increasing rule configuration version this entry captures, incremented on every change.'
+    ),
 });
 export type RuleChangeHistoryListItem = z.infer<typeof ruleChangeHistoryListItemSchema>;
 
@@ -144,7 +136,7 @@ export type ListRuleChangeHistoryResponse = z.infer<typeof listRuleChangeHistory
  * development. The TypeScript type is narrowed to the write-path snapshot
  * shape for autocomplete. Same rationale as alerting v1 `get_rule_history`.
  */
-export type RuleChangeHistorySnapshot = Omit<RuleResponse, 'version'>;
+export type RuleChangeHistorySnapshot = RuleResponse;
 
 const ruleChangeHistorySnapshotSchema = z.record(z.string(), z.unknown()) as z.ZodType<
   RuleChangeHistorySnapshot | Record<string, unknown>

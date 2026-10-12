@@ -10,6 +10,7 @@
 import { type MutableRefObject, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
+import { WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG } from '@kbn/workflows';
 import type {
   ConnectorTypesValidationState,
   WorkflowYamlValidationContext,
@@ -19,6 +20,7 @@ import { createWorkflowContextRegistry } from '../../../../common/lib/create_wor
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import {
   selectConnectorsLoadState,
+  selectWorkflow,
   selectWorkflows,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -42,10 +44,16 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
   const connectorsData = useAvailableConnectors();
   const connectorsLoadState = useSelector(selectConnectorsLoadState);
   const workflows = useSelector(selectWorkflows);
-  const { application, http, data, licensing, workflowsExtensions } = useKibana().services;
+  const isManaged = useSelector(selectWorkflow)?.managed === true;
+  const { application, http, data, licensing, featureFlags, workflowsExtensions } =
+    useKibana().services;
   const registry = useMemo(
     () => createWorkflowContextRegistry(workflowsExtensions),
     [workflowsExtensions]
+  );
+  const warnIgnoredKibanaFetcher = featureFlags.useBooleanValue(
+    WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
+    false
   );
   const esqlCallbacks = useWorkflowEsqlCallbacks({
     http,
@@ -65,11 +73,26 @@ export function useWorkflowYamlValidationContext(): WorkflowYamlValidationContex
         deepLinkId: 'triggersActionsConnectors',
         absolute: true,
       }),
+      modelSettingsUrl: application.getUrlForApp('management', {
+        path: '/modelManagement/model_settings',
+        absolute: true,
+      }),
       workflows,
+      isManaged,
       getPropertyHandler,
       esqlCallbacks: esqlCallbacksRef.current,
+      warnIgnoredKibanaFetcher,
     }),
-    [application, connectorsData, connectorsLoadState, getPropertyHandler, registry, workflows]
+    [
+      application,
+      connectorsData,
+      connectorsLoadState,
+      getPropertyHandler,
+      registry,
+      warnIgnoredKibanaFetcher,
+      workflows,
+      isManaged,
+    ]
   );
 }
 

@@ -38,6 +38,11 @@ import { WorkflowExecutionOverview } from './workflow_execution_overview';
 import type { WorkflowExecutionLinkInfo } from '../../../hooks/navigation/use_navigate_to_execution';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
 import {
+  approvalLabelsForStepExecution,
+  resumeMessageForStepExecution,
+  resumeSchemaForStepExecution,
+} from '../../workflow_execution_detail/model/use_waiting_step_resume';
+import {
   type ApprovalLabels,
   ResumeExecutionButton,
 } from '../../workflow_execution_detail/ui/resume_execution_button';
@@ -55,6 +60,8 @@ interface WorkflowStepExecutionDetailsProps {
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
   waitingStepExecutionId?: string;
+  /** Run that owns `stepExecution`. Differs from `workflowExecutionId` for an injected child step. */
+  resumeExecutionId?: string;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
@@ -74,6 +81,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     approvalLabels,
     shouldAutoResume = false,
     waitingStepExecutionId,
+    resumeExecutionId,
     childWorkflowExecution,
     parentWorkflowExecution,
   }) => {
@@ -96,6 +104,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     );
 
     const isWaitingForInput = stepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT;
+    const isOwnWaitingStep = stepExecution?.id === waitingStepExecutionId;
 
     // Show data for terminal steps OR steps paused for input (they have input but no output yet)
     const isFinished = useMemo(
@@ -185,7 +194,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     if (!stepExecution) {
       return (
-        <EuiPanel hasShadow={false} paddingSize="m">
+        <EuiPanel hasShadow={false} hasBorder={false} borderRadius="none" paddingSize="m">
           <EuiSkeletonText lines={1} />
           <EuiSpacer size="l" />
           <EuiSkeletonText lines={4} />
@@ -199,7 +208,10 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
           workflowExecutionUsage={workflowExecutionUsage}
-          showResumeUI={workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT}
+          showResumeUI={
+            workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT &&
+            Boolean(waitingStepExecutionId)
+          }
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
@@ -213,6 +225,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: '13px' /* overrides EuiPanel's paddingTop */ }}
         data-test-subj={
@@ -281,7 +295,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           {isFinished ? (
             <EuiFlexItem css={{ overflowY: 'auto' }}>
               {isLoadingStepData ? (
-                <EuiPanel hasShadow={false} paddingSize="m">
+                <EuiPanel hasShadow={false} hasBorder={false} borderRadius="none" paddingSize="m">
                   <EuiSkeletonText lines={4} />
                 </EuiPanel>
               ) : (
@@ -320,12 +334,24 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                       {isWaitingForInput && (
                         <>
                           <ResumeExecutionButton
-                            executionId={workflowExecutionId}
+                            executionId={resumeExecutionId ?? workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
                             stepStartedAt={stepExecution?.startedAt}
-                            resumeMessage={resumeMessage}
-                            resumeSchema={resumeSchema}
-                            approvalLabels={approvalLabels}
+                            resumeMessage={
+                              isOwnWaitingStep
+                                ? resumeMessage
+                                : resumeMessageForStepExecution(stepExecution)
+                            }
+                            resumeSchema={
+                              isOwnWaitingStep
+                                ? resumeSchema
+                                : resumeSchemaForStepExecution(stepExecution)
+                            }
+                            approvalLabels={
+                              isOwnWaitingStep
+                                ? approvalLabels
+                                : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
+                            }
                             autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}
                           />

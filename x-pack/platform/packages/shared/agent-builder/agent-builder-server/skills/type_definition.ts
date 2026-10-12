@@ -34,6 +34,7 @@ export type SkillsDirectoryStructure = Directory<{
       dashboard: FileDirectory;
       discover: FileDirectory;
       evals: FileDirectory;
+      proposals: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
@@ -55,6 +56,7 @@ export type SkillsDirectoryStructure = Directory<{
       rules: FileDirectory;
       entities: FileDirectory<{}>;
       watchlists: FileDirectory<{}>;
+      entity_resolution: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;

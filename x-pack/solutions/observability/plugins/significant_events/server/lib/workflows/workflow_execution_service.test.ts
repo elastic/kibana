@@ -13,20 +13,25 @@ import { WorkflowExecutionService } from './workflow_execution_service';
 const WORKFLOW_ID = 'wf-1';
 const WORKFLOW_SPACE_ID = '*';
 
-const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => ({
-  getWorkflow: jest.fn().mockResolvedValue({
-    id: WORKFLOW_ID,
-    name: 'workflow',
-    enabled: true,
-    definition: {},
-    yaml: '',
-  }),
-  runWorkflow: jest.fn().mockResolvedValue('execution-id'),
-  getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
-  getWorkflowExecution: jest.fn().mockResolvedValue(null),
-  cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
-  ...overrides,
-});
+const statusRequest = httpServerMock.createKibanaRequest();
+
+const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
+  const api = {
+    getWorkflow: jest.fn().mockResolvedValue({
+      id: WORKFLOW_ID,
+      name: 'workflow',
+      enabled: true,
+      definition: {},
+      yaml: '',
+    }),
+    runWorkflow: jest.fn().mockResolvedValue('execution-id'),
+    getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
+    getWorkflowExecution: jest.fn().mockResolvedValue(null),
+    cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    ...overrides,
+  };
+  return { ...api, getClient: jest.fn(() => api) };
+};
 
 const createService = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
@@ -96,7 +101,7 @@ describe('WorkflowExecutionService', () => {
     it('returns NotStarted when there are no executions', async () => {
       const { service } = createService();
 
-      const result = await service.getStatus({ spaceId: 'space-a' });
+      const result = await service.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.NotStarted,
@@ -111,7 +116,7 @@ describe('WorkflowExecutionService', () => {
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });
 
-      const result = await service.getStatus({ spaceId: 'space-a' });
+      const result = await service.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.InProgress,
@@ -126,7 +131,7 @@ describe('WorkflowExecutionService', () => {
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.COMPLETED }] }),
       });
 
-      const result = await service.getStatus({ spaceId: 'space-a' });
+      const result = await service.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Completed,
@@ -141,7 +146,7 @@ describe('WorkflowExecutionService', () => {
         }),
       });
 
-      const result = await service.getStatus({ spaceId: 'space-a' });
+      const result = await service.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
@@ -157,7 +162,7 @@ describe('WorkflowExecutionService', () => {
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.TIMED_OUT }] }),
       });
 
-      const result = await service.getStatus({ spaceId: 'space-a' });
+      const result = await service.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(result).toEqual({
         status: SignificantEventsWorkflowStatus.Failed,
@@ -169,7 +174,7 @@ describe('WorkflowExecutionService', () => {
     it('always fetches exactly one execution', async () => {
       const { service, managementApi } = createService();
 
-      await service.getStatus({ spaceId: 'space-a' });
+      await service.getStatus({ request: statusRequest, spaceId: 'space-a' });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ size: 1 }),
@@ -180,7 +185,11 @@ describe('WorkflowExecutionService', () => {
     it('caller-supplied queryParams cannot override size: 1', async () => {
       const { service, managementApi } = createService();
 
-      await service.getStatus({ spaceId: 'space-a', queryParams: { size: 99 } });
+      await service.getStatus({
+        request: statusRequest,
+        spaceId: 'space-a',
+        queryParams: { size: 99 },
+      });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ size: 1 }),
@@ -192,6 +201,7 @@ describe('WorkflowExecutionService', () => {
       const { service, managementApi } = createService();
 
       await service.getStatus({
+        request: statusRequest,
         spaceId: 'space-a',
         queryParams: { concurrencyGroupKey: 'group-1' },
       });
@@ -348,7 +358,7 @@ describe('WorkflowExecutionService', () => {
           .mockResolvedValue({ results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }] }),
       });
 
-      const result = await service.getLastExecution('space-a');
+      const result = await service.getLastExecution('space-a', statusRequest);
 
       expect(result).toEqual({ id: 'exec-1', status: ExecutionStatus.RUNNING });
     });
@@ -356,7 +366,7 @@ describe('WorkflowExecutionService', () => {
     it('returns null when there are no executions', async () => {
       const { service } = createService();
 
-      const result = await service.getLastExecution('space-a');
+      const result = await service.getLastExecution('space-a', statusRequest);
 
       expect(result).toBeNull();
     });
@@ -364,7 +374,7 @@ describe('WorkflowExecutionService', () => {
     it('queries by createdAt desc to get the most recently created execution', async () => {
       const { service, managementApi } = createService();
 
-      await service.getLastExecution('space-a');
+      await service.getLastExecution('space-a', statusRequest);
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({ sortField: 'createdAt', sortOrder: 'desc', size: 1 }),

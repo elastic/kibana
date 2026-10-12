@@ -6,10 +6,18 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
+import {
+  MAX_ARRAY_LENGTH,
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TITLE_LENGTH,
+} from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { INVESTIGATION_TRIGGER_TYPES } from '../../common';
+import {
+  INVESTIGATION_TRIGGER_TYPES,
+  investigationNotificationDestinationsSchema,
+} from '../../common';
 import type { GetInvestigationsClient } from '../routes/types';
 
 const inputSchema = z.object({
@@ -31,6 +39,17 @@ const inputSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .optional()
     .describe('Short description of the subject, returned on reads as subject.summary'),
+  message: z
+    .string()
+    .min(1)
+    .max(MAX_TEXT_LENGTH)
+    .optional()
+    .describe('Caller-supplied prompt for the investigation agent'),
+  stream_names: z
+    .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
+    .optional()
+    .describe('Logical stream names to scope the investigation'),
   concurrency_key: z
     .string()
     .optional()
@@ -42,6 +61,11 @@ const inputSchema = z.object({
     .optional()
     .describe(
       'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+    ),
+  notificationDestinations: investigationNotificationDestinationsSchema
+    .optional()
+    .describe(
+      'Destinations that receive the concluded investigation. Delivery results are recorded on the investigation.'
     ),
 });
 
@@ -75,8 +99,11 @@ export const triggerInvestigationStepDefinition = (
         },
         title: input.title,
         trigger_type: input.trigger_type ?? 'automatic',
+        message: input.message,
+        stream_names: input.stream_names,
         concurrency_key: input.concurrency_key,
         context: input.context,
+        notificationDestinations: input.notificationDestinations,
       });
       return { output: result };
     },

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import { createRuleDataSchema } from './rule_data_schema';
 import {
@@ -73,6 +73,11 @@ export const findRuleTemplatesRequestSchema = z
       .describe(
         'Only return templates carrying at least one of these tags. Accepts a single tag or a repeated parameter.'
       ),
+    excluded_tags: arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS)
+      .optional()
+      .describe(
+        'Exclude templates carrying any of these tags. Accepts a single tag or a repeated parameter.'
+      ),
   })
   .strict()
   .refine(
@@ -102,3 +107,24 @@ export const ruleTemplateIdParamsSchema = z
   .strict();
 
 export type RuleTemplateIdParams = z.infer<typeof ruleTemplateIdParamsSchema>;
+
+export const ruleTemplateTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(MAX_TAG_LENGTH)
+      .optional()
+      .describe('Prefix to filter tags by. Returns the most-used tags when omitted.'),
+  })
+  .strict();
+
+export type RuleTemplateTagsParams = z.infer<typeof ruleTemplateTagsParamsSchema>;
+
+export const ruleTemplateTagsResponseSchema = z
+  .object({
+    tags: z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(TAGS_RESPONSE_LIMIT),
+  })
+  .describe('The most-used unique tags across v2 rule templates, optionally filtered by prefix.')
+  .meta({ id: 'alerting_rule_template_tags_response' });
+
+export type RuleTemplateTagsResponse = z.infer<typeof ruleTemplateTagsResponseSchema>;

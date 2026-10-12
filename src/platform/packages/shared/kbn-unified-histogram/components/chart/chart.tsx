@@ -26,6 +26,7 @@ import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { useStableCallback } from '@kbn/react-hooks';
+import type { DataSource } from '@kbn/data-source';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -75,6 +76,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
@@ -100,6 +102,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   onApiAvailable: consumerOnApiAvailable,
+  withLensActions = true,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -146,18 +149,17 @@ export function UnifiedHistogramChart({
   }, [visContext?.attributes]);
 
   const {
-    dataView,
+    dataSource,
     query,
     timeRange,
     relativeTimeRange,
     abortController,
-    columns,
     controlsState,
-    isESQLQuery: isPlainRecord,
     breakdown,
   } = fetchParams;
+  const isEsql = dataSource.kind === 'esql';
   const hasLensSuggestions = Boolean(
-    isPlainRecord &&
+    isEsql &&
       lensVisServiceCurrentSuggestionContext?.type === UnifiedHistogramSuggestionType.lensSuggestion
   );
 
@@ -191,7 +193,7 @@ export function UnifiedHistogramChart({
       }
 
       const adapterTables = adapters?.tables?.tables;
-      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, isPlainRecord);
+      const totalHits = computeTotalHits(hasLensSuggestions, adapterTables, dataSource);
 
       if (response?._shards?.failed || response?.timed_out) {
         onTotalHitsChange?.(UnifiedHistogramFetchStatus.error, totalHits);
@@ -205,7 +207,7 @@ export function UnifiedHistogramChart({
       if (response) {
         const newBucketInterval = buildBucketInterval({
           data: services.data,
-          dataView,
+          dataSource,
           timeInterval: chart?.timeInterval,
           timeRange,
           response,
@@ -244,39 +246,36 @@ export function UnifiedHistogramChart({
 
   const onEditVisualization = useEditVisualization({
     services,
-    dataView,
+    dataSource,
     relativeTimeRange,
     lensAttributes: visContext?.attributes,
-    isPlainRecord,
   });
 
   const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
   const toolbarSelectors = useMemo(
     () => [
-      chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
+      chartVisible && !isEsql && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
       <div>
         {chartVisible && breakdown && (
           <BreakdownFieldSelector
-            dataView={dataView}
+            dataSource={dataSource}
             breakdown={breakdown}
             onBreakdownFieldChange={onBreakdownFieldChange}
-            esqlColumns={isPlainRecord ? columns : undefined}
           />
         )}
       </div>,
     ],
     [
       chartVisible,
-      isPlainRecord,
+      isEsql,
       onTimeIntervalChange,
       chart,
       breakdown,
-      dataView,
+      dataSource,
       onBreakdownFieldChange,
-      columns,
     ]
   );
 
@@ -291,7 +290,7 @@ export function UnifiedHistogramChart({
   const LensSaveModalComponent = services.lens.SaveModalComponent;
 
   const canCustomizeVisualization =
-    isPlainRecord &&
+    isEsql &&
     currentSuggestion &&
     [
       UnifiedHistogramSuggestionType.lensSuggestion,
@@ -304,7 +303,7 @@ export function UnifiedHistogramChart({
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
-  if (canEditVisualizationOnTheFly) {
+  if (withLensActions && canEditVisualizationOnTheFly) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -316,7 +315,7 @@ export function UnifiedHistogramChart({
       'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
       onClick: () => setIsFlyoutVisible(true),
     });
-  } else if (onEditVisualization) {
+  } else if (withLensActions && onEditVisualization) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -329,7 +328,7 @@ export function UnifiedHistogramChart({
     });
   }
 
-  if (canSaveVisualization) {
+  if (withLensActions && canSaveVisualization) {
     const saveLabel = i18n.translate('unifiedHistogram.saveVisualizationButton', {
       defaultMessage: 'Save visualization to dashboard',
     });
@@ -387,11 +386,10 @@ export function UnifiedHistogramChart({
               {lensPropsContext && (
                 <HistogramMemoized
                   services={services}
-                  dataView={dataView}
+                  dataSource={dataSource}
                   chart={chart}
                   bucketInterval={bucketInterval}
                   visContext={visContext}
-                  isPlainRecord={isPlainRecord}
                   abortController={abortController}
                   {...histogramProps}
                   {...lensPropsContext}
@@ -420,7 +418,7 @@ export function UnifiedHistogramChart({
           dataLoading$={dataLoading$}
           isFlyoutVisible={isFlyoutVisible}
           setIsFlyoutVisible={setIsFlyoutVisible}
-          isPlainRecord={isPlainRecord}
+          dataSource={dataSource}
           query={query}
           currentSuggestionContext={lensVisServiceCurrentSuggestionContext}
           onSuggestionContextEdit={onSuggestionContextEdit}
@@ -438,11 +436,12 @@ const computeTotalHits = (
         [key: string]: Datatable;
       }
     | undefined,
-  isPlainRecord?: boolean
+  dataSource: DataSource
 ) => {
-  if (isPlainRecord && hasLensSuggestions) {
+  const isEsql = dataSource.kind === 'esql';
+  if (isEsql && hasLensSuggestions) {
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
-  } else if (isPlainRecord && !hasLensSuggestions) {
+  } else if (isEsql && !hasLensSuggestions) {
     // ES|QL histogram case
     const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
     if (!rows) {

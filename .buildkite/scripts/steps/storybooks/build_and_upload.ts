@@ -41,7 +41,7 @@ const STORYBOOK_DOCS_ARCHIVE_FILE = 'storybook-docs.tar.gz';
 const STORYBOOK_DOCS_ARCHIVE_PATH = path.join(STORYBOOK_BUILD_DIR, STORYBOOK_DOCS_ARCHIVE_FILE);
 const STORYBOOK_DOCS_ARCHIVE_URL = `${STORYBOOK_BASE_URL}/${STORYBOOK_DOCS_ARCHIVE_FILE}`;
 
-const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
+const exec = (command: string) => execSync(command, { stdio: 'inherit' });
 
 const annotateStorybookDocsArtifacts = (
   archive: BuildDocsArchiveResult,
@@ -189,6 +189,7 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
     'common',
     'activate_service_account.sh'
   );
+  exec(`${activateScriptPath} gs://ci-artifacts.kibana.dev`);
   try {
     console.log('--- Generating Storybooks HTML');
 
@@ -219,7 +220,6 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
 
     console.log('--- Uploading Storybooks');
     exec(`
-      ${path.relative(process.cwd(), activateScriptPath)} gs://ci-artifacts.kibana.dev
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --no-user-output-enabled '${storybookDocsArchivePath}' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${STORYBOOK_DOCS_ARCHIVE_FILE}'
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=html --no-user-output-enabled 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
@@ -228,10 +228,9 @@ const upload = (archive: BuildDocsArchiveResult, registry: BuildDocsRegistryResu
     console.log('--- Uploading Storybook docs assets');
     process.chdir(originalDirectory);
     process.chdir(STORYBOOK_DOCS_BUILD_DIR);
-    exec(`
-      ${path.relative(process.cwd(), activateScriptPath)} gs://ci-artifacts.kibana.dev
-      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${STORYBOOK_DOCS_DIRECTORY}/'
-    `);
+    exec(
+      `gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${STORYBOOK_DOCS_DIRECTORY}/'`
+    );
 
     annotateStorybookDocsArtifacts(archive, registry);
 

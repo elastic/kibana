@@ -38,11 +38,10 @@ export const proposalOutcome = ({
   decision,
   decidedBy,
   status,
-  expired,
 }: ProposalItem): string | undefined => {
   // Nobody answered, so there is no decision to attribute.
   if (!decision) {
-    return status === 'expired' || expired ? EXPIRED : undefined;
+    return status === 'expired' ? EXPIRED : undefined;
   }
 
   // Nothing writes a synthetic system user, so an unattributed approval is the only

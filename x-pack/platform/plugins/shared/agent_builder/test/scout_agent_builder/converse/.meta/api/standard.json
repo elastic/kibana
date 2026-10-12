@@ -1,5 +1,5 @@
 {
-  "sha1": "30ae8993a15459b4a20085c25160a6a575606b5a",
+  "sha1": "3d1a6f3bcaf6049106b017b54df66121a98efaf7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -160,8 +160,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 136,
+        "line": 137,
         "column": 8
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-646bebf93f1b464",
+      "title": "Agent Builder — chat API converse (/api/chat) trigger_mode: never still validates execution-only options, even though they are unused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 242,
+        "column": 13
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-c34d6cb565fa2b6",
+      "title": "Agent Builder — chat API converse (/api/chat) trigger_mode: never persists an attachment-only message, and rejects an invalid one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 280,
+        "column": 17
       }
     },
     {
@@ -176,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 248,
-        "column": 13
+        "line": 324,
+        "column": 30
       }
     },
     {
@@ -192,8 +224,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 286,
-        "column": 23
+        "line": 356,
+        "column": 19
+      }
+    },
+    {
+      "id": "84f452e8da9aae3-9be67d9f1b2a81d",
+      "title": "Agent Builder — chat API converse (/api/chat) a user message on the streaming route reports the conversation and stops",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
+        "line": 389,
+        "column": 13
       }
     },
     {
@@ -208,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 318,
-        "column": 28
+        "line": 416,
+        "column": 25
       }
     },
     {
@@ -224,8 +272,88 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_converse_api.spec.ts",
-        "line": 376,
-        "column": 14
+        "line": 474,
+        "column": 22
+      }
+    },
+    {
+      "id": "89815b88d825848-36a8096503f4066",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers a new conversation with text only, then continues it with the returned conversation_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 113,
+        "column": 7
+      }
+    },
+    {
+      "id": "89815b88d825848-a973fe264ad4206",
+      "title": "Agent Builder — chat API message (/api/chat/message) declines a tool confirmation instead of pausing, and reports it next to the answer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 182,
+        "column": 22
+      }
+    },
+    {
+      "id": "89815b88d825848-d40081a38e00ba0",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers 404 for an unknown agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 239,
+        "column": 16
+      }
+    },
+    {
+      "id": "89815b88d825848-1468902586a1963",
+      "title": "Agent Builder — chat API message (/api/chat/message) answers 404 for an unknown conversation_id without creating a conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 253,
+        "column": 11
+      }
+    },
+    {
+      "id": "89815b88d825848-851cf3f66c3b61e",
+      "title": "Agent Builder — chat API message (/api/chat/message) rejects requests outside the minimal shape with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/chat_api_message_api.spec.ts",
+        "line": 273,
+        "column": 7
       }
     },
     {
@@ -464,8 +592,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 134,
+        "line": 138,
         "column": 23
+      }
+    },
+    {
+      "id": "69411a87481f950-afb719b3a3f36ee",
+      "title": "Agent Builder - converse callback API renders the Slack surface payload with attachments in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
+        "line": 225,
+        "column": 14
       }
     },
     {
@@ -480,8 +624,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 196,
-        "column": 29
+        "line": 268,
+        "column": 14
       }
     },
     {
@@ -496,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 291,
-        "column": 22
+        "line": 365,
+        "column": 15
       }
     },
     {
@@ -512,8 +656,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 327,
-        "column": 31
+        "line": 397,
+        "column": 18
       }
     },
     {
@@ -528,14 +672,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 366,
-        "column": 18
+        "line": 439,
+        "column": 19
       }
     },
     {
       "id": "69411a87481f950-e3a4852c5eeefc2",
       "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -544,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 430,
-        "column": 20
+        "line": 507,
+        "column": 17
       }
     },
     {
@@ -560,8 +704,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 494,
-        "column": 29
+        "line": 568,
+        "column": 13
       }
     },
     {
@@ -576,8 +720,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 552,
-        "column": 31
+        "line": 627,
+        "column": 13
       }
     },
     {
@@ -592,8 +736,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_callback_api.spec.ts",
-        "line": 591,
-        "column": 9
+        "line": 668,
+        "column": 32
+      }
+    },
+    {
+      "id": "bca2309a02a613a-e12e2371ba1dd9a",
+      "title": "Agent Builder — ephemeral ai.agent workflow step runs on top of the conversation without modifying it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/converse/api/tests/converse_ephemeral_workflow_step_api.spec.ts",
+        "line": 67,
+        "column": 37
       }
     },
     {

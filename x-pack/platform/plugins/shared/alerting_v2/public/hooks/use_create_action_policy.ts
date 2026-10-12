@@ -10,6 +10,7 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { CreateActionPolicyData, ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../services/action_policies_api';
+import { invalidateMatchedActionPolicies } from './invalidate_matched_action_policies';
 import { actionPolicyKeys } from './query_key_factory';
 
 export const useCreateActionPolicy = () => {
@@ -21,6 +22,7 @@ export const useCreateActionPolicy = () => {
     mutationFn: (data) => actionPoliciesApi.createActionPolicy(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
+      invalidateMatchedActionPolicies(queryClient);
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.createSuccess', {
           defaultMessage: 'Action policy created successfully',

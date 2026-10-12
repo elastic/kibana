@@ -75,22 +75,22 @@ export const useInvestigationSections = ({
 
   const critical = useFetchInvestigations({
     statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['80-critical'],
+    severities: ['critical'],
     query,
   });
   const high = useFetchInvestigations({
     statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['60-high'],
+    severities: ['high'],
     query,
   });
   const medium = useFetchInvestigations({
     statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['40-medium'],
+    severities: ['medium'],
     query,
   });
   const low = useFetchInvestigations({
     statuses: COMPLETED_INVESTIGATION_STATUSES,
-    severities: ['20-low'],
+    severities: ['low'],
     query,
   });
   const failed = useFetchInvestigations({
@@ -155,10 +155,10 @@ export const useInvestigationSections = ({
   const sections = useMemo(
     () => [
       toSectionState({ id: 'in-progress', queryResult: inProgress }),
-      toSectionState({ id: '80-critical', queryResult: critical }),
-      toSectionState({ id: '60-high', queryResult: high }),
-      toSectionState({ id: '40-medium', queryResult: medium }),
-      toSectionState({ id: '20-low', queryResult: low }),
+      toSectionState({ id: 'critical', queryResult: critical }),
+      toSectionState({ id: 'high', queryResult: high }),
+      toSectionState({ id: 'medium', queryResult: medium }),
+      toSectionState({ id: 'low', queryResult: low }),
       toSectionState({ id: 'failed', queryResult: failed }),
     ],
     [inProgress, critical, high, medium, low, failed]
@@ -166,10 +166,10 @@ export const useInvestigationSections = ({
 
   const severityCounts = useMemo(
     (): SeverityCounts => ({
-      '80-critical': critical.total,
-      '60-high': high.total,
-      '40-medium': medium.total,
-      '20-low': low.total,
+      critical: critical.total,
+      high: high.total,
+      medium: medium.total,
+      low: low.total,
     }),
     [critical.total, high.total, medium.total, low.total]
   );

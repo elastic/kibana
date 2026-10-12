@@ -6,7 +6,11 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
+import type { ErrorResultData } from '@kbn/agent-builder-common/tools/tool_result';
+import type {
+  BuiltInToolConfirmationPolicy,
+  ToolHandlerContext,
+} from '@kbn/agent-builder-server/tools';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -30,8 +34,15 @@ import type { EndpointPolicyManagementService } from '../services/endpoint_polic
 import { createEndpointPolicyManagementService } from '../services/endpoint_policy_management_service';
 import {
   InvalidEndpointPolicyError,
+  POLICY_ERROR_MESSAGES,
   PolicyAmbiguousNameError,
+  PolicyBaselineUnavailableError,
+  PolicyBlockedChangeError,
+  PolicyNoChangeError,
   PolicyNotFoundError,
+  PolicyVersionConflictError,
+  PolicyWriteRejectedError,
+  PolicyWriteUnverifiedError,
 } from '../services/policy_errors';
 import {
   POLICY_TOOL_ERROR_MESSAGES,
@@ -46,9 +57,18 @@ jest.mock('../services/endpoint_policy_management_service', () => ({
 const SPACE_ID = 'space-marketing';
 const TOOL_ID = 'security.policy_management.test_policy_tool';
 
+const WRITE_IDENTITY = {
+  id: 'policy-1',
+  name: 'Protect marketing',
+  revision: 4,
+  version: 'WzQsMV0=',
+} as const;
+
 const testSchema = z.object({
   idOrName: z.string().min(1).max(256),
 });
+
+type TestParams = z.infer<typeof testSchema>;
 
 const createLogger = () => loggingSystemMock.createLogger();
 
@@ -78,6 +98,7 @@ const getHandlerResult = async (
   options: {
     logger?: ReturnType<typeof loggingSystemMock.createLogger>;
     maxResultTokens?: number;
+    confirmation?: BuiltInToolConfirmationPolicy<TestParams>;
   } = {}
 ) => {
   const logger = options.logger ?? createLogger();
@@ -87,6 +108,7 @@ const getHandlerResult = async (
   const mockService = {
     getPolicy: jest.fn(),
   } as unknown as EndpointPolicyManagementService;
+  mockedCreateEndpointPolicyManagementService.mockClear();
   mockedCreateEndpointPolicyManagementService.mockReturnValue(mockService);
 
   const tool = createPolicyTool({
@@ -96,6 +118,7 @@ const getHandlerResult = async (
     description: 'Test policy tool',
     schema: testSchema,
     maxResultTokens: options.maxResultTokens,
+    confirmation: options.confirmation,
     run,
   });
   const result = await tool.handler({ idOrName: 'policy-1' }, ctx);
@@ -181,6 +204,12 @@ describe('classifyPolicyError', () => {
       'unknown_error'
     );
     expect(classifyPolicyError('string error')).toBe('unknown_error');
+    expect(classifyPolicyError(new Error(POLICY_ERROR_MESSAGES.baseline_unavailable))).toBe(
+      'unknown_error'
+    );
+    expect(classifyPolicyError(new Error(POLICY_ERROR_MESSAGES.write_unverified))).toBe(
+      'unknown_error'
+    );
   });
 });
 
@@ -200,7 +229,7 @@ describe('createPolicyTool', () => {
     expect(tool.maxResultTokens).toBe(8_000);
   });
 
-  it('omits maxResultTokens when the caller does not set a budget', () => {
+  it('omits maxResultTokens and confirmation when the caller does not set them', () => {
     const tool = createPolicyTool({
       endpointAppContextService: createMockEndpointAppContextService(),
       getStartServices: createGetStartServices(),
@@ -211,6 +240,23 @@ describe('createPolicyTool', () => {
     });
 
     expect(tool.maxResultTokens).toBeUndefined();
+    expect(tool.confirmation).toBeUndefined();
+  });
+
+  it('forwards optional confirmation unchanged and does not invoke getConfirmation', async () => {
+    const confirmation: BuiltInToolConfirmationPolicy<TestParams> = {
+      askUser: 'always',
+      getConfirmation: jest.fn(async () => {
+        throw new Error('preview failed');
+      }),
+    };
+    const run = jest.fn(async () => ({ ok: true }));
+    const { tool, result } = await getHandlerResult(run, { confirmation });
+
+    expect(tool.confirmation).toBe(confirmation);
+    expect(confirmation.getConfirmation).not.toHaveBeenCalled();
+    expect(result.type).toBe(ToolResultType.other);
+    expect(result.data).toEqual({ ok: true });
   });
 
   it('constructs the request-scoped service from the handler request and spaceId and does not authorize in the wrapper', async () => {
@@ -226,7 +272,7 @@ describe('createPolicyTool', () => {
       spaceId: SPACE_ID,
     });
     expect(run).toHaveBeenCalledTimes(1);
-    expect(run).toHaveBeenCalledWith({ idOrName: 'policy-1' }, mockService);
+    expect(run).toHaveBeenCalledWith({ idOrName: 'policy-1' }, mockService, ctx);
     expect(endpointAppContextService.getEndpointAuthz).not.toHaveBeenCalled();
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data).toEqual({ ok: true });
@@ -237,6 +283,11 @@ describe('createPolicyTool', () => {
     ['not_found', new PolicyNotFoundError()],
     ['invalid_policy', new InvalidEndpointPolicyError()],
     ['not_found', new EndpointNotFoundError('missing')],
+    ['baseline_unavailable', new PolicyBaselineUnavailableError()],
+    ['version_conflict', new PolicyVersionConflictError()],
+    ['blocked_change', new PolicyBlockedChangeError()],
+    ['no_change', new PolicyNoChangeError()],
+    ['write_rejected', new PolicyWriteRejectedError()],
   ] as const)(
     'returns a stable %s error result without internals and debug-logs expected faults',
     async (errorClass, thrown) => {
@@ -287,6 +338,80 @@ describe('createPolicyTool', () => {
       },
     });
     expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: ambiguous_name`);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns write_unverified with unavailable observation when observed is absent', async () => {
+    const logger = createLogger();
+    const run = jest.fn(async () => {
+      throw new PolicyWriteUnverifiedError(WRITE_IDENTITY);
+    });
+    const { result } = await getHandlerResult(run, { logger });
+    const serialized = JSON.stringify(result.data);
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data).toEqual({
+      message: POLICY_TOOL_ERROR_MESSAGES.write_unverified,
+      metadata: {
+        error: 'write_unverified',
+        before: WRITE_IDENTITY,
+        observation: 'unavailable',
+      },
+    });
+    expect((result.data as ErrorResultData).metadata).not.toHaveProperty('observed');
+    expect(serialized).not.toContain('proposedConfig');
+    expect(serialized).not.toContain('config');
+    expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: write_unverified`);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns write_unverified with available bounded observed identity and no success claim', async () => {
+    const logger = createLogger();
+    const overlongName = 'N'.repeat(600);
+    const overlongVersion = 'V'.repeat(600);
+    const before = {
+      id: 'policy-1',
+      name: overlongName,
+      revision: 4,
+      version: 'WzQsMV0=',
+    };
+    const observed = {
+      id: 'policy-1',
+      name: overlongName,
+      revision: 5,
+      version: overlongVersion,
+    };
+    const run = jest.fn(async () => {
+      throw new PolicyWriteUnverifiedError(before, observed);
+    });
+    const { result } = await getHandlerResult(run, { logger });
+    const serialized = JSON.stringify(result.data);
+
+    expect(result.type).toBe(ToolResultType.error);
+    expect(result.data).toEqual({
+      message: POLICY_TOOL_ERROR_MESSAGES.write_unverified,
+      metadata: {
+        error: 'write_unverified',
+        before: {
+          id: 'policy-1',
+          name: 'N'.repeat(512),
+          name_string_truncated: true,
+          revision: 4,
+          version: 'WzQsMV0=',
+        },
+        observation: 'available',
+        observed: {
+          id: 'policy-1',
+          name: 'N'.repeat(512),
+          name_string_truncated: true,
+          revision: 5,
+          version: 'V'.repeat(512),
+          version_string_truncated: true,
+        },
+      },
+    });
+    expect(serialized).not.toContain('proposedConfig');
+    expect(logger.debug).toHaveBeenCalledWith(`Error in ${TOOL_ID}: write_unverified`);
     expect(logger.error).not.toHaveBeenCalled();
   });
 

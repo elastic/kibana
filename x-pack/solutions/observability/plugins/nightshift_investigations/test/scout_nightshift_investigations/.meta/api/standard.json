@@ -1,12 +1,108 @@
 {
-  "sha1": "b4d4192708960a4b54c53dc1b7aa1acbae9563f4",
+  "sha1": "d4c019e49eb9bc0356939b85975a8762abe403db",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "573fcc9ed716f81-87fcfda1cf1f296",
-      "title": "POST /internal/nightshift/investigations/{id}/_ensure acknowledges without side effects when the investigation is already running",
+      "id": "9094409a4361f3f-43b3061a5b88a7d",
+      "title": "/internal/nightshift/custom_context adds, keeps, edits and removes snippets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 57,
+        "column": 9
+      }
+    },
+    {
+      "id": "9094409a4361f3f-7de094e8a9e8d67",
+      "title": "/internal/nightshift/custom_context rejects snippets over the size limits",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "9094409a4361f3f-4eb95a61f406597",
+      "title": "/internal/nightshift/custom_context keeps snippets isolated per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 155,
+        "column": 7
+      }
+    },
+    {
+      "id": "9094409a4361f3f-22c6f36b3ac03c7",
+      "title": "/internal/nightshift/custom_context lets read-only users list snippets but not change them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 168,
+        "column": 7
+      }
+    },
+    {
+      "id": "9094409a4361f3f-c85f4acc63ae68e",
+      "title": "/internal/nightshift/custom_context rejects users without any Nightshift privilege in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 185,
+        "column": 31
+      }
+    },
+    {
+      "id": "9094409a4361f3f-e7ae12e2cdfa0f9",
+      "title": "/internal/nightshift/custom_context returns 404 while Nightshift is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/custom_context.spec.ts",
+        "line": 201,
+        "column": 30
+      }
+    },
+    {
+      "id": "573fcc9ed716f81-3479f2ebf69bc23",
+      "title": "POST /internal/nightshift/investigations/{id}/_ensure rejects a running investigation without a matching workflow execution",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -117,8 +213,8 @@
       }
     },
     {
-      "id": "cb3d6997f977f32-a514f7163a066e4",
-      "title": "GET /internal/nightshift/investigations/availability returns 403 for a user with only agentBuilder:read",
+      "id": "cb3d6997f977f32-fdebaf43d0d402d",
+      "title": "GET /internal/nightshift/investigations/availability returns 200 unavailable for an unknown connector_id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -133,6 +229,22 @@
       }
     },
     {
+      "id": "cb3d6997f977f32-a514f7163a066e4",
+      "title": "GET /internal/nightshift/investigations/availability returns 403 for a user with only agentBuilder:read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
+        "line": 44,
+        "column": 27
+      }
+    },
+    {
       "id": "cb3d6997f977f32-5e08bf0031d3fda",
       "title": "GET /internal/nightshift/investigations/availability returns 403 for a user without agentBuilder privileges",
       "expectedStatus": "passed",
@@ -144,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/get_investigation_availability.spec.ts",
-        "line": 40,
-        "column": 17
+        "line": 54,
+        "column": 7
       }
     },
     {
@@ -421,6 +533,158 @@
       }
     },
     {
+      "id": "04709a0df7399d2-fbf417bb9008f85",
+      "title": "Semantic Memory write routes are authorized on the server archive is refused to a reader and leaves the memory active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 61,
+        "column": 15
+      }
+    },
+    {
+      "id": "04709a0df7399d2-b74c471701b9b99",
+      "title": "Semantic Memory write routes are authorized on the server delete is refused to a reader and leaves the document in place",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "04709a0df7399d2-b83137dc4d0d216",
+      "title": "Semantic Memory write routes are authorized on the server delete is refused to a manager, who may archive but not configure",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 82,
+        "column": 16
+      }
+    },
+    {
+      "id": "04709a0df7399d2-7348e67402db359",
+      "title": "Semantic Memory write routes are authorized on the server a manager may archive, and a reader may read the memory that survived",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/memory_page_authorization.spec.ts",
+        "line": 93,
+        "column": 52
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-15179325f34e902",
+      "title": "/internal/nightshift/sandbox_secrets stores secrets and only ever returns their keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 66,
+        "column": 27
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-63eb4e1841adf74",
+      "title": "/internal/nightshift/sandbox_secrets rejects new keys without a value, too short or multi-line values and reserved keys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 131,
+        "column": 18
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-ed89ab4d3a81891",
+      "title": "/internal/nightshift/sandbox_secrets keeps secrets isolated per space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 160,
+        "column": 19
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-e70ee20f53d6a87",
+      "title": "/internal/nightshift/sandbox_secrets lets read-only users list keys but not change secrets",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 173,
+        "column": 16
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-64dda8fa872ad46",
+      "title": "/internal/nightshift/sandbox_secrets rejects users without any Nightshift privilege in the space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 197,
+        "column": 30
+      }
+    },
+    {
+      "id": "5634887a4dd65b3-7bb1a377ae1bfdf",
+      "title": "/internal/nightshift/sandbox_secrets returns 404 while Nightshift is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/sandbox_secrets.spec.ts",
+        "line": 207,
+        "column": 24
+      }
+    },
+    {
       "id": "339d855bf92e6e6-afca8ce6de73e20",
       "title": "investigations are isolated per space GET returns the investigation in the space it was created in",
       "expectedStatus": "passed",
@@ -549,8 +813,8 @@
       }
     },
     {
-      "id": "2bd6d8da5d00a5a-d29b9decd15410e",
-      "title": "POST /internal/nightshift/investigations returns 400 for a significant event body without a title",
+      "id": "2bd6d8da5d00a5a-0052c9640bd5a03",
+      "title": "POST /internal/nightshift/investigations returns 400 for a significant event subject, which is not accepted by this route",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -576,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 50,
-        "column": 28
+        "line": 51,
+        "column": 30
       }
     },
     {
@@ -592,7 +856,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 62,
+        "line": 65,
         "column": 58
       }
     },
@@ -608,7 +872,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/start_investigation.spec.ts",
-        "line": 75,
+        "line": 78,
         "column": 27
       }
     },
@@ -704,8 +968,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 113,
-        "column": 92
+        "line": 108,
+        "column": 41
       }
     },
     {
@@ -720,8 +984,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 122,
-        "column": 87
+        "line": 116,
+        "column": 51
       }
     },
     {
@@ -736,8 +1000,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 129,
+        "column": 13
       }
     },
     {
@@ -752,8 +1016,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 147,
-        "column": 16
+        "line": 139,
+        "column": 81
       }
     },
     {
@@ -768,8 +1032,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_investigations/test/scout_nightshift_investigations/api/tests/update_investigation.spec.ts",
-        "line": 165,
-        "column": 16
+        "line": 158,
+        "column": 20
       }
     }
   ]

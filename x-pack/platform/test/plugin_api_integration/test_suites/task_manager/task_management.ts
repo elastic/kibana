@@ -191,12 +191,13 @@ export default function ({ getService }: FtrProviderContext) {
               interval: number;
               tzid: string;
             };
-          }
+          },
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule })
+        .send({ taskIds, schedule, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -212,12 +213,13 @@ export default function ({ getService }: FtrProviderContext) {
               tzid: string;
             };
           },
-      regenerateApiKey: boolean = false
+      regenerateApiKey: boolean = false,
+      includeRunningTasks: boolean = false
     ) {
       return supertest
         .post('/api/sample_tasks/bulk_update_schedules_with_api_key')
         .set('kbn-xsrf', 'xxx')
-        .send({ taskIds, schedule, regenerateApiKey })
+        .send({ taskIds, schedule, regenerateApiKey, includeRunningTasks })
         .expect(200)
         .then((response: { body: BulkUpdateTaskResult }) => response.body);
     }
@@ -1922,6 +1924,57 @@ export default function ({ getService }: FtrProviderContext) {
 
         // scheduledRunAt shouldn't be changed
         expect(task.runAt).to.eql(scheduledRunAt);
+      });
+    });
+
+    it('should bulk update schedules for a running task and have the update survive completion when includeRunningTasks is true', async () => {
+      const releaseEvent = 'releaseRunningTaskWithUpdatedSchedule';
+      const runningTask = await scheduleTask(supertest, {
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { waitForEvent: releaseEvent },
+      });
+
+      await runTaskSoon({ id: runningTask.id });
+
+      // ensure task is running and capture when this execution was due
+      let dueRunAt: string;
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('running');
+        dueRunAt = task.runAt;
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([runningTask.id], { interval: '3h' }, true);
+
+        expect(updates.tasks.length).to.be(1);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // the running task's schedule is updated in place while it is still running, runAt is untouched
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('running');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expect(task.runAt).to.be(dueRunAt);
+      });
+
+      // the task writes its history doc right before it starts waiting for the release event
+      await retry.try(async () => {
+        expect((await historyDocs(runningTask.id)).length).to.eql(1);
+      });
+      await releaseTasksWaitingForEventToComplete(releaseEvent);
+
+      // once the run finishes, the next runAt is one 3h interval from this run's due time
+      await retry.try(async () => {
+        const task = await currentTask(runningTask.id);
+
+        expect(task.status).to.be('idle');
+        expect(task.schedule).to.eql({ interval: '3h' });
+        expectReschedule(Date.parse(dueRunAt), task, 3 * 60 * 60 * 1000);
       });
     });
 

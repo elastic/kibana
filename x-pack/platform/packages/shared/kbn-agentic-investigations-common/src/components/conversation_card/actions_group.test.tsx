@@ -17,8 +17,7 @@ const makeInvestigation = (overrides: Partial<Investigation> = {}): Investigatio
   title: 'Impossible travel — exec account',
   createdAt: '2024-01-01T00:00:00Z',
   updatedAt: '2024-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   recordId: 'inv-1',
   pendingProposalCount: 1,
   assignees: [],
@@ -44,6 +43,7 @@ const renderGroup = (
       investigation={investigation}
       onClickRecommendedAction={withRecommendedAction ? onClickRecommendedAction : undefined}
       onClickAction={onClickAction}
+      onCopyLink={jest.fn()}
       onOpenChat={onOpenChat}
       canManageEscalations={canManageEscalations}
     />
@@ -98,13 +98,11 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('omits the recommended action on a decided investigation', () => {
-      // A decided proposal without canManageEscalations has no available actions at all —
-      // the menu trigger is hidden rather than opening an empty popover.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
 
-      // Absence of the trigger proves no decision item can be reached.
-      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
       expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+      expect(screen.getByText('Copy link')).toBeInTheDocument();
     });
 
     it('omits the recommended action when no handler is wired', () => {
@@ -121,12 +119,11 @@ describe('ConversationsActionsGroup', () => {
       expect(screen.queryByText('Open in chat')).not.toBeInTheDocument();
     });
 
-    it('drops assign and close on a decided investigation', () => {
-      // A decided investigation with canManageEscalations=false has no available actions;
-      // the trigger is hidden and there is nothing to open.
+    it('drops close on a decided investigation', () => {
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
+      openMenu();
 
-      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
 
     it('shows the menu trigger for a decided investigation when escalations are available', () => {
@@ -144,7 +141,7 @@ describe('ConversationsActionsGroup', () => {
       openMenu();
 
       expect(screen.getByText('Open an escalation')).toBeInTheDocument();
-      expect(screen.getByText('Add to an escalation')).toBeInTheDocument();
+      expect(screen.getByText('Attach to an escalation')).toBeInTheDocument();
     });
 
     it('hides escalation actions when canManageEscalations is false (default)', () => {
@@ -153,16 +150,32 @@ describe('ConversationsActionsGroup', () => {
       openMenu();
 
       expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();
-      expect(screen.queryByText('Add to an escalation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Attach to an escalation')).not.toBeInTheDocument();
     });
 
-    it('keeps assign and close while the decision is open', () => {
-      const { onClickAction } = renderGroup(makeInvestigation());
+    it('keeps close available while the decision is open when canCloseInvestigation is true', () => {
+      const onClickAction = jest.fn();
+      renderWithKibanaRenderContext(
+        <ConversationsActionsGroup
+          investigation={makeInvestigation()}
+          onClickAction={onClickAction}
+          onOpenChat={jest.fn()}
+          onCopyLink={jest.fn()}
+          canCloseInvestigation={true}
+        />
+      );
       openMenu();
 
       fireEvent.click(screen.getByText('Close investigation'));
 
       expect(onClickAction).toHaveBeenCalledWith('close', 'inv-1');
+    });
+
+    it('hides close when canCloseInvestigation is false (default)', () => {
+      renderGroup(makeInvestigation());
+      openMenu();
+
+      expect(screen.queryByText('Close investigation')).not.toBeInTheDocument();
     });
   });
 });

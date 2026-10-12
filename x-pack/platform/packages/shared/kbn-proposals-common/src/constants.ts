@@ -16,12 +16,18 @@ export const PROPOSALS_INDEX_NAME = '.kibana-proposals' as const;
 /** Shared by every route, so a caller versions the whole surface at once. */
 export const PROPOSALS_API_VERSION = '1' as const;
 
+/** Agent Builder tool that appends a revision to a proposal chain. */
+export const PROPOSALS_REVISE_TOOL_ID = 'platform.proposals.revise' as const;
+
 export const PROPOSALS_INTERNAL_URL = '/internal/proposals' as const;
 export const PROPOSAL_BY_ID_URL = `${PROPOSALS_INTERNAL_URL}/{id}` as const;
 export const PROPOSAL_APPROVE_URL = `${PROPOSALS_INTERNAL_URL}/{id}/approve` as const;
 export const PROPOSAL_DISMISS_URL = `${PROPOSALS_INTERNAL_URL}/{id}/dismiss` as const;
 export const PROPOSAL_REVISIONS_URL = `${PROPOSALS_INTERNAL_URL}/{proposalId}/revisions` as const;
 export const PROPOSAL_CHARTS_SUMMARY_URL = `${PROPOSALS_INTERNAL_URL}/charts-summary` as const;
+
+/** Agent Builder builtin tool through which an agent proposes an action in its conversation. */
+export const PROPOSALS_CREATE_TOOL_ID = 'proposals.create' as const;
 
 /**
  * Stand-in category for a proposal that carries no action and therefore has no

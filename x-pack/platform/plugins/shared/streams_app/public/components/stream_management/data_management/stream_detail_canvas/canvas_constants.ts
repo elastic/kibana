@@ -56,7 +56,7 @@ export const DESTINATION_NODE_WIDTH = 184;
  * Revisit whenever a card gains or loses a content row.
  */
 export const SOURCE_NODE_HEIGHT = 74;
-export const DESTINATION_NODE_HEIGHT = 50;
+export const DESTINATION_NODE_HEIGHT = 78;
 
 export const NODE_HEIGHT_BY_TYPE: Readonly<Record<string, number>> = {
   [SOURCE_NODE_TYPE]: SOURCE_NODE_HEIGHT,

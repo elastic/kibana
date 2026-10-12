@@ -158,6 +158,7 @@ export const AiQaMultiFileInputSchema = lazySchema(() =>
     fileIds: z
       .array(z.string().min(1).max(256))
       .min(1)
+      .max(25)
       .describe(
         'Array of Box file IDs to query across. Use file IDs from searchFilesKeyword or listFolderContent results.'
       ),
@@ -343,7 +344,7 @@ export const CallToolInputSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(200).describe('Name of the Box MCP tool to call'),
     arguments: z
-      .record(z.string(), z.unknown())
+      .record(z.string().max(200), z.unknown())
       .optional()
       .describe('Arguments to pass to the tool (tool-specific)'),
   })

@@ -7,7 +7,8 @@
 
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const PAGE_TITLE = '[data-test-subj="header-page-title"]';
+// Legacy pages render `header-page-title`; pages migrated to AppHeader render `appHeaderTitle`.
+export const PAGE_TITLE = '[data-test-subj="header-page-title"],[data-test-subj="appHeaderTitle"]';
 
 export const NOT_FOUND = '[data-test-subj="notFoundPage"]';
 

@@ -364,6 +364,56 @@ export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
 export const ObjectQueries = lazySchema(() => z.object({}).catchall(ObjectQueriesItem));
 export type ObjectQueries = z.infer<typeof ObjectQueries>;
 
+/**
+ * Uses the Osquery versions greater than or equal to the specified version string. Formatted as a numeric version string, e.g. `"5.10.0"`, or an empty string to inherit the pack's `min_osquery_version` (no constraint if the pack has none). Non-numeric values (e.g. `"latest"`) are rejected.
+ */
+export const PackQueryVersionInput = lazySchema(() =>
+  z
+    .string()
+    .max(64)
+    .regex(/^(\d+(\.\d+){0,2})?$/)
+);
+export type PackQueryVersionInput = z.infer<typeof PackQueryVersionInput>;
+
+export const PackQueryVersionInputOrUndefined = lazySchema(() => PackQueryVersionInput);
+export type PackQueryVersionInputOrUndefined = z.infer<typeof PackQueryVersionInputOrUndefined>;
+
+export const ObjectQueriesItemInput = lazySchema(() =>
+  z.object({
+    query: Query.optional(),
+    id: QueryId.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    version: PackQueryVersionInputOrUndefined.optional(),
+    platform: PlatformOrUndefined.optional(),
+    saved_query_id: SavedQueryIdOrUndefined.optional(),
+    removed: RemovedOrUndefined.optional(),
+    snapshot: SnapshotOrUndefined.optional(),
+    /**
+      * Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+
+      */
+    interval: z
+      .number()
+      .int()
+      .nullable()
+      .optional()
+      .describe(
+        "Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.\n"
+      ),
+    schedule_type: ScheduleTypeOrUndefined.optional(),
+    rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+    enabled: QueryEnabled.optional(),
+    result_type: ResultType.optional(),
+  })
+);
+export type ObjectQueriesItemInput = z.infer<typeof ObjectQueriesItemInput>;
+
+/**
+ * An object of queries.
+ */
+export const ObjectQueriesInput = lazySchema(() => z.object({}).catchall(ObjectQueriesItemInput));
+export type ObjectQueriesInput = z.infer<typeof ObjectQueriesInput>;
+
 export const Queries = lazySchema(() => z.union([ArrayQueries, ObjectQueries]));
 export type Queries = z.infer<typeof Queries>;
 
@@ -424,10 +474,24 @@ export const ResultTypeOrUndefined = lazySchema(() => ResultType.nullable());
 export type ResultTypeOrUndefined = z.infer<typeof ResultTypeOrUndefined>;
 
 /**
- * Minimum osquery version required to run this pack or query. Formatted as a semver string, e.g. `"5.10.0"`.
+ * Minimum osquery version required to run this pack or query, e.g. `"5.10.0"`.
  */
 export const MinOsqueryVersion = lazySchema(() => z.string().min(1).max(64));
 export type MinOsqueryVersion = z.infer<typeof MinOsqueryVersion>;
 
-export const MinOsqueryVersionOrUndefined = lazySchema(() => MinOsqueryVersion.nullable());
-export type MinOsqueryVersionOrUndefined = z.infer<typeof MinOsqueryVersionOrUndefined>;
+/**
+ * Minimum osquery version required to run this pack or query. Formatted as a numeric version string, e.g. `"5.10.0"`. Non-numeric values (e.g. `"latest"`) are rejected.
+ */
+export const MinOsqueryVersionInput = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(64)
+    .regex(/^\d+(\.\d+){0,2}$/)
+);
+export type MinOsqueryVersionInput = z.infer<typeof MinOsqueryVersionInput>;
+
+export const MinOsqueryVersionInputOrUndefined = lazySchema(() =>
+  MinOsqueryVersionInput.nullable()
+);
+export type MinOsqueryVersionInputOrUndefined = z.infer<typeof MinOsqueryVersionInputOrUndefined>;

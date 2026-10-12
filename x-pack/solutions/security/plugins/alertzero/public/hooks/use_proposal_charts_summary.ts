@@ -9,6 +9,7 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PROPOSALS_API_VERSION, PROPOSAL_CHARTS_SUMMARY_URL } from '@kbn/proposals-common';
 import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../common/proposals/origin';
 import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
 import { PROPOSALS_POLL_INTERVAL_MS } from './use_proposals_api';
@@ -31,7 +32,9 @@ export const useProposalChartsSummary = ({
     queryFn: (): Promise<ProposalChartsSummaryResponse> =>
       services.http!.get<ProposalChartsSummaryResponse>(PROPOSAL_CHARTS_SUMMARY_URL, {
         version: PROPOSALS_API_VERSION,
-        query: { windowHours, bucketMinutes },
+        // Scoped like the queues below it: the index is shared with every other
+        // solution, so an unscoped count would contradict the rows it heads.
+        query: { windowHours, bucketMinutes, origin: ALERTZERO_PROPOSAL_ORIGIN },
       }),
     keepPreviousData: true,
     // Shares the queues' cadence: this drives the header count, which would otherwise

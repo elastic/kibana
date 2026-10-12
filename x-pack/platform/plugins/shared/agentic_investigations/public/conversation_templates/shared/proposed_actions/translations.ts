@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+/** Keyed by the HTTP status the proposals route returns for a refused decision. */
+export const DECISION_ERRORS: Readonly<Record<number | 'default', string>> = Object.freeze({
+  400: i18n.translate('xpack.agenticInvestigations.proposedActions.decisionInvalidInput', {
+    defaultMessage: 'The action rejected its inputs, so nothing was run.',
+  }),
+  404: i18n.translate('xpack.agenticInvestigations.proposedActions.decisionMissing', {
+    defaultMessage: 'This action no longer exists. Reload to see the current queue.',
+  }),
+  // Covers every way a decision can be refused once the proposal is no longer `pending` —
+  // already decided, settled as expired, or otherwise superseded — since the route maps all
+  // of those to the same conflict.
+  409: i18n.translate('xpack.agenticInvestigations.proposedActions.decisionConflict', {
+    defaultMessage:
+      'This action is no longer available to decide. Reload to see the current queue.',
+  }),
+  default: i18n.translate('xpack.agenticInvestigations.proposedActions.decisionFailed', {
+    defaultMessage: 'The decision could not be submitted. Try again.',
+  }),
+});
+
+export const PROPOSED_ACTIONS_EMPTY_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.proposedActions.empty',
+  { defaultMessage: 'No proposed actions for this investigation.' }
+);
+
+export const PROPOSED_ACTIONS_LOAD_ERROR_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.proposedActions.loadError',
+  { defaultMessage: 'Unable to load proposed actions. Try refreshing the page.' }
+);
+
+export const PROPOSED_ACTIONS_SHOW_MORE_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.detailsFlyout.proposedActions.showMore',
+  { defaultMessage: 'Show more proposed actions' }
+);

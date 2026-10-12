@@ -70,6 +70,7 @@ export const registerInvestigationReconciliationTask = ({
               const { results } = await workflowsManagement.management.searchExecutionsView(
                 {
                   query: { ids: { values: executionIds } },
+                  request: undefined,
                   includeManagedExecutions: true,
                   size: executionIds.length,
                 },

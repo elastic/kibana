@@ -139,6 +139,7 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
+            "checkUserProfilesPrivileges": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -251,6 +252,7 @@ describe('Security Plugin', () => {
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
             "checkSavedObjectsPrivilegesWithRequest": [Function],
+            "checkUserProfilesPrivileges": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
@@ -263,6 +265,26 @@ describe('Security Plugin', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('service accounts', () => {
+    it('hands the audit service to the service accounts service', () => {
+      const start = jest.spyOn(ServiceAccountsService.prototype, 'start').mockReturnValue(null);
+      try {
+        plugin.setup(mockCoreSetup, mockSetupDependencies);
+        plugin.start(mockCoreStart, mockStartDependencies);
+        expect(start).toHaveBeenCalledWith(
+          expect.objectContaining({
+            audit: expect.objectContaining({
+              asScoped: expect.any(Function),
+              withoutRequest: expect.anything(),
+            }),
+          })
+        );
+      } finally {
+        start.mockRestore();
+      }
     });
   });
 

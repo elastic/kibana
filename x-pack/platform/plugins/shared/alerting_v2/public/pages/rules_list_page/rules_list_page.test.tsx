@@ -31,8 +31,6 @@ let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
-let mockCanWriteActionPolicies = true;
-let mockToursEnabled = true;
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
@@ -44,7 +42,6 @@ jest.mock('@kbn/core-di-browser', () => {
         return {
           canWrite: (feature: string) => {
             if (feature === 'rules') return mockCanWriteRules;
-            if (feature === 'actionPolicies') return mockCanWriteActionPolicies;
             return true;
           },
           canRead: () => true,
@@ -73,14 +70,6 @@ jest.mock('@kbn/core-di-browser', () => {
         http: { basePath: { prepend: (p: string) => p } },
         notifications: {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
-          tours: { isEnabled: () => mockToursEnabled },
-        },
-        docLinks: {
-          links: {
-            alerting: {
-              actionPolicies: 'https://docs.test/action-policies',
-            },
-          },
         },
       };
 
@@ -119,6 +108,9 @@ jest.mock('../../hooks/use_create_rule', () => ({
 const mockUpdateRuleMutate = jest.fn();
 jest.mock('../../hooks/use_update_rule', () => ({
   useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
+}));
+jest.mock('../../hooks/use_is_action_policies_license_valid', () => ({
+  useIsActionPoliciesLicenseValid: () => true,
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -161,7 +153,7 @@ const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =
       tags: ['prod'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
     time_field: '@timestamp',
     createdBy: 'elastic',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -175,9 +167,9 @@ const mockRules: RuleApiResponse[] = [
   createRule({
     id: 'rule-2',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] as string[], version: 1 },
+    metadata: { name: 'Rule Two', tags: [] as string[] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   }),
 ];
 
@@ -226,8 +218,6 @@ describe('RulesListPage', () => {
     mockExperimentalFeaturesEnabled = true;
     mockAlertingV2ExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
-    mockCanWriteActionPolicies = true;
-    mockToursEnabled = true;
     mockUseDeleteRule.mockReturnValue({
       mutate: mockDeleteMutate,
       isLoading: false,
@@ -269,53 +259,6 @@ describe('RulesListPage', () => {
     await waitForRules();
 
     expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
-  });
-
-  describe('centralized action policies banner', () => {
-    it('renders the banner above the search bar when rules exist', async () => {
-      renderPage();
-      await waitForRules();
-
-      const banner = screen.getByTestId('centralizedActionPoliciesBanner');
-      const searchBar = screen.getByPlaceholderText('Search rules');
-      expect(banner).toBeInTheDocument();
-      expect(banner.compareDocumentPosition(searchBar)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    });
-
-    it('renders the banner even when there are no rules (empty phase)', async () => {
-      resolveRules([], 0);
-      renderPage();
-
-      await waitFor(() => {
-        expect(screen.getByTestId('centralizedActionPoliciesBanner')).toBeInTheDocument();
-      });
-    });
-
-    it('hides the banner after dismissal', async () => {
-      renderPage();
-      await waitForRules();
-
-      const dismissBtn = screen.getByTestId('centralizedActionPoliciesBannerDismiss');
-      fireEvent.click(dismissBtn);
-
-      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
-    });
-
-    it('does not show the banner for users without action-policy write privilege', async () => {
-      mockCanWriteActionPolicies = false;
-      renderPage();
-      await waitForRules();
-
-      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
-    });
-
-    it('does not show the banner when hideAnnouncements is enabled', async () => {
-      mockToursEnabled = false;
-      renderPage();
-      await waitForRules();
-
-      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
-    });
   });
 
   it('renders loading state', async () => {
@@ -384,7 +327,10 @@ describe('RulesListPage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
+        screen.getByRole('heading', {
+          level: 2,
+          name: /no universal rules yet\. let's get started!/i,
+        })
       ).toBeInTheDocument();
     });
     expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();
@@ -952,11 +898,11 @@ describe('RulesListPage', () => {
       const page2 = [
         createRule({
           id: 'rule-3',
-          metadata: { name: 'Rule Three', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Three', tags: [] as string[] },
         }),
         createRule({
           id: 'rule-4',
-          metadata: { name: 'Rule Four', tags: [] as string[], version: 1 },
+          metadata: { name: 'Rule Four', tags: [] as string[] },
         }),
       ];
 
@@ -990,14 +936,6 @@ describe('RulesListPage', () => {
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCanWriteRules = false;
-      mockCanWriteActionPolicies = false;
-    });
-
-    it('hides the centralized action policies banner', async () => {
-      renderPage();
-      await waitForRules();
-
-      expect(screen.queryByTestId('centralizedActionPoliciesBanner')).not.toBeInTheDocument();
     });
 
     it('hides the header create controls even when rules exist', async () => {

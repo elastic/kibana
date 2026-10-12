@@ -8,7 +8,8 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
-import type { EventClient } from '../../../lib/significant_events/events';
+import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
 import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
 
@@ -16,7 +17,7 @@ import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
  * Chat-initiated event input — a minimal subset of EventsWriteInput.
  *
  * Always-write snapshot: a generated `event_id` is supplied so find-or-create does not
- * collapse chat creates onto an existing same-stream event. `status` defaults to 'open'.
+ * collapse chat creates onto an existing same-stream event. `status` defaults to 'active'.
  */
 export type EventCreateInput = Pick<
   EventsWriteInput,
@@ -26,24 +27,27 @@ export type EventCreateInput = Pick<
 };
 
 export async function createEventToolHandler({
-  eventClient,
+  eventSearchClient,
   eventInput,
   alertEventsClient,
+  emitTrigger,
   logger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   eventInput: EventCreateInput;
-  alertEventsClient?: AlertEventsClientApi;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
   logger?: Logger;
-}): Promise<{ event_uuid: string; acknowledged: true }> {
+}): Promise<{ event_id: string; acknowledged: true }> {
   const result = await eventsWriteHandler({
-    eventClient,
+    eventSearchClient,
     input: {
       ...eventInput,
       event_id: uuidv4(),
-      status: eventInput.status ?? 'open',
+      status: eventInput.status ?? 'active',
     },
     alertEventsClient,
+    emitTrigger,
     logger,
   });
   if (!result.written) {
@@ -51,5 +55,5 @@ export async function createEventToolHandler({
       `Event write skipped (${result.reason}): event_id=${result.event_id}`
     );
   }
-  return { event_uuid: result.event_uuid, acknowledged: true };
+  return { event_id: result.event_id, acknowledged: true };
 }

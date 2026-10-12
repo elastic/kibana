@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFormRow, type EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiProgress, type EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
@@ -51,31 +51,36 @@ export const ElasticAgentField = ({ value, onChange }: ElasticAgentFieldProps) =
   };
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.contextEngine.traceSelector.agentField.label', {
-        defaultMessage: 'Agent',
-      })}
-      helpText={i18n.translate('xpack.contextEngine.traceSelector.agentField.helpText', {
-        defaultMessage:
-          'Agents registered in Agent Builder. Traces are matched on gen_ai.agent.id.',
-      })}
-      fullWidth
-    >
-      <EuiComboBox
-        singleSelection={{ asPlainText: true }}
-        fullWidth
-        isLoading={isLoading}
-        options={options}
-        selectedOptions={selectedOptions}
-        onChange={handleChange}
-        placeholder={i18n.translate('xpack.contextEngine.traceSelector.agentField.placeholder', {
-          defaultMessage: 'Select an agent',
-        })}
-        aria-label={i18n.translate('xpack.contextEngine.traceSelector.agentField.ariaLabel', {
-          defaultMessage: 'Agent trace source',
-        })}
-        data-test-subj="contextTraceAgentComboBox"
+    <>
+      <EuiProgress
+        size="xs"
+        color="accent"
+        css={{ visibility: isLoading ? 'visible' : 'hidden' }}
+        data-test-subj="contextTraceDataStreamComboBoxLoadingBar"
       />
-    </EuiFormRow>
+      <EuiFormRow
+        helpText={i18n.translate('xpack.contextEngine.traceSelector.agentField.helpText', {
+          defaultMessage:
+            'Agents registered in Agent Builder. Traces are matched on gen_ai.agent.id.',
+        })}
+        fullWidth
+      >
+        <EuiComboBox
+          singleSelection={{ asPlainText: true }}
+          fullWidth
+          isLoading={isLoading}
+          options={options}
+          selectedOptions={selectedOptions}
+          onChange={handleChange}
+          placeholder={i18n.translate('xpack.contextEngine.traceSelector.agentField.placeholder', {
+            defaultMessage: 'Select an agent',
+          })}
+          aria-label={i18n.translate('xpack.contextEngine.traceSelector.agentField.ariaLabel', {
+            defaultMessage: 'Agent trace source',
+          })}
+          data-test-subj="contextTraceAgentComboBox"
+        />
+      </EuiFormRow>
+    </>
   );
 };

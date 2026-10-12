@@ -11,20 +11,21 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../../common/proposals/origin';
 import { ConversationProposalsService } from './conversation_proposals_service';
 
 const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMetadata => ({
   id: 'p1',
   spaceId: 'default',
   conversationId: 'conv-1',
+  title: 'Do something',
   comment: 'do something',
   status: 'pending',
   impact: 'low',
   confidence: 'medium',
   category: 'investigate',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T10:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 
@@ -84,15 +85,51 @@ const makeImpactClient = (
   entityIdsByConversationId: Record<string, string[]> = {}
 ): AgenticInvestigationsPluginStart['getImpactClient'] =>
   jest.fn().mockReturnValue({
-    listByConversationIds: jest.fn().mockImplementation(async (ids: string[]) =>
-      ids.flatMap((conversationId) => {
-        const entityIds = entityIdsByConversationId[conversationId];
-        return entityIds ? [{ conversationId, entities: entityIds.map((id) => ({ id })) }] : [];
-      })
+    getEntityIdsByConversationId: jest.fn().mockImplementation(
+      async (ids: string[]) =>
+        new Map(
+          [...new Set(ids)].flatMap((conversationId) => {
+            const entityIds = entityIdsByConversationId[conversationId];
+            return entityIds ? [[conversationId, entityIds] as [string, string[]]] : [];
+          })
+        )
     ),
   });
 
 describe('ConversationProposalsService', () => {
+  it.each([
+    [
+      'listByCategory',
+      (service: ConversationProposalsService) =>
+        service.listByCategory('respond', request, spaceId, { size: 10, from: 0 }),
+    ],
+    [
+      'listClosed',
+      (service: ConversationProposalsService) =>
+        service.listClosed(request, spaceId, { size: 10, from: 0 }),
+    ],
+  ])('%s shows only AlertZero-produced proposals', async (_name, run) => {
+    const proposalsService = makeProposalsService();
+
+    await run(
+      new ConversationProposalsService(
+        proposalsService,
+        makeAgentBuilder(),
+        logger,
+        makeImpactClient()
+      )
+    );
+
+    // The index is shared with every other solution's proposals, and this
+    // filter is the only thing keeping theirs out of an AlertZero queue.
+    expect(proposalsService.list).toHaveBeenCalledWith(
+      expect.objectContaining({ origin: ALERTZERO_PROPOSAL_ORIGIN }),
+      spaceId,
+      expect.anything(),
+      expect.anything()
+    );
+  });
+
   const logger = loggingSystemMock.createLogger();
   const request = httpServerMock.createKibanaRequest();
   const spaceId = 'default';
@@ -122,6 +159,7 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
+        request,
         [
           { createdAt: { order: 'desc' } },
           { rootProposalId: { order: 'asc' } },
@@ -337,16 +375,10 @@ describe('ConversationProposalsService', () => {
         makeProposal({ id: 'p2', conversationId: 'shared' }),
         makeProposal({ id: 'p3', conversationId: 'other' }),
       ];
-      const listByConversationIds = jest
+      const getEntityIdsByConversationId = jest
         .fn()
-        .mockImplementation(async (ids: string[]) =>
-          ids.flatMap((conversationId) =>
-            conversationId === 'shared'
-              ? [{ conversationId, entities: [{ id: 'user-1' }, { id: 'host-1' }] }]
-              : []
-          )
-        );
-      const getImpactClient = jest.fn().mockReturnValue({ listByConversationIds });
+        .mockResolvedValue(new Map([['shared', ['user-1', 'host-1']]]));
+      const getImpactClient = jest.fn().mockReturnValue({ getEntityIdsByConversationId });
 
       const service = new ConversationProposalsService(
         makeProposalsService(proposals),
@@ -360,10 +392,26 @@ describe('ConversationProposalsService', () => {
       });
 
       expect(getImpactClient).toHaveBeenCalledWith(request);
-      expect(listByConversationIds).toHaveBeenCalledWith(['shared', 'other']);
+      expect(getEntityIdsByConversationId).toHaveBeenCalledWith(['shared', 'shared', 'other']);
       expect(result.proposals[0].entityIds).toEqual(['user-1', 'host-1']);
       expect(result.proposals[1].entityIds).toEqual(['user-1', 'host-1']);
       expect(result.proposals[2]).not.toHaveProperty('entityIds');
+    });
+
+    it('omits entity ids for an impact recorded without entities', async () => {
+      const getEntityIdsByConversationId = jest.fn().mockResolvedValue(new Map([['conv-1', []]]));
+      const service = new ConversationProposalsService(
+        makeProposalsService([makeProposal()]),
+        makeAgentBuilder(),
+        logger,
+        jest.fn().mockReturnValue({ getEntityIdsByConversationId })
+      );
+      const result = await service.listByCategory('investigate', request, spaceId, {
+        size: 10,
+        from: 0,
+      });
+
+      expect(result.proposals[0]).not.toHaveProperty('entityIds');
     });
 
     it('still resolves when the impact fetch fails', async () => {
@@ -372,7 +420,7 @@ describe('ConversationProposalsService', () => {
         makeAgentBuilder(),
         logger,
         jest.fn().mockReturnValue({
-          listByConversationIds: jest.fn().mockRejectedValue(new Error('index missing')),
+          getEntityIdsByConversationId: jest.fn().mockRejectedValue(new Error('index missing')),
         })
       );
       const result = await service.listByCategory('investigate', request, spaceId, {
@@ -406,6 +454,7 @@ describe('ConversationProposalsService', () => {
           from: 0,
         }),
         spaceId,
+        request,
         [
           { decidedAt: { order: 'desc' } },
           { createdAt: { order: 'desc' } },

@@ -8,26 +8,21 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type {
-  BoundInferenceClient,
-  InferenceClient,
-  AnonymizationRule,
-  ChatCompleteAnonymizationTarget,
-  AnonymizationSettings,
-} from '@kbn/inference-common';
-import { aiAnonymizationSettings } from '@kbn/inference-common';
+import type { BoundInferenceClient, InferenceClient } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/ai-anonymization-common';
+import type { AnonymizationRule, AnonymizationSettings } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
+import { RegexWorkerService, getAnonymizationUiSettings } from '@kbn/ai-anonymization-server';
 import {
   createClient as createInferenceClient,
   createClientWithoutRequest,
   createChatModel,
 } from './inference_client';
-import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
 import type {
@@ -38,7 +33,6 @@ import type {
   InferenceSetupDependencies,
   InferenceStartDependencies,
 } from './types';
-import { getUiSettings } from '../common/ui_settings';
 import { getConnectorList } from './util/get_connector_list';
 import { loadDefaultConnector } from './util/load_default_connector';
 import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/get_connector_by_id';
@@ -115,7 +109,7 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    coreSetup.uiSettings.register(getUiSettings());
+    coreSetup.uiSettings.register(getAnonymizationUiSettings());
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -128,6 +122,14 @@ export class InferencePlugin
   }
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
+    // Two anonymization implementations coexist here:
+    //  - Legacy (live): rules from the `ai:anonymizationSettings` uiSetting, no persisted replacements.
+    //  - Policy-service (dormant): profiles, per-space salt and persistent replacements from the
+    //    `anonymization` plugin, awaiting removal. The pipeline no longer applies that plugin's
+    //    field policies, so re-activating it would NOT mask fields it is configured to mask.
+    // `anonymization.isEnabled()` is backed by the hard-coded `ANONYMIZATION_FEATURE_ACTIVE = false`,
+    // so this is always false and every `anonymizationEnabled` branch below is dead code. Treat the
+    // uiSetting path as the only real one.
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
@@ -221,15 +223,6 @@ export class InferencePlugin
         esClient: core.elasticsearch.client.asScoped(request).asCurrentUser,
         anonymization: {
           saltPromise: anonymizationEnabled ? policyService?.getSalt(namespace) : undefined,
-          resolveEffectivePolicy: async (target?: ChatCompleteAnonymizationTarget) => {
-            if (!anonymizationEnabled || !policyService || !target) {
-              return undefined;
-            }
-            return policyService.resolveEffectivePolicy(namespace, {
-              type: target.targetType,
-              id: target.targetId,
-            });
-          },
           replacements: {
             esClient: core.elasticsearch.client.asInternalUser,
             encryptionKeyPromise: replacementsEncryptionKeyPromise,
@@ -266,6 +259,21 @@ export class InferencePlugin
       };
     };
 
+    // uses the internal ES client, like the default connector lookup, so that aliases resolve
+    // the same way regardless of whether the user can list inference endpoints
+    const createConnectorIdResolver = (request: KibanaRequest) => {
+      return async (connectorId: string) => {
+        const connector = await getConnectorById({
+          connectorId,
+          actions: pluginsStart.actions,
+          request,
+          esClient: core.elasticsearch.client.asInternalUser,
+          logger: this.logger,
+        });
+        return connector.connectorId;
+      };
+    };
+
     const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
       return async () => {
         try {
@@ -291,6 +299,7 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -311,6 +320,7 @@ export class InferencePlugin
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
           isDefaultConnectorOnly: createDefaultConnectorOnlyCheck(options.request),
           getDefaultConnectorId: createDefaultConnectorIdGetter(options.request),
+          resolveConnectorId: createConnectorIdResolver(options.request),
         });
       },
 

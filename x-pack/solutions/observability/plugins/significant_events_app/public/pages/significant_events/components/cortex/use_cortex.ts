@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
+import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../util/errors';
+import {
+  toFeatureAvailability,
+  type FeatureAvailability,
+} from '../../../../util/feature_availability';
+import type { CortexPage, GetCortexPageResponse } from './types';
 
 const cortexKeys = {
   availability: ['cortex', 'availability'] as const,
   pages: ['cortex', 'pages'] as const,
+  anyPage: ['cortex', 'page'] as const,
   page: (id: string) => ['cortex', 'page', id] as const,
 };
 
-/**
- * Typed client for the Nightshift routes, or undefined when the plugin is not installed. Every
- * query below stays disabled in that case.
- */
+export type CortexPageInput = Pick<
+  CortexPage,
+  'entity_type' | 'slug' | 'title' | 'description' | 'content' | 'status'
+>;
+
+type CortexPageVersion = Required<Pick<CortexPage, 'version'>>;
+
+/** Undefined when the plugin is not installed; every query below stays disabled. */
 const useCortexClient = () => {
   const {
     dependencies: {
@@ -28,22 +40,19 @@ const useCortexClient = () => {
   return nightshiftInvestigations?.investigationsClient;
 };
 
-/**
- * Reports whether Cortex is usable: the Nightshift plugin has to be installed, and
- * `xpack.nightshift_investigations.cortex.enabled` has to be on.
- */
-export const useCortexEnabled = (): boolean => {
+/** The Nightshift plugin must be installed and `cortex.enabled` on; loading is distinct from off. */
+export const useCortexEnabled = (): FeatureAvailability => {
   const client = useCortexClient();
 
-  const { data } = useQuery({
-    queryKey: cortexKeys.availability,
-    queryFn: ({ signal }) =>
-      client!.fetch('GET /internal/nightshift/cortex/availability', { signal: signal ?? null }),
-    enabled: client !== undefined,
-    retry: false,
-  });
-
-  return data?.enabled ?? false;
+  return toFeatureAvailability(
+    useQuery({
+      queryKey: cortexKeys.availability,
+      queryFn: ({ signal }) =>
+        client!.fetch('GET /internal/nightshift/cortex/availability', { signal: signal ?? null }),
+      enabled: client !== undefined,
+      retry: false,
+    })
+  );
 };
 
 export const useCortexPages = () => {
@@ -70,3 +79,73 @@ export const useCortexPage = (id: string | undefined) => {
     enabled: id !== undefined && client !== undefined,
   });
 };
+
+type CortexClient = NonNullable<ReturnType<typeof useCortexClient>>;
+
+const useCortexMutation = <TVariables>(
+  write: (client: CortexClient, variables: TVariables) => Promise<GetCortexPageResponse>,
+  errorTitle: string
+) => {
+  const client = useCortexClient();
+  const queryClient = useQueryClient();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
+
+  const refreshCortex = () =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: cortexKeys.pages }),
+      queryClient.invalidateQueries({ queryKey: cortexKeys.anyPage }),
+    ]);
+
+  return useMutation<GetCortexPageResponse, Error, TVariables>({
+    mutationFn: (variables) => write(client!, variables),
+    onSuccess: ({ page }) => {
+      queryClient.setQueryData(cortexKeys.page(page.id), { page });
+      // A write can fold a legacy page id into the canonical one, so every cached page may be stale.
+      return refreshCortex();
+    },
+    onError: (error) => {
+      toasts.addError(getFormattedError(error), { title: errorTitle });
+      return refreshCortex();
+    },
+  });
+};
+
+export const useCreateCortexPage = () =>
+  useCortexMutation(
+    (client, page: CortexPageInput) =>
+      client.fetch('POST /internal/nightshift/cortex/pages', {
+        signal: null,
+        params: { body: page },
+      }),
+    i18n.translate('xpack.significantEventsApp.cortex.createErrorTitle', {
+      defaultMessage: 'Could not create Cortex page',
+    })
+  );
+
+export const useUpdateCortexPage = () =>
+  useCortexMutation(
+    (client, page: CortexPageInput & CortexPageVersion) =>
+      client.fetch('PUT /internal/nightshift/cortex/pages', {
+        signal: null,
+        params: { body: page },
+      }),
+    i18n.translate('xpack.significantEventsApp.cortex.updateErrorTitle', {
+      defaultMessage: 'Could not save Cortex page',
+    })
+  );
+
+export const useArchiveCortexPage = () =>
+  useCortexMutation(
+    (client, { id, version }: CortexPageVersion & { id: string }) =>
+      client.fetch('DELETE /internal/nightshift/cortex/pages/{id}', {
+        signal: null,
+        params: { path: { id }, query: { version } },
+      }),
+    i18n.translate('xpack.significantEventsApp.cortex.archiveErrorTitle', {
+      defaultMessage: 'Could not archive Cortex page',
+    })
+  );

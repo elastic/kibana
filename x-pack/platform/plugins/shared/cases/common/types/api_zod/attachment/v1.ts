@@ -7,8 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  MAX_BULK_CREATE_ATTACHMENTS,
-  MAX_BULK_GET_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
@@ -117,34 +115,6 @@ export const FindAttachmentsQueryParamsSchema = paginationSchema({
   sortOrder: z.enum(['desc', 'asc']).optional(),
 });
 
-export const BulkCreateAttachmentsRequestSchema = limitedArraySchema({
-  codec: AttachmentRequestSchema,
-  min: 0,
-  max: MAX_BULK_CREATE_ATTACHMENTS,
-  fieldName: 'attachments',
-});
-
-export const BulkGetAttachmentsRequestSchema = z.object({
-  ids: limitedArraySchema({
-    codec: z.string(),
-    min: 1,
-    max: MAX_BULK_GET_ATTACHMENTS,
-    fieldName: 'ids',
-  }),
-});
-
-export const BulkGetAttachmentsResponseSchema = z.object({
-  attachments: AttachmentsSchema,
-  errors: z.array(
-    z.object({
-      error: z.string(),
-      message: z.string(),
-      status: z.number().optional(),
-      savedObjectId: z.string(),
-    })
-  ),
-});
-
 export type BulkDeleteFileAttachmentsRequest = z.infer<
   typeof BulkDeleteFileAttachmentsRequestSchema
 >;
@@ -153,6 +123,3 @@ export type AttachmentRequest = z.infer<typeof AttachmentRequestSchema>;
 export type AttachmentPatchRequest = z.infer<typeof AttachmentPatchRequestSchema>;
 export type AttachmentsFindResponse = z.infer<typeof AttachmentsFindResponseSchema>;
 export type FindAttachmentsQueryParams = z.infer<typeof FindAttachmentsQueryParamsSchema>;
-export type BulkCreateAttachmentsRequest = z.infer<typeof BulkCreateAttachmentsRequestSchema>;
-export type BulkGetAttachmentsRequest = z.infer<typeof BulkGetAttachmentsRequestSchema>;
-export type BulkGetAttachmentsResponse = z.infer<typeof BulkGetAttachmentsResponseSchema>;

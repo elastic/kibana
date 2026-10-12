@@ -45,19 +45,6 @@ describe('appendTimeBucketToEsqlQuery', () => {
     );
   });
 
-  // Known limitation: the time field is out of scope after the first STATS, so
-  // the generated query fails at ES with `Unknown column`. Pins current rewrite
-  // output; not promoted to the executable case matrix for that reason.
-  it('appends bucket to the last STATS in a query with multiple piped STATS', () => {
-    const result = appendTimeBucketToEsqlQuery(
-      'FROM index | STATS total = SUM(bytes) BY host | STATS AVG(total)',
-      'timestamp'
-    );
-    expect(result).toBe(
-      'FROM index | STATS total = SUM(bytes) BY host | STATS AVG(total) BY BUCKET(timestamp, 75, ?_tstart, ?_tend)'
-    );
-  });
-
   it('throws on empty query', () => {
     expect(() => appendTimeBucketToEsqlQuery('', 'timestamp')).toThrow(
       'Cannot append time bucket to an empty ES|QL query'
@@ -144,7 +131,7 @@ describe('appendTimeBucketToEsqlQuery', () => {
     const query =
       'TS metrics-* | STATS total = AVG(cpu) BY host | STATS MAX(total) BY TBUCKET(100)';
     expect(appendTimeBucketToEsqlQuery(query, '@timestamp')).toBe(
-      'TS metrics-* | STATS total = AVG(cpu) BY host, TBUCKET(75) | STATS MAX(total) BY TBUCKET(100)'
+      'TS metrics-* | STATS total = AVG(cpu) BY host, TBUCKET(75) | STATS MAX(total) BY TBUCKET(100), `TBUCKET(75)`'
     );
   });
 

@@ -19,15 +19,17 @@ import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
-import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
 import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps, DashboardListingTab } from './types';
+import type { DashboardListingProps } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 
 export const DashboardListing = ({
   children,
@@ -109,7 +111,9 @@ export const DashboardListing = ({
         dashboardBreadcrumb,
         {
           text: activeTabTitle,
-          href: coreServices.application.getUrlForApp(appId, { path: window.location.hash }),
+          href: coreServices.application.getUrlForApp(appId, {
+            path: `#${LANDING_PAGE_PATH}/${activeTabId}`,
+          }),
         },
       ];
     },
@@ -121,42 +125,30 @@ export const DashboardListing = ({
     coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
   }, []);
 
+  const createDashboardAction = useCallback(() => {
+    if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
+      confirmCreateWithUnsaved(() => {
+        getDashboardBackupService().clearState();
+        goToDashboard();
+      }, goToDashboard);
+      return;
+    }
+    goToDashboard();
+  }, [goToDashboard, useSessionStorageIntegration]);
+
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
-    const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
-    const createDashboardAction = tabsByIdMap.get('dashboards')?.createAction;
-    const createVisualizationAction = tabsByIdMap.get('visualizations')?.createAction;
-    const createAnnotationAction = tabsByIdMap.get('annotations')?.createAction;
-    const createMenuItems: AppMenuPopoverItem[] = [];
-
-    if (createVisualizationAction) {
-      createMenuItems.push({
-        id: 'createVisualization',
-        order: 1,
-        label: i18n.translate('dashboard.listing.createVisualizationButtonLabel', {
-          defaultMessage: 'Create visualization',
-        }),
-        iconType: 'chartBarVertical',
-        testId: 'createVisualizationButton',
-        run: createVisualizationAction,
-      });
-    }
-
-    if (createAnnotationAction) {
-      createMenuItems.push({
-        id: 'createAnnotation',
-        order: 2,
-        label: i18n.translate('dashboard.listing.createAnnotationButtonLabel', {
-          defaultMessage: 'Create annotation',
-        }),
-        iconType: 'flag',
-        testId: 'createAnnotationButton',
-        run: createAnnotationAction,
-      });
-    }
-
-    if (!createDashboardAction) {
-      return undefined;
-    }
+    const secondaryCreateActions = getTabs
+      ? getTabs()
+          .filter((tab) => Boolean(tab.createAction))
+          .map((tab) => ({
+            id: `create_${tab.id}`,
+            order: tab.createAction!.order,
+            label: tab.createAction!.label,
+            iconType: tab.createAction!.iconType,
+            testId: `create_${tab.id}_button`,
+            run: () => tab.createAction!.create(`#${LANDING_PAGE_PATH}/${tab.id}`),
+          }))
+      : [];
 
     return {
       primaryActionItem: {
@@ -166,10 +158,10 @@ export const DashboardListing = ({
         label: i18n.translate('dashboard.listing.createButtonLabel', {
           defaultMessage: 'Create dashboard',
         }),
-        run: createDashboardAction,
+        run: () => createDashboardAction(),
         popoverWidth: 200,
         splitButtonProps:
-          createMenuItems.length > 0
+          secondaryCreateActions.length > 0
             ? {
                 secondaryButtonAriaLabel: i18n.translate(
                   'dashboard.listing.createMoreActionsButtonAriaLabel',
@@ -177,7 +169,7 @@ export const DashboardListing = ({
                     defaultMessage: 'Create more dashboard content',
                   }
                 ),
-                items: createMenuItems,
+                items: secondaryCreateActions,
               }
             : undefined,
       },
@@ -201,7 +193,7 @@ export const DashboardListing = ({
           ]
         : [],
     };
-  }, [tabs, onImportSuccess]);
+  }, [onImportSuccess, createDashboardAction, getTabs]);
 
   return (
     <I18nProvider>

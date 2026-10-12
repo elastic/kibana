@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export * from './index_fields';
 
@@ -17,9 +17,11 @@ export * from './model/timeline_events_queries';
 
 export * from './model/runtime_mappings';
 
-export const searchStrategyRequestSchema = z.discriminatedUnion('factoryQueryType', [
-  timelineSchemas.timelineEventsAllSchema,
-  timelineSchemas.timelineEventsDetailsSchema,
-  timelineSchemas.timelineEventsLastEventTimeRequestSchema,
-  timelineSchemas.timelineKpiRequestOptionsSchema,
-]);
+export const searchStrategyRequestSchema = lazySchema(() =>
+  z.discriminatedUnion('factoryQueryType', [
+    timelineSchemas.timelineEventsAllSchema,
+    timelineSchemas.timelineEventsDetailsSchema,
+    timelineSchemas.timelineEventsLastEventTimeRequestSchema,
+    timelineSchemas.timelineKpiRequestOptionsSchema,
+  ])
+);

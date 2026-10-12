@@ -89,7 +89,8 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
     });
   }, [canOpenDiscover, dest.value, share?.url?.locators]);
 
-  const canLinkToIndexManagement = !isIndexPattern(dest.value);
+  const canOpenIndexManagement = application.capabilities.index_management?.monitor === true;
+  const canLinkToIndexManagement = canOpenIndexManagement && !isIndexPattern(dest.value);
   const indexManagementLocator = canLinkToIndexManagement
     ? share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID)
     : undefined;
@@ -106,7 +107,7 @@ export const KiListPanel = ({ aiIndex: { id: aiIndexId, dest } }: KiListPanelPro
 
   return (
     <div data-test-subj="contextKiListPanel">
-      <EuiText size="s" color="subdued" data-test-subj="contextKiListPanelDescription">
+      <EuiText size="xs" color="subdued" data-test-subj="contextKiListPanelDescription">
         <p>
           {i18n.translate('xpack.contextEngine.aiIndexDetail.kiList.description', {
             defaultMessage: 'The knowledge your agents retrieve.',

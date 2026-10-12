@@ -25,8 +25,19 @@ export function applyBeforeAgentResult(
   context: BeforeAgentHookContext,
   result: void | HookHandlerResult<HookLifecycle.beforeAgent>
 ): BeforeAgentHookContext {
-  if (!isResultObject(result) || result.nextInput === undefined) return context;
-  return { ...context, nextInput: result.nextInput };
+  if (
+    !isResultObject(result) ||
+    (result.nextInput === undefined && result.preExecutionWorkflow === undefined)
+  ) {
+    return context;
+  }
+  return {
+    ...context,
+    ...(result.nextInput !== undefined ? { nextInput: result.nextInput } : {}),
+    ...(result.preExecutionWorkflow !== undefined
+      ? { preExecutionWorkflow: result.preExecutionWorkflow }
+      : {}),
+  };
 }
 
 export function applyBeforeToolCallResult(
