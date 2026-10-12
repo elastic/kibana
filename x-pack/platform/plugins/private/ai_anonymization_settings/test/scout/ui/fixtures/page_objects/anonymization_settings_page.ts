@@ -7,7 +7,6 @@
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout/ui';
 
 /**
  * Page object for the Anonymization Settings management page
@@ -19,13 +18,8 @@ export class AnonymizationSettingsPage {
    * Navigate to the Anonymization Settings page in Stack Management
    */
   async navigateTo() {
-    await expect(async () => {
-      await this.page.gotoApp('management/ai/aiAnonymizationSettings');
-      await this.page.testSubj.waitForSelector('aiAnonymizationSettingsPage', {
-        state: 'visible',
-        timeout: 10_000,
-      });
-    }).toPass({ timeout: 70_000, intervals: [500, 1_000, 2_000] });
+    await this.page.gotoApp('management/ai/aiAnonymizationSettings');
+    await this.waitForPageToLoad();
   }
 
   /**
