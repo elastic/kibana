@@ -118,8 +118,7 @@ const KEYWORD_DOCS_WITH_BOTH = KEYWORD_DOCS.filter(
   (doc) => doc.tags.includes(INVOKE_AGENT_KEYWORD) && doc.tags.includes(CHECKOUT_KEYWORD)
 ).map((doc) => doc.key);
 
-// Failing: See https://github.com/elastic/kibana/issues/297192
-test.describe.skip(
+test.describe(
   'Semantic Memory page',
   {
     // Stateful classic only. Semantic Memory needs its own Kibana flag, which the
@@ -259,9 +258,9 @@ test.describe.skip(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      // Significant Events refuses to render its tabs at all until the
-      // availability route says so, and that route needs the plugin's managed
-      // index. The alert spec in this suite stubs the same thing.
+      // Nightshift renders nothing until the Significant Events availability
+      // route says so, and that route needs the plugin's managed index. The
+      // alert spec in this suite stubs the same thing.
       await mockInvestigationApi(page);
       await browserAuth.loginWithCustomRole(MEMORY_CONFIGURE_ROLE);
     });
@@ -276,10 +275,10 @@ test.describe.skip(
      * Opens the Memory page by loading its route, the way a bookmark or a pasted
      * link does.
      *
-     * That used to bounce to Streams: the page builds its tab list from an
-     * availability query that is still pending on the first render, so `memory` was
-     * briefly not one of its tabs and an unknown tab is redirected to the first
-     * one. Loading the route directly and staying on it is the assertion.
+     * The Knowledge page builds its tab list from availability queries that are
+     * still pending on the first render, and a tab that is not visible is
+     * redirected to the first one that is. Loading the route directly and staying
+     * on it is the assertion.
      */
     const gotoMemory = async (
       page: ScoutPage,
