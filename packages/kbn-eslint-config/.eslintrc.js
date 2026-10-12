@@ -32,7 +32,6 @@ module.exports = {
     // The plugins stay registered so `eslint-disable` directives naming their rules resolve.
     '@elastic/eui',
     'eslint-plugin-depend',
-    'prettier',
   ],
 
   parserOptions: {
@@ -41,14 +40,5 @@ module.exports = {
 
   env: {
     es6: true,
-  },
-
-  rules: {
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto',
-      },
-    ],
   },
 };

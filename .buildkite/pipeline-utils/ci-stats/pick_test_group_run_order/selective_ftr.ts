@@ -90,7 +90,7 @@ export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   'OWNERS',
   '**/OWNERS',
   '**/.eslintrc*',
-  '**/.prettierrc*',
+  '**/.oxfmtrc*',
   '.mise.toml',
   '.river/**',
   '**/.i18nrc.json',

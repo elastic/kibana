@@ -8,8 +8,9 @@
  */
 
 import { mkdir, writeFile } from 'fs/promises';
-import { dirname } from 'path';
-import prettier from 'prettier';
+import { dirname, relative } from 'path';
+import { formatWithOxfmt } from '@kbn/oxfmt';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export interface GeneratedFile {
   readonly path: string;
@@ -25,13 +26,15 @@ const LICENSE_HEADER = `/*
  * License v3.0 only", or the "Server Side Public License, v 1".
  */`;
 
-export const formatGeneratedFile = ({ path, content }: GeneratedFile): GeneratedFile => {
+export const formatGeneratedFile = async ({
+  path,
+  content,
+}: GeneratedFile): Promise<GeneratedFile> => {
   const source = content.trimStart().startsWith(LICENSE_HEADER)
     ? content
     : `${LICENSE_HEADER}\n\n${content}`;
-  const config = prettier.resolveConfig.sync(path, { editorconfig: true }) ?? {};
 
-  return { path, content: prettier.format(source, { ...config, filepath: path }) };
+  return { path, content: await formatWithOxfmt(relative(REPO_ROOT, path), source) };
 };
 
 export const writeGeneratedFiles = async (files: readonly GeneratedFile[]): Promise<void> => {

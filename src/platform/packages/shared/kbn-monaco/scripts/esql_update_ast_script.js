@@ -90,14 +90,6 @@ function getUnquotedText(ctx: ParserRuleContext) {
           sourceType: 'module',
           ecmaVersion: 2018,
         },
-        rules: {
-          'prettier/prettier': [
-            'error',
-            {
-              parser: 'typescript',
-            },
-          ],
-        },
       },
     });
 

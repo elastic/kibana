@@ -172,18 +172,18 @@ describe('Type checking with TypeScript compiler', () => {
         },
         Object {
           "errorMessage": "Object literal may only specify known properties, and 'b' does not exist in type '{ b: string; c?: number | undefined; }[]'.",
-          "lineNumber": 126,
+          "lineNumber": 127,
           "tsErrorLine": Array [
             "Type Error Explanation: a is casted to an array of objects, not an object",
-            "Error Line [126]: b: 'test',",
+            "Error Line [127]: b: 'test',",
           ],
         },
         Object {
           "errorMessage": "Subsequent property declarations must have the same type.  Property 'a' must be of type 'string[] | undefined', but here has type 'number[] | undefined'.",
-          "lineNumber": 133,
+          "lineNumber": 134,
           "tsErrorLine": Array [
             "Type Error Explanation: a is a string | string[], not a number[]",
-            "Error Line [133]: a?: number[];",
+            "Error Line [134]: a?: number[];",
           ],
         },
       ]
