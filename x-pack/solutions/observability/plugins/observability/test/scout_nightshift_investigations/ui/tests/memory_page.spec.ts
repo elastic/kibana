@@ -118,8 +118,7 @@ const KEYWORD_DOCS_WITH_BOTH = KEYWORD_DOCS.filter(
   (doc) => doc.tags.includes(INVOKE_AGENT_KEYWORD) && doc.tags.includes(CHECKOUT_KEYWORD)
 ).map((doc) => doc.key);
 
-// Failing: See https://github.com/elastic/kibana/issues/297192
-test.describe.skip(
+test.describe(
   'Semantic Memory page',
   {
     // Stateful classic only. Semantic Memory needs its own Kibana flag, which the
@@ -259,9 +258,9 @@ test.describe.skip(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      // The Nightshift shell gates its Knowledge nav entry on the Significant
-      // Events availability route, and that route needs the plugin's managed
-      // index. The alert spec in this suite stubs the same thing.
+      // The Nightshift shell renders nothing until the Significant Events
+      // availability route reports available, and that route needs the plugin's
+      // managed index. The alert spec in this suite stubs the same thing.
       await mockInvestigationApi(page);
       await browserAuth.loginWithCustomRole(MEMORY_CONFIGURE_ROLE);
     });
