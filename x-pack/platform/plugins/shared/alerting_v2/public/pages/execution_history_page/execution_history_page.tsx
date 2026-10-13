@@ -67,12 +67,14 @@ const getExecutionHistoryTabs = ({
   },
 ];
 
-const UNIVERSAL_RULES_ONLY_CALLOUT_BODY = i18n.translate(
-  'xpack.alertingV2.executionHistory.universalRulesOnlyCalloutBody',
-  {
-    defaultMessage: 'Review past runs for Universal rules and action policies.',
-  }
-);
+const CALLOUT_BODY_BY_TAB: Record<TabId, string> = {
+  [RULES_TAB_ID]: i18n.translate('xpack.alertingV2.executionHistory.rulesTabCalloutBody', {
+    defaultMessage: 'Review past runs for Universal rules.',
+  }),
+  [POLICIES_TAB_ID]: i18n.translate('xpack.alertingV2.executionHistory.policiesTabCalloutBody', {
+    defaultMessage: 'Review past runs for action policies.',
+  }),
+};
 
 export const ExecutionHistoryPage = () => {
   useBreadcrumbs('execution_history_list');
@@ -114,7 +116,7 @@ export const ExecutionHistoryPage = () => {
       <EuiSpacer size="m" />
       <UniversalRulesOnlyCallout
         appId={ALERTING_V2_EXECUTION_HISTORY_APP_ID}
-        description={UNIVERSAL_RULES_ONLY_CALLOUT_BODY}
+        description={CALLOUT_BODY_BY_TAB[selectedTabId]}
       />
       {selectedTabId === RULES_TAB_ID ? (
         <RulesTabContent onRuleClick={handleRuleClick} />

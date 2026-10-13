@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 export const universalRulesOnlyBadge: AppHeaderBadge = {
   label: i18n.translate('xpack.alertingV2.universalRulesOnly.badgeLabel', {
-    defaultMessage: 'Universal rules only',
+    defaultMessage: 'Universal',
   }),
   color: 'hollow',
   'data-test-subj': 'universalRulesOnlyBadge',
