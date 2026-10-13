@@ -517,6 +517,7 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByText('ES|QL Query Results'));
 
     expect(editorProps.mock.lastCall?.[0].errors).toEqual([previewError]);
+    expect(screen.getByText(previewError.message)).toBeInTheDocument();
     expect(screen.queryByTestId('esqlViewPreviewError')).not.toBeInTheDocument();
   });
 

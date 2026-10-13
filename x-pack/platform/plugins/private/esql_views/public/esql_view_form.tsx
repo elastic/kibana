@@ -22,6 +22,7 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
+  EuiScreenReaderLive,
   EuiSpacer,
   EuiText,
   EuiTextArea,
@@ -344,6 +345,11 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
             />
           </Suspense>
         </EuiFormRow>
+        {preview.error && (
+          <EuiScreenReaderLive aria-live="assertive" aria-atomic="true">
+            {preview.error.message}
+          </EuiScreenReaderLive>
+        )}
 
         <EuiSpacer size="m" />
 
