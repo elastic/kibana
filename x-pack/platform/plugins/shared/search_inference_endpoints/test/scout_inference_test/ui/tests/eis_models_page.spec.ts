@@ -65,6 +65,10 @@ test.describe('EIS Models Page', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
+  test('region filter is on the models toolbar', async ({ pageObjects }) => {
+    await expect(pageObjects.eisModels.regionFilter).toBeVisible();
+  });
+
   test('model family filter filters cards by provider', async ({ page, pageObjects }) => {
     const { eisModels } = pageObjects;
 

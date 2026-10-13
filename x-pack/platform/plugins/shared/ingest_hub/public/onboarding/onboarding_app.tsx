@@ -98,6 +98,9 @@ export async function hydrateOnboardingSession(
       isAgentBased
         ? JSON.stringify({
             deploymentMethod: 'agent_based',
+            // The saved settings were confirmed under agent-based, so Step 3 must not report them
+            // as collected for another method (the "Service settings have changed" callout).
+            serviceSettingsMethod: 'agent_based',
             // Any persisted policy ids mean the policies already exist, so resume in
             // 'existing' mode — otherwise the hook's new-policy route would create another.
             agentHostsMode: policyIds.length ? 'existing' : 'new',

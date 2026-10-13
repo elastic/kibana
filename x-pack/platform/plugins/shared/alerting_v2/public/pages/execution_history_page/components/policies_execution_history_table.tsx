@@ -170,7 +170,7 @@ const PolicyRulesCell = ({
   <RulesCell
     rules={row.flattened[POLICY_EXECUTION_FIELDS.rules] as PolicyRules}
     maxVisibleRules={MAX_VISIBLE_RULES}
-    totalRuleCount={row.flattened[POLICY_RECORD_EXTRA_FIELDS.totalRuleCount] as number}
+    totalRuleCount={row.flattened[POLICY_RECORD_EXTRA_FIELDS.ruleCount] as number}
     activeRuleId={activeRuleId}
     onRuleClick={onRuleClick}
     canReadRules={canReadRules}

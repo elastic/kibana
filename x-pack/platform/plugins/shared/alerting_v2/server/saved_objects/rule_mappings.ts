@@ -21,6 +21,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
         description: { type: 'text' },
         tags: { type: 'keyword', ignore_above: 128 },
+        routing_tags: { type: 'keyword', ignore_above: 128 },
       },
     },
     enabled: { type: 'boolean' },

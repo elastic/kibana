@@ -48,6 +48,7 @@ jest.mock('./use_last_agent_id', () => ({
 const stubConversationStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,
   getStreamEnded$: () => NEVER,
+  getStreamStarted$: () => NEVER,
 });
 
 const mockUseConversationId = jest.mocked(useConversationId);

@@ -99,7 +99,7 @@ const formatAlertDescription = ({
     `Use the ${ruleToolId} tool to fetch the alert rule associated with this alert, then query that rule's source indices. To modify that rule, or create a new rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`
   );
   lines.push(
-    `Use the ${ruleEventsToolId} tool to fetch this episode's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window. It returns at most 100 rows (oldest first). If truncated is true, call again with start set to the last event's @timestamp and the same end; skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window, stop and use the rows you have.`
+    `Use the ${ruleEventsToolId} tool to fetch this alert's rule events from .rule-events, including timestamp, episode.status, severity, source, group_hash, and event data. Call it with no arguments; pass start/end only to narrow the window. It returns at most 100 rows (oldest first). If truncated is true, call again with start set to the last event's @timestamp and the same end; skip the overlapping first row. Do not retry the same window. If truncated is still true for a very small window, stop and use the rows you have.`
   );
 
   return lines.join('\n');
@@ -137,7 +137,7 @@ export const createAlertAttachmentType = ({
         if (!canRead) {
           attachmentLogger.debug({
             message: 'Unauthorized to resolve episode attachment',
-            labels: { episode_id: alertId, space_id: context.spaceId },
+            labels: { alert_id: alertId, space_id: context.spaceId },
           });
           return undefined;
         }
@@ -160,7 +160,7 @@ export const createAlertAttachmentType = ({
         attachmentLogger.warn({
           message: 'Failed to resolve episode attachment',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
-          labels: { episode_id: alertId, space_id: context.spaceId },
+          labels: { alert_id: alertId, space_id: context.spaceId },
           error,
         });
         return undefined;
@@ -188,7 +188,7 @@ export const createAlertAttachmentType = ({
         attachmentLogger.warn({
           message: 'Failed to check episode attachment staleness',
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
-          labels: { episode_id: attachment.origin, space_id: context.spaceId },
+          labels: { alert_id: attachment.origin, space_id: context.spaceId },
           error,
         });
         return false;

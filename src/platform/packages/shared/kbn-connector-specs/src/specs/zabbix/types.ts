@@ -46,8 +46,8 @@ export const ZABBIX_TAG_FILTER_OPERATORS = [
 ] as const;
 export type ZabbixTagFilterOperator = (typeof ZABBIX_TAG_FILTER_OPERATORS)[number];
 
-const IdSchema = z.string().min(1).max(MAX_ID_LENGTH);
-const IdArraySchema = z.array(IdSchema).min(1).max(MAX_IDS);
+const IdSchema = lazySchema(() => z.string().min(1).max(MAX_ID_LENGTH));
+const IdArraySchema = lazySchema(() => z.array(IdSchema).min(1).max(MAX_IDS));
 
 export const ZabbixTagFilterSchema = lazySchema(() =>
   z.object({

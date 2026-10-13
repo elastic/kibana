@@ -73,6 +73,8 @@ type ExpectedDiffOutcome =
       expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate;
       isSolvableConflict: boolean;
       expectedFieldDiffValues: FieldDiffValueVersions;
+      /** Merge outcome of a solvable conflict, defaults to `Merged` */
+      expectedMergeOutcome?: ThreeWayMergeOutcome;
     }
   | {
       expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate;
@@ -146,6 +148,7 @@ export function testFieldUpgradeReview(
           expectSolvableABCFieldDiff(diff, {
             diffableRuleFieldName: params.diffableRuleFieldName,
             valueVersions: params.expectedFieldDiffValues,
+            expectedMergeOutcome: params.expectedMergeOutcome,
           });
         } else {
           expectNonSolvableABCFieldDiff(diff, {
@@ -443,7 +446,7 @@ function expectABBFieldDiff(
  */
 function expectSolvableABCFieldDiff(
   ruleDiff: PartialThreeWayRuleDiff,
-  fieldAssertParams: FieldAssertParams
+  fieldAssertParams: FieldAssertParams & { expectedMergeOutcome?: ThreeWayMergeOutcome }
 ): void {
   expect(ruleDiff).toMatchObject({
     num_fields_with_updates: 2, // counts <diffableRuleFieldName> + version field
@@ -458,7 +461,7 @@ function expectSolvableABCFieldDiff(
         target_version: fieldAssertParams.valueVersions.target,
         merged_version: fieldAssertParams.valueVersions.merged,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-        merge_outcome: ThreeWayMergeOutcome.Merged,
+        merge_outcome: fieldAssertParams.expectedMergeOutcome ?? ThreeWayMergeOutcome.Merged,
         conflict: ThreeWayDiffConflict.SOLVABLE,
       },
       isUndefined

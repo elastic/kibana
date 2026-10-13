@@ -40,9 +40,9 @@ export const mountApp = async ({
     services.usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
-  const conversationStreamService = new ConversationStreamService(services.eventsService);
   await services.accessChecker.initAccess();
   const activeSpaceId = (await plugins.spaces?.getActiveSpace())?.id ?? DEFAULT_SPACE_ID;
+  const conversationStreamService = new ConversationStreamService(services.eventsService);
 
   ReactDOM.render(
     core.rendering.addContext(
@@ -72,6 +72,7 @@ export const mountApp = async ({
   );
 
   return () => {
+    conversationStreamService.dispose();
     ReactDOM.unmountComponentAtNode(element);
   };
 };
