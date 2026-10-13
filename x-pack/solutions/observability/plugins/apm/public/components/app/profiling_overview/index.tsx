@@ -9,7 +9,10 @@ import type { EuiTabbedContentProps } from '@elastic/eui';
 import { EuiLoadingSpinner, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
+import {
+  ProfilingEmptyState,
+  useProfilingSchemaState,
+} from '@kbn/observability-shared-plugin/public';
 import React, { useMemo } from 'react';
 import { isJavaAgentName as getIsJavaAgentName } from '../../../../common/agent_name';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -19,6 +22,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ProfilingFlamegraph } from '../../shared/profiling/flamegraph';
+import { ProfilingSchemaSelector } from '../../shared/profiling/schema_selector';
 import { ProfilingTopNFunctions } from '../../shared/profiling/top_functions';
 import { ProfilingHostsCallout } from './profiling_hosts_callout';
 import { ProfilingHostsFlamegraph } from './profiling_hosts_flamegraph';
@@ -43,6 +47,7 @@ export function ProfilingOverview() {
 
   const { agentName, transactionType } = useApmServiceContext();
   const isJavaAgent = getIsJavaAgentName(agentName);
+  const { schema } = useProfilingSchemaState();
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     return [
@@ -62,6 +67,7 @@ export function ProfilingOverview() {
                 rangeTo={rangeTo}
                 environment={environment}
                 transactionType={transactionType}
+                schema={schema}
               />
             ) : (
               <ProfilingHostsFlamegraph
@@ -73,6 +79,7 @@ export function ProfilingOverview() {
                 kuery={kuery}
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
+                schema={schema}
               />
             )}
           </>
@@ -94,6 +101,7 @@ export function ProfilingOverview() {
                 rangeTo={rangeTo}
                 environment={environment}
                 transactionType={transactionType}
+                schema={schema}
               />
             ) : (
               <ProfilingHostsTopNFunctions
@@ -107,6 +115,7 @@ export function ProfilingOverview() {
                 kuery={kuery}
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
+                schema={schema}
               />
             )}
           </>
@@ -121,6 +130,7 @@ export function ProfilingOverview() {
     preferred?.source,
     rangeFrom,
     rangeTo,
+    schema,
     serviceName,
     start,
     transactionType,
@@ -151,6 +161,14 @@ export function ProfilingOverview() {
           <EuiSpacer />
         </>
       )}
+      <ProfilingSchemaSelector
+        start={start}
+        end={end}
+        // The Java views filter APM transactions with the kuery, which doesn't apply to profiling
+        // data, so their schemas with data are checked for the whole time range
+        kuery={isJavaAgent ? '' : kuery}
+      />
+      <EuiSpacer />
       <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} autoFocus="selected" />
     </>
   );
