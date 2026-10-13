@@ -34,6 +34,7 @@ import {
   cleanSignificantEventsDataStreams,
   ensureStreamsEnabled,
 } from '../../src/data_generators/replay';
+import { createEvalSource, deleteEvalSource } from '../../src/eval_source';
 import { evaluate } from '../../src/evaluate';
 import {
   createSemanticUniquenessEvaluator,
@@ -131,12 +132,16 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
   ],
 };
 
-const replaceStoredFeatures = async (kbnClient: KbnClient, features: FeatureUpsert[]) => {
+const replaceStoredFeatures = async (
+  kbnClient: KbnClient,
+  sourceId: string,
+  features: FeatureUpsert[]
+) => {
   const {
     data: { features: storedFeatures },
   } = await kbnClient.request<{ features: Feature[] }>({
     method: 'GET',
-    path: `/internal/streams/${DEDUP_CONTEXT_STREAM_NAME}/features`,
+    path: `/internal/streams/${sourceId}/features`,
   });
   const operations = [
     ...storedFeatures.map(({ id }) => ({ delete: { id } })),
@@ -147,7 +152,7 @@ const replaceStoredFeatures = async (kbnClient: KbnClient, features: FeatureUpse
   }
   await kbnClient.request({
     method: 'POST',
-    path: `/internal/streams/${DEDUP_CONTEXT_STREAM_NAME}/features/_bulk`,
+    path: `/internal/streams/${sourceId}/features/_bulk`,
     body: { operations },
   });
 };
@@ -451,6 +456,11 @@ evaluate.describe(
       'known feature ids and semantic duplicate search',
       async ({ executorClient, fetch, connector, kbnClient, esClient, apiServices, log }) => {
         await ensureStreamsEnabled({ esClient, apiServices, log });
+        const source = await createEvalSource({
+          fetch,
+          title: 'KI feature deduplication context',
+          esql: `FROM ${DEDUP_CONTEXT_STREAM_NAME}`,
+        });
 
         try {
           await executorClient.runExperiment(
@@ -464,13 +474,14 @@ evaluate.describe(
 
                 await replaceStoredFeatures(
                   kbnClient,
+                  source.id,
                   input.seededFeature ? [input.seededFeature] : []
                 );
 
                 const { features, searchCalls } = await runFeatureIdentificationAgent({
                   fetch,
                   log,
-                  streamName: DEDUP_CONTEXT_STREAM_NAME,
+                  streamName: source.id,
                   connectorId: connector.id,
                   sampleDocuments: input.sampleDocuments,
                   knownFeatureIds: input.knownFeatureIds,
@@ -483,9 +494,13 @@ evaluate.describe(
           );
         } finally {
           try {
-            await replaceStoredFeatures(kbnClient, []);
+            await replaceStoredFeatures(kbnClient, source.id, []);
           } finally {
-            await apiServices.streams.disable().catch(() => {});
+            try {
+              await deleteEvalSource({ fetch, source });
+            } finally {
+              await apiServices.streams.disable().catch(() => {});
+            }
           }
         }
       }
