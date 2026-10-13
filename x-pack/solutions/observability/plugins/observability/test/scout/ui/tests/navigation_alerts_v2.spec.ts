@@ -39,7 +39,7 @@ import { observabilityAlertingNavRole } from '../fixtures/roles';
 const ALERTS_PANEL_ID = 'alerting';
 const ALERTS_DEEP_LINK = 'observability-overview:alerts';
 const CLASSIC_ALERTS_TITLE = 'Alerts';
-const V1_ALERTS_NAV_TITLE = 'Alerts (V1)';
+const ALERTS_CLASSIC_NAV_TITLE = 'Alerts (Classic)';
 
 const PANEL_LINKS = {
   alerts: 'observabilityAlerting:alerts',
@@ -364,6 +364,7 @@ test.describe(
 
     test('clicking Alerts V1 loads the classic alerts page when the V1 alerts table setting is on', async ({
       browserAuth,
+      page,
       pageObjects,
       kbnClient,
       scoutSpace,
@@ -389,11 +390,12 @@ test.describe(
         timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
       });
       await expect(nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK)).toHaveText(
-        V1_ALERTS_NAV_TITLE
+        ALERTS_CLASSIC_NAV_TITLE
       );
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
+      await expect(page.getByTestId('classicAlertsBadge')).toBeVisible();
     });
 
     test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
