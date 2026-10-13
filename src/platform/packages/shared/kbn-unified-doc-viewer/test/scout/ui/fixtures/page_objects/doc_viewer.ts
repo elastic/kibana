@@ -11,6 +11,10 @@ import type { Locator, ScoutPage } from '@kbn/scout';
 import { DataGrid } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+// EuiDataGrid's scroll container, or the TanStack fields table, which scrolls itself.
+const FIELDS_TABLE_SCROLL_CONTAINER =
+  '.euiDataGrid__virtualized, [data-test-subj="UnifiedDocViewerTableGrid"][role="grid"]';
+
 interface MonacoJsonModel {
   getValue(): string;
 }
@@ -264,7 +268,7 @@ export class DocViewer {
   async scrollFieldsTableToBottom() {
     await this.page.testSubj
       .locator('docViewerFlyout')
-      .locator('.euiDataGrid__virtualized')
+      .locator(FIELDS_TABLE_SCROLL_CONTAINER)
       .evaluate((el) => el.scrollTo(0, el.scrollHeight));
   }
 
@@ -360,11 +364,41 @@ export class DocViewer {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
       });
       await cell.hover();
+      const gridCell = cell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
+      await this.revealTanStackCellActions(gridCell);
 
-      const actionBtn = flyout.locator(`[data-test-subj="${actionName}-${fieldName}"]`);
+      const actionBtn = await this.getCellAction(gridCell, `${actionName}-${fieldName}`);
       await actionBtn.waitFor({ state: 'visible' });
       await actionBtn.click();
     }).toPass({ timeout: 15_000 });
+  }
+
+  /**
+   * The TanStack fields table shows a hovered cell's actions behind an ellipsis button, while
+   * EuiDataGrid shows them directly. Opens them when the button is there.
+   */
+  private async revealTanStackCellActions(gridCell: Locator) {
+    if (await gridCell.evaluate((element) => element.matches('.euiDataGridRowCell'))) {
+      return;
+    }
+    const trigger = gridCell.locator('[data-test-subj="tanStackCellActionsButton"]');
+    // The trigger is replaced by the actions once open, e.g. when a retry runs this again.
+    const isTriggerVisible = await trigger
+      .waitFor({ state: 'visible', timeout: 2_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (isTriggerVisible) {
+      await trigger.click();
+    }
+  }
+
+  /** A cell action of the hovered cell, also when the TanStack table portals it out of the cell. */
+  private async getCellAction(gridCell: Locator, testSubj: string): Promise<Locator> {
+    const selector = `[data-test-subj="${testSubj}"]`;
+    const actionInCell = gridCell.locator(selector);
+    return (await actionInCell.count()) > 0
+      ? actionInCell
+      : this.page.locator(`[role="toolbar"] ${selector}`);
   }
 
   /**
@@ -383,8 +417,10 @@ export class DocViewer {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
       });
       await nameCell.hover();
+      const gridCell = nameCell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
+      await this.revealTanStackCellActions(gridCell);
 
-      const action = flyout.locator(`[data-test-subj="${actionTestSubj}-${fieldName}"]`);
+      const action = await this.getCellAction(gridCell, `${actionTestSubj}-${fieldName}`);
       await action.waitFor({ state: 'visible' });
       await action.scrollIntoViewIfNeeded();
       await action.click();
@@ -414,7 +450,8 @@ export class DocViewer {
     });
 
     await gridCell.hover();
-    await gridCell.locator('[data-test-subj="euiDataGridCellExpandButton"]').click();
+    await this.revealTanStackCellActions(gridCell);
+    await (await this.getCellAction(gridCell, 'euiDataGridCellExpandButton')).click();
 
     await this.page.testSubj.locator('euiDataGridExpansionPopover').waitFor({ state: 'visible' });
   }

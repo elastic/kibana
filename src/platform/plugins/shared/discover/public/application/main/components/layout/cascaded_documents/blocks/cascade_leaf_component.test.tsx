@@ -102,6 +102,7 @@ const renderLeafCellWithContext = ({
           showTimeCol={true}
           dataView={dataViewWithTimefieldMock}
           showKeyboardShortcuts={false}
+          gridImplementation="unified"
           onUpdateDataGridDensity={jest.fn()}
         />
       </CascadedDocumentsProvider>

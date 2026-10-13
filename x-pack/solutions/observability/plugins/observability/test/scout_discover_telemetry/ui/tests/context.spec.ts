@@ -74,7 +74,10 @@ test.describe(
       await setEbtOptIn(page, true);
       await pageObjects.dashboard.addSavedSearch('A Saved Search');
       await pageObjects.dashboard.waitForRenderComplete();
-      await expect(page.components.dataGrid('docTable').rows).not.toHaveCount(0);
+      // Rows of EuiDataGrid or Discover's TanStack grid.
+      await expect(
+        page.testSubj.locator('discoverDocTable').locator('[data-grid-row-index]')
+      ).not.toHaveCount(0);
       await pageObjects.dashboard.openAddPanelFlyout();
 
       const events = await getEbtEvents(page, ['click']);

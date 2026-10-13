@@ -53,6 +53,7 @@ const createSearchEmbeddableStateManager = (): SearchEmbeddableStateManager => (
   density: new BehaviorSubject<DataGridDensity | undefined>(undefined),
   documentsDisplayMode: new BehaviorSubject<DocumentsDisplayMode | undefined>(undefined),
   jsonModeSettings: new BehaviorSubject<JsonModeSettings | undefined>(undefined),
+  gridImplementation: new BehaviorSubject<'tanstack' | 'unified' | undefined>(undefined),
   rows: new BehaviorSubject<DataTableRecord[]>([]),
   totalHitCount: new BehaviorSubject<number | undefined>(undefined),
   inspectorAdapters: new BehaviorSubject<Record<string, unknown>>({}),

@@ -53,6 +53,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { BehaviorSubject } from 'rxjs';
 import { DiscoverGrid } from '../../../../components/discover_grid';
+import type { DiscoverGridImplementation } from '../../../../components/discover_grid/discover_grid_implementation';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import {
   selectTabCombinedFilters,
@@ -136,6 +137,7 @@ function DiscoverDocumentsComponent({
     density,
     documentsDisplayMode,
     jsonModeSettings,
+    gridImplementation,
   ] = useAppStateSelector((state) => {
     return [
       state.dataSource,
@@ -150,6 +152,7 @@ function DiscoverDocumentsComponent({
       state.density,
       state.documentsDisplayMode,
       state.jsonModeSettings,
+      state.gridImplementation,
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
@@ -322,6 +325,13 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
+  const onChangeGridImplementation = useCallback(
+    (nextGridImplementation: DiscoverGridImplementation) => {
+      dispatch(updateAppState({ appState: { gridImplementation: nextGridImplementation } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => showTimeFieldColumn({ uiSettings, query }),
@@ -462,19 +472,24 @@ function DiscoverDocumentsComponent({
 
   const approximationApplied = documentState.approximationApplied;
 
+  const toolbarBottomSection = useMemo(
+    () => (
+      <>
+        {callouts}
+        {loadingIndicator}
+      </>
+    ),
+    [callouts, loadingIndicator]
+  );
+
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         saveToDashboardButton,
         leftSide: isDataGridFullScreen ? undefined : renderViewModeToggle(),
-        bottomSection: (
-          <>
-            {callouts}
-            {loadingIndicator}
-          </>
-        ),
+        bottomSection: toolbarBottomSection,
       }),
-    [renderViewModeToggle, callouts, loadingIndicator, isDataGridFullScreen, saveToDashboardButton]
+    [renderViewModeToggle, toolbarBottomSection, isDataGridFullScreen, saveToDashboardButton]
   );
 
   const [expandedDoc$] = useState(() => new BehaviorSubject(expandedDoc));
@@ -644,6 +659,9 @@ function DiscoverDocumentsComponent({
             renderDocumentView="external"
             setRenderDocumentViewMeta={setRenderDocumentViewMetaForDefaultOwner}
             renderCustomToolbar={renderCustomToolbarWithElements}
+            toolbarLeftSide={isDataGridFullScreen ? undefined : renderViewModeToggle()}
+            toolbarTrailingControl={saveToDashboardButton}
+            toolbarBottomSection={toolbarBottomSection}
             services={services}
             totalHits={totalHits}
             onFetchMoreRecords={onFetchMoreRecords}
@@ -661,6 +679,8 @@ function DiscoverDocumentsComponent({
             onUpdateDocumentsDisplayMode={onUpdateDocumentsDisplayMode}
             jsonModeSettingsState={jsonModeSettings}
             onUpdateJsonModeSettings={onUpdateJsonModeSettings}
+            gridImplementation={gridImplementation}
+            onChangeGridImplementation={onChangeGridImplementation}
           />
         </CellActionsProvider>
       </div>

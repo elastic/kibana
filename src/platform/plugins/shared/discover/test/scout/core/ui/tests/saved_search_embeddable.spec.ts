@@ -202,6 +202,10 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     await expect(pageObjects.dataGrid.getColumnHeader('bytes')).toBeVisible();
     await expect(pageObjects.dataGrid.getColumnHeader('clientip')).toBeVisible();
     await expect(pageObjects.dataGrid.getColumnHeader('agent')).toBeHidden();
+    // Wait for the selected tab's data, not just its columns.
+    await expect(page.testSubj.locator('savedSearchTotalDocuments')).not.toHaveText(
+      initialDocumentCount
+    );
     const [firstBytesCell, secondBytesCell, switchedDocumentCount] = await Promise.all([
       pageObjects.dataGrid.getCellValue(0, 'bytes').innerText(),
       pageObjects.dataGrid.getCellValue(1, 'bytes').innerText(),
@@ -250,6 +254,6 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     await pageObjects.dashboard.selectDiscoverEmbeddableTab('Default tab');
     await pageObjects.dashboard.applyDiscoverEmbeddableInlineEdits();
 
-    await expect(page.testSubj.locator('docTable')).toBeVisible();
+    await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
   });
 });

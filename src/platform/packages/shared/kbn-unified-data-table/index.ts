@@ -18,11 +18,20 @@ export {
   RowHeightSettings,
   type RowHeightSettingsProps,
 } from './src/components/row_height_settings';
+export { UnifiedDataTableAdditionalDisplaySettings } from './src/components/data_table_additional_display_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
-export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE } from './src/constants';
+export {
+  ROWS_HEIGHT_OPTIONS,
+  DataGridDensity,
+  DEFAULT_PAGINATION_MODE,
+  DEFAULT_ROWS_PER_PAGE,
+  defaultTimeColumnWidth,
+} from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
+export { SourceDocumentJsonMode } from './src/components/source_document_json_mode';
+export { UnifiedDataTableFooter } from './src/components/data_table_footer';
 
 export type * from './src/types';
 export * as columnActions from './src/components/actions/columns';
@@ -42,10 +51,65 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
-export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_data_grid_density';
-export { getRowHeight } from './src/hooks/use_row_height';
+export {
+  getDataGridDensity,
+  getDataGridDensityPadding,
+  useDataGridDensity,
+  DATA_GRID_DENSITY_STYLE_MAP,
+} from './src/hooks/use_data_grid_density';
+export { getRowHeight, useRowHeight, RowHeightType } from './src/hooks/use_row_height';
+export { RowHeightMode } from './src/components/row_height_settings';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSourceColumnHeader } from './src/components/data_table_source_column_header';
 
+export { getColumnDisplayName } from './src/components/data_table_columns';
+export {
+  buildCopyColumnNameButton,
+  buildCopyColumnValuesButton,
+} from './src/components/build_copy_column_button';
+export { buildEditFieldButton } from './src/components/build_edit_field_button';
+export { isSortable } from './src/hooks/use_sorting';
+export { getSchemaByKbnType } from './src/components/data_table_schema';
+export { convertValueToString } from './src/utils/convert_value_to_string';
+export { ComparisonControls } from './src/components/compare_documents/comparison_controls';
+export { useComparisonFields } from './src/components/compare_documents/hooks/use_comparison_fields';
+export {
+  useRestorableLocalStorage,
+  useRestorableState as useUnifiedDataTableRestorableState,
+  withRestorableState as withUnifiedDataTableRestorableState,
+} from './src/restorable_state';
+export {
+  calculateDiff,
+  formatDiffValue,
+} from './src/components/compare_documents/hooks/calculate_diff';
+export type { DocumentDiffMode } from './src/components/compare_documents/types';
+export {
+  useComparisonCss,
+  ADDED_SEGMENT_CLASS as COMPARISON_ADDED_SEGMENT_CLASS,
+  BASE_CELL_CLASS as COMPARISON_BASE_CELL_CLASS,
+  DIFF_CELL_CLASS as COMPARISON_DIFF_CELL_CLASS,
+  MATCH_CELL_CLASS as COMPARISON_MATCH_CELL_CLASS,
+  REMOVED_SEGMENT_CLASS as COMPARISON_REMOVED_SEGMENT_CLASS,
+  SEGMENT_CLASS as COMPARISON_SEGMENT_CLASS,
+} from './src/components/compare_documents/hooks/use_comparison_css';
+export {
+  CELL_CLASS as DATA_TABLE_CELL_VALUE_CLASS,
+  getRenderCellValueFn,
+} from './src/utils/get_render_cell_value';
+export type { CompareDocumentsProps } from './src/components/compare_documents/compare_documents';
+export {
+  CopyAsTextFormat,
+  copyRowsAsJsonToClipboard,
+  copyRowsAsTextToClipboard,
+} from './src/utils/copy_value_to_clipboard';
+
 export { type EuiDataGridRefProps } from '@elastic/eui';
+
+export { TanStackCellActionsBubble } from './src/components/tanstack_cell_actions/tanstack_cell_actions_bubble';
+export {
+  TANSTACK_CELL_ACTIONS_CLASS,
+  tanStackCellActionsStyles,
+} from './src/components/tanstack_cell_actions/tanstack_cell_actions_styles';
+export { useFullScreenWatcher } from './src/hooks/use_full_screen_watcher';
+export { useScrollToExpandedDoc } from './src/hooks/use_scroll_to_expanded_doc';

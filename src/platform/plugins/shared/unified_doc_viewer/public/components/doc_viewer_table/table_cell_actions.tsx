@@ -291,7 +291,7 @@ const FilterExist: React.FC<TableActionsProps & { onFilter: DocViewFilterFn | un
   return (
     <Component
       data-test-subj={`addExistsFilterButton-${name}`}
-      iconType="filter"
+      iconType="plusCircle"
       title={filterExistsLabel}
       flush="left"
       onClick={() => onFilter!('_exists_', name, '+')}
@@ -329,7 +329,7 @@ const ToggleColumn: React.FC<
   return (
     <Component
       data-test-subj={`toggleColumnButton-${name}`}
-      iconType={isColumnAdded ? 'cross' : 'plusCircle'}
+      iconType={isColumnAdded ? 'eyeSlash' : 'eye'}
       title={toggleColumnLabel}
       flush="left"
       onClick={() => onToggleColumn(name)}

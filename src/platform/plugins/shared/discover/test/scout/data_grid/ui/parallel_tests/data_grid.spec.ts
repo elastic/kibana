@@ -20,7 +20,10 @@ import { testData } from '../fixtures';
 // `.euiDataGridHeaderCell__content`, so this excludes control columns (select,
 // actions) and their screen-reader-only labels.
 const getColumnTitles = async (page: ScoutPage): Promise<string[]> => {
-  const titles = await page.locator('.euiDataGridHeaderCell__content').allInnerTexts();
+  const titles = await page
+    // EuiDataGrid header content, or the column title of Discover's TanStack grid.
+    .locator('.euiDataGridHeaderCell__content, [data-test-subj="dataGridHeaderCellTitle"]')
+    .allInnerTexts();
   return titles.map((title) => title.trim());
 };
 

@@ -1,5 +1,5 @@
 {
-  "sha1": "b08bf21958e9f3c928e025b84fbcb8f51f1df44d",
+  "sha1": "41a7d8b96c4a7228d6afb92fcfd2db5715f34920",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -63,8 +63,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_context.spec.ts",
-        "line": 78,
-        "column": 64
+        "line": 81,
+        "column": 46
       }
     },
     {
@@ -281,7 +281,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid_footer_date_nanos.spec.ts",
-        "line": 66,
+        "line": 62,
         "column": 25
       }
     },
@@ -752,8 +752,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 65,
-        "column": 5
+        "line": 67,
+        "column": 22
       }
     },
     {
@@ -765,8 +765,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 97,
-        "column": 22
+        "line": 99,
+        "column": 11
       }
     },
     {
@@ -778,8 +778,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/data_grid.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 121,
+        "column": 19
       }
     },
     {
@@ -921,8 +921,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 117,
-        "column": 24
+        "line": 122,
+        "column": 31
       }
     },
     {
@@ -934,8 +934,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 129,
-        "column": 15
+        "line": 133,
+        "column": 11
       }
     },
     {
@@ -947,8 +947,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 151,
-        "column": 42
+        "line": 157,
+        "column": 17
       }
     },
     {
@@ -960,8 +960,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts",
-        "line": 185,
-        "column": 22
+        "line": 190,
+        "column": 9
       }
     },
     {

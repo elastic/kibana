@@ -6,7 +6,7 @@
  */
 
 import { test as base } from '@kbn/scout-oblt';
-import type { PageObjects, ScoutPage } from '@kbn/scout-oblt';
+import type { Locator, PageObjects, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { setEbtOptIn } from './ebt';
 
@@ -103,10 +103,40 @@ export class DiscoverEbt {
         el.scrollIntoView({ block: 'center', inline: 'nearest' });
       });
       await cell.hover();
-      const actionButton = flyout.locator(`[data-test-subj="${action}-${field}"]`);
+      const gridCell = cell.locator('xpath=ancestor::*[@data-gridcell-column-id][1]');
+      await this.revealTanStackCellActions(gridCell);
+      const actionButton = await this.getCellAction(gridCell, `${action}-${field}`);
       await actionButton.waitFor({ state: 'visible' });
       await actionButton.click();
     }).toPass({ timeout: 15_000 });
+  }
+
+  /**
+   * The TanStack fields table shows a hovered cell's actions behind an ellipsis button, while
+   * EuiDataGrid shows them directly. Opens them when the button is there.
+   */
+  private async revealTanStackCellActions(gridCell: Locator): Promise<void> {
+    if (await gridCell.evaluate((element) => element.matches('.euiDataGridRowCell'))) {
+      return;
+    }
+    const trigger = gridCell.locator('[data-test-subj="tanStackCellActionsButton"]');
+    // The trigger is replaced by the actions once open, e.g. when a retry runs this again.
+    const isTriggerVisible = await trigger
+      .waitFor({ state: 'visible', timeout: 2_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (isTriggerVisible) {
+      await trigger.click();
+    }
+  }
+
+  /** A cell action of the hovered cell, also when the TanStack table portals it out of the cell. */
+  private async getCellAction(gridCell: Locator, testSubj: string): Promise<Locator> {
+    const selector = `[data-test-subj="${testSubj}"]`;
+    const actionInCell = gridCell.locator(selector);
+    return (await actionInCell.count()) > 0
+      ? actionInCell
+      : this.page.locator(`[role="toolbar"] ${selector}`);
   }
 
   async toggleColumnInFlyout(

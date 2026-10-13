@@ -33,5 +33,6 @@ export const EDITABLE_SAVED_SEARCH_KEYS = [
   'density',
   'documentsDisplayMode',
   'jsonModeSettings',
+  'gridImplementation',
   'grid',
 ] as const satisfies ReadonlyArray<keyof SavedSearchAttributes>;

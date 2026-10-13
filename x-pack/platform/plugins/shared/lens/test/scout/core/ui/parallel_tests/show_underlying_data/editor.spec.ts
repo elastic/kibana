@@ -18,8 +18,11 @@ const SPLIT_TRIGGER = 'lnsXY_splitDimensionPanel > lns-dimensionTrigger';
 const Y_TRIGGER = 'lnsXY_yDimensionPanel > lns-dimensionTrigger';
 const Y_EMPTY = 'lnsXY_yDimensionPanel > lns-empty-dimension';
 
-const COMPATIBLE_TITLES = ['extension.raw', 'bytes'] as const;
-const FORMULA_TITLES = ['extension.raw', 'memory'] as const;
+// EuiDataGrid header content, or the column title of Discover's TanStack grid.
+const COLUMN_TITLE_SELECTOR =
+  '.euiDataGridHeaderCell__content, [data-test-subj="dataGridHeaderCellTitle"]';
+const COMPATIBLE_TITLES = ['@timestamp', 'extension.raw', 'bytes'] as const;
+const FORMULA_TITLES = ['@timestamp', 'extension.raw', 'memory'] as const;
 
 spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic' }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
@@ -61,7 +64,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
       try {
         await expect(discoverPage.testSubj.locator('unifiedDataTableToolbar')).toBeVisible();
         await expect(discoverPage.testSubj.locator('dataGridHeaderCell-@timestamp')).toBeVisible();
-        await expect(discoverPage.testSubj.locator('unifiedDataTableColumnTitle')).toHaveText([
+        await expect(discoverPage.locator(COLUMN_TITLE_SELECTOR)).toHaveText([
           ...COMPATIBLE_TITLES,
         ]);
       } finally {
@@ -92,7 +95,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
           await expect(
             discoverPage.testSubj.locator('dataGridHeaderCell-@timestamp')
           ).toBeVisible();
-          await expect(discoverPage.testSubj.locator('unifiedDataTableColumnTitle')).toHaveText([
+          await expect(discoverPage.locator(COLUMN_TITLE_SELECTOR)).toHaveText([
             ...COMPATIBLE_TITLES,
           ]);
         } finally {
@@ -124,7 +127,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
           await expect(
             discoverPage.testSubj.locator('dataGridHeaderCell-@timestamp')
           ).toBeVisible();
-          await expect(discoverPage.testSubj.locator('unifiedDataTableColumnTitle')).toHaveText([
+          await expect(discoverPage.locator(COLUMN_TITLE_SELECTOR)).toHaveText([
             ...COMPATIBLE_TITLES,
           ]);
         } finally {
@@ -268,9 +271,7 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
           await expect(
             discoverPage.testSubj.locator('dataGridHeaderCell-@timestamp')
           ).toBeVisible();
-          await expect(discoverPage.testSubj.locator('unifiedDataTableColumnTitle')).toHaveText([
-            ...FORMULA_TITLES,
-          ]);
+          await expect(discoverPage.locator(COLUMN_TITLE_SELECTOR)).toHaveText([...FORMULA_TITLES]);
           await expect(discoverPage.testSubj.locator('queryInput')).toHaveValue(
             '( ( bytes > 2000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
           );

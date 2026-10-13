@@ -13,6 +13,8 @@ export {
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
 } from './src';
+export { InTableSearchHighlightsWrapper } from './src/in_table_search_highlights_wrapper';
+export { getHighlightColors as getInTableSearchHighlightColors } from './src/get_highlight_colors';
 
 export {
   BUTTON_TEST_SUBJ,

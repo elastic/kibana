@@ -14,6 +14,7 @@
  * to classic mode) renders the expected layout.
  */
 
+import { euiSelectors } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../../../common/ui/fixtures';
 import { runCascadeQuery } from '../../../common/ui/fixtures/helpers';
@@ -87,22 +88,26 @@ spaceTest.describe(
         await spaceTest.step('expanding a row and entering/exiting fullscreen works', async () => {
           await discover.toggleCascadeLayoutRow(firstRowId);
 
-          // `docTable` is the subj on the EuiDataGrid itself (the component-type guard
-          // requires that). Scoped to the expanded row: while scrolled, the sticky pinned
-          // group header renders a `createPortal` duplicate of row content elsewhere in
-          // the DOM, so an unscoped page-wide locator can match the wrong copy.
-          const expandedRowGrid = page.components.dataGrid(
-            'docTable',
-            page.locator(`[id="${firstRowId}"]`)
+          // Scoped to the expanded row: while scrolled, the sticky pinned group header renders
+          // a `createPortal` duplicate of row content elsewhere in the DOM, so an unscoped
+          // page-wide locator can match the wrong copy. The selectors are shared by both grids.
+          const expandedRow = page.locator(`[id="${firstRowId}"]`);
+          const expandedRowGridRows = expandedRow.locator(
+            '[data-test-subj="discoverDocTable"] [data-grid-row-index]'
           );
-          await expect(expandedRowGrid.rows).not.toHaveCount(0);
+          const fullScreenButton = expandedRow.locator(
+            '[data-test-subj="dataGridFullScreenButton"]'
+          );
+          await expect(expandedRowGridRows).not.toHaveCount(0);
 
-          await expandedRowGrid.openFullScreenMode();
-          await expect(expandedRowGrid.rows).not.toHaveCount(0);
+          await fullScreenButton.click();
+          await expect(page.locator(euiSelectors.dataGrid.FULL_SCREEN_ROOT_SELECTOR)).toBeVisible();
+          await expect(expandedRowGridRows).not.toHaveCount(0);
 
-          await expandedRowGrid.closeFullScreenMode();
+          await fullScreenButton.click();
+          await expect(page.locator(euiSelectors.dataGrid.FULL_SCREEN_ROOT_SELECTOR)).toBeHidden();
           // Rows are still rendered (the grid didn't unmount/lose its data) after exiting fullscreen.
-          await expect(expandedRowGrid.rows).not.toHaveCount(0);
+          await expect(expandedRowGridRows).not.toHaveCount(0);
         });
 
         await spaceTest.step('opting out of grouping shows the flat doc table', async () => {

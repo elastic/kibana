@@ -51,6 +51,7 @@ import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
+import { useDiscoverGridImplementation } from '../../components/discover_grid/use_discover_grid_implementation';
 import { onResizeGridColumn } from '../../utils/on_resize_grid_column';
 import { useAdditionalCellActions, useProfileAccessor } from '../../context_awareness';
 import { createDataSource } from '../../../common/data_sources';
@@ -116,6 +117,8 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const services = useDiscoverServices();
   const { uiSettings: config, uiActions } = services;
+  const { implementation: gridImplementation, onChangeImplementation: onChangeGridImplementation } =
+    useDiscoverGridImplementation(services.storage);
 
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
@@ -164,12 +167,14 @@ export function ContextAppContent({
         initialTabId={initialDocViewerTabId}
         setExpandedDoc={setExpandedDoc}
         docViewerRef={docViewerRef}
+        gridImplementation={gridImplementation}
       />
     ),
     [
       addFilter,
       dataView,
       docViewerRef,
+      gridImplementation,
       initialDocViewerTabId,
       onAddColumn,
       onRemoveColumn,
@@ -261,6 +266,7 @@ export function ContextAppContent({
           <DiscoverGrid
             ariaLabelledBy="surDocumentsAriaLabel"
             renderCustomToolbar={renderCustomToolbar}
+            toolbarLeftSide={predecessorsActionBar}
             cellActionsTriggerId={DISCOVER_CELL_ACTIONS_TRIGGER_ID}
             cellActionsMetadata={cellActionsMetadata}
             cellActionsHandling="append"
@@ -288,6 +294,8 @@ export function ContextAppContent({
             settings={grid}
             onResize={onResize}
             externalCustomRenderers={cellRenderers}
+            gridImplementation={gridImplementation}
+            onChangeGridImplementation={onChangeGridImplementation}
           />
         </CellActionsProvider>
       </div>

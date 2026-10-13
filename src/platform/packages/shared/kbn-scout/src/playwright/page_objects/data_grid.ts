@@ -28,6 +28,11 @@ const DOCUMENTS_DISPLAY_MODE_TEST_SUBJS: Readonly<Record<DataGridDocumentsDispla
   JSON: 'unifiedDataTableViewModeSettings_viewMode_json',
 };
 
+// Wrapper rendered by both UnifiedDataTable (EuiDataGrid) and Discover's TanStack grid.
+const DOC_TABLE_TEST_SUBJ = 'discoverDocTable';
+const HEADER_CELL_TITLE_SELECTOR = '[data-test-subj="dataGridHeaderCellTitle"]';
+const ROW_CELL_SELECTOR = euiSelectors.dataGrid.ROW_CELL_SELECTOR;
+
 export class DataGrid {
   constructor(private readonly page: ScoutPage) {}
 
@@ -39,8 +44,9 @@ export class DataGrid {
 
   private async readHeaderLabels(scope: Locator, limit: number): Promise<string[]> {
     const headerCell = euiSelectors.dataGrid.HEADER_CELL_SELECTOR;
+    // EuiDataGrid header content, or the column title of Discover's TanStack grid.
     const headerCellContent = scope.locator(
-      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content`
+      `${headerCell}:not(${headerCell}--controlColumn) ${headerCell}__content, ${HEADER_CELL_TITLE_SELECTOR}`
     );
 
     const labels = await headerCellContent.allInnerTexts();
@@ -81,7 +87,23 @@ export class DataGrid {
   }
 
   private getPaginationContainer(): Locator {
-    return this.page.testSubj.locator('docTable');
+    return this.page.testSubj.locator(DOC_TABLE_TEST_SUBJ);
+  }
+
+  /**
+   * EuiPopover moves focus into its panel shortly after opening. Escape only closes it once focus
+   * is inside, so wait for that before interacting with it.
+   */
+  private async waitForPopoverFocus(content: Locator) {
+    await content.waitFor({ state: 'visible' });
+    await expect
+      .poll(() => content.evaluate((element) => element.contains(document.activeElement)))
+      .toBe(true);
+  }
+
+  /** EuiDataGrid opens the cell popover from the hover expand button, the TanStack grid on cell click. */
+  private async isEuiDataGridCell(cell: Locator): Promise<boolean> {
+    return cell.evaluate((element, selector) => element.matches(selector), ROW_CELL_SELECTOR);
   }
 
   private getDisplaySelectorButton(): Locator {
@@ -124,6 +146,16 @@ export class DataGrid {
       .waitFor({ state: 'visible' });
   }
 
+  /**
+   * Whether Discover renders the classic EuiDataGrid (UnifiedDataTable) rather than the TanStack
+   * grid. Use it only where the two grids intentionally differ, e.g. in focus management.
+   */
+  async isEuiDataGrid(): Promise<boolean> {
+    const docTable = this.page.testSubj.locator(DOC_TABLE_TEST_SUBJ);
+    await docTable.waitFor({ state: 'visible' });
+    return (await docTable.locator(euiSelectors.dataGrid.ROOT_SELECTOR).count()) > 0;
+  }
+
   async expandCell({ rowIndex, columnId }: { rowIndex: number; columnId: string }) {
     const cell = this.getCell(rowIndex, columnId);
     const expansionPopover = this.page.testSubj.locator('euiDataGridExpansionPopover');
@@ -143,7 +175,11 @@ export class DataGrid {
     await expect(async () => {
       if (await expansionPopover.isVisible()) return;
       await cell.hover();
-      await expandButton.click({ timeout: 2_000 });
+      if (await this.isEuiDataGridCell(cell)) {
+        await expandButton.click({ timeout: 2_000 });
+      } else {
+        await cell.click({ timeout: 2_000 });
+      }
       await expect(expansionPopover).toBeVisible({ timeout: 2_000 });
     }).toPass({ timeout: 20_000 });
   }
@@ -209,7 +245,7 @@ export class DataGrid {
   }
 
   async getColumnTitles(
-    scope: Locator = this.page.testSubj.locator('docTable')
+    scope: Locator = this.page.testSubj.locator(DOC_TABLE_TEST_SUBJ)
   ): Promise<string[]> {
     return this.readHeaderLabels(scope, Number.MAX_SAFE_INTEGER);
   }
@@ -338,9 +374,11 @@ export class DataGrid {
 
   async getDocTableRowCount(): Promise<number> {
     await this.waitForDocTableRendered();
-    const table = this.page.testSubj.locator('docTable');
+    const table = this.page.testSubj.locator(DOC_TABLE_TEST_SUBJ);
     await table.waitFor({ state: 'visible' });
-    return table.locator('.euiDataGridRowCell--firstColumn').count();
+    return table
+      .locator('[data-test-subj="dataGridRowCell"][data-gridcell-column-index="0"]')
+      .count();
   }
 
   getDocumentColumnFieldValue(rowIndex: number, fieldName: string): Locator {
@@ -390,7 +428,7 @@ export class DataGrid {
   async getNumberOfSelectedRowsOnCurrentPage(): Promise<number> {
     return this.page
       .locator(
-        `${euiSelectors.dataGrid.ROW_SELECTOR} [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
+        `[data-grid-row-index] [data-gridcell-column-id="select"] input[type="checkbox"]:checked`
       )
       .count();
   }
@@ -453,9 +491,9 @@ export class DataGrid {
 
   async openComparisonSettings() {
     await this.page.testSubj.locator('unifiedDataTableComparisonSettings').click();
-    await this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu').waitFor({
-      state: 'visible',
-    });
+    await this.waitForPopoverFocus(
+      this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu')
+    );
   }
 
   async selectComparisonDiffMode(mode: 'basic' | 'chars' | 'words' | 'lines') {
@@ -514,6 +552,7 @@ export class DataGrid {
       .then(() => true)
       .catch(() => false);
     await this.page.keyboard.press('Escape');
+    await this.page.testSubj.locator('unifiedDataTableSelectionMenu').waitFor({ state: 'hidden' });
     return exists;
   }
 
@@ -641,7 +680,7 @@ export class DataGrid {
 
   async openSelectedRowsMenu() {
     await this.page.testSubj.click('unifiedDataTableSelectionBtn');
-    await this.page.testSubj.waitForSelector('unifiedDataTableSelectionMenu', { state: 'visible' });
+    await this.waitForPopoverFocus(this.page.testSubj.locator('unifiedDataTableSelectionMenu'));
   }
 
   async resetColumnWidth(field: string) {

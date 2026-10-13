@@ -66,6 +66,7 @@ dependsOn:
   - '@kbn/ebt-click'
   - '@kbn/apm-shared'
   - '@kbn/ui-callout'
+  - '@kbn/unified-data-table'
   - '@kbn/genai-common'
 tags:
   - plugin

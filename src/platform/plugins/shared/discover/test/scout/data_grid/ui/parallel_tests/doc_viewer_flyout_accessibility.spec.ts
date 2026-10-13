@@ -39,7 +39,7 @@ const OVERLAY_VIEWPORT = { width: 800, height: 1200 };
  * fails loudly on the violation rather than silently losing coverage.
  */
 const FIELDS_GRID_SCROLL_CONTAINER =
-  '[data-test-subj="UnifiedDocViewerTableGrid"] .euiDataGrid__virtualized';
+  '[data-test-subj="UnifiedDocViewerTableGrid"] .euiDataGrid__virtualized, [data-test-subj="UnifiedDocViewerTableGrid"][role="grid"]';
 
 const FLYOUT_TEST_SUBJ = '[data-test-subj="docViewerFlyout"]';
 
@@ -103,8 +103,14 @@ spaceTest.describe(
     spaceTest(
       'returns focus to the trigger element when the flyout is closed',
       async ({ page, pageObjects }) => {
-        const { docViewer } = pageObjects;
+        const { dataGrid, docViewer } = pageObjects;
         const focused = page.locator(':focus');
+        // When an overlay flyout closes, EuiDataGrid's cell focus management can move focus from
+        // the expand toggle to the cell containing it, depending on timing. The TanStack grid
+        // always keeps it on the toggle.
+        const overlayCloseFocusTarget = (await dataGrid.isEuiDataGrid())
+          ? /^(docTableExpandToggleColumn|dataGridRowCell)$/
+          : 'docTableExpandToggleColumn';
 
         // The flyout takes focus a tick after `kbnDocViewer` becomes visible (and
         // again after a push<->overlay re-render). Escape only closes it while it
@@ -131,7 +137,7 @@ spaceTest.describe(
           await expect(focused).toHaveAttribute('data-test-subj', 'docViewerFlyout');
 
           await page.keyboard.press('Escape');
-          await expect(focused).toHaveAttribute('data-test-subj', 'docTableExpandToggleColumn');
+          await expect(focused).toHaveAttribute('data-test-subj', overlayCloseFocusTarget);
         });
 
         await spaceTest.step('opened as overlay, closed as push', async () => {

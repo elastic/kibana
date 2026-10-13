@@ -13,7 +13,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { euiSelectors, spaceTest } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 
 const DATE_NANOS_KBN_ARCHIVE = 'src/platform/test/functional/fixtures/kbn_archiver/date_nanos';
 const DATE_NANOS_DATA_VIEW = 'date-nanos';
@@ -31,20 +31,16 @@ const expectFooterText = async (page: ScoutPage, documentCount: string) => {
 const footerLocator = (page: ScoutPage) => page.testSubj.locator('unifiedDataTableFooter');
 
 const getRowsText = async (page: ScoutPage): Promise<string[]> =>
-  page
-    .locator(
-      `[data-test-subj="discoverDocTable"] ${euiSelectors.dataGrid.ROW_SELECTOR}[data-grid-row-index]`
-    )
-    .evaluateAll((rows) =>
-      rows.map((row) => {
-        const getCellText = (columnId: string) =>
-          row
-            .querySelector(`[data-gridcell-column-id="${columnId}"] .unifiedDataTable__cellValue`)
-            ?.textContent?.trim() ?? '';
+  page.locator('[data-test-subj="discoverDocTable"] [data-grid-row-index]').evaluateAll((rows) =>
+    rows.map((row) => {
+      const getCellText = (columnId: string) =>
+        row
+          .querySelector(`[data-gridcell-column-id="${columnId}"] .unifiedDataTable__cellValue`)
+          ?.textContent?.trim() ?? '';
 
-        return `${getCellText('@timestamp')}${getCellText('_id')}`;
-      })
-    );
+      return `${getCellText('@timestamp')}${getCellText('_id')}`;
+    })
+  );
 
 spaceTest.describe(
   'Discover data grid footer - date nanos',

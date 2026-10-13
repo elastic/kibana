@@ -99,6 +99,10 @@ export function RowHeightSettings({
             required
             step={1}
             disabled={rowHeight !== RowHeightMode.custom}
+            aria-label={i18n.translate('unifiedDataTable.rowHeight.lineCountAriaLabel', {
+              defaultMessage: '{label} line count',
+              values: { label },
+            })}
             data-test-subj={`${dataTestSubj}_lineCountNumber`}
           />
         </EuiFlexGroup>

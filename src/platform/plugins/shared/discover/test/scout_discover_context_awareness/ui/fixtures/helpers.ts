@@ -144,7 +144,9 @@ async function waitForSurroundingDocs(page: ScoutPage) {
 export function getGridColumnIds(page: ScoutPage): Promise<string[]> {
   return page
     .locator(
-      `${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}:not(${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}--controlColumn)`
+      // EuiDataGrid data column headers, or the data column headers of Discover's TanStack grid.
+      `${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}:not(${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}--controlColumn), ` +
+        `[role="columnheader"][data-gridcell-column-id]:not(${euiSelectors.dataGrid.HEADER_CELL_SELECTOR}):not([data-gridcell-column-id="select"]):not([data-gridcell-column-id="actions"])`
     )
     .evaluateAll((cells) =>
       cells.map((cell) => cell.getAttribute('data-gridcell-column-id') ?? '')
