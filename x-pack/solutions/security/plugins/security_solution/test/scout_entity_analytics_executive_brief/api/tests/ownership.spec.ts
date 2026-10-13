@@ -68,7 +68,6 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       apiClient,
       headers: ownerHeaders,
       connectorId,
-      llmProxy,
     });
 
     const read = await apiClient.get(BRIEF_ROUTE, {
@@ -99,7 +98,6 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
         apiClient,
         headers: ownerHeaders,
         connectorId,
-        llmProxy,
       });
 
       const otherSpaceRead = await apiClient.get(briefRouteInSpace(OTHER_SPACE_ID), {
@@ -113,7 +111,6 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
         apiClient,
         headers: ownerHeaders,
         connectorId: otherSpaceConnectorId,
-        llmProxy,
         route: briefRouteInSpace(OTHER_SPACE_ID),
       });
       expect(otherSpaceJobId).not.toBe(jobId);
@@ -138,13 +135,11 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       apiClient,
       headers: ownerHeaders,
       connectorId,
-      llmProxy,
     });
     const { jobId: secondJobId, document } = await generateBrief({
       apiClient,
       headers: ownerHeaders,
       connectorId,
-      llmProxy,
     });
 
     expect(secondJobId).not.toBe(firstJobId);

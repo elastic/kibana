@@ -7,7 +7,7 @@
 
 import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
-import { buildValidBrief, EMPTY_EVIDENCE, FIXTURE_EVIDENCE } from './__fixtures__/evidence';
+import { buildValidBrief, FIXTURE_EVIDENCE } from './__fixtures__/evidence';
 import { checkCitations } from './citations';
 import { buildEvidenceIndex } from './evidence_index';
 
@@ -24,7 +24,7 @@ describe('checkCitations', () => {
   it('passes a valid brief unchanged', () => {
     const brief = buildValidBrief();
     const outcome = run(brief);
-    expect(outcome).toEqual({ brief, drops: [], structuralErrors: [], notes: [] });
+    expect(outcome).toEqual({ brief, drops: [], structuralErrors: [], lowered: 0, notes: [] });
   });
 
   it('removes unknown and duplicate ids from evidence lists', () => {
@@ -77,14 +77,6 @@ describe('checkCitations', () => {
         };
       }),
       FIXTURE_EVIDENCE,
-    ],
-    [
-      'any claim on empty evidence',
-      {
-        verdict: { level: 'watch', headline: 'Quiet', summary: 'Quiet week.', evidence: [] },
-        areas: [{ id: 'threats', level: 'watch', summary: 'No threats.', evidence: [] }],
-      },
-      EMPTY_EVIDENCE,
     ],
   ])('lets %s go without citations', (_name, brief, evidence) => {
     const outcome = run(brief, evidence);

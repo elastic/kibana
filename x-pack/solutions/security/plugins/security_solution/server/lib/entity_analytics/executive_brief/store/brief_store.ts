@@ -88,9 +88,11 @@ export interface StartJobResult {
   reused: boolean;
 }
 
-export interface CompleteJobInput extends ComposeVerifiedBriefResult {
+export interface CompleteJobInput {
   evidence: Evidence;
   params: BriefParams;
+  /** Absent when the evidence had no findings, so the AI was not called. */
+  composed?: ComposeVerifiedBriefResult;
 }
 
 const isConflictError = (error: unknown): boolean =>
@@ -241,7 +243,7 @@ export class BriefStore {
     result: CompleteJobInput;
   }): Promise<boolean> {
     return this.updateInFlightJob(docId, jobId, (document, now) => {
-      const { brief, evidence, verification, model, tokens, params } = result;
+      const { evidence, params, composed } = result;
       return {
         schema_version: 1,
         owner: document.owner,
@@ -255,11 +257,15 @@ export class BriefStore {
         generated_at: now,
         expires_at: addRetention(now),
         params,
-        ...(model ? { model } : {}),
-        tokens,
         evidence,
-        brief,
-        verification,
+        ...(composed
+          ? {
+              ...(composed.model ? { model: composed.model } : {}),
+              tokens: composed.tokens,
+              brief: composed.brief,
+              verification: composed.verification,
+            }
+          : {}),
       };
     });
   }

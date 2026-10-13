@@ -18,7 +18,6 @@ export type BriefErrorCode =
   | 'no_connector'
   | 'llm_error'
   | 'llm_output'
-  | 'no_evidence'
   | 'internal';
 
 export interface BriefJob {
@@ -39,7 +38,8 @@ export interface BriefParams {
 
 /**
  * One document per (owner, space). The job fields track the latest run; the brief fields
- * hold the last successful brief and are replaced only when a job succeeds.
+ * hold the last successful brief and are replaced only when a job succeeds. A succeeded job
+ * without `brief` found nothing: `evidence.signals` says what was checked.
  */
 export interface BriefDocument {
   schema_version: 1;

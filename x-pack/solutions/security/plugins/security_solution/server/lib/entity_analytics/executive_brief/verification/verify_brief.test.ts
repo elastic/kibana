@@ -12,7 +12,12 @@ describe('verifyBrief', () => {
   it('keeps a valid brief intact', () => {
     const brief = buildValidBrief();
     const result = verifyBrief(brief, FIXTURE_EVIDENCE, { range: '7d' });
-    expect(result).toEqual({ brief, summary: { dropped: {} }, structuralErrors: [], notes: [] });
+    expect(result).toEqual({
+      brief,
+      summary: { dropped: {}, lowered: 0 },
+      structuralErrors: [],
+      notes: [],
+    });
   });
 
   it('drops failing areas, counts drops per check and keeps the rest', () => {

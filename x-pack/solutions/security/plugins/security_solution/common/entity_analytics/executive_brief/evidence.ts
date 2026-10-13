@@ -149,3 +149,7 @@ export interface Evidence {
   links: Link[];
   signals: SignalRun[];
 }
+
+/** True when any signal found something; without findings the AI is not called and no brief is written. */
+export const hasFindings = ({ facts, links }: Evidence): boolean =>
+  facts.length > 0 || links.length > 0;

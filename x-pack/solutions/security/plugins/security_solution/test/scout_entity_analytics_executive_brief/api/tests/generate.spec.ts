@@ -14,16 +14,12 @@ import {
   BRIEF_SIGNAL_IDS,
   EXECUTIVE_BRIEF_TAGS,
   INTERNAL_HEADERS,
-  QUIET_TENANT_BRIEF,
-  SUBMIT_BRIEF_TOOL_NAME,
 } from '../fixtures/constants';
 import {
   createBriefConnector,
   deleteAllBriefs,
   deleteBriefConnector,
   generateBrief,
-  holdSubmitBrief,
-  mockSubmitBrief,
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
 
@@ -52,67 +48,27 @@ apiTest.describe(
     });
 
     apiTest(
-      'generates a verified brief through the LLM and stores it for the caller',
+      'with no findings, records what was checked without calling the LLM',
       async ({ apiClient }) => {
-        const llmCall = mockSubmitBrief(llmProxy);
-
         const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
         expect(response).toHaveStatusCode(202);
-        expect(response.body.job.id).toBeDefined();
-        expect(response.body).toMatchObject({ job: { status: 'pending' }, reused: false });
 
         const jobId = response.body.job.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
-        await llmCall;
-
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
-        expect(document.brief).toStrictEqual(QUIET_TENANT_BRIEF);
-        expect(document.verification).toMatchObject({ repaired: false });
-        expect(document.params).toMatchObject({ range: '7d', connector_id: connectorId });
+        expect(document.brief).toBeUndefined();
+        expect(document.tokens).toBeUndefined();
         expect(document.evidence?.facts).toHaveLength(0);
         expect(document.evidence?.signals.map(({ id }) => id).sort()).toStrictEqual(
           [...BRIEF_SIGNAL_IDS].sort()
         );
-        // The owner id and schema version stay server-side.
-        expect(Object.keys(document.owner)).toStrictEqual(['username']);
-        expect('schema_version' in document).toBe(false);
-
-        // One LLM call, with the brief tool forced.
-        expect(llmProxy.interceptedRequests).toHaveLength(1);
-        expect(llmProxy.interceptedRequests[0].requestBody.tool_choice).toMatchObject({
-          function: { name: SUBMIT_BRIEF_TOOL_NAME },
-        });
+        expect(llmProxy.interceptedRequests).toHaveLength(0);
       }
     );
-
-    apiTest('returns the running job instead of starting a second one', async ({ apiClient }) => {
-      const held = holdSubmitBrief(llmProxy);
-
-      const first = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
-        headers,
-        responseType: 'json',
-        body: { range: '7d', connectorId },
-      });
-      expect(first).toHaveStatusCode(202);
-
-      const second = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
-        headers,
-        responseType: 'json',
-        body: { range: '24h', connectorId },
-      });
-      expect(second).toHaveStatusCode(202);
-      expect(second.body).toMatchObject({ job: { id: first.body.job.id }, reused: true });
-
-      await held.release();
-      const document = await waitForBriefJob({ apiClient, headers, jobId: first.body.job.id });
-      expect(document.job.status).toBe('succeeded');
-      expect(document.params?.range).toBe('7d');
-      expect(llmProxy.interceptedRequests).toHaveLength(1);
-    });
 
     apiTest('rejects an unknown connector before starting a job', async ({ apiClient }) => {
       const response = await apiClient.post(BRIEF_ROUTE, {
@@ -137,7 +93,7 @@ apiTest.describe(
     });
 
     apiTest('DELETE removes the caller brief', async ({ apiClient }) => {
-      await generateBrief({ apiClient, headers, connectorId, llmProxy });
+      await generateBrief({ apiClient, headers, connectorId });
 
       const deleted = await apiClient.delete(BRIEF_ROUTE, { headers, responseType: 'json' });
       expect(deleted).toHaveStatusCode(200);

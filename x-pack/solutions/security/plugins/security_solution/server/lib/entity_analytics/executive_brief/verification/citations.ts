@@ -14,9 +14,8 @@ import { EVIDENCE_ID_PATTERN, hasFactOrLink, isKnownId, unique } from './evidenc
 import type { BriefCheck, CheckOutcome, Claim } from './types';
 import { emptyOutcome, isDropped, listClaims, reportClaim } from './types';
 
-/** An absence claim ("nothing to report") at level `clear`, or any claim on empty evidence, needs no citation. */
-const needsEvidence = (index: EvidenceIndex, level: AttentionLevel): boolean =>
-  !index.isEmpty && level !== 'clear';
+/** Only an absence claim ("nothing to report") at level `clear` needs no citation. */
+const needsEvidence = (level: AttentionLevel): boolean => level !== 'clear';
 
 /** Ids written in the claim's prose that are not in the evidence (invented ids). */
 const unknownIdsInProse = (claim: Claim, index: EvidenceIndex): string[] =>
@@ -64,7 +63,7 @@ export const checkCitations: BriefCheck = (input, context): CheckOutcome => {
     if (invented.length > 0) {
       reasons.push(`its text names ids that are not in the evidence: ${invented.join(', ')}`);
     }
-    if (needsEvidence(index, claim.level) && !hasFactOrLink(index, claim.evidence)) {
+    if (needsEvidence(claim.level) && !hasFactOrLink(index, claim.evidence)) {
       reasons.push('it cites no known fact (F-n) or link (L-n)');
     }
     if (reasons.length > 0) {

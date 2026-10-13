@@ -18,8 +18,6 @@ export interface EvidenceIndex {
   readonly entities: ReadonlyMap<string, BriefEntity>;
   readonly facts: ReadonlyMap<string, Fact>;
   readonly links: ReadonlyMap<string, Link>;
-  /** True when there is nothing a claim could cite (a quiet tenant). */
-  readonly isEmpty: boolean;
 }
 
 /** Any evidence id written in prose. */
@@ -33,13 +31,7 @@ export const buildEvidenceIndex = (evidence: Evidence): EvidenceIndex => {
   );
   const facts = new Map<string, Fact>(evidence.facts.map((fact) => [fact.id, fact]));
   const links = new Map<string, Link>(evidence.links.map((link) => [link.id, link]));
-  return {
-    evidence,
-    entities,
-    facts,
-    links,
-    isEmpty: facts.size === 0 && links.size === 0,
-  };
+  return { evidence, entities, facts, links };
 };
 
 export const isKnownId = (index: EvidenceIndex, id: string): boolean =>

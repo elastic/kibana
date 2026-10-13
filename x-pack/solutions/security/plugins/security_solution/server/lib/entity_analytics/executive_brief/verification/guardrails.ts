@@ -8,10 +8,14 @@
 import type { AttentionLevel } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { Fact } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { EvidenceIndex } from './evidence_index';
+import { citedFacts } from './evidence_index';
 import type { BriefCheck, CheckOutcome, ItemPath } from './types';
 import { emptyOutcome } from './types';
 
 const LEVEL_RANK: Record<AttentionLevel, number> = { clear: 0, watch: 1, action: 2, urgent: 3 };
+
+const higher = (a: AttentionLevel, b: AttentionLevel): AttentionLevel =>
+  LEVEL_RANK[a] >= LEVEL_RANK[b] ? a : b;
 
 const HANDLED_STATUS = /^(?:acknowledged|closed|in[-_ ]progress|resolved)$/i;
 
@@ -40,18 +44,43 @@ export const unaddressedSevereDiscoveries = (index: EvidenceIndex): Fact[] =>
   );
 
 /**
- * Guardrails: small deterministic floors on the AI's judgement. Verdict violations are structural
- * (the model gets one chance to fix them); duplicate areas are dropped.
- * - The verdict is never `clear` while an unaddressed critical/high attack discovery exists.
- * - The verdict is never calmer than its most severe area.
+ * The highest level a fact supports: `urgent` needs an unaddressed critical or high fact; a handled
+ * one, a medium one or an unrated one supports `action`; a low one supports `watch`.
+ */
+const supportOf = (fact: Fact, index: EvidenceIndex): AttentionLevel => {
+  switch (fact.severity) {
+    case 'critical':
+    case 'high':
+      return isAddressed(fact, index) ? 'action' : 'urgent';
+    case 'low':
+      return 'watch';
+    default:
+      return 'action';
+  }
+};
+
+/** The highest level the cited facts (directly or through links) support; `clear` with none. */
+export const supportedLevel = (index: EvidenceIndex, ids: readonly string[]): AttentionLevel =>
+  citedFacts(index, ids).reduce<AttentionLevel>(
+    (level, fact) => higher(level, supportOf(fact, index)),
+    'clear'
+  );
+
+/**
+ * Guardrails: small deterministic bounds on the AI's judgement.
+ * - Ceiling: a level never exceeds what its cited facts support (the verdict: everything the brief
+ *   cites); higher levels are lowered, so little evidence can't read as an emergency.
+ * - Floors: the verdict is never `clear` while an unaddressed critical/high attack discovery exists,
+ *   and never calmer than its most severe area. These are structural (the model gets one chance
+ *   to fix them).
+ * Duplicate areas are dropped.
  */
 export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
   const { index, dropped } = context;
   const outcome = emptyOutcome(brief);
-  const { verdict } = brief;
 
   const seenAreas = new Set<string>();
-  const keptAreas = brief.areas.filter((area, i) => {
+  const isKept = brief.areas.map((area, i) => {
     const path: ItemPath = `areas[${i}]`;
     if (dropped.has(path)) {
       return false;
@@ -63,6 +92,29 @@ export const checkGuardrails: BriefCheck = (brief, context): CheckOutcome => {
     seenAreas.add(area.id);
     return true;
   });
+
+  const cap = (path: string, level: AttentionLevel, ids: readonly string[]): AttentionLevel => {
+    const ceiling = supportedLevel(index, ids);
+    if (LEVEL_RANK[level] <= LEVEL_RANK[ceiling]) {
+      return level;
+    }
+    outcome.lowered += 1;
+    outcome.notes.push(`lowered ${path} from "${level}" to "${ceiling}" (cited evidence)`);
+    return ceiling;
+  };
+
+  const areas = brief.areas.map((area, i) =>
+    isKept[i] ? { ...area, level: cap(`areas[${i}].level`, area.level, area.evidence) } : area
+  );
+  const keptAreas = areas.filter((_area, i) => isKept[i]);
+  const verdict = {
+    ...brief.verdict,
+    level: cap('verdict.level', brief.verdict.level, [
+      ...brief.verdict.evidence,
+      ...keptAreas.flatMap(({ evidence }) => evidence),
+    ]),
+  };
+  outcome.brief = { verdict, areas };
 
   const discoveries = unaddressedSevereDiscoveries(index);
   if (verdict.level === 'clear' && discoveries.length > 0) {

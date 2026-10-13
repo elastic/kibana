@@ -35,6 +35,7 @@ export interface BriefCompletedEvent {
   linkCount: number;
   tokens?: { prompt: number; completion: number };
   repaired: boolean;
+  levelsLowered: number;
   verificationDropped: Partial<Record<VerificationCheck, number>>;
 }
 

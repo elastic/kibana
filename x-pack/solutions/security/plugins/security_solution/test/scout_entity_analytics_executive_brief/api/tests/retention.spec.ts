@@ -44,7 +44,7 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
   });
 
   apiTest('a generated brief expires 30 days after it was generated', async ({ apiClient }) => {
-    await generateBrief({ apiClient, headers, connectorId, llmProxy });
+    await generateBrief({ apiClient, headers, connectorId });
 
     const read = await apiClient.get<BriefResponse>(BRIEF_ROUTE, { headers, responseType: 'json' });
     expect(read).toHaveStatusCode(200);
@@ -56,7 +56,7 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
   apiTest(
     'an expired brief reads as not found, even before cleanup runs',
     async ({ apiClient, esClient }) => {
-      await generateBrief({ apiClient, headers, connectorId, llmProxy });
+      await generateBrief({ apiClient, headers, connectorId });
       const { docId } = await getBriefDocId({ apiClient, headers, spaceId: 'default' });
 
       await esClient.update({

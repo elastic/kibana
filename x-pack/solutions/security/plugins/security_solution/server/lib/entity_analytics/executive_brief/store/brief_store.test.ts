@@ -119,12 +119,14 @@ const docId = getBriefDocId(owner.id, spaceId);
 const brief = { verdict: { level: 'clear' } } as unknown as Brief;
 const evidence: Evidence = { entities: {}, facts: [], links: [], signals: [] };
 const result: CompleteJobInput = {
-  brief,
   evidence,
-  verification: { dropped: {}, repaired: false },
-  model: 'model-x',
-  tokens: { prompt: 10, completion: 5, total: 15 },
   params: { range: '7d', from: iso(T0 - 7 * 86_400_000), to: iso(T0), connector_id: 'c1' },
+  composed: {
+    brief,
+    verification: { dropped: {}, lowered: 0, repaired: false },
+    model: 'model-x',
+    tokens: { prompt: 10, completion: 5, total: 15 },
+  },
 };
 
 const job = (overrides: Partial<BriefJob> = {}): BriefJob => ({
@@ -312,6 +314,23 @@ describe('BriefStore', () => {
           expires_at: iso(T0 + 10_000 + BRIEF_RETENTION_MS),
         })
       );
+    });
+
+    it('replaces the previous brief when a run finds nothing', async () => {
+      fake.put(docId, succeededDoc());
+      await store.startJob({ owner, spaceId, jobId: 'job-1' });
+
+      const { evidence: emptyEvidence, params } = result;
+      expect(
+        await store.completeJob({
+          docId,
+          jobId: 'job-1',
+          result: { evidence: emptyEvidence, params },
+        })
+      ).toBe(true);
+      expect(stored()?.job.status).toBe('succeeded');
+      expect(stored()).not.toHaveProperty('brief');
+      expect(stored()).not.toHaveProperty('tokens');
     });
 
     it('does not extend the previous brief when a regeneration fails', async () => {

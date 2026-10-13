@@ -97,8 +97,6 @@ export const FIXTURE_EVIDENCE: Evidence = {
   ],
 };
 
-export const EMPTY_EVIDENCE: Evidence = { entities: {}, facts: [], links: [], signals: [] };
-
 /** FIXTURE_EVIDENCE with the facts replaced or extended. */
 export const withFacts = (update: (facts: Fact[]) => Fact[]): Evidence => ({
   ...FIXTURE_EVIDENCE,

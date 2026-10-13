@@ -96,7 +96,7 @@ describe('composeVerifiedBrief', () => {
 
     expect(result).toEqual({
       brief: buildValidBrief(),
-      verification: { dropped: {}, repaired: false },
+      verification: { dropped: {}, lowered: 0, repaired: false },
       model: 'test-model',
       tokens: DEFAULT_TOKENS,
     });
@@ -254,7 +254,7 @@ describe('composeVerifiedBrief', () => {
 
     expect(chatComplete).toHaveBeenCalledTimes(1);
     expect(result.brief.areas.map(({ id }) => id)).toEqual(['threats']);
-    expect(result.verification).toEqual({ dropped: { number: 1 }, repaired: false });
+    expect(result.verification).toEqual({ dropped: { number: 1 }, lowered: 0, repaired: false });
   });
 
   it('logs when the plugin reports no usage', async () => {

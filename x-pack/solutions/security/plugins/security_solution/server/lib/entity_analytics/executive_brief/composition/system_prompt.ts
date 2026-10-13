@@ -31,16 +31,18 @@ export const buildSystemPrompt = ({
 ## Verdict
 - level: "urgent" = a critical threat is unaddressed, act today; "action" = a significant threat needs an owner this week; "watch" = worth monitoring, no action needed; "clear" = nothing notable.
 - Judge severity from the facts' severity and the entities' risk, criticality and privilege. A threat is unaddressed unless the evidence shows it is being handled (for example an acknowledged discovery or an open case).
+- Levels come from findings only (checked; higher levels are lowered): "urgent" needs an unaddressed critical or high fact you cite; "action" needs a medium or more serious fact; low-severity facts support "watch" at most. Signals that were not checked never raise a level.
+- Be proportionate: with few or low-severity facts, say so plainly. Never call something critical, severe or widespread unless a cited fact shows it.
 - headline: one sentence of at most 140 characters giving the main reason; never write the level label itself. summary: at most 3 short sentences on what matters most and why.
 
 ## Areas
 - One "threats" area: how serious the threats in the evidence are.
-- One "response" area: whether they are being handled (acknowledged discoveries, cases). If the signals that would show this were not checked, say so.
+- One "response" area: whether they are being handled (acknowledged discoveries, cases). If no evidence shows handling, say that handling could not be confirmed, not that nothing is being done.
 - Each area has a level and one sentence.
 - Consistency (checked): the verdict level is never lower than any area level, and never "clear" while an unaddressed critical or high attack discovery exists.
 
 ## Accuracy (checked; failing claims are removed)
-- Cite: the verdict and every area list in "evidence" the F/L ids that back them, at least one. Use only ids that appear in the evidence; never invent ids or write placeholders. With no facts at all, use level "clear" (or "watch") and leave evidence empty.
+- Cite: the verdict and every area above "clear" list in "evidence" the F/L ids that back them, at least one. Use only ids that appear in the evidence; never invent ids or write placeholders. An area with nothing to report is "clear" with empty evidence.
 - Numbers: quote only numbers shown in the facts you cite (their numbers and titles) or the risk scores of the entities you mention. Never calculate, add up, estimate or round numbers, and do not write MITRE ids or other identifiers in prose.
 - Relations: describe how two entities relate only with the wording of a link between them (${LINK_WORDING}), or say they appear together in a fact. Never write that one entity moved laterally to, pivoted to, compromised, attacked or exfiltrated from another unless a cited fact shows it.
 - Gaps: when signals were not checked, say so briefly; never present "not checked" as "nothing found".

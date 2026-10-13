@@ -23,7 +23,7 @@ export interface VerifyBriefOptions {
 }
 
 export interface VerifyBriefResult {
-  /** The brief with unknown ids removed and failing areas dropped. */
+  /** The brief with unknown ids removed, failing areas dropped and levels capped. */
   brief: Brief;
   summary: Omit<VerificationSummary, 'repaired'>;
   /** Problems only the model can fix; non-empty means the brief is not usable as is. */
@@ -53,6 +53,7 @@ export const verifyBrief = (
   const dropped = new Map<string, ItemDrop>();
   const structuralErrors: string[] = [];
   const notes: string[] = [];
+  let lowered = 0;
 
   const checked = checks.reduce<Brief>((brief, check) => {
     const outcome = check(brief, { index, dropped: new Set(dropped.keys()) });
@@ -63,6 +64,7 @@ export const verifyBrief = (
       }
     });
     structuralErrors.push(...outcome.structuralErrors);
+    lowered += outcome.lowered;
     notes.push(...outcome.notes);
     return outcome.brief;
   }, input);
@@ -77,7 +79,7 @@ export const verifyBrief = (
       verdict: checked.verdict,
       areas: checked.areas.filter((_area, i) => !dropped.has(`areas[${i}]`)),
     },
-    summary: { dropped: droppedCounts },
+    summary: { dropped: droppedCounts, lowered },
     structuralErrors,
     notes,
   };

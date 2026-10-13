@@ -19,6 +19,7 @@ import type {
   BriefParams,
 } from '../../../../../common/entity_analytics/executive_brief/document';
 import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import { hasFindings } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import type { ComposeVerifiedBrief, ComposeVerifiedBriefResult } from '../composition/types';
 import { BriefCompositionError } from '../composition/types';
 import type { BriefSignal, RunSignals, SignalContext } from '../signals/types';
@@ -187,6 +188,7 @@ const toCompletedEvent = ({
       ? { tokens: { prompt: usedTokens.prompt, completion: usedTokens.completion } }
       : {}),
     repaired: result?.verification.repaired ?? false,
+    levelsLowered: result?.verification.lowered ?? 0,
     verificationDropped: result?.verification.dropped ?? {},
   };
 };
@@ -195,7 +197,7 @@ const toCompletedEvent = ({
  * Runs one brief job and records progress on its document: running → gather (signals) →
  * compose → verify → succeeded, or failed with an error code. Heartbeats every 10 s; if a
  * heartbeat or stage write finds the job superseded, the run is aborted without writing.
- * Composition runs even when the evidence has no facts (the AI reports a quiet tenant).
+ * With no findings the AI is not called: the job succeeds with the signal coverage only.
  */
 export const runBrief = async ({
   docId,
@@ -250,6 +252,13 @@ export const runBrief = async ({
     progress.evidence = evidence;
 
     signal.throwIfAborted();
+    if (!hasFindings(evidence)) {
+      stageClock.stop();
+      logger.debug(`Executive brief job ${jobId} found nothing; skipping composition`);
+      const completed = await store.completeJob({ ...ids, result: { evidence, params } });
+      return completed ? { status: 'succeeded' } : { status: 'superseded' };
+    }
+
     await enterStage('compose');
     // Verification runs in its own span inside composeVerifiedBrief.
     const result = await telemetry.withSpan('compose', {}, () =>
@@ -269,7 +278,10 @@ export const runBrief = async ({
     telemetry.recordVerificationDropped(result.verification.dropped);
 
     signal.throwIfAborted();
-    const completed = await store.completeJob({ ...ids, result: { ...result, evidence, params } });
+    const completed = await store.completeJob({
+      ...ids,
+      result: { evidence, params, composed: result },
+    });
     return completed ? { status: 'succeeded' } : { status: 'superseded' };
   };
 

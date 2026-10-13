@@ -30,6 +30,8 @@ export interface CheckOutcome {
   drops: ItemDrop[];
   /** Problems only the model can fix (sent back once in a repair round-trip). */
   structuralErrors: string[];
+  /** Attention levels lowered to what the cited evidence supports. */
+  lowered: number;
   /** Non-blocking clean-ups, for debug logging (e.g. unknown ids removed). */
   notes: string[];
 }
@@ -46,6 +48,7 @@ export const emptyOutcome = (brief: Brief): CheckOutcome => ({
   brief,
   drops: [],
   structuralErrors: [],
+  lowered: 0,
   notes: [],
 });
 

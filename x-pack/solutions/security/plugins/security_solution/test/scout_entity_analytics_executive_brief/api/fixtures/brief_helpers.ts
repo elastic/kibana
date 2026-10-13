@@ -22,8 +22,9 @@ import type {
 } from '../../../../common/entity_analytics/executive_brief/document';
 import {
   BRIEF_ROUTE,
+  HIGH_RISK_ENTITY_BRIEF,
   INTERNAL_HEADERS,
-  QUIET_TENANT_BRIEF,
+  SEEDED_ENTITY,
   SUBMIT_BRIEF_TOOL_NAME,
 } from './constants';
 
@@ -94,7 +95,7 @@ export const deleteBriefConnector = async ({
  * proxy has replied; a rejection (no call within 30 s) is only raised when it is awaited, so a
  * failed job is reported by `waitForBriefJob` with its own error instead.
  */
-export const mockSubmitBrief = (llmProxy: LlmProxy, brief: Brief = QUIET_TENANT_BRIEF) => {
+export const mockSubmitBrief = (llmProxy: LlmProxy, brief: Brief = HIGH_RISK_ENTITY_BRIEF) => {
   const call = llmProxy.interceptors.toolChoice({
     name: SUBMIT_BRIEF_TOOL_NAME,
     response: createToolCallMessage(SUBMIT_BRIEF_TOOL_NAME, brief),
@@ -117,7 +118,7 @@ const getToolChoiceName = (toolChoice: unknown): string | undefined => {
  * Holds the next `submit_brief` call open until `release` is called, which then answers it with
  * `brief`. Keeps a job in flight for as long as a test needs.
  */
-export const holdSubmitBrief = (llmProxy: LlmProxy, brief: Brief = QUIET_TENANT_BRIEF) => {
+export const holdSubmitBrief = (llmProxy: LlmProxy, brief: Brief = HIGH_RISK_ENTITY_BRIEF) => {
   const interceptor = llmProxy.intercept({
     name: `${SUBMIT_BRIEF_TOOL_NAME} (held)`,
     when: (body) => getToolChoiceName(body.tool_choice) === SUBMIT_BRIEF_TOOL_NAME,
@@ -162,26 +163,20 @@ export const waitForBriefJob = async ({
 };
 
 /**
- * Starts a brief with a mocked LLM answer and waits for the job to succeed. Returns the job id
- * from POST and the brief document from GET.
+ * Starts a brief and waits for the job to succeed. The test cluster has no findings, so the job
+ * completes without an LLM call. Returns the job id from POST and the brief document from GET.
  */
 export const generateBrief = async ({
   apiClient,
   headers,
   connectorId,
-  llmProxy,
-  brief,
   route = BRIEF_ROUTE,
 }: {
   apiClient: ApiClientFixture;
   headers: Headers;
   connectorId: string;
-  llmProxy: LlmProxy;
-  brief?: Brief;
   route?: string;
 }): Promise<{ jobId: string; document: BriefResponse }> => {
-  const llmCall = mockSubmitBrief(llmProxy, brief);
-
   const response = await apiClient.post<GenerateBriefResponse>(route, {
     headers: { ...INTERNAL_HEADERS, ...headers },
     responseType: 'json',
@@ -198,8 +193,53 @@ export const generateBrief = async ({
   if (document.job.status !== 'succeeded') {
     throw new Error(`Executive brief job ${jobId} failed: ${JSON.stringify(document.job.error)}`);
   }
-  await llmCall;
   return { jobId, document };
+};
+
+/** Entity Store v2 latest index for the default space, and the alias the high-risk signal reads. */
+const ENTITIES_LATEST_INDEX = '.entities.v2.latest.default-00001';
+const ENTITIES_LATEST_ALIAS = 'entities-latest-default';
+
+/** Writes one golden entity at High risk, so a brief has a finding to compose from. */
+export const seedHighRiskEntity = async (esClient: EsClient): Promise<void> => {
+  const keyword = { type: 'keyword' } as const;
+  await esClient.indices.create({
+    index: ENTITIES_LATEST_INDEX,
+    aliases: { [ENTITIES_LATEST_ALIAS]: {} },
+    mappings: {
+      properties: {
+        entity: {
+          properties: {
+            id: keyword,
+            name: keyword,
+            type: keyword,
+            risk: {
+              properties: { calculated_level: keyword, calculated_score_norm: { type: 'float' } },
+            },
+          },
+        },
+      },
+    },
+  });
+  await esClient.index({
+    index: ENTITIES_LATEST_ALIAS,
+    refresh: true,
+    document: {
+      entity: {
+        id: SEEDED_ENTITY.id,
+        name: SEEDED_ENTITY.name,
+        type: 'user',
+        risk: {
+          calculated_level: SEEDED_ENTITY.riskLevel,
+          calculated_score_norm: SEEDED_ENTITY.riskScore,
+        },
+      },
+    },
+  });
+};
+
+export const deleteSeededEntities = async (esClient: EsClient): Promise<void> => {
+  await esClient.indices.delete({ index: ENTITIES_LATEST_INDEX, ignore_unavailable: true });
 };
 
 interface CurrentUser {

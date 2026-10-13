@@ -31,24 +31,32 @@ export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief';
 
 export const BRIEF_SIGNAL_IDS = ['attack_discoveries', 'high_risk_entities'] as const;
 
+/** The high-risk entity `seedHighRiskEntity` writes; the signal reports it as F-1. */
+export const SEEDED_ENTITY = {
+  id: 'user:brief-scout-user',
+  name: 'brief-scout-user',
+  riskLevel: 'High',
+  riskScore: 82,
+} as const;
+
 /**
- * What a model should answer for a quiet tenant: `clear` everywhere and no citations. The test
- * cluster has no attack discoveries or risk scores, so verification keeps it unchanged. The prose
- * has no digits, so the number check has nothing to drop.
+ * A model answer for the seeded high-risk entity: it cites F-1 at `watch`, which the evidence
+ * supports, so verification keeps it unchanged. The prose has no digits, so the number check has
+ * nothing to drop.
  */
-export const QUIET_TENANT_BRIEF: Brief = {
+export const HIGH_RISK_ENTITY_BRIEF: Brief = {
   verdict: {
-    level: 'clear',
-    headline: 'Nothing in this period needs your attention',
-    summary: 'No attack discoveries or high-risk entities were found in this period.',
-    evidence: [],
+    level: 'watch',
+    headline: 'One user is at high risk and worth monitoring',
+    summary: 'A single user is at high risk. No attack discoveries were found in this period.',
+    evidence: ['F-1'],
   },
   areas: [
     {
       id: 'threats',
-      level: 'clear',
-      summary: 'No discovered attacks or high-risk entities.',
-      evidence: [],
+      level: 'watch',
+      summary: 'One user is at high risk; no discovered attacks.',
+      evidence: ['F-1'],
     },
     {
       id: 'response',

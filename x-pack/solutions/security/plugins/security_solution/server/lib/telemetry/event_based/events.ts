@@ -2608,6 +2608,10 @@ export const ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT: EventTypeOpts<Bri
         type: 'boolean',
         _meta: { description: 'Whether a repair round-trip to the LLM was needed' },
       },
+      levelsLowered: {
+        type: 'long',
+        _meta: { description: 'Attention levels lowered to what the cited evidence supports' },
+      },
       verificationDropped: {
         properties: {
           citation: briefDroppedSchema('citation'),

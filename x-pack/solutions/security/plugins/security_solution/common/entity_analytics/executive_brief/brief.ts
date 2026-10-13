@@ -58,6 +58,8 @@ export type VerificationCheck = 'citation' | 'number' | 'guardrail';
 export interface VerificationSummary {
   /** Claims or items removed, per check. */
   dropped: Partial<Record<VerificationCheck, number>>;
+  /** Attention levels lowered to what the cited evidence supports. */
+  lowered: number;
   /** True when a repair round-trip was needed. */
   repaired: boolean;
 }
