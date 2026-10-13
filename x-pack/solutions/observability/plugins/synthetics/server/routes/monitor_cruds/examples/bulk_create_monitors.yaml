@@ -1,0 +1,63 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkCreateRequestExample1:
+          summary: Two HTTP monitors
+          description: Run `POST /api/synthetics/monitors/_bulk_create` to create several monitors in one request.
+          value:
+            monitors:
+              - type: http
+                name: Storefront
+                url: https://example.com
+                locations: [united_kingdom]
+              - type: http
+                name: Documentation
+                url: https://docs.example.com
+                locations: [united_kingdom]
+responses:
+  200:
+    description: >
+      A successful response. `created: false` indicates an individual Saved Object creation or Fleet synchronization failure; see `error`.
+      Batch-level Fleet synchronization errors are returned in `errors`.
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - result
+          properties:
+            result:
+              type: array
+              items:
+                type: object
+                required:
+                  - id
+                  - created
+                properties:
+                  id:
+                    type: string
+                    description: The config ID of the created monitor.
+                  created:
+                    type: boolean
+                    description: Whether the monitor Saved Object was created.
+                  error:
+                    type: string
+                    description: Present when `created` is `false`.
+            errors:
+              type: array
+              description: Optional service-level errors from the bulk sync.
+              items:
+                description: A service-level error from the bulk sync.
+        examples:
+          bulkCreateResponseExample1:
+            description: A response from successfully creating two monitors.
+            value:
+              result:
+                - id: monitor1-id
+                  created: true
+                - id: monitor2-id
+                  created: true
+  400:
+    description: >
+      Bad request. Returned when the batch is empty or too large, a monitor configuration is invalid, or two monitors use the same name.
