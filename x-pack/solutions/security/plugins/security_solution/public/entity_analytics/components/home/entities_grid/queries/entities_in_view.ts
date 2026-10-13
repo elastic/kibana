@@ -8,19 +8,25 @@
 import { RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
 import { ENTITY_TYPE_FILTER, getEntityAlias } from './esql';
+import { buildGroupValueCondition } from './group_values';
 
 // ── entities in view ─────────────────────────────────────────────────────────
 
+/** Conditions of the entity filters on entity docs, which hold the entities' own values. */
+export const buildEntityFilterConditions = (args: QueryArgs): string[] => {
+  const groupValueCondition = buildGroupValueCondition(args);
+  return [
+    ...(args.entityExpression ? [args.entityExpression] : []),
+    ...(groupValueCondition ? [groupValueCondition] : []),
+  ];
+};
+
 /** Conditions on entity docs that make them rows of the grid (rows mode and filters). */
-export const buildEntitiesInViewConditions = ({
-  rowsMode,
-  searchExpression,
-  entityExpression,
-}: QueryArgs): string[] => [
+export const buildEntitiesInViewConditions = (args: QueryArgs): string[] => [
   ENTITY_TYPE_FILTER,
-  ...(rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
-  ...(searchExpression ? [searchExpression] : []),
-  ...(entityExpression ? [entityExpression] : []),
+  ...(args.rowsMode === 'resolved' ? [`${RESOLVED_TO_FIELD} IS NULL`] : []),
+  ...(args.searchExpression ? [args.searchExpression] : []),
+  ...buildEntityFilterConditions(args),
 ];
 
 /** Entity docs that are rows of the grid for the current rows mode and filters. */

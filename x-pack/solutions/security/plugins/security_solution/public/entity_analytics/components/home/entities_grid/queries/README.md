@@ -62,6 +62,14 @@ Most entities are alone in their group and keep their own values, so only the gr
 aliases are read: `withGroupValues` reads them for each page of resolved rows, after the page is
 sorted. The cursor comes from the rows as sorted, so paging is not affected.
 
+The filters on criticality, sources and watchlists test the group's value (`groupValueExpression`),
+so they are kept apart from the other entity filters. The entity docs hold only the own value, so
+before any query runs, `fetchGroupValueCorrections` lists the groups that pass differently from
+their main entity: the ones the filters add (the group passes, the main entity doesn't) and the
+ones they remove. `buildEntitiesInViewConditions` then tests the main entities on their own
+values, corrected by those two lists, so the sorts, the count and the enrichers all read the same
+rows without knowing about groups.
+
 ## Which query runs
 
 A view is **large** when it has at least `SPLIT_SORT_MIN_VIEW_SIZE` entities (`split_sort.ts`).
@@ -121,6 +129,7 @@ below is one less than what its query can return: the extra row tells that there
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | The count fails | the view counts as small, so the small view queries run |
 | A computed column fails | its cells stay empty, the other columns still load, and the grid shows an error toast |
+| More than `MAX_GROUP_VALUE_CORRECTIONS` groups pass the filters on the group values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
 
 ## Checking a change
 

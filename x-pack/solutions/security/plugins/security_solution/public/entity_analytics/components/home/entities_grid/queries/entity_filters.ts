@@ -26,35 +26,65 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   key: keyof EntityFilters;
   field: string;
   isMultiValue?: boolean;
+  /** The column shows the group's value in resolved rows, so the filter tests the group's. */
+  isGroupValue?: boolean;
 }> = [
   { key: 'entityTypes', field: 'entity.EngineMetadata.Type' },
   { key: 'riskLevels', field: 'entity.risk.calculated_level' },
-  { key: 'assetCriticality', field: 'asset.criticality' },
-  { key: 'watchlists', field: 'entity.attributes.watchlists', isMultiValue: true },
-  { key: 'dataSources', field: 'entity.source', isMultiValue: true },
+  { key: 'assetCriticality', field: 'asset.criticality', isGroupValue: true },
+  {
+    key: 'watchlists',
+    field: 'entity.attributes.watchlists',
+    isMultiValue: true,
+    isGroupValue: true,
+  },
+  { key: 'dataSources', field: 'entity.source', isMultiValue: true, isGroupValue: true },
 ];
 
-/** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
 /** The risk level a resolved row shows: its group's, or its own when it has no group level. */
 const RESOLVED_RISK_LEVEL = `COALESCE(${RESOLUTION_RISK_LEVEL_FIELD}, ${RISK_LEVEL_FIELD})`;
 
 const getFilterField = (key: keyof EntityFilters, field: string, rowsMode: RowsMode): string =>
   key === 'riskLevels' && rowsMode === 'resolved' ? RESOLVED_RISK_LEVEL : field;
 
+/**
+ * ES|QL predicates of the entity filters (no leading `| WHERE`), AND-joined. For resolved rows,
+ * the filters on the columns that show the group's value come apart, as they are tested on the
+ * groups: see `GroupValueCorrections`. Individual rows test every filter on the entity.
+ */
+export const buildEntityFilterExpressions = (
+  filters: EntityFilters,
+  rowsMode: RowsMode = 'individual'
+): { entityExpression?: string; groupValueExpression?: string } => {
+  const entityParts: string[] = [];
+  const groupValueParts: string[] = [];
+  ENTITY_FILTER_FIELDS.forEach(({ key, field, isMultiValue, isGroupValue }) => {
+    const values: readonly string[] = filters[key];
+    if (!values.length) return;
+    const filterField = getFilterField(key, field, rowsMode);
+    const part = isMultiValue
+      ? buildMvContainsExpression(filterField, values)
+      : `${filterField} IN (${toList(values)})`;
+    (isGroupValue && rowsMode === 'resolved' ? groupValueParts : entityParts).push(part);
+  });
+  return {
+    entityExpression: entityParts.join(' AND ') || undefined,
+    groupValueExpression: groupValueParts.join(' AND ') || undefined,
+  };
+};
+
+/** Every entity filter as one predicate, each tested on the entity. */
 export const buildEntityFiltersExpression = (
   filters: EntityFilters,
   rowsMode: RowsMode = 'individual'
-): string =>
-  ENTITY_FILTER_FIELDS.flatMap(({ key, field, isMultiValue }) => {
-    const values: readonly string[] = filters[key];
-    if (!values.length) return [];
-    const filterField = getFilterField(key, field, rowsMode);
-    return isMultiValue
-      ? [buildMvContainsExpression(filterField, values)]
-      : [`${filterField} IN (${toList(values)})`];
-  }).join(' AND ');
+): string => {
+  const { entityExpression, groupValueExpression } = buildEntityFilterExpressions(
+    filters,
+    rowsMode
+  );
+  return [entityExpression, groupValueExpression].filter(Boolean).join(' AND ');
+};
 
-/** DSL counterpart of {@link buildEntityFiltersExpression}. */
 /** DSL counterpart of {@link RESOLVED_RISK_LEVEL}. */
 const buildResolvedRiskLevelQuery = (levels: readonly string[]): QueryDslQueryContainer => ({
   bool: {
@@ -71,6 +101,7 @@ const buildResolvedRiskLevelQuery = (levels: readonly string[]): QueryDslQueryCo
   },
 });
 
+/** DSL counterpart of {@link buildEntityFiltersExpression}. */
 export const buildEntityFiltersQuery = (
   filters: EntityFilters,
   rowsMode: RowsMode = 'individual'
@@ -83,7 +114,6 @@ export const buildEntityFiltersQuery = (
       : [{ terms: { [field]: [...values] } }];
   });
 
-/** `| WHERE …` pipe clauses for NAT tile queries (empty when no filters). */
 export const buildEntityFilterClauses = (
   filters: EntityFilters,
   rowsMode: RowsMode = 'individual'

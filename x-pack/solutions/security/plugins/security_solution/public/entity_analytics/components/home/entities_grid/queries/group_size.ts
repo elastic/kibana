@@ -18,7 +18,6 @@ import {
   ENTITY_TYPE_FILTER,
   getEntityAlias,
   buildKeepClause,
-  buildFilterClause,
   buildLookupJoinClause,
   ESQL_MAX_RESULT_ROWS,
   toList,
@@ -27,7 +26,7 @@ import {
   compareEntityIds,
   fetchPerIdChunk,
 } from './esql';
-import { buildEntitiesInViewSteps } from './entities_in_view';
+import { buildEntitiesInViewSteps, buildEntityFilterConditions } from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, Row, PageCursor, SortDir } from '../common';
 import { SPLIT_SORT_MIN_VIEW_SIZE, buildEmptyRowsQuery } from './split_sort';
@@ -72,7 +71,7 @@ const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_ROWS - p
  * out at 10M entities. Same rows as grouping every entity, as entity filters apply to the target.
  */
 const buildAliasFirstGroupSizeSortQuery = (args: QueryArgs): string => {
-  const entityFilter = buildFilterClause(args.entityExpression);
+  const entityFilter = buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`);
   const cursor = buildCursorClause(args.cursor);
   const indent = (steps: string[]) => steps.map((step) => `  ${step}`);
   return [
@@ -129,7 +128,7 @@ const buildSearchGroupSizeSortQuery = (args: QueryArgs): string =>
 /** The single query of a view, for small views and when the plans in parts can't be used. */
 const buildGroupSizeSortQuery = (args: QueryArgs): string => {
   if (args.searchExpression) return buildSearchGroupSizeSortQuery(args);
-  if (args.entityExpression) return buildAliasFirstGroupSizeSortQuery(args);
+  if (buildEntityFilterConditions(args).length) return buildAliasFirstGroupSizeSortQuery(args);
   return buildUnfilteredGroupSizeSortQuery(args);
 };
 
@@ -148,7 +147,7 @@ const buildAliasGroupsQuery = (args: QueryArgs): string =>
     '| RENAME group_key AS `entity.id`',
     buildLookupJoinClause(args.concreteEntityIndexName),
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
-    ...buildFilterClause(args.entityExpression),
+    ...buildEntityFilterConditions(args).map((condition) => `| WHERE ${condition}`),
     `| EVAL ${GROUP_SIZE_FIELD} = alias_count + 1`,
     `| KEEP \`entity.id\`, ${GROUP_SIZE_FIELD}`,
     `| LIMIT ${getMaxAliasGroups(args.pageSize) + 1}`,

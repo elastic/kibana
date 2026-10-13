@@ -13,7 +13,8 @@ import type { PageCursor, QueryArgs, Row, SortDir } from '../../common';
 import { COLUMN_ENRICHERS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
-import { withGroupValues } from '../group_values';
+import { fetchGroupValueCorrections, withGroupValues } from '../group_values';
+import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from '../split_sort';
 import type { EsqlRunner } from '../types';
 import { BASE_ARGS, getIds, hoursAgo, startFixtureCluster } from './fixture';
@@ -139,9 +140,31 @@ const FILTER_CASES: readonly FilterCase[] = [
     ['user:alice@okta', 'user:bob@okta'],
   ],
   [
-    'a criticality filter',
+    // host:h1 is high impact itself, and extreme through one of its aliases.
+    'a criticality filter on the highest criticality of the group',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['extreme_impact'] } },
+    'alert_count',
+    'desc',
+    ['host:h1'],
+  ],
+  [
+    'a criticality filter that the group does not pass, though its main entity does',
     { entityFilters: { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] } },
     'alert_count',
+    'desc',
+    [],
+  ],
+  [
+    'a watchlist filter on the watchlist of an alias',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, watchlists: ['wl-2'] } },
+    'entity.name',
+    'asc',
+    ['host:h1'],
+  ],
+  [
+    'a source filter on the source of an alias',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, dataSources: ['aws'] } },
+    'group_size',
     'desc',
     ['host:h1'],
   ],
@@ -193,20 +216,29 @@ describe('entities grid on Elasticsearch', () => {
   });
 
   describe.each(Object.entries(VIEW_SIZES))('on %s', (_view, viewSize) => {
-    /** The page of a filter case, its filters compiled by the grid's own `toEsql`. */
-    const fetchFilteredPage = ([, filters, field, direction]: FilterCase): Promise<Row[]> => {
+    /** The query arguments of a filter case, its filters compiled by the grid's own `toEsql`. */
+    const getFilteredArgs = async ([
+      ,
+      filters,
+      field,
+      direction,
+    ]: FilterCase): Promise<QueryArgs> => {
       const activeFilters = { ...NO_FILTERS, ...filters };
-      return fetchPage(
-        cluster.runQuery,
-        {
-          ...BASE_ARGS,
-          ...toEsql(activeFilters),
-          rowsMode: activeFilters.rowsMode,
-          sort: { field, direction },
-        },
-        viewSize
-      );
+      const args = {
+        ...BASE_ARGS,
+        ...toEsql(activeFilters),
+        rowsMode: activeFilters.rowsMode,
+        sort: { field, direction },
+      };
+      // The grid reads the groups the filters on the group values add or remove first.
+      return {
+        ...args,
+        groupValueCorrections: await fetchGroupValueCorrections(args, cluster.runQuery),
+      };
     };
+
+    const fetchFilteredPage = async (filterCase: FilterCase): Promise<Row[]> =>
+      fetchPage(cluster.runQuery, await getFilteredArgs(filterCase), viewSize);
 
     describe('sorts', () => {
       it.each(EXPECTED_ORDERS)('sorts by %s %s', async (field, direction, expected) => {
@@ -242,6 +274,14 @@ describe('entities grid on Elasticsearch', () => {
         const rows = await fetchFilteredPage(filterCase);
 
         expect(getIds(rows)).toEqual(filterCase[4]);
+      });
+
+      it.each(cases)('counts the rows of %s, sorted by %s %s', async (...filterCase) => {
+        const [{ total }] = await cluster.runQuery(
+          buildEntitiesInViewCountQuery(await getFilteredArgs(filterCase))
+        );
+
+        expect(total).toBe(filterCase[4].length);
       });
     });
   });

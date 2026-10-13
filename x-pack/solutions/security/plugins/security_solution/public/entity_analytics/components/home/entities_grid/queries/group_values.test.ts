@@ -6,7 +6,13 @@
  */
 
 import type { QueryArgs, Row } from '../common';
-import { buildGroupValuesQuery, withGroupValues } from './group_values';
+import {
+  buildGroupValueCondition,
+  buildGroupValueCorrectionsQuery,
+  buildGroupValuesQuery,
+  fetchGroupValueCorrections,
+  withGroupValues,
+} from './group_values';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
@@ -92,5 +98,101 @@ describe('withGroupValues', () => {
 
     expect(await withGroupValues([], ARGS, runQuery)).toEqual([]);
     expect(runQuery).not.toHaveBeenCalled();
+  });
+});
+
+describe('buildGroupValueCorrectionsQuery', () => {
+  it('compares the group with its main entity on the filters, and keeps the groups that differ', () => {
+    expect(
+      buildGroupValueCorrectionsQuery({
+        ...ARGS,
+        groupValueExpression: 'asset.criticality IN ("high_impact")',
+      })
+    ).toMatchSnapshot();
+  });
+});
+
+describe('fetchGroupValueCorrections', () => {
+  const FILTERED_ARGS: QueryArgs = {
+    ...ARGS,
+    groupValueExpression: 'asset.criticality IN ("high_impact")',
+  };
+
+  it('splits the groups into those the filters add and those they remove', async () => {
+    const runQuery = jest.fn(async () => [
+      row('host:a', { group_matches: true }),
+      row('host:b', { group_matches: false }),
+      row('host:c', { group_matches: true }),
+    ]);
+
+    expect(await fetchGroupValueCorrections(FILTERED_ARGS, runQuery)).toEqual({
+      include: ['host:a', 'host:c'],
+      exclude: ['host:b'],
+    });
+  });
+
+  it('has no corrections, and no query, without filters on the group values', async () => {
+    const runQuery = jest.fn(async () => []);
+
+    expect(await fetchGroupValueCorrections(ARGS, runQuery)).toEqual({ include: [], exclude: [] });
+    expect(runQuery).not.toHaveBeenCalled();
+  });
+
+  it('has no corrections, and no query, for individual rows', async () => {
+    const runQuery = jest.fn(async () => []);
+
+    expect(
+      await fetchGroupValueCorrections({ ...FILTERED_ARGS, rowsMode: 'individual' }, runQuery)
+    ).toEqual({ include: [], exclude: [] });
+    expect(runQuery).not.toHaveBeenCalled();
+  });
+
+  it('fails when too many groups differ to list them in the filter', async () => {
+    const runQuery = jest.fn(async () =>
+      Array.from({ length: 4_001 }, (_, i) => row(`host:${i}`, { group_matches: true }))
+    );
+
+    await expect(fetchGroupValueCorrections(FILTERED_ARGS, runQuery)).rejects.toThrow(
+      'too many groups'
+    );
+  });
+});
+
+describe('buildGroupValueCondition', () => {
+  const EXPRESSION = 'asset.criticality IN ("high_impact")';
+
+  it('is nothing without filters on the group values', () => {
+    expect(buildGroupValueCondition({})).toBeUndefined();
+  });
+
+  it('is the filters themselves without corrections', () => {
+    expect(buildGroupValueCondition({ groupValueExpression: EXPRESSION })).toBe(`(${EXPRESSION})`);
+  });
+
+  it('removes the groups that do not pass, though their main entity does', () => {
+    expect(
+      buildGroupValueCondition({
+        groupValueExpression: EXPRESSION,
+        groupValueCorrections: { include: [], exclude: ['host:a'] },
+      })
+    ).toBe(`(${EXPRESSION}) AND NOT entity.id IN ("host:a")`);
+  });
+
+  it('adds the groups that pass, though their main entity does not', () => {
+    expect(
+      buildGroupValueCondition({
+        groupValueExpression: EXPRESSION,
+        groupValueCorrections: { include: ['host:b'], exclude: [] },
+      })
+    ).toBe(`((${EXPRESSION})) OR entity.id IN ("host:b")`);
+  });
+
+  it('removes and adds groups', () => {
+    expect(
+      buildGroupValueCondition({
+        groupValueExpression: EXPRESSION,
+        groupValueCorrections: { include: ['host:b'], exclude: ['host:a'] },
+      })
+    ).toBe(`((${EXPRESSION}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
   });
 });

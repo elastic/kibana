@@ -52,7 +52,35 @@ describe('toEsql', () => {
     expect(toEsql(ALL)).toEqual({
       searchExpression: 'KQL("""entity.name: web-1""")',
       entityExpression:
-        'entity.EngineMetadata.Type IN ("host") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND entity.id IN ("host:a", "host:b")',
+        'entity.EngineMetadata.Type IN ("host") AND entity.id IN ("host:a", "host:b")',
+      groupValueExpression: 'MV_CONTAINS(entity.attributes.watchlists, "w1")',
+    });
+  });
+
+  describe('the filters on the columns that show the value of the group', () => {
+    const filters = {
+      ...EMPTY_ENTITY_FILTERS,
+      assetCriticality: ['high_impact'],
+      watchlists: ['w1'],
+      dataSources: ['okta'],
+    };
+
+    it('come apart for resolved rows, as the groups are tested for them', () => {
+      expect(toEsql({ ...NONE, entityFilters: filters })).toEqual({
+        searchExpression: undefined,
+        entityExpression: undefined,
+        groupValueExpression:
+          'asset.criticality IN ("high_impact") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND MV_CONTAINS(entity.source, "okta")',
+      });
+    });
+
+    it('stay with the other filters for individual rows', () => {
+      expect(toEsql({ ...NONE, entityFilters: filters, rowsMode: 'individual' })).toEqual({
+        searchExpression: undefined,
+        entityExpression:
+          'asset.criticality IN ("high_impact") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND MV_CONTAINS(entity.source, "okta")',
+        groupValueExpression: undefined,
+      });
     });
   });
 
