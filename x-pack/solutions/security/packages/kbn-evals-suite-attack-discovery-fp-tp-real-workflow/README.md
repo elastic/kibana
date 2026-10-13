@@ -1,11 +1,15 @@
 # @kbn/evals-suite-attack-discovery-fp-tp-real-workflow
 
-FP/TP verdict eval suite for the Attack Discovery FP/TP analysis workflow, built on
-the `@kbn/evals` harness. This package currently ships the dataset layer: 7
-vendored, validated JSONL corpora (1,017 cases), the corpus loader, cohort
-selection, the Playwright budget calculation, and the evaluators that grade the
-workflow's structured verdict. The workflow task module and the Playwright eval
-that drive the real workflow are added in a follow-up.
+FP/TP verdict eval suite for the attack-discovery review workflow, built on the
+`@kbn/evals` harness. Ships 7 vendored, validated JSONL corpora (1,017 cases) plus
+the corpus loader, workflow task module, and evaluators that grade the review
+step's structured verdict.
+
+> **Status: harness + dataset validated, verdict path pending.** The review
+> workflow under test is still a stub on main
+> ([security-team#19282](https://github.com/elastic/security-team/issues/19282));
+> the suite currently validates the run/poll/structured-output plumbing and the
+> dataset layer. Once the stub lands, the Playwright eval drives it end-to-end.
 
 ## Corpus provenance
 
@@ -42,14 +46,16 @@ is intentionally **not** vendored — see the external
 
 ## Layout
 
-- `src/corpus_loader.ts`: JSONL loading plus schema/enum/count validation (throws on invalid)
-- `src/cohort.ts`: cohort selection (which corpora are scored, excluded, or evidence-gated)
-- `src/budget.ts`: Playwright timeout derived from cohort size, repetitions and concurrency
-- `src/evaluators.ts`: `VerdictAccuracy`, `PayloadConformance`, `UnsafeClose`, and the LLM criteria set
-- `src/judge_retry.ts`: retries the LLM verdict judge on transient connection errors
-- `src/constants.ts`: corpus registry with known case counts (regression guard)
-- `corpora/`: the 7 vendored corpora plus READMEs
-- `docs/label_integrity_findings.md`: label-integrity review of the corpora
+- `src/corpus_loader.ts` — JSONL loading + schema/enum/count validation (throws on invalid)
+- `src/workflow_task.ts` — `POST /api/workflows/{id}/run` + poll + `ai.agent`
+  structured-output verdict extraction
+- `src/evaluators.ts` — `VerdictAccuracy` (CODE, primary), `PayloadConformance`
+  (CODE: label enum + `summary_markdown` present and ≤ 8k chars), and the LLM
+  criteria set for verdict-quality review
+- `src/constants.ts` — corpus registry with known case counts (regression guard)
+- `evals/attack_discovery_fp_tp.spec.ts` — the Playwright eval (gated on the
+  review workflow landing)
+- `corpora/` — the 7 vendored corpora + READMEs
 
 ## Cohort selection and the safety metric
 
@@ -79,13 +85,54 @@ The three `drop-link` twins stay. The scored/excluded counts are printed at star
 Report results as n=21 with confidence intervals; do not extrapolate to the full
 corpus.
 
+For those 21 rows the seeder indexes the corpus events into
+`logs-endpoint.events.<category>-default` and projects identity-only host and
+user entity docs into `entities-latest-<space>` from the events' observed
+`host.name` / `user.name`, tagged `labels.provenance: derived-from-raw-events`.
+No role, ownership, criticality, reputation, allowlist or asset tier is added.
+`host.id` is fixture bookkeeping (a hash of the attack discovery id and host
+name) so each attack discovery joins only its own events. A seeding failure for
+a row that carries events fails the case as a `seedingError`.
+
+Cited alert ids are unique per task invocation, and only the verdict emitted by a
+`completed` execution is graded; an intermediate agent verdict from a failed or
+timed-out run is kept on the task output for diagnostics but never scored.
+
+After the run, `afterAll` removes exactly what the run seeded (discoveries in both AD
+indices, cited alerts, derived entities, tagged raw events, investigation
+conversations, and the `fp-tp-corpus-endpoint-events` index template), driven by an
+id ledger recorded at seed time. Foreign documents in the same indices survive.
+
 A scored/gating run uses the default `evidenced` cohort. An unknown value throws rather
 than falling back. `FP_TP_MAX_EXAMPLES_PER_CORPUS` (default 15, no cap under
 `evidenced`; `0` or non-numeric means no cap) applies per corpus on top of the cohort.
 
+## Subject-model routing and Playwright budget
+
+The workflow's `ai.agent` step resolves its connector from the
+`alertzero_reasoning` inference feature, so `beforeAll` routes that feature to
+the Playwright project's connector (`src/subject_model_routing.ts`, reusing the
+sibling suite's `overrideInferenceFeature`) and `afterAll` restores the previous
+settings. Without it, every model column would grade the space default
+connector. Each row's task output carries `agentConnectorId`
+(`metadata.usage.connectorId` from the `ai.agent` step) so per-row routing is
+verifiable in results.
+
+The Playwright test timeout is derived (`src/budget.ts`) from
+`FP_TP_COHORT`, `FP_TP_MAX_EXAMPLES_PER_CORPUS`, `EVAL_REPETITIONS`, and
+`EVAL_CONCURRENCY` (default 5) — 60s/case of wall clock, never below the
+original 120 min. The full scored cohort (267 cases) × 3 reps at default
+concurrency yields ceil(267·3/5) = 161 waves ≈ 161 min.
+
+`UnsafeClose` scores 0 for any case where the verdict is `false_positive` and the
+gold label is anything else. It is the `UnsafeClose` evaluator from
+`@kbn/evals-suite-attack-discovery-fp-tp`, adapted to this suite's output shape.
+It is zero-tolerance and reported on its own: never average it into, or weight
+it against, `VerdictAccuracy`.
+
 ## Tests
 
-`node scripts/jest --config x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow/jest.config.js`
+`npx jest x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp-real-workflow`
 runs the unit suite: loader validation against the real vendored corpora,
-corrupt-label/duplicate-id/mutation-spec mutation tests, cohort and budget
-selection, evaluator scoring, and judge retry behaviour.
+corrupt-label/duplicate-id/mutation-spec mutation tests, evaluator scoring, and
+workflow task run/poll/verdict plumbing.

@@ -20,6 +20,9 @@ dependsOn:
   - '@kbn/evals'
   - '@kbn/evals-suite-attack-discovery-fp-tp'
   - '@kbn/tooling-log'
+  - '@kbn/workflows'
+  - '@kbn/core'
+  - '@kbn/scout'
 tags:
   - functional-tests
   - package
