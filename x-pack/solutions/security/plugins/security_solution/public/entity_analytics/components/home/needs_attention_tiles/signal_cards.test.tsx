@@ -23,22 +23,22 @@ const renderCards = (cards: SignalCardData[]) =>
   render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={jest.fn()} />);
 
 describe('SignalCards delta pill', () => {
-  it('shows an increase with a plus sign, its percentage and an up arrow', () => {
+  it('shows an increase with a plus sign and an up arrow, without a percentage', () => {
     renderCards([card({ value: 50, delta: 10 })]);
-    // The previous count is 40, so +10 is +25%.
-    expect(screen.getByText(/\+10 \(\+25%\) ↑/)).toBeInTheDocument();
+    expect(screen.getByText(/\+10 ↑/)).toBeInTheDocument();
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
     expect(screen.getByText('vs previous period')).toBeInTheDocument();
   });
 
   it('shows a decrease with a down arrow', () => {
     renderCards([card({ value: 30, delta: -10 })]);
-    expect(screen.getByText(/-10 \(-25%\) ↓/)).toBeInTheDocument();
+    expect(screen.getByText(/-10 ↓/)).toBeInTheDocument();
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
   });
 
-  it('shows the change without a percentage when the previous count was 0', () => {
+  it('shows the change as a plain number when the previous count was 0', () => {
     renderCards([card({ value: 12, delta: 12 })]);
     expect(screen.getByText(/\+12 ↑/)).toBeInTheDocument();
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
   });
 
   it('shows no pill for a zero or missing delta', () => {
