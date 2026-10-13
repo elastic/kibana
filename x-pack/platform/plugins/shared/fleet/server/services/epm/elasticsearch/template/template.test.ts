@@ -3095,24 +3095,26 @@ describe('EPM template', () => {
           options
         );
 
-      it.each(['logsdb_columnar', 'time_series'])(
-        'should rollover when the template no longer defines an index mode and the write index is %s',
+      it('should rollover when the template no longer defines an index mode and the write index is logsdb_columnar', async () => {
+        const esClient = setupEsClient({ currentIndexMode: 'logsdb_columnar' });
+
+        await runUpdate(esClient, { rolloverOnIndexModeReset: true });
+
+        expect(esClient.transport.request).toHaveBeenCalledWith(ROLLOVER_REQUEST);
+      });
+
+      // The time series reset keeps its existing behaviour: the write index switches at the next
+      // natural rollover.
+      it.each(['logsdb', 'time_series'])(
+        'should not rollover on index mode reset when the write index is %s',
         async (currentIndexMode) => {
           const esClient = setupEsClient({ currentIndexMode });
 
           await runUpdate(esClient, { rolloverOnIndexModeReset: true });
 
-          expect(esClient.transport.request).toHaveBeenCalledWith(ROLLOVER_REQUEST);
+          expect(esClient.transport.request).not.toHaveBeenCalledWith(ROLLOVER_REQUEST);
         }
       );
-
-      it('should not rollover on index mode reset when the write index uses the cluster default logsdb mode', async () => {
-        const esClient = setupEsClient({ currentIndexMode: 'logsdb' });
-
-        await runUpdate(esClient, { rolloverOnIndexModeReset: true });
-
-        expect(esClient.transport.request).not.toHaveBeenCalledWith(ROLLOVER_REQUEST);
-      });
 
       it('should not rollover on index mode reset when the write index has no index mode', async () => {
         const esClient = setupEsClient({});

@@ -453,11 +453,11 @@ const getDataStreams = async (
   }));
 };
 
-// Index modes Fleet writes explicitly to `settings.index.mode`; they are only ever present on a
-// write index because a toggle or the package manifest put them there, never because of a
-// cluster default. That is what makes it safe to roll over when the template no longer declares
-// a mode: the write index is still on a mode that nothing asks for anymore.
-const TOGGLEABLE_INDEX_MODES: string[] = ['time_series', 'logsdb_columnar'];
+// Index modes whose removal from the template triggers a rollover. `logsdb_columnar` is only
+// ever present on a write index because Fleet put it there (user choice or package default),
+// never because of a cluster default. That is what makes it safe to roll over when the template
+// no longer declares a mode: the write index is still on a mode that nothing asks for anymore.
+const TOGGLEABLE_INDEX_MODES: string[] = ['logsdb_columnar'];
 
 const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
   'subobjects',
