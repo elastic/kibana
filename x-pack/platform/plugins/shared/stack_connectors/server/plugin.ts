@@ -26,6 +26,12 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { ConfigSchema as StackConnectorsConfigType } from './config';
 import { registerConnectorTypesFromSpecs } from './connector_types_from_spec';
+import type { PrivateLocationRunner } from './private_location';
+
+export interface StackConnectorsPluginSetup {
+  /** Registers the runner that executes connector requests from private locations. */
+  registerPrivateLocationRunner: (runner: PrivateLocationRunner) => void;
+}
 
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
@@ -41,10 +47,12 @@ export interface ConnectorsPluginsStart {
 }
 
 export class StackConnectorsPlugin
-  implements Plugin<void, void, ConnectorsPluginsSetup, ConnectorsPluginsStart>
+  implements
+    Plugin<StackConnectorsPluginSetup, void, ConnectorsPluginsSetup, ConnectorsPluginsStart>
 {
   private config: StackConnectorsConfigType;
   readonly experimentalFeatures: ExperimentalFeatures;
+  private privateLocationRunner?: PrivateLocationRunner;
 
   // Whether this is a Serverless deployment, and — if so — whether its organization is in trial.
   // Serverless projects always report an `enterprise` ES license, so their trial status can only
@@ -90,6 +98,7 @@ export class StackConnectorsPlugin
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       experimentalFeatures: this.experimentalFeatures,
       isElasticCloudTrial: this.isElasticCloudTrial,
+      getPrivateLocationRunner: () => this.privateLocationRunner,
     });
 
     if (this.experimentalFeatures.connectorsFromSpecs) {
@@ -99,6 +108,15 @@ export class StackConnectorsPlugin
     if (plugins.usageCollection) {
       registerInferenceConnectorsUsageCollector(plugins.usageCollection, core);
     }
+
+    return {
+      registerPrivateLocationRunner: (runner: PrivateLocationRunner) => {
+        if (this.privateLocationRunner) {
+          throw new Error('A private location runner is already registered');
+        }
+        this.privateLocationRunner = runner;
+      },
+    };
   }
 
   public start(core: CoreStart, plugins: ConnectorsPluginsStart) {

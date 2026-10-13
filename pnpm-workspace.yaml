@@ -1506,6 +1506,7 @@ packages:
   - 'x-pack/platform/plugins/shared/task_manager'
   - 'x-pack/platform/plugins/shared/triggers_actions_ui'
   - 'x-pack/platform/plugins/shared/usage_api'
+  - 'x-pack/platform/plugins/shared/workflows_private_runner'
   - 'x-pack/platform/test'
   - 'x-pack/platform/test/agent_builder_sml/plugins/sml_test_types'
   - 'x-pack/platform/test/alerting_api_integration/common/plugins/aad'

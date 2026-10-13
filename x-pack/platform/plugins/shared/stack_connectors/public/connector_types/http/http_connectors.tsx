@@ -88,7 +88,12 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
 
   const { getFieldDefaultValue, getFormData, updateFieldValues } = useFormContext();
   const [{ config, __internal__, id: connectorId }] = useFormData({
-    watch: ['config.hasProxyAuth', '__internal__.hasProxy', '__internal__.hasQueryParams'],
+    watch: [
+      'config.hasProxyAuth',
+      '__internal__.hasProxy',
+      '__internal__.hasQueryParams',
+      '__internal__.hasPrivateLocation',
+    ],
   });
 
   const {
@@ -105,6 +110,7 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const hasProxy = __internal__?.hasProxy ?? false;
   const hasProxyAuth = config?.hasProxyAuth ?? false;
   const hasQueryParams = __internal__?.hasQueryParams ?? false;
+  const hasPrivateLocation = __internal__?.hasPrivateLocation ?? false;
 
   useEffect(() => {
     if (queryParamsHydratedRef.current) return;
@@ -211,7 +217,52 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
         ) : (
           <QueryParamFields readOnly={readOnly} />
         ))}
-      {supportsProxySettings && (
+      <EuiSpacer size="m" />
+      <UseField
+        path="__internal__.hasPrivateLocation"
+        component={ToggleField}
+        config={{
+          defaultValue: false,
+          label: i18n.PRIVATE_LOCATION_SWITCH_LABEL,
+        }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'httpPrivateLocationSwitch',
+          },
+        }}
+      />
+      {hasPrivateLocation && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            size="s"
+            color="primary"
+            iconType="info"
+            title={i18n.PRIVATE_LOCATION_CALLOUT}
+            data-test-subj="httpPrivateLocationCallout"
+            announceOnMount
+          />
+          <EuiSpacer size="m" />
+          <UseField
+            path="config.privateLocation"
+            config={{
+              label: i18n.PRIVATE_LOCATION_LABEL,
+              helpText: i18n.PRIVATE_LOCATION_HELP_TEXT,
+              validations: [{ validator: emptyField(i18n.PRIVATE_LOCATION_REQUIRED) }],
+            }}
+            component={Field}
+            componentProps={{
+              euiFieldProps: {
+                readOnly,
+                'data-test-subj': 'httpPrivateLocationText',
+                fullWidth: true,
+              },
+            }}
+          />
+        </>
+      )}
+      {supportsProxySettings && !hasPrivateLocation && (
         <>
           <EuiSpacer size="m" />
           <UseField

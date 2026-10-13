@@ -45,6 +45,9 @@ import { processBufferResponse, type ResponseBuffer } from '../lib/process_buffe
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
+import type { GetPrivateLocationRunner } from '../../private_location';
+import type { HttpErrorResponse } from './private_location';
+import { executeViaPrivateLocation } from './private_location';
 import {
   errorResultRequestFailed,
   errorResultUnexpectedNullResponse,
@@ -57,17 +60,28 @@ import {
 
 const userErrorCodes = [400, 404, 405, 406, 410, 411, 414, 428, 431];
 
+interface ExecutorDeps {
+  getPrivateLocationRunner: GetPrivateLocationRunner;
+  isSystem: boolean;
+}
+
 // connector type definition
 
 // This is currently a Workflows-only connector.
 // Ownership can be extended to support other features if needed.
-const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
+const getConnectorTypeDefinition = (
+  executorDeps: ExecutorDeps
+): Omit<HttpConnectorType, 'id' | 'validate'> => ({
   minimumLicenseRequired: 'gold',
   name: CONNECTOR_NAME,
   supportedFeatureIds: [WorkflowsConnectorFeatureId, AgentBuilderConnectorFeatureId],
   renderParameterTemplates,
-  executor,
-};
+  executor: (execOptions) => executor(execOptions, executorDeps),
+});
+
+interface GetHttpConnectorTypeParams {
+  getPrivateLocationRunner?: GetPrivateLocationRunner;
+}
 
 /**
  * Exports 2 connector types:
@@ -75,9 +89,11 @@ const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
  * - The system connector type: To be executed as system action without the need of creating a saved objects instance, doesn't manage authentication and secrets configuration
  */
 
-export const getConnectorType = (): HttpConnectorType => ({
+export const getConnectorType = ({
+  getPrivateLocationRunner = () => undefined,
+}: GetHttpConnectorTypeParams = {}): HttpConnectorType => ({
   id: CONNECTOR_ID,
-  ...connectorTypeDefinition,
+  ...getConnectorTypeDefinition({ getPrivateLocationRunner, isSystem: false }),
   validate: {
     config: {
       schema: ConfigSchema,
@@ -116,9 +132,11 @@ export const getConnectorType = (): HttpConnectorType => ({
   },
 });
 
-export const getSystemConnectorType = (): HttpConnectorType => ({
+export const getSystemConnectorType = ({
+  getPrivateLocationRunner = () => undefined,
+}: GetHttpConnectorTypeParams = {}): HttpConnectorType => ({
   id: CONNECTOR_ID_SYSTEM,
-  ...connectorTypeDefinition,
+  ...getConnectorTypeDefinition({ getPrivateLocationRunner, isSystem: true }),
   isSystemActionType: true,
   validate: {
     config: {
@@ -325,7 +343,8 @@ function processResponseHeaders(headers: object): Record<string, string> {
  * @returns The HTTP connector execution response
  */
 export async function executor(
-  execOptions: HttpConnectorTypeExecutorOptions
+  execOptions: HttpConnectorTypeExecutorOptions,
+  { getPrivateLocationRunner, isSystem }: ExecutorDeps
 ): Promise<HttpConnectorTypeExecutorResult> {
   const {
     actionId,
@@ -346,7 +365,16 @@ export async function executor(
     query,
     headers: paramsHeaders,
     fetcher,
+    private_location: paramsPrivateLocation,
   } = params;
+
+  if (!isSystem && paramsPrivateLocation) {
+    return errorResultInvalid(
+      actionId,
+      'private_location can only be set when running without a connector; set the private location on the connector instead'
+    );
+  }
+  const privateLocation = isSystem ? paramsPrivateLocation : config.privateLocation;
 
   // params always takes precedence over config
   const baseUrl = params.url || config.url;
@@ -409,6 +437,19 @@ export async function executor(
         Object.entries(mergedHeaders).filter(([key]) => key.toLowerCase() !== 'content-type')
       )
     : mergedHeaders;
+
+  if (privateLocation) {
+    return executeViaPrivateLocation({
+      execOptions,
+      privateLocation,
+      runner: getPrivateLocationRunner(),
+      method,
+      url,
+      headers: finalHeaders,
+      body: typeof requestData === 'string' ? requestData : undefined,
+      onHttpError: (response) => httpErrorResult({ actionId, logger, ...response }),
+    });
+  }
 
   // Connector-level proxy overrides
   const proxyOverrides = getProxySettings({
@@ -489,33 +530,16 @@ export async function executor(
         error.response.data = processBufferResponse(responseData, responseHeaders);
       }
 
-      const responseMessage = getErrorResponseMessage(error);
-      const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
-      const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`error on ${actionId} http event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
-      // special handling for 5xx
-      if (status >= 500) {
-        return retryResult(actionId, message);
-      }
-
-      // special handling for rate limiting
-      if (status === 429) {
-        return pipe(
-          getRetryAfterIntervalFromHeaders(responseHeaders),
-          map((retry) => retryResultSeconds(actionId, message, retry)),
-          getOrElse(() => retryResult(actionId, message))
-        );
-      }
-
-      const errorResult = errorResultInvalid(actionId, message);
-
-      if (userErrorCodes.includes(status)) {
-        errorResult.errorSource = TaskErrorSource.USER;
-      }
-
-      return errorResult;
+      return httpErrorResult({
+        actionId,
+        logger,
+        status,
+        statusText,
+        headers: responseHeaders,
+        responseMessage: getErrorResponseMessage(error),
+      });
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
       logger.error(`error on ${actionId} http event: ${message}`);
@@ -529,4 +553,41 @@ export async function executor(
     logger.error(`error on ${actionId} http action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
+}
+
+function httpErrorResult({
+  actionId,
+  logger,
+  status,
+  statusText,
+  headers,
+  responseMessage,
+}: HttpErrorResponse & {
+  actionId: string;
+  logger: Logger;
+}): HttpConnectorTypeExecutorResult {
+  const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
+  const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
+  logger.error(`error on ${actionId} http event: ${message}`);
+  // special handling for 5xx
+  if (status >= 500) {
+    return retryResult(actionId, message);
+  }
+
+  // special handling for rate limiting
+  if (status === 429) {
+    return pipe(
+      getRetryAfterIntervalFromHeaders(headers),
+      map((retry) => retryResultSeconds(actionId, message, retry)),
+      getOrElse(() => retryResult(actionId, message))
+    );
+  }
+
+  const errorResult = errorResultInvalid(actionId, message);
+
+  if (userErrorCodes.includes(status)) {
+    errorResult.errorSource = TaskErrorSource.USER;
+  }
+
+  return errorResult;
 }

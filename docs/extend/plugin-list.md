@@ -282,4 +282,5 @@ mapped_pages:
 | [usageApi](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/usage_api/README.md) | This plugin is used to report Usage metrics to our Cloud internal Usage API. |
 | [ux](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/ux/readme.md) | https://docs.elastic.dev/kibana-dev-docs/welcome |
 | [watcher](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/private/watcher/README.md) | This plugins adopts some conventions in addition to or in place of conventions in Kibana (at the time of the plugin's creation): |
+| [workflowsPrivateRunner](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/workflows_private_runner/README.md) | Runs connector HTTP requests from Elastic Agents inside customer private networks ("private locations"), so connectors can reach services that resolve only through private DNS. |
 | [workplaceAIApp](https://github.com/elastic/kibana/blob/main/x-pack/solutions/workplaceai/plugins/workplace_ai_app/README.md) | Workplace AI application plugin |

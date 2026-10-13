@@ -45,6 +45,14 @@ export const HttpParamsSchema = z.object({
       keep_alive: z.boolean().optional(),
     })
     .optional(),
+  private_location: z
+    .string()
+    .min(1)
+    .max(256)
+    .optional()
+    .describe(
+      'Fleet agent policy id of a private location. The request is sent by an Elastic Agent in that policy, inside your network. Only valid without `connector-id`; for a saved connector, set the private location on the connector.'
+    ),
 });
 
 // HTTP connector response schema

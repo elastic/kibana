@@ -4111,6 +4111,9 @@ importers:
       '@kbn/workflows-management-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/shared/workflows_management
+      '@kbn/workflows-private-runner-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/workflows_private_runner
       '@kbn/workflows-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-workflows-ui
@@ -9510,6 +9513,8 @@ importers:
   x-pack/platform/plugins/shared/triggers_actions_ui: {}
 
   x-pack/platform/plugins/shared/usage_api: {}
+
+  x-pack/platform/plugins/shared/workflows_private_runner: {}
 
   x-pack/platform/test: {}
 

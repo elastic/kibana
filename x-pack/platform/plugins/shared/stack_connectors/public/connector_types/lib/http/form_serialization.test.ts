@@ -180,6 +180,45 @@ describe('formSerializer', () => {
       })
     );
   });
+
+  it('should keep the private location and drop proxy settings when the toggle is on', () => {
+    const formData = {
+      actionTypeId: '.http',
+      isDeprecated: false,
+      __internal__: { headers: [], hasProxy: true, hasPrivateLocation: true },
+      config: {
+        privateLocation: 'internal-net',
+        proxyUrl: 'http://proxy:8080',
+        hasProxyAuth: true,
+      },
+      secrets: { proxyUsername: 'user', proxyPassword: 'pass' },
+      isMissingSecrets: false,
+    };
+
+    const { config, secrets } = formSerializer(formData);
+
+    expect(config).toEqual(
+      expect.objectContaining({
+        privateLocation: 'internal-net',
+        proxyUrl: null,
+        hasProxyAuth: false,
+      })
+    );
+    expect(secrets).toEqual(expect.objectContaining({ proxyUsername: null, proxyPassword: null }));
+  });
+
+  it('should drop the private location when the toggle is off', () => {
+    const formData = {
+      actionTypeId: '.http',
+      isDeprecated: false,
+      __internal__: { headers: [], hasProxy: false, hasPrivateLocation: false },
+      config: { privateLocation: 'internal-net' },
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formSerializer(formData).config.privateLocation).toBeUndefined();
+  });
 });
 
 describe('formDeserializer', () => {
@@ -211,11 +250,26 @@ describe('formDeserializer', () => {
           { key: 'an', type: 'config', value: 'tonio' },
         ],
         hasProxy: false,
+        hasPrivateLocation: false,
       },
       isDeprecated: false,
       isMissingSecrets: false,
       secrets: {},
     });
+  });
+
+  it('should enable the private location toggle when a private location is set', () => {
+    const data = {
+      actionTypeId: '.http',
+      isDeprecated: false,
+      config: { privateLocation: 'internal-net' },
+      secrets: {},
+      isMissingSecrets: false,
+    };
+
+    expect(formDeserializer(data).__internal__).toEqual(
+      expect.objectContaining({ hasPrivateLocation: true })
+    );
   });
 
   it('should return data unchanged when actionTypeId is not set', () => {

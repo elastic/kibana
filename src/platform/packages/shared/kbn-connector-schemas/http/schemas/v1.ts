@@ -17,6 +17,9 @@ export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
 export const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
+// Fleet agent policy id of the private location whose agents send the request.
+const PrivateLocationSchema = z.string().min(1).max(256);
+
 export const ConfigSchema = lazySchema(() =>
   z
     .object({
@@ -34,6 +37,7 @@ export const ConfigSchema = lazySchema(() =>
       proxyUrl: z.string().url().nullable().default(null),
       proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
       hasProxyAuth: z.boolean().default(false),
+      privateLocation: PrivateLocationSchema.optional(),
     })
     .strict()
 );
@@ -105,6 +109,8 @@ export const ParamsSchema = lazySchema(() =>
           max_content_length: z.number().positive().finite().optional(),
         })
         .optional(),
+      // Only honored when running without a saved connector; saved connectors use `config.privateLocation`.
+      private_location: PrivateLocationSchema.optional(),
     })
     .strict()
 );

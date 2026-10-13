@@ -43,6 +43,7 @@ import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import { getMcpConnectorType } from './mcp';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
+import type { GetPrivateLocationRunner } from '../private_location';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 
@@ -51,11 +52,13 @@ export function registerConnectorTypes({
   publicBaseUrl,
   experimentalFeatures,
   isElasticCloudTrial,
+  getPrivateLocationRunner,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
   isElasticCloudTrial?: () => Promise<boolean>;
+  getPrivateLocationRunner?: GetPrivateLocationRunner;
 }) {
   actions.registerType(getEmailConnectorType({ publicBaseUrl, isElasticCloudTrial }));
   actions.registerType(getIndexConnectorType());
@@ -65,8 +68,8 @@ export function registerConnectorTypes({
   actions.registerType(getSlackWebhookConnectorType({}));
   actions.registerType(getSlackApiConnectorType());
   actions.registerType(getWebhookConnectorType());
-  actions.registerType(getHttpConnectorType());
-  actions.registerType(getHttpSystemConnectorType());
+  actions.registerType(getHttpConnectorType({ getPrivateLocationRunner }));
+  actions.registerType(getHttpSystemConnectorType({ getPrivateLocationRunner }));
   actions.registerType(getCasesWebhookConnectorType());
   actions.registerType(getXmattersConnectorType());
   actions.registerType(getServiceNowITSMConnectorType());

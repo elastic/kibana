@@ -128,6 +128,35 @@ function validateOAuth2(configObject: ConnectorTypeConfigType) {
   }
 }
 
+// TLS trust and proxy settings for private locations are owned by the agent's integration
+// policy, so a connector must not be able to weaken them or present client certificates.
+function validatePrivateLocation(configObject: ConnectorTypeConfigType) {
+  if (!configObject.privateLocation) {
+    return;
+  }
+
+  const unsupportedSettings = [
+    ...(configObject.authType === AuthType.SSL ? ['SSL authentication (authType)'] : []),
+    ...(configObject.ca ? ['custom CA certificate (ca)'] : []),
+    ...(configObject.verificationMode && configObject.verificationMode !== 'full'
+      ? [`verificationMode "${configObject.verificationMode}"`]
+      : []),
+    ...(configObject.proxyUrl ? ['proxy (proxyUrl)'] : []),
+  ];
+
+  if (unsupportedSettings.length > 0) {
+    throw new Error(
+      i18n.translate('xpack.stackConnectors.http.privateLocationConfigurationError', {
+        defaultMessage:
+          'error validation http action config: {settings} cannot be used with a private location',
+        values: {
+          settings: unsupportedSettings.join(', '),
+        },
+      })
+    );
+  }
+}
+
 export function validateConnectorTypeConfig(
   configObject: ConnectorTypeConfigType,
   validatorServices: ValidatorServices
@@ -141,4 +170,5 @@ export function validateConnectorTypeConfig(
   validateCertType(configObject, configurationUtilities);
   validateAdditionalFields(configObject);
   validateOAuth2(configObject);
+  validatePrivateLocation(configObject);
 }
