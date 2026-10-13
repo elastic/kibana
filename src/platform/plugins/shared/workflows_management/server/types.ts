@@ -18,6 +18,10 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
@@ -61,6 +65,8 @@ export interface WorkflowsServerPluginSetupDeps {
    * cross-cutting Inbox UI / MCP / API.
    */
   inbox?: InboxPluginSetup;
+  /** Optional: without it, or without an encryption key, workflow pages stay offline. */
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface WorkflowsServerPluginStartDeps {
@@ -72,6 +78,7 @@ export interface WorkflowsServerPluginStartDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
   dataViews: DataViewsServerPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
 }
 
 export type WorkflowsManagementRequestHandlerContext = Promise<void>;

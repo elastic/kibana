@@ -51,6 +51,8 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   stepExecutionsDataClient: StepExecutionsDataClient;
+  /** Deletes the page credential of a workflow that no longer has a page trigger. */
+  retirePage?: (ref: { workflowId: string; spaceId: string }) => Promise<void>;
 }
 
 /** Deps for WorkflowSearchService. */

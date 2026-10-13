@@ -599,10 +599,16 @@ export class WorkflowsManagementApi {
     return result;
   }
 
+  /** Returns the page URL secret. Anyone who can read the workflow can share its page. */
+  public async getPageSecret(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
+    await this.assertWorkflowAccess(id, spaceId, 'read', request);
+    return this.workflowsService.getPageSecret(id, spaceId);
+  }
+
   /** Retires the workflow page URL. Needs edit access, like any change to the workflow. */
   public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
     await this.assertWorkflowAccess(id, spaceId, 'edit', request);
-    return this.workflowsService.rotatePage(id, spaceId, request);
+    return this.workflowsService.rotatePage(id, spaceId);
   }
 
   public async updateWorkflow(

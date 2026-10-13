@@ -8,16 +8,16 @@
  */
 
 import type { WorkflowDetailDto } from '@kbn/workflows';
-import { getPageSubmitter, parsePageSubmission, resolvePage } from './page_service';
+import { buildPageUrl, getPageSubmitter, parsePageSubmission, resolvePage } from './page_service';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
 
 const SPACE_ID = 'default';
-const PAGE_KEY = '0b5f3c1e-8d2a-4f6b-9c7e-1a2b3c4d5e6f';
+const SECRET = 'q1W2e3R4t5Y6u7I8o9P0a1S2d3F4g5H6j7K8l9Z0x1C';
+const REF = { spaceId: SPACE_ID, workflowId: 'report-incident', secret: SECRET };
 
 const pageWorkflow = (overrides: Partial<WorkflowDetailDto> = {}) =>
   ({
     id: 'report-incident',
-    pageKey: PAGE_KEY,
     enabled: true,
     valid: true,
     definition: {
@@ -33,21 +33,34 @@ const pageWorkflow = (overrides: Partial<WorkflowDetailDto> = {}) =>
     ...overrides,
   } as unknown as WorkflowDetailDto);
 
-const resolve = (workflow: WorkflowDetailDto | null) =>
-  resolvePage(jest.fn().mockResolvedValue(workflow), { spaceId: SPACE_ID, pageKey: PAGE_KEY });
+const lookup = (workflow: WorkflowDetailDto | null, secretValid = true) => ({
+  verifyPageSecret: jest.fn().mockResolvedValue(secretValid),
+  getPageWorkflow: jest.fn().mockResolvedValue(workflow),
+});
+
+const resolve = (workflow: WorkflowDetailDto | null, secretValid = true) =>
+  resolvePage(lookup(workflow, secretValid), REF);
 
 const expectHiddenNotFound = (promise: Promise<unknown>) =>
   expect(promise).rejects.toEqual(expect.objectContaining({ statusCode: 404, expose: false }));
 
 describe('resolvePage', () => {
-  it('looks the workflow up by page key and returns its page trigger', async () => {
-    const getWorkflowByPageKey = jest.fn().mockResolvedValue(pageWorkflow());
+  it('checks the secret, then returns the page trigger of the workflow', async () => {
+    const deps = lookup(pageWorkflow());
 
-    const page = await resolvePage(getWorkflowByPageKey, { spaceId: SPACE_ID, pageKey: PAGE_KEY });
+    const page = await resolvePage(deps, REF);
 
-    expect(getWorkflowByPageKey).toHaveBeenCalledWith(PAGE_KEY, SPACE_ID);
-    expect(page.pageKey).toBe(PAGE_KEY);
+    expect(deps.verifyPageSecret).toHaveBeenCalledWith(REF);
+    expect(deps.getPageWorkflow).toHaveBeenCalledWith('report-incident', SPACE_ID);
+    expect(page.secret).toBe(SECRET);
     expect(page.trigger.title).toBe('Report an incident');
+  });
+
+  it('does not load the workflow when the secret is wrong', async () => {
+    const deps = lookup(pageWorkflow(), false);
+
+    await expectHiddenNotFound(resolvePage(deps, REF));
+    expect(deps.getPageWorkflow).not.toHaveBeenCalled();
   });
 
   it('hides why a request failed', async () => {
@@ -60,6 +73,14 @@ describe('resolvePage', () => {
           definition: { triggers: [{ type: 'manual' }] },
         } as unknown as Partial<WorkflowDetailDto>)
       )
+    );
+  });
+});
+
+describe('buildPageUrl', () => {
+  it('puts the workflow id and secret in the page path', () => {
+    expect(buildPageUrl({ basePath: '/s/marketing', workflowId: 'a b', secret: SECRET })).toBe(
+      `/s/marketing/pages/a%20b/k/${SECRET}`
     );
   });
 });

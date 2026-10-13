@@ -25,6 +25,7 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  isPageTrigger,
   NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
@@ -85,7 +86,6 @@ import {
   prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from '../api/lib/workflow_prepare';
-import { createPageKey, withPageKey } from '../api/pages/page_key';
 import type { DeleteWorkflowsResponse } from '../api/workflows_management_api';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -142,6 +142,9 @@ export interface BulkCreateWorkflowsResult {
 type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
   workflowData: WorkflowProperties;
 };
+
+const hasPageTrigger = (definition: WorkflowYaml | null | undefined): boolean =>
+  Boolean(definition?.triggers?.some(isPageTrigger));
 
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
@@ -557,12 +560,12 @@ export class WorkflowCrudService {
   async getWorkflow(
     id: string,
     spaceId: string,
-    options?: { includeDeleted?: boolean }
+    options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowDetailDto | null> {
     try {
       const source = await this.getWorkflowDocumentSource(id, spaceId, {
         includeDeleted: options?.includeDeleted ?? false,
-        includeGlobal: true,
+        includeGlobal: options?.includeGlobal ?? true,
       });
       if (!source) {
         return null;
@@ -973,6 +976,7 @@ export class WorkflowCrudService {
         : undefined;
 
     let previousVersion: number | undefined;
+    let hadPage = false;
     const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
       request,
       getOptions: { includeDeleted: true, includeGlobal: true },
@@ -1022,12 +1026,12 @@ export class WorkflowCrudService {
           validationErrors.push(...fieldResult.validationErrors);
         }
 
-        // Adding a page trigger to an existing workflow gives it a page key here.
-        const merged: WorkflowProperties = withPageKey({ ...existingSource, ...updatedData });
+        const merged: WorkflowProperties = { ...existingSource, ...updatedData };
         if (merged.triggerTypes === undefined) {
           merged.triggerTypes = getTriggerTypesFromDefinition(merged.definition) ?? [];
         }
         previousVersion = existingSource.version;
+        hadPage = hasPageTrigger(existingSource.definition);
         return merged;
       },
     });
@@ -1050,6 +1054,11 @@ export class WorkflowCrudService {
       shouldUpdateScheduler,
     });
 
+    // Removing the page trigger retires the URL; adding it back later gives a new one.
+    if (hadPage && !hasPageTrigger(finalData.definition)) {
+      await this.deps.retirePage?.({ workflowId: id, spaceId });
+    }
+
     return {
       response: {
         id,
@@ -1061,26 +1070,6 @@ export class WorkflowCrudService {
       },
       finalData,
     };
-  }
-
-  /**
-   * Retires a workflow page URL by giving the page a new key. Only `pageKey` changes:
-   * the YAML stays the same, so a rotation is not a new workflow definition.
-   */
-  async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
-    const profileId =
-      (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined;
-    const finalData = await this.readModifyWriteWorkflowDocument(id, spaceId, {
-      request,
-      mutate: (existingSource: WorkflowProperties) => {
-        assertWorkflowOperation(existingSource, 'edit', profileId);
-        return { ...existingSource, pageKey: createPageKey() };
-      },
-    });
-    if (!finalData.pageKey) {
-      throw new Error(`Workflow ${id} has no page key after rotation`);
-    }
-    return finalData.pageKey;
   }
 
   async updateWorkflow(

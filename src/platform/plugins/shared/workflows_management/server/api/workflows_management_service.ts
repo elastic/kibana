@@ -68,6 +68,8 @@ import type { z } from '@kbn/zod/v4';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 
+import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './pages/page_saved_object';
+import { WorkflowPageStore } from './pages/page_store';
 import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
 import type {
   DeleteWorkflowsResponse,
@@ -170,6 +172,7 @@ export class WorkflowsService {
   private executionQueryService!: WorkflowExecutionQueryService;
   private searchService!: WorkflowSearchService;
   private crudService!: WorkflowCrudService;
+  private pageStore: WorkflowPageStore | null = null;
   private accessControlService?: WorkflowAccessControlService;
   private managedWorkflowsService!: ManagedWorkflowsService;
   private readonly changeHistoryService: WorkflowChangeHistoryService;
@@ -300,7 +303,20 @@ export class WorkflowsService {
       changeHistoryService: this.changeHistoryService,
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
+      retirePage: (ref) => this.retirePage(ref),
     });
+
+    const { encryptedSavedObjects } = pluginsStart;
+    if (encryptedSavedObjects) {
+      this.pageStore = new WorkflowPageStore({
+        repository: coreStart.savedObjects.createInternalRepository([
+          WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+        ]),
+        encryptedClient: encryptedSavedObjects.getClient({
+          includedHiddenTypes: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
+        }),
+      });
+    }
 
     this.managedWorkflowsService = new ManagedWorkflowsService({
       crudService: this.crudService,
@@ -457,9 +473,49 @@ export class WorkflowsService {
     return this.crudService.updateWorkflow(id, workflow, spaceId, request);
   }
 
-  public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
+  /** Loads the workflow behind a page. A page belongs to one space, so global workflows have none. */
+  public async getPageWorkflow(
+    workflowId: string,
+    spaceId: string
+  ): Promise<WorkflowDetailDto | null> {
     await this.ensureInitialized();
-    return this.crudService.rotatePage(id, spaceId, request);
+    return this.crudService.getWorkflow(workflowId, spaceId, { includeGlobal: false });
+  }
+
+  /** Returns the page URL secret, creating the page on first use. Callers authorize first. */
+  public async getPageSecret(workflowId: string, spaceId: string): Promise<string> {
+    return (await this.getPageStore()).getOrCreateSecret({ workflowId, spaceId });
+  }
+
+  /** Replaces the page URL secret. Callers authorize first. */
+  public async rotatePage(workflowId: string, spaceId: string): Promise<string> {
+    return (await this.getPageStore()).rotate({ workflowId, spaceId });
+  }
+
+  /** Checks a page URL secret. Used by the public page route, which has no Kibana identity. */
+  public async verifyPageSecret(ref: {
+    workflowId: string;
+    spaceId: string;
+    secret: string;
+  }): Promise<boolean> {
+    return (await this.getPageStore()).verify(ref);
+  }
+
+  private async getPageStore(): Promise<WorkflowPageStore> {
+    await this.ensureInitialized();
+    if (!this.pageStore) {
+      throw new Error('Workflow pages need the encrypted saved objects plugin');
+    }
+    return this.pageStore;
+  }
+
+  /** Deletes a page credential, so a re-added page trigger gets a new URL. */
+  private async retirePage(ref: { workflowId: string; spaceId: string }): Promise<void> {
+    try {
+      await this.pageStore?.retire(ref);
+    } catch (error) {
+      this.logger.warn(`Failed to retire page of workflow ${ref.workflowId}: ${error}`);
+    }
   }
 
   public async restoreWorkflowVersion(
@@ -479,7 +535,11 @@ export class WorkflowsService {
     request?: KibanaRequest
   ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
-    return this.crudService.deleteWorkflows(ids, spaceId, options, request);
+    const result = await this.crudService.deleteWorkflows(ids, spaceId, options, request);
+    await Promise.all(
+      (result.successfulIds ?? []).map((workflowId) => this.retirePage({ workflowId, spaceId }))
+    );
+    return result;
   }
 
   /**
@@ -500,14 +560,6 @@ export class WorkflowsService {
   }> {
     await this.ensureInitialized();
     return this.crudService.disableAllWorkflows(spaceId, request);
-  }
-
-  public async getWorkflowByPageKey(
-    pageKey: string,
-    spaceId: string
-  ): Promise<WorkflowDetailDto | null> {
-    await this.ensureInitialized();
-    return this.searchService.getWorkflowByPageKey(pageKey, spaceId);
   }
 
   public async getWorkflowsSubscribedToTrigger(

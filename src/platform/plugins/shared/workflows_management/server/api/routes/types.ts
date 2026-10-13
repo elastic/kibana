@@ -23,6 +23,8 @@ export interface RouteDependencies {
   logger: Logger;
   spaces: SpacesServiceSetup;
   audit: WorkflowManagementAuditLog;
+  /** Pages store their URL secret encrypted, so they need an encryption key. */
+  canEncryptPages?: boolean;
 }
 
 export type RouteHandler = (deps: RouteDependencies) => void;

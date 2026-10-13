@@ -211,7 +211,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
         untrustedInputs: true,
       };
 
-      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0, false, 'child');
 
       // Only the flag is inherited, not the rest of the parent's metadata.
       expect(mockEngine.executeWorkflow).toHaveBeenCalledWith(
@@ -222,7 +222,7 @@ describe('WorkflowExecuteSyncStrategy', () => {
     });
 
     it('passes no metadata to the child when the parent inputs are trusted', async () => {
-      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0);
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0, false, 'child');
 
       expect(mockEngine.executeWorkflow.mock.calls[0][1]).not.toHaveProperty('metadata');
     });
