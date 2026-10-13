@@ -19,6 +19,9 @@ import {
   fetchEntityCaseCounts,
 } from './fetch_entity_case_counts';
 
+/** Most member ids a request lists: the cases of all of them are read in one query. */
+const MAX_MEMBER_IDS = 2000;
+
 export const registerEntityCaseCountsRoute = ({
   router,
   logger: rootLogger,
@@ -39,8 +42,20 @@ export const registerEntityCaseCountsRoute = ({
         validate: {
           request: {
             body: buildRouteValidationWithZod(
-              // An id is at most as long as an entity attachment's `attachmentId`.
-              z.object({ entity_ids: z.array(z.string().max(1000)).max(100) })
+              z.object({
+                // An id is at most as long as an entity attachment's `attachmentId`.
+                entity_ids: z.array(z.string().max(1000)).max(100),
+                // The members of the group of an entity id, which count their cases with its own.
+                member_ids: z
+                  .record(z.string().max(1000), z.array(z.string().max(1000)).max(MAX_MEMBER_IDS))
+                  .refine(
+                    (members) =>
+                      Object.keys(members).length <= 100 &&
+                      Object.values(members).flat().length <= MAX_MEMBER_IDS,
+                    { message: `At most ${MAX_MEMBER_IDS} member ids of at most 100 entities` }
+                  )
+                  .optional(),
+              })
             ),
           },
         },
@@ -64,7 +79,8 @@ export const registerEntityCaseCountsRoute = ({
             repository,
             await cases.getCasesClientWithRequest(request),
             spaceId,
-            request.body.entity_ids
+            request.body.entity_ids,
+            request.body.member_ids
           );
           return response.ok({ body: Object.fromEntries(counts) });
         } catch (err) {

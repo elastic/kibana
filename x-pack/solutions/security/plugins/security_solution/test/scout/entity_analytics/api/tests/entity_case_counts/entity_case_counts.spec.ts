@@ -24,6 +24,8 @@ const CASE_TAG = 'scout-entity-case-counts';
 const ENTITY_ID = 'host:scout-case-counts-1';
 const ENTITY_WITHOUT_CASES = 'host:scout-case-counts-none';
 const ENTITY_WITH_CLOSED_CASE = 'host:scout-case-counts-closed';
+const GROUP_HEAD = 'host:scout-case-counts-head';
+const GROUP_ALIAS = 'host:scout-case-counts-alias';
 
 type CasesApi = ApiServicesFixture['cases'];
 type CommentParams = Parameters<CasesApi['comments']['create']>[1];
@@ -111,6 +113,10 @@ apiTest.describe(
       });
       // The other space: one case.
       await createCaseWithEntity(apiServices.cases, { spaceId: OTHER_SPACE_ID });
+      // A group: its main entity and its alias share a case, and the alias has one of its own.
+      const sharedCaseId = await createCaseWithEntity(apiServices.cases, { entityId: GROUP_HEAD });
+      await apiServices.cases.comments.create(sharedCaseId, buildEntityAttachment(GROUP_ALIAS));
+      await createCaseWithEntity(apiServices.cases, { entityId: GROUP_ALIAS });
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
@@ -139,6 +145,44 @@ apiTest.describe(
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ [ENTITY_ID]: 1 });
+    });
+
+    apiTest(
+      'counts the distinct cases of a group over its members, a shared case once',
+      async ({ apiClient, samlAuth }) => {
+        const cookieHeader = await asUserWith(samlAuth, CASES_READER);
+        const countOf = async (body: object) => {
+          const response = await apiClient.post(ENTITY_CASE_COUNTS_INTERNAL_URL, {
+            headers: { ...cookieHeader, ...HEADERS },
+            responseType: 'json' as const,
+            body,
+          });
+          expect(response).toHaveStatusCode(200);
+          return response.body;
+        };
+
+        // The main entity alone is in the shared case. With its alias it has the alias' own case
+        // too, and the case that they share counts once.
+        expect(await countOf({ entity_ids: [GROUP_HEAD] })).toStrictEqual({ [GROUP_HEAD]: 1 });
+        expect(
+          await countOf({ entity_ids: [GROUP_HEAD], member_ids: { [GROUP_HEAD]: [GROUP_ALIAS] } })
+        ).toStrictEqual({ [GROUP_HEAD]: 2 });
+      }
+    );
+
+    apiTest('rejects a request that lists too many members', async ({ apiClient, samlAuth }) => {
+      const response = await apiClient.post(ENTITY_CASE_COUNTS_INTERNAL_URL, {
+        headers: { ...(await asUserWith(samlAuth, CASES_READER)), ...HEADERS },
+        responseType: 'json' as const,
+        body: {
+          entity_ids: [GROUP_HEAD],
+          member_ids: {
+            [GROUP_HEAD]: Array.from({ length: 2001 }, (_, i) => `host:scout-member-${i}`),
+          },
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
     });
 
     apiTest('is forbidden without Security cases access', async ({ apiClient, samlAuth }) => {

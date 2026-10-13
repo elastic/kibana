@@ -45,7 +45,7 @@ export const buildGroupRollUpSteps = (rollUps: Readonly<Record<string, RollUp>>)
 ];
 
 /** The aliases of each of the heads, as entity docs, by head id. */
-const fetchGroupMembers = async (
+export const fetchGroupMembers = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
   headIds: readonly string[]
