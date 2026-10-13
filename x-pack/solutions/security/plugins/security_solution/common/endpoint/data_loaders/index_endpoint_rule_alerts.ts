@@ -30,6 +30,11 @@ export interface IndexEndpointRuleAlertsOptions {
   count?: number;
   log?: ToolingLog;
   kbnClient?: KbnClient;
+  /**
+   * Index that receives the alerts. Defaults to the default-space detection
+   * alerts alias, which is created here when it is missing.
+   */
+  index?: string;
 }
 
 export interface IndexedEndpointRuleAlerts {
@@ -60,10 +65,14 @@ export const indexEndpointRuleAlerts = async ({
   endpointIsolated,
   count = 1,
   log = createToolingLogger(),
+  index,
 }: IndexEndpointRuleAlertsOptions): Promise<IndexedEndpointRuleAlerts> => {
   log.verbose(`Indexing ${count} endpoint rule alerts`);
 
-  await ensureEndpointRuleAlertsIndexExists(esClient);
+  const alertIndex = index ?? `${DEFAULT_ALERTS_INDEX}-default`;
+  if (!index) {
+    await ensureEndpointRuleAlertsIndexExists(esClient);
+  }
 
   let version = kibanaPackageJson.version;
   if (kbnClient) {
@@ -83,7 +92,7 @@ export const indexEndpointRuleAlerts = async ({
       ...(endpointIsolated ? { Endpoint: { state: { isolation: endpointIsolated } } } : {}),
     });
     const indexedAlert = await esClient.index({
-      index: `${DEFAULT_ALERTS_INDEX}-default`,
+      index: alertIndex,
       refresh: 'wait_for',
       body: alert,
     });

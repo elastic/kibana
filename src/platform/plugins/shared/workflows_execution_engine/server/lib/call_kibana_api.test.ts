@@ -520,13 +520,17 @@ describe('callKibanaApi', () => {
           'x-elastic-internal-origin': 'spoof',
           'x-elastic-internal-origin-request': 'spoof',
           'x-kibana-event-chain-depth': '99',
+          'x-client-authentication': 'invented-secret',
+          'es-secondary-x-client-authentication': 'invented-secret',
           'x-custom-trace-id': 'trace-1',
         },
       }
     );
 
     const headers = lastFetchHeaders();
-    // Core owns authorization; the explicit caller content type is preserved for JSON requests.
+    // Core owns authorization and the UIAM shared secret, and forwarding them would make the self
+    // client throw, so they are stripped here. The explicit caller content type is preserved for
+    // JSON requests.
     expect(headers.Authorization).toBeUndefined();
     expect(headers['content-type']).toBe('text/plain');
     expect(headers.cookie).toBeUndefined();
@@ -535,10 +539,30 @@ describe('callKibanaApi', () => {
     expect(headers['x-kbn-self-call']).toBeUndefined();
     expect(headers['x-elastic-internal-origin']).toBeUndefined();
     expect(headers['x-elastic-internal-origin-request']).toBeUndefined();
+    expect(headers['x-client-authentication']).toBeUndefined();
+    expect(headers['es-secondary-x-client-authentication']).toBeUndefined();
     // Engine-stamped, not caller-forgeable.
     expect(headers['x-kibana-event-chain-depth']).toBeUndefined();
     // Genuinely custom headers pass through untouched.
     expect(headers['x-custom-trace-id']).toBe('trace-1');
+  });
+
+  it('always sends x-kbn-alerting-clone-api-key: true, even if the step tries to set it', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      {
+        method: 'POST',
+        path: '/api/detection_engine/rules/_bulk_action',
+        body: { action: 'enable', ids: ['r1'] },
+        headers: { 'X-Kbn-Alerting-Clone-Api-Key': 'false' },
+      }
+    );
+
+    const headers = lastFetchHeaders();
+    expect(headers['x-kbn-alerting-clone-api-key']).toBe('true');
+    expect(headers['X-Kbn-Alerting-Clone-Api-Key']).toBeUndefined();
   });
 
   it('throws a KibanaApiCallError with the unchanged HTTP <status>: <body> message on non-2xx', async () => {

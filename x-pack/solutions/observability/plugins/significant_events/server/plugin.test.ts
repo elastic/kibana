@@ -9,7 +9,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { consumeRunQuota, createRunQuotaInternalRepository } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
-import { eventsDataStream } from './lib/significant_events/events';
 import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
@@ -33,16 +32,23 @@ const createCoreSetup = () => {
 
 const createSetupDeps = ({
   registerInvestigationQuota,
+  onSourceChange = jest.fn(),
+  workflowsExtensions,
 }: {
   registerInvestigationQuota?: jest.Mock;
+  onSourceChange?: jest.Mock;
+  workflowsExtensions?: {
+    registerStepDefinition: jest.Mock;
+    registerManagedWorkflowOwner: jest.Mock;
+    registerTriggerDefinition: jest.Mock;
+  };
 } = {}) =>
   ({
-    streams: {
-      registerKnowledgeIndicatorClientProvider: jest.fn(),
-    },
+    nightshiftSources: { onSourceChange },
     ...(registerInvestigationQuota
       ? { nightshiftInvestigations: { registerInvestigationQuota } }
       : {}),
+    ...(workflowsExtensions ? { workflowsExtensions } : {}),
   } as unknown as SignificantEventsPluginSetupDependencies);
 
 describe('SignificantEventsPlugin setup', () => {
@@ -57,6 +63,28 @@ describe('SignificantEventsPlugin setup', () => {
     expect(() => plugin.setup(createCoreSetup(), createSetupDeps())).not.toThrow();
   });
 
+  it('subscribes to source changes so deletes and toggles reach knowledge right away', () => {
+    const onSourceChange = jest.fn();
+
+    createPlugin().setup(createCoreSetup(), createSetupDeps({ onSourceChange }));
+
+    expect(onSourceChange).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('registers its model resolver when the investigations plugin is absent', () => {
+    const workflowsExtensions = {
+      registerStepDefinition: jest.fn(),
+      registerManagedWorkflowOwner: jest.fn(),
+      registerTriggerDefinition: jest.fn(),
+    };
+
+    createPlugin().setup(createCoreSetup(), createSetupDeps({ workflowsExtensions }));
+
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'significantEvents.resolveModel' })
+    );
+  });
+
   it('registers all Core data streams', () => {
     const core = createCoreSetup();
 
@@ -64,7 +92,7 @@ describe('SignificantEventsPlugin setup', () => {
 
     expect(
       core.dataStreams.registerDataStream.mock.calls.map(([definition]) => definition)
-    ).toEqual([detectionsDataStream, eventsDataStream, knowledgeIndicatorsDataStream]);
+    ).toEqual([detectionsDataStream, knowledgeIndicatorsDataStream]);
   });
 
   it('registers a callback without accessing start services', () => {

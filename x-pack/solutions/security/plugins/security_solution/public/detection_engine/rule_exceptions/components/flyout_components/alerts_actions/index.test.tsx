@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -44,12 +45,39 @@ const defaultProps: ComponentProps = {
   onUpdateBulkCloseIndex: jest.fn(),
   onBulkCloseCheckboxChange: jest.fn(),
   onSingleAlertCloseCheckboxChange: jest.fn(),
+  onCloseAlertsReasonChange: jest.fn(),
 };
 
 const mountComponent = (props: Partial<ComponentProps> = {}) =>
   mountWithIntl(
     <TestProviders>
       <ExceptionItemsFlyoutAlertsActions {...defaultProps} {...props} />
+    </TestProviders>
+  );
+
+const ControlledAlertsActions = ({
+  initialShouldBulkCloseAlert = false,
+}: {
+  initialShouldBulkCloseAlert?: boolean;
+}) => {
+  const [shouldCloseSingleAlert, setShouldCloseSingleAlert] = useState(false);
+  const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(initialShouldBulkCloseAlert);
+
+  return (
+    <ExceptionItemsFlyoutAlertsActions
+      {...defaultProps}
+      shouldCloseSingleAlert={shouldCloseSingleAlert}
+      shouldBulkCloseAlert={shouldBulkCloseAlert}
+      onSingleAlertCloseCheckboxChange={setShouldCloseSingleAlert}
+      onBulkCloseCheckboxChange={setShouldBulkCloseAlert}
+    />
+  );
+};
+
+const renderControlledComponent = (initialShouldBulkCloseAlert?: boolean) =>
+  render(
+    <TestProviders>
+      <ControlledAlertsActions initialShouldBulkCloseAlert={initialShouldBulkCloseAlert} />
     </TestProviders>
   );
 
@@ -251,6 +279,108 @@ describe('ExceptionItemsFlyoutAlertsActions', () => {
       mountComponent({ shouldBulkCloseAlert: false, onUpdateBulkCloseIndex });
 
       expect(onUpdateBulkCloseIndex).toHaveBeenLastCalledWith(undefined);
+    });
+  });
+
+  describe('close reason', () => {
+    const closeReasonSelect = '[data-test-subj="exceptionFlyoutCloseReasonSelect"]';
+
+    it('does not display the reason select when neither close option is checked', () => {
+      const wrapper = mountComponent({
+        shouldCloseSingleAlert: false,
+        shouldBulkCloseAlert: false,
+      });
+
+      expect(wrapper.find(closeReasonSelect).exists()).toBeFalsy();
+    });
+
+    it('displays the reason select when single alert close is checked', () => {
+      const wrapper = mountComponent({ shouldCloseSingleAlert: true });
+
+      expect(wrapper.find(closeReasonSelect).exists()).toBeTruthy();
+    });
+
+    it('displays the reason select when bulk close is checked', () => {
+      const wrapper = mountComponent({ shouldBulkCloseAlert: true });
+
+      expect(wrapper.find(closeReasonSelect).exists()).toBeTruthy();
+    });
+
+    it('does not display the reason select when no change handler is provided', () => {
+      const wrapper = mountComponent({
+        shouldBulkCloseAlert: true,
+        onCloseAlertsReasonChange: undefined,
+      });
+
+      expect(wrapper.find(closeReasonSelect).exists()).toBeFalsy();
+    });
+
+    it('clears a previously selected reason when both close options are unchecked', () => {
+      const onCloseAlertsReasonChange = jest.fn();
+      mountComponent({
+        shouldCloseSingleAlert: false,
+        shouldBulkCloseAlert: false,
+        closeAlertsReason: 'duplicate',
+        onCloseAlertsReasonChange,
+      });
+
+      expect(onCloseAlertsReasonChange).toHaveBeenCalledWith(undefined);
+    });
+
+    it('does not clear the reason while a close option is still checked', () => {
+      const onCloseAlertsReasonChange = jest.fn();
+      mountComponent({
+        shouldBulkCloseAlert: true,
+        closeAlertsReason: 'duplicate',
+        onCloseAlertsReasonChange,
+      });
+
+      expect(onCloseAlertsReasonChange).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('scrolling revealed content into view', () => {
+    const scrollIntoView = jest.fn();
+    const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView;
+
+    beforeAll(() => {
+      window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+    });
+
+    afterAll(() => {
+      window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+    });
+
+    it('scrolls the section into view when the user checks bulk close', () => {
+      renderControlledComponent();
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    });
+
+    it('scrolls the section into view when the user checks single alert close', () => {
+      renderControlledComponent();
+
+      fireEvent.click(screen.getByTestId('closeAlertOnAddExceptionCheckbox'));
+
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest' });
+    });
+
+    it('does not scroll when the user unchecks a close option', () => {
+      renderControlledComponent(true);
+
+      fireEvent.click(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox'));
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it('does not scroll on mount when a close option is already checked', () => {
+      renderControlledComponent(true);
+
+      expect(scrollIntoView).not.toHaveBeenCalled();
     });
   });
 });

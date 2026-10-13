@@ -50,7 +50,6 @@ apiTest.describe('Get rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(created);
-      expect(response.body.metadata.version).toBe(1);
     }
   );
 

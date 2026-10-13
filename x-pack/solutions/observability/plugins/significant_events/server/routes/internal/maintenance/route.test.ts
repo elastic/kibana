@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
@@ -52,7 +52,7 @@ describe('cleanup workflow bootstrap route', () => {
     await expect(route.handler(params.handlerParams)).resolves.toEqual({ success: true });
 
     expect(route.security.authz).toEqual({
-      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage, NIGHTSHIFT_API_PRIVILEGES.configure],
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
     });
     expect(assertSignificantEventsAccess).toHaveBeenCalledWith({
       server: params.server,
@@ -74,6 +74,39 @@ describe('cleanup workflow bootstrap route', () => {
     expect(params.logger.warn).toHaveBeenCalledWith(
       'Failed to ensure Significant Events cleanup workflow is enabled: workflow unavailable'
     );
+  });
+});
+
+describe('reset route', () => {
+  const resetRoute =
+    internalMaintenanceRoutes['POST /internal/significant_events/maintenance/_reset'];
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
+    const request = {};
+    const licensing = {};
+    const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
+    const server = {
+      core: {
+        security: {
+          authc: { getCurrentUser: jest.fn().mockReturnValue({ username: 'operator' }) },
+        },
+      },
+    };
+
+    await resetRoute.handler({
+      request,
+      server,
+      maintenanceService: { reset },
+      getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+    } as unknown as Parameters<typeof resetRoute.handler>[0]);
+
+    expect(resetRoute.security.authz).toEqual({
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+    });
+    expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
+    expect(reset).toHaveBeenCalledWith({ request, updatedBy: 'operator' });
   });
 });
 

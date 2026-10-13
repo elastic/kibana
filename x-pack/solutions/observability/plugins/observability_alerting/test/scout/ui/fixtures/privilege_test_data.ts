@@ -186,7 +186,7 @@ export const seedV2PrivilegeRule = async (
           source: 'scout-test',
           type: 'alert',
           space_id: 'default',
-          episode: { id: `${ruleId}-episode`, status: 'active' },
+          alert: { id: `${ruleId}-episode`, status: 'active' },
         },
         { create: { _index: ALERT_ACTIONS_DATA_STREAM } },
         {

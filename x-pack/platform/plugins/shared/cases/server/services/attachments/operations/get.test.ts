@@ -176,7 +176,77 @@ describe('AttachmentService getter', () => {
         expect(res).toStrictEqual({ saved_objects: [asUnifiedUserAttachment()] });
       });
 
-      it('returns migrated legacy events in unified shape', async () => {
+      it('returns a per-item error and logs a warning for an unrecognized attachment type', async () => {
+        const unrecognizedAttachment = createFileAttachment({
+          externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+        });
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            unrecognizedAttachment,
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1']);
+
+        expect(res.saved_objects).toEqual([
+          {
+            id: unrecognizedAttachment.id,
+            type: unrecognizedAttachment.type,
+            references: unrecognizedAttachment.references,
+            error: {
+              error: 'Bad Request',
+              message: expect.stringContaining('is not recognized'),
+              statusCode: 400,
+            },
+          },
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(`Attachment ${unrecognizedAttachment.id}`)
+        );
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('which has no unified mapping')
+        );
+      });
+
+      it('returns a per-item error instead of throwing when a row fails the unified decode', async () => {
+        const userAttachment = createUserAttachment();
+        const junkTypeAttachment = {
+          ...userAttachment,
+          id: '2',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
+            userAttachment,
+            { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '2' },
+            junkTypeAttachment,
+          ] as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1', '2']);
+
+        expect(res.saved_objects).toEqual([
+          asUnifiedUserAttachment(),
+          {
+            id: '2',
+            type: junkTypeAttachment.type,
+            references: junkTypeAttachment.references,
+            error: {
+              error: 'Bad Request',
+              message: expect.stringMatching(/^Attachment type "junk" failed validation: .+/),
+              statusCode: 400,
+            },
+          },
+        ]);
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringMatching(/^Attachment 2 .*which failed unified decode: .+\. Returning/)
+        );
+      });
+
+      it('returns legacy events in unified shape', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             { ...createErrorSO(CASE_ATTACHMENT_SAVED_OBJECT), id: '1' },
@@ -219,7 +289,7 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('returns migrated legacy file externalReference in unified shape', async () => {
+      it('returns legacy file externalReference in unified shape', async () => {
         const legacyFile = createFileAttachment({
           externalReferenceMetadata: {
             files: [
@@ -360,18 +430,21 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('throws when the response is missing the attributes.alertId field', async () => {
-        const invalidAlert = { ...createAlertAttachment(), score: 0 };
+      it('skips a row missing the attributes.alertId field and logs a warning', async () => {
+        const invalidAlert = { ...createAlertAttachment(), id: 'invalid-alert', score: 0 };
         unset(invalidAlert, 'attributes.alertId');
-        const soFindRes = createSOFindResponse([invalidAlert]);
+        const validAlert = { ...createAlertAttachment(), score: 0 };
+        const soFindRes = createSOFindResponse([invalidAlert, validAlert]);
 
         mockFinder(soFindRes);
 
-        await expect(
-          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1', owner: 'securitySolution' })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\""`
-        );
+        const res = await attachmentGetter.getAllDocumentsAttachedToCase({
+          caseId: '1',
+          owner: 'securitySolution',
+        });
+
+        expect(res).toStrictEqual([validAlert]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid-alert'));
       });
     });
 
@@ -535,6 +608,38 @@ describe('AttachmentService getter', () => {
       );
     });
 
+    it('falls back to a legacy shape instead of throwing for an unrecognized attachment type', async () => {
+      const unrecognizedAttachment = createFileAttachment({
+        externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+      });
+      unsecuredSavedObjectsClient.get.mockResolvedValue(unrecognizedAttachment);
+
+      const res = await attachmentGetter.get({ savedObjectId: '1' });
+
+      expect(res.attributes).toEqual(
+        expect.objectContaining({
+          type: 'externalReference',
+          externalReferenceAttachmentTypeId: 'unknown-third-party-type',
+        })
+      );
+    });
+
+    it('throws a 404 when a row fails to decode', async () => {
+      const userAttachment = createUserAttachment();
+      unsecuredSavedObjectsClient.get.mockResolvedValue({
+        ...userAttachment,
+        attributes: { ...userAttachment.attributes, type: 'junk' },
+      });
+
+      await expect(attachmentGetter.get({ savedObjectId: '1' })).rejects.toMatchObject({
+        message: 'Attachment 1 could not be read.',
+        output: { statusCode: 404 },
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to decode attachment 1')
+      );
+    });
+
     describe('Decoding', () => {
       it('does not throw when the response has the required fields', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue(createUserAttachment());
@@ -600,18 +705,18 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('throws when the response is missing the attributes.externalReferenceAttachmentTypeId field', async () => {
-        const invalidFile = { ...createFileAttachment(), score: 0 };
+      it('skips a row missing the attributes.externalReferenceAttachmentTypeId field and logs a warning', async () => {
+        const invalidFile = { ...createFileAttachment(), id: 'invalid-file', score: 0 };
         unset(invalidFile, 'attributes.externalReferenceAttachmentTypeId');
-        const soFindRes = createSOFindResponse([invalidFile]);
+        const validFile = { ...createFileAttachment(), score: 0 };
+        const soFindRes = createSOFindResponse([invalidFile, validFile]);
 
         mockFinder(soFindRes);
 
-        await expect(
-          attachmentGetter.getFileAttachments({ caseId: '1', fileIds: ['1'] })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"externalReference\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"savedObject\\" supplied to \\"externalReferenceStorage,type\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
-        );
+        const res = await attachmentGetter.getFileAttachments({ caseId: 'caseId', fileIds: ['1'] });
+
+        expect(res).toEqual([expect.objectContaining({ id: validFile.id })]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid-file'));
       });
     });
   });

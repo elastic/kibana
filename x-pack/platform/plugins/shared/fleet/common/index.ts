@@ -56,7 +56,6 @@ export {
   AGENTS_SETUP_API_ROUTES,
   PACKAGE_POLICY_API_ROUTES,
   DATA_STREAM_API_ROUTES,
-  DATA_STREAM_INDEX_PATTERN_REGEX,
   EPM_API_ROUTES,
   SETUP_API_ROUTE,
   // Should probably be removed
@@ -97,6 +96,7 @@ export {
   isValidNamespace,
   isValidDataset,
   isValidDataStreamType,
+  isValidDataStreamIndexPattern,
   INVALID_NAMESPACE_CHARACTERS,
   VALID_DATA_STREAM_TYPES,
   getFileMetadataIndexName,
@@ -117,6 +117,9 @@ export {
   findFirstVarEntry,
   // Version-specific policies helpers
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,

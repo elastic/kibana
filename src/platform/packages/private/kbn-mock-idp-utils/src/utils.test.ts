@@ -255,9 +255,18 @@ describe('mock-idp-utils', () => {
         // reach cross-project (CPS) linked projects of any type.
         expect(
           payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
-        ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
+        ).toEqual(['observability', 'elasticsearch', 'security', 'vectordb']);
+        // Organization membership is what grants organization actions such as creating a
+        // project-scoped service account. It must add no application roles of its own.
+        expect(payload.ras.organization).toEqual([
+          {
+            role_id: 'ess-default-organization',
+            organization_id: serverlessOptions.serverless.organizationId,
+            application_roles: [],
+          },
+        ]);
         for (const grant of payload.ras.project) {
-          expect(grant.role_id).toBe('cloud-role-id');
+          expect(grant.role_id).toBe(`${grant.project_type}-application-only`);
           expect(grant.organization_id).toBe(serverlessOptions.serverless.organizationId);
           expect(grant.application_roles).toEqual(serverlessOptions.roles);
           expect(grant.project_scope).toEqual({ scope: 'all' });
@@ -292,7 +301,7 @@ describe('mock-idp-utils', () => {
         // `observability` grant.
         expect(
           payload.ras.project.map((grant: { project_type: string }) => grant.project_type)
-        ).toEqual(['observability', 'elasticsearch', 'security', 'workplaceai', 'vectordb']);
+        ).toEqual(['observability', 'elasticsearch', 'security', 'vectordb']);
       });
 
       it('should generate refresh token with valid JWT structure', async () => {

@@ -21,6 +21,8 @@ export interface ServiceAccountDirectoryEntry {
   /** Opaque identifier. Its structure differs between backends and must not be parsed. */
   id: string;
   name: string;
+  /** The account's description. It is absent when the account has none. */
+  description?: string;
   /**
    * Role names assigned to the account.
    */
@@ -60,4 +62,51 @@ export interface ServiceAccountDirectoryEntry {
 export interface ListServiceAccountsResponse {
   serviceAccounts: ServiceAccountDirectoryEntry[];
   nextPage?: string;
+}
+
+/**
+ * A workload bound to a service account, as the management routes report it. The workload type is
+ * scoped to the plugin that registered it, so `pluginId` and `workloadType` name the type
+ * together.
+ */
+export interface ServiceAccountBoundWorkload {
+  pluginId: string;
+  workloadType: string;
+  workloadId: string;
+  /**
+   * What to call the workload in the UI: the title its workload type resolved, or the workload id
+   * when there is none.
+   */
+  displayName: string;
+  /**
+   * The name the owning plugin registered for the workload type. Absent when that plugin is not
+   * loaded, in which case the UI shows `workloadType`.
+   */
+  typeName?: string;
+  /**
+   * Link to the workload. It already carries the base path and the space of the binding, so use
+   * it as is.
+   */
+  href?: string;
+}
+
+/** Every workload bound to one service account, across spaces. */
+export interface ListServiceAccountWorkloadsResponse {
+  workloads: ServiceAccountBoundWorkload[];
+}
+
+/**
+ * The body of a successful delete. `warnings` describes anything the delete left behind, and is
+ * empty when it cleaned up everything.
+ */
+export interface DeleteServiceAccountResponse {
+  warnings: string[];
+}
+
+/**
+ * The `attributes` of the 409 the delete route answers with when the account is still bound to
+ * workloads and the caller did not force the delete.
+ */
+export interface DeleteServiceAccountConflictAttributes {
+  workloads: ServiceAccountBoundWorkload[];
 }

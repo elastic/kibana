@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { DismissReason } from '@kbn/proposals-common';
-import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-plugin/public';
+import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-ui';
 import { BaseActionModal } from '@kbn/agentic-investigations-common';
 import * as i18n from './translations';
 
@@ -29,7 +29,7 @@ export const DismissProposalModal: React.FC<DismissProposalModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
+  const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
 
   return (
     <BaseActionModal

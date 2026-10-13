@@ -381,7 +381,7 @@ describe('Attachment Routes', () => {
           id: 'conv-1',
           events: [expect.objectContaining({ type: 'attachment_added' })],
         }),
-        { access: 'owner' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -738,7 +738,7 @@ describe('Attachment Routes', () => {
             }),
           ],
         }),
-        { access: 'owner' }
+        { access: 'converse', source: 'http_api' }
       );
     });
 
@@ -919,6 +919,10 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.success).toBe(true);
       expect(result.body.attachment).toBeDefined();
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('returns 404 for non-existent attachment', async () => {
@@ -978,6 +982,10 @@ describe('Attachment Routes', () => {
       expect(result.body.attachment.description).toBe('New name');
       // Version should not change
       expect(result.body.attachment.current_version).toBe(1);
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('returns 404 for non-existent attachment', async () => {

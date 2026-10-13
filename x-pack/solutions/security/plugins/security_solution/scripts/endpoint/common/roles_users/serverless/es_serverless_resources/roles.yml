@@ -76,6 +76,7 @@ viewer:
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
         - feature_siemV5.endpoint_exceptions_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
@@ -96,7 +97,6 @@ viewer:
         - feature_alertzero.read
         - feature_agenticInvestigations.read
         - feature_proposals.read
-        - feature_agenticInvestigations.escalations_read
       resources: "*"
   run_as: []
 
@@ -173,6 +173,7 @@ editor:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -198,8 +199,8 @@ editor:
         - feature_workflowsManagement.all
         - feature_alertzero.all
         - feature_agenticInvestigations.all
+        - feature_agenticInvestigations.escalations_all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
   run_as: []
@@ -252,6 +253,7 @@ t1_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionCases.read
@@ -272,8 +274,8 @@ t1_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: "*"
 
 t2_analyst:
@@ -327,6 +329,7 @@ t2_analyst:
         - feature_ml.read
         - feature_siemV5.read
         - feature_siemV5.endpoint_list_read
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.scripts_management_read
         - feature_securitySolutionRulesV2.read
         - feature_securitySolutionTimeline.read
@@ -347,8 +350,8 @@ t2_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: "*"
 
 t3_analyst:
@@ -414,6 +417,7 @@ t3_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.policy_management_read # Elastic Defend Policy Management
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
@@ -442,7 +446,6 @@ t3_analyst:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -507,6 +510,7 @@ threat_intelligence_analyst:
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
@@ -525,8 +529,8 @@ threat_intelligence_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: "*"
 
 rule_author:
@@ -598,6 +602,7 @@ rule_author:
         - feature_siemV5.host_isolation_exceptions_read
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
@@ -619,7 +624,6 @@ rule_author:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -691,6 +695,7 @@ soc_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -721,7 +726,6 @@ soc_manager:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -783,6 +787,7 @@ detections_admin:
         - feature_siemV5.all
         - feature_siemV5.global_artifact_management_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
@@ -802,7 +807,6 @@ detections_admin:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -865,6 +869,7 @@ platform_engineer:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.actions_log_management_read
         - feature_siemV5.scripts_management_read
         - feature_siemV5.workflow_insights_all
@@ -890,7 +895,6 @@ platform_engineer:
         - feature_alertzero.all
         - feature_agenticInvestigations.all
         - feature_proposals.all
-        - feature_agenticInvestigations.escalations_read
         - feature_workflowsManagement.workflow_update_managed
       resources: "*"
 
@@ -960,6 +964,7 @@ endpoint_operations_analyst:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_read
         - feature_siemV5.host_isolation_all
         - feature_siemV5.process_operations_all
         - feature_siemV5.actions_log_management_all
@@ -989,8 +994,8 @@ endpoint_operations_analyst:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: "*"
 
 endpoint_policy_manager:
@@ -1063,6 +1068,7 @@ endpoint_policy_manager:
         - feature_siemV5.host_isolation_exceptions_all
         - feature_siemV5.blocklist_all # Elastic Defend Policy Management
         - feature_siemV5.endpoint_exceptions_all
+        - feature_siemV5.custom_yara_signatures_all
         - feature_siemV5.workflow_insights_all
         - feature_securitySolutionRulesV2.all
         - feature_securitySolutionCases.all
@@ -1084,6 +1090,6 @@ endpoint_policy_manager:
         - feature_workflowsManagement.all
         - feature_alertzero.read
         - feature_agenticInvestigations.all
-        - feature_proposals.all
         - feature_agenticInvestigations.escalations_all
+        - feature_proposals.all
       resources: "*"

@@ -12,13 +12,12 @@ import { memoize } from 'lodash';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import type { ILicense } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLControlVariable, ESQLSourceResult } from '@kbn/esql-types';
-import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
   getIndexPatternFromESQLQuery,
   getESQLSources,
-  getEsqlColumns,
+  getEsqlSourceColumns,
   getJoinIndices,
   getTimeseriesIndices,
   getProjectRoutingFromEsqlQuery,
@@ -47,32 +46,39 @@ export const useMemoizedCaches = ({
   favoritesClient,
   pickerProjectRouting,
 }: UseMemoizedCachesParams) => {
+  // `SET project_routing` in the query takes precedence over the project picker selection.
+  const setProjectRouting = useMemo(() => getProjectRoutingFromEsqlQuery(code), [code]);
+  const effectiveProjectRouting = setProjectRouting ?? pickerProjectRouting;
+
+  // Recreated when effectiveProjectRouting changes, like the caches below.
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     const fn = memoize(
-      (
-        ...args: [
-          {
-            esqlQuery: string;
-            search: ISearchGeneric;
-            timeRange: TimeRange;
-            signal?: AbortSignal;
-            dropNullColumns?: boolean;
-            variables?: ESQLControlVariable[];
-          }
-        ]
-      ) => ({
+      ({
+        esqlQuery,
+        timeRange,
+        variables,
+        signal,
+      }: {
+        esqlQuery: string;
+        timeRange: TimeRange;
+        variables?: ESQLControlVariable[];
+        signal?: AbortSignal;
+      }) => ({
         timestamp: Date.now(),
-        result: getEsqlColumns(...args),
+        result: getEsqlSourceColumns({
+          esqlQuery,
+          http: core.http,
+          projectRouting: effectiveProjectRouting,
+          timeRange,
+          variables,
+          signal,
+        }),
       }),
       ({ esqlQuery }) => esqlQuery
     );
 
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
-  }, []);
-
-  // `SET project_routing` in the query takes precedence over the project picker selection.
-  const setProjectRouting = useMemo(() => getProjectRoutingFromEsqlQuery(code), [code]);
-  const effectiveProjectRouting = setProjectRouting ?? pickerProjectRouting;
+  }, [core.http, effectiveProjectRouting]);
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     // effectiveProjectRouting as a useMemo dependency ensures a fresh cache (and therefore a fresh fetch)
@@ -206,6 +212,7 @@ export const useMemoizedCaches = ({
     memoizedHistoryStarredItems,
     minimalQuery,
     minimalQueryRef,
+    effectiveProjectRouting,
     getJoinIndicesCallback,
   };
 };

@@ -61,6 +61,32 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
   } as unknown as StepHandlerContext<never, never>);
 
 describe('proposals.createProposal input schema', () => {
+  it.each(['', null])('should treat %p as an absent proposalId', (blank) => {
+    const parsed = createProposalStepInputSchema.parse({
+      conversationId: 'conv-1',
+      comment: 'Tune the noisy rule',
+      origin: 'alertzero',
+      proposalId: blank,
+    });
+
+    expect(parsed.proposalId).toBeUndefined();
+  });
+
+  it('should keep a supplied proposalId, and refuse one that is not a UUID', () => {
+    const base = { conversationId: 'conv-1', comment: 'c', origin: 'alertzero' };
+
+    expect(
+      createProposalStepInputSchema.parse({
+        ...base,
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      }).proposalId
+    ).toBe('6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50');
+    // Every proposal id is a UUID, and routes and cards assume it.
+    expect(createProposalStepInputSchema.safeParse({ ...base, proposalId: 'host-1' }).success).toBe(
+      false
+    );
+  });
+
   // Liquid renders a template for an absent workflow input as `''`, so the
   // schema — not just the service — has to treat a blank as an omission.
   it.each(['', null])('should treat %p as absent for the non-string optional inputs', (blank) => {
@@ -269,6 +295,31 @@ describe('proposals.createProposal step', () => {
       alwaysGate: false,
       expiresAt: '2026-09-04T00:00:00.000Z',
     });
+  });
+
+  it('should hand the proposalId to the service as its id', async () => {
+    const create = jest.fn().mockResolvedValue({
+      id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      status: 'pending',
+      category: 'respond',
+      action: { name: 'Isolate host' },
+    });
+    const { definition } = createDefinition(create);
+
+    await definition.handler(
+      createContext({
+        conversationId: 'conv-2',
+        origin: 'alertzero',
+        comment: 'Isolate the host',
+        actionWorkflowId: 'system-alertzero-action-isolate',
+        proposalId: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50',
+      })
+    );
+
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50' }),
+      expect.anything()
+    );
   });
 
   it('should report alwaysGate when the action refuses to be auto-approved', async () => {
@@ -692,7 +743,40 @@ describe('proposals.getProposal step', () => {
       supersededBy: 'proposal-2',
       expiresAt: '2026-09-04T00:00:00.000Z',
       actionWorkflowId: 'system-alertzero-action-create-rule',
+      dismissReason: undefined,
+      rationale: undefined,
     });
+  });
+
+  it('should return dismissReason and rationale when a proposal is dismissed', async () => {
+    const get = jest.fn().mockResolvedValue({
+      status: 'failed',
+      decision: 'dismissed',
+      decidedBy: { username: 'analyst', fullName: 'Alice Analyst', email: null },
+      dismissReason: 'wrong',
+      rationale: 'The alert fired on a known-good admin script, not a real intrusion.',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output).toMatchObject({
+      decision: 'dismissed',
+      dismissReason: 'wrong',
+      rationale: 'The alert fired on a known-good admin script, not a real intrusion.',
+    });
+  });
+
+  it('should return dismissReason without rationale when rationale was not supplied', async () => {
+    const get = jest.fn().mockResolvedValue({
+      status: 'failed',
+      decision: 'dismissed',
+      dismissReason: 'low_value',
+    });
+
+    const result = await getDefinition(get).handler(createContext({ proposalId: 'proposal-1' }));
+
+    expect(result.output?.dismissReason).toBe('low_value');
+    expect(result.output?.rationale).toBeUndefined();
   });
 
   it('should leave decidedBy undefined when the stored proposal has no decider', async () => {
@@ -745,7 +829,8 @@ describe('proposals.cloneProposal step', () => {
 
     expect(clone).toHaveBeenCalledWith(
       { id: 'proposal-1', executionError: 'action exploded' },
-      SPACE_ID
+      SPACE_ID,
+      FAKE_REQUEST
     );
     expect(result.output).toEqual({ proposalId: 'proposal-2' });
   });

@@ -8,7 +8,7 @@
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getRuleMock } from '../../../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../../../rule_schema/mocks';
-import { RULE_IMPORT_BULK_CREATE_BATCH_SIZE } from '../../../../api/constants';
+import { RULE_IMPORT_BATCH_SIZE } from '../../../../api/constants';
 import { findInstalledRulesBySignatureIds } from './find_installed_rules_by_signature_ids';
 
 /**
@@ -54,10 +54,7 @@ describe('findInstalledRulesBySignatureIds', () => {
   });
 
   it('a full outer batch stays under ES max_clause_count', async () => {
-    const ruleIds = Array.from(
-      { length: RULE_IMPORT_BULK_CREATE_BATCH_SIZE },
-      (_, i) => `rule-${i}`
-    );
+    const ruleIds = Array.from({ length: RULE_IMPORT_BATCH_SIZE }, (_, i) => `rule-${i}`);
 
     await findInstalledRulesBySignatureIds({ rulesClient, ruleIds });
 
@@ -65,7 +62,7 @@ describe('findInstalledRulesBySignatureIds', () => {
     const ruleIdGroup = opts.filter?.match(/alert\.attributes\.params\.ruleId: \(([^)]*)\)/)?.[1];
     expect(ruleIdGroup).toBeDefined();
     const ruleIdClauseCount = (ruleIdGroup?.match(/ OR /g) ?? []).length + 1;
-    expect(ruleIdClauseCount).toBe(RULE_IMPORT_BULK_CREATE_BATCH_SIZE);
+    expect(ruleIdClauseCount).toBe(RULE_IMPORT_BATCH_SIZE);
     expect(ruleIdClauseCount).toBeLessThanOrEqual(ES_MIN_MAX_CLAUSE_COUNT);
   });
 
