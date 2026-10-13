@@ -8,7 +8,12 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import {
+  getUiamContainers,
+  initializeUiamContainers,
+  runUiamContainer,
+  UIAM_CONTAINERS,
+} from './docker_uiam';
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
