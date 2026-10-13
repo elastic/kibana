@@ -6,6 +6,7 @@
  */
 
 import { getEuidEsqlFilterBasedOnDocument } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import {
   buildIdentityPrefilter,
   getAlertsIndex,
@@ -83,7 +84,7 @@ const buildUnstampedIdentityFilters = (
   for (const row of pageRows) {
     const entityType = row[ENTITY_TYPE_FIELD];
     if (isAllowedEntityType(entityType)) {
-      const clause = getEuidEsqlFilterBasedOnDocument(entityType, row);
+      const clause = getEuidEsqlFilterBasedOnDocument(getBuiltInEntityDefinition(entityType), row);
       if (clause) {
         clauses.add(clause);
         matchedRows.push(row);

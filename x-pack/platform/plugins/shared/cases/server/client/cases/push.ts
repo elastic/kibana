@@ -31,6 +31,7 @@ import {
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
   OWNER_FIELD,
+  SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
 
@@ -43,6 +44,7 @@ import {
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
+  createAttackUpdateStatusRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
@@ -66,6 +68,9 @@ function shouldCloseByPush(
   );
 }
 
+/**
+ * Closes the alert and attack documents attached to a case that was closed by a push.
+ */
 const changeAlertsStatusToClose = async (
   caseId: string,
   caseService: CasesClientArgs['services']['caseService'],
@@ -76,11 +81,11 @@ const changeAlertsStatusToClose = async (
     AttachmentType.alert
   );
 
-  const alertFilter = combineFilters(
+  const syncFilter = combineFilters(
     [
       legacyAlertFilter,
       buildFilter({
-        filters: UNIFIED_ALERT_TYPES_ARRAY,
+        filters: [...UNIFIED_ALERT_TYPES_ARRAY, SECURITY_ATTACK_ATTACHMENT_TYPE],
         field: 'type',
         operator: 'or',
         type: CASE_ATTACHMENT_SAVED_OBJECT,
@@ -89,23 +94,25 @@ const changeAlertsStatusToClose = async (
     NodeBuilderOperators.or
   );
 
-  const alertAttachments = await caseService.getAllCaseComments({
+  const syncableAttachments = await caseService.getAllCaseComments({
     id: [caseId],
     options: {
-      filter: alertFilter,
+      filter: syncFilter,
     },
   });
 
-  const alerts = alertAttachments.saved_objects
-    .map((attachment) =>
-      createAlertUpdateStatusRequest({
-        comment: attachment.attributes,
-        status: CaseStatuses.closed,
-      })
-    )
-    .flat();
+  const documentsToClose = syncableAttachments.saved_objects.flatMap((attachment) => [
+    ...createAlertUpdateStatusRequest({
+      comment: attachment.attributes,
+      status: CaseStatuses.closed,
+    }),
+    ...createAttackUpdateStatusRequest({
+      comment: attachment.attributes,
+      status: CaseStatuses.closed,
+    }),
+  ]);
 
-  await alertsService.updateAlertsStatus(alerts);
+  await alertsService.updateAlertsStatus(documentsToClose);
 };
 
 /**
