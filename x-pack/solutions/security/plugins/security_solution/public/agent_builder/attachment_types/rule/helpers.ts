@@ -36,6 +36,11 @@ export const getRuleIdFromAttachment = (
   attachment: Pick<RuleAttachment, 'origin'>
 ): string | undefined => attachment.origin ?? undefined;
 
+// A saved rule's own id when the payload carries it: `origin` is either that id or, for rule
+// coverage, the human-readable `rule_id`, and the rule flyout looks rules up by saved-object id.
+export const getSavedRuleId = (attachment: RuleAttachment): string | undefined =>
+  parseRuleFromAttachment(attachment)?.id ?? getRuleIdFromAttachment(attachment);
+
 export const getRuleAttachmentIntent = (attachment: RuleAttachment): RuleAttachmentIntent =>
   attachment.origin ? 'update' : 'create';
 

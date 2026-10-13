@@ -90,12 +90,16 @@ export interface OldCustomFieldsAndTemplatesSectionProps {
   connector: CasesConfigurationUI['connector'];
   customFields: CasesConfigurationUI['customFields'];
   templates: CasesConfigurationUI['templates'];
+  observableTypes: CasesConfigurationUI['observableTypes'];
+  workflowTags: CasesConfigurationUI['workflowTags'];
   connectors: ActionConnector[];
   isLoadingCaseConfiguration: boolean;
   persistCaseConfigure: (params: {
     connector: CasesConfigurationUI['connector'];
     customFields: CasesConfigurationUI['customFields'];
     templates: CasesConfigurationUI['templates'];
+    observableTypes: CasesConfigurationUI['observableTypes'];
+    workflowTags: CasesConfigurationUI['workflowTags'];
     id: string;
     version: string;
     closureType: ClosureType;
@@ -113,6 +117,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
       connector,
       customFields,
       templates,
+      observableTypes,
+      workflowTags,
       connectors,
       isLoadingCaseConfiguration,
       persistCaseConfigure,
@@ -157,6 +163,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
             connector,
             customFields: [...remainingCustomFields],
             templates: [...templatesWithRemainingCustomFields],
+            observableTypes,
+            workflowTags,
             id: configurationId,
             version: configurationVersion,
             closureType,
@@ -168,6 +176,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
           configurationVersion,
           connector,
           customFields,
+          observableTypes,
+          workflowTags,
           templates,
           persistCaseConfigure,
         ]
@@ -207,6 +217,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
             connector,
             customFields: updatedCustomFields,
             templates: updatedTemplates,
+            observableTypes,
+            workflowTags,
             id: configurationId,
             version: configurationVersion,
             closureType,
@@ -221,6 +233,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
           configurationVersion,
           connector,
           customFields,
+          observableTypes,
+          workflowTags,
           templates,
           persistCaseConfigure,
           setFlyOutVisibility,
@@ -235,6 +249,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
             connector,
             customFields,
             templates: [...remainingTemplates],
+            observableTypes,
+            workflowTags,
             id: configurationId,
             version: configurationVersion,
             closureType,
@@ -246,6 +262,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
           configurationVersion,
           connector,
           customFields,
+          observableTypes,
+          workflowTags,
           templates,
           persistCaseConfigure,
         ]
@@ -281,6 +299,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
             connector,
             customFields,
             templates: updatedTemplates,
+            observableTypes,
+            workflowTags,
             id: configurationId,
             version: configurationVersion,
             closureType,
@@ -295,6 +315,8 @@ export const OldCustomFieldsAndTemplatesSection: React.FC<OldCustomFieldsAndTemp
           configurationVersion,
           connector,
           customFields,
+          observableTypes,
+          workflowTags,
           templates,
           persistCaseConfigure,
           setFlyOutVisibility,

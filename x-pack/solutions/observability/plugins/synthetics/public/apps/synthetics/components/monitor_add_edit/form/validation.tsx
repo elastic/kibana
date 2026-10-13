@@ -6,6 +6,7 @@
  */
 import type { MonitorFields, Validator, Validation } from '../types';
 import { ConfigKey, MonitorTypeEnum, ScheduleUnit } from '../types';
+import { isJsonObjectString } from '../../../../../../common/utils/is_json_object_string';
 
 export const DIGITS_ONLY = /^[0-9]*$/g;
 export const INCLUDES_VALID_PORT = /[^\:]+:[0-9]{1,5}$/g;
@@ -154,7 +155,7 @@ const validateBrowser: ValidationLibrary = {
   [ConfigKey.PLAYWRIGHT_OPTIONS]: ({ [ConfigKey.PLAYWRIGHT_OPTIONS]: playwrightOptions }) =>
     playwrightOptions ? !validJSONFormat(playwrightOptions) : false,
   [ConfigKey.PARAMS]: ({ [ConfigKey.PARAMS]: params }) =>
-    params ? !validJSONFormat(params) : false,
+    params ? !isJsonObjectString(params) : false,
 };
 
 // API monitors share validation with browser monitors except for throttling,

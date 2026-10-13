@@ -83,6 +83,19 @@ import { searchParamNames } from './application/search_param_names';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
+const getConversationPath = ({
+  conversationId,
+  agentId,
+  openDetails,
+}: {
+  conversationId: string;
+  agentId: string;
+  openDetails?: boolean;
+}): string => {
+  const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
+  return openDetails ? `${basePath}?${searchParamNames.openConversationDetails}=true` : basePath;
+};
+
 export class AgentBuilderPlugin
   implements
     Plugin<
@@ -366,14 +379,17 @@ export class AgentBuilderPlugin
           openSidebarConversation: (conversationId) => {
             openSidebarInternal({ conversationId });
           },
-          openFullscreenConversation: ({ conversationId, agentId, openDetails }) => {
+          openFullscreenConversation: (location) => {
             agentBuilderSidebar.close();
-            const basePath = appPaths.agent.conversations.byId({ agentId, conversationId });
-            const path = openDetails
-              ? `${basePath}?${searchParamNames.openConversationDetails}=true`
-              : basePath;
-            return core.application.navigateToApp(AGENTBUILDER_APP_ID, { path });
+            return core.application.navigateToApp(AGENTBUILDER_APP_ID, {
+              path: getConversationPath(location),
+            });
           },
+          getConversationUrl: (location) =>
+            core.application.getUrlForApp(AGENTBUILDER_APP_ID, {
+              path: getConversationPath(location),
+              absolute: true,
+            }),
         },
       }),
       renderers: createPublicRenderersContract({ renderersService }),

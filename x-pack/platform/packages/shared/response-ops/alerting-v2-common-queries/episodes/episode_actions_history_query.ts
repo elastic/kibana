@@ -28,7 +28,7 @@ export interface RawEpisodeActionHistoryEntry {
   action_type: string;
   'actor.type': EpisodeActionActor['type'];
   'actor.profile_uid': string | null;
-  episode_id: string | null;
+  alert_id: string | null;
   group_hash: string | null;
   tags?: string | string[] | null;
   assignee_uid: string | null;
@@ -42,7 +42,7 @@ export interface EpisodeActionHistoryEntry {
   '@timestamp': string;
   action_type: string;
   actor: EpisodeActionActor;
-  episode_id: string | null;
+  alert_id: string | null;
   group_hash: string | null;
   tags: string[];
   assignee_uid: string | null;
@@ -74,7 +74,7 @@ export const buildEpisodeActionsHistoryQuery = (
   const query = esql
     .from([ALERT_ACTIONS_DATA_STREAM], ['_id'])
     .where`space_id == ${spaceId}`
-    .where`episode_id == ${episodeId} OR (group_hash == ${groupHash} AND episode_id IS NULL)`
+    .where`alert_id == ${episodeId} OR (group_hash == ${groupHash} AND alert_id IS NULL)`
     .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign")`;
 
   if (before) {
@@ -91,7 +91,7 @@ export const buildEpisodeActionsHistoryQuery = (
         'action_type',
         'actor.type',
         'actor.profile_uid',
-        'episode_id',
+        'alert_id',
         'group_hash',
         'tags',
         'assignee_uid',

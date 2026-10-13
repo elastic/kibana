@@ -42,7 +42,7 @@ import type {
   SyntheticsCommonState,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { SyntheticsCommonStateCodec } from '../../common/runtime_types/zod/alert_rules_common';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/schemas/alert_rules_common';
 import {
   getSyntheticsErrorRouteFromMonitorId,
   getSyntheticsCertificatesRoute,

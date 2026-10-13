@@ -43,9 +43,34 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(/Do not narrate your reasoning or announce each step/);
     });
 
+    it('names the catalog strategy to the user, followed by what it produces', () => {
+      expect(instructions).toMatch(/name the strategy, then say in plain words what it produces/);
+      expect(instructions).toMatch(
+        /Index\/Table Metadata, Bottom-Up, Cumulative \/ Wiki-style and the rest — are the user's terms too/
+      );
+    });
+
+    it('names no document summary workflow, which the document template does not use', () => {
+      expect(instructions).not.toMatch(/system-context-engine-document-summary/);
+    });
+
+    it('stops after a pilot that failed or wrote fewer indicators than it covered', () => {
+      expect(instructions).toMatch(
+        /unless it failed or wrote fewer indicators than it covered: then report that and stop/
+      );
+    });
+
+    it('uses the catalog names for the template strategies, not variants of them', () => {
+      expect(instructions).not.toMatch(/Cumulative entity-profile|Bottom-Up document/);
+    });
+
+    it('keeps its examples generic, outside any one domain', () => {
+      expect(instructions).not.toMatch(/\b(tickets?|zendesk|invoices?|support cases?)\b/i);
+    });
+
     it('keeps the facts the user needs to decide', () => {
       expect(instructions).toMatch(
-        /how many one run writes, how long a run takes and what it costs/
+        /how many one run writes and the model calls that costs, how long a run takes once a pilot has measured it/
       );
     });
   });
@@ -85,8 +110,27 @@ describe('Context Engine agent instructions', () => {
       expect(instructions).toMatch(/or when the index already has automations/);
     });
 
-    it('settles the first automation and asks for intent where it cannot be inferred', () => {
-      expect(instructions).toMatch(/An index with no automations starts at Index\/Table Metadata/);
+    it('chooses the first strategy from the data, proceeding on a clear fit and asking on a tie', () => {
+      expect(instructions).not.toMatch(/starts at Index\/Table Metadata/);
+      expect(instructions).not.toMatch(/that is settled/);
+      expect(instructions).toMatch(
+        /choose it by the signals in the strategy catalog rather than from a default/
+      );
+      expect(instructions).toMatch(
+        /When one strategy clearly fits, state it with the evidence that chose it and proceed, without asking which strategy/
+      );
+      expect(instructions).toMatch(
+        /When two fit about equally, or the data does not show what the index is for, ask with `ask_user_question`, offering the recommended strategy first/
+      );
+      expect(instructions).toMatch(
+        /Index\/Table Metadata is not that default: it is the strategy for routing between or joining several sources/
+      );
+      expect(instructions).toMatch(
+        /A strategy built through a subagent still stops at the checkpoint before a subagent/
+      );
+    });
+
+    it('asks for intent where it cannot be inferred', () => {
       expect(instructions).toMatch(/where the answer is new coverage, ask which strategy/);
       expect(instructions).toContain(`\`${internalTools.askUserQuestion}\``);
       expect(instructions).toMatch(/name the unit and what one KI should carry/);
@@ -97,7 +141,10 @@ describe('Context Engine agent instructions', () => {
     });
 
     it('asks before the build and not before the save or the run', () => {
-      expect(instructions).toMatch(/Ask before you build; do not ask before you save or run/);
+      expect(instructions).toMatch(
+        /Settle what to build before you build, asking only where it is not clear; do not ask before you save or run/
+      );
+      expect(instructions).not.toMatch(/Ask before you build;/);
       expect(instructions).toMatch(/The question you owed was the one before the build/);
     });
 
@@ -140,6 +187,17 @@ describe('Context Engine agent instructions', () => {
       );
     });
 
+    it('pilots a template install that writes more than 5 items through the run tool before its full run', () => {
+      expect(instructions).toMatch(
+        /a pilot first when a document, unit-profile or index-metadata install writes more than 5 items, then the full run/
+      );
+      expect(instructions).not.toMatch(/when a template install writes more than 5 items/);
+      expect(instructions).not.toMatch(/a pilot of a document or unit-profile install first/);
+      expect(instructions).toMatch(
+        /A pilot returns when it finishes, with its duration: state the projected full-run time from it, then start the full run/
+      );
+    });
+
     it('reports a started run and treats a failed one as something to report, not to retry by hand', () => {
       expect(instructions).toMatch(
         /When `started` is false the run did not happen and `reason` says why/
@@ -161,7 +219,7 @@ describe('Context Engine agent instructions', () => {
 
     it('lists Targeted KIs with the templates rather than the subagent path', () => {
       expect(instructions).toMatch(
-        /Cumulative entity-profile and Targeted KI automations do not go through a subagent/
+        /Cumulative \/ Wiki-style and Targeted KI automations do not go through a subagent/
       );
     });
 

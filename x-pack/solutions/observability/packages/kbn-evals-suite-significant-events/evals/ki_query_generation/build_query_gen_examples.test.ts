@@ -26,7 +26,7 @@ const scenario = (
 ): KIQueryGenerationScenario => ({
   input: {
     scenario_id: 'ledger-db-disconnect',
-    stream_name: 'logs',
+    source_id: 'logs',
     stream_description: 'Bank of Anthos ledger-db disconnect',
   },
   output: {

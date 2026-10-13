@@ -156,7 +156,7 @@ function isOldSchema(attributes: AttachmentAttributesV2): boolean {
 }
 
 /**
- * Transformer for migrated persistable visualization attachments (e.g. Lens): legacy
+ * Transformer for mapped persistable visualization attachments (e.g. Lens): legacy
  * `persistableState` wrapper <-> unified value shape (`type` + `data.state`).
  */
 export const persistableStateAttachmentTransformer: AttachmentTypeTransformer<

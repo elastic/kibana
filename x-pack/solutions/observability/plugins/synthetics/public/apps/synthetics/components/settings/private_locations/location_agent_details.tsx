@@ -41,6 +41,7 @@ export const LocationAgentDetails = ({
   agentPolicyId,
   locationLabel,
   locationMonitorCount,
+  missingCompleteAgent = false,
 }: {
   stats?: LocationAgentStats;
   loading: boolean;
@@ -48,6 +49,8 @@ export const LocationAgentDetails = ({
   locationLabel: string;
   /** Authoritative monitor count for the location (matches the table's "Monitors" column). */
   locationMonitorCount: number;
+  /** Browser monitors here cannot run: no enrolled agent is elastic-agent-complete. */
+  missingCompleteAgent?: boolean;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgentPolicies, canReadAgents } = useFleetPermissions();
@@ -71,7 +74,7 @@ export const LocationAgentDetails = ({
   }
 
   const agents = stats?.agents ?? [];
-  const isAgentSharding = stats?.isAgentSharding === true;
+  const isShardingActive = stats?.isShardingActive === true;
   const healthyAgents = agents.filter((agent) => agent.healthy).length;
   const unhealthyAgents = agents.filter((agent) => !agent.healthy);
   const pressuredAgents = agents.filter(
@@ -84,6 +87,9 @@ export const LocationAgentDetails = ({
   const clusterUsedMib = agents.reduce((sum, a) => sum + (a.usedMemoryMib ?? 0), 0);
 
   const warnings: React.ReactNode[] = [];
+  if (missingCompleteAgent) {
+    warnings.push(BROWSER_NEEDS_COMPLETE_AGENT);
+  }
   if (unhealthyAgents.length > 0) {
     warnings.push(UNHEALTHY_AGENTS_WARNING(unhealthyAgents.length));
   }
@@ -144,7 +150,7 @@ export const LocationAgentDetails = ({
       name: DISTRIBUTION_COLUMN,
       width: '200px',
       render: (agent: AgentStat) => {
-        const share = agentShare(agent, locationMonitorCount, isAgentSharding);
+        const share = agentShare(agent, locationMonitorCount, isShardingActive);
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
@@ -371,7 +377,7 @@ export const LocationAgentDetails = ({
           <h4>
             {DISTRIBUTION_TITLE}{' '}
             <EuiIconTip
-              content={isAgentSharding ? DISTRIBUTION_HELP_SHARDED : DISTRIBUTION_HELP}
+              content={isShardingActive ? DISTRIBUTION_HELP_SHARDED : DISTRIBUTION_HELP}
               position="right"
               type="question"
             />
@@ -401,12 +407,12 @@ export const LocationAgentDetails = ({
 const agentShare = (
   agent: AgentStat,
   locationMonitorCount: number,
-  isAgentSharding: boolean
+  isShardingActive: boolean
 ): number | null => {
   if (locationMonitorCount <= 0) {
     return null;
   }
-  if (!isAgentSharding || agent.monitorsAssigned == null) {
+  if (!isShardingActive || agent.monitorsAssigned == null) {
     return 1;
   }
   return agent.monitorsAssigned / locationMonitorCount;
@@ -624,6 +630,14 @@ const DISTRIBUTION_HELP_SHARDED = i18n.translate(
 const NO_AGENTS_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetails.noAgents', {
   defaultMessage: 'No agents enrolled for this location yet.',
 });
+
+const BROWSER_NEEDS_COMPLETE_AGENT = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.browserNeedsCompleteAgent',
+  {
+    defaultMessage:
+      'Browser monitors on this location are not running. They only run on the elastic-agent-complete image, and no enrolled agent is on that image.',
+  }
+);
 
 const AGENTS_TABLE_CAPTION = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.tableCaption',

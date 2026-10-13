@@ -9,7 +9,6 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLColumnsWithHighlights } from '@kbn/esql-utils';
-import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 export type { IgnoredReason, ShouldShowFieldInTableHandler } from './utils';
 export type {
@@ -55,19 +54,6 @@ export interface DataTableRecord {
    */
   isAnchor?: boolean;
 }
-
-/**
- * Custom column types per column name
- */
-export type DataTableColumnsMeta = Record<
-  string,
-  {
-    type: DatatableColumnMeta['type'];
-    esType?: DatatableColumnMeta['esType'];
-    /** True when the column was produced by ES|QL (EVAL, STATS, …), not an index field. */
-    isComputedColumn?: boolean;
-  }
->;
 
 import type { ReactNode } from 'react';
 
