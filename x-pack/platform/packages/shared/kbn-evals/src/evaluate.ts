@@ -38,6 +38,8 @@ import { getSpaceIdsFromEnv } from './utils/space_ids';
 import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
+import { getConnectorReasoningEffort } from './utils/eval_connector';
+import { withDefaultReasoning } from './utils/with_default_reasoning';
 import type {
   DefaultEvaluators,
   EvaluationDataset,
@@ -172,9 +174,14 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         },
       });
       const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(inferenceClient);
+      const reasoningEffort = getConnectorReasoningEffort(connector);
       log.serviceLoaded?.('inferenceClient');
 
-      await use(wrappedInferenceClient);
+      await use(
+        reasoningEffort
+          ? withDefaultReasoning(wrappedInferenceClient, reasoningEffort)
+          : wrappedInferenceClient
+      );
     },
     { scope: 'worker' },
   ],
@@ -185,6 +192,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         fetch,
         log,
         connectorId: connector.id,
+        reasoningLevel: getConnectorReasoningEffort(connector),
       });
 
       log.serviceLoaded?.('agentBuilderClient');
@@ -414,9 +422,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   ],
   evaluators: [
     async ({ log, inferenceClient, evaluationConnector, traceEsClient }, use) => {
-      const evaluatorInferenceClient = inferenceClient.bindTo({
+      const boundEvaluatorClient = inferenceClient.bindTo({
         connectorId: evaluationConnector.id,
       });
+      const judgeReasoningEffort = getConnectorReasoningEffort(evaluationConnector);
+      const evaluatorInferenceClient = judgeReasoningEffort
+        ? withDefaultReasoning(boundEvaluatorClient, judgeReasoningEffort)
+        : boundEvaluatorClient;
 
       // These judges run in-process against `evaluationConnector`, so unlike the
       // `_evaluate`-backed ones they know their model up front.

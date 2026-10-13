@@ -42,6 +42,12 @@ export const isInferenceEndpointDefinition = (
 export const getConnectorActionTypeId = (connector: EvalConnector): string =>
   isInferenceEndpointDefinition(connector) ? '.inference' : connector.actionTypeId;
 
+/** Reasoning effort a connector's definition asks for. */
+export const getConnectorReasoningEffort = (
+  connector: EvalConnector
+): InferenceEndpointDefinition['reasoningEffort'] =>
+  isInferenceEndpointDefinition(connector) ? connector.reasoningEffort : undefined;
+
 export const getInferenceEndpointId = (connector: EvalConnector): string | undefined => {
   if (isInferenceEndpointDefinition(connector)) {
     return connector.inferenceId;

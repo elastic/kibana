@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { ChatCompletionReasoningEffort } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import pRetry from 'p-retry';
@@ -40,6 +41,8 @@ export interface AgentBuilderConverseParams {
   promptResponses?: Record<string, unknown>;
   /** Attachments sent with this turn, e.g. a by-value dashboard the agent should act on. */
   attachments?: AgentBuilderConverseAttachment[];
+  /** Reasoning effort for this turn.*/
+  reasoningLevel?: ChatCompletionReasoningEffort;
 }
 
 export interface AgentBuilderConverseAttachment {
@@ -105,10 +108,12 @@ export function createAgentBuilderClient({
   fetch,
   log,
   connectorId,
+  reasoningLevel: defaultReasoningLevel,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
   connectorId: string;
+  reasoningLevel?: ChatCompletionReasoningEffort;
 }): AgentBuilderClient {
   const retryOnFail = <T>(operationName: string, fn: () => Promise<T>): Promise<T> =>
     pRetry(fn, {
@@ -133,6 +138,7 @@ export function createAgentBuilderClient({
     conversationId,
     promptResponses,
     attachments,
+    reasoningLevel = defaultReasoningLevel,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -152,6 +158,7 @@ export function createAgentBuilderClient({
           _execution_mode: 'local',
           ...(conversationId ? { conversation_id: conversationId } : {}),
           ...(attachments ? { attachments } : {}),
+          ...(reasoningLevel ? { reasoning_level: reasoningLevel } : {}),
         }),
       });
 
