@@ -162,8 +162,7 @@ export const DashboardGrid = () => {
         }
         const dx = moveEvent.clientX - start.x;
         const dy = moveEvent.clientY - start.y;
-        const hasDragged =
-          Math.abs(dx) >= DRAG_THRESHOLD_PX || Math.abs(dy) >= DRAG_THRESHOLD_PX;
+        const hasDragged = Math.abs(dx) >= DRAG_THRESHOLD_PX || Math.abs(dy) >= DRAG_THRESHOLD_PX;
         if (hasDragged) {
           dragStateRef.current = {
             start: { ...start },
@@ -448,6 +447,10 @@ const dashboardGridStyles = {
       // Hide hover actions when dashboard has an overlay
       '.dshDashboardGrid__item--hideHoverActions .embPanel__hoverActions': {
         visibility: 'hidden !important' as 'hidden',
+      },
+      // On selected panels the right-side hover actions are replaced by the selected panel actions
+      '.dshDashboardGrid__item--showSelectionHoverActions .embPanel__hoverActionsRight': {
+        visibility: 'hidden',
       },
       '&.dshLayout-isMaximizedPanel': {
         height: '100%', // need to override the kbn-grid-layout height when a single panel is expanded

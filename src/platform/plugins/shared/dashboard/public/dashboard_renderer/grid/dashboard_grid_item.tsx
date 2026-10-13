@@ -102,8 +102,9 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
       'dshDashboardGrid__item--focused': focusPanel,
       'dshDashboardGrid__item--blurred': blurPanel,
       'dshDashboardGrid__item--selected': isSelected || isIndicatingRelatedPanels,
-      'dshDashboardGrid__item--hideHoverActions':
-        blurPanel || focusedForEdit || showSelectedPanelActions,
+      'dshDashboardGrid__item--hideHoverActions': blurPanel || focusedForEdit,
+      'dshDashboardGrid__item--showSelectionHoverActions':
+        showSelectedPanelActions && !blurPanel && !focusedForEdit,
       // eslint-disable-next-line @typescript-eslint/naming-convention
       printViewport__vis: viewMode === 'print',
     });
