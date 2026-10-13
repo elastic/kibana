@@ -66,7 +66,7 @@ export const AccessDenied = ({
               size="s"
               src={colorMode === 'LIGHT' ? lockLight : lockDark}
               alt={i18n.translate(
-                'platform.plugins.shared.workflows_management.ui.accessDenied.illustrationAlt',
+                'workflows.plugins.shared.workflows_management.ui.accessDenied.illustrationAlt',
                 { defaultMessage: 'Restricted access' }
               )}
             />

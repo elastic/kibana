@@ -23,10 +23,9 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryBreadcrumbLabel = i18n.translate(
-  'workflowsManagement.libraryImportPage.libraryBreadcrumb',
-  { defaultMessage: 'Template Library' }
-);
+const libraryBreadcrumbLabel = i18n.translate('workflows.libraryImportPage.libraryBreadcrumb', {
+  defaultMessage: 'Template Library',
+});
 
 /**
  * Workflow Template Library import page (`/app/workflows/library/import`).
