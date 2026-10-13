@@ -153,7 +153,6 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
-    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 

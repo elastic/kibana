@@ -80,9 +80,9 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     description: vis.title,
   };
 
-  const executionContext = {
+  const executionContext: KibanaExecutionContext = {
     ...parentContext,
-    childContext,
+    child: childContext,
   };
 
   const timefilter = getTimeFilter();
