@@ -25,7 +25,7 @@ configured, run:
 
 ```sh
 RULE_CREATION_LIVE_SMOKE=1 node scripts/jest \
-  --config x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation/jest.config.js \
+  --config x-pack/solutions/security/packages/kbn-evals-suite-az-detection-watch-rule-creation/jest.config.js \
   --runInBand --testPathPattern=coverage_chain.live
 ```
 

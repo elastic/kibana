@@ -143,7 +143,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
       await evaluateDataset({
         dataset: {
-          name: 'detection-watch-rule-creation: golden',
+          name: 'az-detection-watch-rule-creation: golden',
           description:
             'Evaluates the Rule Creation Worker against known detection gaps with ground-truth MITRE mappings',
           examples: goldenDataset,
@@ -181,7 +181,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
       await evaluateDataset({
         dataset: {
-          name: 'detection-watch-rule-creation: hard-cases',
+          name: 'az-detection-watch-rule-creation: hard-cases',
           description:
             'Complex gaps: supply chain, cloud log tampering, and container administration. ' +
             'Adapted from kbn-evals-suite-security-ai-rules complex_pairs.',
@@ -220,7 +220,7 @@ evaluate.describe('Rule Creation Worker', { tag: tags.serverless.security.comple
 
       await evaluateDataset({
         dataset: {
-          name: 'detection-watch-rule-creation: canary',
+          name: 'az-detection-watch-rule-creation: canary',
           description:
             'Deliberately unwinnable input scored with an inverted expectation: 1 means the ' +
             'quality gate correctly penalized it, 0 means the gate stopped discriminating.',

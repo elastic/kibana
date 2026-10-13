@@ -1,6 +1,6 @@
 {
   "type": "functional-tests",
-  "id": "@kbn/evals-suite-detection-watch-rule-creation",
+  "id": "@kbn/evals-suite-az-detection-watch-rule-creation",
   "owner": "@elastic/security-detection-engineering",
   "group": "security",
   "visibility": "private"

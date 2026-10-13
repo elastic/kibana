@@ -12,7 +12,7 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
- * Config set for the detection-watch-rule-creation eval suite. The suite measures the
+ * Config set for the az-detection-watch-rule-creation eval suite. The suite measures the
  * managed rule-creation workflow the alertzero plugin installs at start, so alertzero must be
  * enabled. `xpack.alertzero.enabled` defaults to `false` so it is set explicitly below. Service
  * accounts are off by default too, and alertzero installs its managed workflows only when they
