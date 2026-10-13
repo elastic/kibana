@@ -14,7 +14,7 @@ import {
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 import type {
   AttachmentRequestV2,
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain/attachment/v2';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -135,7 +135,7 @@ export default ({ getService }: FtrProviderContext): void => {
           params: [
             attackAttachment,
             ...alertAttachments,
-          ] as unknown as BulkCreateAttachmentsRequestV2,
+          ] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
         expect(updatedCase.comments?.length).to.be(1 + ALERT_IDS.length);
@@ -240,7 +240,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const updatedCase = await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [attackAttachment] as unknown as BulkCreateAttachmentsRequestV2,
+          params: [attackAttachment] as unknown as BulkCreateUnifiedAttachmentsRequest,
         });
 
         const attachments = updatedCase.comments as unknown as Array<{ id: string }>;
