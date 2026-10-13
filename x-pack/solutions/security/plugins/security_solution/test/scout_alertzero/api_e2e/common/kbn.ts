@@ -93,7 +93,7 @@ export const pollUntil = async <T>(
 
 interface ActionsConnector {
   id: string;
-  actionTypeId: string;
+  connector_type_id: string;
   config?: { taskType?: string };
 }
 
@@ -111,6 +111,7 @@ export const listChatCompletionConnectors = async (
   }
   return result.body.filter(
     (connector) =>
-      connector.actionTypeId === '.inference' && connector.config?.taskType === 'chat_completion'
+      connector.connector_type_id === '.inference' &&
+      connector.config?.taskType === 'chat_completion'
   );
 };

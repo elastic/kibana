@@ -205,6 +205,7 @@ export interface WorkflowExecution {
   cancellationReason?: string;
   error?: { type?: string; message?: string } | null;
   stepExecutions?: ExecutionStep[];
+  context?: { inputs?: Record<string, unknown> };
 }
 
 interface ExecutionChild {

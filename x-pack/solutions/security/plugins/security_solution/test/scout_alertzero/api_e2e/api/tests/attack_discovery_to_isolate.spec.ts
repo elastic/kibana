@@ -33,7 +33,7 @@ import {
   waitForExecutionStatus,
   waitForNewExecution,
 } from '../fixtures';
-import type { SeededScenario } from '../fixtures';
+import type { SeededScenario, WorkflowExecution } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
 const FORENSICS_WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
@@ -231,19 +231,33 @@ apiTest.describe(
 
         // Correlates a proposal with THIS run's seeded attack: the proposal that drives the
         // isolate must reference the seeded host (agent id or host name) or one of this run's
-        // alert ids, otherwise an unrelated AlertZero run could satisfy the test.
-        const expectProposalReferencesSeededRun = (
+        // alert ids, otherwise an unrelated AlertZero run could satisfy the test. The Investigate
+        // proposal's input holds only opaque ids, so it is resolved through the review execution
+        // that raised it, whose inputs list the alerts the attack correlated.
+        const expectProposalReferencesSeededRun = async (
           label: string,
           proposal: { actionInput?: unknown }
         ) => {
-          const encoded = JSON.stringify(proposal.actionInput ?? {});
+          const reviewExecutionId = (proposal.actionInput as { workflow_execution_id?: unknown })
+            ?.workflow_execution_id;
+          const reviewInputs =
+            typeof reviewExecutionId === 'string'
+              ? ok(
+                  await api.public<WorkflowExecution>(
+                    'GET',
+                    `/api/workflows/executions/${reviewExecutionId}`
+                  ),
+                  `read the review execution behind the ${label} proposal`
+                ).context?.inputs
+              : undefined;
+          const encoded = JSON.stringify({ input: proposal.actionInput ?? {}, reviewInputs });
           const referencesSeededRun =
             encoded.includes(hosts.hosts[0].agentId) ||
             encoded.includes(scenarioHost) ||
             (scenario?.alertIds ?? []).some((alertId) => encoded.includes(alertId));
           expect(
             referencesSeededRun,
-            `${label} proposal must reference the seeded attack run; actionInput: ${encoded}`
+            `${label} proposal must reference the seeded attack run; context: ${encoded}`
           ).toBe(true);
         };
 
@@ -254,7 +268,7 @@ apiTest.describe(
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
         expect(investigate.actionInput).toBeDefined();
-        expectProposalReferencesSeededRun('Investigate', investigate);
+        await expectProposalReferencesSeededRun('Investigate', investigate);
 
         // Approve exactly as the approval modal does — but only once the execution backing the
         // proposal has parked in `waiting_for_input`. Approving earlier answers 409; retrying
@@ -291,7 +305,7 @@ apiTest.describe(
           () => findPending(testData.ISOLATE_HOST_ACTION_ID),
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
-        expectProposalReferencesSeededRun('Isolate', isolate);
+        await expectProposalReferencesSeededRun('Isolate', isolate);
         await approveProposal('Isolate', isolate);
 
         // 5. The approval creates a Defend isolate action. Complete it as the agent would.
