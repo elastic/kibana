@@ -32,6 +32,12 @@ export {
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
   SECURITY_UPDATE_WATCHLIST_TOOL_ID,
   updateWatchlistTool,
+  setWatchlistRuleBasedDataSourceTool,
+  SECURITY_SET_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID,
+  removeWatchlistRuleBasedDataSourceTool,
+  SECURITY_REMOVE_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID,
+  listWatchlistDataSourcesTool,
+  SECURITY_LIST_WATCHLIST_DATA_SOURCES_TOOL_ID,
 } from './watchlists';
 export { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './leads/list_leads_tool';
 export { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './leads/generate_leads_tool';

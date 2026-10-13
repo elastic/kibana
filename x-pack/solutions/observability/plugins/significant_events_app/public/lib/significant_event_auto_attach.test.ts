@@ -23,7 +23,7 @@ const AGENT_BUILDER_APP_ID = 'agentBuilder';
 const createEvent = (overrides?: Partial<SignificantEvent>): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'payment-outage',
-  stream_names: ['logs.payment'],
+  source_ids: ['logs.payment'],
   title: 'Payment outage',
   summary: 'Payments are failing.',
   severity: 'high',

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { EntityType } from '../../domain/definitions/entity_schema';
 
@@ -14,35 +14,37 @@ export const ENTITY_RISK_SCORE_CHANGED_TRIGGER_ID = 'entityStore.entityRiskScore
 
 export const RISK_SCORE_CHANGED_WATCHED_FIELDS = ['entity.risk.calculated_score_norm'] as const;
 
-export const entityRiskScoreChangedEventSchema = z.object({
-  entityId: z
-    .string()
-    .max(1000)
-    .describe('The unique EUID of the entity whose risk score changed.'),
-  entityType: EntityType.describe('The type of entity (e.g. host, user, service, generic).'),
-  score: z.number().describe('The normalized risk score after the update (0–100).'),
-  previousScore: z
-    .number()
-    .nullable()
-    .describe(
-      'The normalized risk score before the update, or null when this is the first score assignment.'
-    ),
-  delta: z
-    .number()
-    .nullable()
-    .describe(
-      'The absolute magnitude of the change in normalized risk score. ' +
-        'Use `direction` to distinguish an increase from a decrease. ' +
-        'Null when the previous score is unavailable.'
-    ),
-  direction: z
-    .enum(['increase', 'decrease'])
-    .nullable()
-    .describe(
-      'Whether the risk score increased or decreased. ' +
-        'Null when the previous score is unavailable.'
-    ),
-});
+export const entityRiskScoreChangedEventSchema = lazySchema(() =>
+  z.object({
+    entityId: z
+      .string()
+      .max(1000)
+      .describe('The unique EUID of the entity whose risk score changed.'),
+    entityType: EntityType.describe('The type of entity (e.g. host, user, service, generic).'),
+    score: z.number().describe('The normalized risk score after the update (0–100).'),
+    previousScore: z
+      .number()
+      .nullable()
+      .describe(
+        'The normalized risk score before the update, or null when this is the first score assignment.'
+      ),
+    delta: z
+      .number()
+      .nullable()
+      .describe(
+        'The absolute magnitude of the change in normalized risk score. ' +
+          'Use `direction` to distinguish an increase from a decrease. ' +
+          'Null when the previous score is unavailable.'
+      ),
+    direction: z
+      .enum(['increase', 'decrease'])
+      .nullable()
+      .describe(
+        'Whether the risk score increased or decreased. ' +
+          'Null when the previous score is unavailable.'
+      ),
+  })
+);
 
 export type EntityRiskScoreChangedEvent = z.infer<typeof entityRiskScoreChangedEventSchema>;
 

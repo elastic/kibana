@@ -25,6 +25,9 @@ import {
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
+  setWatchlistRuleBasedDataSourceTool,
+  removeWatchlistRuleBasedDataSourceTool,
+  listWatchlistDataSourcesTool,
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
@@ -97,6 +100,15 @@ export const registerTools = (
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    removeWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    listWatchlistDataSourcesTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
 
   agentBuilder.tools.register(getResolutionGroupTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(linkEntitiesTool(core, logger, experimentalFeatures));
