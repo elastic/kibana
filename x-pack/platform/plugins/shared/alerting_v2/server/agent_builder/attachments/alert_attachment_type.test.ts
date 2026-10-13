@@ -260,7 +260,7 @@ describe('createAlertAttachmentType', () => {
         expect.objectContaining({
           labels: {
             attachment_type: ALERT_ATTACHMENT_TYPE,
-            episode_id: 'ep-missing',
+            alert_id: 'ep-missing',
             space_id: SPACE_ID,
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
           },
@@ -287,7 +287,7 @@ describe('createAlertAttachmentType', () => {
       expect(mockLogger.debug).toHaveBeenCalledWith('Unauthorized to resolve episode attachment', {
         labels: {
           attachment_type: ALERT_ATTACHMENT_TYPE,
-          episode_id: 'ep-1',
+          alert_id: 'ep-1',
           space_id: SPACE_ID,
         },
       });
@@ -388,7 +388,7 @@ describe('createAlertAttachmentType', () => {
         expect.objectContaining({
           labels: {
             attachment_type: ALERT_ATTACHMENT_TYPE,
-            episode_id: 'ep-1',
+            alert_id: 'ep-1',
             space_id: SPACE_ID,
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
           },

@@ -81,18 +81,18 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       const secondAction = actions.find((doc) => doc.group_hash === groupHashTwo);
 
       // Series actions target the series as a whole, so the persisted doc
-      // carries `episode_id: null` even though an episode exists.
+      // carries `alert_id: null` even though an episode exists.
       expect(firstAction).toMatchObject({
         action_type: 'snooze',
         group_hash: groupHashOne,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         expiry: '2099-01-01T00:00:00Z',
       });
       expect(secondAction).toMatchObject({
         action_type: 'snooze',
         group_hash: groupHashTwo,
-        episode_id: null,
+        alert_id: null,
         rule_id: ruleId,
         expiry: '2099-06-01T00:00:00Z',
       });
@@ -127,7 +127,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
     expect(actions[0]).toMatchObject({
       action_type: 'unsnooze',
       group_hash: groupHash,
-      episode_id: null,
+      alert_id: null,
       rule_id: ruleId,
     });
   });
@@ -171,7 +171,7 @@ apiTest.describe('Bulk series actions API', { tag: '@local-stateful-classic' }, 
       expect(actions[0]).toMatchObject({
         action_type: 'snooze',
         group_hash: knownGroup,
-        episode_id: null,
+        alert_id: null,
       });
     }
   );

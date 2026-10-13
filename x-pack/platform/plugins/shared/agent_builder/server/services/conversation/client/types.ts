@@ -28,7 +28,12 @@ import type {
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
-import type { ConversationEvent, TimelineEvent, UserIdAndName } from '@kbn/agent-builder-common';
+import type {
+  ConversationEvent,
+  ConversationWriteSource,
+  TimelineEvent,
+  UserIdAndName,
+} from '@kbn/agent-builder-common';
 import type { ConversationWithoutRoundsWithPermissions } from '../../../../common/http_api/conversations';
 
 export type ConversationCreateRequest = Omit<
@@ -221,3 +226,9 @@ export type NormalizedConversation = Conversation & {
   read_by?: ConversationReadByEntry[];
   pinned_by?: ConversationPinnedByEntry[];
 };
+
+/** Options of every conversation write that can emit `ai.conversation.updated`. */
+export interface ConversationWriteOptions {
+  /** The code path performing the write, recorded on the trigger event. */
+  source: ConversationWriteSource;
+}

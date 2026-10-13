@@ -53,7 +53,7 @@ describe('kiRetrievalSkill', () => {
     expect(templates?.length).toBeGreaterThan(0);
     expect(withLifecycle?.length).toBe(templates?.length);
     expect(kiRetrievalSkill.content).toContain('and `DROP governance.*`');
-    expect(kiRetrievalSkill.content).toContain('switches off its default only');
+    expect(kiRetrievalSkill.content).toContain('switches off its filter only');
   });
 
   it('keeps retrieval to the AI indices assigned to the agent', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, isoDateTime } from '@kbn/zod/v4';
 import { ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
@@ -56,16 +56,6 @@ export const getRuleChangeHistoryEventParamsSchema = z
 export type GetRuleChangeHistoryEventParams = z.infer<typeof getRuleChangeHistoryEventParamsSchema>;
 
 /**
- * Query params for `GET …/change_history/rules/{change_id}`.
- *
- * `change_id` alone identifies the event; `rule_id` is here only because the
- * one read API `@kbn/change-history` exposes always filters on an object id.
- * Tracked for removal in https://github.com/elastic/kibana/issues/292882.
- */
-export const getRuleChangeHistoryEventQuerySchema = z.object({ rule_id: ruleIdSchema }).strict();
-export type GetRuleChangeHistoryEventQuery = z.infer<typeof getRuleChangeHistoryEventQuerySchema>;
-
-/**
  * Actor for a change-history row. Unattributed writes may carry an empty
  * `name` (the write path stores `username ?? ''`).
  */
@@ -106,11 +96,9 @@ export type RuleChangeHistoryChanges = z.infer<typeof ruleChangeHistoryChangesSc
  */
 export const ruleChangeHistoryListItemSchema = z.object({
   id: z.string(),
-  created_at: z.iso
-    .datetime()
-    .describe(
-      'The ISO datetime when this change-history record was written. The rule change itself is timestamped by `updated_at` on the snapshot.'
-    ),
+  created_at: isoDateTime().describe(
+    'The ISO datetime when this change-history record was written. The rule change itself is timestamped by `updated_at` on the snapshot.'
+  ),
   actor: ruleChangeHistoryActorSchema,
   action: ruleChangeHistoryActionSchema,
   changes: ruleChangeHistoryChangesSchema.optional(),

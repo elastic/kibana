@@ -375,7 +375,6 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       aiIndices: false,
       relevantSkills: false,
       todos: false,
-      datasets: false,
       bash: false,
       apiDiscovery: false,
     },
@@ -400,6 +399,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 
@@ -449,7 +449,6 @@ export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
       aiIndices: false,
       relevantSkills: false,
       todos: false,
-      datasets: false,
       bash: false,
       apiDiscovery: false,
     },
@@ -510,7 +509,6 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       aiIndices: false,
       relevantSkills: false,
       todos: false,
-      datasets: false,
       bash: false,
       apiDiscovery: false,
     },
@@ -523,6 +521,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 

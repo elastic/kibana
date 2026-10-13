@@ -20,6 +20,9 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  // Migration recommendation: ALREADY COVERED - DELETE
+  // Covered by Scout:
+  // src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/filter.spec.ts
   describe('filter fields', () => {
     before(async () => {
       await es.index({

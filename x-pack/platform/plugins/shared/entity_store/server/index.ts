@@ -38,6 +38,12 @@ export type {
   EntityStoreCRUDClient,
 } from './types';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
+export type {
+  RegistrableEntityDefinition,
+  RegisteredEntityDefinition,
+  RegisterResult,
+  EntityDefinitionsClient,
+} from './domain/definitions/registry';
 export { EntityMaintainerTaskStatus } from './tasks/entity_maintainers/types';
 export type {
   EntityUpdateClient,
