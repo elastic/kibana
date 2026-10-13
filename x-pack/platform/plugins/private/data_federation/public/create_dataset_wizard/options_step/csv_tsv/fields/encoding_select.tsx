@@ -11,12 +11,12 @@ import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import { type CreateDatasetFormValues } from '../../../create_dataset_form_state';
+import { DEFAULT_ENCODING, type CreateDatasetFormValues } from '../../../create_dataset_form_state';
 import { EuiComboBoxWithCustomOption } from '../../../components/eui_combo_box_with_custom_option';
 
 const presetOptions = [
   {
-    value: 'UTF-8',
+    value: DEFAULT_ENCODING,
     label: createDatasetWizardStrings.settingsEncodingUtf8,
     append: <EuiBadge color="hollow">{createDatasetWizardStrings.defaultBadgeLabel}</EuiBadge>,
   },

@@ -228,8 +228,10 @@ steps:
             description: >-
               rule_uuid of every detection that is done this cycle: a detection whose
               events_write result was written: true or skipped with reason
-              existing_active_event or unchanged_outcome.
-              Failed (bulk_error) or unattempted writes must not be included.
+              existing_active_event or unchanged_outcome, or a detection intentionally
+              determined not event-eligible for which no write was attempted.
+              Failed (bulk_error or unknown_event_id) or unattempted event-eligible writes
+              must not be included.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -256,7 +258,7 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome]
+                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome, unknown_event_id]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]
@@ -316,17 +318,17 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
+          # Written through Kibana as its internal user, like detections in detection.yaml.
           - name: write_processed_marker
-            type: elasticsearch.request
+            type: kibana.request
             with:
               method: POST
-              path: '/{{ consts.DETECTIONS_INDEX }}/_doc'
+              path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+              headers:
+                x-elastic-internal-origin: 'kibana'
               body:
-                '@timestamp': '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-                kibana:
-                  space_ids:
-                    - '{{ variables.spaceId }}'
-                detection_id: '{{ foreach.item[0] }}'
+                detection_ids:
+                  - '{{ foreach.item[0] }}'
                 processed_by: '{{ execution.id }}'
             on-failure:
               continue: true
@@ -380,9 +382,7 @@ steps:
                 type: if
                 condition: '${{ foreach.item.event_id != null and consts.INVESTIGATABLE_SEVERITIES contains foreach.item.severity }}'
                 steps:
-                  # Flag-aware read (`getEventSearchClient()`): serves from `.rule-events` when
-                  # SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ is on, `.significant_events-events`
-                  # otherwise. Returns only the latest current-state version per event_id.
+                  # Reads the latest current-state version per event_id from `.rule-events`.
                   - name: resolve_active_event
                     type: kibana.request
                     with:

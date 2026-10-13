@@ -10,11 +10,14 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { UpdateWorkerResponse } from '@kbn/alertzero-common';
 import {
   ListWorkersResponse,
+  isWorkerEnableBlocked,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
+  SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
   touchesWorkerSettings,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   type UpdateWorkerRequestBody,
   type Worker,
+  type WorkerBlockingReason,
 } from '@kbn/alertzero-common';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowYaml } from '@kbn/workflows';
@@ -23,14 +26,13 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
+import type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowTemplateValues,
+} from '@kbn/workflows/managed';
 import { getManagedWorkflowDefinition } from '@kbn/workflows/managed';
 import { parseWorkflowYamlToJSON } from '@kbn/workflows-yaml';
-import {
-  installRegisteredWorker,
-  workerRegistry,
-  type WorkerRegistration,
-} from '../../managed_workflows/worker_registry';
+import { workerRegistry, type WorkerRegistration } from '../../managed_workflows/worker_registry';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
 import type { AgentLookup } from '../utils';
 import { buildAgentLookup, projectSkillsFromDefinition } from '../utils';
@@ -43,6 +45,12 @@ import {
   detachAlertTriageWorkerFromAllRules,
   detachRuleIdChunks,
 } from './alert_triage_rule_attachments';
+import {
+  ThreatIntelSupplyHardGateError,
+  ThreatIntelSupplyNotInstalledError,
+  type ThreatIntelSupplyService,
+} from '../threat_intel_supply';
+import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 interface AlertTriageOpts {
   getAttachmentService?: AlertTriageAttachmentServiceProvider;
@@ -85,17 +93,50 @@ const templateValuesEqual = (
   left != null &&
   Object.keys(right).every((key) => Object.hasOwn(left, key) && isEqual(left[key], right[key]));
 
+/** Why enabling any Worker in the space was refused before anything was written. */
+export type SpaceEnableBlockedReason = 'noModel';
+
 /** Why an Alert Triage Worker enable was refused before anything was written. */
 export type AlertTriageEnableBlockedReason =
   | 'alertAnalysisWorkflowDisabled'
   | 'alertAnalysisRuntimeDisabled'
   | 'ruleAttachmentUnavailable';
 
+/** Why Continuous Threat Hunt enable was refused before anything was written. */
+export type HuntSupplyEnableBlockedReason =
+  | 'huntSupplyPrerequisitesUnmet'
+  | 'huntSupplyReportsIndexUnmanaged'
+  | 'huntSupplyNotInstalled';
+
+/** Why a Worker enable was refused before anything was written. */
+export type WorkerEnableBlockedReason =
+  | SpaceEnableBlockedReason
+  | AlertTriageEnableBlockedReason
+  | HuntSupplyEnableBlockedReason;
+
+const readServiceAccountId = (
+  values: Record<string, unknown> | null | undefined
+): string | undefined => {
+  const id = values?.serviceAccountId;
+  return typeof id === 'string' && id.length > 0 ? id : undefined;
+};
+
+/** User saves install through the request-scoped workflows client so `run_as` can bind. */
+export type InstallWorkerForRequest = (
+  request: KibanaRequest,
+  registration: WorkerRegistration,
+  options: {
+    spaceId: string;
+    workflowIdSuffix?: string;
+    values?: ManagedWorkflowTemplateValues;
+  }
+) => Promise<void>;
+
 export type WorkerUpdateResult =
   | { outcome: 'updated'; response: UpdateWorkerResponse }
   | { outcome: 'not-found' }
   | { outcome: 'rejected'; what: string }
-  | { outcome: 'blocked'; reason: AlertTriageEnableBlockedReason }
+  | { outcome: 'blocked'; reason: WorkerEnableBlockedReason }
   | { outcome: 'invalid'; message: string }
   | { outcome: 'conflict' }
   | { outcome: 'unavailable' }
@@ -117,7 +158,10 @@ export class WorkersService {
       /** Code-registered agent types owned by this plugin, used for skill base resolution. */
       agentTypes?: readonly AgentTypeDefinition[];
     } = {},
-    private readonly alertTriageOpts: AlertTriageOpts = {}
+    private readonly alertTriageOpts: AlertTriageOpts = {},
+    private readonly installWorkerForRequest: InstallWorkerForRequest,
+    private readonly getBlockingReasons: GetWorkerBlockingReasons,
+    private readonly threatIntelSupply?: ThreatIntelSupplyService
   ) {
     this.agentTypeMap = new Map((agentOpts.agentTypes ?? []).map((t) => [t.id, t]));
   }
@@ -138,6 +182,18 @@ export class WorkersService {
       throw new Error('Managed Workflows API is not available');
     }
     return managedWorkflows;
+  }
+
+  private async persistWorker(
+    request: KibanaRequest,
+    registration: WorkerRegistration,
+    options: {
+      spaceId: string;
+      workflowIdSuffix: string;
+      values: ManagedWorkflowTemplateValues;
+    }
+  ): Promise<void> {
+    await this.installWorkerForRequest(request, registration, options);
   }
 
   private async ensureAgent(spaceId: string): Promise<void> {
@@ -181,13 +237,18 @@ export class WorkersService {
   async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
-    const agentLookup = await this.buildAgentLookup(request);
-    const hiddenWorkerIds = await this.hiddenWorkerIds(request);
+    const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.hiddenWorkerIds(request),
+      this.getBlockingReasons(request),
+    ]);
     const workers = await Promise.all(
       workerRegistry
         .list()
         .filter((registration) => !hiddenWorkerIds.has(registration.id))
-        .map((registration) => this.projectWorker(registration, spaceId, request, agentLookup))
+        .map((registration) =>
+          this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup)
+        )
     );
     return ListWorkersResponse.parse({ workers });
   }
@@ -206,8 +267,11 @@ export class WorkersService {
       return undefined;
     }
 
-    const agentLookup = await this.buildAgentLookup(request);
-    return this.projectWorker(registration, spaceId, request, agentLookup);
+    const [agentLookup, blockingReasons] = await Promise.all([
+      this.buildAgentLookup(request),
+      this.getBlockingReasons(request),
+    ]);
+    return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
   }
 
   async update(
@@ -223,6 +287,10 @@ export class WorkersService {
     if ((await this.hiddenWorkerIds(request)).has(registration.id)) {
       return { outcome: 'not-found' };
     }
+    const blockingReasons = await this.getBlockingReasons(request);
+    if (patch.enabled === true && isWorkerEnableBlocked(blockingReasons)) {
+      return { outcome: 'blocked', reason: 'noModel' };
+    }
 
     const touchesSettings = touchesWorkerSettings(patch);
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -233,6 +301,7 @@ export class WorkersService {
     });
 
     const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+    const isHuntWorker = workerId === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
     // Rules the caller cannot edit (ML rules without ML authz), so this call could not attach or
     // detach them. Reported to the caller: on enable those rules are silently not triaged, and on
     // disable they keep firing the Worker's action against a disabled workflow.
@@ -258,6 +327,23 @@ export class WorkersService {
       }
     }
 
+    const currentState = status.installed
+      ? await managedWorkflows.getInstalledWorkflowState(status.workflowId, spaceId)
+      : null;
+    if (status.installed && !currentState) return { outcome: 'unavailable' };
+    const requestedAccount = patch.settings?.serviceAccountId;
+    const nextAccount =
+      requestedAccount === undefined
+        ? readServiceAccountId(currentState?.templateValues)
+        : requestedAccount ?? undefined;
+    const nextEnabled = patch.enabled ?? Boolean(status.enabled);
+    if (nextEnabled && !nextAccount) {
+      return { outcome: 'rejected', what: 'a worker that is enabled without a service account' };
+    }
+
+    // Validate settings (revision + patch) before Hunt supply ensure so a rejected
+    // account/settings update cannot leave ingest/enrich/attribute already on.
+    let pendingSettingsValues: ManagedWorkflowTemplateValues | null = null;
     if (touchesSettings) {
       if (patch.settingsRevision === undefined) {
         return { outcome: 'rejected', what: 'a settings update without its revision' };
@@ -275,133 +361,225 @@ export class WorkersService {
       if ('invalid' in applied) {
         return { outcome: 'invalid', message: applied.invalid };
       }
-
-      await installRegisteredWorker(managedWorkflows, registration, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-        values: applied.values,
-      });
-      status = await managedWorkflows.getWorkflowStatus(registration.id, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
-      if (!status.installed) return { outcome: 'unavailable' };
-      const persisted = await managedWorkflows.getInstalledWorkflowState(
-        status.workflowId,
-        spaceId
-      );
-      if (!persisted || !templateValuesEqual(persisted.templateValues, applied.values)) {
-        this.logger.error(
-          `Worker "${registration.id}" settings write could not be confirmed after save`
-        );
-        return { outcome: 'failed' };
-      }
-
-      await management.updateWorkflow(
-        status.workflowId,
-        { enabled: Boolean(status.enabled) },
-        spaceId,
-        request
-      );
-      status = await managedWorkflows.getWorkflowStatus(registration.id, {
-        spaceId,
-        workflowIdSuffix: spaceId,
-      });
+      pendingSettingsValues = applied.values;
     }
 
-    if (patch.enabled != null) {
-      if (!status.installed) {
-        await installRegisteredWorker(managedWorkflows, registration, {
+    // Hunt supply: hard-gate + ensure TI after request validation and before enabling
+    // CTH so a failed ensure never leaves Hunt on without reports. If Hunt never ends up
+    // enabled after this ensure, roll supply back (Restore only shows when Hunt is on).
+    let huntSupplyEnsured = false;
+    const rollbackHuntSupplyIfNeeded = async (): Promise<void> => {
+      if (!huntSupplyEnsured || !this.threatIntelSupply) {
+        return;
+      }
+      huntSupplyEnsured = false;
+      try {
+        await this.threatIntelSupply.teardownSupplyForSpace(spaceId, request);
+      } catch (err) {
+        this.logger.error(
+          `Hunt Watch: threat intel supply rollback failed: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    };
+
+    if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+      try {
+        await this.threatIntelSupply.assertHardGate(request);
+        await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+        huntSupplyEnsured = true;
+      } catch (err) {
+        if (err instanceof ThreatIntelSupplyHardGateError) {
+          return {
+            outcome: 'blocked',
+            reason: err.reasonCodes.includes('reports_index_unmanaged')
+              ? 'huntSupplyReportsIndexUnmanaged'
+              : 'huntSupplyPrerequisitesUnmet',
+          };
+        }
+        if (err instanceof ThreatIntelSupplyNotInstalledError) {
+          return { outcome: 'blocked', reason: 'huntSupplyNotInstalled' };
+        }
+        throw err;
+      }
+    }
+
+    try {
+      if (pendingSettingsValues) {
+        await this.persistWorker(request, registration, {
           spaceId,
           workflowIdSuffix: spaceId,
-          values: registration.settings.createDefaultValues(),
+          values: pendingSettingsValues,
         });
         status = await managedWorkflows.getWorkflowStatus(registration.id, {
           spaceId,
           workflowIdSuffix: spaceId,
         });
-        if (!status.installed) return { outcome: 'unavailable' };
-      }
-
-      if (isAlertTriageWorker && patch.enabled && alertTriageAttachmentService) {
-        // Attach-then-enable: the Worker only fires from rules carrying its action, so enabling
-        // without attaching produces a Worker that never runs. Preflight and attachment-service
-        // resolution already ran above, before anything was written.
-        // A failed bulk edit leaves the Worker off, not enabled-but-unattached: attach runs in
-        // passes (see alert_triage_rule_attachments.ts), so a later pass can throw after an
-        // earlier one already attached some rules. Roll those back on failure — best-effort, so
-        // a failed rollback does not mask the original error — rather than leave rules carrying
-        // the action while the Worker itself stays (or is reported) disabled.
-        // Only the rule IDs *this attempt* attached are compensated (via onRulesAttached +
-        // detachRuleIdChunks): a re-enable of an already-attached Worker must not detach rules
-        // that were attached before this call, which detachAlertTriageWorkerFromAllRules would
-        // do by re-querying every currently-attached rule.
-        const attachedRuleIdChunks: string[][] = [];
-        const attachResult = await attachAlertTriageWorkerToAllRules(
-          alertTriageAttachmentService,
-          (ruleIds) => attachedRuleIdChunks.push(ruleIds)
-        ).catch(async (err: Error) => {
-          this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
-          await detachRuleIdChunks(alertTriageAttachmentService, attachedRuleIdChunks).catch(
-            (rollbackErr: Error) => {
-              this.logger.error(
-                `Alert Triage Worker: rollback detach after failed attach also failed: ${rollbackErr.message}`
-              );
-            }
-          );
-          throw err;
-        });
-        skippedRuleCount = attachResult.skippedRuleCount;
-        if (skippedRuleCount > 0) {
-          this.logger.warn(
-            `Alert Triage Worker: ${skippedRuleCount} rule(s) were not attached because the current user cannot edit them`
-          );
+        if (!status.installed) {
+          await rollbackHuntSupplyIfNeeded();
+          return { outcome: 'unavailable' };
         }
+        const persisted = await managedWorkflows.getInstalledWorkflowState(
+          status.workflowId,
+          spaceId
+        );
+        if (!persisted || !templateValuesEqual(persisted.templateValues, pendingSettingsValues)) {
+          this.logger.error(
+            `Worker "${registration.id}" settings write could not be confirmed after save`
+          );
+          await rollbackHuntSupplyIfNeeded();
+          return { outcome: 'failed' };
+        }
+
+        await management.updateWorkflow(
+          status.workflowId,
+          { enabled: Boolean(status.enabled) },
+          spaceId,
+          request
+        );
+        status = await managedWorkflows.getWorkflowStatus(registration.id, {
+          spaceId,
+          workflowIdSuffix: spaceId,
+        });
       }
 
-      await management.updateWorkflow(
-        status.workflowId,
-        { enabled: patch.enabled },
-        spaceId,
-        request
-      );
+      if (patch.enabled != null) {
+        if (!status.installed) {
+          await this.persistWorker(request, registration, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+            values: registration.settings.createDefaultValues(),
+          });
+          status = await managedWorkflows.getWorkflowStatus(registration.id, {
+            spaceId,
+            workflowIdSuffix: spaceId,
+          });
+          if (!status.installed) {
+            await rollbackHuntSupplyIfNeeded();
+            return { outcome: 'unavailable' };
+          }
+        }
 
-      if (isAlertTriageWorker && !patch.enabled) {
-        // Detach after disabling; don't let a partial detach — or a failure resolving the
-        // attachment service itself — fail the disable, which has already been persisted above.
-        // Resolving the service can throw (it builds scoped rules/actions clients and
-        // calculates rule authorization), so it shares this try/catch rather than only the
-        // detach call.
-        try {
-          const attachmentService = await this.getAlertTriageAttachmentService(
-            request,
-            status.workflowId
-          );
-          if (attachmentService) {
-            const detachResult = await detachAlertTriageWorkerFromAllRules(attachmentService);
-            skippedRuleCount = detachResult.skippedRuleCount;
-            if (skippedRuleCount > 0) {
-              this.logger.warn(
-                `Alert Triage Worker: ${skippedRuleCount} rule(s) still carry the Worker action because the current user cannot edit them`
-              );
-            }
-          } else {
+        if (isAlertTriageWorker && patch.enabled && alertTriageAttachmentService) {
+          // Attach-then-enable: the Worker only fires from rules carrying its action, so enabling
+          // without attaching produces a Worker that never runs. Preflight and attachment-service
+          // resolution already ran above, before anything was written.
+          // A failed bulk edit leaves the Worker off, not enabled-but-unattached: attach runs in
+          // passes (see alert_triage_rule_attachments.ts), so a later pass can throw after an
+          // earlier one already attached some rules. Roll those back on failure — best-effort, so
+          // a failed rollback does not mask the original error — rather than leave rules carrying
+          // the action while the Worker itself stays (or is reported) disabled.
+          // Only the rule IDs *this attempt* attached are compensated (via onRulesAttached +
+          // detachRuleIdChunks): a re-enable of an already-attached Worker must not detach rules
+          // that were attached before this call, which detachAlertTriageWorkerFromAllRules would
+          // do by re-querying every currently-attached rule.
+          const attachedRuleIdChunks: string[][] = [];
+          const attachResult = await attachAlertTriageWorkerToAllRules(
+            alertTriageAttachmentService,
+            (ruleIds) => attachedRuleIdChunks.push(ruleIds)
+          ).catch(async (err: Error) => {
+            this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
+            await detachRuleIdChunks(alertTriageAttachmentService, attachedRuleIdChunks).catch(
+              (rollbackErr: Error) => {
+                this.logger.error(
+                  `Alert Triage Worker: rollback detach after failed attach also failed: ${rollbackErr.message}`
+                );
+              }
+            );
+            throw err;
+          });
+          skippedRuleCount = attachResult.skippedRuleCount;
+          if (skippedRuleCount > 0) {
             this.logger.warn(
-              'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'
+              `Alert Triage Worker: ${skippedRuleCount} rule(s) were not attached because the current user cannot edit them`
             );
           }
-        } catch (err) {
-          this.logger.error(
-            `Alert Triage Worker: rule detachment failed: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
+        }
+
+        await management.updateWorkflow(
+          status.workflowId,
+          { enabled: patch.enabled },
+          spaceId,
+          request
+        );
+
+        if (isHuntWorker && patch.enabled === true && this.threatIntelSupply) {
+          // Hunt is on: do not roll supply back if later projection fails. Re-ensure so a
+          // concurrent teardown in another space cannot leave this space hunting without
+          // shared ingest/enrich (that other space ensured before its Hunt write finished).
+          huntSupplyEnsured = false;
+          try {
+            await this.threatIntelSupply.ensureSupplyForSpace(spaceId, request);
+          } catch (err) {
+            this.logger.error(
+              `Hunt Watch: threat intel supply re-ensure after enable failed: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+        }
+
+        if (isAlertTriageWorker && !patch.enabled) {
+          // Detach after disabling; don't let a partial detach — or a failure resolving the
+          // attachment service itself — fail the disable, which has already been persisted above.
+          // Resolving the service can throw (it builds scoped rules/actions clients and
+          // calculates rule authorization), so it shares this try/catch rather than only the
+          // detach call.
+          try {
+            const attachmentService = await this.getAlertTriageAttachmentService(
+              request,
+              status.workflowId
+            );
+            if (attachmentService) {
+              const detachResult = await detachAlertTriageWorkerFromAllRules(attachmentService);
+              skippedRuleCount = detachResult.skippedRuleCount;
+              if (skippedRuleCount > 0) {
+                this.logger.warn(
+                  `Alert Triage Worker: ${skippedRuleCount} rule(s) still carry the Worker action because the current user cannot edit them`
+                );
+              }
+            } else {
+              this.logger.warn(
+                'Alert Triage Worker: disabled without detaching rules; the rule-attachment service is unavailable'
+              );
+            }
+          } catch (err) {
+            this.logger.error(
+              `Alert Triage Worker: rule detachment failed: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
+        }
+
+        if (isHuntWorker && !patch.enabled && this.threatIntelSupply) {
+          try {
+            await this.threatIntelSupply.teardownSupplyForSpace(spaceId, request);
+          } catch (err) {
+            // Hunt is already off; log and continue so disable still succeeds when TI
+            // docs are missing or a global update races another space.
+            this.logger.error(
+              `Hunt Watch: threat intel supply teardown failed: ${
+                err instanceof Error ? err.message : String(err)
+              }`
+            );
+          }
         }
       }
+    } catch (err) {
+      await rollbackHuntSupplyIfNeeded();
+      throw err;
     }
 
     const agentLookup = await this.buildAgentLookup(request);
-    const worker = await this.projectWorker(registration, spaceId, request, agentLookup);
+    const worker = await this.projectWorker(
+      registration,
+      spaceId,
+      request,
+      blockingReasons,
+      agentLookup
+    );
     return {
       outcome: 'updated',
       response: { worker, ...(skippedRuleCount > 0 ? { skippedRuleCount } : {}) },
@@ -487,6 +665,7 @@ export class WorkersService {
     registration: WorkerRegistration,
     spaceId: string,
     request: KibanaRequest,
+    blockingReasons: WorkerBlockingReason[],
     agentLookupCallback?: AgentLookup
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
@@ -560,6 +739,7 @@ export class WorkersService {
       settingsRevision,
       // `installed` is any document at this id, including a user workflow that is not ours.
       workflowId: status.installed && status.status !== 'not_managed' ? status.workflowId : null,
+      blockingReasons,
       skills: projectSkillsFromDefinition(definition, agentLookupCallback),
     };
   }

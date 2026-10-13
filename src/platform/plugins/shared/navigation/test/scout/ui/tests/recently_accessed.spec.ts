@@ -27,6 +27,7 @@ test.describe('recently accessed hover list', { tag: tags.stateful.classic }, ()
   const runId = randomUUID();
   let first: { id: string; title: string };
   let second: { id: string; title: string };
+  let long: { id: string; title: string };
 
   test.beforeAll(async ({ apiServices }) => {
     // Delete first so a leftover space from an interrupted prior run doesn't
@@ -44,6 +45,12 @@ test.describe('recently accessed hover list', { tag: tags.stateful.classic }, ()
     second = {
       title: secondTitle,
       id: await apiServices.dashboard.create({ title: secondTitle }, SPACE.id),
+    };
+
+    const longTitle = `[Metrics Kubernetes] Pods CPU and memory usage by namespace ${runId}`;
+    long = {
+      title: longTitle,
+      id: await apiServices.dashboard.create({ title: longTitle }, SPACE.id),
     };
   });
 
@@ -104,6 +111,34 @@ test.describe('recently accessed hover list', { tag: tags.stateful.classic }, ()
       await pageObjects.chrome.nav.hoverPrimaryItemById('dashboards');
       await secondItem.click();
       await expectDashboardLoaded(second);
+    });
+  });
+
+  test('shows the full long title in a tooltip on hover', async ({
+    browserAuth,
+    pageObjects,
+    kbnUrl,
+    page,
+  }) => {
+    await browserAuth.loginAsViewer();
+
+    await test.step('open the long-titled dashboard to record it', async () => {
+      await page.goto(
+        kbnUrl.app('dashboards', {
+          space: SPACE.id,
+          pathOptions: { hash: `/view/${long.id}` },
+        })
+      );
+      await pageObjects.dashboard.waitForRenderComplete();
+      await pageObjects.collapsibleNav.clickNavItemByDeepLinkId('discover');
+      await expect(page).toHaveURL(/\/app\/discover/);
+    });
+
+    // The tooltip only renders when the label is measured as overflowing in the real layout.
+    await test.step('hover the recent item', async () => {
+      await pageObjects.chrome.nav.hoverPrimaryItemById('dashboards');
+      await pageObjects.chrome.nav.getPopoverItemById(`recentlyViewed:${long.id}`).hover();
+      await expect(page.getByRole('tooltip')).toHaveText(long.title);
     });
   });
 });

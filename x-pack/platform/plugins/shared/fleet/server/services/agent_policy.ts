@@ -149,6 +149,7 @@ import {
 } from './elastic_agent_manifest';
 
 import { bulkInstallPackages, getPackageInfo } from './epm/packages';
+import { runWithCache } from './epm/packages/cache';
 import { ensureInstalledPackage } from './epm/packages/install';
 import { unenrollForAgentPolicyId } from './agents';
 import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
@@ -935,6 +936,7 @@ class AgentPolicyService {
       esClient?: ElasticsearchClient;
       withAgentCount?: boolean;
       spaceId?: string;
+      showAgentless?: boolean;
     }
   ): Promise<{
     items: AgentPolicy[];
@@ -953,6 +955,7 @@ class AgentPolicyService {
       withPackagePolicies = false,
       fields,
       spaceId,
+      showAgentless = true,
     } = options;
 
     const baseFindParams: SavedObjectsFindOptions = {
@@ -968,7 +971,15 @@ class AgentPolicyService {
       baseFindParams.namespaces = [spaceId];
     }
 
-    const filter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
+    // Applied separately from the user kuery so that it is kept when falling back to a simple search
+    const hideAgentlessFilter = showAgentless
+      ? undefined
+      : normalizeKuery(savedObjectType, `NOT ${savedObjectType}.supports_agentless:true`);
+    const userFilter = kuery ? normalizeKuery(savedObjectType, kuery) : undefined;
+    const filter =
+      hideAgentlessFilter && userFilter
+        ? `(${hideAgentlessFilter}) AND (${userFilter})`
+        : hideAgentlessFilter ?? userFilter;
     let agentPoliciesSO;
     try {
       agentPoliciesSO = await soClient.find<AgentPolicySOAttributes>({
@@ -983,6 +994,7 @@ class AgentPolicyService {
         agentPoliciesSO = await soClient
           .find<AgentPolicySOAttributes>({
             ...baseFindParams,
+            filter: hideAgentlessFilter,
             search: kuery,
           })
           .catch(
@@ -1326,18 +1338,22 @@ class AgentPolicyService {
     minAgentVersion: string | undefined;
     packageAgentVersionConditions: AgentPolicyAgentVersionCondition[] | undefined;
   }> {
-    const packagePolicies = await findPackagePoliciesForVersionCheck(soClient, policyId);
-    const { conditions, hasTemplateConditions } = await collectAgentVersionConditions(
-      soClient,
-      packagePolicies
-    );
-    const hasConditions = conditions.length > 0;
+    // getPackageInfo only reuses results inside a runWithCache session. Sync updates never
+    // opened one, so every package policy paid a full lookup.
+    return runWithCache(async () => {
+      const packagePolicies = await findPackagePoliciesForVersionCheck(soClient, policyId);
+      const { conditions, hasTemplateConditions } = await collectAgentVersionConditions(
+        soClient,
+        packagePolicies
+      );
+      const hasConditions = conditions.length > 0;
 
-    return {
-      hasAgentVersionConditions: hasConditions || hasTemplateConditions,
-      minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
-      packageAgentVersionConditions: hasConditions ? conditions : undefined,
-    };
+      return {
+        hasAgentVersionConditions: hasConditions || hasTemplateConditions,
+        minAgentVersion: hasConditions ? highestMinAgentVersion(conditions) : undefined,
+        packageAgentVersionConditions: hasConditions ? conditions : undefined,
+      };
+    });
   }
 
   /**
