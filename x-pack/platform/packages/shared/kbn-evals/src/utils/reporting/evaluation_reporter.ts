@@ -19,13 +19,16 @@ export type EvaluationReporter = (
   options?: { taskModelId?: string; suiteId?: string; executionId?: string }
 ) => Promise<void>;
 
+const describeModel = (model: Model): string =>
+  `${model.id} (${model.family}/${model.provider})${
+    model.reasoning_effort ? ` reasoning effort: ${model.reasoning_effort}` : ''
+  }`;
+
 function buildReportHeader(taskModel: Model, evaluatorModel: Model | undefined): string[] {
-  const lines = [`Model: ${taskModel.id} (${taskModel.family}/${taskModel.provider})`];
+  const lines = [`Model: ${describeModel(taskModel)}`];
   // Experiments scored only by code evaluators invoke no judge, so there is no line to print.
   if (evaluatorModel) {
-    lines.push(
-      `Evaluator Model: ${evaluatorModel.id} (${evaluatorModel.family}/${evaluatorModel.provider})`
-    );
+    lines.push(`Evaluator Model: ${describeModel(evaluatorModel)}`);
   }
   return lines;
 }

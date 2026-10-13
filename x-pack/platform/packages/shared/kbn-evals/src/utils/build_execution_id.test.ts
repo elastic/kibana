@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildExecutionId } from './build_execution_id';
+import { buildExecutionId, parseExecutionIdModelSegment } from './build_execution_id';
 
 describe('buildExecutionId', () => {
   it('combines build, suite, and model into a single key', () => {
@@ -91,5 +91,32 @@ describe('buildExecutionId', () => {
     expect(
       buildExecutionId({ baseExecutionId: '', suiteId: 'significant-events', modelId: 'gpt-4' })
     ).toBe('');
+  });
+});
+
+describe('parseExecutionIdModelSegment', () => {
+  it('reads the model and effort back out of a variant segment', () => {
+    expect(parseExecutionIdModelSegment('claude-opus@high')).toEqual({
+      modelId: 'claude-opus',
+      reasoningEffort: 'high',
+    });
+  });
+
+  it('leaves a plain model segment without an effort', () => {
+    expect(parseExecutionIdModelSegment('claude-opus')).toEqual({ modelId: 'claude-opus' });
+  });
+
+  it('round-trips what buildExecutionId produced', () => {
+    const executionId = buildExecutionId({
+      baseExecutionId: 'bk-build-1',
+      suiteId: 'significant-events',
+      modelId: 'claude-opus',
+      reasoningEffort: 'low',
+    })!;
+
+    expect(parseExecutionIdModelSegment(executionId.split('::').pop()!)).toEqual({
+      modelId: 'claude-opus',
+      reasoningEffort: 'low',
+    });
   });
 });

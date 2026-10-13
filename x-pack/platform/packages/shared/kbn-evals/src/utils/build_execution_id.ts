@@ -46,3 +46,18 @@ export function buildExecutionId({
     .filter((part): part is string => Boolean(part))
     .join('::');
 }
+
+/**
+ * Reads the model segment of a composite execution id back into its parts: `claude@high`
+ * -> `{ modelId: 'claude', reasoningEffort: 'high' }`, `claude` -> `{ modelId: 'claude' }`.
+ */
+export function parseExecutionIdModelSegment(segment: string): {
+  modelId: string;
+  reasoningEffort?: string;
+} {
+  const at = segment.lastIndexOf('@');
+  if (at === -1) {
+    return { modelId: segment };
+  }
+  return { modelId: segment.slice(0, at), reasoningEffort: segment.slice(at + 1) };
+}

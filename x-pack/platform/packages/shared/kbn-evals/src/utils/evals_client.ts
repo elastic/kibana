@@ -515,11 +515,13 @@ export class EvalsClient {
     suiteId,
     branch,
     taskModelId,
+    reasoningEffort,
     excludeExecutionId,
   }: {
     suiteId: string;
     branch: string;
     taskModelId?: string;
+    reasoningEffort?: string;
     excludeExecutionId?: string;
   }): Promise<BaselineExperiment | undefined> {
     try {
@@ -530,15 +532,19 @@ export class EvalsClient {
           suite_id: suiteId,
           branch,
           ...(taskModelId && { model_id: taskModelId }),
+          ...(reasoningEffort && { reasoning_effort: reasoningEffort }),
           page: 1,
-          per_page: 5,
+          per_page: 10,
         },
         headers: VERSIONED_HEADERS,
       });
 
       const parsed = GetEvaluationExperimentsResponse.parse(getResponseData(response));
       const match = parsed.experiments.find(
-        (exp) => exp.execution_id != null && exp.execution_id !== excludeExecutionId
+        (exp) =>
+          exp.execution_id != null &&
+          exp.execution_id !== excludeExecutionId &&
+          (taskModelId === undefined || exp.task_model?.reasoning_effort === reasoningEffort)
       );
 
       if (!match || !match.execution_id) {
