@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
+import type { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
 import { isHitlWaitStepType } from '../../common/hitl';
@@ -1349,5 +1349,32 @@ function resolveWorklfowSettings(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function convertToSerializableGraph(graph: graphlib.Graph): any {
-  return graphlib.json.write(graph); // GraphLib does not provide type information, so we use `any`
+  // Same shape as graphlib's `json.write`, which `@dagrejs/dagre` no longer exposes.
+  const graphLabel = graph.graph();
+  return {
+    options: {
+      directed: graph.isDirected(),
+      multigraph: graph.isMultigraph(),
+      compound: graph.isCompound(),
+    },
+    nodes: graph.nodes().map((v) => {
+      const value = graph.node(v);
+      const parent = graph.parent(v);
+      return {
+        v,
+        ...(value !== undefined && { value }),
+        ...(parent !== undefined && { parent }),
+      };
+    }),
+    edges: graph.edges().map((edge) => {
+      const value = graph.edge(edge);
+      return {
+        v: edge.v,
+        w: edge.w,
+        ...(edge.name !== undefined && { name: edge.name }),
+        ...(value !== undefined && { value }),
+      };
+    }),
+    ...(graphLabel !== undefined && { value: structuredClone(graphLabel) }),
+  };
 }
