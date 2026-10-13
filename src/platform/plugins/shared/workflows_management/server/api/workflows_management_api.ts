@@ -254,6 +254,11 @@ export interface RunWorkflowWithAlertPreprocessingParams {
    * the expanded alert-event shape.
    */
   eventOverrides?: Record<string, unknown>;
+  /**
+   * Set by manual-run entry points (the Run route) to refuse workflows that can only run
+   * as the delegated identity of a parent run. Server-side callers leave it unset.
+   */
+  rejectDelegatedIdentity?: boolean;
 }
 
 export interface RunWorkflowWithAlertPreprocessingResult {
@@ -702,15 +707,13 @@ export class WorkflowsManagementApi {
     return this.workflowsService.disableAllWorkflows(spaceId, request);
   }
 
-  public async runWorkflow(
-    workflow: WorkflowExecutionEngineModel,
-    spaceId: string,
-    inputs: Record<string, any>,
-    request: KibanaRequest,
-    triggeredBy?: string,
-    metadata?: Record<string, unknown>,
-    isUserInteractive?: boolean
-  ): Promise<string> {
+  /**
+   * Rejects a manual, top-level run of a workflow that can only execute as the delegated
+   * identity of a parent run. Only manual-run entry points (the Run route, the workflows
+   * connector action) call this. Server-side callers such as `executeWorkflow` are not
+   * gated: they own the run, and an `inherit` step nested in the definition is legitimate.
+   */
+  public assertRunnableStandalone(workflow: WorkflowExecutionEngineModel): void {
     if (requiresDelegatedIdentity(workflow)) {
       throw new WorkflowRequiresDelegatedIdentityError(
         i18n.translate('workflows.api.workflowRequiresDelegatedIdentityErrorMessage', {
@@ -720,6 +723,17 @@ export class WorkflowsManagementApi {
         })
       );
     }
+  }
+
+  public async runWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    inputs: Record<string, any>,
+    request: KibanaRequest,
+    triggeredBy?: string,
+    metadata?: Record<string, unknown>,
+    isUserInteractive?: boolean
+  ): Promise<string> {
     if (!workflow.isEphemeral) {
       await this.assertWorkflowAccess(workflow.id, spaceId, 'execute', request);
     }
@@ -760,7 +774,11 @@ export class WorkflowsManagementApi {
     preprocessingContext,
     metadata,
     eventOverrides,
+    rejectDelegatedIdentity,
   }: RunWorkflowWithAlertPreprocessingParams): Promise<RunWorkflowWithAlertPreprocessingResult> {
+    if (rejectDelegatedIdentity) {
+      this.assertRunnableStandalone(workflow);
+    }
     const processedInputs = await preprocessAlertInputs(
       inputs,
       preprocessingContext,

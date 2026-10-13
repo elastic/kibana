@@ -1382,6 +1382,7 @@ steps:
           inputs: {},
           request: mockRequest,
           preprocessingContext: {} as AlertPreprocessingContext,
+          rejectDelegatedIdentity: true,
         })
         .catch((e: unknown) => e);
 
@@ -1391,6 +1392,39 @@ steps:
         /delegates its execution identity to a parent workflow/
       );
       expect(mockWorkflowsExecutionEngine.executeWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('does not refuse delegated-identity workflows unless the caller opts in', async () => {
+      const workflow = {
+        id: 'delegating-workflow',
+        name: 'Delegating',
+        enabled: true,
+        definition: {
+          version: '1',
+          name: 'Delegating',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [
+            {
+              name: 'child',
+              type: 'workflow.execute',
+              with: { 'workflow-id': 'child', 'run-as-mode': 'inherit' },
+            },
+          ],
+        },
+        yaml: 'name: Delegating',
+      } as WorkflowExecutionEngineModel;
+      mockPreprocessAlertInputs.mockResolvedValue({});
+
+      await api.runWorkflowWithAlertPreprocessing({
+        workflow,
+        spaceId: 'default',
+        inputs: {},
+        request: mockRequest,
+        preprocessingContext: {} as AlertPreprocessingContext,
+      });
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1487,6 +1521,74 @@ steps:
         'default',
         { includeOutput: true }
       );
+    });
+
+    it('executes a workflow with a nested run-as-mode inherit step and no run_as (server-side caller is not gated)', async () => {
+      // Regression: shape of the proposals `system-create-proposal` workflow — an `inherit`
+      // workflow.execute step nested in if/else inside a while loop, no settings.run_as.
+      // `executeWorkflow` is the server-side entry (agent tools), so it must not be refused
+      // the way a manual Run of the same definition is.
+      const definition = {
+        version: '1' as const,
+        name: 'Create proposal shape',
+        enabled: true,
+        triggers: [{ type: 'manual' as const }],
+        steps: [
+          {
+            name: 'decision_loop',
+            type: 'while',
+            condition: 'true',
+            steps: [
+              {
+                name: 'approve_with_action',
+                type: 'if',
+                condition: 'true',
+                steps: [
+                  {
+                    name: 'execute_by_approval_mode',
+                    type: 'if',
+                    condition: 'true',
+                    steps: [],
+                    else: [
+                      {
+                        name: 'execute_as_worker',
+                        type: 'workflow.execute',
+                        with: { 'workflow-id': 'worker', 'run-as-mode': 'inherit' },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'system-create-proposal',
+        name: 'Create proposal shape',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Create proposal shape',
+        definition,
+      } as any);
+
+      // Capture rejection immediately so a regression fails the assertion below instead of
+      // surfacing as an unhandled rejection while fake timers advance.
+      const outcome = await runWithTimers(
+        api
+          .executeWorkflow({
+            workflowId: 'system-create-proposal',
+            inputs: {},
+            spaceId: 'default',
+            request: mockRequest,
+            waitForCompletion: false,
+          })
+          .catch((e: unknown) => e)
+      );
+
+      expect(outcome).not.toBeInstanceOf(WorkflowRequiresDelegatedIdentityError);
+      expect(outcome).toEqual(expect.objectContaining({ workflowExecutionId: 'test-exec-id' }));
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledTimes(1);
     });
 
     it('executes an inline workflow as ephemeral without forcing test-run semantics', async () => {

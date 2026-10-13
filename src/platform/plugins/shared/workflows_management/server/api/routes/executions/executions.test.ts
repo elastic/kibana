@@ -207,6 +207,7 @@ describe('Execution Routes', () => {
         request,
         preprocessingContext: mockContext,
         metadata: { src: 'ui' },
+        rejectDelegatedIdentity: true,
       });
       expect(result).toEqual({ type: 'ok', body: { workflowExecutionId: 'exec-1' } });
     });
