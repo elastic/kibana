@@ -6,16 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 
 const keepAlivePersistentIndicatorsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_keep_alive',
+  endpoint: 'POST /internal/streams/{sourceId}/knowledge_indicators/_keep_alive',
   options: {
     access: 'internal',
-    summary: 'Keep alive persistent (durable or excluded) knowledge indicators for a stream',
+    summary: 'Keep alive persistent (durable or excluded) knowledge indicators for a source',
   },
   security: {
     authz: {
@@ -23,19 +23,19 @@ const keepAlivePersistentIndicatorsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
     body: z.object({ lastRefreshedBefore: z.iso.datetime() }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
-    const { getKnowledgeIndicatorClient, licensing, streamsClient } = await getScopedClients({
+    const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing });
-    await streamsClient.ensureStream(params.path.streamName);
+    const { source } = await sourcesClient.get(params.path.sourceId);
 
     const kiClient = await getKnowledgeIndicatorClient();
-    const { refreshed } = await kiClient.keepAlivePersistentIndicators(params.path.streamName, {
+    const { refreshed } = await kiClient.keepAlivePersistentIndicators(source.id, {
       lastRefreshedBefore: params.body.lastRefreshedBefore,
     });
     return { refreshed };
