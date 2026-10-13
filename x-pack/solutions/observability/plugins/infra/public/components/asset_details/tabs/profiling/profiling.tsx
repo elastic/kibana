@@ -11,6 +11,7 @@ import React, { useCallback } from 'react';
 import {
   EmbeddableProfilingSearchBar,
   ProfilingEmptyState,
+  useProfilingSchemaState,
 } from '@kbn/observability-shared-plugin/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -25,6 +26,7 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ErrorPrompt } from './error_prompt';
 import { Threads } from './threads';
 import { DescriptionCallout } from './description_callout';
+import { ProfilingSchemaSelector } from './profiling_schema_selector';
 import { Popover } from '../common/popover';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useProfilingKuery } from '../../hooks/use_profiling_kuery';
@@ -34,6 +36,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
   const { isActiveTab } = useTabSwitcherContext();
   const { dateRange, setDateRange } = useDatePickerContext();
   const { fullKuery, customKuery, setCustomKuery } = useProfilingKuery();
+  const { schema } = useProfilingSchemaState();
   const { request$ } = useRequestObservable<ProfilingSchemasStatus>();
 
   const { data, status, error } = useFetcher(
@@ -69,7 +72,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
       content: (
         <>
           <EuiSpacer />
-          <Flamegraph kuery={fullKuery} />
+          <Flamegraph kuery={fullKuery} schema={schema} />
         </>
       ),
       append: (
@@ -105,7 +108,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
       content: (
         <>
           <EuiSpacer />
-          <Functions kuery={fullKuery} />
+          <Functions kuery={fullKuery} schema={schema} />
         </>
       ),
       append: (
@@ -141,7 +144,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
       content: (
         <>
           <EuiSpacer />
-          <Threads kuery={fullKuery} />
+          <Threads kuery={fullKuery} schema={schema} />
         </>
       ),
       append: (
@@ -186,6 +189,7 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
                 kuery={customKuery}
                 rangeFrom={dateRange.from}
                 rangeTo={dateRange.to}
+                schema={schema}
                 onQuerySubmit={onSearchSubmit}
                 onRefresh={onSearchRefresh}
               />
@@ -193,6 +197,8 @@ export function Profiling({ showSearchBar = true }: { showSearchBar?: boolean })
             </>
           )}
           <DescriptionCallout />
+          <ProfilingSchemaSelector kuery={fullKuery} />
+          <EuiSpacer />
           <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
         </>
       )}

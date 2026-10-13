@@ -7,15 +7,22 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
+import {
+  EmbeddableProfilingSearchBar,
+  ProfilingEmptyState,
+} from '@kbn/observability-shared-plugin/public';
 import type { ProfilingSchemasStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { DescriptionCallout } from './description_callout';
+import { Flamegraph } from './flamegraph';
+import { ProfilingSchemaSelector } from './profiling_schema_selector';
 import { Profiling } from './profiling';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
-  EmbeddableProfilingSearchBar: () => null,
+  EmbeddableProfilingSearchBar: jest.fn(() => null),
   ProfilingEmptyState: jest.fn(() => null),
+  useProfilingSchemaState: () => ({ schema: 'otel', setSchema: jest.fn() }),
 }));
 jest.mock('../../../../hooks/use_fetcher', () => ({
   ...jest.requireActual('../../../../hooks/use_fetcher'),
@@ -37,7 +44,8 @@ jest.mock('../../hooks/use_request_observable', () => ({
   useRequestObservable: () => ({ request$: undefined }),
 }));
 jest.mock('./description_callout', () => ({ DescriptionCallout: jest.fn(() => null) }));
-jest.mock('./flamegraph', () => ({ Flamegraph: () => null }));
+jest.mock('./flamegraph', () => ({ Flamegraph: jest.fn(() => null) }));
+jest.mock('./profiling_schema_selector', () => ({ ProfilingSchemaSelector: jest.fn(() => null) }));
 jest.mock('./functions', () => ({ Functions: () => null }));
 jest.mock('./threads', () => ({ Threads: () => null }));
 
@@ -123,5 +131,27 @@ describe('Profiling tab', () => {
 
     expect(ProfilingEmptyState).toHaveBeenCalled();
     expect(DescriptionCallout).not.toHaveBeenCalled();
+  });
+
+  it('selects the schema of the host profiling data and shows the data of the selected schema', () => {
+    mockStatus(
+      createStatus({
+        hasOtelData: true,
+        hasUniversalProfilingData: false,
+        hasUniversalProfilingSetup: false,
+      })
+    );
+
+    render(<Profiling />);
+
+    expect(ProfilingSchemaSelector).toHaveBeenCalledWith({ kuery: '' }, expect.anything());
+    expect(Flamegraph).toHaveBeenCalledWith(
+      expect.objectContaining({ schema: ProfilingSchema.OTEL }),
+      expect.anything()
+    );
+    expect(EmbeddableProfilingSearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({ schema: ProfilingSchema.OTEL }),
+      expect.anything()
+    );
   });
 });
