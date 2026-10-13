@@ -21,6 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+import { getDeltaPercentage } from './delta_percentage';
 import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
 
 export interface SignalCardsProps {
@@ -78,6 +79,79 @@ const layoutCappedGridCss = ({
     grid-template-columns: repeat(${maxColumns}, minmax(0, 1fr));
     ${steps}
   `;
+};
+
+const DeltaPill: React.FC<{
+  delta: number | undefined;
+  /** Current tile count, used to derive the previous count and the percentage change. */
+  value: number;
+  isLoading?: boolean;
+}> = ({ delta, value, isLoading }) => {
+  const { euiTheme } = useEuiTheme();
+
+  // While loading, show "vs previous period" + spinner (Iryna's suggestion).
+  // This also avoids showing a misleading delta while prev count defaults to 0.
+  if (isLoading) {
+    return (
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPreviousPeriod',
+              { defaultMessage: 'vs previous period' }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
+  if (delta === undefined || delta === 0) return null;
+
+  const isPositive = delta > 0;
+  const bg = isPositive
+    ? euiTheme.colors.backgroundBaseDanger
+    : euiTheme.colors.backgroundBaseSuccess;
+  const color = isPositive ? euiTheme.colors.danger : euiTheme.colors.textSuccess;
+  const arrow = isPositive ? '↑' : '↓';
+  const sign = isPositive ? '+' : '';
+  const percentage = getDeltaPercentage(delta, value);
+
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <span
+          css={css`
+            display: inline-flex;
+            align-items: center;
+            gap: ${euiTheme.size.xs};
+            padding: 1px ${euiTheme.size.s};
+            border-radius: ${euiTheme.border.radius.medium};
+            background: ${bg};
+            color: ${color};
+            font-size: ${euiTheme.size.m};
+            font-weight: ${euiTheme.font.weight.semiBold};
+            white-space: nowrap;
+          `}
+        >
+          {sign}
+          {delta}
+          {percentage !== undefined && ` (${sign}${percentage}%)`} {arrow}
+        </span>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {i18n.translate(
+            'xpack.securitySolution.entityAnalytics.facelift.signalCards.vsPreviousPeriod',
+            { defaultMessage: 'vs previous period' }
+          )}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 const displayDescriptionFor = (card: SignalCardData): string => card.description;
@@ -422,6 +496,19 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
                     >
                       {card.noDataMessage}
                     </EuiText>
+                  )}
+                  {!isZero && (card.isDeltaLoading || card.delta !== undefined) && (
+                    <div
+                      css={css`
+                        margin-block-start: ${euiTheme.size.xs};
+                      `}
+                    >
+                      <DeltaPill
+                        delta={card.delta}
+                        value={card.value}
+                        isLoading={card.isDeltaLoading}
+                      />
+                    </div>
                   )}
                 </>
               )}

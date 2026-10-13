@@ -31,7 +31,7 @@ import {
 } from '../components/home/use_entity_filters_param';
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
-  useAlertBasedTiles,
+  useAlertBasedTilesWithDelta as useAlertBasedTiles,
   useEntitiesWithAnomaliesCount,
   useNewEntityCount,
   useRiskMoversCount,
@@ -131,9 +131,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
 
   const {
     severeAlertsCount: alertsCount,
+    severeAlertsDelta: alertsDelta,
     severeAlertsEntityIds: alertsEntityIds,
     watchlistedCount,
+    watchlistedDelta,
     watchlistedEntityIds,
+    isDeltaLoading,
     isLoading: alertBasedLoading,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
@@ -265,6 +268,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: alertsCount,
+        delta: alertsDelta,
+        isDeltaLoading,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -395,6 +400,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           }
         ),
         value: watchlistedCount,
+        delta: watchlistedDelta,
+        isDeltaLoading,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -437,7 +444,9 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     ],
     [
       alertsCount,
+      alertsDelta,
       alertBasedLoading,
+      isDeltaLoading,
       anomaliesCount,
       anomaliesLoading,
       riskMoversCount,
@@ -446,6 +455,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
+      watchlistedDelta,
       newEntityCount,
       newEntityLoading,
       riskMoversMissingIndex,
