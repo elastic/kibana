@@ -12,7 +12,7 @@ import {
   BRIEF_RETENTION_MS,
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../common/entity_analytics/executive_brief/constants';
-import type { BriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
+import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
 import { BRIEF_ROUTE, EXECUTIVE_BRIEF_TAGS, INTERNAL_HEADERS } from '../fixtures/constants';
 import {
   createBriefConnector,
@@ -46,11 +46,16 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
   apiTest('a generated brief expires 30 days after it was generated', async ({ apiClient }) => {
     await generateBrief({ apiClient, headers, connectorId });
 
-    const read = await apiClient.get<BriefResponse>(BRIEF_ROUTE, { headers, responseType: 'json' });
+    const read = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
+      headers,
+      responseType: 'json',
+    });
     expect(read).toHaveStatusCode(200);
-    const { generatedAt, expiresAt } = read.body.metadata ?? {};
-    expect(generatedAt).toBeDefined();
-    expect(Date.parse(expiresAt ?? '') - Date.parse(generatedAt ?? '')).toBe(BRIEF_RETENTION_MS);
+    const { metadata, expiresAt } = read.body;
+    expect(metadata?.generatedAt).toBeDefined();
+    expect(Date.parse(expiresAt) - Date.parse(metadata?.generatedAt ?? '')).toBe(
+      BRIEF_RETENTION_MS
+    );
   });
 
   apiTest(
@@ -62,7 +67,7 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
       await esClient.update({
         index: EXECUTIVE_BRIEF_INDEX,
         id: docId,
-        doc: { expires_at: new Date(Date.now() - 60_000).toISOString() },
+        doc: { expiresAt: new Date(Date.now() - 60_000).toISOString() },
         refresh: true,
       });
 

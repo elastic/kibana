@@ -6,7 +6,7 @@
  */
 
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
-import type { Fact } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { Fact } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { EvidenceIndex } from './evidence_index';
 import { citedFacts, unique } from './evidence_index';
 import type { BriefCheck, CheckOutcome, Claim } from './types';

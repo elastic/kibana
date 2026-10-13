@@ -6,10 +6,8 @@
  */
 
 import type { Entity } from '@kbn/entity-store/common';
-import type {
-  Evidence,
-  Fact,
-} from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { Evidence } from '../signals/types';
+import type { Fact } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { entityDisplayName } from '../entity_record';
 
 /** Lookup tables over the evidence a brief was composed from. */

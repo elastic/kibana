@@ -8,11 +8,9 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type {
-  BriefResponse,
-  BriefStatusResponse,
-  GenerateBriefResponse,
-} from '../../../../common/entity_analytics/executive_brief/api';
+import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
+import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
+import type { GetExecutiveBriefStatusResponse } from '../../../../common/api/entity_analytics/executive_brief/get_status.gen';
 import {
   BRIEF_JOB_DEADLINE_MS,
   EXECUTIVE_BRIEF_INDEX,
@@ -60,12 +58,12 @@ apiTest.describe(
     apiTest(
       'with no findings, records what was checked without calling the LLM',
       async ({ apiClient }) => {
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const jobId = response.body.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
@@ -84,7 +82,7 @@ apiTest.describe(
         expect(llmProxy.interceptedRequests).toHaveLength(0);
 
         // The status route returns the same job, flat: no job, report or metadata keys.
-        const status = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+        const status = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(), {
           headers,
           responseType: 'json',
         });
@@ -150,12 +148,12 @@ apiTest.describe(
           index: EXECUTIVE_BRIEF_INDEX,
           id: docId,
           doc: {
-            job: { id: jobId, status: 'running', started_at: startedAt, updated_at: startedAt },
+            job: { id: jobId, status: 'running', startedAt, updatedAt: startedAt },
           },
           refresh: true,
         });
 
-        const read = await apiClient.get<BriefResponse>(BRIEF_ROUTE, {
+        const read = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
         });
@@ -168,7 +166,7 @@ apiTest.describe(
           error: { code: 'interrupted' },
         });
 
-        const status = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+        const status = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(), {
           headers,
           responseType: 'json',
         });

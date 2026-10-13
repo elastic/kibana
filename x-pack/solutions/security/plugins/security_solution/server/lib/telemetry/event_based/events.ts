@@ -9,7 +9,7 @@ import type { RiskScoreDistribution } from '@kbn/entity-store/common';
 import type { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BulkUpsertAssetCriticalityRecordsResponse } from '../../../../common/api/entity_analytics';
 import type { CsvErrorCategory } from '../../entity_analytics/entity_resolution/csv_upload';
-import type { BriefCompletedEvent } from '../../entity_analytics/executive_brief/telemetry/types';
+import type { BriefCompletedEvent } from '../../entity_analytics/executive_brief/telemetry';
 import type {
   ResponseActionAgentType,
   ResponseActionStatus,
@@ -2494,12 +2494,6 @@ export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
-const briefStageDurationSchema = (stage: string) =>
-  ({
-    type: 'long',
-    _meta: { description: `Duration of the ${stage} stage in milliseconds`, optional: true },
-  } as const);
-
 const briefDroppedSchema = (check: string) =>
   ({
     type: 'long',
@@ -2541,14 +2535,6 @@ export const ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT: EventTypeOpts<Bri
       durationMs: {
         type: 'long',
         _meta: { description: 'Total job duration in milliseconds' },
-      },
-      stageDurationsMs: {
-        properties: {
-          gather: briefStageDurationSchema('gather (signals)'),
-          compose: briefStageDurationSchema('compose (LLM)'),
-          verify: briefStageDurationSchema('verify'),
-        },
-        _meta: { description: 'Duration of each stage that ran, in milliseconds' },
       },
       signals: {
         type: 'array',

@@ -275,6 +275,13 @@ import type {
   EntityDetailsHighlightsRequestBodyInput,
   EntityDetailsHighlightsResponse,
 } from './entity_analytics/entity_details/highlights.gen';
+import type { DeleteExecutiveBriefResponse } from './entity_analytics/executive_brief/delete.gen';
+import type {
+  GenerateExecutiveBriefRequestBodyInput,
+  GenerateExecutiveBriefResponse,
+} from './entity_analytics/executive_brief/generate.gen';
+import type { GetExecutiveBriefStatusResponse } from './entity_analytics/executive_brief/get_status.gen';
+import type { GetExecutiveBriefResponse } from './entity_analytics/executive_brief/get.gen';
 import type { RunEntityAnalyticsMigrationsResponse } from './entity_analytics/migrations/run_migrations_route.gen';
 import type {
   CreatePrivilegesImportIndexRequestBodyInput,
@@ -1176,6 +1183,21 @@ Delete an entity source configuration.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Deletes the caller's brief in this space. A running job stops at its next write.
+   */
+  async deleteExecutiveBrief() {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteExecutiveBrief`);
+    return this.kbnClient
+      .request<DeleteExecutiveBriefResponse>({
+        path: '/internal/entity_analytics/executive_brief',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'DELETE',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
@@ -1700,6 +1722,22 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Starts a brief job for the caller in this space, replacing any job in progress. The time window is fixed by the server from `range`.
+   */
+  async generateExecutiveBrief(props: GenerateExecutiveBriefProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GenerateExecutiveBrief`);
+    return this.kbnClient
+      .request<GenerateExecutiveBriefResponse>({
+        path: '/internal/entity_analytics/executive_brief',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves the dashboard migrations stats for all migrations stored in the system
    */
   async getAllDashboardMigrationsStats() {
@@ -1985,6 +2023,36 @@ Get an entity source configuration by ID.
         path: replaceParams('/api/entity_analytics/monitoring/entity_source/{id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns the caller's brief in this space. A job past its deadline reads as failed with `interrupted`.
+   */
+  async getExecutiveBrief() {
+    this.log.info(`${new Date().toISOString()} Calling API GetExecutiveBrief`);
+    return this.kbnClient
+      .request<GetExecutiveBriefResponse>({
+        path: '/internal/entity_analytics/executive_brief',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Returns the latest job of the caller's brief in this space, for polling.
+   */
+  async getExecutiveBriefStatus() {
+    this.log.info(`${new Date().toISOString()} Calling API GetExecutiveBriefStatus`);
+    return this.kbnClient
+      .request<GetExecutiveBriefStatusResponse>({
+        path: '/internal/entity_analytics/executive_brief/status',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
       })
@@ -3959,6 +4027,9 @@ export interface FindAssetCriticalityRecordsProps {
 }
 export interface FindRulesProps {
   query: FindRulesRequestQueryInput;
+}
+export interface GenerateExecutiveBriefProps {
+  body: GenerateExecutiveBriefRequestBodyInput;
 }
 export interface GetAllTranslationStatsDashboardMigrationProps {
   params: GetAllTranslationStatsDashboardMigrationRequestParamsInput;

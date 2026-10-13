@@ -74,6 +74,7 @@ import type {
   DeleteAssetCriticalityRecordRequestQueryInput,
   DeleteAssetCriticalityRecordResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/delete_asset_criticality.gen';
+import type { DeleteExecutiveBriefResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/executive_brief/delete.gen';
 import type {
   DeleteMonitoringEngineRequestQueryInput,
   DeleteMonitoringEngineResponse,
@@ -101,6 +102,10 @@ import type {
   FindAssetCriticalityRecordsResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
 import type {
+  GenerateExecutiveBriefRequestBodyInput,
+  GenerateExecutiveBriefResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/executive_brief/generate.gen';
+import type {
   GetAnomalyOverviewRequestParamsInput,
   GetAnomalyOverviewRequestBodyInput,
   GetAnomalyOverviewResponse,
@@ -113,6 +118,8 @@ import type {
   GetAssetCriticalityRecordResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality.gen';
 import type { GetAssetCriticalityStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/get_asset_criticality_status.gen';
+import type { GetExecutiveBriefResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/executive_brief/get.gen';
+import type { GetExecutiveBriefStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/executive_brief/get_status.gen';
 import type { GetPrivilegedAccessDetectionPackageStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/privileged_access_detection/status.gen';
 import type { GetRiskEngineStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type {
@@ -579,6 +586,27 @@ Delete an entity source configuration.
     });
   },
   /**
+   * Deletes the caller's brief in this space. A running job stops at its next write.
+   */
+  async deleteExecutiveBrief<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, DeleteExecutiveBriefResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/entity_analytics/executive_brief`;
+
+    return apiClient.delete<ScoutResponseBody<TResponseType, DeleteExecutiveBriefResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
    * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   async deleteMonitoringEngine<TResponseType extends ScoutResponseType = 'json'>(
@@ -785,6 +813,28 @@ Removes a privileged user from monitoring by their document ID.
     );
   },
   /**
+   * Starts a brief job for the caller in this space, replacing any job in progress. The time window is fixed by the server from `range`.
+   */
+  async generateExecutiveBrief<TResponseType extends ScoutResponseType = 'json'>(
+    props: GenerateExecutiveBriefProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GenerateExecutiveBriefResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/entity_analytics/executive_brief`;
+
+    return apiClient.post<ScoutResponseBody<TResponseType, GenerateExecutiveBriefResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: props.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
    * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
    */
   async getAnomalyOverview<TResponseType extends ScoutResponseType = 'json'>(
@@ -909,6 +959,48 @@ Get an entity source configuration by ID.
       headers: {
         'kbn-xsrf': 'true',
         [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
+   * Returns the caller's brief in this space. A job past its deadline reads as failed with `interrupted`.
+   */
+  async getExecutiveBrief<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetExecutiveBriefResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/entity_analytics/executive_brief`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, GetExecutiveBriefResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
+   * Returns the latest job of the caller's brief in this space, for polling.
+   */
+  async getExecutiveBriefStatus<TResponseType extends ScoutResponseType = 'json'>(
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<ApiClientResponse<ScoutResponseBody<TResponseType, GetExecutiveBriefStatusResponse>>> {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}/internal/entity_analytics/executive_brief/status`;
+
+    return apiClient.get<ScoutResponseBody<TResponseType, GetExecutiveBriefStatusResponse>>(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
         ...options.headers,
       },
@@ -1781,6 +1873,9 @@ export interface EntityDetailsHighlightsProps {
 }
 export interface FindAssetCriticalityRecordsProps {
   query: FindAssetCriticalityRecordsRequestQueryInput;
+}
+export interface GenerateExecutiveBriefProps {
+  body: GenerateExecutiveBriefRequestBodyInput;
 }
 export interface GetAnomalyOverviewProps {
   params: GetAnomalyOverviewRequestParamsInput;

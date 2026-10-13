@@ -9,63 +9,63 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { EXECUTIVE_BRIEF_INDEX } from '../../../../../common/entity_analytics/executive_brief/constants';
-import type { BriefDocument } from '../../../../../common/entity_analytics/executive_brief/document';
+import type {
+  BriefJob,
+  BriefMetadata,
+  BriefReport,
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
+
+/**
+ * One document per owner and space, mirroring the GET response. `job` is the latest run;
+ * `report` and `metadata` hold the last successful one and are replaced only when a job succeeds.
+ */
+export interface BriefDocument {
+  /** Stable principal id of the owner; the caller is always the owner. */
+  owner: { id: string };
+  spaceId: string;
+  schemaVersion: 1;
+  job: BriefJob;
+  report?: BriefReport;
+  metadata?: BriefMetadata;
+  expiresAt: string;
+}
 
 /** Stored in `_source` but neither indexed nor given doc values. */
 const storedOnly = () => types.object({ enabled: false });
 
 /**
- * Only the fields used for lookups, the cluster cap and cleanup are mapped. The root mapping is
- * `strict` (set by the adapter), so every top-level field is declared; nested payloads are stored
- * with `enabled: false` and sub-objects use `dynamic: false`.
+ * Only the fields used for the cluster cap and cleanup are indexed. The root mapping is `strict`
+ * (set by the adapter), so every top-level field is declared.
  */
 export const briefStorageSettings = {
   name: EXECUTIVE_BRIEF_INDEX,
   schema: {
     properties: {
-      schema_version: types.long({ index: false, doc_values: false }),
-      owner: types.object({
-        dynamic: false,
-        properties: {
-          id: types.keyword({}),
-        },
-      }),
-      space_id: types.keyword({}),
+      owner: types.object({ dynamic: false, properties: { id: types.keyword({}) } }),
+      spaceId: types.keyword({}),
+      schemaVersion: types.long({ index: false, doc_values: false }),
       job: types.object({
         dynamic: false,
-        properties: {
-          status: types.keyword({}),
-          started_at: types.date({}),
-        },
+        properties: { status: types.keyword({}), startedAt: types.date({}) },
       }),
-      generated_at: types.date({}),
-      expires_at: types.date({}),
-      params: storedOnly(),
-      model: types.keyword({ index: false, doc_values: false }),
-      tokens: storedOnly(),
-      evidence: storedOnly(),
-      brief: storedOnly(),
-      verification: storedOnly(),
+      report: storedOnly(),
+      metadata: storedOnly(),
+      expiresAt: types.date({}),
     },
   },
 } satisfies IndexStorageSettings;
 
-export type BriefStorageSettings = typeof briefStorageSettings;
+export type BriefStorageClient = ReturnType<
+  StorageIndexAdapter<typeof briefStorageSettings, BriefDocument>['getClient']
+>;
 
-export type BriefStorage = StorageIndexAdapter<BriefStorageSettings, BriefDocument>;
-
-export type BriefStorageClient = ReturnType<BriefStorage['getClient']>;
-
-/** Creates the storage adapter. Pass `asInternalUser`; every read filters on owner and space. */
-export const createBriefStorage = ({
-  esClient,
-  logger,
-}: {
-  esClient: ElasticsearchClient;
-  logger: Logger;
-}): BriefStorage =>
-  new StorageIndexAdapter<BriefStorageSettings, BriefDocument>(
+/** Creates the storage client. Pass `asInternalUser`; the store checks owner and space. */
+export const createBriefStorageClient = (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): BriefStorageClient =>
+  new StorageIndexAdapter<typeof briefStorageSettings, BriefDocument>(
     esClient,
     logger,
     briefStorageSettings
-  );
+  ).getClient();

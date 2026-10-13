@@ -14,14 +14,12 @@ import type {
   EsClient,
   ScoutLogger,
 } from '@kbn/scout-security';
-import type { Brief } from '../../../../common/entity_analytics/executive_brief/brief';
+import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
+import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
+import type { GetExecutiveBriefStatusResponse } from '../../../../common/api/entity_analytics/executive_brief/get_status.gen';
 import { EXECUTIVE_BRIEF_INDEX } from '../../../../common/entity_analytics/executive_brief/constants';
-import type {
-  BriefResponse,
-  BriefStatusResponse,
-  GenerateBriefResponse,
-} from '../../../../common/entity_analytics/executive_brief/api';
-import type { BriefDocument } from '../../../../common/entity_analytics/executive_brief/document';
+import type { BriefDocument } from '../../../../server/lib/entity_analytics/executive_brief/store/storage';
 import {
   BRIEF_ROUTE,
   HIGH_RISK_ENTITY_BRIEF,
@@ -143,8 +141,8 @@ const readBrief = async ({
   apiClient: ApiClientFixture;
   headers: Headers;
   route: string;
-}): Promise<BriefResponse> => {
-  const response = await apiClient.get<BriefResponse>(route, {
+}): Promise<GetExecutiveBriefResponse> => {
+  const response = await apiClient.get<GetExecutiveBriefResponse>(route, {
     headers: { ...INTERNAL_HEADERS, ...headers },
     responseType: 'json',
   });
@@ -167,12 +165,12 @@ export const waitForBriefJob = async ({
   headers: Headers;
   jobId: string;
   route?: string;
-}): Promise<BriefResponse> => {
+}): Promise<GetExecutiveBriefResponse> => {
   const deadline = Date.now() + JOB_TIMEOUT_MS;
   let lastStatus = 'not found';
 
   while (Date.now() < deadline) {
-    const response = await apiClient.get<BriefStatusResponse>(briefStatusRoute(route), {
+    const response = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(route), {
       headers: { ...INTERNAL_HEADERS, ...headers },
       responseType: 'json',
     });
@@ -205,13 +203,13 @@ export const generateBrief = async ({
   headers: Headers;
   connectorId: string;
   route?: string;
-}): Promise<{ jobId: string; document: BriefResponse }> => {
-  const response = await apiClient.post<GenerateBriefResponse>(route, {
+}): Promise<{ jobId: string; document: GetExecutiveBriefResponse }> => {
+  const response = await apiClient.post<GenerateExecutiveBriefResponse>(route, {
     headers: { ...INTERNAL_HEADERS, ...headers },
     responseType: 'json',
     body: { range: '7d', connectorId },
   });
-  if (response.statusCode !== 202) {
+  if (response.statusCode !== 200) {
     throw new Error(
       `POST ${route} returned ${response.statusCode}: ${JSON.stringify(response.body)}`
     );

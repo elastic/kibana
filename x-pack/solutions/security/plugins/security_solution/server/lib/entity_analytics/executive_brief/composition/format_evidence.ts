@@ -7,14 +7,13 @@
 
 import type { Entity } from '@kbn/entity-store/common';
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
+import type { Evidence, SignalOutcome } from '../signals/types';
 import type {
-  Evidence,
   Fact,
   Severity,
-} from '../../../../../common/entity_analytics/executive_brief/evidence';
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
 import { BRIEF_SIGNALS } from '../signals';
-import type { SignalOutcome } from '../signals/types';
 import { toMention } from '../verification/mentions';
 
 /**

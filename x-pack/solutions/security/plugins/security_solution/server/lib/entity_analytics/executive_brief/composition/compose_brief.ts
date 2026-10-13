@@ -19,14 +19,13 @@ import {
   isInferenceRequestAbortedError,
   isToolValidationError,
 } from '@kbn/inference-common';
-import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
 import {
   ASSESSMENT_KEYS,
   BRIEF_TEXT_LIMITS,
   MAX_CITED_IDS,
   rawTextLimit,
-  briefSchema,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
+import { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { getSubmitBriefTool, SUBMIT_BRIEF_TOOL_NAME } from './brief_tool_schema';
 
 /** The model's tool call, kept so a repair can reply to it. */
@@ -149,7 +148,7 @@ type ParseResult = { ok: true; brief: Brief } | { ok: false; errors: string[] };
 
 /** Validates the tool arguments against the contract schema, after normalisation. */
 export const parseBrief = (output: unknown): ParseResult => {
-  const result = briefSchema.safeParse(normalizeBriefOutput(output));
+  const result = Brief.safeParse(normalizeBriefOutput(output));
   if (result.success) {
     return { ok: true, brief: result.data };
   }

@@ -6,13 +6,10 @@
  */
 
 import type { Entity } from '@kbn/entity-store/common';
-import type {
-  Evidence,
-  Fact,
-} from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { Evidence, EntityRef, SignalOutcome, SignalOutput } from './types';
+import type { Fact } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { minimalEntityRecord, nameFromEuid } from '../entity_record';
 import type { EntityResolution } from './resolve_entities';
-import type { EntityRef, SignalOutcome, SignalOutput } from './types';
 
 export interface SignalResult {
   signalId: string;

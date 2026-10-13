@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: Delete Executive Brief API
+  version: '1'
+paths:
+  /internal/entity_analytics/executive_brief:
+    delete:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: DeleteExecutiveBrief
+      summary: Delete the executive brief
+      description: Deletes the caller's brief in this space. A running job stops at its next write.
+      responses:
+        '200':
+          description: Whether a brief was deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - deleted
+                properties:
+                  deleted:
+                    type: boolean

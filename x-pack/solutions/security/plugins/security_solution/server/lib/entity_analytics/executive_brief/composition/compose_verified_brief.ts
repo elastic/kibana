@@ -20,7 +20,7 @@ import type {
   ComposeVerifiedBriefResult,
 } from './types';
 import { BriefCompositionError } from './types';
-import { noopBriefTelemetry } from '../telemetry/types';
+import { withBriefSpan } from '../telemetry';
 
 const MAX_ERRORS_IN_MESSAGE = 5;
 
@@ -59,7 +59,6 @@ export const composeVerifiedBrief: ComposeVerifiedBrief = async ({
   abortSignal,
   logger,
   onStage,
-  telemetry = noopBriefTelemetry,
 }: ComposeVerifiedBriefParams): Promise<ComposeVerifiedBriefResult> => {
   const system = buildSystemPrompt();
   const messages: Message[] = [
@@ -103,7 +102,7 @@ export const composeVerifiedBrief: ComposeVerifiedBrief = async ({
   };
 
   const check = (result: ComposeAttempt): Promise<Checked> =>
-    telemetry.withSpan('verify', {}, async () => {
+    withBriefSpan('verify', {}, async () => {
       if (!result.ok) {
         return { errors: result.errors.map((error) => `invalid output: ${error}`) };
       }

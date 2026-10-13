@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AttentionLevel } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { AttentionLevel } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { unique } from './evidence_index';
 import type { BriefCheck, CheckOutcome } from './types';
 import {

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AssessmentKey, AttentionLevel } from './brief';
+import type { AttentionLevel } from '../../api/entity_analytics/executive_brief/common.gen';
+import type { AssessmentKey } from './brief';
 
 /** Shared labels, so the server (prompts, events) and later UI PRs use one source. */
 

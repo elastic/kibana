@@ -8,11 +8,9 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type {
-  BriefStatusResponse,
-  GenerateBriefResponse,
-} from '../../../../common/entity_analytics/executive_brief/api';
-import type { Brief } from '../../../../common/entity_analytics/executive_brief/brief';
+import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
+import type { GetExecutiveBriefStatusResponse } from '../../../../common/api/entity_analytics/executive_brief/get_status.gen';
 import {
   BRIEF_ROUTE,
   EXECUTIVE_BRIEF_TAGS,
@@ -70,12 +68,12 @@ apiTest.describe(
       async ({ apiClient }) => {
         const llmCall = mockSubmitBrief(llmProxy);
 
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
         expect(response.body.id).toBeDefined();
         expect(response.body.status).toBe('pending');
 
@@ -128,16 +126,16 @@ apiTest.describe(
         };
         const held = holdSubmitBrief(llmProxy, replacedBrief);
 
-        const first = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const first = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(first).toHaveStatusCode(202);
+        expect(first).toHaveStatusCode(200);
         await held.waitForCall();
 
         // While the first job is in flight, its status has no duration yet.
-        const inFlight = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+        const inFlight = await apiClient.get<GetExecutiveBriefStatusResponse>(briefStatusRoute(), {
           headers,
           responseType: 'json',
         });
@@ -145,12 +143,12 @@ apiTest.describe(
         expect(inFlight.body.took).toBeUndefined();
 
         const secondCall = mockSubmitBrief(llmProxy);
-        const second = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const second = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '24h', connectorId },
         });
-        expect(second).toHaveStatusCode(202);
+        expect(second).toHaveStatusCode(200);
         expect(second.body.id).not.toBe(first.body.id);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: second.body.id });
@@ -177,12 +175,12 @@ apiTest.describe(
         mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
         mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
 
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
@@ -200,12 +198,12 @@ apiTest.describe(
       'fails with llm_output when the repaired brief is still invalid, keeping the previous brief',
       async ({ apiClient }) => {
         mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
-        const previous = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const previous = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(previous).toHaveStatusCode(202);
+        expect(previous).toHaveStatusCode(200);
         const previousDocument = await waitForBriefJob({
           apiClient,
           headers,
@@ -216,12 +214,12 @@ apiTest.describe(
         llmProxy.clear();
         mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
         mockSubmitBrief(llmProxy, VERDICT_BELOW_ASSESSMENT_BRIEF);
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '24h', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job).toMatchObject({
@@ -253,12 +251,12 @@ apiTest.describe(
           },
         });
 
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');

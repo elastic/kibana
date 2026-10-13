@@ -7,16 +7,15 @@
 
 import type {
   Brief,
-  VerificationCheck,
   VerificationSummary,
-} from '../../../../../common/entity_analytics/executive_brief/brief';
-import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { VerificationCheck, BriefCheck, ItemDrop } from './types';
+import type { Evidence } from '../signals/types';
 import { checkCitations } from './citations';
 import { buildEvidenceIndex } from './evidence_index';
 import { checkGuardrails } from './guardrails';
 import { checkMentions } from './mentions';
 import { createNumbersCheck } from './numbers';
-import type { BriefCheck, ItemDrop } from './types';
 import { assessmentPath, presentAssessments } from './types';
 
 export interface VerifyBriefOptions {

@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { BriefRange } from '../../api/entity_analytics/executive_brief/common.gen';
+
 export const EXECUTIVE_BRIEF_API_PATH = '/internal/entity_analytics/executive_brief' as const;
 export const EXECUTIVE_BRIEF_STATUS_API_PATH = `${EXECUTIVE_BRIEF_API_PATH}/status` as const;
 export const EXECUTIVE_BRIEF_API_VERSION = '1' as const;
 
-/** Single index for all spaces; every read filters on owner and space. */
+/** Single index for all spaces; every read checks owner and space. */
 export const EXECUTIVE_BRIEF_INDEX = '.entity_analytics.executive_briefs' as const;
 
 export const EXECUTIVE_BRIEF_GENERATE_TASK_TYPE =
@@ -21,9 +23,6 @@ export const EXECUTIVE_BRIEF_CLEANUP_TASK_ID =
 
 /** Inference feature id used to resolve the connector. */
 export const EXECUTIVE_BRIEF_INFERENCE_FEATURE_ID = 'entity_analytics_executive_brief' as const;
-
-export const BRIEF_RANGES = ['24h', '7d', '30d'] as const;
-export type BriefRange = (typeof BRIEF_RANGES)[number];
 
 export const BRIEF_RANGE_MS: Record<BriefRange, number> = {
   '24h': 24 * 60 * 60 * 1000,

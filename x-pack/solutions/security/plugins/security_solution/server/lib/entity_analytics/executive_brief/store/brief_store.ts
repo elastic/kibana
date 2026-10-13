@@ -6,9 +6,8 @@
  */
 
 import { createHash } from 'crypto';
-import { pick } from 'lodash';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { omit } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   BRIEF_JOB_DEADLINE_MS,
@@ -16,50 +15,55 @@ import {
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
-  BriefDocument,
-  BriefErrorCode,
   BriefJob,
-  BriefJobStage,
-  BriefParams,
-} from '../../../../../common/entity_analytics/executive_brief/document';
-import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
-import type { ComposeVerifiedBriefResult } from '../composition/types';
+  BriefMetadata,
+  BriefReport,
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { GetExecutiveBriefResponse } from '../../../../../common/api/entity_analytics/executive_brief/get.gen';
 import { BriefStoreConflictError } from './errors';
-import type { BriefOwner } from './owner_id';
-import type { BriefStorageClient } from './storage';
-
-/** Fields that hold the last successful brief; replaced only when a job succeeds. */
-const BRIEF_FIELDS = [
-  'generated_at',
-  'params',
-  'model',
-  'tokens',
-  'evidence',
-  'brief',
-  'verification',
-] as const;
+import type { BriefDocument, BriefStorageClient } from './storage';
 
 const MAX_WRITE_ATTEMPTS = 3;
 
-/** Deterministic document id: one brief document per owner and space. */
-const getBriefDocId = (ownerId: string, spaceId: string): string =>
+/** Identifies the caller's brief in a space. */
+export interface BriefKey {
+  ownerId: string;
+  spaceId: string;
+}
+
+/** A change to a job; a `metadata` (only on success) restarts the retention period. */
+export interface JobUpdate {
+  job: Partial<Pick<BriefJob, 'status' | 'stage' | 'error'>>;
+  report?: BriefReport;
+  metadata?: BriefMetadata;
+}
+
+interface StoredBrief {
+  document: BriefDocument;
+  seqNo: number;
+  primaryTerm: number;
+}
+
+/** One document per owner and space, so reads and writes go by id. */
+const getBriefDocId = ({ ownerId, spaceId }: BriefKey): string =>
   createHash('sha256').update(`${ownerId}:${spaceId}`).digest('hex');
 
-const isInFlight = (job: BriefJob): boolean => job.status === 'pending' || job.status === 'running';
+const isInFlight = ({ status }: Pick<BriefJob, 'status'>): boolean =>
+  status === 'pending' || status === 'running';
+
+const hasStatusCode = (error: unknown, statusCode: number): boolean =>
+  isResponseError(error) && error.statusCode === statusCode;
 
 const addRetention = (iso: string): string =>
   new Date(Date.parse(iso) + BRIEF_RETENTION_MS).toISOString();
 
-/** A pending or running job past its deadline: its run stopped without finishing (e.g. a restart). */
-const isPastDeadline = (job: BriefJob, now: Date): boolean =>
-  isInFlight(job) && now.getTime() - Date.parse(job.started_at) > BRIEF_JOB_DEADLINE_MS;
-
-/** Reports an in-flight job past its deadline as failed with `interrupted`, as the routes show it. */
-export const overdueJobAsInterrupted = (job: BriefJob, now: Date): BriefJob =>
-  isPastDeadline(job, now)
+/** An in-flight job past its deadline stopped without finishing (e.g. a restart). */
+const overdueAsInterrupted = (job: BriefJob, now: number): BriefJob =>
+  isInFlight(job) && now - Date.parse(job.startedAt) > BRIEF_JOB_DEADLINE_MS
     ? {
-        ...job,
+        ...omit(job, 'stage'),
         status: 'failed',
+        took: Date.parse(job.updatedAt) - Date.parse(job.startedAt),
         error: {
           code: 'interrupted',
           message: 'The brief generation stopped before finishing. Generate it again.',
@@ -67,387 +71,188 @@ export const overdueJobAsInterrupted = (job: BriefJob, now: Date): BriefJob =>
       }
     : job;
 
-/** The document with an overdue in-flight job reported as interrupted. */
-export const withOverdueJobAsInterrupted = (document: BriefDocument, now: Date): BriefDocument => {
-  const job = overdueJobAsInterrupted(document.job, now);
-  return job === document.job ? document : { ...document, job };
-};
-
-export interface StoredBrief {
-  docId: string;
-  document: BriefDocument;
-  seqNo: number;
-  primaryTerm: number;
-}
-
-export interface StartJobResult {
-  docId: string;
-  job: BriefJob;
-}
-
-interface CompleteJobInput {
-  evidence: Evidence;
-  params: BriefParams;
-  /** Absent when the evidence had no findings, so the AI was not called. */
-  composed?: ComposeVerifiedBriefResult;
-}
-
-const isConflictError = (error: unknown): boolean =>
-  isResponseError(error) && error.statusCode === 409;
-
-const ownerFilters = (ownerId: string, spaceId: string): QueryDslQueryContainer[] => [
-  { term: { 'owner.id': ownerId } },
-  { term: { space_id: spaceId } },
-];
-
-export interface BriefStoreOptions {
-  storageClient: BriefStorageClient;
-  /** Internal user client, used only for the cleanup delete-by-query. */
-  esClient: ElasticsearchClient;
-  logger: Logger;
-  now?: () => Date;
-}
-
 /**
- * Owner-scoped access to brief documents. Reads used by routes always filter on owner, space and
- * expiry. Starting a job replaces any job in progress. Job writes (used by the task) are
- * conditional on the stored `job.id` matching, and use `if_seq_no`/`if_primary_term`, so a
- * replaced or deleted job stops at its next write and can never overwrite a newer one.
+ * Owner-scoped access to brief documents. Starting a job replaces any job in progress. Job updates
+ * are conditional on the stored `job.id` and use `if_seq_no`/`if_primary_term`, so a replaced or
+ * deleted job stops at its next write and never overwrites a newer one.
  */
 export class BriefStore {
-  private readonly storageClient: BriefStorageClient;
-  private readonly esClient: ElasticsearchClient;
-  private readonly logger: Logger;
-  private readonly now: () => Date;
+  constructor(
+    private readonly storageClient: BriefStorageClient,
+    /** Internal user client, only for the cleanup delete-by-query. */
+    private readonly esClient: ElasticsearchClient,
+    private readonly now: () => Date = () => new Date()
+  ) {}
 
-  constructor({ storageClient, esClient, logger, now = () => new Date() }: BriefStoreOptions) {
-    this.storageClient = storageClient;
-    this.esClient = esClient;
-    this.logger = logger;
-    this.now = now;
+  /** The caller's unexpired brief as GET returns it (an overdue job reads as interrupted). */
+  async get(key: BriefKey): Promise<GetExecutiveBriefResponse | undefined> {
+    const document = await this.readOwned(key);
+    if (!document) {
+      return undefined;
+    }
+    const { job, report, metadata, expiresAt } = document;
+    return { job: overdueAsInterrupted(job, this.now().getTime()), report, metadata, expiresAt };
   }
 
-  /** The caller's unexpired brief document in this space, or undefined (route returns 404). */
-  async get({
-    ownerId,
-    spaceId,
-  }: {
-    ownerId: string;
-    spaceId: string;
-  }): Promise<StoredBrief | undefined> {
-    return this.read(getBriefDocId(ownerId, spaceId), this.callerFilters(ownerId, spaceId));
+  /** The job of the caller's unexpired brief, without reading the report. */
+  async getJob(key: BriefKey): Promise<BriefJob | undefined> {
+    const document = await this.readOwned(key, ['owner', 'spaceId', 'job', 'expiresAt']);
+    return document && overdueAsInterrupted(document.job, this.now().getTime());
   }
 
-  /** The job of the caller's unexpired brief in this space, reading only the job fields. */
-  async getJob({
-    ownerId,
-    spaceId,
-  }: {
-    ownerId: string;
-    spaceId: string;
-  }): Promise<BriefJob | undefined> {
-    const hit = await this.findHit(
-      getBriefDocId(ownerId, spaceId),
-      this.callerFilters(ownerId, spaceId),
-      { _source: ['job'] }
-    );
-    return hit?._source?.job;
-  }
-
-  /** The document a task works on, only while `job.id` still matches. Internal use (task). */
-  async getForJob({
-    docId,
-    jobId,
-  }: {
-    docId: string;
-    jobId: string;
-  }): Promise<StoredBrief | undefined> {
-    const stored = await this.read(docId);
-    return stored?.document.job.id === jobId ? stored : undefined;
-  }
-
-  /**
-   * Starts a new pending job on the owner's document, keeping the previous (unexpired) brief and
-   * replacing any job in progress (its run stops at its next write). The write is conditional
-   * (`op_type: create` or `if_seq_no`), so concurrent starts can't both win.
-   */
-  async startJob({
-    owner,
-    spaceId,
-    jobId,
-  }: {
-    owner: BriefOwner;
-    spaceId: string;
-    jobId: string;
-  }): Promise<StartJobResult> {
-    const docId = getBriefDocId(owner.id, spaceId);
-
+  /** Starts a pending job, keeping the previous unexpired report and replacing any job in progress. */
+  async startJob(key: BriefKey, jobId: string): Promise<{ docId: string; job: BriefJob }> {
+    const docId = getBriefDocId(key);
     for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt++) {
+      const existing = await this.read(docId);
       const now = this.now();
-      const existing = await this.read(docId, ownerFilters(owner.id, spaceId));
-      const document = buildStartedDocument({
-        previous: existing?.document,
-        owner,
-        spaceId,
-        jobId,
-        now,
-      });
-
-      try {
-        await this.write(docId, document, existing);
+      const startedAt = now.toISOString();
+      const previous =
+        existing?.document.report && Date.parse(existing.document.expiresAt) > now.getTime()
+          ? existing.document
+          : undefined;
+      const document: BriefDocument = {
+        owner: { id: key.ownerId },
+        spaceId: key.spaceId,
+        schemaVersion: 1,
+        job: { id: jobId, status: 'pending', startedAt, updatedAt: startedAt },
+        ...(previous ? { report: previous.report, metadata: previous.metadata } : {}),
+        expiresAt: previous?.expiresAt ?? addRetention(startedAt),
+      };
+      if (await this.write(docId, document, existing)) {
         return { docId, job: document.job };
-      } catch (error) {
-        if (!isConflictError(error)) {
-          throw error;
-        }
-        this.logger.debug(`Conflict starting executive brief job on ${docId}; retrying`);
       }
     }
-
     throw new BriefStoreConflictError('Another request is starting a brief; try again shortly.');
   }
 
-  /** pending → running, stage gather. False when the job was superseded, deleted or finished. */
-  async markRunning({ docId, jobId }: { docId: string; jobId: string }): Promise<boolean> {
-    return this.updateInFlightJob(docId, jobId, (document, now) => ({
-      ...document,
-      job: { ...document.job, status: 'running', stage: 'gather', updated_at: now },
-    }));
-  }
-
-  async setStage({
-    docId,
-    jobId,
-    stage,
-  }: {
-    docId: string;
-    jobId: string;
-    stage: BriefJobStage;
-  }): Promise<boolean> {
-    return this.updateInFlightJob(docId, jobId, (document, now) => ({
-      ...document,
-      job: { ...document.job, stage, updated_at: now },
-    }));
-  }
-
-  /** Replaces the brief fields and marks the job succeeded; expiry restarts from generated_at. */
-  async completeJob({
-    docId,
-    jobId,
-    result,
-  }: {
-    docId: string;
-    jobId: string;
-    result: CompleteJobInput;
-  }): Promise<boolean> {
-    return this.updateInFlightJob(docId, jobId, (document, now) => {
-      const { evidence, params, composed } = result;
-      return {
-        schema_version: 1,
-        owner: document.owner,
-        space_id: document.space_id,
-        job: {
-          id: document.job.id,
-          status: 'succeeded',
-          started_at: document.job.started_at,
-          updated_at: now,
-        },
-        generated_at: now,
-        expires_at: addRetention(now),
-        params,
-        evidence,
-        ...(composed
-          ? {
-              ...(composed.model ? { model: composed.model } : {}),
-              tokens: composed.tokens,
-              brief: composed.brief,
-              verification: composed.verification,
-            }
+  /**
+   * Applies `update` while the job is still this run's and in flight; false once it was replaced,
+   * deleted or finished. Finishing (succeeded or failed) records `took`.
+   */
+  async updateJob(docId: string, jobId: string, update: JobUpdate): Promise<boolean> {
+    for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt++) {
+      const stored = await this.read(docId);
+      if (!stored || stored.document.job.id !== jobId || !isInFlight(stored.document.job)) {
+        return false;
+      }
+      const now = this.now();
+      const job: BriefJob = { ...stored.document.job, ...update.job, updatedAt: now.toISOString() };
+      const document: BriefDocument = {
+        ...stored.document,
+        job: isInFlight(job)
+          ? job
+          : { ...omit(job, 'stage'), took: now.getTime() - Date.parse(job.startedAt) },
+        ...(update.report ? { report: update.report } : {}),
+        ...(update.metadata
+          ? { metadata: update.metadata, expiresAt: addRetention(update.metadata.generatedAt) }
           : {}),
       };
-    });
-  }
-
-  /**
-   * Marks the job failed, keeping the previous brief and its expiry. A document that never held
-   * a brief expires 30 days after the job started.
-   */
-  async failJob({
-    docId,
-    jobId,
-    error,
-  }: {
-    docId: string;
-    jobId: string;
-    error: { code: BriefErrorCode; message: string };
-  }): Promise<boolean> {
-    return this.updateInFlightJob(docId, jobId, (document, now) => ({
-      ...document,
-      job: { ...document.job, status: 'failed', updated_at: now, error },
-      expires_at: document.brief ? document.expires_at : addRetention(document.job.started_at),
-    }));
+      if (await this.write(docId, document, stored)) {
+        return true;
+      }
+    }
+    throw new BriefStoreConflictError(`Could not update executive brief job ${jobId}`);
   }
 
   /** Deletes the caller's brief in this space. Returns false when there was none. */
-  async delete({ ownerId, spaceId }: { ownerId: string; spaceId: string }): Promise<boolean> {
-    const docId = getBriefDocId(ownerId, spaceId);
-    const existing = await this.read(docId, ownerFilters(ownerId, spaceId));
-    if (!existing) {
-      return false;
-    }
-    const { result } = await this.storageClient.delete({ id: docId });
+  async delete(key: BriefKey): Promise<boolean> {
+    const { result } = await this.storageClient.delete({ id: getBriefDocId(key) });
     return result === 'deleted';
   }
 
-  /** In-flight jobs within their deadline, across all users and spaces (cluster cap). */
-  async countRunning(): Promise<number> {
+  /** In-flight jobs within their deadline across the cluster, except the caller's own. */
+  async countRunning(key: BriefKey): Promise<number> {
     const since = new Date(this.now().getTime() - BRIEF_JOB_DEADLINE_MS).toISOString();
-    const response = await this.storageClient.search({
+    const { hits } = await this.storageClient.search({
       track_total_hits: true,
       size: 0,
       query: {
         bool: {
           filter: [
             { terms: { 'job.status': ['pending', 'running'] } },
-            { range: { 'job.started_at': { gte: since } } },
+            { range: { 'job.startedAt': { gte: since } } },
           ],
+          must_not: [{ ids: { values: [getBriefDocId(key)] } }],
         },
       },
     });
-    const { total } = response.hits;
-    return typeof total === 'number' ? total : total?.value ?? 0;
+    return typeof hits.total === 'number' ? hits.total : hits.total?.value ?? 0;
   }
 
   /** Deletes expired documents (cleanup task). Returns the number deleted. */
-  async deleteExpired({ abortSignal }: { abortSignal?: AbortSignal } = {}): Promise<number> {
+  async deleteExpired(abortSignal?: AbortSignal): Promise<number> {
     try {
       const response = await this.esClient.deleteByQuery(
         {
           index: EXECUTIVE_BRIEF_INDEX,
-          query: { range: { expires_at: { lt: this.now().toISOString() } } },
+          query: { range: { expiresAt: { lt: this.now().toISOString() } } },
           conflicts: 'proceed',
           refresh: true,
           ignore_unavailable: true,
           allow_no_indices: true,
         },
-        abortSignal ? { signal: abortSignal } : undefined
+        { signal: abortSignal }
       );
       return response.deleted ?? 0;
     } catch (error) {
-      if (isResponseError(error) && error.statusCode === 404) {
+      if (hasStatusCode(error, 404)) {
         return 0;
       }
       throw error;
     }
   }
 
-  /** Owner, space and expiry filters for reads made on behalf of the caller. */
-  private callerFilters(ownerId: string, spaceId: string): QueryDslQueryContainer[] {
-    return [
-      ...ownerFilters(ownerId, spaceId),
-      { range: { expires_at: { gt: this.now().toISOString() } } },
-    ];
+  /** The caller's document when it is theirs and unexpired. */
+  private async readOwned(key: BriefKey, source?: string[]): Promise<BriefDocument | undefined> {
+    const document = (await this.read(getBriefDocId(key), source))?.document;
+    return document?.owner.id === key.ownerId &&
+      document.spaceId === key.spaceId &&
+      Date.parse(document.expiresAt) > this.now().getTime()
+      ? document
+      : undefined;
   }
 
-  private async findHit(
-    docId: string,
-    filters: QueryDslQueryContainer[],
-    request: { _source?: string[]; seq_no_primary_term?: boolean } = {}
-  ) {
-    const response = await this.storageClient.search({
-      track_total_hits: false,
-      size: 1,
-      query: { bool: { filter: [{ ids: { values: [docId] } }, ...filters] } },
-      ...request,
-    });
-    return response.hits.hits[0];
-  }
-
-  private async read(
-    docId: string,
-    filters: QueryDslQueryContainer[] = []
-  ): Promise<StoredBrief | undefined> {
-    const hit = await this.findHit(docId, filters, { seq_no_primary_term: true });
-    if (!hit?._source) {
-      return undefined;
+  private async read(docId: string, source?: string[]): Promise<StoredBrief | undefined> {
+    try {
+      const response = await this.storageClient.get({
+        id: docId,
+        seq_no_primary_term: true,
+        ...(source ? { _source: source } : {}),
+      });
+      const { _source: document, _seq_no: seqNo, _primary_term: primaryTerm } = response;
+      if (!document || seqNo === undefined || primaryTerm === undefined) {
+        return undefined;
+      }
+      return { document, seqNo, primaryTerm };
+    } catch (error) {
+      if (hasStatusCode(error, 404)) {
+        return undefined;
+      }
+      throw error;
     }
-    if (hit._seq_no === undefined || hit._primary_term === undefined) {
-      throw new Error(`Executive brief ${docId} was read without sequence number`);
-    }
-    return {
-      docId,
-      document: hit._source,
-      seqNo: hit._seq_no,
-      primaryTerm: hit._primary_term,
-    };
   }
 
+  /** Writes conditionally on `occ`, or creates; false on a version conflict. */
   private async write(
     docId: string,
     document: BriefDocument,
-    occ: Pick<StoredBrief, 'seqNo' | 'primaryTerm'> | undefined
-  ): Promise<void> {
-    await this.storageClient.index({
-      id: docId,
-      document,
-      ...(occ
-        ? { if_seq_no: occ.seqNo, if_primary_term: occ.primaryTerm }
-        : { op_type: 'create' as const }),
-    });
-  }
-
-  /**
-   * Read-modify-write on an in-flight job, only while `job.id` matches. A version conflict means
-   * another writer (e.g. a new job replacing this one), so it re-reads and returns false once the
-   * job is no longer this run's.
-   */
-  private async updateInFlightJob(
-    docId: string,
-    jobId: string,
-    mutate: (document: BriefDocument, nowIso: string) => BriefDocument
+    occ: StoredBrief | undefined
   ): Promise<boolean> {
-    for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt++) {
-      const stored = await this.read(docId);
-      if (!stored || stored.document.job.id !== jobId || !isInFlight(stored.document.job)) {
+    try {
+      await this.storageClient.index({
+        id: docId,
+        document,
+        ...(occ
+          ? { if_seq_no: occ.seqNo, if_primary_term: occ.primaryTerm }
+          : { op_type: 'create' as const }),
+      });
+      return true;
+    } catch (error) {
+      if (hasStatusCode(error, 409)) {
         return false;
       }
-      try {
-        await this.write(docId, mutate(stored.document, this.now().toISOString()), stored);
-        return true;
-      } catch (error) {
-        if (!isConflictError(error)) {
-          throw error;
-        }
-      }
+      throw error;
     }
-    throw new BriefStoreConflictError(`Could not update executive brief job ${jobId}`);
   }
 }
-
-const buildStartedDocument = ({
-  previous,
-  owner,
-  spaceId,
-  jobId,
-  now,
-}: {
-  previous: BriefDocument | undefined;
-  owner: BriefOwner;
-  spaceId: string;
-  jobId: string;
-  now: Date;
-}): BriefDocument => {
-  const startedAt = now.toISOString();
-  const job: BriefJob = { id: jobId, status: 'pending', started_at: startedAt };
-  const keepPrevious =
-    previous?.brief !== undefined && Date.parse(previous.expires_at) > now.getTime();
-
-  return {
-    schema_version: 1,
-    owner: { id: owner.id },
-    space_id: spaceId,
-    job,
-    expires_at: keepPrevious && previous ? previous.expires_at : addRetention(startedAt),
-    ...(keepPrevious && previous ? pick(previous, BRIEF_FIELDS) : {}),
-  };
-};

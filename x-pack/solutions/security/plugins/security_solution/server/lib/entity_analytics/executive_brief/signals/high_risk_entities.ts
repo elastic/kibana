@@ -7,7 +7,7 @@
 
 import type { Entity } from '@kbn/entity-store/common';
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
-import type { Severity } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { Severity } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { toEntityRef, watchlistsOf } from '../entity_record';
 import { ALWAYS_AVAILABLE, compareStrings, defineSignal, errorMessage } from './define_signal';
 import { ENTITY_SOURCE_FIELDS, expandResolutionGroups, parseEntityDoc } from './resolve_entities';

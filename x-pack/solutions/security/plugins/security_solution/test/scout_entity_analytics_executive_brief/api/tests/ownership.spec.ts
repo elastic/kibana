@@ -8,7 +8,7 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { BriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
+import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
 import {
   BRIEF_ROUTE,
   EXECUTIVE_BRIEF_TAGS,
@@ -90,7 +90,7 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
     expect(deleted).toHaveStatusCode(200);
     expect(deleted.body).toStrictEqual({ deleted: false });
 
-    const ownerRead = await apiClient.get<BriefResponse>(BRIEF_ROUTE, {
+    const ownerRead = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
       headers: ownerHeaders,
       responseType: 'json',
     });
@@ -122,7 +122,7 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       });
       expect(otherSpaceJobId).not.toBe(jobId);
 
-      const defaultSpaceRead = await apiClient.get<BriefResponse>(BRIEF_ROUTE, {
+      const defaultSpaceRead = await apiClient.get<GetExecutiveBriefResponse>(BRIEF_ROUTE, {
         headers: ownerHeaders,
         responseType: 'json',
       });
@@ -160,9 +160,9 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
     });
     const stored = await readStoredBrief(esClient, docId);
     expect(stored).toMatchObject({
-      schema_version: 1,
+      schemaVersion: 1,
       owner: { id: ownerId },
-      space_id: 'default',
+      spaceId: 'default',
       job: { id: secondJobId, status: 'succeeded' },
     });
     expect(await countStoredBriefs(esClient, ownerId)).toBe(1);

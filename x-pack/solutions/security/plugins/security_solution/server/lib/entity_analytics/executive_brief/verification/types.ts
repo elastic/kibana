@@ -7,13 +7,15 @@
 
 import type {
   Assessment,
-  AssessmentKey,
   AttentionLevel,
   Brief,
-  VerificationCheck,
-} from '../../../../../common/entity_analytics/executive_brief/brief';
+  VerificationSummary,
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { AssessmentKey } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type { EvidenceIndex } from './evidence_index';
+
+export type VerificationCheck = keyof VerificationSummary['dropped'];
 
 /** A removable item of the brief. The verdict is never removed: its failures are structural. */
 export type ItemPath = `assessments.${AssessmentKey}`;

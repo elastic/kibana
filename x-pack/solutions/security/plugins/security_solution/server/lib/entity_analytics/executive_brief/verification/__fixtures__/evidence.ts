@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Brief } from '../../../../../../common/entity_analytics/executive_brief/brief';
 import type {
-  Evidence,
+  Brief,
   Fact,
-} from '../../../../../../common/entity_analytics/executive_brief/evidence';
+} from '../../../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { Evidence } from '../../signals/types';
 
 export const ROD = 'user:a.rodriguez@corp';
 const LAPTOP = 'host:laptop-fin03';

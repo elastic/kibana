@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { AssessmentKey } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type {
-  AssessmentKey,
   AttentionLevel,
-} from '../../../../../common/entity_analytics/executive_brief/brief';
-import type { Fact } from '../../../../../common/entity_analytics/executive_brief/evidence';
+  Fact,
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { EvidenceIndex } from './evidence_index';
 import { citedFacts } from './evidence_index';
 import type { BriefCheck, CheckOutcome } from './types';

@@ -55,6 +55,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { EntityDetailsHighlightsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_details/highlights.gen';
 import type { FindAssetCriticalityRecordsRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality/list_asset_criticality.gen';
+import type { GenerateExecutiveBriefRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/executive_brief/generate.gen';
 import type {
   GetAnomalyOverviewRequestParamsInput,
   GetAnomalyOverviewRequestBodyInput,
@@ -304,6 +305,16 @@ Delete an entity source configuration.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
+   * Deletes the caller's brief in this space. A running job stops at its next write.
+   */
+  deleteExecutiveBrief(kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/internal/entity_analytics/executive_brief', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
    * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   deleteMonitoringEngine(props: DeleteMonitoringEngineProps, kibanaSpace: string = 'default') {
@@ -411,6 +422,17 @@ Removes a privileged user from monitoring by their document ID.
       .query(props.query);
   },
   /**
+   * Starts a brief job for the caller in this space, replacing any job in progress. The time window is fixed by the server from `range`.
+   */
+  generateExecutiveBrief(props: GenerateExecutiveBriefProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/entity_analytics/executive_brief', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
    * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
    */
   getAnomalyOverview(props: GetAnomalyOverviewProps, kibanaSpace: string = 'default') {
@@ -489,6 +511,26 @@ Get an entity source configuration by ID.
       )
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Returns the caller's brief in this space. A job past its deadline reads as failed with `interrupted`.
+   */
+  getExecutiveBrief(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/entity_analytics/executive_brief', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Returns the latest job of the caller's brief in this space, for polling.
+   */
+  getExecutiveBriefStatus(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/entity_analytics/executive_brief/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
@@ -1000,6 +1042,9 @@ export interface EntityDetailsHighlightsProps {
 }
 export interface FindAssetCriticalityRecordsProps {
   query: FindAssetCriticalityRecordsRequestQueryInput;
+}
+export interface GenerateExecutiveBriefProps {
+  body: GenerateExecutiveBriefRequestBodyInput;
 }
 export interface GetAnomalyOverviewProps {
   params: GetAnomalyOverviewRequestParamsInput;

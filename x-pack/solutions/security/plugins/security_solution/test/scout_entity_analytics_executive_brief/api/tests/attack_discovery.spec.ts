@@ -8,11 +8,11 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
 import type {
   AttentionLevel,
   Brief,
-} from '../../../../common/entity_analytics/executive_brief/brief';
+} from '../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { GenerateExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/generate.gen';
 import { BRIEF_ROUTE, EXECUTIVE_BRIEF_TAGS, INTERNAL_HEADERS } from '../fixtures/constants';
 import {
   createAttackDiscoveryIndex,
@@ -95,12 +95,12 @@ apiTest.describe(
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('watch'));
 
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
@@ -132,12 +132,12 @@ apiTest.describe(
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('watch'));
 
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
@@ -161,12 +161,12 @@ apiTest.describe(
         ]);
         mockSubmitBrief(llmProxy, discoveryBrief('urgent'));
 
-        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+        const response = await apiClient.post<GenerateExecutiveBriefResponse>(BRIEF_ROUTE, {
           headers,
           responseType: 'json',
           body: { range: '7d', connectorId },
         });
-        expect(response).toHaveStatusCode(202);
+        expect(response).toHaveStatusCode(200);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');

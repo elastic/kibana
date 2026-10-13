@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Severity } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { Severity } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { Availability, BriefSignal, SignalScope } from './types';
 
 /** Identity helper that keeps a signal's scope literal, so `run` gets the right input type. */

@@ -10,12 +10,13 @@ import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Entity } from '@kbn/entity-store/common';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 import type {
-  Evidence,
+  BriefMetadata,
+  BriefReport,
+  Fact,
   FactSource,
   Severity,
   SignalStatus,
-} from '../../../../../common/entity_analytics/executive_brief/evidence';
-import type { BriefTelemetry } from '../telemetry/types';
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 
 /**
  * Signal framework. Each signal is one file that gathers facts (and optionally candidate
@@ -103,6 +104,13 @@ export interface SignalOutcome {
   factCount: number;
 }
 
+/** What the signals gathered: the report's entities and facts, and each signal's run. */
+export interface Evidence {
+  entities: BriefReport['entities'];
+  facts: Fact[];
+  signals: BriefMetadata['signals'];
+}
+
 export interface GatherResult {
   evidence: Evidence;
   /** One per signal, in signal-priority order. */
@@ -113,5 +121,5 @@ export interface GatherResult {
 export type RunSignals = (
   ctx: SignalContext,
   signals: readonly BriefSignal[],
-  options: { abortSignal: AbortSignal; telemetry?: BriefTelemetry }
+  options: { abortSignal: AbortSignal }
 ) => Promise<GatherResult>;

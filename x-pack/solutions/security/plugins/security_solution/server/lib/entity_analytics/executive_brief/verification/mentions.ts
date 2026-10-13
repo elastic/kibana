@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Brief } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import {
   BRIEF_TEXT_LIMITS,
   ENTITY_MENTION_FIELD,

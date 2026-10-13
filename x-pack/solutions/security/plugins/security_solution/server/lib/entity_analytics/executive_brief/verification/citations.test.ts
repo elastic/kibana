@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Assessment } from '../../../../../common/entity_analytics/executive_brief/brief';
+import type { Assessment } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { FullBrief } from './__fixtures__/evidence';
 import { buildValidBrief, FIXTURE_EVIDENCE } from './__fixtures__/evidence';
 import { checkCitations } from './citations';

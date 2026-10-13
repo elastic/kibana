@@ -10,10 +10,8 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type {
   Brief,
   VerificationSummary,
-} from '../../../../../common/entity_analytics/executive_brief/brief';
-import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
-import type { SignalOutcome } from '../signals/types';
-import type { BriefTelemetry } from '../telemetry/types';
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
+import type { Evidence, SignalOutcome } from '../signals/types';
 
 export interface ComposeVerifiedBriefParams {
   /** Bound to the resolved connector. */
@@ -26,8 +24,6 @@ export interface ComposeVerifiedBriefParams {
   logger: Logger;
   /** Called when moving from compose to verify, so the job doc can show the stage. */
   onStage?: (stage: 'compose' | 'verify') => Promise<void>;
-  /** Wraps verification in its own span; defaults to no telemetry. */
-  telemetry?: BriefTelemetry;
 }
 
 export interface ComposeVerifiedBriefResult {

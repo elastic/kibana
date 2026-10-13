@@ -1,0 +1,36 @@
+openapi: 3.0.0
+info:
+  title: Get Executive Brief API
+  version: '1'
+paths:
+  /internal/entity_analytics/executive_brief:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GetExecutiveBrief
+      summary: Get the executive brief
+      description: Returns the caller's brief in this space. A job past its deadline reads as failed with `interrupted`.
+      responses:
+        '200':
+          description: The latest job, and the report and its metadata once a run has succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - job
+                  - expiresAt
+                properties:
+                  job:
+                    $ref: './common.schema.yaml#/components/schemas/BriefJob'
+                  report:
+                    $ref: './common.schema.yaml#/components/schemas/BriefReport'
+                  metadata:
+                    $ref: './common.schema.yaml#/components/schemas/BriefMetadata'
+                  expiresAt:
+                    type: string
+                    format: date-time
+                    description: When the brief is deleted; 30 days after it was generated.
+        '404':
+          description: No brief in this space

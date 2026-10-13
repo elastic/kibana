@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { AssessmentKey } from '../../../../../common/entity_analytics/executive_brief/brief';
 import type {
-  AssessmentKey,
   AttentionLevel,
   Brief,
-} from '../../../../../common/entity_analytics/executive_brief/brief';
+} from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { ASSESSMENT_KEYS } from '../../../../../common/entity_analytics/executive_brief/brief';
-import type { Evidence } from '../../../../../common/entity_analytics/executive_brief/evidence';
+import type { Evidence } from '../signals/types';
 import { buildValidBrief, DOCKER, FIXTURE_EVIDENCE, withFacts } from './__fixtures__/evidence';
 import { buildEvidenceIndex } from './evidence_index';
 import { checkGuardrails } from './guardrails';

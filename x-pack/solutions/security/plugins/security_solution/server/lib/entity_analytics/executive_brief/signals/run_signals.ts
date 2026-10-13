@@ -7,8 +7,7 @@
 
 import pMap from 'p-map';
 import { BRIEF_LIMITS } from '../../../../../common/entity_analytics/executive_brief/constants';
-import { noopBriefTelemetry } from '../telemetry/types';
-import type { BriefTelemetry } from '../telemetry/types';
+import { withBriefSpan } from '../telemetry';
 import {
   SignalUnavailableError,
   compareStrings,
@@ -74,7 +73,6 @@ const hasContent = (output: SignalOutput): boolean =>
 interface PhaseOptions {
   jobAbort: AbortSignal;
   gatherAbort: AbortSignal;
-  telemetry: BriefTelemetry;
 }
 
 const runOne = async <TScope extends SignalScope>({
@@ -143,7 +141,7 @@ const runOne = async <TScope extends SignalScope>({
   }
 };
 
-/** Runs one phase through a bounded pool; each signal runs in its own span and is recorded. */
+/** Runs one phase through a bounded pool; each signal runs in its own span. */
 const runPhase = <TScope extends SignalScope>(
   ctx: SignalContext,
   signals: ReadonlyArray<BriefSignal<TScope>>,
@@ -153,9 +151,12 @@ const runPhase = <TScope extends SignalScope>(
   pMap(
     signals,
     (signal) =>
-      options.telemetry.withSignalSpan(signal.id, async () => {
+      withBriefSpan('signal', { 'signal.id': signal.id }, async (span) => {
         const result = await runOne({ ctx, signal, input, ...options });
-        options.telemetry.recordSignal(result.outcome);
+        span?.setAttributes({
+          'signal.status': result.outcome.status,
+          'signal.fact_count': result.outcome.factCount,
+        });
         return result;
       }),
     { concurrency: BRIEF_LIMITS.signalConcurrency }
@@ -250,16 +251,12 @@ const selectCandidates = (
  * and a gather budget; a failing or slow signal is recorded in its `SignalOutcome` and never fails
  * the run. Only an aborted job (the caller's `abortSignal`) throws.
  */
-export const runSignals: RunSignals = async (
-  ctx,
-  signals,
-  { abortSignal, telemetry = noopBriefTelemetry }
-) => {
+export const runSignals: RunSignals = async (ctx, signals, { abortSignal }) => {
   const gatherAbort = AbortSignal.any([
     abortSignal,
     AbortSignal.timeout(BRIEF_LIMITS.gatherBudgetMs),
   ]);
-  const phaseOptions: PhaseOptions = { jobAbort: abortSignal, gatherAbort, telemetry };
+  const phaseOptions: PhaseOptions = { jobAbort: abortSignal, gatherAbort };
   const tenantSignals = signals.filter(
     (signal): signal is BriefSignal<'tenant'> => signal.scope === 'tenant'
   );

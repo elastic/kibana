@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { ToolDefinition, ToolSchema } from '@kbn/inference-common';
-import { briefSchema } from '../../../../../common/entity_analytics/executive_brief/brief';
+import { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 
 export const SUBMIT_BRIEF_TOOL_NAME = 'submit_brief' as const;
 
@@ -20,7 +20,7 @@ const FACT_IDS_DESCRIPTION =
 const ASSESSMENT_SUMMARY_DESCRIPTION = 'One sentence, at most 180 characters';
 
 /**
- * Descriptions added to the JSON schema derived from `briefSchema`, keyed by property path
+ * Descriptions added to the JSON schema derived from the contract's `Brief`, keyed by property path
  * (`[]` stands for array items). They guide the model; the zod schema stays the source of truth.
  */
 const FIELD_DESCRIPTIONS: Readonly<Record<string, string>> = {
@@ -86,20 +86,20 @@ const prepare = (node: JsonNode, path: string): JsonNode => {
 const buildSubmitBriefSchema = (): ToolSchema => {
   // Drop the meta keys: providers only need the schema itself.
   const jsonSchema = Object.fromEntries(
-    Object.entries(z.toJSONSchema(briefSchema)).filter(
+    Object.entries(z.toJSONSchema(Brief)).filter(
       ([key]) => key !== '$schema' && key !== '~standard'
     )
   );
   const prepared = prepare(jsonSchema, '');
   if (!isToolSchema(prepared)) {
-    throw new Error('briefSchema did not convert to an object JSON schema');
+    throw new Error('The Brief schema did not convert to an object JSON schema');
   }
   return prepared;
 };
 
 let cachedTool: Required<ToolDefinition<ToolSchema>> | undefined;
 
-/** The forced `submit_brief` tool; its JSON schema is derived from the contract's `briefSchema`. */
+/** The forced `submit_brief` tool; its JSON schema is derived from the contract's `Brief` schema. */
 export const getSubmitBriefTool = (): Required<ToolDefinition<ToolSchema>> => {
   cachedTool ??= { description: SUBMIT_BRIEF_DESCRIPTION, schema: buildSubmitBriefSchema() };
   return cachedTool;

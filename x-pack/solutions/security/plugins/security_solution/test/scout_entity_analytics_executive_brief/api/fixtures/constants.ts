@@ -6,7 +6,7 @@
  */
 
 import { INTERNAL_API_HEADERS, tags } from '@kbn/scout-security';
-import type { Brief } from '../../../../common/entity_analytics/executive_brief/brief';
+import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
 import { EXECUTIVE_BRIEF_API_PATH } from '../../../../common/entity_analytics/executive_brief/constants';
 
 /** The brief route in the default space (no leading slash, the apiClient convention). */

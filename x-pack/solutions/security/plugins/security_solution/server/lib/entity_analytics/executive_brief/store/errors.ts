@@ -5,10 +5,5 @@
  * 2.0.
  */
 
-/** Thrown when a job write keeps conflicting with concurrent writes to the same document. */
-export class BriefStoreConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'BriefStoreConflictError';
-  }
-}
+/** Thrown when a write keeps conflicting with concurrent writes to the same document. */
+export class BriefStoreConflictError extends Error {}
