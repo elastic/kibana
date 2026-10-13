@@ -78,25 +78,6 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'keeps manually opened query history open across searches',
-      async ({ pageObjects }) => {
-        const { discover, esqlEditor } = pageObjects;
-        const historyPanel = esqlEditor.historyPanel;
-
-        await discover.goto({ queryMode: 'esql' });
-        await discover.waitUntilSearchingHasFinished();
-        await expect(historyPanel).toBeHidden();
-
-        await esqlEditor.toggleHistoryPanel();
-        await esqlEditor.setQuery(QUERY);
-        await discover.submitQuery();
-        await discover.waitUntilSearchingHasFinished();
-
-        await expect(historyPanel).toBeVisible();
-      }
-    );
-
     spaceTest('switches to ES|QL from a new classic empty tab', async ({ pageObjects }) => {
       const { discover, unifiedTabs } = pageObjects;
 

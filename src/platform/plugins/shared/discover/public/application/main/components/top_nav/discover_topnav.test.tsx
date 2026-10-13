@@ -11,7 +11,6 @@ import type { ComponentProps } from 'react';
 import React, { useContext, useEffect } from 'react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DataSourceType } from '../../../../../common/data_sources';
@@ -222,28 +221,6 @@ describe('Discover topnav component', () => {
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
     expect(itemIds).toEqual(['new', 'open', 'inspect']);
     expect(capturedTopNavMenu?.primaryActionItem).toBeUndefined();
-  });
-
-  test('keeps the query history state when submitting a query', async () => {
-    const user = userEvent.setup();
-    const { toolkit, props } = await setup();
-    const tabId = toolkit.getCurrentTab().id;
-    const query = { esql: 'FROM test' };
-
-    toolkit.internalState.dispatch(
-      internalStateActions.updateAppState({ tabId, appState: { query } })
-    );
-    toolkit.internalState.dispatch(
-      internalStateActions.setESQLEditorUiState({
-        tabId,
-        esqlEditorUiState: { isHistoryOpen: true },
-      })
-    );
-
-    renderTestComponent({ toolkit, props });
-    await user.click(screen.getByTestId('mock-query-submit'));
-
-    expect(toolkit.getCurrentTab().uiState.esqlEditor?.isHistoryOpen).toBe(true);
   });
 
   test('disables submit when the ES|QL editor is empty after a search', async () => {

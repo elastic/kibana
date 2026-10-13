@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from '../../../..';
 import { expect } from '../..';
 import {
   DiscoverAppBase,
@@ -38,22 +37,6 @@ export abstract class DiscoverNavigation extends DiscoverAppBase {
     await this.page.testSubj.locator('unifiedTabs_tabPreview_contentPanel').waitFor({
       state: 'hidden',
     });
-  }
-
-  getRefreshDataButton(): Locator {
-    return this.page.testSubj.locator('refreshDataButton');
-  }
-
-  getUninitializedPrompt(): Locator {
-    return this.page.testSubj.locator('discoverUninitialized');
-  }
-
-  getRecommendedQueries(): Locator {
-    return this.page.testSubj.locator('discoverRecommendedQueries');
-  }
-
-  getRecommendedQueryRunButton(label: string): Locator {
-    return this.getRecommendedQueries().getByRole('button', { name: `Run query: ${label}` });
   }
 
   async waitUntilSearchingHasFinished() {
