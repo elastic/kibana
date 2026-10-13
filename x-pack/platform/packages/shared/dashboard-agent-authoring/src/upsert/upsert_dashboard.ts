@@ -16,6 +16,10 @@ import {
 import {
   appendPanelsToDashboard,
   findSectionIndex,
+  getControlId,
+  getControlIds,
+  getSectionIdByPanelId,
+  getSectionsById,
   indexPanelsById,
   removePanelsFromDashboard,
   updatePanelInDashboard,
@@ -52,6 +56,11 @@ interface PanelPlan {
   resolveContent?: () => PanelContentAttempt | Promise<PanelContentAttempt>;
 }
 
+interface PanelResolvers {
+  resolvePanelContent: ResolvePanelContent;
+  resolveAttachmentPanel: ResolveAttachmentPanel;
+}
+
 interface ExecuteDashboardUpsertParams {
   dashboardData?: DashboardAttachmentData;
   upsert: DashboardUpsert;
@@ -81,9 +90,6 @@ export interface DashboardUpsertResult {
 
 const findDuplicates = (ids: string[]): Set<string> =>
   new Set(ids.filter((id, index) => ids.indexOf(id) !== index));
-
-const getSectionIds = ({ panels }: DashboardAttachmentData): Set<string> =>
-  new Set(panels.filter(isSection).map(({ id }) => id));
 
 /**
  * Leaves out ids listed both as an update (`panels` or `sections`) and in `remove`, recording one
@@ -188,20 +194,11 @@ const planPanelContent = ({
   existingPanel,
   resolvePanelContent,
   resolveAttachmentPanel,
-}: {
+}: PanelResolvers & {
   id: string;
   content: UpsertPanelContent;
   existingPanel?: AttachmentPanel;
-  resolvePanelContent?: ResolvePanelContent;
-  resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): { resolveContent: NonNullable<PanelPlan['resolveContent']> } | { error: string } => {
-  const resolveRequest: ResolvePanelContent = (request) => {
-    if (!resolvePanelContent) {
-      throw new Error('Inline panel resolver is required for request-source panels.');
-    }
-    return resolvePanelContent(request);
-  };
-
   if (existingPanel && !canEditPanel(content, existingPanel)) {
     return { error: getPanelEditError(existingPanel) };
   }
@@ -218,14 +215,7 @@ const planPanelContent = ({
 
   if (content.source === 'attachment') {
     const { attachment_id: attachmentId } = content;
-    return {
-      resolveContent: () => {
-        if (!resolveAttachmentPanel) {
-          throw new Error('Attachment panel resolver is required for attachment-source panels.');
-        }
-        return resolveAttachmentPanel(attachmentId);
-      },
-    };
+    return { resolveContent: () => resolveAttachmentPanel(attachmentId) };
   }
 
   const result = existingPanel
@@ -234,7 +224,7 @@ const planPanelContent = ({
   if ('error' in result) {
     return result;
   }
-  return { resolveContent: () => resolveRequest(result.request) };
+  return { resolveContent: () => resolvePanelContent(result.request) };
 };
 
 const planPanels = ({
@@ -244,17 +234,15 @@ const planPanels = ({
   recordFailure,
   resolvePanelContent,
   resolveAttachmentPanel,
-}: {
+}: PanelResolvers & {
   dashboardData: DashboardAttachmentData;
   panels: UpsertPanelItem[];
   removedIds: ReadonlySet<string>;
   recordFailure: RecordFailure;
-  resolvePanelContent?: ResolvePanelContent;
-  resolveAttachmentPanel?: ResolveAttachmentPanel;
 }): PanelPlan[] => {
   const duplicateIds = findDuplicates(panels.map(({ id }) => id));
   const panelsById = indexPanelsById(dashboardData.panels);
-  const sectionIds = getSectionIds(dashboardData);
+  const sectionsById = getSectionsById(dashboardData);
 
   return panels.flatMap((item): PanelPlan[] => {
     const { id, section, content } = item;
@@ -262,7 +250,7 @@ const planPanels = ({
       recordFailure(id, `Panel "${id}" appears more than once. List each panel once.`);
       return [];
     }
-    if (sectionIds.has(id)) {
+    if (sectionsById.has(id)) {
       recordFailure(id, `"${id}" is a section id. Use a different id for the panel.`);
       return [];
     }
@@ -273,7 +261,7 @@ const planPanels = ({
       );
       return [];
     }
-    if (typeof section === 'string' && !sectionIds.has(section)) {
+    if (typeof section === 'string' && !sectionsById.has(section)) {
       recordFailure(
         id,
         `Section "${section}" not found. Create it in \`sections\` or use an existing section id.`
@@ -302,24 +290,6 @@ const planPanels = ({
     }
     return [{ item, existingPanel, resolveContent: contentPlan.resolveContent }];
   });
-};
-
-const getPanelSectionId = (
-  { panels }: DashboardAttachmentData,
-  panelId: string
-): string | null | undefined => {
-  for (const widget of panels) {
-    if (!isSection(widget)) {
-      if (widget.id === panelId) {
-        return null;
-      }
-      continue;
-    }
-    if (widget.panels.some(({ id }) => id === panelId)) {
-      return widget.id;
-    }
-  }
-  return undefined;
 };
 
 /** Applies one planned panel in place, or moves it when it targets another container. */
@@ -353,7 +323,7 @@ const applyPanel = ({
     grid: { ...panel.grid, ...size },
   });
 
-  const currentSectionId = getPanelSectionId(dashboardData, id);
+  const currentSectionId = getSectionIdByPanelId(dashboardData).get(id);
   if (section === undefined || section === currentSectionId) {
     return updatePanelInDashboard({ dashboardData, panelId: id, transformPanel }).dashboardData;
   }
@@ -369,25 +339,6 @@ const applyPanel = ({
   });
 };
 
-/**
- * Panels that a section to remove still holds although the call asked to move them elsewhere. Their
- * move failed, so removing the section would delete them.
- */
-const getStrandedPanelIds = (
-  { panels }: DashboardAttachmentData,
-  sectionId: string,
-  panelItems: UpsertPanelItem[]
-): string[] => {
-  const section = panels.find((widget) => isSection(widget) && widget.id === sectionId);
-  if (!section || !isSection(section)) {
-    return [];
-  }
-  const sectionPanelIds = new Set(section.panels.map(({ id }) => id));
-  return panelItems
-    .filter(({ id, section: target }) => target !== undefined && sectionPanelIds.has(id))
-    .map(({ id }) => id);
-};
-
 const applyRemovals = ({
   dashboardData,
   remove,
@@ -400,10 +351,9 @@ const applyRemovals = ({
   recordFailure: RecordFailure;
 }): DashboardAttachmentData => {
   const panelIds = new Set(indexPanelsById(dashboardData.panels).keys());
-  const sectionIds = getSectionIds(dashboardData);
-  const controlIds = new Set(
-    (dashboardData.pinned_panels ?? []).map((control) => (control as { id?: string }).id)
-  );
+  const sectionsById = getSectionsById(dashboardData);
+  const controlIds = new Set(getControlIds(dashboardData));
+  const sectionIdByPanelId = getSectionIdByPanelId(dashboardData);
 
   const panelIdsToRemove = new Set<string>();
   const sectionIdsToRemove = new Set<string>();
@@ -412,8 +362,14 @@ const applyRemovals = ({
   for (const id of remove) {
     if (panelIds.has(id)) {
       panelIdsToRemove.add(id);
-    } else if (sectionIds.has(id)) {
-      const strandedPanelIds = getStrandedPanelIds(dashboardData, id, panelItems);
+    } else if (sectionsById.has(id)) {
+      // Panels the call asked to move out of the section are still in it when their move failed.
+      const strandedPanelIds = panelItems
+        .filter(
+          ({ id: panelId, section }) =>
+            section !== undefined && sectionIdByPanelId.get(panelId) === id
+        )
+        .map(({ id: panelId }) => panelId);
       if (strandedPanelIds.length > 0) {
         recordFailure(
           id,
@@ -446,21 +402,12 @@ const applyRemovals = ({
     ...(controlIdsToRemove.size > 0
       ? {
           pinned_panels: (withoutPanels.pinned_panels ?? []).filter(
-            (control) => !controlIdsToRemove.has((control as { id?: string }).id ?? '')
+            (control) => !controlIdsToRemove.has(getControlId(control) ?? '')
           ),
         }
       : {}),
   };
 };
-
-const getControlIds = ({ pinned_panels: controls = [] }: DashboardAttachmentData): string[] =>
-  controls.flatMap((control) => {
-    const { id } = control as { id?: string };
-    return id ? [id] : [];
-  });
-
-const getSectionsById = ({ panels }: DashboardAttachmentData): Map<string, DashboardSection> =>
-  new Map(panels.filter(isSection).map((section) => [section.id, section]));
 
 /**
  * Splits the changes kept in the final dashboard into created ids (panels, sections and controls
@@ -482,6 +429,8 @@ const getChangedIds = ({
   const originalSectionsById = getSectionsById(originalDashboardData);
   const sectionsById = getSectionsById(dashboardData);
   const originalControlIds = new Set(getControlIds(originalDashboardData));
+  const originalSectionIdByPanelId = getSectionIdByPanelId(originalDashboardData);
+  const sectionIdByPanelId = getSectionIdByPanelId(dashboardData);
 
   const created = [
     ...[...panelsById.keys()].filter((id) => !originalPanelsById.has(id)),
@@ -496,7 +445,7 @@ const getChangedIds = ({
       originalPanel !== undefined &&
       panel !== undefined &&
       (!isEqual(originalPanel, panel) ||
-        getPanelSectionId(originalDashboardData, id) !== getPanelSectionId(dashboardData, id))
+        originalSectionIdByPanelId.get(id) !== sectionIdByPanelId.get(id))
     );
   };
   const isSectionUpdated = (id: string): boolean => {
@@ -519,6 +468,10 @@ const getChangedIds = ({
   return { created, updated };
 };
 
+const missingResolver = (message: string) => (): never => {
+  throw new Error(message);
+};
+
 /**
  * Environment-agnostic dashboard upsert: applies the desired dashboard fields, sections, panels,
  * controls, and removals to a prior dashboard payload (or an empty one), keyed by id. New panels and
@@ -532,8 +485,12 @@ export const executeDashboardUpsert = async ({
   dashboardData,
   upsert,
   logger,
-  resolvePanelContent,
-  resolveAttachmentPanel,
+  resolvePanelContent = missingResolver(
+    'Inline panel resolver is required for request-source panels.'
+  ),
+  resolveAttachmentPanel = missingResolver(
+    'Attachment panel resolver is required for attachment-source panels.'
+  ),
   resolveControlFieldCapabilities,
   arrangeLayout,
   finalizeDashboard,

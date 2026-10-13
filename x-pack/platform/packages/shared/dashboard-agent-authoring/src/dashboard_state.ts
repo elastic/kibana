@@ -31,6 +31,31 @@ export const indexPanelsById = (
   return index;
 };
 
+type DashboardControl = NonNullable<DashboardAttachmentData['pinned_panels']>[number];
+
+export const getSectionsById = ({
+  panels,
+}: DashboardAttachmentData): Map<string, DashboardSection> =>
+  new Map(panels.filter(isSection).map((section) => [section.id, section]));
+
+/** Section id of every panel, or null for panels at the top level. */
+export const getSectionIdByPanelId = ({
+  panels,
+}: DashboardAttachmentData): Map<string, string | null> =>
+  new Map(
+    panels.flatMap(
+      (widget): Array<[string, string | null]> =>
+        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
+    )
+  );
+
+export const getControlId = (control: DashboardControl): string | undefined =>
+  (control as { id?: string }).id;
+
+export const getControlIds = ({
+  pinned_panels: controls = [],
+}: DashboardAttachmentData): string[] => controls.flatMap((control) => getControlId(control) ?? []);
+
 export const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
   return panels.findIndex((widget) => isSection(widget) && widget.id === sectionId);
 };

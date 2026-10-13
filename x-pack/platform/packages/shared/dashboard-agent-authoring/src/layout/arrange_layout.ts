@@ -12,6 +12,7 @@ import {
   type DashboardAttachmentData,
   type DashboardSection,
 } from '@kbn/agent-builder-dashboards-common';
+import { getSectionIdByPanelId, getSectionsById } from '../dashboard_state';
 import { getErrorMessage } from '../utils';
 import { getLensChartType } from './panel_sizes';
 import {
@@ -34,15 +35,14 @@ type ContainerKey = string | null;
 /** Grid of every placed item. Sections only use `y`, as they take one row of the top level. */
 type Placements = Map<string, PanelGrid>;
 
-const SECTION_HEIGHT = 1;
+/** A panel to place on a line, at its final size. */
+interface LineEntry {
+  id: string;
+  w: number;
+  h: number;
+}
 
-const getContainerKeyByPanelId = ({ panels }: DashboardAttachmentData): Map<string, ContainerKey> =>
-  new Map(
-    panels.flatMap(
-      (widget): Array<[string, ContainerKey]> =>
-        isSection(widget) ? widget.panels.map(({ id }) => [id, widget.id]) : [[widget.id, null]]
-    )
-  );
+const SECTION_HEIGHT = 1;
 
 const compareReadingOrder = (left: { y: number; x: number }, right: { y: number; x: number }) =>
   left.y - right.y || left.x - right.x;
@@ -86,10 +86,8 @@ export const arrangeDashboardLayout = async ({
   arrangeLayout,
   logger,
 }: ArrangeLayoutParams): Promise<DashboardAttachmentData> => {
-  const originalContainerKeyByPanelId = getContainerKeyByPanelId(originalDashboardData);
-  const originalSectionIds = new Set(
-    originalDashboardData.panels.filter(isSection).map(({ id }) => id)
-  );
+  const originalContainerKeyByPanelId = getSectionIdByPanelId(originalDashboardData);
+  const originalSectionIds = new Set(getSectionsById(originalDashboardData).keys());
 
   const isNewItem = (widget: AttachmentPanel | DashboardSection, key: ContainerKey): boolean =>
     isSection(widget)
@@ -240,6 +238,27 @@ const scaleWidths = (widths: number[], total: number): number[] => {
 };
 
 /**
+ * Places entries left to right from `startY`, wrapping onto the next line when an entry does not
+ * fit. Returns the next free `y`.
+ */
+const placeLine = (entries: LineEntry[], startY: number, placements: Placements): number => {
+  let x = 0;
+  let y = startY;
+  let lineHeight = 0;
+  for (const { id, w, h } of entries) {
+    if (x > 0 && x + w > GRID_COLUMNS) {
+      y += lineHeight;
+      x = 0;
+      lineHeight = 0;
+    }
+    placements.set(id, { x, y, w, h });
+    x += w;
+    lineHeight = Math.max(lineHeight, h);
+  }
+  return y + lineHeight;
+};
+
+/**
  * Places one row of panels from `y`. Widths of panels without a fixed size are scaled so the row
  * fills the grid; panels that still do not fit wrap onto the next line. Returns the next free `y`.
  */
@@ -263,44 +282,24 @@ const placePanelRow = (
       : flexibleEntries.map(({ w }) => w);
   const widthByPanel = new Map(flexibleEntries.map(({ panel }, i) => [panel, flexibleWidths[i]]));
 
-  let x = 0;
-  let y = startY;
-  let lineHeight = 0;
-  for (const { panel } of entries) {
-    const w = panel.fixedSize ? panel.size.w : widthByPanel.get(panel) ?? panel.size.w;
-    const panelHeight = panel.fixedSize ? panel.size.h : h;
-    if (x > 0 && x + w > GRID_COLUMNS) {
-      y += lineHeight;
-      x = 0;
-      lineHeight = 0;
-    }
-    placements.set(panel.id, { x, y, w, h: panelHeight });
-    x += w;
-    lineHeight = Math.max(lineHeight, panelHeight);
-  }
-  return y + lineHeight;
+  return placeLine(
+    entries.map(({ panel }) =>
+      panel.fixedSize
+        ? { id: panel.id, ...panel.size }
+        : { id: panel.id, w: widthByPanel.get(panel) ?? panel.size.w, h }
+    ),
+    startY,
+    placements
+  );
 };
 
 /** Packs items left to right at their current size, sections on their own row. */
 const packItems = (items: LayoutItem[], startY: number, placements: Placements): number => {
   let y = startY;
-  let line: Array<{ panel: LayoutPanel; w: number }> = [];
-  let lineWidth = 0;
-
+  let line: LineEntry[] = [];
   const flushLine = () => {
-    if (line.length === 0) {
-      return;
-    }
-    let x = 0;
-    let lineHeight = 0;
-    for (const { panel, w } of line) {
-      placements.set(panel.id, { x, y, w, h: panel.size.h });
-      x += w;
-      lineHeight = Math.max(lineHeight, panel.size.h);
-    }
-    y += lineHeight;
+    y = placeLine(line, y, placements);
     line = [];
-    lineWidth = 0;
   };
 
   for (const item of items) {
@@ -310,12 +309,7 @@ const packItems = (items: LayoutItem[], startY: number, placements: Placements):
       y += SECTION_HEIGHT;
       continue;
     }
-    const w = Math.min(item.size.w, GRID_COLUMNS);
-    if (lineWidth + w > GRID_COLUMNS) {
-      flushLine();
-    }
-    line.push({ panel: item, w });
-    lineWidth += w;
+    line.push({ id: item.id, w: Math.min(item.size.w, GRID_COLUMNS), h: item.size.h });
   }
   flushLine();
   return y;
