@@ -88,8 +88,8 @@ const examples: DatasetExample[] = cases.map((c) => ({
 
 evaluate.describe(
   MUTATION
-    ? 'Escalation grounded-QA (mutation: drop last investigation)'
-    : 'Escalation grounded-QA',
+    ? 'AZ escalation grounded-QA (mutation: drop last investigation)'
+    : 'AZ escalation grounded-QA',
   { tag: tags.stateful.classic },
   () => {
     // The investigation-summary step runs on the `alertzero_reasoning` feature
@@ -150,7 +150,7 @@ evaluate.describe(
           {
             datasets: [
               {
-                name: 'security: escalation-grounded-qa',
+                name: 'security: az-escalation-grounded-qa',
                 description:
                   `Grounded-QA set for the Escalations feature (security-team#19927): each case is an ` +
                   `escalation with 2-5 linked investigations carrying distinct planted facts, one only in ` +

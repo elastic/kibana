@@ -550,16 +550,17 @@
       "serverConfigSet": "evals_tracing"
     },
     {
-      "id": "security-escalation-grounding",
-      "name": "Escalation Grounded QA",
+      "id": "az-escalation-grounding",
+      "name": "AZ Escalation Grounded QA",
       "slackChannel": "#security-generative-ai-evals",
-      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding/playwright.config.ts",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding/playwright.config.ts",
       "tags": [
         "security",
-        "escalation-grounding"
+        "escalation-grounding",
+        "alertzero"
       ],
       "ciLabels": [
-        "evals:security-escalation-grounding"
+        "evals:az-escalation-grounding"
       ],
       "serverConfigSet": "evals_attack_discovery_fp_tp"
     }

@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding/src'],
+  roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding/src'],
 };

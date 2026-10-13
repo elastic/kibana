@@ -5525,6 +5525,9 @@ importers:
       '@kbn/evals-suite-attack-discovery-fp-tp':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp
+      '@kbn/evals-suite-az-escalation-grounding':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding
       '@kbn/evals-suite-detection-watch-rule-creation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation
@@ -5534,9 +5537,6 @@ importers:
       '@kbn/evals-suite-entity-analytics':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics
-      '@kbn/evals-suite-escalation-grounding':
-        specifier: workspace:*
-        version: link:x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding
       '@kbn/evals-suite-lead-generation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-evals-suite-lead-generation
@@ -9769,13 +9769,13 @@ importers:
 
   x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp: {}
 
+  x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding: {}
+
   x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-endpoint: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics: {}
-
-  x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding: {}
 
   x-pack/solutions/security/packages/kbn-evals-suite-lead-generation: {}
 

@@ -1,4 +1,4 @@
-# Escalation summary + escalation-context chat grounded-QA suite
+# AZ (AlertZero) escalation summary + escalation-context chat grounded-QA suite
 
 Scores the two claims from security-team#19927 the Escalations feature makes
 about linked investigations:
@@ -73,7 +73,7 @@ Kibana with security):
 
 ```bash
 node scripts/evals_runner \
-  --eval x-pack/solutions/security/packages/kbn-evals-suite-escalation-grounding
+  --eval x-pack/solutions/security/packages/kbn-evals-suite-az-escalation-grounding
 ```
 
 Environment:
