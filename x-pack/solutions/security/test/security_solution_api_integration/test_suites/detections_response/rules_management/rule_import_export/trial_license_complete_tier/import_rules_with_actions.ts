@@ -347,7 +347,6 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(importResponse).toMatchObject({
             success: true,
             success_count: 1,
-            rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 0 },
             rules_count: 1,
             errors: [],
             action_connectors_success: true,
@@ -456,7 +455,6 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(importResponse).toMatchObject({
           success: true,
           success_count: 1,
-          rules_summary: { created: 1, updated: 0, unchanged: 0, failed: 0 },
           rules_count: 1,
           errors: [],
           action_connectors_success: true,

@@ -51,7 +51,7 @@ export async function overwriteRules({
   const { actionsClient, rulesClient, prebuiltRuleAssetClient } = deps;
   const successes: ImportRuleSuccess[] = [];
   const errors: ImportRuleError[] = [];
-  const pending = new Map<string, ImportRuleSuccess>();
+  const byId = new Map<string, ImportRuleSuccess>();
   const bulkInputs: BulkUpdateRulesParams<RuleParams>['rules'] = [];
   const toEnable: string[] = [];
   const toDisable: string[] = [];
@@ -85,7 +85,7 @@ export async function overwriteRules({
         if (existingRule.enabled !== requestedEnabled) {
           (requestedEnabled ? toEnable : toDisable).push(existingRule.id);
         }
-        pending.set(existingRule.id, { rule_id: rule.rule_id, outcome: 'updated', telemetry });
+        byId.set(existingRule.id, { rule_id: rule.rule_id, outcome: 'updated', telemetry });
         bulkInputs.push({ id: existingRule.id, data });
       }
     } catch (e) {
@@ -112,7 +112,7 @@ export async function overwriteRules({
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    for (const source of pending.values()) {
+    for (const source of byId.values()) {
       errors.push(createRuleImportErrorObject({ ruleId: source.rule_id, message }));
     }
     return { successes, errors };
@@ -122,20 +122,20 @@ export async function overwriteRules({
   const successIds = new Set(successfulIds);
   const { errors: toggleErrors, failedIds } = await toggleState({
     rulesClient,
-    pending,
+    byId,
     enableIds: toEnable.filter((id) => successIds.has(id)),
     disableIds: toDisable.filter((id) => successIds.has(id)),
   });
 
   for (const id of successfulIds) {
-    const source = pending.get(id);
+    const source = byId.get(id);
     if (source != null && !failedIds.has(id)) {
       successes.push(source);
     }
   }
 
   for (const err of bulkErrors) {
-    const failed = pending.get(err.rule.id);
+    const failed = byId.get(err.rule.id);
     if (failed != null) {
       errors.push(
         createRuleImportErrorObject({
@@ -152,12 +152,12 @@ export async function overwriteRules({
 
 const toggleState = async ({
   rulesClient,
-  pending,
+  byId,
   enableIds,
   disableIds,
 }: {
   rulesClient: RulesClient;
-  pending: Map<string, ImportRuleSuccess>;
+  byId: Map<string, ImportRuleSuccess>;
   enableIds: string[];
   disableIds: string[];
 }): Promise<{ errors: ImportRuleError[]; failedIds: Set<string> }> => {
@@ -168,7 +168,7 @@ const toggleState = async ({
       return;
     }
     failedIds.add(id);
-    const source = pending.get(id);
+    const source = byId.get(id);
     if (source != null) {
       errors.push(createRuleImportErrorObject({ ruleId: source.rule_id, message }));
     }

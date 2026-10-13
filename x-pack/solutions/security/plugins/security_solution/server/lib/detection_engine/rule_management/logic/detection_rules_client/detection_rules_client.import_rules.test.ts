@@ -15,6 +15,7 @@ import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 
 import { buildMlAuthz } from '../../../../machine_learning/__mocks__/authz';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { createDetectionRulesClient } from './detection_rules_client';
@@ -348,6 +349,68 @@ describe('detectionRulesClient.importRules', () => {
       DETECTION_RULE_IMPORT_EVENT.eventType,
       expect.objectContaining({ ruleId: unchanged.id, outcome: 'unchanged' })
     );
+  });
+
+  describe('unchanged detection', () => {
+    const action = {
+      group: 'default',
+      id: 'connector-id',
+      action_type_id: '.slack',
+      params: { message: 'Rule fired' },
+      uuid: 'action-uuid',
+      frequency: { summary: true, notifyWhen: 'onThrottleInterval' as const, throttle: '1h' },
+    };
+    const existingRule = {
+      ...getRulesSchemaMock(),
+      rule_id: 'existing-rule',
+      exceptions_list: [],
+      actions: [action],
+    };
+
+    const importRule = (rule: RuleToImport) =>
+      subject.importRules({
+        allowMissingConnectorSecrets: false,
+        overwriteRules: true,
+        rules: [rule],
+      });
+
+    beforeEach(() => {
+      (findInstalledRulesBySignatureIds as jest.Mock).mockResolvedValueOnce({
+        'existing-rule': existingRule,
+      });
+      rulesClient.bulkUpdateRules.mockResolvedValueOnce({
+        successfulIds: [existingRule.id],
+        errors: [],
+        total: 1,
+      });
+    });
+
+    it('counts identical actions as unchanged', async () => {
+      const { successes } = await importRule({ ...existingRule });
+
+      expect(successes).toEqual([expect.objectContaining({ outcome: 'unchanged' })]);
+      expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
+    });
+
+    it('counts a legacy rule-level throttle matching the stored frequency as unchanged', async () => {
+      const { frequency, ...legacyAction } = action;
+      const { successes } = await importRule({
+        ...existingRule,
+        throttle: '1h',
+        actions: [legacyAction],
+      });
+
+      expect(successes).toEqual([expect.objectContaining({ outcome: 'unchanged' })]);
+      expect(rulesClient.bulkUpdateRules).not.toHaveBeenCalled();
+    });
+
+    it('counts an action without its stored uuid as updated', async () => {
+      const { uuid, ...actionWithoutUuid } = action;
+      const { successes } = await importRule({ ...existingRule, actions: [actionWithoutUuid] });
+
+      expect(successes).toEqual([expect.objectContaining({ outcome: 'updated' })]);
+      expect(rulesClient.bulkUpdateRules).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('per-row bulk error is re-paired to its source rule_id via uuid', async () => {
