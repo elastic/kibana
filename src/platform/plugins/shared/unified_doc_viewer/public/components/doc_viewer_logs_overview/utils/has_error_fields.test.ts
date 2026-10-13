@@ -526,6 +526,18 @@ describe('hasErrorFields', () => {
       expect(hasErrorFields(doc)).toBe(true);
     });
 
+    it('returns true when log.level and message are null and body.text carries the message', () => {
+      const doc: LogDocumentOverview = {
+        ...createBaseDoc(),
+        [fieldConstants.LOG_LEVEL_FIELD]: null as unknown as string,
+        [fieldConstants.MESSAGE_FIELD]: null as unknown as string,
+        [fieldConstants.OTEL_SEVERITY_TEXT_FIELD]: 'ERROR',
+        [fieldConstants.OTEL_MESSAGE_FIELD]: 'OTel request failed',
+      };
+
+      expect(hasErrorFields(doc)).toBe(true);
+    });
+
     it('returns false when severity_text is not an error level and there is no error event type', () => {
       const doc: LogDocumentOverview = {
         ...createBaseDoc(),

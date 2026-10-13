@@ -151,6 +151,22 @@ describe('getLogLevelFieldWithFallback', () => {
     });
   });
 
+  it('falls back to severity_text when log.level is null', () => {
+    const doc: LogDocumentOverview = {
+      ...createBaseDoc(),
+      'log.level': null as unknown as string,
+      [OTEL_SEVERITY_TEXT_FIELD]: 'ERROR',
+      'error.log.level': 'warning',
+    };
+
+    const result = getLogLevelFieldWithFallback(doc);
+
+    expect(result).toEqual({
+      field: OTEL_SEVERITY_TEXT_FIELD,
+      value: 'ERROR',
+    });
+  });
+
   it('prioritizes severity_text over error.log.level', () => {
     const doc: LogDocumentOverview = {
       ...createBaseDoc(),
