@@ -219,6 +219,7 @@ describe('sendWaitForInputNotifications', () => {
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate: (template) =>
         template
           .replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form')
@@ -253,6 +254,7 @@ describe('sendWaitForInputNotifications', () => {
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate: (template) => template,
       connectorExecutor: { execute, executeSystemConnector } as never,
       abortController: new AbortController(),
@@ -284,6 +286,7 @@ describe('sendWaitForInputNotifications', () => {
       },
       stepMessage: 'Please provide input',
       formUrl: 'https://kibana.example/form',
+      kibanaUrl: 'https://kibana.example',
       renderTemplate: (template) =>
         template.replaceAll('{{context.hitl.externalFormLink}}', 'https://kibana.example/form'),
       connectorExecutor: { execute, executeSystemConnector: jest.fn() } as never,
@@ -313,6 +316,7 @@ describe('sendWaitForInputNotifications', () => {
         },
         stepMessage: 'Please provide input',
         formUrl: 'https://kibana.example/form',
+        kibanaUrl: 'https://kibana.example',
         renderTemplate: () => '',
         connectorExecutor: { executeSystemConnector: jest.fn() } as never,
         abortController: new AbortController(),
