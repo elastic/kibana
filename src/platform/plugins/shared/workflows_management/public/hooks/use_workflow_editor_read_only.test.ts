@@ -13,7 +13,10 @@ import { Route } from '@kbn/shared-ux-router';
 import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 
-import { useWorkflowEditorReadOnly } from './use_workflow_editor_read_only';
+import {
+  useWorkflowEditorReadOnly,
+  useWorkflowEditorReadOnlyReason,
+} from './use_workflow_editor_read_only';
 import { createMockStore } from '../entities/workflows/store/__mocks__/store.mock';
 import {
   setActiveTab,
@@ -69,12 +72,10 @@ interface RenderParams {
   workflow?: WorkflowDetailDto;
 }
 
-const renderReadOnlyHook = ({
-  search = '',
-  activeTab = 'workflow',
-  execution,
-  workflow = baseWorkflow,
-}: RenderParams = {}) => {
+const renderWithStore = <T>(
+  hook: () => T,
+  { search = '', activeTab = 'workflow', execution, workflow = baseWorkflow }: RenderParams = {}
+) => {
   const store = createMockStore();
   store.dispatch(setWorkflow(workflow));
   store.dispatch(setActiveTab(activeTab));
@@ -86,7 +87,7 @@ const renderReadOnlyHook = ({
     store,
     initialEntries: [`/workflows/${workflow.id}${search}`],
   });
-  return renderHook(() => useWorkflowEditorReadOnly(), {
+  return renderHook(hook, {
     wrapper: ({ children }: { children: React.ReactNode }) =>
       React.createElement(
         Provider,
@@ -95,6 +96,9 @@ const renderReadOnlyHook = ({
       ),
   });
 };
+
+const renderReadOnlyHook = (params?: RenderParams) =>
+  renderWithStore(useWorkflowEditorReadOnly, params);
 
 describe('useWorkflowEditorReadOnly', () => {
   beforeEach(() => {
@@ -181,5 +185,76 @@ describe('useWorkflowEditorReadOnly', () => {
     const { result } = renderReadOnlyHook();
 
     expect(result.current).toBe(true);
+  });
+});
+
+describe('useWorkflowEditorReadOnlyReason', () => {
+  beforeEach(() => {
+    useWorkflowsCapabilities.mockReturnValue({
+      canCreateWorkflow: true,
+      canUpdateWorkflow: true,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns undefined when the editor is editable', () => {
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason);
+
+    expect(result.current).toBeUndefined();
+  });
+
+  it('returns executions_tab on the executions tab', () => {
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      search: '?tab=executions',
+      activeTab: 'executions',
+    });
+
+    expect(result.current).toBe('executions_tab');
+  });
+
+  it('returns managed on the executions tab, because the Workflow tab is read-only too', () => {
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      search: '?tab=executions',
+      activeTab: 'executions',
+      workflow: { ...baseWorkflow, managed: true },
+    });
+
+    expect(result.current).toBe('managed');
+  });
+
+  it('returns no_permission on the executions tab when the user cannot edit', () => {
+    useWorkflowsCapabilities.mockReturnValue({
+      canCreateWorkflow: false,
+      canUpdateWorkflow: false,
+    });
+
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      search: '?tab=executions',
+      activeTab: 'executions',
+    });
+
+    expect(result.current).toBe('no_permission');
+  });
+
+  it('returns managed for a managed workflow', () => {
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason, {
+      workflow: { ...baseWorkflow, managed: true },
+    });
+
+    expect(result.current).toBe('managed');
+  });
+
+  it('returns no_permission when the user cannot edit', () => {
+    useWorkflowsCapabilities.mockReturnValue({
+      canCreateWorkflow: false,
+      canUpdateWorkflow: false,
+    });
+
+    const { result } = renderWithStore(useWorkflowEditorReadOnlyReason);
+
+    expect(result.current).toBe('no_permission');
   });
 });

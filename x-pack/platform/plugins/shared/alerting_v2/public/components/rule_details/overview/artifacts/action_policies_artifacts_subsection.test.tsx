@@ -68,7 +68,7 @@ const baseRule: RuleApiResponse = {
   kind: 'alert',
   enabled: true,
   version: 1,
-  metadata: { name: 'Test Rule', tags: ['prod'] },
+  metadata: { name: 'Test Rule', tags: ['prod'], routing_tags: ['sre'] },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
   query: { base: 'FROM logs-*' },
@@ -88,11 +88,7 @@ const buildItem = (
     description: '',
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
-    matcher: null,
-    group_by: null,
-    grouping_mode: 'per_alert',
-    throttle: null,
-    snoozed_until: null,
+    grouping: { mode: 'per_alert' },
     created_by: { profile_uid: 'u_user' },
     created_at: '2026-01-01T00:00:00.000Z',
     updated_by: { profile_uid: 'u_user' },
@@ -136,12 +132,12 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       .mockReturnValue('/mock-locator-url');
   });
 
-  it('loads linked policies using the current rule tags', () => {
+  it('loads linked policies using the rule routing tags, not its tags', () => {
     renderSubsection();
-    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith(['prod']);
+    expect(mockUseLinkedActionPolicies).toHaveBeenCalledWith(['sre']);
   });
 
-  it('loads linked policies with an empty tag list when the rule has none', () => {
+  it('loads linked policies with an empty list when the rule has no routing tags', () => {
     renderSubsection({
       ...baseRule,
       metadata: { name: 'Untagged Rule' },
@@ -209,7 +205,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
         buildItem('tags', {
           id: 'policy-match',
           name: 'Tag policy',
-          matcher: { tags: ['prod'] },
+          matcher: { tags: ['sre'] },
         }),
         buildItem('catch_all', { id: 'policy-catch', name: 'Catch-all policy' }),
       ],
@@ -229,7 +225,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       within(screen.getByTestId('ruleActionPolicyArtifactRow-policy-match')).getByTestId(
         'matchedPolicyReasonTags'
       )
-    ).toBeInTheDocument();
+    ).toHaveAttribute('aria-label', 'Matching routing tags: sre');
     expect(
       screen.queryByTestId('ruleActionPolicyArtifactEditLink-policy-match')
     ).not.toBeInTheDocument();
@@ -261,7 +257,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     const name = 'Long matching policy for production hosts across every region and cluster';
     mockUseLinkedActionPolicies.mockReturnValue({
       ...idleHookResult,
-      items: [buildItem('tags', { id: 'policy-long', name, matcher: { tags: ['prod'] } })],
+      items: [buildItem('tags', { id: 'policy-long', name, matcher: { tags: ['sre'] } })],
     });
 
     renderSubsection();
@@ -276,7 +272,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
     const name = `${'a'.repeat(27)}😀 and the rest of the policy name`;
     mockUseLinkedActionPolicies.mockReturnValue({
       ...idleHookResult,
-      items: [buildItem('tags', { id: 'policy-emoji', name, matcher: { tags: ['prod'] } })],
+      items: [buildItem('tags', { id: 'policy-emoji', name, matcher: { tags: ['sre'] } })],
     });
 
     renderSubsection();
@@ -294,7 +290,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
         buildItem('tags', {
           id: 'policy-expr',
           name: 'Expression policy',
-          matcher: { tags: ['prod'], expression: 'data.severity: "critical"' },
+          matcher: { tags: ['sre'], expression: 'data.severity: "critical"' },
         }),
       ],
     });
@@ -316,7 +312,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
         buildItem('tags', {
           id: 'policy-match',
           name: 'Tag policy',
-          matcher: { tags: ['prod'] },
+          matcher: { tags: ['sre'] },
         }),
       ],
     });
@@ -402,7 +398,7 @@ describe('ActionPoliciesArtifactsSubsection', () => {
           name: 'Quiet policy',
           enabled: false,
           snoozed_until: snoozedUntil,
-          matcher: { tags: ['prod'] },
+          matcher: { tags: ['sre'] },
         }),
       ],
     });

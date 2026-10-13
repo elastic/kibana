@@ -14,7 +14,7 @@ import { CreateDatasetDetailsFields } from './create_dataset_details_fields';
 import type { CreateDatasetFormValues, DatasetFormatFormValue } from '../create_dataset_form_state';
 import { CreateDatasetFormatField } from '../options_step/create_dataset_settings';
 import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
-import { SUPPORTED_DATASET_FORMATS, type SupportedDatasetFormat } from './fields/format_select';
+import { SUPPORTED_DATASET_FORMATS, isSupportedDatasetFormat } from './fields/format_select';
 import { useWizardStep } from '../wizard_step_context';
 
 const DATASET_STEP_FIELDS: Array<FieldPath<CreateDatasetFormValues>> = [
@@ -23,9 +23,6 @@ const DATASET_STEP_FIELDS: Array<FieldPath<CreateDatasetFormValues>> = [
   'resource',
   'settings.format',
 ];
-
-const isSupportedDatasetFormat = (value: string): value is SupportedDatasetFormat =>
-  (SUPPORTED_DATASET_FORMATS as readonly string[]).includes(value);
 
 const inferFormatFromResource = (resource: string): DatasetFormatFormValue => {
   const value = resource?.trim().toLowerCase();

@@ -10,7 +10,7 @@ import { EuiFlexItem, EuiText, type EuiTextProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface RunscriptActionNoOutputProps {
-  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
+  textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
 

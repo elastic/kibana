@@ -12,4 +12,5 @@ export const RULE_MIGRATION_SKILLS = {
   UPDATE: 'automatic-migration-rules-update-migration',
   DELETE: 'automatic-migration-rules-delete-migration',
   INSTALL: 'automatic-migration-rules-install-rules',
+  UPDATE_TRANSLATED_RULE: 'automatic-migration-rules-update-translated-rule',
 } as const;

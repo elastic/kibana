@@ -5,6 +5,7 @@
     "types": ["jest", "node"],
     "lib": ["es2021"]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"]
+  "include": ["**/*.ts", "oxlint_plugin.js", "rules/__fixtures__/*.mjs"],
+  "exclude": ["target/**/*"],
+  "kbn_references": ["@kbn/swc-register"]
 }
