@@ -48,6 +48,9 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     conversationTemplates: {
       register: jest.fn(),
     },
+    conversations: {
+      enableUpdatedTrigger: jest.fn(),
+    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };

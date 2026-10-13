@@ -94,6 +94,22 @@ describe('utils', () => {
       expect(result.metadata.routing_tags).toEqual(['sre']);
     });
 
+    it('stores the server-provided template in metadata', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, {
+        ...serverFields,
+        template: { id: 'template-1' },
+      });
+
+      expect(result.metadata.template).toEqual({ id: 'template-1' });
+      expect(result).not.toHaveProperty('template');
+    });
+
+    it('stores no template when the server does not provide one', () => {
+      const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
+
+      expect(result.metadata.template).toBeUndefined();
+    });
+
     it('sets metadata.builder_type to undefined when not provided', () => {
       const result = transformCreateRuleBodyToRuleSoAttributes(baseCreateData, serverFields);
 
@@ -335,6 +351,20 @@ describe('utils', () => {
 
       expect(result.metadata.routing_tags).toEqual(['sre', 'payments']);
       expect(result.metadata.tags).toEqual(['prod']);
+    });
+
+    it('keeps the existing template when metadata is updated', () => {
+      const existing = createRuleSoAttributes({
+        metadata: { name: 'original', template: { id: 'template-1' } },
+      });
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        { metadata: { name: 'renamed' } },
+        { updatedBy: { profile_uid: 'user-2' }, updatedAt: '2025-01-02T00:00:00.000Z', version: 2 }
+      );
+
+      expect(result.metadata.template).toEqual({ id: 'template-1' });
     });
 
     it('clears state_transition when update sends null (immediate mode)', () => {
@@ -764,6 +794,17 @@ describe('utils', () => {
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
       expect(result.metadata).toMatchObject({ tags: ['prod'], routing_tags: ['sre'] });
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
+    it('returns metadata.template in a response that satisfies the schema', () => {
+      const attrs = createRuleSoAttributes({
+        metadata: { name: 'test-rule', template: { id: 'template-1' } },
+      });
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.metadata.template).toEqual({ id: 'template-1' });
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 

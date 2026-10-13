@@ -7,13 +7,25 @@
 
 import path from 'path';
 import type { Client } from '@elastic/elasticsearch';
+import type {
+  IndicesPutIndexTemplateRequest,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { getPack, listPacks, type Hunt, type TechnologyWatchPack } from '../packs';
 import { readNdjson } from './episodes';
 import { enrichDocForGraph } from './graph_enrichment';
 import { huntRuleId, legacyHuntRuleId } from './hunt_ids';
-import { bulkIndex, dateSuffix, ensureIndex, scriptsDataDir } from './indexing';
+import {
+  bulkIndex,
+  dateSuffix,
+  deleteIndicesChunked,
+  INDEX_FIELDS_LIMIT,
+  readMappingJsonCached,
+  scriptsDataDir,
+  waitForIndexSearchable,
+} from './indexing';
 import {
   createCustomRule,
   deleteRules,
@@ -22,7 +34,7 @@ import {
   fetchAllInstalledRules,
   findGeneratorPackRules,
 } from './ruleset';
-import { isString } from './type_guards';
+import { getStatusCode, isString } from './type_guards';
 
 export { huntRuleId, legacyHuntRuleId, HUNT_RULE_ID_NAMESPACE } from './hunt_ids';
 
@@ -96,23 +108,55 @@ export const packRuleTags = (pack: TechnologyWatchPack): string[] => [
   pack.technology,
 ];
 
-export const packIndexName = ({
-  packId: _packId,
+const safeDataset = (dataStream: string): string => dataStream.replace(/[^a-zA-Z0-9.]+/g, '_');
+
+/** Namespace every pack data stream is written under. */
+export const PACK_DATA_STREAM_NAMESPACE = 'default';
+
+/**
+ * Pack events land in a `logs-<dataset>-default` data stream, the shape a Fleet integration
+ * produces, so discovery (`_resolve/index`) sees packs the way it sees a customer's data.
+ */
+export const packIndexName = ({ dataStream }: { dataStream: string }): string =>
+  `logs-${safeDataset(dataStream)}-${PACK_DATA_STREAM_NAMESPACE}`;
+
+/** Composable template backing a pack data stream; removed by `--clean`. */
+export const packTemplateName = ({ dataStream }: { dataStream: string }): string =>
+  `data-generator-pack-${safeDataset(dataStream)}`;
+
+/** Priority above the built-in `logs` template (100) so the pack template owns its stream. */
+export const PACK_TEMPLATE_PRIORITY = 250;
+
+export const PACK_TEMPLATE_COMPOSED_OF = ['logs@mappings', 'logs@settings', 'ecs@mappings'];
+
+export const buildPackIndexTemplate = ({
   dataStream,
-  endMs,
-  dateSuffixOverride,
+  mappings,
 }: {
-  packId: string;
+  dataStream: string;
+  mappings: MappingTypeMapping;
+}): IndicesPutIndexTemplateRequest => ({
+  name: packTemplateName({ dataStream }),
+  index_patterns: [`logs-${safeDataset(dataStream)}-*`],
+  data_stream: {},
+  composed_of: PACK_TEMPLATE_COMPOSED_OF,
+  priority: PACK_TEMPLATE_PRIORITY,
+  template: {
+    settings: { 'index.mapping.total_fields.limit': INDEX_FIELDS_LIMIT },
+    mappings,
+  },
+});
+
+/** Pre-data-stream dotted concrete index names from earlier generator runs (for --clean only). */
+export const legacyDottedPackIndexName = ({
+  dataStream,
+  dateSuffixOverride,
+  endMs,
+}: {
   dataStream: string;
   endMs: number;
   dateSuffixOverride?: string;
-}): string => {
-  const suffix = dateSuffixOverride ?? dateSuffix(endMs);
-  // Prefer integration dataset naming (no "generator" token). Dot segments avoid logs-*-*
-  // data-stream-only templates (those need a second hyphen after logs-).
-  const safeDs = dataStream.replace(/[^a-zA-Z0-9.]+/g, '_');
-  return `logs-${safeDs}.${suffix}`;
-};
+}): string => `logs-${safeDataset(dataStream)}.${dateSuffixOverride ?? dateSuffix(endMs)}`;
 
 /** Legacy index names from older generator runs (for --clean only). */
 export const legacyPackIndexName = ({
@@ -181,6 +225,35 @@ const timeShiftDocs = (
     }
     return cloned;
   });
+};
+
+/** Puts the pack's composable template, then creates its data stream (idempotent). */
+export const ensurePackDataStream = async ({
+  esClient,
+  dataStream,
+  log,
+}: {
+  esClient: Client;
+  dataStream: string;
+  log: ToolingLog;
+}): Promise<string> => {
+  const name = packIndexName({ dataStream });
+  await esClient.indices.putIndexTemplate(
+    buildPackIndexTemplate({
+      dataStream,
+      mappings: readMappingJsonCached(PACK_MAPPING_PATH),
+    })
+  );
+  try {
+    await esClient.indices.createDataStream({ name });
+    log.info(`Created data stream ${name}`);
+  } catch (e) {
+    const alreadyExists =
+      getStatusCode(e) === 400 && String(e).includes('resource_already_exists_exception');
+    if (!alreadyExists) throw e;
+  }
+  await waitForIndexSearchable({ esClient, index: name, log });
+  return name;
 };
 
 const loadPackEvents = async (
@@ -265,8 +338,7 @@ export const indexAndInstallPack = async ({
     `Pack ${packId}: fidelity=${source.fidelity} integration=${source.integration}@${source.version} dataStream=${source.dataStream}`
   );
 
-  const index = packIndexName({ packId, dataStream: source.dataStream, endMs });
-  await ensureIndex({ esClient, index, mappingPath: PACK_MAPPING_PATH, log });
+  const index = await ensurePackDataStream({ esClient, dataStream: source.dataStream, log });
 
   const rawEvents = await loadPackEvents(pack);
   const events = timeShiftDocs(rawEvents, startMs, endMs).map((doc) => {
@@ -292,7 +364,7 @@ export const indexAndInstallPack = async ({
   }
 
   const allDocs = [...events, ...fpEvents];
-  await bulkIndex({ esClient, index, docs: allDocs, log });
+  await bulkIndex({ esClient, index, docs: allDocs, log, op: 'create' });
   await esClient.indices.refresh({ index });
   log.info(
     `Pack ${packId}: indexed ${events.length} events + ${fpEvents.length} FP events → ${index}`
@@ -402,6 +474,27 @@ export const indexAndInstallPack = async ({
   };
 };
 
+/** Deletes a pack's data stream, then its template. Missing resources are not errors. */
+const deletePackDataStream = async ({
+  esClient,
+  dataStream,
+  log,
+}: {
+  esClient: Client;
+  dataStream: string;
+  log: ToolingLog;
+}): Promise<void> => {
+  const name = packIndexName({ dataStream });
+  const templateName = packTemplateName({ dataStream });
+  try {
+    await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
+    await esClient.indices.deleteIndexTemplate({ name: templateName }, { ignore: [404] });
+    log.info(`--clean: deleted pack data stream ${name} and template ${templateName} (if present)`);
+  } catch (e) {
+    log.warning(`--clean: failed deleting pack data stream ${name}: ${String(e)}`);
+  }
+};
+
 export const cleanPackData = async ({
   esClient,
   kbnClient,
@@ -430,38 +523,28 @@ export const cleanPackData = async ({
     new Date(endMs).getUTCDate()
   );
 
-  const indices: string[] = [];
+  const legacyIndices: string[] = [];
   for (const packId of ids) {
     const pack = getPack(packId);
     if (pack) {
       const dataStream = pack.eventSources[0]?.dataStream ?? 'unknown';
+      await deletePackDataStream({ esClient, dataStream, log });
       for (let cur = startDay; cur <= endDay; cur += dayMs) {
-        indices.push(
-          packIndexName({
-            packId,
-            dataStream,
-            endMs,
-            dateSuffixOverride: dateSuffix(cur),
-          })
-        );
-        indices.push(
-          legacyPackIndexName({
-            packId,
-            dataStream,
-            endMs,
-            dateSuffixOverride: dateSuffix(cur),
-          })
+        const dateSuffixOverride = dateSuffix(cur);
+        legacyIndices.push(
+          legacyDottedPackIndexName({ dataStream, endMs, dateSuffixOverride }),
+          legacyPackIndexName({ packId, dataStream, endMs, dateSuffixOverride })
         );
       }
     }
   }
 
-  if (indices.length > 0) {
+  if (legacyIndices.length > 0) {
     try {
-      await esClient.indices.delete({ index: indices, ignore_unavailable: true });
-      log.info(`--clean: deleted ${indices.length} pack index name(s)`);
+      await deleteIndicesChunked({ esClient, indices: legacyIndices });
+      log.info(`--clean: deleted ${legacyIndices.length} legacy pack index name(s)`);
     } catch (e) {
-      log.warning(`--clean: failed deleting pack indices: ${String(e)}`);
+      log.warning(`--clean: failed deleting legacy pack indices: ${String(e)}`);
     }
   }
 

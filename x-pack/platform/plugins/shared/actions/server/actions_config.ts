@@ -174,6 +174,7 @@ export interface ActionsConfigurationUtilities {
   getInboundEventsMaxEmitted: () => number;
   getInboundEventsAdmission: () => InboundEventAdmissionConfig;
   getInboundEventsRateLimit: () => InboundEventRateLimitConfig;
+  isConnectorSigningKeysEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -417,5 +418,6 @@ export function getActionsConfigurationUtilities(
         windowMs: parseDuration(config.inboundEvents.rateLimit.connector.window),
       },
     }),
+    isConnectorSigningKeysEnabled: () => config.connectorSigningKeys.enabled,
   };
 }

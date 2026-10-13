@@ -19,6 +19,7 @@
 
 import { parse } from 'yaml';
 import { coreMock } from '@kbn/core/server/mocks';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import {
   getManagedWorkflowDefinition,
   NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -68,6 +69,7 @@ const registeredStepIds = (flags: {
     })
   );
   plugin.setup(coreMock.createSetup(), {
+    share: { url: new MockUrlService() },
     taskManager: { registerTaskDefinitions: jest.fn() },
     workflowsManagement: {},
     workflowsExtensions: {
