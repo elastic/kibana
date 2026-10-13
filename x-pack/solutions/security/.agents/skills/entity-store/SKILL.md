@@ -133,7 +133,7 @@ x-pack/platform/plugins/shared/entity_store/
    - With the flag off: internal `start`/`stop` return 404, `force_log_extraction` defaults to `single`, and `GET /status` leaves out the `nonPriority` block.
    - Enable locally with `feature_flags.overrides.entityStore.dualProcess.enabled: true`.
 
-A fourth, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `false`) — controls only the risk score maintainer's create-if-missing path. See [references/risk-score.md](references/risk-score.md).
+A fourth, narrower gate — the `riskScoreCreateMissingEntitiesEnabled` experimental feature flag (defaults to `true`) — controls only the risk score maintainer's create-if-missing path and remains available as a kill switch. See [references/risk-score.md](references/risk-score.md).
 
 ## Risk Score Architecture (v2)
 

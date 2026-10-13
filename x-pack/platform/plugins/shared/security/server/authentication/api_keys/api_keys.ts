@@ -7,8 +7,10 @@
 
 /* eslint-disable max-classes-per-file */
 
+import Boom from '@hapi/boom';
+
 import type { BuildFlavor } from '@kbn/config';
-import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
+import type { AuthenticatedUser, IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
@@ -29,9 +31,12 @@ import type {
 import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
+import { toServiceAccountGrantError } from './service_account_grant_error';
 import type { SecurityLicense } from '../../../common';
+import { getErrorStatusCode } from '../../errors';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
 import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
+import { isEsServiceAccountToken } from '../../service_accounts/es_service_account_token';
 import { type UiamServicePublic } from '../../uiam';
 import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
 
@@ -51,6 +56,8 @@ export interface ConstructorOptions {
   kibanaFeatures: KibanaFeature[];
   buildFlavor?: BuildFlavor;
   uiam?: UiamServicePublic;
+  serviceAccountsEnabled?: boolean;
+  getCurrentUser?: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
 type GrantAPIKeyParams = (
@@ -65,6 +72,11 @@ type GrantAPIKeyParams = (
       grant_type: 'access_token';
       access_token: string;
     }
+  | {
+      api_key: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams;
+      grant_type: '_user_managed_service_account';
+      service_account_token: string;
+    }
 ) & { refresh?: boolean | 'wait_for' };
 
 /**
@@ -78,6 +90,8 @@ export class APIKeys implements NativeAPIKeysType {
   private readonly kibanaFeatures: KibanaFeature[];
   private readonly buildFlavor?: BuildFlavor;
   private readonly uiam?: UiamServicePublic;
+  private readonly serviceAccountsEnabled: boolean;
+  private readonly getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 
   constructor({
     logger,
@@ -87,6 +101,8 @@ export class APIKeys implements NativeAPIKeysType {
     kibanaFeatures,
     buildFlavor,
     uiam,
+    serviceAccountsEnabled = false,
+    getCurrentUser = () => null,
   }: ConstructorOptions) {
     this.logger = logger;
     this.clusterClient = clusterClient;
@@ -95,6 +111,8 @@ export class APIKeys implements NativeAPIKeysType {
     this.kibanaFeatures = kibanaFeatures;
     this.buildFlavor = buildFlavor;
     this.uiam = uiam;
+    this.serviceAccountsEnabled = serviceAccountsEnabled;
+    this.getCurrentUser = getCurrentUser;
   }
 
   /**
@@ -331,10 +349,24 @@ export class APIKeys implements NativeAPIKeysType {
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
+      this.logger.debug(`Granting an API key with grant type [${params.grant_type}]`);
+      // @ts-expect-error Elasticsearch client types do not yet include the `_user_managed_service_account` grant
       result = await this.clusterClient.asInternalUser.security.grantApiKey(params);
       this.logger.debug('API key was granted successfully');
     } catch (e) {
-      this.logger.error(`Failed to grant API key: ${e.message}`);
+      const serviceAccountError = toServiceAccountGrantError(e, this.getCurrentUser(request), {
+        reason: this.getServiceAccountGrantRefusalReason(authorizationHeader),
+      });
+      // A refused service account is the caller's to fix, not a Kibana failure.
+      this.logger[serviceAccountError ? 'warn' : 'error'](`Failed to grant API key: ${e.message}`);
+      if (serviceAccountError) {
+        throw serviceAccountError;
+      }
+      // The original error's request metadata carries the service account token, so it must not
+      // leave this method.
+      if (params.grant_type === '_user_managed_service_account') {
+        throw Boom.boomify(new Error(e.message), { statusCode: getErrorStatusCode(e) || 500 });
+      }
       throw e;
     }
 
@@ -488,12 +520,37 @@ export class APIKeys implements NativeAPIKeysType {
     );
   }
 
+  /**
+   * Explains a refused grant that Kibana itself caused: a service account token presented while
+   * service accounts are disabled is sent as an access token, which Elasticsearch never accepts.
+   */
+  private getServiceAccountGrantRefusalReason(
+    authorizationHeader: HTTPAuthorizationHeader
+  ): string | undefined {
+    return !this.serviceAccountsEnabled &&
+      authorizationHeader.scheme.toLowerCase() === 'bearer' &&
+      isEsServiceAccountToken(authorizationHeader.credentials)
+      ? 'Kibana grants API keys from service account tokens only when ' +
+          '`xpack.security.serviceAccounts.enabled` is `true`'
+      : undefined;
+  }
+
   private getGrantParams(
     createParams: CreateRestAPIKeyParams | CreateRestAPIKeyWithKibanaPrivilegesParams,
     authorizationHeader: HTTPAuthorizationHeader,
     clientAuthentication?: ClientAuthentication
   ): GrantAPIKeyParams {
     if (authorizationHeader.scheme.toLowerCase() === 'bearer') {
+      // A raw service account token can't be granted as an access token. Elasticsearch rejects
+      // client authentication for this grant type, so none is sent.
+      if (this.serviceAccountsEnabled && isEsServiceAccountToken(authorizationHeader.credentials)) {
+        return {
+          api_key: createParams,
+          grant_type: '_user_managed_service_account',
+          service_account_token: authorizationHeader.credentials,
+        };
+      }
+
       return {
         api_key: createParams,
         grant_type: 'access_token',

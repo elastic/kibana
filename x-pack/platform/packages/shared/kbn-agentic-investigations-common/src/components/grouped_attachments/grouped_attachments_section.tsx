@@ -8,10 +8,9 @@
 import React, { Suspense, memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiSkeletonText, useEuiTheme } from '@elastic/eui';
-import type { UnknownAttachment, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import { getActiveAttachments } from '@kbn/agent-builder-common/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AttachmentErrorBoundary } from './attachment_error_boundary';
-import { toRenderAttachment } from './to_render_attachment';
+import { selectGroupedAttachments } from './select_grouped_attachments';
 import type { FlyoutGroupedAttachments, FlyoutGroupedAttachmentsRegistry } from './types';
 
 export interface GroupedAttachmentsSectionProps {
@@ -20,35 +19,15 @@ export interface GroupedAttachmentsSectionProps {
   order: readonly FlyoutGroupedAttachments[];
 }
 
-interface GroupToRender {
-  group: FlyoutGroupedAttachments;
-  renderer: React.ComponentType<{ attachments: UnknownAttachment[] }>;
-  attachments: UnknownAttachment[];
-}
-
 /** One card holding the rows of every registered group that has attachments, in `order`. */
 export const GroupedAttachmentsSection = memo<GroupedAttachmentsSectionProps>(
   ({ attachments, registry, order }) => {
     const { euiTheme } = useEuiTheme();
 
-    const groups = useMemo(() => {
-      const renderable = getActiveAttachments(attachments ?? [])
-        .filter((attachment) => !attachment.hidden)
-        .map(toRenderAttachment);
-
-      return order.flatMap((group): GroupToRender[] => {
-        const definition = registry.get(group);
-        if (!definition) {
-          return [];
-        }
-        const groupAttachments = renderable.filter(({ type }) =>
-          definition.attachmentTypes.includes(type)
-        );
-        return groupAttachments.length > 0
-          ? [{ group, renderer: definition.renderer, attachments: groupAttachments }]
-          : [];
-      });
-    }, [attachments, registry, order]);
+    const groups = useMemo(
+      () => selectGroupedAttachments(attachments, registry, order),
+      [attachments, registry, order]
+    );
 
     if (groups.length === 0) {
       return null;
