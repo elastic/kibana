@@ -686,7 +686,7 @@ groups:
           observability: removed
           elasticsearch: removed
           security: removed
-        note: "{applies_to}`stack: preview 9.6+, serverless: preview` The `ai:anonymizationSettings` setting has been replaced by the **Anonymization** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)."
+        note: "{applies_to}`stack: preview 9.6+` {applies_to}`serverless: preview` The `ai:anonymizationSettings` setting has been replaced by the **Anonymization** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md)."
 
   - group: Presentation Labs
     id: presentation-labs
