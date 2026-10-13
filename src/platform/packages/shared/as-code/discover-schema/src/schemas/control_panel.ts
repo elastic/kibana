@@ -19,14 +19,10 @@ import {
 import { MAX_DISCOVER_SESSION_CONTROL_PANELS } from '@kbn/discover-session-constants';
 
 const discoverSessionControlWidthSchema = z
-  .union([
-    z.literal(CONTROL_WIDTH_SMALL),
-    z.literal(CONTROL_WIDTH_MEDIUM),
-    z.literal(CONTROL_WIDTH_LARGE),
-  ])
+  .enum([CONTROL_WIDTH_SMALL, CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_LARGE])
   .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
   .meta({
-    description: 'Minimum width of the control panel.',
+    description: 'The minimum width of the control.',
   });
 
 export const discoverSessionApiControlPanelSchema = z
@@ -34,14 +30,9 @@ export const discoverSessionApiControlPanelSchema = z
     id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
     type: z.literal(ESQL_CONTROL),
     width: discoverSessionControlWidthSchema,
-    grow: z
-      .boolean()
-      .default(DEFAULT_PINNED_CONTROL_STATE.grow)
-      .meta({
-        description:
-          'When `true`, the control expands to fill any available horizontal space. ' +
-          'Defaults to `false`.',
-      }),
+    grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
+      description: 'When `true`, the control expands to fill any available horizontal space.',
+    }),
     config: optionsListESQLControlSchema,
   })
   .strict()
@@ -61,5 +52,5 @@ export const discoverSessionApiControlPanelsSchema = z
     'control_panels must have unique ids'
   )
   .meta({
-    description: 'An array of Discover ES|QL control panels.',
+    description: 'The ES|QL controls of the tab.',
   });

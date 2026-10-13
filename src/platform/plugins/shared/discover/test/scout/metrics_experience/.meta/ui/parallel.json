@@ -1,5 +1,5 @@
 {
-  "sha1": "e9c6efec704d6f4991d0a7c401faf6916ac5cd3a",
+  "sha1": "496c92295f3cb36963e6671abd93427f3e0ea47b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -925,7 +925,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
-        "line": 35,
+        "line": 44,
         "column": 66
       }
     },
@@ -943,7 +943,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
-        "line": 33,
+        "line": 43,
         "column": 66
       }
     },

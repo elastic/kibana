@@ -16,10 +16,10 @@ import {
 export const visContextSchema = z
   .object({
     suggestion_type: z
-      .union([
-        z.literal(UnifiedHistogramSuggestionType.lensSuggestion),
-        z.literal(UnifiedHistogramSuggestionType.histogramForESQL),
-        z.literal(UnifiedHistogramSuggestionType.histogramForDataView),
+      .enum([
+        UnifiedHistogramSuggestionType.lensSuggestion,
+        UnifiedHistogramSuggestionType.histogramForESQL,
+        UnifiedHistogramSuggestionType.histogramForDataView,
       ])
       .meta({
         description:
