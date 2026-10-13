@@ -14,10 +14,14 @@ import {
   ReadOperations,
   WriteOperations,
 } from '@kbn/alerting-plugin/server/authorization';
+import { RulesNotFoundError } from '@kbn/alerting-plugin/server/rules_client/lib/rules_not_found_error';
+import { RulesNotVisibleError } from '@kbn/alerting-plugin/server/rules_client/lib/rules_not_visible_error';
 
 module.exports = {
   parseDuration,
   AlertingAuthorizationEntity,
   ReadOperations,
   WriteOperations,
+  RulesNotFoundError,
+  RulesNotVisibleError,
 };

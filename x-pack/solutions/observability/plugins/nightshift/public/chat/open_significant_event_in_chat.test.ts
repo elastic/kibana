@@ -15,7 +15,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'evt-1',
   status: 'active',
-  stream_names: ['logs.app'],
+  source_ids: ['logs.app'],
   title: 'Latency spike',
   summary: 'Summary',
   severity: 'critical',

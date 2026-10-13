@@ -5,49 +5,77 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
+import { badRequest } from '@hapi/boom';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isNotFoundError, isResponseError } from '@kbn/es-errors';
 import { isElasticsearchWriteConflict } from '@kbn/occ';
 import {
   MEMORY_INDEX,
   type MemoryArchiveReason,
-  type StoredMemoryPage,
-  type StoredMemoryStatus,
-  type MemoryPage,
+  type MemoryFilter,
+  type MemoryPageSummary,
   type MemoryStats,
+  type StoredMemoryPage,
+  type MemoryPage,
 } from '../../common/memory';
 import { formatPageRefs, previewText } from './log_format';
 import { applyUpdate, displayTelemetry, type CounterState, type CounterUpdate } from './ranking';
+import { canonicalizeTag, MAX_MEMORY_TAGS_PER_PAGE } from '../../common/memory_tags';
 
 const MAX_LIST_SIZE = 500;
+const DEFAULT_PAGE_SIZE = 25;
+/** Exported so the list route's zod bound and the store's clamp share one value. */
+export const MAX_PAGE_SIZE = 200;
 const MAX_ARCHIVE_ATTEMPTS = 3;
 const MAX_COUNTER_UPDATE_ATTEMPTS = 3;
 const MEMORY_TAG = 'memory';
 const SPACE_ID_FIELD = 'attributes.space_id';
+const ARCHIVE_REASON_FIELD = 'attributes.archive_reason';
+const UPDATED_AT_FIELD = 'attributes.updated_at';
+const SLUG_FIELD = 'attributes.slug';
+
+/** Archived = presence of `archive_reason` (even empty), matching `toPage`. */
+const ARCHIVED_CLAUSE: object = { exists: { field: ARCHIVE_REASON_FIELD } };
 
 export type { CounterUpdate };
 
+/** Lost an optimistic-concurrency race; routes answer 409 instead of retrying blindly. */
+export class MemoryVersionConflictError extends Error {
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'MemoryVersionConflictError';
+  }
+}
+
+export const MAX_TAG_FILTER_KEYWORDS = MAX_MEMORY_TAGS_PER_PAGE;
+
 export type MemoryRetrieveMatch = 'context' | 'content';
 
-export interface VersionedMemoryPage {
-  page: MemoryPage;
+/** Elasticsearch's optimistic-concurrency pair, as the store hands it out. */
+export interface MemoryPageVersion {
   seqNo: number;
   primaryTerm: number;
+}
+
+export interface VersionedMemoryPage extends MemoryPageVersion {
+  page: MemoryPage;
 }
 
 export interface MemoryPageWrite {
   slug: string;
   title: string;
-  description?: string;
   content: string;
   context?: string;
   tags: string[];
   categories: string[];
   references: string[];
-  status: StoredMemoryStatus;
   source?: string;
   merged_from?: string[];
   archive_reason?: MemoryArchiveReason;
+  /** Provenance. Metadata only — Space remains the tenancy boundary. */
+  agent_id?: string;
+  conversation_id?: string;
   telemetry?: {
     impressions: number;
     conversions: number;
@@ -56,30 +84,53 @@ export interface MemoryPageWrite {
   user: string;
 }
 
+export interface MemoryPageListResult {
+  pages: MemoryPageSummary[];
+  stats: MemoryStats;
+  total: number;
+  cursor?: string;
+}
+
 export interface MemoryPageStore {
-  list: (options?: { status?: StoredMemoryStatus }) => Promise<{
-    pages: MemoryPage[];
+  list: (options?: { filter?: MemoryFilter; tags?: readonly string[] }) => Promise<{
+    pages: MemoryPageSummary[];
     stats: MemoryStats;
   }>;
+  listPaginated: (options?: {
+    filter?: MemoryFilter;
+    cursor?: string;
+    size?: number;
+    tags?: readonly string[];
+    search?: string;
+  }) => Promise<MemoryPageListResult>;
   retrieve: (options?: {
     query?: string;
     size?: number;
-    /** Task recall uses `context` (default). Duplicate-detection uses `content`. */
+    /** Default matches stored `description`; duplicate-detection matches `content`. */
     match?: MemoryRetrieveMatch;
   }) => Promise<MemoryPage[]>;
   get: (id: string) => Promise<MemoryPage | undefined>;
+  getMany: (ids: readonly string[]) => Promise<MemoryPage[]>;
   getVersioned: (id: string) => Promise<VersionedMemoryPage | undefined>;
   getByName: (name: string) => Promise<MemoryPage | undefined>;
   upsert: (page: MemoryPageWrite) => Promise<MemoryPage>;
   create: (page: MemoryPageWrite) => Promise<MemoryPage>;
   update: (id: string, page: MemoryPageWrite, version: VersionedMemoryPage) => Promise<MemoryPage>;
   applyCounterUpdates: (updates: readonly CounterUpdate[]) => Promise<void>;
-  archive: (id: string, reason: MemoryArchiveReason) => Promise<MemoryPage | undefined>;
+  archive: (
+    id: string,
+    reason: MemoryArchiveReason,
+    user?: string
+  ) => Promise<MemoryPage | undefined>;
   archiveVersioned: (
     version: VersionedMemoryPage,
-    reason: MemoryArchiveReason
+    reason: MemoryArchiveReason,
+    user?: string
   ) => Promise<MemoryPage>;
-  delete: (id: string) => Promise<void>;
+  /** Clears `archive_reason`, returning the memory to active recall. */
+  unarchive: (id: string, user?: string) => Promise<MemoryPage | undefined>;
+  /** Hard delete, guarded on the revision the caller read. */
+  delete: (id: string, version: MemoryPageVersion, user?: string) => Promise<void>;
 }
 
 const normalizeSlugText = (slug: string): string =>
@@ -130,7 +181,6 @@ const toCounterState = (telemetry: MemoryPage['telemetry']): CounterState => ({
   lastTime: isoToEpochSeconds(telemetry.last_impression_time),
 });
 
-/** Read-time decay for headers / stats. Does not change stored `last_impression_time`. */
 export const toMemoryDisplayTelemetry = (
   page: MemoryPage,
   nowSec: number
@@ -162,20 +212,22 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
   }
 
   const slug = source.attributes?.slug ?? slugFromMemoryId(id);
-  const status = source.attributes?.status ?? 'tentative';
+  const archiveReason = source.attributes?.archive_reason;
+  const archived = archiveReason !== undefined;
 
   return {
     id,
     slug,
     title: source.title,
-    description: source.description,
     content: source.content ?? '',
-    context: source.context,
+    context: source.description,
     tags: source.tags ?? [],
-    status,
+    archived,
     source: source.attributes?.source,
     merged_from: source.attributes?.merged_from,
-    archive_reason: source.attributes?.archive_reason,
+    archive_reason: archiveReason,
+    conversation_id: source.attributes?.conversation_id,
+    agent_id: source.attributes?.agent_id,
     categories: source.attributes?.categories ?? [],
     references: source.attributes?.references ?? [],
     created_at: source.attributes?.created_at ?? source['@timestamp'] ?? new Date().toISOString(),
@@ -228,14 +280,15 @@ export const createMemoryPageStore = ({
       '@timestamp': nowIso,
       type: 'memory',
       title: page.title,
-      description: page.description,
+      // The managed AI-index mapping has no `context` field; task recall reads `description`.
+      description: page.context ?? existing?.context,
       content: page.content,
-      context: page.context ?? existing?.context,
       tags: memoryTags(page.tags),
       attributes: {
-        status: page.status,
         slug: page.slug,
         space_id: spaceId,
+        ...(page.agent_id !== undefined ? { agent_id: page.agent_id } : {}),
+        ...(page.conversation_id !== undefined ? { conversation_id: page.conversation_id } : {}),
         categories: page.categories,
         ...(page.source !== undefined ? { source: page.source } : {}),
         ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
@@ -283,111 +336,219 @@ export const createMemoryPageStore = ({
     return mapWrittenPage(id, document);
   };
 
+  /** Shared by archive and restore so neither can drop a provenance field. */
+  const toWrite = (page: MemoryPage): MemoryPageWrite => ({
+    slug: page.slug,
+    title: page.title,
+    content: page.content,
+    context: page.context,
+    tags: page.tags,
+    categories: page.categories,
+    references: page.references,
+    agent_id: page.agent_id,
+    conversation_id: page.conversation_id,
+    source: page.source,
+    merged_from: page.merged_from,
+    telemetry: page.telemetry,
+    user: page.updated_by,
+  });
+
   const toArchiveWrite = (
     version: VersionedMemoryPage,
-    reason: MemoryArchiveReason
-  ): MemoryPageWrite => {
-    const latest = version.page;
-    return {
-      slug: latest.slug,
-      title: latest.title,
-      description: latest.description,
-      content: latest.content,
-      context: latest.context,
-      tags: latest.tags,
-      categories: latest.categories,
-      references: latest.references,
-      status: 'archived',
-      source: latest.source,
-      merged_from: latest.merged_from,
-      archive_reason: reason,
-      telemetry: latest.telemetry,
-      user: latest.updated_by,
-    };
+    reason: MemoryArchiveReason,
+    user?: string
+  ): MemoryPageWrite => ({
+    ...toWrite(version.page),
+    archive_reason: reason,
+    user: user ?? version.page.updated_by,
+  });
+
+  // Slug is the tiebreaker: ES refuses fielddata on `_id`, and a non-unique sort key drops rows.
+  const PAGINATION_SORT: estypes.Sort = [
+    { [UPDATED_AT_FIELD]: { order: 'desc', unmapped_type: 'date' } },
+    { [SLUG_FIELD]: { order: 'asc', unmapped_type: 'keyword' } },
+  ];
+
+  const spaceAndTagFilter = [
+    { term: { tags: MEMORY_TAG } },
+    { term: { [SPACE_ID_FIELD]: spaceId } },
+  ];
+
+  const tagFilterClauses = (tags: readonly string[] | undefined): object[] => {
+    const keywords: string[] = [];
+    for (const tag of tags ?? []) {
+      const keyword = canonicalizeTag(tag);
+      if (keyword === null || keywords.includes(keyword)) continue;
+      keywords.push(keyword);
+    }
+    if (keywords.length > MAX_TAG_FILTER_KEYWORDS) {
+      throw badRequest(
+        `A Semantic Memory tag filter may name at most ${MAX_TAG_FILTER_KEYWORDS} keywords`
+      );
+    }
+    return keywords.map((keyword) => ({ term: { tags: keyword } }));
   };
 
-  const listAll = async (): Promise<MemoryPage[]> => {
-    try {
-      const response = await esClient.search<StoredMemoryPage>(
-        {
-          index: MEMORY_INDEX,
-          query: {
-            bool: {
-              filter: [{ term: { tags: MEMORY_TAG } }, { term: { [SPACE_ID_FIELD]: spaceId } }],
-            },
-          },
-          size: MAX_LIST_SIZE,
-          sort: [{ '@timestamp': { order: 'desc' } }],
-        },
-        { signal }
-      );
-
-      return response.hits.hits.flatMap((hit) => {
-        if (!hit._id || !hit._source) return [];
-        const pageId = toPageId(hit._id);
-        if (!pageId) return [];
-        const page = toPage(pageId, hit._source);
-        return page ? [page] : [];
-      });
-    } catch (err) {
-      if (isIndexNotFoundError(err)) return [];
-      throw err;
+  const filterClause = (
+    filter: MemoryFilter,
+    tags?: readonly string[],
+    search?: string
+  ): object[] => {
+    const tagClauses = tagFilterClauses(tags);
+    const searchClauses: object[] = search
+      ? [{ multi_match: { query: search, fields: ['title', 'description'], operator: 'and' } }]
+      : [];
+    switch (filter) {
+      case 'active':
+        return [
+          ...spaceAndTagFilter,
+          { bool: { must_not: [ARCHIVED_CLAUSE] } },
+          ...tagClauses,
+          ...searchClauses,
+        ];
+      case 'archived':
+        return [...spaceAndTagFilter, ARCHIVED_CLAUSE, ...tagClauses, ...searchClauses];
+      case 'all':
+      default:
+        return [...spaceAndTagFilter, ...tagClauses, ...searchClauses];
     }
   };
 
-  return {
-    async list({ status } = {}) {
-      const allPages = await listAll();
-      const filtered = allPages.filter((page) => {
-        if (status !== undefined && page.status !== status) {
-          return false;
-        }
-        return true;
-      });
+  const hitsToPages = (
+    hits: Array<{ _id?: string; _source?: StoredMemoryPage; sort?: unknown[] }>
+  ): MemoryPage[] =>
+    hits.flatMap((hit) => {
+      if (!hit._id || !hit._source) return [];
+      const pageId = toPageId(hit._id);
+      if (!pageId) return [];
+      const page = toPage(pageId, hit._source);
+      return page ? [page] : [];
+    });
 
-      const nowSec = now();
-      let decayedImpressions = 0;
-      let decayedConversions = 0;
-      for (const page of filtered) {
-        const display = toMemoryDisplayTelemetry(page, nowSec);
-        decayedImpressions += display.impressions;
-        decayedConversions += display.conversions;
-      }
+  const toSummary = (page: MemoryPage): MemoryPageSummary => {
+    const { content, ...rest } = page;
+    const display = toMemoryDisplayTelemetry(page, now());
+    return { ...rest, usefulness: display.conversionRate, confidence: display.confidence };
+  };
 
-      return {
-        pages: filtered,
-        stats: {
-          total: filtered.length,
-          decayed_impressions: decayedImpressions,
-          decayed_conversions: decayedConversions,
+  const emptyStats = (): MemoryStats => ({ total: 0, archived: 0 });
+
+  // `global` ignores the listing's query, so the header's archived count is unfiltered.
+  const archivedAgg = {
+    archived: {
+      global: {},
+      aggs: {
+        inScope: {
+          filter: { bool: { filter: [...spaceAndTagFilter, ARCHIVED_CLAUSE] } },
         },
-      };
+      },
+    },
+  };
+
+  const decodeCursor = (cursor?: string): Array<number | string> | undefined => {
+    if (!cursor) return undefined;
+    try {
+      const decoded: unknown = JSON.parse(Buffer.from(cursor, 'base64').toString('utf8'));
+      if (!Array.isArray(decoded) || decoded.length !== PAGINATION_SORT.length) return undefined;
+      return decoded.every((part) => typeof part === 'number' || typeof part === 'string')
+        ? (decoded as Array<number | string>)
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const encodeCursor = (sort: unknown[] | undefined): string | undefined =>
+    Array.isArray(sort) && sort.length === PAGINATION_SORT.length
+      ? Buffer.from(JSON.stringify(sort), 'utf8').toString('base64')
+      : undefined;
+
+  return {
+    async list({ filter = 'all', tags } = {}) {
+      try {
+        const response = await esClient.search<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            query: { bool: { filter: filterClause(filter, tags) } },
+            size: MAX_LIST_SIZE,
+            sort: PAGINATION_SORT,
+          },
+          { signal }
+        );
+        const pages = hitsToPages(response.hits.hits);
+
+        return {
+          pages: pages.map(toSummary),
+          stats: {
+            total: pages.length,
+            archived: pages.filter((page) => page.archived).length,
+          },
+        };
+      } catch (err) {
+        if (isIndexNotFoundError(err)) {
+          return { pages: [], stats: emptyStats() };
+        }
+        throw err;
+      }
+    },
+
+    async listPaginated({ filter = 'all', cursor, size, tags, search } = {}) {
+      const pageSize = Math.min(Math.max(size ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
+      const searchAfter = decodeCursor(cursor);
+      const searchText = search?.trim() ? search.trim() : undefined;
+
+      try {
+        const response = await esClient.search<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            query: { bool: { filter: filterClause(filter, tags, searchText) } },
+            size: pageSize,
+            track_total_hits: true,
+            sort: PAGINATION_SORT,
+            aggs: archivedAgg,
+            ...(searchAfter ? { search_after: searchAfter } : {}),
+          },
+          { signal }
+        );
+
+        const hits = response.hits.hits;
+        const pages = hitsToPages(hits);
+        const lastSort = hits.length > 0 ? hits[hits.length - 1].sort : undefined;
+        const nextCursor =
+          hits.length === pageSize && pages.length === pageSize
+            ? encodeCursor(lastSort)
+            : undefined;
+        const total =
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value ?? 0;
+        const aggs = response.aggregations as
+          | { archived?: { inScope?: { doc_count?: number } } }
+          | undefined;
+
+        return {
+          pages: pages.map(toSummary),
+          stats: { total, archived: aggs?.archived?.inScope?.doc_count ?? 0 },
+          total,
+          ...(nextCursor ? { cursor: nextCursor } : {}),
+        };
+      } catch (err) {
+        if (isIndexNotFoundError(err)) {
+          return { pages: [], stats: emptyStats(), total: 0 };
+        }
+        throw err;
+      }
     },
 
     async retrieve({ query, size, match = 'context' } = {}) {
       const trimmed = query?.trim();
       const isSearch = trimmed !== undefined && trimmed.length > 0;
       const pageSize = size ?? (isSearch ? 50 : 150);
-      const spaceAndTagFilter = [
-        { term: { tags: MEMORY_TAG } },
-        { term: { [SPACE_ID_FIELD]: spaceId } },
-      ];
-      const notArchived = { term: { 'attributes.status': 'archived' } };
+      const archived = ARCHIVED_CLAUSE;
       logger.debug(
         `Memory retrieve start match=${match} search=${isSearch} size=${pageSize} ` +
           `space=${spaceId} query=${JSON.stringify(previewText(trimmed))}`
       );
-
-      const hitsToPages = (
-        hits: Array<{ _id?: string; _source?: StoredMemoryPage }>
-      ): MemoryPage[] =>
-        hits.flatMap((hit) => {
-          if (!hit._id || !hit._source) return [];
-          const pageId = toPageId(hit._id);
-          if (!pageId) return [];
-          const page = toPage(pageId, hit._source);
-          return page ? [page] : [];
-        });
 
       const searchWithQuery = async (queryText: string) => {
         if (match === 'content') {
@@ -397,7 +558,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                   must: [
                     {
                       bool: {
@@ -426,13 +587,13 @@ export const createMemoryPageStore = ({
               retriever: {
                 rrf: {
                   retrievers: [
-                    { standard: { query: { match: { context: queryText } } } },
-                    { standard: { query: { match: { 'context.semantic': queryText } } } },
+                    { standard: { query: { match: { description: queryText } } } },
+                    { standard: { query: { match: { 'description.semantic': queryText } } } },
                   ],
                   filter: {
                     bool: {
                       filter: spaceAndTagFilter,
-                      must_not: [notArchived],
+                      must_not: [archived],
                     },
                   },
                   rank_window_size: pageSize,
@@ -457,8 +618,8 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
-                  must: [{ match: { context: queryText } }],
+                  must_not: [archived],
+                  must: [{ match: { description: queryText } }],
                 },
               },
               size: pageSize,
@@ -478,7 +639,7 @@ export const createMemoryPageStore = ({
               query: {
                 bool: {
                   filter: spaceAndTagFilter,
-                  must_not: [notArchived],
+                  must_not: [archived],
                 },
               },
               size: pageSize,
@@ -521,6 +682,34 @@ export const createMemoryPageStore = ({
         if (isIndexNotFoundError(err) || isNotFoundError(err)) {
           return undefined;
         }
+        throw err;
+      }
+    },
+
+    async getMany(ids) {
+      const canonical = [...new Set(ids)].filter(isCanonicalMemoryId);
+      if (canonical.length === 0) {
+        return [];
+      }
+      const byStoredId = new Map(canonical.map((id) => [toStoredId(id), id]));
+      try {
+        const response = await esClient.mget<StoredMemoryPage>(
+          {
+            index: MEMORY_INDEX,
+            ids: [...byStoredId.keys()],
+          },
+          { signal }
+        );
+        return response.docs.flatMap((doc) => {
+          const item = doc as { _id?: string; found?: boolean; _source?: StoredMemoryPage };
+          if (!item.found || !item._source || !item._id) return [];
+          const pageId = byStoredId.get(item._id);
+          if (!pageId) return [];
+          const page = toPage(pageId, item._source);
+          return page ? [page] : [];
+        });
+      } catch (err) {
+        if (isIndexNotFoundError(err)) return [];
         throw err;
       }
     },
@@ -605,7 +794,6 @@ export const createMemoryPageStore = ({
         return;
       }
 
-      // Aggregate first so each logical batch decays a page only once.
       const deltas = new Map<string, { addImp: number; addConv: number }>();
       for (const update of updates) {
         const previous = deltas.get(update.id) ?? { addImp: 0, addConv: 0 };
@@ -622,19 +810,17 @@ export const createMemoryPageStore = ({
         let applied = false;
         for (let attempt = 0; attempt < MAX_COUNTER_UPDATE_ATTEMPTS; attempt++) {
           const versioned = await this.getVersioned(id);
-          if (!versioned || versioned.page.status === 'archived') {
+          if (!versioned || versioned.page.archived) {
             skipped++;
             break;
           }
 
           const current = toCounterState(versioned.page.telemetry);
-          // A fresh time on every retry prevents a concurrent newer timestamp from regressing.
           const effectiveNow = Math.max(now(), current.lastTime);
           const next = applyUpdate(current, effectiveNow, delta.addImp, delta.addConv);
 
           try {
-            // Elasticsearch 9.6 rejects scripts on any index containing semantic_text, even
-            // when a script only changes counters, so send only the non-semantic partial fields.
+            // ES 9.6 rejects scripts on any index containing semantic_text; send plain fields.
             await esClient.update(
               {
                 index: MEMORY_INDEX,
@@ -652,7 +838,6 @@ export const createMemoryPageStore = ({
               },
               { signal }
             );
-            // The successful conditional write is the atomic linearization point.
             updated++;
             applied = true;
             break;
@@ -662,9 +847,7 @@ export const createMemoryPageStore = ({
             }
             conflicts++;
             logger.debug(`Memory counter update conflict id=${id} attempt=${attempt + 1}`);
-            // Rereading and recomputing on conflict preserves increments committed by another writer.
             if (attempt === MAX_COUNTER_UPDATE_ATTEMPTS - 1) {
-              // Bounded exhaustion fails visibly instead of silently dropping feedback.
               throw new Error(
                 `Memory counter update exhausted ${MAX_COUNTER_UPDATE_ATTEMPTS} version conflicts`,
                 { cause: err }
@@ -684,44 +867,94 @@ export const createMemoryPageStore = ({
       );
     },
 
-    async archive(id, reason) {
+    async archive(id, reason, user) {
       for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
         const versioned = await this.getVersioned(id);
-        if (!versioned || versioned.page.status === 'archived') {
+        if (!versioned) {
           return undefined;
         }
+        // A retried archive of an already-archived page still answers with the page.
+        if (versioned.page.archived) {
+          return versioned.page;
+        }
         try {
-          return await this.archiveVersioned(versioned, reason);
+          return await this.archiveVersioned(versioned, reason, user);
         } catch (err) {
           if (!isElasticsearchWriteConflict(err)) {
             throw err;
           }
           if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
-            throw new Error(`Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`, {
-              cause: err,
-            });
+            throw new MemoryVersionConflictError(
+              `Memory archive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`,
+              { cause: err }
+            );
           }
         }
       }
       return undefined;
     },
 
-    async archiveVersioned(version, reason) {
-      return writeVersionedPage(version.page.id, toArchiveWrite(version, reason), version);
+    async archiveVersioned(version, reason, user) {
+      return writeVersionedPage(version.page.id, toArchiveWrite(version, reason, user), version);
     },
 
-    async delete(id) {
+    /** Clears `archive_reason`, returning the memory to active recall. */
+    async unarchive(id, user) {
+      for (let attempt = 0; attempt < MAX_ARCHIVE_ATTEMPTS; attempt++) {
+        const versioned = await this.getVersioned(id);
+        if (!versioned) {
+          return undefined;
+        }
+        if (!versioned.page.archived) {
+          return versioned.page;
+        }
+        const restored: MemoryPageWrite = {
+          ...toWrite(versioned.page),
+          user: user ?? (versioned.page.updated_by || 'nightshift'),
+        };
+        try {
+          return await writeVersionedPage(id, restored, versioned);
+        } catch (err) {
+          if (!isElasticsearchWriteConflict(err)) {
+            throw err;
+          }
+          if (attempt === MAX_ARCHIVE_ATTEMPTS - 1) {
+            throw new MemoryVersionConflictError(
+              `Memory unarchive exhausted ${MAX_ARCHIVE_ATTEMPTS} version conflicts`,
+              { cause: err }
+            );
+          }
+        }
+      }
+      return undefined;
+    },
+
+    /** Conditional on the revision the operator read; the route answers 409 on a mismatch. */
+    async delete(id, version, user) {
       const storedId = toStoredId(id);
+      const versioned = await this.getVersioned(id);
       try {
         await esClient.delete(
           {
             index: MEMORY_INDEX,
             id: storedId,
+            if_seq_no: version.seqNo,
+            if_primary_term: version.primaryTerm,
             refresh: 'wait_for',
           },
           { signal }
         );
+        logger.info(
+          `Semantic Memory page deleted id=${id} title=${JSON.stringify(
+            versioned?.page.title ?? '(unknown)'
+          )} space=${spaceId} user=${user ?? '(unknown)'}`
+        );
       } catch (err) {
+        if (isElasticsearchWriteConflict(err)) {
+          throw new MemoryVersionConflictError('Memory changed since it was read', {
+            cause: err,
+          });
+        }
         if (!isIndexNotFoundError(err) && (err as { statusCode?: number }).statusCode !== 404) {
           throw err;
         }

@@ -7,7 +7,7 @@
 
 export type EscalationModalMode = 'create' | 'addToExisting';
 
-export interface EscalationIncidentSummary {
+export interface EscalationSummary {
   id: string;
   title: string;
   linkedInvestigationCount: number;
