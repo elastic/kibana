@@ -28,7 +28,7 @@ import type { EsqlRunner, SortPageContext } from './types';
 /*
  * Split sort: a foreign sort that reads its two kinds of rows separately.
  *
- * The general sort query (`buildSortQuery`) resolvedEntityAggregations the foreign values with every entity in
+ * The general sort query (`buildSortQuery`) merges the foreign values with every entity in
  * view, so it reads `entity.id` for every entity in view. On a large view that read is
  * most of the cost (about 20s for 10M entities on ECH). Yet the rows split in two:
  * - value rows: entities with a foreign value (alerts, anomalies, a risk score change).
