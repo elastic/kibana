@@ -38,7 +38,6 @@ export const transformCustomScheduleToRRule = (
 
   const [, interval, frequency] = recurring?.every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
   const transformedFrequency = transformEveryToFrequency(frequency);
-  const isRecurring = Boolean(recurring?.every);
 
   const durationInMilliseconds = getDurationInMilliseconds(duration);
 
@@ -49,11 +48,9 @@ export const transformCustomScheduleToRRule = (
       bymonthday: recurring?.onMonthDay,
       bymonth: recurring?.onMonth,
       until: recurring?.end,
-      // A one-off window is a single yearly occurrence, matching the UI. Without `freq`,
-      // consumers such as Heartbeat cannot unpack the window.
-      count: isRecurring ? recurring?.occurrences : 1,
+      count: recurring?.occurrences,
       interval: interval ? parseInt(interval, 10) : undefined,
-      freq: isRecurring ? transformedFrequency : Frequency.YEARLY,
+      freq: transformedFrequency,
       dtstart: start,
       tzid: timezone ?? DEFAULT_TIMEZONE,
     },

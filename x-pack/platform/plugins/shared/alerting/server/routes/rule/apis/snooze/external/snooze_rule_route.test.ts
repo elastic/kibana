@@ -109,7 +109,7 @@ describe('snoozeAlertRoute', () => {
         "byweekday": undefined,
         "count": 1,
         "dtstart": "2021-03-07T00:00:00.000Z",
-        "freq": 0,
+        "freq": undefined,
         "interval": undefined,
         "tzid": "UTC",
         "until": undefined,
