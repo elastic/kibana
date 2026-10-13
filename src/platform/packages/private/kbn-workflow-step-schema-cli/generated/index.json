@@ -186,6 +186,7 @@
     "cases.addObservables",
     "cases.addTags",
     "cases.assignCase",
+    "cases.bulkDeleteObservables",
     "cases.closeCase",
     "cases.createCase",
     "cases.createCaseFromTemplate",
@@ -1012,11 +1013,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "ca9147c3e50a907d70f161dfbab53b5aca36b606e0d497afbfdc26ff38137216"
+      "sha256": "525e95eee74e1512197828ccab80cb8340a74174956b3bbc4ee9a2bb82cdb628"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "c71540f5ea04c033d8f5c30a66a657aad853e6879f38b73293bf2c5b604a5510"
+      "sha256": "2aeda41fc31cf86a629de4f94b00846b448bef8d87a11ea6316a65f28ac1b026"
     }
   }
 }
