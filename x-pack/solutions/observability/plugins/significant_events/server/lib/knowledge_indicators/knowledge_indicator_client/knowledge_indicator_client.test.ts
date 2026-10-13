@@ -729,6 +729,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       soClient: {} as KnowledgeIndicatorClientDeps['soClient'],
       logger,
       space: SPACE,
+      searchEmbeddingModelResolver: jest.fn().mockResolvedValue({ kind: 'sparse' }),
     };
     const rulesManagementClient = {
       createRule: jest.fn().mockResolvedValue(undefined),
@@ -798,6 +799,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('EVAL _score = CASE');
     expect(query).toContain('CASE(TO_LOWER(title) LIKE "*checkout*", 3.0, 0.0)');
     expect(query).toContain('CASE(TO_LOWER(description) LIKE "*checkout*", 2.0, 0.0)');
+    expect(query).toContain('CASE(TO_LOWER(`feature.slug`) LIKE "*checkout*", 3.0, 0.0)');
   });
 
   it('uses only query fields when type is [query]', async () => {
@@ -815,6 +817,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
     expect(query).toContain('TO_LOWER(`query.features.id`) LIKE');
     expect(query).not.toContain('feature.type');
     expect(query).not.toContain('feature.subtype');
+    expect(query).not.toContain('feature.slug');
     expect(query).not.toContain('MV_CONCAT(TO_LOWER(tags)');
   });
 
