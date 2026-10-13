@@ -35,6 +35,8 @@ import { DatasetService } from './storage/datasets/dataset_service';
 import { EvaluatorDefinitionService } from './storage/evaluators/evaluator_definition_service';
 import { EvaluationScoreService } from './storage/scores/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from './storage/scores/scores_index_template';
+import { OnlineScoreService } from './storage/scores/online_score_service';
+import { onlineScoresDataStreamDefinition } from './storage/scores/online_scores_index_template';
 import { createTaskProviderRegistry } from './task_providers/registry';
 import type { TaskProviderRegistry } from './task_providers/types';
 import { registerEvalsWorkflowSteps } from './workflows';
@@ -51,6 +53,7 @@ export class EvalsPlugin
   private evaluationScoreService?: EvaluationScoreService;
   private evaluatorDefinitionService?: EvaluatorDefinitionService;
   private taskProviderRegistry?: TaskProviderRegistry;
+  private onlineScoreService?: OnlineScoreService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -74,6 +77,7 @@ export class EvalsPlugin
 
     this.logger.info('Setting up Evals plugin');
     coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
+    coreSetup.dataStreams.registerDataStream(onlineScoresDataStreamDefinition);
 
     this.taskProviderRegistry = createTaskProviderRegistry();
 
@@ -93,6 +97,7 @@ export class EvalsPlugin
         if (
           !this.datasetService ||
           !this.evaluationScoreService ||
+          !this.onlineScoreService ||
           !this.evaluatorDefinitionService ||
           !this.evaluatorRegistry
         ) {
@@ -102,6 +107,7 @@ export class EvalsPlugin
         return {
           datasetService: this.datasetService,
           evaluationScoreService: this.evaluationScoreService,
+          onlineScoreService: this.onlineScoreService,
           evaluatorDefinitionService: this.evaluatorDefinitionService,
           evaluatorRegistry: this.evaluatorRegistry,
         };
@@ -250,6 +256,7 @@ export class EvalsPlugin
       this.isServerless,
       evaluatorRegistry.isBuiltIn
     );
+    this.onlineScoreService = new OnlineScoreService(this.logger, coreStart.dataStreams);
 
     return {
       datasetService: this.datasetService,
@@ -274,6 +281,7 @@ export class EvalsPlugin
           type: connector.type,
         }));
       },
+      onlineScoreService: this.onlineScoreService,
     };
   }
 

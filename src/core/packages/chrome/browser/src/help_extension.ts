@@ -10,6 +10,15 @@
 import type { EuiButtonEmptyProps, IconType } from '@elastic/eui';
 
 /** @public */
+export interface ChromeHelpMenuLink {
+  title: string;
+  href?: string;
+  onClick?: () => void;
+  iconType?: string;
+  dataTestSubj?: string;
+}
+
+/** @public */
 export interface ChromeHelpExtension {
   /**
    * Provide your plugin's name to create a header for separation

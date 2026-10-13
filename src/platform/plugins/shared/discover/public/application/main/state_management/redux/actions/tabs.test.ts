@@ -29,7 +29,7 @@ import {
 import * as runtimeStateModule from '../runtime_state';
 import * as contextAwarenessToolkitModule from '../context_awareness_toolkit';
 import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
-import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
+import type { UISession } from '@kbn/data-plugin/public';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
 import type { DiscoverAppLocatorParams } from '../../../../../../common';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -233,6 +233,60 @@ describe('tabs actions', () => {
         testProfileState: {
           uiValue: 'primary',
         },
+      });
+    });
+
+    it('preserves auto-refresh when duplicating a tab', async () => {
+      const { internalState, getCurrentTab, services } = await setup();
+      const activeRefreshInterval = { pause: false, value: 5000 };
+      services.timefilter.getRefreshInterval = jest.fn(() => activeRefreshInterval);
+
+      const currentTab = getCurrentTab();
+      const allTabs = selectAllTabs(internalState.getState());
+      const duplicatedTab = {
+        ...createTabItem(allTabs),
+        duplicatedFromId: currentTab.id,
+      };
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...allTabs, duplicatedTab],
+          selectedItem: duplicatedTab,
+        })
+      );
+
+      expect(
+        selectTab(internalState.getState(), duplicatedTab.id).globalState.refreshInterval
+      ).toEqual(activeRefreshInterval);
+      expect(selectTab(internalState.getState(), duplicatedTab.id).skipInitialFetch).toBeFalsy();
+    });
+
+    it('pauses auto-refresh on a fresh tab', async () => {
+      const { internalState, getCurrentTab, services } = await setup();
+      const activeRefreshInterval = { pause: false, value: 5000 };
+      services.timefilter.getRefreshInterval = jest.fn(() => activeRefreshInterval);
+
+      const sourceTabId = getCurrentTab().id;
+      const allTabs = selectAllTabs(internalState.getState());
+      const freshTab = createTabItem(allTabs);
+
+      await internalState.dispatch(
+        internalStateActions.updateTabs({
+          items: [...allTabs, freshTab],
+          selectedItem: freshTab,
+        })
+      );
+
+      expect(selectTab(internalState.getState(), freshTab.id).globalState.refreshInterval).toEqual({
+        ...activeRefreshInterval,
+        pause: true,
+      });
+      expect(selectTab(internalState.getState(), freshTab.id).skipInitialFetch).toBe(true);
+      expect(
+        selectTab(internalState.getState(), sourceTabId).globalState.refreshInterval
+      ).not.toEqual({
+        ...activeRefreshInterval,
+        pause: true,
       });
     });
 

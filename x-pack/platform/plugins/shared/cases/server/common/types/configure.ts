@@ -33,6 +33,8 @@ export interface ConfigurationPersistedAttributes {
   customFields?: PersistedCustomFieldsConfiguration;
   templates?: PersistedTemplatesConfiguration;
   observableTypes?: PersistedObservableTypesConfiguration;
+  extractObservables?: boolean;
+  workflowTags?: string[];
   legacyTemplatesMigrated?: boolean;
   legacyCustomFieldsMigrated?: boolean;
   /**

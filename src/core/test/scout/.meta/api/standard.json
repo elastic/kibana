@@ -1,5 +1,5 @@
 {
-  "sha1": "7a63effb2cacba3700a3d046e9156e7583ec0371",
+  "sha1": "e7df724f23c87c8c2b28e5a66588d325de74e5ba",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -287,7 +287,7 @@
     {
       "id": "2392b373cc723ee-ab33734347ca58f",
       "title": "kibana status api returns version, status and metrics fields",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -300,8 +300,28 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/status.spec.ts",
-        "line": 19,
-        "column": 11
+        "line": 21,
+        "column": 5
+      }
+    },
+    {
+      "id": "2392b373cc723ee-872c3803747abcc",
+      "title": "kibana status api returns at least the overall status level to a viewer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/core/test/scout/api/tests/status.spec.ts",
+        "line": 58,
+        "column": 12
       }
     },
     {
@@ -320,8 +340,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 20,
-        "column": 11
+        "line": 27,
+        "column": 38
       }
     },
     {
@@ -340,8 +360,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 38,
-        "column": 5
+        "line": 43,
+        "column": 12
       }
     },
     {
@@ -360,8 +380,8 @@
       ],
       "location": {
         "file": "src/core/test/scout/api/tests/translations.spec.ts",
-        "line": 62,
-        "column": 26
+        "line": 55,
+        "column": 14
       }
     },
     {

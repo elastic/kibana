@@ -33,36 +33,42 @@ export const naturalLanguageSearch = async ({
   target,
   modelProvider,
   esClient,
+  internalEsClient,
   logger,
   events,
   rowLimit,
   customInstructions,
   timeRange,
   includeDatasets = false,
+  includeFrozen = false,
 }: {
   nlQuery: string;
   target: string;
   modelProvider: ModelProvider;
   esClient: ElasticsearchClient;
+  internalEsClient?: ElasticsearchClient;
   logger: Logger;
   events: ToolEventEmitter;
   rowLimit?: number;
   customInstructions?: string;
   timeRange?: TimeRange;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
     index: target,
-    executeQuery: true,
+    execute: 'data',
     modelProvider,
     esClient,
+    internalEsClient,
     logger,
     events,
     rowLimit,
     additionalInstructions: customInstructions,
     timeRange,
     includeDatasets,
+    includeFrozen,
   });
 
   return {

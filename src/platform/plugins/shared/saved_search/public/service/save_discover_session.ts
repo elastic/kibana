@@ -10,11 +10,10 @@
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
-import { extractReferences } from '@kbn/data-plugin/common';
-import type { SavedObjectReference } from '@kbn/core/server';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
 import type { DiscoverSession } from '../../common';
+import { serializeDiscoverSession } from '../../common/service/discover_session_serialization';
 import type { DiscoverSessionAttributes } from '../../server';
 
 export type SaveDiscoverSessionParams = Pick<
@@ -66,57 +65,7 @@ export const saveDiscoverSession = async (
   savedObjectsTagging: SavedObjectsTaggingApi | undefined
 ): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
-
-  const tabReferences: SavedObjectReference[] = [];
-
-  const tabs: DiscoverSessionAttributes['tabs'] = discoverSession.tabs.map((tab) => {
-    const [serializedSearchSource, searchSourceReferences] = extractReferences(
-      tab.serializedSearchSource,
-      { refNamePrefix: `tab_${tab.id}` }
-    );
-
-    tabReferences.push(...searchSourceReferences);
-
-    return {
-      id: tab.id,
-      label: tab.label,
-      attributes: {
-        sort: tab.sort,
-        columns: tab.columns,
-        grid: tab.grid,
-        hideChart: tab.hideChart,
-        hideTable: tab.hideTable,
-        isTextBasedQuery: tab.isTextBasedQuery,
-        usesAdHocDataView: tab.usesAdHocDataView,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: JSON.stringify(serializedSearchSource),
-        },
-        viewMode: tab.viewMode,
-        hideAggregatedPreview: tab.hideAggregatedPreview,
-        rowHeight: tab.rowHeight,
-        headerRowHeight: tab.headerRowHeight,
-        esqlApproximation: tab.esqlApproximation,
-        timeRestore: tab.timeRestore,
-        timeRange: tab.timeRange,
-        refreshInterval: tab.refreshInterval,
-        rowsPerPage: tab.rowsPerPage,
-        sampleSize: tab.sampleSize,
-        breakdownField: tab.breakdownField,
-        chartInterval: tab.chartInterval,
-        density: tab.density,
-        documentsDisplayMode: tab.documentsDisplayMode,
-        jsonModeSettings: tab.jsonModeSettings,
-        visContext: tab.visContext,
-        controlGroupJson: tab.controlGroupJson,
-      },
-    };
-  });
-
-  const attributes: DiscoverSessionAttributes = {
-    title: discoverSession.title,
-    description: discoverSession.description,
-    tabs,
-  };
+  const { attributes, references: tabReferences } = serializeDiscoverSession(discoverSession);
 
   const references = savedObjectsTagging
     ? savedObjectsTagging.ui.updateTagsReferences(tabReferences, discoverSession.tags ?? [])

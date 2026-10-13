@@ -77,6 +77,7 @@ dependsOn:
   - '@kbn/core-node-server'
   - '@kbn/core-user-settings-server-internal'
   - '@kbn/core-user-settings-server-mocks'
+  - '@kbn/core-security-server'
   - '@kbn/core-security-server-mocks'
   - '@kbn/core-security-server-internal'
   - '@kbn/core-usage-data-server-mocks'

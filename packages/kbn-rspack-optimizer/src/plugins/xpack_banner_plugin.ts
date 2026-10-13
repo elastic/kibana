@@ -14,9 +14,8 @@ import { rspack } from '../rspack_runtime';
 /**
  * Elastic License 2.0 banner for x-pack plugin bundles.
  *
- * This is the exact text the legacy webpack optimizer prepends to every output
- * chunk of x-pack plugin compilations via `webpack.BannerPlugin({ raw: true })`.
- * The `/*!` prefix marks it as a legal comment so it survives any future
+ * This text is prepended to every output chunk of x-pack plugins. The `/*!`
+ * prefix marks it as a legal comment so it survives any future
  * re-minification.
  *
  * This is intentionally NOT the same as the triple-license source file header
@@ -32,16 +31,13 @@ export const XPACK_ELASTIC_LICENSE_BANNER =
  * Rspack plugin that selectively prepends the Elastic License 2.0 banner
  * to x-pack plugin chunks in the single compilation.
  *
- * The legacy webpack optimizer ran one compilation per plugin and used
- * `webpack.BannerPlugin` on each x-pack compilation. The rspack optimizer
- * uses a single compilation for all plugins, so this plugin identifies
- * x-pack chunks by their **chunk name** (e.g., `plugin-discover`) — stable
- * regardless of output filename hashing — and prepends the banner only to
- * those chunks' `.js` assets.
+ * Since the optimizer uses a single compilation for all plugins, this plugin
+ * identifies x-pack chunks by their **chunk name** (e.g., `plugin-discover`)
+ * — stable regardless of output filename hashing — and prepends the banner
+ * only to those chunks' `.js` assets.
  *
- * X-pack detection uses the same directory-prefix heuristic as the legacy
- * optimizer: plugins whose `contextDir` lives under `<repoRoot>/x-pack/`
- * are considered x-pack plugins.
+ * X-pack detection uses a directory-prefix heuristic: plugins whose
+ * `contextDir` lives under `<repoRoot>/x-pack/` are considered x-pack plugins.
  *
  * CSS is injected via `style-loader` (not extracted to files), so only
  * `.js` files need bannering. Shared vendor/split chunks contain third-party

@@ -29,11 +29,14 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
     'enables share/export for a valid config and preserves filters in the shared URL',
     async ({ page, pageObjects, context, kbnUrl }) => {
       spaceTest.setTimeout(120_000);
-      const { lens, queryBar, filterBar, toasts } = pageObjects;
+      const { appMenu, lens, queryBar, filterBar, toasts } = pageObjects;
 
       await spaceTest.step('share disabled on empty visualization', async () => {
         await lens.waitForLensApp();
+        await appMenu.openOverflow();
         await expect(lens.workspace.shareButton).toBeDisabled();
+        await page.keyboard.press('Escape');
+        await expect(appMenu.popover).toBeHidden();
       });
 
       await spaceTest.step('share stays disabled for incomplete XY', async () => {
@@ -45,7 +48,10 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
           operation: 'date_histogram',
           field: '@timestamp',
         });
+        await appMenu.openOverflow();
         await expect(lens.workspace.shareButton).toBeDisabled();
+        await page.keyboard.press('Escape');
+        await expect(appMenu.popover).toBeHidden();
       });
 
       await spaceTest.step('share and export enable for a valid config', async () => {
@@ -56,13 +62,28 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         });
         // Share/export enable after Lens has produced a request/visualization.
         await lens.waitForVisualization('xyVisChart');
+        await appMenu.openOverflow();
         await expect(lens.workspace.shareButton).toBeEnabled();
         await expect(lens.workspace.exportButton).toBeEnabled();
+        await page.keyboard.press('Escape');
+        await expect(appMenu.popover).toBeHidden();
 
         // Modern share modal exposes Copy link directly (no `link` tab / tabbedModal-link-content).
         await lens.workspace.openShareModal();
         await expect(page.testSubj.locator('copyShareUrlButton')).toBeVisible();
         await lens.workspace.closeShareModal();
+      });
+
+      // Export while the chart still has data. The next step applies a filter that
+      // yields "No results found", which disables CSV (`csvEnabled` requires hasData).
+      await spaceTest.step('download CSV for single-layer visualization', async () => {
+        await page.evaluate(() => {
+          window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
+          window.ELASTIC_LENS_CSV_CONTENT = undefined;
+        });
+        await completeLensCsvExport(page);
+        const csvContent = await waitForLensCsvContent(page, 1);
+        expect(Object.keys(csvContent)).toHaveLength(1);
       });
 
       await spaceTest.step('preserve filter and query when sharing URL', async () => {
@@ -90,16 +111,6 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         } finally {
           await sharedPage.close();
         }
-      });
-
-      await spaceTest.step('download CSV for single-layer visualization', async () => {
-        await page.evaluate(() => {
-          window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
-          window.ELASTIC_LENS_CSV_CONTENT = undefined;
-        });
-        await completeLensCsvExport(page);
-        const csvContent = await waitForLensCsvContent(page, 1);
-        expect(Object.keys(csvContent)).toHaveLength(1);
       });
 
       await spaceTest.step('download CSV for multi-layer visualization', async () => {

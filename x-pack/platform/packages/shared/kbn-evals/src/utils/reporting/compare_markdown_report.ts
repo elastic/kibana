@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { PairedTTestResult } from '@kbn/evals-common';
+import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
+import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 const STALENESS_WARNING_DAYS = 3;
@@ -30,14 +32,13 @@ function formatNumber(value: number): string {
 
 function formatOutcome(
   delta: number,
-  direction: string,
+  direction: Direction,
   pValue: number | null,
   threshold: number
 ): string {
   if (pValue === null || !Number.isFinite(pValue) || pValue >= threshold) return '-';
   if (direction === 'neutral') return '-';
-  const isImprovement = direction === 'maximize' ? delta > 0 : delta < 0;
-  return isImprovement ? 'Improvement' : 'Regression';
+  return isImproved(delta, direction) ? 'Improvement' : 'Regression';
 }
 
 function formatDifference(value: number): string {
@@ -66,8 +67,8 @@ function relativeAge(days: number): string {
 }
 
 export function formatMarkdownCompareReport({
-  experimentIdA,
-  experimentIdB,
+  targetExperimentId,
+  baselineExperimentId,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
   comparePageUrl,
@@ -78,9 +79,9 @@ export function formatMarkdownCompareReport({
   skippedNullScores = 0,
   baselineBranch = 'main',
 }: {
-  experimentIdA: string;
-  experimentIdB: string;
-  results: PairedTTestResult[];
+  targetExperimentId: string;
+  baselineExperimentId: string;
+  results: ComparisonResult[];
   significanceThreshold?: number;
   comparePageUrl?: string;
   baselineTimestamp?: string;
@@ -104,7 +105,9 @@ export function formatMarkdownCompareReport({
 
   const lines: string[] = [];
 
-  lines.push(`**PR run**: ${experimentIdA} | **Baseline (${baselineBranch})**: ${experimentIdB}`);
+  lines.push(
+    `**PR run**: ${targetExperimentId} | **Baseline (${baselineBranch})**: ${baselineExperimentId}`
+  );
 
   if (baselineTimestamp) {
     const diffDays = daysSince(baselineTimestamp);
@@ -121,6 +124,9 @@ export function formatMarkdownCompareReport({
   }
 
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
+  lines.push(
+    `Test per row is chosen from the scores: McNemar for pass/fail, otherwise Wilcoxon signed-rank (paired t-test for continuous scores when n ≥ ${PARAMETRIC_UPGRADE_MIN_PAIRS} and differences look normal).`
+  );
   lines.push('');
 
   lines.push('**Summary**');
@@ -172,21 +178,22 @@ export function formatMarkdownCompareReport({
     (r) => r.pValue === null || !Number.isFinite(r.pValue) || r.pValue >= significanceThreshold
   );
 
-  const renderTable = (rows: PairedTTestResult[]) => {
+  const renderTable = (rows: ComparisonResult[]) => {
     const tableLines: string[] = [];
     tableLines.push(
-      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig | Outcome |`
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | Test | p-value | Sig | Outcome |`
     );
-    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+    tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
-      const delta = r.meanA - r.meanB;
+      const delta = r.meanTarget - r.meanBaseline;
       const cols = [
         escapeTableCell(r.datasetName),
         escapeTableCell(r.evaluatorName),
         String(r.sampleSize),
-        formatNumber(r.meanA),
-        formatNumber(r.meanB),
-        formatDifference(delta),
+        formatNumber(r.meanTarget),
+        formatNumber(r.meanBaseline),
+        formatDifference(delta) + formatDiscordantPairs(r.hypothesisTest),
+        getTestLabel(r.hypothesisTest.id),
         formatPValue(r.pValue),
         formatSig(r.pValue, significanceThreshold),
         formatOutcome(delta, r.direction, r.pValue, significanceThreshold),

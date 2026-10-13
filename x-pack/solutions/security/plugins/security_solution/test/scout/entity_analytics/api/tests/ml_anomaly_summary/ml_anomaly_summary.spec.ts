@@ -60,8 +60,7 @@ const buildOverviewUrl = (entityEuid: string, entityType: 'user' | 'host'): stri
     encodeURIComponent(entityEuid)
   );
 
-// Failing: See https://github.com/elastic/kibana/issues/287531
-apiTest.describe.skip(
+apiTest.describe(
   'Entity ML Anomaly Detection APIs',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
@@ -174,33 +173,6 @@ apiTest.describe.skip(
         start: startMs,
       });
 
-      // DIAGNOSTIC (theory 1): verify the PAD ML job was created with a non-empty config.
-      // In MKI the job config has been theorised to be empty, which would cause baseline
-      // enrichment to silently fail.
-      try {
-        const padJobRes = await esClient.ml.getJobs({
-          job_id: 'pad_windows_rare_region_name_by_user_ea',
-        });
-        const padJob = padJobRes.jobs?.[0];
-        if (!padJob) {
-          log.info(`[DIAG] PAD job not found — job config is missing entirely`);
-        } else {
-          const analysisConfig = padJob.analysis_config;
-          const detectorCount = analysisConfig?.detectors?.length ?? 0;
-          log.info(
-            `[DIAG] PAD job config: detectors=${detectorCount}, ` +
-              `analysisConfig=${JSON.stringify(analysisConfig)}`
-          );
-          if (detectorCount === 0) {
-            log.info(
-              `[DIAG] WARNING: PAD job analysis_config.detectors is empty — theory 1 confirmed`
-            );
-          }
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to fetch PAD job config: ${err}`);
-      }
-
       // Create Security: Authentication ML jobs
       log.debug(`Setting up Security: Authentication ML jobs...`);
       await setupMlModuleWithRetry('security_auth', {
@@ -222,73 +194,6 @@ apiTest.describe.skip(
         ]),
         refresh: true,
       });
-
-      // DIAGNOSTIC (theory 2): verify the source index mappings applied the right types for
-      // the fields the PAD rare detector queries.  If dynamic mapping mapped
-      // source.geo.region_name or user.name as non-keyword the baseline lookup will
-      // return nothing and baselineValues will be empty.
-      try {
-        const mappingRes = await esClient.indices.getMapping({ index: SOURCE_EVENTS_INDEX });
-        const indexNames = Object.keys(mappingRes);
-        for (const indexName of indexNames) {
-          const props = (mappingRes[indexName]?.mappings?.properties ?? {}) as Record<
-            string,
-            unknown
-          >;
-          const sourceGeo = (props.source as Record<string, unknown> | undefined)?.properties as
-            | Record<string, unknown>
-            | undefined;
-          const regionNameMapping = (sourceGeo?.geo as Record<string, unknown> | undefined)
-            ?.properties as Record<string, unknown> | undefined;
-          const regionNameType = (
-            regionNameMapping?.region_name as Record<string, unknown> | undefined
-          )?.type;
-          const userProps = (props.user as Record<string, unknown> | undefined)?.properties as
-            | Record<string, unknown>
-            | undefined;
-          const userNameType = (userProps?.name as Record<string, unknown> | undefined)?.type;
-          log.info(
-            `[DIAG] ${indexName} mappings: source.geo.region_name.type=${regionNameType}, user.name.type=${userNameType}`
-          );
-          if (regionNameType !== 'keyword' && regionNameType !== undefined) {
-            log.info(
-              `[DIAG] WARNING: source.geo.region_name mapped as "${regionNameType}" not keyword — theory 2 confirmed`
-            );
-          }
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to fetch source index mappings: ${err}`);
-      }
-
-      // DIAGNOSTIC (theory 2 continued): confirm the source events were actually indexed with
-      // the expected geo data so we can tell mapping issues apart from indexing failures.
-      try {
-        const searchRes = await esClient.search({
-          index: SOURCE_EVENTS_INDEX,
-          query: {
-            bool: {
-              must: [
-                { term: { 'user.name': 'carol.davis' } },
-                { exists: { field: 'source.geo.region_name' } },
-              ],
-            },
-          },
-          _source: ['user.name', 'source.geo.region_name', '@timestamp'],
-          size: 10,
-        });
-        const hits = searchRes.hits?.hits ?? [];
-        log.info(
-          `[DIAG] Source events for carol.davis with source.geo.region_name: count=${hits.length}, ` +
-            `docs=${JSON.stringify(hits.map((h) => h._source))}`
-        );
-        if (hits.length === 0) {
-          log.info(
-            `[DIAG] WARNING: no carol.davis source events with geo region found — baseline enrichment will return empty`
-          );
-        }
-      } catch (err) {
-        log.info(`[DIAG] Failed to search source events: ${err}`);
-      }
 
       // Index anomaly records for the test entities.
       log.debug(`Indexing test anomaly records...`);
@@ -539,7 +444,11 @@ apiTest.describe.skip(
 
     apiTest(
       'Anomaly summary API: enriches anomalies with baseline values from source index',
-      async ({ apiClient }) => {
+      async ({ apiClient, log, config }) => {
+        apiTest.skip(
+          config.isCloud && config.serverless,
+          'Skipped on serverless MKI — ML datafeed setup is not properly supported'
+        );
         const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
@@ -548,6 +457,8 @@ apiTest.describe.skip(
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
+
+        log.info(`anomaly summary response body: ${JSON.stringify(body)}`);
 
         const rareAnomaly = body.anomalies.find(
           (a) => a.jobId === 'pad_windows_rare_region_name_by_user_ea'

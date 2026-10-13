@@ -18,6 +18,13 @@ export const CREATE_DATASET_BUTTON = i18n.translate(
   }
 );
 
+export const IMPORT_FILE_BUTTON = i18n.translate(
+  'xpack.evals.importDatasetFlyout.datasetsListButtonLabel',
+  {
+    defaultMessage: 'Import file',
+  }
+);
+
 export const CREATE_DATASET_FLYOUT_TITLE = i18n.translate(
   'xpack.evals.datasetsList.createDatasetFlyout.title',
   {
@@ -123,6 +130,19 @@ export const DELETE_DATASET_ACTION = i18n.translate(
     defaultMessage: 'Delete dataset',
   }
 );
+
+export const COPY_DATASET_ACTION = i18n.translate(
+  'xpack.evals.datasetsList.copyDatasetActionTooltip',
+  {
+    defaultMessage: 'Copy dataset',
+  }
+);
+
+export const getCopyDatasetAriaLabel = (datasetName: string) =>
+  i18n.translate('xpack.evals.datasetsList.copyDatasetAriaLabel', {
+    defaultMessage: 'Copy dataset {datasetName}',
+    values: { datasetName },
+  });
 
 export const getDeleteDatasetAriaLabel = (datasetName: string) =>
   i18n.translate('xpack.evals.datasetsList.deleteDatasetAriaLabel', {

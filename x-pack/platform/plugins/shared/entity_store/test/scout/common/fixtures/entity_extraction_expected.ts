@@ -617,22 +617,7 @@ export const expectedUserEntities: Hits = [
   },
   {
     _index: LATEST_INDEX,
-    _id: '5404b10c22698b0ec86abec4c3bc429a8f8f063ed1dc6eee24b127a3521e9d63',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:16.000Z',
-      user: { name: 'karen.green', id: 'user-505' },
-      host: { entity: { id: 'host-505' } },
-      entity: {
-        name: 'karen.green',
-        type: 'Identity',
-        id: 'user:user-505@okta',
-        EngineMetadata: { Type: 'user', UntypedId: 'user-505@okta' },
-      },
-    },
-  },
-  {
-    _index: LATEST_INDEX,
-    _id: '7b4db899b11d212ff774f38b2253ec037fa88c1592ce5df752045879d8c35872',
+    _id: '24028ba0d337af0ac2ccc7374cc6560416fc540dbd23e39f492039c56a857fcf',
     _source: {
       '@timestamp': '2026-01-20T12:05:17.000Z',
       user: { email: 'larry@example.com', name: 'larry.black' },
@@ -640,23 +625,10 @@ export const expectedUserEntities: Hits = [
       entity: {
         name: 'larry.black',
         type: 'Identity',
-        id: 'user:larry@example.com@entra_id',
-        EngineMetadata: { Type: 'user', UntypedId: 'larry@example.com@entra_id' },
-      },
-    },
-  },
-  {
-    _index: LATEST_INDEX,
-    _id: '1f49dd57680b1986183a83644a0182b64b921c84e3e464a98a25664186b38f30',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:18.000Z',
-      user: { domain: 'corp', name: 'mary.blue' },
-      host: { name: 'server-07' },
-      entity: {
-        name: 'mary.blue',
-        type: 'Identity',
-        id: 'user:mary.blue@corp@active_directory',
-        EngineMetadata: { Type: 'user', UntypedId: 'mary.blue@corp@active_directory' },
+        id: 'user:larry.black@host-606@local',
+        namespace: 'local',
+        confidence: 'medium',
+        EngineMetadata: { Type: 'user', UntypedId: 'larry.black@host-606@local' },
       },
     },
   },
@@ -671,20 +643,6 @@ export const expectedUserEntities: Hits = [
         type: 'Identity',
         id: 'user:not-captured-no-module@unknown',
         EngineMetadata: { Type: 'user', UntypedId: 'not-captured-no-module@unknown' },
-      },
-    },
-  },
-  {
-    _index: LATEST_INDEX,
-    _id: '6d0b61db6529233f9e39eedfc91919e526d7b55d2d9e395c26f8fbce1b5541b5',
-    _source: {
-      '@timestamp': '2026-01-20T12:05:20.000Z',
-      user: { name: 'okta.from.dataset' },
-      entity: {
-        name: 'okta.from.dataset',
-        type: 'Identity',
-        id: 'user:okta.from.dataset@okta',
-        EngineMetadata: { Type: 'user', UntypedId: 'okta.from.dataset@okta' },
       },
     },
   },

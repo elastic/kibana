@@ -30,12 +30,6 @@ export interface ExecutionListFiltersQueryParams {
   executedBy: string[];
 }
 
-const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
-  statuses: [],
-  executionTypes: [],
-  executedBy: [],
-};
-
 interface WorkflowExecutionListProps {
   workflowId: string | null;
 }
@@ -45,8 +39,9 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
   const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
-  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
+  const { selectedExecutionId, lastViewedExecutionId, executionListFilters, updateUrlState } =
+    useWorkflowUrlState();
 
   const { canCancelWorkflowExecution } = useWorkflowsCapabilities();
 
@@ -57,11 +52,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     error,
     setPaginationObserver,
     refetch,
+    hasNextPage,
   } = useWorkflowExecutions({
     workflowId,
-    statuses: filters.statuses,
-    executionTypes: filters.executionTypes,
-    executedBy: filters.executedBy,
+    statuses: executionListFilters.statuses,
+    executionTypes: executionListFilters.executionTypes,
+    executedBy: executionListFilters.executedBy,
   });
 
   const workflowExecutionsRef = useRef(workflowExecutions);
@@ -85,11 +81,35 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     pollKey: workflowId,
   });
 
-  const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
+  const setFilters = useCallback(
+    (next: ExecutionListFiltersQueryParams) => {
+      updateUrlState({
+        executionStatuses: next.statuses,
+        executionTypes: next.executionTypes,
+        executedBy: next.executedBy,
+      });
+    },
+    [updateUrlState]
+  );
 
-  const handleViewWorkflowExecution = (executionId: string) => {
-    setSelectedExecution(executionId);
-  };
+  const handleViewWorkflowExecution = useCallback(
+    (executionId: string) => {
+      // replace: false so Back returns to the draft. updateUrlState replaces by default.
+      // lastViewed stays in the URL after the detail closes, so the row is still highlighted
+      // when the list mounts again.
+      updateUrlState(
+        {
+          tab: 'executions',
+          executionId,
+          lastViewedExecutionId: executionId,
+          stepExecutionId: undefined,
+          stepId: undefined,
+        },
+        { replace: false }
+      );
+    },
+    [updateUrlState]
+  );
 
   const onConfirmCancel = useCallback(async () => {
     if (!workflowId) {
@@ -138,13 +158,15 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
+      lastViewedId={lastViewedExecutionId ?? null}
       isInitialLoading={isLoadingWorkflowExecutions}
       isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
-      filters={filters}
+      filters={executionListFilters}
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}
+      hasNextPage={Boolean(hasNextPage)}
       canCancel={canCancelWorkflowExecution}
       isCancelInProgress={isCancelInProgress}
       onConfirmCancel={onConfirmCancel}

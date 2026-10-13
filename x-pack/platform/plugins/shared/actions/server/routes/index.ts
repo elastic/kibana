@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IRouter, KibanaRequest } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, CoreSetup } from '@kbn/core/server';
 import { getAllConnectorsRoute } from './connector/get_all';
@@ -21,6 +21,7 @@ import { deleteConnectorRoute } from './connector/delete';
 import { executeConnectorRoute } from './connector/execute';
 import { getConnectorRoute } from './connector/get';
 import { updateConnectorRoute } from './connector/update';
+import { rotateInboundIngressRoute } from './connector/rotate_inbound_ingress';
 import { getOAuthAccessToken } from './get_oauth_access_token';
 import { oauthAuthorizeRoute } from './oauth_authorize';
 import { oauthCallbackRoute, oauthCallbackScriptRoute } from './oauth_callback';
@@ -33,7 +34,7 @@ import { inboundEventsRoute } from './inbound_events';
 
 import type { ActionsPluginsStart } from '../plugin';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
-import type { InboundEventsClient } from '../inbound/client';
+import type { InboundEventsSetup } from '../inbound/setup_inbound_events';
 
 export interface RouteOptions {
   router: IRouter<ActionsRequestHandlerContext>;
@@ -43,11 +44,7 @@ export interface RouteOptions {
   logger: Logger;
   core: CoreSetup<ActionsPluginsStart>;
   oauthRateLimiter: OAuthRateLimiter;
-  inboundEvents?: {
-    maxBodyBytes: number;
-    client: InboundEventsClient;
-    getSpaceId: (request: KibanaRequest) => string;
-  };
+  inboundEvents?: InboundEventsSetup;
 }
 
 export function defineRoutes(opts: RouteOptions) {
@@ -61,13 +58,13 @@ export function defineRoutes(opts: RouteOptions) {
     inboundEvents,
   } = opts;
 
-  createConnectorRoute(router, licenseState);
+  createConnectorRoute(router, licenseState, actionsConfigUtils);
   deleteConnectorRoute(router, licenseState);
-  getConnectorRoute(router, licenseState);
-  getAllConnectorsRoute(router, licenseState);
-  updateConnectorRoute(router, licenseState);
+  getConnectorRoute(router, licenseState, actionsConfigUtils);
+  getAllConnectorsRoute(router, licenseState, actionsConfigUtils);
+  updateConnectorRoute(router, licenseState, actionsConfigUtils);
   listTypesRoute(router, licenseState);
-  executeConnectorRoute(router, licenseState);
+  executeConnectorRoute(router, licenseState, actionsConfigUtils);
   getGlobalExecutionLogRoute(router, licenseState);
   getGlobalExecutionKPIRoute(router, licenseState);
   getOAuthAccessToken(router, licenseState, actionsConfigUtils);
@@ -76,7 +73,7 @@ export function defineRoutes(opts: RouteOptions) {
   oauthCallbackScriptRoute(router);
   oauthDisconnectRoute(router, licenseState, logger, core, actionsConfigUtils);
   oauthCancelRoute(router, licenseState, logger, core);
-  getAllConnectorsIncludingSystemRoute(router, licenseState);
+  getAllConnectorsIncludingSystemRoute(router, licenseState, actionsConfigUtils);
   connectorAuthStatusRoute(router, licenseState);
   listTypesWithSystemRoute(router, licenseState);
 
@@ -90,5 +87,6 @@ export function defineRoutes(opts: RouteOptions) {
       inboundEventsClient: inboundEvents.client,
       getSpaceId: inboundEvents.getSpaceId,
     });
+    rotateInboundIngressRoute(router, licenseState);
   }
 }

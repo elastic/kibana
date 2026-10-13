@@ -372,6 +372,55 @@ steps:
     });
   });
 
+  describe('connector-id on requiresConnectorId triggers', () => {
+    const connectorEventTriggerId = 'example.connector_event';
+    const schemaRequiringConnectorId = getWorkflowZodSchema({}, [
+      { id: connectorEventTriggerId, requiresConnectorId: true },
+    ]);
+
+    const workflowYaml = (triggerBlock: string) => `
+version: '1'
+name: Connector Event Trigger
+triggers:
+  - ${triggerBlock}
+steps:
+  - name: step1
+    type: console
+    with:
+      message: hello
+`;
+
+    it('should pass when connector-id is present', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: webhook-1`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(true);
+    });
+
+    it('should fail when connector-id is missing', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+      expect(result.diagnostics.some((d) => d.message.includes('connector-id'))).toBe(true);
+    });
+
+    it('should fail when connector-id is empty', () => {
+      const result = validateWorkflowYaml(
+        workflowYaml(`type: ${connectorEventTriggerId}\n    connector-id: ""`),
+        schemaRequiringConnectorId
+      );
+
+      expect(result.valid).toBe(false);
+      expect(result.diagnostics.some((d) => d.source === 'schema')).toBe(true);
+    });
+  });
+
   describe('graph build validation', () => {
     it('rejects nested flow-control inside a parallel branch (nested parallel)', () => {
       // The schema accepts this, but compiling to an execution graph fails because
@@ -567,6 +616,104 @@ steps:
       );
 
       expect(result.diagnostics.map((diag) => diag.ruleId)).toContain('duplicateStepName');
+    });
+  });
+
+  describe('ignored kibana fetcher setting', () => {
+    it('warns without invalidating kibana.request workflows that still set fetcher', () => {
+      const yaml = `
+version: '1'
+name: kibana-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: status
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/status
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema, { warnIgnoredKibanaFetcher: true });
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics).toEqual([
+        expect.objectContaining({
+          severity: 'warning',
+          ruleId: 'ignoredFetcherSetting',
+          message: expect.stringContaining('fetcher'),
+          path: ['steps', 0, 'with', 'fetcher'],
+        }),
+      ]);
+    });
+
+    it('does not warn on generated kibana.* fetcher when the self-client flag is off', () => {
+      const yaml = `
+version: '1'
+name: kibana-generated-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: get-case
+    type: kibana.getCase
+    with:
+      caseId: test-case
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
+        false
+      );
+    });
+
+    it('does not warn when the self-client path is off', () => {
+      const yaml = `
+version: '1'
+name: kibana-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: status
+    type: kibana.request
+    with:
+      method: GET
+      path: /api/status
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+
+      expect(result.valid).toBe(true);
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
+        false
+      );
+    });
+
+    it('does not warn on http connector fetcher settings', () => {
+      const yaml = `
+version: '1'
+name: http-fetcher
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: ping
+    type: http
+    with:
+      url: https://example.com
+      fetcher:
+        skip_ssl_verification: true
+`;
+      const result = validateWorkflowYaml(yaml, schema);
+      expect(result.diagnostics.some((diag) => diag.ruleId === 'ignoredFetcherSetting')).toBe(
+        false
+      );
     });
   });
 });

@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiText } from '@elastic/eui';
+import { removeMultilines } from '../../../../common/utils/build_query/remove_multilines';
+
+const titleCss = {
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap' as const,
+  marginBottom: 0,
+};
+
+interface QueryTitleProps {
+  query: string;
+}
+
+const QueryTitleComponent: React.FC<QueryTitleProps> = ({ query }) => {
+  const oneLine = removeMultilines(query);
+
+  return (
+    <EuiText>
+      {/* `h2` because `AppHeader` already renders the page `h1` ("Query results"). */}
+      <h2 css={titleCss} title={oneLine} data-test-subj="query-details-title">
+        {oneLine}
+      </h2>
+    </EuiText>
+  );
+};
+
+QueryTitleComponent.displayName = 'QueryTitle';
+
+export const QueryTitle = React.memo(QueryTitleComponent);

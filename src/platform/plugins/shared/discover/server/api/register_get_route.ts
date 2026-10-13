@@ -52,7 +52,6 @@ export const registerGetRoute = (
             },
             403: { description: 'Forbidden' },
             404: { description: 'Not found' },
-            409: { description: 'Conflict' },
             500: { description: 'Internal server error' },
           },
         },
@@ -60,9 +59,9 @@ export const registerGetRoute = (
       async (context, request, response) =>
         telemetryHandler(request, { usageCounter }, async () => {
           try {
-            const body = await getDiscoverSession(context, request.params.id);
+            const { body, resolveHeaders } = await getDiscoverSession(context, request.params.id);
 
-            return response.ok({ body });
+            return response.ok({ body, headers: resolveHeaders });
           } catch (error) {
             if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
               const message = `A Discover session with ID [${request.params.id}] was not found.`;

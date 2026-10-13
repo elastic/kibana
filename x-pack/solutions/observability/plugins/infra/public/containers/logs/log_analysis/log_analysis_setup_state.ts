@@ -21,6 +21,7 @@ import type {
   ValidationIndicesError,
   ValidationUIError,
 } from '../../../components/logging/log_analysis_setup/initial_configuration_step';
+import { useIsInfraMlCpsEnabled } from '../../../hooks/use_infra_ml_cps';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../hooks/use_tracked_promise';
 import type { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
@@ -52,7 +53,7 @@ export const useAnalysisSetupState = <T extends JobType>({
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);
 
-  const isCpsEnabled = Boolean(services.cps?.isTierEligible && services.cps?.cpsManager);
+  const isCpsEnabled = useIsInfraMlCpsEnabled();
   const [projectRouting, setProjectRouting] = useState<ProjectRouting>(undefined);
   const [isCpsManagerReady, setIsCpsManagerReady] = useState(false);
 

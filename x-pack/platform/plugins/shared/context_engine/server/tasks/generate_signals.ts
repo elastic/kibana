@@ -17,6 +17,7 @@ import {
   buildConvAgentMap,
   queryExecuteToolSpans,
   queryInvokeAgentSpans,
+  querySelfAnalysisTraceIds,
   spaceFromTracesIndex,
 } from './traces_repository';
 import type { ToolSpanReadRow } from './traces_repository';
@@ -95,7 +96,10 @@ export const generateSignals = async ({
   const traceIds = [
     ...new Set(toolRows.map((row) => row.trace_id).filter((id): id is string => !!id)),
   ];
-  const agentRows = await queryInvokeAgentSpans(esClient, traceIds, signal);
+  const [agentRows, selfAnalysisTraceIds] = await Promise.all([
+    queryInvokeAgentSpans(esClient, traceIds, signal),
+    querySelfAnalysisTraceIds(esClient, traceIds, signal),
+  ]);
   const convAgent = buildConvAgentMap(agentRows);
 
   let windowMax = '';
@@ -105,7 +109,16 @@ export const generateSignals = async ({
     }
   }
 
-  const rowsBySpace = groupRowsBySpace(toolRows, logger);
+  const analyzableRows = toolRows.filter((row) => !selfAnalysisTraceIds.has(row.trace_id));
+  if (selfAnalysisTraceIds.size > 0) {
+    logger.debug(
+      `Excluded ${toolRows.length - analyzableRows.length} tool span(s) from ${
+        selfAnalysisTraceIds.size
+      } self-analysis round(s)`
+    );
+  }
+
+  const rowsBySpace = groupRowsBySpace(analyzableRows, logger);
 
   let fullyProcessed = true;
   let total = 0;
@@ -135,7 +148,7 @@ export const generateSignals = async ({
   }
 
   logger.debug(
-    `Generated ${total} signal(s) across ${rowsBySpace.size} space(s) from ${toolRows.length} tool span(s)`
+    `Generated ${total} signal(s) across ${rowsBySpace.size} space(s) from ${analyzableRows.length} tool span(s)`
   );
 
   return { watermark: fullyProcessed ? windowMax || undefined : state.watermark };

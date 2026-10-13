@@ -13,7 +13,7 @@ import {
   SCORES_SORT_ORDER,
   CompareExperimentsRequestQuery,
   pairScores,
-  computePairedTTestResults,
+  compareScores,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -139,8 +139,8 @@ export const registerCompareExperimentsRoute = ({
                   totalPairs: 0,
                   skippedMissingPairs: 0,
                   skippedNullScores: 0,
-                  truncatedA: truncatedBaseline,
-                  truncatedB: truncatedTarget,
+                  truncatedBaseline,
+                  truncatedTarget,
                 },
               },
             });
@@ -158,7 +158,7 @@ export const registerCompareExperimentsRoute = ({
             filteredTarget,
             filteredBaseline
           );
-          const results = computePairedTTestResults(pairs);
+          const results = compareScores(pairs);
 
           return response.ok({
             body: {
@@ -167,8 +167,8 @@ export const registerCompareExperimentsRoute = ({
                 totalPairs: pairs.length,
                 skippedMissingPairs,
                 skippedNullScores,
-                truncatedA: truncatedBaseline,
-                truncatedB: truncatedTarget,
+                truncatedBaseline,
+                truncatedTarget,
               },
             },
           });

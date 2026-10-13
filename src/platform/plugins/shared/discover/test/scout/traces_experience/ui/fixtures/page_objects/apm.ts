@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { euiSelectors } from '@kbn/scout';
 import type { ScoutPage } from '@kbn/scout';
 import type { Waterfall } from './waterfall';
 import { createWaterfall } from './waterfall';
@@ -60,7 +61,7 @@ export function createApmPage(page: ScoutPage): ApmPage {
     },
 
     async dismissFlyout() {
-      const flyout = page.locator('.euiFlyout');
+      const flyout = page.locator(euiSelectors.flyout.ROOT_SELECTOR);
       await flyout.waitFor({ state: 'visible' });
       await page.keyboard.press('Escape');
       await flyout.waitFor({ state: 'hidden' });

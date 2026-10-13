@@ -8,13 +8,12 @@
  */
 
 import type { MetricsGridSettings } from '@kbn/discover-utils';
+import { FLYOUT_SETTING_KEYS } from './constants';
 
 export const getChangedSettings = (
   draft: MetricsGridSettings,
   applied: MetricsGridSettings
 ): Partial<MetricsGridSettings> =>
   Object.fromEntries(
-    (Object.keys(draft) as Array<keyof MetricsGridSettings>)
-      .filter((key) => draft[key] !== applied[key])
-      .map((key) => [key, draft[key]])
+    FLYOUT_SETTING_KEYS.filter((key) => draft[key] !== applied[key]).map((key) => [key, draft[key]])
   );

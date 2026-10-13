@@ -1,5 +1,5 @@
 {
-  "sha1": "2747e51f6df47c8464d7a1954937ec5d0b831e2c",
+  "sha1": "3a4696ad4061db0002981f09a349f5f7d1808d13",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -357,56 +357,8 @@
       }
     },
     {
-      "id": "45b3d09166622fb-ffede76b443a709",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-okta-user-id\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
       "id": "45b3d09166622fb-3284f1411b982f0",
       "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-azure-null-kind-email\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "45b3d09166622fb-0320318eb1a5364",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-ad-user-name-domain\"",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/dsl_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "45b3d09166622fb-87402f3901cb755",
-      "title": "DSL query translation user.ts DSL: should return a single matching hit for scenario \"idp-iam-okta-from-dataset\"",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -949,6 +901,54 @@
       }
     },
     {
+      "id": "98daa5f18956b6d-83ce2f254454415",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-user-id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-0d600e31082dc1f",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-ad-user-name-domain",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
+      "id": "98daa5f18956b6d-c05ec5e2e15dc2f",
+      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-from-dataset",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
+        "line": 152,
+        "column": 29
+      }
+    },
+    {
       "id": "98daa5f18956b6d-e1ca0ce15d2b750",
       "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for documents-filter-outcome-failure",
       "expectedStatus": "passed",
@@ -1333,56 +1333,8 @@
       }
     },
     {
-      "id": "98daa5f18956b6d-83ce2f254454415",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-user-id",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
       "id": "98daa5f18956b6d-f9fe91592ccea9b",
       "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-azure-null-kind-email",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-0d600e31082dc1f",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-ad-user-name-domain",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/query_translation/api/tests/painless_translation.spec.ts",
-        "line": 161,
-        "column": 9
-      }
-    },
-    {
-      "id": "98daa5f18956b6d-c05ec5e2e15dc2f",
-      "title": "Painless runtime field translation should align user.ts Painless entity_id with definitions for idp-iam-okta-from-dataset",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

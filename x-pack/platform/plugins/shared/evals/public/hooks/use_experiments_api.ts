@@ -10,14 +10,12 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   API_VERSIONS,
-  EVALS_EVALUATORS_URL,
   EVALS_EXPERIMENTS_RUN_URL,
   EVALS_EXPERIMENTS_SAVE_WORKFLOW_URL,
   EVALS_EXPERIMENTS_PREVIEW_URL,
   EVALS_EXPERIMENT_TEMPLATES_URL,
   EVALS_EXPERIMENT_EXECUTION_URL,
   EVALS_EXPERIMENT_EXECUTION_CANCEL_URL,
-  type ListEvaluatorsResponse,
 } from '@kbn/evals-common';
 import type {
   RunExperimentRequest,
@@ -28,24 +26,6 @@ import type {
   ExperimentExecutionStatus,
 } from '../../common/experiments/run_experiment';
 import { EvaluateDatasetStepId } from '../../common/workflows/steps';
-
-export interface ModelConnector {
-  id: string;
-  name: string;
-  connectorTypeId: string;
-  isDeprecated: boolean;
-  isMissingSecrets: boolean;
-}
-
-interface RawActionConnector {
-  id: string;
-  name: string;
-  connector_type_id: string;
-  is_deprecated?: boolean;
-  is_missing_secrets?: boolean;
-}
-
-export const MODEL_CONNECTOR_TYPE_IDS = ['.inference', '.gen-ai', '.bedrock', '.gemini'] as const;
 
 const retryOnServerError = (_failureCount: number, error: unknown) => {
   if (isHttpFetchError(error)) {
@@ -80,50 +60,6 @@ export const useExperimentTemplates = () => {
       services.http!.get<GetExperimentTemplatesResponse>(EVALS_EXPERIMENT_TEMPLATES_URL, {
         version: API_VERSIONS.internal.v1,
       }),
-    retry: retryOnServerError,
-    refetchOnWindowFocus: false,
-  });
-};
-
-export const useEvaluators = () => {
-  const { services } = useKibana();
-
-  return useQuery({
-    queryKey: ['evals', 'evaluators'],
-    queryFn: async (): Promise<ListEvaluatorsResponse> =>
-      services.http!.get<ListEvaluatorsResponse>(EVALS_EVALUATORS_URL, {
-        version: API_VERSIONS.internal.v1,
-      }),
-    retry: retryOnServerError,
-    refetchOnWindowFocus: false,
-  });
-};
-
-export const useModelConnectors = () => {
-  const { services } = useKibana();
-
-  return useQuery({
-    queryKey: ['evals', 'model-connectors'],
-    queryFn: async (): Promise<ModelConnector[]> => {
-      const connectors = await services.http!.get<RawActionConnector[]>('/api/actions/connectors');
-      const modelConnectors = connectors
-        .filter((connector) => !connector.is_deprecated)
-        .map<ModelConnector>((connector) => ({
-          id: connector.id,
-          name: connector.name,
-          connectorTypeId: connector.connector_type_id,
-          isDeprecated: connector.is_deprecated ?? false,
-          isMissingSecrets: connector.is_missing_secrets ?? false,
-        }));
-
-      const modelTypeIds = new Set<string>(MODEL_CONNECTOR_TYPE_IDS);
-      const filtered = modelConnectors.filter((connector) =>
-        modelTypeIds.has(connector.connectorTypeId)
-      );
-      // Fall back to showing all connectors if none match the known model types,
-      // so unusual deployments can still pick a connector.
-      return filtered.length > 0 ? filtered : modelConnectors;
-    },
     retry: retryOnServerError,
     refetchOnWindowFocus: false,
   });

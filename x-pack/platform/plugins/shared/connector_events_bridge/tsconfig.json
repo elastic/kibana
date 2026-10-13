@@ -9,7 +9,6 @@
     "@kbn/core",
     "@kbn/actions-plugin",
     "@kbn/workflows-extensions",
-    "@kbn/core-http-server-utils",
-    "@kbn/core-spaces-common"
+    "@kbn/core-http-server-mocks"
   ]
 }

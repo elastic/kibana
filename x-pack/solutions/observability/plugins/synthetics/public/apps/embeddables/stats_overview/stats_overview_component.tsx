@@ -9,6 +9,8 @@ import React, { useEffect, useRef } from 'react';
 import type { Subject } from 'rxjs';
 import { useDispatch } from 'react-redux-v7';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PLUGIN } from '../../../../common/constants/plugin';
 import { areFiltersEmpty } from '../common/utils';
 import { getStatsOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
@@ -17,18 +19,25 @@ import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewStatus } from '../../synthetics/components/monitors_page/overview/overview/overview_status';
 import type { MonitorFilters } from '../../../../common/types';
+import type { RequestCancellationManager } from '../../synthetics/state/request_cancellation_manager';
 
 export const StatsOverviewComponent = ({
   reload$,
   filters,
+  requestCancellationManager,
 }: {
   reload$: Subject<boolean>;
   filters: MonitorFilters;
+  requestCancellationManager: RequestCancellationManager;
 }) => {
-  const statsOverviewStore = useRef(getStatsOverviewStore());
+  const statsOverviewStore = useRef(getStatsOverviewStore(requestCancellationManager));
 
   return (
-    <SyntheticsEmbeddableContext reload$={reload$} reduxStore={statsOverviewStore.current}>
+    <SyntheticsEmbeddableContext
+      reload$={reload$}
+      reduxStore={statsOverviewStore.current}
+      onAutoRefresh={() => requestCancellationManager.resumeAfterCancellation()}
+    >
       <EuiFlexGroup
         alignItems="center"
         css={{
@@ -45,6 +54,7 @@ export const StatsOverviewComponent = ({
 
 const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
   const dispatch = useDispatch();
+  const { application } = useKibana().services;
 
   useOverviewStatus({ scopeStatusByLocation: false });
 
@@ -67,6 +77,11 @@ const WithFiltersComponent = ({ filters }: { filters: MonitorFilters }) => {
       titleAppend={hasFilters ? <ShowSelectedFilters filters={filters ?? {}} /> : null}
       hideTitle={true}
       areStatsClickable
+      onStatusFilterClick={(statusFilter) => {
+        application?.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
+          path: `?statusFilter=${statusFilter}`,
+        });
+      }}
     />
   );
 };

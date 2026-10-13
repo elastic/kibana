@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "test/scout*/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/app-header",
@@ -17,6 +17,7 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/charts-theme",
     "@kbn/react-query",
+    "@kbn/scout",
   ],
   "exclude": [
     "target/**/*",

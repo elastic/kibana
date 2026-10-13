@@ -383,15 +383,6 @@ describe('Index Templates tab', () => {
         expect(modal).toHaveTextContent('Delete template');
       });
 
-      test('should show a warning message when attempting to delete a system template', async () => {
-        await actions.toggleViewFilter('system');
-
-        const { name: systemTemplateName } = templates[2];
-        await actions.clickTemplateAction(systemTemplateName, 'delete');
-
-        expect(exists('deleteSystemTemplateCallOut')).toBe(true);
-      });
-
       test('should send the correct HTTP request to delete an index template', async () => {
         const [
           {
@@ -439,15 +430,6 @@ describe('Index Templates tab', () => {
 
         const modal = await screen.findByTestId('deleteTemplatesConfirmation');
         expect(modal).toHaveTextContent('Delete template');
-      });
-
-      test('should show a warning message when attempting to delete a system template', async () => {
-        await actions.toggleViewFilter('system');
-
-        const { name: systemTemplateName } = legacyTemplates[2];
-        await actions.clickTemplateAction(systemTemplateName, 'delete');
-
-        expect(exists('deleteSystemTemplateCallOut')).toBe(true);
       });
 
       test('should send the correct HTTP request to delete an index template', async () => {

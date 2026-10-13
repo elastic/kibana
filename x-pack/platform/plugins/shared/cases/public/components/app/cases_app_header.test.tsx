@@ -10,39 +10,26 @@ import { render, renderHook, screen } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
 import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import type { AppHeaderProps } from '@kbn/app-header';
 import { TestProviders } from '../../common/mock';
-import { KibanaServices } from '../../common/lib/kibana';
 import { CasesPageLayout } from './cases_page_layout';
 import { CasesAppHeader } from './cases_app_header';
 
-const renderHeader = (listRedesignEnabled: boolean) => {
-  jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
-    casesRedesign: {
-      list: listRedesignEnabled,
-      details: false,
-      settings: false,
-    },
-  } as ReturnType<typeof KibanaServices.getConfig>);
-
-  return render(
+const renderHeader = (spacing?: AppHeaderProps['spacing']) =>
+  render(
     <TestProviders>
       <MemoryRouter initialEntries={['/cases']}>
         <CasesPageLayout basePath="/cases">
-          <CasesAppHeader title="Cases" />
+          <CasesAppHeader title="Cases" spacing={spacing} />
         </CasesPageLayout>
       </MemoryRouter>
     </TestProviders>
   );
-};
 
 describe('CasesAppHeader', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('uses standard header spacing when the route redesign is enabled', () => {
+  it('defaults to standard header spacing', () => {
     const { result } = renderHook(() => useEuiTheme());
-    renderHeader(true);
+    renderHeader();
 
     const header = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root);
     expect(header).toHaveStyleRule('padding-inline', result.current.euiTheme.size.base);
@@ -50,8 +37,8 @@ describe('CasesAppHeader', () => {
     expect(header).not.toHaveStyleRule('margin-inline', expect.any(String));
   });
 
-  it('uses flush header spacing when the legacy layout owns the gutter', () => {
-    renderHeader(false);
+  it('lets an explicit spacing prop override the default', () => {
+    renderHeader('flush');
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toHaveStyleRule(
       'padding-inline',

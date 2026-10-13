@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { AlertDeletionContext } from '../alert_deletion_client';
 import { deleteAlertsForSpace, logFailedDeletion, logSuccessfulDeletion } from '.';
@@ -17,7 +18,7 @@ export const runTask = async (
   const runDate = new Date();
   try {
     const settings = taskInstance.params.settings;
-    const spaceIds = taskInstance.params.spaceIds;
+    const spaceIds = taskInstance.params.spaceIds?.map(brandSpaceId);
 
     if (!spaceIds || spaceIds.length === 0 || !settings) {
       throw new Error(`Invalid task parameters: ${JSON.stringify(taskInstance.params)}`);

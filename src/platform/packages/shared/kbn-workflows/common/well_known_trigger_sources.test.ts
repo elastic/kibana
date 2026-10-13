@@ -83,8 +83,6 @@ describe('isEventDrivenWorkflowTriggerSource', () => {
     'attack-discovery-pipeline',
     'attack-discovery-skill-report',
     'attack-discovery-scheduled',
-    'significant-events-memory-synthesis',
-    'significant-events-memory-ui',
     'evals-run-now',
     'evals-skill-run',
     'action_policy',

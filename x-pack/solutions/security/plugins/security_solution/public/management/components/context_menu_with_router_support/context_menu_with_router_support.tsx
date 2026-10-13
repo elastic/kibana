@@ -39,12 +39,6 @@ export interface ContextMenuWithRouterSupportProps
    */
   title?: string;
   loading?: boolean;
-  /**
-   * Additional information to show on ALL menu items.
-   * The content provided here will be applied to all menu items, thus overriding the
-   * `hoverInfo` that may be defined on each one.
-   */
-  hoverInfo?: ContextMenuItemNavByRouterProps['hoverInfo'];
 }
 
 /**
@@ -63,7 +57,6 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     fixedWidth = false,
     title,
     loading = false,
-    hoverInfo,
     isNavigationDisabled = false,
     ...commonProps
   }) => {
@@ -95,7 +88,6 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
             key={uuidv4()}
             data-test-subj={itemProps['data-test-subj'] ?? getTestId(`item-${index}`)}
             textTruncate={Boolean(maxWidth) || itemProps.textTruncate}
-            hoverInfo={hoverInfo || itemProps.hoverInfo}
             onClick={(ev) => {
               handleCloseMenu();
               if (itemProps.onClick) {
@@ -105,7 +97,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
           />
         );
       });
-    }, [items, loading, isNavigationDisabled, getTestId, maxWidth, hoverInfo, handleCloseMenu]);
+    }, [items, loading, isNavigationDisabled, getTestId, maxWidth, handleCloseMenu]);
 
     type AdditionalPanelProps = Partial<
       Omit<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>, 'style'>

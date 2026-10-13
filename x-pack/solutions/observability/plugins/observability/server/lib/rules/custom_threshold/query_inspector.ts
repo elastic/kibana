@@ -23,6 +23,7 @@ import type { CustomThresholdRuleTypeParams } from './types';
 import { getElasticsearchMetricQuery } from './lib/metric_query';
 import { createTimerange } from './lib/create_timerange';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
+import { shouldTrackMissingGroups } from './lib/should_track_missing_groups';
 
 type GetStartServices = () => Promise<
   [
@@ -68,8 +69,10 @@ export const createQueryInspector = (
       throw new Error('No matched data view');
     }
 
-    const alertOnGroupDisappear =
-      params.alertOnGroupDisappear !== false && params.noDataBehavior !== 'recover';
+    const alertOnGroupDisappear = shouldTrackMissingGroups(
+      params.noDataBehavior,
+      params.alertOnGroupDisappear
+    );
 
     const queries: RuleQueryInspectorResponse['queries'] = [];
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import {
   MAX_ALERTS_PER_TRIGGER,
@@ -19,8 +19,8 @@ import {
   ATTACK_TAGS_CHANGED_TRIGGER_DESCRIPTION,
   ATTACK_TAGS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS,
   ATTACK_TAGS_CHANGED_TRIGGER_TITLE,
-  TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION,
-  TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION,
+  TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION,
+  TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION,
 } from '../translations';
 
 export const AttackTagsChangedTriggerId = 'security.attackTagsChanged' as const;
@@ -30,24 +30,26 @@ const documentationExample = `## Run when a tag is added to attacks
 triggers:
   - type: security.attackTagsChanged
     on:
-      condition: 'event.tagsToAdd: "escalated"'
+      condition: 'event.tagsAdded: "escalated"'
 \`\`\``;
 
-const attackTagsChangedEventSchema = z.object({
-  attackIds: z
-    .array(z.string().min(1).max(MAX_ID_LENGTH))
-    .max(MAX_ALERTS_PER_TRIGGER)
-    .meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
-  tagsToAdd: z
-    .array(z.string().min(1).max(MAX_TAG_LENGTH))
-    .max(MAX_TAGS_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_TAGS_TO_ADD_DESCRIPTION }),
-  tagsToRemove: z
-    .array(z.string().min(1).max(MAX_TAG_LENGTH))
-    .max(MAX_TAGS_PER_OPERATION)
-    .meta({ description: TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION }),
-  truncated: z.boolean().meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
-});
+const attackTagsChangedEventSchema = lazySchema(() =>
+  z.object({
+    attackIds: z
+      .array(z.string().min(1).max(MAX_ID_LENGTH))
+      .max(MAX_ALERTS_PER_TRIGGER)
+      .meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION }),
+    tagsAdded: z
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
+      .max(MAX_TAGS_PER_OPERATION)
+      .meta({ description: TRIGGER_SCHEMA_TAGS_ADDED_DESCRIPTION }),
+    tagsRemoved: z
+      .array(z.string().min(1).max(MAX_TAG_LENGTH))
+      .max(MAX_TAGS_PER_OPERATION)
+      .meta({ description: TRIGGER_SCHEMA_TAGS_REMOVED_DESCRIPTION }),
+    truncated: z.boolean().meta({ description: ATTACK_TAGS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION }),
+  })
+);
 
 export const attackTagsChangedTriggerDef: CommonTriggerDefinition = {
   id: AttackTagsChangedTriggerId,

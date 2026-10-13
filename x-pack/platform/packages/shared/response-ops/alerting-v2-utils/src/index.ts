@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-export { getAlertingV2ManagementNavPanel } from './get_management_nav_panel';
 export {
+  hasAlertingV2Capability,
   isAlertingV2Enabled,
   shouldShowAlertingV2CreateRuleFlyout,
+  shouldShowV1ObservabilityAlertsTable,
+  canAccessAlertingV2Rules,
+  type AlertingV2CapabilityFeature,
+  type AlertingV2CapabilityLevel,
 } from './is_alerting_v2_enabled';
+export { normalizeMatcher } from './normalize_matcher';
 export { normalizeTags } from './normalize_tags';
 export { resolveArtifactId } from './resolve_artifact_id';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';
 export { parseEpisodeDataJson, getValueByFieldPath } from './episode_data';
+export {
+  alertEpisodeToAlertAttachment,
+  type AlertEpisodeToAttachmentOptions,
+} from './alert_mappers';
+export { resolveAlertLabel, type ResolveAlertLabelParams } from './resolve_alert_label';
+export { buildRulePayload } from './rule_mappers';
+export { attachmentDataToActionPolicyPayload } from './action_policy_mappers';

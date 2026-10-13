@@ -11,30 +11,23 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import type { FlyoutFooterPrimaryActionProps } from '../../types';
 import { primaryActionPart } from './part';
+import { resolveTooltipButtonProps, withTooltip } from './tooltip';
 
 /** Declarative `FlyoutTemplate.Footer.PrimaryAction`. */
 export const PrimaryAction = primaryActionPart.createComponent<FlyoutFooterPrimaryActionProps>({
-  resolve: ({
-    id,
-    label,
-    onClick,
-    iconType,
-    isLoading,
-    isDisabled,
-    'data-test-subj': dataTestSubj,
-  }) =>
-    React.createElement(
-      EuiButton,
-      {
-        id,
-        fill: true,
-        iconType,
-        isLoading,
-        isDisabled,
-        onClick,
-        'data-test-subj': dataTestSubj,
-      },
-      label
+  resolve: ({ label, tooltip, ...buttonProps }) =>
+    withTooltip(
+      React.createElement(
+        EuiButton,
+        {
+          ...resolveTooltipButtonProps(buttonProps, tooltip),
+          color: 'primary',
+          size: 'm',
+          fill: true,
+        },
+        label
+      ),
+      tooltip
     ),
 });
 

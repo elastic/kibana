@@ -12,6 +12,7 @@ import {
   createAgentUnavailableError,
   createBadRequestError,
   chatAgentTypeId,
+  SELF_AGENT_ID,
   type AgentAccessControl,
 } from '@kbn/agent-builder-common';
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
@@ -179,10 +180,22 @@ class AgentRegistryImpl implements AgentRegistry {
       throw createBadRequestError(`Agent with id ${agentId} already exists`);
     }
 
+    await this.validateSubagentIds({
+      agentId,
+      subagentIds: createRequest.configuration?.subagent_ids ?? [],
+    });
+
     return this.persistedProvider.create(createRequest);
   }
 
   async update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition> {
+    if (update.configuration?.subagent_ids !== undefined) {
+      await this.validateSubagentIds({
+        agentId,
+        subagentIds: update.configuration.subagent_ids,
+      });
+    }
+
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
         if (isReadonlyProvider(provider)) {
@@ -193,6 +206,43 @@ class AgentRegistryImpl implements AgentRegistry {
       }
     }
     throw createAgentNotFoundError({ agentId });
+  }
+
+  private async validateSubagentIds({
+    agentId,
+    subagentIds,
+  }: {
+    agentId: string;
+    subagentIds: string[];
+  }): Promise<void> {
+    if (subagentIds.length === 0) {
+      return;
+    }
+
+    const seen = new Set<string>();
+    for (const id of subagentIds) {
+      if (seen.has(id)) {
+        throw createBadRequestError(`subagent_ids must be unique (duplicate: "${id}")`);
+      }
+      seen.add(id);
+    }
+
+    if (subagentIds.includes(agentId)) {
+      throw createBadRequestError(
+        `subagent_ids contains this agent's own id — use '${SELF_AGENT_ID}' to enable self-fork`
+      );
+    }
+
+    for (const id of subagentIds) {
+      if (id === SELF_AGENT_ID) continue;
+      try {
+        await this.get(id);
+      } catch {
+        throw createBadRequestError(
+          `subagent_ids contains an unknown or inaccessible agent: "${id}"`
+        );
+      }
+    }
   }
 
   async delete({ id: agentId }: AgentDeleteRequest): Promise<boolean> {

@@ -46,7 +46,7 @@ export const Page: FC = () => {
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
   });
 
-  const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
+  const [recognizerResultsCount, setRecognizerResultsCount] = useState<number | null>(null);
 
   const { selectedDataView, selectedSavedSearch, projectRouting } = useDataSource();
 
@@ -114,13 +114,6 @@ export const Page: FC = () => {
         defaultMessage: 'data view {dataViewName}',
         values: { dataViewName: selectedDataView.getName() },
       });
-
-  const recognizerResults = {
-    count: 0,
-    onChange() {
-      setRecognizerResultsCount(recognizerResults.count);
-    },
-  };
 
   const getJobTypeUrlParams = () =>
     getUrlParams({
@@ -316,7 +309,7 @@ export const Page: FC = () => {
         </>
       )}
 
-      <div hidden={recognizerResultsCount === 0}>
+      <div hidden={!recognizerResultsCount}>
         <EuiTitle size="s">
           <h2>
             <FormattedMessage
@@ -342,7 +335,7 @@ export const Page: FC = () => {
           <DataRecognizer
             indexPattern={selectedDataView}
             savedSearch={selectedSavedSearch}
-            results={recognizerResults}
+            onResultsChange={setRecognizerResultsCount}
           />
         </EuiFlexGrid>
 
@@ -359,7 +352,13 @@ export const Page: FC = () => {
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <EuiFlexGrid gutterSize="l" columns={4}>
+      <EuiFlexGrid
+        gutterSize="l"
+        columns={4}
+        data-test-subj={`mlJobTypeSelectionWizardCards ${
+          recognizerResultsCount === null ? 'loading' : 'loaded'
+        }`}
+      >
         {jobTypes.map(({ onClick, icon, title, description, id }) => (
           <EuiFlexItem key={id}>
             <LinkCard

@@ -6,38 +6,70 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { getInlineActionStepDefinition } from '../registry';
-import type { InlineWorkflowActionDraft } from '../types';
+import type { ConnectorCreationConfig, InlineWorkflowActionDraft } from '../types';
+import { validateInlineAction } from '../types';
 import { ConnectorSelector } from './connector_selector';
 import { ParamsEditor } from './params_editor';
 
 export interface InlineWorkflowEditorProps {
   value: InlineWorkflowActionDraft;
   onChange: (next: InlineWorkflowActionDraft) => void;
+  connectorCreationConfig?: ConnectorCreationConfig;
+  /**
+   * Shows every validation error, including on fields the user has not touched
+   * yet (e.g. after a submit attempt).
+   */
+  forceShowErrors?: boolean;
 }
 
-export const InlineWorkflowEditor = ({ value, onChange }: InlineWorkflowEditorProps) => {
+export const InlineWorkflowEditor = ({
+  value,
+  onChange,
+  connectorCreationConfig,
+  forceShowErrors = false,
+}: InlineWorkflowEditorProps) => {
+  const [isConnectorTouched, setIsConnectorTouched] = useState(false);
+  const [areParamsTouched, setAreParamsTouched] = useState(false);
+
   const definition = getInlineActionStepDefinition(value.stepType);
   if (!definition) {
     return null;
   }
+
+  const errors = validateInlineAction(value);
+  const connectorError = forceShowErrors || isConnectorTouched ? errors.connector : undefined;
+  const paramErrors = forceShowErrors || areParamsTouched ? errors.params : [];
+
+  const onParamsChange = (next: InlineWorkflowActionDraft) => {
+    setAreParamsTouched(true);
+    onChange(next);
+  };
 
   return (
     <div data-test-subj="inlineWorkflowEditor">
       <ConnectorSelector
         connectorTypeId={definition.connectorTypeId}
         value={value.connectorId}
+        connectorCreationConfig={connectorCreationConfig}
+        error={connectorError}
+        onBlur={() => setIsConnectorTouched(true)}
         onChange={(connectorId) => {
+          setIsConnectorTouched(true);
           if (connectorId === value.connectorId) return;
           onChange({ ...value, connectorId });
         }}
       />
       {definition.CustomComponent && (
-        <definition.CustomComponent value={value} onChange={(nextValue) => onChange(nextValue)} />
+        <definition.CustomComponent value={value} onChange={onParamsChange} />
       )}
       <EuiSpacer size="m" />
-      <ParamsEditor value={value.params} onChange={(params) => onChange({ ...value, params })} />
+      <ParamsEditor
+        value={value.params}
+        onChange={(params) => onParamsChange({ ...value, params })}
+        errors={paramErrors}
+      />
     </div>
   );
 };

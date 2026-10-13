@@ -19,7 +19,7 @@ const mockRules = [
     enabled: true,
     metadata: { name: 'Rule One', tags: ['prod'] },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
   {
     id: 'rule-2',
@@ -27,7 +27,7 @@ const mockRules = [
     enabled: false,
     metadata: { name: 'Rule Two', tags: [] },
     schedule: { every: '5m' },
-    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+    query: { base: 'FROM metrics-*' },
   },
 ];
 
@@ -41,7 +41,7 @@ const mockRulesWithManyTags = [
       tags: ['new', 'rna', 'production', 'fix', 'this', 'tags', 'more', 'than', 'enough'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 ];
 
@@ -55,7 +55,7 @@ const mockRulesWithLongTags = [
       tags: ['this-is-a-very-long-tag-name-that-should-be-truncated'],
     },
     schedule: { every: '1m' },
-    query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+    query: { base: 'FROM logs-* | LIMIT 1' },
   },
 ];
 
@@ -133,19 +133,23 @@ describe('RulesListTable', () => {
     it('renders a generic empty state when there are no rules', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
-      expect(screen.getByText('No rules found.')).toBeInTheDocument();
+      expect(screen.getByText('No Universal rules found.')).toBeInTheDocument();
     });
 
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders a filter-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {

@@ -24,6 +24,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
+    relationshipsClient,
     signal,
     telemetry,
   }) => {
@@ -42,6 +43,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       namespace,
       crudClient,
       entityMetadataClient,
+      relationshipsClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
       maintainerName: 'communicates_with',
       signal,
@@ -60,13 +62,14 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
         targetIdsNotInStore: result.totalTargetIdsNotInStore,
         failed: result.totalWriteErrors,
         metadataDocsApplied: result.totalMetadataDocsApplied,
+        metadataDocsFailed: result.totalMetadataDocsFailed,
       },
       sources: collector.sources,
       // no breakdown — communicates_with is a single relationship type
     });
 
     logger.info(
-      `[communicates_with] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended`
+      `[communicates_with] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalTargetIdsNotInStore} targetIdsNotInStore, ${result.totalMetadataDocsApplied} metadata docs appended, ${result.totalMetadataDocsFailed} metadata docs failed`
     );
     return result;
   },

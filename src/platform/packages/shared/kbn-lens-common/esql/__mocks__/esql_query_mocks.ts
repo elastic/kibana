@@ -8,6 +8,7 @@
  */
 
 import type { IndexPattern } from '../../types';
+import type { TermsIndexPatternColumn } from '../../datasources/operations';
 
 export const mockLayer = {
   indexPatternId: 'myIndexPattern',
@@ -38,3 +39,23 @@ export const mockDateRange = {
   fromDate: '2021-01-01T00:00:00.000Z',
   toDate: '2021-01-01T23:59:59.999Z',
 };
+
+/** Shared terms column factory (used by top-N and terms eligibility tests). */
+export const createTermsColumn = (
+  params: Partial<TermsIndexPatternColumn['params']> = {},
+  overrides: Partial<Omit<TermsIndexPatternColumn, 'params'>> = {}
+): TermsIndexPatternColumn => ({
+  label: 'Top values of host.keyword',
+  dataType: 'string',
+  operationType: 'terms',
+  sourceField: 'host.keyword',
+  isBucketed: true,
+  ...overrides,
+  params: {
+    size: 5,
+    orderBy: { type: 'alphabetical' },
+    orderDirection: 'asc',
+    otherBucket: false,
+    ...params,
+  },
+});

@@ -1,5 +1,5 @@
 {
-  "sha1": "f0067f37d06f24cde6ad2981b061c934789f0723",
+  "sha1": "3bddd46553715591d96a39664ac13f285beea559",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -186,6 +186,34 @@
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/06_feature_controls.spec.ts",
         "line": 105,
         "column": 11
+      }
+    },
+    {
+      "id": "60f6134e51842aa-d3df98c48ed4cc0",
+      "title": "Profiling status matches the Universal Profiling setup status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
+        "line": 71,
+        "column": 9
+      }
+    },
+    {
+      "id": "60f6134e51842aa-18d0b83a714f209",
+      "title": "Profiling status reports OTel data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/07_status.spec.ts",
+        "line": 93,
+        "column": 28
       }
     },
     {

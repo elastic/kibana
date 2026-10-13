@@ -20,6 +20,7 @@ const originProject = {
   _alias: 'Origin project',
   _type: 'security',
   _organisation: 'elastic',
+  environment: 'production',
 };
 
 const linkedProject = {
@@ -27,6 +28,7 @@ const linkedProject = {
   _alias: 'Linked project',
   _type: 'observability',
   _organisation: 'elastic',
+  environment: 'production',
 };
 
 const createLinkedProject = (id: number) => ({
@@ -76,6 +78,7 @@ describe('ProjectScopeColumn', () => {
     expect(
       screen.queryByRole('group', { name: 'Cross-project search scope selector' })
     ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('projectPickerListItemTags')).not.toBeInTheDocument();
   });
 
   it('renders only the origin routing project when project routing is not configured', async () => {

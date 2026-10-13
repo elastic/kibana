@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiButton, EuiCode, EuiLink, EuiPageHeader } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { default as React, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
 import { AlertFlyout } from '../../alerts/alert_flyout';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import { useKibanaContextForPlugin } from '../../utils';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filters';
+
+const DATA_STREAM_NAMING_SCHEME_URL = 'https://ela.st/data-stream-naming-scheme';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -35,70 +36,55 @@ export default function Header() {
     [isDatasetQualityAllSignalsAvailable, authorizedDatasetTypes]
   );
 
+  const description = useMemo(
+    () => ({
+      text: i18n.translate('xpack.datasetQuality.appDescription', {
+        defaultMessage:
+          'Monitor the data set quality for {types} data streams that follow the data stream naming scheme.',
+        values: { types: validTypes.join(', ') },
+      }),
+      learnMoreUrl: DATA_STREAM_NAMING_SCHEME_URL,
+    }),
+    [validTypes]
+  );
+
+  const menu = useMemo(
+    () =>
+      isAlertingAvailable && validTypes.length
+        ? {
+            primaryActionItem: {
+              id: 'createAlert',
+              label: createAlertText,
+              iconType: 'bell' as const,
+              testId: 'datasetQualityDetailsHeaderButton',
+              run: () => {
+                setRuleType(DEGRADED_DOCS_RULE_TYPE_ID);
+              },
+            },
+          }
+        : undefined,
+    [isAlertingAvailable, validTypes.length]
+  );
+
   return (
-    <EuiPageHeader
-      bottomBorder
-      pageTitle={
-        <>
-          {datasetQualityAppTitle}
-          &nbsp;
-          <EuiBetaBadge
-            label={betaBadgeLabel}
-            title={betaBadgeLabel}
-            tooltipContent={betaBadgeDescription}
-          />
-        </>
-      }
-      description={
-        <FormattedMessage
-          id="xpack.datasetQuality.appDescription"
-          defaultMessage="Monitor the data set quality for {types} data streams that follow the {dsNamingSchemeLink}."
-          values={{
-            types: validTypes.map((type, index) => {
-              return (
-                <>
-                  {index > 0 && ', '}
-                  <EuiCode>{type}</EuiCode>
-                </>
-              );
-            }),
-            dsNamingSchemeLink: (
-              <EuiLink
-                data-test-subj="datasetQualityAppDescriptionDsNamingSchemeLink"
-                href="https://ela.st/data-stream-naming-scheme"
-                target="_blank"
-                rel="noopener"
-              >
-                <FormattedMessage
-                  id="xpack.datasetQuality.appDescription.dsNamingSchemeLinkText"
-                  defaultMessage="Data stream naming scheme"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      }
-      rightSideItems={
-        isAlertingAvailable && validTypes.length
-          ? [
-              <>
-                <EuiButton
-                  data-test-subj="datasetQualityDetailsHeaderButton"
-                  onClick={() => {
-                    setRuleType(DEGRADED_DOCS_RULE_TYPE_ID);
-                  }}
-                  iconType="bell"
-                >
-                  {createAlertText}
-                </EuiButton>
-                {ruleType === DEGRADED_DOCS_RULE_TYPE_ID && (
-                  <AlertFlyout closeFlyout={() => setRuleType(null)} />
-                )}
-              </>,
-            ]
-          : undefined
-      }
-    />
+    <>
+      <AppHeader
+        title={datasetQualityAppTitle}
+        badges={[
+          {
+            label: betaBadgeLabel,
+            color: 'hollow',
+            tooltip: betaBadgeDescription,
+          },
+        ]}
+        description={description}
+        menu={menu}
+        spacing="bleed"
+      />
+      {ruleType === DEGRADED_DOCS_RULE_TYPE_ID && (
+        <AlertFlyout closeFlyout={() => setRuleType(null)} />
+      )}
+    </>
   );
 }
 

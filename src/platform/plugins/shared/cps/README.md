@@ -17,7 +17,11 @@ Kibana acts as a **transparent orchestrator**. It does not execute cross-project
 ## Server-Side (`server/`)
 
 - **API Routes**: Registers endpoints like `POST /internal/cps/projects_tags` to retrieve project tags from Elasticsearch (`/_project/tags`), delegating authorization to the scoped Elasticsearch client.
-- **Configuration**: Exposes the `cpsEnabled` flag via its setup contract, which is used by other parts of the system (like Core's `ElasticsearchService`) to toggle CPS behaviors.
+- **Configuration**: Exposes the `cpsEnabled` flag via its setup contract, which is used by other parts of the system (like Core's `ElasticsearchService`) to toggle CPS behaviors. `cpsEnabled` means "this deployment can do CPS" and is true on all serverless projects.
+- **Start contract**: When `cpsEnabled` is true, `start()` returns:
+  - `createNpreClient(request)` — a request-scoped client for named project routing expressions.
+  - `getLinkedProjects(request)` — the linked projects visible to the request principal, or `undefined` when they could not be resolved (unauthorized or the call failed). `undefined` is distinct from `[]`: "unknown" must never be read as "none".
+  - `isCpsActive(request)` — `true` when at least one linked project is visible to the principal, `false` when none are, and `undefined` when that could not be determined (most often a missing `read_project_routing` cluster privilege). `undefined` is not a synonym for `false`; see [Privileges](#privileges) for why, and for who decides what to do about it. Note that a plain truthiness check reads `undefined` as "do not fan out"; use `=== false` to fan out on unresolved. When `cpsEnabled` is false, `start()` returns `undefined` (capability off).
 
 ### API Routes
 
@@ -63,3 +67,7 @@ Elasticsearch gates the CPS metadata APIs behind cluster privileges:
 - `manage_project_routing` — additionally allows creating/updating NPREs (e.g. customizing a space's default project routing).
 
 Users without `read_project_routing` can still run searches: the space default project routing is resolved via the Kibana internal user and applied to their queries, and Elasticsearch scopes cross-project results to the projects the user is authorized to access.
+
+This is why `isCpsActive` reports those users as `undefined` rather than `false`: Kibana cannot tell whether they have linked projects, and "unknown" is not "none". Whether an unresolved scope should read origin-only or fan out and let Elasticsearch scope the result depends on what the consumer reads and how much it trusts the principal's index grants, so this plugin does not pick for everyone.
+
+Defend and Osquery both currently read `undefined` as "do not fan out". Their reads target indices whose grants Kibana cannot inspect for custom roles, so fanning out would put exactly the principals whose grants are least visible on `asCurrentUser`. The cost is that a custom role without `read_project_routing` reads origin-only until the predefined roles carry the privilege.

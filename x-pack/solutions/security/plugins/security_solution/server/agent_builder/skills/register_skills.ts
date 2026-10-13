@@ -13,11 +13,13 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { manageWatchlistsSkill } from './manage_watchlists';
+import { manageResolutionSkill } from './entity_resolution';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertTriageSkill } from './alert_triage';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
+import { createEndpointResponseActionsSkill } from './endpoint_response_actions';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createInvestigateRuleSkill } from './investigate_rule';
 import { createFindRulesSkill } from './find_rules';
@@ -25,10 +27,17 @@ import { siemReadinessSkill } from './siem_readiness';
 import {
   automaticMigrationRulesStartMigrationSkill,
   automaticMigrationRulesSummarizeSkill,
+  automaticMigrationRulesStopMigrationSkill,
+  automaticMigrationRulesUpdateMigrationSkill,
+  automaticMigrationRulesDeleteMigrationSkill,
+  automaticMigrationRulesUpdateTranslatedRuleSkill,
+  automaticMigrationRulesInstallRulesSkill,
 } from './siem_migration';
 import { entityAnalyticsLeadsSkill } from './entity_analytics_leads';
 import { createRecommendPrebuiltRulesSkill } from './recommend_prebuilt_rules';
+import { createDetectionCoverageSkill } from './detection_coverage';
 import { endpointForensicAnalysisSkill } from './endpoint_forensic_analysis';
+import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 import { SIEM_READINESS_AGENT_BUILDER_ENABLED } from '../siem_readiness_feature_flag';
 
 interface RegisterSkillsOpts {
@@ -70,6 +79,10 @@ export const registerSkills = async ({
     agentBuilder.skills.register(manageWatchlistsSkill);
   }
 
+  if (isEntityStoreV2Enabled) {
+    agentBuilder.skills.register(manageResolutionSkill);
+  }
+
   agentBuilder.skills.register(
     getDetectionRuleEditSkill({
       rulePreviewEnabled: experimentalFeatures.rulePreviewAttachmentEnabled,
@@ -80,6 +93,8 @@ export const registerSkills = async ({
       createRecommendPrebuiltRulesSkill({ getStartServices, logger, ml })
     );
   }
+
+  await agentBuilder.skills.register(createDetectionCoverageSkill());
 
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
@@ -103,6 +118,11 @@ export const registerSkills = async ({
   ) {
     await agentBuilder.skills.register(automaticMigrationRulesSummarizeSkill);
     await agentBuilder.skills.register(automaticMigrationRulesStartMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesStopMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesUpdateMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesDeleteMigrationSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesUpdateTranslatedRuleSkill);
+    await agentBuilder.skills.register(automaticMigrationRulesInstallRulesSkill);
   }
 
   if (experimentalFeatures.leadGenerationEnabled) {
@@ -115,6 +135,21 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.endpointForensicAnalysisSkill) {
     await agentBuilder.skills.register(endpointForensicAnalysisSkill);
+  }
+
+  if (experimentalFeatures.elasticDefendPolicyManagementSkill) {
+    await agentBuilder.skills.register(
+      createElasticDefendPolicyManagementSkill({
+        endpointAppContextService: options.endpointAppContextService,
+        getStartServices,
+      })
+    );
+  }
+
+  if (experimentalFeatures.endpointResponseActionsSkill) {
+    await agentBuilder.skills.register(
+      createEndpointResponseActionsSkill(options.endpointAppContextService)
+    );
   }
 
   if (experimentalFeatures.investigateRuleSkill) {

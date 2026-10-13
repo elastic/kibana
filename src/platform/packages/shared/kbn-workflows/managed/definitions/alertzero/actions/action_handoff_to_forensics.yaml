@@ -1,0 +1,233 @@
+version: "1"
+name: Run a deep forensics investigation
+description: >
+  AlertZero action: hands an attack to Forensics Watch by writing a Context Engine
+  knowledge indicator its sweep picks up. Executed by the investigation proposal gate
+  once the proposal is approved — by an analyst under `manual` autonomy, or by the gate
+  itself under `supervised`. Either way the handoff is attributed to whoever approved it
+  and recorded in the proposals index.
+enabled: true
+tags:
+  # Generic tag every action workflow carries, so the catalog can be
+  # discovered by tag rather than a hardcoded list.
+  - action
+  - alertzero
+consts:
+  # Self-describing catalog metadata, read back by the proposals service when a
+  # proposal referencing this workflow is created or rendered. Metadata has to
+  # live under `consts`: unknown top-level keys are stripped by the schema.
+  actionMetadata:
+    name: Run a deep forensics investigation
+    description: >-
+      Hands this attack to Forensics Watch, which determines the response
+      actions to take. Writes a Context Engine knowledge indicator the
+      Forensics Watch sweep picks up.
+    # Matches the contain / investigate / configure vocabulary the Watch Floor
+    # sync settled on. The schema types this as a free string: the workflows
+    # package owns no vocabulary.
+    category: investigate
+    impact: medium
+    # The knowledge indicator is only a request, but approving it commits a real
+    # forensics run against the hard cost ceiling in #19233 R11, and nothing here can
+    # recall one. Declared for what it is; it is not what decides whether the action
+    # gates. `approvalPolicy` below is.
+    reversible: false
+    # Deferred to the caller's autonomy level rather than gated outright, which is what
+    # makes the caller's dial mean anything: `always-gate` would make `supervised`
+    # identical to `manual`. #19233 R10 and #18908 both say the Forensics tier itself
+    # runs at manual autonomy, which this does not contradict — at manual,
+    # `autonomy-dependent` gates.
+    approvalPolicy: autonomy-dependent
+  journal_note: system-alertzero-journal-note
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        actionInput:
+          type: object
+          description: >
+            The handoff contract: two ids, the classification, and the provenance of
+            the analysis that produced it. Every action workflow takes a single
+            `actionInput` object so the generic gate workflow never needs to know an
+            action's parameter names.
+
+            IDS AND PROVENANCE ONLY, deliberately. The attack narrative, the alert set,
+            the affected hosts and the time window are all reachable from
+            `investigation_id` and `attack_discovery_id`, and a second copy here is a
+            second copy that can disagree with the first. Forensics dereferences; it is
+            not handed a snapshot.
+          # Every string is bounded, matching the review's own trigger schema. These
+          # five flow into a knowledge indicator's title, description and attributes,
+          # which are persisted and swept by a consumer, so an unbounded value here is
+          # an oversized-document footgun rather than a validation nicety.
+          properties:
+            ai_index_id:
+              type: string
+              maxLength: 256
+              description: >-
+                AI index the knowledge indicator is written into. The existing
+                Context-Engine-as-IPC producers hardcode `security-investigations`;
+                it is a convention rather than a shared constant.
+            attack_discovery_id:
+              type: string
+              maxLength: 512
+              description: >-
+                Persisted Attack Discovery document id. AUTHORITATIVE for the attack
+                narrative and for the complete set of correlated detection alerts. Also
+                the stable part of the knowledge indicator's id.
+            investigation_id:
+              type: string
+              # 256 to match CONVERSATION_ID_MAX_LENGTH, which is what the journal
+              # helper and every `ai.*` step already enforce on a conversation id.
+              maxLength: 256
+              description: >-
+                Conversation id of the Investigation. AUTHORITATIVE for every attachment
+                the review produced, including the FP/TP report. READ-ONLY for
+                Forensics: the Investigation is `access_mode: public`, so any consumer
+                can read it, but attachment writes require conversation OWNER access,
+                which a watch running under a different principal does not have.
+            classification:
+              type: string
+              # Bounded rather than an `enum`: the verdict vocabulary is the review's to
+              # own, and pinning it here would fail the handoff outright if #19211's
+              # real analysis ever adds an escalating verdict.
+              maxLength: 128
+              description: >-
+                The FP/TP verdict, `true_positive` or `inconclusive`. Carried rather
+                than dereferenced because it is what a consumer routes on, and because
+                the same KI shape has to distinguish the two without a second read.
+            workflow_execution_id:
+              type: string
+              maxLength: 128
+              description: >-
+                Execution id of the review that produced this handoff. The provenance
+                link back to the FP/TP analysis and its report.
+          required:
+            - ai_index_id
+            - attack_discovery_id
+            - investigation_id
+            - classification
+            - workflow_execution_id
+          additionalProperties: false
+      required:
+        - actionInput
+      additionalProperties: false
+outputs:
+  - name: kiId
+    type: string
+  - name: aiIndexId
+    type: string
+steps:
+  # `contextEngine:enabled` is off by default and this step throws
+  # `FeatureDisabledError` when it is. That failure still fails the proposal: the
+  # fallback journals the error onto the Investigation, then `workflow.fail`
+  # so the gate records the proposal as `failed` and the Investigation stays
+  # open. There is nothing to fall back TO — the handoff is the only thing this
+  # action does.
+  #
+  # Written only here, never on an ungated path: the handoff IS the decision, and
+  # it is the expensive one. Running it from the action the gate executes also buys
+  # attribution to the approver and a row in the proposals index for audit.
+  #
+  # `ki_id` is stable per ATTACK, not per run, so a re-review replaces rather than
+  # appends a near-duplicate. A stable id means a replace resets
+  # `attributes.status` to `pending`, which could re-dispatch something the consumer
+  # already processed — but reaching here twice needs a second review run for the same
+  # attack AND a second approval of its proposal, so that is a note rather than a hazard
+  # to mechanise.
+  #
+  # Status lives ONLY on `attributes.status` and is not duplicated onto `tags`, per D28:
+  # `tags` is the fixed classification vocabulary a sweep selects on, `status` is a value
+  # that changes over the KI's life. Carrying it on both would be one state with two
+  # update paths. `attributes` is mapped `flattened`, so a consumer's
+  # `term: { attributes.status: pending }` matches.
+  #
+  # `title` is SYNTHESIZED rather than passed in. It is a required KI field, and deriving
+  # it from the id keeps the attack narrative out of the handoff — the Investigation and
+  # the Attack Discovery document are what carry that. `content` is omitted for the same
+  # reason, and because writing it would trigger a `semantic_text` embedding inference on
+  # every handoff for a document nobody semantically searches.
+  #
+  # The two ids live in `attributes` because that is the only place main can put them
+  # today. Once elastic/kibana#290962 lands they belong in first-class `references`
+  # (`relation: derived_from`); its `governance.lifecycle.status` is `active`/`deleted`
+  # only, so it does not replace the pending/processed lifecycle below.
+  #
+  # `type` and the attribute names are the CONSUMER's vocabulary, not this producer's:
+  # Forensics Watch sweeps this KI and reads it without ever calling back, so a name
+  # only this side agrees with reads as an absent field there.
+  #
+  # `space_id` is carried even though the step already stamps it under
+  # `governance.provenance.created_by.metadata`. A KI's backing index name derives from
+  # the AI index id alone, so every space's `security-investigations` indicators share
+  # one index, and both ids above are space-scoped — a consumer that cannot filter on
+  # the space cannot resolve either. Provenance is metadata about the writer; this is
+  # the routing data a sweep selects on.
+  - name: write_analyze_endpoint_ki
+    type: context-engine.createKi
+    with:
+      ai_index_id: "{{ inputs.actionInput.ai_index_id }}"
+      ki_id: "analyze-endpoint-{{ inputs.actionInput.attack_discovery_id }}"
+      ki:
+        type: security.analyze_endpoint
+        title: "Forensics handoff for Attack Discovery {{ inputs.actionInput.attack_discovery_id }}"
+        description: >-
+          Classified {{ inputs.actionInput.classification }} by review
+          {{ inputs.actionInput.workflow_execution_id }}. Investigation
+          {{ inputs.actionInput.investigation_id }} is authoritative for the attack
+          narrative, its correlated alerts, and the FP/TP report.
+        tags:
+          # The sweep's selector.
+          - consumer:forensics
+          # The producing tier.
+          - watch:floor
+        attributes:
+          status: pending
+          producer: alertzero.ad_review.handoff_to_forensics.v1
+          watch_id: floor
+          attack_discovery_alert_id: "{{ inputs.actionInput.attack_discovery_id }}"
+          investigation_id: "{{ inputs.actionInput.investigation_id }}"
+          space_id: "{{ workflow.spaceId }}"
+          classification: "{{ inputs.actionInput.classification }}"
+          workflow_execution_id: "{{ inputs.actionInput.workflow_execution_id }}"
+    on-failure:
+      fallback:
+        - name: journal_handoff_failed
+          type: workflow.execute
+          with:
+            workflow-id: "{{ consts.journal_note }}"
+            inputs:
+              conversation_id: "{{ inputs.actionInput.investigation_id }}"
+              message: >-
+                Forensics handoff failed: knowledge indicator write failed.
+                {{ steps.write_analyze_endpoint_ki.error }}
+          on-failure:
+            continue: true
+        - name: fail_handoff
+          type: workflow.fail
+          with:
+            message: >-
+              Forensics handoff failed: knowledge indicator write failed.
+              {{ steps.write_analyze_endpoint_ki.error }}
+
+  - name: journal_handoff_succeeded
+    type: workflow.execute
+    with:
+      workflow-id: "{{ consts.journal_note }}"
+      inputs:
+        conversation_id: "{{ inputs.actionInput.investigation_id }}"
+        message: >-
+          Wrote knowledge indicator {{ steps.write_analyze_endpoint_ki.output.id }}
+          to {{ inputs.actionInput.ai_index_id }}
+          ({{ inputs.actionInput.classification }}).
+    on-failure:
+      continue: true
+
+  # `workflow.execute` declares its output as unknown, so the parent falls back
+  # to a heuristic read of the last step unless the child emits explicitly.
+  - name: emit_result
+    type: workflow.output
+    status: completed
+    with:
+      kiId: "{{ steps.write_analyze_endpoint_ki.output.id }}"
+      aiIndexId: "{{ inputs.actionInput.ai_index_id }}"

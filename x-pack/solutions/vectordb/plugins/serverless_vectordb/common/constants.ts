@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Elasticsearch currently reports dense vector `value_count` as 0 on stateless
+ * (https://github.com/elastic/elasticsearch/pull/158563), so this stat is
+ * misleading. Keep the fetch and UI paths intact but disabled until we have a
+ * replacement.
+ */
+export const VECTOR_COUNT_ENABLED = false;
+
 export const VECTORDB_APP_ID = 'vectordb';
 export const GETTING_STARTED_DEEP_LINK_ID = 'getting_started';
 export const GETTING_STARTED_PATH = `/${GETTING_STARTED_DEEP_LINK_ID}`;

@@ -62,6 +62,11 @@ const useStyles = () => {
     contextMenu: css`
       width: 150px;
     `,
+    // Flex children default to min-width: auto, so a long unbreakable string in the
+    // processors JSON would widen the panel past the flyout and push the footer off-screen.
+    detailsPanel: css`
+      min-width: 0;
+    `,
     badge: css`
       margin-left: ${euiTheme.size.s};
       border-radius: 999px;
@@ -155,7 +160,7 @@ export const DetailsPanel: FunctionComponent<Props> = ({
   };
 
   return (
-    <EuiSplitPanel.Inner grow={true} paddingSize="none">
+    <EuiSplitPanel.Inner grow={true} paddingSize="none" css={styles.detailsPanel}>
       <EuiSplitPanel.Outer hasShadow={false} grow={true} css={{ height: '100%' }}>
         <EuiSplitPanel.Inner style={{ overflowY: 'auto' }} paddingSize="l" grow={true}>
           <EuiSkeletonTitle isLoading={isLoading}>

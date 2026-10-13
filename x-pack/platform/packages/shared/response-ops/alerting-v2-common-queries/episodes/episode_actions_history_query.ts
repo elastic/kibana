@@ -9,14 +9,42 @@ import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
+/**
+ * Who performed an action: a user (with a profile uid when one could be resolved) or Kibana
+ * itself (`internal`, e.g. the dispatcher).
+ */
+export interface EpisodeActionActor {
+  type: 'user' | 'internal';
+  profile_uid: string | null;
+}
+
+/**
+ * Raw ES|QL row shape — `tags` may arrive as a string when ES|QL collapses a single-value
+ * multivalue field, and the `actor` object arrives as its two leaf columns.
+ */
+export interface RawEpisodeActionHistoryEntry {
+  _id: string;
+  '@timestamp': string;
+  action_type: string;
+  'actor.type': EpisodeActionActor['type'];
+  'actor.profile_uid': string | null;
+  alert_id: string | null;
+  group_hash: string | null;
+  tags?: string | string[] | null;
+  assignee_uid: string | null;
+  expiry: string | null;
+  reason: string | null;
+}
+
+/** Normalized entry with `tags` guaranteed to be a string array and `actor` folded into an object. */
 export interface EpisodeActionHistoryEntry {
   _id: string;
   '@timestamp': string;
   action_type: string;
-  actor: string | null;
-  episode_id: string | null;
+  actor: EpisodeActionActor;
+  alert_id: string | null;
   group_hash: string | null;
-  tags: string[] | null;
+  tags: string[];
   assignee_uid: string | null;
   expiry: string | null;
   reason: string | null;
@@ -41,19 +69,19 @@ export const buildEpisodeActionsHistoryQuery = (
   episodeId: string,
   groupHash: string,
   { before, limit }: BuildEpisodeActionsHistoryQueryOptions
-): TypedEsqlQuery<EpisodeActionHistoryEntry> => {
+): TypedEsqlQuery<RawEpisodeActionHistoryEntry> => {
   // prettier-ignore
   const query = esql
     .from([ALERT_ACTIONS_DATA_STREAM], ['_id'])
     .where`space_id == ${spaceId}`
-    .where`episode_id == ${episodeId} OR (group_hash == ${groupHash} AND episode_id IS NULL)`
+    .where`alert_id == ${episodeId} OR (group_hash == ${groupHash} AND alert_id IS NULL)`
     .where`action_type IN ("ack", "unack", "snooze", "unsnooze", "deactivate", "activate", "tag", "assign")`;
 
   if (before) {
     query.where`@timestamp <= ${before}`;
   }
 
-  return asTypedEsqlQuery<EpisodeActionHistoryEntry>(
+  return asTypedEsqlQuery<RawEpisodeActionHistoryEntry>(
     query
       .sort(['@timestamp', 'DESC'])
       .limit(limit)
@@ -61,8 +89,9 @@ export const buildEpisodeActionsHistoryQuery = (
         '_id',
         '@timestamp',
         'action_type',
-        'actor',
-        'episode_id',
+        'actor.type',
+        'actor.profile_uid',
+        'alert_id',
         'group_hash',
         'tags',
         'assignee_uid',
@@ -71,3 +100,11 @@ export const buildEpisodeActionsHistoryQuery = (
       )
   );
 };
+
+/** Folds the raw `actor.*` leaf columns of a history row into an {@link EpisodeActionActor}. */
+export const toEpisodeActionActor = (
+  row: Pick<RawEpisodeActionHistoryEntry, 'actor.type' | 'actor.profile_uid'>
+): EpisodeActionActor => ({
+  type: row['actor.type'],
+  profile_uid: row['actor.profile_uid'] ?? null,
+});

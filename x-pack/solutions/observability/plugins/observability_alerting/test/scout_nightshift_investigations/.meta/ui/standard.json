@@ -1,0 +1,56 @@
+{
+  "sha1": "742363c821cef4f4c84734497dedbea2c4fddbd5",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "05b5ab071a3f4c7-dda554a65d55133",
+      "title": "Observability Alerting v2 Inbox investigation actions triggers investigation from inbox table row overflow menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 97,
+        "column": 22
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-a21ca7ce7d1e607",
+      "title": "Observability Alerting v2 Inbox investigation actions triggers investigation from classic alert details flyout take action menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 150,
+        "column": 18
+      }
+    },
+    {
+      "id": "05b5ab071a3f4c7-bb6b8a7b9e6f6f2",
+      "title": "Observability Alerting v2 Inbox investigation actions shows investigating state while running and reveals re-investigate only after viewing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability_alerting/test/scout_nightshift_investigations/ui/tests/inbox_investigation_actions.spec.ts",
+        "line": 171,
+        "column": 26
+      }
+    }
+  ]
+}

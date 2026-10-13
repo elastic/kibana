@@ -12,6 +12,7 @@ import {
 } from '@kbn/agent-builder-common/tools/tool_result';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
+import { CUSTOM_CONTENT_UPDATED_UI_EVENT } from '../../common/ui_events';
 import { createUpdateCustomContentTool } from './update_custom_content_tool';
 
 const mockResolver = jest.fn();
@@ -31,15 +32,18 @@ const makeContext = (attachmentData?: Record<string, unknown>) => {
   // `attachments.update` resolves the new versioned attachment; the tool reads `current_version`
   // off it so the agent can address that exact version in its render tag.
   const update = jest.fn().mockResolvedValue({ ...attachment, current_version: 2 });
+  const sendUiEvent = jest.fn();
   return {
     attachments: {
       getAll: jest.fn().mockReturnValue(attachment ? [attachment] : []),
       update,
     },
+    events: { sendUiEvent },
     logger: { warn: jest.fn(), error: jest.fn() },
     esClient: {},
     modelProvider: {},
     update,
+    sendUiEvent,
     attachment,
   };
 };
@@ -60,7 +64,7 @@ const callHandler = async (
 describe('createUpdateCustomContentTool handler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockResolver.mockResolvedValue('<div>generated</div>');
+    mockResolver.mockResolvedValue({ template: '<div>generated</div>', height: 320 });
   });
 
   describe('missing attachment', () => {
@@ -228,6 +232,17 @@ describe('createUpdateCustomContentTool handler', () => {
       );
     });
 
+    it('sends a custom content updated UI event with the new panel data', async () => {
+      const { ctx } = await callHandler({ embeddable_id: 'p1', prompt: 'Show KPIs' }, existing);
+      expect(ctx.sendUiEvent).toHaveBeenCalledWith(CUSTOM_CONTENT_UPDATED_UI_EVENT, {
+        attachmentId: 'att-1',
+        data: expect.objectContaining({
+          panel_template: '<div>generated</div>',
+          embeddable_id: 'p1',
+        }),
+      });
+    });
+
     it('omits the version when the update produced no new one', async () => {
       const tool = createUpdateCustomContentTool();
       const ctx = makeContext(existing);
@@ -244,6 +259,7 @@ describe('createUpdateCustomContentTool handler', () => {
       expect(ret.results[0].data).toEqual(
         expect.objectContaining({ attachment_id: 'att-1', version: undefined })
       );
+      expect(ctx.sendUiEvent).not.toHaveBeenCalled();
     });
   });
 
@@ -274,6 +290,7 @@ describe('createUpdateCustomContentTool handler', () => {
       const update = jest.fn().mockResolvedValue({ ...panelB, current_version: 2 });
       const ctx = {
         attachments: { getAll: jest.fn().mockReturnValue([panelA, panelB]), update },
+        events: { sendUiEvent: jest.fn() },
         logger: { warn: jest.fn(), error: jest.fn() },
         esClient: {},
         modelProvider: {},
@@ -297,6 +314,71 @@ describe('createUpdateCustomContentTool handler', () => {
         { panel_template: '<p>old</p>', embeddable_id: 'p1' }
       );
       expect(results[0].type).toBe(ToolResultType.error);
+    });
+  });
+
+  describe('time range', () => {
+    // A refined version previews in the same chat card, so losing the range would make the
+    // preview silently jump to a default window after the first edit.
+    it('carries the panel time range through an update', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        {
+          panel_template: '<div>old</div>',
+          esql_query: 'FROM logs',
+          embeddable_id: 'panel-1',
+          time_range: { from: 'now-7d', to: 'now' },
+        }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }) },
+        expect.anything()
+      );
+    });
+
+    // Asserted as a whole rather than field by field: the failure this guards against is
+    // adding a snapshot field and forgetting the carry-through, so a refined version would
+    // silently lose it.
+    it('carries the whole captured snapshot through an update', async () => {
+      const snapshot = {
+        time_range: { from: 'now-7d', to: 'now' },
+        panel_height: 480,
+        esql_variables: [{ key: 'host', value: 'host-1', type: 'values' }],
+        filters: [{ meta: { key: 'host.name' } }],
+        query: { query: 'status:200', language: 'kuery' },
+        is_approximate: true,
+        project_routing: 'project-1',
+      };
+
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        { panel_template: '<div>old</div>', embeddable_id: 'panel-1', ...snapshot }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining(snapshot) },
+        expect.anything()
+      );
+    });
+
+    it('carries the captured panel height through an update', async () => {
+      const { ctx } = await callHandler(
+        { embeddable_id: 'panel-1', prompt: 'make it darker' },
+        {
+          panel_template: '<div>old</div>',
+          embeddable_id: 'panel-1',
+          panel_height: 480,
+        }
+      );
+
+      expect(ctx.update).toHaveBeenCalledWith(
+        expect.anything(),
+        { data: expect.objectContaining({ panel_height: 480 }) },
+        expect.anything()
+      );
     });
   });
 });

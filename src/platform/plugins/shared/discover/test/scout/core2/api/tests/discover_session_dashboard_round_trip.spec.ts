@@ -54,7 +54,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'preserves the public by-reference and by-value panel shapes',
+      'preserves the public by-reference and by-value panel shapes, including saved profile state',
       async ({ apiClient }) => {
         const sessionResponse = await apiTest.step('create Discover session', async () => {
           const response = await apiClient.post(DISCOVER_SESSION_API_BASE_PATH, {
@@ -120,6 +120,36 @@ apiTest.describe(
           },
           view_mode: 'documents',
         };
+        const byValueMetricsTab = {
+          type: 'metrics',
+          dimensions: ['host.name', 'service.name'],
+          search_term: 'cpu',
+          counter_aggregation: 'max',
+          gauge_aggregation: 'min',
+          histogram_percentile: 'p99',
+          data_source: {
+            type: 'esql',
+            query: 'TS metrics-* | LIMIT 10',
+          },
+        };
+        const byValueInlineTab = {
+          data_source: {
+            type: 'data_view_spec',
+            index_pattern: 'logs-*',
+            time_field: '@timestamp',
+          },
+          filters: [
+            {
+              type: 'condition',
+              condition: { field: 'service.name', operator: 'is', value: 'checkout' },
+            },
+            {
+              type: 'condition',
+              data_view_id: 'foreign-data-view',
+              condition: { field: 'service.name', operator: 'is', value: 'api' },
+            },
+          ],
+        };
 
         const createResponse = await apiTest.step('create source dashboard', async () => {
           const response = await apiClient.post(DASHBOARD_API_PATH, {
@@ -143,6 +173,24 @@ apiTest.describe(
                   config: {
                     title: 'Discover by value',
                     tabs: [byValueTab],
+                  },
+                },
+                {
+                  id: 'discover-by-value-metrics',
+                  grid: { x: 0, y: 15, w: 24, h: 15 },
+                  type: 'discover_session',
+                  config: {
+                    title: 'Discover by value with metrics state',
+                    tabs: [byValueMetricsTab],
+                  },
+                },
+                {
+                  id: 'discover-by-value-inline',
+                  grid: { x: 24, y: 15, w: 24, h: 15 },
+                  type: 'discover_session',
+                  config: {
+                    title: 'Discover by value with inline filters',
+                    tabs: [byValueInlineTab],
                   },
                 },
               ],
@@ -177,6 +225,22 @@ apiTest.describe(
               config: expect.objectContaining({
                 title: 'Discover by value',
                 tabs: [expect.objectContaining(byValueTab)],
+              }),
+            }),
+            expect.objectContaining({
+              id: 'discover-by-value-metrics',
+              type: 'discover_session',
+              config: expect.objectContaining({
+                title: 'Discover by value with metrics state',
+                tabs: [expect.objectContaining(byValueMetricsTab)],
+              }),
+            }),
+            expect.objectContaining({
+              id: 'discover-by-value-inline',
+              type: 'discover_session',
+              config: expect.objectContaining({
+                title: 'Discover by value with inline filters',
+                tabs: [expect.objectContaining(byValueInlineTab)],
               }),
             }),
           ]);

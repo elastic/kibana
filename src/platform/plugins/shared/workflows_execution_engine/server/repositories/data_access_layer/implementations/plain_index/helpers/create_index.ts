@@ -18,6 +18,20 @@ interface CreateIndexOptions {
   logger: Logger;
 }
 
+/** Scale to 0 replicas on single-node clusters so health can go green. */
+const REPLICA_SETTINGS = {
+  auto_expand_replicas: '0-1',
+} as const;
+
+const HIDDEN_SETTINGS = {
+  index: { hidden: true },
+} as const;
+
+const INDEX_SETTINGS = {
+  ...REPLICA_SETTINGS,
+  ...HIDDEN_SETTINGS,
+} as const;
+
 export const createIndexWithMappings = async ({
   esClient,
   indexName,
@@ -38,12 +52,12 @@ export const createIndexWithMappings = async ({
 
     logger?.debug(`Creating index ${indexName} with mappings`);
 
-    // Create the index with proper mappings
     await retryTransientEsErrors(
       () =>
         esClient.indices.create({
           index: indexName,
           mappings,
+          settings: INDEX_SETTINGS,
         }),
       { logger }
     );
@@ -85,21 +99,41 @@ export const createOrUpdateIndex = async ({
         logger,
       });
     } else {
-      // Index exists, check if we need to update mappings
       try {
         await retryTransientEsErrors(
           () =>
-            esClient.indices.putMapping({
+            esClient.indices.putSettings({
               index: indexName,
-              ...mappings,
+              settings: REPLICA_SETTINGS,
             }),
           { logger }
         );
-        logger?.debug(`Updated mappings for existing index ${indexName}`);
-      } catch (mappingError) {
-        logger?.warn(`Failed to update mappings for index ${indexName}: ${mappingError.message}`);
-        // Continue - the index exists and can be used
+        logger?.debug(`Updated replica settings for existing index ${indexName}`);
+      } catch (settingsError) {
+        logger?.warn(
+          `Failed to update replica settings for index ${indexName}: ${settingsError.message}`
+        );
       }
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putSettings({
+            index: indexName,
+            settings: HIDDEN_SETTINGS,
+          }),
+        { logger }
+      );
+      logger?.debug(`Applied hidden setting for existing index ${indexName}`);
+
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putMapping({
+            index: indexName,
+            ...mappings,
+          }),
+        { logger }
+      );
+      logger?.debug(`Updated mappings for existing index ${indexName}`);
     }
   } catch (error) {
     logger?.error(`Failed to create or update index ${indexName}: ${error}`);

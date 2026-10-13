@@ -16,7 +16,10 @@ jest.mock('../../../../../../common/schema', () => ({
   getWorkflowZodSchema: jest.fn(() => ({})),
 }));
 jest.mock('../../../../../trigger_schemas', () => ({
-  triggerSchemas: { getRegisteredIds: jest.fn(() => []) },
+  triggerSchemas: {
+    getRegisteredIds: jest.fn(() => []),
+    getRegisteredTriggersForSchema: jest.fn(() => []),
+  },
 }));
 jest.mock('../../../../../shared/lib/query_client', () => ({
   queryClient: { invalidateQueries: jest.fn() },

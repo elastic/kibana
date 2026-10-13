@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FeatureFlagsRequestHandlerContext,
-  FeatureFlagsStart,
-} from '@kbn/core-feature-flags-server';
+import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
+import type { InternalFeatureFlagsStart } from './feature_flags_service';
 
 /**
  * The {@link FeatureFlagsRequestHandlerContext} implementation.
  * @internal
  */
 export class CoreFeatureFlagsRouteHandlerContext implements FeatureFlagsRequestHandlerContext {
-  constructor(private readonly featureFlags: FeatureFlagsStart) {}
+  constructor(private readonly featureFlags: InternalFeatureFlagsStart) {}
 
   public getBooleanValue(flagName: string, fallback: boolean): Promise<boolean> {
     return this.featureFlags.getBooleanValue(flagName, fallback);

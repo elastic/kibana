@@ -15,7 +15,11 @@ import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
-import { getCreateRuleRoute, getCreateRuleFromTemplateRoute } from '@kbn/rule-data-utils';
+import {
+  getCreateRuleRoute,
+  getCreateRuleFromTemplateRoute,
+  getTriggersActionsManagementPath,
+} from '@kbn/rule-data-utils';
 import { RulesSettingsLink } from './components/rules_setting/rules_settings_link';
 import { RulesListDocLink } from './sections/rules_list/components/rules_list_doc_link';
 import { CreateRuleButton } from './sections/rules_list/components/create_rule_button';
@@ -163,14 +167,14 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
           onClose={() => setRuleTypeModalVisibility(false)}
           onSelectRuleType={(ruleTypeId) => {
             navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              path: getTriggersActionsManagementPath(getCreateRuleRoute(ruleTypeId)),
             });
           }}
           onSelectTemplate={(templateId) => {
             navigateToApp('management', {
-              path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
-                encodeURIComponent(templateId)
-              )}`,
+              path: getTriggersActionsManagementPath(
+                getCreateRuleFromTemplateRoute(encodeURIComponent(templateId))
+              ),
             });
           }}
           http={http}

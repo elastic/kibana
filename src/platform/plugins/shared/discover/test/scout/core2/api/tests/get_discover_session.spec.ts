@@ -23,6 +23,7 @@ const INVALID_DISCOVER_SESSION_ID = 'invalid-discover-session';
 apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
   let devToolsReaderCredentials: RoleApiCredentials;
+  const createdLegacyAliasIds: string[] = [];
 
   apiTest.beforeAll(async ({ kbnClient, requestAuth }) => {
     viewerCredentials = await requestAuth.getApiKeyForViewer();
@@ -31,6 +32,11 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
+    if (createdLegacyAliasIds.length > 0) {
+      await kbnClient.savedObjects.bulkDelete({
+        objects: createdLegacyAliasIds.map((id) => ({ type: 'legacy-url-alias', id })),
+      });
+    }
     await kbnClient.savedObjects.clean({ types: ['search'] });
   });
 
@@ -100,6 +106,70 @@ apiTest.describe('GET /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
       'A Discover session with ID [does-not-exist] was not found.'
     );
   });
+
+  apiTest(
+    'returns the session and resolution headers when an ID is in conflict',
+    async ({ apiClient, kbnClient }) => {
+      const suffix = Date.now();
+      const conflictingId = `discover-session-conflict-${suffix}`;
+      const aliasTargetId = `discover-session-alias-target-${suffix}`;
+      const legacyAliasId = `default:search:${conflictingId}`;
+      const { attributes, references } =
+        await kbnClient.savedObjects.get<DiscoverSessionAttributes>({
+          type: 'search',
+          id: TEST_DISCOVER_SESSION_ID,
+        });
+
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id: conflictingId,
+        overwrite: true,
+        attributes,
+        references,
+      });
+      await kbnClient.savedObjects.create({
+        type: 'search',
+        id: aliasTargetId,
+        overwrite: true,
+        attributes,
+        references,
+      });
+      await kbnClient.savedObjects.create({
+        type: 'legacy-url-alias',
+        id: legacyAliasId,
+        overwrite: true,
+        attributes: {
+          targetType: 'search',
+          targetId: aliasTargetId,
+          targetNamespace: 'default',
+          sourceId: conflictingId,
+          purpose: 'savedObjectConversion',
+        },
+        references: [],
+        migrationVersion: { 'legacy-url-alias': '8.2.0' },
+      });
+      createdLegacyAliasIds.push(legacyAliasId);
+
+      const response = await apiClient.get(`${DISCOVER_SESSION_API_BASE_PATH}/${conflictingId}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...viewerCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(200);
+      expect(response).toHaveHeaders({
+        'kbn-resolve-outcome': 'conflict',
+        'kbn-resolve-alias-target-id': aliasTargetId,
+        'kbn-resolve-purpose': 'savedObjectConversion',
+      });
+      expect(response.body).toMatchObject({
+        id: conflictingId,
+        data: { title: attributes.title },
+      });
+    }
+  );
 
   apiTest('returns 403 when the user cannot read Discover sessions', async ({ apiClient }) => {
     const response = await apiClient.get(

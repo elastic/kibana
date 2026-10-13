@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { NULL_LABEL } from '@kbn/field-formats-common';
+import { NULL_PLACEHOLDER } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { LENS_BASIC_FIXTURE_IDS } from '../../../fixtures/kbn_archives/lens/ids';
 
@@ -57,8 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should not show static value tab for data layers', async () => {
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       // Quick functions and Formula tabs should be visible
-      expect(await testSubjects.exists('lens-dimensionTabs-quickFunctions')).to.eql(true);
-      expect(await testSubjects.exists('lens-dimensionTabs-formula')).to.eql(true);
+      await testSubjects.existOrFail('lens-dimensionTabs-quickFunctions', { timeout: 5000 });
+      await testSubjects.existOrFail('lens-dimensionTabs-formula', { timeout: 5000 });
       // Static value tab should not be visible
       expect(await testSubjects.exists('lens-dimensionTabs-static_value')).to.eql(false);
 
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         range(0, 6).map((index) => lens.getDatatableCellText(index, 1))
       );
       expect(values).to.eql([
-        NULL_LABEL,
+        NULL_PLACEHOLDER,
         '222,420.00',
         '702,050.00',
         '1,879,613.33',

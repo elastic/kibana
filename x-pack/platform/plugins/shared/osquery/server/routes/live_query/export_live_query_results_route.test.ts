@@ -31,6 +31,7 @@ const mockCreateExportRouteHandler = createExportRouteHandler as jest.MockedFunc
 const createOsqueryContext = (): OsqueryAppContext =>
   ({
     logFactory: { get: () => loggingSystemMock.createLogger() },
+    isCpsActive: jest.fn().mockResolvedValue(false),
     experimentalFeatures: { ...allowedExperimentalValues, exportResults: true },
     security: {} as OsqueryAppContext['security'],
     service: {
@@ -122,6 +123,7 @@ describe('exportLiveQueryResultsRoute', () => {
       request,
       response,
       expect.objectContaining({
+        actionId: 'action-abc',
         baseFilter: 'action_id: "action-abc"',
         metadata: expect.objectContaining({ action_id: 'action-abc' }),
         fileNamePrefix: 'osquery-results-action-abc',

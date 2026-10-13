@@ -27,12 +27,15 @@ import type {
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   ElasticsearchClient,
+  SavedObjectErrorResult,
   SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
 } from '@kbn/core/server';
 
 import {
   isSavedObjectErrorResult,
+  SavedObjectsErrorHelpers,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
 } from '@kbn/core/server';
@@ -40,6 +43,7 @@ import {
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import { nodeBuilder } from '@kbn/es-query';
 import type { ExecutionContextStart } from '@kbn/core/server';
 
@@ -57,9 +61,11 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  TaskCredential,
+  TaskInstanceWithId,
+  TaskClaimCandidate,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
-
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
@@ -71,6 +77,10 @@ import { TASK_SO_NAME, INVALIDATE_API_KEY_SO_NAME } from './saved_objects';
 import type { ApiKeyStrategy, ApiKeySOFields, InvalidationTarget } from './api_key_strategy';
 import { getFirstRunAt } from './lib/get_first_run_at';
 import { isInterval } from './lib/intervals';
+import {
+  getServiceAccountCredentialAttributes,
+  SERVICE_ACCOUNT_CREDENTIAL_TYPE,
+} from './lib/service_account_credential';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -111,6 +121,21 @@ export interface FetchResult {
   versionMap: Map<string, ConcreteTaskInstanceVersion>;
 }
 
+export interface ClaimCandidateFetchResult {
+  docs: TaskClaimCandidate[];
+  versionMap: Map<string, ConcreteTaskInstanceVersion>;
+}
+
+// The claim phase only needs metadata to version-check, cost and select candidates, and the
+// winners are hydrated again by bulkGet afterwards. Excluding the API key fields also keeps
+// decryption off the candidate path entirely.
+const CLAIM_CANDIDATE_SOURCE_EXCLUDES = [
+  'task.state',
+  'task.params',
+  'task.apiKey',
+  'task.uiamApiKey',
+];
+
 export interface BulkUpdateOpts {
   validate: boolean;
   mergeAttributes?: boolean;
@@ -124,6 +149,46 @@ export type PartialBulkUpdateResult = Result<PartialConcreteTaskInstance, ErrorO
 export type BulkGetResult = Array<
   Result<ConcreteTaskInstance, { type: string; id: string; error: SavedObjectError }>
 >;
+
+type TaskBulkCreateObject = SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>;
+type TaskBulkCreateResult =
+  SavedObjectsBulkResponse<SerializedConcreteTaskInstance>['saved_objects'][number];
+
+type ServiceAccountCredentialFields = ReturnType<typeof getServiceAccountCredentialAttributes>;
+
+type BulkScheduleTask =
+  | { action: 'conflict'; taskInstance: TaskInstanceWithId; conflict: SavedObjectErrorResult }
+  | { action: 'overwrite'; taskInstance: TaskInstanceWithId; version: string }
+  | {
+      action: 'create';
+      taskInstance: TaskInstanceWithId;
+      credentialFields?: ServiceAccountCredentialFields;
+    };
+
+type BulkScheduleWriteTask = Exclude<BulkScheduleTask, { action: 'conflict' }>;
+
+// `bulkCreate` takes `overwrite` for the whole call, and tasks with a credential are created by
+// another client, so each batch is written by its own call.
+const BULK_SCHEDULE_WRITE_BATCHES = ['createWithCredential', 'overwrite', 'create'] as const;
+type BulkScheduleWriteBatch = (typeof BULK_SCHEDULE_WRITE_BATCHES)[number];
+
+const getBulkScheduleWriteBatch = (task: BulkScheduleWriteTask): BulkScheduleWriteBatch =>
+  task.action === 'create' && task.credentialFields ? 'createWithCredential' : task.action;
+
+// Where each task's result is, so the response keeps the order of the input.
+type BulkSchedulePlacement =
+  | { batch: BulkScheduleWriteBatch; index: number }
+  | { conflict: SavedObjectErrorResult };
+
+const getCredentialConflict = (id: string): SavedObjectErrorResult => ({
+  id,
+  type: 'task',
+  error: SavedObjectsErrorHelpers.decorateConflictError(
+    new Error(
+      `Task "${id}" has a credential and can't be overwritten. Remove it and schedule it again.`
+    )
+  ).output.payload,
+});
 
 /**
  * Wraps an elasticsearch connection and provides a task manager-specific
@@ -141,6 +206,7 @@ export class TaskStore {
   private savedObjectsRepository: ISavedObjectsRepository;
   private savedObjectsService: SavedObjectsServiceStart;
   private _invalidationSoClient?: SavedObjectsClientContract;
+  private _serviceAccountSoClient?: SavedObjectsClientContract;
   private serializer: ISavedObjectsSerializer;
   private adHocTaskCounter: AdHocTaskCounter;
   private security: SecurityServiceStart;
@@ -157,6 +223,18 @@ export class TaskStore {
       });
     }
     return this._invalidationSoClient;
+  }
+
+  // Creates tasks that run as a service account. Unlike the internal repository it encrypts
+  // `encryptedCredential`, and it needs no request.
+  private get serviceAccountSoClient(): SavedObjectsClientContract {
+    if (!this._serviceAccountSoClient) {
+      this._serviceAccountSoClient = this.savedObjectsService.getUnsafeInternalClient({
+        includedHiddenTypes: [TASK_SO_NAME],
+        excludedExtensions: [SPACES_EXTENSION_ID],
+      });
+    }
+    return this._serviceAccountSoClient;
   }
 
   /**
@@ -217,6 +295,30 @@ export class TaskStore {
     }
   }
 
+  private getServiceAccountCredentialAttributes(taskInstance: TaskInstance) {
+    const { runAs, taskType } = taskInstance;
+    if (!runAs) {
+      return undefined;
+    }
+    if (!this.security.serviceAccounts.isEnabled()) {
+      throw new Error(
+        'Unable to schedule task(s) with runAs because service accounts are disabled.'
+      );
+    }
+    if (!this.canEncryptSo()) {
+      throw new Error(
+        'Unable to schedule task(s) with runAs because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+    }
+    const attributes = getServiceAccountCredentialAttributes(runAs);
+    if (!this.definitions.get(taskType)?.runAs?.workloadTypes.includes(runAs.workloadType)) {
+      throw new Error(
+        `Task type "${taskType}" does not allow runAs with workload type "${runAs.workloadType}".`
+      );
+    }
+    return attributes;
+  }
+
   private getSoClientForCreate(options: ApiKeyOptions) {
     if (options.request && this.getIsSecurityEnabled()) {
       return this.savedObjectsService.getScopedClient(options.request, {
@@ -240,11 +342,24 @@ export class TaskStore {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
 
       docs.forEach((taskInstance) => {
-        if (docHasEncryptedApiKey(taskInstance)) {
+        if (
+          docHasEncryptedApiKey(taskInstance) &&
+          taskInstance.credential?.type !== SERVICE_ACCOUNT_CREDENTIAL_TYPE
+        ) {
           docsWithApiKeys.push(taskInstance);
           const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
           if (targets.length > 0) {
-            invalidationTargets.push({ taskId: taskInstance.id, targets });
+            const { id, status, startedAt } = taskInstance;
+            const runningTask =
+              status === TaskStatus.Running && startedAt
+                ? // Set when replacing the key while the task is running. Together they
+                  // identify that run, so invalidation can wait until the task finishes.
+                  { taskId: id, taskStartedAt: startedAt.toISOString() }
+                : {};
+            invalidationTargets.push({
+              taskId: id,
+              targets: targets.map((target) => ({ ...target, ...runningTask })),
+            });
           }
         }
       });
@@ -285,24 +400,77 @@ export class TaskStore {
     return this.savedObjectsRepository;
   }
 
+  /**
+   * Whether a scheduling call with these options will grant API keys. Guards on the grant path
+   * (like the ensureScheduled existence pre-check) must use this predicate rather than checking
+   * the request themselves, so they cannot drift from the grant condition in
+   * `grantApiKeysFromRequest`.
+   */
+  public willGrantApiKeys(options?: { request?: KibanaRequest }): boolean {
+    return Boolean(options?.request) && this.getIsSecurityEnabled();
+  }
+
   private async grantApiKeysFromRequest(
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<Map<string, ApiKeySOFields> | null> {
     const request = options?.request;
-    if (!this.getIsSecurityEnabled() || !request) {
+    if (!this.willGrantApiKeys(options) || !request) {
       return null;
     }
 
+    const createdTargets: InvalidationTarget[] = [];
     try {
       return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
         ...(options?.onEsKey === true ? { onEsKey: true } : {}),
         ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        onApiKeyCreated: (target) => createdTargets.push(target),
       });
     } catch (e) {
+      await this.markApiKeysForInvalidation(createdTargets);
       this.errors$.next(e);
       throw e;
     }
+  }
+
+  private async markApiKeysForInvalidation(targets: InvalidationTarget[]) {
+    if (!targets.length) {
+      return;
+    }
+
+    // Best effort, so cleanup can never mask the failure that made it necessary.
+    try {
+      await this.apiKeyStrategy.markForInvalidation(
+        targets,
+        this.logger,
+        this.invalidationSoClient
+      );
+    } catch (e) {
+      this.logger.error(
+        `Failed to mark ${targets.length} unused API keys for invalidation: ${e.message}`
+      );
+    }
+  }
+
+  /**
+   * Marks API keys that were granted for a task write that never landed, so the invalidation task
+   * can revoke them.
+   *
+   * API keys are granted before the task document is written, so any failure in between leaves them
+   * attached to no task and referenced by nothing. Marking is safe even when a key turns out to be
+   * shared with a task that was written successfully (keys are granted per task type, not per task):
+   * the invalidation task skips keys still referenced by a live task and retries them later.
+   */
+  private async invalidateUnpersistedApiKeys(granted: Array<ApiKeySOFields | undefined>) {
+    const targets = granted.flatMap((fields) =>
+      fields ? this.apiKeyStrategy.getApiKeyIdsForInvalidation(fields) : []
+    );
+
+    // Keys are granted per task type and shared across instances, so several failed tasks can
+    // carry the same key; queue each key once instead of once per task.
+    const uniqueTargets = [...new Map(targets.map((target) => [target.apiKeyId, target])).values()];
+
+    await this.markApiKeysForInvalidation(uniqueTargets);
   }
 
   private async bulkGetDecryptedTaskApiKeys(
@@ -439,12 +607,18 @@ export class TaskStore {
       throw e;
     }
     this.definitions.ensureHas(taskInstance.taskType);
+    const serviceAccountAttributes = this.getServiceAccountCredentialAttributes(taskInstance);
 
     const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
-    const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
+      (serviceAccountAttributes
+        ? null
+        : await this.grantApiKeysFromRequest([taskInstance], options)) || new Map();
+    const grantedApiKeyFields = apiKeySOFieldsMap.get(taskInstance.id);
+    const apiKeySOFields = grantedApiKeyFields || {};
 
-    const soClient = this.getSoClientForCreate(options || {});
+    const soClient = serviceAccountAttributes
+      ? this.serviceAccountSoClient
+      : this.getSoClientForCreate(options || {});
 
     let savedObject;
     try {
@@ -457,6 +631,7 @@ export class TaskStore {
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...apiKeySOFields,
+          ...serviceAccountAttributes,
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
         { id, refresh: false }
@@ -468,6 +643,7 @@ export class TaskStore {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([grantedApiKeyFields]);
       this.errors$.next(e);
       throw e;
     }
@@ -507,74 +683,259 @@ export class TaskStore {
       this.errors$.next(e);
       throw e;
     }
-    const apiKeySOFieldsMap =
-      (await this.grantApiKeysFromRequest(taskInstances, options)) || new Map();
+    const tasks = await this.planBulkSchedule(taskInstances);
 
-    const soClient = this.getSoClientForCreate(options || {});
+    const taskInstancesToGrant = tasks
+      .filter(
+        (task) =>
+          task.action === 'overwrite' || (task.action === 'create' && !task.credentialFields)
+      )
+      .map(({ taskInstance }) => taskInstance);
+    const apiKeySOFieldsMap: Map<string, ApiKeySOFields> =
+      (taskInstancesToGrant.length
+        ? await this.grantApiKeysFromRequest(taskInstancesToGrant, options)
+        : null) || new Map();
 
-    const objects = taskInstances.reduce(
-      (acc: Array<SavedObjectsBulkCreateObject<SerializedConcreteTaskInstance>>, taskInstance) => {
-        const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id) || {};
-        const id = taskInstance.id || v4();
-        this.definitions.ensureHas(taskInstance.taskType);
-
-        try {
-          const validatedTaskInstance =
-            this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
-
-          return [
-            ...acc,
-            {
-              type: 'task',
-              attributes: {
-                ...taskInstanceToAttributes(validatedTaskInstance, id),
-                ...apiKeySOFields,
-                runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
-              },
-              id,
-            },
-          ];
-        } catch (e) {
-          this.logger.error(
-            `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
-          );
-          return acc;
-        }
-      },
-      []
-    );
-
-    let savedObjects;
+    let writes;
     try {
-      savedObjects = await soClient.bulkCreate<SerializedConcreteTaskInstance>(objects, {
-        refresh: false,
-        overwrite: true,
-      });
-      this.adHocTaskCounter.increment(
-        taskInstances.filter((task) => {
-          return get(task, 'schedule.interval', null) == null;
-        }).length
-      );
+      writes = this.buildBulkScheduleWrites(tasks, apiKeySOFieldsMap);
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
+    const { objects, placements, omittedTaskApiKeys } = writes;
+
+    const results = await this.executeBulkScheduleWrites(
+      objects,
+      apiKeySOFieldsMap,
+      omittedTaskApiKeys,
+      options
+    );
+
+    this.adHocTaskCounter.increment(
+      tasks.filter(({ taskInstance }) => {
+        return get(taskInstance, 'schedule.interval', null) == null;
+      }).length
+    );
+
+    const savedObjects = placements.map((placement) =>
+      'conflict' in placement ? placement.conflict : results[placement.batch][placement.index]
+    );
 
     if (options?.request && !this.getIsSecurityEnabled()) {
       this.logger.info(
         `Trying to bulk schedule tasks ${JSON.stringify(
-          savedObjects.saved_objects.map((so) => so.id)
+          savedObjects.map((so) => so.id)
         )} with user scope but security is disabled. Tasks will run without user scope.`
       );
     }
 
-    return savedObjects.saved_objects.map((so) => {
+    return savedObjects.map((so) => {
       if (isSavedObjectErrorResult(so)) {
         throw so.error;
       }
       const taskInstance = savedObjectToConcreteTaskInstance(so);
       return this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
     });
+  }
+
+  // Overwriting an existing id must never replace a task's credential, nor give a task one. Tasks
+  // with `runAs` are always created, and the others only overwrite a task read without a
+  // credential, at the version that was read.
+  private async planBulkSchedule(taskInstances: TaskInstance[]): Promise<BulkScheduleTask[]> {
+    // Assign generated ids before granting so every credential remains correlated with the saved
+    // object request and response, including per-item failures.
+    const taskInstancesWithIds = taskInstances.map((taskInstance) => ({
+      ...taskInstance,
+      id: taskInstance.id ?? v4(),
+    }));
+    const credentialFields = taskInstancesWithIds.map((taskInstance) => {
+      if (!taskInstance.runAs) {
+        return undefined;
+      }
+      this.definitions.ensureHas(taskInstance.taskType);
+      return this.getServiceAccountCredentialAttributes(taskInstance);
+    });
+
+    const existingTasks = await this.getExistingTasksToOverwrite(
+      taskInstancesWithIds
+        .filter((taskInstance, index) => !taskInstance.runAs && taskInstances[index].id)
+        .map(({ id }) => id)
+    );
+
+    return taskInstancesWithIds.map((taskInstance, index): BulkScheduleTask => {
+      const serviceAccountFields = credentialFields[index];
+      if (serviceAccountFields) {
+        return { action: 'create', taskInstance, credentialFields: serviceAccountFields };
+      }
+      const existingTask = existingTasks.get(taskInstance.id);
+      if (existingTask?.hasCredential) {
+        return {
+          action: 'conflict',
+          taskInstance,
+          conflict: getCredentialConflict(taskInstance.id),
+        };
+      }
+      if (existingTask?.version) {
+        return { action: 'overwrite', taskInstance, version: existingTask.version };
+      }
+      return { action: 'create', taskInstance };
+    });
+  }
+
+  private buildBulkScheduleWrites(
+    tasks: BulkScheduleTask[],
+    apiKeySOFieldsMap: Map<string, ApiKeySOFields>
+  ) {
+    const objects: Record<BulkScheduleWriteBatch, TaskBulkCreateObject[]> = {
+      createWithCredential: [],
+      overwrite: [],
+      create: [],
+    };
+    const placements: BulkSchedulePlacement[] = [];
+    // Tasks rejected during local preparation never reach `bulkCreate`, so they get no entry in
+    // the bulk response; collect their granted keys here so they are still invalidated.
+    const omittedTaskApiKeys: Array<ApiKeySOFields | undefined> = [];
+
+    for (const task of tasks) {
+      const { taskInstance } = task;
+      this.definitions.ensureHas(taskInstance.taskType);
+
+      if (task.action === 'conflict') {
+        placements.push({ conflict: task.conflict });
+        continue;
+      }
+
+      const batch = getBulkScheduleWriteBatch(task);
+      const apiKeySOFields = apiKeySOFieldsMap.get(taskInstance.id);
+      try {
+        const index = objects[batch].push(this.toBulkCreateObject(task, apiKeySOFields)) - 1;
+        placements.push({ batch, index });
+      } catch (e) {
+        this.logger.error(
+          `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
+        );
+        omittedTaskApiKeys.push(batch === 'createWithCredential' ? undefined : apiKeySOFields);
+      }
+    }
+
+    return { objects, placements, omittedTaskApiKeys };
+  }
+
+  private toBulkCreateObject(
+    task: BulkScheduleWriteTask,
+    apiKeySOFields?: ApiKeySOFields
+  ): TaskBulkCreateObject {
+    const { taskInstance } = task;
+    const { id } = taskInstance;
+    const validatedTaskInstance =
+      this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+    const credentialAttributes =
+      task.action === 'create' && task.credentialFields ? task.credentialFields : apiKeySOFields;
+
+    return {
+      type: 'task',
+      attributes: {
+        ...taskInstanceToAttributes(validatedTaskInstance, id),
+        ...credentialAttributes,
+        runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
+      },
+      id,
+      ...(task.action === 'overwrite' ? { version: task.version } : {}),
+    };
+  }
+
+  // Settles every write before cleaning up, so a failed write never invalidates the keys of a
+  // write that persisted.
+  private async executeBulkScheduleWrites(
+    objects: Record<BulkScheduleWriteBatch, TaskBulkCreateObject[]>,
+    apiKeySOFieldsMap: Map<string, ApiKeySOFields>,
+    omittedTaskApiKeys: Array<ApiKeySOFields | undefined>,
+    options?: ApiKeyOptions
+  ): Promise<Record<BulkScheduleWriteBatch, TaskBulkCreateResult[]>> {
+    const soClient = this.getSoClientForCreate(options || {});
+    const settledWrites = await Promise.allSettled(
+      BULK_SCHEDULE_WRITE_BATCHES.map(
+        async (batch): Promise<SavedObjectsBulkResponse<SerializedConcreteTaskInstance>> => {
+          if (!objects[batch].length) {
+            return { saved_objects: [] };
+          }
+          const client = batch === 'createWithCredential' ? this.serviceAccountSoClient : soClient;
+          return client.bulkCreate<SerializedConcreteTaskInstance>(objects[batch], {
+            refresh: false,
+            overwrite: batch === 'overwrite',
+          });
+        }
+      )
+    );
+
+    const results: Record<BulkScheduleWriteBatch, TaskBulkCreateResult[]> = {
+      createWithCredential: [],
+      overwrite: [],
+      create: [],
+    };
+    const unpersistedApiKeys = [...omittedTaskApiKeys];
+    let writeError: Error | undefined;
+    for (const [index, write] of settledWrites.entries()) {
+      const batch = BULK_SCHEDULE_WRITE_BATCHES[index];
+      const getGrantedApiKeys = (taskId?: string) =>
+        batch === 'createWithCredential' || !taskId ? undefined : apiKeySOFieldsMap.get(taskId);
+      if (write.status === 'rejected') {
+        writeError = writeError ?? write.reason;
+        unpersistedApiKeys.push(...objects[batch].map(({ id }) => getGrantedApiKeys(id)));
+        continue;
+      }
+      results[batch] = write.value.saved_objects;
+      unpersistedApiKeys.push(
+        ...write.value.saved_objects
+          .filter(isSavedObjectErrorResult)
+          .map(({ id }) => getGrantedApiKeys(id))
+      );
+    }
+
+    if (unpersistedApiKeys.length) {
+      await this.invalidateUnpersistedApiKeys(unpersistedApiKeys);
+    }
+
+    if (writeError) {
+      this.errors$.next(writeError);
+      throw writeError;
+    }
+
+    return results;
+  }
+
+  private async getExistingTasksToOverwrite(
+    ids: string[]
+  ): Promise<Map<string, { version?: string; hasCredential: boolean }>> {
+    const existingTasks = new Map<string, { version?: string; hasCredential: boolean }>();
+    if (!ids.length) {
+      return existingTasks;
+    }
+
+    let result;
+    try {
+      result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
+        ids.map((id) => ({ type: 'task', id }))
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    // A task that failed to read for another reason than not existing is created without
+    // overwrite, so it fails with a conflict if it does exist.
+    for (const so of result.saved_objects) {
+      if (!isSavedObjectErrorResult(so)) {
+        const { credential, encryptedCredential } = so.attributes;
+        existingTasks.set(so.id, {
+          version: so.version,
+          hasCredential: credential !== undefined || encryptedCredential !== undefined,
+        });
+      }
+    }
+    return existingTasks;
   }
 
   /**
@@ -599,7 +960,7 @@ export class TaskStore {
    */
   public async update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     return this.executionContextRunner.run(() => this._update(doc, options), {
       id: 'update',
@@ -608,7 +969,7 @@ export class TaskStore {
 
   private async _update(
     doc: ConcreteTaskInstance,
-    options: { validate: boolean }
+    options: { validate: boolean; refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     let updatedSavedObject;
     let attributes;
@@ -622,7 +983,7 @@ export class TaskStore {
         doc.id,
         attributes,
         {
-          refresh: false,
+          refresh: options.refresh ?? false,
           version: doc.version,
         }
       );
@@ -668,6 +1029,9 @@ export class TaskStore {
     const apiKeySOFieldsMap = regenerateResult.apiKeySOFieldsMap || new Map();
     const { invalidationTargets } = regenerateResult;
 
+    // Docs rejected during local validation never reach `bulkUpdate`, so they get no entry in the
+    // bulk response; track them here so their regenerated keys are still invalidated below.
+    const omittedDocIds: string[] = [];
     const newDocs = docs.reduce(
       (acc: Map<string, SavedObjectsBulkUpdateObject<SerializedConcreteTaskInstance>>, doc) => {
         try {
@@ -678,6 +1042,18 @@ export class TaskStore {
           const apiKey = updatedFields?.apiKey || doc?.apiKey;
           const uiamApiKey = updatedFields?.uiamApiKey || doc?.uiamApiKey;
           const userScope = updatedFields?.userScope || doc?.userScope;
+          const { credential, encryptedCredential } = doc;
+          // The encryption-aware client can't rewrite such a task: a merged update re-encrypts the
+          // API key without credential in its AAD, and a full replace encrypts encryptedCredential
+          // twice.
+          if (
+            (credential !== undefined || encryptedCredential !== undefined) &&
+            (apiKey || uiamApiKey)
+          ) {
+            throw new Error(
+              'Task has both a credential and an API key, which this version of Kibana cannot update'
+            );
+          }
 
           acc.set(doc.id, {
             type: 'task',
@@ -688,6 +1064,12 @@ export class TaskStore {
               ...(apiKey ? { apiKey } : {}),
               ...(uiamApiKey ? { uiamApiKey } : {}),
               ...(userScope ? { userScope } : {}),
+              // A full replace drops every attribute it doesn't send. credential is in the AAD, so it
+              // and encryptedCredential must be copied unchanged or decryption fails.
+              ...(!mergeAttributes && credential !== undefined ? { credential } : {}),
+              ...(!mergeAttributes && encryptedCredential !== undefined
+                ? { encryptedCredential }
+                : {}),
             },
             mergeAttributes,
           });
@@ -695,31 +1077,68 @@ export class TaskStore {
           this.logger.error(
             `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
           );
+          omittedDocIds.push(doc.id);
         }
         return acc;
       },
       new Map()
     );
 
+    // The encryption-aware client would encrypt the stored encryptedCredential ciphertext again,
+    // so those tasks are written through the plain repository.
+    const objectsToUpdate = Array.from(newDocs.values());
+    const plainRepositoryObjects =
+      soClientToUpdate === this.savedObjectsRepository
+        ? []
+        : objectsToUpdate.filter(({ attributes }) => attributes.encryptedCredential !== undefined);
+    const soClientObjects = objectsToUpdate.filter(
+      (object) => !plainRepositoryObjects.includes(object)
+    );
+
     let updatedSavedObjects: Awaited<
       ReturnType<typeof soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>>
     >['saved_objects'];
     try {
-      ({ saved_objects: updatedSavedObjects } =
-        await soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(
-          Array.from(newDocs.values()),
-          {
-            refresh: false,
-          }
-        ));
+      const [soClientResult, plainRepositoryResult] = await Promise.all([
+        soClientToUpdate.bulkUpdate<SerializedConcreteTaskInstance>(soClientObjects, {
+          refresh: false,
+        }),
+        plainRepositoryObjects.length
+          ? this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+              plainRepositoryObjects,
+              { refresh: false }
+            )
+          : { saved_objects: [] },
+      ]);
+      updatedSavedObjects = [
+        ...soClientResult.saved_objects,
+        ...plainRepositoryResult.saved_objects,
+      ];
     } catch (e) {
+      await this.invalidateUnpersistedApiKeys([...apiKeySOFieldsMap.values()]);
       this.errors$.next(e);
       throw e;
     }
 
     const allInvalidationTargets: InvalidationTarget[] = [];
+
+    for (const omittedDocId of omittedDocIds) {
+      // Same as the error-result branch below: the regenerated key never made it onto the task,
+      // but an omitted doc has no bulk response entry, so it has to be queued explicitly.
+      const granted = apiKeySOFieldsMap.get(omittedDocId);
+      if (granted) {
+        allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
+      }
+    }
+
     const updates = updatedSavedObjects.map((updatedSavedObject) => {
       if (isSavedObjectErrorResult(updatedSavedObject)) {
+        // The regenerated key never made it onto the task, so nothing references it. Queue it
+        // alongside the replaced keys below rather than leaving it orphaned.
+        const granted = apiKeySOFieldsMap.get(updatedSavedObject.id);
+        if (granted) {
+          allInvalidationTargets.push(...this.apiKeyStrategy.getApiKeyIdsForInvalidation(granted));
+        }
         return asErr({
           type: 'task',
           id: updatedSavedObject.id,
@@ -953,6 +1372,58 @@ export class TaskStore {
   }
 
   /**
+   * Resolves whether a task document exists, without reading or decrypting its API keys.
+   *
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  public async taskExists(id: string): Promise<boolean> {
+    return this.executionContextRunner.run(() => this._taskExists(id), {
+      id: 'task-exists',
+    });
+  }
+
+  private async _taskExists(id: string): Promise<boolean> {
+    try {
+      await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
+      return true;
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return false;
+      }
+      this.errors$.next(e);
+      throw e;
+    }
+  }
+
+  /**
+   * Gets a task's stored credential, without decrypting the task.
+   *
+   * @param {string} id
+   * @returns {Promise<TaskCredential | undefined>}
+   */
+  public async getCredential(id: string): Promise<TaskCredential | undefined> {
+    return this.executionContextRunner.run(() => this._getCredential(id), {
+      id: 'get-credential',
+    });
+  }
+
+  private async _getCredential(id: string): Promise<TaskCredential | undefined> {
+    try {
+      const { attributes } = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>(
+        'task',
+        id
+      );
+      return attributes.credential;
+    } catch (e) {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        this.errors$.next(e);
+      }
+      throw e;
+    }
+  }
+
+  /**
    * Gets tasks by ids
    *
    * @param {Array<string>} ids
@@ -1068,17 +1539,21 @@ export class TaskStore {
     }
   }
 
-  // like search(), only runs multiple searches in parallel returning the combined results
-  async msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
+  /**
+   * Like search(), only runs multiple searches in parallel and returns the combined results as
+   * claim candidates, without the task state, params or API keys.
+   */
+  async msearch(opts: SearchOpts[] = []): Promise<ClaimCandidateFetchResult> {
     return this.executionContextRunner.run(() => this._msearch(opts), {
       id: 'msearch',
     });
   }
 
-  private async _msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
-    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
-      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
-    );
+  private async _msearch(opts: SearchOpts[] = []): Promise<ClaimCandidateFetchResult> {
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) => ({
+      ...ensureQueryOnlyReturnsTaskObjects({ sort, ...opt }),
+      _source: { excludes: CLAIM_CANDIDATE_SOURCE_EXCLUDES },
+    }));
     const searches = queries.flatMap((query) => [{}, query]);
 
     const result = await this.esClient.msearch<SavedObjectsRawDoc['_source']>(
@@ -1092,7 +1567,7 @@ export class TaskStore {
     const { responses } = result;
 
     const versionMap = this.createVersionMap([]);
-    let allTasks = new Array<ConcreteTaskInstance>();
+    let allTasks = new Array<TaskClaimCandidate>();
 
     for (const response of responses) {
       if (response.status !== 200) {
@@ -1104,14 +1579,10 @@ export class TaskStore {
       const { hits } = response as estypes.MsearchMultiSearchItem<SavedObjectsRawDoc['_source']>;
       const { hits: tasks } = hits;
       this.addTasksToVersionMap(versionMap, tasks);
-      allTasks = allTasks.concat(this.filterTasks(tasks));
+      allTasks = allTasks.concat(this.filterClaimCandidates(tasks));
     }
 
-    const allSortedTasks = claimSort(this.definitions, allTasks);
-    const tasksWithDecryptedApiKeys = await this.bulkGetAndMergeTasksWithDecryptedApiKey(
-      allSortedTasks
-    );
-    return { docs: tasksWithDecryptedApiKeys, versionMap };
+    return { docs: claimSort(this.definitions, allTasks), versionMap };
   }
 
   public async search(opts: SearchOpts = {}, limitResponse: boolean = false): Promise<FetchResult> {
@@ -1170,6 +1641,20 @@ export class TaskStore {
         .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
         .map((doc) => savedObjectToConcreteTaskInstance(doc))
         .filter((doc): doc is ConcreteTaskInstance => !!doc)
+    );
+  }
+
+  private filterClaimCandidates(
+    tasks: Array<estypes.SearchHit<SavedObjectsRawDoc['_source']>>
+  ): TaskClaimCandidate[] {
+    return (
+      tasks
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .filter((doc) => this.serializer.isRawSavedObject(doc))
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        .map((doc) => this.serializer.rawToSavedObject(doc))
+        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+        .map((doc) => savedObjectToTaskClaimCandidate(doc))
     );
   }
 
@@ -1254,7 +1739,8 @@ export class TaskStore {
  * Returns true when a task document holds an encrypted API key credential
  * (either an ES API key or a UIAM API key) together with the `userScope`
  * metadata required to process it. Must be kept in sync with every credential
- * field registered for ESO encryption on the `task` saved object type.
+ * field registered for ESO encryption on the `task` saved object type, except
+ * `encryptedCredential`, which is never decrypted or re-encrypted on update.
  */
 export function docHasEncryptedApiKey(
   doc: Pick<ConcreteTaskInstance, 'apiKey' | 'uiamApiKey' | 'userScope'>
@@ -1267,7 +1753,17 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credential',
+      'encryptedCredential',
+      'runAs'
+    ),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1284,7 +1780,16 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
+    ...omit(
+      doc,
+      'id',
+      'version',
+      'userScope',
+      'apiKey',
+      'uiamApiKey',
+      'credential',
+      'encryptedCredential'
+    ),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
@@ -1297,8 +1802,17 @@ export function partialTaskInstanceToAttributes(
 export function savedObjectToConcreteTaskInstance(
   savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
 ): ConcreteTaskInstance {
+  const { userScope, ...attributes } = savedObject.attributes;
   return {
-    ...savedObject.attributes,
+    ...attributes,
+    ...(userScope
+      ? {
+          userScope: {
+            ...userScope,
+            ...(userScope.spaceId ? { spaceId: brandSpaceId(userScope.spaceId) } : {}),
+          },
+        }
+      : {}),
     id: savedObject.id,
     version: savedObject.version,
     scheduledAt: new Date(savedObject.attributes.scheduledAt),
@@ -1307,6 +1821,33 @@ export function savedObjectToConcreteTaskInstance(
     retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
     state: parseJSONField(savedObject.attributes.state, 'state', savedObject.id),
     params: parseJSONField(savedObject.attributes.params, 'params', savedObject.id),
+  };
+}
+
+/**
+ * Converts a slimmed saved object from the claim candidate search into a TaskClaimCandidate,
+ * dropping rather than parsing the fields excluded from the search source.
+ */
+export function savedObjectToTaskClaimCandidate(
+  savedObject: Omit<SavedObject<SerializedConcreteTaskInstance>, 'references'>
+): TaskClaimCandidate {
+  const { userScope } = savedObject.attributes;
+  return {
+    ...omit(savedObject.attributes, 'state', 'params', 'apiKey', 'uiamApiKey', 'userScope'),
+    ...(userScope
+      ? {
+          userScope: {
+            ...userScope,
+            ...(userScope.spaceId ? { spaceId: brandSpaceId(userScope.spaceId) } : {}),
+          },
+        }
+      : {}),
+    id: savedObject.id,
+    version: savedObject.version,
+    scheduledAt: new Date(savedObject.attributes.scheduledAt),
+    runAt: new Date(savedObject.attributes.runAt),
+    startedAt: savedObject.attributes.startedAt ? new Date(savedObject.attributes.startedAt) : null,
+    retryAt: savedObject.attributes.retryAt ? new Date(savedObject.attributes.retryAt) : null,
   };
 }
 

@@ -31,7 +31,9 @@ import {
 import {
   fetchAllAlertIdIndexWithSource,
   collectChangedIdsByFamily,
+  computeActualDelta,
 } from '../common/operations/prefetch_previous_statuses';
+import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
 
 export const setUnifiedAlertsTagsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -82,8 +84,15 @@ export const setUnifiedAlertsTagsRoute = (
         const validTagsToAdd = allValidTagsToAdd.slice(0, MAX_TAGS_PER_OPERATION);
         const validTagsToRemove = allValidTagsToRemove.slice(0, MAX_TAGS_PER_OPERATION);
         const operationTruncated =
+          allValidTagsToAdd.length !== tags.tags_to_add.length ||
+          allValidTagsToRemove.length !== tags.tags_to_remove.length ||
           allValidTagsToAdd.length > MAX_TAGS_PER_OPERATION ||
           allValidTagsToRemove.length > MAX_TAGS_PER_OPERATION;
+
+        let alertTagsActuallyAdded = validTagsToAdd;
+        let alertTagsActuallyRemoved = validTagsToRemove;
+        let attackTagsActuallyAdded = validTagsToAdd;
+        let attackTagsActuallyRemoved = validTagsToRemove;
 
         if (eventBus) {
           try {
@@ -100,13 +109,33 @@ export const setUnifiedAlertsTagsRoute = (
                   ? (source[ALERT_WORKFLOW_TAGS] as string[])
                   : []
               );
-              // Use allValid* (not the capped arrays) so a tag beyond position 100 that would
-              // actually change the document still triggers the event.
+              // Use the raw request arrays so over-length tags that would change a document
+              // still trigger the event; allValid* is only used for the schema-bounded payload.
               return (
-                allValidTagsToAdd.some((t) => !currentTags.has(t)) ||
-                allValidTagsToRemove.some((t) => currentTags.has(t))
+                tags.tags_to_add.some((t) => !currentTags.has(t)) ||
+                tags.tags_to_remove.some((t) => currentTags.has(t))
               );
             }));
+            // Compute independent per-family deltas: a tag already present on every attack doc
+            // must not appear in the alert emit's tagsAdded, and vice versa.
+            const alertHits = hits.filter((h) => !isAttackDiscoveryIndex(h.index));
+            const attackHits = hits.filter((h) => isAttackDiscoveryIndex(h.index));
+            const alertDelta = computeActualDelta(
+              alertHits.map((h) => h.source),
+              validTagsToAdd,
+              validTagsToRemove,
+              ALERT_WORKFLOW_TAGS
+            );
+            const attackDelta = computeActualDelta(
+              attackHits.map((h) => h.source),
+              validTagsToAdd,
+              validTagsToRemove,
+              ALERT_WORKFLOW_TAGS
+            );
+            alertTagsActuallyAdded = alertDelta.actualAdded;
+            alertTagsActuallyRemoved = alertDelta.actualRemoved;
+            attackTagsActuallyAdded = attackDelta.actualAdded;
+            attackTagsActuallyRemoved = attackDelta.actualRemoved;
           } catch {
             logger.warn('Failed to pre-fetch alert indices for workflow trigger (tags)');
           }
@@ -118,16 +147,16 @@ export const setUnifiedAlertsTagsRoute = (
             if (attackIds.length > 0) {
               void eventBus.emitAttackTagsChanged(request, {
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: validTagsToAdd,
-                tagsToRemove: validTagsToRemove,
+                tagsAdded: attackTagsActuallyAdded,
+                tagsRemoved: attackTagsActuallyRemoved,
                 truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }
             if (alertIds.length > 0) {
               void eventBus.emitAlertTagsChanged(request, {
                 alertIds: alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
-                tagsToAdd: validTagsToAdd,
-                tagsToRemove: validTagsToRemove,
+                tagsAdded: alertTagsActuallyAdded,
+                tagsRemoved: alertTagsActuallyRemoved,
                 truncated: alertIds.length > MAX_ALERTS_PER_TRIGGER || operationTruncated,
               });
             }

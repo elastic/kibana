@@ -5,12 +5,51 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { createRequire } from 'module';
+import numeral from '@elastic/numeral';
 import path from 'path';
+import { LRUCache } from 'lru-cache';
 import type { Logger } from '@kbn/logging';
-import type { YaraDiagnostic, YaraValidateResult } from './types';
+import type {
+  YaraCompiledRule,
+  YaraCompiledRuleMeta,
+  YaraDiagnostic,
+  YaraValidateResult,
+} from './types';
+import { YaraMetaKeyOfInterest } from '../../../../common/endpoint/types';
+import { YaraEngineUnavailableError } from './errors';
 
 let logger: Logger | undefined;
+
+/**
+ * Matches the packer's ES `max_result_window` ceiling (~10k items per type per OS).
+ */
+export const YARA_VALIDATE_RESULT_CACHE_MAX = 10_000;
+
+/** Byte cap so worst-case compiled results cannot pin unbounded JS heap. */
+const YARA_VALIDATE_RESULT_CACHE_MAX_SIZE_BYTES = 32 * 1024 * 1024;
+
+const createYaraValidateResultCache = (max: number): LRUCache<string, YaraValidateResult> =>
+  new LRUCache<string, YaraValidateResult>({
+    max,
+    maxSize: YARA_VALIDATE_RESULT_CACHE_MAX_SIZE_BYTES,
+    sizeCalculation: (result) => Buffer.byteLength(JSON.stringify(result), 'utf8'),
+  });
+
+/**
+ * Process-local LRU of compile results keyed by SHA-256 of the source string.
+ * Compile errors are cached; WASM traps and internal errors are not.
+ */
+let validateResultCache = createYaraValidateResultCache(YARA_VALIDATE_RESULT_CACHE_MAX);
+
+const hashYaraSource = (source: string): string =>
+  createHash('sha256').update(source, 'utf8').digest('hex');
+
+/** @internal Rebuilds the process-local validate cache. For tests. */
+export const clearYaraValidateCache = (max: number = YARA_VALIDATE_RESULT_CACHE_MAX): void => {
+  validateResultCache = createYaraValidateResultCache(max);
+};
 
 /**
  * Sets the process-wide logger used by the libyara WASM wrapper.
@@ -25,25 +64,77 @@ export const setYaraLogger = (nextLogger: Logger | undefined): void => {
  * Compile-check a YARA rule source string with classic libyara (WASM).
  * Lazy-inits the WASM module once per process; frees per-call allocations.
  * Reloads the module if a WASM trap leaves it unusable.
+ * LRU-caches successful parses and compile errors by SHA-256 of the source
+ * (up to 10,000 entries); WASM traps and internal errors are not cached.
+ * Each call returns a deep copy so caller mutations do not change the cached result.
+ * Engine failures throw `YaraEngineUnavailableError` (not cached).
  */
 export const validateYaraRule = async (source: string): Promise<YaraValidateResult> => {
+  const cacheKey = hashYaraSource(source);
+  const cached = validateResultCache.get(cacheKey);
+  if (cached !== undefined) {
+    logger?.debug(
+      () =>
+        `YARA validate cache hit: sourceSha256=${cacheKey}, sourceByteLength=${Buffer.byteLength(
+          source,
+          'utf8'
+        )}. [Cache: ${validateResultCache.size} entries, ${numeral(
+          validateResultCache.calculatedSize
+        ).format('0.[00] b')}]`
+    );
+    return cloneYaraValidateResult(cached);
+  }
+
+  try {
+    const result = await compileYaraRule(source);
+    validateResultCache.set(cacheKey, result);
+    return cloneYaraValidateResult(result);
+  } catch (error) {
+    if (error instanceof YaraEngineUnavailableError) {
+      throw error;
+    }
+    throw new YaraEngineUnavailableError(
+      error instanceof Error ? error.message : 'libyara engine failed during validate',
+      error
+    );
+  }
+};
+
+const cloneYaraValidateResult = (result: YaraValidateResult): YaraValidateResult =>
+  structuredClone(result);
+
+async function compileYaraRule(source: string): Promise<YaraValidateResult> {
   const started = performance.now();
-  const mod = await loadModule();
+  const mod = await loadYaraValidateModule();
+
+  /**
+   * WASM heap address of the C string returned by `validate_yara`.
+   *
+   * In Emscripten this is not a JS object: `ptr` is an integer byte offset into
+   * the module's linear memory (a large ArrayBuffer). C `malloc` returns such
+   * an offset; `0` is C's NULL (allocation failed — nothing to free).
+   * `UTF8ToString(ptr)` copies the bytes at that offset into a JS string;
+   * `validate_yara_free` must then release the allocation.
+   */
   let ptr = 0;
 
   try {
     ptr = mod.ccall<number>('validate_yara', 'number', ['string'], [source]);
+    if (ptr === 0) {
+      // calloc/malloc failure in WASM. Not a trap — the module remains usable.
+      throw new Error('libyara WASM validate_yara returned null (allocation failed)');
+    }
     const json = mod.UTF8ToString(ptr);
     const result = parseResult(json);
     const durationMs = Math.round(performance.now() - started);
-    const outcome = result.errors.length > 0 ? 'compile_error' : 'success';
+    const outcome = result.errorCount > 0 ? 'compile_error' : 'success';
 
     logger?.debug(
       () =>
         `YARA validate completed: outcome=${outcome}, errorCount=${
-          result.errors.length
-        }, warningCount=${
-          result.warnings.length
+          result.errorCount
+        }, warningCount=${result.warningCount}, ruleCount=${
+          result.rules.length
         }, durationMs=${durationMs}, sourceByteLength=${Buffer.byteLength(source, 'utf8')}`
     );
 
@@ -73,25 +164,36 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
       }
     }
   }
-};
+}
 
 /**
  * Returns the pinned libyara engine version string from the WASM module
  * (e.g. `"4.3.2"`). See `wasm/dist/ENGINE.md`.
+ * Engine failures throw `YaraEngineUnavailableError`.
  */
 export const getYaraEngineVersion = async (): Promise<string> => {
-  const mod = await loadModule();
   try {
-    return mod.ccall<string>('yara_engine_version', 'string', [], []);
-  } catch (error) {
-    if (isWasmTrap(error)) {
-      modulePromise = undefined;
-      logger?.error(
-        'libyara WASM trap during yara_engine_version; module will be reloaded on next call'
-      );
+    const mod = await loadYaraValidateModule();
+    try {
+      return mod.ccall<string>('yara_engine_version', 'string', [], []);
+    } catch (error) {
+      if (isWasmTrap(error)) {
+        modulePromise = undefined;
+        logger?.error(
+          'libyara WASM trap during yara_engine_version; module will be reloaded on next call'
+        );
+      }
+      logger?.error(error);
+      throw error;
     }
-    logger?.error(error);
-    throw error;
+  } catch (error) {
+    if (error instanceof YaraEngineUnavailableError) {
+      throw error;
+    }
+    throw new YaraEngineUnavailableError(
+      error instanceof Error ? error.message : 'libyara engine failed during yara_engine_version',
+      error
+    );
   }
 };
 
@@ -100,7 +202,24 @@ export const getYaraEngineVersion = async (): Promise<string> => {
  * Generated JS lives next to this package under wasm/dist/.
  */
 interface YaraValidateModule {
+  /**
+   * Calls a compiled C function from JavaScript by name.
+   * See https://emscripten.org/docs/api_reference/preamble.js.html#ccall
+   *
+   * @param ident - C function name (e.g. `'validate_yara'`)
+   * @param returnType - `'number'`, `'string'`, or `null` for void
+   * @param argTypes - type of each argument (`'number'` or `'string'`)
+   * @param args - argument values as native JavaScript values
+   */
   ccall: <T>(ident: string, returnType: string | null, argTypes: string[], args: unknown[]) => T;
+  /**
+   * Given a pointer `ptr` to a null-terminated UTF-8 C string in WASM linear
+   * memory, returns a copy of that string as a JavaScript `string`.
+   * See https://emscripten.org/docs/api_reference/preamble.js.html#UTF8ToString
+   *
+   * @param ptr - integer byte offset into WASM memory (the C `char*` address),
+   *   not a JavaScript object
+   */
   UTF8ToString: (ptr: number) => string;
 }
 
@@ -119,7 +238,8 @@ const isWasmTrap = (error: unknown): boolean =>
     (/memory access out of bounds|function signature mismatch|Aborted\(/i.test(error.message) ||
       error.name === 'RuntimeError'));
 
-const loadModule = async (): Promise<YaraValidateModule> => {
+/** @internal Exported so tests can stub WASM `ccall` on the loaded module. */
+export const loadYaraValidateModule = async (): Promise<YaraValidateModule> => {
   if (!modulePromise) {
     modulePromise = (async () => {
       const started = performance.now();
@@ -150,10 +270,57 @@ const loadModule = async (): Promise<YaraValidateModule> => {
   return modulePromise;
 };
 
+const isYaraMetaKeyOfInterest = (value: string): value is YaraMetaKeyOfInterest =>
+  Object.values(YaraMetaKeyOfInterest).includes(value as YaraMetaKeyOfInterest);
+
+const parseOptionalString = (value: string | undefined): string | undefined =>
+  typeof value === 'string' ? value : undefined;
+
+const parseDuplicateMeta = (value: string[] | undefined): YaraMetaKeyOfInterest[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter(isYaraMetaKeyOfInterest);
+};
+
+const parseCompiledRule = (item: {
+  identifier?: string;
+  meta?: { os?: string; arch?: string; scan_type?: string };
+  duplicateMeta?: string[];
+}): YaraCompiledRule => {
+  const meta: YaraCompiledRuleMeta = {};
+  const os = parseOptionalString(item.meta?.os);
+  const arch = parseOptionalString(item.meta?.arch);
+  const scanType = parseOptionalString(item.meta?.scan_type);
+
+  if (os !== undefined) {
+    meta.os = os;
+  }
+  if (arch !== undefined) {
+    meta.arch = arch;
+  }
+  if (scanType !== undefined) {
+    meta.scan_type = scanType;
+  }
+
+  return {
+    identifier: item.identifier ?? '',
+    meta,
+    duplicateMeta: parseDuplicateMeta(item.duplicateMeta),
+  };
+};
+
 const parseResult = (json: string): YaraValidateResult => {
   const parsed = JSON.parse(json) as {
     errors?: Array<{ severity?: string; message?: string; line?: number }>;
     warnings?: Array<{ severity?: string; message?: string; line?: number }>;
+    rules?: Array<{
+      identifier?: string;
+      meta?: { os?: string; arch?: string; scan_type?: string };
+      duplicateMeta?: string[];
+    }>;
+    errorCount?: number;
+    warningCount?: number;
   };
 
   const toDiagnostic = (
@@ -165,8 +332,14 @@ const parseResult = (json: string): YaraValidateResult => {
     line: typeof item.line === 'number' ? item.line : 0,
   });
 
+  const errors = (parsed.errors ?? []).map((e) => toDiagnostic(e, 'error'));
+  const warnings = (parsed.warnings ?? []).map((w) => toDiagnostic(w, 'warning'));
+
   return {
-    errors: (parsed.errors ?? []).map((e) => toDiagnostic(e, 'error')),
-    warnings: (parsed.warnings ?? []).map((w) => toDiagnostic(w, 'warning')),
+    errors,
+    warnings,
+    errorCount: typeof parsed.errorCount === 'number' ? parsed.errorCount : errors.length,
+    warningCount: typeof parsed.warningCount === 'number' ? parsed.warningCount : warnings.length,
+    rules: (parsed.rules ?? []).map(parseCompiledRule),
   };
 };

@@ -79,7 +79,7 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
 export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
   pluginId: 'significantEvents',
-  version: 5,
+  version: 6,
   billable: false,
   // Defaults on the 3 flaky-rule fields only matter on a Kibana restart with a pre-upgrade
   // install: this workflow re-renders from old persisted values on boot, and without a

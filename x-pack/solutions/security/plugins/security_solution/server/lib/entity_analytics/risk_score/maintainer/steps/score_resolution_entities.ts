@@ -14,7 +14,7 @@ import {
   getResolutionCompositeQuery,
   getResolutionScoreESQLByIds,
 } from '../../calculate_esql_risk_scores';
-import { MAX_RESOLUTION_TARGETS_PER_PAGE } from '../../constants';
+import { MAX_RESOLUTION_TARGETS_PER_PAGE, RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import { RESOLUTION_RELATIONSHIP_TYPE } from '../lookup/lookup_types';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
@@ -279,7 +279,10 @@ const scoreResolutionPage = async ({
     alertsIndex,
     lookupIndex
   );
-  const esqlResponse = await esClient.esql.query({ query });
+  const esqlResponse = await esClient.esql.query(
+    { query },
+    { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
+  );
   return {
     parsedScores: (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex)),
     esqlRows: esqlResponse.values?.length ?? 0,

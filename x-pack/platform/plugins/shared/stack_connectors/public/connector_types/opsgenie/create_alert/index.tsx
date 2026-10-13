@@ -61,6 +61,7 @@ const FormView: React.FC<FormViewProps> = ({
         fullWidth
         error={errors['subActionParams.message'] as string}
         label={i18n.MESSAGE_FIELD_LABEL}
+        helpText={i18n.MESSAGE_FIELD_HELP}
         isInvalid={isMessageInvalid}
         aria-label={i18n.MESSAGE_FIELD_LABEL}
       >

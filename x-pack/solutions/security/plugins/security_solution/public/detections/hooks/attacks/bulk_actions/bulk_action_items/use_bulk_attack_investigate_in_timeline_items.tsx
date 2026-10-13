@@ -16,6 +16,7 @@ import type { BulkAttackActionItems } from '../types';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
+import { ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID } from '../../../../../common/constants/action_ids';
 
 export interface UseBulkAttackInvestigateInTimelineItemsProps {
   /** Optional callback to close the popover after triggering action */
@@ -65,7 +66,7 @@ export const useBulkAttackInvestigateInTimelineItems = ({
             {
               name: ACTION_INVESTIGATE_IN_TIMELINE,
               label: ACTION_INVESTIGATE_IN_TIMELINE,
-              key: 'attack-investigate-in-timeline-action-item',
+              key: ATTACK_INVESTIGATE_IN_TIMELINE_ACTION_ID,
               'data-test-subj': 'attack-investigate-in-timeline-action-item',
               disableOnQuery: true,
               onClick: onInvestigateInTimelineClick,

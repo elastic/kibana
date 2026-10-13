@@ -8,10 +8,13 @@
  */
 
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { isEqual, isObject, omit } from 'lodash';
+import { isEqual, isObject, omit, sortBy } from 'lodash';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { FilterCompareOptions } from '@kbn/es-query';
+import type { Filter, FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType } from '@kbn/es-query';
+import { fromStoredFilter, toStoredFilter } from '@kbn/as-code-filters-transforms';
 import { canImportVisContext } from '@kbn/unified-histogram';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { DataGridDensity } from '@kbn/unified-data-table';
@@ -19,7 +22,11 @@ import type { VisContextUnmapped } from '@kbn/saved-search-plugin/common/types';
 import { isEqualFilters } from '../../utils/state_comparators';
 import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
-import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
+import {
+  selectTabRuntimeState,
+  selectTabTypeForPersistence,
+  type RuntimeStateManager,
+} from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
 import {
   fromSavedObjectTabToAppState,
@@ -74,36 +81,55 @@ export const selectHasUnsavedChanges = (
       continue;
     }
 
+    const tabState = selectTab(state, tabId);
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
+
+    // Normalize both sides against the same tab type to avoid phantom changes.
+    const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
+
     // Ensure the persisted tab accounts for default app state values when comparing,
     // otherwise initializing a tab could automatically trigger unsaved changes.
+    const initialAppState = getInitialAppState({
+      initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
+      persistedTab,
+      dataView: getSerializedSearchSourceDataViewDetails(
+        persistedTab.serializedSearchSource,
+        state.savedDataViews
+      ),
+      services,
+      defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
+    });
+
     const persistedTabWithDefaults = fromTabStateToSavedObjectTab({
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
-        initialAppState: getInitialAppState({
-          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
-          persistedTab,
-          dataView: getSerializedSearchSourceDataViewDetails(
-            persistedTab.serializedSearchSource,
-            state.savedDataViews
-          ),
-          services,
-          defaultProfileEsqlQuery: state.defaultProfileEsqlQuery,
-        }),
+        profileStateRegistry: services.profileStateRegistry,
+        initialAppState,
       }),
       overridenTimeRestore: Boolean(persistedTab.timeRestore),
       services,
       currentDataView: undefined,
+      tabType,
     });
-
-    const tabState = selectTab(state, tabId);
-    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-    const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
     const normalizedTab = fromTabStateToSavedObjectTab({
       tab: tabState,
       currentDataView,
       services,
+      tabType,
     });
+
+    if (persistedTab.serializedSearchSource.query === undefined) {
+      // API-created sessions can have no query. Filling in an empty one in the UI
+      // shouldn't trigger "Unsaved changes".
+      for (const tab of [persistedTabWithDefaults, normalizedTab]) {
+        tab.serializedSearchSource = {
+          ...tab.serializedSearchSource,
+          query: tab.serializedSearchSource.query ?? initialAppState.query,
+        };
+      }
+    }
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {
       const key = stringKey as keyof DiscoverSessionTab;
@@ -171,6 +197,18 @@ const FILTER_COMPARE_OPTIONS: FilterCompareOptions = {
   state: false, // We don't compare filter types (global vs appState).
 };
 
+// The HTTP API stores filters in the as-code format, which omits default meta values such as
+// alias: null and negate: false, while filters built in the UI keep them. Both sides compare the
+// meta after the same conversion. The query is kept as is, because the conversion can drop query
+// options such as slop. Pinning is not part of the comparison, and a filter that cannot be
+// converted is compared as is.
+const toComparableFilters = (filters: Filter[]): Filter[] =>
+  filters.map((filter) => {
+    const asCodeFilter = fromStoredFilter(omit(filter, '$state'));
+    const storedFilter = asCodeFilter && toStoredFilter(asCodeFilter);
+    return storedFilter ? { ...filter, meta: storedFilter.meta } : filter;
+  });
+
 // ad-hoc data view id can change, so we rather compare the ES|QL query itself here
 const getAdjustedDataViewId = (searchSource: SerializedSearchSourceFields) =>
   isOfAggregateQueryType(searchSource.query)
@@ -183,8 +221,8 @@ export const searchSourceComparator: TabComparators['serializedSearchSource'] = 
   searchSourceA,
   searchSourceB
 ) => {
-  const filtersA = searchSourceA.filter ?? [];
-  const filtersB = searchSourceB.filter ?? [];
+  const filtersA = toComparableFilters(searchSourceA.filter ?? []);
+  const filtersB = toComparableFilters(searchSourceB.filter ?? []);
 
   return (
     // if a filter gets pinned and the order of filters does not change,
@@ -203,6 +241,25 @@ const getAdjustedVisContext = (visContext: VisContextUnmapped | undefined) =>
 
 const visContextComparator: TabComparators['visContext'] = (visContextA, visContextB) => {
   return isEqual(getAdjustedVisContext(visContextA), getAdjustedVisContext(visContextB));
+};
+
+// API conversions renumber positions, so compare the visual order rather than the numbers.
+const getComparableControls = (controls: ControlPanelsState<OptionsListESQLControlState>) =>
+  sortBy(Object.entries(controls), ([, control]) => control.order).map(([id, control]) => [
+    id,
+    omit(control, 'order'),
+  ]);
+
+const controlGroupComparator: TabComparators['controlGroupJson'] = (a, b) => {
+  const controlsA: ControlPanelsState<OptionsListESQLControlState> = JSON.parse(a ?? '{}');
+  const controlsB: ControlPanelsState<OptionsListESQLControlState> = JSON.parse(b ?? '{}');
+
+  // Equal positions must not make JSON key order count as an edit.
+  if (isEqual(controlsA, controlsB)) {
+    return true;
+  }
+
+  return isEqual(getComparableControls(controlsA), getComparableControls(controlsB));
 };
 
 const TAB_COMPARATORS: TabComparators = {
@@ -236,10 +293,6 @@ const TAB_COMPARATORS: TabComparators = {
   jsonModeSettings: fieldComparator('jsonModeSettings', {}),
   esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
-  controlGroupJson: (a, b) => {
-    // ignore the order of keys when comparing JSON strings
-    const testA = JSON.parse(a ?? '{}');
-    const testB = JSON.parse(b ?? '{}');
-    return isEqual(testA, testB);
-  },
+  controlGroupJson: controlGroupComparator,
+  tabTypeState: fieldComparator('tabTypeState', undefined),
 };

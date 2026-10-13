@@ -7,7 +7,9 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
-import type { Direction, PairedTTestResult } from '@kbn/evals-common';
+import { isImproved } from '@kbn/evals-common';
+import type { Direction, ComparisonResult } from '@kbn/evals-common';
+import { formatDiscordantPairs, getTestLabel } from './test_label';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 
@@ -33,8 +35,7 @@ function formatDifference(value: number, direction: Direction): string {
     return formatted;
   }
 
-  const improved = direction === 'maximize' ? value > 0 : value < 0;
-  return improved ? chalk.green(formatted) : chalk.red(formatted);
+  return isImproved(value, direction) ? chalk.green(formatted) : chalk.red(formatted);
 }
 
 function buildTableConfig(columnCount: number): {
@@ -52,15 +53,15 @@ function buildTableConfig(columnCount: number): {
   return { columns };
 }
 
-export function formatPairedTTestReport({
-  experimentIdA,
-  experimentIdB,
+export function formatCompareReport({
+  targetExperimentId,
+  baselineExperimentId,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
 }: {
-  experimentIdA: string;
-  experimentIdB: string;
-  results: PairedTTestResult[];
+  targetExperimentId: string;
+  baselineExperimentId: string;
+  results: ComparisonResult[];
   significanceThreshold?: number;
 }): {
   header: string[];
@@ -83,13 +84,14 @@ export function formatPairedTTestReport({
     'Mean (target)',
     'Mean (baseline)',
     'Diff',
+    'Test',
     'p-value',
     'Significant',
   ];
   const rowsByDataset = new Map<string, string[][]>();
 
   sortedResults.forEach((result) => {
-    const delta = result.meanA - result.meanB;
+    const delta = result.meanTarget - result.meanBaseline;
     const isSignificant = result.pValue !== null && result.pValue < significanceThreshold;
     const significanceLabel =
       result.pValue === null
@@ -102,9 +104,10 @@ export function formatPairedTTestReport({
     rows.push([
       result.evaluatorName,
       result.sampleSize.toString(),
-      formatNumber(result.meanA),
-      formatNumber(result.meanB),
-      formatDifference(delta, result.direction),
+      formatNumber(result.meanTarget),
+      formatNumber(result.meanBaseline),
+      formatDifference(delta, result.direction) + formatDiscordantPairs(result.hypothesisTest),
+      getTestLabel(result.hypothesisTest.id),
       formatPValue(result.pValue),
       significanceLabel,
     ]);
@@ -112,8 +115,8 @@ export function formatPairedTTestReport({
   });
 
   const header = [
-    `Target: ${experimentIdA}`,
-    `Baseline: ${experimentIdB}`,
+    `Target: ${targetExperimentId}`,
+    `Baseline: ${baselineExperimentId}`,
     `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;

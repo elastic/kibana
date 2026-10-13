@@ -85,18 +85,18 @@ public class GenerateEmbeddings {
             BulkIngester<Void> ingester = BulkIngester.of(b -> b.client(esClient))) {
 
             esClient.indices().create(c -> c
-               .index("my_semantic_vectors")
-               .mappings(m -> m
-                   .properties("content", p -> p.text(t -> t.copyTo("semantic_content")))
-                   .properties("semantic_content", p -> p.semanticText(t -> t))
-               )
+                .index("my_semantic_vectors")
+                .mappings(m -> m
+                    .properties("content", p -> p.text(t -> t.copyTo("semantic_content")))
+                    .properties("semantic_content", p -> p.semanticText(t -> t))
+                )
             );
 
             TEXTS.forEach(text -> ingester.add(op -> op
-               .index(i -> i
-                   .index("my_semantic_vectors")
-                   .document(Map.of("content", text))
-               )
+                .index(i -> i
+                    .index("my_semantic_vectors")
+                    .document(Map.of("content", text))
+                )
             ));
         }
     }

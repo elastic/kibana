@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import type { AlertingMountConfig } from './alerting_mount_config';
 
 export class RulesListPage {
   public readonly tagsFilterButton: Locator;
@@ -14,25 +15,27 @@ export class RulesListPage {
   public readonly bulkDisableMenuItem: Locator;
   public readonly rulesListTable: Locator;
   public readonly ruleSummaryFlyout: Locator;
-  public readonly ruleSummaryQuickEditButton: Locator;
   /** Header "Create rule" split button; hidden for read-only users. */
   public readonly createRuleButton: Locator;
+  /** Heading tab linking to the classic (v1) Rules page; hidden without v1 read access. */
+  public readonly v1RulesTab: Locator;
+  /** Heading tab for this (v2) Rules page; hidden alongside v1RulesTab when only one would show. */
+  public readonly v2RulesTab: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly mountConfig: AlertingMountConfig) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
     this.selectAllRulesButton = this.page.testSubj.locator('selectAllRulesButton');
     this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');
     this.bulkDisableMenuItem = this.page.testSubj.locator('bulkDisableRules');
     this.rulesListTable = this.page.testSubj.locator('rulesListTable');
     this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
-    this.ruleSummaryQuickEditButton = this.page.testSubj.locator(
-      'ruleSummaryFlyoutQuickEditButton'
-    );
     this.createRuleButton = this.page.testSubj.locator('createRuleButton');
+    this.v1RulesTab = this.page.testSubj.locator('v1RulesTab');
+    this.v2RulesTab = this.page.testSubj.locator('v2RulesTab');
   }
 
   async goto() {
-    await this.page.gotoApp('management/alertingV2/rules');
+    await this.page.gotoApp(`${this.mountConfig.appRoute}${this.mountConfig.paths.rules}`);
   }
 
   tagsFilterOption(tag: string) {

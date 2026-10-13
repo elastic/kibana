@@ -7,9 +7,12 @@
 
 import React, { useState } from 'react';
 import {
+  EuiBetaBadge,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiPopover,
   useEuiTheme,
@@ -20,6 +23,7 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
   useConversationPermissions,
+  useConversationReadOnly,
   useConversationTitle,
   useHasPersistedConversation,
 } from '../../../hooks/use_conversation';
@@ -39,7 +43,23 @@ const labels = {
   openTitleMenu: i18n.translate('xpack.agentBuilder.conversationTitle.openTitleMenu', {
     defaultMessage: 'Open conversation menu',
   }),
+  readOnly: i18n.translate('xpack.agentBuilder.embeddableConversationTitle.readOnly', {
+    defaultMessage: 'Read-Only',
+  }),
 };
+
+const titleSlotStyles = css`
+  min-width: 0;
+`;
+
+const ConversationReadOnlyBadge = () => (
+  <EuiBetaBadge
+    iconType="lock"
+    label={labels.readOnly}
+    size="s"
+    data-test-subj="agentBuilderEmbeddableConversationReadOnlyBadge"
+  />
+);
 
 interface EmbeddableConversationTitleProps {
   ariaLabelledBy?: string;
@@ -51,6 +71,7 @@ export const EmbeddableConversationTitle = ({
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
   const { rename: canRename, delete: canDelete } = useConversationPermissions();
+  const { isReadOnly } = useConversationReadOnly();
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -108,15 +129,24 @@ export const EmbeddableConversationTitle = ({
   // Nothing to open the popover for: an unsaved conversation, or one the user may not act on.
   if (!hasPersistedConversation || menuItems.length === 0) {
     return (
-      <h4
-        id={ariaLabelledBy}
-        css={css`
-          font-weight: ${euiTheme.font.weight.semiBold};
-        `}
-        data-test-subj="agentBuilderConversationTitle"
-      >
-        {displayedTitle}
-      </h4>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={true} css={titleSlotStyles}>
+          <h4
+            id={ariaLabelledBy}
+            css={css`
+              font-weight: ${euiTheme.font.weight.semiBold};
+            `}
+            data-test-subj="agentBuilderConversationTitle"
+          >
+            {displayedTitle}
+          </h4>
+        </EuiFlexItem>
+        {isReadOnly && (
+          <EuiFlexItem grow={false}>
+            <ConversationReadOnlyBadge />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
   }
 
@@ -132,23 +162,32 @@ export const EmbeddableConversationTitle = ({
   `;
 
   const titleButton = (
-    <EuiButtonEmpty
-      color="text"
-      iconType="chevronSingleDown"
-      iconSide="right"
-      flush="left"
-      onClick={() => setIsPopoverOpen((open) => !open)}
-      aria-expanded={isPopoverOpen}
-      css={titleButtonStyles}
-      data-test-subj="agentBuilderConversationTitleButton"
-      {...getEbtProps({
-        element: AGENT_BUILDER_UI_EBT.element.pageContent,
-        action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_TITLE_MENU,
-        detail: 'conversation',
-      })}
-    >
-      <span id={ariaLabelledBy}>{displayedTitle}</span>
-    </EuiButtonEmpty>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={true} css={titleSlotStyles}>
+        <EuiButtonEmpty
+          color="text"
+          iconType="chevronSingleDown"
+          iconSide="right"
+          flush="left"
+          onClick={() => setIsPopoverOpen((open) => !open)}
+          aria-expanded={isPopoverOpen}
+          css={titleButtonStyles}
+          data-test-subj="agentBuilderConversationTitleButton"
+          {...getEbtProps({
+            element: AGENT_BUILDER_UI_EBT.element.pageContent,
+            action: AGENT_BUILDER_UI_EBT.action.conversation.OPEN_TITLE_MENU,
+            detail: 'conversation',
+          })}
+        >
+          <span id={ariaLabelledBy}>{displayedTitle}</span>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      {isReadOnly && (
+        <EuiFlexItem grow={false}>
+          <ConversationReadOnlyBadge />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
 
   return (

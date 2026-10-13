@@ -109,14 +109,14 @@ describe('investigation_presentation', () => {
       const state: InvestigationState = {
         ...completeState,
         recommendations: [
-          { title: 'Revert the pool-size config change', code: 'max_size: 100' },
-          { title: 'Add a connection pool utilization alert' },
+          { title: 'Revert the pool-size config change', confidence: 0.9, code: 'max_size: 100' },
+          { title: 'Add a connection pool utilization alert', confidence: 0.7 },
         ],
       };
 
       expect(parseInvestigationRecommendations(state)).toEqual([
-        { title: 'Revert the pool-size config change', code: 'max_size: 100' },
-        { title: 'Add a connection pool utilization alert' },
+        { title: 'Revert the pool-size config change', confidence: 0.9, code: 'max_size: 100' },
+        { title: 'Add a connection pool utilization alert', confidence: 0.7 },
       ]);
     });
 

@@ -6,7 +6,7 @@
  */
 
 import { ConversationAccessControlMode, type UserIdAndName } from '@kbn/agent-builder-common';
-import { buildReadAccessFilter } from './query';
+import { buildPinnedFilter, buildReadAccessFilter } from './query';
 
 const user: UserIdAndName = {
   id: 'user-profile-id',
@@ -96,6 +96,88 @@ describe('conversation access control query', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('buildPinnedFilter', () => {
+    const ownedByUser = {
+      bool: {
+        should: [
+          { term: { user_id: user.id } },
+          {
+            bool: {
+              must_not: { exists: { field: 'user_id' } },
+              filter: { term: { user_name: user.username } },
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+
+    // Either the user's own `pinned_by` entry, or the legacy owner-only `pinned` boolean.
+    const pinnedByUser = {
+      bool: {
+        should: [
+          {
+            nested: {
+              path: 'pinned_by',
+              ignore_unmapped: true,
+              query: { term: { 'pinned_by.userId': user.id } },
+            },
+          },
+          { bool: { filter: [{ term: { pinned: true } }, ownedByUser] } },
+        ],
+        minimum_should_match: 1,
+      },
+    };
+
+    it('is empty when pinned is not set, leaving the list unfiltered', () => {
+      expect(buildPinnedFilter({ user })).toEqual([]);
+    });
+
+    it('matches conversations the user pinned, or legacy ones they own and pinned', () => {
+      expect(buildPinnedFilter({ user, pinned: true })).toEqual([pinnedByUser]);
+    });
+
+    it('negates that match for pinned: false, so pre-field documents are included', () => {
+      expect(buildPinnedFilter({ user, pinned: false })).toEqual([
+        { bool: { must_not: pinnedByUser } },
+      ]);
+    });
+
+    it('drops the nested clause when the user has no stable id', () => {
+      const noProfileUser: UserIdAndName = { username: 'no-profile-user' };
+
+      expect(buildPinnedFilter({ user: noProfileUser, pinned: true })).toEqual([
+        {
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    { term: { pinned: true } },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              must_not: { exists: { field: 'user_id' } },
+                              filter: { term: { user_name: noProfileUser.username } },
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ]);
     });
   });
 });

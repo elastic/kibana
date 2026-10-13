@@ -366,13 +366,7 @@ export class SavedMap {
   }
 
   public hasSaveAndReturnConfig(): boolean {
-    return Boolean(
-      this._originatingApp &&
-        this._originatingPath &&
-        // TODO remove this check in editors (lens does this too)
-        // instead, embeddable state transform should provide hasSaveAndReturnConfig
-        !this._originatingPath.includes('/list/')
-    );
+    return Boolean(this._originatingApp && this._originatingPath);
   }
 
   public getTitle(): string {
@@ -380,6 +374,10 @@ export class SavedMap {
       throw new Error('Invalid usage, must await getTitle before calling getAttributes');
     }
     return this._attributes.title !== undefined ? this._attributes.title : '';
+  }
+
+  public getPageTitle(): string {
+    return this._getPageTitle();
   }
 
   public getAttributes(): MapAttributes {

@@ -21,9 +21,10 @@ interface WorkflowEdgeData extends Record<string, unknown> {
   /** Switch bus routing marker — present on all case/default edges of a switch node. */
   readonly branchType?: EdgeBranchType;
   /**
-   * True when this edge participates in a fan-in that includes a synthetic
-   * placeholder (empty `if` branch lane). Routes the edge on the merge bus
-   * (symmetric inverted-bus fan-in matching the fork-bus fan-out).
+   * True when this edge participates in any fan-in (multiple predecessors
+   * converging on the same target). Routes the edge on the merge bus
+   * (symmetric inverted-bus fan-in matching the fork-bus fan-out) so the
+   * lane change happens as late as possible — just above the target node.
    */
   readonly isMerge?: boolean;
   /**
@@ -31,9 +32,23 @@ interface WorkflowEdgeData extends Record<string, unknown> {
    * arrowhead so the in-edge and out-edge form one continuous line mid-lane.
    */
   readonly hideEndMarker?: boolean;
+  /**
+   * True on the edge from a step to its fallback lane head. Renders as always-
+   * dashed; stroke colour transitions from `borderBaseProminent` to `danger`
+   * once any node in the lane has a step-execution record (ADR-0010 decision 9).
+   */
+  readonly isFailure?: boolean;
 }
 
 const LABEL_TRUNCATE = 24;
+// Branch labels are annotations on the graph and must paint above the container
+// frames they sit inside — a foreach/while body is a 50%-opaque panel that would
+// otherwise veil them. `.react-flow__edgelabel-renderer` ships no z-index, and it
+// is a sibling of `.react-flow__nodes` (which also has none), so labels tie with
+// nodes at level 0 and lose on DOM order.
+// Must exceed the deepest node z-index, which in `zIndexMode: 'basic'` with
+// `elevateNodesOnSelect={false}` equals the container nesting depth.
+const EDGE_LABEL_Z_INDEX = 10;
 
 function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
@@ -64,13 +79,21 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     points: edgeData?.points,
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
+    isFailure: edgeData?.isFailure,
   });
 
   const traversed = edgeData?.traversed ?? false;
-  // Traversed edges use the `success` token to match the node's success state.
-  // Non-traversed edges use the neutral `borderBasePlain` tone. Both adapt to
-  // dark mode (borderBasePlain: light `#cad3e2` → dark `#485975`).
-  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBasePlain;
+  const isFailure = edgeData?.isFailure ?? false;
+  // Failure edges: always dashed; colour = danger when the lane has run, neutral
+  // otherwise (ADR-0010 decision 9). All other edges: success when traversed.
+  const stroke = isFailure
+    ? traversed
+      ? euiTheme.colors.danger
+      : euiTheme.colors.borderBaseProminent
+    : traversed
+    ? euiTheme.colors.success
+    : euiTheme.colors.borderBaseProminent;
+  const strokeDasharray = isFailure ? '6 3' : undefined;
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
@@ -97,7 +120,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
       </defs>
       <path
         id={id}
-        style={{ ...style, stroke, strokeWidth, fill: 'none' }}
+        style={{ ...style, stroke, strokeWidth, fill: 'none', strokeDasharray }}
         className="react-flow__edge-path"
         d={edgePath}
         markerEnd={edgeData?.hideEndMarker ? undefined : `url(#arrow-${id})`}
@@ -107,16 +130,17 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
           <div
             style={{
               position: 'absolute',
+              zIndex: EDGE_LABEL_Z_INDEX,
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'all',
               padding: '0 12px',
-              borderRadius: 8,
-              fontFamily: '"Roboto Mono", monospace',
+              borderRadius: euiTheme.border.radius.medium,
+              fontFamily: euiTheme.font.familyCode,
               fontSize: 11,
               fontWeight: 400,
               lineHeight: '20px',
-              background: euiTheme.colors.backgroundBaseSubdued,
-              border: `1px solid ${euiTheme.colors.borderBasePrimary}`,
+              background: euiTheme.colors.backgroundBasePlain,
+              border: `1px solid ${euiTheme.colors.borderBaseProminent}`,
               color: euiTheme.colors.textParagraph,
               whiteSpace: 'nowrap',
             }}
@@ -150,7 +174,8 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.points === nd?.points &&
     pd?.branchType === nd?.branchType &&
     pd?.isMerge === nd?.isMerge &&
-    pd?.hideEndMarker === nd?.hideEndMarker
+    pd?.hideEndMarker === nd?.hideEndMarker &&
+    pd?.isFailure === nd?.isFailure
   );
 }
 

@@ -141,6 +141,7 @@ export type {
   TimeScaleIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
+  LastValueOrderAggColumn,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
@@ -213,6 +214,7 @@ export type {
   ValueFontMode,
   SecondaryTrendType,
   SecondaryTrend,
+  SecondaryNameVisibility,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
   PrimaryMetricFontSize,
@@ -470,7 +472,9 @@ export { convertToAbsoluteDateRange } from './esql/date_range';
 export type { EsqlConversionFailureReason } from './esql/to_esql_failure_reasons';
 export {
   esqlConversionFailureReasonMessages,
+  esqlConversionFailureTitle,
   getFailureTooltip,
+  getFailureTooltipText,
 } from './esql/to_esql_failure_reasons';
 export type { CreateEsAggsIdMapEntryParams } from './esql/create_es_aggs_id_map_entry';
 export type { GetDefaultLabelFn } from './esql/operations';
@@ -513,9 +517,11 @@ export {
   buildMetricToESQL,
   dateHistogramToESQL,
   rangesToESQL,
+  termsToESQL,
   toEsqlRegistry,
   DATE_HISTOGRAM_ID,
   RANGE_ID,
+  TERMS_ID,
   AUTO_INTERVAL,
   DEFAULT_DATE_HISTOGRAM_INTERVAL,
   hasDateRange,

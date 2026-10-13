@@ -69,13 +69,8 @@ export function registerRoutes(
   registerRemoteSyncedIntegrations(fleetAuthzRouter, isServerless);
   registerDebugRoutes(fleetAuthzRouter);
   registerCloudConnectorRoutes(fleetAuthzRouter);
-  if (experimentalFeatures.enableCloudOnboardingDeployments) {
-    registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
-  }
-  if (config.iacProvisioner?.enabled) {
-    registerIacProvisionerRoutes(fleetAuthzRouter);
-  }
-
+  registerCloudOnboardingDeploymentRoutes(fleetAuthzRouter);
+  registerIacProvisionerRoutes(fleetAuthzRouter);
   registerAgentlessPoliciesRoutes(fleetAuthzRouter);
 
   // Conditional config routes

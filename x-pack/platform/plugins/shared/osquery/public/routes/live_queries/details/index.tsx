@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useLayoutEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
-import { useRouterNavigate } from '../../../common/lib/kibana';
-import { useGoBack } from '../../../common/use_go_back';
 import { fullWidthContentCss, WithoutHeaderLayout } from '../../../components/layouts';
 import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { pagePathGetters } from '../../../common/page_paths';
 import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 import { SavedQueryFlyout } from '../../../saved_queries';
 import { useSaveQueryFromDetails } from './use_save_query_from_details';
+import { QueryDetailsHeader } from './query_details_header';
+import { ResultTabs } from '../../saved_queries/edit/tabs';
+import { ExportFiltersProvider } from '../../../results/export_filters_context';
 
 const tableWrapperCss = {
   paddingLeft: 0,
@@ -27,10 +26,8 @@ const tableWrapperCss = {
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   useBreadcrumbs('history_details', { liveQueryId: actionId });
-  const handleGoBack = useGoBack(pagePathGetters.history());
-  const liveQueryListProps = useRouterNavigate(pagePathGetters.history(), handleGoBack);
   const [isLive, setIsLive] = useState(false);
-  const { data } = useLiveQueryDetails({ actionId, isLive });
+  const { data, isLoading } = useLiveQueryDetails({ actionId, isLive });
 
   const {
     canSave,
@@ -39,15 +36,6 @@ const LiveQueryDetailsPageComponent = () => {
     handleCloseSaveQueryFlyout,
     savedQueryDefaultValue,
   } = useSaveQueryFromDetails({ data });
-
-  const backLink = (
-    <EuiButtonEmpty iconType="chevronSingleLeft" {...liveQueryListProps} flush="left" size="xs">
-      <FormattedMessage
-        id="xpack.osquery.liveQueryDetails.viewHistoryTitle"
-        defaultMessage="View history"
-      />
-    </EuiButtonEmpty>
-  );
 
   useLayoutEffect(() => {
     setIsLive(() => !(data?.status === 'completed'));
@@ -59,24 +47,49 @@ const LiveQueryDetailsPageComponent = () => {
     <SavedQueryFlyout onClose={handleCloseSaveQueryFlyout} defaultValue={savedQueryDefaultValue} />
   ) : null;
 
+  const query = data?.queries?.[0];
+  const isSingleQuery = !!data && !data.pack_id && data.queries?.length === 1 && query != null;
+
   return (
     <>
       <WithoutHeaderLayout restrictWidth={false}>
         <div css={fullWidthContentCss}>
-          {backLink}
-          <EuiSpacer size="m" />
-          <div css={tableWrapperCss}>
-            <PackQueriesStatusTable
-              actionId={actionId}
-              data={data?.queries}
-              startDate={data?.['@timestamp']}
-              expirationDate={data?.expiration}
-              agentIds={data?.agents}
-              showResultsHeader
-              tags={data?.tags}
-              onSaveQuery={onSaveQuery}
-            />
-          </div>
+          {isLoading && !data ? (
+            <div data-test-subj="query-details-loading">
+              <EuiSpacer size="l" />
+              <EuiSkeletonText lines={5} />
+            </div>
+          ) : isSingleQuery ? (
+            // Only this branch needs the provider; the pack path below gets one from
+            // `PackQueriesStatusTable`, which self-wraps.
+            <ExportFiltersProvider>
+              <QueryDetailsHeader actionId={actionId} data={data} onSaveQuery={onSaveQuery} />
+              <ResultTabs
+                actionId={query.action_id}
+                liveQueryActionId={actionId}
+                agentIds={data.agents}
+                startDate={data['@timestamp']}
+                endDate={data.expiration}
+                ecsMapping={query.ecs_mapping}
+                failedAgentsCount={query.failed ?? 0}
+                error={query.error}
+              />
+            </ExportFiltersProvider>
+          ) : (
+            <div css={tableWrapperCss}>
+              <PackQueriesStatusTable
+                actionId={actionId}
+                data={data?.queries}
+                startDate={data?.['@timestamp']}
+                expirationDate={data?.expiration}
+                agentIds={data?.agents}
+                showResultsHeader
+                hideResultsTitle
+                tags={data?.tags}
+                onSaveQuery={onSaveQuery}
+              />
+            </div>
+          )}
         </div>
       </WithoutHeaderLayout>
       {savedQueryFlyout}

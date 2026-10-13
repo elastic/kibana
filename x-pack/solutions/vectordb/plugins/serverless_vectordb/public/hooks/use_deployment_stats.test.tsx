@@ -33,6 +33,7 @@ const esStats = {
   dashboardsCount: 5,
   apiKeysCount: 7,
   expiringApiKeysCount: 2,
+  newIndex: null,
 };
 
 describe('useDeploymentStats', () => {
@@ -110,6 +111,7 @@ describe('useDeploymentStats', () => {
       apiKeysCount: null,
       expiringApiKeysCount: null,
       starredDashboardsCount: null,
+      newIndex: null,
     });
   });
 
@@ -140,10 +142,20 @@ describe('useDeploymentStats', () => {
         dashboardsCount: null,
         apiKeysCount: null,
         expiringApiKeysCount: null,
+        newIndex: null,
         workflowsCount: 3,
         workflowsRunningCount: 2,
       })
     );
+  });
+
+  it('reports the vector count as unavailable when the caller may not see it', async () => {
+    mockResponses({ deploymentStats: { ...esStats, vectorCount: null } });
+
+    const result = await renderStats();
+
+    expect(result.current.stats.vectorCount).toBeNull();
+    expect(result.current.stats.indicesCount).toBe(3);
   });
 
   it('keeps the other stats when the workflows request fails', async () => {

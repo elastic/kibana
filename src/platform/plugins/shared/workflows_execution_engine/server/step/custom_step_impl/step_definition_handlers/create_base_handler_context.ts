@@ -37,6 +37,15 @@ export function createBaseHandlerContext(
           additionalContext
         );
       },
+      createTemplateRenderer: () => {
+        const workflowContext = stepExecutionRuntime.contextManager.getContext();
+        return (value, additionalContext) =>
+          stepExecutionRuntime.contextManager.renderValueWithContext(
+            value,
+            workflowContext,
+            additionalContext
+          );
+      },
       getFakeRequest: () => {
         return stepExecutionRuntime.contextManager.getFakeRequest();
       },

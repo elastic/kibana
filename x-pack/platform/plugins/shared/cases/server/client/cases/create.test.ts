@@ -6,6 +6,7 @@
  */
 
 import { stringify as yamlStringify } from 'yaml';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_TAGS_PER_CASE,
@@ -822,7 +823,7 @@ describe('create', () => {
             ],
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: true },
             severity: 'low',
             tags: [],
             title: 'My Case',
@@ -852,7 +853,7 @@ describe('create', () => {
             customFields: caseWithOptionalFields.customFields,
             description: 'testing sir',
             owner: 'securitySolution',
-            settings: { syncAlerts: true },
+            settings: { syncAlerts: true, extractObservables: true },
             severity: 'critical',
             tags: [],
             title: 'My Case',
@@ -895,7 +896,16 @@ describe('create', () => {
       clientArgs.services.templatesService.getTemplate.mockResolvedValue(usageTemplateSO as never);
     });
 
+    // Read from the persisted case rather than the request, so the mock has to carry the template
+    // the way a real create would.
+    const persistedCaseWithTemplate = {
+      ...caseSO,
+      attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+    };
+
     it('increments template usage stats when a case is created with a template', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(persistedCaseWithTemplate);
+
       const caseWithTemplate = {
         ...theCase,
         template: { id: 'tmpl-1', version: 1 },
@@ -914,7 +924,21 @@ describe('create', () => {
       expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
     });
 
+    // Reading the request instead would credit a template the persisted case never received.
+    it('reads the template from the persisted case, not from the request', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(caseSO);
+
+      await create(
+        { ...theCase, template: { id: 'tmpl-1', version: 1 } },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.templatesService.incrementUsageStats).not.toHaveBeenCalled();
+    });
+
     it('does not fail case creation when template stats update fails', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(persistedCaseWithTemplate);
       clientArgs.services.templatesService.incrementUsageStats.mockRejectedValueOnce(
         new Error('stats update failed')
       );
@@ -928,6 +952,116 @@ describe('create', () => {
       expect(clientArgs.logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update template usage stats')
       );
+    });
+  });
+
+  describe('Template usage counters', () => {
+    const usageCounter = usageCollectionPluginMock
+      .createSetupContract()
+      .createUsageCounter('cases');
+    const clientArgs = { ...createCasesClientMockArgs(), usageCounter };
+    clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+    // Creating from a template expands it first, so the template read has to resolve for the
+    // create to get as far as the counter.
+    const counterTemplateSO = {
+      id: 'so-tmpl-1',
+      type: 'cases-templates',
+      references: [],
+      attributes: {
+        templateId: 'tmpl-1',
+        name: 'Counter Template',
+        owner: SECURITY_SOLUTION_OWNER,
+        definition: yamlStringify({ name: 'Counter Template', fields: [] }),
+        templateVersion: 1,
+        deletedAt: null,
+        isLatest: true,
+      },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.services.templatesService.getTemplate.mockResolvedValue(
+        counterTemplateSO as never
+      );
+    });
+
+    const caseSOWithTemplate = {
+      ...caseSO,
+      attributes: { ...caseSO.attributes, template: { id: 'tmpl-1', version: 1 } },
+    };
+
+    it('counts a case created with a template', async () => {
+      clientArgs.services.caseService.createCase.mockResolvedValueOnce(caseSOWithTemplate);
+
+      await create(
+        { ...theCase, template: { id: 'tmpl-1', version: 1 } },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.rest_api',
+      });
+    });
+
+    it('counts a case created without a template', async () => {
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.rest_api',
+      });
+    });
+
+    // The templates feature only governs server-side expansion; a caller may still pin a template
+    // with the feature off, and that reference is persisted onto the case. The counter follows what
+    // was written, so such a case counts as templated even though the feature is off.
+    it('counts a pinned template as templated even when the templates feature is off', async () => {
+      const flagOffArgs = {
+        ...createCasesClientMockArgs(),
+        usageCounter,
+        config: { ...createCasesClientMockArgs().config, templates: { enabled: false } },
+      };
+      flagOffArgs.services.caseService.createCase.mockResolvedValue(caseSOWithTemplate);
+
+      await create(
+        { ...theCase, template: { id: 'tmpl-1', version: 1 } },
+        flagOffArgs,
+        casesClientMock
+      );
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_with_template',
+        counterType: 'cases_client.rest_api',
+      });
+    });
+
+    it('attributes the counter to the calling source', async () => {
+      const connectorArgs = {
+        ...createCasesClientMockArgs(),
+        usageCounter,
+        clientSource: 'connector' as const,
+      };
+      connectorArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await create(theCase, connectorArgs, casesClientMock);
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'create_case_without_template',
+        counterType: 'cases_client.connector',
+      });
+    });
+
+    it('does not count a create that failed', async () => {
+      clientArgs.services.caseService.createCase.mockRejectedValueOnce(new Error('create failed'));
+
+      await expect(create(theCase, clientArgs, casesClientMock)).rejects.toThrow();
+
+      expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
   });
 
@@ -2240,6 +2374,65 @@ describe('create', () => {
           ).rejects.toThrow('Field "risk_score" must be at most 3 characters');
         });
       });
+    });
+  });
+
+  describe('extractObservables defaulting from space configuration', () => {
+    const extractObservablesCasesClient = createCasesClientMock();
+
+    const createClientArgsWithConfig = (extractObservables: boolean) => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([
+        {
+          owner: theCase.owner,
+          customFields: [],
+          extractObservables,
+        },
+      ]);
+      return clientArgs;
+    };
+
+    it('inherits extractObservables from the space configuration when omitted', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(true);
+    });
+
+    it('inherits extractObservables false from the space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(false);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(false);
+    });
+
+    it('uses explicit extractObservables over space configuration', async () => {
+      const clientArgs = createClientArgsWithConfig(true);
+      const caseWithExplicitSetting = {
+        ...theCase,
+        settings: { syncAlerts: true, extractObservables: false },
+      };
+
+      await create(caseWithExplicitSetting, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(false);
+    });
+
+    it('falls back to true when no space configuration exists', async () => {
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+      extractObservablesCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+
+      await create(theCase, clientArgs, extractObservablesCasesClient);
+
+      const createCaseCall = clientArgs.services.caseService.createCase.mock.calls[0][0].attributes;
+      expect(createCaseCall.settings.extractObservables).toBe(true);
     });
   });
 });

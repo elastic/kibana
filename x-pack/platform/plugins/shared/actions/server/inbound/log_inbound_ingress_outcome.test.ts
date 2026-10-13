@@ -25,7 +25,11 @@ describe('logInboundIngressOutcome', () => {
       'handle_fail',
       'validate_fail',
       'emit_partial',
+      'identity_missing',
+      'http_ack',
       'accepted',
+      'rate_limited',
+      'payload_too_large',
     ]);
   });
 
@@ -67,20 +71,80 @@ describe('logInboundIngressOutcome', () => {
     );
   });
 
+  it('logs address and in-flight rate limits at debug and a connector rate limit at info', () => {
+    const base = {
+      spaceId: 'default',
+      connectorId: 'c1',
+      connectorTypeId: '.myConnector',
+      retryAfterSeconds: 60,
+    };
+    logInboundIngressOutcome(logger, {
+      ...base,
+      outcome: 'rate_limited',
+      budget: 'remoteAddress',
+      detail: 'budget=remote_address retryAfter=60',
+    });
+    logInboundIngressOutcome(logger, {
+      ...base,
+      outcome: 'rate_limited',
+      budget: 'inflight',
+      scope: 'process',
+      retryAfterSeconds: 1,
+      detail: 'budget=inflight scope=process retryAfter=1',
+    });
+    logInboundIngressOutcome(logger, {
+      ...base,
+      outcome: 'rate_limited',
+      budget: 'connector',
+      detail: 'budget=connector retryAfter=60',
+    });
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('detail=budget=remote_address retryAfter=60'),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          outcome: 'rate_limited',
+          budget: 'remoteAddress',
+          retryAfterSeconds: 60,
+        }),
+      })
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('detail=budget=inflight scope=process retryAfter=1'),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          budget: 'inflight',
+          scope: 'process',
+          retryAfterSeconds: 1,
+        }),
+      })
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      expect.stringContaining('detail=budget=connector retryAfter=60'),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          budget: 'connector',
+          retryAfterSeconds: 60,
+        }),
+      })
+    );
+    expect(JSON.stringify(logger.debug.mock.calls)).not.toContain('remoteAddress=');
+  });
+
   it('logs handle_fail at error with detail', () => {
     logInboundIngressOutcome(logger, {
       outcome: 'handle_fail',
       spaceId: 'default',
       connectorId: 'c1',
       connectorTypeId: '.myConnector',
-      detail: 'spoke failed',
+      detail: 'handler failed',
     });
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('detail=spoke failed'),
+      expect.stringContaining('detail=handler failed'),
       expect.objectContaining({
         inboundEvents: expect.objectContaining({
           outcome: 'handle_fail',
-          detail: 'spoke failed',
+          detail: 'handler failed',
         }),
       })
     );

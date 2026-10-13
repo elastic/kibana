@@ -99,6 +99,20 @@ describe('formatResourceWithSampledValues', () => {
     expect(out).toContain('- @timestamp [date]');
   });
 
+  it('includes the stored query when the resource is an ES|QL view', () => {
+    const out = formatResourceWithSampledValues({
+      resource: {
+        ...buildResource([field({ path: 'status', type: 'integer' })], false),
+        name: 'logs-proxy-parsed',
+        type: EsResourceType.view,
+        query: 'FROM logs-* | KEEP status',
+      },
+    });
+
+    expect(out).toContain('<target_resource name="logs-proxy-parsed" type="view">');
+    expect(out).toContain('definition: FROM logs-* | KEEP status');
+  });
+
   it('backtick-escapes field path segments that start with a digit', () => {
     const out = formatResourceWithSampledValues({
       resource: buildResource(

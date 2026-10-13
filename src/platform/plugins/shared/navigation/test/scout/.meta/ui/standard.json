@@ -1,5 +1,5 @@
 {
-  "sha1": "026b049612374d79517bf4c9a3630e6231fafcb9",
+  "sha1": "de9c0427941201a2a2b78ebc53001b34e8583360",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -71,6 +71,20 @@
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/nav_search.spec.ts",
         "line": 34,
+        "column": 28
+      }
+    },
+    {
+      "id": "6fe77ca3288ac4f-8813f4127ca0a5e",
+      "title": "recently accessed hover list shows viewed dashboards in the Dashboards hover list and navigates on click",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/recently_accessed.spec.ts",
+        "line": 50,
         "column": 28
       }
     }

@@ -37,6 +37,7 @@ import {
   getOriginalAlertIds,
   replaceAnonymizedValuesWithOriginalValues,
 } from '@kbn/discoveries/impl/attack_discovery/anonymization';
+import { getGenerationSourceHashSuffix } from '@kbn/attack-discovery-schedules-common';
 import {
   ALERT_ATTACK_DISCOVERY_ALERT_IDS,
   ALERT_ATTACK_DISCOVERY_ALERTS_CONTEXT_COUNT,
@@ -45,6 +46,7 @@ import {
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
@@ -104,6 +106,7 @@ export const generateAttackDiscoveryAlertHash = ({
   alertIds,
   attackDiscoveryId,
   connectorId,
+  generationSource,
   ownerId,
   replacements,
   spaceId,
@@ -111,6 +114,7 @@ export const generateAttackDiscoveryAlertHash = ({
   alertIds: string[];
   attackDiscoveryId: string | undefined;
   connectorId: string;
+  generationSource?: string;
   ownerId: string;
   replacements: Record<string, string> | undefined;
   spaceId: string;
@@ -128,7 +132,17 @@ export const generateAttackDiscoveryAlertHash = ({
     hash.update('attack_discovery');
   }
 
-  return hash.update(connectorId).update(ownerId).update(spaceId).digest('hex');
+  // The suffix is appended on every branch, including the fallbacks, so producer
+  // independence does not depend on the discovery having verifiable alert ids.
+  // Incremental `update` calls hash the same bytes as one concatenated string, so
+  // this stays byte-identical to `generateAttackDiscoveryAlertHash` in
+  // `@kbn/attack-discovery-schedules-common`, which the de-duplication lookup uses.
+  return hash
+    .update(connectorId)
+    .update(ownerId)
+    .update(spaceId)
+    .update(getGenerationSourceHashSuffix(generationSource))
+    .digest('hex');
 };
 
 /**
@@ -186,11 +200,13 @@ const getAlertRiskScore = ({
  */
 export const transformToAlertDocuments = ({
   authenticatedUser,
+  generationSource,
   now,
   spaceId,
   validateRequestBody,
 }: {
   authenticatedUser: AuthenticatedUser;
+  generationSource?: string;
   now: Date;
   spaceId: string;
   validateRequestBody: PostValidateRequestBody;
@@ -203,6 +219,7 @@ export const transformToAlertDocuments = ({
       alertIds: attackDiscovery.alertIds,
       attackDiscoveryId: attackDiscovery.id,
       connectorId: restParams.apiConfig.connectorId,
+      generationSource,
       ownerId: authenticatedUser.username ?? authenticatedUser.profile_uid,
       replacements: restParams.replacements,
       spaceId,
@@ -243,6 +260,11 @@ export const transformToAlertDocuments = ({
               replacements: restParams.replacements,
             })
           : undefined,
+      // only written when the caller contributed it to the alert hash, so documents
+      // whose identity does not depend on a producer stay exactly as they were:
+      ...(generationSource != null
+        ? { [ALERT_ATTACK_DISCOVERY_GENERATION_SOURCE]: generationSource }
+        : {}),
       [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: attackDiscovery.mitreAttackTactics,
       [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: !isEmpty(restParams.replacements)
         ? Object.entries(restParams.replacements as Record<string, string>).map(

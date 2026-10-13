@@ -25,7 +25,7 @@ For the shared evals CLI, profiles, and CI labels, see the main
 - **Docker** running (the evals CLI starts an EDOT collector container).
 - **Vault CLI** with OIDC access to `https://secrets.elastic.co:8200` (needed for EIS model
   discovery and EIS Cloud Connected Mode / CCM).
-- Repo bootstrapped (`yarn kbn bootstrap`) in a Kibana checkout.
+- Repo bootstrapped (`pnpm kbn bootstrap`) in a Kibana checkout.
 - Agent Builder + Alerting V2 enabled for the Scout server config set `evals_alerting_v2`
   (the suite registration wires this; you do not need to hand-edit `kibana.dev.yml` for the
   standard `evals start` flow).

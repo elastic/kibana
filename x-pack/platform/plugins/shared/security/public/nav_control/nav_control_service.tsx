@@ -106,36 +106,18 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
-    core.chrome.navControls.registerRight({
-      order: 4000,
-      content: (
-        <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
-          <SecurityNavControl
-            editProfileUrl={core.http.basePath.prepend('/security/account')}
-            logoutUrl={this.logoutUrl}
-            userMenuLinks$={this.userMenuLinks$}
-          />
-        </Providers>
-      ),
-    });
-
-    this.registerChromeNextUserMenu(core, authc);
-
-    this.navControlRegistered = true;
-  }
-
-  private registerChromeNextUserMenu(core: CoreStart, authc: AuthenticationServiceSetup) {
-    core.chrome.next.userMenu.set(
+    core.chrome.controls.userMenu.set(
       <Providers services={core} authc={authc} securityApiClients={this.securityApiClients}>
         <SecurityNavControl
           editProfileUrl={core.http.basePath.prepend('/security/account')}
           logoutUrl={this.logoutUrl}
           userMenuLinks$={this.userMenuLinks$}
           renderButton={(props) => <UserMenuComponent {...props} />}
-          avatarSize="m"
+          avatarSize="s"
         />
       </Providers>
     );
+    this.navControlRegistered = true;
   }
 
   private sortUserMenuLinks(userMenuLinks: UserMenuLink[]) {

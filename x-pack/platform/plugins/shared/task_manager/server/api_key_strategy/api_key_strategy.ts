@@ -37,12 +37,28 @@ export interface GrantApiKeysOpts {
    * See {@link ApiKeyOptions.cloneApiKey}.
    */
   cloneApiKey?: boolean;
+  /**
+   * Called as soon as Task Manager creates a credential, before the complete grant operation
+   * resolves. This lets callers clean up partial successes when a later grant fails.
+   */
+  onApiKeyCreated?: (target: InvalidationTarget) => void;
 }
 
 export interface InvalidationTarget {
   apiKeyId: string;
   uiamApiKey?: string;
+  taskId?: string;
+  taskStartedAt?: string;
 }
+
+/**
+ * The credential fields {@link ApiKeyStrategy.getApiKeyIdsForInvalidation} needs, so that both a
+ * stored task and a freshly granted key set that was never persisted can be passed to it.
+ */
+export type ApiKeyInvalidationSource = Pick<
+  ConcreteTaskInstance,
+  'apiKey' | 'uiamApiKey' | 'userScope'
+>;
 
 export interface ApiKeyStrategy {
   readonly shouldGrantUiam: boolean;
@@ -57,7 +73,7 @@ export interface ApiKeyStrategy {
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined;
 
-  getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[];
+  getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[];
 
   markForInvalidation(
     targets: InvalidationTarget[],
@@ -99,6 +115,9 @@ export const markApiKeysForInvalidation = async (
           apiKeyId: target.apiKeyId,
           createdAt: new Date().toISOString(),
           ...(target.uiamApiKey ? { uiamApiKey: target.uiamApiKey } : {}),
+          ...(target.taskId && target.taskStartedAt
+            ? { taskId: target.taskId, taskStartedAt: target.taskStartedAt }
+            : {}),
         },
         type: INVALIDATE_API_KEY_SO_NAME,
       }))

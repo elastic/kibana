@@ -8,7 +8,6 @@
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type {
-  InvestigationBlindSpot,
   InvestigationHypothesis,
   InvestigationRecommendation,
   InvestigationState,
@@ -23,16 +22,7 @@ export {
   isInvestigationTerminalFailure,
 } from '../common/investigation_progress_status';
 
-/**
- * One row of the Try next list: either a recommendation the agent emitted structurally, or one
- * derived from a hypothesis when the investigation reported none — the only case carrying a
- * `confidence`, since the agent's own recommendations have no such notion.
- */
-export interface RecommendationItem extends InvestigationRecommendation {
-  confidence?: number;
-}
-
-export type BlindSpotItem = InvestigationBlindSpot;
+export type RecommendationItem = InvestigationRecommendation;
 
 export const formatInvestigationDuration = (
   startedAt: string,
@@ -148,11 +138,6 @@ export const parseInvestigationRecommendations = (
 export const getPrimaryRecommendation = (
   state?: InvestigationState
 ): RecommendationItem | undefined => parseInvestigationRecommendations(state)[0];
-
-const escapeMarkdownInline = (text: string): string => text.replace(/([\\`*_[\]])/g, '\\$1');
-
-export const formatBlindSpotMarkdown = ({ title, description }: BlindSpotItem): string =>
-  `**${escapeMarkdownInline(title)}** · ${escapeMarkdownInline(description)}`;
 
 export const sortInvestigationHypotheses = (
   hypotheses: InvestigationHypothesis[]

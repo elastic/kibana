@@ -29,6 +29,9 @@ describe('ensureMetadataDataStreamMappings', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggerMock.create();
     resetEnsuredMetadataNamespaces();
+    esClient.indices.getDataStream.mockImplementation(
+      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] } as never)
+    );
   });
 
   it('installs the ingest pipeline, component template, and index template (all idempotent)', async () => {
@@ -87,6 +90,22 @@ describe('ensureMetadataDataStreamMappings', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Plain index found'));
   });
 
+  it('detects a plain index even when getDataStream resolves without throwing (empty/non-matching list)', async () => {
+    esClient.indices.getDataStream.mockResolvedValueOnce({ data_streams: [] } as never);
+    esClient.indices.exists.mockResolvedValueOnce(true as never);
+
+    await expect(
+      ensureMetadataDataStreamMappings(esClient, 'default', logger)
+    ).resolves.toBeUndefined();
+
+    expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.delete.mock.calls[0][0]).toMatchObject({ index: DATA_STREAM });
+    expect(esClient.indices.createDataStream).toHaveBeenCalledTimes(1);
+    expect(esClient.indices.createDataStream.mock.calls[0][0]).toMatchObject({ name: DATA_STREAM });
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+    expect(esClient.indices.rollover).not.toHaveBeenCalled();
+  });
+
   it('falls back to a rollover when the in-place update conflicts with an existing field type', async () => {
     esClient.indices.putMapping.mockRejectedValueOnce(esError('illegal_argument_exception', 400));
 
@@ -115,6 +134,9 @@ describe('ensureMetadataDataStreamMappingsOnce', () => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
     logger = loggerMock.create();
     resetEnsuredMetadataNamespaces();
+    esClient.indices.getDataStream.mockImplementation(
+      async ({ name } = {}) => ({ data_streams: name ? [{ name }] : [] } as never)
+    );
   });
 
   it('runs the sync once per namespace and no-ops on subsequent calls', async () => {

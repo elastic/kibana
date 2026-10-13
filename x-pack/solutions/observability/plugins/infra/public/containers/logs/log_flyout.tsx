@@ -8,6 +8,7 @@
 import createContainer from 'constate';
 import { isString } from 'lodash';
 import React, { useCallback, useState } from 'react';
+import type { ProjectRouting } from '@kbn/es-query';
 import { UrlStateContainer } from '../../utils/url_state';
 
 export enum FlyoutVisibility {
@@ -25,12 +26,15 @@ export const useLogFlyout = () => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [logEntryId, setLogEntryId] = useState<string | null>(null);
   const [surroundingLogsId, setSurroundingLogsId] = useState<string | null>(null);
+  const [projectRouting, setProjectRouting] = useState<ProjectRouting | undefined>(undefined);
 
   const closeFlyout = useCallback(() => setIsFlyoutOpen(false), []);
-  const openFlyout = useCallback((newLogEntryId?: string) => {
+  const openFlyout = useCallback((newLogEntryId?: string, newProjectRouting?: ProjectRouting) => {
     if (newLogEntryId) {
       setLogEntryId(newLogEntryId);
     }
+    // always reassigned so a scope from a previous entry never leaks into this one
+    setProjectRouting(newProjectRouting);
     setIsFlyoutOpen(true);
   }, []);
 
@@ -42,6 +46,7 @@ export const useLogFlyout = () => {
     setLogEntryId,
     surroundingLogsId,
     setSurroundingLogsId,
+    projectRouting,
   };
 };
 

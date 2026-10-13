@@ -11,7 +11,7 @@ import { createAnalyzeChatOpener } from './analyze_chat_opener';
 import type { AnalyzeAndImproveContext, AnalyzeChatOptions } from './types';
 
 const analyzeOptions = async (ctx: AnalyzeAndImproveContext): Promise<AnalyzeChatOptions> => ({
-  agentId: ctx.aiIndex.feedback_agent_id,
+  agentId: ctx.aiIndex.feedback_analysis?.agent_id,
   newConversation: true,
   sessionTag: `context-engine-feedback:${ctx.aiIndex.id}`,
   attachments: [
@@ -25,7 +25,7 @@ const analyzeOptions = async (ctx: AnalyzeAndImproveContext): Promise<AnalyzeCha
 
 const context = (feedbackAgentId?: string): AnalyzeAndImproveContext =>
   ({
-    aiIndex: { id: 'idx-1', feedback_agent_id: feedbackAgentId },
+    aiIndex: { id: 'idx-1', feedback_analysis: { enabled: false, agent_id: feedbackAgentId } },
   } as AnalyzeAndImproveContext);
 
 const coreWithCapability = (show: boolean | undefined) => {

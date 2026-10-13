@@ -71,7 +71,10 @@ export const createCasesTelemetry = ({
 
   const collectAndStore = async () => {
     const savedObjectsClient = await getInternalSavedObjectClient();
-    const telemetryData = await collectTelemetryData({ savedObjectsClient, logger });
+    const telemetryData = await collectTelemetryData({
+      savedObjectsClient,
+      logger,
+    });
 
     await savedObjectsClient.create(CASE_TELEMETRY_SAVED_OBJECT, telemetryData, {
       id: CASE_TELEMETRY_SAVED_OBJECT_ID,

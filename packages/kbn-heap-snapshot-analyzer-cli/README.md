@@ -50,13 +50,13 @@ Generate keys:
 node -e "for (let i=0;i<3;i++) console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-The `kibana_system`/`changeme` credentials match what `yarn es snapshot`
+The `kibana_system`/`changeme` credentials match what `pnpm es snapshot`
 provisions and avoid the interactive preboot setup flow.
 
 ### 3. Start Elasticsearch
 
 ```sh
-yarn es snapshot
+pnpm es snapshot
 ```
 
 Wait for `started`. Verify:
@@ -80,7 +80,7 @@ What the environment variables do:
   inspector session and starts allocation tracking.
 - `HEAP_TRACK_FORCE=1` is required for built Kibana. The preload normally
   gates on `isDevCliChild=true` so it does not slow down the launcher and
-  `@kbn/optimizer` workers.
+  `@kbn/rspack-optimizer` workers.
 - `HEAP_TRACK_OUTPUT` sets the snapshot destination.
 
 You should see:

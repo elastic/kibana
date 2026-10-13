@@ -53,6 +53,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -154,6 +157,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -251,6 +257,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -352,6 +361,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -449,6 +461,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -546,6 +561,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -647,6 +665,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -744,6 +765,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -841,6 +865,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -938,6 +965,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1040,6 +1070,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1143,6 +1176,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1245,6 +1281,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1351,6 +1390,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1448,6 +1490,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1550,6 +1595,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1656,6 +1704,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1758,6 +1809,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1862,6 +1916,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {
@@ -1966,6 +2023,9 @@ Object {
         "label": "English",
       },
     ],
+    "configDefaultLocale": "en",
+    "locale": "en",
+    "localeSource": "default",
     "translationsUrl": null,
   },
   "legacyMetadata": Object {

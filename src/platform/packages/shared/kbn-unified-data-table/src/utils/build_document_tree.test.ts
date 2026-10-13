@@ -18,7 +18,6 @@ const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
   const { tree } = flattenedToNestedDocument({
     row: buildDataTableRecord(hit, dataViewMock),
     dataView: dataViewMock,
-    columnsMeta: undefined,
     shouldShowFieldHandler: () => true,
   });
   if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
@@ -52,7 +51,6 @@ describe('flattenedToNestedDocument', () => {
       flattenedToNestedDocument({
         row: { id: '1', raw: { _id: '1', _index: 'test' }, flattened },
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: () => true,
         selectedColumns,
       }).tree;
@@ -83,7 +81,6 @@ describe('flattenedToNestedDocument', () => {
           flattened: { name: 'Alice', 'name.keyword': 'Alice' },
         },
         dataView: dataViewMock,
-        columnsMeta: undefined,
         // `name.keyword` is a multi-field, hidden by the shared handler.
         shouldShowFieldHandler: (fieldName) => fieldName !== 'name.keyword',
         selectedColumns: ['name.keyword'],
@@ -100,12 +97,38 @@ describe('flattenedToNestedDocument', () => {
           flattened: { name: 'Alice', 'name.keyword': 'Alice' },
         },
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: (fieldName) => fieldName !== 'name.keyword',
         selectedColumns: ['name'],
       }).tree;
 
       expect(tree).toEqual({ name: 'Alice' });
+    });
+
+    it('keeps the parent scalar and the multi-field when both are selected', () => {
+      const tree = flattenedToNestedDocument({
+        row: {
+          id: '1',
+          raw: { _id: '1', _index: 'test' },
+          flattened: {
+            'aws.s3.bucket.name.keyword': 'bucket3',
+            'aws.s3.bucket.name': 'bucket3',
+          },
+        },
+        dataView: dataViewMock,
+        shouldShowFieldHandler: (fieldName) => fieldName !== 'aws.s3.bucket.name.keyword',
+        selectedColumns: ['aws.s3.bucket.name', 'aws.s3.bucket.name.keyword'],
+      }).tree;
+
+      expect(tree).toEqual({
+        aws: {
+          s3: {
+            bucket: {
+              name: 'bucket3',
+              'name.keyword': 'bucket3',
+            },
+          },
+        },
+      });
     });
 
     it('caches per filter, so changing the selection is not served a stale tree', () => {
@@ -119,7 +142,6 @@ describe('flattenedToNestedDocument', () => {
         flattenedToNestedDocument({
           row,
           dataView: dataViewMock,
-          columnsMeta: undefined,
           shouldShowFieldHandler: () => true,
           selectedColumns,
         }).tree;
@@ -129,6 +151,72 @@ describe('flattenedToNestedDocument', () => {
       expect(build()).toEqual({ bytes: 100, extension: '.gz' });
       expect(build(['bytes'])).toEqual({ bytes: 100 });
     });
+  });
+
+  it('keeps numeric object keys as objects', () => {
+    const tree = buildTree({
+      _id: '1',
+      _index: 'test',
+      _source: undefined,
+      fields: {
+        'latency.50': [10],
+        'latency.95': [100],
+        'http.response.status_code.200': [5],
+      },
+    });
+
+    expect(tree).toEqual({
+      latency: { '50': 10, '95': 100 },
+      http: { response: { status_code: { '200': 5 } } },
+    });
+  });
+
+  it('does not pollute Object.prototype when unflattening a nested __proto__ key', () => {
+    const { tree } = flattenedToNestedDocument({
+      row: {
+        id: '1',
+        raw: { _id: '1', _index: 'test' },
+        flattened: { '__proto__.polluted': true },
+      },
+      dataView: dataViewMock,
+      shouldShowFieldHandler: () => true,
+    });
+    if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
+      throw new Error('expected an object document tree');
+    }
+
+    expect(Object.hasOwn(Object.prototype, 'polluted')).toBe(false);
+    const canary: Record<string, unknown> = {};
+    expect(canary.polluted).toBeUndefined();
+    expect(Object.getPrototypeOf(tree)).toBeNull();
+    expect(Object.getOwnPropertyDescriptor(tree, '__proto__')?.value).toEqual({ polluted: true });
+  });
+
+  it('stores a __proto__ field as an own property instead of changing the document prototype', () => {
+    // A `{ __proto__: ... }` literal sets the object's prototype; define the field name explicitly.
+    const flattened: Record<string, unknown> = {};
+    Object.defineProperty(flattened, '__proto__', {
+      value: 'own',
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    });
+
+    const { tree } = flattenedToNestedDocument({
+      row: {
+        id: '1',
+        raw: { _id: '1', _index: 'test' },
+        flattened,
+      },
+      dataView: dataViewMock,
+      shouldShowFieldHandler: () => true,
+    });
+    if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
+      throw new Error('expected an object document tree');
+    }
+
+    expect(Object.getPrototypeOf(tree)).toBeNull();
+    expect(Object.getOwnPropertyDescriptor(tree, '__proto__')?.value).toBe('own');
   });
 
   it('preserves number and boolean types (so the tree still colours them by type)', () => {
@@ -203,7 +291,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView: nestedDataView,
-      columnsMeta: undefined,
       shouldShowFieldHandler: () => true,
     });
 
@@ -264,10 +351,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
-      columnsMeta: {
-        histogram: { type: 'number', esType: 'histogram' },
-        agg_metric: { type: 'number', esType: 'aggregate_metric_double' },
-      },
       shouldShowFieldHandler: () => true,
     });
 
@@ -287,7 +370,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView: dataViewMock,
-      columnsMeta: { note: { type: 'string', esType: 'keyword' } },
       shouldShowFieldHandler: () => true,
     });
 
@@ -324,7 +406,6 @@ describe('flattenedToNestedDocument', () => {
     const { tree } = flattenedToNestedDocument({
       row,
       dataView,
-      columnsMeta: undefined,
       shouldShowFieldHandler: getShouldShowFieldHandler(
         ['agent', 'agent.keyword'],
         dataView,
@@ -343,7 +424,6 @@ describe('flattenedToNestedDocument', () => {
           dataViewMock
         ),
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: () => true,
       });
 
@@ -404,7 +484,6 @@ describe('flattenedToNestedDocument', () => {
           dataViewMock
         ),
         dataView: dataViewMock,
-        columnsMeta: undefined,
         shouldShowFieldHandler: () => true,
         hideNulls,
       });

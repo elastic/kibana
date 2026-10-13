@@ -8,25 +8,37 @@
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 
 import type { Case } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
-import type { ExternalReferenceSOAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
-import { CaseStatuses, ExternalReferenceStorageType } from '@kbn/cases-plugin/common/types/domain';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  OSQUERY_ATTACHMENT_TYPE,
+  isUnifiedAlertAttachment,
+  isUnifiedCommentAttachment,
+} from '@kbn/cases-plugin/common';
+import { MAX_COMMENT_LENGTH } from '@kbn/cases-plugin/common/constants';
+import type { AttachmentRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import type { UnifiedAttachmentPayload } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
-  postCommentUserReq,
-  postCommentAlertReq,
   getPostCaseRequest,
-  getFilesAttachmentReq,
   fileAttachmentMetadata,
-  postExternalReferenceESReq,
   fileMetadata,
+  userActionSourceApi,
   postCommentAlertMultipleIdsReq,
-  postCommentActionsReq,
+  postCommentUserReq,
+  buildUnifiedAlertReq,
+  getUnifiedFilesAttachmentReq,
+  postUnifiedActionsReq,
+  postUnifiedAlertMultipleIdsReq,
+  postUnifiedAlertReq,
+  postUnifiedCommentReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -35,6 +47,7 @@ import {
   superUserSpace1Auth,
   createCaseAndBulkCreateAttachments,
   bulkCreateAttachments,
+  getUnifiedAttachments,
   updateCase,
   findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
@@ -72,6 +85,41 @@ import {
   createSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
 
+// Any non-file attachment type works here; the file-limit tests only need one alongside the files.
+const unifiedOtherAttachmentReq = {
+  type: OSQUERY_ATTACHMENT_TYPE,
+  attachmentId: 'osquery-1',
+  metadata: { agentIds: ['agent-1'], queryId: 'query-1' },
+  owner: 'securitySolutionFixture',
+};
+
+// User actions persist the legacy shape, regardless of the unified shape sent on the wire.
+const toLegacyUserActionPayload = (attachment: UnifiedAttachmentPayload) => {
+  if (isUnifiedCommentAttachment(attachment)) {
+    return { type: 'user', comment: attachment.data.content, owner: attachment.owner };
+  }
+
+  if (!isUnifiedAlertAttachment(attachment)) {
+    throw new Error(`No legacy user action mapping for attachment type "${attachment.type}"`);
+  }
+
+  const { attachmentId, metadata, owner } = attachment;
+  return {
+    type: 'alert',
+    alertId: attachmentId,
+    index: metadata?.index,
+    rule: metadata?.rule,
+    owner,
+  };
+};
+
+// `getAllComments` reads through the cases_fixture route, which projects to the legacy shape.
+const legacyAlertCommentOnlyId3 = {
+  ...postCommentAlertMultipleIdsReq,
+  alertId: ['test-id-3'],
+  index: ['test-index-3'],
+};
+
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -81,7 +129,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const validateCommentsIgnoringOrder = (
     comments: Case['comments'],
-    attachments: BulkCreateAttachmentsRequestV2
+    attachments: AttachmentRequestV2[]
   ) => {
     expect(comments?.length).to.eql(attachments.length);
 
@@ -158,13 +206,12 @@ export default ({ getService }: FtrProviderContext): void => {
             action: 'create',
             created_by: defaultUser,
             payload: {
-              comment: {
-                ...attachments[index],
-              },
+              comment: toLegacyUserActionPayload(attachments[index]),
             },
             comment_id: theCase.comments?.find((comment) => comment.id === userAction.comment_id)
               ?.id,
             owner: 'securitySolutionFixture',
+            source: userActionSourceApi,
           });
         });
       });
@@ -176,21 +223,22 @@ export default ({ getService }: FtrProviderContext): void => {
           const caseWithAttachments = await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [getFilesAttachmentReq(), getFilesAttachmentReq()],
+            params: [getUnifiedFilesAttachmentReq(), getUnifiedFilesAttachmentReq()],
           });
 
-          const firstFileAttachment =
-            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
-          const secondFileAttachment =
-            caseWithAttachments.comments![1] as ExternalReferenceSOAttachmentPayload;
+          const filesPerAttachment = caseWithAttachments.comments?.map((comment) =>
+            'metadata' in comment ? comment.metadata?.files : undefined
+          );
 
           expect(caseWithAttachments.totalComment).to.be(2);
-          expect(firstFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
-          expect(secondFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+          expect(filesPerAttachment).to.eql([
+            fileAttachmentMetadata.files,
+            fileAttachmentMetadata.files,
+          ]);
         });
 
         it('should bulk create 100 file attachments', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+          const fileRequests = [...Array(100).keys()].map(() => getUnifiedFilesAttachmentReq());
 
           const postedCase = await createCase(supertest, postCaseReq);
           await bulkCreateAttachments({
@@ -201,13 +249,13 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should bulk create 100 file attachments when there is another attachment type already associated with the case', async () => {
-          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+          const fileRequests = [...Array(100).keys()].map(() => getUnifiedFilesAttachmentReq());
 
           const postedCase = await createCase(supertest, postCaseReq);
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [postExternalReferenceESReq],
+            params: [unifiedOtherAttachmentReq],
           });
 
           await bulkCreateAttachments({
@@ -241,7 +289,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const fileRequests = [...Array(99).keys()].map(() =>
-            getFilesAttachmentReq({ owner: 'securitySolution' })
+            getUnifiedFilesAttachmentReq({ owner: 'securitySolution' })
           );
 
           await bulkCreateAttachments({
@@ -287,7 +335,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           const fileRequests = [...Array(100).keys()].map(() =>
-            getFilesAttachmentReq({ owner: 'securitySolution' })
+            getUnifiedFilesAttachmentReq({ owner: 'securitySolution' })
           );
 
           await bulkCreateAttachments({
@@ -308,10 +356,8 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              getFilesAttachmentReq({
-                externalReferenceMetadata: {
-                  files,
-                },
+              getUnifiedFilesAttachmentReq({
+                metadata: { files, soType: FILE_SO_TYPE },
               }),
             ],
             expectedHttpCode: 400,
@@ -325,11 +371,12 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              postCommentUserReq,
-              getFilesAttachmentReq({
-                externalReferenceMetadata: {
+              postUnifiedCommentReq,
+              getUnifiedFilesAttachmentReq({
+                metadata: {
                   // intentionally structure the data in a way that is invalid
                   food: fileAttachmentMetadata.files,
+                  soType: FILE_SO_TYPE,
                 },
               }),
             ],
@@ -344,8 +391,8 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              getFilesAttachmentReq({
-                externalReferenceMetadata: {},
+              getUnifiedFilesAttachmentReq({
+                metadata: {},
               }),
             ],
             expectedHttpCode: 400,
@@ -353,7 +400,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('400s when attempting to add more than 100 files to a case', async () => {
-          const fileRequests = [...Array(101).keys()].map(() => getFilesAttachmentReq());
+          const fileRequests = [...Array(101).keys()].map(() => getUnifiedFilesAttachmentReq());
           const postedCase = await createCase(supertest, postCaseReq);
           await bulkCreateAttachments({
             supertest,
@@ -365,13 +412,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s when attempting to add more than 100 attachments', async () => {
-        const comment = {
-          type: AttachmentType.user,
-          comment: 'test',
-          owner: 'securitySolutionFixture',
-        };
-
-        const attachments = Array(101).fill(comment);
+        const attachments = Array(101).fill(postUnifiedCommentReq);
 
         await bulkCreateAttachments({
           supertest,
@@ -391,16 +432,8 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            {
-              type: AttachmentType.user,
-              comment: 'test',
-              owner: 'securitySolutionFixture',
-            },
-            {
-              type: AttachmentType.user,
-              comment: 'test',
-              owner: 'observabilityFixture',
-            },
+            postUnifiedCommentReq,
+            { ...postUnifiedCommentReq, owner: 'observabilityFixture' },
           ],
           expectedHttpCode: 400,
         });
@@ -412,11 +445,7 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            {
-              type: AttachmentType.user,
-              comment: 'test',
-              owner: 'securitySolutionFixture',
-            },
+            postUnifiedCommentReq,
             {
               // @ts-expect-error
               bad: 'comment',
@@ -426,20 +455,16 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('400s when missing attributes for type user', async () => {
+      it('400s when missing attributes for type comment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
           params: [
-            {
-              type: AttachmentType.user,
-              comment: 'test',
-              owner: 'securitySolutionFixture',
-            },
+            postUnifiedCommentReq,
             // @ts-expect-error
             {
-              type: AttachmentType.user,
+              type: COMMENT_ATTACHMENT_TYPE,
             },
           ],
           expectedHttpCode: 400,
@@ -447,23 +472,21 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('400s when comment is too long', async () => {
-        const longComment = 'x'.repeat(30001);
-
+        const postedCase = await createCase(supertest, postCaseReq);
         await bulkCreateAttachments({
           supertest,
-          caseId: 'case-id',
+          caseId: postedCase.id,
           params: [
             {
-              type: AttachmentType.user,
-              comment: longComment,
-              owner: 'securitySolutionFixture',
+              ...postUnifiedCommentReq,
+              data: { content: 'x'.repeat(MAX_COMMENT_LENGTH + 1) },
             },
           ],
           expectedHttpCode: 400,
         });
       });
 
-      it('400s when adding excess attributes for type user', async () => {
+      it('400s when adding excess attributes for type comment', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
         for (const attribute of ['alertId', 'index']) {
@@ -471,16 +494,10 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
+              postUnifiedCommentReq,
               {
-                type: AttachmentType.user,
-                comment: 'test',
-                owner: 'securitySolutionFixture',
-              },
-              {
-                type: AttachmentType.user,
+                ...postUnifiedCommentReq,
                 [attribute]: attribute,
-                comment: 'a comment',
-                owner: 'securitySolutionFixture',
               },
             ],
             expectedHttpCode: 400,
@@ -488,37 +505,18 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('400s when missing attributes for type alert', async () => {
+      it('400s when an alert is missing attachmentId', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
 
-        const allRequestAttributes = {
-          type: AttachmentType.alert,
-          index: 'test-index',
-          alertId: 'test-id',
-          rule: {
-            id: 'id',
-            name: 'name',
-          },
-          owner: 'securitySolutionFixture',
-        };
-
-        for (const attribute of ['alertId', 'index']) {
-          const requestAttributes = omit(attribute, allRequestAttributes);
-          await bulkCreateAttachments({
-            supertest,
-            caseId: postedCase.id,
-            params: [
-              {
-                type: AttachmentType.user,
-                comment: 'test',
-                owner: 'securitySolutionFixture',
-              },
-              // @ts-expect-error
-              requestAttributes,
-            ],
-            expectedHttpCode: 400,
-          });
-        }
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postUnifiedCommentReq,
+            omit('attachmentId', postUnifiedAlertReq) as unknown as UnifiedAttachmentPayload,
+          ],
+          expectedHttpCode: 400,
+        });
       });
 
       it('400s when adding excess attributes for type alert', async () => {
@@ -529,21 +527,10 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
+              postUnifiedCommentReq,
               {
-                type: AttachmentType.user,
-                comment: 'test',
-                owner: 'securitySolutionFixture',
-              },
-              {
-                type: AttachmentType.alert,
+                ...postUnifiedAlertReq,
                 [attribute]: attribute,
-                alertId: 'test-id',
-                index: 'test-index',
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'securitySolutionFixture',
               },
             ],
             expectedHttpCode: 400,
@@ -555,13 +542,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: 'not-exists',
-          params: [
-            {
-              type: AttachmentType.user,
-              comment: 'test',
-              owner: 'securitySolutionFixture',
-            },
-          ],
+          params: [postUnifiedCommentReq],
           expectedHttpCode: 404,
         });
       });
@@ -584,18 +565,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [
-            {
-              type: AttachmentType.alert,
-              alertId: 'test-id',
-              index: 'test-index',
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-              owner: 'securitySolutionFixture',
-            },
-          ],
+          params: [postUnifiedAlertReq],
           expectedHttpCode: 400,
         });
       });
@@ -615,7 +585,12 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        await createCaseAndBulkCreateAttachments({ supertest, expectedHttpCode: 400 });
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: getUnifiedAttachments(3),
+          expectedHttpCode: 400,
+        });
       });
 
       describe('validation', () => {
@@ -626,11 +601,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
-                alertId: alerts,
-                index: alerts,
-              },
+              buildUnifiedAlertReq('securitySolutionFixture', { alertId: alerts, index: alerts }),
             ],
             expectedHttpCode: 400,
           });
@@ -643,17 +614,15 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts.slice(0, 500),
                 index: alerts.slice(0, 500),
-              },
-              {
-                ...postCommentAlertReq,
+              }),
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts.slice(500, alerts.length),
                 index: alerts.slice(500, alerts.length),
-              },
-              postCommentAlertReq,
+              }),
+              postUnifiedAlertReq,
             ],
             expectedHttpCode: 400,
           });
@@ -666,11 +635,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
-                alertId: alerts,
-                index: alerts,
-              },
+              buildUnifiedAlertReq('securitySolutionFixture', { alertId: alerts, index: alerts }),
             ],
           });
 
@@ -678,11 +643,10 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: 'test-id',
                 index: 'test-index',
-              },
+              }),
             ],
             expectedHttpCode: 400,
           });
@@ -695,11 +659,10 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts.slice(0, 500),
                 index: alerts.slice(0, 500),
-              },
+              }),
             ],
           });
 
@@ -707,51 +670,31 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: [
-              {
-                ...postCommentAlertReq,
+              buildUnifiedAlertReq('securitySolutionFixture', {
                 alertId: alerts.slice(500),
                 index: alerts.slice(500),
-              },
-              postCommentAlertReq,
+              }),
+              postUnifiedAlertReq,
             ],
             expectedHttpCode: 400,
           });
         });
 
-        // Skipped pending the attachment-cap redesign: these rely on a custom `.test` ER/PS subtype to
-        // reach MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES (100), which no longer exists once the
-        // ER/PS registries are removed. Re-enable when the cap is revisited (UNIFIED_ATTACHMENT_PLAN "Deferred").
+        // Skipped pending the attachment-cap redesign (UNIFIED_ATTACHMENT_PLAN "Deferred").
         it.skip('400s when attempting to bulk create persistable state attachments reaching the 100 limit', async () => {
           const postedCase = await createCase(supertest, postCaseReq);
 
           await createComment({
             supertest,
             caseId: postedCase.id,
-            params: {
-              type: AttachmentType.externalReference as const,
-              owner: 'securitySolutionFixture',
-              externalReferenceAttachmentTypeId: '.test',
-              externalReferenceId: 'so-id',
-              externalReferenceMetadata: {},
-              externalReferenceStorage: {
-                soType: 'external-ref',
-                type: ExternalReferenceStorageType.savedObject as const,
-              },
-            },
+            params: postUnifiedIndicatorReq,
             expectedHttpCode: 200,
-          });
-
-          const persistableStateAttachments = Array(100).fill({
-            persistableStateAttachmentTypeId: '.test',
-            persistableStateAttachmentState: {},
-            type: AttachmentType.persistableState as const,
-            owner: 'securitySolutionFixture',
           });
 
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: persistableStateAttachments,
+            params: Array(100).fill(postUnifiedLensReq),
             expectedHttpCode: 400,
           });
         });
@@ -763,31 +706,14 @@ export default ({ getService }: FtrProviderContext): void => {
           await createComment({
             supertest,
             caseId: postedCase.id,
-            params: {
-              persistableStateAttachmentTypeId: '.test',
-              persistableStateAttachmentState: {},
-              type: AttachmentType.persistableState as const,
-              owner: 'securitySolutionFixture',
-            },
+            params: postUnifiedLensReq,
             expectedHttpCode: 200,
-          });
-
-          const externalRequestAttachments = Array(100).fill({
-            type: AttachmentType.externalReference as const,
-            owner: 'securitySolutionFixture',
-            externalReferenceAttachmentTypeId: '.test',
-            externalReferenceId: 'so-id',
-            externalReferenceMetadata: {},
-            externalReferenceStorage: {
-              soType: 'external-ref',
-              type: ExternalReferenceStorageType.savedObject as const,
-            },
           });
 
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: externalRequestAttachments,
+            params: Array(100).fill(postUnifiedIndicatorReq),
             expectedHttpCode: 400,
           });
         });
@@ -821,16 +747,12 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest: supertestWithoutAuth,
             caseId,
-            params: alerts.map((alert) => ({
-              alertId: alert.id,
-              index: alert.index,
-              rule: {
-                id: 'id',
-                name: 'name',
-              },
-              owner: 'securitySolutionFixture',
-              type: AttachmentType.alert,
-            })),
+            params: alerts.map((alert) =>
+              buildUnifiedAlertReq('securitySolutionFixture', {
+                alertId: alert.id,
+                index: alert.index,
+              })
+            ),
             expectedHttpCode,
             auth,
           });
@@ -1130,22 +1052,11 @@ export default ({ getService }: FtrProviderContext): void => {
             await bulkCreateAttachments({
               supertest,
               caseId: theCase.id,
-              params: [
-                {
-                  alertId,
-                  index: apmIndex,
-                  rule: {
-                    id: 'id',
-                    name: 'name',
-                  },
-                  owner: 'observabilityFixture',
-                  type: AttachmentType.alert,
-                },
-              ],
+              params: [buildUnifiedAlertReq('observabilityFixture', { alertId, index: apmIndex })],
             });
           }
 
-          const alert = await getAlertById({
+          const updatedAlert = await getAlertById({
             supertest,
             id: alertId,
             index: apmIndex,
@@ -1154,9 +1065,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const caseIds = cases.map((theCase) => theCase.id);
 
-          expect(alert['kibana.alert.case_ids']).eql(caseIds);
+          expect(updatedAlert['kibana.alert.case_ids']).eql(caseIds);
 
-          return { alert, cases };
+          return { alert: updatedAlert, cases };
         };
 
         it('should add the case ID to the alert schema', async () => {
@@ -1174,18 +1085,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [
-              {
-                alertId,
-                index: apmIndex,
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'observabilityFixture',
-                type: AttachmentType.alert,
-              },
-            ],
+            params: [buildUnifiedAlertReq('observabilityFixture', { alertId, index: apmIndex })],
           });
 
           const alert = await getAlertById({
@@ -1209,18 +1109,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [
-              {
-                alertId,
-                index: apmIndex,
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'securitySolutionFixture',
-                type: AttachmentType.alert,
-              },
-            ],
+            params: [buildUnifiedAlertReq('securitySolutionFixture', { alertId, index: apmIndex })],
             expectedHttpCode: 400,
           });
         });
@@ -1240,18 +1129,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            params: [
-              {
-                alertId,
-                index: apmIndex,
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'observabilityFixture',
-                type: AttachmentType.alert,
-              },
-            ],
+            params: [buildUnifiedAlertReq('observabilityFixture', { alertId, index: apmIndex })],
             auth: { user: obsOnlyReadAlerts, space: 'space1' },
             expectedHttpCode: 200,
           });
@@ -1272,18 +1150,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            params: [
-              {
-                alertId,
-                index: apmIndex,
-                rule: {
-                  id: 'id',
-                  name: 'name',
-                },
-                owner: 'observabilityFixture',
-                type: AttachmentType.alert,
-              },
-            ],
+            params: [buildUnifiedAlertReq('observabilityFixture', { alertId, index: apmIndex })],
             auth: { user: obsSec, space: 'space1' },
             expectedHttpCode: 403,
           });
@@ -1292,18 +1159,17 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('alert format', () => {
-      type AlertComment = AttachmentType.alert;
-
-      for (const [alertId, index, type] of [
-        ['1', ['index1', 'index2'], AttachmentType.alert],
-        [['1', '2'], 'index', AttachmentType.alert],
-      ]) {
-        it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index} type: ${type}`, async () => {
+      const alertFormatCases: Array<{ alertId: string | string[]; index: string | string[] }> = [
+        { alertId: '1', index: ['index1', 'index2'] },
+        { alertId: ['1', '2'], index: ['index'] },
+      ];
+      for (const { alertId, index } of alertFormatCases) {
+        it(`throws an error with an alert comment with contents id: ${alertId} indices: ${index}`, async () => {
           const postedCase = await createCase(supertest, postCaseReq);
           await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [{ ...postCommentAlertReq, alertId, index, type: type as AlertComment }],
+            params: [buildUnifiedAlertReq('securitySolutionFixture', { alertId, index })],
             expectedHttpCode: 400,
           });
         });
@@ -1312,18 +1178,11 @@ export default ({ getService }: FtrProviderContext): void => {
       it('does not throw an error with correct alert formatting', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
         const attachments = [
-          {
-            ...postCommentAlertReq,
-            alertId: '1',
-            index: ['index1'],
-            type: AttachmentType.alert as const,
-          },
-          {
-            ...postCommentAlertReq,
+          buildUnifiedAlertReq('securitySolutionFixture', { alertId: '1', index: ['index1'] }),
+          buildUnifiedAlertReq('securitySolutionFixture', {
             alertId: ['1', '2'],
             index: ['index', 'other-index'],
-            type: AttachmentType.alert as const,
-          },
+          }),
         ];
 
         await bulkCreateAttachments({
@@ -1342,14 +1201,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertReq],
+          params: [postUnifiedAlertReq],
           expectedHttpCode: 200,
         });
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertReq],
+          params: [postUnifiedAlertReq],
           expectedHttpCode: 200,
         });
 
@@ -1363,7 +1222,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertReq, postCommentAlertReq],
+          params: [postUnifiedAlertReq, postUnifiedAlertReq],
           expectedHttpCode: 200,
         });
 
@@ -1377,14 +1236,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertMultipleIdsReq],
+          params: [postUnifiedAlertMultipleIdsReq],
           expectedHttpCode: 200,
         });
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertMultipleIdsReq],
+          params: [postUnifiedAlertMultipleIdsReq],
           expectedHttpCode: 200,
         });
 
@@ -1398,7 +1257,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertMultipleIdsReq, postCommentAlertMultipleIdsReq],
+          params: [postUnifiedAlertMultipleIdsReq, postUnifiedAlertMultipleIdsReq],
           expectedHttpCode: 200,
         });
 
@@ -1407,26 +1266,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a new attachment without alerts attached to the case', async () => {
-        const alertCommentWithId3 = {
-          ...postCommentAlertMultipleIdsReq,
+        const alertCommentWithId3 = buildUnifiedAlertReq('securitySolutionFixture', {
           alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
           index: ['test-index-1', 'test-index-2', 'test-index-3'],
-        };
+        });
 
-        const alertCommentOnlyId3 = {
-          ...postCommentAlertMultipleIdsReq,
-          alertId: ['test-id-3'],
-          index: ['test-index-3'],
-        };
-
-        const allAttachments = [postCommentAlertMultipleIdsReq, alertCommentOnlyId3];
+        const allAttachments = [postCommentAlertMultipleIdsReq, legacyAlertCommentOnlyId3];
 
         const postedCase = await createCase(supertest, postCaseReq);
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertMultipleIdsReq],
+          params: [postUnifiedAlertMultipleIdsReq],
           expectedHttpCode: 200,
         });
 
@@ -1444,26 +1296,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should create a new attachment without alerts attached to the case on the same request', async () => {
-        const alertCommentWithId3 = {
-          ...postCommentAlertMultipleIdsReq,
+        const alertCommentWithId3 = buildUnifiedAlertReq('securitySolutionFixture', {
           alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
           index: ['test-index-1', 'test-index-2', 'test-index-3'],
-        };
+        });
 
-        const alertCommentOnlyId3 = {
-          ...postCommentAlertMultipleIdsReq,
-          alertId: ['test-id-3'],
-          index: ['test-index-3'],
-        };
-
-        const allAttachments = [postCommentAlertMultipleIdsReq, alertCommentOnlyId3];
+        const allAttachments = [postCommentAlertMultipleIdsReq, legacyAlertCommentOnlyId3];
 
         const postedCase = await createCase(supertest, postCaseReq);
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertMultipleIdsReq, alertCommentWithId3],
+          params: [postUnifiedAlertMultipleIdsReq, alertCommentWithId3],
           expectedHttpCode: 200,
         });
 
@@ -1474,28 +1319,21 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('does not remove user comments when filtering out duplicate alerts', async () => {
-        const alertCommentWithId3 = {
-          ...postCommentAlertMultipleIdsReq,
+        const alertCommentWithId3 = buildUnifiedAlertReq('securitySolutionFixture', {
           alertId: ['test-id-1', 'test-id-2', 'test-id-3'],
           index: ['test-index-1', 'test-index-2', 'test-index-3'],
-        };
-
-        const alertCommentOnlyId3 = {
-          ...postCommentAlertMultipleIdsReq,
-          alertId: ['test-id-3'],
-          index: ['test-index-3'],
-        };
+        });
 
         const superComment = {
-          ...postCommentUserReq,
-          comment: 'Super comment',
+          ...postUnifiedCommentReq,
+          data: { content: 'Super comment' },
         };
 
         const allAttachments = [
           postCommentAlertMultipleIdsReq,
-          alertCommentOnlyId3,
+          legacyAlertCommentOnlyId3,
           postCommentUserReq,
-          superComment,
+          { ...postCommentUserReq, comment: 'Super comment' },
         ];
 
         const postedCase = await createCase(supertest, postCaseReq);
@@ -1503,14 +1341,14 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentAlertMultipleIdsReq],
+          params: [postUnifiedAlertMultipleIdsReq],
           expectedHttpCode: 200,
         });
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [superComment, alertCommentWithId3, postCommentUserReq],
+          params: [superComment, alertCommentWithId3, postUnifiedCommentReq],
           expectedHttpCode: 200,
         });
 
@@ -1545,7 +1383,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: [postCommentUserReq],
+          params: [postUnifiedCommentReq],
           expectedHttpCode: 200,
         });
       });
@@ -1557,11 +1395,11 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
-            postCommentUserReq,
-            postCommentAlertReq,
+            postUnifiedCommentReq,
+            postUnifiedCommentReq,
+            postUnifiedAlertReq,
             // an attachment that is not a comment or an alert should not affect the stats
-            postCommentActionsReq,
+            postUnifiedActionsReq,
           ],
           expectedHttpCode: 200,
         });
@@ -1593,7 +1431,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          params: [postCommentUserReq],
+          params: [postUnifiedCommentReq],
           auth: { user: secOnly, space: 'space1' },
         });
       });
@@ -1609,7 +1447,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          params: [{ ...postCommentUserReq, owner: 'observabilityFixture' }],
+          params: [{ ...postUnifiedCommentReq, owner: 'observabilityFixture' }],
           auth: { user: secOnly, space: 'space1' },
           expectedHttpCode: 403,
         });
@@ -1629,7 +1467,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await bulkCreateAttachments({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
-            params: [postCommentUserReq],
+            params: [postUnifiedCommentReq],
             auth: { user, space: 'space1' },
             expectedHttpCode: 403,
           });
@@ -1647,7 +1485,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await bulkCreateAttachments({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
-          params: [postCommentUserReq],
+          params: [postUnifiedCommentReq],
           auth: { user: secOnly, space: 'space2' },
           expectedHttpCode: 403,
         });
