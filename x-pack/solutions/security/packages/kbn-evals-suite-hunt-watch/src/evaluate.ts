@@ -10,6 +10,7 @@ import { EVAL_SPACE_IDS } from './constants';
 import { HuntWatchClient } from './hunt_watch_client';
 import { assertWorkflowInstalled } from './workflow_fixture';
 import { runPreflight } from './preflight';
+import { seedHuntData } from './seed_hunt_data';
 
 // Extend the base evaluate fixture with the Hunt Watch client and the stack preflight.
 // Playwright constructs each worker-scoped fixture once per worker and passes it into the spec
@@ -19,7 +20,7 @@ import { runPreflight } from './preflight';
 // test/scout.
 export const evaluate = base.extend<
   {},
-  { huntWatchPreflight: void; huntWatchClient: HuntWatchClient }
+  { huntWatchPreflight: void; huntWatchSeed: void; huntWatchClient: HuntWatchClient }
 >({
   // `auto` so a spec cannot silently skip the preflight and score an empty/misconfigured
   // stack. Order matters: the preflight must run before `assertWorkflowInstalled` checks the
@@ -38,9 +39,31 @@ export const evaluate = base.extend<
     },
     { scope: 'worker', auto: true },
   ],
-  huntWatchClient: [
-    async ({ fetch, log, huntWatchPreflight }, use) => {
+  // Seeds the Demo C+ aws-iam pack, the non-default space copies, and the canary once per
+  // worker, then verifies every bound report id exists in its expected space. `auto` so an
+  // unseeded stack cannot be scored. Runs after the preflight (spaces must exist for the copies).
+  huntWatchSeed: [
+    async ({ config, esClient, log, huntWatchPreflight }, use) => {
       void huntWatchPreflight;
+      const cleanup = await seedHuntData({
+        esClient,
+        log,
+        target: {
+          kibanaUrl: config.hosts.kibana,
+          elasticsearchUrl: config.hosts.elasticsearch,
+          username: config.auth.username,
+          password: config.auth.password,
+        },
+      });
+      await use();
+      await cleanup();
+    },
+    { scope: 'worker', auto: true },
+  ],
+  huntWatchClient: [
+    async ({ fetch, log, huntWatchPreflight, huntWatchSeed }, use) => {
+      void huntWatchPreflight;
+      void huntWatchSeed;
       const client = new HuntWatchClient(fetch, log);
       await use(client);
       await client.cancelPending();

@@ -14,6 +14,8 @@
     "@kbn/core",
     "@kbn/zod",
     "@kbn/alertzero-common",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/repo-info",
+    "@kbn/proposals-common"
   ]
 }

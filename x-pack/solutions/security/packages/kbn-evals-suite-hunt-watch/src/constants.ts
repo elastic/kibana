@@ -80,12 +80,106 @@ export const EVAL_SPACE_IDS = [
 /** Index pattern that resolves to no indices/data streams/aliases, used to induce `blocked`. */
 export const HUNT_BLOCKED_INDEX_PATTERN = 'logs-hunt-eval-nonexistent-*';
 
+/** Public (versioned) API version shared by `/api/workflows/*` and `/api/agent_builder/*`. */
+export const PUBLIC_API_VERSION = '2023-10-31';
+
 /**
- * Fixture report ids from the Demo C+ generator (elastic/kibana#291895). Bound in Phase 2 once
- * the generator fixtures land on `main` — listed here now (per the plan's locked decisions) so
- * downstream constants have a single source, but nothing in Phase 1 seeds or asserts against
- * them yet.
+ * Fixture report ids from the Demo C+ generator (elastic/kibana#291895, on `main`). Id scheme is
+ * `ti-report-<reportIdSlug>-historic-NN`; the slugs below mirror `PACK_TI_SCENARIOS['aws-iam']`
+ * in `security_solution/scripts/data/lib/threat_intel_fixtures.ts`. That file is not importable
+ * from a package, so `seed_contract.test.ts` reads it as text to catch drift.
  */
 export const TI_REPORT_AWS_IAM_PREFIX = 'ti-report-aws-iam';
 export const TI_REPORT_CANARY_ID = 'ti-report-hunt-eval-canary-01';
 export const TI_REPORT_MISSING_ID = 'ti-report-hunt-eval-missing-01';
+
+/** `reportIdSlug` of each aws-iam scenario the generator seeds. */
+export const AWS_IAM_REPORT_SLUGS = [
+  'aws-iam',
+  'aws-iam-assume-role',
+  'aws-iam-ioc-only',
+  'aws-iam-behavior-only',
+  'aws-iam-clean',
+] as const;
+export type AwsIamReportSlug = (typeof AWS_IAM_REPORT_SLUGS)[number];
+
+/** Historic reports seeded per scenario (`--threat-intel-report-count`). */
+export const HISTORIC_REPORTS_PER_SCENARIO = 3;
+
+export const buildHistoricReportId = (slug: AwsIamReportSlug, slot: number): string =>
+  `ti-report-${slug}-historic-${String(slot).padStart(2, '0')}`;
+
+/** Id of a report copied into a non-default eval space (`<original-id>-<spaceId>`). */
+export const buildSpaceCopyReportId = (reportId: string, spaceId: string): string =>
+  `${reportId}-${spaceId}`;
+
+/** Every report id the generator writes for the aws-iam pack (5 scenarios x 3 historic). */
+export const GENERATED_AWS_IAM_REPORT_IDS: readonly string[] = AWS_IAM_REPORT_SLUGS.flatMap(
+  (slug) =>
+    Array.from({ length: HISTORIC_REPORTS_PER_SCENARIO }, (_, i) =>
+      buildHistoricReportId(slug, i + 1)
+    )
+);
+
+/** Report ids the dataset rows bind to. */
+export const HUNT_REPORT_IDS = {
+  /** Golden `hit`: behavior-only, smoke-proven end to end (Tier 1 clean, Tier 2 AssumeRole hit). */
+  hit: buildHistoricReportId('aws-iam-behavior-only', 2),
+  /** Golden `clean`: password-spray advisory disjoint from seeded telemetry. */
+  clean: buildHistoricReportId('aws-iam-clean', 1),
+  /** Hard `partial` probe: a second clean report. */
+  partial: buildHistoricReportId('aws-iam-clean', 2),
+  /** Hard `difficult hit`: IOC-only narrative with no technique ids for Tier 2. */
+  difficultHit: buildHistoricReportId('aws-iam-ioc-only', 2),
+  /** Hard `multi-candidate`: three named reports in one trigger. */
+  multiCandidate: [
+    buildHistoricReportId('aws-iam', 1),
+    buildHistoricReportId('aws-iam-assume-role', 1),
+    buildHistoricReportId('aws-iam-ioc-only', 1),
+  ],
+  /** Hard `no-candidates`: an id that does not exist. Must complete with `not_found`. */
+  missing: TI_REPORT_MISSING_ID,
+  /** Canary: suite-authored prose-only report with no IOCs or technique ids. */
+  canary: TI_REPORT_CANARY_ID,
+} as const;
+
+/** Default-space reports copied into non-default eval spaces, keyed by target space. */
+export const SPACE_COPY_SOURCES: ReadonlyArray<{
+  spaceId: string;
+  sourceReportId: string;
+  copyReportId: string;
+}> = [
+  { spaceId: HUNT_BLOCKED_SPACE_ID, sourceSlug: 'aws-iam' as const, slot: 1 },
+  { spaceId: HUNT_A_SPACE_ID, sourceSlug: 'aws-iam-behavior-only' as const, slot: 1 },
+  { spaceId: HUNT_B_SPACE_ID, sourceSlug: 'aws-iam-behavior-only' as const, slot: 1 },
+].map(({ spaceId, sourceSlug, slot }) => {
+  const sourceReportId = buildHistoricReportId(sourceSlug, slot);
+  return {
+    spaceId,
+    sourceReportId,
+    copyReportId: buildSpaceCopyReportId(sourceReportId, spaceId),
+  };
+});
+
+const copyIdFor = (spaceId: string): string => {
+  const entry = SPACE_COPY_SOURCES.find((c) => c.spaceId === spaceId);
+  if (!entry) throw new Error(`No space copy configured for space "${spaceId}"`);
+  return entry.copyReportId;
+};
+
+/** Report ids the space rows trigger inside their own space. */
+export const SPACE_REPORT_IDS = {
+  blocked: copyIdFor(HUNT_BLOCKED_SPACE_ID),
+  spaceA: copyIdFor(HUNT_A_SPACE_ID),
+  spaceB: copyIdFor(HUNT_B_SPACE_ID),
+} as const;
+
+/** Threat intel index the seed writes into. Must already exist (Kibana creates it). */
+export const THREAT_REPORTS_INDEX = '.kibana-threat-reports';
+
+/** Holdout reports (`historic-03` of the other scenarios); scaffolded in Phase 6. */
+export const HOLDOUT_REPORT_IDS = [
+  buildHistoricReportId('aws-iam-assume-role', 3),
+  buildHistoricReportId('aws-iam-ioc-only', 3),
+  buildHistoricReportId('aws-iam-clean', 3),
+] as const;
