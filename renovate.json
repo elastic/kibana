@@ -936,8 +936,12 @@
       "enabled": true
     },
     {
-      "groupName": "license-checker",
-      "matchDepNames": ["license-checker", "@types/license-checker"],
+      "groupName": "license detection",
+      "matchDepNames": [
+        "normalize-package-data",
+        "@types/normalize-package-data",
+        "spdx-expression-parse"
+      ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
