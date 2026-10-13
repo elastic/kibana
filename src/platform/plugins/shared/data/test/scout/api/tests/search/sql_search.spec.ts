@@ -46,10 +46,10 @@ apiTest.describe('sql search strategy', { tag: tags.stateful.classic }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toHaveProperty('id');
-      expect(response.body).toHaveProperty('isPartial');
-      expect(response.body).toHaveProperty('isRunning');
-      expect(response.body).toHaveProperty('rawResponse');
+      expect(response.body.id).toBeDefined();
+      expect(response.body.isPartial).toBeDefined();
+      expect(response.body.isRunning).toBeDefined();
+      expect(response.body.rawResponse).toBeDefined();
       expect(response.headers[ELASTIC_HTTP_VERSION_HEADER]).toBe('1');
     }
   );
@@ -70,9 +70,9 @@ apiTest.describe('sql search strategy', { tag: tags.stateful.classic }, () => {
     const second = await apiClient.post(`${SQL_PATH}/${id}`, { headers, body: {} });
     expect(second).toHaveStatusCode(200);
     expect(second.body.id).toBe(id);
-    expect(second.body).toHaveProperty('isPartial');
-    expect(second.body).toHaveProperty('isRunning');
-    expect(second.body).toHaveProperty('rawResponse');
+    expect(second.body.isPartial).toBeDefined();
+    expect(second.body.isRunning).toBeDefined();
+    expect(second.body.rawResponse).toBeDefined();
     expect(second.headers[ELASTIC_HTTP_VERSION_HEADER]).toBe('1');
   });
 

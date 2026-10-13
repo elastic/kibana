@@ -61,7 +61,7 @@ apiTest.describe('Saved queries API', { tag: tags.deploymentAgnostic }, () => {
     apiClient.post(`${SAVED_QUERY_BASE_URL}/_find`, { headers, body });
 
   const countQueries = (apiClient: ApiClientFixture) =>
-    apiClient.get(`${SAVED_QUERY_BASE_URL}/_count`, { headers });
+    apiClient.get(`${SAVED_QUERY_BASE_URL}/_count`, { headers, responseType: 'text' });
 
   const isDuplicateTitle = (apiClient: ApiClientFixture, title: string, id?: string) =>
     apiClient.post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`, {
@@ -323,17 +323,17 @@ apiTest.describe('Saved queries API', { tag: tags.deploymentAgnostic }, () => {
   apiTest('count: should return expected counts for saved query count', async ({ apiClient }) => {
     const empty = await countQueries(apiClient);
     expect(empty).toHaveStatusCode(200);
-    expect(Number(empty.body)).toBe(0);
+    expect(empty.body).toBe('0');
 
     expect(await createQuery(apiClient)).toHaveStatusCode(200);
     const second = await createQuery(apiClient, { ...mockSavedQuery, title: 'my title 2' });
     expect(second).toHaveStatusCode(200);
 
-    expect(Number((await countQueries(apiClient)).body)).toBe(2);
+    expect((await countQueries(apiClient)).body).toBe('2');
 
     expect(await deleteQuery(apiClient, second.body.id)).toHaveStatusCode(200);
 
-    expect(Number((await countQueries(apiClient)).body)).toBe(1);
+    expect((await countQueries(apiClient)).body).toBe('1');
   });
 
   apiTest(
