@@ -467,8 +467,14 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       // open edit flyout when icon is clicked
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
+      await testSubjects.existOrFail('ruleForm');
 
-      await testSubjects.click('rulePageFooterCancelButton');
+      // Cancel can be swallowed while the edit form is still re-rendering, so navigate back instead.
+      await pageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions',
+      });
+      await testSubjects.click('rulesTab');
+      await testSubjects.existOrFail('rulesList');
     });
 
     it('should delete all selection', async () => {
