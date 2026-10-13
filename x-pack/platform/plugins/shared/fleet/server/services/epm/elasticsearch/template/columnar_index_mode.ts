@@ -93,19 +93,20 @@ export function stripColumnarIncompatibleMappings(componentTemplates: TemplateMa
  *
  * - A data stream that is not columnar-ready (`unsupported` or nothing declared) never gets it.
  * - An explicit user choice, stored once per installation, always wins.
- * - Without a user choice, `default` readiness applies to new installations only; existing data
- *   streams keep whatever mode their index template already has, so an `opt_in` -> `default`
- *   package upgrade never flips them.
+ * - Without a user choice, `default` readiness applies to data streams that are new to the
+ *   installation: a fresh install, or a data stream added in a later package version. Existing
+ *   data streams keep whatever mode their index template already has, so an `opt_in` ->
+ *   `default` package upgrade never flips them.
  */
 export function resolveLogsdbColumnarIndexMode({
   readiness,
   userChoice,
-  isNewInstall,
+  isNewDataStream,
   currentIndexMode,
 }: {
   readiness?: ReturnType<typeof getLogsdbColumnarReadiness>;
   userChoice?: boolean;
-  isNewInstall: boolean;
+  isNewDataStream: boolean;
   currentIndexMode?: string;
 }): typeof LOGSDB_COLUMNAR_INDEX_MODE | undefined {
   if (!isLogsdbColumnarReady(readiness)) {
@@ -114,7 +115,7 @@ export function resolveLogsdbColumnarIndexMode({
   if (userChoice !== undefined) {
     return userChoice ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
   }
-  if (isNewInstall) {
+  if (isNewDataStream) {
     return readiness === 'default' ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
   }
   return currentIndexMode === LOGSDB_COLUMNAR_INDEX_MODE ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
@@ -122,7 +123,8 @@ export function resolveLogsdbColumnarIndexMode({
 
 /**
  * Reads `settings.index.mode` of the index templates that are already installed for the given
- * data streams. Missing templates (fresh install, new data stream) resolve to `undefined`.
+ * data streams. Missing templates (fresh install, new data stream) are left out of the map, so
+ * `has()` tells an existing template without a mode apart from a template that does not exist.
  */
 export async function getCurrentIndexModes(
   esClient: ElasticsearchClient,
@@ -136,12 +138,14 @@ export async function getCurrentIndexModes(
           { name: templateName },
           { ignore: [404] }
         );
-        const mode =
-          res?.index_templates?.[0]?.index_template?.template?.settings?.index?.mode ?? undefined;
-        return [templateName, mode] as const;
+        const indexTemplate = res?.index_templates?.[0]?.index_template;
+        if (!indexTemplate) {
+          return undefined;
+        }
+        return [templateName, indexTemplate.template?.settings?.index?.mode ?? undefined] as const;
       } catch (err) {
         if (err?.statusCode === 404) {
-          return [templateName, undefined] as const;
+          return undefined;
         }
         throw err;
       }
@@ -149,7 +153,7 @@ export async function getCurrentIndexModes(
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
   );
 
-  return new Map(entries);
+  return new Map(entries.filter((entry) => entry !== undefined));
 }
 
 /**
@@ -212,7 +216,10 @@ export async function resolveColumnarIndexModes({
       resolveLogsdbColumnarIndexMode({
         readiness,
         userChoice,
-        isNewInstall,
+        // Without an ES client the current templates are unknown: treat every data stream as
+        // existing so that none of them flips.
+        isNewDataStream:
+          isNewInstall || (esClient !== undefined && !currentIndexModes.has(templateName)),
         currentIndexMode,
       })
     );

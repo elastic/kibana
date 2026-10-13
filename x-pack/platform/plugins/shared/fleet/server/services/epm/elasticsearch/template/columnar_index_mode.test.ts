@@ -106,36 +106,36 @@ describe('resolveLogsdbColumnarIndexMode', () => {
     'returns undefined when the readiness is %s',
     (readiness) => {
       expect(
-        resolveLogsdbColumnarIndexMode({ readiness, userChoice: true, isNewInstall: true })
+        resolveLogsdbColumnarIndexMode({ readiness, userChoice: true, isNewDataStream: true })
       ).toBeUndefined();
     }
   );
 
   it('follows an explicit user choice', () => {
     expect(
-      resolveLogsdbColumnarIndexMode({ readiness: 'opt_in', userChoice: true, isNewInstall: false })
+      resolveLogsdbColumnarIndexMode({ readiness: 'opt_in', userChoice: true, isNewDataStream: false })
     ).toEqual('logsdb_columnar');
     expect(
       resolveLogsdbColumnarIndexMode({
         readiness: 'default',
         userChoice: false,
-        isNewInstall: true,
+        isNewDataStream: true,
       })
     ).toBeUndefined();
   });
 
-  it('applies `default` readiness on a new installation only', () => {
-    expect(resolveLogsdbColumnarIndexMode({ readiness: 'default', isNewInstall: true })).toEqual(
+  it('applies `default` readiness to a new data stream only', () => {
+    expect(resolveLogsdbColumnarIndexMode({ readiness: 'default', isNewDataStream: true })).toEqual(
       'logsdb_columnar'
     );
     expect(
-      resolveLogsdbColumnarIndexMode({ readiness: 'default', isNewInstall: false })
+      resolveLogsdbColumnarIndexMode({ readiness: 'default', isNewDataStream: false })
     ).toBeUndefined();
   });
 
-  it('does not apply `opt_in` readiness on a new installation', () => {
+  it('does not apply `opt_in` readiness to a new data stream', () => {
     expect(
-      resolveLogsdbColumnarIndexMode({ readiness: 'opt_in', isNewInstall: true })
+      resolveLogsdbColumnarIndexMode({ readiness: 'opt_in', isNewDataStream: true })
     ).toBeUndefined();
   });
 
@@ -143,14 +143,14 @@ describe('resolveLogsdbColumnarIndexMode', () => {
     expect(
       resolveLogsdbColumnarIndexMode({
         readiness: 'default',
-        isNewInstall: false,
+        isNewDataStream: false,
         currentIndexMode: 'logsdb_columnar',
       })
     ).toEqual('logsdb_columnar');
     expect(
       resolveLogsdbColumnarIndexMode({
         readiness: 'default',
-        isNewInstall: false,
+        isNewDataStream: false,
         currentIndexMode: 'logsdb',
       })
     ).toBeUndefined();
@@ -220,6 +220,35 @@ describe('resolveColumnarIndexModes', () => {
     });
 
     expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
+  });
+
+  it('applies the package `default` readiness to a data stream added by an upgrade', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockResponse({ index_templates: [] } as any);
+
+    const modes = await resolveColumnarIndexModes({
+      esClient,
+      logger: loggerMock.create(),
+      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
+      dataStreams: [dataStream({})],
+      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
+    });
+
+    expect(modes.get('logs-pkg.ds')).toEqual('logsdb_columnar');
+  });
+
+  it('does not flip an existing data stream on an `opt_in` -> `default` upgrade', async () => {
+    const esClient = setupEsClient();
+
+    const modes = await resolveColumnarIndexModes({
+      esClient,
+      logger: loggerMock.create(),
+      packageInfo: { name: 'pkg', version: '2.0.0', elasticsearch: { logsdb_columnar: 'default' } },
+      dataStreams: [dataStream({})],
+      installedPkg: { name: 'pkg', version: '1.0.0' } as Installation,
+    });
+
+    expect(modes.get('logs-pkg.ds')).toBeUndefined();
   });
 
   it('removes the mode and warns when the data stream becomes unsupported', async () => {
