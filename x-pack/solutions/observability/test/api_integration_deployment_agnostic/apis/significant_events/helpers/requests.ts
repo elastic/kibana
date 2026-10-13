@@ -372,6 +372,35 @@ export async function deleteFeature(
   );
 }
 
+/**
+ * The cross-source bulk route answers 200 and counts a source's operations as `failed` when
+ * that source's write lease is held, so this resends the request until nothing fails. A resent
+ * delete or exclude that already applied comes back as `skipped`, which lets the counts be folded
+ * into what one uncontended request returns. A resent restore applies again, so restores must
+ * target a single source: its operations then fail or apply together.
+ */
+export async function bulkFeaturesAcrossSources(
+  client: SignificantEventsSupertestRepositoryClient,
+  operations: Array<
+    { delete: { id: string } } | { exclude: { id: string } } | { restore: { id: string } }
+  >
+) {
+  let appliedEarlier = 0;
+  for (let attempt = 1; ; attempt++) {
+    const { succeeded, failed, skipped } = await client
+      .fetch('POST /internal/streams/features/_bulk', {
+        params: { body: { operations } },
+      })
+      .expect(200)
+      .then((response) => response.body);
+    if (failed === 0 || attempt === WRITE_LEASE_RETRY_ATTEMPTS) {
+      return { succeeded: appliedEarlier + succeeded, failed, skipped: skipped - appliedEarlier };
+    }
+    appliedEarlier += succeeded;
+    await new Promise((resolve) => setTimeout(resolve, WRITE_LEASE_RETRY_DELAY_MS));
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Maintenance helpers
 // ---------------------------------------------------------------------------
