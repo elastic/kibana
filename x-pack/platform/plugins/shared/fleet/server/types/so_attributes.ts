@@ -54,6 +54,7 @@ import type {
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
+import type { IacCallbackStatus } from '../../common/types/models/iac_callback';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -421,4 +422,21 @@ export interface CloudOnboardingDeploymentSOAttributes {
   agentPolicyIds?: string[];
   /** Elasticsearch API key ID for push mechanisms (ecf). Set by the backend after key creation; used to identify the key for rotation/revocation. */
   apiKeyId?: string;
+}
+
+export interface IacCallbackSOAttributes {
+  provider: 'aws';
+  status: IacCallbackStatus;
+  /** Elasticsearch id of the zero-privilege key minted for this record; the key itself is never stored. */
+  api_key_id: string;
+  created_at: string;
+  created_by?: string;
+  /** Space the launch happened in; the type is space-agnostic because the Lambda calls without one. */
+  space_id?: string;
+  expires_at: string;
+  received_at?: string;
+  role_arn?: string;
+  stack_arn?: string;
+  aws_account_id?: string;
+  region?: string;
 }
