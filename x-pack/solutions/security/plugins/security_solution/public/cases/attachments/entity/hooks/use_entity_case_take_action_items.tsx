@@ -16,7 +16,10 @@ import {
   ADD_TO_NEW_CASE_TEST_ID,
   ADD_TO_EXISTING_CASE_TEST_ID,
 } from '../../../../../common/cases/attachments/entity/test_ids';
-import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
+import {
+  isFaceliftV8OrLater,
+  useActiveFaceliftVersion,
+} from '../../../../entity_analytics/components/home/facelift/active_version';
 import {
   ADD_TO_CASE_LABEL,
   ADD_TO_CASE_TEST_ID,
@@ -51,7 +54,7 @@ export const useEntityCaseTakeActionItems = (
 
   return useCallback(
     (closePopover: () => void) => {
-      if (faceliftVersion === 'v8') {
+      if (isFaceliftV8OrLater(faceliftVersion)) {
         return canAddToCase
           ? [
               <EuiContextMenuItem

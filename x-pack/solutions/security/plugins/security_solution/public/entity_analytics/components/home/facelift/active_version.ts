@@ -8,7 +8,7 @@
 /**
  * Active EA Facelift prototype version.
  *
- * Home UI lives in `./v1`–`./v8` as independent code snapshots. Flyout / table
+ * Home UI lives in `./v1`–`./v9` as independent code snapshots. Flyout / table
  * mock bridges read this module so external hooks follow the selected version.
  * To ship a single final version later: keep that folder, delete the others,
  * drop the switcher, and point the thin root bridges at the survivor (or move
@@ -25,16 +25,19 @@
  * its own metrics state: v.6 reads `./active_metrics_version` (metrics v.1–v.7),
  * v.7 reads `./v7/active_metrics_version` (metrics v.7–v.8), v.8 reads
  * `./v8/active_metrics_version` (full vs simplified tracks, each with its own
- * v.1). Prototype v.5 keeps a fixed metrics v.1 look with no control.
+ * v.1). v.9 has metrics v.6 only, with its own Simplified metrics switch
+ * (`./v9/active_metrics_version`). Prototype v.5 keeps a fixed metrics v.1
+ * look with no control.
  */
 
 import { useCallback, useEffect, useState } from 'react';
 
-export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6' | 'v7' | 'v8';
+export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4' | 'v5' | 'v6' | 'v7' | 'v8' | 'v9';
 
-export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v8';
+export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v9';
 
 export const FACELIFT_VERSION_OPTIONS: Array<{ key: FaceliftVersion; label: string }> = [
+  { key: 'v9', label: 'v.9' },
   { key: 'v8', label: 'v.8' },
   { key: 'v7', label: 'v.7' },
   { key: 'v6', label: 'v.6' },
@@ -91,4 +94,9 @@ export const isFaceliftAppHeaderVersion = (version: FaceliftVersion): boolean =>
   version === 'v5' ||
   version === 'v6' ||
   version === 'v7' ||
-  version === 'v8';
+  version === 'v8' ||
+  version === 'v9';
+
+/** v.8 and later share the flyout / header refinements gated in shared code. */
+export const isFaceliftV8OrLater = (version: FaceliftVersion): boolean =>
+  version === 'v8' || version === 'v9';

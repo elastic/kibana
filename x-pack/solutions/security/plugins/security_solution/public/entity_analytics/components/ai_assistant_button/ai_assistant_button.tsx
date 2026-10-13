@@ -22,7 +22,7 @@ import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agen
 import { useAskAiAssistant } from './use_ask_ai_assistant';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { AgentBuilderAddToChatTelemetry } from '../../../agent_builder/hooks/use_report_add_to_chat';
-import { useActiveFaceliftVersion } from '../home/facelift/active_version';
+import { isFaceliftV8OrLater, useActiveFaceliftVersion } from '../home/facelift/active_version';
 
 export interface AiAssistantButtonProps<T extends EntityType> {
   entityType: T;
@@ -94,7 +94,7 @@ export const AiAssistantButton = <T extends EntityType>({
       <NewAgentBuilderAttachment
         onClick={openAgentBuilderFlyout}
         telemetry={{ pathway: telemetryPathway, attachments: ['entity'] }}
-        iconType={faceliftVersion === 'v8' ? 'addToChat' : 'productAgent'}
+        iconType={isFaceliftV8OrLater(faceliftVersion) ? 'addToChat' : 'productAgent'}
       />
     );
   }

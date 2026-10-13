@@ -17,7 +17,10 @@ import { PreferenceFormattedDate } from '../../../common/components/formatted_da
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import type { ObservedEntityData } from '../../../flyout_v2/entity/shared/components/observed_entity/types';
-import { useActiveFaceliftVersion } from '../../../entity_analytics/components/home/facelift/active_version';
+import {
+  isFaceliftV8OrLater,
+  useActiveFaceliftVersion,
+} from '../../../entity_analytics/components/home/facelift/active_version';
 import { EntitySourceBadge } from '../shared/components/entity_source_badge';
 import { RiskLevelBadge } from '../shared/components/risk_level_badge';
 import {
@@ -54,7 +57,8 @@ export const ServicePanelHeader = ({
   const [faceliftVersion] = useActiveFaceliftVersion();
   const resolvedRawRecordCount = useResolvedRawRecordCount(entityId);
   // v.8 resolved identities show "Resolved from N records" where "Entity Store" was.
-  const replaceSourceWithResolved = faceliftVersion === 'v8' && resolvedRawRecordCount != null;
+  const replaceSourceWithResolved =
+    isFaceliftV8OrLater(faceliftVersion) && resolvedRawRecordCount != null;
 
   return (
     <FlyoutHeader data-test-subj="service-panel-header" {...flyoutHeaderProps}>

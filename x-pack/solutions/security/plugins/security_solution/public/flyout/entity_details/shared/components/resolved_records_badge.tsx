@@ -9,7 +9,10 @@ import { EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
+import {
+  isFaceliftV8OrLater,
+  useActiveFaceliftVersion,
+} from '../../../../entity_analytics/components/home/facelift/active_version';
 import { getEntityId } from '../../../../entity_analytics/components/entity_resolution/helpers';
 import { useResolutionGroup } from '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group';
 
@@ -55,7 +58,7 @@ export const ResolvedRecordsBadge: React.FC<ResolvedRecordsBadgeProps> = ({ enti
       iconSide="left"
       data-test-subj="entity-panel-header-resolved-badge"
     >
-      {faceliftVersion === 'v8' ? (
+      {isFaceliftV8OrLater(faceliftVersion) ? (
         <FormattedMessage
           id="xpack.securitySolution.flyout.entityDetails.resolvedFromRecordsBadge"
           defaultMessage="Resolved from {count, plural, one {# record} other {# records}}"

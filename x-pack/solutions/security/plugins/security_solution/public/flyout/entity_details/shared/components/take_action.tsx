@@ -19,7 +19,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useActiveFaceliftVersion } from '../../../../entity_analytics/components/home/facelift/active_version';
+import {
+  isFaceliftV8OrLater,
+  useActiveFaceliftVersion,
+} from '../../../../entity_analytics/components/home/facelift/active_version';
 
 interface TakeActionProps {
   kqlQuery: string;
@@ -45,7 +48,7 @@ export const TakeAction = ({ kqlQuery, isDisabled, additionalItems }: TakeAction
   const [showTimeline] = useShowTimeline();
   /** Facelift v.8 carries an icon on every take-action item, like the entities table. */
   const [faceliftVersion] = useActiveFaceliftVersion();
-  const timelineIcon = faceliftVersion === 'v8' ? 'timeline' : undefined;
+  const timelineIcon = isFaceliftV8OrLater(faceliftVersion) ? 'timeline' : undefined;
 
   const last30MinRange = normalizeTimeRange({
     kind: 'absolute',

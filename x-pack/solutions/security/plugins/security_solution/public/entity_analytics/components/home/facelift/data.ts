@@ -7,7 +7,7 @@
 
 /**
  * Stable import path for facelift mock entity data.
- * Implementation lives in `./v1`–`./v8`; keep this file as a thin bridge so
+ * Implementation lives in `./v1`–`./v9`; keep this file as a thin bridge so
  * external call sites do not hard-code a version folder.
  * v.3+ re-export v.2's corpus so mocks stay shared.
  */
@@ -21,6 +21,7 @@ import * as v5 from './v5/data';
 import * as v6 from './v6/data';
 import * as v7 from './v7/data';
 import * as v8 from './v8/data';
+import * as v9 from './v9/data';
 
 const impl = () => {
   switch (getActiveFaceliftVersion()) {
@@ -40,6 +41,8 @@ const impl = () => {
       return v7;
     case 'v8':
       return v8;
+    case 'v9':
+      return v9;
   }
 };
 

@@ -29,6 +29,7 @@ import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import {
   isFaceliftAppHeaderVersion,
+  isFaceliftV8OrLater,
   useActiveFaceliftVersion,
   type FaceliftVersion,
 } from '../components/home/facelift/active_version';
@@ -57,6 +58,10 @@ import {
   FACELIFT_V8_DEFAULT_FROM,
   FACELIFT_V8_DEFAULT_TO,
 } from '../components/home/facelift/v8/time_range';
+import {
+  FACELIFT_V9_DEFAULT_FROM,
+  FACELIFT_V9_DEFAULT_TO,
+} from '../components/home/facelift/v9/time_range';
 
 /**
  * Prototypes that open on their own range instead of the app-wide “Today”.
@@ -66,6 +71,7 @@ const FACELIFT_DEFAULT_RANGES: Partial<Record<FaceliftVersion, { from: string; t
   v6: { from: FACELIFT_V6_DEFAULT_FROM, to: FACELIFT_V6_DEFAULT_TO },
   v7: { from: FACELIFT_V7_DEFAULT_FROM, to: FACELIFT_V7_DEFAULT_TO },
   v8: { from: FACELIFT_V8_DEFAULT_FROM, to: FACELIFT_V8_DEFAULT_TO },
+  v9: { from: FACELIFT_V9_DEFAULT_FROM, to: FACELIFT_V9_DEFAULT_TO },
 };
 
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
@@ -95,6 +101,16 @@ const CREATE_WATCHLIST_BUTTON_LABEL = i18n.translate(
 const ADD_INTEGRATIONS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.addIntegrationsButtonLabel',
   { defaultMessage: 'Add integrations' }
+);
+
+const HUNT_WITH_AI_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.huntWithAiButtonLabel',
+  { defaultMessage: 'Hunt with AI' }
+);
+
+const GENERATE_EXECUTIVE_BRIEF_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.homePage.generateExecutiveBriefButtonLabel',
+  { defaultMessage: 'Generate executive brief' }
 );
 
 const UEBA_INTEGRATIONS_PATH = '/app/integrations/browse/security/advanced_analytics_ueba';
@@ -157,11 +173,11 @@ const EntityAnalyticsHomePageContent = () => {
   /**
    * Native AppHeader overflow includes Feedback only when Chrome has a handler
    * (the feedback plugin registers one after telemetry opt-in). Register one on
-   * v.8 so the three-dots menu matches Workflows: Add integrations, Feedback,
+   * v.8+ so the three-dots menu matches Workflows: Add integrations, Feedback,
    * Documentation.
    */
   useEffect(() => {
-    if (faceliftVersion !== 'v8') {
+    if (!isFaceliftV8OrLater(faceliftVersion)) {
       return;
     }
     return chrome.next.registerFeedbackHandler(() => undefined);
@@ -230,11 +246,37 @@ const EntityAnalyticsHomePageContent = () => {
   );
 
   const faceliftAppMenu = useMemo<AppHeaderMenu>(() => {
-    // v.8: Add integrations then Settings in the overflow menu so the native
+    // v.8+: Add integrations then Settings in the overflow menu so the native
     // static items (Feedback, Documentation) render below a divider.
-    if (faceliftVersion === 'v8') {
+    if (isFaceliftV8OrLater(faceliftVersion)) {
+      const isV9 = faceliftVersion === 'v9';
       return {
+        // v.9: Hunt with AI is the primary action, Generate executive brief sits beside it.
+        ...(isV9
+          ? {
+              primaryActionItem: {
+                id: 'entityAnalyticsHuntWithAi',
+                label: HUNT_WITH_AI_BUTTON_LABEL,
+                iconType: 'productAgent',
+                // Prototype: no-op until the AI hunt flow is wired.
+                run: () => undefined,
+                testId: 'eaFaceliftHuntWithAiButton',
+              },
+            }
+          : {}),
         items: [
+          ...(isV9
+            ? [
+                {
+                  id: 'entityAnalyticsGenerateExecutiveBrief',
+                  label: GENERATE_EXECUTIVE_BRIEF_BUTTON_LABEL,
+                  iconType: 'sparkles' as const,
+                  // Prototype: no-op until the executive brief is wired.
+                  run: () => undefined,
+                  testId: 'eaFaceliftGenerateExecutiveBriefButton',
+                },
+              ]
+            : []),
           {
             id: 'addIntegrations',
             label: ADD_INTEGRATIONS_BUTTON_LABEL,
@@ -357,7 +399,7 @@ const EntityAnalyticsHomePageContent = () => {
         <AppHeader
           title={PAGE_TITLE}
           menu={faceliftAppMenu}
-          {...(faceliftVersion === 'v8' ? { docLink: ENTITY_ANALYTICS_DOC_LINK } : {})}
+          {...(isFaceliftV8OrLater(faceliftVersion) ? { docLink: ENTITY_ANALYTICS_DOC_LINK } : {})}
         />
       ) : (
         <HeaderPage

@@ -33,8 +33,9 @@ import {
 import {
   METRICS_VERSION_OPTIONS as METRICS_VERSION_OPTIONS_V8,
   useActiveMetricsVersion as useActiveMetricsVersionV8,
-  useSimplifiedMetrics,
+  useSimplifiedMetrics as useSimplifiedMetricsV8,
 } from '../../../entity_analytics/components/home/facelift/v8/active_metrics_version';
+import { useSimplifiedMetrics as useSimplifiedMetricsV9 } from '../../../entity_analytics/components/home/facelift/v9/active_metrics_version';
 
 const ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.globalHeader.prototypeSettingsAriaLabel',
@@ -74,13 +75,16 @@ export const PrototypeSettingsNavControl: React.FC = () => {
   const [metricsVersionV6, setMetricsVersionV6] = useActiveMetricsVersionV6();
   const [metricsVersionV7, setMetricsVersionV7] = useActiveMetricsVersionV7();
   const [metricsVersionV8, setMetricsVersionV8] = useActiveMetricsVersionV8();
-  const [simplified, setSimplified] = useSimplifiedMetrics();
+  const [simplifiedV8, setSimplifiedV8] = useSimplifiedMetricsV8();
+  const [simplifiedV9, setSimplifiedV9] = useSimplifiedMetricsV9();
 
   const closePopover = useCallback(() => setIsOpen(false), []);
   const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
 
   const showMetrics = showsMetricsVersion(faceliftVersion);
-  const showSwitcher = faceliftVersion === 'v8';
+  const showSwitcher = faceliftVersion === 'v8' || faceliftVersion === 'v9';
+  const simplified = faceliftVersion === 'v9' ? simplifiedV9 : simplifiedV8;
+  const setSimplified = faceliftVersion === 'v9' ? setSimplifiedV9 : setSimplifiedV8;
 
   const metricsOptions =
     faceliftVersion === 'v8'

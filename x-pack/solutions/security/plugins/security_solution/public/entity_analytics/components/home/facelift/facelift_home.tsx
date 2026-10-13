@@ -40,6 +40,10 @@ import {
   FaceliftHome as FaceliftHomeV8,
   FaceliftPageDescription as FaceliftPageDescriptionV8,
 } from './v8/facelift_home';
+import {
+  FaceliftHome as FaceliftHomeV9,
+  FaceliftPageDescription as FaceliftPageDescriptionV9,
+} from './v9/facelift_home';
 
 export type { FaceliftHomeProps };
 
@@ -61,6 +65,8 @@ export const FaceliftPageDescription: React.FC<{ version: FaceliftVersion }> = (
       return <FaceliftPageDescriptionV7 />;
     case 'v8':
       return <FaceliftPageDescriptionV8 />;
+    case 'v9':
+      return <FaceliftPageDescriptionV9 />;
   }
 };
 
@@ -85,5 +91,7 @@ export const FaceliftHome: React.FC<FaceliftHomeProps & { version: FaceliftVersi
       return <FaceliftHomeV7 {...props} />;
     case 'v8':
       return <FaceliftHomeV8 {...props} />;
+    case 'v9':
+      return <FaceliftHomeV9 {...props} />;
   }
 };

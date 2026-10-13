@@ -13,7 +13,10 @@ import { ExpandableSection } from '../../../../../flyout_v2/shared/components/ex
 import { VISUALIZATION_SECTION_TEST_ID } from '../../../../../flyout_v2/document/main/components/visualizations_section';
 import { VISUALIZATION_SECTION_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
-import { useActiveFaceliftVersion } from '../../../../../entity_analytics/components/home/facelift/active_version';
+import {
+  isFaceliftV8OrLater,
+  useActiveFaceliftVersion,
+} from '../../../../../entity_analytics/components/home/facelift/active_version';
 import { EntityDetailsLeftPanelTab, type EntityDetailsPath } from '../left_panel/left_panel_header';
 import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
 
@@ -46,7 +49,7 @@ export const VisualizationsSection = memo(
     // shows the section; the preview falls back to its empty state when the
     // graph feature itself is unavailable.
     const [faceliftVersion] = useActiveFaceliftVersion();
-    const shouldShowGraph = useShouldShowGraph() || faceliftVersion === 'v8';
+    const shouldShowGraph = useShouldShowGraph() || isFaceliftV8OrLater(faceliftVersion);
     const handleOpenGraphViewTab = useCallback(() => {
       openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW });
     }, [openDetailsPanel]);
