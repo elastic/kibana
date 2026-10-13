@@ -8,10 +8,10 @@
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
-  SECURITY_ROLES_URL,
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
+  buildSecurityRoleUrl,
   getWorkerRoleName,
   type WorkerRoleDefinition,
 } from '@kbn/alertzero-common';
@@ -35,8 +35,7 @@ export interface EnsureWorkerServiceAccountsOptions {
   isServerless: boolean;
 }
 
-interface RoleEntry {
-  name: string;
+interface RoleResponse {
   metadata?: { _reserved?: unknown };
 }
 
@@ -46,7 +45,9 @@ export type WorkerServiceAccountResult =
 
 const LIST_PAGE_SIZE = 100;
 
-const isConflict = (error: unknown) => isHttpFetchError(error) && error.response?.status === 409;
+const hasStatus = (error: unknown, status: number) =>
+  isHttpFetchError(error) && error.response?.status === status;
+const isConflict = (error: unknown) => hasStatus(error, 409);
 
 const toMessage = (error: unknown): string => {
   const body = isHttpFetchError(error)
@@ -85,33 +86,27 @@ type FindRole = (definition: WorkerRoleDefinition) => Promise<string>;
 
 /**
  * The roles ship built in: as Elasticsearch reserved roles on stateful and as predefined roles on
- * Serverless, where only the reserved-roles listing returns them. Listed once per call.
+ * Serverless. Each is read by name, which on Serverless also finds roles hidden from the listing.
  */
-const findBuiltInRole = (http: HttpStart, isServerless: boolean): FindRole => {
-  let reservedRoleNames: Promise<Set<string>> | undefined;
-  return async ({ name }) => {
-    reservedRoleNames ??= http
-      .get<RoleEntry[]>(SECURITY_ROLES_URL, {
-        version: SECURITY_ROLE_API_VERSION,
-        query: { includeReservedRoles: true },
-      })
-      .then(
-        (roles) =>
-          new Set(
-            roles
-              .filter(({ metadata }) => metadata?._reserved === true)
-              .map(({ name: reservedName }) => reservedName)
-          )
-      );
+const findBuiltInRole =
+  (http: HttpStart, isServerless: boolean): FindRole =>
+  async ({ name }) => {
     const roleName = getWorkerRoleName(name, { isServerless });
-    if (!(await reservedRoleNames).has(roleName)) {
-      throw new Error(
+    const missing = () =>
+      new Error(
         isServerless ? i18n.predefinedRoleMissing(roleName) : i18n.reservedRoleMissing(roleName)
       );
+    let role: RoleResponse;
+    try {
+      role = await http.get<RoleResponse>(buildSecurityRoleUrl(roleName), {
+        version: SECURITY_ROLE_API_VERSION,
+      });
+    } catch (error) {
+      throw hasStatus(error, 404) ? missing() : error;
     }
+    if (role.metadata?._reserved !== true) throw missing();
     return roleName;
   };
-};
 
 const ensureOne = async (
   http: HttpStart,

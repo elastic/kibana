@@ -7,12 +7,12 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import {
-  SECURITY_ROLES_URL,
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
+  buildSecurityRoleUrl,
   getWorkerRoleName,
 } from '@kbn/alertzero-common';
 import {
@@ -57,6 +57,17 @@ const ALL_BUILT_IN_ROLES = Object.values(WORKER_ROLE_DEFINITIONS).flatMap(({ nam
   reserved(getWorkerRoleName(name, SERVERLESS)),
 ]);
 
+const ROLE_URL_PREFIX = buildSecurityRoleUrl('');
+const isRoleUrl = (url: string) => url.startsWith(ROLE_URL_PREFIX);
+
+/** Answers a get-role-by-name call from `roles`, or with a 404 like Kibana's role route. */
+const lookupRole = (roles: RoleEntry[], url: string) => {
+  const roleName = decodeURIComponent(url.slice(ROLE_URL_PREFIX.length));
+  const role = roles.find(({ name }) => name === roleName);
+  if (!role) throw httpError(404, 'Not Found');
+  return role;
+};
+
 const setup = ({
   pages = [{ serviceAccounts: [] as Array<ReturnType<typeof account>> }],
   enabled = true,
@@ -64,12 +75,12 @@ const setup = ({
 }: {
   pages?: Array<{ serviceAccounts: Array<ReturnType<typeof account>>; nextPage?: string }>;
   enabled?: boolean;
-  /** What the role listing returns. */
+  /** The roles that exist, looked up by name. */
   roles?: RoleEntry[];
 } = {}) => {
-  // Pages answer the account listings in order; the role listing answers by URL.
+  // Pages answer the account listings in order; role lookups answer by URL.
   const get = jest.fn(
-    async (url: string): Promise<unknown> => (url === SECURITY_ROLES_URL ? roles : undefined)
+    async (url: string): Promise<unknown> => (isRoleUrl(url) ? lookupRole(roles, url) : undefined)
   );
   pages.forEach((page) => get.mockResolvedValueOnce(page));
   const put = jest.fn().mockResolvedValue({});
@@ -82,8 +93,7 @@ const setup = ({
   return { http, get, put, serviceAccounts };
 };
 
-const roleListingCalls = (get: jest.Mock) =>
-  get.mock.calls.filter(([url]) => url === SECURITY_ROLES_URL);
+const roleLookupCalls = (get: jest.Mock) => get.mock.calls.filter(([url]) => isRoleUrl(url));
 
 describe('ensureWorkerServiceAccounts', () => {
   it('reuses an existing account without looking up its role', async () => {
@@ -98,12 +108,12 @@ describe('ensureWorkerServiceAccounts', () => {
     const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], STATEFUL);
 
     expect(results.get(TRIAGE)).toEqual({ ok: true, serviceAccountId: `kibana/${name}` });
-    expect(roleListingCalls(get)).toHaveLength(0);
+    expect(roleLookupCalls(get)).toHaveLength(0);
     expect(put).not.toHaveBeenCalled();
     expect(serviceAccounts.create).not.toHaveBeenCalled();
   });
 
-  it('lists the accounts and the roles once for several workers', async () => {
+  it('lists the accounts once and looks up each worker role', async () => {
     const { http, get, serviceAccounts } = setup();
 
     const results = await ensureWorkerServiceAccounts(
@@ -115,7 +125,7 @@ describe('ensureWorkerServiceAccounts', () => {
 
     expect(get).toHaveBeenCalledWith(SECURITY_SERVICE_ACCOUNT_URL, { query: { limit: 100 } });
     expect(get.mock.calls.filter(([url]) => url === SECURITY_SERVICE_ACCOUNT_URL)).toHaveLength(1);
-    expect(roleListingCalls(get)).toHaveLength(1);
+    expect(roleLookupCalls(get)).toHaveLength(2);
     expect([...results.values()].every(({ ok }) => ok)).toBe(true);
   });
 
@@ -136,7 +146,7 @@ describe('ensureWorkerServiceAccounts', () => {
     const { http, get, serviceAccounts } = setup();
     // After the first page, account listings see the account the other tab created.
     get.mockImplementation(async (url: string) =>
-      url === SECURITY_ROLES_URL ? ALL_BUILT_IN_ROLES : { serviceAccounts: [account(name)] }
+      isRoleUrl(url) ? lookupRole(ALL_BUILT_IN_ROLES, url) : { serviceAccounts: [account(name)] }
     );
     serviceAccounts.create.mockRejectedValueOnce(httpError(409));
 
@@ -149,7 +159,7 @@ describe('ensureWorkerServiceAccounts', () => {
     const { http, get, serviceAccounts } = setup();
     serviceAccounts.create.mockRejectedValueOnce(httpError(409));
     get.mockImplementation(async (url: string) => {
-      if (url === SECURITY_ROLES_URL) return ALL_BUILT_IN_ROLES;
+      if (isRoleUrl(url)) return lookupRole(ALL_BUILT_IN_ROLES, url);
       throw httpError(503, 'Service unavailable');
     });
 
@@ -207,9 +217,8 @@ describe('ensureWorkerServiceAccounts', () => {
 
       const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], options);
 
-      expect(get).toHaveBeenCalledWith(SECURITY_ROLES_URL, {
+      expect(get).toHaveBeenCalledWith(buildSecurityRoleUrl(roleName), {
         version: SECURITY_ROLE_API_VERSION,
-        query: { includeReservedRoles: true },
       });
       expect(put).not.toHaveBeenCalled();
       expect(serviceAccounts.create).toHaveBeenCalledWith(
@@ -254,10 +263,10 @@ describe('ensureWorkerServiceAccounts', () => {
       expect(serviceAccounts.create).not.toHaveBeenCalled();
     });
 
-    it('fails the workers when the roles cannot be listed', async () => {
+    it('reports a failed role lookup', async () => {
       const { http, get, serviceAccounts } = setup();
       get.mockImplementation(async (url: string) => {
-        if (url === SECURITY_ROLES_URL) throw httpError(403, 'Forbidden');
+        if (isRoleUrl(url)) throw httpError(403, 'Forbidden');
       });
 
       const results = await ensureWorkerServiceAccounts(http, serviceAccounts, [TRIAGE], options);
