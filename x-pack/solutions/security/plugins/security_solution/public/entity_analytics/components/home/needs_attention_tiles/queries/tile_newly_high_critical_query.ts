@@ -8,6 +8,8 @@
 import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import { buildRiskLevelHistoryBranch } from './risk_history';
+import { buildPreviousNewlyHighCriticalQuery } from './risk_previous_period';
+import type { TilePeriod } from './tile_period';
 
 /**
  * Builds an ES|QL query that counts entities that crossed into High or Critical risk
@@ -37,14 +39,26 @@ import { buildRiskLevelHistoryBranch } from './risk_history';
  *   - current_level_num >= 3  (is High or Critical right now)
  *   - boundary_level_num IS NULL OR current_level_num > boundary_level_num  (had no level at the
  *     boundary, or a lower one: Low or Moderate to High or Critical, or High to Critical)
+ *
+ * `period` 'previous' builds the same tile for the range right before the selected one, for the
+ * period-over-period delta (see risk_previous_period.ts); the default 'current' is unchanged.
  */
 
 export const buildNewlyHighCriticalCountQuery = (
   spaceId: string,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
-  entityFilterClauses: string[] = []
+  entityFilterClauses: string[] = [],
+  period: TilePeriod = 'current'
 ): string => {
+  if (period === 'previous') {
+    return buildPreviousNewlyHighCriticalQuery(
+      spaceId,
+      entitiesIndexName,
+      timeRange,
+      entityFilterClauses
+    );
+  }
   const index = getRiskScoreIndex(spaceId);
   const boundary = buildLookback(timeRange);
   return [

@@ -8,6 +8,8 @@
 import type { TimeRange } from '../../entities_grid/common';
 import { buildLookback, getRiskScoreIndex } from '../../entities_grid/queries/esql';
 import { buildRiskScoreHistoryBranch } from './risk_history';
+import { buildPreviousRiskMoversQuery } from './risk_previous_period';
+import type { TilePeriod } from './tile_period';
 
 /**
  * Builds an ES|QL query that counts entities whose risk score rose by ≥10 points
@@ -31,14 +33,21 @@ import { buildRiskScoreHistoryBranch } from './risk_history';
  *
  * SET unmapped_fields="nullify" prevents errors when only some entity types are
  * present in the index (e.g. only host docs → user.name is not in the mapping).
+ *
+ * `period` 'previous' builds the same tile for the range right before the selected one, for the
+ * period-over-period delta (see risk_previous_period.ts); the default 'current' is unchanged.
  */
 
 export const buildRiskMoversCountQuery = (
   spaceId: string,
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
-  entityFilterClauses: string[] = []
+  entityFilterClauses: string[] = [],
+  period: TilePeriod = 'current'
 ): string => {
+  if (period === 'previous') {
+    return buildPreviousRiskMoversQuery(spaceId, entitiesIndexName, timeRange, entityFilterClauses);
+  }
   const index = getRiskScoreIndex(spaceId);
   const boundary = buildLookback(timeRange);
   return [
