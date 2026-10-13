@@ -210,7 +210,7 @@ export function createSearchEventsTool({
       })}
     `,
     annotations: {
-      title: 'Search Significant Events',
+      title: 'Search significant events',
       readOnlyHint: true,
       destructiveHint: false,
       idempotentHint: true,
