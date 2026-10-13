@@ -13,6 +13,12 @@ import {
   type Investigation,
 } from '@kbn/agentic-investigations-common';
 import { proposalOutcome } from '../proposal_outcome';
+import {
+  ALERTZERO_UI_EVENTS,
+  classifyError,
+  useAlertZeroTelemetry,
+  useReportErrorShown,
+} from '../../../telemetry';
 import type { QueueSection as QueueSectionState } from './use_queue_section';
 
 export interface QueueSectionProps {
@@ -38,6 +44,7 @@ export const QueueSection = ({
   section,
   entityFilter,
   selectedProposalId,
+  onClickCard,
   ...handlers
 }: QueueSectionProps) => {
   const {
@@ -49,6 +56,7 @@ export const QueueSection = ({
     onToggle,
     loadingRows,
     hasLoadError,
+    loadError,
     hasLoadMoreError,
     hasCountError,
     retry,
@@ -70,6 +78,29 @@ export const QueueSection = ({
   );
   const getOutcomeLabel = useCallback((proposalId: string) => outcomes.get(proposalId), [outcomes]);
 
+  useReportErrorShown({
+    errorClass: classifyError(loadError),
+    isShown: hasLoadError,
+    surface: 'queue',
+  });
+
+  // Only a click reaches here: a copied link or the URL opens the flyout without a card.
+  const { reportEvent } = useAlertZeroTelemetry();
+  const onClickBriefCard = useCallback(
+    (proposalId: Investigation['id']) => {
+      reportEvent(ALERTZERO_UI_EVENTS.BriefCardClicked, {
+        conversation_type: 'investigation',
+        has_pending_proposal:
+          proposals.find((proposal) => proposal.id === proposalId)?.status === 'pending',
+        position_in_list: investigations.findIndex(
+          (investigation) => investigation.id === proposalId
+        ),
+      });
+      onClickCard(proposalId);
+    },
+    [investigations, onClickCard, proposals, reportEvent]
+  );
+
   return (
     <ConversationQueue
       briefingType={id}
@@ -88,6 +119,7 @@ export const QueueSection = ({
       isFiltered={Boolean(entityFilter)}
       selectedIds={selectedIds}
       getOutcomeLabel={getOutcomeLabel}
+      onClickCard={onClickBriefCard}
       {...handlers}
     />
   );

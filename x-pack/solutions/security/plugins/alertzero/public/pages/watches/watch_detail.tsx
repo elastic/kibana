@@ -26,6 +26,7 @@ import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatchSettingsDraft } from '../../hooks/use_watch_settings_draft';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useWorkers } from '../../hooks/use_workers_api';
+import { classifyError, useReportErrorShown } from '../../telemetry';
 import { WatchesSectionLayout } from './components/watches_section_layout';
 import { WorkerSettingsPanel } from './components/worker_settings_panel';
 import {
@@ -236,7 +237,19 @@ export const WatchDetailPage: React.FC = () => {
     (isHttpFetchError(error) && error.response?.status === 404) ||
     (!isLoading && !error && !hasCurrentWatch);
 
-  if (!hasCurrentWatch && isLoading) {
+  const isWatchLoading = !hasCurrentWatch && isLoading;
+  useReportErrorShown({
+    errorClass: isNotFound ? 'not_found' : classifyError(error),
+    isShown: !isWatchLoading && (!watch || !hasCurrentWatch),
+    surface: 'watch_detail',
+  });
+  useReportErrorShown({
+    errorClass: classifyError(workersError),
+    isShown: Boolean(workersError) && Boolean(watch) && hasCurrentWatch,
+    surface: 'watch_detail',
+  });
+
+  if (isWatchLoading) {
     return (
       <WatchesSectionLayout active={watchId} title={i18n.PAGE_TITLE}>
         <EuiFlexGroup justifyContent="center" alignItems="center">

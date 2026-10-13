@@ -38,6 +38,7 @@ import { getSubscriptionAvailability, type SubscriptionAvailability } from '../c
 import { getAlertZeroDeepLinks } from './deep_links';
 import { registerAlertZeroAttachmentTypesUI } from './agent_builder/attachment_types';
 import { registerAlertZeroPublicStepDefinitions } from './step_types';
+import { registerAlertZeroUiEvents } from './telemetry';
 import type {
   AlertZeroClientConfig,
   AlertZeroPublicSetup,
@@ -93,6 +94,8 @@ export class AlertZeroPublicPlugin
     }
 
     registerAlertZeroPublicStepDefinitions(workflowsExtensions);
+    // Inside the kill-switch guard, like the server events: with it off, no AlertZero UI event exists.
+    registerAlertZeroUiEvents(coreSetup.analytics);
 
     coreSetup.application.register({
       id: ALERTZERO_APP_ID,
