@@ -66,6 +66,7 @@ import {
 } from './usage';
 import { TASK_MANAGER_CLAIM_NUDGE_INDEX, TASK_MANAGER_INDEX } from './constants';
 import { TaskManagerClaimNudgeService } from './claim_nudge/claim_nudge_service';
+import { EventLoopWatchdog } from './event_loop_watchdog';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { setupIntervalLogging } from './lib/log_health_metrics';
 import type { Metrics } from './metrics';
@@ -179,6 +180,7 @@ export class TaskManagerPlugin
   private startContract?: TaskManagerStartContract;
   private enrichFakeRequest?: FakeRequestEnricher;
   private claimNudgeService?: TaskManagerClaimNudgeService;
+  private eventLoopWatchdog?: EventLoopWatchdog;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -483,6 +485,11 @@ export class TaskManagerPlugin
         kibanasPerPartition: this.config.kibanas_per_partition,
       });
 
+      this.eventLoopWatchdog = new EventLoopWatchdog({
+        logger: this.logger.get('event-loop-watchdog'),
+        config: this.config!.event_loop_watchdog,
+      });
+
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
         definitions: this.definitions,
@@ -499,7 +506,10 @@ export class TaskManagerPlugin
         eventLogger: this.taskEventLogger!,
         enrichFakeRequest,
         claimNudgeService: this.claimNudgeService,
+        eventLoopBlocks$: this.eventLoopWatchdog.blocks$,
+        eventLoopWatchdog: this.eventLoopWatchdog,
       });
+      this.eventLoopWatchdog.start();
     }
 
     createMonitoringStats({
@@ -580,6 +590,7 @@ export class TaskManagerPlugin
   public async stop() {
     this.licenseSubscriber?.cleanup();
     this.claimNudgeService?.stop();
+    this.eventLoopWatchdog?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
