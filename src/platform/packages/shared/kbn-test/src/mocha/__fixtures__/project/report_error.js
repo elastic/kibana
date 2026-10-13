@@ -8,8 +8,6 @@
  */
 
 describe('REPORT_ERROR_SUITE', () => {
-  it('passes', () => {});
-
   it('fails', () => {
     throw new Error('FORCE_TEST_FAIL');
   });

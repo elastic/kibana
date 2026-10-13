@@ -188,8 +188,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     writeFileSync(reportPath, reportXML, 'utf8');
   };
 
-  // a throwing 'end' listener stops mocha from notifying the remaining listeners, including the
-  // run callback, which leaves the test runner waiting forever without tearing down its servers
+  // a throwing 'end' listener prevents mocha from calling the run callback and hangs the runner
   runner.on('end', () => {
     try {
       writeReport();

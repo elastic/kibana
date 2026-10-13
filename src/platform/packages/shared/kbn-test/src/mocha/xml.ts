@@ -9,9 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 
-// selects any code point that is NOT allowed by https://www.w3.org/TR/xml/#NT-Char. A single
-// character class keeps matching linear: a repeated alternation backtracks per character and
-// overflows the V8 stack on multi-MB inputs containing astral (surrogate pair) characters.
+// selects any code point not allowed by https://www.w3.org/TR/xml/#NT-Char. Keep it a single
+// character class: a repeated alternation overflows the V8 stack on multi-MB inputs.
 const invalidXmlCharsRE = /[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu;
 
 export function escapeCdata(input: string) {
