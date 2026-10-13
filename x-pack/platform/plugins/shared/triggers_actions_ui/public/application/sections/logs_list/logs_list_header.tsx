@@ -30,7 +30,7 @@ const BACK_TO_RULES_LABEL = i18n.translate(
 
 const CLASSIC_RULES_ONLY_BADGE: AppHeaderBadge = {
   label: i18n.translate('xpack.triggersActionsUI.rulesLogsPage.classicRulesOnlyBadgeLabel', {
-    defaultMessage: 'Classic rules only',
+    defaultMessage: 'Classic',
   }),
   color: 'hollow',
   'data-test-subj': 'classicRulesOnlyBadge',
