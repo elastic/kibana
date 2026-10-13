@@ -9,6 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import { execFileSync } from 'child_process';
 
 import { parse } from 'yaml';
 import deepmerge from 'deepmerge';
@@ -85,6 +86,7 @@ export function regenerateMoonProjects() {
     const allPackages = getPackages(REPO_ROOT);
     const packages: Package[] = filter?.length ? filterPackages(allPackages, filter) : allPackages;
     const allPackageIds = allPackages.map((pkg) => pkg.name);
+    const runnerConfigsByProject = indexRunnerConfigsByProject(allPackages);
 
     for (const pkg of packages) {
       log.verbose(`Generating project configuration for ${pkg.name}`);
@@ -102,6 +104,8 @@ export function regenerateMoonProjects() {
       applyPackageJsonSettings(projectConfig, pathInPackage('package.json'));
 
       applyJestTaskConfig(projectConfig);
+
+      applyRunnerTaskConfig(projectConfig, runnerConfigsByProject);
 
       projectConfig = applyDevOverrides(
         projectConfig,
@@ -293,8 +297,126 @@ function applyJestTaskConfig(projectConfig: MoonProjectConfig) {
   } else {
     projectConfig.tags = (projectConfig.tags || []).concat([MOON_CONST.TAG_JEST_UNIT]);
 
-    projectConfig.fileGroups = { ...projectConfig.fileGroups, 'jest-config': [jestConfigName] };
+    projectConfig.fileGroups = {
+      ...projectConfig.fileGroups,
+      [MOON_CONST.FILE_GROUP_JEST_CONFIG]: [jestConfigName],
+    };
   }
+}
+
+interface RunnerConfigsByProject {
+  /** project dir → project-relative `jest.integration.config.js` paths */
+  jestIntegration: Map<string, string[]>;
+  /** project dir → project-relative FTR config paths listed in the FTR manifests */
+  ftr: Map<string, string[]>;
+}
+
+/** Maps Jest integration and FTR config files to the project that owns them (nearest project dir). */
+function indexRunnerConfigsByProject(allPackages: Package[]): RunnerConfigsByProject {
+  const projectDirs = allPackages
+    .map((pkg) => pkg.normalizedRepoRelativeDir)
+    .sort((a, b) => b.length - a.length);
+
+  const groupByProject = (files: string[]) => {
+    const byProject = new Map<string, string[]>();
+    for (const file of files) {
+      const projectDir = projectDirs.find((dir) => file.startsWith(`${dir}/`));
+      if (!projectDir) {
+        continue;
+      }
+      const projectFiles = byProject.get(projectDir) ?? [];
+      projectFiles.push(path.relative(projectDir, file));
+      byProject.set(projectDir, projectFiles);
+    }
+    for (const projectFiles of byProject.values()) {
+      projectFiles.sort();
+    }
+    return byProject;
+  };
+
+  const jestIntegrationConfigs = execFileSync(
+    'git',
+    [
+      'ls-files',
+      '--cached',
+      '--others',
+      '--exclude-standard',
+      '--',
+      `:(glob)**/${MOON_CONST.JEST_INTEGRATION_CONFIG_FILE}`,
+    ],
+    { cwd: REPO_ROOT, encoding: 'utf8' }
+  )
+    .split('\n')
+    .filter(Boolean);
+
+  return {
+    jestIntegration: groupByProject(jestIntegrationConfigs),
+    ftr: groupByProject(readFtrManifestConfigs()),
+  };
+}
+
+/** Every FTR config (enabled and disabled) listed in the CI FTR manifests. */
+function readFtrManifestConfigs(): string[] {
+  const manifestsIndex: Record<string, string[]> = JSON.parse(
+    readFile(path.resolve(REPO_ROOT, MOON_CONST.FTR_MANIFESTS_INDEX))
+  );
+  const configs = new Set<string>();
+  for (const manifestPath of Object.values(manifestsIndex).flat()) {
+    const manifest = parse(readFile(path.resolve(REPO_ROOT, manifestPath))) as {
+      enabled?: Array<string | Record<string, unknown>>;
+      disabled?: Array<string | Record<string, unknown>>;
+    };
+    for (const entry of [...(manifest.enabled ?? []), ...(manifest.disabled ?? [])]) {
+      configs.add(typeof entry === 'string' ? entry : Object.keys(entry)[0]);
+    }
+  }
+  return [...configs];
+}
+
+const SCOUT_TEST_DIR = /^scout(_.+)?$/;
+
+/** Tags the project for the Jest integration, FTR and Scout tasks inherited from `.moon/tasks`. */
+function applyRunnerTaskConfig(
+  projectConfig: MoonProjectConfig,
+  runnerConfigsByProject: RunnerConfigsByProject
+) {
+  if (!hasSourceRoot(projectConfig)) {
+    return;
+  }
+  const { sourceRoot } = projectConfig.project;
+  const tags: string[] = [];
+  const fileGroups: Record<string, string[]> = {};
+
+  const jestIntegrationConfigs = runnerConfigsByProject.jestIntegration.get(sourceRoot);
+  if (jestIntegrationConfigs) {
+    tags.push(MOON_CONST.TAG_JEST_INTEGRATION);
+    fileGroups[MOON_CONST.FILE_GROUP_JEST_INTEGRATION_CONFIG] = jestIntegrationConfigs;
+  }
+
+  const ftrConfigs = runnerConfigsByProject.ftr.get(sourceRoot);
+  if (ftrConfigs) {
+    tags.push(MOON_CONST.TAG_FTR);
+    fileGroups[MOON_CONST.FILE_GROUP_FTR_CONFIG] = ftrConfigs;
+  }
+
+  const testDir = path.resolve(REPO_ROOT, sourceRoot, 'test');
+  const scoutDirs = fs.existsSync(testDir)
+    ? fs
+        .readdirSync(testDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && SCOUT_TEST_DIR.test(entry.name))
+        .map((entry) => entry.name)
+        .sort()
+    : [];
+  if (scoutDirs.length) {
+    tags.push(MOON_CONST.TAG_SCOUT);
+    fileGroups[MOON_CONST.FILE_GROUP_SCOUT_TESTS] = scoutDirs.map((dir) => `test/${dir}/**/*`);
+  }
+
+  if (!tags.length) {
+    return;
+  }
+  projectConfig.tags = (projectConfig.tags || []).concat(tags);
+  projectConfig.fileGroups = { ...projectConfig.fileGroups, ...fileGroups };
 }
 
 type ProjectCreationResult = 'create' | 'update' | 'intact' | 'delete' | 'skip';

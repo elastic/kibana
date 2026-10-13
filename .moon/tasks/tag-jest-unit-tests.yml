@@ -14,13 +14,17 @@ tasks:
       - '@files(jest-config)'
     deps:
       # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
-      # local/upstream source changes invalidate the jest cache.
-      - target: '~:source'
-        cacheStrategy: hash
+      # local/upstream production changes invalidate the jest cache.
       - target: '~:source-upstream'
         cacheStrategy: hash
+    # The project's own sources, minus files only another runner executes. Helpers and fixtures
+    # under integration_tests/ and test/scout*/ stay: some unit tests import them.
     inputs:
       - '@group(src)'
+      - '@group(jest-config)'
+      - '!**/integration_tests/**/*.test.{js,jsx,mjs,ts,tsx}'
+      - '!test/scout/**/*.spec.{ts,tsx}'
+      - '!test/scout_*/**/*.spec.{ts,tsx}'
     options:
       mergeArgs: append
       runFromWorkspaceRoot: true

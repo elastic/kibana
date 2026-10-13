@@ -19,11 +19,14 @@ tasks:
       internal: true
       runFromWorkspaceRoot: true
 
-  # This task can be used to make a task depend on the full upstream source files of a select project
+  # This task can be used to make a task depend on the upstream production files of a select project.
+  # Runner-only files (unit tests, snapshots, Jest integration tests, Scout tests) are excluded, so
+  # editing them affects only the owning project's tasks, not its dependents.
   source-upstream:
     command: 'true'
     inputs:
       - '@group(src)'
+      - '@group(excludeRunnerOnly)'
     deps:
       # Moon 2.3+ defaults output-less deps to cacheStrategy: ignored; keep hash so
       # transitive upstream source changes invalidate dependents (e.g. jest).

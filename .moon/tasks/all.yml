@@ -5,5 +5,16 @@ fileGroups:
     - "/tsconfig.json"
     - "/tsconfig.base.json"
     - "/tsconfig.browser.json"
+  # Negated globs for files only a single test runner consumes. Combine with a source group,
+  # e.g. ['@group(src)', '@group(excludeRunnerOnly)'], to get production inputs; file groups
+  # cannot reference other groups.
+  "excludeRunnerOnly":
+    - "!**/*.test.{js,jsx,mjs,ts,tsx}"
+    - "!**/__snapshots__/**"
+    - "!**/integration_tests/**"
+    - "!**/jest.config.js"
+    - "!**/jest.integration.config.js"
+    - "!test/scout/**"
+    - "!test/scout_*/**"
 
 tasks: {}

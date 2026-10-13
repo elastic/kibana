@@ -130,6 +130,21 @@ const filteredFiles = filterFilesByPackages(
 
 **Performance**: ~5-7 seconds
 
+### Moon runner tasks
+
+Each test runner has its own Moon task, inherited by tag from `.moon/tasks/tag-*.yml`. `node scripts/regenerate_moon_projects.js` adds the tags and config file groups:
+
+| Task | Tag | Added when the project has | Own inputs |
+|------|-----|----------------------------|------------|
+| `jest` | `jest-unit-tests` | a root `jest.config.js` | `src` + `jest-config`, minus integration tests and Scout specs |
+| `jest-integration` | `jest-integration-tests` | a `jest.integration.config.js` | `**/integration_tests/**` |
+| `ftr` | `ftr-tests` | a config listed in the FTR manifests | production files + `ftr-config` |
+| `scout` | `scout-tests` | a root `test/scout*/` directory | `test/scout*/**` |
+
+Every runner task depends on `~:source-upstream`: the project's and its upstream projects' production files, i.e. `src` minus the `excludeRunnerOnly` group in `.moon/tasks/all.yml`. A runner-only edit therefore selects only that runner in that project, while a production edit selects every runner downstream. `scout` also depends on upstream `scout-fixtures` (non-spec files under `test/scout*/`), since suites import other projects' Scout fixtures.
+
+`jest-integration`, `ftr` and `scout` are `noop` selection targets: query them with `moon query tasks --affected --downstream deep` and map them to configs. Without `--downstream deep`, upstream production changes are not reported.
+
 ## PR and merge-queue Jest selective testing
 
 On pull request builds, Jest unit and integration test groups are narrowed to configs under affected packages (see `pick_test_group_run_order` in CI stats). Add the GitHub label `ci:prevent-selective-testing` to run the full Jest suite instead. Touching files listed in `CRITICAL_FILES_JEST_*` in `const.ts` also skips filtering for the relevant test type.

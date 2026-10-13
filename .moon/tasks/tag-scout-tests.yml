@@ -1,0 +1,40 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - scout-tests
+
+tasks:
+  # CI selection target: `moon query tasks --affected` reports this task when the project's Scout
+  # suites (test/scout*/) may be affected. CI maps it to the project's Playwright configs; the task
+  # itself executes nothing.
+  scout:
+    command: noop
+    deps:
+      - target: '~:source-upstream'
+        cacheStrategy: hash
+      - target: '^:scout-fixtures'
+        cacheStrategy: hash
+    inputs:
+      - '@group(scout-tests)'
+    options:
+      cache: false
+      runInCI: false
+      runFromWorkspaceRoot: true
+
+  # Scout suites import fixtures from other projects' test/scout*/ trees
+  # (e.g. `@kbn/data-plugin/test/scout_search_sessions/ui/fixtures`), which are not production.
+  # Specs are excluded so editing one only selects its own project's suites.
+  scout-fixtures:
+    command: noop
+    deps:
+      - target: '^:scout-fixtures'
+        cacheStrategy: hash
+    inputs:
+      - '@group(scout-tests)'
+      - '!**/*.spec.{ts,tsx}'
+    options:
+      cache: false
+      internal: true
+      runInCI: false
+      runFromWorkspaceRoot: true

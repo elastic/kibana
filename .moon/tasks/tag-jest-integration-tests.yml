@@ -1,0 +1,22 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - jest-integration-tests
+
+tasks:
+  # CI selection target: `moon query tasks --affected` reports this task when the project's Jest
+  # integration suites may be affected. CI maps it to the `jest-integration-config` files and runs
+  # them through the existing Buildkite groups; the task itself executes nothing.
+  jest-integration:
+    command: noop
+    deps:
+      - target: '~:source-upstream'
+        cacheStrategy: hash
+    inputs:
+      - '@group(jest-integration-config)'
+      - '**/integration_tests/**/*'
+    options:
+      cache: false
+      runInCI: false
+      runFromWorkspaceRoot: true
