@@ -13,7 +13,7 @@ jest.mock('../utils.ts', () => ({ getKibanaDir: () => '/repo' }));
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
-import { getAffectedProjectsMoon } from './strategy_moon.ts';
+import { getAffectedProjectsMoon, getDownstreamProjectsMoon } from './strategy_moon.ts';
 
 const mockExecSync = execSync as jest.Mock;
 const mockExistsSync = existsSync as jest.Mock;
@@ -79,5 +79,24 @@ describe('getAffectedProjectsMoon', () => {
       expect.stringContaining('/resolved/moon'),
       expect.anything()
     );
+  });
+});
+
+describe('getDownstreamProjectsMoon', () => {
+  it('does not run moon for no files, which would make moon diff the working tree instead', () => {
+    expect(getDownstreamProjectsMoon([])).toEqual(new Set());
+    expect(mockExecSync).not.toHaveBeenCalled();
+  });
+
+  it('passes the files on stdin instead of letting moon diff', () => {
+    mockExistsSync.mockReturnValue(true);
+    mockExecSync.mockReturnValueOnce(moonResponse);
+
+    const result = getDownstreamProjectsMoon(['packages/foo/kibana.jsonc']);
+
+    expect(result).toEqual(new Set(['@kbn/foo']));
+    const [command, options] = mockExecSync.mock.calls[0];
+    expect(command).toContain('--affected --downstream deep');
+    expect(JSON.parse(options.input)).toEqual({ files: ['packages/foo/kibana.jsonc'] });
   });
 });

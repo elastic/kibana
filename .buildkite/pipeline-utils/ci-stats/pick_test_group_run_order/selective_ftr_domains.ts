@@ -12,6 +12,7 @@ import {
   createScopeMatcher,
   findModuleForPath,
   getDownstreamDependents,
+  getDownstreamProjectsMoon,
   getModuleLookup,
 } from '../../affected-packages/index.ts';
 
@@ -49,6 +50,28 @@ export const createRepoFtrModuleGraph = (): FtrModuleGraph => {
     moduleForPath: findModuleForPath,
     groupOf: (moduleId) => groupById.get(moduleId),
     downstreamOf: getDownstreamDependents,
+  };
+};
+
+/**
+ * Same module lookup, but the downstream closure comes from moon's project graph. Each module is
+ * handed to moon as its `kibana.jsonc`, which always belongs to exactly that project.
+ */
+export const createMoonFtrModuleGraph = (): FtrModuleGraph => {
+  const { byId, groupById } = getModuleLookup();
+  return {
+    moduleForPath: findModuleForPath,
+    groupOf: (moduleId) => groupById.get(moduleId),
+    downstreamOf: (moduleIds) => {
+      const files = [...moduleIds].map((moduleId) => {
+        const dir = byId.get(moduleId);
+        if (dir === undefined) {
+          throw new Error(`no directory known for module ${moduleId}`);
+        }
+        return `${dir}/kibana.jsonc`;
+      });
+      return new Set([...moduleIds, ...getDownstreamProjectsMoon(files)]);
+    },
   };
 };
 
@@ -195,4 +218,21 @@ export const summarizeFtrDomainSelection = (
     }
   }
   return { selected, skipped };
+};
+
+/** Manifest config paths only one of the two selections runs. */
+export const diffFtrDomainSelections = (
+  a: FtrDomainSelection,
+  b: FtrDomainSelection,
+  manifestEntries: readonly FTRManifestEntry[]
+): { onlyA: string[]; onlyB: string[] } => {
+  const onlyA: string[] = [];
+  const onlyB: string[] = [];
+  for (const entry of manifestEntries) {
+    const inA = includesFtrEntry(a, entry);
+    const inB = includesFtrEntry(b, entry);
+    if (inA && !inB) onlyA.push(entry.path);
+    if (inB && !inA) onlyB.push(entry.path);
+  }
+  return { onlyA, onlyB };
 };

@@ -12,6 +12,7 @@ import { UNCATEGORIZED_MODULE_ID } from '../../affected-packages/index.ts';
 import type { FTRManifestEntry } from './ftr_manifests.ts';
 import type { FtrDomainSelection, FtrModuleGraph } from './selective_ftr_domains.ts';
 import {
+  diffFtrDomainSelections,
   includesFtrEntry,
   resolveFtrDomains,
   summarizeFtrDomainSelection,
@@ -239,6 +240,25 @@ describe('summarizeFtrDomainSelection', () => {
     expect(summarizeFtrDomainSelection(selection, ENTRIES)).toEqual({
       selected: ['base (1/4 configs)', 'security'],
       skipped: ['base (3/4 configs)', 'observability', 'platform', 'search'],
+    });
+  });
+});
+
+describe('diffFtrDomainSelections', () => {
+  it('lists the configs only one selection runs', () => {
+    const search = resolve(['x-pack/solutions/search/plugins/search/server/index.ts']);
+    const security = resolve(['x-pack/solutions/security/plugins/security_solution/index.ts']);
+
+    expect(diffFtrDomainSelections(search, security, ENTRIES)).toEqual({
+      onlyA: [
+        `${BASE_DIR}/search.serverless.config.ts`,
+        'x-pack/solutions/security/test/search_project/config.ts',
+        'x-pack/solutions/search/test/config.ts',
+      ],
+      onlyB: [
+        `${BASE_DIR}/security.serverless.config.ts`,
+        'x-pack/solutions/security/test/config.ts',
+      ],
     });
   });
 });

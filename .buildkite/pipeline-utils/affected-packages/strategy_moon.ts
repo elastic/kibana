@@ -14,14 +14,55 @@ import { getKibanaDir } from '../utils.ts';
 
 const REPO_ROOT = getKibanaDir();
 
-/** Resolves `moon`'s absolute path — run via `node`, not yarn, so it's not on `PATH`. */
+/**
+ * Resolves `moon`'s absolute path — run via `node`, not yarn, so it's not on `PATH`.
+ * `MOON_BIN` points at a standalone install (e.g. the bootstrap-less pick step).
+ */
 function getMoonBinPath(): string {
+  if (process.env.MOON_BIN) {
+    return process.env.MOON_BIN;
+  }
+
   const moonBinPath = path.resolve(REPO_ROOT, 'node_modules/.bin/moon');
   if (existsSync(moonBinPath)) {
     return moonBinPath;
   }
 
   return execSync('pnpm --silent exec which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
+}
+
+const parseProjectIds = (output: string): Set<string> => {
+  const result = JSON.parse(output);
+  const projectIds = new Set<string>();
+  if (result.projects && Array.isArray(result.projects)) {
+    for (const project of result.projects) {
+      if (project.id) {
+        projectIds.add(project.id);
+      }
+    }
+  }
+  return projectIds;
+};
+
+/**
+ * Returns the moon projects owning `files` plus all their transitive dependents. The files are
+ * passed on stdin, so moon skips its own VCS diff; files outside any project are ignored.
+ */
+export function getDownstreamProjectsMoon(files: readonly string[]): Set<string> {
+  // With no stdin files moon would fall back to diffing the working tree.
+  if (files.length === 0) {
+    return new Set();
+  }
+
+  const output = execSync(`"${getMoonBinPath()}" query projects --affected --downstream deep`, {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+    maxBuffer: 200 * 1024 * 1024, // every project's full config is serialized
+    timeout: 120000, // a cold agent first downloads moon's toolchain plugins
+    input: JSON.stringify({ files }),
+  });
+
+  return parseProjectIds(output);
 }
 
 export function getAffectedProjectsMoon(
@@ -51,15 +92,5 @@ export function getAffectedProjectsMoon(
     },
   });
 
-  const result = JSON.parse(output);
-
-  const packageIds = new Set<string>();
-  if (result.projects && Array.isArray(result.projects)) {
-    for (const project of result.projects) {
-      if (project.id) {
-        packageIds.add(project.id);
-      }
-    }
-  }
-  return packageIds;
+  return parseProjectIds(output);
 }
