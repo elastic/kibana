@@ -15,6 +15,11 @@ import type { StartServices } from '../../types';
 import { Header } from '../../flyout_v2/attack/main/header';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
+import { useFlyoutV2UrlWriter } from '../../flyout_v2/shared/url_state/flyout_v2_url_writer';
+import {
+  FLYOUT_DESCRIPTOR_KIND,
+  urlParamKeyForHistoryKey,
+} from '../../flyout_v2/shared/url_state/flyout_v2_url_param';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
@@ -47,6 +52,10 @@ export const AttackFlyoutHeader = ({
   const isSecurityApp = useIsInSecurityApp();
   const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
   const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(
+    urlParamKeyForHistoryKey(historyKey),
+    historyKey
+  );
   const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
 
   const openNotesFlyout = useCallback(() => {
@@ -54,6 +63,10 @@ export const AttackFlyoutHeader = ({
       return;
     }
 
+    const { _id: documentId, _index: indexName } = hit.raw;
+    if (documentId && indexName) {
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.notes, documentId, indexName });
+    }
     const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
@@ -66,6 +79,7 @@ export const AttackFlyoutHeader = ({
         historyKey,
         session: FLYOUT_SESSION_KIND.START,
         title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
+        onClose: buildOnClose(null),
       }
     );
     if (ref) {
@@ -77,7 +91,17 @@ export const AttackFlyoutHeader = ({
         origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
       });
     }
-  }, [attackTitle, defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
+  }, [
+    attackTitle,
+    buildOnClose,
+    defaultToolsFlyoutProperties,
+    history,
+    historyKey,
+    hit,
+    services,
+    store,
+    writeOnOpen,
+  ]);
 
   useEffect(() => {
     let isCanceled = false;
