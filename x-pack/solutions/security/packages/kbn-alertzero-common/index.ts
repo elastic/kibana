@@ -84,6 +84,7 @@ export {
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
   buildSecurityRoleUrl,
+  getPredefinedWorkerRoleName,
 } from './worker_roles';
 export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
 
