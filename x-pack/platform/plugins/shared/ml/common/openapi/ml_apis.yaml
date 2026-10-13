@@ -22,8 +22,6 @@ paths:
       operationId: mlSync
       tags:
         - ml
-      parameters:
-        - $ref: '#/components/parameters/simulateParam'
       responses:
         '200':
           description: Indicates a successful call

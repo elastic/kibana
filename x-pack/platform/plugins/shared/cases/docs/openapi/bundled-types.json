@@ -6428,10 +6428,6 @@
       "alert_response_properties": {
         "type": "object",
         "properties": {
-          "attached_at": {
-            "type": "string",
-            "format": "date-time"
-          },
           "id": {
             "description": "The alert identifier.",
             "type": "string"

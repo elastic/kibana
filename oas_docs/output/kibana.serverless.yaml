@@ -62640,8 +62640,6 @@ paths:
 
         Synchronizes Kibana saved objects for machine learning jobs and trained models in the default space. You must have `all` privileges for the **Machine Learning** feature in the **Analytics** section of the Kibana feature privileges. This API runs automatically when you start Kibana and periodically thereafter.
       operationId: mlSync
-      parameters:
-        - $ref: '#/components/parameters/Machine_learning_APIs_simulateParam'
       responses:
         '200':
           content:
@@ -139796,14 +139794,6 @@ components:
       schema:
         example: ff959d40-b880-11e8-a6d9-e546fe2bba5f
         type: string
-    Machine_learning_APIs_simulateParam:
-      description: When true, simulates the synchronization by returning only the list of actions that would be performed.
-      example: 'true'
-      in: query
-      name: simulate
-      required: false
-      schema:
-        type: boolean
     SLOs_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
@@ -140536,9 +140526,6 @@ components:
     Cases_alert_response_properties:
       type: object
       properties:
-        attached_at:
-          format: date-time
-          type: string
         id:
           description: The alert identifier.
           type: string
