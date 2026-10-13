@@ -158,6 +158,11 @@ async function buildChunk(options: BuildChunkOptions): Promise<void> {
 
   if (options.entry) {
     await esbuild({ ...shared, entryPoints: [options.entry] });
+    // esbuild ends the entry with `module.exports = require_plugin()`. That
+    // replaces the object Node already gave to any on-disk file that required
+    // this module while the bundle was still evaluating, so those files keep
+    // an empty exports object. Copy onto the original object instead.
+    publishEntryExports(options.outfile);
     return;
   }
 
@@ -170,6 +175,35 @@ async function buildChunk(options: BuildChunkOptions): Promise<void> {
       loader: 'js',
     },
   });
+}
+
+function publishEntryExports(outfile: string): void {
+  const source = Fs.readFileSync(outfile, 'utf8');
+  // A cycle makes esbuild wrap the entry and assign `module.exports` at the
+  // end. Without a cycle the entry writes onto Node's `exports` directly.
+  const match = source.match(/module\.exports = (require_[A-Za-z0-9_$]+)\(\);\s*$/);
+  if (!match || match.index === undefined || !match[1]) {
+    return;
+  }
+
+  const requireEntry = match[1];
+  const assignment = [
+    `var __kbnBundleExports = ${requireEntry}();`,
+    'if (__kbnBundleExports !== null && typeof __kbnBundleExports === "object") {',
+    '  var __kbnBundleKeys = Reflect.ownKeys(__kbnBundleExports);',
+    '  for (var __kbnBundleIndex = 0; __kbnBundleIndex < __kbnBundleKeys.length; __kbnBundleIndex++) {',
+    '    var __kbnBundleKey = __kbnBundleKeys[__kbnBundleIndex];',
+    '    var __kbnBundleDescriptor = Object.getOwnPropertyDescriptor(__kbnBundleExports, __kbnBundleKey);',
+    '    if (__kbnBundleDescriptor) {',
+    '      Object.defineProperty(module.exports, __kbnBundleKey, __kbnBundleDescriptor);',
+    '    }',
+    '  }',
+    '} else {',
+    '  module.exports = __kbnBundleExports;',
+    '}',
+    '',
+  ].join('\n');
+  Fs.writeFileSync(outfile, source.slice(0, match.index) + assignment);
 }
 
 function virtualChunkEntry(modules: readonly string[], serverDir: string): string {

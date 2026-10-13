@@ -303,6 +303,70 @@ describe('bundlePluginServer', () => {
     }
   });
 
+  it('publishes entry exports onto the object on-disk files capture mid-evaluation', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    const lib = Path.join(server, 'lib');
+    Fs.mkdirSync(lib, { recursive: true });
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      [
+        '"use strict";',
+        'const inner = require("./lib/inner");',
+        'const logger = require("./lib/logger");',
+        'Object.defineProperty(exports, "EVENT_LOG_ACTIONS", {',
+        '  enumerable: true,',
+        '  get: function () { return EVENT_LOG_ACTIONS; }',
+        '});',
+        'const EVENT_LOG_ACTIONS = { execute: "execute" };',
+        'exports.inner = inner;',
+        'exports.readActions = logger.readActions;',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'index.js'),
+      '"use strict";\nexports.logger = require("./lib/logger");\n'
+    );
+    Fs.writeFileSync(
+      Path.join(lib, 'inner.js'),
+      [
+        '"use strict";',
+        'const plugin = require("../plugin");',
+        'exports.marker = "inner-marker";',
+        'exports.actions = () => plugin.EVENT_LOG_ACTIONS;',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(lib, 'logger.js'),
+      [
+        '"use strict";',
+        'const plugin = require("../plugin");',
+        'exports.readActions = () => plugin.EVENT_LOG_ACTIONS;',
+        '',
+      ].join('\n')
+    );
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    expect(bundle).toContain('inner-marker');
+    expect(bundle).toContain('require("./lib/logger.js")');
+    expect(bundle).toContain('__kbnBundleExports');
+    expect(bundle).not.toMatch(/module\.exports = require_[A-Za-z0-9_$]+\(\);\s*$/);
+
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.EVENT_LOG_ACTIONS).toEqual({ execute: 'execute' });
+    expect(loaded.inner.marker).toBe('inner-marker');
+    expect(loaded.inner.actions()).toEqual({ execute: 'execute' });
+    expect(loaded.readActions()).toEqual({ execute: 'execute' });
+    expect(requireFromTest(Path.join(lib, 'logger.js')).readActions()).toEqual({
+      execute: 'execute',
+    });
+  });
+
   it('keeps one instance when an outside conditional requires an inlined module', async () => {
     const root = makePlugin();
     const server = Path.join(root, 'server');
