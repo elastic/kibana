@@ -30,7 +30,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
 
 const DEACTIVATE: StatusChange = { kind: 'operator', status: 'inactive' };
 
-const assessment = (outcome: 'breaching' | 'clean' | 'no_data'): StatusChange => ({
+const assessment = (outcome: 'breached' | 'recovered' | 'no_data'): StatusChange => ({
   kind: 'assessment',
   outcome,
 });
@@ -76,17 +76,17 @@ describe('decideStatusChange', () => {
     expect(
       decideStatusChange({
         latest: createEvent({ status: 'active' }),
-        change: assessment('breaching'),
+        change: assessment('breached'),
         timestamp: TIMESTAMP,
       })
     ).toEqual({ write: false, status: 'active', reason: 'already_in_state' });
   });
 
   describe('assessment', () => {
-    it.each<[string, SignificantEventStatus, 'breaching' | 'clean', SignificantEventStatus]>([
-      ['starts recovery when every member is healthy', 'active', 'clean', 'recovering'],
-      ['returns a recovering event to active on a breach', 'recovering', 'breaching', 'active'],
-      ['reopens a closed event on a breach', 'inactive', 'breaching', 'active'],
+    it.each<[string, SignificantEventStatus, 'breached' | 'recovered', SignificantEventStatus]>([
+      ['starts recovery when every member is healthy', 'active', 'recovered', 'recovering'],
+      ['returns a recovering event to active on a breach', 'recovering', 'breached', 'active'],
+      ['reopens a closed event on a breach', 'inactive', 'breached', 'active'],
     ])('%s', (_label, current, outcome, status) => {
       const decision = decideStatusChange({
         latest: createEvent({ status: current }),
@@ -97,7 +97,7 @@ describe('decideStatusChange', () => {
       expect(decision).toMatchObject({ write: true, event: { status } });
     });
 
-    it.each<'clean' | 'no_data'>(['clean', 'no_data'])(
+    it.each<'recovered' | 'no_data'>(['recovered', 'no_data'])(
       'skips a %s assessment of a closed event',
       (outcome) => {
         expect(
@@ -117,7 +117,7 @@ describe('requestedStatus', () => {
     ['an operator deactivating', DEACTIVATE, 'inactive'],
     ['an operator activating', { kind: 'operator', status: 'active' }, 'active'],
     ['a rule that no longer exists', { kind: 'rule_deleted' }, 'inactive'],
-    ['an assessment', assessment('breaching'), 'active'],
+    ['an assessment', assessment('breached'), 'active'],
   ])('is the status %s asks for', (_label, change, status) => {
     expect(requestedStatus(change)).toBe(status);
   });
@@ -140,20 +140,20 @@ describe('decideLifecycle', () => {
       [
         string,
         SignificantEventStatus | undefined,
-        'breaching' | 'clean' | 'no_data',
+        'breached' | 'recovered' | 'no_data',
         LifecycleDecision
       ]
     >([
-      ['opens a new series on a breach', undefined, 'breaching', ACTIVE],
-      ['reopens a closed series on a breach', 'inactive', 'breaching', ACTIVE],
-      ['keeps an active series active on a breach', 'active', 'breaching', ACTIVE],
-      ['returns a recovering series to active on a breach', 'recovering', 'breaching', ACTIVE],
-      ['starts recovery when every member is healthy', 'active', 'clean', RECOVERING],
+      ['opens a new series on a breach', undefined, 'breached', ACTIVE],
+      ['reopens a closed series on a breach', 'inactive', 'breached', ACTIVE],
+      ['keeps an active series active on a breach', 'active', 'breached', ACTIVE],
+      ['returns a recovering series to active on a breach', 'recovering', 'breached', ACTIVE],
+      ['starts recovery when every member is healthy', 'active', 'recovered', RECOVERING],
       ['keeps an active series active when a member cannot be judged', 'active', 'no_data', ACTIVE],
       [
         'keeps a recovering series recovering while members stay healthy',
         'recovering',
-        'clean',
+        'recovered',
         RECOVERING,
       ],
       [
@@ -162,9 +162,9 @@ describe('decideLifecycle', () => {
         'no_data',
         RECOVERING,
       ],
-      ['does not open a new series on healthy members', undefined, 'clean', NOT_A_BREACH],
+      ['does not open a new series on healthy members', undefined, 'recovered', NOT_A_BREACH],
       ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
-      ['does not reopen a closed series on healthy members', 'inactive', 'clean', NOT_A_BREACH],
+      ['does not reopen a closed series on healthy members', 'inactive', 'recovered', NOT_A_BREACH],
       ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
     ])('%s', (_label, status, outcome, expected) => {
       expect(decide(status, { kind: 'assessment', outcome })).toEqual(expected);
@@ -215,8 +215,8 @@ describe('decideLifecycle', () => {
       'inactive',
     ];
     const inputs: StatusChange[] = [
-      { kind: 'assessment', outcome: 'breaching' },
-      { kind: 'assessment', outcome: 'clean' },
+      { kind: 'assessment', outcome: 'breached' },
+      { kind: 'assessment', outcome: 'recovered' },
       { kind: 'assessment', outcome: 'no_data' },
       { kind: 'operator', status: 'active' },
       { kind: 'operator', status: 'inactive' },
@@ -255,7 +255,7 @@ describe('decideLifecycle', () => {
     it('never lets an assessment open or reopen a series unless it is breaching', () => {
       everyCase.forEach(({ status, change, decision }) => {
         const notLive = status === undefined || status === 'inactive';
-        if (change.kind === 'assessment' && change.outcome !== 'breaching' && notLive) {
+        if (change.kind === 'assessment' && change.outcome !== 'breached' && notLive) {
           expect(decision.write).toBe(false);
         }
       });

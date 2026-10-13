@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type {
   SignificantEvent,
   SignificantEventManualStatus,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 
-/** What the verdicts of an event's members add up to, or what one member's verdict says. */
-export type StatusOutcome = 'breaching' | 'clean' | 'no_data';
+/**
+ * What the verdicts of an event's members add up to, or what one member's verdict says. The same
+ * values as Alerting v2's `AlertEventStatus`, which that plugin does not export.
+ */
+export type StatusOutcome = 'breached' | 'recovered' | 'no_data';
 
 /**
  * The one place that decides a significant event's status. Every caller submits a typed change, built with `StatusChange`;
@@ -24,7 +28,7 @@ export type StatusOutcome = 'breaching' | 'clean' | 'no_data';
 export type StatusChange =
   /**
    * What discovery's stored verdicts say about the event's members after a write is merged:
-   * `breaching` when any member asserts a breach, `clean` when every member is healthy, `no_data`
+   * `breached` when any member asserts a breach, `recovered` when every member is healthy, `no_data`
    * when none asserts a breach but some cannot be judged.
    */
   | { kind: 'assessment'; outcome: StatusOutcome }
@@ -62,7 +66,7 @@ export type LifecycleDecision =
   { write: true; status: SignificantEventStatus } | { write: false; reason: LifecycleSkipReason };
 
 const isLive = (status: SignificantEventStatus | undefined): boolean =>
-  status === 'active' || status === 'recovering';
+  status === ALERT_EPISODE_STATUS.ACTIVE || status === ALERT_EPISODE_STATUS.RECOVERING;
 
 const decideAssessment = ({
   state,
@@ -75,20 +79,26 @@ const decideAssessment = ({
 
   if (!isLive(status)) {
     // Only a breach opens or reopens (a new episode on an inactive series).
-    return outcome === 'breaching'
-      ? { write: true, status: 'active' }
+    return outcome === 'breached'
+      ? { write: true, status: ALERT_EPISODE_STATUS.ACTIVE }
       : { write: false, reason: 'not_a_breach' };
   }
 
-  if (outcome === 'breaching') {
-    return { write: true, status: 'active' };
+  if (outcome === 'breached') {
+    return { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
   }
-  if (status === 'active' && outcome === 'clean') {
-    return { write: true, status: 'recovering' };
+  if (status === ALERT_EPISODE_STATUS.ACTIVE && outcome === 'recovered') {
+    return { write: true, status: ALERT_EPISODE_STATUS.RECOVERING };
   }
   // A healthy or unjudged assessment of a recovering series, or an unjudged one of an active
   // series: the evidence is kept and the status stands. Discovery never closes a series.
-  return { write: true, status: status === 'recovering' ? 'recovering' : 'active' };
+  return {
+    write: true,
+    status:
+      status === ALERT_EPISODE_STATUS.RECOVERING
+        ? ALERT_EPISODE_STATUS.RECOVERING
+        : ALERT_EPISODE_STATUS.ACTIVE,
+  };
 };
 
 export const decideLifecycle = ({
@@ -105,19 +115,19 @@ export const decideLifecycle = ({
       return decideAssessment({ state, outcome: change.outcome });
 
     case 'operator':
-      if (change.status === 'inactive') {
+      if (change.status === ALERT_EPISODE_STATUS.INACTIVE) {
         return isLive(status)
-          ? { write: true, status: 'inactive' }
+          ? { write: true, status: ALERT_EPISODE_STATUS.INACTIVE }
           : { write: false, reason: 'already_in_state' };
       }
       // Activate overrides the assessment, like the framework's own activate action.
-      return status === 'active'
+      return status === ALERT_EPISODE_STATUS.ACTIVE
         ? { write: false, reason: 'already_in_state' }
-        : { write: true, status: 'active' };
+        : { write: true, status: ALERT_EPISODE_STATUS.ACTIVE };
 
     case 'rule_deleted':
       return isLive(status)
-        ? { write: true, status: 'inactive' }
+        ? { write: true, status: ALERT_EPISODE_STATUS.INACTIVE }
         : { write: false, reason: 'already_in_state' };
   }
 };
@@ -138,9 +148,9 @@ export const requestedStatus = (change: StatusChange): SignificantEventStatus =>
     case 'operator':
       return change.status;
     case 'rule_deleted':
-      return 'inactive';
+      return ALERT_EPISODE_STATUS.INACTIVE;
     case 'assessment':
-      return 'active';
+      return ALERT_EPISODE_STATUS.ACTIVE;
   }
 };
 

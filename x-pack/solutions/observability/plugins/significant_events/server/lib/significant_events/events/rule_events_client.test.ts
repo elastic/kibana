@@ -170,7 +170,7 @@ describe('RuleEventsClient', () => {
     it.each<[string, StatusChange, string]>([
       ['an operator status', DEACTIVATE_STATUS, 'inactive'],
       ['a deleted rule', StatusChange.ruleDeleted(), 'inactive'],
-      ['an assessment', StatusChange.assessed('breaching'), 'active'],
+      ['an assessment', StatusChange.assessed('breached'), 'active'],
     ])('reports the status %s asks for when the event is not found', async (_l, change, status) => {
       const alertEventsClient = makeStatusAlertEventsClient();
 
@@ -260,7 +260,7 @@ describe('RuleEventsClient', () => {
 
       const result = await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
         eventId: existing.event_id,
-        change: StatusChange.assessed('breaching'),
+        change: StatusChange.assessed('breached'),
       });
 
       expect(result).toEqual({
