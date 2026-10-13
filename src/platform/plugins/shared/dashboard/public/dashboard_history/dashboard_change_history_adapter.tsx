@@ -44,17 +44,6 @@ export const createDashboardChangeHistoryAdapter = (
       throw mapChangeHistoryHttpError(e);
     }
   },
-  getPendingChange: () => {
-    if (!dashboardApi || !dashboardApi!.hasUnsavedChanges$.getValue()) return;
-    return {
-      id: dashboardApi!.uuid,
-      actor: { name: dashboardApi.user?.name ?? '' },
-      action: 'dashboard_unsaved_changes',
-      timestamp: new Date(Date.now()).toISOString(),
-      snapshot: dashboardApi!.getSerializedState().attributes,
-      metadata: { unsavedChanges: true },
-    };
-  },
   restoreChange: dashboardApi
     ? async ({ objectId, changeId, signal }) => {
         try {
@@ -68,6 +57,20 @@ export const createDashboardChangeHistoryAdapter = (
         } catch (e) {
           throw mapChangeHistoryHttpError(e);
         }
+      }
+    : undefined,
+  getPendingChange: dashboardApi
+    ? () => {
+        return dashboardApi.hasUnsavedChanges$.getValue()
+          ? {
+              id: dashboardApi.uuid,
+              actor: { name: dashboardApi.user?.name ?? '' },
+              action: 'dashboard_unsaved_changes',
+              timestamp: new Date(Date.now()).toISOString(),
+              snapshot: dashboardApi.getSerializedState().attributes,
+              metadata: { unsavedChanges: true },
+            }
+          : undefined;
       }
     : undefined,
 });

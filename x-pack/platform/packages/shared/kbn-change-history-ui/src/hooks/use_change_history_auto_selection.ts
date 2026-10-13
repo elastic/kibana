@@ -41,6 +41,11 @@ export const useChangeHistoryAutoSelection = ({
   }, []);
 
   useEffect(() => {
+    /** Unlock selection when fetching first page */
+    if (isFetchingFirstPage) decidedRef.current = false;
+  }, [isFetchingFirstPage]);
+
+  useEffect(() => {
     setSelectedChangeId(undefined);
     decidedRef.current = false;
   }, [objectId, setSelectedChangeId]);
@@ -60,6 +65,7 @@ export const useChangeHistoryAutoSelection = ({
     onAutoSelect?.(firstItem);
 
     if (!isFetchingFirstPage) {
+      /** Lock selection when fetching something other than the first page */
       decidedRef.current = true;
     }
   }, [enabled, isFetchingFirstPage, items, onAutoSelect, setSelectedChangeId]);

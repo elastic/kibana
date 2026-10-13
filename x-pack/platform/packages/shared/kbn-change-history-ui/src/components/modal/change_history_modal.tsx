@@ -66,7 +66,6 @@ export function ChangeHistoryModal(): JSX.Element | null {
     objectId,
     enabled: isOpen,
   });
-
   const reportChangeSelected = useCallback(
     (item: ChangeHistoryListItem, selectionSource: ChangeHistorySelectionSource) => {
       if (lastReportedChangeIdBySourceRef.current[selectionSource] === item.id) {

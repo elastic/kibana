@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { lazy, Suspense, useMemo, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 
@@ -37,9 +37,19 @@ export const DashboardChangeHistoryProvider = ({
   children,
 }: DashboardChangeHistoryProviderProps): JSX.Element => {
   const { analytics } = coreServices;
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [previewTitle, setPreviewTitle] = useState<string>(
     dashboardApi?.title$.getValue() ?? dashboardId
   );
+
+  useEffect(() => {
+    const unsavedChangesSubscription = dashboardApi?.hasUnsavedChanges$.subscribe((result) => {
+      setHasUnsavedChanges(result);
+    });
+    return () => {
+      unsavedChangesSubscription?.unsubscribe();
+    };
+  }, [dashboardApi]);
 
   const scope = useMemo(
     () => ({
@@ -75,7 +85,7 @@ export const DashboardChangeHistoryProvider = ({
         }),
         previewTitle,
       }}
-      features={{ compare: false, restore: true, unsavedChanges: true }}
+      features={{ compare: false, restore: true, unsavedChanges: hasUnsavedChanges }}
       permissions={{ canRestore: true }}
       scope={scope}
       analytics={analytics}
