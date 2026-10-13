@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -15,6 +15,8 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
 import { useKibana } from '../../hooks/use_kibana';
+import { useQueryState } from '../../hooks/use_query_state';
+import { searchParamNames } from '../../search_param_names';
 
 import {
   CONDENSED_SIDEBAR_WIDTH,
@@ -31,7 +33,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const {
     services: { analytics },
   } = useKibana();
-  const [isCondensed, setIsCondensed] = useState(false);
+  // Kept in the URL so an entry point (e.g. "Open chat" on an investigation) can land on the page
+  // with the sidebar already collapsed; toggling keeps the URL in step with the state.
+  const [sidebarCollapsedParam, setSidebarCollapsedParam] = useQueryState<string>(
+    searchParamNames.sidebarCollapsed
+  );
+  const isCondensed = sidebarCollapsedParam === 'true';
+  const setIsCondensed = useCallback(
+    (nextIsCondensed: boolean) => setSidebarCollapsedParam(nextIsCondensed ? 'true' : null),
+    [setSidebarCollapsedParam]
+  );
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -52,7 +63,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         setIsCondensed(nextIsCondensed);
       }
     },
-    [analytics, isCondensed]
+    [analytics, isCondensed, setIsCondensed]
   );
 
   const sidebarStyles = css`
@@ -77,7 +88,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         pageSideBar={
           <UnifiedSidebar
             isCondensed={isCondensed}
-            onToggleCondensed={() => setIsCondensed((v) => !v)}
+            onToggleCondensed={() => setIsCondensed(!isCondensed)}
           />
         }
         pageSideBarProps={{
