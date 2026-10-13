@@ -34,6 +34,30 @@ describe('verdictAccuracy', () => {
     expect(result.explanation).toContain('true_positive');
   });
 
+  // A harness seeding failure means the workflow never ran: the case carries no
+  // signal about the model, so it is excluded (score null) rather than scored 0.
+  it('excludes (score null) runs whose output carries a harness seedingError', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params(
+        {
+          executionStatus: 'failed',
+          seedingError: '[harness seeding failure] Bulk seeding cited alerts',
+        },
+        { label: 'true_positive' }
+      )
+    );
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('harness-seeding-error');
+    expect(meta(result).seedingError).toContain('Bulk seeding cited alerts');
+  });
+
+  it('still scores 0 for a missing verdict when there was NO seedingError', async () => {
+    const result = await verdictAccuracy.evaluate(
+      params({ executionStatus: 'completed' }, { label: 'true_positive' })
+    );
+    expect(result.score).toBe(0);
+  });
+
   it('accepts the classification alias', async () => {
     const result = await verdictAccuracy.evaluate(
       params({ verdict: { classification: 'false_positive' } }, { label: 'false_positive' })

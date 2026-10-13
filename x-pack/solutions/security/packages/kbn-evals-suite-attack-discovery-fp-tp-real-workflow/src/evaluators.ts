@@ -29,6 +29,8 @@ export type GradedVerdict =
 interface Output {
   verdict?: GradedVerdict;
   executionStatus?: string;
+  /** Set only when the harness itself failed to seed the case; the model never ran. */
+  seedingError?: string;
 }
 
 /** Extracts the canonical verdict label from either output shape. */
@@ -51,14 +53,31 @@ const expectedLabel = (expected: unknown): Label | undefined =>
 
 /**
  * Primary metric (CODE): did the workflow's verdict label match the corpus
- * gold label? A missing/undefined verdict scores 0 — it is reported as an
- * incorrect verdict, never thrown, so infra failures stay visible in metrics.
+ * gold label? A missing/undefined verdict from a run that actually executed
+ * scores 0 — reported as an incorrect verdict, never thrown, so product
+ * failures stay visible in metrics. The exception is a harness seeding
+ * failure (`seedingError`): the workflow never ran, so the case carries no
+ * signal about the model and is excluded from the metric (score null) instead
+ * of being counted against it.
  */
 export const verdictAccuracy: Evaluator = {
   name: 'VerdictAccuracy',
   kind: 'CODE',
   direction: 'maximize',
   evaluate: async ({ output, expected }) => {
+    if (asOutput(output).seedingError != null) {
+      return {
+        score: null,
+        label: 'harness-seeding-error',
+        explanation: `excluded: harness seeding failure: ${asOutput(output).seedingError}`,
+        metadata: {
+          predicted: null,
+          expected: expectedLabel(expected) ?? null,
+          executionStatus: asOutput(output).executionStatus,
+          seedingError: asOutput(output).seedingError ?? null,
+        },
+      };
+    }
     const predicted = verdictLabel(asOutput(output).verdict);
     const golden = expectedLabel(expected);
     const correct = predicted != null && golden != null && predicted === golden;

@@ -928,9 +928,17 @@ export const seedCitedAlerts = async (
     log.warning(`Seeded AD ${attackDiscoveryId} cites no alerts; nothing seeded into ${index}`);
     return;
   }
-  const result = await esClient.bulk({ body, refresh: true });
+  // The shared cited-alerts index is created lazily: concurrent reps bulk into
+  // it before it exists, and ES's bulk auto-create can reject one batch with
+  // resource_already_exists_exception (lost race) instead of retrying. Creating
+  // it explicitly first removes that race; a retry on the same error class
+  // covers the residual window.
+  await ensureCitedAlertsIndex(esClient, index);
+  const result = await bulkWithRetry({ esClient, log }, index, body);
   if (result.errors) {
-    throw new Error(`Bulk seeding cited alerts into ${index} reported errors`);
+    throw new Error(
+      `Bulk seeding cited alerts into ${index} reported errors: ${describeBulkErrors(result, 5)}`
+    );
   }
   log.info(
     `Seeded ${doc.alertIds.length} cited alert(s) into ${index} for AD ${attackDiscoveryId}`
@@ -941,6 +949,78 @@ const assertBulkOk = (label: string, result: { errors?: boolean; items?: unknown
   if (result.errors) {
     throw new Error(`${label} bulk had item errors: ${JSON.stringify(result.items).slice(0, 500)}`);
   }
+};
+
+/** First N failed bulk items, flattened to `op: type reason` — enough to root-cause. */
+export const describeBulkErrors = (result: { items?: unknown[] }, maxItems: number): string => {
+  const described: string[] = [];
+  for (const item of result.items ?? []) {
+    const failed = Object.entries((item ?? {}) as Record<string, unknown>).find(
+      ([opName, op]) => opName !== 'status' && (op as { error?: unknown })?.error != null
+    );
+    if (failed) {
+      const [op, { error }] = failed as [string, { error: unknown }];
+      described.push(`${op}: ${JSON.stringify(error)}`);
+      if (described.length >= maxItems) break;
+    }
+  }
+  return described.length > 0
+    ? described.join(' | ')
+    : 'no item errors reported (transport-level failure?)';
+};
+
+/** Item errors that are worth one retry: a lost auto-create race or a timeout. */
+const isTransientBulkError = (error: unknown): boolean => {
+  const type = (error as { type?: string })?.type;
+  return (
+    type === 'resource_already_exists_exception' || type === 'es_timeout' || type === 'timeout'
+  );
+};
+
+const bulkItemsHaveOnlyTransientErrors = (result: { errors?: boolean; items?: unknown[] }) => {
+  const failures = (result.items ?? []).filter((item) =>
+    Object.values((item ?? {}) as Record<string, unknown>).some(
+      (op) => (op as { error?: unknown })?.error != null
+    )
+  );
+  return failures.every((item) =>
+    Object.values((item ?? {}) as Record<string, unknown>).every(
+      (op) =>
+        (op as { error?: unknown })?.error == null ||
+        isTransientBulkError((op as { error?: unknown }).error)
+    )
+  );
+};
+
+/** Creates the shared cited-alerts index up front; tolerates a concurrent create. */
+const ensureCitedAlertsIndex = async (esClient: EsClientLike, index: string): Promise<void> => {
+  if (!esClient.indices) {
+    // Unit-test stubs carry no indices API; the bulk retry below still covers the race.
+    return;
+  }
+  try {
+    await esClient.indices.create({ index, mappings: {} });
+  } catch (error) {
+    if (!isAlreadyExists(error)) {
+      throw error;
+    }
+  }
+};
+
+/** One retry when every failed bulk item is a transient auto-create/timeout error. */
+const bulkWithRetry = async (
+  { esClient, log }: { esClient: EsClientLike; log: ToolingLog },
+  index: string,
+  body: unknown[]
+): Promise<{ errors?: boolean; items?: unknown[] }> => {
+  let result = await esClient.bulk({ body, refresh: true });
+  if (result.errors && bulkItemsHaveOnlyTransientErrors(result)) {
+    log.warning(
+      `Transient bulk errors seeding ${index} (${describeBulkErrors(result, 2)}); retrying once`
+    );
+    result = await esClient.bulk({ body, refresh: true });
+  }
+  return result;
 };
 
 /** Identity fields the workflow's `terms` filters hit must be keyword, not dynamic text. */

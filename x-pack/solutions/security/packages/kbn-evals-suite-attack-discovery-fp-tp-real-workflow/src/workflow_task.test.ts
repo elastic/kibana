@@ -27,6 +27,7 @@ import {
   seedAttackDiscovery,
   seedCitedAlerts,
   seedInvestigation,
+  type EsClientLike,
 } from './workflow_task';
 
 describe('seeder→reader index contract', () => {
@@ -128,18 +129,16 @@ describe('seedCitedAlerts', () => {
       .map((op) => op.index!._id!);
 
   const makeEsClient = () => {
-    const bulks: Array<{ body: unknown[]; refresh?: boolean }> = [];
-    return {
-      bulks,
-      client: {
-        get: async () => ({ found: false }),
-        bulk: async (params: { body: unknown[]; refresh?: boolean }) => {
-          bulks.push(params);
-          return { errors: false };
-        },
-        deleteByQuery: async () => ({}),
+    const bulks: Array<{ body: unknown[]; refresh?: unknown }> = [];
+    const client: EsClientLike = {
+      get: async () => ({ found: false }),
+      bulk: async (params: { body: unknown[]; refresh?: boolean | 'wait_for' }) => {
+        bulks.push(params);
+        return { errors: false };
       },
+      deleteByQuery: async () => ({}),
     };
+    return { bulks, client };
   };
 
   it('seeds every cited alert id into the security alerts index the workflow reads', async () => {
@@ -174,6 +173,98 @@ describe('seedCitedAlerts', () => {
       AD_DOC_ID
     );
     expect(bulks).toHaveLength(0);
+  });
+
+  it('creates the shared cited-alerts index before the first bulk (auto-create race)', async () => {
+    const created: Array<{ index: string }> = [];
+    const { bulks, client } = makeEsClient();
+    client.indices = {
+      create: async (params: { index: string; mappings: Record<string, unknown> }) => {
+        created.push(params);
+        return { acknowledged: true };
+      },
+      putIndexTemplate: async () => ({}),
+      deleteIndexTemplate: async () => ({}),
+    };
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID);
+    expect(created).toEqual([{ index: `${SEED_CITED_ALERTS_INDEX_PREFIX}default`, mappings: {} }]);
+    expect(bulks).toHaveLength(1);
+  });
+
+  it('tolerates a concurrent create (resource_already_exists) when provisioning the index', async () => {
+    const { client } = makeEsClient();
+    client.indices = {
+      create: async () => {
+        const err = new Error('index already exists');
+        (err as { meta?: unknown }).meta = {
+          body: { error: { type: 'resource_already_exists_exception' } },
+        };
+        throw err;
+      },
+      putIndexTemplate: async () => ({}),
+      deleteIndexTemplate: async () => ({}),
+    };
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await expect(
+      seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID)
+    ).resolves.toBeUndefined();
+  });
+
+  it('retries the bulk once when every item error is a lost auto-create race', async () => {
+    const { bulks, client } = makeEsClient();
+    let call = 0;
+    client.bulk = async (params: { body: unknown[]; refresh?: boolean }) => {
+      bulks.push(params);
+      call += 1;
+      return call === 1
+        ? {
+            errors: true,
+            items: [{ index: { error: { type: 'resource_already_exists_exception' } } }],
+          }
+        : { errors: false };
+    };
+    const log = mockLog();
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await seedCitedAlerts({ fetch: jest.fn(), log, esClient: client }, doc, AD_DOC_ID);
+    expect(bulks).toHaveLength(2);
+    expect((log as unknown as { warning: jest.Mock }).warning).toHaveBeenCalledWith(
+      expect.stringMatching(/Transient bulk errors/)
+    );
+  });
+
+  it('does NOT retry when the item error is not transient (e.g. mapper rejection)', async () => {
+    const { bulks, client } = makeEsClient();
+    client.bulk = async (params: { body: unknown[]; refresh?: boolean }) => {
+      bulks.push(params);
+      return {
+        errors: true,
+        items: [
+          {
+            index: {
+              error: { type: 'document_parsing_exception', reason: 'failed to parse [host.id]' },
+            },
+          },
+        ],
+      };
+    };
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await expect(
+      seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID)
+    ).rejects.toThrow(/document_parsing_exception/);
+    expect(bulks).toHaveLength(1);
+  });
+
+  it('surfaces per-item bulk error reasons in the thrown message', async () => {
+    const { client } = makeEsClient();
+    client.bulk = async () => ({
+      errors: true,
+      items: [{ index: { error: { type: 'illegal_argument_exception', reason: 'boom' } } }],
+    });
+    const doc = buildAttackDiscoveryFromPayload('40', GUIDE_PAYLOAD);
+    await expect(
+      seedCitedAlerts({ fetch: jest.fn(), log: mockLog(), esClient: client }, doc, AD_DOC_ID)
+    ).rejects.toThrow(/illegal_argument_exception.*boom/);
   });
 });
 
