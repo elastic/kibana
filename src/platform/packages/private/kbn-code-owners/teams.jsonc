@@ -349,6 +349,16 @@
     ]
   },
   {
+    "id": "apps-dx",
+    "name": "Apps DX",
+    "github": {
+      "team": "elastic/apps-dx"
+    },
+    "responsibilities": [
+      "GitHub workflow scripts"
+    ]
+  },
+  {
     "id": "kibana-performance-testing",
     "name": "Kibana Performance Testing",
     "areas": [

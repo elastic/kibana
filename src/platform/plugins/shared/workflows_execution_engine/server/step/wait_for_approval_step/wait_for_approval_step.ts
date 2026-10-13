@@ -188,6 +188,9 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       approveLabel,
       rejectLabel,
       resumeLinks,
+      spaceId,
+      workflowId: execution.workflowId,
+      executionId: execution.id,
       renderTemplate: (template) =>
         String(
           this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template, {

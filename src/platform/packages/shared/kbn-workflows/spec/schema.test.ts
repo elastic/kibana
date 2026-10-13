@@ -1333,6 +1333,11 @@ describe('HITL external channel schemas', () => {
       channels: ['#alerts'],
       message: 'api note',
     },
+    email: {
+      'connector-id': 'email-1',
+      to: ['analyst@example.com'],
+      message: 'Open {{context.hitl.externalFormLink}}',
+    },
     slack2: {
       'connector-id': 'slack2-1',
       channels: ['C0123'],
@@ -1370,6 +1375,7 @@ describe('HITL external channel schemas', () => {
     expect(channelPropertyNames(WaitForInputChannelsSchema.unwrap())).toEqual({
       slack: ['connector-id', 'message'],
       slack_api: ['connector-id', 'channels', 'message'],
+      email: ['connector-id', 'to', 'cc', 'bcc', 'subject', 'message'],
       slack2: ['connector-id', 'channels', 'message'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
@@ -1386,6 +1392,7 @@ describe('HITL external channel schemas', () => {
     expect(channelPropertyNames(WaitForApprovalChannelsSchema.unwrap())).toEqual({
       slack: ['connector-id'],
       slack_api: ['connector-id', 'channels'],
+      email: ['connector-id', 'to', 'cc', 'bcc', 'subject'],
       slack2: ['connector-id', 'channels'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
