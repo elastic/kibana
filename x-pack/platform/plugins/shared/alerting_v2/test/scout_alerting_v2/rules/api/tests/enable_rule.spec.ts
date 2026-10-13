@@ -66,9 +66,9 @@ apiTest.describe('Enable rule API', { tag: '@local-stateful-classic' }, () => {
         rule_id: created.id,
         operation: 'rule.enabled',
         enabled: true,
-        channel: 'api',
+        origin: { actor: 'user', channel: 'api' },
       });
-      expect(event.properties.app).toBeUndefined();
+      expect(event.properties.origin.app).toBeUndefined();
     }
   );
 

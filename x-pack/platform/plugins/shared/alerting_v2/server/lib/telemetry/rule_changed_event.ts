@@ -15,6 +15,7 @@ import {
   RULE_UPDATED_EVENT_TYPE,
 } from '../events/rule_event_publisher/events';
 import type { RuleEventChannel } from '../rules_client/rule_event_origin';
+import type { EventOrigin } from '../event_origin/token';
 
 /** Domain event types reported as telemetry; the event type is the reported operation. */
 export const RULE_OPERATIONS = [
@@ -27,6 +28,12 @@ export const RULE_OPERATIONS = [
 
 export type RuleOperation = (typeof RULE_OPERATIONS)[number];
 
+export interface RuleChangedEventOrigin {
+  actor: EventOrigin;
+  channel: RuleEventChannel;
+  app?: string;
+}
+
 export interface RuleChangedEventData {
   rule_id: string;
   operation: RuleOperation;
@@ -35,8 +42,7 @@ export interface RuleChangedEventData {
   kind: RuleKind;
   builder_type?: string;
   enabled: boolean;
-  channel: RuleEventChannel;
-  app?: string;
+  origin: RuleChangedEventOrigin;
 }
 
 export const RULE_CHANGED_EBT_EVENT_TYPE = 'alerting_v2_rule_changed' as const;
@@ -97,20 +103,36 @@ export const RULE_CHANGED_EVENT: EventTypeOpts<RuleChangedEventData> = {
         optional: false,
       },
     },
-    channel: {
-      type: 'keyword',
-      _meta: {
-        description:
-          'The channel the change was made through: `ui` for requests made by the Kibana browser app, `system` for Kibana acting on its own behalf, or `api` for any other request.',
-        optional: false,
+    origin: {
+      properties: {
+        actor: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Who made the change: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.',
+            optional: false,
+          },
+        },
+        channel: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'The channel the change was made through: `ui` for requests made by the Kibana browser app, `system` for Kibana acting on its own behalf, or `api` for any other request.',
+            optional: false,
+          },
+        },
+        app: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'The app the change was made from: the app configured by the calling plugin or, for `ui` requests, the app named in the execution context. Absent otherwise.',
+            optional: true,
+          },
+        },
       },
-    },
-    app: {
-      type: 'keyword',
       _meta: {
-        description:
-          'The app the change was made from: the app configured by the calling plugin or, for `ui` requests, the app named in the execution context. Absent otherwise.',
-        optional: true,
+        description: 'Where the change came from.',
+        optional: false,
       },
     },
   },
@@ -123,7 +145,10 @@ export const ruleChangeTelemetryEvents: Array<EventTypeOpts<RuleChangedEventData
 /** Projects the telemetry payload from the domain rule; optional fields are omitted when absent. */
 export const buildRuleChangedEventData = (
   rule: RuleResponse,
-  { operation, channel, app }: { operation: RuleOperation; channel: RuleEventChannel; app?: string }
+  {
+    operation,
+    origin: { actor, channel, app },
+  }: { operation: RuleOperation; origin: RuleChangedEventOrigin }
 ): RuleChangedEventData => {
   const { id, kind, enabled, created_at: createdAt, metadata } = rule;
   const templateId = metadata.template?.id;
@@ -137,7 +162,6 @@ export const buildRuleChangedEventData = (
     kind,
     ...(builderType ? { builder_type: builderType } : {}),
     enabled,
-    channel,
-    ...(app ? { app } : {}),
+    origin: { actor, channel, ...(app ? { app } : {}) },
   };
 };

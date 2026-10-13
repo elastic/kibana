@@ -113,12 +113,29 @@ describe('RuleTelemetrySubscriber', () => {
           created_at: rule.created_at,
           kind: 'alert',
           enabled: true,
-          channel: 'api',
+          origin: { actor: 'user', channel: 'api' },
         });
       }
     );
 
-    it('forwards the channel and app from the event payload', async () => {
+    it('reports the publisher context origin as origin.actor', async () => {
+      subscriber.start();
+
+      await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), {
+        ...context,
+        origin: 'internal',
+      });
+
+      expect(ebtService.reportEvent).toHaveBeenCalledWith(
+        RULE_CHANGED_EBT_EVENT_TYPE,
+        expect.objectContaining({
+          rule_id: 'rule-1',
+          origin: expect.objectContaining({ actor: 'internal' }),
+        })
+      );
+    });
+
+    it('forwards the channel and app from the event payload as origin.channel and origin.app', async () => {
       subscriber.start();
 
       await handler()(
@@ -134,17 +151,20 @@ describe('RuleTelemetrySubscriber', () => {
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         RULE_CHANGED_EBT_EVENT_TYPE,
-        expect.objectContaining({ rule_id: 'rule-1', channel: 'ui', app: 'discover' })
+        expect.objectContaining({
+          rule_id: 'rule-1',
+          origin: { actor: 'user', channel: 'ui', app: 'discover' },
+        })
       );
     });
 
-    it('omits app when the event payload has none', async () => {
+    it('omits origin.app when the event payload has none', async () => {
       subscriber.start();
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context);
 
       const [, data] = ebtService.reportEvent.mock.calls[0];
-      expect(data).not.toHaveProperty('app');
+      expect(data.origin).not.toHaveProperty('app');
     });
 
     it('omits template_id and builder_type for rules without them', async () => {

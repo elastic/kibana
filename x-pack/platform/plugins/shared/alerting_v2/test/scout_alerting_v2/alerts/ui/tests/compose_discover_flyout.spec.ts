@@ -239,8 +239,7 @@ test.describe(
         expect(event.properties).toMatchObject({
           rule_id: items[0].id,
           operation: 'rule.created',
-          channel: 'ui',
-          app: 'observabilityAlerting',
+          origin: { actor: 'user', channel: 'ui', app: 'observabilityAlerting' },
         });
       });
     });

@@ -60,9 +60,9 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       rule_id: created.id,
       operation: 'rule.deleted',
       enabled: true,
-      channel: 'api',
+      origin: { actor: 'user', channel: 'api' },
     });
-    expect(event.properties.app).toBeUndefined();
+    expect(event.properties.origin.app).toBeUndefined();
   });
 
   apiTest('status: returns 404 when the rule does not exist', async ({ apiClient }) => {

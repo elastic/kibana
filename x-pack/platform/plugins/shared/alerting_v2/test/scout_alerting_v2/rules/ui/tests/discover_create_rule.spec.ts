@@ -109,8 +109,7 @@ test.describe(
         expect(event.properties).toMatchObject({
           rule_id: ruleId,
           operation: 'rule.created',
-          channel: 'ui',
-          app: 'discover',
+          origin: { actor: 'user', channel: 'ui', app: 'discover' },
         });
       });
     });

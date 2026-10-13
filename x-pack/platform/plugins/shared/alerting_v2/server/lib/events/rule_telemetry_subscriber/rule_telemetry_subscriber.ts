@@ -60,7 +60,9 @@ export class RuleTelemetrySubscriber {
 
     for (const eventType of RULE_OPERATIONS) {
       this.#subscriptions.push(
-        this.bus.subscribe<ReportedRuleEvent>(eventType, (event) => this.#reportRuleChanged(event))
+        this.bus.subscribe<ReportedRuleEvent>(eventType, (event, context) =>
+          this.#reportRuleChanged(event, context)
+        )
       );
     }
   }
@@ -73,7 +75,7 @@ export class RuleTelemetrySubscriber {
     this.#subscriptions = [];
   }
 
-  #reportRuleChanged(event: ReportedRuleEvent): void {
+  #reportRuleChanged(event: ReportedRuleEvent, { origin: actor }: AlertingPublisherContext): void {
     const { type: operation, payload } = event;
     const { rule, channel, app } = payload;
 
@@ -83,7 +85,7 @@ export class RuleTelemetrySubscriber {
 
     this.ebtService.reportEvent(
       RULE_CHANGED_EBT_EVENT_TYPE,
-      buildRuleChangedEventData(rule, { operation, channel, app })
+      buildRuleChangedEventData(rule, { operation, origin: { actor, channel, app } })
     );
   }
 }

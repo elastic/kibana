@@ -20,7 +20,7 @@ const data: RuleChangedEventData = {
   created_at: '2026-10-12T22:05:11.352Z',
   kind: 'alert',
   enabled: true,
-  channel: 'api',
+  origin: { actor: 'user', channel: 'api' },
 };
 
 describe('EbtService', () => {

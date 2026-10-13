@@ -65,9 +65,9 @@ apiTest.describe('Disable rule API', { tag: '@local-stateful-classic' }, () => {
         rule_id: created.id,
         operation: 'rule.disabled',
         enabled: false,
-        channel: 'api',
+        origin: { actor: 'user', channel: 'api' },
       });
-      expect(event.properties.app).toBeUndefined();
+      expect(event.properties.origin.app).toBeUndefined();
     }
   );
 

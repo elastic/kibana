@@ -11,7 +11,10 @@ import {
   RULE_CHANGED_EVENT,
   RULE_OPERATIONS,
   ruleChangeTelemetryEvents,
+  type RuleChangedEventOrigin,
 } from './rule_changed_event';
+
+const apiUserOrigin: RuleChangedEventOrigin = { actor: 'user', channel: 'api' };
 
 describe('RULE_CHANGED_EVENT', () => {
   it('uses an event type distinct from the alerting v1 event', () => {
@@ -37,41 +40,42 @@ describe('buildRuleChangedEventData', () => {
   it('projects the required fields from the rule', () => {
     const rule = createRuleResponse({ id: 'rule-1', kind: 'signal', enabled: false });
 
-    expect(buildRuleChangedEventData(rule, { operation: 'rule.created', channel: 'api' })).toEqual({
+    expect(
+      buildRuleChangedEventData(rule, { operation: 'rule.created', origin: apiUserOrigin })
+    ).toEqual({
       rule_id: 'rule-1',
       operation: 'rule.created',
       created_at: rule.created_at,
       kind: 'signal',
       enabled: false,
-      channel: 'api',
+      origin: { actor: 'user', channel: 'api' },
     });
   });
 
   it.each(RULE_OPERATIONS)('includes the %s operation', (operation) => {
-    expect(buildRuleChangedEventData(createRuleResponse(), { operation, channel: 'api' })).toEqual(
-      expect.objectContaining({ operation })
-    );
+    expect(
+      buildRuleChangedEventData(createRuleResponse(), { operation, origin: apiUserOrigin })
+    ).toEqual(expect.objectContaining({ operation }));
   });
 
-  it('omits template_id, builder_type, and app when absent', () => {
+  it('omits template_id, builder_type, and origin.app when absent', () => {
     const data = buildRuleChangedEventData(createRuleResponse(), {
       operation: 'rule.updated',
-      channel: 'api',
+      origin: apiUserOrigin,
     });
 
     expect(data).not.toHaveProperty('template_id');
     expect(data).not.toHaveProperty('builder_type');
-    expect(data).not.toHaveProperty('app');
+    expect(data.origin).not.toHaveProperty('app');
   });
 
-  it('includes the channel and app', () => {
+  it('nests the actor, channel, and app under origin', () => {
     expect(
       buildRuleChangedEventData(createRuleResponse(), {
-        operation: 'rule.updated',
-        channel: 'ui',
-        app: 'discover',
-      })
-    ).toEqual(expect.objectContaining({ channel: 'ui', app: 'discover' }));
+        operation: 'rule.disabled',
+        origin: { actor: 'internal', channel: 'ui', app: 'discover' },
+      }).origin
+    ).toEqual({ actor: 'internal', channel: 'ui', app: 'discover' });
   });
 
   it('includes template_id and builder_type when present', () => {
@@ -79,7 +83,7 @@ describe('buildRuleChangedEventData', () => {
       createRuleResponse({
         metadata: { template: { id: 'template-1' }, builder: { type: 'threshold' } },
       }),
-      { operation: 'rule.created', channel: 'api' }
+      { operation: 'rule.created', origin: apiUserOrigin }
     );
 
     expect(data).toEqual(
