@@ -13,6 +13,7 @@ import {
   isEsqlLensPanel,
   lensPanelKind,
   vegaPanelKind,
+  visUpsertContentSchema,
   type VisPanelResolutionRequest,
 } from './vis';
 import { markdownPanelKind } from './markdown';
@@ -36,7 +37,8 @@ import { attachmentPanelInputSchema } from './attachment_source';
  * Each kind's module describes it once, with `defineConfigPanelKind` or `defineRequestPanelKind`.
  * Registering it in one of the lists below derives its members of the input schemas, the
  * embeddable-type lookups, and the type lists in descriptions and errors. List order is the
- * order of the schema unions sent to the model.
+ * order of the schema unions sent to the model, except that the upsert content sent to the model
+ * merges the Lens and Vega kinds into one member.
  */
 export { attachmentPanelInputSchema } from './attachment_source';
 export type { AttachmentPanelInput } from './attachment_source';
@@ -146,10 +148,10 @@ export const upsertPanelContentSchema = z.discriminatedUnion('source', [
     'type',
     toNonEmpty(CONFIG_PANEL_KINDS.map(({ upsertContentSchema }) => upsertContentSchema))
   ),
-  z.discriminatedUnion(
-    'renderer',
-    toNonEmpty(REQUEST_PANEL_KINDS.map(({ upsertContentSchema }) => upsertContentSchema))
-  ),
+  z.discriminatedUnion('renderer', [
+    visUpsertContentSchema,
+    customContentPanelKind.upsertContentSchema,
+  ]),
   attachmentPanelInputSchema.omit({ grid: true }),
 ]);
 

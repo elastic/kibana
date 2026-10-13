@@ -64,13 +64,9 @@ const dataControlInputFields = {
   ...controlLayoutFields,
 };
 
-const optionsListControlInputSchema = z.object({
-  type: z.literal(OPTIONS_LIST_CONTROL),
-  ...dataControlInputFields,
-});
-
-const rangeSliderControlInputSchema = z.object({
-  type: z.literal(RANGE_SLIDER_CONTROL),
+/** Options lists and range sliders take the same fields, so they share one schema. */
+const dataControlInputSchema = z.object({
+  type: z.enum([OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL]),
   ...dataControlInputFields,
 });
 
@@ -81,8 +77,7 @@ const timeSliderControlInputSchema = z.object({
 });
 
 export const controlInputSchema = z.discriminatedUnion('type', [
-  optionsListControlInputSchema,
-  rangeSliderControlInputSchema,
+  dataControlInputSchema,
   timeSliderControlInputSchema,
 ]);
 
