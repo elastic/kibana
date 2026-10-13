@@ -349,6 +349,16 @@
     ]
   },
   {
+    "id": "apps-dx",
+    "name": "Apps DX",
+    "github": {
+      "team": "elastic/apps-dx"
+    },
+    "responsibilities": [
+      "GitHub workflow scripts"
+    ]
+  },
+  {
     "id": "kibana-performance-testing",
     "name": "Kibana Performance Testing",
     "areas": [
@@ -760,7 +770,6 @@
     "name": "Search & ML UX",
     "areas": [
       "search",
-      "workplaceai",
       "vectordb",
       "platform"
     ],
@@ -993,7 +1002,7 @@
     "id": "workchat-eng",
     "name": "Agent Builder",
     "areas": [
-      "workplaceai"
+      "platform"
     ],
     "github": {
       "team": "elastic/workchat-eng",

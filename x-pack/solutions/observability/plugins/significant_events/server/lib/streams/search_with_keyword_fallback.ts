@@ -19,7 +19,7 @@ export async function searchWithKeywordFallback<T>(
   opts: {
     searchMode: SearchMode | undefined;
     label: string;
-    streamNames: string[];
+    sourceIds: string[];
   },
   execute: (mode: SearchMode) => Promise<T>
 ): Promise<T> {
@@ -31,7 +31,7 @@ export async function searchWithKeywordFallback<T>(
     if (effectiveMode !== 'keyword' && !opts.searchMode) {
       const { message } = parseError(error);
       logger.warn(
-        `${opts.label} search mode "${effectiveMode}" failed for streams [${opts.streamNames.join(
+        `${opts.label} search mode "${effectiveMode}" failed for sources [${opts.sourceIds.join(
           ', '
         )}], falling back to keyword: ${message}`
       );
