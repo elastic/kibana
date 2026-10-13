@@ -10,6 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
+import { MICROSOFT_TEAMS_CONNECTOR_TYPE_ID } from './constants';
+import { microsoftTeamsEvents } from './events';
 import {
   ListJoinedTeamsInputSchema,
   ListChannelsInputSchema,
@@ -53,7 +55,7 @@ const GraphCollectionOutputSchema = lazySchema(() =>
 
 export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
-    id: '.microsoft-teams',
+    id: MICROSOFT_TEAMS_CONNECTOR_TYPE_ID,
     displayName: 'Microsoft Teams (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.microsoftTeams.metadata.description', {
       defaultMessage:
@@ -566,6 +568,8 @@ export const MicrosoftTeams: ConnectorSpec = {
       },
     },
   },
+
+  events: microsoftTeamsEvents,
 
   skill: [
     'Microsoft Teams connector — usage guidance:',
