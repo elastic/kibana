@@ -48,7 +48,7 @@ const DetectionResponseComponent = () => {
   const additionalFilters = useMemo(() => (filterQuery ? [filterQuery] : []), [filterQuery]);
 
   if (!canReadAlerts && !canReadCases) {
-    return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
+    return <NoPrivileges docLinkSelector={({ siem }: DocLinks) => siem.privileges} />;
   }
 
   if (status === 'pristine') {
