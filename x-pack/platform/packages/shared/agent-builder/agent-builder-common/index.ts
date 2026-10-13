@@ -152,6 +152,7 @@ export {
   isUserProfileId,
   SERVICE_ACCOUNT_ID_PREFIX,
   REALM_USER_ID_PREFIX,
+  serviceAccountUserId,
 } from './base/users';
 export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';

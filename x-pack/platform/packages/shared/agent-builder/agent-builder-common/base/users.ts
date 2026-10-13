@@ -20,6 +20,9 @@ export interface UserIdAndName {
 export const SERVICE_ACCOUNT_ID_PREFIX = 'service_account:';
 export const REALM_USER_ID_PREFIX = 'realm:';
 
+export const serviceAccountUserId = (serviceAccountId: string) =>
+  `${SERVICE_ACCOUNT_ID_PREFIX}${serviceAccountId}`;
+
 // `bulkGet` resolves a batch as one unit: one synthetic id would drop every real user's profile in it.
 export const isUserProfileId = (id: string | undefined): id is string =>
   id !== undefined &&

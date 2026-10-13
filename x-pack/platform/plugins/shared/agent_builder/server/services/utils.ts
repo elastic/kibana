@@ -13,7 +13,7 @@ import {
 } from '@kbn/core-security-server';
 import {
   REALM_USER_ID_PREFIX,
-  SERVICE_ACCOUNT_ID_PREFIX,
+  serviceAccountUserId,
   type CurrentUser,
 } from '@kbn/agent-builder-common';
 import { errors } from '@elastic/elasticsearch';
@@ -140,7 +140,8 @@ export const getUserFromRequest = async ({
   const principal = security.authc.getPrincipal(request);
   if (principal?.type === 'service_account') {
     return {
-      id: `${SERVICE_ACCOUNT_ID_PREFIX}${principal.serviceAccountId}`,
+      id: serviceAccountUserId(principal.serviceAccountId),
+      // A fake request Kibana minted for the account carries a credential but no stored user.
       username: authUser?.username ?? (await esClient.security.authenticate()).username,
       type: 'service_account',
       isAdmin,

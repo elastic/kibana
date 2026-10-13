@@ -226,6 +226,7 @@ const CONVERSATION_LIST_SOURCE_FIELDS = [
   'agent_id',
   'user_id',
   'user_name',
+  'user_type',
   'title',
   'created_at',
   'updated_at',

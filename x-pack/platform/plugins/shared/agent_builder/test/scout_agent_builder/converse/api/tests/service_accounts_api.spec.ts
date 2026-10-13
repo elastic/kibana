@@ -22,6 +22,11 @@ import {
   deleteConnectorById,
 } from '../../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../../scout_agent_builder_shared/lib/proxy_scenario';
+import {
+  mockAgentToolCall,
+  mockFinalAnswer,
+  mockTitleGeneration,
+} from '../../../../scout_agent_builder_shared/lib/proxy_scenario/calls';
 import { deleteAllConversationsFromEs } from '../../../../scout_agent_builder_shared/lib/conversations_es';
 import {
   createServiceAccountWithToken,
@@ -46,8 +51,6 @@ const CONVERSATIONS_PATH = `${API_AGENT_BUILDER}/conversations`;
 const CONVERSATION_PATH = (id: string) => `${CONVERSATIONS_PATH}/${encodeURIComponent(id)}`;
 const ADD_EVENTS_PATH = (id: string) => `${CONVERSATION_PATH(id)}/_add_events`;
 const CHAT_CONVERSE = `${chatApiPath}/converse`;
-const EXECUTE_TOOL_PATH = `${API_AGENT_BUILDER}/tools/_execute`;
-const VERSION_HEADER = { 'elastic-api-version': ELASTIC_API_VERSION };
 const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 
 const ROLE_NAME = 'agent-builder-service-account-role';
@@ -216,6 +219,16 @@ apiTest.describe('Agent Builder — service accounts', { tag: STATEFUL_ONLY }, (
           type: 'service_account',
         });
         expect(conversation.rounds[0].response.message).toBe('Hello from the agent');
+
+        const listed = await apiClient.get(CONVERSATIONS_PATH, {
+          headers: asServiceAccount,
+          responseType: 'json',
+        });
+        expect(listed).toHaveStatusCode(200);
+        const { results } = listed.body as { results: Array<{ id: string; user: unknown }> };
+        expect(results.find((item) => item.id === id)?.user).toMatchObject({
+          type: 'service_account',
+        });
       }
     );
 
@@ -264,39 +277,47 @@ apiTest.describe('Agent Builder — service accounts', { tag: STATEFUL_ONLY }, (
     );
   }
 
-  apiTest(
-    'runs tools with its own Elasticsearch privileges',
-    async ({ apiClient, asAdmin, esClient }) => {
-      const index = `agent-builder-sa-restricted-${Date.now()}`;
-      const marker = 'only admins can see this';
-      await esClient.indices.create({ index });
-      await esClient.index({ index, document: { message: marker }, refresh: 'wait_for' });
+  apiTest('runs tools with its own Elasticsearch privileges', async ({ apiClient, esClient }) => {
+    const index = `agent-builder-sa-restricted-${Date.now()}`;
+    const marker = 'only admins can see this';
+    await esClient.indices.create({ index });
+    await esClient.index({ index, document: { message: marker }, refresh: 'wait_for' });
 
-      try {
-        const body = {
-          tool_id: 'platform.core.execute_esql',
-          tool_params: { query: `FROM ${index} | LIMIT 1` },
-        };
+    const runEsqlTool = async (authHeaders: Record<string, string>) => {
+      mockTitleGeneration(llmProxy, 'Tool run');
+      mockAgentToolCall({
+        llmProxy,
+        toolName: 'platform_core_execute_esql',
+        toolArg: { query: `FROM ${index} | LIMIT 1` },
+      });
+      mockFinalAnswer(llmProxy, 'done');
 
-        const asAdminRun = await asAdmin.post(EXECUTE_TOOL_PATH, {
-          headers: VERSION_HEADER,
-          body,
-          responseType: 'json',
-        });
-        expect(asAdminRun).toHaveStatusCode(200);
-        expect(JSON.stringify(asAdminRun.body)).toContain(marker);
+      const res = await postConverse(
+        apiClient,
+        authHeaders,
+        { input: 'read the index', connector_id: connectorId },
+        'local'
+      );
+      expect(res).toHaveStatusCode(200);
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-        const asServiceAccountRun = await apiClient.post(EXECUTE_TOOL_PATH, {
-          headers: { ...asServiceAccount, ...VERSION_HEADER },
-          body,
-          responseType: 'json',
-        });
-        expect(JSON.stringify(asServiceAccountRun.body)).not.toContain(marker);
-      } finally {
-        await esClient.indices.delete({ index }, { ignore: [404] });
-      }
+      const { conversation_id: id } = res.body as { conversation_id: string };
+      const conversation = await getConversation(apiClient, authHeaders, id);
+      const toolStep = conversation.rounds[0].steps.find((step) => step.type === 'tool_call');
+      expect(toolStep).toBeDefined();
+      return JSON.stringify(toolStep);
+    };
+
+    try {
+      expect(await runEsqlTool(adminCredentials.apiKeyHeader)).toContain(marker);
+
+      const asServiceAccountStep = await runEsqlTool(serviceAccount.authHeader);
+      expect(asServiceAccountStep).not.toContain(marker);
+      expect(asServiceAccountStep).toContain('"type":"error"');
+    } finally {
+      await esClient.indices.delete({ index }, { ignore: [404] });
     }
-  );
+  });
 
   apiTest('cannot reach a private conversation it does not own', async ({ apiClient, asAdmin }) => {
     const created = await asAdmin.post(CONVERSATIONS_PATH, {
