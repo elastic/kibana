@@ -52,6 +52,16 @@ describe('renderSteps', () => {
     expect(parse(renderSteps([step('a')], { header: true }))).toEqual({ steps: [step('a')] });
   });
 
+  it('renders an empty chunk that leaves the document it continues unchanged', () => {
+    const first = 'steps:\n  - command: a.sh\n    key: a\n';
+    expect(renderSteps([])).toBe('');
+    expect(parse(first + renderSteps([])).steps).toEqual([{ command: 'a.sh', key: 'a' }]);
+  });
+
+  it('keeps "steps: []" for an empty standalone document', () => {
+    expect(parse(renderSteps([], { header: true }))).toEqual({ steps: [] });
+  });
+
   it('keeps integer and wildcard exit statuses, colons in labels and multi-line commands', () => {
     const s = step('k', {
       command: 'echo one\necho two\n',

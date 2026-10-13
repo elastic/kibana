@@ -57,6 +57,11 @@ export const renderSteps = (
     registerCancelKeys(getStepKeys(steps));
   }
 
+  // An empty continuation chunk adds no steps; ` []` would break the document it continues.
+  if (!header && steps.length === 0) {
+    return '';
+  }
+
   // lineWidth 0 stops from folding long commands. The default indentSeq keeps list items two
   // spaces in, which is what lets this chunk continue a document that already has `steps:`.
   const text = stringify({ steps }, { lineWidth: 0 });
