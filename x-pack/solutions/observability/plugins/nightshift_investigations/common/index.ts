@@ -15,6 +15,8 @@ import type { InvestigationSubjectType, InvestigationTriggerType } from './workf
 
 export type { Severity } from '@kbn/significant-events-schema';
 
+export { MAX_RULE_NAMES } from './automation_limits';
+
 export {
   INVESTIGATION_SUBJECT_TYPES,
   type InvestigationSubjectType,
@@ -29,6 +31,7 @@ export type {
   AlertSnapshotEvaluation,
   AlertSnapshotGroup,
   InvestigationContext,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
@@ -36,13 +39,17 @@ export {
   alertInvestigationContextSchema,
   alertSnapshotSchema,
   freeFormContextSchema,
+  investigationNotificationDestinationSchema,
+  investigationNotificationDestinationsSchema,
   investigationSubjectSchema,
   MAX_ALERTS_PER_INVESTIGATION,
+  MAX_INVESTIGATION_NOTIFICATIONS,
 } from './schemas';
 
 import type {
   AlertInvestigationContext,
   InvestigationContext,
+  InvestigationNotificationDestination,
   InvestigationSubject,
 } from './schemas';
 
@@ -51,7 +58,12 @@ export interface StartInvestigationRequest {
   title: string;
   trigger_type: InvestigationTriggerType;
   message?: string;
-  stream_names?: string[];
+  /**
+   * Nightshift source ids the investigation should scope its queries to. The
+   * investigation workflow resolves them to slug and ES|QL view.
+   */
+  source_ids?: string[];
+  /** Optional chat model connector or inference endpoint id for this run. */
   connector_id?: string;
   /**
    * Passed to the workflow engine as `concurrency_key`. Two starts with the same key
@@ -59,6 +71,8 @@ export interface StartInvestigationRequest {
    */
   concurrency_key?: string;
   context?: InvestigationContext | AlertInvestigationContext;
+  /** Destinations receiving investigation lifecycle messages. */
+  notificationDestinations?: InvestigationNotificationDestination[];
 }
 
 export interface StartInvestigationResponse {
@@ -80,6 +94,10 @@ export const INVESTIGATION_STATUSES = [
   'cancelled',
 ] as const;
 export type InvestigationStatus = (typeof INVESTIGATION_STATUSES)[number];
+
+/** Whether an investigation has settled and can no longer transition to another status. */
+export const isTerminalStatus = (status: InvestigationStatus): boolean =>
+  status === 'completed' || status === 'failed' || status === 'cancelled';
 
 export const UPDATABLE_INVESTIGATION_STATUSES = [
   'running',

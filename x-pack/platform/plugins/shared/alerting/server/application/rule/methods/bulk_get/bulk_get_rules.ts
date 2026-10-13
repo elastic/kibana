@@ -48,6 +48,7 @@ export async function bulkGetRules<Params extends RuleParams = never>(
 
   await checkAuthorizationAndGetTotal(context, {
     filter: kueryNodeFilterWithAuth,
+    baseFilter: kueryNodeFilter,
     action: 'GET',
   });
 

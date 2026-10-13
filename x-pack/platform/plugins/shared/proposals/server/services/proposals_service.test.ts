@@ -14,7 +14,9 @@ import {
   type ListProposalsQuery,
 } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
+import { IMPACT_RANK_FIELD } from '../storage/sort_ranks';
 import {
+  ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -57,6 +59,7 @@ const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocume
 /** The full query shape, so a test only states the filters it cares about. */
 const listQuery = (overrides: Partial<ListProposalsQuery> = {}): ListProposalsQuery => ({
   excludeSuperseded: false,
+  excludeUndecidedSuperseded: false,
   excludeExpired: false,
   size: 50,
   from: 0,
@@ -707,6 +710,143 @@ describe('ProposalsService', () => {
 
       expect(proposal.actionWorkflowId).toBeUndefined();
       expect(workflowsApi.getWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('create — caller-supplied id', () => {
+    const ID = '6f1a8c2e-2f47-5c4b-9a33-7d2a1b4e6c50';
+    const idParams = (overrides: Partial<Parameters<ProposalsService['create']>[0]> = {}) => ({
+      conversationId: 'conv-1',
+      comment: 'Isolate the host for this finding',
+      confidence: 'medium' as const,
+      origin: 'alertzero' as const,
+      id: ID,
+      ...overrides,
+    });
+    const conflict = () => Object.assign(new Error('version conflict'), { statusCode: 409 });
+
+    it('creates the proposal under the supplied id, rooted at itself', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const proposal = await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.id).toBe(ID);
+      expect(createArgs.op_type).toBe('create');
+      expect(createArgs.document.rootProposalId).toBe(ID);
+      expect(proposal.id).toBe(ID);
+    });
+
+    it('omitting the id behaves identically to today: a fresh random id every call', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      const first = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+      const second = await service.create(idParams({ id: undefined }), {
+        spaceId: SPACE_ID,
+        request,
+      });
+
+      expect(first.id).not.toBe(second.id);
+      expect(first.id).not.toBe(ID);
+    });
+
+    it('does not read anything before the create, or on a success', async () => {
+      // The atomicity comes from `op_type: 'create'` itself, not from a
+      // check-then-create pair in application code.
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      expect(storage.search).not.toHaveBeenCalled();
+    });
+
+    it('refuses an id that already exists, reading and returning nothing', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(conflict());
+      const { service, attachmentsClient } = createService(storage);
+
+      const attempt = service.create(idParams(), { spaceId: SPACE_ID, request });
+
+      await expect(attempt).rejects.toBeInstanceOf(ProposalAlreadyExistsError);
+      // Nothing about the existing record, whoever or whichever space owns it,
+      // is looked up on the way to the error, so nothing can leak through it.
+      expect(storage.search).not.toHaveBeenCalled();
+      expect(attachmentsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('is a conflict as far as routes and workflows are concerned', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(conflict());
+      const { service } = createService(storage);
+
+      await expect(
+        service.create(idParams(), { spaceId: SPACE_ID, request })
+      ).rejects.toBeInstanceOf(ProposalConflictError);
+    });
+
+    it('rethrows a conflict on a random id unchanged: only a caller-chosen id can duplicate', async () => {
+      const storage = createStorage();
+      const error = conflict();
+      storage.index.mockRejectedValue(error);
+      const { service } = createService(storage);
+
+      await expect(
+        service.create(idParams({ id: undefined }), { spaceId: SPACE_ID, request })
+      ).rejects.toBe(error);
+    });
+
+    it('rethrows a failure that is not a conflict', async () => {
+      const storage = createStorage();
+      storage.index.mockRejectedValue(Object.assign(new Error('boom'), { statusCode: 500 }));
+      const { service } = createService(storage);
+
+      await expect(service.create(idParams(), { spaceId: SPACE_ID, request })).rejects.toThrow(
+        'boom'
+      );
+    });
+
+    /**
+     * A true multi-request race can only be fully proven against real
+     * Elasticsearch, where `op_type: 'create'` is actually atomic. What a unit test
+     * can prove is that two calls fired together against a fake that enforces the
+     * same "only the first create to reach an id wins, every other throws a
+     * conflict" contract produce one proposal and one refusal. The fake's
+     * check-and-set is forced apart by a real `await`, so the calls interleave
+     * there instead of running one after the other.
+     */
+    it('lets only one of two concurrent calls with the same id create the proposal', async () => {
+      const documents = new Map<string, ProposalDocument>();
+      const storage = {
+        index: jest.fn(async ({ id, document }: { id: string; document: ProposalDocument }) => {
+          await new Promise((resolve) => setImmediate(resolve));
+          if (documents.has(id)) {
+            throw conflict();
+          }
+          documents.set(id, document);
+          return { _id: id };
+        }),
+        search: jest.fn(),
+      } as unknown as ReturnType<typeof createStorage>;
+      const { service: serviceA, attachmentsClient: attachmentsA } = createService(storage);
+      const { service: serviceB, attachmentsClient: attachmentsB } = createService(storage);
+
+      const results = await Promise.allSettled([
+        serviceA.create(idParams(), { spaceId: SPACE_ID, request }),
+        serviceB.create(idParams(), { spaceId: SPACE_ID, request }),
+      ]);
+
+      expect(results.map(({ status }) => status).sort()).toEqual(['fulfilled', 'rejected']);
+      const refused = results.find(({ status }) => status === 'rejected') as PromiseRejectedResult;
+      expect(refused.reason).toBeInstanceOf(ProposalAlreadyExistsError);
+      expect(documents.size).toBe(1);
+      // Only the winner posted a conversation card.
+      expect(attachmentsA.create.mock.calls.length + attachmentsB.create.mock.calls.length).toBe(1);
     });
   });
 
@@ -1878,6 +2018,42 @@ describe('ProposalsService', () => {
   });
 
   describe('getLatestRevision', () => {
+    it('rejects an id nothing is under with ProposalNotFoundError, which a caller reads as "free"', async () => {
+      // Hunt picks the id a proposal is created under by asking each generation of a subject
+      // whether anything is there, and treats exactly this error as "no": anything else fails closed.
+      const { service } = createService(createStorage());
+
+      await expect(service.getLatestRevision('nothing-here', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
+    it('does not find a proposal that is in another space', async () => {
+      // The read is filtered to the caller's space, so another space's proposal under the same id
+      // does not hold a subject here.
+      const storage = createStorage();
+      storage.search.mockImplementation(
+        async ({ query }: { query: { bool: { filter: Array<Record<string, any>> } } }) => {
+          const space = query.bool.filter.find(
+            (clause) => 'term' in clause && 'spaceId' in clause.term
+          );
+          return space?.term.spaceId === 'other-space'
+            ? {
+                hits: {
+                  hits: [searchHit(baseDocument({ spaceId: 'other-space' }))],
+                  total: { value: 1 },
+                },
+              }
+            : { hits: { hits: [], total: { value: 0 } } };
+        }
+      );
+      const { service } = createService(storage);
+
+      await expect(service.getLatestRevision('proposal-1', SPACE_ID)).rejects.toBeInstanceOf(
+        ProposalNotFoundError
+      );
+    });
+
     it('returns the proposal itself when it is the live revision', async () => {
       const storage = createStorage(baseDocument({ rootProposalId: 'proposal-1', revision: 1 }));
       const { service } = createService(storage);
@@ -2143,6 +2319,54 @@ describe('ProposalsService', () => {
       const [[searchArgs]] = storage.search.mock.calls;
       expect(searchArgs.query.bool.filter).toEqual(
         expect.arrayContaining([{ bool: { must_not: { exists: { field: 'supersededBy' } } } }])
+      );
+    });
+
+    it('should order a conversation history newest first when asked, undecided leading', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ order: 'newest' }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort).toEqual([
+        { decidedAt: { order: 'desc', missing: '_first' } },
+        { createdAt: { order: 'desc' } },
+        { rootProposalId: { order: 'asc' } },
+        { revision: { order: 'asc' } },
+      ]);
+    });
+
+    it('should keep ranking by priority unless a newest-first order is asked for', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery(), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.sort[0]).toEqual({ [IMPACT_RANK_FIELD]: { order: 'asc' } });
+    });
+
+    it('should keep a decided superseded proposal but drop an undecided one', async () => {
+      const storage = createStorage(baseDocument());
+      const { service } = createService(storage);
+
+      await service.list(listQuery({ excludeUndecidedSuperseded: true }), SPACE_ID, request);
+
+      const [[searchArgs]] = storage.search.mock.calls;
+      expect(searchArgs.query.bool.filter).toEqual(
+        expect.arrayContaining([
+          {
+            bool: {
+              must_not: {
+                bool: {
+                  filter: [{ exists: { field: 'supersededBy' } }],
+                  must_not: [{ exists: { field: 'decision' } }],
+                },
+              },
+            },
+          },
+        ])
       );
     });
 

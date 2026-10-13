@@ -97,6 +97,12 @@ export interface WritableDataClient<TExecution extends { id: string }> {
    * Throws on storage errors.
    */
   deleteByQuery(request: ExecutionsDeleteByQueryRequest): Promise<estypes.DeleteByQueryResponse>;
+
+  /**
+   * Makes all writes so far visible to search, delete-by-query, and count.
+   * Throws on storage errors.
+   */
+  refresh(): Promise<void>;
 }
 
 export type DataClient<TExecution extends { id: string }> = ReadonlyDataClient<TExecution> &

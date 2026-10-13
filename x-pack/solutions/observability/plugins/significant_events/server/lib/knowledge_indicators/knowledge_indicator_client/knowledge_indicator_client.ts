@@ -14,7 +14,6 @@ import {
   type StreamQuery,
   DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG,
 } from '@kbn/significant-events-schema';
-import type { Streams } from '@kbn/streams-schema';
 import type { SearchMode } from '../../../../common/queries';
 import type { KnowledgeIndicatorType } from '../fields';
 import {
@@ -38,12 +37,23 @@ export type {
   RuleUnbackedFilter,
 };
 
+/**
+ * Space-scoped access to knowledge indicators keyed by Nightshift source id.
+ *
+ * A source id identifies the unit of data a KI describes. Callers pass a
+ * Nightshift source id. Route paths name it `{sourceId}`. The server
+ * stamps the id on every revision; it is never part of a write payload.
+ *
+ * Every read filters on the space the client was built for and every write is
+ * stamped with it; callers never see documents from another space.
+ */
 export class KnowledgeIndicatorClient {
   private readonly writer: IndicatorWriter;
   private readonly reader: IndicatorReader;
   private readonly searcher: IndicatorSearcher;
   private readonly orchestrator: QueryRuleOrchestrator;
   private readonly ttlDays: number;
+  private readonly withSourceWrite: NonNullable<KnowledgeIndicatorClientDeps['withSourceWrite']>;
 
   constructor(
     deps: KnowledgeIndicatorClientDeps,
@@ -54,27 +64,43 @@ export class KnowledgeIndicatorClient {
       'semantic_min_score' | 'rrf_rank_constant' | 'feature_ttl_days'
     > = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG
   ) {
-    const revisionReader = new RevisionReader(deps.esClient, deps.logger);
+    this.withSourceWrite = deps.withSourceWrite ?? ((_sourceId, run) => run());
+    const revisionReader = new RevisionReader(deps.esClient, deps.logger, deps.space);
     this.ttlDays = config.feature_ttl_days;
     this.writer = new IndicatorWriter(
       deps.dataStreamClient,
       deps.logger,
       revisionReader,
-      config.feature_ttl_days
+      config.feature_ttl_days,
+      deps.space
     );
     this.reader = new IndicatorReader(revisionReader);
-    this.searcher = new IndicatorSearcher(deps.esClient, deps.logger, config, revisionReader);
+    this.searcher = new IndicatorSearcher(
+      deps.esClient,
+      deps.logger,
+      config,
+      revisionReader,
+      deps.space
+    );
     this.orchestrator = new QueryRuleOrchestrator(
       alertingContext.rulesClient,
       deps.logger,
       isSignificantEventsEnabled,
       this.writer,
-      this.reader
+      this.reader,
+      deps.space
     );
   }
 
-  bulk(stream: string, operations: KIBulkOperation[]) {
-    return this.writer.bulk(stream, operations);
+  bulk(sourceId: string, operations: KIBulkOperation[]) {
+    // Deleting or excluding must keep working on a disabled source; the guard exists to stop
+    // a stale onboarding run from adding knowledge back, and those runs only index.
+    const removesOnly = operations.every(
+      (operation) => 'delete' in operation || 'exclude' in operation
+    );
+    return this.withSourceWrite(sourceId, () => this.writer.bulk(sourceId, operations), {
+      allowDisabled: removesOnly,
+    });
   }
 
   getDefaultExpiresAt(): string {
@@ -86,18 +112,18 @@ export class KnowledgeIndicatorClient {
   }
 
   keepAlivePersistentIndicators(
-    stream: string,
+    sourceId: string,
     options: { lastRefreshedBefore: string }
   ): Promise<{ refreshed: number }> {
-    return this.writer.keepAlivePersistent(stream, options);
+    return this.withSourceWrite(sourceId, () => this.writer.keepAlivePersistent(sourceId, options));
   }
 
-  deleteIndicators(stream: string) {
-    return this.writer.deleteIndicators(stream);
+  deleteIndicators(sourceId: string) {
+    return this.writer.deleteIndicators(sourceId);
   }
 
   getFeatures(
-    streams: string | string[],
+    sources: string | string[],
     options?: {
       type?: string[];
       excludedType?: string[];
@@ -110,26 +136,26 @@ export class KnowledgeIndicatorClient {
       sort?: ComposerSortShorthand[];
     }
   ): Promise<{ hits: Feature[] }> {
-    return this.reader.getFeatures(streams, options);
+    return this.reader.getFeatures(sources, options);
   }
 
-  getExcludedFeatures(stream: string): Promise<{ hits: Feature[] }> {
-    return this.reader.getExcludedFeatures(stream);
+  getExcludedFeatures(sourceId: string): Promise<{ hits: Feature[] }> {
+    return this.reader.getExcludedFeatures(sourceId);
   }
 
-  getFeature(stream: string, id: string): Promise<Feature> {
-    return this.reader.getFeature(stream, id);
+  getFeature(sourceId: string, id: string): Promise<Feature> {
+    return this.reader.getFeature(sourceId, id);
   }
 
   getLatestRevisionTimestamp(
-    stream: string,
+    sourceId: string,
     options?: { types?: string[] }
   ): Promise<{ '@timestamp': string } | null> {
-    return this.reader.getLatestRevisionTimestamp(stream, options);
+    return this.reader.getLatestRevisionTimestamp(sourceId, options);
   }
 
   getQueryLinks(
-    streamNames: string[],
+    sourceIds: string[],
     filters?: {
       ruleUnbacked?: RuleUnbackedFilter;
       queryIds?: string[];
@@ -139,22 +165,22 @@ export class KnowledgeIndicatorClient {
       includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
-    return this.reader.getQueryLinks(streamNames, filters);
+    return this.reader.getQueryLinks(sourceIds, filters);
   }
 
-  getStreamToQueryLinksMap(
-    streamNames: string[],
+  getSourceToQueryLinksMap(
+    sourceIds: string[],
     options?: { includeExpired?: boolean }
   ): Promise<Record<string, QueryLink[]>> {
-    return this.reader.getStreamToQueryLinksMap(streamNames, options);
+    return this.reader.getSourceToQueryLinksMap(sourceIds, options);
   }
 
   bulkGetQueriesByIds(
-    stream: string,
+    sourceId: string,
     ids: string[],
     options?: { includeExpired?: boolean }
   ): Promise<QueryLink[]> {
-    return this.reader.bulkGetQueriesByIds(stream, ids, options);
+    return this.reader.bulkGetQueriesByIds(sourceId, ids, options);
   }
 
   getPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
@@ -165,38 +191,39 @@ export class KnowledgeIndicatorClient {
     return this.reader.getRuleBackedQueryLinks();
   }
 
-  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; stream_name: string }>> {
+  findFeaturesByIds(ids: string[]): Promise<Array<{ id: string; source_id: string }>> {
     return this.reader.findFeaturesByIds(ids);
   }
 
-  getStreamNamesWithKnowledgeIndicators(): Promise<string[]> {
-    return this.reader.getStreamNamesWithKnowledgeIndicators();
+  getSourceIdsWithKnowledgeIndicators(): Promise<string[]> {
+    return this.reader.getSourceIdsWithKnowledgeIndicators();
   }
 
   /**
-   * Streams the sync sweep must reconcile: those with active knowledge
-   * indicators unioned with those that still have Streams-owned rules. The KI
-   * set alone misses streams whose rules outlived all of their KIs — the very
+   * Sources the sync sweep must reconcile: those with active knowledge
+   * indicators unioned with those that still have Nightshift-owned rules. The KI
+   * set alone misses sources whose rules outlived all of their KIs — the very
    * orphan-rule case the sweep exists to catch.
    */
-  async getStreamNamesToReconcile(): Promise<string[]> {
+  async getSourceIdsToReconcile(): Promise<string[]> {
     const [withIndicators, withOwnedRules] = await Promise.all([
-      this.reader.getStreamNamesWithKnowledgeIndicators(),
-      this.orchestrator.findStreamNamesWithOwnedRules(),
+      this.reader.getSourceIdsWithKnowledgeIndicators(),
+      this.orchestrator.findSourceIdsWithOwnedRules(),
     ]);
     return [...new Set([...withIndicators, ...withOwnedRules])];
   }
 
-  findStreamNamesWithOwnedRules(): Promise<string[]> {
-    return this.orchestrator.findStreamNamesWithOwnedRules();
+  /** Source ids that still have a Nightshift-owned rule. One tag-prefix lookup. */
+  findSourceIdsWithOwnedRules(): Promise<string[]> {
+    return this.orchestrator.findSourceIdsWithOwnedRules();
   }
 
-  findOwnedRuleIds(streamName: string): Promise<string[]> {
-    return this.orchestrator.findOwnedRuleIds(streamName);
+  findOwnedRuleIds(sourceId: string): Promise<string[]> {
+    return this.orchestrator.findOwnedRuleIds(sourceId);
   }
 
   findIndicators(
-    streams: string | string[],
+    sources: string | string[],
     query: string,
     options?: {
       types?: KnowledgeIndicatorType[];
@@ -211,11 +238,11 @@ export class KnowledgeIndicatorClient {
       ruleUnbacked?: RuleUnbackedFilter;
     }
   ): Promise<{ hits: KnowledgeIndicator[] }> {
-    return this.searcher.findIndicators(streams, query, options);
+    return this.searcher.findIndicators(sources, query, options);
   }
 
   findFeatures(
-    streams: string | string[],
+    sources: string | string[],
     query: string,
     options?: {
       searchMode?: SearchMode;
@@ -225,11 +252,11 @@ export class KnowledgeIndicatorClient {
       featureIds?: string[];
     }
   ): Promise<{ hits: Feature[] }> {
-    return this.searcher.findFeatures(streams, query, options);
+    return this.searcher.findFeatures(sources, query, options);
   }
 
   findQueries(
-    streams: string | string[],
+    sources: string | string[],
     query: string,
     filters?: {
       ruleUnbacked?: RuleUnbackedFilter;
@@ -239,71 +266,75 @@ export class KnowledgeIndicatorClient {
     },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
-    return this.searcher.findQueries(streams, query, filters, searchMode);
+    return this.searcher.findQueries(sources, query, filters, searchMode);
   }
 
   syncQueries(
-    definition: Streams.all.Definition,
+    sourceId: string,
     queries: StreamQuery[],
     options?: { currentLinks?: QueryLink[] }
   ): Promise<void> {
-    return this.orchestrator.syncQueries(definition, queries, options);
+    return this.withSourceWrite(sourceId, () =>
+      this.orchestrator.syncQueries(sourceId, queries, options)
+    );
   }
 
-  async replaceStreamQueries(
-    definition: Streams.all.Definition,
+  async replaceSourceQueries(
+    sourceId: string,
     getNextQueries: (currentLinks: QueryLink[]) => StreamQuery[]
   ): Promise<void> {
-    const { [definition.name]: currentLinks } = await this.getStreamToQueryLinksMap([
-      definition.name,
-    ]);
-    await this.syncQueries(definition, getNextQueries(currentLinks), { currentLinks });
+    await this.withSourceWrite(sourceId, async () => {
+      const { [sourceId]: currentLinks } = await this.getSourceToQueryLinksMap([sourceId]);
+      await this.orchestrator.syncQueries(sourceId, getNextQueries(currentLinks), { currentLinks });
+    });
   }
 
-  upsertQuery(definition: Streams.all.Definition, query: StreamQuery): Promise<void> {
-    return this.orchestrator.upsertQuery(definition, query);
+  upsertQuery(sourceId: string, query: StreamQuery): Promise<void> {
+    return this.withSourceWrite(sourceId, () => this.orchestrator.upsertQuery(sourceId, query));
   }
 
-  deleteQuery(definition: Streams.all.Definition, queryId: string): Promise<void> {
-    return this.orchestrator.deleteQuery(definition, queryId);
+  deleteQuery(sourceId: string, queryId: string): Promise<void> {
+    return this.orchestrator.deleteQuery(sourceId, queryId);
   }
 
-  deleteQueries(
-    definition: Streams.all.Definition,
-    queryIds: string[]
-  ): Promise<{ deleted: number }> {
-    return this.orchestrator.deleteQueries(definition, queryIds);
+  deleteQueries(sourceId: string, queryIds: string[]): Promise<{ deleted: number }> {
+    return this.orchestrator.deleteQueries(sourceId, queryIds);
   }
 
-  deleteAllQueries(streamName: string): Promise<void> {
-    return this.orchestrator.deleteAllQueries(streamName);
+  deleteAllQueries(sourceId: string): Promise<void> {
+    return this.orchestrator.deleteAllQueries(sourceId);
   }
 
-  promoteQueries(
-    definition: Streams.all.Definition,
-    queryIds: string[]
-  ): Promise<PromoteQueriesResult> {
-    return this.orchestrator.promoteQueries(definition, queryIds);
+  setSourceRulesEnabled(sourceId: string, enabled: boolean): Promise<void> {
+    return this.orchestrator.setSourceRulesEnabled(sourceId, enabled);
+  }
+
+  deleteOwnedRules(sourceId: string): Promise<void> {
+    return this.orchestrator.deleteOwnedRules(sourceId);
+  }
+
+  promoteQueries(sourceId: string, queryIds: string[]): Promise<PromoteQueriesResult> {
+    return this.withSourceWrite(sourceId, () =>
+      this.orchestrator.promoteQueries(sourceId, queryIds)
+    );
   }
 
   promoteUnbackedQueries(args: {
     queryIds?: string[];
     minSeverityScore?: number;
-    streamDefinitions: Map<string, Streams.all.Definition>;
+    sourceIds: string[];
   }): Promise<PromoteQueriesResult> {
-    return this.orchestrator.promoteUnbackedQueries(args);
+    return this.orchestrator.promoteUnbackedQueries({
+      ...args,
+      promote: (sourceId, ids) => this.promoteQueries(sourceId, ids),
+    });
   }
 
-  demoteQueries(
-    definition: Streams.all.Definition,
-    queryIds: string[]
-  ): Promise<{ demoted: number }> {
-    return this.orchestrator.demoteQueries(definition, queryIds);
+  demoteQueries(sourceId: string, queryIds: string[]): Promise<{ demoted: number }> {
+    return this.orchestrator.demoteQueries(sourceId, queryIds);
   }
 
-  reconcileStream(
-    definition: Streams.all.Definition
-  ): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
-    return this.orchestrator.reconcileStream(definition);
+  reconcileSource(sourceId: string): Promise<{ tombstoned: number; orphanRulesDeleted: number }> {
+    return this.withSourceWrite(sourceId, () => this.orchestrator.reconcileSource(sourceId));
   }
 }

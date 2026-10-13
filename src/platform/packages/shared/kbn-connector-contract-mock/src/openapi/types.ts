@@ -29,6 +29,13 @@ export interface SpecSchema {
   readonly schema: JsonSchema | boolean;
 }
 
+/** A schema of an operation, with a human-readable location such as `query.limit`. */
+export interface LocatedSchema {
+  readonly kind: 'parameter' | 'request' | 'response';
+  readonly location: string;
+  readonly schema: SpecSchema;
+}
+
 /** `querystring` (OpenAPI 3.2) describes the whole query string as one `content` value. */
 export type ParameterLocation = 'path' | 'query' | 'querystring' | 'header' | 'cookie';
 

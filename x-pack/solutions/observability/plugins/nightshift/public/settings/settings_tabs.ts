@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export const SETTINGS_TAB_IDS = ['general', 'investigations', 'detections'] as const;
+import { SETTINGS_TAB_IDS, type SettingsTabId } from '@kbn/nightshift-shared';
 
-export type SettingsTabId = (typeof SETTINGS_TAB_IDS)[number];
+export { SETTINGS_TAB_IDS, type SettingsTabId };
 
 export const isSettingsTabId = (value: string): value is SettingsTabId =>
   (SETTINGS_TAB_IDS as readonly string[]).includes(value);
