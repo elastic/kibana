@@ -86,7 +86,7 @@ export class AgentBuilderPlatformPlugin
   }
 
   start(coreStart: CoreStart): AgentBuilderPlatformPluginStart {
-    checkPdfExtractionAvailability({
+    void checkPdfExtractionAvailability({
       esClient: coreStart.elasticsearch.client.asInternalUser,
       logger: this.logger.get('pdf-extraction'),
     });
