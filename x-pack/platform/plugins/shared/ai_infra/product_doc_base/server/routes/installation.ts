@@ -12,6 +12,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import {
   resolveDefaultInferenceIdFromInferenceGet,
   ResourceTypes,
+  type ProductName,
   type ResourceType,
 } from '@kbn/product-doc-common';
 import type {
@@ -130,7 +131,14 @@ export const registerInstallationRoutes = ({
             version: securityLabsStatus.version,
             latestVersion: securityLabsStatus.latestVersion,
             isUpdateAvailable: securityLabsStatus.isUpdateAvailable,
+            ...(securityLabsStatus.availableArtifactLastModified
+              ? { availableArtifactLastModified: securityLabsStatus.availableArtifactLastModified }
+              : {}),
             failureReason: securityLabsStatus.failureReason,
+            ...(securityLabsStatus.updatedAt ? { updatedAt: securityLabsStatus.updatedAt } : {}),
+            ...(securityLabsStatus.artifactLastModified
+              ? { artifactLastModified: securityLabsStatus.artifactLastModified }
+              : {}),
           },
         });
       }
@@ -145,12 +153,17 @@ export const registerInstallationRoutes = ({
         latestVersion: openApiSpecStatus.latestVersion,
         isUpdateAvailable: openApiSpecStatus.isUpdateAvailable,
         failureReason: openApiSpecStatus.failureReason,
+        ...(openApiSpecStatus.updatedAt ? { updatedAt: openApiSpecStatus.updatedAt } : {}),
+        ...(openApiSpecStatus.artifactLastModified
+          ? { artifactLastModified: openApiSpecStatus.artifactLastModified }
+          : {}),
       };
       if (resourceType === ResourceTypes.openapiSpec) {
         return res.ok({ body: openApiSpecStatusResponse });
       }
 
       // Default: product documentation status
+      const { packageInstaller } = getServices();
       const installStatus = await installClient.getInstallationStatus({
         inferenceId,
       });
@@ -159,6 +172,30 @@ export const registerInstallationRoutes = ({
         inferenceId,
       });
 
+      let isUpdateAvailable: boolean | undefined;
+      let availableArtifactLastModified: string | undefined;
+      let availableStackVersion: string | undefined;
+      if (overallStatus === 'installed') {
+        const updateAvailability = await packageInstaller.isProductDocUpdateAvailable({
+          inferenceId,
+        });
+        isUpdateAvailable = updateAvailability?.isUpdateAvailable;
+        availableArtifactLastModified = updateAvailability?.availableArtifactLastModified;
+        availableStackVersion = updateAvailability?.availableStackVersion;
+        const installedDates = updateAvailability?.installedArtifactLastModifiedByProduct;
+        if (installedDates) {
+          for (const [productName, lastModified] of Object.entries(installedDates)) {
+            const product = installStatus[productName as ProductName];
+            if (product && lastModified && !product.artifactLastModified) {
+              installStatus[productName as ProductName] = {
+                ...product,
+                artifactLastModified: lastModified,
+              };
+            }
+          }
+        }
+      }
+
       return res.ok<InstallationStatusResponse>({
         body: {
           inferenceId,
@@ -166,6 +203,9 @@ export const registerInstallationRoutes = ({
           overall: overallStatus,
           resourceType: ResourceTypes.productDoc,
           openApiStatus: openApiSpecStatusResponse,
+          ...(isUpdateAvailable !== undefined ? { isUpdateAvailable } : {}),
+          ...(availableArtifactLastModified ? { availableArtifactLastModified } : {}),
+          ...(availableStackVersion ? { availableStackVersion } : {}),
         },
       });
     }

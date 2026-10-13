@@ -20,11 +20,13 @@ export type { ProductDocBasePluginSetup, ProductDocBasePluginStart };
 export {
   useProductDocStatus,
   useInstallProductDoc,
+  useUpdateProductDoc,
   useUninstallProductDoc,
   useDefaultInferenceId,
   REACT_QUERY_KEYS,
   type UseProductDocStatusOptions,
   type UseInstallProductDocOptions,
+  type UseUpdateProductDocOptions,
   type UseUninstallProductDocOptions,
 } from './hooks';
 

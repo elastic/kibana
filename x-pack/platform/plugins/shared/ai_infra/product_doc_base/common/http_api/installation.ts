@@ -21,6 +21,15 @@ export interface InstallationStatusResponse {
   /** Resource type for this installation status */
   resourceType?: ResourceType;
   openApiStatus?: OpenAPISpecInstallStatusResponse;
+  /**
+   * Whether a newer artifact is available in the repository than what is installed
+   * (version drift or a newer GCS LastModified than the stored artifactLastModified).
+   */
+  isUpdateAvailable?: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
+  /** Major.minor stack version of that artifact, when it is a versioned zip rather than `latest`. */
+  availableStackVersion?: string;
 }
 
 export interface PerformInstallResponse {
@@ -57,7 +66,13 @@ export interface BaseInstallStatusResponse<T extends ResourceType> {
   version?: string;
   latestVersion?: string;
   isUpdateAvailable?: boolean;
+  /** ISO 8601 LastModified of the newer repository artifact, when an update is available. */
+  availableArtifactLastModified?: string;
   failureReason?: string;
+  /** Last time the status was written, ISO 8601. When status is `installed`, this is the installation time. */
+  updatedAt?: string;
+  /** ISO 8601 last-modified time of the installed artifact, when known. */
+  artifactLastModified?: string;
 }
 
 export type OpenAPISpecInstallStatusResponse = BaseInstallStatusResponse<'openapi_spec'>;

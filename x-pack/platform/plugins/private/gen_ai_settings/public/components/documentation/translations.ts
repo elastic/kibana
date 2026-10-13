@@ -48,6 +48,10 @@ export const COLUMN_STATUS = i18n.translate('genAiSettings.documentation.column.
   defaultMessage: 'Status',
 });
 
+export const COLUMN_DETAILS = i18n.translate('genAiSettings.documentation.column.details', {
+  defaultMessage: 'Details',
+});
+
 export const COLUMN_ACTIONS = i18n.translate('genAiSettings.documentation.column.actions', {
   defaultMessage: 'Actions',
 });
@@ -66,6 +70,17 @@ export const STATUS_NOT_INSTALLED = i18n.translate(
 export const STATUS_INSTALLING = i18n.translate('genAiSettings.documentation.status.installing', {
   defaultMessage: 'Installing...',
 });
+
+export const STATUS_UPDATING = i18n.translate('genAiSettings.documentation.status.updating', {
+  defaultMessage: 'Updating',
+});
+
+export const UPDATING_TO_NEWEST_VERSION = i18n.translate(
+  'genAiSettings.documentation.update.updatingToNewest',
+  {
+    defaultMessage: 'Updating to newest version',
+  }
+);
 
 export const STATUS_UNINSTALLING = i18n.translate(
   'genAiSettings.documentation.status.uninstalling',
@@ -113,6 +128,18 @@ export const getInstallErrorTitle = (name: string) =>
     values: { name },
   });
 
+export const getUpdateSuccessTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.update.successWithName', {
+    defaultMessage: '{name} updated successfully',
+    values: { name },
+  });
+
+export const getUpdateErrorTitle = (name: string) =>
+  i18n.translate('genAiSettings.documentation.update.errorWithName', {
+    defaultMessage: 'Failed to update {name}',
+    values: { name },
+  });
+
 export const getUninstallSuccessTitle = (name: string) =>
   i18n.translate('genAiSettings.documentation.uninstall.successWithName', {
     defaultMessage: '{name} uninstalled successfully',
@@ -131,6 +158,18 @@ export const TECH_PREVIEW = i18n.translate('genAiSettings.documentation.techPrev
 
 export const UPDATE_AVAILABLE = i18n.translate('genAiSettings.documentation.updateAvailable', {
   defaultMessage: 'Update available',
+});
+
+export const DETAIL_VERSION = i18n.translate('genAiSettings.documentation.detail.version', {
+  defaultMessage: 'Version',
+});
+
+export const DETAIL_INSTALLED = i18n.translate('genAiSettings.documentation.detail.installed', {
+  defaultMessage: 'Installed',
+});
+
+export const DETAIL_INFERENCE = i18n.translate('genAiSettings.documentation.detail.inference', {
+  defaultMessage: 'Inference',
 });
 
 export const SHOWING = i18n.translate('genAiSettings.documentation.showing', {

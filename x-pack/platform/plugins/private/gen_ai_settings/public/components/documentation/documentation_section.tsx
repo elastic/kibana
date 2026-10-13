@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
   EuiBadge,
   EuiBetaBadge,
   EuiButtonEmpty,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,6 +29,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   useInstallProductDoc,
+  useUpdateProductDoc,
   useUninstallProductDoc,
   useDefaultInferenceId,
   REACT_QUERY_KEYS,
@@ -115,10 +120,21 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         resourceType: doc.resourceType,
         inferenceId: inferenceIdByResourceType[doc.resourceType],
         ...(updateAvailable ? { updateAvailable } : {}),
+        ...(data?.availableArtifactLastModified
+          ? { availableArtifactLastModified: data.availableArtifactLastModified }
+          : {}),
+        ...(data?.availableStackVersion
+          ? { availableStackVersion: data.availableStackVersion }
+          : {}),
         isTechPreview: doc.isTechPreview,
         isStubbed: doc.isStubbed,
         icon: doc.icon,
         ...(data?.failureReason ? { failureReason: data.failureReason } : {}),
+        ...(data?.installedAt ? { installedAt: data.installedAt } : {}),
+        ...(data?.artifactLastModified ? { artifactLastModified: data.artifactLastModified } : {}),
+        ...(data?.installedStackVersion
+          ? { installedStackVersion: data.installedStackVersion }
+          : {}),
       };
     });
   }, [docsConfig, statusQueries, inferenceIdByResourceType]);
@@ -137,7 +153,6 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
     (item: DocumentationItem) => {
       switch (item.status) {
         case 'installed':
-          return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
         case 'uninstalling':
           return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
         case 'error': {
@@ -208,11 +223,6 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
                 <EuiBetaBadge label={i18n.TECH_PREVIEW} size="s" alignment="middle" />
               </EuiFlexItem>
             )}
-            {item.updateAvailable && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="warning">{i18n.UPDATE_AVAILABLE}</EuiBadge>
-              </EuiFlexItem>
-            )}
           </EuiFlexGroup>
         ),
       },
@@ -220,14 +230,19 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         field: 'status',
         name: i18n.COLUMN_STATUS,
         sortable: false,
-        width: '300px',
+        width: '160px',
         render: (_: DocumentationStatus, item: DocumentationItem) => getStatusBadge(item),
+      },
+      {
+        name: i18n.COLUMN_DETAILS,
+        sortable: false,
+        render: (item: DocumentationItem) => <DocumentationDetails item={item} />,
       },
       {
         field: 'actions',
         name: i18n.COLUMN_ACTIONS,
         sortable: false,
-        width: '150px',
+        width: '160px',
         align: 'right',
         render: (_: unknown, item: DocumentationItem) => getActionButton(item),
       },
@@ -267,6 +282,131 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
   );
 };
 
+const DateValue: React.FC<{ value: string }> = ({ value }) => (
+  <>
+    <FormattedDate value={value} year="numeric" month="short" day="2-digit" />{' '}
+    <FormattedTime value={value} hour="numeric" minute="2-digit" />
+  </>
+);
+
+/** Calendar day of a zip LastModified. The day is the date half of a release version. */
+const VersionDate: React.FC<{ value: string }> = ({ value }) => (
+  <FormattedDate value={value} year="numeric" month="short" day="numeric" />
+);
+
+/**
+ * A documentation release is the stack version plus the zip's GCS LastModified,
+ * for example `9.6 | Sep 28, 2026`. Date-only artifacts show the day on its own.
+ */
+const ReleaseVersion: React.FC<{
+  stackVersion?: string;
+  lastModified?: string;
+}> = ({ stackVersion, lastModified }) => {
+  const date = lastModified ? <VersionDate value={lastModified} /> : null;
+
+  if (stackVersion && date) {
+    return (
+      <FormattedMessage
+        id="genAiSettings.documentation.releaseVersion"
+        defaultMessage="{version} | {date}"
+        values={{ version: stackVersion, date }}
+      />
+    );
+  }
+
+  if (stackVersion) {
+    return <>{stackVersion}</>;
+  }
+
+  return date;
+};
+
+/** Sits above Update. The badge is the cue; the tooltip names the newer release. */
+const UpdateAvailableCallout: React.FC<{ item: DocumentationItem }> = ({ item }) => {
+  const badge = (
+    <EuiBadge color="warning" data-test-subj={`documentation-update-available-${item.id}`}>
+      {i18n.UPDATE_AVAILABLE}
+    </EuiBadge>
+  );
+  const hasRelease = Boolean(item.availableStackVersion || item.availableArtifactLastModified);
+  if (!hasRelease) {
+    return badge;
+  }
+
+  return (
+    <EuiToolTip
+      position="top"
+      content={
+        <ReleaseVersion
+          stackVersion={item.availableStackVersion}
+          lastModified={item.availableArtifactLastModified}
+        />
+      }
+    >
+      {badge}
+    </EuiToolTip>
+  );
+};
+
+const DocumentationDetails: React.FC<{ item: DocumentationItem }> = ({ item }) => {
+  if (item.status !== 'installed' && item.status !== 'uninstalling') {
+    return null;
+  }
+
+  const hasDetails = Boolean(
+    item.artifactLastModified || item.installedStackVersion || item.installedAt || item.inferenceId
+  );
+  if (!hasDetails) {
+    return null;
+  }
+
+  return (
+    <EuiText size="xs">
+      <EuiDescriptionList
+        type="column"
+        compressed
+        columnWidths={['6rem', '1fr']}
+        data-test-subj={`documentation-details-${item.id}`}
+      >
+        {item.installedStackVersion || item.artifactLastModified ? (
+          <>
+            <EuiDescriptionListTitle>{i18n.DETAIL_VERSION}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj={`documentation-version-at-${item.id}`}>
+              <ReleaseVersion
+                stackVersion={item.installedStackVersion}
+                lastModified={
+                  item.artifactLastModified ??
+                  (item.installedStackVersion ? item.installedAt : undefined)
+                }
+              />
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
+        {item.installedAt ? (
+          <>
+            <EuiDescriptionListTitle>{i18n.DETAIL_INSTALLED}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj={`documentation-installed-at-${item.id}`}>
+              <DateValue value={item.installedAt} />
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
+        {item.inferenceId ? (
+          <>
+            <EuiDescriptionListTitle>{i18n.DETAIL_INFERENCE}</EuiDescriptionListTitle>
+            <EuiDescriptionListDescription
+              data-test-subj={`documentation-inference-model-${item.id}`}
+            >
+              {item.inferenceId}
+            </EuiDescriptionListDescription>
+          </>
+        ) : null}
+      </EuiDescriptionList>
+    </EuiText>
+  );
+};
+
+const UPDATE_STATUS_POLL_MS = 2000;
+
 const DocumentationRowActions: React.FC<{
   item: DocumentationItem;
   productDocBase: ProductDocBasePluginStart;
@@ -276,6 +416,14 @@ const DocumentationRowActions: React.FC<{
 }> = ({ item, productDocBase, hasManagePrivilege, isInferenceIdLoading, onRefetch }) => {
   const { services } = useKibana();
   const { notifications, rendering, docLinks } = services;
+  const [isUpdating, setIsUpdating] = useState(false);
+  const isUpdatingRef = useRef(false);
+  const sawInstallingRef = useRef(false);
+  const baselineRef = useRef<{
+    installedAt?: string;
+    artifactLastModified?: string;
+    updateAvailable?: boolean;
+  } | null>(null);
 
   const installMutation = useInstallProductDoc(productDocBase, {
     onSuccess: () => {
@@ -285,6 +433,31 @@ const DocumentationRowActions: React.FC<{
       const message = error.body?.message ?? error.message;
       notifications.toasts.addDanger({
         title: i18n.getInstallErrorTitle(item.name),
+        text: toMountPoint(
+          <EuiText size="s">
+            <p>{message}</p>
+            <p>{i18n.AIR_GAPPED_HINT}</p>
+            <p>
+              <EuiLink href={docLinks.links.aiAssistantSettings} target="_blank" external>
+                {i18n.LEARN_MORE}
+              </EuiLink>
+            </p>
+          </EuiText>,
+          rendering
+        ),
+      });
+    },
+  });
+
+  const updateMutation = useUpdateProductDoc(productDocBase, {
+    onError: (error) => {
+      isUpdatingRef.current = false;
+      sawInstallingRef.current = false;
+      baselineRef.current = null;
+      setIsUpdating(false);
+      const message = error.body?.message ?? error.message;
+      notifications.toasts.addDanger({
+        title: i18n.getUpdateErrorTitle(item.name),
         text: toMountPoint(
           <EuiText size="s">
             <p>{message}</p>
@@ -320,9 +493,68 @@ const DocumentationRowActions: React.FC<{
     [item.inferenceId, item.resourceType]
   );
 
-  const isItemInstalling = item.status === 'installing' || installMutation.isLoading;
+  const isProductDoc = item.resourceType === ResourceTypes.productDoc;
+  const isItemInstalling =
+    item.status === 'installing' || installMutation.isLoading || updateMutation.isLoading;
   const isItemUninstalling = item.status === 'uninstalling' || uninstallMutation.isLoading;
   const isActionDisabled = !hasManagePrivilege || isInferenceIdLoading;
+
+  useEffect(() => {
+    if (!isUpdating) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      onRefetch();
+    }, UPDATE_STATUS_POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [isUpdating, onRefetch]);
+
+  useEffect(() => {
+    if (!isUpdating || !isUpdatingRef.current) {
+      return;
+    }
+    if (item.status === 'installing') {
+      sawInstallingRef.current = true;
+      return;
+    }
+    const baseline = baselineRef.current;
+    const releaseChanged =
+      baseline != null &&
+      (item.installedAt !== baseline.installedAt ||
+        item.artifactLastModified !== baseline.artifactLastModified ||
+        Boolean(item.updateAvailable) !== Boolean(baseline.updateAvailable));
+    const finished =
+      item.status === 'error' ||
+      ((item.status === 'installed' || item.status === 'uninstalled') &&
+        (sawInstallingRef.current || releaseChanged));
+    if (!finished) {
+      return;
+    }
+    isUpdatingRef.current = false;
+    sawInstallingRef.current = false;
+    baselineRef.current = null;
+    setIsUpdating(false);
+    if (item.status === 'installed') {
+      notifications.toasts.addSuccess({ title: i18n.getUpdateSuccessTitle(item.name) });
+    }
+  }, [isUpdating, item, notifications]);
+
+  const onUpdate = () => {
+    if (isProductDoc) {
+      notifications.toasts.addInfo({ title: i18n.UPDATING_TO_NEWEST_VERSION });
+      baselineRef.current = {
+        installedAt: item.installedAt,
+        artifactLastModified: item.artifactLastModified,
+        updateAvailable: item.updateAvailable,
+      };
+      sawInstallingRef.current = false;
+      isUpdatingRef.current = true;
+      setIsUpdating(true);
+      updateMutation.mutate({ inferenceId: item.inferenceId });
+      return;
+    }
+    installMutation.mutate(installVars);
+  };
 
   const wrapWithPrivilegeTooltip = (button: React.ReactElement) => {
     if (!hasManagePrivilege) {
@@ -393,43 +625,24 @@ const DocumentationRowActions: React.FC<{
     );
   }
 
-  // Installed - show uninstall button
-  if (item.status === 'installed') {
-    if (item.updateAvailable) {
-      return wrapWithPrivilegeTooltip(
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="flexEnd"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="refresh"
-              onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
-              isDisabled={isActionDisabled}
-              data-test-subj={`documentation-update-${item.id}`}
-            >
-              {i18n.ACTION_UPDATE}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="return"
-              onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
-              isDisabled={isActionDisabled}
-              data-test-subj={`documentation-uninstall-${item.id}`}
-            >
-              {i18n.ACTION_UNINSTALL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
+  // Update schedules a background install. Keep this control until that install finishes,
+  // including the gap before status flips to `installing`.
+  if (isUpdating) {
+    return (
+      <EuiButtonEmpty
+        size="xs"
+        isLoading={true}
+        isDisabled={true}
+        data-test-subj={`documentation-updating-${item.id}`}
+      >
+        {i18n.STATUS_UPDATING}
+      </EuiButtonEmpty>
+    );
+  }
 
-    return wrapWithPrivilegeTooltip(
+  // Installed - show uninstall button, with the installation time underneath
+  if (item.status === 'installed') {
+    const uninstallButton = (
       <EuiButtonEmpty
         size="xs"
         iconType="return"
@@ -440,6 +653,40 @@ const DocumentationRowActions: React.FC<{
         {i18n.ACTION_UNINSTALL}
       </EuiButtonEmpty>
     );
+
+    const actions = item.updateAvailable ? (
+      <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <UpdateAvailableCallout item={item} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="flexEnd"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType="refresh"
+                onClick={isActionDisabled ? undefined : onUpdate}
+                isDisabled={isActionDisabled}
+                isLoading={isProductDoc ? updateMutation.isLoading : installMutation.isLoading}
+                data-test-subj={`documentation-update-${item.id}`}
+              >
+                {i18n.ACTION_UPDATE}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{uninstallButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      uninstallButton
+    );
+
+    return wrapWithPrivilegeTooltip(actions);
   }
 
   // Installing - show loading state

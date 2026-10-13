@@ -40,6 +40,7 @@ describe('DocumentationSection', () => {
         });
       }),
       install: jest.fn().mockResolvedValue({ installed: true }),
+      updateAll: jest.fn().mockResolvedValue({ installed: true }),
       uninstall: jest.fn().mockResolvedValue({ success: true }),
       getDefaultInferenceId: jest.fn().mockResolvedValue('.elser-2-elasticsearch'),
     },
@@ -75,9 +76,14 @@ describe('DocumentationSection', () => {
     );
   };
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     mockProductDocBase.installation.install = jest.fn().mockResolvedValue({ installed: true });
+    mockProductDocBase.installation.updateAll = jest.fn().mockResolvedValue({ installed: true });
     mockProductDocBase.installation.uninstall = jest.fn().mockResolvedValue({ success: true });
     mockProductDocBase.installation.getDefaultInferenceId = jest
       .fn()
@@ -154,6 +160,147 @@ describe('DocumentationSection', () => {
       await waitFor(() => {
         const notInstalledBadges = screen.getAllByText('Not installed');
         expect(notInstalledBadges.length).toBeGreaterThan(0);
+      });
+    });
+
+    it('should show the installation date in the Details column when the saved object has one', async () => {
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+              updatedAt: '2026-09-17T15:06:00.000Z',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            perProducts: {
+              kibana: {
+                status: 'installed',
+                version: '9.2',
+                updatedAt: '2026-09-17T15:04:00.000Z',
+              },
+              elasticsearch: {
+                status: 'installed',
+                version: '9.2',
+                updatedAt: '2026-09-17T15:06:00.000Z',
+              },
+            },
+          });
+        });
+
+      renderComponent(mockProductDocBase);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('documentation-installed-at-elastic_documents')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-installed-at-security_labs')).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-details-elastic_documents')).toHaveTextContent(
+          'Installed'
+        );
+        expect(screen.getByTestId('documentation-version-at-elastic_documents')).toHaveTextContent(
+          /9\.2 \| Sep 17, 2026/
+        );
+      });
+      expect(
+        screen.queryByTestId('documentation-modified-at-elastic_documents')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('documentation-version-at-security_labs')
+      ).not.toBeInTheDocument();
+    });
+
+    it('should show the artifact version date in the Details column when present', async () => {
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+              updatedAt: '2026-09-17T15:06:00.000Z',
+              artifactLastModified: '2026-01-27T23:25:54.000Z',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            perProducts: {
+              kibana: {
+                status: 'installed',
+                version: '9.2',
+                updatedAt: '2026-09-17T15:04:00.000Z',
+                artifactLastModified: '2026-01-20T10:00:00.000Z',
+              },
+              elasticsearch: {
+                status: 'installed',
+                version: '9.2',
+                updatedAt: '2026-09-17T15:06:00.000Z',
+                artifactLastModified: '2026-01-27T23:25:54.000Z',
+              },
+            },
+          });
+        });
+
+      renderComponent(mockProductDocBase);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-version-at-elastic_documents')).toHaveTextContent(
+          /9\.2 \| Jan 27, 2026/
+        );
+        expect(screen.getByTestId('documentation-version-at-security_labs')).toHaveTextContent(
+          /Jan 27, 2026/
+        );
+        expect(
+          screen.queryByTestId('documentation-modified-at-elastic_documents')
+        ).not.toBeInTheDocument();
+        expect(
+          screen.getByTestId('documentation-installed-at-elastic_documents')
+        ).toBeInTheDocument();
+        expect(screen.getByTestId('documentation-installed-at-security_labs')).toBeInTheDocument();
+      });
+    });
+
+    it('should show the inference model in the Details column when installed', async () => {
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+              updatedAt: '2026-09-17T15:06:00.000Z',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            perProducts: {
+              kibana: {
+                status: 'installed',
+                version: '9.2',
+                updatedAt: '2026-09-17T15:04:00.000Z',
+              },
+            },
+          });
+        });
+
+      renderComponent(mockProductDocBase);
+
+      await waitFor(() => {
+        expect(
+          screen.getByTestId('documentation-inference-model-elastic_documents')
+        ).toHaveTextContent('.elser-2-elasticsearch');
+        expect(screen.getByTestId('documentation-inference-model-security_labs')).toHaveTextContent(
+          '.elser-2-elasticsearch'
+        );
       });
     });
 
@@ -476,6 +623,179 @@ describe('DocumentationSection', () => {
           resourceType: ResourceTypes.securityLabs,
         });
       });
+    });
+
+    it('should show update action for Elastic docs and call updateAll with forceUpdate', async () => {
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            isUpdateAvailable: true,
+            availableArtifactLastModified: '2026-03-01T12:00:00.000Z',
+            availableStackVersion: '9.2',
+            perProducts: {
+              kibana: {
+                status: 'installed',
+                version: '9.2',
+                artifactLastModified: '2026-01-01T12:00:00.000Z',
+              },
+            },
+          });
+        });
+
+      renderComponent(mockProductDocBase, true);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('documentation-update-elastic_documents')).toBeInTheDocument();
+      });
+
+      const availableRelease = screen.getByTestId(
+        'documentation-update-available-elastic_documents'
+      );
+      expect(availableRelease).toHaveTextContent('Update available');
+      fireEvent.mouseOver(availableRelease);
+      expect(await screen.findByText(/9\.2 \| Mar 1, 2026/)).toBeInTheDocument();
+      expect(screen.getByTestId('documentation-version-at-elastic_documents')).toHaveTextContent(
+        /9\.2 \| Jan 1, 2026/
+      );
+
+      fireEvent.click(screen.getByTestId('documentation-update-elastic_documents'));
+
+      await waitFor(() => {
+        expect(mockProductDocBase.installation.updateAll).toHaveBeenCalledWith({
+          forceUpdate: true,
+          inferenceIds: ['.elser-2-elasticsearch'],
+        });
+        expect(mockProductDocBase.installation.install).not.toHaveBeenCalled();
+      });
+
+      expect(coreStart.notifications.toasts.addInfo).toHaveBeenCalledWith({
+        title: 'Updating to newest version',
+      });
+      expect(screen.getByTestId('documentation-updating-elastic_documents')).toHaveTextContent(
+        'Updating'
+      );
+      expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+    });
+
+    it('should keep Updating until the background install finishes', async () => {
+      let phase: 'available' | 'installing' | 'done' = 'available';
+      mockProductDocBase.installation.getStatus = jest
+        .fn()
+        .mockImplementation(({ resourceType }) => {
+          if (resourceType === ResourceTypes.securityLabs) {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              resourceType: ResourceTypes.securityLabs,
+              status: 'installed',
+            });
+          }
+          if (phase === 'installing') {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              overall: 'installing',
+              isUpdateAvailable: true,
+              perProducts: {},
+            });
+          }
+          if (phase === 'done') {
+            return Promise.resolve({
+              inferenceId: '.elser-2-elasticsearch',
+              overall: 'installed',
+              isUpdateAvailable: false,
+              perProducts: {
+                kibana: {
+                  status: 'installed',
+                  version: '9.2',
+                  artifactLastModified: '2026-03-01T12:00:00.000Z',
+                  updatedAt: '2026-03-01T12:05:00.000Z',
+                },
+              },
+            });
+          }
+          return Promise.resolve({
+            inferenceId: '.elser-2-elasticsearch',
+            overall: 'installed',
+            isUpdateAvailable: true,
+            availableArtifactLastModified: '2026-03-01T12:00:00.000Z',
+            availableStackVersion: '9.2',
+            perProducts: {
+              kibana: {
+                status: 'installed',
+                version: '9.2',
+                artifactLastModified: '2026-01-01T12:00:00.000Z',
+                updatedAt: '2026-01-01T12:00:00.000Z',
+              },
+            },
+          });
+        });
+
+      const realSetInterval = window.setInterval.bind(window);
+      const pollers: Array<() => void> = [];
+      jest.spyOn(window, 'setInterval').mockImplementation(((
+        handler: TimerHandler,
+        timeout?: number,
+        ...args: unknown[]
+      ) => {
+        if (typeof handler === 'function' && timeout === 2000) {
+          pollers.push(() => {
+            handler();
+          });
+          return 1 as unknown as ReturnType<typeof setInterval>;
+        }
+        return realSetInterval(handler, timeout as number, ...(args as []));
+      }) as typeof window.setInterval);
+
+      renderComponent(mockProductDocBase, true);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('documentation-update-elastic_documents')).toBeInTheDocument();
+        });
+
+        fireEvent.click(screen.getByTestId('documentation-update-elastic_documents'));
+
+        await waitFor(() => {
+          expect(screen.getByTestId('documentation-updating-elastic_documents')).toHaveTextContent(
+            'Updating'
+          );
+        });
+        expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+
+        phase = 'installing';
+        pollers.forEach((poll) => poll());
+
+        await waitFor(() => {
+          expect(screen.getByText('Not installed')).toBeInTheDocument();
+        });
+        expect(screen.getByTestId('documentation-updating-elastic_documents')).toHaveTextContent(
+          'Updating'
+        );
+        expect(coreStart.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+
+        phase = 'done';
+        pollers.forEach((poll) => poll());
+
+        await waitFor(() => {
+          expect(
+            screen.queryByTestId('documentation-updating-elastic_documents')
+          ).not.toBeInTheDocument();
+          expect(coreStart.notifications.toasts.addSuccess).toHaveBeenCalledWith({
+            title: 'Elastic documentation updated successfully',
+          });
+        });
+        expect(screen.getByTestId('documentation-uninstall-elastic_documents')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('documentation-update-elastic_documents')
+      ).not.toBeInTheDocument();
     });
 
     it('should call uninstall when uninstall action is clicked', async () => {
