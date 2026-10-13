@@ -49,11 +49,18 @@ const setResponse = (data: RunQuotasResponse) => {
 describe('RunLimitsBanner', () => {
   beforeEach(() => {
     mockUseKibana.mockReturnValue({
-      core: {
-        application: {
-          getUrlForApp: jest.fn(
-            (appId: string, { path }: { path: string }) => `/app/${appId}${path}`
-          ),
+      dependencies: {
+        start: {
+          share: {
+            url: {
+              locators: {
+                get: jest.fn(() => ({
+                  getRedirectUrl: ({ tab }: { tab?: string }) =>
+                    `/app/nightshift/settings${tab ? `/${tab}` : ''}`,
+                })),
+              },
+            },
+          },
         },
       },
     } as never);

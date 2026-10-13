@@ -24,6 +24,9 @@ import {
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   MAX_HITL_ACTION_LABEL_LENGTH,
+  MAX_HITL_EMAIL_ADDRESS_LENGTH,
+  MAX_HITL_EMAIL_RECIPIENTS,
+  MAX_HITL_EMAIL_SUBJECT_LENGTH,
   MAX_HITL_EXTERNAL_LINK_LENGTH,
   MAX_HITL_MESSAGE_LENGTH,
   MAX_HITL_SLACK_CHANNEL_LENGTH,
@@ -352,6 +355,28 @@ export const HitlSlackApiChannelSchema = z.object({
     ),
 });
 
+export const HitlEmailRecipientListSchema = z
+  .array(z.string().min(1).max(MAX_HITL_EMAIL_ADDRESS_LENGTH))
+  .min(1)
+  .max(MAX_HITL_EMAIL_RECIPIENTS);
+
+export const HitlEmailChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Email connector saved object id or name'),
+  to: HitlEmailRecipientListSchema.describe('Primary email recipients'),
+  cc: HitlEmailRecipientListSchema.optional().describe('CC recipients'),
+  bcc: HitlEmailRecipientListSchema.optional().describe('BCC recipients'),
+  subject: z
+    .string()
+    .min(1)
+    .max(MAX_HITL_EMAIL_SUBJECT_LENGTH)
+    .optional()
+    .describe('Email subject. Defaults to a built-in subject when omitted.'),
+});
+
 export const HitlSlack2ChannelSchema = z.object({
   'connector-id': z
     .string()
@@ -378,6 +403,7 @@ const hitlChannelDescriptions = {
   slack: 'Notify via a Slack incoming-webhook connector (posts to the webhook configured channel)',
   slack_api:
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
+  email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
 } as const;
@@ -390,6 +416,9 @@ export const WaitForInputChannelsSchema = z
     slack_api: HitlSlackApiChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
+    email: HitlEmailChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack2),
@@ -403,6 +432,7 @@ export const WaitForApprovalChannelsSchema = z
     slack_api: HitlSlackApiChannelSchema.loose()
       .optional()
       .describe(hitlChannelDescriptions.slack_api),
+    email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
   })
   .optional()

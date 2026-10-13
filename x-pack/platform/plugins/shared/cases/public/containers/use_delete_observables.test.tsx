@@ -10,11 +10,13 @@ import { useDeleteObservable } from './use_delete_observables';
 import { deleteObservable } from './api';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
+import { useObservablesDeletedEBT } from '../analytics/observables';
 import { TestProviders } from '../common/mock';
 
 jest.mock('./api');
 jest.mock('../common/use_cases_toast');
 jest.mock('../components/case_view/use_on_refresh_case_view_page');
+jest.mock('../analytics/observables');
 
 describe('useDeleteObservable', () => {
   const caseId = 'test-case-id';
@@ -22,10 +24,12 @@ describe('useDeleteObservable', () => {
   const showErrorToast = jest.fn();
   const showSuccessToast = jest.fn();
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const reportObservablesDeleted = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     (useCasesToast as jest.Mock).mockReturnValue({ showErrorToast, showSuccessToast });
+    (useObservablesDeletedEBT as jest.Mock).mockReturnValue(reportObservablesDeleted);
   });
 
   it('should call deleteObservable and show success toast on success', async () => {
@@ -44,6 +48,23 @@ describe('useDeleteObservable', () => {
     expect(refreshCaseViewPage).toHaveBeenCalled();
   });
 
+  it('reports the deletion event with single scope on success', async () => {
+    (deleteObservable as jest.Mock).mockResolvedValue({});
+
+    const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() =>
+      expect(reportObservablesDeleted).toHaveBeenCalledWith({ deleteScope: 'single' })
+    );
+    expect(reportObservablesDeleted).toHaveBeenCalledTimes(1);
+  });
+
   it('should show error toast on failure', async () => {
     const error = new Error('Failed to delete observable');
     (deleteObservable as jest.Mock).mockRejectedValue(error);
@@ -59,5 +80,21 @@ describe('useDeleteObservable', () => {
     await waitFor(() =>
       expect(showErrorToast).toHaveBeenCalledWith(error, { title: expect.any(String) })
     );
+  });
+
+  it('does not report the deletion event on failure', async () => {
+    const error = new Error('Failed to delete observable');
+    (deleteObservable as jest.Mock).mockRejectedValue(error);
+
+    const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
+      wrapper: TestProviders,
+    });
+
+    act(() => {
+      result.current.mutate();
+    });
+
+    await waitFor(() => expect(showErrorToast).toHaveBeenCalled());
+    expect(reportObservablesDeleted).not.toHaveBeenCalled();
   });
 });

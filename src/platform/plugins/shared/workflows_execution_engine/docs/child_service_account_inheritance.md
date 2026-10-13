@@ -41,6 +41,15 @@ For a shared parent that delegates to actions published by several products, use
       - auto-approvable
 ```
 
+Choose **IDs or tags**; supplying both is optional and makes the restriction narrower:
+
+| Parent configuration | Child must satisfy |
+| --- | --- |
+| `allowed-workflow-ids` only | Its ID appears in the list. |
+| `allowed-workflow-tags` only | Its saved definition has at least one tag from the list. |
+| Both lists | Its ID is listed **and** at least one saved tag matches. |
+| Neither list | Only a literal `workflow-id` is permitted for SA delegation. |
+
 The resolved managed child's saved definition must contain at least one exact matching tag (for example, `tags: [action, auto-approvable]`). The engine assigns no special meaning to any tag. A supplied ID list and tag list must **both** match; neither can override a different literal `workflow-id`. Lists come from the parent execution's saved, unrendered definition, and child tags come from the persisted definition selected for execution, never from step inputs. Missing tags fail closed. Both lists accept 1–100 literal values of at most 1,024 characters each.
 
 Tag-based delegation trusts managed publishers and privileged managed-definition editors to opt children into receiving the parent's SA. Ordinary workflow editors cannot tag a managed child. This is an explicit alternative to the parent's enumeration of approved IDs, not an action-discovery convention or a replacement for the product's approval/autonomy policy. Child eligibility is checked before scheduling; an already-started child retains the existing execution snapshot and binding checks on resume.

@@ -9,6 +9,9 @@ import type { FindMaintenanceWindowsResult } from '@kbn/maintenance-windows-plug
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import type { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyncTaskState } from '../../tasks/sync_private_locations_monitors_task';
+import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from '../../tasks/sync_private_locations_monitors_task';
+import type { SyntheticsServerSetup } from '../../types';
 
 /**
  * The subset of maintenance window fields the Synthetics UI actually consumes: the id/title
@@ -22,7 +25,25 @@ export type SyntheticsMaintenanceWindow = Pick<
 
 export interface SyntheticsMaintenanceWindowsResult {
   maintenanceWindows: SyntheticsMaintenanceWindow[];
+  /** When the private-location sync task last finished without error; the UI compares it with `updatedAt`. */
+  lastSuccessfulSyncAt?: string;
+  autoSyncDisabled?: boolean;
 }
+
+const getSyncStatus = async (
+  server: SyntheticsServerSetup
+): Promise<
+  Pick<SyntheticsMaintenanceWindowsResult, 'lastSuccessfulSyncAt' | 'autoSyncDisabled'>
+> => {
+  try {
+    const task = await server.pluginsStart.taskManager.get(PRIVATE_LOCATIONS_SYNC_TASK_ID);
+    const { lastSuccessfulSyncAt, disableAutoSync } = task.state as Partial<SyncTaskState>;
+    return { lastSuccessfulSyncAt, autoSyncDisabled: disableAutoSync ?? false };
+  } catch (_err) {
+    // The task may not exist yet; the UI then has no sync status to compare against.
+    return {};
+  }
+};
 
 /**
  * Returns the maintenance windows referenced by the current space's monitors.
@@ -83,6 +104,7 @@ export const getMaintenanceWindowsRoute: SyntheticsRestApiRouteFactory<
       maintenanceWindows: data
         .filter((mw) => referencedIds.has(mw.id))
         .map(({ id, title, status, updatedAt }) => ({ id, title, status, updatedAt })),
+      ...(await getSyncStatus(server)),
     };
   },
 });
