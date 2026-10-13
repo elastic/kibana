@@ -78,14 +78,15 @@ describe('DEFAULT_SOURCES approved catalog', () => {
     'kev:cisa-known-exploited-vulnerabilities':
       'https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json',
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
+    'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
   };
 
-  it('contains only the approved CISA KEV and Elastic Security Labs source IDs and URLs', () => {
+  it('contains only the approved CISA and Elastic Security Labs source IDs and URLs', () => {
     expect(CATALOG_SOURCE_URLS).toEqual(APPROVED_ENDPOINTS);
   });
 
-  it('ships exactly two sources enabled', () => {
-    expect(DEFAULT_SOURCES).toHaveLength(2);
+  it('ships exactly three sources enabled', () => {
+    expect(DEFAULT_SOURCES).toHaveLength(3);
     expect(DEFAULT_SOURCES.every(({ enabled }) => enabled)).toBe(true);
   });
 

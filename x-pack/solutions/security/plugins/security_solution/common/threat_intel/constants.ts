@@ -80,6 +80,7 @@ export type FetchAdapterType = (typeof FETCH_ADAPTER_TYPES)[number];
 export const APPROVED_CATALOG_SOURCE_IDS = [
   'kev:cisa-known-exploited-vulnerabilities',
   'vendor_api:elastic-security-labs',
+  'rss:cisa-alerts',
 ] as const;
 
 export const APPROVED_SOURCE_IDS: ReadonlySet<string> = new Set(APPROVED_CATALOG_SOURCE_IDS);
