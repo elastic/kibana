@@ -146,7 +146,9 @@ Some integration suites boot a full Kibana and snapshot a *global registry* (rul
 
 - Changed files matching `FTR_IRRELEVANT_PATHS`, and modules in `FTR_EXCLUDED_MODULES`, are ignored.
 - Every module in the downstream `kbn_references` closure of the remaining changed modules contributes its kibana.jsonc `group`: a solution group selects that solution's domain; `platform` selects `platform` and every `base` config.
-- A manifest entry whose config file belongs to a closure module selects its own domain, so platform-located configs in solution manifests are covered.
+- A manifest entry whose config file belongs to a closure module runs too, whichever manifest lists it.
+- When `platform` is selected, platform-owned configs filed in solution manifests also run (for example `x-pack/platform/test/serverless/functional/configs/<solution>/*`). They exercise platform UIs inside each serverless project, and no test suite imports the plugins they cover.
+- `FTR_ALWAYS_RUN_CONFIGS` run whenever any domain is selected. They assert runtime registries (task types, privileges, features) or load solution archives by path, so no `kbn_references` edge ties them to the solution plugins they depend on. Keep the list short.
 - `base` serverless configs declare `project` (the solution of their `serverlessProject`) and also run when that solution is selected. Serverless projects only load `platform` plus their own group's plugins, so other solutions cannot affect them. An entry without `project` always runs.
 - Every domain runs when an `FTR_CRITICAL_PATHS` file, a file outside any module, or a module without a `group` changes, or when detection fails. `LIMIT_SOLUTIONS` takes precedence when set.
 

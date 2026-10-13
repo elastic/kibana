@@ -231,6 +231,54 @@ describe('resolveFtrDomains', () => {
 
     expect(selectedPaths(selection)).toEqual([]);
   });
+
+  it('runs platform configs filed in solution manifests only when platform is selected', () => {
+    const platformInSearch = 'x-pack/platform/test/serverless/functional/search/config.group1.ts';
+    const entries = [...ENTRIES, entry('search', platformInSearch)];
+
+    const platformChange = resolve(
+      ['x-pack/solutions/observability/plugins/obs_shared/index.ts'],
+      entries
+    );
+    const securityChange = resolve(
+      ['x-pack/solutions/security/plugins/security_solution/server/index.ts'],
+      entries
+    );
+
+    expect(selectedPaths(platformChange, entries)).toContain(platformInSearch);
+    expect(selectedPaths(securityChange, entries)).not.toContain(platformInSearch);
+  });
+
+  it('runs always-run configs whenever a domain is selected', () => {
+    const alwaysRun = 'x-pack/platform/test/plugin_api_integration/config.ts';
+    const entries = [...ENTRIES, entry('platform', alwaysRun)];
+
+    expect(
+      selectedPaths(
+        resolve(['x-pack/solutions/security/plugins/security_solution/server/index.ts'], entries),
+        entries
+      )
+    ).toContain(alwaysRun);
+    expect(
+      selectedPaths(resolve(['x-pack/platform/plugins/fleet/README.md'], entries), entries)
+    ).toEqual([]);
+  });
+
+  it('ignores data files under nested docs folders but not source code there', () => {
+    const securityChange = 'x-pack/solutions/security/plugins/security_solution/server/index.ts';
+
+    const withOpenApi = resolve([
+      securityChange,
+      'x-pack/platform/plugins/fleet/docs/openapi/bundled.yaml',
+    ]);
+    const withDocsSource = resolve([
+      securityChange,
+      'x-pack/platform/plugins/fleet/src/lib/docs/index_doc_records_stream.ts',
+    ]);
+
+    expect(withOpenApi.all === false && [...withOpenApi.domains]).toEqual(['security']);
+    expect(withDocsSource).toMatchObject({ all: true });
+  });
 });
 
 describe('summarizeFtrDomainSelection', () => {

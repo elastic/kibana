@@ -17,7 +17,12 @@ import {
 } from '../../affected-packages/index.ts';
 
 import type { FTRManifestEntry } from './ftr_manifests.ts';
-import { FTR_CRITICAL_PATHS, FTR_EXCLUDED_MODULES, FTR_IRRELEVANT_PATHS } from './selective_ftr.ts';
+import {
+  FTR_ALWAYS_RUN_CONFIGS,
+  FTR_CRITICAL_PATHS,
+  FTR_EXCLUDED_MODULES,
+  FTR_IRRELEVANT_PATHS,
+} from './selective_ftr.ts';
 
 const PLATFORM_DOMAIN = 'platform';
 const BASE_DOMAIN = 'base';
@@ -38,8 +43,8 @@ export type FtrDomainSelection =
   | {
       readonly all: false;
       readonly domains: ReadonlySet<string>;
-      /** Paths of configs outside `domains` that belong to an affected module. */
-      readonly ownedConfigs: ReadonlySet<string>;
+      /** Paths of configs outside `domains` that run anyway (see `resolveFtrDomains`). */
+      readonly extraConfigs: ReadonlySet<string>;
       readonly reason: string;
     };
 
@@ -85,8 +90,10 @@ const listFiles = (files: readonly string[]): string => {
 /**
  * Picks the FTR manifest domains a PR diff can affect. Domains come from the `group` of every
  * module in the downstream closure of the changed modules; a platform module adds `platform`
- * and all of `base`. Configs owned by a closure module also run, whichever manifest lists them.
- * Falls back to all domains whenever the diff can't be attributed safely.
+ * and all of `base`. Configs outside the selected domains still run when a closure module owns
+ * them, when they are platform configs filed in a solution manifest and `platform` is selected,
+ * or when they are in `FTR_ALWAYS_RUN_CONFIGS`. Falls back to all domains whenever the diff
+ * can't be attributed safely.
  */
 export const resolveFtrDomains = ({
   changedFiles,
@@ -146,30 +153,50 @@ export const resolveFtrDomains = ({
   const domainSelection: FtrDomainSelection = {
     all: false,
     domains,
-    ownedConfigs: new Set(),
+    extraConfigs: new Set(),
     reason: '',
   };
 
-  // Configs owned by an affected module run even when filed under another domain's manifest
-  // (e.g. solution-located configs in the platform manifest, or the reverse).
-  const ownedConfigs = new Set<string>();
+  const ownedConfigs: string[] = [];
+  const platformConfigs: string[] = [];
+  const alwaysRunConfigs: string[] = [];
   for (const entry of manifestEntries) {
     if (includesFtrEntry(domainSelection, entry)) continue;
     const owner = graph.moduleForPath(entry.path);
     if (owner !== undefined && closure.has(owner)) {
-      ownedConfigs.add(entry.path);
+      // Configs owned by an affected module run even when filed under another domain's manifest
+      // (e.g. solution-located configs in the platform manifest, or the reverse).
+      ownedConfigs.push(entry.path);
+    } else if (
+      domains.has(PLATFORM_DOMAIN) &&
+      owner !== undefined &&
+      owner !== UNCATEGORIZED_MODULE_ID &&
+      (graph.groupOf(owner) ?? PLATFORM_DOMAIN) === PLATFORM_DOMAIN
+    ) {
+      // Platform configs in solution manifests run platform UIs inside that solution's serverless
+      // project; no test suite imports the plugins they exercise.
+      platformConfigs.push(entry.path);
+    } else if (domains.size > 0 && FTR_ALWAYS_RUN_CONFIGS.has(entry.path)) {
+      alwaysRunConfigs.push(entry.path);
     }
   }
 
   const reasons = [...triggers].map(([domain, trigger]) => `${domain} ← ${trigger}`);
-  if (ownedConfigs.size) {
-    reasons.push(`configs owned by affected modules: ${listFiles([...ownedConfigs])}`);
+  if (ownedConfigs.length) {
+    reasons.push(`configs owned by affected modules: ${listFiles(ownedConfigs)}`);
+  }
+  if (platformConfigs.length) {
+    reasons.push(`platform configs in solution manifests: ${listFiles(platformConfigs)}`);
+  }
+  if (alwaysRunConfigs.length) {
+    reasons.push(`always-run configs: ${listFiles(alwaysRunConfigs)}`);
   }
   const reason = reasons.length
     ? reasons.join('; ')
     : 'only FTR-irrelevant files or FTR-excluded modules changed';
 
-  const selection: FtrDomainSelection = { all: false, domains, ownedConfigs, reason };
+  const extraConfigs = new Set([...ownedConfigs, ...platformConfigs, ...alwaysRunConfigs]);
+  const selection: FtrDomainSelection = { all: false, domains, extraConfigs, reason };
   return manifestEntries.every((entry) => includesFtrEntry(selection, entry))
     ? all(`every domain affected: ${reason}`)
     : selection;
@@ -185,8 +212,8 @@ export const includesFtrEntry = (
   entry: Pick<FTRManifestEntry, 'path' | 'domain' | 'project'>
 ): boolean => {
   if (selection.all) return true;
-  const { domains, ownedConfigs } = selection;
-  if (ownedConfigs.has(entry.path)) return true;
+  const { domains, extraConfigs } = selection;
+  if (extraConfigs.has(entry.path)) return true;
   if (entry.domain === BASE_DOMAIN) {
     return domains.has(BASE_DOMAIN) || entry.project === undefined || domains.has(entry.project);
   }
