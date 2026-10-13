@@ -100,7 +100,7 @@ overrides:
   'redux-thunk-v2>redux': 'npm:redux@4.2.1'
   'remark-parse>trim': '1.0.1'
   'serialize-javascript': '7.1.2'
-  'sharp': '0.35.4'
+  'sharp': '0.35.5'
   'socket.io-parser': '4.2.7'
   'typescript': '6.0.3'
   'util': '0.12.5'
