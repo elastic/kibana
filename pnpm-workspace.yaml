@@ -98,7 +98,7 @@ overrides:
   'qs': '6.16.0'
   'remark-parse>trim': '1.0.1'
   'serialize-javascript': '7.1.2'
-  'sharp': '0.35.4'
+  'sharp': '0.35.5'
   'typescript': '5.9.3'
   'util': '0.12.5'
   'yauzl': '3.2.1'
