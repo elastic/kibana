@@ -15,7 +15,7 @@ export type HuntTier1Status =
 /** Run-level outcome labels from the Worker's `resolve_run_outcome` step. */
 export type HuntRunOutcome = 'completed' | 'partial' | 'failed';
 
-export type HuntCohort = 'golden' | 'hard' | 'canary';
+export type HuntCohort = 'golden' | 'hard' | 'canary' | 'holdout';
 
 /** Expected structural result for one report in a run. Scored by the Phase 3 CODE evaluators. */
 export interface HuntReportExpectation {

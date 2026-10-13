@@ -13,12 +13,14 @@ import { buildHuntInvestigationConversationId, resetHuntReport } from '../src/se
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
 import { canaryDataset } from '../datasets/canary';
+import { holdoutDataset } from '../datasets/holdout';
 
 evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete }, () => {
   const datasets = [
     { key: 'golden', name: 'hunt-watch: golden', examples: goldenDataset },
     { key: 'hard', name: 'hunt-watch: hard cases', examples: hardCases },
     { key: 'canary', name: 'hunt-watch: canary', examples: canaryDataset },
+    { key: 'holdout', name: 'hunt-watch: holdout', examples: holdoutDataset },
   ] as const;
 
   for (const { key, name, examples } of datasets) {
@@ -34,6 +36,12 @@ evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete 
         evaluationConnector,
         config,
       }) => {
+        // Holdout measures generalisation against the iteration cohorts, so it runs on demand,
+        // not in the weekly step (see datasets/holdout.ts).
+        evaluate.skip(
+          key === 'holdout' && process.env.HUNT_WATCH_HOLDOUT !== '1',
+          'holdout cohort runs only with HUNT_WATCH_HOLDOUT=1'
+        );
         const evaluateDataset = createEvaluateDataset({
           huntWatchClient,
           evaluators,

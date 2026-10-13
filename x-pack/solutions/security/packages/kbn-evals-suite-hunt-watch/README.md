@@ -72,6 +72,9 @@ pre-run reset. Scored tasks never decide a Proposal.
 - `datasets/hard_cases.ts`: multi-candidate fan-out, partial clean probe, unknown report id,
   IOC-only difficult hit.
 - `datasets/canary.ts`: a suite-authored prose-only report scored only by the inverted evaluator.
+- `datasets/holdout.ts`: one hit, one IOC-only hit and one clean row on report ids the iteration
+  cohorts never touch. Skipped unless `HUNT_WATCH_HOLDOUT=1`, so day-to-day runs cannot tune
+  against it. Compare a holdout run with an iteration run through `evaluation.gap-report`.
 
 Report ids bind to the Demo C+ aws-iam scenarios from the Security Solution data generator
 (`security_solution/scripts/data/generate_cli.js`). `src/seed_contract.test.ts` reads the
@@ -118,6 +121,50 @@ In CI the `Evals: Hunt Watch` step in `.buildkite/pipelines/evals/llm_evals.yml`
 over `weekly_eis_core_models` with `EVAL_SERVER_CONFIG_SET: 'evals_hunt_watch'`, and sets
 `FTR_EIS_CCM: '1'`, which does the same provisioning as `node scripts/eis`. The judge comes from
 the `models:judge:<id>` PR label, resolved by `normalizeEvaluationConnectorId`.
+
+## Lockdown scan
+
+`src/lockdown.test.ts` fails in Jest if any fixture literal the datasets rely on (decoy IPs,
+seeded principals, the actor name, bucket, host, role, account id, report id prefix, canary id
+and title) appears in the Worker's prompt or definition surfaces: the `hunt*` managed workflow
+definitions, the hunt watch services and the hunt routes. Comments are stripped first, so a doc
+comment naming a fixture does not count; a string literal or a prompt line does. The scan list
+lives in `LOCKDOWN_SCAN_PATHS` in `src/lockdown.ts`.
+
+## Gate checklist
+
+`gate-checklist.yaml` records, for every NotDaybreak gate family, whether this suite tests the gate
+(with the evaluator or spec as evidence) or why it does not apply. The file is validated with the
+`evaluation.gate-checklist` action in `validate` mode against this package directory; D8 is
+required `tested` because the Worker declares `hitl-resumed-writes`.
+
+<!-- gate-checklist:begin -->
+| Gate | Status | Evidence / reason (short) |
+| --- | --- | --- |
+| A1 dedup | n/a | one trigger per space; reset clears open Proposals |
+| A2 output-validation | tested | `SSE Attachment`, `Outcome Label`, `Hit Consistency` |
+| A3 approval-boundary | n/a | `alwaysGate` is fixed by the product |
+| B-completeness | n/a | policy matrix not varied; hunt Proposals always gate |
+| B-fail-closed-default | n/a | same |
+| B-monotonicity | n/a | one autonomy level |
+| B-reversibility | n/a | approval unconditional |
+| B-audit-fidelity | n/a | only approve and dismiss exercised |
+| C-process | n/a | no Pilot claim; thresholds unratified |
+| D1 subject-separation | n/a | orchestrator identity not observable |
+| D2 authz-scoping | n/a | role scoping not probed |
+| D3 investigation-containment | tested | one Investigation per report; space-isolation case |
+| D4 hitl-pause-fail-closed | tested | dismiss path in the approval spec |
+| D5 allowlist-boundary | n/a | callable surface fixed by managed children |
+| D6 open-vs-append-determinism | n/a | append not exercised |
+| D7 incident-fork-integrity | n/a | no Incident fork |
+| D8 approval-identity-rekey | tested | approve path in the approval spec, red on main |
+| D9 thread-depth-fork-root-containment | n/a | no threads or forks |
+| D10 proposal-gate-exclusivity | tested | `Proposal Presence`, `Canary Inverted`, approval spec |
+| D10a watch-tag-grouping | n/a | Worker triggered directly |
+| D10b per-worker-settings-scope | n/a | v1 bridge is space-level |
+| D10c execute-time-revalidation | n/a | no Defend endpoint actions |
+| D10d coverage-handoff-integrity | n/a | out of scope |
+<!-- gate-checklist:end -->
 
 ## Known Worker behavior pinned by the datasets
 

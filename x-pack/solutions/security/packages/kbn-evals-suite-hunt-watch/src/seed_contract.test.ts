@@ -11,6 +11,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { canaryDataset } from '../datasets/canary';
 import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
+import { holdoutDataset } from '../datasets/holdout';
 import {
   AWS_IAM_REPORT_SLUGS,
   GENERATED_AWS_IAM_REPORT_IDS,
@@ -45,7 +46,7 @@ const scenarioSource = (slug: string): string => {
   return generatorSource.slice(start, next === -1 ? undefined : next);
 };
 
-const allDatasetRows = [...goldenDataset, ...hardCases, ...canaryDataset];
+const allDatasetRows = [...goldenDataset, ...hardCases, ...canaryDataset, ...holdoutDataset];
 const knownReportIds = new Set<string>([
   ...ALL_SEEDED_REPORT_IDS,
   ...HOLDOUT_REPORT_IDS,
