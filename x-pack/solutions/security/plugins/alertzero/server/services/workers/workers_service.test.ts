@@ -1076,9 +1076,9 @@ describe('WorkersService', () => {
 
     it('rejects a schedule interval on a Worker that owns no schedule, naming it', async () => {
       const result = await createPersistentHarness()
-        .createService()
+        .createService(agentBuilderWithSkill(true))
         .update(
-          TRIAGE,
+          FORENSICS,
           { settings: { scheduleInterval: '15m' }, settingsRevision: null },
           SPACE,
           request
@@ -1087,6 +1087,19 @@ describe('WorkersService', () => {
       expect(result.outcome).toBe('invalid');
       if (result.outcome !== 'invalid') throw new Error('Expected an invalid outcome');
       expect(result.message).toContain('scheduleInterval');
+    });
+
+    it('accepts a schedule interval on the alert triage Worker, which sweeps on a schedule', async () => {
+      const result = await createPersistentHarness()
+        .createService()
+        .update(
+          TRIAGE,
+          { settings: { scheduleInterval: '15m' }, settingsRevision: null },
+          SPACE,
+          request
+        );
+
+      expect(result.outcome).not.toBe('invalid');
     });
   });
 
@@ -1909,6 +1922,28 @@ describe('WorkersService', () => {
           request
         )
       ).toEqual({ outcome: 'blocked', reason: 'huntSupplyPrerequisitesUnmet' });
+    });
+
+    it('returns huntSupplyReportsIndexUnmanaged when the hard-gate names a template-free reports index', async () => {
+      const harness = createPersistentHarness();
+      const threatIntelSupply = makeThreatIntelSupply();
+      threatIntelSupply.assertHardGate.mockRejectedValue(
+        new ThreatIntelSupplyHardGateError(['reports_index_unmanaged'])
+      );
+      const service = makeHuntService(harness, threatIntelSupply);
+
+      expect(
+        await service.update(
+          HUNT,
+          {
+            enabled: true,
+            settings: { serviceAccountId: 'sa-1' },
+            settingsRevision: null,
+          },
+          SPACE,
+          request
+        )
+      ).toEqual({ outcome: 'blocked', reason: 'huntSupplyReportsIndexUnmanaged' });
     });
 
     it('does not ensure supply when the hard-gate fails', async () => {

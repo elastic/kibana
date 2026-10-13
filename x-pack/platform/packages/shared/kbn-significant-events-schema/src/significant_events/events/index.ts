@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
@@ -26,7 +26,7 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
 export const significantEventStatusSchema = lazySchema(() =>
   z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS).describe(dedent`
       "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active. Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
+      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active: every confirming signal on it has been re-checked and cleared. A healthy result from one rule never closes signals it did not check; while any confirming signal on the event is unresolved, it stays "${ALERT_EPISODE_STATUS.ACTIVE}". Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
     `)
 );
 
@@ -53,9 +53,8 @@ export const significantEventInvestigationSchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe('ID of the investigation workflow execution.'),
-    started_at: z.iso.datetime({ offset: true }).describe('When this investigation run started.'),
-    completed_at: z.iso
-      .datetime({ offset: true })
+    started_at: isoDateTime({ offset: true }).describe('When this investigation run started.'),
+    completed_at: isoDateTime({ offset: true })
       .optional()
       .describe(
         'When this investigation run finished. Absent while the investigation is still running.'
@@ -66,7 +65,7 @@ export type SignificantEventInvestigation = z.infer<typeof significantEventInves
 
 export const significantEventSchema = lazySchema(() =>
   significantEventBaseSchema.extend({
-    '@timestamp': z.iso.datetime({ offset: true }),
+    '@timestamp': isoDateTime({ offset: true }),
     status: significantEventStatusSchema,
     assessment_note: z
       .string()

@@ -121,19 +121,16 @@ export {
   type CausalFeature,
   type SignalEntry,
   type SignalVerdict,
-  type SignalEffect,
   type Severity,
   severitySchema,
   SEVERITY_OPTIONS,
   SEVERITY_CONTRACT_RULE,
-  EFFECT_CONTRACT_RULE,
   getSeverityLabel,
   detectionSchema,
   blastRadiusEntrySchema,
   causalFeatureSchema,
   signalEntrySchema,
   SIGNAL_VERDICTS,
-  SIGNAL_EFFECTS,
   significantEventSchema,
   significantEventStatusSchema,
   significantEventsTuningConfigSchema,
@@ -175,5 +172,3 @@ export { NightshiftModelBlockedError } from './src/nightshift_model_blocked_erro
 export { NightshiftModelNotFoundError } from './src/nightshift_model_not_found_error';
 
 export { NIGHTSHIFT_DEFAULT_MODELS, type NightshiftModelStep } from './src/nightshift_models';
-
-export type { KnowledgeIndicatorClientContract } from './src/knowledge_indicator_client';
