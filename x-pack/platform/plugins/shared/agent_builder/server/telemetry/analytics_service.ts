@@ -11,8 +11,10 @@ import { ATTACHMENT_REF_ACTOR, AttachmentType } from '@kbn/agent-builder-common/
 import {
   AGENT_BUILDER_EVENT_TYPES,
   agentBuilderServerEbtEvents,
+  type AttachmentTimelineEvent,
   type ConversationRound,
   ConversationRoundStepType,
+  TimelineEventType,
   ToolResultType,
   type ToolSelection,
   type ToolType,
@@ -49,22 +51,28 @@ import {
 
 /**
  * Attachment types on a round's input. Inline attachments carry their own type; user image uploads
- * arrive as refs and have to be resolved against the conversation's attachment snapshot.
+ * are `chat_input` attachment events, or legacy user refs resolved against the conversation snapshot.
  */
 const inputAttachmentTypes = (
   round: ConversationRound,
-  conversationAttachments: VersionedAttachment[]
+  conversationAttachments: VersionedAttachment[],
+  inputAttachmentEvents: AttachmentTimelineEvent[]
 ): string[] | undefined => {
   const attachmentTypeById = new Map(conversationAttachments.map(({ id, type }) => [id, type]));
-  const imageAttachmentIds = new Set(
+  const legacyImageIds =
     round.input.attachment_refs
       ?.filter(({ actor }) => actor === ATTACHMENT_REF_ACTOR.user)
-      .filter(
-        ({ attachment_id: attachmentId }) =>
-          attachmentTypeById.get(attachmentId) === AttachmentType.image
-      )
-      .map(({ attachment_id: attachmentId }) => attachmentId) ?? []
-  );
+      .filter(({ attachment_id: id }) => attachmentTypeById.get(id) === AttachmentType.image)
+      .map(({ attachment_id: id }) => id) ?? [];
+  const eventImageIds = inputAttachmentEvents
+    .filter(
+      (event) =>
+        event.type === TimelineEventType.attachmentAdded &&
+        event.data.source === 'chat_input' &&
+        event.data.attachment_type === AttachmentType.image
+    )
+    .map((event) => event.data.attachment_id);
+  const imageAttachmentIds = new Set([...legacyImageIds, ...eventImageIds]);
   const types = [
     ...(round.input.attachments?.map(({ type }) => type || 'unknown') ?? []),
     ...Array.from(imageAttachmentIds, () => AttachmentType.image),
@@ -300,6 +308,7 @@ export class AnalyticsService {
     round,
     roundCount,
     conversationAttachments,
+    inputAttachmentEvents,
   }: {
     agentId: string;
     conversationId?: string;
@@ -308,6 +317,7 @@ export class AnalyticsService {
     round: ConversationRound;
     roundCount: number;
     conversationAttachments: VersionedAttachment[];
+    inputAttachmentEvents: AttachmentTimelineEvent[];
   }): void {
     try {
       const normalizedAgentId = normalizeAgentIdForTelemetry(agentId);
@@ -326,7 +336,11 @@ export class AnalyticsService {
         return results.length > 0 && results.every((r) => r.type === ToolResultType.error);
       });
 
-      const attachments = inputAttachmentTypes(round, conversationAttachments);
+      const attachments = inputAttachmentTypes(
+        round,
+        conversationAttachments,
+        inputAttachmentEvents
+      );
       this.analytics.reportEvent<ReportRoundCompleteParams>(
         AGENT_BUILDER_EVENT_TYPES.RoundComplete,
         {
@@ -371,6 +385,7 @@ export class AnalyticsService {
     modelProvider,
     telemetry,
     conversationAttachments,
+    inputAttachmentEvents,
   }: {
     agentId: string;
     conversationId?: string;
@@ -378,6 +393,7 @@ export class AnalyticsService {
     modelProvider: ModelProvider;
     telemetry: ExecutionTelemetry;
     conversationAttachments: VersionedAttachment[];
+    inputAttachmentEvents: AttachmentTimelineEvent[];
   }): void {
     try {
       const { executionRound, roundTotals } = telemetry;
@@ -387,7 +403,11 @@ export class AnalyticsService {
       const toolCallErrors = toolCallSteps.filter(
         ({ results }) => results.length > 0 && results.every((r) => r.type === ToolResultType.error)
       );
-      const attachments = inputAttachmentTypes(roundTotals, conversationAttachments);
+      const attachments = inputAttachmentTypes(
+        roundTotals,
+        conversationAttachments,
+        inputAttachmentEvents
+      );
 
       this.analytics.reportEvent<ReportExecutionCompleteParams>(
         AGENT_BUILDER_EVENT_TYPES.ExecutionComplete,

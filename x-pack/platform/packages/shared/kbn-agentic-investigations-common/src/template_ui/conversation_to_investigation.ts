@@ -10,7 +10,12 @@ import type {
   MetadataFieldValue,
   TimelineEvent as AgentBuilderTimelineEvent,
 } from '@kbn/agent-builder-common';
-import { isTimelineEvent, TimelineEventType, TimelineTriggerType } from '@kbn/agent-builder-common';
+import {
+  isAttachmentEvent,
+  isTimelineEvent,
+  TimelineEventType,
+  TimelineTriggerType,
+} from '@kbn/agent-builder-common';
 import type { Investigation, TimelineEvent } from '../types';
 import { TIMELINE_EVENT_LABELS } from './translations';
 
@@ -55,6 +60,9 @@ const TRIGGER_LABELS: Record<string, string> = {
 
 /** Falls back to `undefined` for an event whose payload carries nothing worth a line of text. */
 const summarize = (event: AgentBuilderTimelineEvent): string | undefined => {
+  if (isAttachmentEvent(event) && event.data.hidden) {
+    return undefined;
+  }
   switch (event.type) {
     case TimelineEventType.userMessage:
       return readString(event.data.message);
@@ -79,6 +87,8 @@ const summarize = (event: AgentBuilderTimelineEvent): string | undefined => {
       return TIMELINE_EVENT_LABELS.attachmentUpdated(event.data.attachment_type);
     case TimelineEventType.attachmentDeleted:
       return TIMELINE_EVENT_LABELS.attachmentDeleted(event.data.attachment_type);
+    case TimelineEventType.attachmentRestored:
+      return TIMELINE_EVENT_LABELS.attachmentRestored(event.data.attachment_type);
     default:
       return undefined;
   }

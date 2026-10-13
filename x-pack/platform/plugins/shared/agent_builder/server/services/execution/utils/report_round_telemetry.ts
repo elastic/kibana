@@ -16,7 +16,9 @@ import type {
 import {
   ConversationRoundStatus,
   executionTerminatedEventId,
+  isAttachmentEvent,
   isEventsNativeVersion,
+  parseExecutionId,
 } from '@kbn/agent-builder-common';
 import type { PromptResponse } from '@kbn/agent-builder-common/agents/prompts';
 import {
@@ -216,6 +218,16 @@ export const reportRoundTelemetry = ({
     const telemetry = buildExecutionTelemetry({ event, conversation, nextInput, logger });
     const { roundTotals, roundId, roundCount, executionIndex } = telemetry;
     const conversationAttachments = event.data.attachments ?? conversation.attachments ?? [];
+    const inputAttachmentEvents = [
+      ...(conversation.events ?? [])
+        .filter(isAttachmentEvent)
+        .filter(
+          (stored) =>
+            stored.execution_id !== undefined &&
+            parseExecutionId(stored.execution_id)?.roundId === roundId
+        ),
+      ...(event.data.attachment_events ?? []),
+    ];
 
     // Billing is per turn, so exactly one record per round, emitted when the turn answers and
     // carrying the turn's totals. A pause is not a billable turn: it has produced no response yet,
@@ -251,6 +263,7 @@ export const reportRoundTelemetry = ({
       modelProvider,
       telemetry,
       conversationAttachments,
+      inputAttachmentEvents,
     });
 
     // Counts rounds started, so a round abandoned at a pause still counts once.
@@ -268,6 +281,7 @@ export const reportRoundTelemetry = ({
         round: roundTotals,
         roundCount,
         conversationAttachments,
+        inputAttachmentEvents,
       });
     }
   } catch (error) {

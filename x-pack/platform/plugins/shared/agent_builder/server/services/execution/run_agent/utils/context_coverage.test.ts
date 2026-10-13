@@ -270,7 +270,7 @@ describe('listVisibleUnits', () => {
   const describeUnit = (unit: ContextUnit) =>
     unit.kind === 'message'
       ? 'message'
-      : unit.kind === 'custom_event'
+      : unit.kind === 'standalone_event'
       ? `event:${unit.entry.event.id}`
       : unit.kind === 'round_cycle'
       ? `${unit.round.id}:${unit.range?.start ?? '-'}:${unit.first ? 'first' : ''}${

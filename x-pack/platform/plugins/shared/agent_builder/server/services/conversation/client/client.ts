@@ -362,7 +362,9 @@ class ConversationClientImpl implements ConversationClient {
     if (!this.eventEmitter) {
       return;
     }
-    const attachmentEvents = writtenEvents.filter(isAttachmentEvent);
+    const attachmentEvents = writtenEvents
+      .filter(isAttachmentEvent)
+      .filter((event) => !event.data.hidden);
     if (attachmentEvents.length === 0) {
       return;
     }

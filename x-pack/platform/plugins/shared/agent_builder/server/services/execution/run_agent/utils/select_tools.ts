@@ -78,7 +78,6 @@ export const selectTools = async ({
   });
 
   const versionedAttachmentTools = createVersionedAttachmentTools({
-    attachmentStateManager: conversation.attachmentStateManager,
     attachmentsService,
     formatContext,
     runner,
@@ -154,18 +153,15 @@ const withOrigin = (tools: ExecutableTool[], origin: ToolOrigin): ExecutableTool
  * These tools allow the LLM to add, read, update, delete, restore, list, and diff attachments.
  */
 const createVersionedAttachmentTools = ({
-  attachmentStateManager,
   attachmentsService,
   formatContext,
   runner,
 }: {
-  attachmentStateManager: AttachmentStateManager;
   attachmentsService: AttachmentsService;
   formatContext: AttachmentFormatContext;
   runner: ScopedRunner;
 }): ExecutableTool[] => {
   const builtinTools = createAttachmentTools({
-    attachmentManager: attachmentStateManager,
     attachmentsService,
     formatContext,
   });

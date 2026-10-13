@@ -583,48 +583,30 @@ export function registerAttachmentRoutes({
           getInternalServices();
         const { conversation_id: conversationId, attachment_id: attachmentId } = request.params;
 
-        const client = await conversationsService.getScopedClient({ request });
-        const conversation = await client.get(conversationId);
-
-        const stateManager = createAttachmentStateManager(conversation.attachments ?? [], {
-          getTypeDefinition: attachmentsService.getTypeDefinition,
+        const [coreStart, startDeps] = await coreSetup.getStartServices();
+        const client = createAttachmentPublicClient({
+          request,
+          conversationsService,
+          attachmentsService,
+          coreStart,
+          spaces: startDeps.spaces,
+          source: 'http_api',
         });
-        const existing = stateManager.getAttachmentRecord(attachmentId);
 
-        if (!existing) {
-          return response.notFound({
-            body: { message: `Attachment '${attachmentId}' not found` },
+        try {
+          const restored = await client.restore({ conversationId, attachmentId });
+          return response.ok<RestoreAttachmentResponse>({
+            body: { success: true, attachment: restored },
           });
+        } catch (e) {
+          if (isAgentBuilderError(e)) {
+            return response.customError({
+              statusCode: (e.meta.statusCode as number) ?? 500,
+              body: { message: e.message },
+            });
+          }
+          throw e;
         }
-
-        if (existing.active !== false) {
-          return response.badRequest({
-            body: { message: `Attachment '${attachmentId}' is not deleted` },
-          });
-        }
-
-        const success = stateManager.restore(attachmentId);
-        if (!success) {
-          return response.customError({
-            body: { message: `Failed to restore attachment '${attachmentId}'` },
-            statusCode: 500,
-          });
-        }
-
-        const restored = stateManager.getAttachmentRecord(attachmentId)!;
-
-        // Save the updated conversation
-        await client.update(
-          { id: conversationId, attachments: stateManager.getAll() },
-          { access: 'converse', source: 'http_api' }
-        );
-
-        return response.ok<RestoreAttachmentResponse>({
-          body: {
-            success: true,
-            attachment: restored,
-          },
-        });
       })
     );
 
