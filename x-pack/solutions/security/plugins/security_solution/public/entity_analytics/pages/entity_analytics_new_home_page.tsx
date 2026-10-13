@@ -35,6 +35,8 @@ import {
   useAlertBasedTilesSeries,
   useEntitiesWithAnomaliesSeries,
   useNewEntitySeries,
+  useNewlyHighCriticalSeries,
+  useRiskMoversSeries,
   useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
   useNewEntityCountWithDelta as useNewEntityCount,
   useRiskMoversCountWithDelta as useRiskMoversCount,
@@ -211,6 +213,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityFilters,
     skip: skipTileQueries,
   });
+  const { trend: riskMoversTrend } = useRiskMoversSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !riskMoversLoading && !riskMoversDeltaLoading,
+    count: riskMoversCount,
+  });
   const {
     count: newlyHCCount,
     delta: newlyHCDelta,
@@ -223,6 +233,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     timeRange,
     entityFilters,
     skip: skipTileQueries,
+  });
+  const { trend: newlyHCTrend } = useNewlyHighCriticalSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !newlyHCLoading && !newlyHCDeltaLoading,
+    count: newlyHCCount,
   });
 
   const handleFilterForCard = useCallback((cardId: ActiveFilter['cardId']) => {
@@ -365,6 +383,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: riskMoversCount,
         delta: riskMoversDelta,
         isDeltaLoading: riskMoversDeltaLoading,
+        trend: riskMoversTrend,
         isLoading: riskMoversLoading,
         noDataMessage: riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
@@ -405,6 +424,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: newlyHCCount,
         delta: newlyHCDelta,
         isDeltaLoading: newlyHCDeltaLoading,
+        trend: newlyHCTrend,
         isLoading: newlyHCLoading,
         noDataMessage: newlyHCMissingIndex
           ? i18n.translate(
@@ -507,10 +527,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       riskMoversCount,
       riskMoversDelta,
       riskMoversDeltaLoading,
+      riskMoversTrend,
       riskMoversLoading,
       newlyHCCount,
       newlyHCDelta,
       newlyHCDeltaLoading,
+      newlyHCTrend,
       newlyHCLoading,
       newlyHCMissingIndex,
       watchlistedCount,
