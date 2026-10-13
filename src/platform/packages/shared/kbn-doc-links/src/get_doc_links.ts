@@ -474,6 +474,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       configureAlertSuppression: `${ELASTIC_DOCS}solutions/security/detect-and-alert/alert-suppression#configure-alert-suppression`,
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attacks-page`,
       runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,
+      attackDiscovery: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery`,
       mitreCoverage: `${ELASTIC_DOCS}solutions/security/detect-and-alert/mitre-attack-coverage`,
       remapMitreAttack: `${ELASTIC_DOCS}solutions/security/detect-and-alert/remap-mitre-attack`,
     },

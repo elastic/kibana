@@ -327,6 +327,7 @@ export interface DocLinks {
     readonly automaticImport: string;
     readonly attacksPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
+    readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };

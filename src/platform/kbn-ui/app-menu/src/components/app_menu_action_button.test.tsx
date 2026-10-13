@@ -69,6 +69,26 @@ describe('AppMenuActionButton', () => {
     expect(splitButtonProps.run).not.toHaveBeenCalled();
   });
 
+  it('should show a separate tooltip for each split button action', async () => {
+    const user = userEvent.setup();
+    render(
+      <AppMenuActionButton
+        {...defaultProps}
+        tooltipContent="Save tooltip"
+        splitButtonProps={{ ...splitButtonProps, secondaryButtonTooltipContent: 'Options tooltip' }}
+        testId="test-split-button"
+      />
+    );
+
+    await user.hover(screen.getByLabelText('More options'));
+    expect(await screen.findByText('Options tooltip')).toBeInTheDocument();
+    expect(screen.queryByText('Save tooltip')).not.toBeInTheDocument();
+
+    await user.unhover(screen.getByLabelText('More options'));
+    await user.hover(screen.getByTestId('test-split-button'));
+    expect(await screen.findByText('Save tooltip')).toBeInTheDocument();
+  });
+
   it('should call split button run function when secondary button is clicked', async () => {
     const user = userEvent.setup();
     render(<AppMenuActionButton {...defaultProps} splitButtonProps={splitButtonProps} />);
