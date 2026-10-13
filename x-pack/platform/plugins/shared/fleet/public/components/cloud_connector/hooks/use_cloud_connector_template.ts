@@ -112,6 +112,14 @@ export interface UseCloudConnectorTemplateParams {
    * set it was rendered for. Callers that write the connector at click time store all of it.
    */
   onTemplateRendered?: (rendered: TemplateRendered) => void;
+  /**
+   * Extra stack parameters for the rendered template only, resolved at click time (the AWS
+   * Identity Federation form uses it to create a callback record and pass its key). Not applied
+   * to the static template nor to a stack update: those templates/stacks have no such parameters
+   * and the quick-create console rejects unknown ones. A rejection or undefined result launches
+   * without them.
+   */
+  getLaunchStackParams?: () => Promise<Record<string, string> | undefined>;
 }
 
 export type CloudConnectorLaunchButtonProps =
@@ -156,6 +164,7 @@ export const useCloudConnectorTemplate = ({
   deploymentId,
   staticTemplateFallback = true,
   onTemplateRendered,
+  getLaunchStackParams,
 }: UseCloudConnectorTemplateParams): UseCloudConnectorTemplateResult => {
   const { isIacProvisionerEnabled } = useIacProvisioner();
   const { analytics } = useStartServices();
@@ -204,6 +213,18 @@ export const useCloudConnectorTemplate = ({
       return true;
     };
 
+    /** Never throws: the callback is a convenience; a failure must not block the launch. */
+    const resolveLaunchStackParams = async (): Promise<Record<string, string> | undefined> => {
+      if (!getLaunchStackParams) {
+        return undefined;
+      }
+      try {
+        return await getLaunchStackParams();
+      } catch (e) {
+        return undefined;
+      }
+    };
+
     const renderIntegrations = getRenderIntegrations({
       integrations,
       packageName,
@@ -237,12 +258,14 @@ export const useCloudConnectorTemplate = ({
 
     setIsGeneratingTemplate(true);
     try {
+      // Only a fresh quick-create carries extra parameters; an update keeps the stack's own.
+      const launchStackParams = deploymentId ? undefined : await resolveLaunchStackParams();
       const result = await renderArtifactTemplate({
         provider,
         integrations: renderIntegrations,
         templateSha,
         deploymentId,
-        stackParams,
+        stackParams: launchStackParams ? { ...stackParams, ...launchStackParams } : stackParams,
         staticUrl: staticTemplate.url,
       });
 
@@ -293,6 +316,7 @@ export const useCloudConnectorTemplate = ({
   }, [
     analytics,
     deploymentId,
+    getLaunchStackParams,
     integrations,
     onTemplateRendered,
     packageName,

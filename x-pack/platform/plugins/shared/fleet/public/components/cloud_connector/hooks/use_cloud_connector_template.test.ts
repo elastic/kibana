@@ -870,5 +870,98 @@ describe('useCloudConnectorTemplate', () => {
         expect(result.current.templateGenerationError).toBeUndefined();
       });
     });
+
+    describe('callback stack params (getLaunchStackParams)', () => {
+      const CALLBACK_PARAMS = {
+        ElasticKibanaUrl: 'https://kb.example.com',
+        ElasticApiKey: 'encoded-key',
+        ElasticCallbackId: 'cb-1',
+      };
+
+      it('adds the callback params to the rendered quick-create link', async () => {
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        await launch(result);
+
+        expect(getLaunchStackParams).toHaveBeenCalledTimes(1);
+        const params = new URLSearchParams(cloudFormationTab.location.href.split('?')[1]);
+        expect(params.get('templateURL')).toBe(ARTIFACT_URL);
+        expect(params.get('param_ElasticKibanaUrl')).toBe('https://kb.example.com');
+        expect(params.get('param_ElasticApiKey')).toBe('encoded-key');
+        expect(params.get('param_ElasticCallbackId')).toBe('cb-1');
+        // The workload identity params are still there.
+        expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
+      });
+
+      it('leaves the static fallback without callback params when the render fails', async () => {
+        mockedSendRenderIacTemplate.mockResolvedValue({
+          data: null,
+          error: { message: 'unrenderable', statusCode: 422 },
+        } as any);
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        await launch(result);
+
+        const openedUrl = cloudFormationTab.location.href;
+        expect(openedUrl).toContain('static.example');
+        expect(openedUrl).not.toContain('param_ElasticCallbackId');
+        expect(openedUrl).not.toContain('param_ElasticApiKey');
+      });
+
+      it('does not ask for callback params when there is nothing to render', async () => {
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, policyTemplates: [], getLaunchStackParams })
+        );
+        await launch(result);
+
+        expect(getLaunchStackParams).not.toHaveBeenCalled();
+        expect(windowOpenSpy.mock.calls[0][0]).not.toContain('param_ElasticCallbackId');
+      });
+
+      it('renders without callback params when getLaunchStackParams returns undefined', async () => {
+        const getLaunchStackParams = jest.fn().mockResolvedValue(undefined);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        await launch(result);
+
+        const openedUrl = cloudFormationTab.location.href;
+        expect(openedUrl).toContain(`templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
+        expect(openedUrl).not.toContain('param_ElasticCallbackId');
+      });
+
+      it('still renders and opens the console when getLaunchStackParams throws', async () => {
+        const getLaunchStackParams = jest.fn().mockRejectedValue(new Error('callback down'));
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({ ...HOOK_PARAMS, getLaunchStackParams })
+        );
+        await launch(result);
+
+        const openedUrl = cloudFormationTab.location.href;
+        expect(openedUrl).toContain(`templateURL=${encodeURIComponent(ARTIFACT_URL)}`);
+        expect(openedUrl).not.toContain('param_ElasticCallbackId');
+        expect(result.current.templateGenerationError).toBeUndefined();
+      });
+
+      it('does not add callback params to a stack-update link', async () => {
+        const getLaunchStackParams = jest.fn().mockResolvedValue(CALLBACK_PARAMS);
+        const { result } = renderHook(() =>
+          useCloudConnectorTemplate({
+            ...HOOK_PARAMS,
+            deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/uuid',
+            getLaunchStackParams,
+          })
+        );
+        await launch(result);
+
+        expect(getLaunchStackParams).not.toHaveBeenCalled();
+        expect(cloudFormationTab.location.href).not.toContain('param_ElasticCallbackId');
+      });
+    });
   });
 });
