@@ -202,6 +202,15 @@ describe('resolveMitreBucketsByFramework', () => {
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('atlas unavailable'));
   });
 
+  it('resolves enterprise only and never attempts atlas when no client is given', async () => {
+    const logger = loggingSystemMock.createLogger();
+
+    const result = await resolveMitreBucketsByFramework(undefined, ['enterprise', 'atlas'], logger);
+
+    expect(Object.keys(result)).toEqual(['enterprise']);
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
   it('returns an empty record when every framework rejects', async () => {
     const mockList = jest.fn().mockRejectedValue(new Error('SO unavailable'));
     const client: MitreAttackDataClient = { list: mockList, getById: jest.fn() };

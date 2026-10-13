@@ -87,15 +87,19 @@ const EMPTY_CATALOG: MitreCatalog = {
   subtechniqueById: new Map(),
 };
 
-// The catalog is global ATT&CK Enterprise reference data, identical for every space; keyed by client only so a fresh client (tests) gets a fresh catalog, not for per-space isolation.
-// Keyed by client so a fresh client (tests, or a future client swap) never sees a stale catalog.
-const catalogByClient = new WeakMap<MitreAttackDataClient, MitreCatalog>();
+// Global ATT&CK Enterprise reference data, identical for every space; the client is created once at mitreAttack start.
+let cachedCatalog: MitreCatalog | undefined;
+
+/** Clears the memoized catalog; for tests. */
+export const resetMitreCatalogCache = (): void => {
+  cachedCatalog = undefined;
+};
 
 /**
- * Loads the ATT&CK Enterprise catalog from the managed MITRE data client and memoizes it per client.
+ * Loads the ATT&CK Enterprise catalog from the managed MITRE data client and memoizes it.
  *
- * An empty collection (population not finished) or a missing client yields an empty catalog
- * that is not cached, so the next call retries.
+ * A missing client or an empty collection (the managed data is unavailable: population failed or
+ * the saved objects are gone) yields an empty catalog that is not cached, so the next call retries.
  */
 export const getMitreCatalog = async ({
   mitreDataClient,
@@ -109,8 +113,7 @@ export const getMitreCatalog = async ({
     return EMPTY_CATALOG;
   }
 
-  const cached = catalogByClient.get(mitreDataClient);
-  if (cached) return cached;
+  if (cachedCatalog) return cachedCatalog;
 
   let techniques: MitreTechnique[];
   let subtechniques: MitreSubtechnique[];
@@ -129,11 +132,12 @@ export const getMitreCatalog = async ({
     return EMPTY_CATALOG;
   }
   if (techniques.length === 0 && subtechniques.length === 0) {
-    logger?.debug('MITRE collection is empty (not populated yet); not caching catalog');
+    logger?.debug(
+      'MITRE collection is empty (managed MITRE data unavailable: population failed or data missing); not caching catalog'
+    );
     return EMPTY_CATALOG;
   }
 
-  const catalog = buildMitreCatalog([...techniques, ...subtechniques]);
-  catalogByClient.set(mitreDataClient, catalog);
-  return catalog;
+  cachedCatalog = buildMitreCatalog([...techniques, ...subtechniques]);
+  return cachedCatalog;
 };

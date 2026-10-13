@@ -21,8 +21,8 @@ import { buildMitreCatalog } from './mitre_catalog';
 // A hoisted function declaration (mock-prefixed) so the jest.mock factory below can call it.
 function mockBuildEnterpriseFixture(): MitreEntity[] {
   const { buildMockMitreTechnique, buildMockMitreSubtechnique, buildMockMitreEntities } =
-    jest.requireActual<typeof import('@kbn/security-mitre-attack-common')>(
-      '@kbn/security-mitre-attack-common'
+    jest.requireActual<typeof import('@kbn/security-mitre-attack-mocks')>(
+      '@kbn/security-mitre-attack-mocks'
     );
   return [
     buildMockMitreTechnique({ id: 'T1566', name: 'Phishing', tactic_ids: ['TA0001'] }),
@@ -168,7 +168,7 @@ describe('huntBehavior', () => {
     );
   });
 
-  it('reports every candidate as catalog_unavailable, not unknown, when the catalog is empty', async () => {
+  it('skips extraction and reports one report-level catalog_unavailable gap when the catalog is empty', async () => {
     const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
     getMitreCatalog.mockResolvedValueOnce({
       techniqueById: new Map(),
@@ -178,16 +178,34 @@ describe('huntBehavior', () => {
     warnMock.mockClear();
     const model = buildMockModel([
       { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
-      { technique_id: 'T1078.004', evidence_quote: 'phishing', llm_confidence: 0.9 },
+      { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 },
     ]);
     const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(model.chatModel.withStructuredOutput).not.toHaveBeenCalled();
     expect(result.status).toBe('no_behaviors_validated');
     expect(result.behaviors).toHaveLength(0);
     expect(result.incomplete).toEqual([
-      expect.objectContaining({ reason: 'catalog_unavailable', technique_id: 'T1566' }),
-      expect.objectContaining({ reason: 'catalog_unavailable', technique_id: 'T1078.004' }),
+      expect.objectContaining({ reason: 'catalog_unavailable', detail: expect.any(String) }),
     ]);
+    expect(result.incomplete?.[0].technique_id).toBeUndefined();
     expect(warnMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads the catalog before calling the extraction model', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockClear();
+    const model = buildMockModel([]);
+    const order: string[] = [];
+    getMitreCatalog.mockImplementationOnce(async () => {
+      order.push('catalog');
+      return enterpriseCatalog;
+    });
+    (model.chatModel.withStructuredOutput as jest.Mock).mockImplementationOnce(() => {
+      order.push('extraction');
+      return { invoke: jest.fn().mockResolvedValue({ candidates: [] }) };
+    });
+    await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(order).toEqual(['catalog', 'extraction']);
   });
 
   it('returns indexed_behaviors id as reportId:techniqueId', async () => {

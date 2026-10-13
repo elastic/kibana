@@ -331,10 +331,9 @@ describe('handleCoverageOverviewRequest', () => {
       deps: { rulesClient: rulesClientMock.create(), mitreDataClient },
     });
 
-    // The managed client's list() must have been called once per framework.
-    expect(mockList).toHaveBeenCalledTimes(2);
+    // No fetched rule references ATLAS, so only the enterprise framework is resolved.
+    expect(mockList).toHaveBeenCalledTimes(1);
     expect(mockList).toHaveBeenCalledWith({ framework: 'enterprise' });
-    expect(mockList).toHaveBeenCalledWith({ framework: 'atlas' });
 
     // Bogus tactic not in the managed buckets → invalid.
     expect(result.invalid_mitre_ids['rule-bogus']).toEqual(
@@ -431,13 +430,12 @@ describe('handleCoverageOverviewRequest', () => {
       });
     };
 
-    it('maps an ATLAS-only rule under its ids and does not mark it unmapped', async () => {
+    it('excludes ATLAS ids from coverage and counts an ATLAS-only rule as unmapped', async () => {
       const result = await run([makeRule('rule-atlas', [makeAtlasThreat()])], makeClient(true));
 
-      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-atlas']);
-      expect(result.coverage[ATLAS_TECHNIQUE_ID]).toEqual(['rule-atlas']);
-      expect(result.coverage[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-atlas']);
-      expect(result.unmapped_rule_ids).not.toContain('rule-atlas');
+      expect(Object.keys(result.coverage).filter((id) => id.startsWith('AML.'))).toEqual([]);
+      expect(result.unmapped_rule_ids).toContain('rule-atlas');
+      expect(result.rules_data['rule-atlas']).toBeDefined();
     });
 
     it('flags only ATLAS ids missing from the atlas buckets', async () => {
@@ -470,7 +468,7 @@ describe('handleCoverageOverviewRequest', () => {
       expect(result.invalid_mitre_ids['rule-attack']).toEqual([BOGUS_TECHNIQUE_ID]);
     });
 
-    it('counts a rule with both frameworks under both sets of ids', async () => {
+    it('lists a rule with both frameworks only under its Enterprise ids and not as unmapped', async () => {
       const result = await run(
         [makeRule('rule-both', [makeAttackThreat(), makeAtlasThreat()])],
         makeClient(true)
@@ -478,10 +476,26 @@ describe('handleCoverageOverviewRequest', () => {
 
       expect(result.coverage[VALID_TACTIC_ID]).toEqual(['rule-both']);
       expect(result.coverage[VALID_TECHNIQUE_ID]).toEqual(['rule-both']);
-      expect(result.coverage[ATLAS_TACTIC_ID]).toEqual(['rule-both']);
-      expect(result.coverage[ATLAS_SUBTECHNIQUE_ID]).toEqual(['rule-both']);
+      expect(Object.keys(result.coverage).filter((id) => id.startsWith('AML.'))).toEqual([]);
       expect(result.unmapped_rule_ids).toEqual([]);
       expect(result.invalid_mitre_ids).toEqual({});
+    });
+
+    it('resolves only enterprise buckets when no fetched rule references ATLAS', async () => {
+      const client = makeClient(true);
+      await run([makeRule('rule-attack', [makeAttackThreat()])], client);
+
+      expect(client.list).toHaveBeenCalledTimes(1);
+      expect(client.list).toHaveBeenCalledWith({ framework: 'enterprise' });
+    });
+
+    it('resolves enterprise and atlas buckets when a fetched rule references ATLAS', async () => {
+      const client = makeClient(true);
+      await run([makeRule('rule-atlas', [makeAtlasThreat()])], client);
+
+      expect(client.list).toHaveBeenCalledTimes(2);
+      expect(client.list).toHaveBeenCalledWith({ framework: 'enterprise' });
+      expect(client.list).toHaveBeenCalledWith({ framework: 'atlas' });
     });
   });
 });

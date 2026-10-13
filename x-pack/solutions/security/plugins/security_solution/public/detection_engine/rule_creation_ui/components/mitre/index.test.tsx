@@ -190,5 +190,62 @@ describe('AddMitreThreat', () => {
         },
       ]);
     });
+
+    describe('rows from other frameworks', () => {
+      const atlasRow = {
+        framework: 'MITRE ATLAS',
+        tactic: {
+          id: 'AML.TA0000',
+          name: 'Atlas Tactic',
+          reference: 'https://atlas.mitre.org/tactics/AML.TA0000/',
+        },
+        technique: [
+          {
+            id: 'AML.T0044',
+            name: 'Atlas Technique',
+            reference: 'https://atlas.mitre.org/techniques/AML.T0044/',
+            subtechnique: [],
+          },
+        ],
+      };
+      const attackRow = {
+        framework: 'MITRE ATT&CK',
+        tactic: { id: 'TA0001', name: 'Charlie', reference: 'https://example.com' },
+        technique: [
+          { id: 'T1190', name: 'Technique', reference: 'https://example.com', subtechnique: [] },
+        ],
+      };
+      const { framework: _framework, ...legacyRow } = attackRow;
+
+      beforeEach(() => {
+        mockUseMitreConfiguration.mockReturnValue(
+          createPopulatedMitreConfiguration({
+            tactics: [
+              buildMockMitreTacticSummary({ id: 'TA0001', name: 'Charlie', position: 0 }),
+              buildMockMitreTacticSummary({ id: 'AML.TA0000', name: 'Atlas Tactic', position: 1 }),
+            ],
+          })
+        );
+      });
+
+      it('makes technique fields read-only on an ATLAS row while the tactic and row delete stay enabled', () => {
+        renderWithValue([atlasRow]);
+
+        expect(screen.getByTestId('mitreAttackTechnique')).toBeDisabled();
+        expect(screen.getByTestId('addMitreAttackTechnique')).toBeDisabled();
+        expect(screen.getByTestId('mitreAttackTactic')).toBeEnabled();
+        expect(screen.getAllByLabelText('Delete')[0]).toBeEnabled();
+      });
+
+      it.each([
+        ['an ATT&CK row', attackRow],
+        ['a row with no framework', legacyRow],
+      ])('keeps technique fields enabled on %s', (_name, row) => {
+        renderWithValue([row]);
+
+        expect(screen.getByTestId('mitreAttackTechnique')).toBeEnabled();
+        expect(screen.getByTestId('addMitreAttackTechnique')).toBeEnabled();
+      });
+    });
   });
 });

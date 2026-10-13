@@ -78,13 +78,19 @@ export const resolveMitreBucketsByFramework = async (
   frameworks: readonly MitreFramework[],
   logger?: Logger
 ): Promise<Partial<Record<MitreFramework, MitreEntitySummaryBuckets>>> => {
+  // The legacy source (no data client) serves Enterprise only, so skip other frameworks
+  // up front instead of attempting and failing each one.
+  const availableFrameworks = mitreDataClient
+    ? frameworks
+    : frameworks.filter((framework) => framework === 'enterprise');
+
   const results = await Promise.allSettled(
-    frameworks.map((framework) => resolveMitreBuckets(mitreDataClient, framework))
+    availableFrameworks.map((framework) => resolveMitreBuckets(mitreDataClient, framework))
   );
 
   const bucketsByFramework: Partial<Record<MitreFramework, MitreEntitySummaryBuckets>> = {};
   results.forEach((result, index) => {
-    const framework = frameworks[index];
+    const framework = availableFrameworks[index];
     if (result.status === 'fulfilled') {
       bucketsByFramework[framework] = result.value;
       return;

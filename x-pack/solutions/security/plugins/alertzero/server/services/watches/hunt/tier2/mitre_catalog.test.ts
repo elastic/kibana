@@ -11,10 +11,10 @@ import {
   buildMockMitreSubtechnique,
   buildMockMitreTactic,
   buildMockMitreTechnique,
-} from '@kbn/security-mitre-attack-common';
+} from '@kbn/security-mitre-attack-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import { buildMitreCatalog, getMitreCatalog } from './mitre_catalog';
+import { buildMitreCatalog, getMitreCatalog, resetMitreCatalogCache } from './mitre_catalog';
 
 const fixture: MitreEntity[] = [
   buildMockMitreTactic({ id: 'TA0001', name: 'Initial Access', position: 0 }),
@@ -110,6 +110,10 @@ describe('getMitreCatalog', () => {
     return { list } as unknown as MitreAttackDataClient & { list: typeof list };
   };
 
+  beforeEach(() => {
+    resetMitreCatalogCache();
+  });
+
   it('lists the enterprise framework with status all', async () => {
     const client = makeClient();
     await getMitreCatalog({ mitreDataClient: client });
@@ -134,6 +138,14 @@ describe('getMitreCatalog', () => {
     const second = await getMitreCatalog({ mitreDataClient: client });
     expect(second).toBe(first);
     expect(client.list).toHaveBeenCalledTimes(1);
+  });
+
+  it('resetMitreCatalogCache clears the cache', async () => {
+    const client = makeClient();
+    await getMitreCatalog({ mitreDataClient: client });
+    resetMitreCatalogCache();
+    await getMitreCatalog({ mitreDataClient: client });
+    expect(client.list).toHaveBeenCalledTimes(2);
   });
 
   it('returns an empty catalog without caching it when the collection is empty', async () => {

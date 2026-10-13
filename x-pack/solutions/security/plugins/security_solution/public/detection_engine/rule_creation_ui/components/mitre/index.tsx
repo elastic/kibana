@@ -33,6 +33,9 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
 import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
 
+const isAttackRow = (threat: Threat): boolean =>
+  (threat.framework ?? MITRE_ATTACK_FRAMEWORK) === MITRE_ATTACK_FRAMEWORK;
+
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
 `;
@@ -271,7 +274,10 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
             <MitreAttackTechniqueFields
               field={field}
               threatIndex={index}
-              isDisabled={isDisabled || threat.tactic.name === 'none'}
+              // The picker edits against the Enterprise dataset, so technique fields are read-only on
+              // rows from other frameworks until the framework-aware picker lands. Users can replace
+              // the tactic (converting the row to ATT&CK) or delete the row.
+              isDisabled={isDisabled || threat.tactic.name === 'none' || !isAttackRow(threat)}
               idAria={idAria}
               onFieldChange={onFieldChange}
               tactics={tactics}

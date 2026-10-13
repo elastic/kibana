@@ -9,7 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
-import { MITRE_FRAMEWORKS } from '@kbn/security-mitre-attack-common';
+import type { MitreFramework } from '@kbn/security-mitre-attack-common';
 import { convertRulesFilterToKQL } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   CoverageOverviewRequestBody,
@@ -55,25 +55,6 @@ export async function handleCoverageOverviewRequest({
     enabled: getIsEnabledFilter(activitySet),
   });
 
-  // Resolve MITRE buckets before the expensive rule fetch. A framework whose buckets are
-  // unavailable is skipped (no invalid-ID detection for it) rather than failing the request.
-  const bucketsByFramework = await resolveMitreBucketsByFramework(
-    mitreDataClient,
-    MITRE_FRAMEWORKS,
-    logger
-  );
-  const validIdsByFramework: ValidMitreIdSetsByFramework = {};
-  for (const framework of MITRE_FRAMEWORKS) {
-    const buckets = bucketsByFramework[framework];
-    if (buckets) {
-      validIdsByFramework[framework] = buildValidMitreIdsFromBuckets(buckets);
-    } else {
-      logger?.debug(
-        `MITRE buckets unavailable for framework "${framework}"; invalid-ID detection will be skipped for it`
-      );
-    }
-  }
-
   // rulesClient.find uses ES Search API to fetch the rules. It has some limitations when the number of rules exceeds
   // index.max_result_window (set to 10K by default) Kibana fails. A proper way to handle it is via ES PIT API.
   // This way the endpoint handles max 10K rules for now while support for the higher number of rules will be addressed
@@ -87,6 +68,32 @@ export async function handleCoverageOverviewRequest({
     sortField: undefined,
     sortOrder: undefined,
   });
+
+  // Only resolve buckets for frameworks the fetched rules reference (Enterprise is always
+  // included). A framework whose buckets are unavailable is skipped (no invalid-ID detection
+  // for it) rather than failing the request.
+  const referencedFrameworks = new Set<MitreFramework>(['enterprise']);
+  for (const rule of rules.data) {
+    for (const { framework } of iterateMitreThreatEntities(rule.params.threat)) {
+      referencedFrameworks.add(framework);
+    }
+  }
+  const bucketsByFramework = await resolveMitreBucketsByFramework(
+    mitreDataClient,
+    Array.from(referencedFrameworks),
+    logger
+  );
+  const validIdsByFramework: ValidMitreIdSetsByFramework = {};
+  for (const framework of referencedFrameworks) {
+    const buckets = bucketsByFramework[framework];
+    if (buckets) {
+      validIdsByFramework[framework] = buildValidMitreIdsFromBuckets(buckets);
+    } else {
+      logger?.debug(
+        `MITRE buckets unavailable for framework "${framework}"; invalid-ID detection will be skipped for it`
+      );
+    }
+  }
 
   return rules.data.reduce((acc, rule) => appendRuleToResponse(acc, rule, validIdsByFramework), {
     coverage: {},
@@ -145,14 +152,20 @@ function appendRuleToResponse(
 }
 
 /**
- * Extracts a deduplicated list of MITRE (ATT&CK™ and ATLAS) tactic, technique, and
+ * Extracts a deduplicated list of MITRE ATT&CK Enterprise tactic, technique, and
  * subtechnique IDs referenced by the rule's threat mappings.
+ *
+ * The coverage overview UI renders the ATT&CK Enterprise matrix only. ATLAS ids are excluded
+ * from `coverage` and ATLAS-only rules count as unmapped until the follow-up adds the ATLAS
+ * view (see security-team#14858).
  */
 function extractRuleMitreCategories(rule: SanitizedRule<CoverageOverviewRuleParams>): string[] {
   // dedupe in case data isn't valid in ES
   const categories = new Set<string>();
-  for (const { id } of iterateMitreThreatEntities(rule.params.threat)) {
-    categories.add(id);
+  for (const { id, framework } of iterateMitreThreatEntities(rule.params.threat)) {
+    if (framework === 'enterprise') {
+      categories.add(id);
+    }
   }
   return Array.from(categories);
 }

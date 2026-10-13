@@ -63,16 +63,11 @@ const buildAttackReferenceUrl = (id: string): string | undefined => {
 };
 
 const buildAtlasReferenceUrl = (id: string): string | undefined => {
-  if (!id.startsWith(ATLAS_ID_PREFIX)) {
-    return undefined;
-  }
-
-  const localId = id.slice(ATLAS_ID_PREFIX.length);
-  if (localId.startsWith('TA')) {
+  if (id.startsWith(`${ATLAS_ID_PREFIX}TA`)) {
     return `${MITRE_ATLAS_BASE_URL}/tactics/${id}/`;
   }
 
-  if (localId.startsWith('T')) {
+  if (id.startsWith(`${ATLAS_ID_PREFIX}T`)) {
     // ATLAS keeps the dotted subtechnique id in the URL: /techniques/AML.T0024.002/
     return `${MITRE_ATLAS_BASE_URL}/techniques/${id}/`;
   }

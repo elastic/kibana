@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { MitreSubtechnique, MitreTactic, MitreTechnique } from './schema';
 import type {
   MitreEntitySummaryBuckets,
+  MitreSubtechnique,
   MitreSubtechniqueSummary,
+  MitreTactic,
   MitreTacticSummary,
+  MitreTechnique,
   MitreTechniqueSummary,
-} from './types';
+} from '@kbn/security-mitre-attack-common';
 
 const omitDescription = <T extends { description: string }>(entity: T): Omit<T, 'description'> => {
   const { description, ...summary } = entity;

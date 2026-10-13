@@ -17,20 +17,21 @@ import {
 } from './helpers';
 
 /**
- * Derives the parent technique ID implied by a subtechnique ID by dropping its last dot
- * segment: 'T1003.001' -> 'T1003', 'AML.T0024.002' -> 'AML.T0024'. ATLAS IDs contain a
- * dot in the technique part itself, so a split on the first dot would be wrong.
+ * Matches a subtechnique ID and captures its parent technique ID:
+ * 'T1003.001' -> 'T1003', 'AML.T0024.002' -> 'AML.T0024'. The optional 'AML.' prefix is
+ * part of the parent, so only the trailing '.NNN' segment is dropped.
  */
+const SUBTECHNIQUE_ID_REGEX = /^((?:AML\.)?T\d{4})\.\d{3}$/;
+
+/** Derives the parent technique ID implied by a subtechnique ID's dot-prefix. */
 const getParentIdFromDotPrefix = (subtechniqueId: string): string => {
-  const lastDot = subtechniqueId.lastIndexOf('.');
-  const isOnlyAtlasPrefixDot =
-    subtechniqueId.startsWith('AML.') && lastDot === subtechniqueId.indexOf('.');
-  if (lastDot === -1 || isOnlyAtlasPrefixDot) {
+  const match = SUBTECHNIQUE_ID_REGEX.exec(subtechniqueId);
+  if (match == null) {
     throw new Error(
       `Subtechnique ID '${subtechniqueId}' is malformed: expected a parent technique ID followed by a dot-separated suffix (e.g. 'T1003.001' or 'AML.T0024.002').`
     );
   }
-  return subtechniqueId.slice(0, lastDot);
+  return match[1];
 };
 
 /**

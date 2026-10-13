@@ -142,7 +142,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('returns response with a single rule mapped to MITRE ATLAS categories', async () => {
+        it('returns an ATLAS-only rule as unmapped and excludes ATLAS ids from coverage', async () => {
           const rule1 = await createRule(
             supertest,
             log,
@@ -176,10 +176,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const body = await getCoverageOverview(supertest);
 
-          expect(body.coverage['AML.TA0000']).to.eql([rule1.id]);
-          expect(body.coverage['AML.T0044']).to.eql([rule1.id]);
-          expect(body.coverage['AML.T0024.002']).to.eql([rule1.id]);
-          expect(body.unmapped_rule_ids).not.to.contain(rule1.id);
+          // The coverage overview UI renders ATT&CK Enterprise only (see security-team#14858)
+          expect(Object.keys(body.coverage).filter((id) => id.startsWith('AML.'))).to.eql([]);
+          expect(body.unmapped_rule_ids).to.contain(rule1.id);
         });
       });
 

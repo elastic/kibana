@@ -10,4 +10,4 @@ export {
   buildMockMitreTechniqueSummary,
   buildMockMitreSubtechniqueSummary,
   buildMockMitreEntitySummaryBuckets,
-} from '@kbn/security-mitre-attack-common';
+} from '@kbn/security-mitre-attack-mocks';
