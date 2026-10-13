@@ -135,7 +135,8 @@ const findStepOutput = (
 
 const spacePrefix = (spaceId: string) => `/s/${encodeURIComponent(spaceId)}`;
 
-const getConversation = async ({
+/** Reads an Investigation conversation in a space, or `undefined` when it does not exist there. */
+export const getConversation = async ({
   fetch,
   spaceId,
   conversationId,
