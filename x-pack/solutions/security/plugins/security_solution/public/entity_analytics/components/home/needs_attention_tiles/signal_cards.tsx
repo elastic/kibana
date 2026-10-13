@@ -134,7 +134,7 @@ const DeltaPill: React.FC<{
           `}
         >
           {sign}
-          {delta} {arrow}
+          {delta.toLocaleString()} {arrow}
         </span>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

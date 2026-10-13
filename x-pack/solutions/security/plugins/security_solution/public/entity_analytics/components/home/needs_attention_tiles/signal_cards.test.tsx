@@ -41,6 +41,12 @@ describe('SignalCards delta pill', () => {
     expect(screen.getByText(/\+12 ↑/)).toBeInTheDocument();
   });
 
+  it('formats large changes with a thousands separator, like the main number', () => {
+    renderCards([card({ value: 5000, delta: 1627 }), card({ id: 'watchlisted', delta: -2270 })]);
+    expect(screen.getByText(/\+1,627 ↑/)).toBeInTheDocument();
+    expect(screen.getByText(/-2,270 ↓/)).toBeInTheDocument();
+  });
+
   it('shows no pill for a zero or missing delta', () => {
     renderCards([card({ delta: 0 }), card({ id: 'watchlisted', title: 'Watchlisted' })]);
     expect(screen.queryByText('vs previous period')).not.toBeInTheDocument();
