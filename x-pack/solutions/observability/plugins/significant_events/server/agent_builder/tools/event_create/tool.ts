@@ -24,6 +24,9 @@ import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_c
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import { createEventToolHandler } from './handler';
+import { classifyError } from '../../utils/error_utils';
+import { loadSourceCatalog, toSourceRef } from '../../utils/resolve_source_slugs';
+import { assignStoredSourceIds, sourceSlugsSchema } from '../../utils/stored_source_fields';
 
 export const SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID = platformSignificantEventsTools.createEvent;
 
@@ -35,9 +38,9 @@ const createEventSchema = lazySchema(() =>
       symptom_hypothesis: true,
       summary: true,
       confidence: true,
-      stream_names: true,
     })
     .extend({
+      slugs: sourceSlugsSchema,
       severity: severitySchema
         .optional()
         .describe(`${SEVERITY_CONTRACT_RULE}\n\nOmit to store "low".`),
@@ -60,7 +63,7 @@ export function createEventTool({
     type: ToolType.builtin,
     description: dedent`
       ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventCreate.description', {
-        defaultMessage: 'Create a significant event for one or more streams.',
+        defaultMessage: 'Create a significant event for one or more sources.',
       })}
     `,
     annotations: {
@@ -84,10 +87,10 @@ export function createEventTool({
         message: i18n.translate(
           'xpack.significantEvents.agentBuilder.tools.eventCreate.confirmation.message',
           {
-            defaultMessage: 'Create significant event "{title}" for streams: {streams}?',
+            defaultMessage: 'Create significant event "{title}" for sources: {streams}?',
             values: {
               title: toolParams.title,
-              streams: toolParams.stream_names.join(', '),
+              streams: toolParams.slugs.join(', '),
             },
           }
         ),
@@ -108,17 +111,24 @@ export function createEventTool({
     availability: createSignificantEventsAvailability({ server, logger }),
     handler: async (toolParams, context) => {
       const { request } = context;
+      let sourceIds: string[] = [];
       try {
-        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-          await getScopedClients({
-            request,
-          });
+        const {
+          getEventSearchClient,
+          getAlertEventsClient,
+          emitTrigger,
+          licensing,
+          sourcesClient,
+        } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
+        const catalog = await loadSourceCatalog(sourcesClient);
+        const eventInput = assignStoredSourceIds(catalog, toolParams);
+        sourceIds = eventInput.source_ids;
 
         const data = await createEventToolHandler({
           eventSearchClient: await getEventSearchClient(),
-          eventInput: toolParams,
+          eventInput,
           alertEventsClient: await getAlertEventsClient(),
           emitTrigger,
           logger,
@@ -126,17 +136,31 @@ export function createEventTool({
 
         telemetry.trackAgentToolEventCreate({
           success: true,
-          stream_names: toolParams.stream_names,
+          source_ids: sourceIds,
         });
 
-        return { results: [{ type: ToolResultType.other, data }] };
+        return {
+          results: [
+            {
+              type: ToolResultType.other,
+              data: {
+                ...data,
+                sources: sourceIds.flatMap((sourceId) => {
+                  const source = catalog.byId.get(sourceId);
+                  return source ? [toSourceRef(source)] : [];
+                }),
+              },
+            },
+          ],
+        };
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running event_create: ${message}`);
+        const classified = classifyError(error);
+        const rawMessage = error instanceof Error ? error.message : String(error);
+        logger.error(`Error running event_create: ${rawMessage}`);
         telemetry.trackAgentToolEventCreate({
           success: false,
-          stream_names: toolParams.stream_names,
-          error_message: message,
+          source_ids: sourceIds,
+          error_message: rawMessage,
         });
         return {
           results: [
@@ -147,7 +171,7 @@ export function createEventTool({
                   'xpack.significantEvents.agentBuilder.tools.eventCreate.errorMessage',
                   {
                     defaultMessage: 'Failed to create significant event: {message}',
-                    values: { message },
+                    values: { message: classified },
                   }
                 ),
               },

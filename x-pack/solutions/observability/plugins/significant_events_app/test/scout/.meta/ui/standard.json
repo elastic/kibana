@@ -1,12 +1,12 @@
 {
-  "sha1": "bc190a3621bb2c4931591902c3e4ec98aa9bd503",
+  "sha1": "f3d3b62e06c657ca753b8e765e8c745831fe81b1",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "0bd58b8ab7d8a12-4976b6ba39021f6",
-      "title": "Significant Events app loads and redirects / to /streams tab by default",
+      "id": "0bd58b8ab7d8a12-4cd7c0f5de69760",
+      "title": "Significant Events app loads and redirects / to /sources tab by default",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

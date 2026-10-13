@@ -62,17 +62,17 @@ export const getActivityBlockTooltip = ({
   return undefined;
 };
 
-/** Tooltip when Generate is disabled because no stream has been selected. */
+/** Tooltip when Generate is disabled because no source has been selected. */
 export const GENERATE_NO_STREAM_SELECTED_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.generateNoStreamSelectedTooltip',
+  'xpack.significantEventsApp.sources.generateNoSourceSelectedTooltip',
   {
-    defaultMessage: 'Select at least one stream to generate knowledge indicators.',
+    defaultMessage: 'Select at least one source to generate knowledge indicators.',
   }
 );
 
 /**
  * Tooltip for the Generate split button when it is disabled.
- * Pause/status always wins, since generation cannot run in that state even with a stream selected.
+ * Pause/status always wins, since generation cannot run in that state even with a source selected.
  */
 export const getGenerateDisabledTooltip = ({
   activityBlockTooltip,
@@ -182,17 +182,17 @@ export const CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION = i18n.translate(
 );
 
 export const GENERATE_FEATURES_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.streamsView.generateFeaturesTooltip',
+  'xpack.significantEventsApp.sources.generateFeaturesTooltip',
   {
     defaultMessage:
-      'Runs only feature identification on selected streams using the configured model.',
+      'Runs only feature identification on selected sources using the configured model.',
   }
 );
 
 export const GENERATE_QUERIES_TOOLTIP = i18n.translate(
-  'xpack.significantEventsApp.streamsView.generateQueriesTooltip',
+  'xpack.significantEventsApp.sources.generateQueriesTooltip',
   {
-    defaultMessage: 'Runs only query generation on selected streams using the configured model.',
+    defaultMessage: 'Runs only query generation on selected sources using the configured model.',
   }
 );
 

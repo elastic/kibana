@@ -18,7 +18,7 @@ gated by the Nightshift feature privileges: reads need `read_nightshift`, writes
 | Method | Path | Privilege | Notes |
 | --- | --- | --- | --- |
 | `GET` | `/internal/nightshift/sources?page&per_page&search&enabled` | read | Paginated catalog, sorted by title. Does not fetch views. |
-| `POST` | `/internal/nightshift/sources` | manage | Validates the query, writes the saved object, creates the view |
+| `POST` | `/internal/nightshift/sources` | manage | Validates the query, derives `type`, writes the saved object, creates the view |
 | `GET` | `/internal/nightshift/sources/{sourceId}` | read | Source plus view health, including a `FROM <view> \| LIMIT 0` probe for `unresolvable` |
 | `PUT` | `/internal/nightshift/sources/{sourceId}` | manage | Full replace of `title`, `description`, `tags`, `esql`; always re-puts the view |
 | `DELETE` | `/internal/nightshift/sources/{sourceId}` | manage | Deletes the view (404 ignored), then the saved object |
@@ -32,6 +32,10 @@ Wire schemas and types (`NightshiftSource`, `SourceHealth`, request/response sha
 `@kbn/nightshift-shared` so browser code can import them. A typed repository client is exposed
 on the public start contract through `getClient()`.
 
+`type` (`logs`, `metrics`, `traces` or `unknown`) is stored on the source and returned by
+every read. It is derived from the query on create and when an update changes the query. A
+title-only PUT keeps the stored type. Request bodies cannot set it.
+
 ## Engine access
 
 `start.getSourcesClient({ request })` is how other Nightshift plugins talk to the catalog
@@ -41,6 +45,12 @@ security extension authorizes each call against the Nightshift feature (`all` ca
 does not include the type. `create` and `update` parse the same wire schemas as HTTP, so a
 blank title still 400s.
 
+`setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
+`updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
+request that made it. The write awaits every listener before it returns, so an engine can
+clean up after a deleted source before the caller refetches. A listener that throws is logged;
+the write already happened and is not undone. Rolled-back writes are not reported.
+
 ## Query validation
 
 A source is rows only. On create and update the ES|QL must:
@@ -48,10 +58,27 @@ A source is rows only. On create and update the ES|QL must:
 - parse without errors;
 - start with `FROM` or `TS`;
 - contain nothing but `WHERE` after the source command (this also rejects subqueries);
-- not use `METADATA`, because ES|QL returns nulls for metadata columns read through a view;
-- not reference a remote cluster (`cluster:index`), because views cannot target remote indices;
 - not `FROM` a Nightshift source view, or a `$` wildcard that would match one (`$.nightshift.sources.*`,
-  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself.
+  `$.nightshift.*`, `$.*`, `$.*.sources.*-*`), or the new view can match itself;
+- target exactly one kind of data. Every index in `FROM` or `TS` must classify as the same
+  value, and `unknown` counts. `FROM logs-*, my-app-*` is rejected because `my-app-*` is not
+  logs, metrics or traces. A single name that matches more than one kind (`logs-traces-*`) is
+  rejected. One `logs`, `metrics` or `traces` segment wins over a dataset token, so
+  `metrics-logstash.node-*` is metrics, while `metrics-logs-*` is still a mix. A `TS` command
+  is metrics, so `TS logs-*` mixes logs and metrics, while `TS my-tsdb-*` is metrics. An
+  unscoped wildcard (`*`, `*log*`, `cluster:*`) is rejected. A remote cluster prefix is allowed
+  and is not part of the type: `FROM remote:logs-*` and `FROM *:logs-*` are logs, and
+  `FROM remote:logs-*, other:traces-*` is still a mix. An exclusion (`-cluster:*`,
+  `cluster:-index`) is not a target.
+
+`METADATA` belongs to the source command (`FROM logs-* METADATA _id`). A field declared there is a
+column of the view. A later query that asks for a metadata field the view did not declare gets nulls.
+
+Classification reads the index name. The same bases Discover uses (`logs`, `filebeat`,
+`traces`, `metrics`, `metricbeat`, and the rest of those lists) decide the kind. A name that
+matches none of them is `unknown`, including `apm-*` and a custom index that does not contain
+one of those words. `traces-apm*`, `logs-apm*` and `metrics-apm*` are traces, logs and metrics.
+The error names the kinds and the indices.
 
 The view name is `$.nightshift.sources.<spaceId>.<slug>`. `<spaceId>` is the Kibana space that
 owns the saved object. `<slug>` is derived from the title at create (`nginx-errors` from
@@ -60,12 +87,12 @@ this space — another source, or an orphaned view — create walks `-2`, `-3`, 
 both have an `nginx-errors` source; the views are `….default.nginx-errors` and
 `….marketing.nginx-errors`. The saved-object id stays a uuid; it is not in the view name.
 
-Wildcards, several sources and date math are fine. Create always runs `<esql> | LIMIT 0` as
-the calling user. Update does too when the normalized query changes. A title-only PUT, or a
-repair that sends the stored query, skips that probe so a vanished `WHERE` field cannot block
-rename or restoring a deleted view; GET reports `unresolvable` instead. A pattern that
-matches no index yet is accepted, which means field names in `WHERE` are only checked once
-data exists.
+Wildcards, several sources and date math are fine. An unscoped `*` is not. Create always runs
+`<esql> | LIMIT 0` as the calling user. Update does too when the normalized query changes. A
+title-only PUT, or a repair that sends the stored query, skips that probe and keeps the stored
+type, so a vanished `WHERE` field cannot block rename or restoring a deleted view; GET reports
+`unresolvable` instead. A pattern that matches no index yet is accepted,
+which means field names in `WHERE` are only checked once data exists.
 
 ## Health
 
@@ -88,8 +115,8 @@ moves only when the normalized query changes, and is monotonic so two edits in t
 millisecond still advance the cursor) and reconcile their own state: disable rules,
 cancel onboarding, skip the source when picking candidates, re-onboard after a query change.
 The plugin cannot call engines directly without reintroducing the dependency cycle it exists to
-avoid; a lifecycle listener registry on the setup contract is the planned follow-up if the
-reconcile latency turns out to matter.
+avoid. Engines that need to react right away subscribe through `setup.onSourceChange` (see
+[Engine access](#engine-access)); the reconcile stays as the safety net.
 
 ## Elasticsearch privileges
 
