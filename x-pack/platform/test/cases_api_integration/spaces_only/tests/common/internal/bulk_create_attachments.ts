@@ -6,15 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { UserCommentAttachmentAttributes } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import {
-  nullUser,
-  postCaseReq,
-  postCommentUserReq,
-  postUnifiedCommentReq,
-} from '../../../../common/lib/mock';
+import { nullUser, postCaseReq, postUnifiedCommentReq } from '../../../../common/lib/mock';
 import {
   createCase,
   removeServerGeneratedPropertiesFromSavedObject,
@@ -42,13 +36,10 @@ export default ({ getService }: FtrProviderContext): void => {
         auth: authSpace1,
       });
 
-      const comment = removeServerGeneratedPropertiesFromSavedObject(
-        patchedCase.comments![0] as UserCommentAttachmentAttributes
-      );
-
+      const comment = removeServerGeneratedPropertiesFromSavedObject(patchedCase.comments![0]);
       expect(comment).to.eql({
-        type: postCommentUserReq.type,
-        comment: postCommentUserReq.comment,
+        type: postUnifiedCommentReq.type,
+        data: postUnifiedCommentReq.data,
         created_by: nullUser,
         pushed_at: null,
         pushed_by: null,

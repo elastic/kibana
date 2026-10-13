@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { useNlGeneration } from './use_nl_generation';
+import { clearInferenceConnectorCache, useNlGeneration } from './use_nl_generation';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 
 jest.mock('../hooks/use_nl_to_esql_check', () => ({
@@ -33,6 +33,7 @@ describe('useNlGeneration', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    clearInferenceConnectorCache();
   });
 
   it('onNlSubmit does nothing when nlValue is empty', async () => {
@@ -47,7 +48,7 @@ describe('useNlGeneration', () => {
     expect(coreStart.http.post).not.toHaveBeenCalled();
   });
 
-  it('onNlSubmit calls onNlResult with the generated content when provided', async () => {
+  it('onNlSubmit calls onNlResult and keeps the prompt until the result is accepted', async () => {
     const onNlResult = jest.fn();
     (coreStart.http.post as jest.Mock).mockResolvedValue({ content: 'FROM logs | LIMIT 10' });
 
@@ -60,8 +61,15 @@ describe('useNlGeneration', () => {
       await result.current.onNlSubmit();
     });
 
-    expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    expect(onNlResult).toHaveBeenCalledWith(
+      'FROM logs | LIMIT 10',
+      expect.objectContaining({ onAccept: expect.any(Function) })
+    );
     expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+    expect(result.current.nlValue).toBe('show me logs');
+
+    act(() => onNlResult.mock.calls[0][1].onAccept());
+
     expect(result.current.nlValue).toBe('');
   });
 
@@ -260,6 +268,18 @@ describe('useNlGeneration', () => {
       });
 
       await waitFor(() => expect(result.current.hasConnector).toBe(false));
+    });
+
+    it('reuses the connector result for the next editor', async () => {
+      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
+      const wrapper = createWrapper();
+      const first = renderHook(() => useNlGeneration(defaultParams), { wrapper });
+
+      await waitFor(() => expect(first.result.current.hasConnector).toBe(true));
+
+      const second = renderHook(() => useNlGeneration(defaultParams), { wrapper });
+      expect(second.result.current.hasConnector).toBe(true);
+      expect(coreStart.http.get).toHaveBeenCalledTimes(1);
     });
   });
 });

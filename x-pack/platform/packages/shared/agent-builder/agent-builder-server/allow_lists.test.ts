@@ -17,6 +17,19 @@ describe('isAllowedBuiltinTool', () => {
     expect(isAllowedBuiltinTool('nightshift_sandbox_bash')).toBe(true);
     expect(isAllowedBuiltinTool('nightshift_sandbox_view_file')).toBe(true);
   });
+
+  it('allows the agentic investigations tools', () => {
+    expect(isAllowedBuiltinTool('agentic_investigations.set_impact')).toBe(true);
+    expect(isAllowedBuiltinTool('agentic_investigations.set_hypotheses')).toBe(true);
+  });
+
+  it('allows the proposals tools', () => {
+    expect(isAllowedBuiltinTool('proposals.create')).toBe(true);
+  });
+
+  it('rejects unlisted tool ids', () => {
+    expect(isAllowedBuiltinTool('agentic_investigations.not_a_tool')).toBe(false);
+  });
 });
 
 describe('isAllowedBuiltinAttachment', () => {
@@ -32,6 +45,8 @@ describe('isAllowedBuiltinAttachment', () => {
     expect(isAllowedBuiltinAttachment('ml.single_metric_viewer')).toBe(true);
     expect(isAllowedBuiltinAttachment('platform.proposal')).toBe(true);
     expect(isAllowedBuiltinAttachment('investigation_impact')).toBe(true);
+    expect(isAllowedBuiltinAttachment('investigation_subject')).toBe(true);
+    expect(isAllowedBuiltinAttachment('investigation_hypotheses')).toBe(true);
   });
 
   it('returns false for unlisted attachment type ids', () => {

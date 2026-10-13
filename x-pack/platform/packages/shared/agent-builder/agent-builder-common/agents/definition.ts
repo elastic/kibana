@@ -8,6 +8,7 @@
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
 import type { AgentAccessControl } from './access_control';
+import type { ApiTarget } from '../apis';
 
 /**
  * ID of the default agent type
@@ -158,14 +159,43 @@ export interface AgentConfiguration {
    * Must use SELF_AGENT_ID (_self) to reference itself.
    */
   subagent_ids?: string[];
+
+  /**
+   * Optional ID of the inference feature whose first model this agent runs on.
+   */
+  inference_feature_id?: string;
+
+  /**
+   * Destructive APIs pre-approved for every run of this agent.
+   */
+  approvals?: AgentApprovals;
 }
+
+/**
+ * Agent-level destructive API auto-approval defaults.
+ */
+export interface AgentApprovals {
+  /**
+   * API selectors keyed by backend. Each entry is an exact API identifier, a namespace
+   * wildcard (`indices.*`), or `*`.
+   */
+  auto_approved_apis?: Partial<Record<ApiTarget, string[]>>;
+}
+
+/**
+ * Agent configuration without the fields that only built-in agents can declare.
+ */
+export type AgentConfigurationInput = Omit<AgentConfiguration, 'inference_feature_id'>;
 
 /**
  * Runtime configuration overrides for agent execution.
  * These override the stored agent configuration for a single execution instance.
  * Each field, if provided, completely replaces the corresponding field in the stored configuration.
+ *
+ * Excludes `approvals`, since per-run grants go through the execution's interactivity config, which
+ * adds to the stored defaults instead of replacing them.
  */
-export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
+export type AgentConfigurationOverrides = Partial<Omit<AgentConfigurationInput, 'approvals'>>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.

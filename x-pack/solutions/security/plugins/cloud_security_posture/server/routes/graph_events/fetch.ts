@@ -32,8 +32,10 @@ interface FetchEventsParams {
 }
 
 /**
- * Fetches enriched event/alert details.
- * Queries events by document ID (_id) and enriches with entity store data via LOOKUP JOIN.
+ * Fetches per-document event/alert details for `POST /graph/events`, one row per `_id`.
+ * Unlike `fetchEvents` in `graph/fetch_events_graph.ts` (aggregated graph rows), it resolves
+ * actor/target from the v1 pre-populated entity id fields only, without the v2 EUID resolution
+ * or the integration runtime evaluations, and no client consumes it yet.
  */
 export const fetchEvents = async ({
   esClient,
@@ -140,6 +142,7 @@ const buildEventsEsqlQuery = ({
     .filter((indexPattern) => indexPattern.length > 0)
     .join(',')} METADATA _id, _index
 | WHERE _id IN (${documentIdParams})
+// v1 fields (user.entity.id, user.target.entity.id, ...): documents without them get no actor/target
 ${buildActorEntityIdEval(GRAPH_ACTOR_ENTITY_FIELDS)}
 ${buildTargetEntityIdEvals(GRAPH_TARGET_ENTITY_FIELDS)}
 | MV_EXPAND actorEntityId

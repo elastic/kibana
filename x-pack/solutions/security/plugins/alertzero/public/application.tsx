@@ -52,11 +52,22 @@ export const renderApp = async ({
    * for `services.http` and `services.notifications`.
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+    <KibanaContextProvider
+      services={{
+        ...coreStart,
+        ...startDeps,
+        // `security` above is the Security plugin's contract, which shadows Core's. Core's
+        // service-account API is exposed under its own key.
+        serviceAccounts: coreStart.security.serviceAccounts,
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>
-            <AccessBoundary availability$={availability$}>
+            <AccessBoundary
+              availability$={availability$}
+              serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
+            >
               <AppChromeLayout>
                 <AlertZeroRoutes />
               </AppChromeLayout>

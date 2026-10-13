@@ -54,9 +54,17 @@ export const hasAlertingV2Capability = (
  * (capability-based RBAC via `core.application.capabilities`, license
  * checks, etc.) can be added inside this helper without changing its
  * signature or touching any of the consumer files again.
+ *
+ * The setting is read without a default override so the registered default applies. It is only
+ * registered where the Alerting v2 plugin runs, so an undeclared setting resolves to `false`.
  */
 export const isAlertingV2Enabled: (core: CoreStart) => boolean = (core) => {
-  return core.settings.globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID, false) === true;
+  const { globalClient } = core.settings;
+
+  return (
+    globalClient.isDeclared(ALERTING_V2_ENABLED_SETTING_ID) &&
+    globalClient.get<boolean>(ALERTING_V2_ENABLED_SETTING_ID) === true
+  );
 };
 
 /**

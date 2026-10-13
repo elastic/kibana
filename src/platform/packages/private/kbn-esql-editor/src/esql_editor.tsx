@@ -144,6 +144,7 @@ const ESQLEditorInternal = function ESQLEditor({
   hideQuickSearch,
   queryStats,
   enableResourceBrowser = false,
+  enableCreateView = false,
   onESQLDocsFlyoutVisibilityChanged,
   onVisorNlResultReady,
   editorApiRef,
@@ -399,7 +400,8 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
 
-      if (!editorRef.current) {
+      // Focus may have moved on since (e.g. to the visor input); triggerSuggest would steal it back
+      if (!editorRef.current?.hasTextFocus()) {
         return;
       }
 
@@ -504,6 +506,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedHistoryStarredItems,
     minimalQueryRef,
     getJoinIndicesCallback,
+    effectiveProjectRouting,
   } = useMemoizedCaches({
     code,
     core,
@@ -578,6 +581,7 @@ const ESQLEditorInternal = function ESQLEditor({
     favoritesClient,
     getJoinIndicesCallback,
     enableResourceBrowser,
+    projectRouting: effectiveProjectRouting,
   });
 
   const {
@@ -1040,6 +1044,7 @@ const ESQLEditorInternal = function ESQLEditor({
         starredQueriesService={starredQueriesService}
         queryStats={queryStats}
         hideQueryHistory={hideQueryHistory}
+        enableCreateView={enableCreateView}
         onESQLDocsFlyoutVisibilityChanged={onESQLDocsFlyoutVisibilityChanged}
         {...editorMessages}
         onErrorClick={onErrorClick}

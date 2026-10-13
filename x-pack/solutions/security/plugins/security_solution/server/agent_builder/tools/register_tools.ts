@@ -25,10 +25,18 @@ import {
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
+  setWatchlistRuleBasedDataSourceTool,
+  removeWatchlistRuleBasedDataSourceTool,
+  listWatchlistDataSourcesTool,
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
   setAssetCriticalityTool,
+  getResolutionGroupTool,
+  linkEntitiesTool,
+  unlinkEntitiesTool,
+  listResolutionRulesTool,
+  setResolutionRulesTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -92,6 +100,21 @@ export const registerTools = (
     setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    removeWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    listWatchlistDataSourcesTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+
+  agentBuilder.tools.register(getResolutionGroupTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(linkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(unlinkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(listResolutionRulesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(setResolutionRulesTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

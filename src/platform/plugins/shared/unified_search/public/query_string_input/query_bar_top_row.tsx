@@ -30,6 +30,7 @@ import {
   QuickSearchVisor,
   type ESQLEditorProps,
   type ESQLEditorApi,
+  type VisorNlResultHandler,
 } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
@@ -276,6 +277,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Optional ES|QL prop - Enable data source browser in ESQL editor
    */
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
+  /**
+   * Optional ES|QL prop - Show the action to create an ES|QL view from the editor query.
+   * Hidden unless a host opts in.
+   */
+  enableCreateView?: ESQLEditorProps['enableCreateView'];
   useBackgroundSearchButton?: boolean;
   /**
    * Whether to use the new DateRangePicker. Defaults to `true`; pass `false`
@@ -699,16 +705,14 @@ export const QueryBarTopRow = React.memo(
     // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
     // Discover and Dashboard; without this the two independent timers drift apart over time.
     const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
-    const visorNlResultHandlerRef = useRef<((generatedQuery: string) => void) | undefined>(
-      undefined
-    );
+    const visorNlResultHandlerRef = useRef<VisorNlResultHandler | undefined>(undefined);
     const [visorNlResultHandlerReady, setVisorNlResultHandlerReady] = useState(false);
-    const onVisorNlResultReady = useCallback((fn: (generatedQuery: string) => void) => {
+    const onVisorNlResultReady = useCallback((fn: VisorNlResultHandler) => {
       visorNlResultHandlerRef.current = fn;
       setVisorNlResultHandlerReady(true);
     }, []);
-    const onVisorNlResult = useCallback((generatedQuery: string) => {
-      visorNlResultHandlerRef.current?.(generatedQuery);
+    const onVisorNlResult = useCallback<VisorNlResultHandler>((generatedQuery, review) => {
+      visorNlResultHandlerRef.current?.(generatedQuery, review);
     }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
@@ -1394,6 +1398,7 @@ export const QueryBarTopRow = React.memo(
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             queryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            enableCreateView={props.enableCreateView}
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             onVisorNlResultReady={onVisorNlResultReady}
           />

@@ -1,5 +1,5 @@
 {
-  "sha1": "9077c13f7a85e748bdfe7a72f59646b91bb080a1",
+  "sha1": "50ecc047cafbcd64c839c0c76b8babd9e2612947",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -518,8 +518,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 42,
-        "column": 29
+        "line": 53,
+        "column": 15
       }
     },
     {
@@ -531,8 +531,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 63,
-        "column": 31
+        "line": 67,
+        "column": 50
       }
     },
     {
@@ -544,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/dashboard/xy_chart_interactions.spec.ts",
-        "line": 81,
-        "column": 96
+        "line": 87,
+        "column": 15
       }
     },
     {

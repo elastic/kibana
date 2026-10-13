@@ -40,7 +40,11 @@ export const SelectStyle = ({ colors, workspace }: SelectStyleProps) => {
               type="stopFill"
               color={c}
               css={colorPickerIconStyles}
-              aria-hidden="true"
+              aria-label={i18n.translate('xpack.graph.sidebar.selectVertexColorAriaLabel', {
+                defaultMessage: 'Set selected vertices color to {color}',
+                values: { color: c },
+              })}
+              data-test-subj={`graphColorPicker-${c}`}
               onClick={onSelectColor}
             />
           );

@@ -179,7 +179,14 @@ export class AlertZeroPublicPlugin
         React.createElement(
           KibanaContextProvider,
           { services },
-          React.createElement(AccessBoundary, { availability$: this.availability$ }, children)
+          React.createElement(
+            AccessBoundary,
+            {
+              availability$: this.availability$,
+              serviceAccountsEnabled: core.security.serviceAccounts.isEnabled(),
+            },
+            children
+          )
         );
       return { default: Boundary };
     });
