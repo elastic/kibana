@@ -109,7 +109,6 @@ const ebtAction = {
     LOAD_MORE: 'load_more_ki',
     DISCOVER_CAP_REACHED: 'open_ki_discover_cap_reached',
     TOGGLE_ROW: 'toggle_row',
-    OPEN_ROW: 'open_row',
   },
   viewKi: {
     TAB_DETAILS: 'tab_details',
