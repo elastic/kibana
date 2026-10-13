@@ -17,6 +17,13 @@ import {
 } from './rule_template_schema';
 import { FIND_MAX_RESULT_WINDOW, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
+// Test schema structure with eager factories so metadata IDs belong to the schemas
+// passed to Zod's JSON schema generator, without lazy proxy identity mismatches.
+jest.mock('@kbn/zod/v4', () => ({
+  ...jest.requireActual('@kbn/zod/v4'),
+  lazySchema: <T extends object>(factory: () => T): T => factory(),
+}));
+
 const exampleTemplateAttributes = {
   engine: 'v2' as const,
   rule: {
