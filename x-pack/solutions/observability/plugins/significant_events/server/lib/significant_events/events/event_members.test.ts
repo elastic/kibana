@@ -53,6 +53,12 @@ describe('assessMembers', () => {
     );
   });
 
+  it('is breaching even when another member cannot be judged', () => {
+    expect(assessMembers([detection('a', 'inconclusive'), detection('b', 'confirms')])).toBe(
+      'breaching'
+    );
+  });
+
   it('is clean only when every member is healthy', () => {
     expect(assessMembers([detection('a', 'refutes'), detection('b', 'refutes')])).toBe('clean');
   });

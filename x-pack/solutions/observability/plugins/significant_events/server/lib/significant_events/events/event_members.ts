@@ -6,7 +6,7 @@
  */
 
 import type { SignalEntry } from '@kbn/significant-events-schema';
-import { aggregateStatusOutcomes, type StatusOutcome } from './lifecycle/status_outcome';
+import type { StatusOutcome } from './lifecycle/lifecycle_controller';
 
 /**
  * A member of an event is a rule whose detection signal asserts a breach: a confirming signal, or
@@ -36,10 +36,13 @@ export const memberOutcomeOfSignal = (signal: SignalEntry): StatusOutcome | unde
  * member keeps the event breaching, otherwise any member that cannot be judged holds it, and only
  * when every member is healthy is it clean. An event with no members cannot be assessed.
  */
-export const assessMembers = (signals: readonly SignalEntry[] | undefined): StatusOutcome =>
-  aggregateStatusOutcomes(
-    (signals ?? []).flatMap((signal) => {
-      const outcome = memberOutcomeOfSignal(signal);
-      return outcome === undefined ? [] : [outcome];
-    })
-  );
+export const assessMembers = (signals: readonly SignalEntry[] | undefined): StatusOutcome => {
+  const outcomes = (signals ?? []).flatMap((signal) => {
+    const outcome = memberOutcomeOfSignal(signal);
+    return outcome === undefined ? [] : [outcome];
+  });
+
+  if (outcomes.includes('breaching')) return 'breaching';
+  if (outcomes.length === 0 || outcomes.includes('no_data')) return 'no_data';
+  return 'clean';
+};
