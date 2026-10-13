@@ -241,8 +241,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         if (!reset.deleted) {
           throw new Error('Reset response omitted deletion counts');
         }
-        expect(reset.deleted).to.eql({
-          knowledgeIndicators: 1,
+        const { knowledgeIndicators, ...deleted } = reset.deleted;
+        // Creating a source onboards it, which can add computed features before the reset.
+        expect(knowledgeIndicators).to.be.above(0);
+        expect(deleted).to.eql({
           storedQueries: 1,
           rules: 2,
           investigations: 0,
