@@ -64,6 +64,14 @@ export const createNarrativeRubricEvaluator = (
     if (criteria.length === 0) {
       return { score: null, label: 'N/A', explanation: 'row has no rubric criteria' };
     }
+    const reports = (expected as unknown as HuntWatchExample['output']).expected.reports;
+    if (reports.every((r) => r.investigationStatus === 'none')) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'row expects no Investigation, so there is no narrative to judge',
+      };
+    }
     if (!narrative) {
       return { score: null, label: 'MISSING', explanation: 'no narrative was posted to evaluate' };
     }

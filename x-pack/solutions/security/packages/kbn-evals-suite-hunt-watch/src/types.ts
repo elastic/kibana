@@ -28,11 +28,12 @@ export interface HuntReportExpectation {
   /** Expected number of pending `respond` Proposals attached to the report's Investigation. */
   pendingProposals: number | { min: number };
   /**
-   * Whether report `evidence[]` and `last_hunted_at` are written. `iff_completed` is for rows
-   * whose outcome may be `completed` or `partial`: evidence must be written exactly when the
-   * run's outcome is `completed`.
+   * Whether report `evidence[]` and `last_hunted_at` are written. The hunt child writes evidence
+   * exactly when its coordinator completed (`hunt.output.status === 'success'`), independent of
+   * packaging, so a no-hit run that later fails its benign close still records evidence.
+   * `iff_hunt_success` is for rows where the hunt may legitimately end partial.
    */
-  evidenceWritten: boolean | 'iff_completed';
+  evidenceWritten: boolean | 'iff_hunt_success';
   /** Whether a schema-valid SSE attachment is expected on the Investigation. */
   sseAttachment: boolean;
   /**

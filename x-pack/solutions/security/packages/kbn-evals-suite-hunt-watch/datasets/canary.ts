@@ -29,7 +29,7 @@ export const canaryDataset: HuntWatchExample[] = [
             tier1Status: 'no_searchable_terms',
             tier2Executed: false,
             pendingProposals: 0,
-            evidenceWritten: false,
+            evidenceWritten: 'iff_hunt_success',
             sseAttachment: false,
           },
         ],

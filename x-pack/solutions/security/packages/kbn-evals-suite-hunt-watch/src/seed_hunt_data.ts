@@ -274,13 +274,41 @@ export const seedHuntData = async ({
 };
 
 interface ProposalsListResponse {
-  proposals: Array<{ id: string }>;
+  proposals: Array<{ id: string; status?: string }>;
 }
+
+/** Statuses the Worker's candidate query treats as an open Proposal (`OPEN_PROPOSAL_STATUSES`). */
+const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const listOpenProposals = async ({
+  fetch,
+  spacePrefix,
+  conversationId,
+}: {
+  fetch: HttpHandler;
+  spacePrefix: string;
+  conversationId: string;
+}): Promise<ProposalsListResponse['proposals']> => {
+  const open: ProposalsListResponse['proposals'] = [];
+  for (const status of OPEN_PROPOSAL_STATUSES) {
+    const page = await fetch<ProposalsListResponse>(`${spacePrefix}${PROPOSALS_INTERNAL_URL}`, {
+      method: 'GET',
+      version: PROPOSALS_API_VERSION,
+      headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
+      query: { conversationId, status, excludeSuperseded: true, size: 100 },
+    });
+    open.push(...page.proposals);
+  }
+  return open;
+};
 
 /**
  * Per-example reset so a rerun of the same report starts fresh: dismiss pending Proposals on the
- * report's Investigation, delete the Investigation conversation at its deterministic id, and
- * clear `evidence` on the report doc. Reset-only: scored tasks never call dismiss.
+ * report's Investigation and wait for them to settle, delete the Investigation conversation at
+ * its deterministic id, and clear `evidence` on the report doc. Reset-only: scored tasks never
+ * call dismiss.
  */
 export const resetHuntReport = async ({
   esClient,
@@ -298,23 +326,40 @@ export const resetHuntReport = async ({
   const conversationId = buildHuntInvestigationConversationId(reportId);
   const spacePrefix = `/s/${encodeURIComponent(spaceId)}`;
 
-  const pending = await fetch<ProposalsListResponse>(`${spacePrefix}${PROPOSALS_INTERNAL_URL}`, {
-    method: 'GET',
-    version: PROPOSALS_API_VERSION,
-    headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
-    query: { conversationId, status: 'pending' },
-  }).catch((error) => {
+  const open = await listOpenProposals({ fetch, spacePrefix, conversationId }).catch((error) => {
     log.debug(`Could not list proposals for ${conversationId}: ${String(error)}`);
-    return { proposals: [] };
+    return [] as ProposalsListResponse['proposals'];
   });
 
-  for (const { id } of pending.proposals) {
+  // Only a pending Proposal can be dismissed; an executing one settles on its own.
+  for (const { id } of open.filter((p) => p.status === 'pending')) {
     await fetch(`${spacePrefix}${PROPOSAL_DISMISS_URL.replace('{id}', encodeURIComponent(id))}`, {
       method: 'POST',
       version: PROPOSALS_API_VERSION,
       headers: { 'elastic-api-version': PROPOSALS_API_VERSION, 'kbn-xsrf': 'true' },
       body: JSON.stringify({ dismissReason: 'no_reason', rationale: 'eval pre-run reset' }),
     });
+  }
+
+  // Dismiss only resumes the Proposal's gate workflow; the status flips to `no_action` when that
+  // workflow settles, seconds later. The Worker's candidate query skips a report whose
+  // Investigation still carries a pending Proposal (`open_proposal`), so triggering before the
+  // flip lands makes the row silently score nothing. Wait for the same condition the query reads.
+  if (open.length > 0) {
+    const deadline = Date.now() + 90_000;
+    let remaining = open;
+    while (remaining.length > 0 && Date.now() < deadline) {
+      await sleep(2_000);
+      remaining = await listOpenProposals({ fetch, spacePrefix, conversationId });
+    }
+    if (remaining.length > 0) {
+      throw new Error(
+        `resetHuntReport(${reportId}): ${remaining.length} Proposal(s) still open after dismiss ` +
+          `(${remaining.map((p) => `${p.id}:${p.status}`).join(', ')}); the Worker would skip ` +
+          `this report as open_proposal.`
+      );
+    }
+    log.debug(`Dismissed ${open.length} Proposal(s) on ${conversationId} and they settled`);
   }
 
   await fetch(

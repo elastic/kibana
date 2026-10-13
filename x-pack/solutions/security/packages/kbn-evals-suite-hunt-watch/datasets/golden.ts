@@ -73,7 +73,8 @@ export const goldenDataset: HuntWatchExample[] = [
             tier1Status: 'no_environment_hits',
             tier2Executed: true,
             pendingProposals: 0,
-            evidenceWritten: false,
+            // The hunt completes, so evidence is recorded even though packaging then fails.
+            evidenceWritten: true,
             sseAttachment: false,
             investigationStatus: 'open',
           },

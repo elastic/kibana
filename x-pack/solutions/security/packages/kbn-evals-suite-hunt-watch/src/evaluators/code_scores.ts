@@ -315,13 +315,16 @@ export const scoreEvidenceHonesty = (
     (expected, actual) => {
       if (!actual.reportDoc) return missing('report doc not found');
       const written = hasEvidence(actual.reportDoc);
+      const huntStatus = actual.hunt?.status;
       const want =
-        expected.evidenceWritten === 'iff_completed'
-          ? actual.outcome === 'completed'
+        expected.evidenceWritten === 'iff_hunt_success'
+          ? huntStatus === 'success'
           : expected.evidenceWritten;
       return written === want
-        ? pass(`evidence written=${written}`)
-        : fail(`evidence written=${written}, expected ${want} (outcome ${actual.outcome})`);
+        ? pass(`evidence written=${written} (hunt ${huntStatus})`)
+        : fail(
+            `evidence written=${written}, expected ${want} (hunt ${huntStatus}, outcome ${actual.outcome})`
+          );
     },
     'no reports'
   );

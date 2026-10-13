@@ -9,6 +9,7 @@ import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
 import type { HuntReportExpectation, HuntWatchExample } from '../types';
 import {
   scoreCanaryTripped,
+  scoreEvidenceHonesty,
   scoreOutcome,
   scoreProposalPresence,
   scoreTier1Status,
@@ -116,6 +117,31 @@ describe('code scores', () => {
 
   it('scores 1 when pending Proposals meet the exact expected count', () => {
     expect(scoreProposalPresence(buildExample({}), buildArtifacts()).score).toBe(1);
+  });
+
+  it('scores evidence as written when the hunt succeeded, even if the run ended partial', () => {
+    expect(
+      scoreEvidenceHonesty(
+        buildExample({ evidenceWritten: 'iff_hunt_success' }),
+        buildArtifacts({
+          outcome: 'partial',
+          hunt: { status: 'success' },
+          reportDoc: { evidence: [{ space_id: 'default' }] },
+        })
+      ).score
+    ).toBe(1);
+  });
+
+  it('scores 0 when evidence was written by a hunt that did not complete', () => {
+    expect(
+      scoreEvidenceHonesty(
+        buildExample({ evidenceWritten: 'iff_hunt_success' }),
+        buildArtifacts({
+          hunt: { status: 'partial' },
+          reportDoc: { evidence: [{ space_id: 'default' }] },
+        })
+      ).score
+    ).toBe(0);
   });
 
   it('inverts the canary: 1 when nothing was invented', () => {
