@@ -27,8 +27,8 @@ describe('tool_usage_validation evaluator', () => {
       output: {
         queries: [],
         toolUsage: {
-          get_stream_features: { calls: 1, failures: 0, latency_ms: 100 },
-          add_queries: { calls: 2, failures: 0, latency_ms: 200 },
+          get_features: { calls: 1, failures: 0 },
+          validate_queries: { calls: 2, failures: 0 },
         },
       },
       expected: {},

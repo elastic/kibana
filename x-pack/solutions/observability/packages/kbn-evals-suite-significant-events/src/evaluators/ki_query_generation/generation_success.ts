@@ -32,13 +32,13 @@ export const generationSuccessEvaluator: KIQueryGenerationEvaluator = {
     }
 
     // Distinguish "never tried" from "tried and everything was rejected": the first points at the
-    // agent giving up before calling add_queries, the second at validation rejecting every query.
+    // agent giving up before calling validate_queries, the second at validation rejecting every query.
     const attemptedNothing = !attempts || attempts.length === 0;
 
     return {
       score: 0,
       explanation: attemptedNothing
-        ? 'No queries generated: add_queries produced no attempts'
+        ? 'No queries generated: validate_queries produced no attempts'
         : `No queries accepted: all ${attempts.length} attempts were rejected`,
       metadata: {
         acceptedQueryCount: 0,

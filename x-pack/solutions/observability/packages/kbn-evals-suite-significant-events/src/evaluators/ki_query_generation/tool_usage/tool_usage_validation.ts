@@ -6,16 +6,12 @@
  */
 
 import type { Evaluator } from '@kbn/evals';
-import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
+import type { KIQueryGenerationToolUsage } from '../types';
 
 interface ToolUsageTaskOutput {
-  toolUsage?: SignificantEventsToolUsage;
+  toolUsage?: KIQueryGenerationToolUsage;
 }
 
-/**
- * Validates that the `get_stream_features` and `add_queries` tools were
- * invoked correctly during significant event generation.
- */
 export const createToolUsageEvaluator = (): Evaluator => ({
   name: 'tool_usage_validation',
   kind: 'CODE',
@@ -34,22 +30,22 @@ export const createToolUsageEvaluator = (): Evaluator => ({
     const scores: number[] = [];
     const issues: string[] = [];
 
-    if (toolUsage.get_stream_features.calls >= 1) {
+    if (toolUsage.get_features.calls >= 1) {
       scores.push(1);
     } else {
       scores.push(0);
-      issues.push('get_stream_features was never called');
+      issues.push('get_features was never called');
     }
 
-    if (toolUsage.add_queries.calls >= 1) {
+    if (toolUsage.validate_queries.calls >= 1) {
       scores.push(1);
     } else {
       scores.push(0);
-      issues.push('add_queries was never called');
+      issues.push('validate_queries was never called');
     }
 
-    const totalCalls = toolUsage.get_stream_features.calls + toolUsage.add_queries.calls;
-    const totalFailures = toolUsage.get_stream_features.failures + toolUsage.add_queries.failures;
+    const totalCalls = toolUsage.get_features.calls + toolUsage.validate_queries.calls;
+    const totalFailures = toolUsage.get_features.failures + toolUsage.validate_queries.failures;
 
     if (totalCalls > 0) {
       const successRate = 1 - totalFailures / totalCalls;
@@ -66,10 +62,10 @@ export const createToolUsageEvaluator = (): Evaluator => ({
       explanation:
         issues.length > 0
           ? issues.join('; ')
-          : `All tool calls succeeded (get_stream_features: ${toolUsage.get_stream_features.calls}, add_queries: ${toolUsage.add_queries.calls})`,
+          : `All tool calls succeeded (get_features: ${toolUsage.get_features.calls}, validate_queries: ${toolUsage.validate_queries.calls})`,
       metadata: {
-        get_stream_features: toolUsage.get_stream_features,
-        add_queries: toolUsage.add_queries,
+        get_features: toolUsage.get_features,
+        validate_queries: toolUsage.validate_queries,
       },
     };
   },

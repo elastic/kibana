@@ -9,6 +9,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { BaseFeature, IgnoredFeature } from '@kbn/significant-events-schema';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import {
   EMPTY_TOKENS,
   buildFeatureIdentificationUserMessage,
@@ -17,6 +18,7 @@ import {
   type InferenceDocument,
   type ExcludedFeatureSummary,
   type PreviouslyIdentifiedFeature,
+  type SearchSimilarFeaturesArguments,
 } from '@kbn/nightshift-ai';
 import { createAgentBuilderClient, type ConverseStep } from '@kbn/evals';
 import {
@@ -39,7 +41,22 @@ export interface RunFeatureIdentificationAgentResult {
   features: BaseFeature[];
   ignoredFeatures: IgnoredFeature[];
   tokensUsed: ChatCompletionTokenCount;
+  searchCalls: SearchSimilarFeaturesArguments[];
 }
+
+export const getSimilarFeatureSearchCandidates = (
+  steps: ConverseStep[]
+): SearchSimilarFeaturesArguments[] =>
+  steps.flatMap((step) => {
+    if (
+      step.type !== 'tool_call' ||
+      step.tool_id !== platformSignificantEventsTools.searchSimilarFeatures
+    ) {
+      return [];
+    }
+    const candidates = step.params?.candidates;
+    return Array.isArray(candidates) ? (candidates as SearchSimilarFeaturesArguments[]) : [];
+  });
 
 export const getSuccessfulFinalizeFeaturesParams = (
   steps: ConverseStep[]
@@ -106,5 +123,6 @@ export async function runFeatureIdentificationAgent({
     features,
     ignoredFeatures,
     tokensUsed: result.tokensUsed ?? { ...EMPTY_TOKENS },
+    searchCalls: getSimilarFeatureSearchCandidates(result.steps),
   };
 }

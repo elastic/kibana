@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
 import type { StreamType } from '@kbn/streams-schema';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
@@ -18,8 +17,6 @@ interface KnowledgeIndicatorQueriesGeneratedProps {
   duration_ms: number;
   stream_name: string;
   stream_type: StreamType;
-  tool_usage?: SignificantEventsToolUsage;
-  external_content_tool_continuations?: number;
 }
 
 interface KnowledgeIndicatorFeaturesIdentifiedProps {

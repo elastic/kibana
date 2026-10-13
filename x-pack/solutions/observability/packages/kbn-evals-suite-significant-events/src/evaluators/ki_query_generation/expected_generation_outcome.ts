@@ -71,9 +71,9 @@ export const expectedGenerationOutcomeEvaluator: Evaluator<
 
     const passed =
       queryAttempts.length === 0 &&
-      toolUsage.get_stream_features.calls > 0 &&
-      toolUsage.get_stream_features.failures === 0 &&
-      toolUsage.add_queries.calls === 0;
+      toolUsage.get_features.calls > 0 &&
+      toolUsage.get_features.failures === 0 &&
+      toolUsage.validate_queries.calls === 0;
     const attemptOutcomes = [
       ...new Set(
         queryAttempts.map((attempt) => attempt.failureReason ?? attempt.status.toLowerCase())
@@ -84,10 +84,10 @@ export const expectedGenerationOutcomeEvaluator: Evaluator<
       score: passed ? 1 : 0,
       label: passed ? 'PASS' : 'FAIL',
       explanation:
-        `Expected no accepted queries or add_queries calls after successful feature inspection; ` +
-        `observed 0 accepted, ${toolUsage.get_stream_features.calls} get_stream_features calls, ` +
-        `${toolUsage.get_stream_features.failures} get_stream_features failures, ` +
-        `${toolUsage.add_queries.calls} add_queries calls, ` +
+        `Expected no accepted queries or validate_queries calls after successful feature inspection; ` +
+        `observed 0 accepted, ${toolUsage.get_features.calls} get_features calls, ` +
+        `${toolUsage.get_features.failures} get_features failures, ` +
+        `${toolUsage.validate_queries.calls} validate_queries calls, ` +
         `${queryAttempts.length} attempts${
           attemptOutcomes.length > 0 ? ` (${attemptOutcomes.join(', ')})` : ''
         }`,

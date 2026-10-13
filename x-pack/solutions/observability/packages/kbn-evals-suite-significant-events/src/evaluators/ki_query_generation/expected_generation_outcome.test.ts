@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SignificantEventsToolUsage } from '@kbn/nightshift-ai';
+import type { KIQueryGenerationToolUsage } from './types';
 
 import type { KIQueryGenerationOutput, QueryAttempt } from './types';
 import { expectedGenerationOutcomeEvaluator } from './expected_generation_outcome';
@@ -22,7 +22,7 @@ const objectOutput = (
   overrides: Partial<{
     queries: KIQueryGenerationOutput;
     query_attempts: QueryAttempt[];
-    toolUsage: SignificantEventsToolUsage;
+    toolUsage: KIQueryGenerationToolUsage;
   }> = {}
 ): KIQueryGenerationOutput =>
   ({
@@ -30,9 +30,9 @@ const objectOutput = (
     ...overrides,
   } as KIQueryGenerationOutput);
 
-const defaultToolUsage = (): SignificantEventsToolUsage => ({
-  get_stream_features: { calls: 1, failures: 0, latency_ms: 0 },
-  add_queries: { calls: 0, failures: 0, latency_ms: 0 },
+const defaultToolUsage = (): KIQueryGenerationToolUsage => ({
+  get_features: { calls: 1, failures: 0 },
+  validate_queries: { calls: 0, failures: 0 },
 });
 
 const attempt = (overrides: Partial<QueryAttempt> = {}): QueryAttempt => ({
@@ -112,15 +112,15 @@ describe('expectedGenerationOutcomeEvaluator', () => {
     expect(result.label).toBe('FAIL');
   });
 
-  it('fails when add_queries was called even with no attempts recorded', async () => {
+  it('fails when validate_queries was called even with no attempts recorded', async () => {
     const result = await evaluate(
       objectOutput({
         query_attempts: [],
-        toolUsage: { ...defaultToolUsage(), add_queries: { calls: 1, failures: 0, latency_ms: 0 } },
+        toolUsage: { ...defaultToolUsage(), validate_queries: { calls: 1, failures: 0 } },
       })
     );
     expect(result.score).toBe(0);
-    expect(result.explanation).toContain('1 add_queries calls');
+    expect(result.explanation).toContain('1 validate_queries calls');
   });
 
   it('fails when feature inspection never ran', async () => {
@@ -129,7 +129,7 @@ describe('expectedGenerationOutcomeEvaluator', () => {
         query_attempts: [],
         toolUsage: {
           ...defaultToolUsage(),
-          get_stream_features: { calls: 0, failures: 0, latency_ms: 0 },
+          get_features: { calls: 0, failures: 0 },
         },
       })
     );
@@ -142,7 +142,7 @@ describe('expectedGenerationOutcomeEvaluator', () => {
         query_attempts: [],
         toolUsage: {
           ...defaultToolUsage(),
-          get_stream_features: { calls: 1, failures: 1, latency_ms: 0 },
+          get_features: { calls: 1, failures: 1 },
         },
       })
     );

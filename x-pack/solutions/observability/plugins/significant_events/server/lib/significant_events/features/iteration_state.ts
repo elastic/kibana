@@ -6,22 +6,10 @@
  */
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
-import type { FeatureUpsert, IterationResult } from '@kbn/significant-events-schema';
+import type { IterationResult } from '@kbn/significant-events-schema';
 import { EMPTY_TOKENS, sumTokens } from '@kbn/nightshift-ai';
 
 export const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-export interface AccumulatedIterationState {
-  discoveredFeatures: FeatureUpsert[];
-  iterationResults: IterationResult[];
-}
-
-export function createEmptyAccumulatedState(): AccumulatedIterationState {
-  return {
-    discoveredFeatures: [],
-    iterationResults: [],
-  };
-}
 
 export function deriveSuccessCount(results: IterationResult[]): number {
   return results.filter((r) => r.state === 'success').length;

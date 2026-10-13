@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import { FINALIZE_FEATURES_TOOL_ID } from '@kbn/significant-events-plugin/common';
-import { getSuccessfulFinalizeFeaturesParams } from './run_feature_identification_agent';
+import {
+  getSimilarFeatureSearchCandidates,
+  getSuccessfulFinalizeFeaturesParams,
+} from './run_feature_identification_agent';
 
 describe('getSuccessfulFinalizeFeaturesParams', () => {
   it('uses the last successfully completed finalization call', () => {
@@ -39,5 +43,32 @@ describe('getSuccessfulFinalizeFeaturesParams', () => {
         },
       ])
     ).toThrow('returned invalid finalization output');
+  });
+});
+
+describe('getSimilarFeatureSearchCandidates', () => {
+  it('collects candidates across similarity search calls only', () => {
+    const candidate = (id: string) => ({
+      candidate_id: id,
+      title: id,
+      description: id,
+      type: 'entity',
+    });
+
+    expect(
+      getSimilarFeatureSearchCandidates([
+        {
+          type: 'tool_call',
+          tool_id: platformSignificantEventsTools.searchSimilarFeatures,
+          params: { stream_name: 'logs', candidates: [candidate('a'), candidate('b')] },
+        },
+        { type: 'tool_call', tool_id: FINALIZE_FEATURES_TOOL_ID, params: { candidates: [] } },
+        {
+          type: 'tool_call',
+          tool_id: platformSignificantEventsTools.searchSimilarFeatures,
+          params: { stream_name: 'logs', candidates: [candidate('c')] },
+        },
+      ]).map(({ candidate_id: id }) => id)
+    ).toEqual(['a', 'b', 'c']);
   });
 });
