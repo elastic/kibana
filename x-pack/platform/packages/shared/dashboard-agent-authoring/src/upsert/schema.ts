@@ -91,7 +91,7 @@ export const upsertDashboardSchema = z.object({
     .max(1000)
     .optional()
     .describe(
-      'Layout and size instructions from the user, e.g. "put the metrics in one row", "move the error chart next to the latency chart", or "make the table full width". Arranges the whole dashboard again, and is remembered for later calls until the user asks for a different arrangement. Omit it otherwise: new, moved, and removed panels are placed automatically.'
+      'The user\'s own request about arrangement or size, e.g. "put the metrics in one row" or "make the table full width". Remembered for later calls. Omit it unless the user asked: panels are placed and sized automatically.'
     ),
   remove: z
     .array(idSchema)

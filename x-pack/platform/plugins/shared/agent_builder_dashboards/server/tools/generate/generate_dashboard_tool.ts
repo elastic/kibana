@@ -132,7 +132,7 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 - \`panels\`: panels to create, edit, or move between sections, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
 - \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider).
 - \`remove\`: ids of panels, sections, or controls to remove.
-- \`layout\`: the user's layout and size instructions, if any.
+- \`layout\`: the user's own arrangement or size request. Omit it otherwise.
 
 Panel positions and sizes are arranged automatically after the changes are applied. The result lists the ids the call created and updated, so a mistyped id that created a new panel instead of updating one is visible.`,
     schema: generateDashboardSchema,
