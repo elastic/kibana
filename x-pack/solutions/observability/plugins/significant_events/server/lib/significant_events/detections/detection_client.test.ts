@@ -239,7 +239,10 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
     detections,
     history = detections,
     processedIds = [],
+    historyPageSize,
   }: {
+    /** Rows the history read answers per query. Unbounded by default. */
+    historyPageSize?: number;
     detections: Array<Record<string, unknown>>;
     /** Every detection of the rules, what the history read answers. Defaults to the latest ones. */
     history?: Array<Record<string, unknown>>;
@@ -253,7 +256,11 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
         return markerResponse(processedIds);
       }
       if (request.query.includes('rule_uuid IN')) {
-        return sourceResponse(history);
+        const lowerBound = /TO_DATETIME\("([^"]+)"\)/.exec(request.query)?.[1];
+        const page = lowerBound
+          ? history.filter(({ '@timestamp': ts }) => String(ts) >= lowerBound)
+          : history;
+        return sourceResponse(page.slice(0, historyPageSize ?? page.length));
       }
       return sourceResponse(detections);
     });
@@ -350,6 +357,39 @@ describe('DetectionClient.markSourceDetectionsProcessed', () => {
         expect.objectContaining({ detection_id: 'd-old', processed_by: 'source-deleted' }),
         expect.objectContaining({ detection_id: 'd-new', processed_by: 'source-deleted' }),
       ],
+    });
+  });
+
+  it('pages through a rule history longer than one read', async () => {
+    const make = (id: string, day: number) =>
+      createDetection({
+        '@timestamp': `2026-01-0${day}T00:00:00.000Z`,
+        detection_id: id,
+        rule_uuid: 'rule-1',
+        source_id: 'gone',
+      });
+    const all = [make('d-1', 1), make('d-2', 2), make('d-3', 3), make('d-4', 4), make('d-5', 5)];
+    const { client, create } = createSweepClient({
+      detections: [all[4]],
+      history: all,
+      // The first two are processed, the rest are the newer rows a single capped read would drop.
+      processedIds: ['d-1', 'd-2'],
+      historyPageSize: 2,
+    });
+
+    await expect(
+      client.markSourceDetectionsProcessed({
+        sourceId: 'gone',
+        processedBy: 'source-deleted',
+        historyPageSize: 2,
+      })
+    ).resolves.toBe(3);
+
+    expect(create).toHaveBeenCalledWith({
+      space: 'default',
+      documents: ['d-3', 'd-4', 'd-5'].map((id) =>
+        expect.objectContaining({ detection_id: id, processed_by: 'source-deleted' })
+      ),
     });
   });
 });

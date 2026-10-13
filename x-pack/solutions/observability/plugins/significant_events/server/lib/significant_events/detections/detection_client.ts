@@ -55,8 +55,7 @@ const PROCESSED_MARKER_CHUNK_SIZE = 250;
 // Page size and write batch size of the sweep that marks a deleted source's detections processed.
 const SOURCE_SWEEP_PAGE_SIZE = 1000;
 
-// Rules whose histories are read per query, and the row cap of that read (the ES|QL maximum).
-const SOURCE_SWEEP_RULE_CHUNK_SIZE = 10;
+// Row cap of one history read, the ES|QL maximum.
 const ESQL_MAX_ROWS = 10_000;
 
 // Cap the per-rule detection history (flyout timeline) to the most recent N transitions so a churny
@@ -200,9 +199,12 @@ export class DetectionClient {
   async markSourceDetectionsProcessed({
     sourceId,
     processedBy,
+    historyPageSize = ESQL_MAX_ROWS,
   }: {
     sourceId: string;
     processedBy: string;
+    /** Rows of a rule's history read per query. Defaults to the ES|QL maximum. */
+    historyPageSize?: number;
   }): Promise<number> {
     const ruleUuids = new Set<string>();
     for (let page = 1; ; page++) {
@@ -218,22 +220,13 @@ export class DetectionClient {
     }
 
     const detectionIdSet = new Set<string>();
-    const rules = [...ruleUuids];
-    for (let start = 0; start < rules.length; start += SOURCE_SWEEP_RULE_CHUNK_SIZE) {
-      const { hits } = await runFindByIdsEsqlQuery<RawDetection>({
-        esClient: this.clients.esClient,
-        space: this.clients.space,
-        index: DETECTIONS_DATA_STREAM,
-        idField: FIELD_RULE_UUID,
-        idValues: rules.slice(start, start + SOURCE_SWEEP_RULE_CHUNK_SIZE),
-        where: detectionFilter(),
-        limit: ESQL_MAX_ROWS,
+    for (const ruleUuid of ruleUuids) {
+      await this.collectUnprocessedHistory({
+        ruleUuid,
+        sourceId,
+        pageSize: historyPageSize,
+        into: detectionIdSet,
       });
-      for (const detection of await this.withDerivedProcessed(hits)) {
-        if (detection.source_id === sourceId && !detection.processed && detection.detection_id) {
-          detectionIdSet.add(detection.detection_id);
-        }
-      }
     }
     const detectionIds = [...detectionIdSet];
 
@@ -248,6 +241,58 @@ export class DetectionClient {
       );
     }
     return detectionIds.length;
+  }
+
+  /**
+   * Adds the ids of a rule's unprocessed detections of the source to `into`, reading its history
+   * oldest to newest in pages. A page starts at the last timestamp seen, so rows sharing it appear
+   * twice and the set dedupes them. It stops on a short page, or on one that brings no new row,
+   * which also ends a page made only of rows with one timestamp.
+   */
+  private async collectUnprocessedHistory({
+    ruleUuid,
+    sourceId,
+    pageSize,
+    into,
+  }: {
+    ruleUuid: string;
+    sourceId: string;
+    pageSize: number;
+    into: Set<string>;
+  }): Promise<void> {
+    const seen = new Set<string>();
+    let after: string | undefined;
+    for (;;) {
+      const { hits } = await runFindByIdsEsqlQuery<RawDetection>({
+        esClient: this.clients.esClient,
+        space: this.clients.space,
+        index: DETECTIONS_DATA_STREAM,
+        idField: FIELD_RULE_UUID,
+        idValues: [ruleUuid],
+        where:
+          after === undefined
+            ? detectionFilter()
+            : andWhere(
+                detectionFilter(),
+                esql.exp`${esql.col('@timestamp')} >= TO_DATETIME(${esql.str(after)})`
+              ),
+        limit: pageSize,
+      });
+
+      const unseen = hits.filter(({ detection_id: id }) => id !== undefined && !seen.has(id));
+      unseen.forEach(({ detection_id: id }) => seen.add(id as string));
+      for (const detection of await this.withDerivedProcessed(unseen)) {
+        if (detection.source_id === sourceId && !detection.processed && detection.detection_id) {
+          into.add(detection.detection_id);
+        }
+      }
+
+      const last = hits.at(-1);
+      if (hits.length < pageSize || unseen.length === 0 || last === undefined) {
+        return;
+      }
+      after = last['@timestamp'];
+    }
   }
 
   private async withDerivedProcessed(rawHits: RawDetection[]): Promise<Detection[]> {
