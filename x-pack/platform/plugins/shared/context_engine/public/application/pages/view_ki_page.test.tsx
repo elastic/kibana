@@ -18,12 +18,12 @@ import type { GetKiResponse } from '../../../common/http_api/knowledge_indicator
 import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { ViewKiPage } from './view_ki_page';
 
-const mockUseKi = jest.fn();
+const mockUseViewKi = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
 const mockCreateContextEngineUrl = jest.fn((path: string) => path);
 
-jest.mock('../hooks/use_ki', () => ({
-  useKi: (...args: unknown[]) => mockUseKi(...args),
+jest.mock('../hooks/use_view_ki', () => ({
+  useViewKi: (...args: unknown[]) => mockUseViewKi(...args),
 }));
 
 jest.mock('../hooks/use_navigation', () => ({
@@ -65,7 +65,7 @@ const renderViewKiPage = (initialEntry: string) => {
 
 describe('ViewKiPage', () => {
   beforeEach(() => {
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: defaultKi,
       isLoading: false,
       error: undefined,
@@ -80,7 +80,7 @@ describe('ViewKiPage', () => {
     renderViewKiPage('/ai_index/sample-ki/ki/ki-1');
 
     expect(screen.getByTestId('contextViewKiMissingIndex')).toBeInTheDocument();
-    expect(mockUseKi).toHaveBeenCalledWith(
+    expect(mockUseViewKi).toHaveBeenCalledWith(
       expect.objectContaining({
         enabled: false,
       })
@@ -88,7 +88,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders error prompt when useKi returns an error', () => {
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: undefined,
       isLoading: false,
       error: new Error('boom'),
@@ -100,7 +100,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders loading skeletons while useKi is loading', () => {
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: undefined,
       isLoading: true,
       error: undefined,
@@ -116,7 +116,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders document tab loading skeleton while useKi is loading', () => {
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: undefined,
       isLoading: true,
       error: undefined,
@@ -149,7 +149,7 @@ describe('ViewKiPage', () => {
   });
 
   it('renders deleted badge when lifecycle status is deleted', () => {
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: {
         ...defaultKi,
         document: {
@@ -170,7 +170,7 @@ describe('ViewKiPage', () => {
     jest.useFakeTimers();
     jest.setSystemTime(Date.parse('2026-06-15T12:00:00.000Z'));
 
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: {
         ...defaultKi,
         document: {
@@ -190,7 +190,7 @@ describe('ViewKiPage', () => {
   });
 
   it('does not render status badge for active lifecycle', () => {
-    mockUseKi.mockReturnValue({
+    mockUseViewKi.mockReturnValue({
       ki: {
         ...defaultKi,
         document: {

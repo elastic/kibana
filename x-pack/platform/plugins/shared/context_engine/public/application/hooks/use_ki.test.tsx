@@ -61,10 +61,7 @@ describe('useKi', () => {
       '/internal/context_engine/ai_index/sample-ki/kis/ki-1',
       expect.objectContaining({
         version: '1',
-        query: {
-          index: 'ai-index-idx-sample-ki',
-          lifecycle_status: ['active', 'deleted'],
-        },
+        query: { index: 'ai-index-idx-sample-ki' },
       })
     );
   });

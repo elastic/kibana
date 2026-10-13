@@ -7,7 +7,8 @@
 
 import { useQuery } from '@kbn/react-query';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
-import { createKiQueryOptions } from './ki_query_options';
+import { getKi } from '../api/knowledge_indicators';
+import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
 
 interface UseKiArgs {
@@ -29,7 +30,8 @@ export const useKi = ({ aiIndexId, kiId, index, enabled = true }: UseKiArgs): Us
   } = useKibana();
 
   const { data, isLoading, error } = useQuery<GetKiResponse, Error>({
-    ...createKiQueryOptions(http, { aiIndexId, kiId, index }),
+    queryKey: contextEngineQueryKeys.aiIndex.ki(aiIndexId, index, kiId),
+    queryFn: ({ signal }) => getKi(http, { aiIndexId, kiId, index, signal }),
     enabled: enabled && index.length > 0,
   });
 
