@@ -16,9 +16,9 @@ if [[ ${STORE_CACHE} == "true" ]]; then
 fi
 
 # PR and merge-queue builds list their changed files with moon (and run the FTR moon shadow).
-# This step skips bootstrap, so install the repo's pinned moon on its own.
-if [[ -n "${GITHUB_PR_NUMBER:-}" || "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-merge-queue" ]] &&
-  [[ ! -x node_modules/.bin/moon ]]; then
+# This step skips bootstrap, so install the repo's pinned moon on its own. Don't reuse
+# node_modules/.bin/moon: the merge queue's background store_cache.sh may still be writing it.
+if [[ -n "${GITHUB_PR_NUMBER:-}" || "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-merge-queue" ]]; then
   echo '--- Install moon'
   MOON_VERSION=$(node -p "require('./package.json').dependencies['@moonrepo/cli']")
   MOON_INSTALL_DIR="$(mktemp -d)"
