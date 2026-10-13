@@ -11,6 +11,7 @@ It runs inside the rule executor as [`DirectorStep`](../rule_executor/steps/dire
 - Mapping an incoming alert event plus prior alert state to the next episode state
 - Assigning or reusing the episode id (`alert.id`)
 - Encapsulating lifecycle rules behind transition strategies
+- Dropping `no_data` events that change nothing for a group already held in no-data, so a held group writes a single transition marker instead of one event per run
 
 ## What the director does not own
 
@@ -131,6 +132,17 @@ The director writes one of these episode statuses:
 | `recovering` | `'resolve'` | `inactive` |
 
 For `'resolve'`, the episode resolves directly to `inactive` on the first no-data run. `'ignore'` never produces a `no_data` event to begin with.
+
+#### Held groups write one marker
+
+The executor re-synthesizes a `no_data` event for every active group that is absent from the breach set and has no data, on every run. For a held group (`'keep_last'`, or a user `activate` lock) that would persist one identical event per run for as long as the group stays absent.
+
+`DirectorService.isRedundantNoDataEvent` drops a `no_data` event when the previous persisted event for the group was also `no_data` **and** the resolved episode id, `alert.status` and `alert.status_count` match the persisted state. The effect:
+
+- The first `no_data` after a `breached` / `recovered` event is the **transition marker** and is always written. Its `alert.status` carries the held status, so `LAST(alert.status, @timestamp)` readers keep seeing it. (Raw `status` is `no_data` on that marker — readers that want the held status must read `alert.status`.)
+- While the group stays absent nothing further is written. The held alert is **sparse**: time-windowed queries stop seeing it once the marker leaves their window.
+- `breached` / `recovered` events are never dropped, so a group that resumes reporting resumes normal event writing through them.
+- The strategy still runs every tick; only its output is compared. A rule edited from `'keep_last'` to `'resolve'` while a group is absent therefore resolves on the next run.
 
 ### `CountTimeframeStrategy`
 
