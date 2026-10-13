@@ -13,23 +13,27 @@ import { PubSubService } from './pubsub_service';
 
 describe('PubSubService registration', () => {
   const createService = () => new PubSubService(mockCoreContext.create());
+  const owned = (name: string, pluginId = 'ordersPlugin') => ({
+    ...defineTopic(name),
+    pluginId,
+  });
 
-  it('does not register a topic when it is only defined', () => {
-    const service = createService();
-    const setup = service.setup();
-    const topic = defineTopic('orders');
+  it('leaves a defined topic without an owner until a plugin registers it', () => {
+    const setup = createService().setup();
 
-    expect(() => setup.registerTopic(topic)).not.toThrow();
+    expect(defineTopic('orders').pluginId).toBeUndefined();
+    expect(() => setup.registerTopic(defineTopic('orders'))).toThrow(
+      'Cannot register topic "orders" without a plugin id.'
+    );
   });
 
   it('throws when the same topic name is registered twice', () => {
     const setup = createService().setup();
-    const topic = defineTopic('orders');
 
-    setup.registerTopic(topic);
+    setup.registerTopic(owned('orders', 'ordersPlugin'));
 
-    expect(() => setup.registerTopic(defineTopic('orders'))).toThrow(
-      'Topic "orders" is already registered.'
+    expect(() => setup.registerTopic(owned('orders', 'shippingPlugin'))).toThrow(
+      'Topic "orders" is already registered by "ordersPlugin".'
     );
   });
 
@@ -38,7 +42,7 @@ describe('PubSubService registration', () => {
     const setup = service.setup();
     service.start();
 
-    expect(() => setup.registerTopic(defineTopic('orders'))).toThrow(
+    expect(() => setup.registerTopic(owned('orders'))).toThrow(
       'Cannot register topic "orders" outside of setup.'
     );
   });

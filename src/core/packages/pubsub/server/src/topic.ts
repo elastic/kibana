@@ -11,10 +11,12 @@ declare const payloadType: unique symbol;
 
 /**
  * A topic name plus the compile-time type of its payload.
- * Creating a topic does not register it.
+ * Creating a topic does not register it. `pluginId` is set by core when a plugin registers the topic.
  */
 export interface Topic<TPayload = unknown> {
   readonly name: string;
+  /** Plugin that registered the topic. Absent until registration. */
+  readonly pluginId?: string;
   readonly [payloadType]?: TPayload;
 }
 

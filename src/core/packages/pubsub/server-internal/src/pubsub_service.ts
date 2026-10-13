@@ -16,7 +16,7 @@ type Phase = 'created' | 'setup' | 'started' | 'stopped';
 /** @internal */
 export class PubSubService implements CoreService<PubSubSetup, void> {
   private readonly logger: Logger;
-  private readonly topics = new Set<string>();
+  private readonly topics = new Map<string, Topic<unknown>>();
   private phase: Phase = 'created';
 
   constructor(coreContext: CoreContext) {
@@ -55,10 +55,15 @@ export class PubSubService implements CoreService<PubSubSetup, void> {
       throw new Error(`Cannot register topic "${topic.name}" outside of setup.`);
     }
 
-    if (this.topics.has(topic.name)) {
-      throw new Error(`Topic "${topic.name}" is already registered.`);
+    if (!topic.pluginId) {
+      throw new Error(`Cannot register topic "${topic.name}" without a plugin id.`);
     }
 
-    this.topics.add(topic.name);
+    const existing = this.topics.get(topic.name);
+    if (existing) {
+      throw new Error(`Topic "${topic.name}" is already registered by "${existing.pluginId}".`);
+    }
+
+    this.topics.set(topic.name, { name: topic.name, pluginId: topic.pluginId });
   }
 }
