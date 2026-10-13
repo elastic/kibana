@@ -40,10 +40,9 @@ const getTitle = (projectType?: ProjectType): string => {
       return i18n.translate('xpack.subscriptionStatus.serverless.vectordbTitle', {
         defaultMessage: 'Vector Database Serverless',
       });
-    case 'workplaceai':
     case undefined:
       return i18n.translate('xpack.subscriptionStatus.serverless.defaultTitle', {
-        defaultMessage: 'Elastic Serverless',
+        defaultMessage: 'Elastic Cloud Serverless',
       });
     default: {
       const exhaustiveCheck: never = projectType;
@@ -63,7 +62,6 @@ const getPricingSolution = (projectType?: ProjectType): string | undefined => {
       return 'security';
     case 'vectordb':
       return 'vectordb';
-    case 'workplaceai':
     case undefined:
       return undefined;
     default: {
