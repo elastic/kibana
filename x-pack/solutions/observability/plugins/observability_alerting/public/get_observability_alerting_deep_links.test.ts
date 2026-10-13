@@ -128,6 +128,14 @@ describe('getObservabilityAlertingDeepLinks', () => {
       });
     });
 
+    it('keeps Alerts out of the classic side nav for a Stack-only user', () => {
+      expect(
+        visibleInById(capabilities({ stackAlertsOnly: { show: true } }))[
+          OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID
+        ]
+      ).toEqual(SEARCHABLE);
+    });
+
     it('offers Alerts and Rules V1 to a v1 apm navLink user', () => {
       expect(visibleInById(capabilities({ navLinks: { apm: true } }))).toEqual({
         [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: ALERTS,
