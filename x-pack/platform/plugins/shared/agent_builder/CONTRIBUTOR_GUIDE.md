@@ -421,6 +421,25 @@ const myAttachmentType: AttachmentTypeDefinition = {
 Do **not** include guidance on *when* to render inline — that is the responsibility of the
 skill that owns the relevant task. See [Inline rendering guidance in skills](#inline-rendering-guidance-in-skills).
 
+#### `toSurfaceComposition` — rendering outside Kibana
+
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps the data of one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition of `markdown` nodes, which renders to every surface. Without it, the attachment is left out there.
+
+```ts
+const myAttachmentType: AttachmentTypeDefinition<'my_type', MyData> = {
+  id: 'my_type',
+  validate: ...,
+  format: ...,
+  toSurfaceComposition: (data) => ({
+    type: 'view',
+    title: data.name,
+    body: [{ type: 'markdown', text: `Status: ${data.status}` }],
+  }),
+};
+```
+
+GitHub-flavored markdown is converted per surface: tables become native Slack tables and code fences become code blocks. A mapping that throws leaves the attachment out. See the `text` type for an example.
+
 #### Real example: the built-in image attachment
 
 Agent Builder already ships a built-in `image` attachment type, so agents can see images pasted into the chat input. It's a real, file-backed attachment type and a good reference to copy from — the placeholder above just reuses the same `id` to illustrate `getAgentDescription`. See `x-pack/platform/plugins/shared/agent_builder_platform/server/attachment_types/image.ts`.

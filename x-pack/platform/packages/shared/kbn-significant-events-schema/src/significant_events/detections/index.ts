@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import dedent from 'dedent';
 import { MAX_ID_LENGTH, MAX_RULE_NAME_LENGTH } from '../constants';
 
@@ -35,26 +35,27 @@ export type ChangePointType = (typeof CHANGE_POINT_TYPES)[number];
  * at read time from the presence of a processed marker (see `processedMarkerSchema`)
  * and is never stored on the detection.
  */
-export const detectionSchema = z.object({
-  '@timestamp': z.iso.datetime({ offset: true }),
-  detection_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe('ID of the detection document. Used for traceability back to the source alert.'),
-  rule_uuid: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .describe(
-      'UUID of the alerting rule that fired. Used to correlate signals with KI query rules.'
-    ),
-  rule_name: z
-    .string()
-    .max(MAX_RULE_NAME_LENGTH)
-    .optional()
-    .describe('Human-readable name of the alerting rule.'),
-  stream_name: z.string().max(MAX_ID_LENGTH),
-  change_point_type: z.enum(CHANGE_POINT_TYPES).describe(
-    dedent`
+export const detectionSchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.iso.datetime({ offset: true }),
+    detection_id: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe('ID of the detection document. Used for traceability back to the source alert.'),
+    rule_uuid: z
+      .string()
+      .max(MAX_ID_LENGTH)
+      .describe(
+        'UUID of the alerting rule that fired. Used to correlate signals with KI query rules.'
+      ),
+    rule_name: z
+      .string()
+      .max(MAX_RULE_NAME_LENGTH)
+      .optional()
+      .describe('Human-readable name of the alerting rule.'),
+    stream_name: z.string().max(MAX_ID_LENGTH),
+    change_point_type: z.enum(CHANGE_POINT_TYPES).describe(
+      dedent`
         "spike" = Sudden increase in alert volume. May reflect increased failures, higher traffic or load, or a noisy rule.
         "dip" = Sudden decrease in alert volume. May reflect recovery, lower traffic, a disabled rule, or missing telemetry.
         "step_change" = Abrupt, sustained shift to a new alert-volume level. May reflect a deployment, configuration, capacity, or traffic-regime change.
@@ -63,22 +64,23 @@ export const detectionSchema = z.object({
         "non_stationary" = Alert volume varies without a stable baseline. May reflect drift, recurring bursts, or chronic instability.
         "stationary" = Alert volume remains stable with no detected change. May represent either a healthy steady state or a sustained failure.
       `
-  ),
-  p_value: z
-    .number()
-    .describe(
-      'Statistical p_value of the change point detection. Lower values indicate stronger signal.'
     ),
-  severity_score: z
-    .number()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe('Rule-configured severity score used to prioritize discovery work.'),
-  alert_index: z.string().max(MAX_ID_LENGTH).optional(),
-  workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
-  // Derived at read time from processed-marker membership; never stored.
-  processed: z.boolean(),
-});
+    p_value: z
+      .number()
+      .describe(
+        'Statistical p_value of the change point detection. Lower values indicate stronger signal.'
+      ),
+    severity_score: z
+      .number()
+      .min(0)
+      .max(100)
+      .optional()
+      .describe('Rule-configured severity score used to prioritize discovery work.'),
+    alert_index: z.string().max(MAX_ID_LENGTH).optional(),
+    workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+    // Derived at read time from processed-marker membership; never stored.
+    processed: z.boolean(),
+  })
+);
 
 export type Detection = z.infer<typeof detectionSchema>;

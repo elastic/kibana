@@ -29,6 +29,7 @@ describe('logInboundIngressOutcome', () => {
       'http_ack',
       'accepted',
       'rate_limited',
+      'payload_too_large',
     ]);
   });
 

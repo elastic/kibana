@@ -430,18 +430,21 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('throws when the response is missing the attributes.alertId field', async () => {
-        const invalidAlert = { ...createAlertAttachment(), score: 0 };
+      it('skips a row missing the attributes.alertId field and logs a warning', async () => {
+        const invalidAlert = { ...createAlertAttachment(), id: 'invalid-alert', score: 0 };
         unset(invalidAlert, 'attributes.alertId');
-        const soFindRes = createSOFindResponse([invalidAlert]);
+        const validAlert = { ...createAlertAttachment(), score: 0 };
+        const soFindRes = createSOFindResponse([invalidAlert, validAlert]);
 
         mockFinder(soFindRes);
 
-        await expect(
-          attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1', owner: 'securitySolution' })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"alert\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"attachmentId\\""`
-        );
+        const res = await attachmentGetter.getAllDocumentsAttachedToCase({
+          caseId: '1',
+          owner: 'securitySolution',
+        });
+
+        expect(res).toStrictEqual([validAlert]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid-alert'));
       });
     });
 
@@ -621,16 +624,19 @@ describe('AttachmentService getter', () => {
       );
     });
 
-    it('throws when a row fails the unified decode, since get has no per-item error channel', async () => {
+    it('throws a 404 when a row fails to decode', async () => {
       const userAttachment = createUserAttachment();
       unsecuredSavedObjectsClient.get.mockResolvedValue({
         ...userAttachment,
         attributes: { ...userAttachment.attributes, type: 'junk' },
       });
 
-      await expect(attachmentGetter.get({ savedObjectId: '1' })).rejects.toThrow();
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error on GET attachment 1')
+      await expect(attachmentGetter.get({ savedObjectId: '1' })).rejects.toMatchObject({
+        message: 'Attachment 1 could not be read.',
+        output: { statusCode: 404 },
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to decode attachment 1')
       );
     });
 
@@ -699,18 +705,18 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
-      it('throws when the response is missing the attributes.externalReferenceAttachmentTypeId field', async () => {
-        const invalidFile = { ...createFileAttachment(), score: 0 };
+      it('skips a row missing the attributes.externalReferenceAttachmentTypeId field and logs a warning', async () => {
+        const invalidFile = { ...createFileAttachment(), id: 'invalid-file', score: 0 };
         unset(invalidFile, 'attributes.externalReferenceAttachmentTypeId');
-        const soFindRes = createSOFindResponse([invalidFile]);
+        const validFile = { ...createFileAttachment(), score: 0 };
+        const soFindRes = createSOFindResponse([invalidFile, validFile]);
 
         mockFinder(soFindRes);
 
-        await expect(
-          attachmentGetter.getFileAttachments({ caseId: '1', fileIds: ['1'] })
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Invalid value \\"undefined\\" supplied to \\"comment\\",Invalid value \\"externalReference\\" supplied to \\"type\\",Invalid value \\"undefined\\" supplied to \\"alertId\\",Invalid value \\"undefined\\" supplied to \\"index\\",Invalid value \\"undefined\\" supplied to \\"rule\\",Invalid value \\"undefined\\" supplied to \\"eventId\\",Invalid value \\"undefined\\" supplied to \\"actions\\",Invalid value \\"undefined\\" supplied to \\"externalReferenceAttachmentTypeId\\",Invalid value \\"savedObject\\" supplied to \\"externalReferenceStorage,type\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentTypeId\\",Invalid value \\"undefined\\" supplied to \\"persistableStateAttachmentState\\""`
-        );
+        const res = await attachmentGetter.getFileAttachments({ caseId: 'caseId', fileIds: ['1'] });
+
+        expect(res).toEqual([expect.objectContaining({ id: validFile.id })]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('invalid-file'));
       });
     });
   });

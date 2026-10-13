@@ -28,14 +28,18 @@ interface ConnectorSelectorProps {
   connectorTypeId: string;
   value: string | null;
   onChange: (connectorId: string | null) => void;
+  onBlur?: () => void;
   connectorCreationConfig?: ConnectorCreationConfig;
+  error?: string;
 }
 
 export const ConnectorSelector = ({
   connectorTypeId,
   value,
   onChange,
+  onBlur,
   connectorCreationConfig = { mode: 'flyout' },
+  error,
 }: ConnectorSelectorProps) => {
   const { data: connectors = [], isLoading } = useFetchConnectorsByType({ connectorTypeId });
   const triggersActionsUi = useService(
@@ -110,6 +114,8 @@ export const ConnectorSelector = ({
           </EuiLink>
         }
         fullWidth
+        isInvalid={!!error}
+        error={error}
       >
         <EuiComboBox
           fullWidth
@@ -117,6 +123,7 @@ export const ConnectorSelector = ({
           singleSelection={{ asPlainText: true }}
           data-test-subj="singleStepWorkflowConnectorSelect"
           isLoading={isLoading}
+          isInvalid={!!error}
           placeholder={i18n.translate(
             'xpack.responseOps.alertingV2RuleForm.actionForm.connector.placeholder',
             {
@@ -125,6 +132,7 @@ export const ConnectorSelector = ({
           )}
           selectedOptions={selected}
           onFocus={() => queryClient.invalidateQueries({ queryKey: ALL_CONNECTORS_KEY })}
+          onBlur={onBlur}
           onChange={(next) => onChange(next[0]?.value ?? null)}
           options={options}
         />

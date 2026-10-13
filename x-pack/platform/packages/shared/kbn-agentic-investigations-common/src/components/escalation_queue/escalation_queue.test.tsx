@@ -108,6 +108,25 @@ describe('EscalationQueue', () => {
     expect(screen.getByText('Show more (50)')).toBeInTheDocument();
   });
 
+  it('renders "Show more" as the sibling after the last card, so the card keeps its divider', () => {
+    renderWithKibanaRenderContext(
+      <EscalationQueue
+        status="open"
+        escalations={[openItem]}
+        totalItemCount={51}
+        onLoadMore={jest.fn()}
+        renderAssignees={() => <span />}
+      />
+    );
+
+    let footer: HTMLElement = screen.getByTestId('escalationQueueLoadMore-open');
+    while (footer.parentElement && !footer.previousElementSibling) {
+      footer = footer.parentElement;
+    }
+
+    expect(footer.previousElementSibling).toHaveTextContent(openItem.title);
+  });
+
   it('calls onLoadMore when the "Show more" button is clicked', () => {
     const onLoadMore = jest.fn();
     renderWithKibanaRenderContext(
