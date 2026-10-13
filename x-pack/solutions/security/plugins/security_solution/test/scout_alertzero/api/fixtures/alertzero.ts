@@ -12,9 +12,9 @@ import {
   buildAd2SeedPlan,
   getAd2ScenarioAlertIds,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
-import { ATTACK_SCENARIO_KEY } from '../../common/constants';
-import { ok, pollUntil } from '../../common/kbn';
-import type { AlertZeroApi } from '../../common/kbn';
+import { ATTACK_SCENARIO_KEY } from './constants';
+import { ok, pollUntil } from './kbn';
+import type { AlertZeroApi } from './kbn';
 
 const WORKERS_URL = '/internal/alertzero/workers';
 const SERVICE_ACCOUNT_URL = '/internal/security/service_account';

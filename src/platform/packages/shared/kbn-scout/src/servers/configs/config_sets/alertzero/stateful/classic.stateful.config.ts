@@ -13,7 +13,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**
  * Scout server config for everything under `test/scout_alertzero`: the AlertZero API suites
- * and the AlertZero end-to-end flows (`test/scout_alertzero/api_e2e`).
+ * and the AlertZero end-to-end flows (the attack-discovery and worker-control specs).
  *
  * Base flags — `alertzero` plus `agenticInvestigations` and `proposals`, which alertzero
  * requires and which default off; without them Kibana cascade-disables alertzero. On top of

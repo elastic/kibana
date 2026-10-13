@@ -8,11 +8,11 @@
 import { expect } from '@kbn/scout-security/api';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { getAd2Scenario } from '@kbn/evals-suite-attack-discovery-agent-builder';
-import { seedEndpointHosts } from '../../../../scout/edr_response_actions/common/seed_endpoint_hosts';
+import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
 import {
   completeHostAction,
   deleteSubmittedHostActions,
-} from '../../../../scout/edr_response_actions/common/complete_host_action';
+} from '../../../scout/edr_response_actions/common/complete_host_action';
 import {
   assertExecutionCompleted,
   apiTest,

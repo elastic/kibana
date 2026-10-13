@@ -17,3 +17,45 @@ export const TI_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'Content-Type': 'application/json;charset=UTF-8',
 };
+
+/**
+ * Ids are inlined instead of imported from `@kbn/alertzero-common` / `@kbn/workflows`:
+ * Playwright's esbuild transform cannot load the managed-workflow YAML those barrels pull in.
+ */
+export const ATTACK_DISCOVERY_WORKER_WORKFLOW_ID = 'system-security-attack-discovery-worker';
+export const FLOOR_ATTACK_DISCOVERY_WORKER_ID = 'system-security-floor-attack-discovery';
+export const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
+export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-endpoint-analysis';
+export const HANDOFF_TO_FORENSICS_ACTION_ID = 'system-alertzero-action-handoff-to-forensics';
+export const ISOLATE_HOST_ACTION_ID = 'system-alertzero-action-isolate-host';
+
+export const ALERTS_INDEX = '.alerts-security.alerts-default';
+export const ATTACK_DISCOVERY_ADHOC_INDEX =
+  '.adhoc.alerts-security.attack.discovery.alerts-default';
+
+export const AZ_VERDICT_TAGS = [
+  'az:true_positive',
+  'az:false_positive',
+  'az:inconclusive',
+] as const;
+
+/** Scenario the positive flow seeds: Word -> encoded PowerShell -> C2 -> persistence -> SMB copy. */
+export const ATTACK_SCENARIO_KEY = 'encoded-powershell';
+
+export const PUBLIC_HEADERS = {
+  'kbn-xsrf': 'scout',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '2023-10-31',
+} as const;
+
+export const INTERNAL_HEADERS = {
+  'kbn-xsrf': 'scout',
+  'x-elastic-internal-origin': 'kibana',
+  'elastic-api-version': '1',
+} as const;
+
+/** Attack Discovery generation, the per-attack review and forensics each call a real model. */
+export const GENERATION_TIMEOUT_MS = 15 * 60_000;
+export const PROPOSAL_TIMEOUT_MS = 10 * 60_000;
+export const ACTION_TIMEOUT_MS = 3 * 60_000;
+export const POLL_INTERVAL_MS = 5_000;
