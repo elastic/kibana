@@ -31,6 +31,7 @@ type MockSearch = jest.MockedFunction<
 >;
 
 let capturedTableSearch: EuiSearchBarProps | undefined;
+let capturedTableCompressed: boolean | undefined;
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
   fn.cancel = jest.fn();
@@ -43,8 +44,9 @@ jest.mock('@elastic/eui', () => {
   const ActualEuiInMemoryTable = actual.EuiInMemoryTable;
 
   const EuiInMemoryTable = (props: React.ComponentProps<typeof ActualEuiInMemoryTable>) => {
-    // Keep the real table rendering, but expose its search config for focused filter assertions.
+    // Keep the real table rendering, but expose its configuration for focused assertions.
     capturedTableSearch = typeof props.search === 'object' ? props.search : undefined;
+    capturedTableCompressed = props.compressed;
 
     return <ActualEuiInMemoryTable {...props} />;
   };
@@ -207,6 +209,7 @@ describe('SavedObjectsFinder', () => {
   beforeEach(() => {
     mockSearch.mockClear();
     capturedTableSearch = undefined;
+    capturedTableCompressed = undefined;
   });
 
   it('should call API on startup', async () => {
@@ -290,10 +293,8 @@ describe('SavedObjectsFinder', () => {
       });
 
       await waitForItemsLoaded();
-      // EUI labels its default styles "uncompressed", so match the "-compressed" label exactly
-      expect(screen.getByTestId('savedObjectFinderSearchInput').className).toMatch(/-compressed/);
-      expect(document.querySelector('.euiFilterGroup')?.className).toMatch(/-compressed/);
-      expect(screen.getByRole('table').className).toMatch(/-uncompressed/);
+      expect(capturedTableSearch?.compressed).toBe(true);
+      expect(capturedTableCompressed).not.toBe(true);
     });
 
     it('with left button', async () => {
