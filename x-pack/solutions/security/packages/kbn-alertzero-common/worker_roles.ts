@@ -17,9 +17,8 @@ import {
 
 /** Security's public role API, used to look up the built-in worker roles. */
 export const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
-export const SECURITY_ROLES_URL = '/api/security/role';
 export const buildSecurityRoleUrl = (roleName: string) =>
-  `${SECURITY_ROLES_URL}/${encodeURIComponent(roleName)}`;
+  `/api/security/role/${encodeURIComponent(roleName)}`;
 
 /**
  * The built-in role a worker's service account gets. Stateful ships it as an Elasticsearch

@@ -83,7 +83,6 @@ export {
 export {
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
-  SECURITY_ROLES_URL,
   buildSecurityRoleUrl,
   getWorkerRoleName,
 } from './worker_roles';
