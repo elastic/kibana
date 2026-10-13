@@ -129,10 +129,10 @@ export class GenAiSettingsPlugin
 
     core.uiSettings.register({
       [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
-        name: i18n.translate('genAiSettings.tokenUsageTracking.name', {
+        name: i18n.translate('xpack.genAiSettings.tokenUsageTracking.name', {
           defaultMessage: 'Token usage tracking',
         }),
-        description: i18n.translate('genAiSettings.tokenUsageTracking.description', {
+        description: i18n.translate('xpack.genAiSettings.tokenUsageTracking.description', {
           defaultMessage:
             'Track token usage for AI features. When enabled, token counts are logged for each LLM request, and a dashboard is available to monitor usage.',
         }),

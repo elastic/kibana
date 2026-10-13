@@ -202,19 +202,19 @@ const useSettings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     },
     onSuccess() {
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.gen_ai_settings.save.success', {
+        title: i18n.translate('xpack.genAiSettings.save.success', {
           defaultMessage: 'Settings saved',
         }),
       });
     },
     onError(error: Error) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.gen_ai_settings.save.error', {
+        title: i18n.translate('xpack.genAiSettings.save.error', {
           defaultMessage: 'Failed to save settings',
         }),
         text:
           error.message ??
-          i18n.translate('xpack.gen_ai_settings.save.error.text', {
+          i18n.translate('xpack.genAiSettings.save.error.text', {
             defaultMessage: 'Unknown error',
           }),
       });
