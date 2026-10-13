@@ -7,42 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTester } from 'eslint';
-import {
-  StringsShouldBeTranslatedWithI18n,
-  RULE_WARNING_MESSAGE,
-} from './strings_should_be_translated_with_i18n';
+import { RULE_WARNING_MESSAGE } from './strings_should_be_translated_with_i18n';
 
-const tsTester = [
-  '@typescript-eslint/parser',
-  new RuleTester({
-    parser: require.resolve('@typescript-eslint/parser'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 2018,
-      ecmaFeatures: {
-        jsx: true,
-      },
-    },
-  }),
-] as const;
-
-const babelTester = [
-  '@babel/eslint-parser',
-  new RuleTester({
-    parser: require.resolve('@babel/eslint-parser'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 2018,
-      requireConfigFile: false,
-      babelOptions: {
-        presets: ['@kbn/babel-preset/node_preset'],
-      },
-    },
-  }),
-] as const;
-
-const invalid: RuleTester.InvalidTestCase[] = [
+const invalid = [
   {
     name: 'A JSX element with a string literal should be translated with i18n',
     filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
@@ -395,7 +362,7 @@ function TestComponent3() {
   },
 ];
 
-const valid: RuleTester.ValidTestCase[] = [
+const valid = [
   {
     name: 'A JSXText element inside a EuiCode component should not be translated',
     filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
@@ -433,6 +400,18 @@ function TestComponent() {
 }`,
   },
   {
+    name: 'A JSXText element or attribute made up of HTML entities and special characters should not be translated',
+    filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.tsx',
+    code: `
+import React from 'react';
+
+function TestComponent() {
+  return (
+    <div title="&nbsp;">&nbsp;&mdash;&nbsp;</div>
+  )
+}`,
+  },
+  {
     name: invalid[0].name,
     filename: invalid[0].filename,
     code: invalid[0].output as string,
@@ -464,11 +443,5 @@ function TestComponent() {
   },
 ];
 
-for (const [name, tester] of [tsTester, babelTester]) {
-  describe(name, () => {
-    tester.run('@kbn/strings_should_be_translated_with_i18n', StringsShouldBeTranslatedWithI18n, {
-      valid,
-      invalid,
-    });
-  });
-}
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const stringsShouldBeTranslatedWithI18nCases = { valid, invalid };

@@ -7,43 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuleTester } from 'eslint';
 import {
-  I18nTranslateShouldStartWithTheRightId,
   RULE_WARNING_MESSAGE,
   NO_IDENTIFIER_MESSAGE,
 } from './i18n_translate_should_start_with_the_right_id';
 
-const tsTester = [
-  '@typescript-eslint/parser',
-  new RuleTester({
-    parser: require.resolve('@typescript-eslint/parser'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 2018,
-      ecmaFeatures: {
-        jsx: true,
-      },
-    },
-  }),
-] as const;
-
-const babelTester = [
-  '@babel/eslint-parser',
-  new RuleTester({
-    parser: require.resolve('@babel/eslint-parser'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 2018,
-      requireConfigFile: false,
-      babelOptions: {
-        presets: ['@kbn/babel-preset/node_preset'],
-      },
-    },
-  }),
-] as const;
-
-const invalid: RuleTester.InvalidTestCase[] = [
+const invalid = [
   {
     name: 'When a string literal is passed to i18n.translate, it should start with the correct i18n identifier, and if no existing defaultMessage is passed, it should add an empty default.',
     filename: '/x-pack/solutions/observability/plugins/observability/public/test_component.ts',
@@ -169,7 +138,7 @@ function TestComponent() {
   },
 ];
 
-const valid: RuleTester.ValidTestCase[] = [
+const valid = [
   {
     name: invalid[0].name,
     filename: invalid[0].filename,
@@ -202,15 +171,5 @@ function TestComponent() {
   },
 ];
 
-for (const [name, tester] of [tsTester, babelTester]) {
-  describe(name, () => {
-    tester.run(
-      '@kbn/i18n_translate_should_start_with_the_right_id',
-      I18nTranslateShouldStartWithTheRightId,
-      {
-        valid,
-        invalid,
-      }
-    );
-  });
-}
+/** Rule test cases, replayed through Oxlint's RuleTester by `__fixtures__/run_rule_tests.mjs`. */
+export const i18nTranslateShouldStartWithTheRightIdCases = { valid, invalid };

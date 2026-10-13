@@ -16,7 +16,12 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { File } from '../file';
-import { LINT_LOG_PREFIX, OXLINT_CONFIG_PATH, oxlintBinPath } from './constants';
+import {
+  LINT_LOG_PREFIX,
+  OXLINT_CONFIG_PATH,
+  OXLINT_FIX_CONFIG_PATH,
+  oxlintBinPath,
+} from './constants';
 
 export interface LintFilesOptions {
   fix?: boolean;
@@ -57,10 +62,13 @@ const MAX_PATHS_PER_RUN = 4000;
 // Matches ESLint's fix-pass limit.
 const MAX_FIX_PASSES = 10;
 
-async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnostic>> {
+async function runOxlint(
+  configPath: string,
+  args: string[]
+): Promise<OxlintJsonReport<FileDiagnostic>> {
   const { stdout, stderr, exitCode } = await execa(
     process.execPath,
-    [oxlintBinPath, '--config', OXLINT_CONFIG_PATH, '--format', 'json', ...args],
+    [oxlintBinPath, '--config', configPath, '--format', 'json', ...args],
     { cwd: REPO_ROOT, reject: false, maxBuffer: 256 * 1024 * 1024 }
   );
 
@@ -97,12 +105,13 @@ async function runOxlint(args: string[]): Promise<OxlintJsonReport<FileDiagnosti
 }
 
 async function runOxlintOnPaths(
+  configPath: string,
   args: string[],
   paths: string[]
 ): Promise<Array<OxlintJsonReport<FileDiagnostic>>> {
   const reports: Array<OxlintJsonReport<FileDiagnostic>> = [];
   for (let i = 0; i < paths.length; i += MAX_PATHS_PER_RUN) {
-    reports.push(await runOxlint([...args, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
+    reports.push(await runOxlint(configPath, [...args, ...paths.slice(i, i + MAX_PATHS_PER_RUN)]));
   }
   return reports;
 }
@@ -113,27 +122,17 @@ const readContents = (paths: string[]): Promise<string[]> =>
 /**
  * Oxlint applies a single fix pass, so fixes that overlap within a file (e.g. inserting the
  * required license header and removing a disallowed one) only partially apply. Like ESLint,
- * re-run fixes on files that still report diagnostics until their contents stop changing.
+ * re-run fixes on each file until its contents stop changing.
  */
-async function applyRemainingFixes(diagnostics: FileDiagnostic[]): Promise<FileDiagnostic[]> {
-  let current = diagnostics;
-  let candidates = [...new Set(current.map((d) => d.filename))];
+async function fixUntilStable(paths: string[]): Promise<void> {
+  let candidates = paths;
 
-  for (let pass = 1; pass < MAX_FIX_PASSES && candidates.length > 0; pass++) {
+  for (let pass = 0; pass < MAX_FIX_PASSES && candidates.length > 0; pass++) {
     const before = await readContents(candidates);
-    const latest = (await runOxlintOnPaths(['--fix'], candidates)).flatMap(
-      (report) => report.diagnostics
-    );
+    await runOxlintOnPaths(OXLINT_FIX_CONFIG_PATH, ['--fix'], candidates);
     const after = await readContents(candidates);
-
-    const rerun = new Set(candidates);
-    current = [...current.filter((d) => !rerun.has(d.filename)), ...latest];
-
-    const remaining = new Set(latest.map((d) => d.filename));
-    candidates = candidates.filter((path, i) => before[i] !== after[i] && remaining.has(path));
+    candidates = candidates.filter((_, i) => before[i] !== after[i]);
   }
-
-  return current;
 }
 
 /**
@@ -145,17 +144,22 @@ export async function lintFiles(
   files: File[],
   { fix, fullRepo }: LintFilesOptions = {}
 ): Promise<LintFilesResult> {
-  const fixArgs = fix ? ['--fix'] : [];
-  const reports = fullRepo
-    ? [await runOxlint(fixArgs)]
-    : await runOxlintOnPaths(
-        fixArgs,
-        files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()))
-      );
+  const paths = files.map((file) => relative(REPO_ROOT, file.getAbsolutePath()));
+  const lint = async (configPath: string, args: string[]) =>
+    fullRepo ? [await runOxlint(configPath, args)] : runOxlintOnPaths(configPath, args, paths);
+
+  if (fix) {
+    // Oxlint's `--fix` also fixes warnings, so only files with errors are fixed, against the
+    // errors-only config, as ESLint's `--quiet --fix` did. The run below then reports everything.
+    const errorReports = await lint(OXLINT_FIX_CONFIG_PATH, []);
+    await fixUntilStable([
+      ...new Set(errorReports.flatMap((report) => report.diagnostics.map((d) => d.filename))),
+    ]);
+  }
+  const reports = await lint(OXLINT_CONFIG_PATH, []);
 
   const lintedFileCount = reports.reduce((sum, report) => sum + report.number_of_files, 0);
-  const firstPassDiagnostics = reports.flatMap((report) => report.diagnostics);
-  const diagnostics = fix ? await applyRemainingFixes(firstPassDiagnostics) : firstPassDiagnostics;
+  const diagnostics = reports.flatMap((report) => report.diagnostics);
   const failedFiles = [
     ...new Set(diagnostics.filter((d) => d.severity === 'error').map((d) => d.filename)),
   ].sort((left, right) => left.localeCompare(right));
