@@ -287,5 +287,46 @@ spaceTest.describe(
         await expect(discover.unsavedChangesIndicator()).toBeHidden();
       });
     });
+
+    spaceTest(
+      'should open a session saved before sort was persisted with the default sort',
+      async ({ pageObjects, scoutSpace }) => {
+        const { metricsExperience, discover } = pageObjects;
+        const { DEFAULT_BREAKDOWN } = testData.METRICS_DIMENSION_FIELDS;
+
+        await spaceTest.step('import a session saved without sort fields', async () => {
+          await scoutSpace.savedObjects.load(testData.LEGACY_SORT_SESSION_KBN_ARCHIVE);
+        });
+
+        await spaceTest.step('sort the current session in descending order', async () => {
+          // A non-default local sort makes it observable whether opening the session resets it.
+          await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+          await expect(metricsExperience.grid).toBeVisible();
+          await metricsExperience.setSortDirection('desc');
+          await metricsExperience.waitForFirstCard(UNFILTERED_FIRST_CARD_DESC);
+          await expect
+            .poll(() => metricsExperience.getPersistedMetricsStateField('sortDirection'))
+            .toBe('desc');
+        });
+
+        await spaceTest.step('open the session saved before sort was persisted', async () => {
+          await discover.loadSavedSearch(testData.LEGACY_SORT_SESSION_TITLE);
+          await expect(metricsExperience.grid).toBeVisible();
+          await expect(
+            metricsExperience.breakdownSelector.getToggleWithSelection(DEFAULT_BREAKDOWN)
+          ).toBeVisible();
+        });
+
+        await spaceTest.step('the default sort applies and nothing is unsaved', async () => {
+          await expect(metricsExperience.sortSelectorButton).toHaveAttribute(
+            'data-selected-value',
+            METRICS_GRID_SORT_DEFAULTS.sortField
+          );
+          await expect(metricsExperience.sortDirectionAsc).toHaveAttribute('aria-pressed', 'true');
+          await metricsExperience.waitForFirstCard(UNFILTERED_FIRST_CARD_ASC);
+          await expect(discover.unsavedChangesIndicator()).toBeHidden();
+        });
+      }
+    );
   }
 );

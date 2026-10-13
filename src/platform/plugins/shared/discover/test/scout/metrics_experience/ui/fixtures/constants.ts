@@ -98,6 +98,15 @@ export const PUSH_FLYOUT_VIEWPORT = { width: 1920, height: 1080 } as const;
 export const KBN_ARCHIVE =
   'src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/fixtures/kbn_archives/metrics_data_view.json';
 
+/**
+ * A metrics Discover session saved at `search` model version 17, before the grid sort was
+ * persisted. Its tab type state has no `gridSortField` or `gridSortDirection`, and it breaks down
+ * by `METRICS_DIMENSION_FIELDS.DEFAULT_BREAKDOWN` so that opening it is observable.
+ */
+export const LEGACY_SORT_SESSION_KBN_ARCHIVE =
+  'src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/fixtures/kbn_archives/metrics_legacy_sort_session.json';
+export const LEGACY_SORT_SESSION_TITLE = 'Metrics Legacy Sort Session';
+
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
   ...tags.serverless.observability.complete,
