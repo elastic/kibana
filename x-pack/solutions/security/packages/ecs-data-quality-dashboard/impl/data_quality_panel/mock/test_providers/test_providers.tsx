@@ -97,6 +97,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
         getStatus: jest.fn(),
         install: jest.fn(),
         uninstall: jest.fn(),
+        updateAll: jest.fn(),
         getDefaultInferenceId: jest.fn(),
       },
     },

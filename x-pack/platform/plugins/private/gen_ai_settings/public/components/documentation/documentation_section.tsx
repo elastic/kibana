@@ -235,7 +235,6 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
       },
       {
         name: i18n.COLUMN_DETAILS,
-        sortable: false,
         render: (item: DocumentationItem) => <DocumentationDetails item={item} />,
       },
       {

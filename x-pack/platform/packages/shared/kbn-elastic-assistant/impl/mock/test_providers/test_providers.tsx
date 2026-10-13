@@ -100,6 +100,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
         getStatus: jest.fn(),
         install: jest.fn(),
         uninstall: jest.fn(),
+        updateAll: jest.fn(),
         getDefaultInferenceId: jest.fn(),
       },
     },
