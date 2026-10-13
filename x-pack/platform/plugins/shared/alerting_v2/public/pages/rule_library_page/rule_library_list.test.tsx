@@ -82,12 +82,15 @@ const createTemplate = (overrides: Partial<RuleTemplateResponse> = {}): RuleTemp
   ...overrides,
 });
 
-const renderList = () =>
+const renderList = (initialEntries?: string[]) =>
   render(
-    <ListPageTestProviders>
+    <ListPageTestProviders initialEntries={initialEntries}>
       <RuleLibraryList />
     </ListPageTestProviders>
   );
+
+const tagFilterEntry = (tags: string[]) =>
+  `/?q=${encodeURIComponent(`tag:(${tags.join(' or ')})`)}`;
 
 const lastFindItemsArgs = () => {
   const { calls } = mockFindItems.mock;
@@ -234,21 +237,19 @@ describe('RuleLibraryList', () => {
       isLoading: false,
       isError: false,
     }));
+    const selectionLimitMessage = `Maximum of ${MAX_TAGS} tags selected. Remove one to select another.`;
     resolveTemplateList();
-    renderList();
+    renderList([tagFilterEntry(selectedTags)]);
     await screen.findByText('CPU usage');
 
     fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
     const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
-    for (const tag of selectedTags) {
-      fireEvent.click(within(options).getByText(tag));
-    }
 
-    const tagToExclude = within(options).getByText(selectedTags[11]);
+    const tagToExclude = within(options).getByText(selectedTags[5]);
     fireEvent.mouseDown(tagToExclude, { ctrlKey: true });
     fireEvent.click(tagToExclude, { ctrlKey: true });
 
-    expect(tagToExclude.closest('[role="option"]')).toHaveAttribute('aria-posinset', '12');
+    expect(tagToExclude.closest('[role="option"]')).toHaveAttribute('aria-posinset', '6');
 
     fireEvent.change(screen.getByTestId('ruleLibraryTagsFilterSearch'), {
       target: { value: additionalTag },
@@ -258,13 +259,15 @@ describe('RuleLibraryList', () => {
     });
 
     expect(within(options).queryByText(additionalTag)).not.toBeInTheDocument();
-    expect(
-      screen.getByText(`Maximum of ${MAX_TAGS} tags selected. Remove one to select another.`)
-    ).toBeInTheDocument();
+    expect(screen.getByText(selectionLimitMessage)).toBeInTheDocument();
 
-    const tagToRemove = within(options).getByText(selectedTags[MAX_TAGS - 1]);
+    const tagToRemove = within(options).getByText(selectedTags[0]);
     fireEvent.mouseDown(tagToRemove);
     fireEvent.click(tagToRemove);
+
+    expect(screen.queryByText(selectionLimitMessage)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter-clear'));
 
     expect(await within(options).findByText(additionalTag)).toBeInTheDocument();
   });

@@ -1,5 +1,5 @@
 {
-  "sha1": "86081901138401784c76cb2f2b4062c0031e563e",
+  "sha1": "7d391c5fb18ce35bce1b353899807e0c9777a9bb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -268,6 +268,34 @@
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
         "line": 994,
         "column": 25
+      }
+    },
+    {
+      "id": "2b60f5344e96d53-dd53f05d4b8911d",
+      "title": "Agent Builder — agents access-control API user profile bulk get only requires agentBuilder read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
+        "line": 1006,
+        "column": 25
+      }
+    },
+    {
+      "id": "2b60f5344e96d53-3805e11cc7b48d3",
+      "title": "Agent Builder — agents access-control API user profile bulk get rejects callers without Agent Builder privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/api/tests/agents_access_control_api.spec.ts",
+        "line": 1019,
+        "column": 33
       }
     },
     {

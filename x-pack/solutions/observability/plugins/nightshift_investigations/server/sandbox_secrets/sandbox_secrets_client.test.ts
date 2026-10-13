@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   coreMock,
@@ -46,8 +47,8 @@ const setup = ({
   nightshiftEnabled?: boolean;
 } = {}) => {
   const featureFlags = coreMock.createStart().featureFlags;
-  featureFlags.getBooleanValue.mockImplementation(async (flag) =>
-    flag === NIGHTSHIFT_ENABLED_FLAG ? nightshiftEnabled : false
+  featureFlags.getBooleanValue$.mockImplementation((flag) =>
+    of(flag === NIGHTSHIFT_ENABLED_FLAG ? nightshiftEnabled : false)
   );
 
   const savedObjects = savedObjectsServiceMock.createStartContract();

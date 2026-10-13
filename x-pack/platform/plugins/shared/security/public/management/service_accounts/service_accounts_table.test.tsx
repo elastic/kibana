@@ -6,8 +6,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { act, screen, within } from '@testing-library/react';
-import user from '@testing-library/user-event';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import React, { useState } from 'react';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -41,9 +40,11 @@ describe('ServiceAccountsTable', () => {
   const renderTable = ({
     hasMore = false,
     hasLoadMoreError = false,
+    onDeleteAccount,
   }: {
     hasMore?: boolean;
     hasLoadMoreError?: boolean;
+    onDeleteAccount?: (account: ServiceAccountTableItem) => void;
   } = {}) => {
     const onLoadMore = jest.fn();
 
@@ -55,6 +56,7 @@ describe('ServiceAccountsTable', () => {
           isLoadingMore={false}
           hasLoadMoreError={hasLoadMoreError}
           onLoadMore={onLoadMore}
+          onDeleteAccount={onDeleteAccount}
         />
       </EuiProvider>
     );
@@ -88,6 +90,19 @@ describe('ServiceAccountsTable', () => {
     );
   };
 
+  const openRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await screen.findByTestId('euiSelectableList');
+  };
+
+  const clickRoleOption = (role: string) =>
+    fireEvent.click(within(screen.getByTestId('euiSelectableList')).getByText(role));
+
+  const closeRoleFilter = async () => {
+    fireEvent.click(screen.getByLabelText('Role Selection'));
+    await waitFor(() => expect(screen.queryByTestId('euiSelectableList')).not.toBeInTheDocument());
+  };
+
   it('renders directory metadata without unavailable follow-up actions', () => {
     renderTable();
 
@@ -110,7 +125,9 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by free text', async () => {
     renderTable();
 
-    await user.type(screen.getByTestId('serviceAccountsSearch'), 'incident-responder');
+    fireEvent.change(screen.getByTestId('serviceAccountsSearch'), {
+      target: { value: 'incident-responder' },
+    });
 
     expect(await screen.findByText('incident-responder')).toBeVisible();
     expect(screen.queryByText('nightshift-relay')).not.toBeInTheDocument();
@@ -119,16 +136,18 @@ describe('ServiceAccountsTable', () => {
   it('filters accounts by the selected role and restores them when cleared', async () => {
     renderTable();
 
-    await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(await screen.findByRole('option', { name: 'viewer' }));
+    await openRoleFilter();
+    clickRoleOption('viewer');
 
     expect(screen.getByText('nightshift-relay')).toBeVisible();
     expect(screen.queryByText('incident-responder')).not.toBeInTheDocument();
 
-    await user.click(await screen.findByRole('option', { name: 'viewer' }));
+    clickRoleOption('viewer');
 
     expect(screen.getByText('incident-responder')).toBeVisible();
     expect(screen.getByText('nightshift-relay')).toBeVisible();
+
+    await closeRoleFilter();
   });
 
   it.each([
@@ -140,12 +159,12 @@ describe('ServiceAccountsTable', () => {
       screen.getByRole('columnheader', { name: new RegExp(column) })
     ).getByRole('button');
 
-    await user.click(sortButton);
+    fireEvent.click(sortButton);
     screen.getAllByRole('rowheader').forEach((header, index) => {
       expect(header).toHaveTextContent(ascending[index]);
     });
 
-    await user.click(sortButton);
+    fireEvent.click(sortButton);
     const descending = [...ascending].reverse();
     screen.getAllByRole('rowheader').forEach((header, index) => {
       expect(header).toHaveTextContent(descending[index]);
@@ -174,7 +193,7 @@ describe('ServiceAccountsTable', () => {
     expect(
       screen.getByText('Search and filters currently include 2 loaded accounts.')
     ).toBeVisible();
-    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+    fireEvent.click(screen.getByTestId('serviceAccountsLoadMore'));
 
     expect(onLoadMore).toHaveBeenCalledTimes(1);
   });
@@ -182,36 +201,40 @@ describe('ServiceAccountsTable', () => {
   it('keeps the current page after loading more accounts', async () => {
     renderPaginatedTable();
 
-    await user.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
     expect(screen.getByText('account-10')).toBeVisible();
     expect(screen.queryByText('account-00')).not.toBeInTheDocument();
 
-    await user.click(screen.getByTestId('serviceAccountsLoadMore'));
+    fireEvent.click(screen.getByTestId('serviceAccountsLoadMore'));
     expect(screen.getByText('account-10')).toBeVisible();
     expect(screen.queryByText('account-00')).not.toBeInTheDocument();
-    await user.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
     expect(screen.getByText('incident-responder')).toBeVisible();
   });
 
   it('resets the page when searching from a later page', async () => {
     renderPaginatedTable();
 
-    await user.click(screen.getByTestId('pagination-button-next'));
-    await user.type(screen.getByTestId('serviceAccountsSearch'), 'account-00');
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
+    fireEvent.change(screen.getByTestId('serviceAccountsSearch'), {
+      target: { value: 'account-00' },
+    });
 
-    expect(screen.getByText('account-00')).toBeVisible();
+    expect(await screen.findByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
   });
 
   it('resets the page when filtering by role from a later page', async () => {
     renderPaginatedTable();
 
-    await user.click(screen.getByTestId('pagination-button-next'));
-    await user.click(screen.getByRole('button', { name: 'Role Selection' }));
-    await user.click(await screen.findByRole('option', { name: 'editor' }));
+    fireEvent.click(screen.getByTestId('pagination-button-next'));
+    await openRoleFilter();
+    clickRoleOption('editor');
 
     expect(screen.getByText('account-00')).toBeVisible();
     expect(screen.queryByText('account-10')).not.toBeInTheDocument();
+
+    await closeRoleFilter();
   });
 
   it('offers to retry when loading the next cursor page fails', () => {
@@ -219,5 +242,23 @@ describe('ServiceAccountsTable', () => {
 
     expect(screen.getByText('Unable to load more service accounts.')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Try again' })).toBeVisible();
+  });
+
+  it('starts deleting the account from its row', () => {
+    const onDeleteAccount = jest.fn();
+    renderTable({ onDeleteAccount });
+
+    const [firstRowDelete] = screen.getAllByTestId('serviceAccountsDeleteAction');
+    fireEvent.click(firstRowDelete);
+
+    expect(onDeleteAccount).toHaveBeenCalledTimes(1);
+    expect(onDeleteAccount.mock.calls[0][0]).toMatchObject({ id: expect.any(String) });
+  });
+
+  it('offers no row actions unless deleting is allowed', () => {
+    renderTable();
+
+    expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    expect(screen.queryByText('Actions')).not.toBeInTheDocument();
   });
 });

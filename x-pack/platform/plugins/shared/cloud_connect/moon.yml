@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/shared/cloud_connect
 dependsOn:
+  - '@kbn/app-header'
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/management-plugin'

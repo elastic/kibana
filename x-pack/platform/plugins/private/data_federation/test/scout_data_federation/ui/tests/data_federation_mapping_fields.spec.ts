@@ -75,7 +75,9 @@ test.describe('ES|QL Data Federation — mapping fields', { tag: tags.stateful.c
       await expect(dataFederation.mappingFieldRows).toHaveCount(1);
 
       await dataFederation.goToDatasetReviewStep();
-      await expect(page.getByTestId('createDatasetWizardReview-mapped_fields')).toHaveText('2');
+      const mappedFields = page.getByTestId('createDatasetWizardReview-mapped_fields');
+      await expect(mappedFields).toHaveText(/^2 fields/);
+      await expect(mappedFields).toContainText('Custom');
     });
 
     await test.step('return to mapping and add another field', async () => {
@@ -91,7 +93,9 @@ test.describe('ES|QL Data Federation — mapping fields', { tag: tags.stateful.c
 
     await test.step('open the preview again and return to mapping', async () => {
       await dataFederation.goToDatasetReviewStep();
-      await expect(page.getByTestId('createDatasetWizardReview-mapped_fields')).toHaveText('3');
+      const mappedFields = page.getByTestId('createDatasetWizardReview-mapped_fields');
+      await expect(mappedFields).toHaveText(/^3 fields/);
+      await expect(mappedFields).toContainText('Custom');
 
       await dataFederation.goBackToDatasetMappingStep();
       await expect(dataFederation.getMappingFieldRow(REMOVED_FIELD)).toBeVisible();

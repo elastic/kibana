@@ -74,6 +74,11 @@ export const runAfterExecutionWorkflows = async ({
     return;
   }
 
+  // The conversation and round ids would name a conversation that never gets this round.
+  if (context.conversationAccess === 'readOnly') {
+    return;
+  }
+
   if (context.round.status !== ConversationRoundStatus.completed) {
     return;
   }
@@ -118,7 +123,8 @@ export const runAfterExecutionWorkflows = async ({
     AfterExecutionWorkflowParams,
     'round_connector_id' | 'workflow_context' | 'tool_results'
   > = {
-    round_connector_id: roundConnectorId || undefined,
+    round_connector_id:
+      roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
     workflow_context: workflowContext,
     tool_results: toolResults.length > 0 ? toolResults : undefined,
   };

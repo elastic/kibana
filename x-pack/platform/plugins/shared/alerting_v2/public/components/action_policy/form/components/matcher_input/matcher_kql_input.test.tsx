@@ -83,10 +83,10 @@ describe('MatcherInput', () => {
       window.HTMLInputElement.prototype,
       'value'
     )!.set!;
-    nativeInputValueSetter.call(input, 'episode_status: "active"');
+    nativeInputValueSetter.call(input, 'alert_status: "active"');
     input.dispatchEvent(new Event('change', { bubbles: true }));
 
-    expect(onChange).toHaveBeenCalledWith('episode_status: "active"');
+    expect(onChange).toHaveBeenCalledWith('alert_status: "active"');
   });
 
   it('passes placeholder and data-test-subj props through', () => {

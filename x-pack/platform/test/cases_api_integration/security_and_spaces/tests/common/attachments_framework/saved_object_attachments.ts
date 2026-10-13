@@ -14,9 +14,10 @@ import {
   MAP_ATTACHMENT_TYPE,
   MAP_SO_TYPE,
 } from '@kbn/cases-plugin/common/constants/attachments';
-import type { BulkCreateAttachmentsRequestV2 } from '@kbn/cases-plugin/common/types/api';
+import type { BulkCreateUnifiedAttachmentsRequest } from '@kbn/cases-plugin/common/types/api';
+import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
+import { postCaseReq, postUnifiedCommentReq } from '../../../../common/lib/mock';
 import {
   bulkCreateAttachments,
   createCase,
@@ -78,7 +79,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const updatedCase = await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [payload] as unknown as BulkCreateAttachmentsRequestV2,
+            params: [payload] as unknown as BulkCreateUnifiedAttachmentsRequest,
           });
 
           expect(updatedCase.comments?.length).to.be(1);
@@ -99,7 +100,10 @@ export default ({ getService }: FtrProviderContext): void => {
           const updatedCase = await bulkCreateAttachments({
             supertest,
             caseId: postedCase.id,
-            params: [postCommentUserReq, payload] as unknown as BulkCreateAttachmentsRequestV2,
+            params: [
+              postUnifiedCommentReq,
+              payload,
+            ] as unknown as BulkCreateUnifiedAttachmentsRequest,
           });
 
           expect(updatedCase.comments?.length).to.be(2);
@@ -109,11 +113,10 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(attachment).to.be.ok();
           expect(attachment.attachmentId).to.eql(so.attachmentId);
 
-          const userPartner = updatedCase.comments!.find(
-            (comment) => comment.type === 'user' || comment.type === 'comment'
-          ) as unknown as { comment?: string; data?: { content?: string } };
-          const partnerContent = userPartner.data?.content ?? userPartner.comment;
-          expect(partnerContent).to.eql(postCommentUserReq.comment);
+          const commentPartner = updatedCase.comments!.find(
+            (comment) => comment.type === COMMENT_ATTACHMENT_TYPE
+          ) as unknown as { data?: { content?: string } };
+          expect(commentPartner?.data?.content).to.eql(postUnifiedCommentReq.data.content);
         });
       });
     }
@@ -133,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
             attachmentId,
             metadata: { title, soType },
           },
-        ] as unknown as BulkCreateAttachmentsRequestV2,
+        ] as unknown as BulkCreateUnifiedAttachmentsRequest,
       });
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });

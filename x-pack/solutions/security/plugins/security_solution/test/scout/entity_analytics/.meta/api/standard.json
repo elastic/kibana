@@ -1,5 +1,5 @@
 {
-  "sha1": "eaa919eee0d49bbea0ac88faf46b0f9d1f614eac",
+  "sha1": "fd805d16ec4f1951eaba1e114f8b6020901c3a1c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -922,6 +922,86 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/entra_id_owns_maintainer.spec.ts",
         "line": 303,
         "column": 25
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-eac777ba948903c",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) resolves supervises.ids for a manager's email-keyed reports",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 103,
+        "column": 42
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-b9baf3fced80650",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) resolves supervises.ids from user.id when a report has no email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 143,
+        "column": 22
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-0606d31a3d5051c",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) does not build a target from an empty-string email",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 178,
+        "column": 25
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-d70027650b1fb8f",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) writes only reports that exist as entities, drops phantom raw_identifiers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 223,
+        "column": 11
+      }
+    },
+    {
+      "id": "7eca0ac9750c8af-a4f5de5e5fa3593",
+      "title": "Entity Store supervises maintainer (SailPoint, user → user) leaves an actor from another source untouched",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/maintainers/sailpoint_supervises_maintainer.spec.ts",
+        "line": 261,
+        "column": 11
       }
     },
     {

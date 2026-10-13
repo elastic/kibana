@@ -31,6 +31,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { DEFAULT_NAMESPACE } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getCategoryTitle } from '../../service_categories';
 import {
   AWS_REGION_OPTIONS,
@@ -74,8 +75,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
-  const { awsServicesMap, detectAndReviewStep, servicesStep, refetchAwsServiceMatrix } =
-    useOnboardingFlow();
+  const {
+    awsServicesMap,
+    detectAndReviewStep,
+    servicesStep,
+    refetchAwsServiceMatrix,
+    deploymentMethod,
+  } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   // Gate Next on optional package manifests that are still in-flight or have errored.
@@ -118,19 +124,21 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (instanceId: string) =>
     (
       varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-      enabledDataStreams: string[]
+      enabledDataStreams: string[],
+      namespace: string
     ) => {
-      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams);
+      setServiceFieldsAndInputs(instanceId, varsByDataStream, enabledDataStreams, namespace);
       setActiveFlyoutInstanceId(null);
     };
 
   const handleDuplicateAdd = (
     name: string,
     varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
-    enabledDataStreams: string[]
+    enabledDataStreams: string[],
+    namespace: string
   ) => {
     if (!duplicateSourceInstanceId) return;
-    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams);
+    addDuplicate(duplicateSourceInstanceId, name, varsByDataStream, enabledDataStreams, namespace);
     setDuplicateSourceInstanceId(null);
   };
 
@@ -310,7 +318,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         width: '40px',
         render: (inst: ServiceInstance) => {
           const service = awsServicesMap?.get(inst.serviceId);
-          const isEcfOnly = service?.deploymentMethods.every((dm) => dm.method === 'ecf') ?? false;
+          const isEcfOnly = service?.settingsScope === 'ecf';
           if (isEcfOnly && !inst.isDuplicate) return null;
           const isOpen = openMenuInstanceId === inst.instanceId;
           const actionsLabel = i18n.translate(
@@ -617,6 +625,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           service={activeFlyoutService}
           config={getServiceVars(activeFlyoutInstance.instanceId)}
           globalRegion={globalRegion}
+          isNamespaceLocked={
+            !!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]
+          }
+          // Managed integrations put an empty namespace on `default`.
+          resolvedEmptyNamespace={
+            deploymentMethod === 'managed_integration' ? DEFAULT_NAMESPACE : undefined
+          }
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />
