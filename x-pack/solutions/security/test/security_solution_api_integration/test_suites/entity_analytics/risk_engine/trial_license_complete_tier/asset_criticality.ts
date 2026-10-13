@@ -18,7 +18,6 @@ import {
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
   createAssetCriticalityRecords,
-  riskEngineRouteHelpersFactory,
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -29,15 +28,11 @@ export default ({ getService }: FtrProviderContext) => {
   const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
   describe('@ess @serverless @skipInServerlessMKI asset_criticality Asset Criticality APIs', () => {
-    const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
-
     before(async () => {
-      await riskEngineRoutes.cleanUp();
       await cleanAssetCriticality({ log, es });
     });
 
     afterEach(async () => {
-      await riskEngineRoutes.cleanUp();
       await cleanAssetCriticality({ log, es });
     });
 
