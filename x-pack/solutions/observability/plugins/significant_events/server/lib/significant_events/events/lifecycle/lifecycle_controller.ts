@@ -10,7 +10,9 @@ import type {
   SignificantEventManualStatus,
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import type { StatusOutcome } from './status_outcome';
+
+/** What the verdicts of an event's members add up to, or what one member's verdict says. */
+export type StatusOutcome = 'breaching' | 'clean' | 'no_data';
 
 /**
  * The one place that decides a significant event's status. Every caller submits a typed change, built with `StatusChange`;
