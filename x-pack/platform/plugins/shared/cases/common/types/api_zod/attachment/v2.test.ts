@@ -13,7 +13,13 @@ import {
   MAX_OWNER_LENGTH,
   MAX_SAVED_OBJECT_VERSION_LENGTH,
 } from '../../../constants';
-import { UnifiedAttachmentPutRouteRequestSchema, UnifiedAttachmentRouteRequestSchema } from './v2';
+import {
+  AttachmentPatchRequestSchemaV2,
+  BulkCreateUnifiedAttachmentsRequestSchema,
+  UnifiedAttachmentBoundsSchema,
+  UnifiedAttachmentPutRouteRequestSchema,
+  UnifiedAttachmentRouteRequestSchema,
+} from './v2';
 
 describe('UnifiedAttachmentRouteRequestSchema', () => {
   const referencePayload = {
@@ -112,15 +118,140 @@ describe('UnifiedAttachmentRouteRequestSchema', () => {
     });
 
     expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ code: 'custom', path: ['data'] }),
+    ]);
   });
 
   it('rejects metadata over the max serialized length', () => {
+    // The nested string fits its own cap, so only the serialized-length check can reject it.
+    const result = UnifiedAttachmentRouteRequestSchema.safeParse({
+      ...referencePayload,
+      metadata: { index: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH) },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ code: 'custom', path: ['metadata'] }),
+    ]);
+  });
+
+  it('rejects a nested array over the max size', () => {
+    const result = UnifiedAttachmentRouteRequestSchema.safeParse({
+      ...valuePayload,
+      data: { list: Array(MAX_ATTACHMENT_JSON_LENGTH + 1).fill(0) },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'too_big', origin: 'array', path: ['data', 'list'] }),
+      ])
+    );
+  });
+});
+
+describe('BulkCreateUnifiedAttachmentsRequestSchema', () => {
+  const comment = { type: 'comment', owner: 'securitySolution', data: { content: 'hello' } };
+
+  it('accepts bounded attachments', () => {
+    expect(BulkCreateUnifiedAttachmentsRequestSchema.safeParse([comment]).success).toBe(true);
+  });
+
+  it('rejects an attachment over the bounds', () => {
     expect(
-      UnifiedAttachmentRouteRequestSchema.safeParse({
-        ...referencePayload,
-        metadata: { index: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH) },
+      BulkCreateUnifiedAttachmentsRequestSchema.safeParse([
+        comment,
+        { ...comment, owner: 'a'.repeat(MAX_OWNER_LENGTH + 1) },
+      ]).success
+    ).toBe(false);
+  });
+});
+
+describe('AttachmentPatchRequestSchemaV2', () => {
+  const unifiedPatch = {
+    id: 'attachment-1',
+    version: 'WzEsMV0=',
+    type: 'comment',
+    owner: 'securitySolution',
+    data: { content: 'hello' },
+  };
+
+  it('accepts a unified patch', () => {
+    expect(AttachmentPatchRequestSchemaV2.safeParse(unifiedPatch).success).toBe(true);
+  });
+
+  it('accepts a legacy patch', () => {
+    expect(
+      AttachmentPatchRequestSchemaV2.safeParse({
+        id: 'attachment-1',
+        version: 'WzEsMV0=',
+        type: 'user',
+        comment: 'hello',
+        owner: 'securitySolution',
+      }).success
+    ).toBe(true);
+  });
+
+  it('rejects a unified patch with oversized data', () => {
+    expect(
+      AttachmentPatchRequestSchemaV2.safeParse({
+        ...unifiedPatch,
+        data: { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1) },
       }).success
     ).toBe(false);
+  });
+});
+
+describe('UnifiedAttachmentBoundsSchema', () => {
+  const payload = { type: 'security.alert', owner: 'securitySolution', attachmentId: 'alert-1' };
+
+  it('accepts a payload without data or metadata', () => {
+    expect(UnifiedAttachmentBoundsSchema.safeParse(payload).success).toBe(true);
+  });
+
+  it('ignores keys owned by the registered schema', () => {
+    expect(UnifiedAttachmentBoundsSchema.safeParse({ ...payload, extra: 'kept' }).success).toBe(
+      true
+    );
+  });
+
+  it('rejects a nested string in data over the max length', () => {
+    const result = UnifiedAttachmentBoundsSchema.safeParse({
+      ...payload,
+      data: { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1) },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'too_big', origin: 'string', path: ['data', 'content'] }),
+      ])
+    );
+  });
+
+  it('rejects a key in metadata over the max length', () => {
+    const key = 'k'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1);
+    const result = UnifiedAttachmentBoundsSchema.safeParse({ ...payload, metadata: { [key]: 1 } });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'invalid_key', path: ['metadata', key] }),
+      ])
+    );
+  });
+
+  it('rejects metadata over the max serialized length', () => {
+    const result = UnifiedAttachmentBoundsSchema.safeParse({
+      ...payload,
+      metadata: { index: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH) },
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ code: 'custom', path: ['metadata'] }),
+    ]);
   });
 });
 

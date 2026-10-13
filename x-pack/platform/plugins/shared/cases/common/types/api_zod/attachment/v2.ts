@@ -25,14 +25,7 @@ import {
 import {
   UnifiedAttachmentPayloadSchema,
   UnifiedAttachmentSchema,
-  UnifiedReferenceAttachmentPayloadSchema,
-  UnifiedValueAttachmentPayloadSchema,
 } from '../../domain_zod/attachment/v2';
-
-export const UnifiedAttachmentPutRequestSchema = z.union([
-  UnifiedReferenceAttachmentPayloadSchema.extend({ version: z.string() }),
-  UnifiedValueAttachmentPayloadSchema.extend({ version: z.string() }),
-]);
 
 const attachmentTypeSchema = z.string().max(MAX_ATTACHMENT_TYPE_LENGTH);
 const attachmentOwnerSchema = z.string().max(MAX_OWNER_LENGTH);
@@ -40,6 +33,14 @@ const attachmentIdSchema = z.union([
   z.string().max(MAX_ATTACHMENT_ID_LENGTH),
   z.array(z.string().max(MAX_ATTACHMENT_ID_LENGTH)).max(MAX_IDS_PER_ATTACHMENT),
 ]);
+const attachmentDataSchema = limitedJsonObjectSchema({
+  fieldName: 'data',
+  max: MAX_ATTACHMENT_JSON_LENGTH,
+});
+const attachmentMetadataSchema = limitedJsonObjectSchema({
+  fieldName: 'metadata',
+  max: MAX_ATTACHMENT_JSON_LENGTH,
+});
 
 /**
  * Type-agnostic bounds checked on every unified attachment write, before its registered schema.
@@ -48,27 +49,23 @@ export const UnifiedAttachmentBoundsSchema = z.object({
   type: attachmentTypeSchema,
   owner: attachmentOwnerSchema,
   attachmentId: attachmentIdSchema.optional(),
+  data: attachmentDataSchema.nullable().optional(),
+  metadata: attachmentMetadataSchema.nullable().optional(),
 });
 
 const unifiedReferenceAttachmentRouteRequestShape = {
   type: attachmentTypeSchema,
   attachmentId: attachmentIdSchema,
   owner: attachmentOwnerSchema,
-  data: limitedJsonObjectSchema({ fieldName: 'data', max: MAX_ATTACHMENT_JSON_LENGTH })
-    .nullable()
-    .optional(),
-  metadata: limitedJsonObjectSchema({ fieldName: 'metadata', max: MAX_ATTACHMENT_JSON_LENGTH })
-    .nullable()
-    .optional(),
+  data: attachmentDataSchema.nullable().optional(),
+  metadata: attachmentMetadataSchema.nullable().optional(),
 };
 
 const unifiedValueAttachmentRouteRequestShape = {
   type: attachmentTypeSchema,
-  data: limitedJsonObjectSchema({ fieldName: 'data', max: MAX_ATTACHMENT_JSON_LENGTH }),
+  data: attachmentDataSchema,
   owner: attachmentOwnerSchema,
-  metadata: limitedJsonObjectSchema({ fieldName: 'metadata', max: MAX_ATTACHMENT_JSON_LENGTH })
-    .nullable()
-    .optional(),
+  metadata: attachmentMetadataSchema.nullable().optional(),
 };
 
 const versionShape = { version: z.string().max(MAX_SAVED_OBJECT_VERSION_LENGTH) };
@@ -99,13 +96,18 @@ export const AttachmentRequestWithoutRefsSchemaV2 = z.union([
   UnifiedAttachmentPayloadSchema,
 ]);
 
+const idShape = { id: z.string().max(MAX_ATTACHMENT_ID_LENGTH) };
+
 export const AttachmentPatchRequestSchemaV2 = z.union([
   AttachmentPatchRequestSchema,
-  UnifiedAttachmentPutRequestSchema.and(z.object({ id: z.string() })),
+  z
+    .object({ ...unifiedReferenceAttachmentRouteRequestShape, ...versionShape, ...idShape })
+    .strict(),
+  z.object({ ...unifiedValueAttachmentRouteRequestShape, ...versionShape, ...idShape }).strict(),
 ]);
 
 export const BulkCreateUnifiedAttachmentsRequestSchema = limitedArraySchema({
-  codec: UnifiedAttachmentPayloadSchema,
+  codec: UnifiedAttachmentRouteRequestSchema,
   min: 0,
   max: MAX_BULK_CREATE_ATTACHMENTS,
   fieldName: 'attachments',

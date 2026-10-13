@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { MAX_ATTACHMENT_JSON_LENGTH } from '@kbn/cases-plugin/common/constants';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { postCaseReq, getPostCaseRequest } from '../../../../common/lib/mock';
@@ -71,6 +72,41 @@ export default ({ getService }: FtrProviderContext): void => {
           comment: 'This is a cool comment',
           owner: 'securitySolutionFixture',
         } as unknown as typeof unifiedCommentReq,
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('should reject an attachment with oversized data', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+
+      await addAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        params: {
+          ...unifiedCommentReq,
+          data: { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1) },
+        },
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('should reject a replace with oversized data', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const created = await addAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        params: unifiedCommentReq,
+      });
+
+      await updateAttachmentV2({
+        supertest,
+        caseId: postedCase.id,
+        attachmentId: created.id,
+        req: {
+          ...unifiedCommentReq,
+          version: created.version,
+          data: { content: 'a'.repeat(MAX_ATTACHMENT_JSON_LENGTH + 1) },
+        },
         expectedHttpCode: 400,
       });
     });
