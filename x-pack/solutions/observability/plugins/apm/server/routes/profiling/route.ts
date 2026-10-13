@@ -33,7 +33,8 @@ const servicesFlamegraphRoute = createApmServerRoute({
     ]);
     if (profilingDataAccessStart) {
       const { serviceName } = params.path;
-      const { start, end, kuery, transactionName, transactionType, environment } = params.query;
+      const { start, end, kuery, transactionName, transactionType, environment, schema } =
+        params.query;
 
       const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
       const stacktraceIdsField = await getStacktracesIdsField({
@@ -60,6 +61,7 @@ const servicesFlamegraphRoute = createApmServerRoute({
         transactionType,
         indices,
         stacktraceIdsField,
+        schema,
       });
     }
 
@@ -90,6 +92,7 @@ const servicesFunctionsRoute = createApmServerRoute({
         transactionName,
         transactionType,
         environment,
+        schema,
       } = params.query;
       const { serviceName } = params.path;
 
@@ -120,6 +123,7 @@ const servicesFunctionsRoute = createApmServerRoute({
         transactionName,
         environment,
         transactionType,
+        schema,
       });
     }
 

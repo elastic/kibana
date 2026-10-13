@@ -31,7 +31,7 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
       await plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
-      const { start, end, environment, documentType, rollupInterval, kuery } = params.query;
+      const { start, end, environment, documentType, rollupInterval, kuery, schema } = params.query;
       const { serviceName } = params.path;
 
       const { hostNames, containerIds } = await getServiceCorrelationFields({
@@ -60,6 +60,7 @@ const profilingHostsFlamegraphRoute = createApmServerRoute({
           containerIds.length > 0
             ? mergeKueries([`(${toKueryFilterFormat(CONTAINER_ID, containerIds)})`, kuery])
             : mergeKueries([`(${toKueryFilterFormat(HOST_NAME, hostNames)})`, kuery]),
+        schema,
       });
 
       return { flamegraph, hostNames, containerIds };
@@ -82,8 +83,17 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
       await plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
-      const { start, end, environment, startIndex, endIndex, documentType, rollupInterval, kuery } =
-        params.query;
+      const {
+        start,
+        end,
+        environment,
+        startIndex,
+        endIndex,
+        documentType,
+        rollupInterval,
+        kuery,
+        schema,
+      } = params.query;
       const { serviceName } = params.path;
 
       const { hostNames, containerIds } = await getServiceCorrelationFields({
@@ -115,6 +125,7 @@ const profilingHostsFunctionsRoute = createApmServerRoute({
           containerIds.length > 0
             ? mergeKueries([`(${toKueryFilterFormat(CONTAINER_ID, containerIds)})`, kuery])
             : mergeKueries([`(${toKueryFilterFormat(HOST_NAME, hostNames)})`, kuery]),
+        schema,
       });
 
       return { functions, hostNames, containerIds };

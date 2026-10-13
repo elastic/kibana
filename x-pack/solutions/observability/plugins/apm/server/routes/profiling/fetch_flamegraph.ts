@@ -6,6 +6,7 @@
  */
 
 import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
@@ -24,6 +25,8 @@ interface Params {
   transactionType?: string;
   indices?: string[];
   stacktraceIdsField?: string;
+  /** Universal Profiling (ECS) when undefined */
+  schema: ProfilingSchema | undefined;
 }
 
 export function fetchFlamegraph({
@@ -39,6 +42,7 @@ export function fetchFlamegraph({
   transactionType,
   indices,
   stacktraceIdsField,
+  schema,
 }: Params) {
   return profilingDataAccessStart.services.fetchFlamechartData({
     core,
@@ -46,6 +50,7 @@ export function fetchFlamegraph({
     totalSeconds: end - start,
     indices,
     stacktraceIdsField,
+    schema,
     query: {
       bool: {
         filter: [
