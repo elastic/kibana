@@ -57,9 +57,13 @@ export const getPendingSteps = (
     steps.set(stepId, [...(steps.get(stepId) ?? []), { job, label, patterns }]);
   }
 
-  return [...steps.values()].filter(
-    (attempts) => !build.meta_data[`${attempts[attempts.length - 1].job.id}_github_test_reported`]
-  );
+  return [...steps.values()]
+    .map((attempts) =>
+      attempts.slice(
+        attempts.findLastIndex(({ job }) => build.meta_data[`${job.id}_github_test_reported`]) + 1
+      )
+    )
+    .filter((attempts) => attempts.length);
 };
 
 /** Counts the JUnit and Scout failures in a directory of downloaded reports. */
@@ -171,7 +175,8 @@ export const reportFailedTestIssues = async (): Promise<void> => {
     buildkite.setAnnotation(
       'failed-test-github-issues',
       'error',
-      `**GitHub failure issues**\n\n${[...new Set(links)].join('<br />\n')}`
+      `**GitHub failure issues**\n\n${[...new Set(links)].join('<br />\n')}`,
+      true
     );
   }
   if (failedSteps) {

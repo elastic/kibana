@@ -83,6 +83,27 @@ describe('getPendingSteps', () => {
     ).toEqual([]);
   });
 
+  it('only includes attempts after the most recently reported attempt', () => {
+    const build = {
+      jobs: [job('a1', 'ftr'), job('a2', 'ftr'), job('a3', 'ftr'), job('a4', 'ftr')],
+      meta_data: {
+        a1_github_test_reporting: reporting(false),
+        a2_github_test_reporting: reporting(false),
+        a3_github_test_reporting: reporting(false),
+        a4_github_test_reporting: reporting(false),
+        a1_github_test_reported: 'true',
+        a3_github_test_reported: 'true',
+      },
+    };
+
+    expect(
+      getPendingSteps(
+        build,
+        build.jobs.map(({ id }) => artifact(id, `target/junit/TEST-${id}.xml`))
+      ).map((attempts) => attempts.map(({ job: { id } }) => id))
+    ).toEqual([['a4']]);
+  });
+
   it('only includes Scout reports for eligible attempts', () => {
     const build = {
       jobs: [job('a1', 'scout'), job('a2', 'scout')],
@@ -140,8 +161,10 @@ describe('reportFailedTestIssues', () => {
   let failuresByJob: Record<string, number>;
   let failingReporterJob: string | undefined;
 
-  const run = (reported: string[] = []) => {
-    const jobs = [job('a1', 'step-a'), job('a2', 'step-a'), job('b1', 'step-b')];
+  const run = (
+    reported: string[] = [],
+    jobs = [job('a1', 'step-a'), job('a2', 'step-a'), job('b1', 'step-b')]
+  ) => {
     mockGetCurrentBuild.mockResolvedValue({
       web_url: WEB_URL,
       jobs,
@@ -170,9 +193,10 @@ describe('reportFailedTestIssues', () => {
     failuresByJob = {};
     failingReporterJob = undefined;
     jest.clearAllMocks();
+    mockSetAnnotation.mockReset();
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
-    mockExecFileSync.mockImplementation((command: string, args: string[]) => {
+    mockExecFileSync.mockImplementation((command: string, args: string[], options) => {
       if (command.endsWith('download_artifact.sh')) {
         const [, destination, , jobId] = args;
         mkdirSync(Path.join(destination, 'target/junit/0'), { recursive: true });
@@ -187,6 +211,13 @@ describe('reportFailedTestIssues', () => {
         args.includes(`--build-url=${WEB_URL}#${failingReporterJob}`)
       ) {
         throw new Error('reporter failed');
+      } else if (command === process.execPath) {
+        const jobId = options.env.BUILDKITE_JOB_ID;
+        mkdirSync(Path.join(options.cwd, 'target/test_failures'), { recursive: true });
+        writeFileSync(
+          Path.join(options.cwd, 'target/test_failures/failure.json'),
+          JSON.stringify({ githubIssue: `https://github.com/elastic/kibana/issues/${jobId}` })
+        );
       }
     });
   });
@@ -209,9 +240,14 @@ describe('reportFailedTestIssues', () => {
 
   it('keeps a failed step pending and skips reported steps when Post-Build is retried', async () => {
     failingReporterJob = 'a2';
+    let annotation = '';
+    mockSetAnnotation.mockImplementation((_context, _style, value: string, append = false) => {
+      annotation = append ? annotation + value : value;
+    });
 
     await expect(run()).rejects.toThrow('Failed to report failed tests for 1 steps');
     expect(mockSetMetadata.mock.calls).toEqual([['b1_github_test_reported', 'true']]);
+    expect(annotation).toContain(`[[job]](${WEB_URL}#b1)`);
 
     mockExecFileSync.mockClear();
     mockSetMetadata.mockClear();
@@ -220,10 +256,32 @@ describe('reportFailedTestIssues', () => {
     await run(['b1']);
     expect(reporterBuildUrls()).toEqual([`--build-url=${WEB_URL}#a2`]);
     expect(mockSetMetadata.mock.calls).toEqual([['a2_github_test_reported', 'true']]);
+    expect(annotation).toContain(`[[job]](${WEB_URL}#b1)`);
+    expect(annotation).toContain(`[[job]](${WEB_URL}#a2)`);
 
     mockExecFileSync.mockClear();
     await run(['a2', 'b1']);
     expect(mockExecFileSync).not.toHaveBeenCalled();
+  });
+
+  it('only downloads and reports new test-step retries after an earlier Post-Build run', async () => {
+    failuresByJob = { a1: 30, a2: 20, b1: 0, a3: 1 };
+    await run();
+    mockExecFileSync.mockClear();
+    mockSetMetadata.mockClear();
+
+    await run(
+      ['a2', 'b1'],
+      [job('a1', 'step-a'), job('a2', 'step-a'), job('a3', 'step-a'), job('b1', 'step-b')]
+    );
+
+    expect(
+      mockExecFileSync.mock.calls
+        .filter(([command]) => command.endsWith('download_artifact.sh'))
+        .map(([, args]) => args[3])
+    ).toEqual(['a3']);
+    expect(reporterBuildUrls()).toEqual([`--build-url=${WEB_URL}#a3`]);
+    expect(mockSetMetadata.mock.calls).toEqual([['a3_github_test_reported', 'true']]);
   });
 
   it('skips reporting and fails when the failures of all reports exceed the limit', async () => {
