@@ -689,6 +689,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
       actionTypes: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
       actionPolicies: `${ELASTIC_DOCS}explore-analyze/alerting/experimental-alerting-system/action-policies/about-action-policies`,
+      compareAlertingSystems: `${ELASTIC_DOCS}explore-analyze/alerting/compare-alerting-systems`,
       apmRulesErrorCount: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-error-count-threshold-rule`,
       apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
       apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
