@@ -19,6 +19,7 @@ import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { ToastWithRichTitle } from './deduplicate_toasts';
 import { deduplicateToasts } from './deduplicate_toasts';
 import type { ToastsTelemetry } from './telemetry';
+import type { GetMountedText, ToastContentPart } from './toast_announcer';
 import { ToastAnnouncer } from './toast_announcer';
 
 interface Props {
@@ -32,8 +33,6 @@ interface State {
   idToToasts: Record<string, Toast[]>;
 }
 
-type ToastContentPart = 'title' | 'text';
-
 const getContentNodeKey = (toastId: string, part: ToastContentPart) => `${toastId}:${part}`;
 
 export const GlobalToastList: FunctionComponent<Props> = ({
@@ -43,6 +42,7 @@ export const GlobalToastList: FunctionComponent<Props> = ({
 }) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
+  // Rendered mount point content, so that `ToastAnnouncer` can read its text
   const contentNodes = useRef(new Map<string, HTMLElement>());
 
   const renderContent = (
@@ -75,8 +75,8 @@ export const GlobalToastList: FunctionComponent<Props> = ({
     text: renderContent(toast.id, 'text', toast.text),
   });
 
-  const getMountedText = useCallback(
-    (toastId: string, part: ToastContentPart) =>
+  const getMountedText = useCallback<GetMountedText>(
+    (toastId, part) =>
       contentNodes.current.get(getContentNodeKey(toastId, part))?.textContent ?? '',
     []
   );
@@ -136,10 +136,7 @@ export const GlobalToastList: FunctionComponent<Props> = ({
         aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
           defaultMessage: 'Notification message list',
         })}
-        /**
-         * Announcements are handled by `ToastAnnouncer`, which waits for open modals to close
-         * so that toasts added while a modal is open are not lost to screen readers.
-         */
+        // Announced by `ToastAnnouncer` instead, see why there
         aria-live="off"
         data-test-subj="globalToastList"
         toasts={toasts.map(convertToEui)}

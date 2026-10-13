@@ -104,43 +104,45 @@ describe('ToastAnnouncer', () => {
     );
   });
 
-  it('waits for an open modal to close before announcing', async () => {
-    const modal = document.createElement('div');
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    document.body.appendChild(modal);
-
-    const { addToast } = renderToastList();
-
-    addToast({ id: '1', title: 'Synonyms set deleted', color: 'success' });
-    await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS * 10);
-
-    expect(getAnnouncement()).toBe('');
-
-    await act(async () => {
-      modal.remove();
-    });
-    await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
-
-    expect(getAnnouncement()).toContain('Success: Synonyms set deleted');
-  });
-
-  it.each([
-    ['aria-hidden', 'true'],
-    ['inert', ''],
-  ])('waits until an ancestor no longer hides the announcer with %s', async (attribute, value) => {
+  // Each case hides the announcer from assistive technologies and returns a function to undo it
+  it.each<[string, (container: HTMLElement) => () => void]>([
+    [
+      'an open aria-modal element',
+      () => {
+        const modal = document.createElement('div');
+        modal.setAttribute('aria-modal', 'true');
+        document.body.appendChild(modal);
+        return () => modal.remove();
+      },
+    ],
+    [
+      'an aria-hidden ancestor',
+      (container) => {
+        container.setAttribute('aria-hidden', 'true');
+        return () => container.removeAttribute('aria-hidden');
+      },
+    ],
+    [
+      'an inert ancestor',
+      (container) => {
+        container.setAttribute('inert', '');
+        return () => container.removeAttribute('inert');
+      },
+    ],
+  ])('waits while %s hides the announcer', async (_, hide) => {
     const { addToast, container } = renderToastList();
-    container.setAttribute(attribute, value);
+    const unhide = hide(container);
 
     addToast({ id: '1', title: 'Field saved', color: 'success' });
     await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS * 10);
 
     // The visual toast renders the title too, so check for the announcement prefix
-    expect(container.textContent).not.toContain('Success:');
+    expect(document.body.textContent).not.toContain('Success:');
 
-    await act(async () => {
-      container.removeAttribute(attribute);
-    });
+    unhide();
+    // Announced once the announcer has been exposed for a full delay
+    await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
+    expect(document.body.textContent).not.toContain('Success:');
     await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
 
     expect(getAnnouncement()).toContain('Success: Field saved');

@@ -13,54 +13,61 @@ import { i18n } from '@kbn/i18n';
 import type { Toast } from '@kbn/core-notifications-browser';
 
 /**
- * Delay before announcing, so that focus restoration and layout changes triggered by
- * the same user action (e.g. a modal closing) settle and do not drop the announcement.
+ * Delay before announcing, and between checks while the announcer is hidden. It lets focus
+ * restoration and layout changes caused by the same action (e.g. a modal closing) settle,
+ * so they don't cut the announcement off.
  */
 export const TOAST_ANNOUNCEMENT_DELAY_MS = 500;
 
-/**
- * Content hidden from the accessibility tree is never announced, including live regions,
- * and updates made while hidden are not replayed once it becomes visible again.
- */
-const HIDDEN_ANCESTOR_SELECTOR = '[aria-hidden="true"], [inert]';
+export type ToastContentPart = 'title' | 'text';
 
-/**
- * While a modal is open, screen readers ignore everything outside it. This covers
- * `aria-modal` elements (EuiModal, EuiConfirmModal, overlay EuiFlyout, EuiPopover
- * with `ownFocus`) and native `<dialog>` elements opened with `showModal()`.
- */
-const OPEN_MODAL_SELECTOR = '[aria-modal="true"]';
-const OPEN_NATIVE_MODAL_SELECTOR = 'dialog:modal';
+export type GetMountedText = (toastId: string, part: ToastContentPart) => string;
 
-const OBSERVED_ATTRIBUTES = ['aria-modal', 'aria-hidden', 'inert', 'open'];
-
-const hasOpenNativeModal = (): boolean => {
-  try {
-    return document.querySelector(OPEN_NATIVE_MODAL_SELECTOR) !== null;
-  } catch {
-    // `:modal` is not supported by every environment (e.g. older browsers, jsdom)
-    return false;
-  }
-};
-
-const isHiddenFromAssistiveTech = (element: HTMLElement | null): boolean =>
-  element?.closest(HIDDEN_ANCESTOR_SELECTOR) != null ||
-  document.querySelector(OPEN_MODAL_SELECTOR) !== null ||
-  hasOpenNativeModal();
+interface Props {
+  /** Toasts grouped by the id of the toast that represents them in the list. */
+  idToToasts: Record<string, Toast[]>;
+  /** Returns the rendered text of a toast's mount point title or text. */
+  getMountedText: GetMountedText;
+}
 
 interface Announcement {
   id: string;
   message: string;
 }
 
-interface Props {
-  /** Toasts to announce, keyed by the id of the toast that represents them in the list. */
-  idToToasts: Record<string, Toast[]>;
-  /** Returns the rendered text of a toast's mount point content, if any. */
-  getMountedText: (toastId: string, part: 'title' | 'text') => string;
-}
+const hasOpenNativeModal = (): boolean => {
+  try {
+    return document.querySelector('dialog:modal') !== null;
+  } catch {
+    // jsdom doesn't support `:modal`
+    return false;
+  }
+};
 
-const getAnnouncementMessage = (color: Toast['color'], content: string): string => {
+/**
+ * Screen readers ignore content hidden from the accessibility tree, live regions included,
+ * and don't replay updates made while it was hidden. The announcer is hidden when:
+ * - an ancestor has `aria-hidden="true"` or `inert`, e.g. set by a focus trap isolating its content
+ * - a modal is open: EuiModal, EuiConfirmModal, overlay EuiFlyout and EuiPopover with `ownFocus`
+ *   set `aria-modal="true"`, and native `<dialog>`s opened with `showModal()` match `:modal`
+ */
+const isHiddenFromAssistiveTech = (announcer: HTMLElement | null): boolean =>
+  Boolean(announcer?.closest('[aria-hidden="true"], [inert]')) ||
+  document.querySelector('[aria-modal="true"]') !== null ||
+  hasOpenNativeModal();
+
+/** Returns the toast's title and text as a single line of plain text. */
+const getToastContent = (id: string, toast: Toast, getMountedText: GetMountedText): string =>
+  (['title', 'text'] as const)
+    .map((part) => {
+      const value = toast[part];
+      return typeof value === 'function' ? getMountedText(id, part) : value ?? '';
+    })
+    .map((text) => text.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('. ');
+
+const withToastType = (color: Toast['color'], content: string): string => {
   switch (color) {
     case 'success':
       return i18n.translate('core.notifications.globalToast.announcement.success', {
@@ -86,134 +93,77 @@ const getAnnouncementMessage = (color: Toast['color'], content: string): string 
 };
 
 /**
- * Announces newly added toasts to assistive technologies once nothing (e.g. an open modal)
- * hides the announcement from them.
+ * Announces new toasts to screen readers. Unlike the live region of EuiGlobalToastList, it
+ * waits until nothing (e.g. an open modal) hides it, so toasts added meanwhile are not lost.
  */
 export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMountedText }) => {
-  const [pendingIds, setPendingIds] = useState<string[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const seenToastIds = useRef(new Set<string>());
   const announcerRef = useRef<HTMLDivElement>(null);
-  const latestIdToToasts = useRef(idToToasts);
-  latestIdToToasts.current = idToToasts;
-  const latestGetMountedText = useRef(getMountedText);
-  latestGetMountedText.current = getMountedText;
+  const seenToastIds = useRef(new Set<string>());
+  const pendingIds = useRef(new Set<string>());
 
   useEffect(() => {
-    const currentToastIds = new Set<string>();
-    const idsWithNewToasts: string[] = [];
-
+    // A group is pending when any of its toasts is new, so repeated toasts are announced again
+    const isNew = ({ id }: Toast) => !seenToastIds.current.has(id);
     Object.entries(idToToasts).forEach(([id, toasts]) => {
-      let hasNewToast = false;
-      toasts.forEach((toast) => {
-        currentToastIds.add(toast.id);
-        if (!seenToastIds.current.has(toast.id)) {
-          hasNewToast = true;
-        }
-      });
-      if (hasNewToast) {
-        idsWithNewToasts.push(id);
+      if (toasts.some(isNew)) {
+        pendingIds.current.add(id);
       }
     });
+    seenToastIds.current = new Set(
+      Object.values(idToToasts).flatMap((toasts) => toasts.map(({ id }) => id))
+    );
 
-    seenToastIds.current = currentToastIds;
-
-    setPendingIds((prevIds) => {
-      const nextIds = [...new Set([...prevIds, ...idsWithNewToasts])].filter(
-        (id) => idToToasts[id] !== undefined
-      );
-      return nextIds.length === prevIds.length && nextIds.every((id, i) => id === prevIds[i])
-        ? prevIds
-        : nextIds;
-    });
-  }, [idToToasts]);
-
-  useEffect(() => {
-    if (!pendingIds.length) {
+    if (!pendingIds.current.size) {
       return;
     }
 
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    let observer: MutationObserver | undefined;
-
     const announce = () => {
-      const nextAnnouncements = pendingIds.flatMap((id): Announcement[] => {
-        const toast = latestIdToToasts.current[id]?.[0];
+      const nextAnnouncements = [...pendingIds.current].flatMap((id): Announcement[] => {
+        // Toasts dismissed before they could be announced are skipped
+        const toast = idToToasts[id]?.[0];
         if (!toast) {
           return [];
         }
-
-        const getText = (part: 'title' | 'text') => {
-          const value = toast[part];
-          return typeof value === 'string' ? value : latestGetMountedText.current(id, part);
-        };
-        const content = [getText('title'), getText('text')]
-          .map((text) => text.replace(/\s+/g, ' ').trim())
-          .filter(Boolean)
-          .join('. ');
-
-        return content ? [{ id, message: getAnnouncementMessage(toast.color, content) }] : [];
+        const content = getToastContent(id, toast, getMountedText);
+        return content ? [{ id, message: withToastType(toast.color, content) }] : [];
       });
 
-      setPendingIds([]);
+      pendingIds.current.clear();
       if (nextAnnouncements.length) {
         setAnnouncements(nextAnnouncements);
       }
     };
 
-    const isHidden = () => isHiddenFromAssistiveTech(announcerRef.current);
-
-    const waitUntilExposed = () => {
-      observer = new MutationObserver(() => {
-        if (isHidden()) {
-          return;
-        }
-        observer?.disconnect();
-        observer = undefined;
-        scheduleAnnouncement();
-      });
-      observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: OBSERVED_ATTRIBUTES,
-      });
-    };
-
-    const scheduleAnnouncement = () => {
+    // Announce once the announcer has been exposed to assistive technologies for a full delay
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let wasHidden = false;
+    const announceWhenExposed = () => {
       timeoutId = setTimeout(() => {
-        if (isHidden()) {
-          waitUntilExposed();
-          return;
+        const isHidden = isHiddenFromAssistiveTech(announcerRef.current);
+        if (isHidden || wasHidden) {
+          wasHidden = isHidden;
+          announceWhenExposed();
+        } else {
+          announce();
         }
-        announce();
       }, TOAST_ANNOUNCEMENT_DELAY_MS);
     };
+    announceWhenExposed();
 
-    scheduleAnnouncement();
+    return () => clearTimeout(timeoutId);
+  }, [idToToasts, getMountedText]);
 
-    return () => {
-      clearTimeout(timeoutId);
-      observer?.disconnect();
-    };
-  }, [pendingIds]);
-
-  // Memoized so that re-renders of the toast list don't re-trigger the announcement
-  const announcementContent = useMemo(
-    () =>
-      announcements.length ? (
-        <>
-          {announcements.map(({ id, message }) => (
-            <p key={id}>{message}</p>
-          ))}
-        </>
-      ) : null,
+  // EuiScreenReaderLive announces whenever its children change identity, so keep them stable
+  // across re-renders of the toast list
+  const content = useMemo(
+    () => announcements.map(({ id, message }) => <p key={id}>{message}</p>),
     [announcements]
   );
 
   return (
     <div ref={announcerRef}>
-      <EuiScreenReaderLive>{announcementContent}</EuiScreenReaderLive>
+      <EuiScreenReaderLive>{content}</EuiScreenReaderLive>
     </div>
   );
 };
