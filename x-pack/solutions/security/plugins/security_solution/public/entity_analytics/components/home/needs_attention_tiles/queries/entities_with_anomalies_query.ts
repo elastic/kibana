@@ -10,32 +10,39 @@ import type { TimeRange } from '../../entities_grid/common';
 import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
-  buildLookback,
   ML_ANOMALY_INDICES,
 } from '../../entities_grid/queries/esql';
 import {
   buildPerTypeEuidEvals,
   evalGuardedTypedEuids,
 } from '../../entities_grid/queries/euid_pipeline';
+import { buildPeriodCondition } from './tile_period';
+import type { TilePeriod } from './tile_period';
 
 /**
  * Builds a single ES|QL query that counts distinct entities with at least one
  * ML anomaly record within the selected time window, using a LOOKUP JOIN from
  * anomalies → entity-latest on the typed EUID (entity.id).
+ *
+ * `period` shifts the time window back by one range ('previous'), for the period-over-period
+ * delta; the default 'current' builds the query exactly as before.
  */
 export const buildEntitiesWithAnomaliesCountQuery = (
   entitiesIndexName: string,
   timeRange: TimeRange = '24h',
   entityFilterClauses: string[] = [],
-  jobIds: string[] = []
+  jobIds: string[] = [],
+  period: TilePeriod = 'current'
 ): string => {
   const parts: string[] = [];
 
   parts.push(`SET unmapped_fields="nullify";`);
   parts.push(`FROM ${ML_ANOMALY_INDICES}`);
   parts.push(
-    `| WHERE ${ANOMALY_RECORD_FILTER} AND @timestamp >= ${buildLookback(
-      timeRange
+    `| WHERE ${ANOMALY_RECORD_FILTER} AND ${buildPeriodCondition(
+      '@timestamp',
+      timeRange,
+      period
     )} AND ${buildAnomalyJobFilter(jobIds)}`
   );
 
