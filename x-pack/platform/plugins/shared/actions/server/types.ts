@@ -260,6 +260,32 @@ export interface ActionTypeCoreFields<
    */
   isExperimental?: boolean;
   /**
+   * Auth type ids from the connector spec that opted into sandbox credential injection.
+   * Populated for spec-backed connectors via createConnectorTypeFromSpec.
+   */
+  sandboxSupportedAuthTypes?: readonly string[];
+  /**
+   * Per-instance check for stack connectors that are not driven by sandboxSupportedAuthTypes.
+   * Also called when listing connectors, where secrets are not decrypted and are passed as an
+   * empty object, so implementations should decide from config alone when possible.
+   */
+  isSandboxCapable?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+  }) => boolean;
+  /**
+   * Builds auth headers for sandbox credential injection from the decrypted secrets of a
+   * stack connector. Headers from secretHeaders take precedence over these.
+   */
+  getSandboxAuthHeaders?: (args: {
+    config: Record<string, unknown>;
+    secrets: Record<string, unknown>;
+    connectorId: string;
+    connectorTokenClient?: ConnectorTokenClientContract;
+    configurationUtilities: ActionsConfigurationUtilities;
+    logger: Logger;
+  }) => Record<string, string> | Promise<Record<string, string>>;
+  /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.
    * For example, you can define the privileges a users needs to have to execute
