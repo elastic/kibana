@@ -16,9 +16,10 @@ import { useEntityAnalyticsRoutes } from '../api';
 export const ANOMALY_SUMMARY_QUERY_KEY = ['POST', 'FETCH_ANOMALY_SUMMARY'] as const;
 
 interface UseAnomalySummaryParams {
-  entityId: string;
+  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
+  entityIds: string[];
   entityType: string;
-  body?: GetAnomalySummaryRequestBodyInput;
+  body?: Omit<GetAnomalySummaryRequestBodyInput, 'entity_ids'>;
   enabled?: boolean;
   /**
    * Optional Kibana execution context forwarded to the anomaly-summary fetch so slow logs and
@@ -27,14 +28,16 @@ interface UseAnomalySummaryParams {
   executionContext?: KibanaExecutionContext;
 }
 
-const DEFAULT_BODY: Required<Pick<AnomalySummaryRequestBody, 'page' | 'page_size' | 'sort'>> = {
+type AnomalySummaryBody = Omit<AnomalySummaryRequestBody, 'entity_ids'>;
+
+const DEFAULT_BODY: Required<Pick<AnomalySummaryBody, 'page' | 'page_size' | 'sort'>> = {
   page: 1,
   page_size: 10,
   sort: [{ field: 'timestamp', order: 'desc' }],
 };
 
 export const useAnomalySummary = ({
-  entityId,
+  entityIds,
   entityType,
   body,
   enabled = true,
@@ -42,20 +45,20 @@ export const useAnomalySummary = ({
 }: UseAnomalySummaryParams) => {
   const { fetchAnomalySummary } = useEntityAnalyticsRoutes();
 
-  const resolvedBody: AnomalySummaryRequestBody = { ...DEFAULT_BODY, ...body };
+  const resolvedBody: AnomalySummaryBody = { ...DEFAULT_BODY, ...body };
 
   return useQuery(
-    [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityId, resolvedBody],
+    [...ANOMALY_SUMMARY_QUERY_KEY, entityType, entityIds, resolvedBody],
     ({ signal }) =>
       fetchAnomalySummary({
         entityType,
-        entityId,
+        entityIds,
         body: resolvedBody,
         signal,
         context: executionContext,
       }),
     {
-      enabled: enabled && !!entityId,
+      enabled: enabled && entityIds.length > 0,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       retry: (failureCount, error) =>

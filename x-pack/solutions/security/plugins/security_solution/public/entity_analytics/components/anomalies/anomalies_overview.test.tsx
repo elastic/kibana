@@ -120,7 +120,7 @@ const makeHit = (overrides: Partial<AnomalyOverviewHit> = {}): AnomalyOverviewHi
 const makeData = (
   overrides: Partial<GetAnomalyOverviewResponse> = {}
 ): GetAnomalyOverviewResponse => ({
-  entityId: 'test-entity',
+  entityIds: ['test-entity'],
   anomalyByTimeBucket: [],
   recentAnomalies: [],
   tacticCounts: {},

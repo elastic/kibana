@@ -8,7 +8,8 @@
 import { useAnomalyOverview } from './use_anomaly_overview';
 
 interface UseHasAnomaliesParams {
-  entityId: string;
+  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
+  entityIds: string[];
   entityType: string;
   enabled?: boolean;
 }
@@ -22,11 +23,11 @@ interface UseHasAnomaliesParams {
  * cache when the left panel opens after the right panel has loaded.
  */
 export const useHasAnomalies = ({
-  entityId,
+  entityIds,
   entityType,
   enabled = true,
 }: UseHasAnomaliesParams) => {
-  const { data } = useAnomalyOverview({ entityId, entityType, enabled });
+  const { data } = useAnomalyOverview({ entityIds, entityType, enabled });
   if (data === undefined) return undefined;
   return data.totalAnomaliesCount > 0;
 };

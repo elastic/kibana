@@ -39,7 +39,7 @@ describe('useAnomalyOverview', () => {
     };
 
     renderHook(
-      () => useAnomalyOverview({ entityId: 'host-1', entityType: 'host', executionContext }),
+      () => useAnomalyOverview({ entityIds: ['host-1'], entityType: 'host', executionContext }),
       { wrapper: TestWrapper }
     );
 
@@ -51,12 +51,34 @@ describe('useAnomalyOverview', () => {
   });
 
   it('omits context when the caller does not supply executionContext', async () => {
-    renderHook(() => useAnomalyOverview({ entityId: 'host-1', entityType: 'host' }), {
+    renderHook(() => useAnomalyOverview({ entityIds: ['host-1'], entityType: 'host' }), {
       wrapper: TestWrapper,
     });
 
     await waitFor(() => expect(mockFetchAnomalyOverview).toHaveBeenCalled());
     const [callArg] = mockFetchAnomalyOverview.mock.calls[0];
     expect(callArg.context).toBeUndefined();
+  });
+
+  it('passes every entity id of a resolution group to fetchAnomalyOverview', async () => {
+    renderHook(
+      () => useAnomalyOverview({ entityIds: ['host-1', 'host-alias'], entityType: 'host' }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() =>
+      expect(mockFetchAnomalyOverview).toHaveBeenCalledWith(
+        expect.objectContaining({ entityIds: ['host-1', 'host-alias'], entityType: 'host' })
+      )
+    );
+  });
+
+  it('does not fetch when no entity ids are provided', async () => {
+    const { result } = renderHook(() => useAnomalyOverview({ entityIds: [], entityType: 'host' }), {
+      wrapper: TestWrapper,
+    });
+
+    expect(result.current.fetchStatus).toBe('idle');
+    expect(mockFetchAnomalyOverview).not.toHaveBeenCalled();
   });
 });

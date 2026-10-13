@@ -7,6 +7,7 @@
 
 export interface AnomalyHit {
   _id: string;
+  /** Primary (target) entity id of the request that produced this hit. */
   entityId: string;
   jobId: string;
   detectorIndex: number;

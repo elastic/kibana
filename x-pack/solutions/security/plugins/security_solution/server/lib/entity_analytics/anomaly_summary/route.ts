@@ -24,7 +24,7 @@ import {
 } from '../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
-import { checkEntityExists, EntityStoreAccessError } from '../utils/check_entity_exists';
+import { checkEntitiesExist, EntityStoreAccessError } from '../utils/check_entity_exists';
 import { getEntityAnomalies } from './get_anomaly_details';
 import { DEFAULT_OVERVIEW_LOOKBACK_MS, getEntityAnomalyOverview } from './get_anomaly_overview';
 import { _formatPrivileges, hasReadWritePermissions } from '../utils/check_and_format_privileges';
@@ -106,13 +106,14 @@ export const registerAnomalySummaryRoutes = ({
       withMinimumLicense(async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { entity_id: entityId, entity_type: entityType } = request.params;
+          const { entity_type: entityType } = request.params;
           const {
+            entity_ids: entityIds,
             from,
             to,
             score_ranges: scoreRanges,
             threat_tactics: threatTactics,
-          } = request.body ?? {};
+          } = request.body;
 
           if (from !== undefined && from < getStartOfDayOneYearAgo()) {
             return siemResponse.error({
@@ -133,16 +134,16 @@ export const registerAnomalySummaryRoutes = ({
           const soClient = core.savedObjects.client;
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
-          const entityRecord = await checkEntityExists({
+          const entityRecords = await checkEntitiesExist({
             crudClient: entityStoreCrudClient,
             esClient,
-            entityId,
+            entityIds,
             entityType,
           });
-          if (!entityRecord) {
+          if (entityRecords.length === 0) {
             return siemResponse.error({
               statusCode: 404,
-              body: `Entity "${entityId}" not found`,
+              body: `Entity "${entityIds.join(', ')}" not found`,
             });
           }
 
@@ -151,7 +152,7 @@ export const registerAnomalySummaryRoutes = ({
             const now = Date.now();
             return response.ok({
               body: {
-                entityId,
+                entityIds,
                 entityType,
                 anomalyByTimeBucket: [],
                 recentAnomalies: [],
@@ -166,9 +167,9 @@ export const registerAnomalySummaryRoutes = ({
 
           const mitreDataClient = securitySolution.getMitreDataClient();
           const overview = await getEntityAnomalyOverview({
-            entityId,
+            entityIds,
             entityType,
-            entityRecord,
+            entityRecords,
             fromMs: from,
             toMs: to,
             scoreRanges,
@@ -180,7 +181,7 @@ export const registerAnomalySummaryRoutes = ({
             mitreDataClient,
           });
 
-          return response.ok({ body: { entityId, entityType, ...overview } });
+          return response.ok({ body: { entityIds, entityType, ...overview } });
         } catch (err) {
           logger.error(`Error retrieving anomaly overview - ${err}`);
 
@@ -222,8 +223,9 @@ export const registerAnomalySummaryRoutes = ({
       withMinimumLicense(async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { entity_id: entityId, entity_type: entityType } = request.params;
+          const { entity_type: entityType } = request.params;
           const {
+            entity_ids: entityIds,
             page = 1,
             page_size: pageSize = 100,
             from,
@@ -232,7 +234,7 @@ export const registerAnomalySummaryRoutes = ({
             job_ids: jobIds,
             threat_tactics: threatTactics,
             sort,
-          } = request.body ?? {};
+          } = request.body;
 
           if (from !== undefined && from < getStartOfDayOneYearAgo()) {
             return siemResponse.error({
@@ -254,16 +256,16 @@ export const registerAnomalySummaryRoutes = ({
           const securitySolution = await context.securitySolution;
           const entityStoreCrudClient = securitySolution.getEntityStoreUpdateClient();
 
-          const entityRecord = await checkEntityExists({
+          const entityRecords = await checkEntitiesExist({
             crudClient: entityStoreCrudClient,
             esClient,
-            entityId,
+            entityIds,
             entityType,
           });
-          if (!entityRecord) {
+          if (entityRecords.length === 0) {
             return siemResponse.error({
               statusCode: 404,
-              body: `Entity "${entityId}" not found`,
+              body: `Entity "${entityIds.join(', ')}" not found`,
             });
           }
 
@@ -271,7 +273,7 @@ export const registerAnomalySummaryRoutes = ({
             logger.warn('ML plugin is unavailable; returning empty anomaly summary.');
             return response.ok({
               body: {
-                entity_id: entityId,
+                entity_ids: entityIds,
                 entity_type: entityType,
                 anomalies: [],
                 total: 0,
@@ -283,9 +285,9 @@ export const registerAnomalySummaryRoutes = ({
 
           const mitreDataClient = securitySolution.getMitreDataClient();
           const { anomalies, total } = await getEntityAnomalies({
-            entityId,
+            entityIds,
             entityType,
-            entityRecord,
+            entityRecords,
             esClient,
             fromMs: from,
             toMs: to,
@@ -304,7 +306,7 @@ export const registerAnomalySummaryRoutes = ({
 
           return response.ok({
             body: {
-              entity_id: entityId,
+              entity_ids: entityIds,
               entity_type: entityType,
               anomalies,
               total,

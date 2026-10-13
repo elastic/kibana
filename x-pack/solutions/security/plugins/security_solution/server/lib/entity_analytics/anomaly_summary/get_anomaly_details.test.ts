@@ -58,9 +58,9 @@ let mockMl: MlPluginSetup;
 const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
 
 const defaultParams = {
-  entityId: 'user:alice',
+  entityIds: ['user:alice'],
   entityType: 'user' as const,
-  entityRecord: mockEntityRecord,
+  entityRecords: [mockEntityRecord],
   request,
 };
 
@@ -353,7 +353,7 @@ describe('getEntityAnomalies', () => {
 
     expect(searchEntityAnomalies).toHaveBeenCalledWith(
       expect.objectContaining({
-        entityId: 'user:alice',
+        entityIds: ['user:alice'],
         entityType: 'user',
         fromMs: 1_700_000_000_000,
         toMs: 1_700_100_000_000,

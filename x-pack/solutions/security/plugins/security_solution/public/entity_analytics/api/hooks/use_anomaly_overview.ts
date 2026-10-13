@@ -13,7 +13,8 @@ import { useEntityAnalyticsRoutes } from '../api';
 export const ANOMALY_OVERVIEW_QUERY_KEY = ['POST', 'FETCH_ANOMALY_OVERVIEW'] as const;
 
 interface UseAnomalyOverviewParams {
-  entityId: string;
+  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
+  entityIds: string[];
   entityType: string;
   from?: number;
   to?: number;
@@ -28,7 +29,7 @@ interface UseAnomalyOverviewParams {
 }
 
 export const useAnomalyOverview = ({
-  entityId,
+  entityIds,
   entityType,
   from,
   to,
@@ -49,11 +50,11 @@ export const useAnomalyOverview = ({
     : undefined;
 
   return useQuery(
-    [...ANOMALY_OVERVIEW_QUERY_KEY, entityType, entityId, from, to, threatTactics, scoreRanges],
+    [...ANOMALY_OVERVIEW_QUERY_KEY, entityType, entityIds, from, to, threatTactics, scoreRanges],
     ({ signal }) =>
-      fetchAnomalyOverview({ entityType, entityId, body, signal, context: executionContext }),
+      fetchAnomalyOverview({ entityType, entityIds, body, signal, context: executionContext }),
     {
-      enabled: enabled && !!entityId,
+      enabled: enabled && entityIds.length > 0,
       keepPreviousData: true,
       refetchOnWindowFocus: false,
       retry: (failureCount, error) =>

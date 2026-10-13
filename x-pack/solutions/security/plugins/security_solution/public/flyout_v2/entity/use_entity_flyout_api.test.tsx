@@ -466,6 +466,20 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
+  it('openEntityAnomalyInsights persists resolution-group alias ids in the descriptor', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityAnomalyInsights({
+      entityType: EntityType.user,
+      value: 'user-1',
+      entityId: 'e-2',
+      aliasEntityIds: ['e-3', 'e-4'],
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: 'e-2', aliasEntityIds: ['e-3', 'e-4'] })
+    );
+  });
+
   it('openEntityAlertsInsights writes null fallback for generic entity (no scopeId available)', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityAlertsInsights({

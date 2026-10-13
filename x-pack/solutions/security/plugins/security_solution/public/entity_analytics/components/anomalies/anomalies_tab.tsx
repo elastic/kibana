@@ -88,12 +88,17 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
 };
 
 interface AnomaliesTabProps {
-  entityId: string;
+  /** Entity Store ids to cover: the target first, then any resolution-group aliases. */
+  entityIds: string[];
   entityName: string;
   entityType: EntityType;
 }
 
-export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName, entityType }) => {
+export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
+  entityIds,
+  entityName,
+  entityType,
+}) => {
   const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
   const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
   const [end, setEnd] = useState<string>(DEFAULT_TIME_RANGE.to);
@@ -167,8 +172,8 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName
 
   const [selectedTactic, setSelectedTactic] = useState<string | null>(null);
   const entityToAttach = useMemo<EntityToAttach>(
-    () => ({ id: entityId, name: entityName, type: entityType }),
-    [entityId, entityName, entityType]
+    () => ({ id: entityIds[0] ?? '', name: entityName, type: entityType }),
+    [entityIds, entityName, entityType]
   );
   const handleSelectTactic = useCallback(
     (tactic: string) => {
@@ -192,7 +197,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName
   }, []);
 
   const anomalyOverview = useAnomalyOverview({
-    entityId,
+    entityIds,
     entityType,
     from: timeRangeMs.from,
     to: timeRangeMs.to,
@@ -212,7 +217,7 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({ entityId, entityName
   const isEmpty = anomalyOverview.data?.totalAnomaliesCount === 0;
 
   const anomalySummary = useAnomalySummary({
-    entityId,
+    entityIds,
     entityType,
     body: {
       from: timeRangeMs.from,

@@ -4,13 +4,13 @@ info:
   version: '1'
 
 paths:
-  /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview:
+  /internal/entity_analytics/entities/{entity_type}/anomaly_overview:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: GetAnomalyOverview
-      summary: Get anomaly overview for an entity
-      description: Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+      summary: Get anomaly overview for one or more entities
+      description: Returns time-bucketed anomaly counts and tactic distribution for the given entities (e.g. a resolution group), combined as if they were one entity.
       parameters:
         - name: entity_type
           in: path
@@ -19,13 +19,6 @@ paths:
             type: string
             enum: [user, host]
           description: Entity type — determines which EUID runtime mapping is used when searching the anomalies index
-        - name: entity_id
-          in: path
-          required: true
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 1000
       requestBody:
         required: true
         content:
@@ -40,7 +33,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnomalyOverviewResponse'
               example:
-                entityId: admin
+                entityIds: [admin]
                 entityType: user
                 anomalyByTimeBucket:
                   - timestamp: '2024-01-15T00:00:00.000Z'
@@ -69,13 +62,13 @@ paths:
                 to: 1705622400000
                 hasJobsMissingThreatTactics: false
 
-  /internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary:
+  /internal/entity_analytics/entities/{entity_type}/anomaly_summary:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: GetAnomalySummary
-      summary: Get anomaly summary for an entity
-      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+      summary: Get anomaly summary for one or more entities
+      description: Queries ML anomaly records on demand, enriches them with baseline data, and returns results for the given entities (e.g. a resolution group), combined as if they were one entity.
       parameters:
         - name: entity_type
           in: path
@@ -84,13 +77,6 @@ paths:
             type: string
             enum: [user, host]
           description: Entity type — determines which EUID runtime mapping is used when searching the anomalies index
-        - name: entity_id
-          in: path
-          required: true
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 1000
       requestBody:
         required: true
         content:
@@ -105,7 +91,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnomalySummaryResponse'
               example:
-                entity_id: admin
+                entity_ids: [admin]
                 entity_type: user
                 total: 2
                 page: 1
@@ -178,9 +164,22 @@ components:
           maximum: 100
           description: Maximum record_score (exclusive); omit for an unbounded upper end
 
+    AnomalyEntityIds:
+      type: array
+      minItems: 1
+      maxItems: 100
+      items:
+        type: string
+        minLength: 1
+        maxLength: 1000
+      description: Entity Store ids (`entity.id`) of the entities to query. Pass one id for a single entity, or the target plus its aliases for a resolution group; anomalies of every listed entity are returned together. The first id is treated as the primary entity.
+
     AnomalySummaryRequestBody:
       type: object
+      required: [entity_ids]
       properties:
+        entity_ids:
+          $ref: '#/components/schemas/AnomalyEntityIds'
         page:
           type: integer
           minimum: 1
@@ -349,15 +348,14 @@ components:
     AnomalySummaryResponse:
       type: object
       required:
-        - entity_id
+        - entity_ids
         - anomalies
         - total
         - page
         - page_size
       properties:
-        entity_id:
-          type: string
-          maxLength: 200
+        entity_ids:
+          $ref: '#/components/schemas/AnomalyEntityIds'
         entity_type:
           type: string
           maxLength: 100
@@ -374,7 +372,10 @@ components:
 
     AnomalyOverviewRequestBody:
       type: object
+      required: [entity_ids]
       properties:
+        entity_ids:
+          $ref: '#/components/schemas/AnomalyEntityIds'
         from:
           type: integer
           format: int64
@@ -460,7 +461,7 @@ components:
     AnomalyOverviewResponse:
       type: object
       required:
-        - entityId
+        - entityIds
         - anomalyByTimeBucket
         - recentAnomalies
         - tacticCounts
@@ -469,9 +470,8 @@ components:
         - to
         - hasJobsMissingThreatTactics
       properties:
-        entityId:
-          type: string
-          maxLength: 200
+        entityIds:
+          $ref: '#/components/schemas/AnomalyEntityIds'
         entityType:
           type: string
           maxLength: 100

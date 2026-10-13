@@ -8,6 +8,7 @@
 import type { Entity } from '../../../../common/api/entity_analytics';
 import {
   combineEntityGroupFilters,
+  getEntityGroupIds,
   getEntityGroupLifecycle,
   getEntityGroupRecords,
   getMaxCriticality,
@@ -132,6 +133,22 @@ describe('getEntityGroupRecords', () => {
     expect(getEntityGroupRecords(null, [{ id: 'alias' }])).toEqual([{ id: 'alias' }]);
     expect(getEntityGroupRecords({ id: 'target' }, undefined)).toEqual([{ id: 'target' }]);
     expect(getEntityGroupRecords(undefined, [])).toEqual([]);
+  });
+});
+
+describe('getEntityGroupIds', () => {
+  const alias = (id?: string) => ({ entity: id ? { id } : undefined } as unknown as Entity);
+
+  it('returns the target id followed by alias ids, de-duplicated and without blanks', () => {
+    expect(
+      getEntityGroupIds('host:target', [alias('host:a'), alias('host:target'), alias(), alias('')])
+    ).toEqual(['host:target', 'host:a']);
+  });
+
+  it('handles a missing target and no aliases', () => {
+    expect(getEntityGroupIds(undefined, [alias('host:a')])).toEqual(['host:a']);
+    expect(getEntityGroupIds('host:target', undefined)).toEqual(['host:target']);
+    expect(getEntityGroupIds('', [])).toEqual([]);
   });
 });
 

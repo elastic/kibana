@@ -411,14 +411,14 @@ Removes a privileged user from monitoring by their document ID.
       .query(props.query);
   },
   /**
-   * Returns time-bucketed anomaly counts and tactic distribution for a given entity.
+   * Returns time-bucketed anomaly counts and tactic distribution for the given entities (e.g. a resolution group), combined as if they were one entity.
    */
   getAnomalyOverview(props: GetAnomalyOverviewProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
         getRouteUrlForSpace(
           replaceParams(
-            '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_overview',
+            '/internal/entity_analytics/entities/{entity_type}/anomaly_overview',
             props.params
           ),
           kibanaSpace
@@ -430,14 +430,14 @@ Removes a privileged user from monitoring by their document ID.
       .send(props.body as object);
   },
   /**
-   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for a given entity.
+   * Queries ML anomaly records on demand, enriches them with baseline data, and returns results for the given entities (e.g. a resolution group), combined as if they were one entity.
    */
   getAnomalySummary(props: GetAnomalySummaryProps, kibanaSpace: string = 'default') {
     return supertest
       .post(
         getRouteUrlForSpace(
           replaceParams(
-            '/internal/entity_analytics/entities/{entity_type}/{entity_id}/anomaly_summary',
+            '/internal/entity_analytics/entities/{entity_type}/anomaly_summary',
             props.params
           ),
           kibanaSpace

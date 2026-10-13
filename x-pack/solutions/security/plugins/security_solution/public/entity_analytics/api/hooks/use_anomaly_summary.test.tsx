@@ -39,7 +39,7 @@ describe('useAnomalySummary', () => {
     };
 
     renderHook(
-      () => useAnomalySummary({ entityId: 'host-1', entityType: 'host', executionContext }),
+      () => useAnomalySummary({ entityIds: ['host-1'], entityType: 'host', executionContext }),
       { wrapper: TestWrapper }
     );
 
@@ -51,12 +51,29 @@ describe('useAnomalySummary', () => {
   });
 
   it('omits context when the caller does not supply executionContext', async () => {
-    renderHook(() => useAnomalySummary({ entityId: 'host-1', entityType: 'host' }), {
+    renderHook(() => useAnomalySummary({ entityIds: ['host-1'], entityType: 'host' }), {
       wrapper: TestWrapper,
     });
 
     await waitFor(() => expect(mockFetchAnomalySummary).toHaveBeenCalled());
     const [callArg] = mockFetchAnomalySummary.mock.calls[0];
     expect(callArg.context).toBeUndefined();
+  });
+
+  it('passes every entity id of a resolution group and the default body to fetchAnomalySummary', async () => {
+    renderHook(
+      () => useAnomalySummary({ entityIds: ['host-1', 'host-alias'], entityType: 'host' }),
+      { wrapper: TestWrapper }
+    );
+
+    await waitFor(() =>
+      expect(mockFetchAnomalySummary).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entityIds: ['host-1', 'host-alias'],
+          entityType: 'host',
+          body: expect.objectContaining({ page: 1, page_size: 10 }),
+        })
+      )
+    );
   });
 });

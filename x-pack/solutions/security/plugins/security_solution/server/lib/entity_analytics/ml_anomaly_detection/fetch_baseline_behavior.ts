@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { MlDetector, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Entity, EntityType } from '@kbn/entity-store/common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { buildEntitiesFilter } from './build_entities_filter';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK } from '../../../../common/constants';
 import type { AnomalyHit, EnrichedAnomalyHit } from './types';
 import type { JobConfig } from './get_job_config';
@@ -86,9 +86,9 @@ interface BaselineAggType {
 interface QuerySharedOpts {
   anomaly: AnomalyHit;
   detector: MlDetector;
+  /** Human-readable entity label for log messages. */
   entityId: string;
   entityType: EntityType;
-  entityRecord: Entity;
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
@@ -277,9 +277,11 @@ const fetchTimeBaselineForAnomaly = async ({
 
 interface FetchBaselineBehaviorOpts {
   anomaly: AnomalyHit;
-  entityId: string;
+  /** Entity ids covered by the baseline (target first, then any resolution-group aliases). */
+  entityIds: string[];
   entityType: EntityType;
-  entityRecord: Entity;
+  /** Entity-store records matching `entityIds`; the baseline spans documents of any of them. */
+  entityRecords: Entity[];
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
@@ -290,9 +292,9 @@ interface FetchBaselineBehaviorOpts {
 
 export const fetchBaselineBehavior = async ({
   anomaly,
-  entityId,
+  entityIds,
   entityType,
-  entityRecord,
+  entityRecords,
   esClient,
   fromMs,
   toMs,
@@ -300,15 +302,16 @@ export const fetchBaselineBehavior = async ({
   jobId,
   logger,
 }: FetchBaselineBehaviorOpts): Promise<EnrichedAnomalyHit> => {
+  const entityId = entityIds.join(', ');
   try {
     if (!jobConfig || jobConfig.sourceIndex.length === 0 || jobConfig.detectors.length === 0) {
       return anomaly;
     }
 
-    const entityFilter = euid.dsl.getEuidFilterBasedOnEntityRecord(entityType, entityRecord);
+    const entityFilter = buildEntitiesFilter(entityType, entityRecords);
     if (!entityFilter) {
       logger.warn(
-        `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity record lacks identity fields`
+        `Cannot build entity filter for "${entityId}" (type: ${entityType}): entity records lack identity fields`
       );
       return anomaly;
     }
@@ -319,7 +322,6 @@ export const fetchBaselineBehavior = async ({
       detector,
       entityId,
       entityType,
-      entityRecord,
       esClient,
       fromMs,
       toMs,

@@ -34,7 +34,7 @@ jest.mock('./anomalies_overview', () => ({
 const makeData = (
   overrides: Partial<GetAnomalyOverviewResponse> = {}
 ): GetAnomalyOverviewResponse => ({
-  entityId: 'test-entity',
+  entityIds: ['test-entity'],
   anomalyByTimeBucket: [],
   recentAnomalies: [],
   tacticCounts: {},

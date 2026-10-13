@@ -36,17 +36,17 @@ jest.mock('../../../../shared/components/tools_flyout_header', () => ({
 
 jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => ({
   AnomaliesTab: ({
-    entityId,
+    entityIds,
     entityName,
     entityType,
   }: {
-    entityId: string;
+    entityIds: string[];
     entityName: string;
     entityType: string;
   }) => (
     <div
       data-test-subj="mockAnomaliesTab"
-      data-entity-id={entityId}
+      data-entity-ids={entityIds.join(',')}
       data-entity-name={entityName}
       data-entity-type={entityType}
     />
@@ -82,16 +82,31 @@ describe('<AnomalyInsights /> host', () => {
       <AnomalyInsights entityType={EntityType.host} value="my-host" entityId="euid-123" />
     );
     const tab = getByTestId('mockAnomaliesTab');
-    expect(tab).toHaveAttribute('data-entity-id', 'euid-123');
+    expect(tab).toHaveAttribute('data-entity-ids', 'euid-123');
     expect(tab).toHaveAttribute('data-entity-name', 'my-host');
     expect(tab).toHaveAttribute('data-entity-type', 'host');
   });
 
-  it('passes an empty entity id to the tab when none is provided', () => {
+  it('passes no entity ids to the tab when none is provided', () => {
     const { getByTestId } = render(
       <AnomalyInsights entityType={EntityType.host} value="my-host" />
     );
-    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-entity-id', '');
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-entity-ids', '');
+  });
+
+  it('passes the target id followed by resolution-group alias ids to the tab', () => {
+    const { getByTestId } = render(
+      <AnomalyInsights
+        entityType={EntityType.host}
+        value="my-host"
+        entityId="euid-123"
+        aliasEntityIds={['euid-alias-1', 'euid-123', 'euid-alias-2']}
+      />
+    );
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute(
+      'data-entity-ids',
+      'euid-123,euid-alias-1,euid-alias-2'
+    );
   });
 
   it('forwards onOpenEntity to the header click handler', () => {
@@ -123,7 +138,7 @@ describe('<AnomalyInsights /> user', () => {
       <AnomalyInsights entityType={EntityType.user} value="my-user" entityId="euid-456" />
     );
     const tab = getByTestId('mockAnomaliesTab');
-    expect(tab).toHaveAttribute('data-entity-id', 'euid-456');
+    expect(tab).toHaveAttribute('data-entity-ids', 'euid-456');
     expect(tab).toHaveAttribute('data-entity-type', 'user');
   });
 });

@@ -37,6 +37,30 @@ export const checkEntityExists = async ({
   entityId,
   entityType,
 }: CheckEntityExistsParams): Promise<Entity | null> => {
+  const [entity] = await checkEntitiesExist({
+    crudClient,
+    esClient,
+    entityIds: [entityId],
+    entityType,
+  });
+  return entity ?? null;
+};
+
+interface CheckEntitiesExistParams extends Omit<CheckEntityExistsParams, 'entityId'> {
+  entityIds: string[];
+}
+
+/**
+ * Multi-id counterpart of {@link checkEntityExists}: returns the entity records found for the
+ * given EUIDs and type, ordered as requested (ids with no record are omitted). Used for resolution
+ * groups, where a request covers the target plus its aliases.
+ */
+export const checkEntitiesExist = async ({
+  crudClient,
+  esClient,
+  entityIds,
+  entityType,
+}: CheckEntitiesExistParams): Promise<Entity[]> => {
   const latestIndex = await crudClient.latestIndexName();
   const { has_all_requested: hasRead } = await esClient.security.hasPrivileges({
     index: [{ names: [latestIndex], privileges: ['read'] }],
@@ -48,13 +72,17 @@ export const checkEntityExists = async ({
   try {
     const { entities } = await crudClient.listEntities({
       filter: [
-        { term: { 'entity.id': entityId } },
+        { terms: { 'entity.id': entityIds } },
         { term: { 'entity.EngineMetadata.Type': entityType } },
       ],
-      size: 1,
+      size: entityIds.length,
     });
 
-    return entities[0] ?? null;
+    const byId = new Map(entities.map((entity) => [entity.entity?.id, entity]));
+    return entityIds.flatMap((id) => {
+      const entity = byId.get(id);
+      return entity ? [entity] : [];
+    });
   } catch (err) {
     if (err?.statusCode === 403) {
       throw new EntityStoreAccessError();

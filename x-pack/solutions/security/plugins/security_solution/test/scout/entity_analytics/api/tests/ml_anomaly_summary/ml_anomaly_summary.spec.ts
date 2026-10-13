@@ -48,17 +48,11 @@ const INTERNAL_HEADERS = {
   ...ELASTIC_INTERNAL_ORIGIN_HEADER,
 };
 
-const buildUrl = (entityEuid: string, entityType: 'user' | 'host'): string =>
-  ENTITY_ANOMALY_SUMMARY_INTERNAL_URL.replace('{entity_type}', entityType).replace(
-    '{entity_id}',
-    encodeURIComponent(entityEuid)
-  );
+const buildUrl = (entityType: 'user' | 'host'): string =>
+  ENTITY_ANOMALY_SUMMARY_INTERNAL_URL.replace('{entity_type}', entityType);
 
-const buildOverviewUrl = (entityEuid: string, entityType: 'user' | 'host'): string =>
-  ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL.replace('{entity_type}', entityType).replace(
-    '{entity_id}',
-    encodeURIComponent(entityEuid)
-  );
+const buildOverviewUrl = (entityType: 'user' | 'host'): string =>
+  ENTITY_ANOMALY_OVERVIEW_INTERNAL_URL.replace('{entity_type}', entityType);
 
 apiTest.describe(
   'Entity ML Anomaly Detection APIs',
@@ -277,15 +271,17 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns anomalies for an entity with anomaly records',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.entity_id).toBe(CAROL_EUID);
+        expect(body.entity_ids).toStrictEqual([CAROL_EUID]);
         expect(Array.isArray(body.anomalies)).toBe(true);
         expect(body.anomalies).toHaveLength(2);
 
@@ -321,15 +317,17 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns correct jobName and threat fields for suspicious_login_activity_ea',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(DAVID_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [DAVID_EUID],
+          },
         });
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.entity_id).toBe(DAVID_EUID);
+        expect(body.entity_ids).toStrictEqual([DAVID_EUID]);
         expect(body.anomalies).toHaveLength(1);
 
         const anomaly = body.anomalies[0];
@@ -341,17 +339,50 @@ apiTest.describe(
     );
 
     apiTest(
-      'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
+      'Anomaly summary API: returns the combined anomalies of every entity in entity_ids',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(NO_BEHAVIORS_EUID, 'host'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: { entity_ids: [CAROL_EUID, DAVID_EUID] },
         });
 
         expect(response.statusCode).toBe(200);
         const body = response.body as AnomalySummaryResponse;
-        expect(body.entity_id).toBe(NO_BEHAVIORS_EUID);
+        expect(body.entity_ids).toStrictEqual([CAROL_EUID, DAVID_EUID]);
+        expect(body.total).toBe(3);
+        expect(body.anomalies.map((a) => a.jobId).sort()).toStrictEqual([
+          'auth_high_count_logon_events_ea',
+          'pad_windows_rare_region_name_by_user_ea',
+          'suspicious_login_activity_ea',
+        ]);
+      }
+    );
+
+    apiTest('Anomaly summary API: returns 400 when entity_ids is empty', async ({ apiClient }) => {
+      const response = await apiClient.post(buildUrl('user'), {
+        headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+        responseType: 'json',
+        body: { entity_ids: [] },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    apiTest(
+      'Anomaly summary API: returns empty anomalies for entity with no anomaly records',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildUrl('host'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: {
+            entity_ids: [NO_BEHAVIORS_EUID],
+          },
+        });
+
+        expect(response.statusCode).toBe(200);
+        const body = response.body as AnomalySummaryResponse;
+        expect(body.entity_ids).toStrictEqual([NO_BEHAVIORS_EUID]);
         expect(body.anomalies).toHaveLength(0);
       }
     );
@@ -360,10 +391,13 @@ apiTest.describe(
       'Anomaly summary API: returns 400 when from is older than 1 year',
       async ({ apiClient }) => {
         const twoYearsAgoMs = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { from: twoYearsAgoMs },
+          body: {
+            entity_ids: [CAROL_EUID],
+            from: twoYearsAgoMs,
+          },
         });
 
         expect(response.statusCode).toBe(400);
@@ -375,10 +409,13 @@ apiTest.describe(
       'Anomaly summary API: returns 200 when from is within 1 year',
       async ({ apiClient }) => {
         const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const response = await apiClient.post(buildUrl(NO_BEHAVIORS_EUID, 'host'), {
+        const response = await apiClient.post(buildUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { from: thirtyDaysAgoMs },
+          body: {
+            entity_ids: [NO_BEHAVIORS_EUID],
+            from: thirtyDaysAgoMs,
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -386,10 +423,13 @@ apiTest.describe(
     );
 
     apiTest('Anomaly summary API: filters anomalies by jobIds', async ({ apiClient }) => {
-      const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+      const response = await apiClient.post(buildUrl('user'), {
         headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
-        body: { job_ids: ['auth_high_count_logon_events_ea'] },
+        body: {
+          entity_ids: [CAROL_EUID],
+          job_ids: ['auth_high_count_logon_events_ea'],
+        },
       });
 
       expect(response.statusCode).toBe(200);
@@ -399,10 +439,14 @@ apiTest.describe(
     });
 
     apiTest('Anomaly summary API: respects pageSize and page', async ({ apiClient }) => {
-      const page1Response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+      const page1Response = await apiClient.post(buildUrl('user'), {
         headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
-        body: { page_size: 1, page: 1 },
+        body: {
+          entity_ids: [CAROL_EUID],
+          page_size: 1,
+          page: 1,
+        },
       });
       expect(page1Response.statusCode).toBe(200);
       const page1Body = page1Response.body as AnomalySummaryResponse;
@@ -411,10 +455,14 @@ apiTest.describe(
       expect(page1Body.page).toBe(1);
       expect(page1Body.page_size).toBe(1);
 
-      const page2Response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+      const page2Response = await apiClient.post(buildUrl('user'), {
         headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
         responseType: 'json',
-        body: { page_size: 1, page: 2 },
+        body: {
+          entity_ids: [CAROL_EUID],
+          page_size: 1,
+          page: 2,
+        },
       });
       expect(page2Response.statusCode).toBe(200);
       const page2Body = page2Response.body as AnomalySummaryResponse;
@@ -429,10 +477,13 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: sorts anomalies by record_score descending',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { sort: [{ field: 'record_score', order: 'desc' }] },
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+            sort: [{ field: 'record_score', order: 'desc' }],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -449,10 +500,12 @@ apiTest.describe(
           config.isCloud && config.serverless,
           'Skipped on serverless MKI — ML datafeed setup is not properly supported'
         );
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -485,10 +538,13 @@ apiTest.describe(
       'Anomaly summary API: score_ranges filters out anomalies below the threshold',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 should exclude 5.65.
-        const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 10 }] },
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+            score_ranges: [{ min_score: 10 }],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -502,10 +558,13 @@ apiTest.describe(
       'Anomaly summary API: score_ranges filters out anomalies above the threshold',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 should exclude 31.06.
-        const response = await apiClient.post(buildUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+            score_ranges: [{ min_score: 0, max_score: 10 }],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -519,10 +578,13 @@ apiTest.describe(
       'Anomaly summary API: a single score_ranges entry with both bounds narrows results to that range',
       async ({ apiClient }) => {
         // Carol has scores 24.37 and 25.44. Range [24, 25] includes only 24.37.
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 24, max_score: 25 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 24, max_score: 25 }],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -539,10 +601,13 @@ apiTest.describe(
       async ({ apiClient }) => {
         // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
         // [0,10) and [75,∞) each match one of the outer scores.
-        const response = await apiClient.post(buildUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
+        const response = await apiClient.post(buildUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
+          body: {
+            entity_ids: [OR_SEMANTICS_HOST_EUID],
+            score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -556,10 +621,13 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: score_ranges that exclude all anomalies returns empty results',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 50 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 50 }],
+          },
         });
 
         expect(response.statusCode).toBe(200);
@@ -572,10 +640,13 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: -1 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: -1 }],
+          },
         });
 
         expect(response.statusCode).toBe(400);
@@ -585,10 +656,13 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 0, max_score: 101 }],
+          },
         });
 
         expect(response.statusCode).toBe(400);
@@ -598,10 +672,13 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 50, max_score: 25 }],
+          },
         });
 
         expect(response.statusCode).toBe(400);
@@ -614,17 +691,19 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns expected response for entity with anomaly records',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
 
         // Response shape
-        expect(body.entityId).toBe(CAROL_EUID);
+        expect(body.entityIds).toStrictEqual([CAROL_EUID]);
         expect(body.entityType).toBe('user');
         expect(Array.isArray(body.anomalyByTimeBucket)).toBe(true);
         expect(typeof body.from).toBe('number');
@@ -658,14 +737,33 @@ apiTest.describe(
     );
 
     apiTest(
+      'Anomaly overview API: aggregates the anomalies of every entity in entity_ids',
+      async ({ apiClient }) => {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
+          headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
+          responseType: 'json',
+          body: { entity_ids: [CAROL_EUID, DAVID_EUID] },
+        });
+
+        expect(response).toHaveStatusCode(200);
+        const body = response.body as AnomalyOverviewResponse;
+        expect(body.entityIds).toStrictEqual([CAROL_EUID, DAVID_EUID]);
+        // Carol has 2 anomaly records and David has 1
+        expect(body.totalAnomaliesCount).toBe(3);
+      }
+    );
+
+    apiTest(
       'Anomaly overview API: maxScore in each bucket is the highest record_score within that bucket',
       async ({ apiClient }) => {
         // WIN_APP01 has 2 suspicious_login_activity_ea records with scores 5.65 and 31.06.
         // Both have the same timestamp so they land in the same bucket; max should be ~31.06.
-        const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -682,15 +780,17 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns empty anomalies for entity with no anomaly records',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [NO_BEHAVIORS_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
         const body = response.body as AnomalyOverviewResponse;
-        expect(body.entityId).toBe(NO_BEHAVIORS_EUID);
+        expect(body.entityIds).toStrictEqual([NO_BEHAVIORS_EUID]);
         expect(body.anomalyByTimeBucket).toHaveLength(0);
         expect(body.totalAnomaliesCount).toBe(0);
         expect(body.tacticCounts).toStrictEqual({});
@@ -701,10 +801,13 @@ apiTest.describe(
       'Anomaly overview API: returns 400 when from is older than 1 year',
       async ({ apiClient }) => {
         const twoYearsAgoMs = Date.now() - 2 * 365 * 24 * 60 * 60 * 1000;
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { from: twoYearsAgoMs },
+          body: {
+            entity_ids: [CAROL_EUID],
+            from: twoYearsAgoMs,
+          },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -716,10 +819,13 @@ apiTest.describe(
       'Anomaly overview API: returns 200 when from is within 1 year',
       async ({ apiClient }) => {
         const thirtyDaysAgoMs = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { from: thirtyDaysAgoMs },
+          body: {
+            entity_ids: [NO_BEHAVIORS_EUID],
+            from: thirtyDaysAgoMs,
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -731,10 +837,14 @@ apiTest.describe(
       async ({ apiClient }) => {
         const fromMs = Date.now() - 7 * 24 * 60 * 60 * 1000;
         const toMs = Date.now();
-        const response = await apiClient.post(buildOverviewUrl(NO_BEHAVIORS_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { from: fromMs, to: toMs },
+          body: {
+            entity_ids: [NO_BEHAVIORS_EUID],
+            from: fromMs,
+            to: toMs,
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -750,10 +860,13 @@ apiTest.describe(
         // WIN_APP01 has 2 anomalies, both from suspicious_login_activity_ea which only has
         // ['Credential Access']. Filtering by 'Initial Access' excludes that job, so no
         // anomalies are returned for this entity.
-        const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { threat_tactics: ['Initial Access'] },
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+            threat_tactics: ['Initial Access'],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -767,10 +880,13 @@ apiTest.describe(
       'Anomaly overview API: score_ranges reduces totalAnomaliesCount to matching records',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. min_score=10 excludes 5.65.
-        const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 10 }] },
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+            score_ranges: [{ min_score: 10 }],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -787,10 +903,13 @@ apiTest.describe(
       'Anomaly overview API: score_ranges upper bound reduces totalAnomaliesCount to matching records',
       async ({ apiClient }) => {
         // WIN_APP01 has two anomalies: scores 5.65 and 31.06. max_score=10 excludes 31.06.
-        const response = await apiClient.post(buildOverviewUrl(WIN_APP01_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 0, max_score: 10 }] },
+          body: {
+            entity_ids: [WIN_APP01_EUID],
+            score_ranges: [{ min_score: 0, max_score: 10 }],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -808,10 +927,13 @@ apiTest.describe(
       async ({ apiClient }) => {
         // The OR-semantics host has three anomalies: scores 5 (low), 50 (gap), and 90 (high).
         // [0,10) and [75,∞) each match one of the outer scores.
-        const response = await apiClient.post(buildOverviewUrl(OR_SEMANTICS_HOST_EUID, 'host'), {
+        const response = await apiClient.post(buildOverviewUrl('host'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }] },
+          body: {
+            entity_ids: [OR_SEMANTICS_HOST_EUID],
+            score_ranges: [{ min_score: 0, max_score: 10 }, { min_score: 75 }],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -823,10 +945,13 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: score_ranges that exclude all anomalies returns empty response',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 50 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 50 }],
+          },
         });
 
         expect(response).toHaveStatusCode(200);
@@ -840,10 +965,13 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns 400 when a score_ranges min_score is negative',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: -1 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: -1 }],
+          },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -853,10 +981,13 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns 400 when a score_ranges max_score exceeds 100',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 0, max_score: 101 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 0, max_score: 101 }],
+          },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -866,10 +997,13 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns 400 when a score_ranges min_score is greater than its max_score',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: { score_ranges: [{ min_score: 50, max_score: 25 }] },
+          body: {
+            entity_ids: [CAROL_EUID],
+            score_ranges: [{ min_score: 50, max_score: 25 }],
+          },
         });
 
         expect(response).toHaveStatusCode(400);
@@ -882,10 +1016,12 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns 404 for an entity that does not exist in the entity store',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(UNKNOWN_ENTITY_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [UNKNOWN_ENTITY_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(404);
@@ -895,10 +1031,12 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns 404 for an entity that does not exist in the entity store',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(UNKNOWN_ENTITY_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...defaultHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [UNKNOWN_ENTITY_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(404);
@@ -908,10 +1046,12 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns error for user without ML read access',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(403);
@@ -922,10 +1062,12 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns error for user without ML read access',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...noMlPrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(403);
@@ -936,10 +1078,12 @@ apiTest.describe(
     apiTest(
       'Anomaly summary API: returns error for user without entity store access',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildUrl('user'), {
           headers: { ...noEntityStorePrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(403);
@@ -950,10 +1094,12 @@ apiTest.describe(
     apiTest(
       'Anomaly overview API: returns error for user without entity store access',
       async ({ apiClient }) => {
-        const response = await apiClient.post(buildOverviewUrl(CAROL_EUID, 'user'), {
+        const response = await apiClient.post(buildOverviewUrl('user'), {
           headers: { ...noEntityStorePrivsHeaders, ...INTERNAL_API_HEADERS },
           responseType: 'json',
-          body: {},
+          body: {
+            entity_ids: [CAROL_EUID],
+          },
         });
 
         expect(response).toHaveStatusCode(403);

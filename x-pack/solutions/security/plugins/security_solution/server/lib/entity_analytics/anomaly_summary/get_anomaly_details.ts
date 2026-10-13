@@ -59,9 +59,11 @@ const mapToAnomalySummaryEntry = (
 });
 
 interface GetEntityAnomaliesParams {
-  entityId: string;
+  /** Entity ids covered by the request (target first, then any resolution-group aliases). */
+  entityIds: string[];
   entityType: EntityType;
-  entityRecord: Entity;
+  /** Entity-store records matching `entityIds`. */
+  entityRecords: Entity[];
   esClient: ElasticsearchClient;
   fromMs?: number;
   toMs?: number;
@@ -84,9 +86,9 @@ export interface GetEntityAnomaliesResult {
 }
 
 export const getEntityAnomalies = async ({
-  entityId,
+  entityIds,
   entityType,
-  entityRecord,
+  entityRecords,
   esClient,
   fromMs,
   toMs,
@@ -133,8 +135,8 @@ export const getEntityAnomalies = async ({
   // 1. Fetch a single sorted, paginated page from the anomalies index.
   const { hits: page, total } = await searchEntityAnomalies({
     entityType,
-    entityId,
-    entityRecord,
+    entityIds,
+    entityRecords,
     fromMs,
     toMs,
     scoreRanges,
@@ -157,9 +159,9 @@ export const getEntityAnomalies = async ({
     page.map((anomaly) =>
       fetchBaselineBehavior({
         anomaly,
-        entityId,
+        entityIds,
         entityType,
-        entityRecord,
+        entityRecords,
         esClient,
         fromMs,
         toMs,

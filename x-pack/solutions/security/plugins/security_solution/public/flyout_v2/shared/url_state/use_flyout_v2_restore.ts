@@ -458,6 +458,7 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as EntityType.host | EntityType.user,
         value: d.value,
         entityId: d.entityId,
+        aliasEntityIds: d.aliasEntityIds,
         ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
