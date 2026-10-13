@@ -8,17 +8,18 @@
  */
 
 /**
- * Public page endpoint. GET renders the form, POST submits it.
+ * Public page URL. GET renders the form, POST submits it. Spaces strips the
+ * `/s/{spaceId}` prefix before routing, so one path serves every space.
  *
- * `{pageKey}` is an opaque random id stored on the workflow document, never in the
- * YAML. It is the page's capability: anyone with the URL can submit the page, and
- * rotating assigns a new key that retires the old URL.
+ * `{secret}` is the page's capability: anyone with the URL can submit the page.
+ * It lives in an encrypted saved object, never in the YAML or the workflow
+ * document, and rotating replaces it.
  */
-export const PAGE_FORM_API_PATH = '/api/workflows/pages/{pageKey}';
+export const PAGE_FORM_PATH = '/pages/{workflowId}/k/{secret}';
 
 export { PAGE_LINK_API_PATH, PAGE_ROTATE_API_PATH } from '../../../common/lib/api_constants';
 
 export const PAGE_WORKFLOW_ID_MAX_LENGTH = 255;
 
-/** A UUID v4 is 36 characters; leave room without accepting unbounded input. */
-export const PAGE_KEY_MAX_LENGTH = 64;
+/** A secret is 43 base64url characters; leave room without accepting unbounded input. */
+export const PAGE_SECRET_MAX_LENGTH = 64;

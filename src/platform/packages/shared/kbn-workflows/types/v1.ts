@@ -505,8 +505,6 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   valid: boolean;
   tags?: string[];
   version?: number;
-  /** Opaque id of the workflow page URL. Kept outside the YAML on purpose. */
-  pageKey?: string;
 }
 
 export type WorkflowAccessControlUpdateResponseDto = Pick<

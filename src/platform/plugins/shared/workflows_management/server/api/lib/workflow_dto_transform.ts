@@ -36,7 +36,6 @@ export const transformStorageDocumentToWorkflowDto = (
     managed: source.managed,
     managedBy: source.managedBy,
     definitionHash: source.definitionHash,
-    pageKey: source.pageKey,
     originManagedWorkflowId: source.originManagedWorkflowId,
     managedVersion: source.managedVersion,
     lifecycle: source.lifecycle,
