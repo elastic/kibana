@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
@@ -26,15 +26,17 @@ import { validateDestinations, type WorkflowDestinationDiagnostic } from './vali
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 
-const manageActionPolicySchema = z.object({
-  actionPolicyAttachmentId: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) The action policy attachment ID to modify. If not provided, a new policy is created.'
-    ),
-  operations: z.array(actionPolicyOperationSchema).min(1),
-});
+const manageActionPolicySchema = lazySchema(() =>
+  z.object({
+    actionPolicyAttachmentId: z
+      .string()
+      .optional()
+      .describe(
+        '(optional) The action policy attachment ID to modify. If not provided, a new policy is created.'
+      ),
+    operations: z.array(actionPolicyOperationSchema).min(1),
+  })
+);
 
 export interface ManageActionPolicyToolDeps {
   logger: LoggerServiceContract;

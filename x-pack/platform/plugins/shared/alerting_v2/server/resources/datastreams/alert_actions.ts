@@ -7,7 +7,7 @@
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
 
@@ -44,34 +44,38 @@ const mappings: MappingsDefinition = {
 };
 
 // `internal` marks writes made by Kibana itself (e.g. the dispatcher) with no principal behind them.
-const alertActionActorTypeSchema = z.enum(['user', 'internal']);
+const alertActionActorTypeSchema = lazySchema(() => z.enum(['user', 'internal']));
 
-export const alertActionActorSchema = z.object({
-  type: alertActionActorTypeSchema,
-  profile_uid: z.string().optional(),
-});
+export const alertActionActorSchema = lazySchema(() =>
+  z.object({
+    type: alertActionActorTypeSchema,
+    profile_uid: z.string().optional(),
+  })
+);
 
 export const alertActionActorType = alertActionActorTypeSchema.enum;
 
-export const alertActionSchema = z.object({
-  '@timestamp': z.string(),
-  group_hash: z.string(),
-  last_series_event_timestamp: z.string(),
-  expiry: z.string().optional(),
-  actor: alertActionActorSchema,
-  assignee_uid: z.string().nullable().optional(),
-  action_type: z.string(),
-  // Null for series-level actions (tag/snooze/unsnooze): they target the
-  // series as a whole, not one alert.
-  alert_id: z.string().nullable().optional(),
-  alert_status: z.string().optional(),
-  rule_id: z.string().nullable(),
-  action_group_id: z.string().optional(),
-  source: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  reason: z.string().optional(),
-  space_id: z.string(),
-});
+export const alertActionSchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string(),
+    group_hash: z.string(),
+    last_series_event_timestamp: z.string(),
+    expiry: z.string().optional(),
+    actor: alertActionActorSchema,
+    assignee_uid: z.string().nullable().optional(),
+    action_type: z.string(),
+    // Null for series-level actions (tag/snooze/unsnooze): they target the
+    // series as a whole, not one alert.
+    alert_id: z.string().nullable().optional(),
+    alert_status: z.string().optional(),
+    rule_id: z.string().nullable(),
+    action_group_id: z.string().optional(),
+    source: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    reason: z.string().optional(),
+    space_id: z.string(),
+  })
+);
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
 export type AlertActionActor = z.infer<typeof alertActionActorSchema>;
