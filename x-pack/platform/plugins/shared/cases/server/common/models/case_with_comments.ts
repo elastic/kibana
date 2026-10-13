@@ -520,10 +520,11 @@ export class CaseCommentModel {
       await this.params.services.alertsService.ensureDocumentsExist({ alerts: events });
     }
 
-    // An attack discovery is an AAD alert (rule type `attack-discovery`), so the reference is
-    // authorized for read like an alert, and additionally checked for existence, rule type and
-    // space: without that a caller could persist an arbitrary id/index pair and have the status
-    // sync write to any document it can reach.
+    // An attack discovery is an AAD alert, so the reference is checked for existence, rule type
+    // and space before it is persisted: without that a caller could persist an arbitrary id/index
+    // pair and have the status sync write to any document it can reach. Scheduled discoveries are
+    // additionally authorized for read through alerting RBAC; ad-hoc ones, whose sentinel rule type
+    // alerting never registers, are authorized by the caller's index privileges.
     const attackAttachments = attachments.filter((a) => isAttackAttachmentType(a.type));
     const attacks = getAttackInfoFromComments(attackAttachments, true);
 

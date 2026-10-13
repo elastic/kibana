@@ -31,6 +31,7 @@ import {
 } from '../../../../common/lib/api';
 import {
   ALERT_INDEX,
+  AD_HOC_ATTACK_INDEX,
   ATTACK_INDEX,
   buildAlertDocument,
   buildAttackDocument,
@@ -40,6 +41,7 @@ import {
 
 const OWNER = 'securitySolutionFixture';
 const ATTACK_ID = 'attack-doc-1';
+const AD_HOC_ATTACK_ID = 'ad-hoc-attack-doc-1';
 const ALERT_IDS = ['attack-alert-1', 'attack-alert-2'];
 
 /**
@@ -60,6 +62,24 @@ const attackAttachment = {
   owner: OWNER,
   attachmentId: ATTACK_ID,
   metadata: attackMetadata,
+};
+
+/**
+ * Ad-hoc discoveries live in their own index and carry a rule type the alerting framework never
+ * registers, so they are authorized by the caller's Elasticsearch index privileges rather than by
+ * alerting RBAC. They are always visible, so there is no privacy to check beyond that.
+ */
+const adHocAttackMetadata = {
+  title: 'Manually generated attack',
+  alertCount: 0,
+  index: AD_HOC_ATTACK_INDEX,
+};
+
+const adHocAttackAttachment = {
+  type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+  owner: OWNER,
+  attachmentId: AD_HOC_ATTACK_ID,
+  metadata: adHocAttackMetadata,
 };
 
 const alertAttachments = ALERT_IDS.map((alertId) => ({
@@ -95,6 +115,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await indexAttackDocuments({
         es,
         attackIds: [ATTACK_ID],
+        adHocAttackIds: [AD_HOC_ATTACK_ID],
         alertIds: [...ALERT_IDS],
       });
     });
@@ -192,6 +213,23 @@ export default ({ getService }: FtrProviderContext): void => {
             .flatMap((comment) => toArray(comment.alertId ?? comment.attachmentId))
             .sort()
         ).to.eql([...ALERT_IDS].sort());
+      });
+
+      it('persists an ad-hoc attack', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+
+        const updatedCase = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: adHocAttackAttachment as unknown as AttachmentRequestV2,
+        });
+
+        const attack = updatedCase.comments!.find(
+          (comment) => comment.type === SECURITY_ATTACK_ATTACHMENT_TYPE
+        ) as unknown as { attachmentId: string; metadata: typeof adHocAttackMetadata };
+        expect(attack).to.be.ok();
+        expect(attack.attachmentId).to.eql(AD_HOC_ATTACK_ID);
+        expect(attack.metadata.index).to.eql(AD_HOC_ATTACK_INDEX);
       });
     });
 
