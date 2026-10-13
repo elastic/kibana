@@ -18,6 +18,7 @@ import { throttle, debounce } from 'lodash';
 
 import dateMath from '@kbn/datemath';
 import { css } from '@emotion/react';
+import { css as cssClassName } from '@emotion/css';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
@@ -32,7 +33,13 @@ import {
   type ESQLEditorApi,
   type VisorNlResultHandler,
 } from '@kbn/esql/public';
-import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
+import type {
+  EuiButtonColor,
+  EuiFieldText,
+  EuiIconProps,
+  OnRefreshProps,
+  UseEuiTheme,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,6 +53,9 @@ import {
   EuiIconTip,
   EuiSplitButton,
   useEuiTheme,
+  getEuiButtonColorValues,
+  getEuiFilledButtonColorValues,
+  transparentize,
   type EuiTimeZoneDisplayProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -358,7 +368,8 @@ export const QueryBarTopRow = React.memo(
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [isSendingToBackground, setIsSendingToBackground] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
-    const { euiTheme } = useEuiTheme();
+    const euiThemeContext = useEuiTheme();
+    const { euiTheme } = euiThemeContext;
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -1068,6 +1079,10 @@ export const QueryBarTopRow = React.memo(
               {buttonLabelCancel}
             </EuiSplitButton.ActionPrimary>
             <EuiSplitButton.ActionSecondary
+              className={getSplitButtonSecondaryActionClassName(euiThemeContext, {
+                color: 'text',
+                fill: false,
+              })}
               isLoading={isSendingToBackground}
               isDisabled={!canSendToBackground}
               onClick={onClickSendToBackground}
@@ -1181,6 +1196,10 @@ export const QueryBarTopRow = React.memo(
             {buttonText}
           </EuiSplitButton.ActionPrimary>
           <EuiSplitButton.ActionSecondary
+            className={getSplitButtonSecondaryActionClassName(euiThemeContext, {
+              color: buttonColor,
+              fill: buttonFill,
+            })}
             iconType="backgroundTask"
             isLoading={isSendingToBackground}
             isDisabled={!canSendToBackground || Boolean(props.disableSubmitAction)}
@@ -1534,4 +1553,21 @@ const inputStringStyles = {
         backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
       },
     }),
+};
+
+// Temporary override until implemented in EUI
+const getSplitButtonSecondaryActionClassName = (
+  euiThemeContext: UseEuiTheme,
+  { color, fill }: { color: EuiButtonColor; fill: boolean }
+) => {
+  const { backgroundColor: disabledBackgroundColor } = fill
+    ? getEuiFilledButtonColorValues(euiThemeContext, 'disabled')
+    : getEuiButtonColorValues(euiThemeContext, 'disabled');
+
+  return cssClassName({
+    "&:is(:disabled, [aria-disabled='true'])": {
+      backgroundColor: transparentize(disabledBackgroundColor, 0.2),
+      ...(fill && { color: getEuiFilledButtonColorValues(euiThemeContext, color).color }),
+    },
+  });
 };
