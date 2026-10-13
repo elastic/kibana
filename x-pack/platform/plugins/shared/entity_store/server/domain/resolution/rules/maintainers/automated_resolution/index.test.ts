@@ -313,6 +313,7 @@ describe('automatedResolutionMaintainerConfig', () => {
       expect(result.rules['custom:rule-1']).toEqual({
         ...matcherState,
         definitionHash: expect.any(String),
+        lastAttemptAt: expect.any(String),
       });
     });
 

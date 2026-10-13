@@ -41,7 +41,8 @@ const hashOf = (customRule: CustomResolutionRule) =>
 const run = async (
   customRules: CustomResolutionRule[] | Error,
   previousRules: Record<string, PerRuleState> = {},
-  signal: AbortSignal = new AbortController().signal
+  signal: AbortSignal = new AbortController().signal,
+  deadline: number = Date.now() + 60_000
 ) => {
   const esClient = {
     indices: { refresh: jest.fn().mockResolvedValue({}) },
@@ -65,6 +66,7 @@ const run = async (
     signal,
     telemetry: { report: jest.fn() } as unknown as MaintainerTelemetryClient,
     mutatedIds: new Set(),
+    deadline,
   });
   return { rules, logger };
 };
@@ -89,7 +91,11 @@ describe('runCustomResolutionRules', () => {
       matchValueExpression: 'TO_LOWER(user.name)',
       declineSameNamespaceDuplicates: true,
     });
-    expect(rules['custom:a']).toEqual({ ...WATERMARKED, definitionHash: hashOf(rule('a')) });
+    expect(rules['custom:a']).toEqual({
+      ...WATERMARKED,
+      definitionHash: hashOf(rule('a')),
+      lastAttemptAt: expect.any(String),
+    });
   });
 
   it('resumes from the watermark when the definition is unchanged', async () => {
@@ -112,38 +118,126 @@ describe('runCustomResolutionRules', () => {
     expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].state).toEqual(EMPTY);
   });
 
-  it('allows one finished first scan per tick and defers the rest', async () => {
+  it('runs every first scan in the same run while there is time', async () => {
     await run([rule('a'), rule('b'), rule('c')]);
 
-    expect(calledRuleIds()).toEqual(['custom:a']);
+    expect(calledRuleIds()).toEqual(['custom:a', 'custom:b', 'custom:c']);
   });
 
-  it('frees the first-scan slot when a scan finds nothing', async () => {
-    (runEsqlMatcherRule as jest.Mock)
-      .mockResolvedValueOnce(EMPTY)
-      .mockResolvedValueOnce(WATERMARKED);
-    await run([rule('a'), rule('b'), rule('c')]);
-
-    expect(calledRuleIds()).toEqual(['custom:a', 'custom:b']);
-  });
-
-  it('frees the first-scan slot when a scan fails, and keeps running later rules', async () => {
+  it('keeps running later rules when a scan fails', async () => {
     (runEsqlMatcherRule as jest.Mock)
       .mockRejectedValueOnce(new Error('verification_exception'))
       .mockResolvedValueOnce(WATERMARKED);
     const { rules, logger } = await run([rule('a'), rule('b')]);
 
     expect(calledRuleIds()).toEqual(['custom:a', 'custom:b']);
-    expect(rules['custom:a']).toBeUndefined();
-    expect(rules['custom:b']).toBeDefined();
+    expect(rules['custom:a']).toMatchObject({ lastProcessedTimestamp: null });
+    expect(rules['custom:b']).toMatchObject(WATERMARKED);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'a' failed"));
   });
 
-  it('runs watermarked rules alongside a first scan', async () => {
-    const previous = { 'custom:b': { ...WATERMARKED, definitionHash: hashOf(rule('b')) } };
-    await run([rule('a'), rule('b'), rule('c')], previous);
+  it('keeps the watermark of a failed rule and records the attempt', async () => {
+    (runEsqlMatcherRule as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+    const previous = { 'custom:a': { ...WATERMARKED, definitionHash: hashOf(rule('a')) } };
+    const { rules } = await run([rule('a')], previous);
 
-    expect(calledRuleIds()).toEqual(['custom:a', 'custom:b']);
+    expect(rules['custom:a']).toEqual({
+      ...WATERMARKED,
+      definitionHash: hashOf(rule('a')),
+      lastAttemptAt: expect.any(String),
+    });
+  });
+
+  describe('soft deadline', () => {
+    const watermarked = (id: string, lastAttemptAt: string) => ({
+      [`custom:${id}`]: { ...WATERMARKED, definitionHash: hashOf(rule(id)), lastAttemptAt },
+    });
+
+    // Behaves like the matcher: works until its signal fires, then returns the
+    // state it was given.
+    const runUntilAborted = async ({
+      signal,
+      state,
+    }: {
+      signal: AbortSignal;
+      state: PerRuleState;
+    }) => {
+      while (!signal.aborted) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+      return state;
+    };
+
+    it('starts no custom rule once the deadline has passed', async () => {
+      const { rules, logger } = await run([rule('a')], {}, undefined, Date.now() - 1);
+
+      expect(runEsqlMatcherRule).not.toHaveBeenCalled();
+      expect(rules).toEqual({});
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('soft deadline has passed'));
+    });
+
+    it('stops a running rule, keeps its watermark, and leaves the rest for next run', async () => {
+      (runEsqlMatcherRule as jest.Mock).mockImplementationOnce(runUntilAborted);
+      const previous = {
+        ...watermarked('a', '2026-10-01T00:00:00Z'),
+        ...watermarked('b', '2026-10-02T00:00:00Z'),
+      };
+
+      const { rules, logger } = await run(
+        [rule('a'), rule('b')],
+        previous,
+        undefined,
+        Date.now() + 30
+      );
+
+      expect(calledRuleIds()).toEqual(['custom:a']);
+      expect(rules['custom:a']).toEqual({
+        ...WATERMARKED,
+        definitionHash: hashOf(rule('a')),
+        lastAttemptAt: expect.any(String),
+      });
+      expect(rules['custom:a']).not.toEqual(previous['custom:a']);
+      expect(rules['custom:b']).toBe(previous['custom:b']);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('custom:a: stopped at the soft deadline')
+      );
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('1 rule(s) continue next run')
+      );
+    });
+
+    it('does not report a query cut off by the deadline as a failure', async () => {
+      (runEsqlMatcherRule as jest.Mock).mockImplementationOnce(async (deps) => {
+        await runUntilAborted(deps);
+        throw new Error('Request aborted');
+      });
+      const { logger } = await run([rule('a')], {}, undefined, Date.now() + 30);
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('starts with the rule that was attempted least recently', async () => {
+      const previous = {
+        ...watermarked('a', '2026-10-13T10:05:00Z'),
+        ...watermarked('b', '2026-10-13T10:00:00Z'),
+        ...watermarked('c', '2026-10-13T09:55:00Z'),
+      };
+      await run([rule('a'), rule('b'), rule('c')], previous);
+
+      expect(calledRuleIds()).toEqual(['custom:c', 'custom:b', 'custom:a']);
+    });
+
+    it('passes the task abort through: an aborted task is not a deadline', async () => {
+      const controller = new AbortController();
+      (runEsqlMatcherRule as jest.Mock).mockImplementationOnce(async (deps) => {
+        controller.abort();
+        return runUntilAborted(deps);
+      });
+      const { logger } = await run([rule('a'), rule('b')], {}, controller.signal);
+
+      expect(calledRuleIds()).toEqual(['custom:a']);
+      expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('soft deadline'));
+    });
   });
 
   it('skips a rule that no longer validates without stopping the others', async () => {

@@ -25,8 +25,10 @@ export interface PerRuleState extends EntityMaintainerState {
 
 // Custom rules (`custom:<id>` keys) also record a hash of the definition their
 // watermark belongs to; a different hash means the rule changed and rescans.
+// `lastAttemptAt` orders the next run: least recently started first.
 export interface CustomRuleState extends PerRuleState {
   definitionHash: string;
+  lastAttemptAt: string;
 }
 
 // `rules` is an open map keyed by rule id rather than a fixed set: a rule with no

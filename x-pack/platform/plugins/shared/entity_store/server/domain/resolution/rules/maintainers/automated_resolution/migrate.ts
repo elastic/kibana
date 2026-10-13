@@ -71,8 +71,10 @@ const sanitizeRule = (value: unknown, logger: Logger): PerRuleState => {
   return {
     lastProcessedTimestamp: toWatermark(record.lastProcessedTimestamp, logger),
     lastRun: sanitizeLastRun(record.lastRun),
-    // Custom rules only. Dropping it is safe: the rule just rescans.
+    // Custom rules only. Dropping either is safe: the rule rescans, or runs
+    // earlier in the next tick.
     ...(typeof record.definitionHash === 'string' && { definitionHash: record.definitionHash }),
+    ...(typeof record.lastAttemptAt === 'string' && { lastAttemptAt: record.lastAttemptAt }),
   };
 };
 

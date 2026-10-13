@@ -18,7 +18,7 @@ import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
-import { runCustomResolutionRules } from './custom_rules';
+import { CUSTOM_RULES_SOFT_DEADLINE_MS, runCustomResolutionRules } from './custom_rules';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
@@ -36,6 +36,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
   initialState: createInitialState(),
   minLicense: 'enterprise',
   run: async ({ status, signal, logger, esClient, resolutionRulesClient, telemetry }) => {
+    const runStartedAt = Date.now();
     const namespace = status.metadata.namespace;
     const state = migrate(status.state, logger);
 
@@ -131,6 +132,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
         signal,
         telemetry,
         mutatedIds,
+        deadline: runStartedAt + CUSTOM_RULES_SOFT_DEADLINE_MS,
       });
     }
 
