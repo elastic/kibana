@@ -34,7 +34,7 @@ const EcfStackSchema = schema.object({
     })
   ),
   serviceIds: schema.maybe(
-    schema.arrayOf(schema.string({ minLength: 1 }), {
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: 128 }), {
       maxSize: 1000,
       meta: { description: 'Service IDs active when the stack was last launched or updated.' },
     })
