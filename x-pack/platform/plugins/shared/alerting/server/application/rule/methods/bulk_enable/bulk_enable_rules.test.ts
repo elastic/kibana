@@ -240,6 +240,37 @@ describe('bulkEnableRules', () => {
     );
   });
 
+  test('keeps the UIAM key of an already enabled rule that holds only a UIAM key', async () => {
+    const uiamApiKey = Buffer.from('uiam-id:essu_key').toString('base64');
+    const enabledUiamOnlyRule: SavedObject<RawRule> = {
+      ...enabledRuleForBulkOps1,
+      attributes: {
+        ...enabledRuleForBulkOps1.attributes,
+        apiKey: null,
+        apiKeyOwner: 'service-account-id',
+        apiKeyCreatedByUser: false,
+        uiamApiKey,
+      },
+    } as unknown as SavedObject<RawRule>;
+
+    mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [enabledUiamOnlyRule] });
+    mockUnsecuredSavedObjectFind(1);
+    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+      saved_objects: [enabledUiamOnlyRule],
+    });
+
+    await rulesClient.bulkEnableRules({ filter: 'fake_filter' });
+
+    expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    const writtenAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes;
+    expect(writtenAttributes).toMatchObject({
+      apiKey: null,
+      apiKeyOwner: 'service-account-id',
+      uiamApiKey,
+    });
+  });
+
   test('does not invalidate the UIAM key of a rule that failed to enable', async () => {
     const disabledUiamOnlyRule: SavedObject<RawRule> = {
       ...disabledRule1,

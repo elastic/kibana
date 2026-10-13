@@ -245,7 +245,12 @@ const bulkEnableRulesWithOCC = async (
             }
 
             const nowIso = new Date().toISOString();
-            const newApiKeyAttributes = !rule.attributes.apiKey
+            // An enabled rule that holds only a UIAM key, such as one created by a UIAM service
+            // account, already runs on that key. Keep it rather than re-keying the rule as the caller.
+            const hasApiKeyInUse =
+              Boolean(rule.attributes.apiKey) ||
+              Boolean(rule.attributes.enabled && rule.attributes.uiamApiKey);
+            const newApiKeyAttributes = !hasApiKeyInUse
               ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
