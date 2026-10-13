@@ -24,6 +24,7 @@ const FLOATING_TOOLBAR_ICONS = [
   'addToDashboard',
   'section',
   'grid',
+  'keyboard',
   'maximize',
   'minimize',
   // layout popover

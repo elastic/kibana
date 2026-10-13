@@ -67,6 +67,16 @@ describe('SelectedPanelsToolbar', () => {
     expect(screen.getByTestId('dashboardSelectedPanelsToolbarGroup')).toBeDisabled();
   });
 
+  test('shows the keyboard shortcuts in a popover instead of the layout options', () => {
+    renderToolbar(['1']);
+    expect(screen.queryByTestId('dashboardSelectedPanelsToolbarLayout')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('dashboardSelectedPanelsToolbarShortcuts'));
+    const popover = screen.getByTestId('dashboardSelectedPanelsToolbarShortcutsPopover');
+    expect(popover).toHaveTextContent('Keyboard shortcuts');
+    expect(popover).toHaveTextContent('Copy selected panels');
+    expect(popover).toHaveTextContent('Area select');
+  });
+
   test('shows more options in a popover', () => {
     renderToolbar(['1']);
     expect(screen.queryByTestId('dashboardSelectedPanelsToolbarRemove')).not.toBeInTheDocument();

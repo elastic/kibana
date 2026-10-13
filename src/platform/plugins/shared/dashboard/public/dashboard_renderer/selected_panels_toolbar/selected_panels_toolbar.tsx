@@ -35,6 +35,7 @@ import {
 } from '../../dashboard_actions/_dashboard_actions_strings';
 import { useBulkPanelActions } from '../grid/use_bulk_panel_actions';
 import { useAddPanelsToChatAction } from './use_add_panels_to_chat_action';
+import { KeyboardShortcutsPopover } from './keyboard_shortcuts_popover';
 import {
   EASE_OUT,
   FloatingToolbar,
@@ -90,6 +91,9 @@ const strings = {
       defaultMessage: 'More options',
     }),
 };
+
+/** The layout button is hidden for now in favor of the keyboard shortcuts button */
+const SHOW_LAYOUT_BUTTON = false;
 
 /** How long the toolbar waits for the "Add to chat" availability check before showing anyway */
 const READY_TIMEOUT = 250;
@@ -247,52 +251,57 @@ export const SelectedPanelsToolbar = ({
                 data-test-subj="dashboardSelectedPanelsToolbarGroup"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                isOpen={isLayoutPopoverOpen}
-                closePopover={() => setIsLayoutPopoverOpen(false)}
-                anchorPosition="upCenter"
-                panelPaddingSize="none"
-                aria-label={layoutLabel}
-                button={
-                  <FloatingToolbarButton
-                    label={layoutLabel}
-                    iconType="grid"
-                    onClick={() => setIsLayoutPopoverOpen((open) => !open)}
-                    isSelected={isLayoutPopoverOpen}
-                    data-test-subj="dashboardSelectedPanelsToolbarLayout"
+            {SHOW_LAYOUT_BUTTON && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  isOpen={isLayoutPopoverOpen}
+                  closePopover={() => setIsLayoutPopoverOpen(false)}
+                  anchorPosition="upCenter"
+                  panelPaddingSize="none"
+                  aria-label={layoutLabel}
+                  button={
+                    <FloatingToolbarButton
+                      label={layoutLabel}
+                      iconType="grid"
+                      onClick={() => setIsLayoutPopoverOpen((open) => !open)}
+                      isSelected={isLayoutPopoverOpen}
+                      data-test-subj="dashboardSelectedPanelsToolbarLayout"
+                    />
+                  }
+                >
+                  <EuiContextMenuPanel
+                    items={[
+                      <EuiContextMenuItem
+                        key="header"
+                        icon="alignTop"
+                        onClick={() => handleLayout('header')}
+                        data-test-subj="dashboardSelectedPanelsToolbarLayoutHeader"
+                      >
+                        {dashboardPanelContextMenuStrings.getLayoutHeaderLabel()}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="grid"
+                        icon="grid"
+                        onClick={() => handleLayout('grid')}
+                        data-test-subj="dashboardSelectedPanelsToolbarLayoutGrid"
+                      >
+                        {dashboardPanelContextMenuStrings.getLayoutGridLabel()}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="side"
+                        icon="alignRight"
+                        onClick={() => handleLayout('side')}
+                        data-test-subj="dashboardSelectedPanelsToolbarLayoutSide"
+                      >
+                        {dashboardPanelContextMenuStrings.getLayoutSideLabel()}
+                      </EuiContextMenuItem>,
+                    ]}
                   />
-                }
-              >
-                <EuiContextMenuPanel
-                  items={[
-                    <EuiContextMenuItem
-                      key="header"
-                      icon="alignTop"
-                      onClick={() => handleLayout('header')}
-                      data-test-subj="dashboardSelectedPanelsToolbarLayoutHeader"
-                    >
-                      {dashboardPanelContextMenuStrings.getLayoutHeaderLabel()}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="grid"
-                      icon="grid"
-                      onClick={() => handleLayout('grid')}
-                      data-test-subj="dashboardSelectedPanelsToolbarLayoutGrid"
-                    >
-                      {dashboardPanelContextMenuStrings.getLayoutGridLabel()}
-                    </EuiContextMenuItem>,
-                    <EuiContextMenuItem
-                      key="side"
-                      icon="alignRight"
-                      onClick={() => handleLayout('side')}
-                      data-test-subj="dashboardSelectedPanelsToolbarLayoutSide"
-                    >
-                      {dashboardPanelContextMenuStrings.getLayoutSideLabel()}
-                    </EuiContextMenuItem>,
-                  ]}
-                />
-              </EuiPopover>
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <KeyboardShortcutsPopover />
             </EuiFlexItem>
             <div css={shared.separator} aria-hidden />
             <EuiFlexItem grow={false}>
