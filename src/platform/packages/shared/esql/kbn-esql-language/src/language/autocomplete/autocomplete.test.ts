@@ -1061,7 +1061,7 @@ describe('autocomplete', () => {
         ]);
         // no comma if there are no more fields
         testSuggestions(
-          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _version/',
+          'FROM a METADATA _id, _ignored, _index, _source, _index_mode, _score, _name, _class, _version/',
           [
             withAutoSuggest({
               filterText: '_version',

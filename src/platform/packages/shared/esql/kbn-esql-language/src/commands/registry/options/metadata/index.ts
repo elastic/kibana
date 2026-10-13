@@ -28,6 +28,8 @@ export const METADATA_FIELDS = [
   '_ignored',
   '_index_mode',
   '_score',
+  '_name',
+  '_class',
 ];
 
 export const metadataSuggestion: ISuggestionItem = withAutoSuggest({

@@ -399,6 +399,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 
@@ -517,9 +518,11 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    getExecutionService: jest.fn(),
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,
+    conversationAccess: 'readWrite',
   };
 };
 

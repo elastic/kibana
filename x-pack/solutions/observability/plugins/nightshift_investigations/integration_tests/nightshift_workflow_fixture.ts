@@ -43,7 +43,7 @@ import {
   type WorkflowRunFixture as WorkflowRunFixtureType,
 } from '@kbn/workflows-execution-engine/test_helpers';
 import { z } from '@kbn/zod/v4';
-import type { AnalyticsServiceSetup, ElasticsearchClient } from '@kbn/core/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, RunAgentParams } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
@@ -210,7 +210,6 @@ export const createNightshiftWorkflowFixture = ({
   const engine = new WorkflowRunFixture();
   const logger = loggerMock.create();
   const analytics: AnalyticsServiceSetup = coreMock.createSetup().analytics;
-  const esClient = { search: jest.fn() } as unknown as ElasticsearchClient;
 
   // A 200 from the agents route is what `nightshift.ensureInvestigationAgent` polls for, so the
   // real handler runs end to end (install, then poll) instead of retrying a 404 nine times.
@@ -272,7 +271,6 @@ export const createNightshiftWorkflowFixture = ({
     }),
     memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
-      getMemoryEsClient: async () => esClient,
       logger,
       isEnabled: () => memoryEnabled,
       telemetry,
@@ -297,7 +295,6 @@ export const createNightshiftWorkflowFixture = ({
       getInference: () => undefined,
       getSavedObjects: () => undefined,
       getUiSettings: () => undefined,
-      getMemoryEsClient: async () => esClient,
       logger,
       isEnabled: () => memoryEnabled,
       telemetry,

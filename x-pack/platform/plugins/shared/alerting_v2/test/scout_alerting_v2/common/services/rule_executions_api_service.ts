@@ -11,7 +11,7 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../../../server/lib/rule_executor/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
-import { countTaskRuns } from './task_event_log';
+import { countTaskRuns, findTaskRunData } from './task_event_log';
 
 const TASK_MANAGER_INDEX = '.kibana_task_manager';
 const DEFAULT_SPACE_ID = 'default';
@@ -39,6 +39,45 @@ interface WaitForTaskDrainedParams {
   spaceId?: string;
 }
 
+export type ReportedRunStatus = 'success' | 'warning' | 'failed' | 'timeout' | 'skipped';
+
+/**
+ * What the rule executor reported about one run, read back from
+ * `kibana.task.data` on Task Manager's `task-run` event.
+ *
+ * The field names are spelled out here instead of imported from the executor
+ * so that renaming one on the write side fails a test rather than quietly
+ * renaming the expectation along with it. `kibana.task.data` is mapped
+ * `flattened`, so these dotted keys are literal keys in `_source`.
+ */
+export interface ReportedRun {
+  status: ReportedRunStatus;
+  /** Halt reason, failing step, or failure-reason code. Absent on success. */
+  reason?: string;
+  'rule.id': string;
+  'rule.spaceId': string;
+  /** Best-effort on failures: absent when a run threw before it was known. */
+  'rule.version'?: number;
+  'metrics.signalsGenerated'?: number;
+  'metrics.ruleEventsGenerated'?: number;
+  'metrics.newEpisodesGenerated'?: number;
+  'metrics.rowsReturnedByQuery'?: number;
+  'metrics.groupsDroppedByLimit'?: number;
+  'metrics.rowsDroppedByLimit'?: number;
+}
+
+interface FindReportedRunsParams {
+  ruleId: string;
+  /** Lower bound (inclusive) on `event.start`. Defaults to every run so far. */
+  since?: Date;
+  spaceId?: string;
+}
+
+interface WaitForReportedRunParams extends FindReportedRunsParams {
+  /** Accepts the run a spec is waiting for. */
+  match: (run: ReportedRun) => boolean;
+}
+
 /**
  * Test-time accessor for the per-rule alerting_v2 rule executor task. Used to
  * wait for deterministic conditions instead of sleeping by wall-clock time:
@@ -48,6 +87,8 @@ interface WaitForTaskDrainedParams {
  *   - `waitForTaskDrained` — polls `.kibana_task_manager` until the executor
  *     task is no longer in `claiming`/`running` status (or until the document
  *     is gone, e.g. after rule delete).
+ *   - `findReportedRuns` / `waitForReportedRun` — read what those runs
+ *     reported about themselves.
  *
  * The underlying `kibana.task.id` construction (`taskType:spaceId:ruleId`) is
  * an implementation detail; tests pass `ruleId` (and optionally `spaceId`).
@@ -55,6 +96,19 @@ interface WaitForTaskDrainedParams {
 export interface RuleExecutionsApiService {
   waitForRuns: (params: WaitForRunsParams) => Promise<void>;
   waitForTaskDrained: (params: WaitForTaskDrainedParams) => Promise<void>;
+  /** Every run's `kibana.task.data`, oldest first. */
+  findReportedRuns: (params: FindReportedRunsParams) => Promise<ReportedRun[]>;
+  /**
+   * Polls until some run satisfies `match`, and returns the earliest one that
+   * does.
+   *
+   * Selecting a run by what it reported, rather than taking the newest, is
+   * what makes these specs deterministic: a rule keeps ticking on its
+   * schedule, so by the time a condition is observable it has usually
+   * reported several times and only some of those runs are the one under
+   * test.
+   */
+  waitForReportedRun: (params: WaitForReportedRunParams) => Promise<ReportedRun>;
 }
 
 const buildExecutorTaskId = (ruleId: string, spaceId: string): string =>
@@ -87,7 +141,38 @@ export const getRuleExecutionsApiService = ({
     return !status || !RUNNING_TASK_STATUSES.includes(status);
   };
 
+  const findReportedRuns: RuleExecutionsApiService['findReportedRuns'] = ({
+    ruleId,
+    since,
+    spaceId = DEFAULT_SPACE_ID,
+  }) =>
+    measurePerformanceAsync(log, 'ruleExecutions.findReportedRuns', () =>
+      findTaskRunData<ReportedRun>({
+        esClient,
+        taskId: buildExecutorTaskId(ruleId, spaceId),
+        sinceMs: since?.getTime(),
+      })
+    );
+
   return {
+    findReportedRuns,
+
+    waitForReportedRun: async ({ match, ...findParams }) => {
+      let matched: ReportedRun | undefined;
+
+      await expect
+        .poll(
+          async () => {
+            matched = (await findReportedRuns(findParams)).find(match);
+            return matched !== undefined;
+          },
+          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+        )
+        .toBe(true);
+
+      return matched!;
+    },
+
     waitForRuns: ({ ruleId, runs, since, spaceId = DEFAULT_SPACE_ID }) =>
       measurePerformanceAsync(log, 'ruleExecutions.waitForRuns', async () => {
         const taskId = buildExecutorTaskId(ruleId, spaceId);

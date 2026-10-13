@@ -9,7 +9,7 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { monaco as mockMonaco } from '@kbn/code-editor';
+import { jsonDefaults } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -24,41 +24,37 @@ const BUILTIN_INPUTS: JsonModelSchemaType = {
   required: ['notificationGroup'],
 };
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    onChange,
-    editorDidMount,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange?: (value: string) => void;
-    editorDidMount?: (editor: { getModel: () => { uri: { toString: () => string } } }) => void;
-    dataTestSubj?: string;
-  }) => {
-    editorDidMount?.({
-      getModel: () => ({ uri: { toString: () => 'inmemory://test/manual-input.json' } }),
-    });
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
 
-    return (
-      <textarea
-        data-test-subj={dataTestSubj || 'code-editor'}
-        value={value}
-        onChange={(event) => onChange?.(event.target.value)}
-      />
-    );
-  },
-  monaco: {
-    languages: {
-      json: {
-        jsonDefaults: {
-          setDiagnosticsOptions: jest.fn(),
-        },
-      },
+  return {
+    ...actual,
+    CodeEditor: ({
+      value,
+      onChange,
+      editorDidMount,
+      dataTestSubj,
+    }: {
+      value: string;
+      onChange?: (value: string) => void;
+      editorDidMount?: (editor: { getModel: () => { uri: { toString: () => string } } }) => void;
+      dataTestSubj?: string;
+    }) => {
+      editorDidMount?.({
+        getModel: () => ({ uri: { toString: () => 'inmemory://test/manual-input.json' } }),
+      });
+
+      return (
+        <textarea
+          data-test-subj={dataTestSubj || 'code-editor'}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+        />
+      );
     },
-    editor: {},
-  },
-}));
+    monaco: actual.monaco,
+  };
+});
 
 jest.mock('./input_validation_callout', () => ({
   InputValidationCallout: ({ errors }: { errors: string }) => (
@@ -95,15 +91,17 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
   });
 
   it('registers Monaco JSON schema with merged kibana.definitions for $ref resolution', async () => {
+    const jsonDefaultsSetDiagnosticsOptionsSpy = jest.spyOn(jsonDefaults, 'setDiagnosticsOptions');
+
     renderForm('{}');
 
     await waitFor(() => {
-      expect(mockMonaco.languages.json.jsonDefaults.setDiagnosticsOptions).toHaveBeenCalled();
+      expect(jsonDefaultsSetDiagnosticsOptionsSpy).toHaveBeenCalled();
     });
 
-    const options = (
-      mockMonaco.languages.json.jsonDefaults.setDiagnosticsOptions as jest.Mock
-    ).mock.calls.at(-1)?.[0];
+    const lastInvocationArgs = jsonDefaultsSetDiagnosticsOptionsSpy.mock.calls.at(-1);
+
+    const options = lastInvocationArgs?.[0];
 
     expect(options?.schemas?.[0]?.schema).toMatchObject({
       kibana: {

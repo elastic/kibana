@@ -23,6 +23,7 @@ import {
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { getQueryPreview } from './esql_views_table';
 import { ManagementApp } from './management_app';
+import type { EsqlViewsTelemetryClient } from './telemetry';
 import type { DiscoverEsqlLocatorParams } from './types';
 import type {
   EsqlViewPreviewDependencies,
@@ -84,41 +85,56 @@ const createClient = (): jest.Mocked<EsqlViewsClient> => ({
 
 const createDiscoverLocator = () => sharePluginMock.createLocator<DiscoverEsqlLocatorParams>();
 
+const createTelemetryClient = (): jest.Mocked<EsqlViewsTelemetryClient> => ({
+  trackViewsPageVisited: jest.fn(),
+  trackViewCreated: jest.fn(),
+  trackViewEdited: jest.fn(),
+  trackViewDeleted: jest.fn(),
+});
+
 const renderApp = (
   client: EsqlViewsClient,
   {
     canCreate = true,
     canEdit = true,
+    canDelete = true,
     EsqlEditor = MockEsqlEditor,
     isDiscoverAvailable = true,
     discoverLocator,
+    telemetryClient = createTelemetryClient(),
     toasts = notificationServiceMock.createStartContract().toasts,
   }: {
     canCreate?: boolean;
     canEdit?: boolean;
+    canDelete?: boolean;
     EsqlEditor?: ComponentType<EsqlEditorProps>;
     isDiscoverAvailable?: boolean;
     discoverLocator?: ReturnType<typeof createDiscoverLocator>;
+    telemetryClient?: jest.Mocked<EsqlViewsTelemetryClient>;
     toasts?: ReturnType<typeof notificationServiceMock.createStartContract>['toasts'];
   } = {}
-) =>
-  render(
+) => ({
+  ...render(
     <EuiProvider>
       <MockAppHeaderProvider>
         <ManagementApp
           canCreate={canCreate}
           canEdit={canEdit}
+          canDelete={canDelete}
           client={client}
           isDiscoverAvailable={isDiscoverAvailable}
           discoverLocator={discoverLocator}
           documentationUrl={documentationUrl}
           EsqlEditor={EsqlEditor}
           previewDependencies={previewDependencies as never}
+          telemetryClient={telemetryClient}
           toasts={toasts}
         />
       </MockAppHeaderProvider>
     </EuiProvider>
-  );
+  ),
+  telemetryClient,
+});
 
 const twoViews: EsqlViewsResult = {
   views: [
@@ -211,6 +227,41 @@ describe('ManagementApp', () => {
     fireEvent.click(screen.getByTestId('esqlViewsActionsButton'));
     expect(await screen.findByTestId('esqlViewsDeleteButton')).toBeInTheDocument();
     expect(screen.queryByTestId('esqlViewsEditButton')).not.toBeInTheDocument();
+  });
+
+  it('hides delete, selection, and bulk delete controls without the delete capability', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue(twoViews);
+
+    renderApp(client, { canDelete: false });
+
+    await screen.findByText('logs-view');
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsBulkDeleteButton')).not.toBeInTheDocument();
+
+    fireEvent.click(within(getRow('logs-view')).getByTestId('esqlViewsActionsButton'));
+    expect(await screen.findByTestId('esqlViewsEditButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsDeleteButton')).not.toBeInTheDocument();
+  });
+
+  it('hides the row actions menu without the edit and delete capabilities', async () => {
+    const client = createClient();
+    client.getViews.mockResolvedValue(twoViews);
+
+    renderApp(client, {
+      canCreate: false,
+      canEdit: false,
+      canDelete: false,
+      discoverLocator: createDiscoverLocator(),
+    });
+
+    await screen.findByText('logs-view');
+    expect(screen.queryByTestId('esqlViewsCreateButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('esqlViewsActionsButton')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
+    expect(
+      within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction')
+    ).not.toHaveAttribute('aria-disabled', 'true');
   });
 
   it('offers edit and delete in the row actions menu with the edit capability', async () => {
@@ -979,7 +1030,7 @@ describe('ManagementApp', () => {
       });
     });
 
-    it('disables the action when the user cannot access Discover', async () => {
+    it('hides the action when the user cannot access Discover', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
       const discoverLocator = createDiscoverLocator();
@@ -987,22 +1038,17 @@ describe('ManagementApp', () => {
       renderApp(client, { discoverLocator, isDiscoverAvailable: false });
       await screen.findByText('logs-view');
 
-      const action = within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction');
-      expect(action).toHaveAttribute('aria-disabled', 'true');
-      fireEvent.click(action);
-      expect(discoverLocator.navigateSync).not.toHaveBeenCalled();
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
 
-    it('disables the action when the Discover locator is unavailable', async () => {
+    it('hides the action when the Discover locator is unavailable', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
 
       renderApp(client);
       await screen.findByText('logs-view');
 
-      expect(
-        within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction')
-      ).toHaveAttribute('aria-disabled', 'true');
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
   });
 
@@ -1202,6 +1248,203 @@ describe('ManagementApp', () => {
       expect(client.getViews).toHaveBeenCalledTimes(2);
       expect(screen.getByTestId('esqlViewsTable')).toBeInTheDocument();
       expect(screen.getByText('logs-view')).toBeInTheDocument();
+    });
+  });
+
+  describe('telemetry', () => {
+    const createView = async (
+      client: jest.Mocked<EsqlViewsClient>,
+      { description }: { description?: string } = {}
+    ) => {
+      fireEvent.click(screen.getByTestId('esqlViewsCreateButton'));
+      fireEvent.change(await screen.findByTestId('esqlViewNameInput'), {
+        target: { value: 'sales.view' },
+      });
+      if (description !== undefined) {
+        fireEvent.change(screen.getByTestId('esqlViewDescriptionInput'), {
+          target: { value: description },
+        });
+      }
+      fireEvent.change(screen.getByTestId('esqlViewQueryEditor'), {
+        target: { value: 'FROM transactions-*' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await waitFor(() => expect(client.createView).toHaveBeenCalled());
+    };
+
+    it('reports a single page visit per mount', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      expect(telemetryClient.trackViewsPageVisited).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports a created view with its query length and whether it has a description', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client, { description: 'Sales transactions' });
+
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledTimes(1);
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledWith({
+        hasDescription: true,
+        queryLength: 'FROM transactions-*'.length,
+      });
+      expect(telemetryClient.trackViewEdited).not.toHaveBeenCalled();
+    });
+
+    it('reports a created view without a description', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client);
+
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledWith({
+        hasDescription: false,
+        queryLength: 'FROM transactions-*'.length,
+      });
+    });
+
+    it('reports a whitespace-only description as no description', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client, { description: '   ' });
+
+      expect(telemetryClient.trackViewCreated).toHaveBeenCalledWith({
+        hasDescription: false,
+        queryLength: 'FROM transactions-*'.length,
+      });
+    });
+
+    it('does not report a creation that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue({ views: [] });
+      client.createView.mockRejectedValue(createClientError('Forbidden', 403));
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('No ES|QL views found');
+
+      await createView(client);
+
+      await screen.findByTestId('esqlViewSaveError');
+      expect(telemetryClient.trackViewCreated).not.toHaveBeenCalled();
+    });
+
+    it('reports an edited view', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.updateView.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for logs-view' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+      fireEvent.change(await screen.findByTestId('esqlViewDescriptionInput'), {
+        target: { value: 'Updated logs' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await waitFor(() => expect(telemetryClient.trackViewEdited).toHaveBeenCalledTimes(1));
+      expect(telemetryClient.trackViewCreated).not.toHaveBeenCalled();
+    });
+
+    it('does not report an edit that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.updateView.mockRejectedValue(createClientError('Forbidden', 403));
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Actions for logs-view' }));
+      fireEvent.click(screen.getByRole('menuitem', { name: 'Edit' }));
+      fireEvent.change(await screen.findByTestId('esqlViewDescriptionInput'), {
+        target: { value: 'Updated logs' },
+      });
+      fireEvent.click(screen.getByTestId('esqlViewSaveButton'));
+
+      await screen.findByTestId('esqlViewSaveError');
+      expect(telemetryClient.trackViewEdited).not.toHaveBeenCalled();
+    });
+
+    it('reports one deletion event per bulk delete operation, counting the submitted views', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValueOnce(twoViews).mockResolvedValueOnce({ views: [] });
+      client.deleteViews.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      fireEvent.click(within(getRow('logs-view')).getByRole('checkbox'));
+      fireEvent.click(within(getRow('orders-view')).getByRole('checkbox'));
+      fireEvent.click(await screen.findByTestId('esqlViewsBulkDeleteButton'));
+      fireEvent.click(
+        within(await screen.findByTestId('esqlViewsDeleteConfirmModal')).getByRole('button', {
+          name: 'Delete',
+        })
+      );
+
+      await waitFor(() => expect(telemetryClient.trackViewDeleted).toHaveBeenCalledTimes(1));
+      expect(telemetryClient.trackViewDeleted).toHaveBeenCalledWith({ count: 2 });
+    });
+
+    it('reports a single-view deletion', async () => {
+      const client = createClient();
+      client.getViews
+        .mockResolvedValueOnce(twoViews)
+        .mockResolvedValueOnce({ views: [twoViews.views[1]] });
+      client.deleteViews.mockResolvedValue({ acknowledged: true });
+
+      const { telemetryClient } = renderApp(client);
+      await screen.findByText('logs-view');
+
+      await openDeleteAction('logs-view');
+      fireEvent.click(
+        within(await screen.findByTestId('esqlViewsDeleteConfirmModal')).getByRole('button', {
+          name: 'Delete',
+        })
+      );
+
+      await waitFor(() => expect(telemetryClient.trackViewDeleted).toHaveBeenCalledTimes(1));
+      expect(telemetryClient.trackViewDeleted).toHaveBeenCalledWith({ count: 1 });
+    });
+
+    it('does not report a deletion that failed', async () => {
+      const client = createClient();
+      client.getViews.mockResolvedValue(twoViews);
+      client.deleteViews.mockRejectedValue(createClientError('Forbidden', 403));
+      const { toasts } = notificationServiceMock.createStartContract();
+
+      const { telemetryClient } = renderApp(client, { toasts });
+      await screen.findByText('logs-view');
+
+      await openDeleteAction('logs-view');
+      fireEvent.click(
+        within(await screen.findByTestId('esqlViewsDeleteConfirmModal')).getByRole('button', {
+          name: 'Delete',
+        })
+      );
+
+      await waitFor(() => expect(toasts.addDanger).toHaveBeenCalled());
+      expect(telemetryClient.trackViewDeleted).not.toHaveBeenCalled();
     });
   });
 });
