@@ -122,7 +122,8 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
     role: buildRole(
       'Alert Triage',
       {
-        // The sweep lists the batch's live executions and starts its batches.
+        // The sweep lists the batch's live executions, starts its batches, and cancels a batch
+        // whose execution it could not record.
         workflowsManagement: [
           'minimal_read',
           'workflow_read',
@@ -130,6 +131,7 @@ export const WORKER_ROLE_DEFINITIONS: Readonly<Record<string, WorkerRoleDefiniti
           'workflow_execution_read',
           'workflow_execution_read_managed',
           'workflow_execute',
+          'workflow_execution_cancel',
         ],
         securitySolutionRulesV4: ['minimal_read'],
         securitySolutionNotes: ['all'],

@@ -163,7 +163,9 @@ steps:
 
       # Links the rule to its batch: the executions list does not return inputs, so the next sweep
       # reads this tag off the alerts to tell which rule has a live batch. The batch removes it,
-      # with the claim, when it has written the outcome.
+      # with the claim, when it has written the outcome. A claim with no execution tag looks dead
+      # to the next sweep, which would start the same alerts again while this batch still runs, so
+      # when the tag cannot be stored the batch is cancelled and its alerts are planned afresh.
       - name: record_batch_execution
         type: kibana.SetAlertTags
         if: "${{ steps.start_batch.error == blank }}"
@@ -171,6 +173,17 @@ steps:
           retry:
             max-attempts: 3
             delay: 5s
+          fallback:
+            - name: cancel_unlinked_batch
+              type: kibana.request
+              on-failure:
+                continue: true
+              with:
+                method: POST
+                path: "/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.start_batch.output.executionId }}/cancel"
+                headers:
+                  kbn-xsrf: string
+                  elastic-api-version: "2023-10-31"
           continue: true
         with:
           ids: "${{ foreach.item.alert_ids }}"

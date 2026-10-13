@@ -21,7 +21,11 @@ interface YamlStep {
   foreach?: string;
   with?: Record<string, unknown>;
   steps?: YamlStep[];
-  'on-failure'?: { continue?: boolean; retry?: { 'max-attempts'?: number } };
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number };
+    fallback?: YamlStep[];
+  };
 }
 
 interface ParsedSweep {
@@ -155,10 +159,31 @@ describe('floor_alert_triage — the scheduled sweep', () => {
       const step = stepByName('record_batch_execution');
 
       expect(step.if).toBe('${{ steps.start_batch.error == blank }}');
-      expect(step['on-failure']).toEqual({
-        retry: { 'max-attempts': 3, delay: '5s' },
-        continue: true,
-      });
+      expect(step['on-failure']).toEqual(
+        expect.objectContaining({ retry: { 'max-attempts': 3, delay: '5s' }, continue: true })
+      );
+    });
+
+    // A claim with no execution tag looks dead to the next sweep, which would start the same
+    // alerts again while this batch is still running.
+    it('cancels the batch it just started when the execution tag cannot be stored', () => {
+      const fallback = stepByName('record_batch_execution')['on-failure']?.fallback ?? [];
+      const cancel = fallback.find(({ name }) => name === 'cancel_unlinked_batch');
+
+      expect(fallback).toHaveLength(1);
+      expect(cancel?.type).toBe('kibana.request');
+      expect(cancel?.with).toEqual(
+        expect.objectContaining({
+          method: 'POST',
+          path: '/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.start_batch.output.executionId }}/cancel',
+        })
+      );
+    });
+
+    it('does not let a failed cancel stop the sweep from starting the other batches', () => {
+      const fallback = stepByName('record_batch_execution')['on-failure']?.fallback ?? [];
+
+      expect(fallback[0]['on-failure']).toEqual({ continue: true });
     });
 
     it('does not let one batch that cannot be started stop the others', () => {

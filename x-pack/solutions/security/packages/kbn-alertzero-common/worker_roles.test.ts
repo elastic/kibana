@@ -106,6 +106,7 @@ describe('WORKER_ROLE_DEFINITIONS', () => {
         'workflow_execution_read',
         'workflow_execution_read_managed',
         'workflow_execute',
+        'workflow_execution_cancel',
       ])
     );
   });
