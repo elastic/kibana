@@ -372,6 +372,34 @@ describe('SimilarErrors', () => {
       );
     });
 
+    it('prefers log.level over error.log.level, like the section gate', async () => {
+      mockColumns(fieldConstants.LOG_LEVEL_FIELD, fieldConstants.ERROR_LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({
+          ...errorDocFields,
+          [fieldConstants.LOG_LEVEL_FIELD]: 'warn',
+          [fieldConstants.ERROR_LOG_LEVEL_FIELD]: 'error',
+        })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'log.level', value: 'warn' } })
+      );
+    });
+
+    it('uses the first value when the level is an array', async () => {
+      mockColumns(fieldConstants.LOG_LEVEL_FIELD);
+
+      await renderSimilarErrorsAndSettle(
+        buildHit({ ...errorDocFields, [fieldConstants.LOG_LEVEL_FIELD]: ['error', 'fatal'] })
+      );
+
+      expect(mockGetEsqlQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({ level: { fieldName: 'log.level', value: 'error' } })
+      );
+    });
+
     it('filters on severity_text for an OTel document', async () => {
       mockColumns('severity_text');
 
