@@ -23,6 +23,7 @@ import type { ColumnarPackageInfo } from '../../../../common/services/columnar_i
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { FleetErrorWithStatusCode, PackageNotFoundError } from '../../../errors';
 import type { IndexTemplateEntry, Installation, RegistryDataStream } from '../../../types';
+import { ElasticsearchAssetType } from '../../../types';
 import { auditLoggingService } from '../../audit_logging';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 import { getCurrentIndexModes } from '../elasticsearch/template/columnar_index_mode';
@@ -95,6 +96,33 @@ export function getColumnarUnsupportedDataStreams(
   return dataStreams.filter(
     (dataStream) => getLogsdbColumnarReadiness(packageInfo, dataStream) === 'unsupported'
   );
+}
+
+/**
+ * The custom-dataset copies of the given data streams that the installation created, for package
+ * policies that set their own dataset. They inherit the origin data stream's readiness, so the
+ * installation-level choice applies to them too.
+ */
+export function getCustomDatasetDataStreams(
+  installation: Installation | undefined,
+  dataStreams: RegistryDataStream[]
+): RegistryDataStream[] {
+  return (installation?.installed_es ?? []).flatMap((ref) => {
+    if (ref.type !== ElasticsearchAssetType.indexTemplate || !ref.customDataStreamOriginDataset) {
+      return [];
+    }
+    const origin = dataStreams.find(
+      (dataStream) =>
+        dataStream.dataset === ref.customDataStreamOriginDataset &&
+        dataStream.type === ref.customDataStreamOriginType
+    );
+    if (!origin) {
+      return [];
+    }
+    // The index template is named `<type>-<dataset>`.
+    const separator = ref.id.indexOf('-');
+    return [{ ...origin, dataset: separator >= 0 ? ref.id.slice(separator + 1) : ref.id }];
+  });
 }
 
 export async function getInstalledPackageOrThrow(
@@ -203,8 +231,8 @@ export async function setLogsdbColumnarChoice({
 /**
  * Applies a change of the installation-level `logsdb_columnar` choice to Elasticsearch.
  *
- * Every columnar-ready logs data stream of the package has its templates re-prepared with the
- * new target mode and written in the mode-aware order (index template first when the mode is
+ * Every columnar-ready logs data stream of the package, and every custom-dataset copy of one,
+ * has its templates re-prepared with the new target mode and written in the mode-aware order (index template first when the mode is
  * being removed, component templates first when it is being added, which
  * `installComponentAndIndexTemplateForDataStream` takes care of), then the write indices are
  * asked to roll over so the change takes effect — in both directions.
@@ -245,7 +273,11 @@ export async function applyLogsdbColumnarIndexMode({
     paths,
   };
 
-  const templateNames = readyDataStreams.map((dataStream) =>
+  const dataStreams = [
+    ...readyDataStreams,
+    ...getCustomDatasetDataStreams(installation, readyDataStreams),
+  ];
+  const templateNames = dataStreams.map((dataStream) =>
     getRegistryDataStreamAssetBaseName(dataStream)
   );
   const targetIndexModes = new Map<string, string | undefined>(
@@ -267,14 +299,14 @@ export async function applyLogsdbColumnarIndexMode({
 
   const [targetTemplates, previousTemplates] = await Promise.all([
     prepareDataStreamTemplates(
-      readyDataStreams,
+      dataStreams,
       packageInstallContext,
       assetsMap,
       experimentalDataStreamFeatures,
       targetIndexModes
     ),
     prepareDataStreamTemplates(
-      readyDataStreams,
+      dataStreams,
       packageInstallContext,
       assetsMap,
       experimentalDataStreamFeatures,

@@ -98,12 +98,15 @@ const savedObjectsClient = savedObjectsClientMock.create();
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const logger = loggerMock.create();
 
-const mockInstalledPackage = (info: ReturnType<typeof packageInfo>) => {
+const mockInstalledPackage = (
+  info: ReturnType<typeof packageInfo>,
+  installation: Record<string, unknown> = {}
+) => {
   jest.mocked(getInstalledPackageWithAssets).mockResolvedValue({
     packageInfo: info,
     paths: [FIELDS_PATH],
     assetsMap: new Map([[FIELDS_PATH, Buffer.from(FIELDS_YAML, 'utf8')]]),
-    installation: { name: PKG_NAME, version: PKG_VERSION },
+    installation: { name: PKG_NAME, version: PKG_VERSION, ...installation },
   } as any);
 };
 
@@ -371,6 +374,42 @@ describe('applyLogsdbColumnarIndexMode', () => {
         enabled: false,
       })
     ).rejects.toBe(err);
+  });
+
+  it('applies the change to the custom-dataset copies of a ready data stream', async () => {
+    mockInstalledPackage(packageInfo(), {
+      installed_es: [
+        { id: DATA_STREAM, type: 'index_template' },
+        {
+          id: 'logs-custom.dataset',
+          type: 'index_template',
+          customDataStreamOriginDataset: 'test.test',
+          customDataStreamOriginType: 'logs',
+        },
+        {
+          id: 'metrics-other.dataset',
+          type: 'index_template',
+          customDataStreamOriginDataset: 'test.metrics',
+          customDataStreamOriginType: 'metrics',
+        },
+      ],
+    });
+
+    const { updatedDataStreams } = await applyLogsdbColumnarIndexMode({
+      esClient,
+      savedObjectsClient,
+      logger,
+      pkgName: PKG_NAME,
+      enabled: true,
+    });
+
+    expect(updatedDataStreams.sort()).toEqual(['logs-custom.dataset', DATA_STREAM]);
+    const customIndexTemplate = esClient.indices.putIndexTemplate.mock.calls.find(
+      ([params]: any) => params.name === 'logs-custom.dataset'
+    );
+    expect((customIndexTemplate?.[0] as any).template.settings.index).toEqual({
+      mode: 'logsdb_columnar',
+    });
   });
 
   it('rejects enabling when no logs data stream is columnar ready', async () => {
