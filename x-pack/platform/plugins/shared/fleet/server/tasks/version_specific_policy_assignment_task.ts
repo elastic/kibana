@@ -238,7 +238,6 @@ export class VersionSpecificPolicyAssignmentTask {
         soClient,
         signal,
         deployedThisRun,
-        sentinelVersionEnabled,
         packageHasTemplateCondition
       );
       if (sentinelVersionEnabled) {
@@ -302,7 +301,6 @@ export class VersionSpecificPolicyAssignmentTask {
     soClient: SavedObjectsClientContract,
     signal: AbortSignal,
     deployedThisRun: Set<string>,
-    sentinelVersionEnabled: boolean,
     packageHasTemplateCondition: Map<string, boolean>
   ) {
     // Fetch agent policies with version conditions in batches
@@ -327,9 +325,7 @@ export class VersionSpecificPolicyAssignmentTask {
       // a count query for every policy of every run.
       const policyIdsWithCandidates = await this.findPolicyIdsWithCandidateAgents(
         esClient,
-        agentPolicyPageResults.map((agentPolicy) => agentPolicy.id),
-        // agents on `#sentinel` that are inactive can only be told apart by the status
-        !sentinelVersionEnabled
+        agentPolicyPageResults.map((agentPolicy) => agentPolicy.id)
       );
       this.logger.debug(
         `[VersionSpecificPolicyAssignmentTask] ${policyIdsWithCandidates.size} of ${agentPolicyPageResults.length} agent policies have agents to assign`
@@ -346,7 +342,6 @@ export class VersionSpecificPolicyAssignmentTask {
           agentPolicy,
           signal,
           deployedThisRun,
-          sentinelVersionEnabled,
           packageHasTemplateCondition
         );
       }
@@ -519,7 +514,6 @@ export class VersionSpecificPolicyAssignmentTask {
     agentPolicy: AgentPolicy,
     signal: AbortSignal,
     deployedThisRun: Set<string>,
-    sentinelVersionEnabled: boolean,
     packageHasTemplateCondition: Map<string, boolean>
   ) {
     this.logger.debug(
@@ -531,10 +525,7 @@ export class VersionSpecificPolicyAssignmentTask {
       esClient,
       soClient,
       agentPolicy.id,
-      signal,
-      // The `#sentinel` document is no longer updated when the sentinel version is disabled, so
-      // inactive agents still on it must be moved too, not only once they become active again.
-      !sentinelVersionEnabled
+      signal
     );
 
     if (agentVersionGroups.length === 0) {
@@ -561,16 +552,15 @@ export class VersionSpecificPolicyAssignmentTask {
    * find, with one search for all of them. Same agents as its query, so that it can skip the others:
    * - active agents on the policy or on its `#sentinel` copy
    * - active agents on a variant that were recently upgraded
-   * - when `includeSentinelAgents` is set, agents on the `#sentinel` copy whatever their status, to
-   *   cover the inactive ones that are moved off it when the sentinel version is disabled
    *
    * Agents without `policy_base_id` (enrolled by an older fleet-server) are matched through their
-   * `policy_id`, so that a missing field never hides an agent.
+   * `policy_id`, so that a missing field never hides an agent. Those can be of any agent policy, so
+   * when there are more distinct `policy_id`s than the aggregation returns, every policy of the page is
+   * looked at rather than skipping some that the truncated result did not show.
    */
   private async findPolicyIdsWithCandidateAgents(
     esClient: ElasticsearchClient,
-    agentPolicyIds: string[],
-    includeSentinelAgents: boolean
+    agentPolicyIds: string[]
   ): Promise<Set<string>> {
     const policyIds = new Set(agentPolicyIds);
     if (policyIds.size === 0) {
@@ -584,7 +574,9 @@ export class VersionSpecificPolicyAssignmentTask {
       unknown,
       {
         base_policy_ids: { buckets: Array<{ key: string }> };
-        without_policy_base_id: { policy_ids: { buckets: Array<{ key: string }> } };
+        without_policy_base_id: {
+          policy_ids: { buckets: Array<{ key: string }>; sum_other_doc_count?: number };
+        };
       }
     >({
       index: AGENTS_INDEX,
@@ -592,34 +584,26 @@ export class VersionSpecificPolicyAssignmentTask {
       size: 0,
       query: {
         bool: {
+          filter: [{ term: { active: true } }],
           should: [
+            // on the policy or on its `#sentinel` copy
+            { terms: { policy_id: parentPolicyIds } },
+            // on a variant that was recently upgraded: matched by the base policy id, or
+            // for agents without it, by any `policy_id` of an agent that was recently upgraded
             {
               bool: {
-                filter: [{ term: { active: true } }],
-                should: [
-                  // on the policy or on its `#sentinel` copy
-                  { terms: { policy_id: parentPolicyIds } },
-                  // on a variant that was recently upgraded: matched by the base policy id, or
-                  // for agents without it, by any `policy_id` of an agent that was recently upgraded
-                  {
-                    bool: {
-                      filter: [
-                        { terms: { policy_base_id: agentPolicyIds } },
-                        { range: { upgraded_at: { gte: recentlyUpgradedTime } } },
-                      ],
-                    },
-                  },
-                  {
-                    bool: {
-                      filter: [{ range: { upgraded_at: { gte: recentlyUpgradedTime } } }],
-                      must_not: [{ exists: { field: 'policy_base_id' } }],
-                    },
-                  },
+                filter: [
+                  { terms: { policy_base_id: agentPolicyIds } },
+                  { range: { upgraded_at: { gte: recentlyUpgradedTime } } },
                 ],
-                minimum_should_match: 1,
               },
             },
-            ...(includeSentinelAgents ? [{ terms: { policy_id: sentinelPolicyIds } }] : []),
+            {
+              bool: {
+                filter: [{ range: { upgraded_at: { gte: recentlyUpgradedTime } } }],
+                must_not: [{ exists: { field: 'policy_base_id' } }],
+              },
+            },
           ],
           minimum_should_match: 1,
         },
@@ -634,6 +618,13 @@ export class VersionSpecificPolicyAssignmentTask {
         },
       },
     });
+
+    if (response.aggregations?.without_policy_base_id?.policy_ids?.sum_other_doc_count) {
+      this.logger.warn(
+        `[VersionSpecificPolicyAssignmentTask] More than ${MAX_AGENTS_WITHOUT_POLICY_BASE_ID} policy ids of agents without policy_base_id: looking at all the agent policies of the page`
+      );
+      return policyIds;
+    }
 
     const found = new Set<string>();
     for (const { key } of response.aggregations?.base_policy_ids?.buckets ?? []) {
@@ -665,8 +656,7 @@ export class VersionSpecificPolicyAssignmentTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
     agentPolicyId: string,
-    signal: AbortSignal,
-    includeInactiveSentinelAgents: boolean = false
+    signal: AbortSignal
   ): Promise<AgentVersionGroup[]> {
     const agentsByMinorVersion = new Map<string, string[]>();
 
@@ -699,35 +689,21 @@ export class VersionSpecificPolicyAssignmentTask {
       `[VersionSpecificPolicyAssignmentTask] Searching for agents with kuery: ${combinedKuery}`
     );
 
-    // Agents that are inactive (no check-in within the inactivity timeout) are skipped, except for
-    // the ones on the `#sentinel` policy when it is no longer maintained
-    const inactiveSentinelKuery = `policy_id:"${escapeQuotes(
-      getSentinelVersionPolicyId(agentPolicyId)
-    )}" AND active:true AND status:inactive`;
-
-    // First, check if there are any agents matching our criteria
+    // First, check if there are any agents matching our criteria. Agents that are inactive by timeout are
+    // included: the stored `active` field is used instead of the status, and moving them is a metadata update.
     const { total } = await getAgentsByKuery(esClient, soClient, {
       kuery: combinedKuery,
       showInactive: false,
       perPage: 0,
       includeStatusRuntimeField: false,
     });
-    const { total: inactiveSentinelTotal } = includeInactiveSentinelAgents
-      ? await getAgentsByKuery(esClient, soClient, {
-          kuery: inactiveSentinelKuery,
-          showInactive: true,
-          perPage: 0,
-        })
-      : { total: 0 };
 
-    if (total === 0 && inactiveSentinelTotal === 0) {
+    if (total === 0) {
       return [];
     }
 
     this.logger.debug(
-      `[VersionSpecificPolicyAssignmentTask] Found ${
-        total + inactiveSentinelTotal
-      } agents that may need version-specific policy assignment`
+      `[VersionSpecificPolicyAssignmentTask] Found ${total} agents that may need version-specific policy assignment`
     );
 
     // Fetch agents and group by minor version
@@ -773,27 +749,14 @@ export class VersionSpecificPolicyAssignmentTask {
       }
     };
 
-    if (total > 0) {
-      await groupAgentsByMinorVersion(
-        await fetchAllAgentsByKuery(esClient, soClient, {
-          kuery: combinedKuery,
-          perPage: AGENTS_BATCHSIZE,
-          showInactive: false,
-          ...LIGHT_AGENT_QUERY_OPTIONS,
-        })
-      );
-    }
-    if (inactiveSentinelTotal > 0) {
-      await groupAgentsByMinorVersion(
-        await fetchAllAgentsByKuery(esClient, soClient, {
-          kuery: inactiveSentinelKuery,
-          perPage: AGENTS_BATCHSIZE,
-          showInactive: true,
-          // the kuery filters by status: keep the status runtime field, only read the needed source fields
-          _source: AGENT_SOURCE_FIELDS,
-        })
-      );
-    }
+    await groupAgentsByMinorVersion(
+      await fetchAllAgentsByKuery(esClient, soClient, {
+        kuery: combinedKuery,
+        perPage: AGENTS_BATCHSIZE,
+        showInactive: false,
+        ...LIGHT_AGENT_QUERY_OPTIONS,
+      })
+    );
 
     // Convert map to array of AgentVersionGroup
     const versionGroups: AgentVersionGroup[] = [];
@@ -944,7 +907,7 @@ export class VersionSpecificPolicyAssignmentTask {
         esClient,
         {
           agentIds,
-          // the agents were selected above, inactive agents on the `#sentinel` policy included
+          // the agents were selected above, agents that are inactive by timeout included
           showInactive: true,
           spaceId: '*',
           _internalCrossSpace: true,

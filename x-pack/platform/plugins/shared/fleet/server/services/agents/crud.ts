@@ -47,6 +47,25 @@ import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
+
+/**
+ * Whether the kuery filters on the `status` field, which only exists as a runtime field. Parsed from the
+ * KQL, so that `status : inactive` is found too. Falls back to a text search for a kuery that does not parse.
+ */
+function kueryReferencesStatusField(kuery?: string): boolean {
+  if (!kuery) {
+    return false;
+  }
+  const referencesStatus = (node: any): boolean =>
+    node?.type === 'function' &&
+    ((node.arguments?.[0]?.type === 'literal' && node.arguments[0].value === 'status') ||
+      (node.arguments ?? []).some(referencesStatus));
+  try {
+    return referencesStatus(fromKueryExpression(kuery));
+  } catch (error) {
+    return kuery.toLowerCase().includes('status:');
+  }
+}
 export const ACTIVE_AGENT_CONDITION = `NOT (${INACTIVE_AGENT_CONDITION})`;
 export const ENROLLED_AGENT_CONDITION = `NOT status:unenrolled`;
 
@@ -341,7 +360,7 @@ export async function getAgentsByKuery(
 
   // Status kuery (`status:inactive`, `status:unenrolled`, …) is only queryable with the
   // runtime field. Force it on when the caller already referenced `status`.
-  const kueryReferencesStatus = Boolean(kuery?.toLowerCase().includes('status:'));
+  const kueryReferencesStatus = kueryReferencesStatusField(kuery);
   const shouldIncludeStatusRuntimeField =
     includeStatusRuntimeField || getStatusSummary || kueryReferencesStatus;
 
@@ -582,7 +601,7 @@ export async function fetchAllAgentsByKuery(
     includeStatusRuntimeField = true,
   } = options;
   const shouldIncludeStatusRuntimeField =
-    includeStatusRuntimeField || Boolean(kuery?.toLowerCase().includes('status:'));
+    includeStatusRuntimeField || kueryReferencesStatusField(kuery);
 
   const filters = await getSpaceAwarenessFilterForAgents(spaceId);
   if (kuery && kuery !== '') {

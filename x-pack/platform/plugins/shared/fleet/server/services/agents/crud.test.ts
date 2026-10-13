@@ -1140,6 +1140,34 @@ describe('Agents CRUD test', () => {
         expect(request.runtime_mappings).toHaveProperty('status');
       });
 
+      it.each([
+        'status : inactive',
+        'status:inactive',
+        'NOT status:online',
+        'a:b and status : (online or offline)',
+      ])(
+        'keeps the status runtime field for the kuery %s that references the status',
+        async (kuery) => {
+          const request = await consume({
+            kuery,
+            showInactive: true,
+            includeStatusRuntimeField: false,
+          });
+
+          expect(request.runtime_mappings).toHaveProperty('status');
+        }
+      );
+
+      it('does not keep the status runtime field for a kuery that only contains the word status', async () => {
+        const request = await consume({
+          kuery: 'local_metadata.host.hostname:"status-host" and last_checkin_status:online',
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(request.runtime_mappings).not.toHaveProperty('status');
+      });
+
       it('does not log an error for agents without the status field when disabled', async () => {
         const logger = loggingSystemMock.createLogger();
         jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);

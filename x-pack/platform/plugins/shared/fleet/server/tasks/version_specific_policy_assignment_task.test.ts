@@ -174,9 +174,11 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
   const mockCandidateAgentPolicies = async ({
     policyIdsWithCandidates,
     policyIdsOfAgentsWithoutPolicyBaseId = [],
+    otherAgentsWithoutPolicyBaseId = 0,
   }: {
     policyIdsWithCandidates?: string[];
     policyIdsOfAgentsWithoutPolicyBaseId?: string[];
+    otherAgentsWithoutPolicyBaseId?: number;
   } = {}) => {
     const [coreStart] = await mockCore.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser as any;
@@ -185,7 +187,7 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         return {};
       }
       const requestedPolicyIds: string[] =
-        request.query.bool.should[0].bool.should[1].bool.filter[0].terms.policy_base_id;
+        request.query.bool.should[1].bool.filter[0].terms.policy_base_id;
       return {
         aggregations: {
           base_policy_ids: {
@@ -194,7 +196,10 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
               .map((key) => ({ key })),
           },
           without_policy_base_id: {
-            policy_ids: { buckets: policyIdsOfAgentsWithoutPolicyBaseId.map((key) => ({ key })) },
+            policy_ids: {
+              buckets: policyIdsOfAgentsWithoutPolicyBaseId.map((key) => ({ key })),
+              sum_other_doc_count: otherAgentsWithoutPolicyBaseId,
+            },
           },
         },
       };
@@ -635,7 +640,6 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         );
 
       it('searches once for all the agent policies of a page', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
         const esClient = await mockCandidateAgentPolicies();
 
         await runTask();
@@ -651,10 +655,9 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
           field: 'policy_base_id',
           size: 2,
         });
-        const [activeAgents, inactiveSentinelAgents] = request.query.bool.should;
-        expect(inactiveSentinelAgents).toBeUndefined();
-        expect(activeAgents.bool.filter).toEqual([{ term: { active: true } }]);
-        const [onPolicy, onVariant, withoutBaseId] = activeAgents.bool.should;
+        // agents that are inactive by timeout are active in the stored field, like in the agent queries
+        expect(request.query.bool.filter).toEqual([{ term: { active: true } }]);
+        const [onPolicy, onVariant, withoutBaseId] = request.query.bool.should;
         // the policy and its #sentinel copy
         expect(onPolicy).toEqual({
           terms: { policy_id: ['policy-1', 'policy-2', 'policy-1#sentinel', 'policy-2#sentinel'] },
@@ -715,30 +718,16 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect(mockedGetAgentsByKuery).not.toHaveBeenCalled();
       });
 
-      it('also searches for the agents on #sentinel of any status when the sentinel version is disabled', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
-        const esClient = await mockCandidateAgentPolicies();
-
-        await runTask();
-
-        const [[request]] = esClient.search.mock.calls.filter(
-          ([searchRequest]: any) => searchRequest.aggs?.base_policy_ids
-        );
-        expect(request.query.bool.should[1]).toEqual({
-          terms: { policy_id: ['policy-1#sentinel', 'policy-2#sentinel'] },
+      it('looks at all the agent policies of the page when the agents without policy_base_id are truncated', async () => {
+        await mockCandidateAgentPolicies({
+          policyIdsWithCandidates: [],
+          policyIdsOfAgentsWithoutPolicyBaseId: ['another-policy'],
+          otherAgentsWithoutPolicyBaseId: 5,
         });
-      });
-
-      it('does not search for the agents on #sentinel of any status when the sentinel version is enabled', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
-        const esClient = await mockCandidateAgentPolicies();
 
         await runTask();
 
-        const [[request]] = esClient.search.mock.calls.filter(
-          ([searchRequest]: any) => searchRequest.aggs?.base_policy_ids
-        );
-        expect(request.query.bool.should).toHaveLength(1);
+        expect(policyIdsQueried().flat().sort()).toEqual(['policy-1', 'policy-2']);
       });
     });
 
@@ -1492,8 +1481,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       });
     });
 
-    describe('policies with version conditions, inactive agents on #sentinel', () => {
-      const inactiveAgents = generateAgents(1, 'policy-1#sentinel', '9.4.1');
+    describe('policies with version conditions, agents on #sentinel that are inactive by timeout', () => {
+      const agentsOnSentinel = generateAgents(1, 'policy-1#sentinel', '9.4.1');
 
       beforeEach(() => {
         mockAgentPolicyService.fetchAllAgentPolicies = getPolicyPages(
@@ -1501,53 +1490,49 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
           []
         );
         mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
-        mockedGetAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
-          options.kuery.includes('status:inactive')
-            ? { total: 1, agents: inactiveAgents, page: 1, perPage: 0 }
-            : { total: 0, agents: [], page: 1, perPage: 0 }
-        );
-        mockedFetchAllAgentsByKuery.mockImplementation(async (_es, _so, options: any) =>
-          getMockFetchAllAgentsByKuery(
-            options.kuery.includes('status:inactive') ? inactiveAgents : []
-          )
-        );
-      });
-
-      it('moves them to the version specific policy when the sentinel version is disabled', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(false);
-
-        await runTask();
-
-        expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            kuery: 'policy_id:"policy-1#sentinel" AND active:true AND status:inactive',
-            showInactive: true,
-          })
-        );
-        expect(mockedReassignAgents).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({ agentIds: ['agent-0'], showInactive: true }),
-          'policy-1#9.4'
+        mockedGetAgentsByKuery.mockResolvedValue({
+          total: 1,
+          agents: agentsOnSentinel,
+          page: 1,
+          perPage: 0,
+        });
+        mockedFetchAllAgentsByKuery.mockImplementation(async () =>
+          getMockFetchAllAgentsByKuery(agentsOnSentinel)
         );
       });
 
-      it('leaves them alone while the sentinel version is enabled', async () => {
-        mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(true);
+      it.each([true, false])(
+        'are moved once, with the query of the other agents, when the sentinel version is %s',
+        async (sentinelVersionEnabled) => {
+          mockedIsSentinelPolicyVersionEnabled.mockResolvedValue(sentinelVersionEnabled);
 
-        await runTask();
+          await runTask();
 
-        expect(mockedGetAgentsByKuery).not.toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          expect.objectContaining({
-            kuery: expect.stringContaining('status:inactive'),
-          })
-        );
-        expect(mockedReassignAgents).not.toHaveBeenCalled();
-      });
+          // the active agents are selected by the stored `active` field, so those that are inactive by
+          // timeout are in the same query and no query needs the status
+          expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledTimes(1);
+          expect(mockedFetchAllAgentsByKuery).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({
+              kuery: expect.stringContaining('"policy-1#sentinel"'),
+              includeStatusRuntimeField: false,
+            })
+          );
+          const kueries = [
+            ...mockedGetAgentsByKuery.mock.calls.map(([, , options]) => options.kuery),
+            ...mockedFetchAllAgentsByKuery.mock.calls.map(([, , options]) => options.kuery),
+          ];
+          expect(kueries.some((kuery) => kuery?.includes('status'))).toBe(false);
+          expect(mockedReassignAgents).toHaveBeenCalledTimes(1);
+          expect(mockedReassignAgents).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            expect.objectContaining({ agentIds: ['agent-0'] }),
+            'policy-1#9.4'
+          );
+        }
+      );
     });
 
     describe('orphaned version-specific policy sweep', () => {
