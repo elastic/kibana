@@ -60,10 +60,20 @@ const STATUS_CONFIG: Record<ServiceChipState, { color: string; label: React.Reac
 
 interface ServiceStatusIndicatorProps {
   status: ServiceChipState;
+  /** The error comes from an unhealthy Fleet agent rather than a failed deployment. */
+  isAgentError?: boolean;
 }
 
-export function ServiceStatusIndicator({ status }: ServiceStatusIndicatorProps) {
-  const { color, label } = STATUS_CONFIG[status];
+const AGENT_ERROR_LABEL = (
+  <FormattedMessage
+    id="xpack.ingestHub.detectAndReviewStep.serviceStatus.agentError"
+    defaultMessage="Agent needs attention"
+  />
+);
+
+export function ServiceStatusIndicator({ status, isAgentError }: ServiceStatusIndicatorProps) {
+  const { color, label: defaultLabel } = STATUS_CONFIG[status];
+  const label = status === 'error' && isAgentError ? AGENT_ERROR_LABEL : defaultLabel;
   // In-progress states are indicated by the tile's leading spinner (see ServiceTile), so the
   // label here stays plain text — a second spinner beside it would read as two activities.
   const isPending = status === 'detecting' || status === 'instantiating';

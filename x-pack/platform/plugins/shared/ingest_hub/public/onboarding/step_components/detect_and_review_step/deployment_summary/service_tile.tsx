@@ -17,14 +17,18 @@ import {
 } from '@elastic/eui';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
 import type { ServiceChipState } from '../../../onboarding_flow_context';
+import type { ServiceAgentInfo } from '../use_service_data_detection';
 import { ServiceStatusIndicator } from './service_status_indicator';
 import { DeliveryMethodBadge } from './delivery_method_badge';
+import { ServiceAgentStatus } from './service_agent_status';
 
 interface ServiceTileProps {
   name: string;
   status: ServiceChipState;
   entry: AwsServiceMatrixEntry;
   deploymentMethod: DeploymentMethod;
+  /** Set for services deployed through Fleet; ECF services have no agent. */
+  agentInfo?: ServiceAgentInfo;
 }
 
 /**
@@ -41,7 +45,13 @@ const STATUS_ICON: Record<string, { type: string; color: string }> = {
 /** States that are still settling — the tile shows a spinner until one of the terminal states. */
 const PENDING_STATES: ServiceChipState[] = ['instantiating', 'detecting'];
 
-export function ServiceTile({ name, status, entry, deploymentMethod }: ServiceTileProps) {
+export function ServiceTile({
+  name,
+  status,
+  entry,
+  deploymentMethod,
+  agentInfo,
+}: ServiceTileProps) {
   const isPending = PENDING_STATES.includes(status);
   const icon = STATUS_ICON[status];
 
@@ -61,12 +71,25 @@ export function ServiceTile({ name, status, entry, deploymentMethod }: ServiceTi
               <strong>{name}</strong>
             </EuiText>
             <EuiSpacer size="xs" />
-            <ServiceStatusIndicator status={status} />
+            <ServiceStatusIndicator
+              status={status}
+              isAgentError={agentInfo?.health === 'unhealthy'}
+            />
           </EuiFlexItem>
           <EuiSpacer size="xs" />
           <EuiFlexItem grow={false}>
             <DeliveryMethodBadge entry={entry} deploymentMethod={deploymentMethod} />
           </EuiFlexItem>
+          {agentInfo && (
+            <EuiFlexItem grow={false}>
+              <ServiceAgentStatus
+                name={name}
+                entry={entry}
+                deploymentMethod={deploymentMethod}
+                agentInfo={agentInfo}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
