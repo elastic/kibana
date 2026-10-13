@@ -156,8 +156,8 @@ export const upsertPanelContentSchema = z.discriminatedUnion('source', [
 export type UpsertPanelContent = z.infer<typeof upsertPanelContentSchema>;
 
 /**
- * Embeddable types an upsert content can edit in place. A request without a renderer edits Lens or
- * Vega panels. Attachment content always replaces the panel content.
+ * Embeddable types an upsert content can edit. A request without a renderer edits Lens or Vega
+ * panels. Attachment content only creates panels.
  */
 export const getEditableEmbeddableTypes = (content: UpsertPanelContent): string[] => {
   if (content.source === 'config') {
@@ -173,8 +173,8 @@ export const getEditableEmbeddableTypes = (content: UpsertPanelContent): string[
 };
 
 /**
- * Whether upsert content edits the existing panel in place rather than replacing it: the content
- * matches the panel's kind, and a Lens panel is backed by ES|QL.
+ * Whether upsert content can edit the existing panel: the content matches the panel's kind, and a
+ * Lens panel is backed by ES|QL.
  */
 export const canEditPanel = (
   content: UpsertPanelContent,

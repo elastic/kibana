@@ -493,7 +493,7 @@ describe('executeDashboardUpsert', () => {
         },
         identifier: 'panel-1',
         error:
-          'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline editing. To replace the panel with generated content, set `renderer` explicitly.',
+          'Panel "panel-1" with type "aiOpsLogRateAnalysis" cannot be edited. To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.',
       },
       {
         name: 'a custom_content request edit without renderer',
@@ -503,7 +503,7 @@ describe('executeDashboardUpsert', () => {
         },
         identifier: 'cc-1',
         error:
-          'Panel "cc-1" is a custom content panel. Edit it with source: "request", renderer: "custom_content". To replace the panel with generated content, set `renderer` explicitly.',
+          'Panel "cc-1" is a custom_content panel. Edit it with source: "request", renderer: "custom_content". To replace it with another kind of panel, remove "cc-1" and add the new panel with a new id in the same call.',
       },
       {
         name: 'a markdown request edit without renderer',
@@ -513,21 +513,61 @@ describe('executeDashboardUpsert', () => {
         },
         identifier: 'md-1',
         error:
-          'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown". To replace the panel with generated content, set `renderer` explicitly.',
+          'Panel "md-1" is a markdown panel. Edit it with source: "config", type: "markdown". To replace it with another kind of panel, remove "md-1" and add the new panel with a new id in the same call.',
       },
       {
-        name: 'a lens request replacing a Vega panel without chart type',
+        name: 'a lens request on a Vega panel',
         panels: [vegaPanel],
         upsert: {
           panels: [
             {
               id: 'vega-1',
-              content: { source: 'request', renderer: 'lens', query: 'change the title' },
+              content: { source: 'request', renderer: 'lens', query: 'show requests per host' },
             },
           ],
         },
         identifier: 'vega-1',
-        error: expect.stringContaining('Invalid content for panel "vega-1"'),
+        error: `Panel "vega-1" is a vega panel. Edit it with source: "request", renderer: "vega". To replace it with another kind of panel, remove "vega-1" and add the new panel with a new id in the same call.`,
+      },
+      {
+        name: 'a custom_content request on a Lens panel',
+        panels: [createLensPanel('panel-1')],
+        upsert: {
+          panels: [
+            {
+              id: 'panel-1',
+              content: { source: 'request', renderer: 'custom_content', query: 'show a KPI card' },
+            },
+          ],
+        },
+        identifier: 'panel-1',
+        error: `Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.`,
+      },
+      {
+        name: 'a request edit of a Lens panel not backed by ES|QL',
+        panels: [createPanel('panel-1', LENS_EMBEDDABLE_TYPE, { type: 'metric' })],
+        upsert: {
+          panels: [{ id: 'panel-1', content: { source: 'request', query: 'make it a bar' } }],
+        },
+        identifier: 'panel-1',
+        error: `Panel "panel-1" is a Lens panel that is not backed by ES|QL, so it cannot be edited. To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.`,
+      },
+      {
+        name: 'markdown content on a Lens panel',
+        panels: [createLensPanel('panel-1')],
+        upsert: { panels: [{ id: 'panel-1', content: markdownContent('Text') }] },
+        identifier: 'panel-1',
+        error:
+          'Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.',
+      },
+      {
+        name: 'attachment content on an existing panel',
+        panels: [createLensPanel('panel-1')],
+        upsert: {
+          panels: [{ id: 'panel-1', content: { source: 'attachment', attachment_id: 'a' } }],
+        },
+        identifier: 'panel-1',
+        error: `Panel "panel-1" is a lens panel. Edit it with source: "request", renderer: "lens". To replace it with another kind of panel, remove "panel-1" and add the new panel with a new id in the same call.`,
       },
     ])(
       'rejects $name and leaves the dashboard unchanged',
@@ -1291,53 +1331,6 @@ describe('executeDashboardUpsert', () => {
         );
         expect(result.dashboardData.panels).toEqual([{ ...vegaPanel, config: { updated: true } }]);
       });
-
-      it('replaces a Vega panel with a new Lens panel when the content names the lens renderer', async () => {
-        const { result, resolvePanelContent } = await editWith(vegaPanel, {
-          source: 'request',
-          renderer: 'lens',
-          chartType: SupportedChartType.XY,
-          query: 'show requests per host',
-        });
-
-        expect(resolvePanelContent).toHaveBeenCalledWith(
-          expect.objectContaining({ renderer: 'lens', identifier: 'vega-1' })
-        );
-        expect(resolvePanelContent).toHaveBeenCalledWith(
-          expect.not.objectContaining({ existingPanel: expect.anything() })
-        );
-        expect(result.failures).toEqual([]);
-        expect(result.dashboardData.panels).toEqual([
-          expect.objectContaining({
-            id: 'vega-1',
-            type: LENS_EMBEDDABLE_TYPE,
-            config: { updated: true },
-          }),
-        ]);
-      });
-
-      it('replaces a Lens panel with new custom content when the content names custom_content', async () => {
-        const { result, resolvePanelContent } = await editWith(createLensPanel('panel-1'), {
-          source: 'request',
-          renderer: 'custom_content',
-          query: 'show a KPI card',
-        });
-
-        expect(resolvePanelContent).toHaveBeenCalledWith({
-          renderer: 'custom_content',
-          identifier: 'panel-1',
-          nlQuery: 'show a KPI card',
-          esql: undefined,
-        });
-        expect(result.failures).toEqual([]);
-        expect(result.dashboardData.panels).toEqual([
-          expect.objectContaining({
-            id: 'panel-1',
-            type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
-            config: { updated: true },
-          }),
-        ]);
-      });
     });
 
     it('resolves multiple panel edits in parallel', async () => {
@@ -1483,15 +1476,6 @@ describe('executeDashboardUpsert', () => {
         },
       },
       {
-        name: 'markdown content on a Lens panel',
-        existingPanel: createLensPanel('panel-1'),
-        content: markdownContent('new text'),
-        expected: {
-          type: MARKDOWN_EMBEDDABLE_TYPE,
-          config: { content: 'new text', settings: { open_links_in_new_tab: true } },
-        },
-      },
-      {
         name: 'ML anomaly charts content on an anomaly charts panel',
         existingPanel: createPanel('panel-1', 'ml_anomaly_charts', { job_ids: ['job-1'] }),
         content: {
@@ -1509,8 +1493,8 @@ describe('executeDashboardUpsert', () => {
         },
       },
       {
-        name: 'ML anomaly swimlane content on a Lens panel',
-        existingPanel: createLensPanel('panel-1'),
+        name: 'ML anomaly swimlane content on an anomaly swimlane panel',
+        existingPanel: createPanel('panel-1', 'ml_anomaly_swimlane', { job_ids: ['job-1'] }),
         content: {
           source: 'config',
           type: 'ml_anomaly_swimlane',
@@ -1522,8 +1506,8 @@ describe('executeDashboardUpsert', () => {
         },
       },
       {
-        name: 'ML single metric viewer content on a Lens panel',
-        existingPanel: createLensPanel('panel-1'),
+        name: 'ML single metric viewer content on a single metric viewer panel',
+        existingPanel: createPanel('panel-1', 'ml_single_metric_viewer', { job_ids: ['job-1'] }),
         content: {
           source: 'config',
           type: 'ml_single_metric_viewer',
@@ -1547,28 +1531,6 @@ describe('executeDashboardUpsert', () => {
       expect(resolvePanelContent).not.toHaveBeenCalled();
       expect(result.failures).toEqual([]);
       expect(result.dashboardData.panels).toEqual([{ ...existingPanel, ...expected }]);
-    });
-
-    it('replaces a panel with attachment content and keeps its id', async () => {
-      const resolveAttachmentPanel = jest.fn<PanelContentAttempt, [string]>(() => ({
-        type: 'success',
-        panelContent: { type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } },
-      }));
-
-      const result = await executeDashboardUpsert({
-        dashboardData: { title: 'Test', panels: [createLensPanel('panel-1')] },
-        upsert: {
-          panels: [{ id: 'panel-1', content: { source: 'attachment', attachment_id: 'a' } }],
-        },
-        logger,
-        resolveAttachmentPanel,
-      });
-
-      expect(resolveAttachmentPanel).toHaveBeenCalledWith('a');
-      expect(result.failures).toEqual([]);
-      expect(result.dashboardData.panels).toEqual([
-        expect.objectContaining({ id: 'panel-1', config: { type: 'bar' } }),
-      ]);
     });
 
     it('routes custom_content edits through the panel resolver with the existing panel', async () => {

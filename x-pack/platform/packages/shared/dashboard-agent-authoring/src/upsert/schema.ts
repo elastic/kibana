@@ -42,7 +42,7 @@ const upsertPanelSchema = z.object({
   content: upsertPanelContentSchema
     .optional()
     .describe(
-      'Panel content. Required for new panels. For an existing panel of the same kind, edits it (e.g. a request with a query describing the change). Content of a different kind, or an attachment, replaces the panel content and keeps its id. Omit to only move or resize the panel.'
+      'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move or resize the panel.'
     ),
   grid: panelGridSchema
     .optional()

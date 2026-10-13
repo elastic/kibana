@@ -32,7 +32,7 @@ import {
   type UpsertPanelContent,
 } from '../operations/panels';
 import {
-  getRendererlessEditError,
+  getPanelEditError,
   toCreationResolutionRequest,
   toEditResolutionRequest,
 } from '../operations/panels/resolution_requests';
@@ -42,9 +42,6 @@ import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type ValidateDashboard } from '../validate_dashboard';
 import { placeNewWidgets } from './placement';
 import type { DashboardUpsert, UpsertPanelItem, UpsertSectionItem } from './schema';
-
-/** Request fields that only apply when editing a panel in place. */
-const EDIT_ONLY_REQUEST_FIELDS: ReadonlySet<string> = new Set(['preserveESQL', 'applyChartRules']);
 
 /** Grid given to panel inputs while parsing; the item's `grid` sets the real position. */
 const PARSE_GRID = { x: 0, y: 0, w: 24, h: 10 };
@@ -188,9 +185,8 @@ const upsertSections = (
 };
 
 /**
- * Decides how a panel item's content applies: an edit when the content matches the existing
- * panel's kind (and a Lens panel is backed by ES|QL), otherwise new content (a new panel, or a
- * replacement that keeps the id).
+ * Plans how a panel item's content resolves: an edit of the existing panel, which the content must
+ * match in kind, or a new panel.
  */
 const planPanelContent = ({
   id,
@@ -212,25 +208,10 @@ const planPanelContent = ({
     return resolvePanelContent(request);
   };
 
-  const isEdit = existingPanel !== undefined && canEditPanel(content, existingPanel);
-
-  if (existingPanel && !isEdit && content.source === 'request') {
-    if (!content.renderer) {
-      return { error: getRendererlessEditError(existingPanel) };
+  if (existingPanel) {
+    if (!canEditPanel(content, existingPanel)) {
+      return { error: getPanelEditError(existingPanel) };
     }
-    const editOnlyFields = Object.entries(content)
-      .filter(([field, value]) => EDIT_ONLY_REQUEST_FIELDS.has(field) && value !== undefined)
-      .map(([field]) => `"${field}"`);
-    if (editOnlyFields.length > 0) {
-      return {
-        error: `Panel "${id}" cannot be edited with this content, so the content would replace it, and ${editOnlyFields.join(
-          ' and '
-        )} only apply to edits. To replace the panel, describe the full new chart without them.`,
-      };
-    }
-  }
-
-  if (existingPanel && isEdit) {
     const parsed = editPanelInputSchema.safeParse({ ...content, panelId: id });
     if (!parsed.success) {
       return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
@@ -244,21 +225,13 @@ const planPanelContent = ({
         }),
       };
     }
-    const result = toEditResolutionRequest(editInput, existingPanel);
-    if ('error' in result) {
-      return result;
-    }
-    return { resolveContent: () => resolveRequest(result.request) };
+    const request = toEditResolutionRequest(editInput, existingPanel);
+    return { resolveContent: () => resolveRequest(request) };
   }
 
   const parsed = newPanelInputSchema.safeParse({ ...content, grid: PARSE_GRID });
   if (!parsed.success) {
-    const replacement = existingPanel
-      ? ` The content does not match the existing "${existingPanel.type}" panel, so it replaces the panel and must be complete.`
-      : '';
-    return {
-      error: `Invalid content for panel "${id}":${replacement} ${formatIssues(parsed.error)}`,
-    };
+    return { error: `Invalid content for panel "${id}": ${formatIssues(parsed.error)}` };
   }
   const newInput = parsed.data;
   if (newInput.source === 'config') {
