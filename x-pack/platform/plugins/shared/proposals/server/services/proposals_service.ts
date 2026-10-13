@@ -110,6 +110,27 @@ export interface ProposalsServiceDeps {
  * covers the API, the workflows resume route, the Inbox and Agent Builder at
  * once. The routes only release the gate.
  */
+const PRIORITY_SORT: SortCombinations[] = [
+  { [IMPACT_RANK_FIELD]: { order: 'asc' } },
+  { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
+  // Soonest deadline first; proposals without one come after those with.
+  { expiresAt: { order: 'asc', missing: '_last' } },
+  // Final tiebreak, so paging over equally-ranked proposals is stable.
+  { createdAt: { order: 'desc' } },
+];
+
+/**
+ * A conversation's history, newest first. An undecided proposal has no `decidedAt` yet and is the
+ * live one, so it leads; a retry inherits its original's `createdAt`, which therefore cannot
+ * order a chain. The chain keys make the order total, so paging cannot repeat or skip a row.
+ */
+const NEWEST_SORT: SortCombinations[] = [
+  { decidedAt: { order: 'desc', missing: '_first' } },
+  { createdAt: { order: 'desc' } },
+  { rootProposalId: { order: 'asc' } },
+  { revision: { order: 'asc' } },
+];
+
 export class ProposalsService {
   constructor(private readonly deps: ProposalsServiceDeps) {}
 
@@ -266,14 +287,7 @@ export class ProposalsService {
       size: query.size,
       from: query.from,
       query: { bool: { filter: toFilterClauses(query, spaceId) } },
-      sort: sort ?? [
-        { [IMPACT_RANK_FIELD]: { order: 'asc' } },
-        { [CONFIDENCE_RANK_FIELD]: { order: 'asc' } },
-        // Soonest deadline first; proposals without one come after those with.
-        { expiresAt: { order: 'asc', missing: '_last' } },
-        // Final tiebreak, so paging over equally-ranked proposals is stable.
-        { createdAt: { order: 'desc' } },
-      ],
+      sort: sort ?? (query.order === 'newest' ? NEWEST_SORT : PRIORITY_SORT),
     });
 
     const proposals = await this.withMetadataBatch(
@@ -835,6 +849,7 @@ export class ProposalsService {
               {
                 status: 'pending',
                 excludeSuperseded: true,
+                excludeUndecidedSuperseded: false,
                 // Past its deadline a proposal awaits no decision, even before the gate settles it.
                 excludeExpired: true,
               },
@@ -1245,6 +1260,18 @@ const toFilterClauses = (
     // A superseded proposal is represented by its successor, so showing both
     // would put every retry of the same subject in the queue.
     filter.push({ bool: { must_not: { exists: { field: 'supersededBy' } } } });
+  }
+  if (filters.excludeUndecidedSuperseded) {
+    filter.push({
+      bool: {
+        must_not: {
+          bool: {
+            filter: [{ exists: { field: 'supersededBy' } }],
+            must_not: [{ exists: { field: 'decision' } }],
+          },
+        },
+      },
+    });
   }
   if (filters.excludeExpired) {
     // A proposal with no deadline never expires, so it has to survive the
