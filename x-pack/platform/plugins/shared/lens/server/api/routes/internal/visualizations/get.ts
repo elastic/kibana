@@ -6,6 +6,7 @@
  */
 
 import { boomify, isBoom } from '@hapi/boom';
+import { LENS_ERROR_CODES, LensConversionError } from '@kbn/lens-embeddable-utils';
 
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 import {
@@ -66,6 +67,9 @@ export const registerLensInternalVisualizationsGetAPIRoute: RegisterAPIRouteFn =
           404: {
             description: 'Resource not found',
           },
+          422: {
+            description: 'The saved visualization configuration cannot be converted',
+          },
           500: {
             description: 'Internal Server Error',
           },
@@ -86,7 +90,23 @@ export const registerLensInternalVisualizationsGetAPIRoute: RegisterAPIRouteFn =
         }
 
         const resultMeta: CMItemResultMeta = result.meta;
-        const responseItem = getLensInternalResponseItem(builder, result.item, resultMeta);
+        let responseItem: ExtendedLensResponseItem;
+        try {
+          responseItem = getLensInternalResponseItem(builder, result.item, resultMeta);
+        } catch (conversionError) {
+          return res.customError({
+            statusCode: 422,
+            body: {
+              message: conversionError.message,
+              attributes: {
+                code:
+                  conversionError instanceof LensConversionError
+                    ? conversionError.code
+                    : LENS_ERROR_CODES.INVALID_CONFIGURATION,
+              },
+            },
+          });
+        }
 
         return res.ok<ExtendedLensResponseItem>({
           body: lensGetResponseBodySchema.parse(responseItem),
