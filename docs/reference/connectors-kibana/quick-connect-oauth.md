@@ -15,7 +15,7 @@ With other OAuth-based authentication types, you register an app with the servic
 
 ## Set up a connector with Quick Connect OAuth 2.0 [quick-connect-oauth-setup]
 
-1. In {{kib}}, go to **{{stack-manage-app}} > {{connectors-ui}}** and create a connector for one of the [supported services](#quick-connect-oauth-supported-connectors).
+1. In {{kib}}, go to **{{stack-manage-app}} → {{connectors-ui}}** and create a connector for one of the [supported services](#quick-connect-oauth-supported-connectors).
 2. For the authentication type, select **Quick Connect OAuth 2.0**.
 3. Follow the prompt to sign in to the service and authorize the Elastic app to access your organization's data.
 
@@ -45,8 +45,8 @@ The following connectors support Quick Connect OAuth 2.0:
 | [Gmail](/reference/connectors-kibana/gmail-action-type.md) | Read-only. Write actions require OAuth 2.0 authorization code authentication. |
 | [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md) | Read-only access to calendars and events. |
 | [Google Drive](/reference/connectors-kibana/google-drive-action-type.md) | Read-only access to files and file metadata. |
-| [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md) | Search and read messages, channels, users, and files; send messages. |
-| [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md) | Read teams, channels, chats, and messages; send messages. |
+| [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md) | Search and read messages, channels, users, and files, and send messages. |
+| [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md) | Read teams, channels, chats, and messages, and send messages. |
 | [SharePoint Online](/reference/connectors-kibana/sharepoint-online-action-type.md) | Read-only access to sites and files. |
 
 ## How it works [quick-connect-oauth-how-it-works]
