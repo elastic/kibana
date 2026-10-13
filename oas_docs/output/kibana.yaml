@@ -48211,6 +48211,7 @@ paths:
                             serviceIds:
                               description: Service IDs active when the stack was last launched or updated.
                               items:
+                                maxLength: 128
                                 minLength: 1
                                 type: string
                               maxItems: 1000
@@ -48557,6 +48558,7 @@ paths:
                             serviceIds:
                               description: Service IDs active when the stack was last launched or updated.
                               items:
+                                maxLength: 128
                                 minLength: 1
                                 type: string
                               maxItems: 1000
@@ -48796,6 +48798,7 @@ paths:
                       serviceIds:
                         description: Service IDs active when the stack was last launched or updated.
                         items:
+                          maxLength: 128
                           minLength: 1
                           type: string
                         maxItems: 1000
@@ -48962,6 +48965,7 @@ paths:
                             serviceIds:
                               description: Service IDs active when the stack was last launched or updated.
                               items:
+                                maxLength: 128
                                 minLength: 1
                                 type: string
                               maxItems: 1000
@@ -49235,6 +49239,7 @@ paths:
                               serviceIds:
                                 description: Service IDs active when the stack was last launched or updated.
                                 items:
+                                  maxLength: 128
                                   minLength: 1
                                   type: string
                                 maxItems: 1000
