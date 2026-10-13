@@ -111,6 +111,14 @@ export const THREAT_INTEL_SUPPLY_HARD_GATE_BLOCKED = i18n.translate(
   }
 );
 
+export const THREAT_INTEL_SUPPLY_HARD_GATE_UNMANAGED = i18n.translate(
+  'xpack.alertzero.watches.settings.threatIntelSupply.hardGateUnmanaged',
+  {
+    defaultMessage:
+      'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it before turning Hunt on.',
+  }
+);
+
 export const THREAT_INTEL_SUPPLY_STATUS_ERROR = i18n.translate(
   'xpack.alertzero.watches.settings.threatIntelSupply.statusError',
   {

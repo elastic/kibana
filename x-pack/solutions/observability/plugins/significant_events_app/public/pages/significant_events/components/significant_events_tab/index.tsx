@@ -47,11 +47,11 @@ import { RUNNING_POLL_INTERVAL_MS } from '../../../../constants';
 import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significant_events';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
-import { useFetchStreams } from '../../hooks/use_fetch_streams';
+import { useSourcesById } from '../../../../hooks/use_sources_by_id';
 import { useFetchFeatures } from '../../../../hooks/use_fetch_features';
 import { useSignificantEventsPageContext } from '../../context/significant_events_page_context';
 import { SignificantEventFlyout } from './significant_event_flyout';
-import { FindSignificantEventsButton } from '../streams_view/find_significant_events_button';
+import { FindSignificantEventsButton } from '../shared/find_significant_events_button';
 import type { SignificantEventsSearchBarProps } from '../../../../components/search_bar';
 import { SignificantEventsSearchBar } from '../../../../components/search_bar';
 import { formatTimestamp } from '../../../../util/formatters';
@@ -174,6 +174,12 @@ const FETCH_ERROR_TITLE = i18n.translate(
     defaultMessage: 'Failed to load significant events',
   }
 );
+const SOURCES_LOOKUP_ERROR_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.sourcesLookupError',
+  {
+    defaultMessage: 'Failed to load sources. Source names are unavailable until this succeeds.',
+  }
+);
 const TABLE_CAPTION = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.tableCaption',
   {
@@ -204,9 +210,12 @@ const RESET_FILTERS_LABEL = i18n.translate(
 export const getSignificantEventTableColumns = ({
   selectedEventId,
   onToggleEvent,
+  getSourceTitle,
 }: {
   selectedEventId?: string;
   onToggleEvent: (eventId: string) => void;
+  /** Resolves `source_ids` to titles; unknown values are shown as-is. */
+  getSourceTitle: (sourceId: string) => string;
 }): Array<EuiBasicTableColumn<SignificantEventResponse>> => [
   {
     name: '',
@@ -258,16 +267,16 @@ export const getSignificantEventTableColumns = ({
     ),
   },
   {
-    field: 'stream_names',
-    name: i18n.translate('xpack.significantEventsApp.significantEventsTab.streamsColumn', {
-      defaultMessage: 'Streams',
+    field: 'source_ids',
+    name: i18n.translate('xpack.significantEventsApp.sources.significantEventsTab.sourcesColumn', {
+      defaultMessage: 'Sources',
     }),
     width: '160px',
     // Required for the column's `width` to actually constrain the cell — EUI's
     // `truncateText` only kicks in when the cell is bounded (see tableLayout="fixed" below).
     truncateText: true,
-    render: (streamNames: string[]) => {
-      const names = streamNames ?? [];
+    render: (sourceIds: string[]) => {
+      const names = (sourceIds ?? []).map(getSourceTitle);
       const [first, ...rest] = names;
       if (!first) return null;
       const overflowCount = rest.length;
@@ -379,7 +388,7 @@ export const SignificantEventsTab = () => {
   const { timeState } = useTimefilter();
   const { updateTimeRange } = useTimeRangeUpdate();
 
-  const { data: streamsData } = useFetchStreams();
+  const { sourcesById, getSourceTitle, isError: isSourcesLookupError } = useSourcesById();
   const { data: featuresData } = useFetchFeatures();
   /**
    * Filters live in the URL so they survive a reload. Closed events are hidden by default;
@@ -391,7 +400,7 @@ export const SignificantEventsTab = () => {
     openEventId,
     statusFilter,
     severityFilter,
-    streamFilter,
+    sourceFilter,
     serviceFilter,
     setFilters,
     resetFilters,
@@ -419,10 +428,7 @@ export const SignificantEventsTab = () => {
     }
   }, [selectedEventId]);
 
-  const streamOptions = useMemo(
-    () => (streamsData?.streams ?? []).map((s) => s.stream.name).sort(),
-    [streamsData]
-  );
+  const sourceOptions = useMemo(() => [...sourcesById.keys()], [sourcesById]);
 
   const serviceFeatures = useMemo(
     () =>
@@ -431,8 +437,8 @@ export const SignificantEventsTab = () => {
         .sort((a, b) => (a.title ?? a.id).localeCompare(b.title ?? b.id)),
     [featuresData]
   );
-  // `id` is the stream-local slug stored in `causal_features` / `blast_radius`, so the same
-  // service seen in several streams collapses into one option.
+  // `id` is the source-local slug stored in `causal_features` / `blast_radius`, so the same
+  // service seen in several sources collapses into one option.
   const serviceOptions = useMemo(
     () => [...new Set(serviceFeatures.map((f) => f.id))],
     [serviceFeatures]
@@ -453,7 +459,7 @@ export const SignificantEventsTab = () => {
       to: timeState.end,
       status: statusFilter.length > 0 ? statusFilter : undefined,
       severity: severityFilter.length > 0 ? severityFilter : undefined,
-      stream: streamFilter.length > 0 ? streamFilter : undefined,
+      source_id: sourceFilter.length > 0 ? sourceFilter : undefined,
       topologyFeatureIds: serviceFilter.length > 0 ? serviceFilter : undefined,
       search: debouncedSearch || undefined,
       eventId: selectedEventId,
@@ -496,8 +502,8 @@ export const SignificantEventsTab = () => {
     [selectedEventId, data?.hits]
   );
 
-  const resolvedStreamNames = useMemo(
-    () => resolvedSelectedEvent?.stream_names.join(','),
+  const resolvedSourceIds = useMemo(
+    () => resolvedSelectedEvent?.source_ids.join(','),
     [resolvedSelectedEvent]
   );
 
@@ -516,7 +522,7 @@ export const SignificantEventsTab = () => {
       {
         status: [resolvedSelectedEvent.status],
         severity: [resolvedSelectedEvent.severity],
-        stream: resolvedStreamNames ? resolvedStreamNames.split(',') : [],
+        source: resolvedSourceIds ? resolvedSourceIds.split(',') : [],
         service: [],
       },
       { keepSelectedEvent: true }
@@ -536,7 +542,7 @@ export const SignificantEventsTab = () => {
     updateTimeRange({ from: resolvedCreatedAt, to: resolvedLatestAt });
   }, [
     resolvedSelectedEvent,
-    resolvedStreamNames,
+    resolvedSourceIds,
     setFilters,
     timeState.start,
     timeState.end,
@@ -548,8 +554,9 @@ export const SignificantEventsTab = () => {
       getSignificantEventTableColumns({
         selectedEventId: openEventId,
         onToggleEvent: toggleEvent,
+        getSourceTitle,
       }),
-    [openEventId, toggleEvent]
+    [openEventId, toggleEvent, getSourceTitle]
   );
 
   const handleResetFilters = useCallback(() => {
@@ -566,9 +573,9 @@ export const SignificantEventsTab = () => {
       DEFAULT_SIGNIFICANT_EVENT_STATUS_FILTER.every((s) => statusFilter.includes(s)) &&
       severityFilter.length === DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.length &&
       DEFAULT_SIGNIFICANT_EVENT_SEVERITY_FILTER.every((s) => severityFilter.includes(s)) &&
-      streamFilter.length === 0 &&
+      sourceFilter.length === 0 &&
       serviceFilter.length === 0,
-    [statusFilter, severityFilter, streamFilter, serviceFilter]
+    [statusFilter, severityFilter, sourceFilter, serviceFilter]
   );
 
   const onStatusChange = useCallback(
@@ -577,8 +584,8 @@ export const SignificantEventsTab = () => {
     [setFilters]
   );
 
-  const onStreamChange = useCallback(
-    (opts: EuiSelectableOption[]) => setFilters({ stream: extractCheckedKeys(opts) }),
+  const onSourceChange = useCallback(
+    (opts: EuiSelectableOption[]) => setFilters({ source: extractCheckedKeys(opts) }),
     [setFilters]
   );
 
@@ -633,23 +640,23 @@ export const SignificantEventsTab = () => {
         onChange: onSeverityChange,
       },
       {
-        label: i18n.translate('xpack.significantEventsApp.significantEventsTab.filter.stream', {
-          defaultMessage: 'Stream',
+        label: i18n.translate('xpack.significantEventsApp.sources.significantEventsTab.filter', {
+          defaultMessage: 'Source',
         }),
         ariaLabel: i18n.translate(
-          'xpack.significantEventsApp.significantEventsTab.filter.streamAriaLabel',
+          'xpack.significantEventsApp.sources.significantEventsTab.filterAriaLabel',
           {
-            defaultMessage: 'Filter by stream',
+            defaultMessage: 'Filter by source',
           }
         ),
         options: buildSelectableOptions({
-          values: streamOptions,
-          selected: streamFilter,
-          getLabel: (s) => s,
+          values: sourceOptions,
+          selected: sourceFilter,
+          getLabel: getSourceTitle,
         }),
-        numFilters: streamOptions.length,
-        numActiveFilters: streamFilter.length,
-        onChange: onStreamChange,
+        numFilters: sourceOptions.length,
+        numActiveFilters: sourceFilter.length,
+        onChange: onSourceChange,
       },
       {
         label: i18n.translate('xpack.significantEventsApp.significantEventsTab.filter.service', {
@@ -674,14 +681,15 @@ export const SignificantEventsTab = () => {
     [
       statusFilter,
       severityFilter,
-      streamFilter,
-      streamOptions,
+      sourceFilter,
+      sourceOptions,
+      getSourceTitle,
       serviceFilter,
       serviceOptions,
       serviceLabels,
       onStatusChange,
       onSeverityChange,
-      onStreamChange,
+      onSourceChange,
       onServiceChange,
     ]
   );
@@ -769,6 +777,16 @@ export const SignificantEventsTab = () => {
       {isError && (
         <EuiFlexItem grow={false}>
           <KbnDangerCallout announceOnMount title={FETCH_ERROR_TITLE} size="s" />
+        </EuiFlexItem>
+      )}
+      {isSourcesLookupError && (
+        <EuiFlexItem grow={false}>
+          <KbnDangerCallout
+            announceOnMount
+            title={SOURCES_LOOKUP_ERROR_TITLE}
+            size="s"
+            data-test-subj="significantEventsSourcesLookupError"
+          />
         </EuiFlexItem>
       )}
       {eventNotFound && (

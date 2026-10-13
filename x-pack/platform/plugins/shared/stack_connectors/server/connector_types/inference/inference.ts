@@ -17,6 +17,7 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { isUserError } from '@kbn/task-manager-plugin/server/task_running';
 import { trace } from '@opentelemetry/api';
 import type { Observable } from 'rxjs';
@@ -52,12 +53,21 @@ import {
   chunksIntoMessage,
   eventSourceStreamIntoObservable,
   detectandThrowUserError,
+  buildInferenceErrorMessage,
+  truncateUpstreamBody,
 } from './helpers';
 
+// 4xx are the caller's fault, 5xx the provider's. A 429 without the `quota` marker is a transient
+// provider rate limit, not a user quota error (the quota carve-out is thrown earlier by
+// `detectandThrowUserError`), so it stays framework-side.
+const errorSourceForStatus = (statusCode: number): TaskErrorSource =>
+  statusCode >= 500 || statusCode === 429 ? TaskErrorSource.FRAMEWORK : TaskErrorSource.USER;
+
 export class InferenceConnector extends SubActionConnector<Config, Secrets> {
-  // Not using Axios
+  // Not using Axios for requests, but errors may be Axios-shaped or Elasticsearch client ResponseError-shaped.
+  // Must never throw, otherwise the original (upstream) error is lost.
   protected getResponseErrorMessage(error: AxiosError): string {
-    throw new Error(error.message || 'Method not implemented.');
+    return buildInferenceErrorMessage(error);
   }
 
   private inferenceId;
@@ -142,7 +152,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       }),
       tap((line) => {
         if ('error' in line) {
-          throw new Error(line.error.message || line.error.reason || 'Unknown error');
+          throw new Error(
+            truncateUpstreamBody(line.error.message || line.error.reason || 'Unknown error')
+          );
         }
         if (
           'choices' in line &&
@@ -222,9 +234,29 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     );
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
-      const error = await streamToString(response.body as unknown as Readable);
+      let error: string;
+      try {
+        error = await streamToString(response.body as unknown as Readable);
+      } catch (cause) {
+        throw createTaskRunError(
+          new Error(
+            truncateUpstreamBody(
+              `Inference endpoint [${this.inferenceId}] returned status code ${
+                response.statusCode
+              }; upstream body stream failed: ${buildInferenceErrorMessage(cause)}`
+            )
+          ),
+          errorSourceForStatus(response.statusCode)
+        );
+      }
       detectandThrowUserError(error);
-      throw new Error(error);
+      const message = `Inference endpoint [${this.inferenceId}] returned status code ${
+        response.statusCode
+      }${error ? `: ${error}` : ''}`;
+      throw createTaskRunError(
+        new Error(truncateUpstreamBody(message)),
+        errorSourceForStatus(response.statusCode)
+      );
     }
 
     return response.body;
@@ -264,7 +296,16 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         throw e;
       }
       const errorMessage = this.getResponseErrorMessage(e);
-      throw new Error(errorMessage);
+      if (e instanceof Error) {
+        try {
+          e.message = errorMessage;
+        } catch (assignmentError) {
+          // frozen / getter-only `message`: keep the enriched text rather than masking the failure
+          throw new Error(errorMessage, { cause: e });
+        }
+        throw e;
+      }
+      throw new Error(errorMessage, { cause: e });
     }
   }
 
@@ -356,7 +397,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
       // TODO: const usageMetadata = response?.data?.usageMetadata;
       return response;
     } catch (err) {
-      this.logger.error(`error perform inference endpoint API: ${err}`);
+      this.logger.error(`error perform inference endpoint API: ${buildInferenceErrorMessage(err)}`);
       throw err;
     }
   }

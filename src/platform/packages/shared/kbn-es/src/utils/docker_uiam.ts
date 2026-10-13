@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { writeFile, mkdir } from 'fs/promises';
+import { mkdir } from 'fs/promises';
 import { fetch } from 'undici';
 import { join } from 'path';
 import {
@@ -40,6 +40,7 @@ import {
   SERVERLESS_IDP_METADATA_PATH,
 } from '../paths';
 import { publishLoopbackPort } from './publish_loopback_port';
+import { writeContainerLogsToFile } from './extract_and_archive_logs';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
@@ -86,6 +87,36 @@ const SHARED_DOCKER_PARAMS = [
   `${DOCKER_HEALTHCHECK_RETRIES}`,
   '--health-start-period',
   '3s',
+];
+
+/**
+ * Quarkus logging shared by every UIAM service container, so the `uiam` and `uiam-oauth`
+ * configurations cannot drift apart.
+ *
+ * `co.elastic.cloud.uiam` follows `UIAM_APP_LOGGING_LEVEL`, which defaults to INFO. The per-request
+ * credential extractors are pinned back to `UIAM_LOGGING_LEVEL` so that raising the category to
+ * DEBUG stays affordable: they log a stack trace on every inbound request, and on their own account
+ * for more than 100MB of `docker logs` output on a heavy spec file. `ClientCertificateExtractor` was
+ * replaced by `ClientSansExtractor` in elastic/uiam#2502; both are listed so a pinned older
+ * `UIAM_DOCKER_IMAGE` stays quiet too.
+ */
+const UIAM_QUARKUS_LOGGING_PARAMS: readonly string[] = [
+  '--env',
+  `quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientSansExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
+  '--env',
+  'quarkus.log.console.json.enabled=false',
+  '--env',
+  `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
 ];
 
 export interface UiamContainer {
@@ -188,20 +219,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       'quarkus.http.ssl.certificate.key-store-provider=JKS',
       '--env',
       'quarkus.http.ssl.certificate.trust-store-provider=SUN',
-      '--env',
-      `quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}`,
-      '--env',
-      `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
-      '--env',
-      `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
-      '--env',
-      `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
-      '--env',
-      `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
-      '--env',
-      'quarkus.log.console.json.enabled=false',
-      '--env',
-      `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
+      ...UIAM_QUARKUS_LOGGING_PARAMS,
       '--env',
       'quarkus.otel.sdk.disabled=true',
       '--env',
@@ -305,20 +323,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     'quarkus.http.ssl.certificate.key-store-provider=JKS',
     '--env',
     'quarkus.http.ssl.certificate.trust-store-provider=SUN',
-    '--env',
-    `quarkus.log.category."co".level=${env.UIAM_LOGGING_LEVEL}`,
-    '--env',
-    `quarkus.log.category."io".level=${env.UIAM_LOGGING_LEVEL}`,
-    '--env',
-    `quarkus.log.category."org".level=${env.UIAM_LOGGING_LEVEL}`,
-    '--env',
-    `quarkus.log.category."co.elastic.cloud.uiam".level=${env.UIAM_APP_LOGGING_LEVEL}`,
-    '--env',
-    `quarkus.log.category."co.elastic.cloud.uiam.app.authentication.ClientCertificateExtractor".level=${env.UIAM_LOGGING_LEVEL}`,
-    '--env',
-    'quarkus.log.console.json.enabled=false',
-    '--env',
-    `quarkus.log.level=${env.UIAM_LOGGING_LEVEL}`,
+    ...UIAM_QUARKUS_LOGGING_PARAMS,
     '--env',
     'quarkus.otel.sdk.disabled=true',
     '--env',
@@ -595,14 +600,15 @@ export async function initializeUiamContainers(log: ToolingLog) {
   );
 }
 
-async function tryExportLogs(containerName: string, log: ToolingLog) {
+async function tryExportLogs(containerName: string, log: ToolingLog): Promise<void> {
+  const targetPath = join(REPO_ROOT, '.es', 'uiam_docker_error.log');
   try {
-    const { stdout: logs } = await execa('docker', ['logs', containerName]);
     await mkdir(join(REPO_ROOT, '.es'), {
       recursive: true,
     });
-    return writeFile(join(REPO_ROOT, '.es', 'uiam_docker_error.log'), logs);
+    await writeContainerLogsToFile(containerName, targetPath);
+    log.info(`Exported logs for container ${containerName} to ${targetPath}`);
   } catch (err) {
-    log.error(`Failed to export logs for container ${containerName}: ${err}`);
+    log.error(`Failed to export logs for container ${containerName}: ${err.shortMessage ?? err}`);
   }
 }

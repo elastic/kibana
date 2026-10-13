@@ -850,7 +850,7 @@ describe('schema_to_skill_docs', () => {
       }
     });
 
-    it('documents rule_id as nullable, since external-alert episodes have no rule', () => {
+    it('documents rule_id as nullable, since external alerts have no rule', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('| `rule_id` | string \\| null | required |');
     });
