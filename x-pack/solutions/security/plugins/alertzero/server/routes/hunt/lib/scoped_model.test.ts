@@ -35,6 +35,7 @@ const mockSearchInferenceEndpoints = {
 };
 
 const featureId = 'alertzero_reasoning';
+const telemetryPluginId = 'alertzero_hunt_tier2';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -48,6 +49,7 @@ describe('resolveScopedModel', () => {
     const result = await resolveScopedModel({
       inference: undefined,
       featureId,
+      telemetryPluginId,
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
@@ -68,6 +70,7 @@ describe('resolveScopedModel', () => {
       inference: mockInference as never,
       searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
       featureId,
+      telemetryPluginId,
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
@@ -77,6 +80,54 @@ describe('resolveScopedModel', () => {
     expect(mockInference.getConnectorById).toHaveBeenCalledWith('tier-connector', mockRequest);
   });
 
+  it('forwards connector telemetry to the chat model so token usage is attributed', async () => {
+    mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+      endpoints: [{ connectorId: 'tier-connector' }],
+    });
+
+    await resolveScopedModel({
+      inference: mockInference as never,
+      searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+      featureId,
+      telemetryPluginId,
+      request: mockRequest,
+      uiSettingsClient: mockUiSettingsClient as never,
+      logger,
+    });
+
+    expect(mockInference.getChatModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'tier-connector',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: telemetryPluginId, aggregateBy: 'alertzero_parent' },
+        },
+      })
+    );
+  });
+
+  it('forwards connector telemetry on the genAI-default fallback path too', async () => {
+    mockInference.getDefaultConnector.mockResolvedValue({ connectorId: 'default-connector' });
+
+    await resolveScopedModel({
+      inference: mockInference as never,
+      searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
+      featureId,
+      telemetryPluginId,
+      request: mockRequest,
+      uiSettingsClient: mockUiSettingsClient as never,
+      logger,
+    });
+
+    expect(mockInference.getChatModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'default-connector',
+        chatModelOptions: {
+          telemetryMetadata: { pluginId: telemetryPluginId, aggregateBy: 'alertzero_parent' },
+        },
+      })
+    );
+  });
+
   it('falls through to genAI default when no tier connector', async () => {
     mockInference.getDefaultConnector.mockResolvedValue({ connectorId: 'default-connector' });
 
@@ -84,6 +135,7 @@ describe('resolveScopedModel', () => {
       inference: mockInference as never,
       searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
       featureId,
+      telemetryPluginId,
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
@@ -97,6 +149,7 @@ describe('resolveScopedModel', () => {
     const result = await resolveScopedModel({
       inference: mockInference as never,
       featureId,
+      telemetryPluginId,
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
@@ -116,6 +169,7 @@ describe('resolveScopedModel', () => {
       inference: mockInference as never,
       searchInferenceEndpoints: mockSearchInferenceEndpoints as never,
       featureId,
+      telemetryPluginId,
       request: mockRequest,
       uiSettingsClient: mockUiSettingsClient as never,
       logger,
@@ -142,6 +196,7 @@ describe('resolveScopedModel', () => {
       const result = await resolveScopedModel({
         inference: mockInference as never,
         featureId,
+        telemetryPluginId,
         request: mockRequest,
         uiSettingsClient: mockUiSettingsClient as never,
         logger,
@@ -157,6 +212,7 @@ describe('resolveScopedModel', () => {
       const result = await resolveScopedModel({
         inference: mockInference as never,
         featureId,
+        telemetryPluginId,
         request: mockRequest,
         uiSettingsClient: mockUiSettingsClient as never,
         logger,
@@ -176,6 +232,7 @@ describe('resolveScopedModel', () => {
       const result = await resolveScopedModel({
         inference: mockInference as never,
         featureId,
+        telemetryPluginId,
         request: mockRequest,
         uiSettingsClient: mockUiSettingsClient as never,
         logger,
