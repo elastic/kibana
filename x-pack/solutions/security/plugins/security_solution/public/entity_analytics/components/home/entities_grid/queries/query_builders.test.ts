@@ -205,8 +205,26 @@ describe('entities grid query builders', () => {
 
   it('quotes the KEEP fields that are not plain names', () => {
     expect(
-      buildKeepClause({ keepFields: ['host.os.name', 'cloud.account-id', 'labels.a:b', 'we`ird'] })
+      buildKeepClause({
+        keepFields: ['host.os.name', 'cloud.account-id', 'labels.a:b', 'we`ird'],
+        rowsMode: 'individual',
+      })
     ).toContain(', host.os.name, `cloud.account-id`, `labels.a:b`, `we``ird`');
+  });
+
+  describe('the risk score of a row', () => {
+    const EFFECTIVE_RISK =
+      '| EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)';
+
+    it("is the group's for a resolved row, with the main entity's as the fallback", () => {
+      expect(buildKeepClause({ keepFields: [], rowsMode: 'resolved' })).toContain(EFFECTIVE_RISK);
+    });
+
+    it("is the entity's own for an individual row", () => {
+      expect(buildKeepClause({ keepFields: [], rowsMode: 'individual' })).not.toContain(
+        'entity.relationships.resolution.risk'
+      );
+    });
   });
 
   describe('enrich queries', () => {

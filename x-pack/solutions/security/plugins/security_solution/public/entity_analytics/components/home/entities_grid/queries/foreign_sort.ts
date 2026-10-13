@@ -7,7 +7,7 @@
 
 import { ENTITY_ID_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { buildJoinedPageSteps } from './esql';
+import { buildEffectiveRiskSteps, buildJoinedPageSteps } from './esql';
 import { IN_VIEW_FIELD, buildEntitiesInViewSteps } from './entities_in_view';
 
 // ── foreign sorts ────────────────────────────────────────────────────────────
@@ -52,6 +52,7 @@ export const buildMergedForeignRows = (
   ...foreignRows,
   '), (',
   ...buildEntitiesInViewSteps(args),
+  ...buildEffectiveRiskSteps(args),
   ...entityConditions.map((condition) => `| WHERE ${condition}`),
   `| EVAL ${IN_VIEW_FIELD} = 1`,
   `| KEEP ${[`\`${ENTITY_ID_FIELD}\``, IN_VIEW_FIELD, ...entityFields].join(', ')}`,

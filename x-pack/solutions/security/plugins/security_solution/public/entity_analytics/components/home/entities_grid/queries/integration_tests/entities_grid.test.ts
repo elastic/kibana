@@ -56,7 +56,8 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
   [
     'entity.risk.calculated_score_norm',
     'desc',
-    ['host:h1', 'user:alice@okta', 'host:h2', 'service:payments', 'host:h3', 'user:bob@okta'],
+    // user:bob@okta has no score of its own, but its group's score is 85.
+    ['host:h1', 'user:bob@okta', 'user:alice@okta', 'host:h2', 'service:payments', 'host:h3'],
   ],
   [
     'entity.name',
@@ -126,6 +127,14 @@ const FILTER_CASES: readonly FilterCase[] = [
     'entity.name',
     'asc',
     ['host:h1'],
+  ],
+  [
+    // user:bob@okta is High through its group's level, user:alice@okta through its own.
+    'a risk level filter on the level of the group',
+    { entityFilters: { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.High] } },
+    'entity.name',
+    'asc',
+    ['user:alice@okta', 'user:bob@okta'],
   ],
   [
     'a criticality filter',

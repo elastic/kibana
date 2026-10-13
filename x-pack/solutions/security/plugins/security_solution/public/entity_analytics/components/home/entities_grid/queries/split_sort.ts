@@ -10,6 +10,7 @@ import { buildEntitiesInViewConditions, buildEntitiesInViewSteps } from './entit
 import {
   buildAfterIdClause,
   buildAfterValuePredicate,
+  buildEffectiveRiskSteps,
   buildKeepClause,
   buildLookupJoinClause,
   buildSortSuffix,
@@ -106,6 +107,7 @@ export const buildEmptyRowsQuery = (
 ): string =>
   [
     ...buildEntitiesInViewSteps(args),
+    ...buildEffectiveRiskSteps(args),
     ...conditions.map((condition) => `| WHERE ${condition}`),
     ...(excludeIds.length ? [`| WHERE NOT ${ENTITY_ID_FIELD} IN (${toList(excludeIds)})`] : []),
     ...buildAfterIdClause(afterId),

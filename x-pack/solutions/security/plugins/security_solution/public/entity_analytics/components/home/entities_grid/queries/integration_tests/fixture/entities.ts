@@ -26,6 +26,8 @@ interface EntitySeed {
   type: 'host' | 'user' | 'service';
   name: string;
   risk?: [score: number, level: string];
+  /** The risk engine's score of the group, which only the main entity of a group holds. */
+  groupRisk?: [score: number, level: string];
   criticality?: string;
   watchlists?: string[];
   resolvedTo?: string;
@@ -45,7 +47,7 @@ const ENTITIES: readonly EntitySeed[] = [
   { id: 'host:h5', type: 'host', name: 'web-5', resolvedTo: 'host:h1' },
   { id: 'service:payments', type: 'service', name: 'payments', risk: [20, 'Low'] },
   { id: 'user:alice@okta', type: 'user', name: 'alice', risk: [70, 'High'] },
-  { id: 'user:bob@okta', type: 'user', name: 'bob' },
+  { id: 'user:bob@okta', type: 'user', name: 'bob', groupRisk: [85, 'High'] },
   { id: 'user:carol@okta', type: 'user', name: 'carol', resolvedTo: 'user:bob@okta' },
 ];
 
@@ -69,6 +71,12 @@ const toEntityDoc = (seed: EntitySeed, now: number) => ({
         'entity.risk.calculated_level': seed.risk[1],
       }
     : {}),
+  ...(seed.groupRisk
+    ? {
+        'entity.relationships.resolution.risk.calculated_score_norm': seed.groupRisk[0],
+        'entity.relationships.resolution.risk.calculated_level': seed.groupRisk[1],
+      }
+    : {}),
   ...(seed.criticality ? { 'asset.criticality': seed.criticality } : {}),
   ...(seed.watchlists ? { 'entity.attributes.watchlists': seed.watchlists } : {}),
   ...(seed.resolvedTo ? { 'entity.relationships.resolution.resolved_to': seed.resolvedTo } : {}),
@@ -85,6 +93,8 @@ export const entitiesIndex: FixtureIndex = {
     'entity.lifecycle.first_seen': DATE,
     'entity.risk.calculated_score_norm': FLOAT,
     'entity.risk.calculated_level': KEYWORD,
+    'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+    'entity.relationships.resolution.risk.calculated_level': KEYWORD,
   },
   buildDocs: (now) => ENTITIES.map((seed) => toEntityDoc(seed, now)),
 };

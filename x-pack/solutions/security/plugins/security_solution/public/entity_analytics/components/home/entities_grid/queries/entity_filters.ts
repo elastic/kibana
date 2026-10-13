@@ -7,7 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
-import type { EntityFilters } from '../common';
+import {
+  RESOLUTION_RISK_LEVEL_FIELD,
+  RISK_LEVEL_FIELD,
+  type EntityFilters,
+  type RowsMode,
+} from '../common';
 import { buildFilterClause, toList } from './esql';
 
 /** Membership on multivalue keyword fields — scalar `IN` returns null for multi-valued docs. */
@@ -30,22 +35,56 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
 ];
 
 /** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
-export const buildEntityFiltersExpression = (filters: EntityFilters): string =>
+/** The risk level a resolved row shows: its group's, or its own when it has no group level. */
+const RESOLVED_RISK_LEVEL = `COALESCE(${RESOLUTION_RISK_LEVEL_FIELD}, ${RISK_LEVEL_FIELD})`;
+
+const getFilterField = (key: keyof EntityFilters, field: string, rowsMode: RowsMode): string =>
+  key === 'riskLevels' && rowsMode === 'resolved' ? RESOLVED_RISK_LEVEL : field;
+
+export const buildEntityFiltersExpression = (
+  filters: EntityFilters,
+  rowsMode: RowsMode = 'individual'
+): string =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field, isMultiValue }) => {
     const values: readonly string[] = filters[key];
     if (!values.length) return [];
+    const filterField = getFilterField(key, field, rowsMode);
     return isMultiValue
-      ? [buildMvContainsExpression(field, values)]
-      : [`${field} IN (${toList(values)})`];
+      ? [buildMvContainsExpression(filterField, values)]
+      : [`${filterField} IN (${toList(values)})`];
   }).join(' AND ');
 
 /** DSL counterpart of {@link buildEntityFiltersExpression}. */
-export const buildEntityFiltersQuery = (filters: EntityFilters): QueryDslQueryContainer[] =>
+/** DSL counterpart of {@link RESOLVED_RISK_LEVEL}. */
+const buildResolvedRiskLevelQuery = (levels: readonly string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { terms: { [RESOLUTION_RISK_LEVEL_FIELD]: [...levels] } },
+      {
+        bool: {
+          filter: [{ terms: { [RISK_LEVEL_FIELD]: [...levels] } }],
+          must_not: [{ exists: { field: RESOLUTION_RISK_LEVEL_FIELD } }],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+});
+
+export const buildEntityFiltersQuery = (
+  filters: EntityFilters,
+  rowsMode: RowsMode = 'individual'
+): QueryDslQueryContainer[] =>
   ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
     const values: readonly string[] = filters[key];
-    return values.length ? [{ terms: { [field]: [...values] } }] : [];
+    if (!values.length) return [];
+    return key === 'riskLevels' && rowsMode === 'resolved'
+      ? [buildResolvedRiskLevelQuery(values)]
+      : [{ terms: { [field]: [...values] } }];
   });
 
 /** `| WHERE …` pipe clauses for NAT tile queries (empty when no filters). */
-export const buildEntityFilterClauses = (filters: EntityFilters): string[] =>
-  buildFilterClause(buildEntityFiltersExpression(filters));
+export const buildEntityFilterClauses = (
+  filters: EntityFilters,
+  rowsMode: RowsMode = 'individual'
+): string[] => buildFilterClause(buildEntityFiltersExpression(filters, rowsMode));

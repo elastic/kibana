@@ -20,6 +20,8 @@ import {
   ENTITY_FIELDS,
   ENTITY_ID_FIELD,
   ENTITY_TYPE_FIELD,
+  RESOLUTION_RISK_SCORE_FIELD,
+  RISK_SCORE_NORM_FIELD,
   getEntityId,
 } from '../common';
 import type { PageCursor, QueryArgs, Row, SortDir, TimeRange } from '../common';
@@ -109,12 +111,25 @@ const PLAIN_FIELD_NAME = /^[A-Za-z_][A-Za-z0-9_.]*$/;
 const quoteField = (field: string): string =>
   PLAIN_FIELD_NAME.test(field) ? field : `\`${field.replace(/`/g, '``')}\``;
 
+/**
+ * The risk score a resolved row shows: its group's, or its own when it has no group score. The
+ * group's score is on the main entity, which is the row.
+ */
+export const buildEffectiveRiskSteps = ({ rowsMode }: Pick<QueryArgs, 'rowsMode'>): string[] =>
+  rowsMode === 'resolved'
+    ? [
+        `| EVAL ${RISK_SCORE_NORM_FIELD} = COALESCE(${RESOLUTION_RISK_SCORE_FIELD}, ${RISK_SCORE_NORM_FIELD})`,
+      ]
+    : [];
+
 export const buildKeepClause = (
-  args: Pick<QueryArgs, 'keepFields'>,
+  args: Pick<QueryArgs, 'keepFields' | 'rowsMode'>,
   ...extra: string[]
 ): string => {
   const fields = [...new Set([...ENTITY_FIELDS, ...(args.keepFields ?? []), ...extra])];
-  return `| KEEP ${fields.map(quoteField).join(', ')}`;
+  return [...buildEffectiveRiskSteps(args), `| KEEP ${fields.map(quoteField).join(', ')}`].join(
+    '\n'
+  );
 };
 
 export const buildFilterClause = (filterExpression?: string): string[] =>

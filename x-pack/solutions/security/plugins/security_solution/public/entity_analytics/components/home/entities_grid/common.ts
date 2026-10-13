@@ -26,6 +26,11 @@ export const ENTITY_ID_FIELD = 'entity.id';
 export const ENTITY_TYPE_FIELD = 'entity.EngineMetadata.Type';
 export const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 export const RISK_SCORE_NORM_FIELD = 'entity.risk.calculated_score_norm';
+export const RISK_LEVEL_FIELD = 'entity.risk.calculated_level';
+/** The group's risk score and level, which the main entity of a group with aliases holds. */
+export const RESOLUTION_RISK_SCORE_FIELD =
+  'entity.relationships.resolution.risk.calculated_score_norm';
+export const RESOLUTION_RISK_LEVEL_FIELD = 'entity.relationships.resolution.risk.calculated_level';
 
 export const ANOMALY_COUNT_FIELD = 'anomaly_count';
 export const GROUP_SIZE_FIELD = 'group_size';

@@ -44,7 +44,7 @@ export const toEsql = ({
 }: ActiveFilters): ActiveFiltersEsql => ({
   searchExpression: search.esql,
   entityExpression: joinAnd(
-    buildEntityFiltersExpression(entityFilters),
+    buildEntityFiltersExpression(entityFilters, rowsMode),
     tileEntityIds == null ? undefined : buildTileWhereExpression(tileEntityIds, rowsMode)
   ),
 });
@@ -58,7 +58,7 @@ export const toDsl = ({
 }: ActiveFilters): ESBoolQuery | undefined => {
   const filter: QueryDslQueryContainer[] = [
     search.dsl,
-    ...buildEntityFiltersQuery(entityFilters),
+    ...buildEntityFiltersQuery(entityFilters, rowsMode),
     tileEntityIds == null ? undefined : buildTileFilter(tileEntityIds, rowsMode),
   ].filter(isDefined);
   const mustNot = rowsMode === 'resolved' ? [{ exists: { field: RESOLVED_TO_FIELD } }] : [];

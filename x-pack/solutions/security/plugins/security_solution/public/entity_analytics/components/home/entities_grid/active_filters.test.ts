@@ -6,6 +6,7 @@
  */
 
 import { EntityType } from '../../../../../common/entity_analytics/types';
+import { RiskSeverity } from '../../../../../common/search_strategy';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { toDsl, toEsql } from './active_filters';
 import type { ActiveFilters } from './active_filters';
@@ -66,6 +67,22 @@ describe('toEsql', () => {
   it('matches nothing for a tile without entities', () => {
     expect(toEsql({ ...NONE, tileEntityIds: [] }).entityExpression).toBe('false');
   });
+
+  describe('the risk level filter', () => {
+    const critical = { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Critical] };
+
+    it("is on the group's level for resolved rows, or the entity's own without one", () => {
+      expect(toEsql({ ...NONE, entityFilters: critical }).entityExpression).toBe(
+        'COALESCE(entity.relationships.resolution.risk.calculated_level, entity.risk.calculated_level) IN ("Critical")'
+      );
+    });
+
+    it("is on the entity's own level for individual rows", () => {
+      expect(
+        toEsql({ ...NONE, entityFilters: critical, rowsMode: 'individual' }).entityExpression
+      ).toBe('entity.risk.calculated_level IN ("Critical")');
+    });
+  });
 });
 
 describe('toDsl', () => {
@@ -89,6 +106,57 @@ describe('toDsl', () => {
         must_not: [RESOLVED_ROWS_ONLY],
         should: [],
       },
+    });
+  });
+
+  describe('the risk level filter', () => {
+    const critical = { ...EMPTY_ENTITY_FILTERS, riskLevels: [RiskSeverity.Critical] };
+
+    it("matches the group's level, or the entity's own without one, for resolved rows", () => {
+      expect(toDsl({ ...NONE, entityFilters: critical })).toEqual({
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    terms: {
+                      'entity.relationships.resolution.risk.calculated_level': ['Critical'],
+                    },
+                  },
+                  {
+                    bool: {
+                      filter: [{ terms: { 'entity.risk.calculated_level': ['Critical'] } }],
+                      must_not: [
+                        {
+                          exists: {
+                            field: 'entity.relationships.resolution.risk.calculated_level',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          must: [],
+          must_not: [RESOLVED_ROWS_ONLY],
+          should: [],
+        },
+      });
+    });
+
+    it("matches the entity's own level for individual rows", () => {
+      expect(toDsl({ ...NONE, entityFilters: critical, rowsMode: 'individual' })).toEqual({
+        bool: {
+          filter: [{ terms: { 'entity.risk.calculated_level': ['Critical'] } }],
+          must: [],
+          must_not: [],
+          should: [],
+        },
+      });
     });
   });
 
