@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import { EVENT_STATUS_CHANGED_TRIGGER_ID } from '../../../../../common/workflows/triggers';
-import type { LifecycleInput } from './lifecycle_state_machine';
-import { applyLifecycleInput } from './lifecycle_controller';
+import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
 import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-  type SignificantEvent,
-} from '@kbn/significant-events-schema';
+  decideLifecycle,
+  decideStatusChange,
+  requestedStatus,
+  type StatusChange,
+  type LifecycleDecision,
+} from './lifecycle_controller';
 
-const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
+const TIMESTAMP = '2026-02-01T00:00:00.000Z';
+
+const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'agent-event-1',
   status: 'active',
@@ -28,291 +28,245 @@ const createSignificantEvent = (overrides: Partial<SignificantEvent> = {}): Sign
   ...overrides,
 });
 
-const makeAlertEventsClient = (
-  overrides: Partial<jest.Mocked<AlertEventsClientApi>> = {}
-): jest.Mocked<AlertEventsClientApi> =>
-  ({
-    createAlertEvent: jest.fn().mockResolvedValue(undefined),
-    ...overrides,
-  } as jest.Mocked<AlertEventsClientApi>);
+const DEACTIVATE: StatusChange = { kind: 'operator', status: 'inactive' };
 
-/** @param latest - the latest version returned by `findLatestByEventId`, if any. */
-const createSearchClient = (latest?: SignificantEvent) => ({
-  findLatestByEventId: jest.fn().mockResolvedValue(latest),
-});
-
-const DEACTIVATE: LifecycleInput = { kind: 'operator', intent: 'deactivate' };
-
-const assessment = (outcome: 'breaching' | 'clean' | 'no_data'): LifecycleInput => ({
+const assessment = (outcome: 'breaching' | 'clean' | 'no_data'): StatusChange => ({
   kind: 'assessment',
   outcome,
 });
 
-const lastWritten = (client: jest.Mocked<AlertEventsClientApi>) =>
-  client.createAlertEvent.mock.calls[0][0] as {
-    alert_status: string;
-    severity: string;
-    data: Record<string, unknown>;
-  };
+describe('decideStatusChange', () => {
+  it('writes the next version of the event with the decided status and the new timestamp', () => {
+    const latest = createEvent({ status: 'active' });
 
-describe('applyLifecycleInput', () => {
-  it('writes a new version to .rule-events when status changes', async () => {
-    const existing = createSignificantEvent({ status: 'active' });
-    const alertEventsClient = makeAlertEventsClient();
-
-    const result = await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      alertEventsClient,
-    });
-
-    expect(result).toEqual({ updated: 1, ignored: 0, status: 'inactive' });
-    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
-    expect(lastWritten(alertEventsClient)).toMatchObject({
-      fingerprint: existing.event_id,
-      alert_status: 'inactive',
+    expect(decideStatusChange({ latest, change: DEACTIVATE, timestamp: TIMESTAMP })).toEqual({
+      write: true,
+      event: { ...latest, '@timestamp': TIMESTAMP, status: 'inactive' },
     });
   });
 
-  it('records the given assessment note and keeps the stored one when the caller omits it', async () => {
-    const existing = createSignificantEvent({ assessment_note: 'Operator dismissed as noise.' });
-
-    const withNote = makeAlertEventsClient();
-    await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      assessmentNote: 'Automatically closed by cleanup.',
-      alertEventsClient: withNote,
-    });
-    expect(lastWritten(withNote).data).toMatchObject({
-      assessment_note: 'Automatically closed by cleanup.',
-    });
-
-    const withoutNote = makeAlertEventsClient();
-    await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      alertEventsClient: withoutNote,
-    });
-    expect(lastWritten(withoutNote).data).toMatchObject({
-      assessment_note: 'Operator dismissed as noise.',
-    });
-  });
-
-  it('appends nothing when an assessment keeps the status', async () => {
-    const existing = createSignificantEvent({ status: 'active' });
-    const alertEventsClient = makeAlertEventsClient();
-
-    const result = await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: assessment('breaching'),
-      alertEventsClient,
-    });
-
-    expect(result).toEqual({
-      updated: 0,
-      ignored: 1,
-      status: 'active',
-      reason: 'already_in_state',
-    });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('drops the write when another writer appended after the read', async () => {
-    const existing = createSignificantEvent({ status: 'active' });
-    const newer = createSignificantEvent({
-      status: 'active',
-      '@timestamp': '2099-01-01T00:00:00.000Z',
-    });
-    const eventSearchClient = {
-      findLatestByEventId: jest.fn().mockResolvedValueOnce(existing).mockResolvedValueOnce(newer),
+  it('records the given note and keeps the stored one when it is omitted or blank', () => {
+    const latest = createEvent({ assessment_note: 'Operator dismissed as noise.' });
+    const noteAfter = (assessmentNote?: string) => {
+      const decision = decideStatusChange({
+        latest,
+        change: DEACTIVATE,
+        assessmentNote,
+        timestamp: TIMESTAMP,
+      });
+      return decision.write ? decision.event.assessment_note : undefined;
     };
-    const alertEventsClient = makeAlertEventsClient();
 
-    const result = await applyLifecycleInput({
-      eventSearchClient: eventSearchClient as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      alertEventsClient,
-    });
-
-    expect(result).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
+    expect(noteAfter('  Closed by cleanup.  ')).toBe('Closed by cleanup.');
+    expect(noteAfter('   ')).toBe('Operator dismissed as noise.');
+    expect(noteAfter()).toBe('Operator dismissed as noise.');
   });
 
-  it('ignores when the event is not found', async () => {
-    const alertEventsClient = makeAlertEventsClient();
-
-    const result = await applyLifecycleInput({
-      eventSearchClient: createSearchClient() as never,
-      eventId: 'missing-event',
-      input: DEACTIVATE,
-      alertEventsClient,
-    });
-
-    expect(result).toEqual({ updated: 0, ignored: 1, status: 'inactive', reason: 'not_found' });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('ignores when the status is unchanged', async () => {
-    const existing = createSignificantEvent({ status: 'inactive' });
-    const alertEventsClient = makeAlertEventsClient();
-
-    const result = await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      alertEventsClient,
-    });
-
-    expect(result).toEqual({
-      updated: 0,
-      ignored: 1,
-      status: 'inactive',
-      reason: 'already_in_state',
-    });
-    expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-  });
-
-  it('updates the status of an event with longer narratives', async () => {
-    const existing = createSignificantEvent({
-      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
-      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
-      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
-    });
-    const alertEventsClient = makeAlertEventsClient();
-
-    await expect(
-      applyLifecycleInput({
-        eventSearchClient: createSearchClient(existing) as never,
-        eventId: existing.event_id,
-        input: DEACTIVATE,
-        alertEventsClient,
+  it('skips with the lifecycle reason when the status is unchanged', () => {
+    expect(
+      decideStatusChange({
+        latest: createEvent({ status: 'inactive' }),
+        change: DEACTIVATE,
+        timestamp: TIMESTAMP,
       })
-    ).resolves.toMatchObject({ updated: 1, status: 'inactive' });
+    ).toEqual({ write: false, status: 'inactive', reason: 'already_in_state' });
+  });
 
-    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
+  it('skips when an assessment only confirms the current status', () => {
+    expect(
+      decideStatusChange({
+        latest: createEvent({ status: 'active' }),
+        change: assessment('breaching'),
+        timestamp: TIMESTAMP,
+      })
+    ).toEqual({ write: false, status: 'active', reason: 'already_in_state' });
   });
 
   describe('assessment', () => {
-    it.each<
-      [string, SignificantEvent['status'], 'breaching' | 'clean' | 'no_data', string, boolean]
-    >([
-      [
-        'starts recovery silently when every member is healthy',
-        'active',
-        'clean',
-        'recovering',
-        false,
-      ],
-      [
-        'returns a recovering event to active silently on a breach',
-        'recovering',
-        'breaching',
-        'active',
-        false,
-      ],
-      ['reopens a closed event on a breach and notifies', 'inactive', 'breaching', 'active', true],
-    ])('%s', async (_label, current, outcome, status, triggers) => {
-      const existing = createSignificantEvent({ status: current });
-      const alertEventsClient = makeAlertEventsClient();
-      const emitTrigger = jest.fn();
-
-      const result = await applyLifecycleInput({
-        eventSearchClient: createSearchClient(existing) as never,
-        eventId: existing.event_id,
-        input: assessment(outcome),
-        alertEventsClient,
-        emitTrigger,
+    it.each<[string, SignificantEventStatus, 'breaching' | 'clean', SignificantEventStatus]>([
+      ['starts recovery when every member is healthy', 'active', 'clean', 'recovering'],
+      ['returns a recovering event to active on a breach', 'recovering', 'breaching', 'active'],
+      ['reopens a closed event on a breach', 'inactive', 'breaching', 'active'],
+    ])('%s', (_label, current, outcome, status) => {
+      const decision = decideStatusChange({
+        latest: createEvent({ status: current }),
+        change: assessment(outcome),
+        timestamp: TIMESTAMP,
       });
 
-      expect(result).toEqual({ updated: 1, ignored: 0, status });
-      expect(lastWritten(alertEventsClient).alert_status).toBe(status);
-      expect(emitTrigger).toHaveBeenCalledTimes(triggers ? 1 : 0);
+      expect(decision).toMatchObject({ write: true, event: { status } });
     });
 
-    it.each<[string, SignificantEvent['status'], 'clean' | 'no_data']>([
-      ['healthy members of a closed event', 'inactive', 'clean'],
-      ['unjudged members of a closed event', 'inactive', 'no_data'],
-    ])('writes nothing for %s', async (_label, current, outcome) => {
-      const existing = createSignificantEvent({ status: current });
-      const alertEventsClient = makeAlertEventsClient();
-
-      const result = await applyLifecycleInput({
-        eventSearchClient: createSearchClient(existing) as never,
-        eventId: existing.event_id,
-        input: assessment(outcome),
-        alertEventsClient,
-      });
-
-      expect(result).toEqual({ updated: 0, ignored: 1, status: current, reason: 'not_a_breach' });
-      expect(alertEventsClient.createAlertEvent).not.toHaveBeenCalled();
-    });
-  });
-
-  it('writes only when the latest version is the one the caller read', async () => {
-    const existing = createSignificantEvent({ status: 'active' });
-    const stale = makeAlertEventsClient();
-
-    const superseded = await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      expectedTimestamp: '2000-01-01T00:00:00.000Z',
-      alertEventsClient: stale,
-    });
-    expect(superseded).toEqual({ updated: 0, ignored: 1, status: 'active', reason: 'superseded' });
-    expect(stale.createAlertEvent).not.toHaveBeenCalled();
-
-    const current = await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      expectedTimestamp: existing['@timestamp'],
-      alertEventsClient: makeAlertEventsClient(),
-    });
-    expect(current.updated).toBe(1);
-  });
-
-  it('emits a status-changed trigger after a successful write', async () => {
-    const existing = createSignificantEvent({ status: 'active' });
-    const emitTrigger = jest.fn();
-
-    await applyLifecycleInput({
-      eventSearchClient: createSearchClient(existing) as never,
-      eventId: existing.event_id,
-      input: DEACTIVATE,
-      alertEventsClient: makeAlertEventsClient(),
-      emitTrigger,
-    });
-
-    expect(emitTrigger).toHaveBeenCalledTimes(1);
-    expect(emitTrigger).toHaveBeenCalledWith(
-      EVENT_STATUS_CHANGED_TRIGGER_ID,
-      expect.objectContaining({ event_id: existing.event_id, previous_status: 'active' })
+    it.each<'clean' | 'no_data'>(['clean', 'no_data'])(
+      'skips a %s assessment of a closed event',
+      (outcome) => {
+        expect(
+          decideStatusChange({
+            latest: createEvent({ status: 'inactive' }),
+            change: assessment(outcome),
+            timestamp: TIMESTAMP,
+          })
+        ).toEqual({ write: false, status: 'inactive', reason: 'not_a_breach' });
+      }
     );
   });
+});
 
-  it('propagates the error and emits no trigger when createAlertEvent rejects', async () => {
-    const existing = createSignificantEvent({ status: 'active' });
-    const emitTrigger = jest.fn();
-    const alertEventsClient = makeAlertEventsClient({
-      createAlertEvent: jest.fn().mockRejectedValue(new Error('index unavailable')),
+describe('requestedStatus', () => {
+  it.each<[string, StatusChange, SignificantEventStatus]>([
+    ['an operator deactivating', DEACTIVATE, 'inactive'],
+    ['an operator activating', { kind: 'operator', status: 'active' }, 'active'],
+    ['a rule that no longer exists', { kind: 'rule_deleted' }, 'inactive'],
+    ['an assessment', assessment('breaching'), 'active'],
+  ])('is the status %s asks for', (_label, change, status) => {
+    expect(requestedStatus(change)).toBe(status);
+  });
+});
+
+const decide = (
+  status: SignificantEventStatus | undefined,
+  change: StatusChange
+): LifecycleDecision => decideLifecycle({ state: { status }, change });
+
+const ACTIVE = { write: true, status: 'active' } as const;
+const RECOVERING = { write: true, status: 'recovering' } as const;
+const INACTIVE = { write: true, status: 'inactive' } as const;
+const NOT_A_BREACH = { write: false, reason: 'not_a_breach' } as const;
+const ALREADY_IN_STATE = { write: false, reason: 'already_in_state' } as const;
+
+describe('decideLifecycle', () => {
+  describe('assessment (what discovery stored about the members)', () => {
+    it.each<
+      [
+        string,
+        SignificantEventStatus | undefined,
+        'breaching' | 'clean' | 'no_data',
+        LifecycleDecision
+      ]
+    >([
+      ['opens a new series on a breach', undefined, 'breaching', ACTIVE],
+      ['reopens a closed series on a breach', 'inactive', 'breaching', ACTIVE],
+      ['keeps an active series active on a breach', 'active', 'breaching', ACTIVE],
+      ['returns a recovering series to active on a breach', 'recovering', 'breaching', ACTIVE],
+      ['starts recovery when every member is healthy', 'active', 'clean', RECOVERING],
+      ['keeps an active series active when a member cannot be judged', 'active', 'no_data', ACTIVE],
+      [
+        'keeps a recovering series recovering while members stay healthy',
+        'recovering',
+        'clean',
+        RECOVERING,
+      ],
+      [
+        'keeps a recovering series recovering when a member cannot be judged',
+        'recovering',
+        'no_data',
+        RECOVERING,
+      ],
+      ['does not open a new series on healthy members', undefined, 'clean', NOT_A_BREACH],
+      ['does not open a new series on unjudged members', undefined, 'no_data', NOT_A_BREACH],
+      ['does not reopen a closed series on healthy members', 'inactive', 'clean', NOT_A_BREACH],
+      ['does not reopen a closed series on unjudged members', 'inactive', 'no_data', NOT_A_BREACH],
+    ])('%s', (_label, status, outcome, expected) => {
+      expect(decide(status, { kind: 'assessment', outcome })).toEqual(expected);
+    });
+  });
+
+  describe('operator', () => {
+    it.each<SignificantEventStatus>(['active', 'recovering'])(
+      'deactivates a %s series',
+      (status) => {
+        expect(decide(status, { kind: 'operator', status: 'inactive' })).toEqual(INACTIVE);
+      }
+    );
+
+    it('does not deactivate what is already inactive', () => {
+      expect(decide('inactive', { kind: 'operator', status: 'inactive' })).toEqual(
+        ALREADY_IN_STATE
+      );
     });
 
-    await expect(
-      applyLifecycleInput({
-        eventSearchClient: createSearchClient(existing) as never,
-        eventId: existing.event_id,
-        input: DEACTIVATE,
-        alertEventsClient,
-        emitTrigger,
-      })
-    ).rejects.toThrow('index unavailable');
-    expect(emitTrigger).not.toHaveBeenCalled();
+    it.each<SignificantEventStatus | undefined>(['inactive', 'recovering', undefined])(
+      'activates a %s series, overriding the assessment',
+      (status) => {
+        expect(decide(status, { kind: 'operator', status: 'active' })).toEqual(ACTIVE);
+      }
+    );
+
+    it('does not activate what is already active', () => {
+      expect(decide('active', { kind: 'operator', status: 'active' })).toEqual(ALREADY_IN_STATE);
+    });
+  });
+
+  describe('rule_deleted', () => {
+    it.each<SignificantEventStatus>(['active', 'recovering'])('closes a %s series', (status) => {
+      expect(decide(status, { kind: 'rule_deleted' })).toEqual(INACTIVE);
+    });
+
+    it('leaves an inactive series alone', () => {
+      expect(decide('inactive', { kind: 'rule_deleted' })).toEqual(ALREADY_IN_STATE);
+    });
+  });
+
+  describe('invariants over every state and change', () => {
+    const statuses: Array<SignificantEventStatus | undefined> = [
+      undefined,
+      'active',
+      'recovering',
+      'inactive',
+    ];
+    const inputs: StatusChange[] = [
+      { kind: 'assessment', outcome: 'breaching' },
+      { kind: 'assessment', outcome: 'clean' },
+      { kind: 'assessment', outcome: 'no_data' },
+      { kind: 'operator', status: 'active' },
+      { kind: 'operator', status: 'inactive' },
+      { kind: 'rule_deleted' },
+    ];
+    const everyCase = statuses.flatMap((status) =>
+      inputs.map((change) => ({ status, change, decision: decide(status, change) }))
+    );
+
+    it('is deterministic: the same state and change always give the same decision', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        expect(decide(status, change)).toEqual(decision);
+      });
+    });
+
+    it('enters recovering only from an assessment of an active series', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        if (decision.write && decision.status === 'recovering' && status !== 'recovering') {
+          expect(change.kind).toBe('assessment');
+          expect(status).toBe('active');
+        }
+      });
+    });
+
+    it('never lets an assessment close a series, and lets it leave recovering only back to active', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        if (change.kind === 'assessment' && decision.write) {
+          expect(decision.status).not.toBe('inactive');
+          if (status === 'recovering') {
+            expect(['recovering', 'active']).toContain(decision.status);
+          }
+        }
+      });
+    });
+
+    it('never lets an assessment open or reopen a series unless it is breaching', () => {
+      everyCase.forEach(({ status, change, decision }) => {
+        const notLive = status === undefined || status === 'inactive';
+        if (change.kind === 'assessment' && change.outcome !== 'breaching' && notLive) {
+          expect(decision.write).toBe(false);
+        }
+      });
+    });
+
+    it('closes a series only through an operator or a deleted rule', () => {
+      everyCase.forEach(({ change, decision }) => {
+        if (decision.write && decision.status === 'inactive') {
+          expect(['operator', 'rule_deleted']).toContain(change.kind);
+        }
+      });
+    });
   });
 });

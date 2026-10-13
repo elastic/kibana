@@ -77,10 +77,7 @@ export function createEventStatusUpdateTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-          await getScopedClients({
-            request,
-          });
+        const { getEventSearchClient, licensing } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
 
@@ -89,8 +86,6 @@ export function createEventStatusUpdateTool({
           eventId: toolParams.event_id,
           status: toolParams.status,
           assessmentNote: toolParams.assessment_note,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
         });
 
         telemetry.trackAgentToolEventStatusUpdate({

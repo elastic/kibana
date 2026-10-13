@@ -114,13 +114,9 @@ export function createEventTool({
       const { request } = context;
       let sourceIds: string[] = [];
       try {
-        const {
-          getEventSearchClient,
-          getAlertEventsClient,
-          emitTrigger,
-          licensing,
-          sourcesClient,
-        } = await getScopedClients({ request });
+        const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({
+          request,
+        });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
@@ -130,8 +126,6 @@ export function createEventTool({
         const data = await createEventToolHandler({
           eventSearchClient: await getEventSearchClient(),
           eventInput,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
           logger,
         });
 

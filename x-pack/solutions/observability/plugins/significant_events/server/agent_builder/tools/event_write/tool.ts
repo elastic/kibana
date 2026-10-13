@@ -355,16 +355,10 @@ export function createEventsWriteTool({
       const { request } = context;
       let storedItems: EventsWriteInput[] | undefined;
       try {
-        const {
-          getEventSearchClient,
-          getKnowledgeIndicatorClient,
-          getAlertEventsClient,
-          emitTrigger,
-          licensing,
-          sourcesClient,
-        } = await getScopedClients({
-          request,
-        });
+        const { getEventSearchClient, getKnowledgeIndicatorClient, licensing, sourcesClient } =
+          await getScopedClients({
+            request,
+          });
         await assertSignificantEventsAccess({ server, licensing });
         await assertCanManageSignificantEvents({ request, server });
         const catalog = await loadSourceCatalog(sourcesClient);
@@ -383,8 +377,6 @@ export function createEventsWriteTool({
           rejectUnknownEventIds:
             getAgentFromRunContext(context.runContext)?.agentId ===
             SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
-          alertEventsClient: await getAlertEventsClient(),
-          emitTrigger,
           logger,
         });
 

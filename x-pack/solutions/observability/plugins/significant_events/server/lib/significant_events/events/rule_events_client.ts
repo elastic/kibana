@@ -8,6 +8,7 @@
 import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import {
   ALERT_EPISODE_STATUS,
   type AlertEpisodeStatus,
@@ -36,6 +37,15 @@ import {
 } from '../latest_source_query';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
 import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
+import {
+  decideStatusChange,
+  requestedStatus,
+  type StatusChange,
+  type LifecycleSkipReason,
+} from './lifecycle/lifecycle_controller';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
 const GROUP_HASH_FIELD = 'group_hash';
@@ -192,18 +202,42 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   )}), [${literals}]))`;
 };
 
+export type UpdateEventResult =
+  | { updated: true }
+  /**
+   * The version was not written: another writer appended after `prior` was read (`head` is the
+   * version that won), or the series could not be read back at all (no `head`).
+   */
+  | { updated: false; head?: SignificantEvent };
+
+export type UpdateEventStatusResult =
+  | { updated: 1; ignored: 0; status: SignificantEventStatus }
+  | {
+      updated: 0;
+      ignored: 1;
+      /** The status the series has after this call (the requested one when there is no event). */
+      status: SignificantEventStatus;
+      reason: LifecycleSkipReason | 'not_found' | 'superseded';
+    };
+
 /**
- * Read-only `.rule-events` client used by agent-side read call sites (`event_search`,
- * `event_write`'s dedup scan, `attach_investigation`, SML). Query strategy (which ES|QL
- * extraction form to use per field) is validated per-shape on nightshift-program#1492 and #1517
- * before this client's output is trusted in production.
- *
- * Not implemented here:
- * - `findLatestActive`, topology/continuation search, `attach` — agent/discovery reads (#1517).
- * - Writes — this class is read-only; writes go through `AlertEventsClient.createAlertEvent`.
+ * `.rule-events` client.
  */
 export class RuleEventsClient {
-  constructor(private readonly clients: { esClient: ElasticsearchClient; space: string }) {}
+  /**
+   * `getAlertEventsClient` and `emitTrigger` are only needed to write: a read-only client (SML)
+   * omits them, and `createEvent` / `updateEvent` / `updateEventStatus` then throw.
+   */
+  constructor(
+    private readonly clients: {
+      esClient: ElasticsearchClient;
+      space: string;
+      /** Lazily resolves the per-request writer of `.rule-events`. */
+      getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+      /** Fire-and-forget workflow trigger emitter; undefined when workflows are unavailable. */
+      emitTrigger?: TriggerEmitter;
+    }
+  ) {}
 
   private buildLatestByCurrentStateQuery(
     options: RuleEventsCurrentStateSearchOptions
@@ -420,5 +454,114 @@ export class RuleEventsClient {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;
+  }
+
+  /**
+   * Writes the first version of an event and notifies subscribed workflows of its creation.
+   * Callers decide the version; this owns how it is persisted. Deliberately unguarded: a new event
+   * has no prior version to compare against, so two writers creating the same series both succeed.
+   */
+  async createEvent({ event }: { event: SignificantEvent }): Promise<void> {
+    await this.writeVersion({ event });
+  }
+
+  /**
+   * Writes the next version of an event and notifies subscribed workflows of a status change.
+   * Callers decide the version; this owns how it is persisted.
+   *
+   * The version is written only while `prior` is still the latest one, so a version another writer
+   * added since the read is never overwritten with a stale copy. Best effort, not an atomic
+   * conditional write.
+   */
+  async updateEvent({
+    event,
+    prior,
+  }: {
+    event: SignificantEvent;
+    /** The latest version the caller built `event` from. */
+    prior: SignificantEvent;
+  }): Promise<UpdateEventResult> {
+    // A head that cannot be read back, though `prior` was just read, is not a version to build on.
+    const head = await this.findLatestByEventId(event.event_id);
+    if (head === undefined || head['@timestamp'] !== prior['@timestamp']) {
+      return { updated: false, head };
+    }
+
+    await this.writeVersion({ event, prior });
+    return { updated: true };
+  }
+
+  /**
+   * Applies one status change to one event: reads its latest version, lets the lifecycle
+   * controller decide the status change and writes the version it returns through `updateEvent`.
+   * Shared by the operator route, the chat tool and cleanup.
+   */
+  async updateEventStatus({
+    eventId,
+    change,
+    assessmentNote,
+    expectedTimestamp,
+  }: {
+    eventId: string;
+    change: StatusChange;
+    assessmentNote?: string;
+    /**
+     * Writes only while the latest version still carries this `@timestamp`. A newer version means
+     * something else (e.g. a discovery write) changed the event since the caller read it.
+     */
+    expectedTimestamp?: string;
+  }): Promise<UpdateEventStatusResult> {
+    const latest = await this.findLatestByEventId(eventId);
+    if (!latest) {
+      return { updated: 0, ignored: 1, status: requestedStatus(change), reason: 'not_found' };
+    }
+    if (expectedTimestamp !== undefined && latest['@timestamp'] !== expectedTimestamp) {
+      return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
+    }
+
+    const decision = decideStatusChange({
+      latest,
+      change,
+      assessmentNote,
+      timestamp: new Date().toISOString(),
+    });
+    if (!decision.write) {
+      return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
+    }
+
+    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    if (!written.updated) {
+      return {
+        updated: 0,
+        ignored: 1,
+        status: written.head?.status ?? latest.status,
+        reason: 'superseded',
+      };
+    }
+
+    return { updated: 1, ignored: 0, status: decision.event.status };
+  }
+
+  private async writeVersion({
+    event,
+    prior,
+  }: {
+    event: SignificantEvent;
+    prior?: SignificantEvent;
+  }): Promise<void> {
+    const { getAlertEventsClient, emitTrigger } = this.clients;
+    if (!getAlertEventsClient) {
+      throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
+    }
+    const alertEventsClient = await getAlertEventsClient();
+
+    // `createAlertEvent` waits for a refresh, so an immediate re-read (the UI invalidating its
+    // query, the next discovery cycle) sees the new version.
+    await alertEventsClient.createAlertEvent(toRuleEvent(event));
+    emitSignificantEventWriteTriggers({
+      emitTrigger,
+      significantEvent: event,
+      priorSignificantEvent: prior,
+    });
   }
 }

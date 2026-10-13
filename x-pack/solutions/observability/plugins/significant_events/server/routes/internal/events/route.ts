@@ -26,8 +26,6 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { applyLifecycleInput } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
-import { operatorInputFor } from '../../../lib/significant_events/events/lifecycle/lifecycle_state_machine';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
@@ -39,6 +37,7 @@ import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -378,18 +377,14 @@ const eventsUpdateRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-      await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return applyLifecycleInput({
-      eventSearchClient: await getEventSearchClient(),
+    return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
-      input: operatorInputFor(params.body.status),
+      change: StatusChange.byOperator(params.body.status),
       assessmentNote: params.body.assessment_note,
-      alertEventsClient: await getAlertEventsClient(),
-      emitTrigger,
     });
   },
 });
@@ -421,7 +416,7 @@ const cleanupStaleEventsRoute = createServerRoute({
     logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } = scopedClients;
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -431,8 +426,6 @@ const cleanupStaleEventsRoute = createServerRoute({
       eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
-      alertEventsClient: await getAlertEventsClient(),
-      emitTrigger,
     });
   },
 });

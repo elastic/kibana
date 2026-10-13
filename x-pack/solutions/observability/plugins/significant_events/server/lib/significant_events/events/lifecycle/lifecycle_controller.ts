@@ -5,108 +5,181 @@
  * 2.0.
  */
 
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { RuleEventsClient } from '../rule_events_client';
-import type { TriggerEmitter } from '../../../../workflows/triggers/emit';
-import { emitSignificantEventWriteTriggers } from '../../../../workflows/triggers/emit_significant_event_triggers';
-import {
-  decideLifecycle,
-  type LifecycleInput,
-  type LifecycleSkipReason,
-} from './lifecycle_state_machine';
-import { toRuleEvent } from '../to_rule_event';
-
-export type LifecycleControllerSkipReason = LifecycleSkipReason | 'not_found' | 'superseded';
-
-export interface LifecycleControllerResult {
-  updated: number;
-  ignored: number;
-  /** The status the series has after this call. */
-  status: SignificantEventStatus;
-  /** Why nothing was written; set whenever `ignored` is 1. */
-  reason?: LifecycleControllerSkipReason;
-}
-
-/** The status an input asks for, reported when there is no event to read one from. */
-const requestedStatus = (input: LifecycleInput): SignificantEventStatus =>
-  (input.kind === 'operator' && input.intent === 'deactivate') || input.kind === 'rule_deleted'
-    ? 'inactive'
-    : 'active';
+import type {
+  SignificantEvent,
+  SignificantEventManualStatus,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
+import type { StatusOutcome } from './status_outcome';
 
 /**
- * Applies one lifecycle input to one event: reads its latest version, asks the state machine for
- * the decision, and appends the resulting version through the event store. The operator route,
- * chat tools, and cleanup workflow call it. Discovery writes (`event_write/handler.ts`) and
- * `attach_investigation.ts` still write directly and are not governed by this function.
+ * The one place that decides a significant event's status. Every caller submits a typed change, built with `StatusChange`;
+ * none of them picks a status. Pure: no I/O, no caller identity. Who may submit which change is the
+ * write authority's concern, not this function's.
+ *
+ * A new way to change a status is a new change kind and one case in `decideLifecycle`.
  */
-export const applyLifecycleInput = async ({
-  eventSearchClient,
-  eventId,
-  input,
-  assessmentNote,
-  expectedTimestamp,
-  alertEventsClient,
-  emitTrigger,
-}: {
-  eventSearchClient: RuleEventsClient;
-  eventId: string;
-  input: LifecycleInput;
-  assessmentNote?: string;
+export type StatusChange =
   /**
-   * Writes only while the latest version still carries this `@timestamp`. A newer version means
-   * something else (e.g. a discovery write) changed the event since the caller read it.
+   * What discovery's stored verdicts say about the event's members after a write is merged:
+   * `breaching` when any member asserts a breach, `clean` when every member is healthy, `no_data`
+   * when none asserts a breach but some cannot be judged.
    */
-  expectedTimestamp?: string;
-  alertEventsClient: AlertEventsClientApi;
-  emitTrigger?: TriggerEmitter;
-}): Promise<LifecycleControllerResult> => {
-  const latest = await eventSearchClient.findLatestByEventId(eventId);
+  | { kind: 'assessment'; outcome: StatusOutcome }
+  /** The status an operator chose, through the update route or a chat tool. */
+  | { kind: 'operator'; status: SignificantEventManualStatus }
+  /** The rule backing the event no longer exists. */
+  | { kind: 'rule_deleted' };
 
-  if (!latest) {
-    return { updated: 0, ignored: 1, status: requestedStatus(input), reason: 'not_found' };
+/** Named constructors for a `StatusChange`, so callers never spell out the union. */
+export const StatusChange = {
+  /** The status an operator chose, through the update route or a chat tool. */
+  byOperator: (status: SignificantEventManualStatus): StatusChange => ({
+    kind: 'operator',
+    status,
+  }),
+  /** The rule backing the event no longer exists. */
+  ruleDeleted: (): StatusChange => ({ kind: 'rule_deleted' }),
+  /** What discovery's stored verdicts say about the event's members after a write is merged. */
+  assessed: (outcome: StatusOutcome): StatusChange => ({ kind: 'assessment', outcome }),
+};
+
+export interface LifecycleState {
+  /** Undefined when the event has no version yet. */
+  status: SignificantEventStatus | undefined;
+}
+
+export type LifecycleSkipReason =
+  /** The series is already in the state the change asks for. */
+  | 'already_in_state'
+  /** Only a breach opens an event: a healthy or unjudged assessment of a closed or new series. */
+  | 'not_a_breach';
+
+export type LifecycleDecision =
+  /** Append a version carrying `status`. */
+  { write: true; status: SignificantEventStatus } | { write: false; reason: LifecycleSkipReason };
+
+const isLive = (status: SignificantEventStatus | undefined): boolean =>
+  status === 'active' || status === 'recovering';
+
+const decideAssessment = ({
+  state,
+  outcome,
+}: {
+  state: LifecycleState;
+  outcome: StatusOutcome;
+}): LifecycleDecision => {
+  const { status } = state;
+
+  if (!isLive(status)) {
+    // Only a breach opens or reopens (a new episode on an inactive series).
+    return outcome === 'breaching'
+      ? { write: true, status: 'active' }
+      : { write: false, reason: 'not_a_breach' };
   }
 
-  if (expectedTimestamp !== undefined && latest['@timestamp'] !== expectedTimestamp) {
-    return { updated: 0, ignored: 1, status: latest.status, reason: 'superseded' };
+  if (outcome === 'breaching') {
+    return { write: true, status: 'active' };
   }
+  if (status === 'active' && outcome === 'clean') {
+    return { write: true, status: 'recovering' };
+  }
+  // A healthy or unjudged assessment of a recovering series, or an unjudged one of an active
+  // series: the evidence is kept and the status stands. Discovery never closes a series.
+  return { write: true, status: status === 'recovering' ? 'recovering' : 'active' };
+};
 
-  const decision = decideLifecycle({ state: { status: latest.status }, input });
+export const decideLifecycle = ({
+  state,
+  change,
+}: {
+  state: LifecycleState;
+  change: StatusChange;
+}): LifecycleDecision => {
+  const { status } = state;
+
+  switch (change.kind) {
+    case 'assessment':
+      return decideAssessment({ state, outcome: change.outcome });
+
+    case 'operator':
+      if (change.status === 'inactive') {
+        return isLive(status)
+          ? { write: true, status: 'inactive' }
+          : { write: false, reason: 'already_in_state' };
+      }
+      // Activate overrides the assessment, like the framework's own activate action.
+      return status === 'active'
+        ? { write: false, reason: 'already_in_state' }
+        : { write: true, status: 'active' };
+
+    case 'rule_deleted':
+      return isLive(status)
+        ? { write: true, status: 'inactive' }
+        : { write: false, reason: 'already_in_state' };
+  }
+};
+
+export type StatusChangeDecision =
+  /** Write `event`, the version that follows `latest`. */
+  | { write: true; event: SignificantEvent }
+  | {
+      write: false;
+      /** The status the series keeps. */
+      status: SignificantEventStatus;
+      reason: LifecycleSkipReason;
+    };
+
+/**
+ * The status a change asks for, for a caller to report when there is no event to apply it to.
+ */
+export const requestedStatus = (change: StatusChange): SignificantEventStatus => {
+  switch (change.kind) {
+    case 'operator':
+      return change.status;
+    case 'rule_deleted':
+      return 'inactive';
+    case 'assessment':
+      return 'active';
+  }
+};
+
+/**
+ * Everything about a status transition: applies a change to an event's latest version and
+ * returns the version to write, or why nothing should be written. Pure: the caller reads `latest`,
+ * persists the result and guards against concurrent writers, and knows none of the transition
+ * rules.
+ */
+export const decideStatusChange = ({
+  latest,
+  change,
+  assessmentNote,
+  timestamp,
+}: {
+  latest: SignificantEvent;
+  change: StatusChange;
+  assessmentNote?: string;
+  /** `@timestamp` of the version to write. */
+  timestamp: string;
+}): StatusChangeDecision => {
+  const decision = decideLifecycle({ state: { status: latest.status }, change });
   if (!decision.write) {
-    return { updated: 0, ignored: 1, status: latest.status, reason: decision.reason };
+    return { write: false, status: latest.status, reason: decision.reason };
   }
-  // A decision that keeps the status (an assessment that only confirms it) appends nothing here.
+  // A decision that keeps the status (an assessment that only confirms it) writes nothing.
   if (decision.status === latest.status) {
-    return { updated: 0, ignored: 1, status: latest.status, reason: 'already_in_state' };
+    return { write: false, status: latest.status, reason: 'already_in_state' };
   }
 
-  const now = new Date().toISOString();
   // A blank note counts as omitted, so it cannot overwrite the existing one.
   const note = assessmentNote?.trim();
-  const updatedEvent = {
-    ...latest,
-    '@timestamp': now,
-    status: decision.status,
-    ...(note ? { assessment_note: note } : {}),
+  return {
+    write: true,
+    event: {
+      ...latest,
+      '@timestamp': timestamp,
+      status: decision.status,
+      ...(note ? { assessment_note: note } : {}),
+    },
   };
-
-  // Best effort, not an atomic conditional write: re-check the head just before appending so a
-  // version another writer added since the read above is not overwritten with this stale copy.
-  const head = await eventSearchClient.findLatestByEventId(eventId);
-  if (head !== undefined && head['@timestamp'] !== latest['@timestamp']) {
-    return { updated: 0, ignored: 1, status: head.status, reason: 'superseded' };
-  }
-
-  // `createAlertEvent` waits for a refresh, so an immediate re-fetch (e.g. the UI invalidating its
-  // query right after this route responds) sees the new version.
-  await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
-
-  // Notify subscribed workflows of the status change (fire-and-forget).
-  emitSignificantEventWriteTriggers({
-    emitTrigger,
-    significantEvent: updatedEvent,
-    priorSignificantEvent: latest,
-  });
-
-  return { updated: 1, ignored: 0, status: decision.status };
 };
