@@ -45,6 +45,7 @@ interface SkillsTabProps {
   isLoading: boolean;
   isFormDisabled: boolean;
   areElasticCapabilitiesEnabled: boolean;
+  inheritedSkillIds: ReadonlySet<string>;
 }
 
 export const SkillsTab: React.FC<SkillsTabProps> = ({
@@ -53,6 +54,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   isLoading,
   isFormDisabled,
   areElasticCapabilitiesEnabled,
+  inheritedSkillIds,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -73,6 +75,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
             areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
+            inheritedSkillIds={inheritedSkillIds}
           />
         )}
       />
@@ -89,6 +92,7 @@ interface SkillsSelectionProps {
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
   areElasticCapabilitiesEnabled: boolean;
+  inheritedSkillIds: ReadonlySet<string>;
 }
 
 const SkillsSelection: React.FC<SkillsSelectionProps> = ({
@@ -100,6 +104,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   showActiveOnly,
   onShowActiveOnlyChange,
   areElasticCapabilitiesEnabled,
+  inheritedSkillIds,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -108,8 +113,10 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillAutoIncluded = useCallback(
-    (skill: PublicSkillSummary) => getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
-    [areElasticCapabilitiesEnabled]
+    (skill: PublicSkillSummary) =>
+      inheritedSkillIds.has(skill.id) ||
+      getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
+    [inheritedSkillIds, areElasticCapabilitiesEnabled]
   );
 
   const isSkillActive = useCallback(
