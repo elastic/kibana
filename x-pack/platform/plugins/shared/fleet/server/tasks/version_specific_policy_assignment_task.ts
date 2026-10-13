@@ -51,6 +51,7 @@ import {
   AGENT_POLICY_VERSION_SEPARATOR,
   AGENTS_INDEX,
 } from '../../common/constants';
+import { RunMetrics } from './version_specific_policy_assignment_run_metrics';
 import { isSentinelPolicyVersionEnabled } from '../services/utils/sentinel_policy_version';
 
 import { throwIfAborted } from './utils';
@@ -226,6 +227,12 @@ export class VersionSpecificPolicyAssignmentTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
 
+    // Duration and memory of the run, only measured when debug logs are on
+    const runMetrics = this.logger.isLevelEnabled('debug') ? new RunMetrics() : undefined;
+    const measurePhase = <T>(name: string, fn: () => Promise<T>): Promise<T> =>
+      runMetrics ? runMetrics.measurePhase(name, fn) : fn();
+    let runSentinelVersionEnabled: boolean | undefined;
+
     try {
       // Track which variant policy ids Phase 1 deployed this run so Phase 2 does not delete
       // them: Phase 1 skips agents already correctly assigned, so a wrongly-deleted variant is
@@ -235,25 +242,32 @@ export class VersionSpecificPolicyAssignmentTask {
       // for every agent policy of the run
       const packageHasTemplateCondition = new Map<string, boolean>();
       const sentinelVersionEnabled = await isSentinelPolicyVersionEnabled();
+      runSentinelVersionEnabled = sentinelVersionEnabled;
       const previousState = (taskInstance.state ?? {}) as VersionSpecificPolicyAssignmentTaskState;
-      await this.processAgentPoliciesWithVersionConditions(
-        esClient,
-        soClient,
-        signal,
-        deployedThisRun,
-        packageHasTemplateCondition
-      );
-      if (sentinelVersionEnabled) {
-        await this.assignAgentsToSentinelPolicies(esClient, soClient, signal);
-      }
-      const shouldSweepOrphans = this.shouldSweepOrphans(previousState, sentinelVersionEnabled);
-      if (shouldSweepOrphans) {
-        await this.reassignAgentsFromOrphanedVersionSpecificPolicies(
+      await measurePhase('versionConditionPolicies', () =>
+        this.processAgentPoliciesWithVersionConditions(
           esClient,
           soClient,
           signal,
           deployedThisRun,
-          sentinelVersionEnabled
+          packageHasTemplateCondition
+        )
+      );
+      if (sentinelVersionEnabled) {
+        await measurePhase('sentinelAssignment', () =>
+          this.assignAgentsToSentinelPolicies(esClient, soClient, signal)
+        );
+      }
+      const shouldSweepOrphans = this.shouldSweepOrphans(previousState, sentinelVersionEnabled);
+      if (shouldSweepOrphans) {
+        await measurePhase('orphanSweep', () =>
+          this.reassignAgentsFromOrphanedVersionSpecificPolicies(
+            esClient,
+            soClient,
+            signal,
+            deployedThisRun,
+            sentinelVersionEnabled
+          )
         );
       } else {
         this.logger.debug(
@@ -276,6 +290,15 @@ export class VersionSpecificPolicyAssignmentTask {
       }
       this.logger.error(`[VersionSpecificPolicyAssignmentTask] Error: ${err}`);
       this.endRun('error');
+    } finally {
+      if (runMetrics) {
+        this.logger.debug(
+          `[VersionSpecificPolicyAssignmentTask] Run metrics: ${JSON.stringify({
+            sentinelVersionEnabled: runSentinelVersionEnabled,
+            ...runMetrics.stop(),
+          })}`
+        );
+      }
     }
   };
 
