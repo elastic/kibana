@@ -64,6 +64,10 @@ export {
   ProposedActionButton,
   type ProposedActionButtonProps,
 } from './src/components/details/proposed_action_button';
+export {
+  ProposedActionsList,
+  type ProposedActionsListProps,
+} from './src/components/details/proposed_actions_list';
 
 export {
   FlyoutGroupedAttachments,

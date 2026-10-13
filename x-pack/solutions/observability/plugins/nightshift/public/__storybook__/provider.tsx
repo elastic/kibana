@@ -48,8 +48,8 @@ export type NightshiftStreamFeaturesScenario =
   | 'error'
   | 'partialError';
 
-/** The one stream `partialError` refuses to serve, so the others still resolve their services. */
-const UNREACHABLE_STREAM_NAME = 'logs.inventory-service';
+/** The one source `partialError` refuses to serve, so the others still resolve their services. */
+const UNREACHABLE_SOURCE_ID = 'logs.inventory-service';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -122,7 +122,7 @@ const createServices = ({
     fetch: async (
       route: string,
       options?: {
-        params?: { path?: { id?: string; name?: string }; query?: { event_id?: string } };
+        params?: { path?: { id?: string; sourceId?: string }; query?: { event_id?: string } };
       }
     ) => {
       if (route === 'GET /internal/significant_events/events') {
@@ -173,21 +173,21 @@ const createServices = ({
         return checkoutOccurrences;
       }
 
-      if (route === 'GET /internal/streams/{name}/features') {
+      if (route === 'GET /internal/streams/{sourceId}/features') {
         if (streamFeaturesScenario === 'loading') {
           return neverResolve();
         }
         if (streamFeaturesScenario === 'error') {
-          throw new Error('The stream features request failed');
+          throw new Error('The source features request failed');
         }
         if (streamFeaturesScenario === 'empty') {
           return { features: [] };
         }
         if (
           streamFeaturesScenario === 'partialError' &&
-          options?.params?.path?.name === UNREACHABLE_STREAM_NAME
+          options?.params?.path?.sourceId === UNREACHABLE_SOURCE_ID
         ) {
-          throw new Error(`The ${UNREACHABLE_STREAM_NAME} features request failed`);
+          throw new Error(`The ${UNREACHABLE_SOURCE_ID} features request failed`);
         }
       }
 
