@@ -1,0 +1,56 @@
+id: alert-triage
+description: Classify a batch of alerts as false positive, true positive, or inconclusive.
+owner: security
+variables_schema:
+  type: object
+  additionalProperties: false
+  required: [alerts]
+  properties:
+    alerts:
+      type: array
+      maxItems: 50
+      items:
+        type: object
+        additionalProperties: false
+        required: [id, text]
+        properties:
+          id:
+            type: string
+            maxLength: 512
+          text:
+            type: string
+            maxLength: 8000
+messages:
+  - role: system
+    content: |
+      Classify every alert you are given. Return one verdict per alert id, in the same order, and no extras. Copy each id verbatim.
+
+      classification is false_positive, true_positive, or inconclusive.
+      confidence_score is a number from 0 to 1.
+      rationale is one short sentence, at most 20 words, naming the decision and the strongest evidence.
+      contributing_factors is at most 3 short phrases.
+
+      Return JSON only:
+      {
+        "verdicts": [
+          {
+            "id": "",
+            "classification": "false_positive",
+            "confidence_score": 0.0,
+            "rationale": "",
+            "contributing_factors": []
+          }
+        ],
+        "batch_summary": "Optional. One or two sentences, at most 45 words, grouped by host or user. Omit it when the verdicts already say it."
+      }
+  - role: user
+    content: |
+      <alerts>
+      {{ json .alerts }}
+      </alerts>
+examples:
+  - name: one-alert
+    variables:
+      alerts:
+        - id: abc123
+          text: 'rule: Unusual AWS API call | user: analyst@example.com | host: jump-01'
