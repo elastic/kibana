@@ -45,7 +45,7 @@ describe('extractDocument', () => {
       path: `/_inference/document_extraction/${encodeURIComponent(
         DOCUMENT_EXTRACTION_ENDPOINT_ID
       )}`,
-      querystring: { timeout: '180s' },
+      querystring: { timeout: '90s' },
       body: {
         input: [
           {
