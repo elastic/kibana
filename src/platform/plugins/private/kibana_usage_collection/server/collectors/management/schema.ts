@@ -691,6 +691,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:enableSolutionProfilesInClassic': {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether Discover loads Observability and Security contextual profiles in Classic navigation.',
+    },
+  },
   'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
