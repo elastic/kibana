@@ -102,7 +102,7 @@ export const upsertDashboardSchema = z.object({
     .max(1000)
     .optional()
     .describe(
-      'Layout instructions from the user, e.g. "put the metrics in one row" or "move the error chart next to the latency chart". Arranges the whole dashboard again. Omit it otherwise: new, moved, and removed panels are placed automatically.'
+      'Layout instructions from the user, e.g. "put the metrics in one row" or "move the error chart next to the latency chart". Arranges the whole dashboard again, and is remembered for later calls until the user asks for a different arrangement. Omit it otherwise: new, moved, and removed panels are placed automatically.'
     ),
   remove: z
     .array(idSchema)

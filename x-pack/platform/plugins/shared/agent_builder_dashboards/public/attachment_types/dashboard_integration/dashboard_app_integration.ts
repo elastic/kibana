@@ -73,6 +73,7 @@ export const registerDashboardAppIntegration = ({
     const dashboardId = api.savedObjectId$.getValue();
     const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
+    const layoutRules = syncAttachment?.data.layout_rules;
 
     // update an existing linked attachment, or add a draft attachment only when the conversation is new
     if (syncAttachment || !state.conversationId) {
@@ -80,7 +81,8 @@ export const registerDashboardAppIntegration = ({
         id: syncAttachment?.id ?? draftAttachmentId.current,
         origin: dashboardId,
         type: DASHBOARD_ATTACHMENT_TYPE,
-        data: dashboardData,
+        // Layout rules are not part of the dashboard, so they are kept from the synced attachment.
+        data: layoutRules ? { ...dashboardData, layout_rules: layoutRules } : dashboardData,
       });
     }
   };

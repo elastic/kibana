@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 
 export const GRID_COLUMNS = 48;
 
+export const MAX_LAYOUT_RULES = 20;
+
 export interface PanelSize {
   w: number;
   h: number;
@@ -48,6 +50,8 @@ export interface LayoutContainer {
   section: string | null;
   title?: string;
   items: Array<LayoutPanel | LayoutSectionItem>;
+  /** Ids of the existing items, grouped into their current rows top to bottom. */
+  currentRows: string[][];
 }
 
 export interface LayoutRequest {
@@ -55,6 +59,8 @@ export interface LayoutRequest {
   dashboardDescription?: string;
   /** Layout instructions from the user, when the call asked for a relayout. */
   instructions?: string;
+  /** Layout rules from the user's earlier instructions, which still apply. */
+  rules?: string[];
   containers: LayoutContainer[];
 }
 
@@ -96,6 +102,13 @@ export const layoutArrangementSchema = z.object({
       })
     )
     .max(200),
+  rules: z
+    .array(z.string().min(1).max(500))
+    .max(MAX_LAYOUT_RULES)
+    .optional()
+    .describe(
+      'Only when instructions are given: the updated layout rules, i.e. the earlier rules merged with the instructions.'
+    ),
 });
 
 export type LayoutArrangement = z.infer<typeof layoutArrangementSchema>;

@@ -10,6 +10,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/as-code-dashboard-schema';
+import { omit } from 'lodash';
 import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -109,7 +110,7 @@ export const attachmentDataToDashboardState = ({
   ...rest
 }: DashboardAttachmentData): DashboardState => ({
   ...EMPTY_DASHBOARD_STATE,
-  ...rest,
+  ...omit(rest, 'layout_rules'),
   options: {
     ...EMPTY_DASHBOARD_STATE.options,
     ...options,

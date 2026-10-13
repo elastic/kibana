@@ -167,6 +167,8 @@ export const dashboardAttachmentDataSchema = z.object({
   pinned_panels: pinnedPanelsSchema.optional(),
   access_control: accessControlSchema.optional(),
   project_routing: z.string().optional(),
+  /** Layout requests the user made in the conversation. Not part of the saved dashboard. */
+  layout_rules: z.array(z.string()).optional(),
 });
 
 export type DashboardAttachmentData = z.infer<typeof dashboardAttachmentDataSchema>;
