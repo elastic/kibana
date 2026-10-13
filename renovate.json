@@ -50,7 +50,6 @@
         "val-loader",
         "webpack",
         "webpack-cli",
-        "webpack-dev-server",
         "webpack-merge"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -2055,7 +2054,7 @@
       "groupName": "storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "8.19"],
-      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "fix-esm", "react-refresh"],
+      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "react-refresh"],
       "matchDepPatterns": ["storybook"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
       "allowedVersions": "<9.0.0",

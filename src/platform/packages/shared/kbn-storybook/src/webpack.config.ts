@@ -15,15 +15,9 @@ import { merge as webpackMerge } from 'webpack-merge';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
-import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
-    devServer: {
-      devMiddleware: {
-        stats: 'errors-only',
-      },
-    },
     externals: {
       ...externals,
       // mongodb driver uses Node.js TCP/TLS — never bundle for browser.
