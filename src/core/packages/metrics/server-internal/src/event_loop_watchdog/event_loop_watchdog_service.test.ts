@@ -29,25 +29,26 @@ import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 describe('EventLoopWatchdogService', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('toggles the watchdog with the feature flag', async () => {
+  it('starts at setup (before plugins load code) and follows the feature flag from start', async () => {
     const service = new EventLoopWatchdogService(mockCoreContext.create());
-    service.setup({ status: { overall$: NEVER } });
+    service.setup({ status: { overall$: NEVER }, threads: {} as InternalThreadsStart });
+    expect(mockWatchdog.start).toHaveBeenCalledTimes(1);
 
-    const flag$ = new BehaviorSubject(false);
+    const flag$ = new BehaviorSubject(true);
     const featureFlags = coreFeatureFlagsMock.createStart();
     featureFlags.getBooleanValue$.mockReturnValue(flag$);
-    service.start({ featureFlags, threads: {} as InternalThreadsStart });
+    service.start({ featureFlags });
+    // PoC: on unless the flag is explicitly off
     expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(
       EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
-      false
+      true
     );
-    flag$.next(true);
-    // toggles are serialised behind the initial (disabled) toggle
-    await new Promise(setImmediate);
-    expect(mockWatchdog.start).toHaveBeenCalledTimes(1);
     flag$.next(false);
     await new Promise(setImmediate);
-    expect(mockWatchdog.stop).toHaveBeenCalledTimes(2); // initial disabled value, then the toggle
+    expect(mockWatchdog.stop).toHaveBeenCalledTimes(1);
+    flag$.next(true);
+    await new Promise(setImmediate);
+    expect(mockWatchdog.start).toHaveBeenCalledTimes(3); // setup, initial value, toggle
     await service.stop();
   });
 });
@@ -64,8 +65,8 @@ describe('EventLoopWatchdogService startup phase', () => {
     jest.clearAllMocks();
     overall$ = new Subject();
     service = new EventLoopWatchdogService(mockCoreContext.create());
-    service.setup({ status: { overall$ } });
-    service.start({ featureFlags, threads: {} as InternalThreadsStart });
+    service.setup({ status: { overall$ }, threads: {} as InternalThreadsStart });
+    service.start({ featureFlags });
   });
 
   afterEach(async () => {

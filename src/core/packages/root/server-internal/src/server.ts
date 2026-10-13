@@ -9,7 +9,7 @@
 
 import apm from 'elastic-apm-node';
 import { firstValueFrom } from 'rxjs';
-import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { Logger, LoggerFactory, LogMeta } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import type { Env, RawConfigurationProvider } from '@kbn/config';
@@ -83,6 +83,11 @@ import { registerRootEvents, reportKibanaStartedEvent, type UptimeSteps } from '
 const coreId = Symbol('core');
 
 /** @internal */
+
+/** PoC (event loop watchdog): startup timing log meta. */
+interface StartupLogMeta extends LogMeta {
+  kibana: { startup: { steps: Record<string, number>; uptimeMs: number } };
+}
 
 export class Server {
   public readonly configService: ConfigService;
@@ -439,7 +444,7 @@ export class Server {
       coreUsageData: coreUsageDataSetup,
       loggingSystem: this.loggingSystem,
     });
-    this.eventLoopWatchdog.setup({ status: statusSetup });
+    this.eventLoopWatchdog.setup({ status: statusSetup, threads: this.threads.start() });
 
     const customBrandingSetup = this.customBranding.setup();
     const userSettingsServiceSetup = this.userSettingsService.setup();
@@ -530,6 +535,26 @@ export class Server {
             uptimeSteps: this.uptimePerStep as UptimeSteps,
             analytics: coreStart.analytics,
           });
+          // PoC (event loop watchdog): log the startup steps to compare startup time with the
+          // debugger enabled early. Durations in ms; `uptime` = process uptime at the end of start.
+          const steps = Object.fromEntries(
+            Object.entries(this.uptimePerStep).map(([step, value]) => [
+              step,
+              Math.round(
+                'start' in value
+                  ? value.end - value.start
+                  : 'waitTime' in value
+                  ? value.waitTime
+                  : value.migrationTime
+              ),
+            ])
+          );
+          this.log.info<StartupLogMeta>(
+            `Kibana started; startup steps (ms): ${JSON.stringify(steps)}`,
+            {
+              kibana: { startup: { steps, uptimeMs: Math.round(performance.now()) } },
+            }
+          );
 
           return coreStart;
         } catch (error) {
@@ -661,10 +686,7 @@ export class Server {
     });
 
     const featureFlagsStart = this.featureFlags.start();
-    this.eventLoopWatchdog.start({
-      featureFlags: featureFlagsStart,
-      threads: this.threads.start(),
-    });
+    this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
 
     const pricingStart = this.pricing.start();
 

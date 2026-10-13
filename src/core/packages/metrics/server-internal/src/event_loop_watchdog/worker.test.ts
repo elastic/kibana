@@ -7,47 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'node:fs';
-import Os from 'node:os';
-import Path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { MessageChannel, type MessagePort } from 'node:worker_threads';
-import type { CpuProfile } from './profile_summary';
 import { SLOT_COUNT, Slot, monotonicUs, type LogMessage } from './types';
 import { runWatchdogWorker, type InspectorSession } from './worker';
 
-const PROFILE: CpuProfile = {
-  nodes: [
-    {
-      id: 1,
-      callFrame: { functionName: '(root)', url: '', lineNumber: -1, columnNumber: -1 },
-      children: [2],
-    },
-    {
-      id: 2,
-      callFrame: {
-        functionName: 'spin',
-        url: 'file:///kibana/src/spin.ts',
-        lineNumber: 0,
-        columnNumber: 0,
-      },
-    },
-  ],
-  startTime: 0,
-  endTime: 30_000,
-  samples: [2, 2, 2],
-  timeDeltas: [10_000, 10_000, 10_000],
-};
+const CALL_FRAMES = [
+  { functionName: 'init', location: { scriptId: '1', lineNumber: 11 } },
+  { functionName: 'spin', location: { scriptId: '2', lineNumber: 0 } },
+];
+const SCRIPTS = [
+  { scriptId: '1', url: 'file:///kibana/node_modules/zod/core.cjs' },
+  { scriptId: '2', url: 'file:///kibana/src/spin.ts' },
+];
 
-describe('runWatchdogWorker', () => {
-  let diagnosticDir: string;
+type Listener = (message: { params: any }) => void;
+
+describe('runWatchdogWorker (debugger sampling)', () => {
   let main: MessagePort;
   let logs: LogMessage[];
-  let sessions: Array<InspectorSession & { posted: string[]; disconnected: boolean }>;
+  let posted: string[];
+  let listeners: Map<string, Listener[]>;
   let blocked: boolean;
   let heartbeat: NodeJS.Timeout;
 
-  const start = (profiling = { afterMs: 300, maxMs: 2_000, cooldownMs: 60_000 }) => {
+  const emit = (event: string, message: Parameters<Listener>[0]) =>
+    listeners.get(event)?.forEach((listener) => listener(message));
+
+  const start = (
+    profiling = { afterMs: 300, maxMs: 2_000, cooldownMs: 60_000, sampleIntervalMs: 50 }
+  ) => {
     const shared = new SharedArrayBuffer(SLOT_COUNT * BigInt64Array.BYTES_PER_ELEMENT);
     const slots = new BigInt64Array(shared);
     blocked = false;
@@ -58,103 +47,96 @@ describe('runWatchdogWorker', () => {
     const channel = new MessageChannel();
     main = channel.port1;
     main.on('message', (message: LogMessage) => logs.push(message));
-    runWatchdogWorker(
-      channel.port2,
-      { shared, sanitizeRoot: '/kibana', diagnosticDir, profiling },
-      () => {
-        const session = {
-          posted: [] as string[],
-          disconnected: false,
-          connectToMainThread: jest.fn(),
-          post: (
-            method: string,
-            _params: object,
-            callback: (e: Error | null, r?: object) => void
-          ) => {
-            session.posted.push(method);
-            setImmediate(() =>
-              callback(null, method === 'Profiler.stop' ? { profile: PROFILE } : {})
-            );
-          },
-          disconnect: () => {
-            session.disconnected = true;
-          },
-        };
-        sessions.push(session);
-        return session;
-      }
-    );
+    const session: InspectorSession = {
+      connectToMainThread: jest.fn(),
+      on: (event: string, listener: Listener) =>
+        listeners.set(event, [...(listeners.get(event) ?? []), listener]),
+      post: (method, params, callback) => {
+        posted.push(
+          method === 'Debugger.setSkipAllPauses'
+            ? `skip:${(params as { skip: boolean }).skip}`
+            : method
+        );
+        setImmediate(() => {
+          if (method === 'Debugger.enable')
+            SCRIPTS.forEach((script) => emit('Debugger.scriptParsed', { params: script }));
+          callback(null, {});
+          if (method === 'Debugger.pause')
+            emit('Debugger.paused', { params: { callFrames: CALL_FRAMES } });
+        });
+      },
+      disconnect: jest.fn(),
+    };
+    runWatchdogWorker(channel.port2, { shared, sanitizeRoot: '/kibana', profiling }, () => session);
   };
   const block = async (ms: number) => {
     blocked = true;
     await sleep(ms);
     blocked = false;
   };
-  const profileLogs = () =>
-    logs.filter(({ message }) => message.startsWith('Event loop block profile'));
-  const waitForProfileLogs = async (count: number) => {
-    for (let i = 0; i < 200 && profileLogs().length < count; i++) await sleep(10);
-    return profileLogs();
-  };
+  const sampleLogs = () =>
+    logs.filter(({ message }) => message.startsWith('Event loop block stack samples'));
 
   beforeEach(() => {
-    diagnosticDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'elw-worker-'));
     logs = [];
-    sessions = [];
+    posted = [];
+    listeners = new Map();
   });
 
   afterEach(() => {
     clearInterval(heartbeat);
     main.close();
-    Fs.rmSync(diagnosticDir, { recursive: true, force: true });
   });
 
-  it('profiles a block once it lasts long enough, writing the profile and ending the session', async () => {
+  it('enables the debugger at start, skipping pauses from the outset', async () => {
     start();
-    await block(700);
-    const [profileLog] = await waitForProfileLogs(1);
-    expect(sessions).toHaveLength(1);
-    const [session] = sessions;
-    expect(session.connectToMainThread).toHaveBeenCalled();
-    expect(session.posted).toEqual([
-      'Profiler.enable',
-      'Profiler.setSamplingInterval',
-      'Profiler.start',
-      'Profiler.stop',
-    ]);
-    expect(session.disconnected).toBe(true);
-    expect(profileLog.level).toBe('warn');
-    expect(profileLog.message).toMatch(
-      /^Event loop block profile #1: block ~\d+ms \(profiled after ~\d+ms, profiler start took ~\d+ms\), 3 samples\. Top: 100% spin \(src\/spin\.ts:1\)\. Kibana code: 100% spin \(src\/spin\.ts:1\)\. File: /
+    await sleep(50);
+    expect(posted.slice(0, 2)).toEqual(['Debugger.enable', 'skip:true']);
+    expect(logs[0].message).toMatch(
+      /^Event loop watchdog debugger enabled in [\d.]+ms \(2 scripts\)$/
     );
-    const [file] = Fs.readdirSync(diagnosticDir);
-    expect(file).toMatch(/^event-loop-block-startup-000\d{3}ms-.*\.cpuprofile$/);
-    expect(JSON.parse(Fs.readFileSync(Path.join(diagnosticDir, file), 'utf8'))).toEqual(PROFILE);
   });
 
-  it('does not profile blocks shorter than the profiling threshold', async () => {
+  it('samples the stack while a block lasts, allowing pauses only around each sample', async () => {
     start();
+    await sleep(50);
+    posted = [];
+    await block(700);
+    await sleep(100);
+    const [samplesLog] = sampleLogs();
+    // first sample: skip off + pause, then resume + skip on
+    expect(posted.slice(0, 4)).toEqual([
+      'skip:false',
+      'Debugger.pause',
+      'Debugger.resume',
+      'skip:true',
+    ]);
+    const meta = samplesLog.meta!.kibana.event_loop_watchdog.samples as Record<string, unknown>;
+    expect(meta.samples).toBeGreaterThanOrEqual(3);
+    expect(meta).toMatchObject({ captured: 1, sampleIntervalMs: 50, unrequestedPauses: 0 });
+    expect(samplesLog.message).toContain('Kibana code: 100% spin (src/spin.ts:1)');
+    expect(samplesLog.message).toMatch(/first sample after ~\d+ms/);
+  });
+
+  it('resumes pauses it did not request (e.g. `debugger;` statements)', async () => {
+    start();
+    await sleep(50);
+    posted = [];
+    emit('Debugger.paused', { params: { callFrames: CALL_FRAMES } });
+    await sleep(20);
+    expect(posted).toEqual(['Debugger.resume']);
+  });
+
+  it('does not sample blocks shorter than the threshold, and at most once per cooldown', async () => {
+    start();
+    await sleep(50);
     await block(250);
-    await sleep(200);
-    expect(logs.some(({ message }) => message.startsWith('Event loop blocked for ~'))).toBe(true);
-    expect(sessions).toHaveLength(0);
-  });
-
-  it('profiles at most once per cooldown', async () => {
-    start();
-    await block(500);
-    await waitForProfileLogs(1);
-    await block(500);
-    await sleep(200);
-    expect(sessions).toHaveLength(1);
-  });
-
-  it('stops profiling a block that lasts too long, keeping what was sampled', async () => {
-    start({ afterMs: 300, maxMs: 300, cooldownMs: 60_000 });
-    const ended = block(1_200);
-    const [profileLog] = await waitForProfileLogs(1);
-    expect(blocked).toBe(true); // still blocked when the profile was taken
-    expect(profileLog.message).toContain('3 samples');
-    await ended;
+    await sleep(100);
+    expect(sampleLogs()).toHaveLength(0);
+    await block(600);
+    await sleep(100);
+    await block(600);
+    await sleep(100);
+    expect(sampleLogs()).toHaveLength(1);
   });
 });

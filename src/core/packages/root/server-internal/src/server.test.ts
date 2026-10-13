@@ -249,9 +249,9 @@ test('runs services on "start"', async () => {
 
   await server.setup();
 
-  // startup ends once Kibana's overall status is first available
+  // startup ends once Kibana's overall status is first available; the PoC starts at setup
   expect(mockEventLoopWatchdogService.setup).toHaveBeenCalledWith(
-    expect.objectContaining({ status: expect.anything() })
+    expect.objectContaining({ status: expect.anything(), threads: mockThreadsStart })
   );
   expect(mockHttpService.start).not.toHaveBeenCalled();
   expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
@@ -273,7 +273,7 @@ test('runs services on "start"', async () => {
   expect(mockUiSettingsService.start).toHaveBeenCalledTimes(1);
   expect(mockMetricsService.start).toHaveBeenCalledTimes(1);
   expect(mockEventLoopWatchdogService.start).toHaveBeenCalledWith(
-    expect.objectContaining({ threads: mockThreadsStart })
+    expect.objectContaining({ featureFlags: expect.anything() })
   );
   expect(mockStatusService.start).toHaveBeenCalledTimes(1);
   expect(mockDeprecationService.start).toHaveBeenCalledTimes(1);

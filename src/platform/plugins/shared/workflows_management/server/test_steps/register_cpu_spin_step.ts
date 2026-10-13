@@ -35,7 +35,7 @@ export const registerTestOnlyCpuSpinStep = (
       ...cpuSpinStepCommonDefinition,
       handler: async (context) => {
         const enabled = await firstValueFrom(
-          coreStart.featureFlags.getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, false)
+          coreStart.featureFlags.getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, true)
         );
         if (!enabled) {
           throw new Error(

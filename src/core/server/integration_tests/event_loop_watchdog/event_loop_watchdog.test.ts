@@ -7,18 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Fs from 'node:fs';
-import Os from 'node:os';
-import Path from 'node:path';
 import { performance } from 'node:perf_hooks';
+import { Script } from 'node:vm';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ThreadsService } from '@kbn/core-threads-server-internal';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/event_loop_watchdog';
-import type { CpuProfile } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/profile_summary';
 
-const profiling = { afterMs: 1_000, maxMs: 5_000, cooldownMs: 60_000 };
+const profiling = { afterMs: 300, maxMs: 5_000, cooldownMs: 60_000, sampleIntervalMs: 100 };
 
 function spinTheEventLoop(ms: number) {
   const until = performance.now() + ms;
@@ -26,6 +23,10 @@ function spinTheEventLoop(ms: number) {
   while (performance.now() < until) counter++;
   return counter;
 }
+
+// A `debugger;` statement, as dependencies may contain (compiled at runtime, outside lint).
+const debuggerStatement = new Script('debugger; 1;');
+const runDebuggerStatement = () => debuggerStatement.runInThisContext();
 
 const waitFor = async <T>(fn: () => T | undefined, timeoutMs = 15_000): Promise<T> => {
   const deadline = Date.now() + timeoutMs;
@@ -37,96 +38,69 @@ const waitFor = async <T>(fn: () => T | undefined, timeoutMs = 15_000): Promise<
   throw new Error('timed out waiting for condition');
 };
 
-/** A running CPU profiler makes an idle event loop report ~70% utilisation. */
-const idleUtilization = async (ms: number) => {
-  const start = performance.eventLoopUtilization();
-  await sleep(ms);
-  return performance.eventLoopUtilization(start).utilization;
-};
-
-describe('EventLoopWatchdog (real worker, real inspector profiler)', () => {
+describe('EventLoopWatchdog (real worker, real debugger)', () => {
   let logger: MockedLogger;
   let watchdog: EventLoopWatchdog;
-  let diagnosticDir: string;
 
-  const messages = (level: 'info' | 'warn' | 'error') =>
+  const messages = (level: 'info' | 'warn') =>
     logger[level].mock.calls.map(([message]) => String(message));
-  const profileLog = (level: 'info' | 'warn' = 'warn') =>
-    logger[level].mock.calls.find(([message]) =>
-      String(message).startsWith('Event loop block profile')
+  const samplesLog = () =>
+    logger.warn.mock.calls.find(([message]) =>
+      String(message).startsWith('Event loop block stack samples')
     );
-  const metaOf = (meta: unknown) =>
-    (meta as { kibana: { event_loop_watchdog: { profile: any } } }).kibana.event_loop_watchdog
-      .profile;
 
   beforeEach(async () => {
     logger = loggerMock.create();
-    diagnosticDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'elw-'));
     watchdog = new EventLoopWatchdog({
       threads: new ThreadsService().start(),
       logger,
       sanitizeRoot: REPO_ROOT,
-      diagnosticDir,
       profiling,
     });
     watchdog.start();
     await waitFor(() =>
-      messages('info').find((message) => message.startsWith('Event loop watchdog started'))
+      messages('info').find((message) => message.startsWith('Event loop watchdog debugger enabled'))
     );
-    await sleep(300); // let the worker start polling
+    await sleep(200);
   });
 
   afterEach(async () => {
     await watchdog.stop();
-    Fs.rmSync(diagnosticDir, { recursive: true, force: true });
   });
 
-  it('profiles an egregious block while it lasts, locating the blocking code', async () => {
-    spinTheEventLoop(2_500);
-    const [message, meta] = await waitFor(() => profileLog());
-    const profile = metaOf(meta);
-    expect(message).toMatch(/profiled after ~1\d{3}ms, profiler start took ~\d+ms/);
-    // the spin is the busy frame, and this test file is the Kibana code it ran from
-    expect(message).toContain('Kibana code: ');
-    expect(profile.kibanaFrames[0].location).toContain('event_loop_watchdog.test.ts');
-    expect(profile).toMatchObject({ phase: 'startup', profiled: 1 });
-    // sampled at ~99Hz from when profiling started until the block ended
-    expect(profile.samples).toBeGreaterThan(50);
-    expect(profile.samples).toBeLessThan(200);
-
-    expect(Path.dirname(profile.file)).toBe(diagnosticDir);
-    expect(Path.basename(profile.file)).toMatch(
-      /^event-loop-block-startup-002\d{3}ms-.*\.cpuprofile$/
-    );
-    const written: CpuProfile = JSON.parse(Fs.readFileSync(profile.file, 'utf8'));
-    expect(written.samples.length).toBeGreaterThan(50);
-    expect(logger.error).not.toHaveBeenCalled();
-    // the profiler is stopped once the profile is taken
-    expect(await idleUtilization(500)).toBeLessThan(0.2);
+  it('samples the stack during a block, locating the blocking code', async () => {
+    spinTheEventLoop(1_500);
+    const [message, meta] = await waitFor(() => samplesLog());
+    const samples = (meta as { kibana: { event_loop_watchdog: { samples: any } } }).kibana
+      .event_loop_watchdog.samples;
+    expect(samples.kibanaFrames[0].location).toContain('event_loop_watchdog.test.ts');
+    // ~10Hz from ~300ms into a 1.5s block
+    expect(samples.samples).toBeGreaterThanOrEqual(5);
+    expect(samples.firstSampleAfterMs).toBeLessThan(1_000);
+    expect(samples.pauseMsMedian).toBeGreaterThan(0);
+    expect(message).toMatch(/first sample after ~\d+ms/);
   });
 
-  it('does not profile shorter blocks', async () => {
-    spinTheEventLoop(500);
+  it('does not sample shorter blocks', async () => {
+    spinTheEventLoop(250);
     await waitFor(() =>
       messages('warn').find((message) => message.startsWith('Event loop blocked for ~'))
     );
-    await sleep(500);
-    expect(profileLog()).toBeUndefined();
-    expect(Fs.readdirSync(diagnosticDir)).toEqual([]);
+    await sleep(300);
+    expect(samplesLog()).toBeUndefined();
   });
 
-  it('names running blocks once startup is over', async () => {
-    watchdog.markRunning();
-    await sleep(200); // a block starts at the last heartbeat: let one follow the mark
-    spinTheEventLoop(1_500);
-    const [, meta] = await waitFor(() => profileLog());
-    expect(Path.basename(metaOf(meta).file)).toMatch(/^event-loop-block-running-001\d{3}ms-/);
+  it('does not pause on `debugger;` statements', async () => {
+    const start = performance.now();
+    for (let i = 0; i < 100; i++) runDebuggerStatement();
+    expect(performance.now() - start).toBeLessThan(100);
   });
 
-  it('never leaves the profiler running when stopped in the middle of a profile', async () => {
-    spinTheEventLoop(1_500); // profiling started during the block...
-    await watchdog.stop(); // ...and the worker is terminated before it took the profile
-    expect(await idleUtilization(500)).toBeLessThan(0.2);
+  it('leaves no debugger behind when stopped', async () => {
+    await watchdog.stop();
+    const start = performance.now();
+    runDebuggerStatement();
+    expect(performance.now() - start).toBeLessThan(50);
     expect(messages('info')).toContain('Event loop watchdog stopped');
   });
 });

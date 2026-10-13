@@ -32,12 +32,12 @@ import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
 
 export interface EventLoopWatchdogSetupDeps {
+  threads: InternalThreadsStart;
   /** Kibana's overall status: startup ends once it is first available. */
   status: { overall$: Observable<ServiceStatus> };
 }
 
 export interface EventLoopWatchdogStartDeps {
-  threads: InternalThreadsStart;
   featureFlags: FeatureFlagsStart;
 }
 
@@ -70,20 +70,25 @@ export class EventLoopWatchdogService {
     this.logger = coreContext.logger.get('metrics', 'event_loop_watchdog');
   }
 
-  public setup({ status }: EventLoopWatchdogSetupDeps): void {
+  public setup({ status, threads }: EventLoopWatchdogSetupDeps): void {
     this.overall$ = status.overall$;
-  }
-
-  public start({ featureFlags, threads }: EventLoopWatchdogStartDeps): void {
-    const watchdog = new EventLoopWatchdog({
+    // PoC: start (and enable the debugger) before plugins load their code, so that scripts are
+    // registered incrementally rather than all at once later. The flag can still turn it off.
+    this.watchdog = new EventLoopWatchdog({
       threads,
       logger: this.logger,
       sanitizeRoot: REPO_ROOT,
       diagnosticDir: resolveDiagnosticDir(),
     });
-    this.watchdog = watchdog;
+    this.watchdog.start();
+  }
+
+  public start({ featureFlags }: EventLoopWatchdogStartDeps): void {
+    const { watchdog } = this;
+    if (!watchdog) return;
     this.subscription = featureFlags
-      .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, false)
+      // PoC: on unless the flag is explicitly off
+      .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, true)
       .pipe(
         distinctUntilChanged(),
         concatMap(async (enabled) => {

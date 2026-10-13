@@ -184,7 +184,39 @@ export interface ProfiledBlock {
   profilerStartMs?: number;
 }
 
-const describeFrames = (frames: readonly FrameSummary[]) =>
+/** One frame of a stack sampled with the debugger (`lineNumber` 0-based, as in `.cpuprofile`). */
+export interface SampledFrame {
+  functionName: string;
+  url: string;
+  lineNumber: number;
+  columnNumber: number;
+}
+
+/** Builds a `.cpuprofile`-shaped tree from sampled stacks (leaf first), for the summariser. */
+export const stacksToProfile = (stacks: readonly SampledFrame[][]): CpuProfile => {
+  const nodes: CpuProfile['nodes'] = [
+    { id: 1, callFrame: { functionName: '(root)', url: '', lineNumber: -1, columnNumber: -1 } },
+  ];
+  const childIds = new Map<string, number>();
+  const samples = stacks.map((stack) => {
+    let parent = nodes[0];
+    for (const frame of [...stack].reverse()) {
+      const key = `${parent.id}\n${frame.functionName}\n${frame.url}\n${frame.lineNumber}`;
+      let id = childIds.get(key);
+      if (id === undefined) {
+        id = nodes.length + 1;
+        childIds.set(key, id);
+        nodes.push({ id, callFrame: { ...frame } });
+        parent.children = [...(parent.children ?? []), id];
+      }
+      parent = nodes[id - 1];
+    }
+    return parent.id;
+  });
+  return { nodes, startTime: 0, endTime: 0, samples, timeDeltas: samples.map(() => 0) };
+};
+
+export const describeFrames = (frames: readonly FrameSummary[]) =>
   frames
     .slice(0, 3)
     .map(({ percent, name, location, callers }) =>

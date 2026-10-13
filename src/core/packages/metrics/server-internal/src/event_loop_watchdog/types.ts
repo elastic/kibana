@@ -16,10 +16,12 @@ export const WATCHDOG_WORKER_NAME = 'event-loop-watchdog';
 export const HEARTBEAT_INTERVAL_MS = 50;
 export const BLOCK_THRESHOLD_MS = 200;
 export const POLL_INTERVAL_MS = 25;
-/** A block is profiled once it has lasted this long: egregious blocks only, not jitter. */
-export const PROFILE_AFTER_MS = 2_000;
-/** A profile stops when its block ends, or after this long. */
+/** A block's stack is sampled once it has lasted this long (no cold start with the debugger). */
+export const PROFILE_AFTER_MS = 500;
+/** Sampling stops when its block ends, or after this long. */
 export const MAX_PROFILE_MS = 10_000;
+/** Interval between stack samples during a block (each pauses the main thread for a few ms). */
+export const SAMPLE_INTERVAL_MS = 100;
 /** At most one profile per this interval (counted from its start). */
 export const PROFILE_COOLDOWN_MS = 60_000;
 /** 99 Hz, as Datadog's tracer: avoids sampling in lockstep with 10ms timers. */
@@ -62,7 +64,7 @@ export interface WatchdogWorkerData {
   diagnosticDir?: string;
   admissionLimits?: AdmissionLimits;
   /** Overrides of the profiling thresholds, for tests. */
-  profiling?: { afterMs: number; maxMs: number; cooldownMs: number };
+  profiling?: { afterMs: number; maxMs: number; cooldownMs: number; sampleIntervalMs: number };
 }
 
 export interface WatchdogLogMeta extends LogMeta {
