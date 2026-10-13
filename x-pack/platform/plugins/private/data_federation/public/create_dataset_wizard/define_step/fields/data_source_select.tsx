@@ -8,9 +8,12 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
+  EuiSpacer,
   EuiSuperSelect,
   useEuiTheme,
   type EuiSuperSelectOption,
@@ -58,7 +61,7 @@ export function DataSourceSelect({
 }) {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { dataSourcesClient, reportUiCounter },
+    services: { dataSourcesClient, docLinks, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const [isCreateDataSourceOpen, setIsCreateDataSourceOpen] = useState(false);
 
@@ -155,6 +158,31 @@ export function DataSourceSelect({
         placeholder={createDatasetWizardStrings.dataSourcePlaceholder}
         isInvalid={isInvalid}
       />
+      {value ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiCallOut
+            announceOnMount
+            size="s"
+            iconType="info"
+            title={createDatasetWizardStrings.dataSourceAuthenticationCalloutTitle}
+            data-test-subj="createDatasetDataSourceAuthenticationCallout"
+          >
+            <p>
+              {createDatasetWizardStrings.dataSourceAuthenticationCalloutDescription}{' '}
+              <EuiLink
+                color="primary"
+                href={docLinks.links.dataFederation.grantReadAccess}
+                target="_blank"
+                external
+                data-test-subj="createDatasetDataSourceAuthenticationLearnMore"
+              >
+                {createDatasetWizardStrings.learnMore}
+              </EuiLink>
+            </p>
+          </EuiCallOut>
+        </>
+      ) : null}
       {isCreateDataSourceOpen ? (
         <CreateDataSourceFlyout
           existingDataSourceNames={existingDataSourceNames}
