@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { EuiToast } from '@elastic/eui';
-import { screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
@@ -40,15 +39,16 @@ const session = createDiscoverSessionMock({
 });
 
 describe('showSessionWarnings', () => {
-  it('opens warning details with the affected tab and control or property from Learn more', async () => {
+  it('opens warning details with the affected tab and control or property from Learn more', () => {
     const core = coreMock.createStart();
     const modal = { close: jest.fn(), onClose: Promise.resolve() };
     core.overlays.openModal.mockReturnValue(modal);
     const warnings: DiscoverSessionWarning[] = [
       {
-        type: 'dropped_panel',
+        type: 'dropped_item',
         tab_id: 'tab-1',
-        panel_id: 'control-1',
+        key: 'control_panels',
+        item_id: 'control-1',
         message: 'Unable to transform control panel [control-1].\nError: invalid control type.',
       },
       {
@@ -58,9 +58,10 @@ describe('showSessionWarnings', () => {
         message: 'This stored property could not be loaded.',
       },
       {
-        type: 'dropped_panel',
+        type: 'dropped_item',
         tab_id: 'missing-tab',
-        panel_id: 'control-2',
+        key: 'control_panels',
+        item_id: 'control-2',
         message: 'Unable to transform control panel [control-2]. Invalid value: <example>.',
       },
     ];
@@ -69,7 +70,7 @@ describe('showSessionWarnings', () => {
 
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(core.notifications.toasts.addWarning).toHaveBeenCalledWith({
-      title: 'Some session content could not be loaded',
+      title: 'Some session content was skipped while loading',
       actionProps: {
         primary: {
           children: 'Learn more',
@@ -84,22 +85,25 @@ describe('showSessionWarnings', () => {
     const actionProps = typeof toast === 'string' ? undefined : toast.actionProps;
 
     renderWithI18n(<EuiToast actionProps={actionProps} />);
-    await userEvent.click(screen.getByRole('button', { name: 'Learn more' }));
+    fireEvent.click(screen.getByText('Learn more'));
 
     expect(core.overlays.openModal).toHaveBeenCalledTimes(1);
 
     const mountPointMock = jest.mocked(toMountPoint);
 
     renderWithI18n(<>{mountPointMock.mock.calls[0][0]}</>);
-    const dialog = screen.getByRole('dialog', { name: 'Warning details' });
+    const dialog = screen.getByTestId('discoverSessionWarningDetailsModal');
+    expect(dialog).toHaveTextContent('Warning details');
 
-    const items = within(dialog).getAllByRole('listitem');
+    const items = within(dialog).getAllByTestId('discoverSessionWarningDetailsItem');
     expect(items).toHaveLength(3);
-    expect(within(items[0]).getByText('Tab "Logs": control "control-1"')).toBeVisible();
+    expect(within(items[0]).getByText('Tab "Logs": control "control-1"')).toBeInTheDocument();
     expect(
       within(items[1]).getByText('Tab "Metrics": property "some_future_property"')
-    ).toBeVisible();
-    expect(within(items[2]).getByText('Tab "missing-tab": control "control-2"')).toBeVisible();
+    ).toBeInTheDocument();
+    expect(
+      within(items[2]).getByText('Tab "missing-tab": control "control-2"')
+    ).toBeInTheDocument();
 
     const multilineMessage = within(items[0]).getByText(warnings[0].message, {
       normalizer: (text) => text,
@@ -108,7 +112,7 @@ describe('showSessionWarnings', () => {
     expect(items[1]).toHaveTextContent(warnings[1].message);
     expect(items[2]).toHaveTextContent(warnings[2].message);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByTestId('discoverSessionWarningDetailsCloseButton'));
     expect(modal.close).toHaveBeenCalledTimes(1);
   });
 });

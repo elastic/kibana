@@ -94,7 +94,7 @@ export const ActionPolicyDetailsFlyout = ({
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
-  const { snoozed_until: snoozedUntil, grouping_mode: groupingMode, group_by: groupBy } = policy;
+  const { snoozed_until: snoozedUntil, grouping } = policy;
   const snoozedActive = isSnoozed(snoozedUntil);
   const isLicenseValid = useIsActionPoliciesLicenseValid();
   const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
@@ -276,21 +276,21 @@ export const ActionPolicyDetailsFlyout = ({
                 title={DISPATCH_PER_LABEL}
                 data-test-subj="actionPolicyDetailsFlyoutDispatchModeBlock"
               >
-                {getGroupingModeLabel(groupingMode)}
+                {getGroupingModeLabel(grouping?.mode)}
               </Column>
-              {groupingMode === 'per_field' && (
+              {grouping?.mode === 'per_field' && (
                 <Column
                   title={GROUP_BY_LABEL}
                   data-test-subj="actionPolicyDetailsFlyoutGroupByBlock"
                 >
-                  {groupBy && groupBy.length > 0 ? <BadgeList items={groupBy} /> : EMPTY_VALUE}
+                  <BadgeList items={grouping.fields} />
                 </Column>
               )}
               <Column
                 title={FREQUENCY_LABEL}
                 data-test-subj="actionPolicyDetailsFlyoutFrequencyBlock"
               >
-                {getFrequencyLabel(policy.throttle, groupingMode)}
+                {getFrequencyLabel(policy.throttle, grouping?.mode)}
               </Column>
             </SubsectionColumns>
           </Body.Section>

@@ -233,6 +233,12 @@ export const allowedExperimentalValues = Object.freeze({
    */
   enableAlertsAndAttacksAlignment: true,
   /**
+   * Enables attaching an attack, together with its constituent alerts, to a case from
+   * the Attacks page and the attack flyout, and registers the `security.attack` unified
+   * cases attachment type on the server.
+   */
+  attackAttachmentsEnabled: false,
+  /**
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
@@ -375,7 +381,7 @@ export const allowedExperimentalValues = Object.freeze({
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.
    */
-  riskScoreCreateMissingEntitiesEnabled: false,
+  riskScoreCreateMissingEntitiesEnabled: true,
 
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
