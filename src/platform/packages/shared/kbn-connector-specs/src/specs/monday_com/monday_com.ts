@@ -78,10 +78,13 @@ export const MondayCom: ConnectorSpec = {
   metadata: {
     id: '.monday_com',
     displayName: 'Monday.com',
-    description: i18n.translate('core.kibanaConnectorSpecs.monday_com.metadata.description', {
-      defaultMessage:
-        'Search boards, read and create items, post updates, and manage workspaces in Monday.com',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.monday_com.metadata.description',
+      {
+        defaultMessage:
+          'Search boards, read and create items, post updates, and manage workspaces in Monday.com',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],

@@ -35,7 +35,7 @@ export const TavilyConnector: ConnectorSpec = {
   metadata: {
     id: '.tavily_mcp',
     displayName: 'Tavily',
-    description: i18n.translate('core.kibanaConnectorSpecs.tavily.metadata.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.tavily.metadata.description', {
       defaultMessage: 'Search the web and extract content from pages using Tavily',
     }),
     minimumLicense: 'enterprise',

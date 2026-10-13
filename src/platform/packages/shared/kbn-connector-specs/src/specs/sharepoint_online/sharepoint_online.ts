@@ -66,10 +66,13 @@ export const SharepointOnline: ConnectorSpec = {
   metadata: {
     id: '.sharepoint-online',
     displayName: 'SharePoint Online',
-    description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.metadata.description', {
-      defaultMessage:
-        'Search content, browse sites and document libraries, and download files from SharePoint Online',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.metadata.description',
+      {
+        defaultMessage:
+          'Search content, browse sites and document libraries, and download files from SharePoint Online',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -98,7 +101,7 @@ export const SharepointOnline: ConnectorSpec = {
             authorizationUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.authorizationUrl.helpText',
                 {
                   defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
                 }
@@ -107,7 +110,7 @@ export const SharepointOnline: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCode.tokenUrl.helpText',
                 {
                   defaultMessage: "Replace '{tenant-id}' with your Azure AD tenant ID.",
                 }
@@ -127,16 +130,15 @@ export const SharepointOnline: ConnectorSpec = {
             scope: { hidden: true },
             tokenUrl: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.label',
                 { defaultMessage: 'Token URL' }
               ),
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
-                  values: { tenantId: '{tenant-id}' },
+                    "Replace '{tenant-id}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                 }
               ),
             },
@@ -159,7 +161,7 @@ export const SharepointOnline: ConnectorSpec = {
             tokenUrl: {
               placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.tokenUrl.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.tokenUrl.helpText',
                 {
                   defaultMessage:
                     "Replace '{tenant-id}' with your Microsoft Entra tenant ID. Before using this auth method, register an application in Microsoft Entra ID, grant it Microsoft Graph application permissions (Sites.Selected, Files.Read.All), and upload a self-signed or CA-issued X.509 certificate under Certificates & secrets > Certificates.",
@@ -168,7 +170,7 @@ export const SharepointOnline: ConnectorSpec = {
             },
             clientId: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.clientId.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.clientId.helpText',
                 {
                   defaultMessage:
                     'The Application (client) ID of the Entra app registration (Azure Portal > Entra ID > App registrations > your app > Overview).',
@@ -177,7 +179,7 @@ export const SharepointOnline: ConnectorSpec = {
             },
             certificate: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.certificate.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.certificate.helpText',
                 {
                   defaultMessage:
                     'Upload the PEM-encoded public certificate you uploaded to the Entra app registration. Must begin with -----BEGIN CERTIFICATE-----.',
@@ -186,7 +188,7 @@ export const SharepointOnline: ConnectorSpec = {
             },
             privateKey: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.privateKey.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.privateKey.helpText',
                 {
                   defaultMessage:
                     'Upload the PEM-encoded private key that matches the uploaded certificate. Must begin with -----BEGIN PRIVATE KEY-----, -----BEGIN RSA PRIVATE KEY-----, or -----BEGIN ENCRYPTED PRIVATE KEY-----.',
@@ -195,7 +197,7 @@ export const SharepointOnline: ConnectorSpec = {
             },
             passphrase: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.passphrase.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.auth.oauthCert.passphrase.helpText',
                 {
                   defaultMessage:
                     'Only required if the private key is encrypted (ENCRYPTED PRIVATE KEY).',
@@ -832,9 +834,12 @@ export const SharepointOnline: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.sharepointOnline.test.description', {
-      defaultMessage: 'Verifies SharePoint Online connection by checking API access',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.sharepointOnline.test.description',
+      {
+        defaultMessage: 'Verifies SharePoint Online connection by checking API access',
+      }
+    ),
     handler: async (ctx) => {
       ctx.log.debug('SharePoint Online test handler');
       await ctx.client.get('https://graph.microsoft.com/v1.0/');

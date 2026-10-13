@@ -497,32 +497,41 @@ export const slackEvents: ConnectorSpecEvents = {
   definitions: {
     [SLACK_MESSAGE_EVENT_KEY]: {
       eventId: SLACK_MESSAGE_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.message.title', {
+      title: i18n.translate('connectorSpecs.kibanaConnectorSpecs.slack.events.message.title', {
         defaultMessage: 'Message posted',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.message.description', {
-        defaultMessage:
-          'A message was posted in Slack. Subtype and bot identity are included when Slack sends them.',
-      }),
+      description: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.message.description',
+        {
+          defaultMessage:
+            'A message was posted in Slack. Subtype and bot identity are included when Slack sends them.',
+        }
+      ),
       eventSchema: SlackMessageEventSchema,
     },
     [SLACK_APP_MENTION_EVENT_KEY]: {
       eventId: SLACK_APP_MENTION_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.appMention.title', {
+      title: i18n.translate('connectorSpecs.kibanaConnectorSpecs.slack.events.appMention.title', {
         defaultMessage: 'App mentioned',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.appMention.description', {
-        defaultMessage: 'The Slack app was mentioned in a channel.',
-      }),
+      description: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.appMention.description',
+        {
+          defaultMessage: 'The Slack app was mentioned in a channel.',
+        }
+      ),
       eventSchema: SlackAppMentionEventSchema,
     },
     [SLACK_REACTION_ADDED_EVENT_KEY]: {
       eventId: SLACK_REACTION_ADDED_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.reactionAdded.title', {
-        defaultMessage: 'Reaction added',
-      }),
+      title: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.reactionAdded.title',
+        {
+          defaultMessage: 'Reaction added',
+        }
+      ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.events.reactionAdded.description',
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.reactionAdded.description',
         {
           defaultMessage: 'A reaction was added to a Slack message.',
         }
@@ -531,31 +540,40 @@ export const slackEvents: ConnectorSpecEvents = {
     },
     [SLACK_FILE_SHARED_EVENT_KEY]: {
       eventId: SLACK_FILE_SHARED_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.fileShared.title', {
+      title: i18n.translate('connectorSpecs.kibanaConnectorSpecs.slack.events.fileShared.title', {
         defaultMessage: 'File shared',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.fileShared.description', {
-        defaultMessage: 'A file was shared in Slack.',
-      }),
+      description: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.fileShared.description',
+        {
+          defaultMessage: 'A file was shared in Slack.',
+        }
+      ),
       eventSchema: SlackFileSharedEventSchema,
     },
     [SLACK_FILE_PUBLIC_EVENT_KEY]: {
       eventId: SLACK_FILE_PUBLIC_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.filePublic.title', {
+      title: i18n.translate('connectorSpecs.kibanaConnectorSpecs.slack.events.filePublic.title', {
         defaultMessage: 'File made public',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.filePublic.description', {
-        defaultMessage: 'A Slack file was made public.',
-      }),
+      description: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.filePublic.description',
+        {
+          defaultMessage: 'A Slack file was made public.',
+        }
+      ),
       eventSchema: SlackFilePublicEventSchema,
     },
     [SLACK_CHANNEL_CREATED_EVENT_KEY]: {
       eventId: SLACK_CHANNEL_CREATED_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.channelCreated.title', {
-        defaultMessage: 'Public channel created',
-      }),
+      title: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.channelCreated.title',
+        {
+          defaultMessage: 'Public channel created',
+        }
+      ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.events.channelCreated.description',
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.channelCreated.description',
         {
           defaultMessage: 'A public Slack channel was created.',
         }
@@ -564,21 +582,27 @@ export const slackEvents: ConnectorSpecEvents = {
     },
     [SLACK_TEAM_JOIN_EVENT_KEY]: {
       eventId: SLACK_TEAM_JOIN_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.teamJoin.title', {
+      title: i18n.translate('connectorSpecs.kibanaConnectorSpecs.slack.events.teamJoin.title', {
         defaultMessage: 'User joined workspace',
       }),
-      description: i18n.translate('core.kibanaConnectorSpecs.slack.events.teamJoin.description', {
-        defaultMessage: 'A user joined the Slack workspace.',
-      }),
+      description: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.teamJoin.description',
+        {
+          defaultMessage: 'A user joined the Slack workspace.',
+        }
+      ),
       eventSchema: SlackTeamJoinEventSchema,
     },
     [SLACK_MEMBER_JOINED_CHANNEL_EVENT_KEY]: {
       eventId: SLACK_MEMBER_JOINED_CHANNEL_EVENT_ID,
-      title: i18n.translate('core.kibanaConnectorSpecs.slack.events.memberJoinedChannel.title', {
-        defaultMessage: 'User joined channel',
-      }),
+      title: i18n.translate(
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.memberJoinedChannel.title',
+        {
+          defaultMessage: 'User joined channel',
+        }
+      ),
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.events.memberJoinedChannel.description',
+        'connectorSpecs.kibanaConnectorSpecs.slack.events.memberJoinedChannel.description',
         {
           defaultMessage: 'A user joined a Slack channel.',
         }

@@ -293,10 +293,13 @@ export const Bitbucket: ConnectorSpec = {
   metadata: {
     id: '.bitbucket',
     displayName: 'Bitbucket',
-    description: i18n.translate('core.kibanaConnectorSpecs.bitbucket.metadata.description', {
-      defaultMessage:
-        'Open, review, comment on, and merge pull requests, create branches, report commit build statuses, and trigger pipelines in Bitbucket Cloud',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.bitbucket.metadata.description',
+      {
+        defaultMessage:
+          'Open, review, comment on, and merge pull requests, create branches, report commit build statuses, and trigger pipelines in Bitbucket Cloud',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     // A new connector type must reach Production-NonCanary before it can declare
@@ -311,17 +314,17 @@ export const Bitbucket: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.bitbucket.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.basic.label', {
             defaultMessage: 'Atlassian email and API token',
           }),
           meta: {
             username: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.bitbucket.auth.basic.username.label',
+                'connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.basic.username.label',
                 { defaultMessage: 'Atlassian account email' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.bitbucket.auth.basic.username.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.basic.username.helpText',
                 {
                   defaultMessage:
                     'The email address of the Atlassian account that owns the API token. Every action runs as this account.',
@@ -330,11 +333,11 @@ export const Bitbucket: ConnectorSpec = {
             },
             password: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.bitbucket.auth.basic.password.label',
+                'connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.basic.password.label',
                 { defaultMessage: 'API token' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.bitbucket.auth.basic.password.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.basic.password.helpText',
                 {
                   defaultMessage:
                     'An Atlassian API token created with scopes for the Bitbucket app (id.atlassian.com, Security, API tokens, Create API token with scopes). Tokens without scopes are rejected by Bitbucket. Grant read:repository:bitbucket, write:repository:bitbucket, read:pullrequest:bitbucket, write:pullrequest:bitbucket, read:pipeline:bitbucket, and write:pipeline:bitbucket.',
@@ -348,16 +351,19 @@ export const Bitbucket: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.bitbucket.auth.bearer.label', {
+          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.bearer.label', {
             defaultMessage: 'Access token',
           }),
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.bitbucket.auth.bearer.token.label', {
-                defaultMessage: 'Access token',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.bearer.token.label',
+                {
+                  defaultMessage: 'Access token',
+                }
+              ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.bitbucket.auth.bearer.token.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.bitbucket.auth.bearer.token.helpText',
                 {
                   defaultMessage:
                     'A Bitbucket repository, project, or workspace access token with the repository:write, pullrequest:write, and pipeline:write scopes, or a scoped Atlassian API token (see the API token option). Access tokens act as a service identity, not a user, so they cannot approve pull requests.',
@@ -379,12 +385,15 @@ export const Bitbucket: ConnectorSpec = {
         .describe('The Bitbucket workspace slug that every action in this connector runs against')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.bitbucket.config.workspace.label', {
-            defaultMessage: 'Workspace',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.bitbucket.config.workspace.label',
+            {
+              defaultMessage: 'Workspace',
+            }
+          ),
           placeholder: 'my-workspace',
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.bitbucket.config.workspace.helpText',
+            'connectorSpecs.kibanaConnectorSpecs.bitbucket.config.workspace.helpText',
             {
               defaultMessage:
                 'The workspace slug found in repository URLs: bitbucket.org/your-workspace/your-repo. Every action in this connector runs against this workspace; repositories are addressed by slug.',
@@ -867,7 +876,7 @@ export const Bitbucket: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.bitbucket.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.bitbucket.test.description', {
       defaultMessage:
         'Verifies the connection to Bitbucket Cloud by listing repositories in the configured workspace.',
     }),

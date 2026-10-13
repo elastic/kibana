@@ -77,10 +77,13 @@ export const AwsCloudwatch: ConnectorSpec = {
   metadata: {
     id: '.aws_cloudwatch',
     displayName: 'AWS CloudWatch',
-    description: i18n.translate('core.kibanaConnectorSpecs.awsCloudwatch.metadata.description', {
-      defaultMessage:
-        'List and suppress alarms, query metrics and Logs Insights, and retrieve log events in AWS CloudWatch',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.awsCloudwatch.metadata.description',
+      {
+        defaultMessage:
+          'List and suppress alarms, query metrics and Logs Insights, and retrieve log events in AWS CloudWatch',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['agentBuilder'],
@@ -100,11 +103,14 @@ export const AwsCloudwatch: ConnectorSpec = {
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.awsCloudwatch.config.region.label', {
-            defaultMessage: 'AWS Region',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.awsCloudwatch.config.region.label',
+            {
+              defaultMessage: 'AWS Region',
+            }
+          ),
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.awsCloudwatch.config.region.helpText',
+            'connectorSpecs.kibanaConnectorSpecs.awsCloudwatch.config.region.helpText',
             {
               defaultMessage: 'For example, us-east-1',
             }
@@ -415,9 +421,12 @@ export const AwsCloudwatch: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.awsCloudwatch.test.description', {
-      defaultMessage: 'Verifies the connection by listing CloudWatch metrics',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.awsCloudwatch.test.description',
+      {
+        defaultMessage: 'Verifies the connection by listing CloudWatch metrics',
+      }
+    ),
     handler: async (ctx) => {
       const response = await callCloudWatchApi(ctx, 'ListMetrics', {});
       const metrics = (response.metrics as unknown[]) || [];

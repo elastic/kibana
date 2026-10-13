@@ -329,7 +329,7 @@ const renderFunctionDefinition = (
 const ${getDefinitionName(name)}: FunctionDefinition = {
   type: FunctionDefinitionTypes.${type.toUpperCase()},
   name: EsqlFunctionNames.${name.toUpperCase()},
-    description: i18n.translate('kbn-esql-language.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+    description: i18n.translate('esqlLanguage.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
     removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
   )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}${
     functionDefinition.tsdbCompatible === false ? '\n  tsdbCompatible: false,' : ''
@@ -497,7 +497,7 @@ function printPromQLFunctionsGeneratedFile(definitions: PromQLESFunctionDefiniti
 const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.${type.toUpperCase()},
   name: '${name}',
-  description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+  description: i18n.translate('esqlLanguage.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       description
     )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
@@ -549,7 +549,7 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.OPERATOR,
   name: '${name}',
   operator: '${operator}',
-  description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+  description: i18n.translate('esqlLanguage.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       description
     )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}
@@ -601,7 +601,7 @@ const ${getDefinitionName(name)}: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.LABEL_MATCHING_OPERATOR,
   name: '${name}',
   operator: '${operator}',
-  description: i18n.translate('kbn-esql-language.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
+  description: i18n.translate('esqlLanguage.promql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       description
     )} }),
   ${snapshot_only ? 'ignoreAsSuggestion: true,' : ''}

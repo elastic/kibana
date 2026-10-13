@@ -81,7 +81,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
     id: '.opensearch_aws_opensearch_service',
     displayName: 'OpenSearch (AWS OpenSearch Service)',
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.metadata.description',
+      'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.metadata.description',
       {
         defaultMessage:
           'Acknowledge and search alerts, manage monitors, retrieve Security Analytics findings, and search and index documents in OpenSearch',
@@ -103,13 +103,13 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         defaults: {},
         overrides: {
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.awsCredentials.label',
+            'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.awsCredentials.label',
             { defaultMessage: 'AWS access key (Amazon OpenSearch Service)' }
           ),
           meta: {
             accessKeyId: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.accessKeyId.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.accessKeyId.helpText',
                 {
                   defaultMessage:
                     'An IAM access key with es:ESHttpGet, es:ESHttpPost, es:ESHttpPut, and es:ESHttpDelete permissions on the domain.',
@@ -124,13 +124,13 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         defaults: {},
         overrides: {
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.basic.label',
+            'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.basic.label',
             { defaultMessage: 'Username and password (self-managed cluster)' }
           ),
           meta: {
             password: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.basic.password.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.auth.basic.password.helpText',
                 {
                   defaultMessage:
                     'The internal user or Security-plugin backend role must be mapped to a role with the alerting and security-analytics cluster permissions used by this connector\u2019s actions, plus read/write on the indices you search or index into.',
@@ -151,7 +151,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
         )
         .meta({
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.config.endpoint.label',
+            'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.config.endpoint.label',
             { defaultMessage: 'Endpoint URL' }
           ),
         }),
@@ -479,7 +479,7 @@ export const OpensearchAwsOpensearchService: ConnectorSpec = {
   test: {
     enabled: true,
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.opensearchAwsOpensearchService.test.description',
+      'connectorSpecs.kibanaConnectorSpecs.opensearchAwsOpensearchService.test.description',
       {
         defaultMessage: 'Verifies the connection by checking cluster health',
       }

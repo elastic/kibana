@@ -81,9 +81,12 @@ export const FirecrawlConnector: ConnectorSpec = {
   metadata: {
     id: '.firecrawl',
     displayName: 'Firecrawl',
-    description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.metadata.description', {
-      defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.firecrawl.metadata.description',
+      {
+        defaultMessage: 'Scrape, search, map, and crawl the web via the Firecrawl API',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -238,7 +241,7 @@ export const FirecrawlConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.firecrawl.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.firecrawl.test.description', {
       defaultMessage: 'Verifies Firecrawl API key',
     }),
     handler: async (ctx) => {

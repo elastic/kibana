@@ -483,10 +483,13 @@ export const Jenkins: ConnectorSpec = {
   metadata: {
     id: '.jenkins',
     displayName: 'Jenkins',
-    description: i18n.translate('core.kibanaConnectorSpecs.jenkins.metadata.description', {
-      defaultMessage:
-        'Trigger, monitor, and stop Jenkins builds, and manage jobs, test reports, and the build queue',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.jenkins.metadata.description',
+      {
+        defaultMessage:
+          'Trigger, monitor, and stop Jenkins builds, and manage jobs, test reports, and the build queue',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -499,13 +502,13 @@ export const Jenkins: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.jenkins.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.jenkins.auth.basic.label', {
             defaultMessage: 'Username and API token',
           }),
           meta: {
             username: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.jenkins.auth.basic.usernameHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.jenkins.auth.basic.usernameHelpText',
                 {
                   defaultMessage:
                     'The Jenkins account username that every connector action runs as.',
@@ -513,11 +516,14 @@ export const Jenkins: ConnectorSpec = {
               ),
             },
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.jenkins.auth.basic.passwordLabel', {
-                defaultMessage: 'API token',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.jenkins.auth.basic.passwordLabel',
+                {
+                  defaultMessage: 'API token',
+                }
+              ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.jenkins.auth.basic.passwordHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.jenkins.auth.basic.passwordHelpText',
                 {
                   defaultMessage:
                     'Generate a token from the user profile page in Jenkins (click your name, then ' +
@@ -538,9 +544,12 @@ export const Jenkins: ConnectorSpec = {
       baseUrl: UISchemas.url('https://jenkins.example.com')
         .describe('The base URL of the Jenkins controller (no trailing slash needed).')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.jenkins.config.baseUrl.label', {
-            defaultMessage: 'Jenkins URL',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.jenkins.config.baseUrl.label',
+            {
+              defaultMessage: 'Jenkins URL',
+            }
+          ),
           validate: { allowedHosts: true },
         }),
     })
@@ -875,7 +884,7 @@ export const Jenkins: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.jenkins.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.jenkins.test.description', {
       defaultMessage: 'Verifies connectivity and credentials by calling the Jenkins whoAmI API',
     }),
     handler: async (ctx) => {

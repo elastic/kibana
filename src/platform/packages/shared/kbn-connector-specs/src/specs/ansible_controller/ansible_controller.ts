@@ -406,7 +406,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
     id: '.ansible_controller',
     displayName: 'Ansible Control Server',
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.ansibleController.metadata.description',
+      'connectorSpecs.kibanaConnectorSpecs.ansibleController.metadata.description',
       {
         defaultMessage:
           'Launch and monitor Ansible Automation Controller / AWX jobs — templates, inventories, stdout, and remediation runs',
@@ -427,17 +427,17 @@ export const AnsibleControllerConnector: ConnectorSpec = {
         defaults: {},
         overrides: {
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.label',
+            'connectorSpecs.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.label',
             { defaultMessage: 'API token' }
           ),
           meta: {
             token: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.tokenLabel',
+                'connectorSpecs.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.tokenLabel',
                 { defaultMessage: 'Token' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.tokenHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.tokenHelpText',
                 {
                   defaultMessage:
                     'A long-lived Ansible Automation Controller / AWX personal access token or OAuth2 token. Do not use session cookies.',
@@ -446,11 +446,11 @@ export const AnsibleControllerConnector: ConnectorSpec = {
             },
             caCert: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.caLabel',
+                'connectorSpecs.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.caLabel',
                 { defaultMessage: 'Server CA certificate (PEM)' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.caHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.caHelpText',
                 {
                   defaultMessage:
                     'Paste the PEM-encoded certificate authority used to verify the Controller / AWX server. Leave empty to rely on the system trust store or to disable verification.',
@@ -459,7 +459,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
             },
             verificationMode: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.verificationModeHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.ansibleController.auth.bearerWithTls.verificationModeHelpText',
                 {
                   defaultMessage:
                     'How to verify the server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
@@ -479,9 +479,12 @@ export const AnsibleControllerConnector: ConnectorSpec = {
         .url()
         .describe('Ansible Controller / AWX base URL (e.g., https://controller.example.com)')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.ansibleController.config.apiUrl.label', {
-            defaultMessage: 'API server URL',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.ansibleController.config.apiUrl.label',
+            {
+              defaultMessage: 'API server URL',
+            }
+          ),
           widget: 'text',
           placeholder: 'https://controller.example.com',
           validate: { allowedHosts: true },
@@ -494,7 +497,7 @@ export const AnsibleControllerConnector: ConnectorSpec = {
         )
         .meta({
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.ansibleController.config.apiBasePath.label',
+            'connectorSpecs.kibanaConnectorSpecs.ansibleController.config.apiBasePath.label',
             { defaultMessage: 'API base path' }
           ),
         }),
@@ -843,9 +846,13 @@ export const AnsibleControllerConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.ansibleController.test.description', {
-      defaultMessage: 'Verifies connectivity by requesting the authenticated Controller / AWX user',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.ansibleController.test.description',
+      {
+        defaultMessage:
+          'Verifies connectivity by requesting the authenticated Controller / AWX user',
+      }
+    ),
     handler: async (ctx) => {
       const data = (await controllerRequest(ctx, { method: 'GET', path: '/me/' })) as {
         results?: Array<{ username?: string }>;

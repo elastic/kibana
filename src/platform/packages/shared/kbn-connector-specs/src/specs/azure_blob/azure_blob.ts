@@ -126,10 +126,13 @@ export const AzureBlob: ConnectorSpec = {
   metadata: {
     id: '.azure-blob',
     displayName: 'Azure Blob Storage',
-    description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.metadata.description', {
-      defaultMessage:
-        'Connect to Azure Blob Storage to list containers and blobs, and retrieve blob content.',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.azureBlob.metadata.description',
+      {
+        defaultMessage:
+          'Connect to Azure Blob Storage to list containers and blobs, and retrieve blob content.',
+      }
+    ),
     isTechnicalPreview: true,
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -148,18 +151,24 @@ export const AzureBlob: ConnectorSpec = {
         .string()
         .min(1)
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.description', {
-            defaultMessage: 'Azure Blob Storage account URL',
-          })
+          i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.azureBlob.config.accountUrl.description',
+            {
+              defaultMessage: 'Azure Blob Storage account URL',
+            }
+          )
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.azureBlob.config.accountUrl.label', {
-            defaultMessage: 'Storage account URL',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.azureBlob.config.accountUrl.label',
+            {
+              defaultMessage: 'Storage account URL',
+            }
+          ),
           placeholder: 'https://myaccount.blob.core.windows.net',
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.azureBlob.config.accountUrl.helpText',
+            'connectorSpecs.kibanaConnectorSpecs.azureBlob.config.accountUrl.helpText',
             {
               defaultMessage:
                 'The blob service endpoint, for example https://myaccount.blob.core.windows.net.',
@@ -370,7 +379,7 @@ export const AzureBlob: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.azureBlob.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.azureBlob.test.description', {
       defaultMessage: 'Verifies Azure Blob connection by listing containers with maxresults=1',
     }),
     handler: async (ctx) => {

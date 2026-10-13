@@ -54,9 +54,12 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
   metadata: {
     id: '.confluence-cloud',
     displayName: 'Confluence Cloud',
-    description: i18n.translate('core.kibanaConnectorSpecs.confluence.metadata.description', {
-      defaultMessage: 'Connect to Confluence Cloud to search and retrieve pages and spaces.',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.confluence.metadata.description',
+      {
+        defaultMessage: 'Connect to Confluence Cloud to search and retrieve pages and spaces.',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
@@ -69,16 +72,22 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
         overrides: {
           meta: {
             username: {
-              label: i18n.translate('core.kibanaConnectorSpecs.confluence.auth.username.label', {
-                defaultMessage: 'Account email',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.confluence.auth.username.label',
+                {
+                  defaultMessage: 'Account email',
+                }
+              ),
             },
             password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.confluence.auth.password.label', {
-                defaultMessage: 'API token',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.confluence.auth.password.label',
+                {
+                  defaultMessage: 'API token',
+                }
+              ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.confluence.auth.password.helpText',
+                'connectorSpecs.kibanaConnectorSpecs.confluence.auth.password.helpText',
                 {
                   defaultMessage: 'Your Atlassian API token',
                 }
@@ -100,18 +109,24 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
             'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
         })
         .describe(
-          i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
-            defaultMessage: 'Your Atlassian subdomain',
-          })
+          i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.confluence.config.subdomain.description',
+            {
+              defaultMessage: 'Your Atlassian subdomain',
+            }
+          )
         )
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.label', {
-            defaultMessage: 'Subdomain',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.confluence.config.subdomain.label',
+            {
+              defaultMessage: 'Subdomain',
+            }
+          ),
           placeholder: 'your-domain',
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.confluence.config.subdomain.helpText',
+            'connectorSpecs.kibanaConnectorSpecs.confluence.config.subdomain.helpText',
             {
               defaultMessage:
                 'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
@@ -211,7 +226,7 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
     'Typical pattern: listSpaces → listPages (with spaceId) → getPage (with bodyFormat) to retrieve full page content.',
   ].join('\n'),
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.confluence.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.confluence.test.description', {
       defaultMessage: 'Verifies Confluence Cloud connection by listing spaces',
     }),
     handler: async (ctx) => {

@@ -216,10 +216,13 @@ export const GcpSecretManager: ConnectorSpec = {
   metadata: {
     id: '.gcp_secret_manager',
     displayName: 'Google Cloud Secret Manager',
-    description: i18n.translate('core.kibanaConnectorSpecs.gcpSecretManager.metadata.description', {
-      defaultMessage:
-        'List and inspect secrets, add and disable versions, and read access policy in Google Cloud Secret Manager',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.gcpSecretManager.metadata.description',
+      {
+        defaultMessage:
+          'List and inspect secrets, add and disable versions, and read access policy in Google Cloud Secret Manager',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -238,11 +241,11 @@ export const GcpSecretManager: ConnectorSpec = {
         .describe('Optional default Google Cloud project id used when an action omits one')
         .meta({
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.gcpSecretManager.config.defaultProjectId',
+            'connectorSpecs.kibanaConnectorSpecs.gcpSecretManager.config.defaultProjectId',
             { defaultMessage: 'Default project ID' }
           ),
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.gcpSecretManager.config.defaultProjectIdHelp',
+            'connectorSpecs.kibanaConnectorSpecs.gcpSecretManager.config.defaultProjectIdHelp',
             {
               defaultMessage:
                 'Optional, for example my-project-123. Every action takes an explicit project id, but the Test connector button needs this field to have a project to list secrets in.',
@@ -671,10 +674,13 @@ Gotchas:
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.gcpSecretManager.test.description', {
-      defaultMessage:
-        'Verifies the Google Cloud Secret Manager connection by listing secrets in the configured project',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.gcpSecretManager.test.description',
+      {
+        defaultMessage:
+          'Verifies the Google Cloud Secret Manager connection by listing secrets in the configured project',
+      }
+    ),
     handler: async (ctx) => {
       const projectId = ctx.config?.defaultProjectId as string | undefined;
       if (!projectId) {

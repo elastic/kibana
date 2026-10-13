@@ -24,11 +24,11 @@ text: ""
 export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition[] = [
   {
     id: 'email',
-    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.email.label', {
+    label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.email.label', {
       defaultMessage: 'Email',
     }),
     description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.email.description',
+      'xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.email.description',
       {
         defaultMessage: 'Send an email',
       }
@@ -39,11 +39,11 @@ export const INLINE_ACTION_STEP_DEFINITIONS: readonly InlineActionStepDefinition
   },
   {
     id: 'slack2.sendMessage',
-    label: i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.label', {
+    label: i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.label', {
       defaultMessage: 'Slack',
     }),
     description: i18n.translate(
-      'xpack.responseOps.alertingV2RuleForm.actionForm.stepType.slack2.description',
+      'xpack.alertingV2.alertingV2RuleForm.actionForm.stepType.slack2.description',
       {
         defaultMessage: 'Post a Slack message',
       }
