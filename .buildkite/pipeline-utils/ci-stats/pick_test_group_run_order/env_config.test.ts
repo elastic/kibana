@@ -188,6 +188,7 @@ describe('loadRunOrderConfig', () => {
       'PRs with the prevent label',
       { GITHUB_PR_NUMBER: '12345', GITHUB_PR_LABELS: PREVENT_SELECTIVE_TESTS_LABEL },
     ],
+    ['PRs with LIMIT_SOLUTIONS', { GITHUB_PR_NUMBER: '12345', LIMIT_SOLUTIONS: 'security' }],
   ])('keeps every FTR domain on %s', (_, env) => {
     Object.assign(process.env, env, { FTR_DOMAIN_SELECTION: 'enabled' });
     expect(loadRunOrderConfig().ftrDomainSelection).toBe('off');

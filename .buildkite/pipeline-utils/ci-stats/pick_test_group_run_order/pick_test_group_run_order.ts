@@ -131,11 +131,7 @@ export async function pickTestGroupRunOrder() {
       ftrManifestEntriesByQueue.clear();
     }
 
-    if (
-      ftrManifestEntriesByQueue.size &&
-      config.ftrDomainSelection !== 'off' &&
-      config.limitSolutions === undefined
-    ) {
+    if (ftrManifestEntriesByQueue.size && config.ftrDomainSelection !== 'off') {
       applyFtrDomainSelection(
         bk,
         config.ftrDomainSelection,
@@ -352,9 +348,8 @@ function compareFtrDomainSelectionWithMoon(
     return;
   }
 
-  const { onlyA: onlyGit, onlyB: onlyMoon } = diffFtrDomainSelections(
-    gitSelection,
-    moonSelection,
+  const { onlyGit, onlyMoon } = diffFtrDomainSelections(
+    { git: gitSelection, moon: moonSelection },
     entries
   );
   if (onlyGit.length === 0 && onlyMoon.length === 0) {
@@ -362,14 +357,17 @@ function compareFtrDomainSelectionWithMoon(
     return;
   }
 
+  const counts = `${onlyGit.length} only in git, ${onlyMoon.length} only in moon`;
   const details = [
     `git graph: ${gitSelection.reason}`,
     `moon graph: ${moonSelection.reason}`,
-    `Configs only the git graph selects (${onlyGit.length}): ${onlyGit.join(', ') || 'none'}`,
-    `Configs only the moon graph selects (${onlyMoon.length}): ${onlyMoon.join(', ') || 'none'}`,
+    `Only git selects: ${onlyGit.join(', ') || 'none'}`,
+    `Only moon selects: ${onlyMoon.join(', ') || 'none'}`,
   ];
   console.warn(
-    ['FTR domain selection moon shadow: differs from the git graph', ...details].join('\n')
+    [`FTR domain selection moon shadow: differs from the git graph (${counts})`, ...details].join(
+      '\n'
+    )
   );
   bk.setAnnotation(
     'selective-testing-ftr-domains-moon-shadow',
@@ -377,7 +375,7 @@ function compareFtrDomainSelectionWithMoon(
     [
       'FTR domain selection (moon shadow): the moon project graph selects different FTR configs than the git graph. The git graph decides this build.',
       '',
-      `<details><summary>${onlyGit.length} only in git, ${onlyMoon.length} only in moon</summary>`,
+      `<details><summary>${counts}</summary>`,
       '',
       ...details.map((line) => `- ${line}`),
       '</details>',

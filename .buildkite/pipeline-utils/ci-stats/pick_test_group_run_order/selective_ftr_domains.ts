@@ -54,14 +54,13 @@ export const createRepoFtrModuleGraph = (): FtrModuleGraph => {
 };
 
 /**
- * Same module lookup, but the downstream closure comes from moon's project graph. Each module is
- * handed to moon as its `kibana.jsonc`, which always belongs to exactly that project.
+ * The repo graph with its downstream closure taken from moon's project graph instead, by
+ * handing moon each module's `kibana.jsonc`.
  */
 export const createMoonFtrModuleGraph = (): FtrModuleGraph => {
-  const { byId, groupById } = getModuleLookup();
+  const { byId } = getModuleLookup();
   return {
-    moduleForPath: findModuleForPath,
-    groupOf: (moduleId) => groupById.get(moduleId),
+    ...createRepoFtrModuleGraph(),
     downstreamOf: (moduleIds) => {
       const files = [...moduleIds].map((moduleId) => {
         const dir = byId.get(moduleId);
@@ -220,19 +219,18 @@ export const summarizeFtrDomainSelection = (
   return { selected, skipped };
 };
 
-/** Manifest config paths only one of the two selections runs. */
+/** Manifest config paths only one of the git and moon selections runs. */
 export const diffFtrDomainSelections = (
-  a: FtrDomainSelection,
-  b: FtrDomainSelection,
+  { git, moon }: { git: FtrDomainSelection; moon: FtrDomainSelection },
   manifestEntries: readonly FTRManifestEntry[]
-): { onlyA: string[]; onlyB: string[] } => {
-  const onlyA: string[] = [];
-  const onlyB: string[] = [];
+): { onlyGit: string[]; onlyMoon: string[] } => {
+  const onlyGit: string[] = [];
+  const onlyMoon: string[] = [];
   for (const entry of manifestEntries) {
-    const inA = includesFtrEntry(a, entry);
-    const inB = includesFtrEntry(b, entry);
-    if (inA && !inB) onlyA.push(entry.path);
-    if (inB && !inA) onlyB.push(entry.path);
+    const inGit = includesFtrEntry(git, entry);
+    const inMoon = includesFtrEntry(moon, entry);
+    if (inGit && !inMoon) onlyGit.push(entry.path);
+    if (inMoon && !inGit) onlyMoon.push(entry.path);
   }
-  return { onlyA, onlyB };
+  return { onlyGit, onlyMoon };
 };

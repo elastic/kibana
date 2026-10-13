@@ -42,6 +42,7 @@ export function loadRunOrderConfig() {
   const useSelectiveTesting =
     (Boolean(process.env.GITHUB_PR_NUMBER) || isMergeQueue) &&
     !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL);
+  const limitSolutions = parseLimitSolutions();
 
   return {
     ownBranch: getRequiredEnv('BUILDKITE_BRANCH'),
@@ -63,7 +64,7 @@ export function loadRunOrderConfig() {
     functionalTooLongMinutes: MAX_MINUTES.TOO_LONG,
 
     limitConfigType: parseLimitConfigType(),
-    limitSolutions: parseLimitSolutions(),
+    limitSolutions,
     ftrConfigPatterns: parseCsvEnv('FTR_CONFIG_PATTERNS'),
     ftrTestChannels: new Set(
       parseCsvEnv('FTR_TEST_CHANNELS')?.map(ftrTestChannel.fromString) || ftrTestChannels.default
@@ -92,8 +93,11 @@ export function loadRunOrderConfig() {
 
     isMergeQueue,
     useSelectiveTesting,
-    /** FTR domain narrowing; PR builds only (on-merge and the merge queue keep every domain). */
-    ftrDomainSelection: useSelectiveTesting && !isMergeQueue ? parseFtrDomainSelection() : 'off',
+    /** FTR domain narrowing; PR builds only (on-merge and the merge queue keep every domain), and LIMIT_SOLUTIONS wins. */
+    ftrDomainSelection:
+      useSelectiveTesting && !isMergeQueue && limitSolutions === undefined
+        ? parseFtrDomainSelection()
+        : 'off',
     // PRs compare from their common ancestor with the target branch. A merge group
     // compares from the commit it is built on (HEAD~1 for single-PR squash groups),
     // so earlier queued PRs are excluded.

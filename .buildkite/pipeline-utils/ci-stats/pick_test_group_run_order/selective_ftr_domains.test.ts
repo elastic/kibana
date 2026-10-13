@@ -249,13 +249,13 @@ describe('diffFtrDomainSelections', () => {
     const search = resolve(['x-pack/solutions/search/plugins/search/server/index.ts']);
     const security = resolve(['x-pack/solutions/security/plugins/security_solution/index.ts']);
 
-    expect(diffFtrDomainSelections(search, security, ENTRIES)).toEqual({
-      onlyA: [
+    expect(diffFtrDomainSelections({ git: search, moon: security }, ENTRIES)).toEqual({
+      onlyGit: [
         `${BASE_DIR}/search.serverless.config.ts`,
         'x-pack/solutions/security/test/search_project/config.ts',
         'x-pack/solutions/search/test/config.ts',
       ],
-      onlyB: [
+      onlyMoon: [
         `${BASE_DIR}/security.serverless.config.ts`,
         'x-pack/solutions/security/test/config.ts',
       ],

@@ -32,16 +32,8 @@ function getMoonBinPath(): string {
 }
 
 const parseProjectIds = (output: string): Set<string> => {
-  const result = JSON.parse(output);
-  const projectIds = new Set<string>();
-  if (result.projects && Array.isArray(result.projects)) {
-    for (const project of result.projects) {
-      if (project.id) {
-        projectIds.add(project.id);
-      }
-    }
-  }
-  return projectIds;
+  const { projects }: { projects?: Array<{ id?: string }> } = JSON.parse(output);
+  return new Set(Array.isArray(projects) ? projects.flatMap(({ id }) => (id ? [id] : [])) : []);
 };
 
 /**
