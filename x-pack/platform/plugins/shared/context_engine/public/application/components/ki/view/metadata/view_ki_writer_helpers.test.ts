@@ -52,14 +52,10 @@ describe('getKiWriterUriHref', () => {
     );
   });
 
-  it('returns http URIs unchanged', () => {
-    expect(getKiWriterUriHref(getUrlForApp, 'https://example.com/wf')).toBe(
-      'https://example.com/wf'
-    );
-  });
-
-  it('returns the original URI for unknown schemes', () => {
-    expect(getKiWriterUriHref(getUrlForApp, 'custom://foo')).toBe('custom://foo');
+  it('returns undefined for non-linkable schemes', () => {
+    expect(getKiWriterUriHref(getUrlForApp, 'https://example.com/wf')).toBeUndefined();
+    expect(getKiWriterUriHref(getUrlForApp, 'crawler://sml')).toBeUndefined();
+    expect(getKiWriterUriHref(getUrlForApp, 'custom://foo')).toBeUndefined();
   });
 });
 

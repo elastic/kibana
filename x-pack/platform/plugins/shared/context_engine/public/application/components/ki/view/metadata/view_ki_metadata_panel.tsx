@@ -50,7 +50,7 @@ export const ViewKiMetadataPanel = ({
   }
 
   return (
-    <EuiPanel hasBorder grow={false} paddingSize="m" data-test-subj="contextViewKiMetadataPanel">
+    <EuiPanel hasBorder grow={false} paddingSize="l" data-test-subj="contextViewKiMetadataPanel">
       <section data-test-subj="contextViewKiMetadataSection">
         <ViewKiSidebarDescriptionList
           listItems={listItems}

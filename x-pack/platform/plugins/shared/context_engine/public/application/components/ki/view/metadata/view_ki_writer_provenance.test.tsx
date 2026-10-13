@@ -60,6 +60,14 @@ describe('ViewKiSidebarWriterProvenance', () => {
     );
   });
 
+  it('renders crawler URI without a link', () => {
+    renderWriter({ uri: 'crawler://sml', metadata: {} });
+
+    expect(screen.getByText('crawler')).toBeInTheDocument();
+    expect(screen.getByText('sml')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('renders unparsed URI without agent metadata', () => {
     renderWriter({ uri: 'not-a-uri', metadata: {} });
 

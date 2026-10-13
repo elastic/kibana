@@ -19,8 +19,13 @@ import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { ViewKiPage } from './view_ki_page';
 
 const mockUseKi = jest.fn();
+const mockUseAiIndex = jest.fn();
 const mockNavigateToContextEngine = jest.fn();
 const mockCreateContextEngineUrl = jest.fn((path: string) => path);
+
+jest.mock('../hooks/use_ai_index', () => ({
+  useAiIndex: (...args: unknown[]) => mockUseAiIndex(...args),
+}));
 
 jest.mock('../hooks/use_ki', () => ({
   useKi: (...args: unknown[]) => mockUseKi(...args),
@@ -65,6 +70,12 @@ const renderViewKiPage = (initialEntry: string) => {
 
 describe('ViewKiPage', () => {
   beforeEach(() => {
+    mockUseAiIndex.mockReturnValue({
+      aiIndex: { id: 'sample-ki' },
+      isLoading: false,
+      error: undefined,
+      refetch: jest.fn(),
+    });
     mockUseKi.mockReturnValue({
       ki: defaultKi,
       isLoading: false,

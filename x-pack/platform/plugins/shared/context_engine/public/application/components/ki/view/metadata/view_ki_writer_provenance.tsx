@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCode, EuiLink } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
@@ -32,7 +32,7 @@ const ViewKiSidebarWriterValue = ({ value, href }: ViewKiSidebarWriterValueProps
     );
   }
 
-  return <EuiCode transparentBackground>{value}</EuiCode>;
+  return <strong>{value}</strong>;
 };
 
 interface ViewKiSidebarWriterProvenanceProps {

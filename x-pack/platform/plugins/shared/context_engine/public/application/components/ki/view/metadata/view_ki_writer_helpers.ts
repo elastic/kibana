@@ -79,5 +79,5 @@ export const getKiWriterUriHref = (
       path: `/manage/tools/${encodeURIComponent(parsed.identifier)}`,
     });
   }
-  return uri;
+  return undefined;
 };
