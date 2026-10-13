@@ -18,6 +18,9 @@ import { ProfilingStorageExplorerPage } from './page_objects/storage_explorer';
 import { ProfilingSettingsPage } from './page_objects/settings';
 import { ProfilingHomePage } from './page_objects/home';
 import { FlamegraphPage } from './page_objects/flamegraph';
+import { ProfilingAddDataPage } from './page_objects/add_data';
+import { ProfilingSchemaSelector } from './ui_components/schema_selector';
+import { ProfilingSideNav } from './ui_components/side_nav';
 
 export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
   pageObjects: ObltPageObjects & {
@@ -27,6 +30,9 @@ export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
     profilingSettingsPage: ProfilingSettingsPage;
     profilingHomePage: ProfilingHomePage;
     flamegraphPage: FlamegraphPage;
+    profilingAddDataPage: ProfilingAddDataPage;
+    profilingSchemaSelector: ProfilingSchemaSelector;
+    profilingSideNav: ProfilingSideNav;
   };
 }
 
@@ -55,6 +61,9 @@ export const test = base.extend<ExtendedScoutTestFixtures, ObltWorkerFixtures>({
       profilingSettingsPage: createLazyPageObject(ProfilingSettingsPage, page, kbnUrl),
       profilingHomePage: createLazyPageObject(ProfilingHomePage, page, kbnUrl),
       flamegraphPage: createLazyPageObject(FlamegraphPage, page, kbnUrl),
+      profilingAddDataPage: createLazyPageObject(ProfilingAddDataPage, page),
+      profilingSchemaSelector: createLazyPageObject(ProfilingSchemaSelector, page),
+      profilingSideNav: createLazyPageObject(ProfilingSideNav, page),
     };
 
     await use(extendedPageObjects);

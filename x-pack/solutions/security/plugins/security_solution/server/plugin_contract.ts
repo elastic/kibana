@@ -131,7 +131,8 @@ export interface SecuritySolutionPluginStartDependencies {
   cps?: CPSServerStart;
   /**
    * Optional. Present when the alertzero plugin is enabled; used to hand it the Alert Triage
-   * rule-attachment service (see `registerAlertTriageAttachmentServiceProvider`) without
+   * rule-attachment service (see `registerAlertTriageAttachmentServiceProvider`) and the TI
+   * supply workflow installer (see `registerThreatIntelSupplyWorkflowInstaller`) without
    * alertzero declaring a reverse dependency on this plugin, which would create a cycle with
    * the `alertzero` setup dependency above.
    */
