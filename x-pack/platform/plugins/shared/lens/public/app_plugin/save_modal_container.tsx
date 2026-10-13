@@ -20,6 +20,7 @@ import type {
   VisualizeEditorContext,
   LensSerializedState,
 } from '@kbn/lens-common';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { SaveModal } from './save_modal';
 import type { LensAppProps } from './types';
@@ -29,6 +30,7 @@ import { getFromPreloaded } from '../state_management/init_middleware/load_initi
 import { redirectToDashboard } from './save_modal_container_helpers';
 import { isLegacyEditorEmbeddable } from './app_helpers';
 import { transformToApiConfig } from '../react_embeddable/helper';
+import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
 
 type ExtraProps = Simplify<
   Pick<LensAppProps, 'initialInput'> &
@@ -168,6 +170,9 @@ export function SaveModalContainer({
         saveProps,
         options
       );
+      if (!initialInput?.ref_id) {
+        trackCreateUiCounterEvents(isTextBasedAttributes(lastKnownDoc) ? 'esql' : 'dsl');
+      }
       onSave?.(saveProps);
       onClose();
     }

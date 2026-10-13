@@ -5,12 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { renderWithProviders } from '../test_utils/test_utils';
 import type { SaveProps } from './app';
-import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
+import {
+  type SaveVisualizationProps,
+  runSaveLensVisualization,
+  SaveModalContainer,
+} from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
+import type { LensDocument } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
+
+jest.mock('../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
+}));
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -407,5 +423,63 @@ describe('runSaveLensVisualization', () => {
       expect(props.redirectTo).not.toHaveBeenCalled();
       expect(props.application.navigateToApp).toHaveBeenCalledWith('lens', { path: '/' });
     });
+  });
+});
+
+describe('SaveModalContainer', () => {
+  beforeAll(() => setMockedPresentationUtilServices());
+
+  beforeEach(() => {
+    jest.mocked(trackCreateUiCounterEvents).mockClear();
+  });
+
+  const byValueDoc: LensDocument = { ...defaultDoc, savedObjectId: undefined };
+  const esqlDoc: LensDocument = {
+    ...byValueDoc,
+    state: {
+      ...byValueDoc.state,
+      datasourceStates: {
+        textBased: { layers: { layer1: { query: { esql: 'FROM logs' }, columns: [] } } },
+      },
+    },
+  };
+
+  const renderAndSave = async (
+    props: Partial<React.ComponentProps<typeof SaveModalContainer>>,
+    waitForSave: jest.Mock
+  ) => {
+    renderWithProviders(
+      <SaveModalContainer
+        lensServices={makeDefaultServices()}
+        lastKnownDoc={byValueDoc}
+        initialInput={undefined}
+        onClose={jest.fn()}
+        {...props}
+      />
+    );
+    await userEvent.type(await screen.findByTestId('savedObjectTitle'), 'my chart');
+    await userEvent.click(screen.getByLabelText('None'));
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() => expect(waitForSave).toHaveBeenCalled());
+  };
+
+  it('should track a DSL creation when a new chart is saved from outside the Lens app', async () => {
+    const onSave = jest.fn();
+    await renderAndSave({ onSave }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl');
+  });
+
+  it('should track an ES|QL creation when a new ES|QL chart is saved from outside the Lens app', async () => {
+    const onSave = jest.fn();
+    await renderAndSave({ onSave, lastKnownDoc: esqlDoc }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql');
+  });
+
+  it('should not track a creation when the Lens app handles the save', async () => {
+    const runSave = jest.fn();
+    await renderAndSave({ runSave }, runSave);
+    expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
   });
 });
