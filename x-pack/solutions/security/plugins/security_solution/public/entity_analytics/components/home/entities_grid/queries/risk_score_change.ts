@@ -14,6 +14,7 @@ import {
   buildLookback,
   getRiskScoreIndex,
   OWN_RISK_SCORE_CONDITION,
+  RISK_SCORE_TYPE,
   toList,
   compareEntityIds,
 } from './esql';
@@ -35,10 +36,10 @@ const RISK_ID_FIELD_COALESCE = `COALESCE(host.risk.id_field, user.risk.id_field,
 const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user.risk.calculated_score_norm, service.risk.calculated_score_norm)`;
 
 /**
- * Risk score docs that can be the reference: the entity's own scores in the two hours before
- * the start of the time range, keyed by EUID. The reference score is the last of these per
- * entity.
- * Risk score change is the current entity score minus the reference score.
+ * Risk score docs that can be the reference: the scores in the two hours before the start of
+ * the time range, keyed by EUID. The reference score is the last of these per entity, see
+ * {@link buildReferenceScoreStats}.
+ * Risk score change is the current score minus the reference score.
  *
  * This is the boundary window of the risk movers tile, so its rows agree with the tile.
  *
@@ -48,14 +49,30 @@ const RISK_SCORE_NORM_COALESCE = `COALESCE(host.risk.calculated_score_norm, user
  * Consequence: an entity first scored inside the range has no reference, so it has no change.
  * Counting it (vs its earliest score in the range) needs that full read; deferred past 9.6.
  */
-const buildReferenceScoreDocs = ({ namespace, timeRange }: QueryArgs): string[] => {
+const buildReferenceScoreDocs = ({ namespace, timeRange, rowsMode }: QueryArgs): string[] => {
   const windowStart = buildLookback(timeRange);
   return [
     `FROM ${getRiskScoreIndex(namespace)}`,
     `| WHERE \`@timestamp\` >= ${windowStart} - ${REFERENCE_WINDOW_HOURS} hours AND \`@timestamp\` <= ${windowStart}`,
-    `| WHERE ${OWN_RISK_SCORE_CONDITION}`,
+    ...(rowsMode === 'resolved' ? [] : [`| WHERE ${OWN_RISK_SCORE_CONDITION}`]),
   ];
 };
+
+/**
+ * The reference score per `key`, from the docs of `buildReferenceScoreDocs` with their `score`.
+ * A resolved row's current score is its group's, so its reference is the group's last score, or
+ * the entity's own last score when it has no group score. Every other row's current score is its
+ * own, and so is its reference: the risk engine writes the group's score next to it, with the
+ * same key and time, so the group's docs must not be among them.
+ */
+const buildReferenceScoreStats = ({ rowsMode }: QueryArgs, key: string): string[] =>
+  rowsMode === 'resolved'
+    ? [
+        `| STATS group_reference = LAST(score, \`@timestamp\`) WHERE ${RISK_SCORE_TYPE} == "resolution", own_reference = LAST(score, \`@timestamp\`) WHERE ${OWN_RISK_SCORE_CONDITION} BY ${key}`,
+        '| EVAL reference_score = COALESCE(group_reference, own_reference)',
+        `| KEEP ${key}, reference_score`,
+      ]
+    : [`| STATS reference_score = LAST(score, \`@timestamp\`) BY ${key}`];
 
 // ── sort queries ──────────────────────────────────────────────────────────────
 
@@ -65,7 +82,7 @@ const buildRiskScoreChangeRows = (args: QueryArgs): MergedForeignRowsOptions => 
     ...buildReferenceScoreDocs(args),
     `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
     `| EVAL \`entity.id\` = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
-    `| STATS reference_score = LAST(score, \`@timestamp\`) BY \`entity.id\``,
+    ...buildReferenceScoreStats(args, '`entity.id`'),
   ],
   entityFields: [RISK_SCORE_NORM_FIELD],
   mergeAggregations: [
@@ -151,7 +168,7 @@ const buildRiskScoreChangeEnrichQuery = (args: QueryArgs, entityIds: string[]): 
     `| WHERE ${RISK_ID_FIELD_COALESCE} == "entity.id"`,
     `| EVAL entity_id = ${RISK_ID_VALUE_COALESCE}, score = ${RISK_SCORE_NORM_COALESCE}`,
     `| WHERE entity_id IN (${ids})`,
-    `| STATS reference_score = LAST(score, \`@timestamp\`) BY entity_id`,
+    ...buildReferenceScoreStats(args, 'entity_id'),
   ].join('\n');
 };
 

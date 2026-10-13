@@ -22,7 +22,7 @@ const REFERENCE_SCORES: Readonly<Record<string, number>> = {
  * and later in the reference window. The change must still read the own reference score.
  */
 const RESOLUTION_SCORES: Readonly<Record<string, number>> = {
-  'host:h1': 99,
+  'host:h1': 80,
 };
 
 const RISK_ENTITY_TYPES = ['host', 'user', 'service'] as const;

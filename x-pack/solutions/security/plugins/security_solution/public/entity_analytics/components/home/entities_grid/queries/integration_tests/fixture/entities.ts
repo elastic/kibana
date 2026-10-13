@@ -39,6 +39,7 @@ const ENTITIES: readonly EntitySeed[] = [
     type: 'host',
     name: 'web-1',
     risk: [90, 'Critical'],
+    groupRisk: [95, 'Critical'],
     criticality: 'high_impact',
   },
   { id: 'host:h2', type: 'host', name: 'web-2', risk: [50, 'Moderate'], watchlists: ['wl-1'] },

@@ -39,7 +39,7 @@ export const getRiskScoreIndex = (namespace: string) => getRiskScoreTimeSeriesIn
  */
 export const SET_UNMAPPED_NULLIFY = 'SET unmapped_fields="nullify";';
 
-const RISK_SCORE_TYPE = `COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type)`;
+export const RISK_SCORE_TYPE = `COALESCE(host.risk.score_type, user.risk.score_type, service.risk.score_type)`;
 
 /**
  * Keeps the risk score docs of the entity itself. A resolution score is the entity's group

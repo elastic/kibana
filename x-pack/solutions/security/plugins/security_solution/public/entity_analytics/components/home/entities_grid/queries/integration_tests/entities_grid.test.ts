@@ -344,14 +344,23 @@ describe('entities grid on Elasticsearch', () => {
       });
     });
 
-    it('changes the risk score from the last score before the window', async () => {
+    it("changes the risk score of a group from the group's last score before the window", async () => {
+      // host:h1's score is 95 now and its group's was 80, while its own was 60.
       expect(await fetchColumnValues('risk_score_change')).toEqual({
-        'host:h1': { risk_score_change: 30 },
+        'host:h1': { risk_score_change: 15 },
         'host:h2': { risk_score_change: 0 },
         'host:h3': { risk_score_change: null },
         'service:payments': { risk_score_change: null },
         'user:alice@okta': { risk_score_change: -10 },
         'user:bob@okta': { risk_score_change: null },
+      });
+    });
+
+    it('changes the risk score of an entity from its own last score in individual rows', async () => {
+      expect(await fetchColumnValues('risk_score_change', 'individual')).toMatchObject({
+        'host:h1': { risk_score_change: 30 },
+        'host:h2': { risk_score_change: 0 },
+        'user:alice@okta': { risk_score_change: -10 },
       });
     });
   });
