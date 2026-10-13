@@ -155,6 +155,7 @@ export class WorkflowExecutionRepository {
     if (isCreateConflict(itemError)) {
       const persistedIds = await this.getAlreadyPersistedIds([workflowExecution]);
       if (persistedIds.has(workflowExecution.id)) {
+        await this.refreshAfterRecoveredCreate(options.refresh);
         return;
       }
     }
@@ -187,6 +188,18 @@ export class WorkflowExecutionRepository {
           : [];
       })
     );
+  }
+
+  /**
+   * A conflict-only bulk response made no writes, so its `refresh` option does not make the
+   * earlier attempt's document searchable; refresh explicitly when the caller asked for it.
+   */
+  private async refreshAfterRecoveredCreate(
+    refresh: boolean | 'wait_for' | undefined
+  ): Promise<void> {
+    if (refresh === true || refresh === 'wait_for') {
+      await this.workflowExecutionsDataClient.refresh();
+    }
   }
 
   /** Removes a searchable execution rejected before any task or step was started. */
@@ -236,6 +249,9 @@ export class WorkflowExecutionRepository {
     );
     const persistedIds =
       conflicting.length > 0 ? await this.getAlreadyPersistedIds(conflicting) : new Set<string>();
+    if (persistedIds.size > 0) {
+      await this.refreshAfterRecoveredCreate(options.refresh);
+    }
 
     return bulkResponse.items.map((item, idx: number) => {
       const id = executions[idx].id as string;

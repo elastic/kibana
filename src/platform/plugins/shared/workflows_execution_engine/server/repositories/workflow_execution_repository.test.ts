@@ -171,6 +171,41 @@ describe('WorkflowExecutionRepository', () => {
         expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['1'], {
           sourceIncludes: ['spaceId', 'workflowId'],
         });
+        expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+      });
+
+      it.each([true, 'wait_for'] as const)(
+        'refreshes after recovering the create when refresh is %s',
+        async (refresh) => {
+          workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+            createMockGetExecutionsByIdsResponse([
+              { id: '1', workflowId: 'wf', spaceId: 'default' } as any,
+            ])
+          );
+
+          await repository.createWorkflowExecution(
+            { id: '1', workflowId: 'wf', spaceId: 'default' },
+            { refresh }
+          );
+
+          expect(workflowExecutionsDataClient.refresh).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it('does not refresh when the conflict is not recovered', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([
+            { id: '1', workflowId: 'other', spaceId: 'default' } as any,
+          ])
+        );
+
+        await expect(
+          repository.createWorkflowExecution(
+            { id: '1', workflowId: 'wf', spaceId: 'default' },
+            { refresh: 'wait_for' }
+          )
+        ).rejects.toThrow('Failed to create workflow execution 1');
+        expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
       });
 
       it.each([
@@ -333,6 +368,53 @@ describe('WorkflowExecutionRepository', () => {
       expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledTimes(1);
       expect(workflowExecutionsDataClient.getByIds).toHaveBeenCalledWith(['e2', 'e3'], {
         sourceIncludes: ['spaceId', 'workflowId'],
+      });
+      expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
+    });
+
+    describe('refresh after recovered conflicts', () => {
+      const conflict = {
+        type: 'version_conflict_engine_exception',
+        reason: 'doc already exists',
+      };
+      const executions = [
+        { id: 'e1', workflowId: 'wf', spaceId: 'default' },
+        { id: 'e2', workflowId: 'wf', spaceId: 'default' },
+      ];
+
+      beforeEach(() => {
+        workflowExecutionsDataClient.bulk.mockResolvedValue(
+          asBulkResponse({
+            errors: true,
+            items: [
+              { id: 'e1', error: conflict },
+              { id: 'e2', error: conflict },
+            ],
+          })
+        );
+      });
+
+      it('refreshes once when several conflicts are recovered', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse(executions as any[])
+        );
+
+        const result = await repository.bulkCreateWorkflowExecutions(executions, {
+          refresh: 'wait_for',
+        });
+
+        expect(result).toEqual([{ id: 'e1' }, { id: 'e2' }]);
+        expect(workflowExecutionsDataClient.refresh).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not refresh when no conflict is recovered', async () => {
+        workflowExecutionsDataClient.getByIds.mockResolvedValueOnce(
+          createMockGetExecutionsByIdsResponse([], { missing: ['e1', 'e2'] })
+        );
+
+        await repository.bulkCreateWorkflowExecutions(executions, { refresh: 'wait_for' });
+
+        expect(workflowExecutionsDataClient.refresh).not.toHaveBeenCalled();
       });
     });
 
