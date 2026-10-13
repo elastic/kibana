@@ -106,8 +106,11 @@ export interface ESQLEditorProps {
   onVisorNlResultReady?: (handler: VisorNlResultHandler) => void;
 }
 
-/** Receives the generated ES|QL for review; `onAccept` is called once the user keeps it */
-export type VisorNlResultHandler = (generatedQuery: string, onAccept: () => void) => void;
+/** Receives the generated ES|QL for review and the callbacks for the user's decision */
+export type VisorNlResultHandler = (
+  generatedQuery: string,
+  review: { onAccept: () => void; onReject?: () => void }
+) => void;
 
 interface ESQLVariableService {
   isCreateControlSuggestionEnabled: boolean;

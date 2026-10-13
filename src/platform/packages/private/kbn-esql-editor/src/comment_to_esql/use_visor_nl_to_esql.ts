@@ -35,7 +35,7 @@ export const useVisorNlToEsql = ({
 }: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
-  const onAcceptRef = useRef<(() => void) | undefined>(undefined);
+  const reviewRef = useRef<Parameters<VisorNlResultHandler>[1] | undefined>(undefined);
   const isSupersedingRef = useRef(false);
 
   const onAfterAccept = useCallback(
@@ -45,7 +45,7 @@ export const useVisorNlToEsql = ({
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
       onSubmit(generatedContentRef.current);
-      onAcceptRef.current?.();
+      reviewRef.current?.onAccept();
     },
     [onSubmit, telemetryService]
   );
@@ -57,6 +57,7 @@ export const useVisorNlToEsql = ({
         action: AiReviewAction.REJECT,
         linesChanged: generatedLineEnd - generatedLineStart + 1,
       });
+      reviewRef.current?.onReject?.();
     },
     [telemetryService]
   );
@@ -94,7 +95,7 @@ export const useVisorNlToEsql = ({
   });
 
   const showVisorReview = useCallback<VisorNlResultHandler>(
-    (generatedContent, onAccept) => {
+    (generatedContent, review) => {
       const editor = editorRef.current;
       const model = editorModel.current;
       if (!editor || !model) return;
@@ -106,7 +107,7 @@ export const useVisorNlToEsql = ({
       isSupersedingRef.current = false;
 
       generatedContentRef.current = generatedContent;
-      onAcceptRef.current = onAccept;
+      reviewRef.current = review;
 
       const plan = getVisorNlInsertPlan(model.getValue().split('\n'), generatedContent.split('\n'));
       if (!plan) return;

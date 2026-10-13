@@ -711,8 +711,8 @@ export const QueryBarTopRow = React.memo(
       visorNlResultHandlerRef.current = fn;
       setVisorNlResultHandlerReady(true);
     }, []);
-    const onVisorNlResult = useCallback<VisorNlResultHandler>((generatedQuery, onAccept) => {
-      visorNlResultHandlerRef.current?.(generatedQuery, onAccept);
+    const onVisorNlResult = useCallback<VisorNlResultHandler>((generatedQuery, review) => {
+      visorNlResultHandlerRef.current?.(generatedQuery, review);
     }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;

@@ -61,11 +61,14 @@ describe('useNlGeneration', () => {
       await result.current.onNlSubmit();
     });
 
-    expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10', expect.any(Function));
+    expect(onNlResult).toHaveBeenCalledWith(
+      'FROM logs | LIMIT 10',
+      expect.objectContaining({ onAccept: expect.any(Function) })
+    );
     expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
     expect(result.current.nlValue).toBe('show me logs');
 
-    act(() => onNlResult.mock.calls[0][1]());
+    act(() => onNlResult.mock.calls[0][1].onAccept());
 
     expect(result.current.nlValue).toBe('');
   });
