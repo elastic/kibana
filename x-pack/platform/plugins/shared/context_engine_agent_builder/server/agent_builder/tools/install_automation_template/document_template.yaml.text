@@ -95,6 +95,7 @@ steps:
         with:
           query: |
             FROM {{ consts.source_index }} METADATA _id
+            {{ consts.corpus_filter }}
             | WHERE _id IN ({% for row in foreach.item %}"{{ row[0] | replace: '\\', '\\\\' | replace: '"', '\\"' | replace: '\n', '\\n' | replace: '\r', '\\r' }}"{% unless forloop.last %}, {% endunless %}{% endfor %})
             | EVAL body = SUBSTRING(`{{ consts.body_field }}`, 1, {{ consts.body_max_chars }})
             | KEEP _id, `{{ consts.title_field }}`, body

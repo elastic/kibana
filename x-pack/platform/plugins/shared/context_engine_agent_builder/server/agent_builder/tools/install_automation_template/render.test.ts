@@ -145,6 +145,23 @@ describe('automation template rendering', () => {
       expect(query).toContain('| EVAL body = SUBSTRING(`body`, 1, 12000)');
       expect(query).toContain('| KEEP _id, `title`, body');
     });
+
+    it('applies the corpus filter to discovery and to the batch fetch', () => {
+      const definition = parse(
+        renderDocumentOrchestrationTemplate({
+          ...documentValues,
+          corpusFilter: 'WHERE status == "published"',
+        })
+      );
+
+      for (const step of ['discover_documents', 'fetch_documents']) {
+        const query = createWorkflowLiquidEngine().parseAndRenderSync(
+          findStep(definition.steps, step)?.with?.query ?? '',
+          { consts: definition.consts, inputs: {}, foreach: { item: [['a']] } }
+        );
+        expect(query).toContain('| WHERE status == "published"');
+      }
+    });
   });
 
   describe('index metadata', () => {
