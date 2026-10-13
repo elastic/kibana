@@ -46,10 +46,13 @@ export const WorkflowExecutionsGroupByControl = React.memo<WorkflowExecutionsGro
       [value]
     );
 
-    const buttonLabel = i18n.translate('workflows.executionsPage.table.groupBy.buttonLabel', {
-      defaultMessage: 'Group executions by: {selection}',
-      values: { selection: getExecutionsGroupByLabel(value) },
-    });
+    const buttonLabel = i18n.translate(
+      'workflowsManagement.executionsPage.table.groupBy.buttonLabel',
+      {
+        defaultMessage: 'Group executions by: {selection}',
+        values: { selection: getExecutionsGroupByLabel(value) },
+      }
+    );
 
     return (
       <EuiPopover

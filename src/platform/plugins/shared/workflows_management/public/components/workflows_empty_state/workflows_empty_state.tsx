@@ -165,7 +165,7 @@ export function WorkflowsEmptyStateReadOnly() {
         <PrivilegesFooter
           permissions={[
             {
-              id: 'workflows.plugins.shared.workflows_management.writeWorkflowPermissionText',
+              id: 'platform.plugins.shared.workflows_management.writeWorkflowPermissionText',
               default: 'Workflows: Write',
             },
           ]}

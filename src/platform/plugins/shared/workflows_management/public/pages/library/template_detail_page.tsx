@@ -22,11 +22,12 @@ import { WorkflowsPageName } from '../../deep_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSetWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
-const libraryBreadcrumbLabel = i18n.translate('workflows.libraryTemplatePage.libraryBreadcrumb', {
-  defaultMessage: 'Template Library',
-});
+const libraryBreadcrumbLabel = i18n.translate(
+  'workflowsManagement.libraryTemplatePage.libraryBreadcrumb',
+  { defaultMessage: 'Template Library' }
+);
 
-const backToLibraryLabel = i18n.translate('workflows.libraryTemplatePage.backToLibrary', {
+const backToLibraryLabel = i18n.translate('workflowsManagement.libraryTemplatePage.backToLibrary', {
   defaultMessage: 'Back to library',
 });
 

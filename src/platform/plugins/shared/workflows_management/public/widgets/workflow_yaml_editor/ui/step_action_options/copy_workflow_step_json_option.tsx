@@ -40,13 +40,13 @@ export const CopyWorkflowStepJsonOption: React.FC<CopyWorkflowStepJsonOptionProp
       if (notifications) {
         notifications.toasts.addSuccess({
           title: i18n.translate(
-            'workflows.workflowsManagement.copyWorkflowStepToClipboard.successTitle',
+            'plugins.workflowsManagement.copyWorkflowStepToClipboard.successTitle',
             {
               defaultMessage: 'Copied to clipboard',
             }
           ),
           text: i18n.translate(
-            'workflows.workflowsManagement.copyWorkflowStepToClipboard.successText',
+            'plugins.workflowsManagement.copyWorkflowStepToClipboard.successText',
             {
               defaultMessage: 'Workflow step copied successfully',
             }
@@ -57,7 +57,7 @@ export const CopyWorkflowStepJsonOption: React.FC<CopyWorkflowStepJsonOptionProp
       if (notifications) {
         notifications.toasts.addError(error as Error, {
           title: i18n.translate(
-            'workflows.workflowsManagement.copyWorkflowStepToClipboard.errorTitle',
+            'plugins.workflowsManagement.copyWorkflowStepToClipboard.errorTitle',
             {
               defaultMessage: 'Failed to copy',
             }
@@ -76,7 +76,7 @@ export const CopyWorkflowStepJsonOption: React.FC<CopyWorkflowStepJsonOptionProp
       icon="copy"
     >
       <FormattedMessage
-        id="workflows.workflowsManagement.copyWorkflowStepAsJson.buttonLabel"
+        id="plugins.workflowsManagement.copyWorkflowStepAsJson.buttonLabel"
         defaultMessage="Copy as JSON"
       />
     </EuiContextMenuItem>

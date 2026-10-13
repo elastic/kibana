@@ -38,15 +38,18 @@ export const WorkflowChangeHistoryDiffNavigator = ({
   const isFirst = !hasChanges || currentIndex <= 0;
   const isLast = !hasChanges || currentIndex >= totalChanges - 1;
 
-  const previousChangeLabel = i18n.translate('workflows.changeHistory.diffNavigator.previous', {
-    defaultMessage: 'Previous change',
-  });
-  const nextChangeLabel = i18n.translate('workflows.changeHistory.diffNavigator.next', {
-    defaultMessage: 'Next change',
-  });
-  const noChangesLabel = i18n.translate('workflows.changeHistory.diffNavigator.noChanges', {
-    defaultMessage: 'No changes',
-  });
+  const previousChangeLabel = i18n.translate(
+    'xpack.workflowsManagement.changeHistory.diffNavigator.previous',
+    { defaultMessage: 'Previous change' }
+  );
+  const nextChangeLabel = i18n.translate(
+    'xpack.workflowsManagement.changeHistory.diffNavigator.next',
+    { defaultMessage: 'Next change' }
+  );
+  const noChangesLabel = i18n.translate(
+    'xpack.workflowsManagement.changeHistory.diffNavigator.noChanges',
+    { defaultMessage: 'No changes' }
+  );
 
   return (
     <EuiFlexGroup
@@ -76,7 +79,7 @@ export const WorkflowChangeHistoryDiffNavigator = ({
         <EuiText css={styles.label} size="s" component="span">
           {hasChanges ? (
             <FormattedMessage
-              id="workflows.changeHistory.diffNavigator.label"
+              id="xpack.workflowsManagement.changeHistory.diffNavigator.label"
               defaultMessage="{current} of {total} changes"
               values={{
                 current: <strong>{displayIndex}</strong>,

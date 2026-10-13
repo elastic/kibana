@@ -80,13 +80,13 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
       if (notifications) {
         notifications.toasts.addSuccess({
           title: i18n.translate(
-            'workflows.workflowsManagement.copyDevToolsSnippetToClipboard.successTitle',
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.successTitle',
             {
               defaultMessage: 'Copied to clipboard',
             }
           ),
           text: i18n.translate(
-            'workflows.workflowsManagement.copyDevToolsSnippetToClipboard.successText',
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.successText',
             {
               defaultMessage: 'Devtools command copied successfully',
             }
@@ -97,7 +97,7 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
       if (notifications) {
         notifications.toasts.addError(error as Error, {
           title: i18n.translate(
-            'workflows.workflowsManagement.copyDevToolsSnippetToClipboard.errorTitle',
+            'plugins.workflowsManagement.copyDevToolsSnippetToClipboard.errorTitle',
             {
               defaultMessage: 'Failed to copy',
             }
@@ -116,7 +116,7 @@ export const CopyDevToolsOption: React.FC<CopyDevToolsOptionProps> = ({ onClick 
       icon="copy"
     >
       <FormattedMessage
-        id="workflows.workflowsManagement.copyDevToolsSnippetToClipboard.buttonLabel"
+        id="plugins.workflowsManagement.copyDevToolsSnippetToClipboard.buttonLabel"
         defaultMessage="Copy as devtools snippet"
       />
     </EuiContextMenuItem>

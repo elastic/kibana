@@ -64,7 +64,7 @@ const LicenseAccessDenied = React.memo(() => {
     () => [
       <EuiButton fill href={'https://www.elastic.co/subscriptions'} target="_blank">
         <FormattedMessage
-          id="workflows.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
+          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.subscriptionPlansButton"
           defaultMessage="Subscription plans"
         />
         <EuiIcon type="external" aria-hidden={true} />
@@ -78,7 +78,7 @@ const LicenseAccessDenied = React.memo(() => {
         href={application.getUrlForApp('management', { deepLinkId: 'license_management' })}
       >
         <FormattedMessage
-          id="workflows.plugins.shared.workflows_management.ui.upgradeLicense.manageLicenseButton"
+          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.manageLicenseButton"
           defaultMessage="Manage your license"
         />
       </EuiButtonEmpty>,
@@ -90,11 +90,11 @@ const LicenseAccessDenied = React.memo(() => {
     <AccessDenied
       data-test-subj="workflowsLicenseAccessDenied"
       title={i18n.translate(
-        'workflows.plugins.shared.workflows_management.ui.upgradeLicense.title',
+        'platform.plugins.shared.workflows_management.ui.upgradeLicense.title',
         { defaultMessage: 'Upgrade your license' }
       )}
       description={i18n.translate(
-        'workflows.plugins.shared.workflows_management.ui.upgradeLicense.description',
+        'platform.plugins.shared.workflows_management.ui.upgradeLicense.description',
         { defaultMessage: 'You need to upgrade your license to use Workflows.' }
       )}
       actions={actions}
@@ -117,7 +117,7 @@ const LicenseFooter = React.memo(() => (
       <EuiText color="subdued" textAlign="center" size="xs">
         <p css={{ marginBlock: 0 }}>
           <FormattedMessage
-            id="workflows.plugins.shared.workflows_management.ui.upgradeLicense.footer"
+            id="platform.plugins.shared.workflows_management.ui.upgradeLicense.footer"
             defaultMessage="License required:"
           />
         </p>
@@ -126,7 +126,7 @@ const LicenseFooter = React.memo(() => (
     <EuiFlexItem grow={false}>
       <EuiBadge color="hollow">
         <FormattedMessage
-          id="workflows.plugins.shared.workflows_management.ui.upgradeLicense.footer.badge"
+          id="platform.plugins.shared.workflows_management.ui.upgradeLicense.footer.badge"
           defaultMessage="Enterprise"
         />
       </EuiBadge>
@@ -160,7 +160,7 @@ const ServerlessTierAccessDenied = React.memo<{
       return [
         <EuiButton fill href={billingUrl} target="_blank">
           <FormattedMessage
-            id="workflows.plugins.shared.workflows_management.ui.unavailableInServerlessTier.manageSubscriptionButton"
+            id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.manageSubscriptionButton"
             defaultMessage="Manage subscription"
           />
           <EuiIcon type="external" aria-hidden={true} />
@@ -171,7 +171,7 @@ const ServerlessTierAccessDenied = React.memo<{
     return [
       <EuiText color="subdued" textAlign="center" size="s">
         <FormattedMessage
-          id="workflows.plugins.shared.workflows_management.ui.unavailableInServerlessTier.contactAdmin"
+          id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.contactAdmin"
           defaultMessage="Contact your administrator to upgrade your subscription."
         />
       </EuiText>,
@@ -182,11 +182,11 @@ const ServerlessTierAccessDenied = React.memo<{
     <AccessDenied
       data-test-subj="workflowsServerlessTierAccessDenied"
       title={i18n.translate(
-        'workflows.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
+        'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.title',
         { defaultMessage: 'Upgrade your subscription' }
       )}
       description={i18n.translate(
-        'workflows.plugins.shared.workflows_management.ui.unavailableInServerlessTier.description',
+        'platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.description',
         {
           defaultMessage:
             'You need to upgrade your serverless project subscription to use Workflows.',
@@ -215,7 +215,7 @@ const ServerlessTierFooter = React.memo<{
         <EuiText color="subdued" textAlign="center" size="xs">
           <p css={{ marginBlock: 0 }}>
             <FormattedMessage
-              id="workflows.plugins.shared.workflows_management.ui.unavailableInServerlessTier.requiredProducts"
+              id="platform.plugins.shared.workflows_management.ui.unavailableInServerlessTier.requiredProducts"
               defaultMessage="To use Workflows, you need to upgrade your subscription to {count, plural, one {the following product tier} other {one of the following product tiers}}:"
               values={{ count: requiredProducts.length }}
             />

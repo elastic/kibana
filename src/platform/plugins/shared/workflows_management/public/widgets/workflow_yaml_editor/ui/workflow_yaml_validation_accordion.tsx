@@ -36,12 +36,15 @@ import { FIX_WITH_AI_LABEL } from '../lib/fix_with_ai_label';
 
 const severityOrder = ['error', 'warning'];
 
-const copyErrorMessageLabel = i18n.translate('workflows.workflowYAMLValidationErrors.copyMessage', {
-  defaultMessage: 'Copy message',
-});
+const copyErrorMessageLabel = i18n.translate(
+  'workflowsManagement.workflowYAMLValidationErrors.copyMessage',
+  {
+    defaultMessage: 'Copy message',
+  }
+);
 
 const copiedErrorMessageLabel = i18n.translate(
-  'workflows.workflowYAMLValidationErrors.copiedMessage',
+  'workflowsManagement.workflowYAMLValidationErrors.copiedMessage',
   {
     defaultMessage: 'Copied',
   }
@@ -82,7 +85,7 @@ function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
     const arr = [];
     if (errorCount > 0) {
       arr.push(
-        i18n.translate('workflows.workflowYAMLValidationErrors.errorCount', {
+        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.errorCount', {
           defaultMessage: '{errorCount} error{errorCount, plural, one {} other {s}}',
           values: { errorCount },
         })
@@ -90,7 +93,7 @@ function useGroupedErrors(allValidationErrors: YamlValidationResult[] | null) {
     }
     if (warningCount > 0) {
       arr.push(
-        i18n.translate('workflows.workflowYAMLValidationErrors.warningCount', {
+        i18n.translate('workflowsManagement.workflowYAMLValidationErrors.warningCount', {
           defaultMessage: '{warningCount} warning{warningCount, plural, one {} other {s}}',
           values: { warningCount },
         })
@@ -194,7 +197,7 @@ const ValidationErrorRow = React.memo(function ValidationErrorRow({
           <EuiText color="subdued" size="xs" component="span" css={styles.validationErrorLocation}>
             <span>
               <FormattedMessage
-                id="workflows.workflowYAMLValidationErrors.lineAndColumn"
+                id="workflowsManagement.workflowYAMLValidationErrors.lineAndColumn"
                 defaultMessage="Ln {lineNumber}, Col {columnNumber}"
                 values={{
                   lineNumber: error.startLineNumber,
@@ -323,13 +326,16 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
 
   if (!isMounted) {
     icon = <EuiLoadingSpinner size="m" />;
-    buttonContent = i18n.translate('workflows.workflowYAMLValidationErrors.loadingEditor', {
-      defaultMessage: 'Loading editor...',
-    });
+    buttonContent = i18n.translate(
+      'workflowsManagement.workflowYAMLValidationErrors.loadingEditor',
+      {
+        defaultMessage: 'Loading editor...',
+      }
+    );
   } else if (!allValidationErrors || isLoading) {
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = i18n.translate(
-      'workflows.workflowYAMLValidationErrors.initializingValidation',
+      'workflowsManagement.workflowYAMLValidationErrors.initializingValidation',
       {
         defaultMessage: 'Initializing validation...',
       }
@@ -346,7 +352,7 @@ export const WorkflowYamlValidationAccordion = React.memo(function WorkflowYamlV
         aria-hidden={true}
       />
     );
-    buttonContent = i18n.translate('workflows.workflowYAMLValidationErrors.noErrors', {
+    buttonContent = i18n.translate('workflowsManagement.workflowYAMLValidationErrors.noErrors', {
       defaultMessage: 'No validation errors',
     });
   } else {

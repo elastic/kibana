@@ -38,7 +38,7 @@ export function getDeepLinks({
   if (executionsViewEnabled) {
     links.push({
       id: WorkflowsPageName.executions,
-      title: i18n.translate('workflows.nav.executionsDeepLinkTitle', {
+      title: i18n.translate('workflowsManagement.nav.executionsDeepLinkTitle', {
         defaultMessage: 'Executions',
       }),
       path: '/executions',
@@ -50,7 +50,7 @@ export function getDeepLinks({
   if (libraryEnabled) {
     links.push({
       id: WorkflowsPageName.library,
-      title: i18n.translate('workflows.nav.libraryDeepLinkTitle', {
+      title: i18n.translate('workflowsManagement.nav.libraryDeepLinkTitle', {
         defaultMessage: 'Template library',
       }),
       path: '/library',

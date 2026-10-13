@@ -9,26 +9,29 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_WORKFLOWS = i18n.translate('workflows.workflowsList.searchAriaLabel', {
-  defaultMessage: 'Search workflows',
-});
+export const SEARCH_WORKFLOWS = i18n.translate(
+  'xpack.workflowsManagement.workflowsList.searchAriaLabel',
+  {
+    defaultMessage: 'Search workflows',
+  }
+);
 
 export const SEARCH_PLACEHOLDER = i18n.translate(
-  'workflows.workflowsManagement.workflowsList.searchPlaceholder',
+  'plugins.workflowsManagement.workflowsList.searchPlaceholder',
   {
     defaultMessage: 'Workflow name/description',
   }
 );
 
 export const TRIGGERS_LIST_TITLE = i18n.translate(
-  'workflows.workflowsManagement.workflowsList.triggersListTitle',
+  'plugins.workflowsManagement.workflowsList.triggersListTitle',
   {
     defaultMessage: 'Triggers',
   }
 );
 
 export const TAGS_LIST_TITLE = i18n.translate(
-  'workflows.workflowsManagement.workflowsList.tagsListTitle',
+  'plugins.workflowsManagement.workflowsList.tagsListTitle',
   {
     defaultMessage: 'Tags',
   }

@@ -391,7 +391,7 @@ export const WorkflowDetailHeader = React.memo(
       return {
         primaryActionItem: {
           id: 'saveWorkflow',
-          label: i18n.translate('workflows.saveButtonText', {
+          label: i18n.translate('keepWorkflows.buttonText', {
             defaultMessage: 'Save',
           }),
           iconType: 'save',

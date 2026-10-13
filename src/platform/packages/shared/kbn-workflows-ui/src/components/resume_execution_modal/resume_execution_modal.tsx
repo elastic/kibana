@@ -182,14 +182,14 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
               <FormattedMessage
-                id="workflowsUi.resumeExecutionModal.title"
+                id="workflowsManagement.resumeExecutionModal.title"
                 defaultMessage="Provide action"
               />
             </EuiFlexItem>
             <EuiFlexItem css={descriptionStyle}>
               {resumeMessage ?? (
                 <FormattedMessage
-                  id="workflowsUi.resumeExecutionModal.description"
+                  id="workflowsManagement.resumeExecutionModal.description"
                   defaultMessage="Provide input to resume the workflow."
                 />
               )}
@@ -240,10 +240,13 @@ export const ResumeExecutionModal: React.FC<ResumeExecutionModalProps> = ({
           data-test-subj="workflowSubmitResume"
         >
           {useRunButton ? (
-            <FormattedMessage id="workflowsUi.resumeExecutionModal.runBtn" defaultMessage="Run" />
+            <FormattedMessage
+              id="workflowsManagement.resumeExecutionModal.runBtn"
+              defaultMessage="Run"
+            />
           ) : (
             <FormattedMessage
-              id="workflowsUi.resumeExecutionModal.resumeBtn"
+              id="workflowsManagement.resumeExecutionModal.resumeBtn"
               defaultMessage="Resume"
             />
           )}

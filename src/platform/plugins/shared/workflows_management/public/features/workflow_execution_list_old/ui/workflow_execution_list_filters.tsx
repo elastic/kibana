@@ -105,18 +105,15 @@ export function ExecutionListFilters({
       group: 'status' as const,
     })),
     {
-      label: i18n.translate(
-        'workflows.workflowExecutionListOld.filterIconButton.executionTypeLabel',
-        {
-          defaultMessage: 'Execution type',
-        }
-      ),
+      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.executionTypeLabel', {
+        defaultMessage: 'Execution type',
+      }),
       isGroupLabel: true,
       group: 'executionType' as const,
     },
     {
       key: ExecutionType.TEST,
-      label: i18n.translate('workflows.workflowExecutionListOld.filterIconButton.testLabel', {
+      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.testLabel', {
         defaultMessage: 'test',
       }),
       checked: filters.executionTypes.includes(ExecutionType.TEST) ? ('on' as const) : undefined,
@@ -124,7 +121,7 @@ export function ExecutionListFilters({
     },
     {
       key: ExecutionType.PRODUCTION,
-      label: i18n.translate('workflows.workflowExecutionListOld.filterIconButton.productionLabel', {
+      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.productionLabel', {
         defaultMessage: 'production',
       }),
       checked: filters.executionTypes.includes(ExecutionType.PRODUCTION)
