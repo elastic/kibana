@@ -591,6 +591,7 @@ const topNavStyles = {
       },
       '.controlGroup': {
         padding: euiTheme.size.s,
+        paddingTop: 0,
       },
     }),
   updateEditButton: ({ euiTheme }: UseEuiTheme) =>

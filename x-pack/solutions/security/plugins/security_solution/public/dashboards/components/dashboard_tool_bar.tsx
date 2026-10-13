@@ -11,6 +11,8 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboard_api/types';
@@ -28,6 +30,7 @@ const DashboardToolBarComponent = ({
   onLoad?: (mode: ViewMode) => void;
 }) => {
   const { setHeaderActionMenu } = useKibana().services;
+  const { euiTheme } = useEuiTheme();
 
   const viewMode = useStateFromPublishingSubject(dashboardContainer.viewMode$);
 
@@ -72,18 +75,32 @@ const DashboardToolBarComponent = ({
   );
   const { showWriteControls } = useCapabilities<DashboardCapabilities>('dashboard_v2');
 
+  // Security-only: recessed controls strip + top padding (beats TopNav's paddingTop: 0).
+  const controlsOverrideStyles = useMemo(
+    () =>
+      css({
+        '.controlGroup[data-test-subj="controls-group-wrapper"]': {
+          backgroundColor: euiTheme.colors.backgroundBaseRecessed,
+          paddingTop: euiTheme.size.s,
+        },
+      }),
+    [euiTheme.colors.backgroundBaseRecessed, euiTheme.size.s]
+  );
+
   return showWriteControls ? (
-    <DashboardTopNav
-      customLeadingBreadCrumbs={landingBreadcrumb}
-      dashboardApi={dashboardContainer}
-      dashboardInternalApi={dashboardInternalApi}
-      forceHideUnifiedSearch={true}
-      embedSettings={embedSettings}
-      redirectTo={redirectTo}
-      showBorderBottom={false}
-      setCustomHeaderActionMenu={setHeaderActionMenu}
-      showResetChange={false}
-    />
+    <div css={controlsOverrideStyles}>
+      <DashboardTopNav
+        customLeadingBreadCrumbs={landingBreadcrumb}
+        dashboardApi={dashboardContainer}
+        dashboardInternalApi={dashboardInternalApi}
+        forceHideUnifiedSearch={true}
+        embedSettings={embedSettings}
+        redirectTo={redirectTo}
+        showBorderBottom={false}
+        setCustomHeaderActionMenu={setHeaderActionMenu}
+        showResetChange={false}
+      />
+    </div>
   ) : null;
 };
 
