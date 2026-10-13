@@ -26,6 +26,29 @@ artifact it needed was absent, which the golden gate treats as a failure.
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff a prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
+| Factuality | LLM | narrative claims against a ground truth synthesized from the row's pinned expectations; reported, not gated |
+| Relevance | LLM | share of narrative claims that answer the hunt question; reported, not gated |
+| Groundedness | LLM | narrative claims against the hunt facts (hunt output, SSE `hunt_result`, packaging, Proposals, evidence); reported, not gated |
+
+The LLM evaluators judge the narrative the Worker posted to the Investigation, so they are
+`N/A` on rows that expect no Investigation and `MISSING` when a narrative was expected but the
+judge produced nothing. Factuality, Relevance and Groundedness reuse the `@kbn/evals`
+correctness and groundedness judges; `src/evaluators/judge_analysis.ts` maps a hunt run onto
+the chat shape those judges expect (question, final message, tool-call history, ground truth)
+and runs both analyses once per row inside the task. Sequence Accuracy is left out because a
+hunt narrative is a verdict, not a procedure. The canary cohort runs CODE only: an LLM score
+cannot rescue it.
+
+Read the LLM scores against their ceilings. The ground truth is synthesized from the row's
+pinned expectations, so Factuality docks the narrative's peripheral detail (publish date,
+indicator values, search window) as "not in ground truth"; about 0.9 is a healthy row, and a
+drop below that points at a central claim the judge contradicted. Counts a row leaves unpinned
+(no `tier1Status`, no `tier2Executed`, `pendingProposals: { min: 0 }`) are stated to the judge
+as open, so the narrative is not docked for reporting them. Groundedness judges the same
+narrative against the collected hunt facts (report doc, hunt output, coordinator result, SSE,
+packaging, Proposals, evidence, plus every pending Proposal in the space because convergence
+notes cite other Investigations), so a dip there is a claim the Worker made that none of its
+own data supports.
 
 ## Datasets
 
@@ -42,7 +65,9 @@ generator source so an id, slug, or Investigation-id drift fails in Jest before 
 
 The `huntWatchSeed` worker fixture runs the generator once per worker, copies one report into
 each non-default eval space (`hunt-a`, `hunt-b`, `hunt-blocked`), writes the canary, and
-verifies every bound id exists. Teardown deletes them.
+verifies every bound id exists. Teardown deletes the seeded reports. The eval spaces themselves
+are created once and left in place: deleting and recreating them between runs races the
+per-space Worker install and its service-account binding on a long-lived stack.
 
 Before each row, `resetHuntReport` dismisses pending Proposals on the report's Investigation,
 waits for them to settle (dismiss only resumes the gate workflow; the status flips a few
@@ -73,8 +98,10 @@ The `local` profile's `evaluationsKbn.url` defaults to `localhost:5601/dev`. Whe
 stack is the only Kibana running, point it at `localhost:5620` in
 `x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.local.json`.
 
-In CI the weekly step sets `FTR_EIS_CCM: '1'`, which does the same provisioning as
-`node scripts/eis`.
+In CI the `Evals: Hunt Watch` step in `.buildkite/pipelines/evals/llm_evals.yml` runs weekly
+over `weekly_eis_core_models` with `EVAL_SERVER_CONFIG_SET: 'evals_hunt_watch'`, and sets
+`FTR_EIS_CCM: '1'`, which does the same provisioning as `node scripts/eis`. The judge comes from
+the `models:judge:<id>` PR label, resolved by `normalizeEvaluationConnectorId`.
 
 ## Known Worker behavior pinned by the datasets
 

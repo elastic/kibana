@@ -55,6 +55,7 @@ const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifact
   executionStatus: 'completed',
   selectedIds: [REPORT_ID],
   skipped: [],
+  pendingProposalsInSpace: [],
   reports: {
     [REPORT_ID]: {
       reportId: REPORT_ID,

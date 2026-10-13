@@ -8,7 +8,11 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import type {
+  ChildWorkflowExecutionItem,
+  WorkflowExecutionDto,
+  WorkflowStepExecutionDto,
+} from '@kbn/workflows';
 import { huntResultSchema, type HuntResult } from '@kbn/alertzero-common';
 import {
   PROPOSALS_API_VERSION,
@@ -18,11 +22,13 @@ import {
 import type { HuntWatchRunResult } from './hunt_watch_client';
 import {
   FIND_OR_CREATE_INVESTIGATION_STEP_ID,
+  HUNT_EXECUTE_WORKFLOW_ID,
   HUNT_STEP_ID,
   PACKAGE_REPORT_STEP_ID,
   PUBLIC_API_VERSION,
   RESOLVE_INDEX_SCOPE_GATE_STEP_ID,
   RESOLVE_RUN_OUTCOME_STEP_ID,
+  RUN_HUNT_COORDINATOR_STEP_ID,
   SELECT_CANDIDATE_REPORTS_STEP_ID,
   THREAT_REPORTS_INDEX,
   WRITE_RUN_CONCLUSION_STEP_ID,
@@ -83,6 +89,11 @@ export interface HuntReportArtifacts {
   /** Per-stage status and start time for this branch, keyed by stepId (outputs are not kept). */
   stages: Record<string, { status: string; startedAt?: string }>;
   hunt?: HuntStepOutput;
+  /**
+   * `run_hunt_coordinator` output from the `hunt` child execution, minus Tier 1 sample hits:
+   * the window, index patterns, resolved IOCs and Tier 2 targets the narrative reports.
+   */
+  coordinator?: Record<string, unknown>;
   packaging?: PackageStepOutput;
   /** `resolve_run_outcome` output for this branch. */
   outcome?: string;
@@ -105,6 +116,14 @@ export interface HuntArtifacts {
   selectedIds: string[];
   skipped: unknown[];
   reports: Record<string, HuntReportArtifacts>;
+  /**
+   * Every pending Proposal in the space after the run, across Investigations. The narrative's
+   * convergence notes cite Proposals other Investigations raised, so the judge needs them too.
+   */
+  pendingProposalsInSpace: ProposalWithMetadata[];
+  /** Judge analyses the task attaches after collection; read by the quantitative LLM evaluators. */
+  correctnessAnalysis?: Record<string, unknown>;
+  groundednessAnalysis?: Record<string, unknown>;
 }
 
 const SSE_TYPE = 'security.significant_security_event';
@@ -139,6 +158,76 @@ const findStepOutput = (
   steps: WorkflowStepExecutionDto[],
   stepId: string
 ): WorkflowStepExecutionDto | undefined => steps.find((s) => s.stepId === stepId);
+
+const executionPath = (spaceId: string, executionId: string, suffix = ''): string =>
+  spacePath(spaceId, `/api/workflows/executions/${encodeURIComponent(executionId)}${suffix}`);
+
+/** Child executions of the Worker run, keyed by the parent (branch) step execution id. */
+const listChildExecutions = async ({
+  fetch,
+  spaceId,
+  workflowExecutionId,
+}: {
+  fetch: HttpHandler;
+  spaceId: string;
+  workflowExecutionId: string;
+}): Promise<ChildWorkflowExecutionItem[]> =>
+  fetch<ChildWorkflowExecutionItem[]>(executionPath(spaceId, workflowExecutionId, '/children'), {
+    method: 'GET',
+    headers: apiVersion(PUBLIC_API_VERSION),
+  });
+
+const withoutTier1Hits = (coordinator: Record<string, unknown>): Record<string, unknown> => {
+  const tier1 = asRecord(coordinator.tier1);
+  if (!tier1) return coordinator;
+  const { hits, ...rest } = tier1;
+  return { ...coordinator, tier1: rest };
+};
+
+const getCoordinatorOutput = async ({
+  fetch,
+  spaceId,
+  children,
+  huntStep,
+}: {
+  fetch: HttpHandler;
+  spaceId: string;
+  children: ChildWorkflowExecutionItem[];
+  huntStep?: WorkflowStepExecutionDto;
+}): Promise<Record<string, unknown> | undefined> => {
+  const child = children.find(
+    (c) => c.parentStepExecutionId === huntStep?.id && c.workflowId === HUNT_EXECUTE_WORKFLOW_ID
+  );
+  if (!child) return undefined;
+  const execution = await fetch<WorkflowExecutionDto>(executionPath(spaceId, child.executionId), {
+    method: 'GET',
+    headers: apiVersion(PUBLIC_API_VERSION),
+    query: { includeOutput: true },
+  });
+  const output = execution.stepExecutions
+    .filter((s) => s.stepId === RUN_HUNT_COORDINATOR_STEP_ID)
+    .map((s) => asRecord(s.output))
+    .find((o) => o !== undefined);
+  return output && withoutTier1Hits(output);
+};
+
+const listPendingProposalsInSpace = async ({
+  fetch,
+  spaceId,
+}: {
+  fetch: HttpHandler;
+  spaceId: string;
+}): Promise<ProposalWithMetadata[]> => {
+  const response = await fetch<{ proposals: ProposalWithMetadata[] }>(
+    spacePath(spaceId, PROPOSALS_INTERNAL_URL),
+    {
+      method: 'GET',
+      headers: apiVersion(PROPOSALS_API_VERSION),
+      query: { status: 'pending', excludeSuperseded: true, size: 100 },
+    }
+  );
+  return response.proposals;
+};
 
 /** Reads an Investigation conversation in a space, or `undefined` when it does not exist there. */
 export const getConversation = async ({
@@ -230,6 +319,10 @@ export const collectHuntArtifacts = async ({
     findStepOutput(steps, SELECT_CANDIDATE_REPORTS_STEP_ID)
   );
   const selectedIds = selection?.ids ?? [];
+  const children =
+    selectedIds.length > 0
+      ? await listChildExecutions({ fetch, spaceId, workflowExecutionId: run.workflowExecutionId })
+      : [];
 
   const reports: Record<string, HuntReportArtifacts> = {};
   for (const reportId of reportIds) {
@@ -239,6 +332,7 @@ export const collectHuntArtifacts = async ({
     const byId = (stepId: string) => branchSteps.find((s) => s.stepId === stepId);
 
     const huntStep = byId(HUNT_STEP_ID);
+    const coordinator = await getCoordinatorOutput({ fetch, spaceId, children, huntStep });
     const packageStep = byId(PACKAGE_REPORT_STEP_ID);
     const outcomeOut = stepOutput<{ outcome?: string; incomplete_stage?: string }>(
       byId(RESOLVE_RUN_OUTCOME_STEP_ID)
@@ -285,6 +379,7 @@ export const collectHuntArtifacts = async ({
         })
       ),
       hunt: stepOutput<HuntStepOutput>(huntStep),
+      coordinator,
       packaging: stepOutput<PackageStepOutput>(packageStep),
       outcome: outcomeOut?.outcome,
       incompleteStage: outcomeOut?.incomplete_stage || undefined,
@@ -308,5 +403,6 @@ export const collectHuntArtifacts = async ({
     selectedIds,
     skipped: selection?.skipped ?? [],
     reports,
+    pendingProposalsInSpace: await listPendingProposalsInSpace({ fetch, spaceId }),
   };
 };

@@ -427,6 +427,11 @@ export const runPreflight = async ({
   await ensureEntityStoreRunning({ fetch, log });
   await ensureJudgeConnectorAccessible({ fetch, connector: evaluationConnector, log });
 
+  // The eval spaces are left in place on purpose. Deleting them here and recreating them on the
+  // next run races the per-space Worker install, its service-account binding and the managed
+  // workflow reconcile (seen as a 404 on the TI supply route and a 403 "service account binding
+  // does not match" on the next run against a long-lived stack). They are eval-only and
+  // `ensureSpaceExists` is idempotent, so a CI stack discards them and a local one reuses them.
   return async () => {
     for (const spaceId of EVAL_SPACE_IDS) {
       try {
@@ -441,16 +446,6 @@ export const runPreflight = async ({
             err
           )}`
         );
-      }
-    }
-    for (const spaceId of NON_DEFAULT_EVAL_SPACE_IDS) {
-      try {
-        await fetch(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
-          method: 'DELETE',
-          headers: apiVersion(PUBLIC_API_VERSION),
-        });
-      } catch (err) {
-        log.warning(`[hunt-watch] failed to delete eval space "${spaceId}": ${errorMessage(err)}`);
       }
     }
   };

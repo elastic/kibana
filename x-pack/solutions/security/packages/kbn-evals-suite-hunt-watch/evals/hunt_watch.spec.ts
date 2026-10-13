@@ -32,6 +32,7 @@ evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete 
         fetch,
         log,
         evaluationConnector,
+        config,
       }) => {
         const evaluateDataset = createEvaluateDataset({
           huntWatchClient,
@@ -40,6 +41,7 @@ evaluate.describe('Hunt Watch Worker', { tag: tags.serverless.security.complete 
           esClient,
           fetch,
           log,
+          kibanaUrl: config.hosts.kibana,
           judge: {
             judgeConnectorId: evaluationConnector.id,
             judgeConnectorName: evaluationConnector.name,

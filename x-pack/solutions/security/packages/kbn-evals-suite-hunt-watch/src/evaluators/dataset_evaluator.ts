@@ -19,6 +19,12 @@ import type { HuntWatchClient } from '../hunt_watch_client';
 import { resetHuntReport } from '../seed_hunt_data';
 import type { HuntExpected, HuntWatchExample } from '../types';
 import { CODE_SCORERS, scoreCanaryTripped, type CodeScore } from './code_scores';
+import {
+  createJudgeEvaluators,
+  narrativeOf,
+  runJudgeAnalyses,
+  type JudgeProvenance,
+} from './judge_analysis';
 import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
 
 export type HuntEvaluator = Evaluator<HuntWatchExample, HuntArtifacts>;
@@ -46,7 +52,7 @@ export const createCanaryEvaluators = (): HuntEvaluator[] => [
 /** LLM rubric over the Investigation narrative; reported, never gated. */
 export const createNarrativeRubricEvaluator = (
   evaluators: DefaultEvaluators,
-  judge?: { judgeConnectorId: string; judgeConnectorName?: string }
+  judge?: JudgeProvenance
 ): HuntEvaluator => ({
   name: 'Narrative Rubric',
   kind: 'LLM',
@@ -63,10 +69,7 @@ export const createNarrativeRubricEvaluator = (
         explanation: 'row expects no Investigation, so there is no narrative to judge',
       };
     }
-    const narrative = Object.values(output.reports)
-      .map((r) => r.narrative)
-      .filter(Boolean)
-      .join('\n\n---\n\n');
+    const narrative = narrativeOf(output);
     if (!narrative) {
       return { score: null, label: 'MISSING', explanation: 'no narrative was posted to evaluate' };
     }
@@ -95,6 +98,7 @@ export const createEvaluateDataset =
     fetch,
     log,
     judge,
+    kibanaUrl,
   }: {
     huntWatchClient: HuntWatchClient;
     evaluators: DefaultEvaluators;
@@ -102,7 +106,8 @@ export const createEvaluateDataset =
     esClient: Client;
     fetch: HttpHandler;
     log: ToolingLog;
-    judge?: { judgeConnectorId: string; judgeConnectorName?: string };
+    judge?: JudgeProvenance;
+    kibanaUrl?: string;
   }) =>
   async ({
     dataset,
@@ -114,7 +119,9 @@ export const createEvaluateDataset =
     const all = evaluatorOverrides ?? [
       ...createCodeEvaluators(),
       createNarrativeRubricEvaluator(evaluators, judge),
+      ...createJudgeEvaluators(judge),
     ];
+    const judged = evaluatorOverrides === undefined;
     const sink: ScoreSink = new Map();
     log.info(`Running Hunt Watch evaluation: "${dataset.name}" (${dataset.examples.length} rows)`);
 
@@ -123,14 +130,23 @@ export const createEvaluateDataset =
         name: dataset.name,
         datasets: [dataset],
         concurrency: 1,
-        task: async ({ input }) => {
+        task: async ({ input, output }) => {
           const { spaceId, reportIds } = input;
           // Reset first so every row starts from an unhunted report and no Investigation.
           for (const reportId of reportIds) {
             await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
           }
           const run = await huntWatchClient.run({ spaceId, reportIds });
-          return collectHuntArtifacts({ run, reportIds, fetch, esClient, log });
+          const artifacts = await collectHuntArtifacts({ run, reportIds, fetch, esClient, log });
+          if (!judged) return artifacts;
+          const analyses = await runJudgeAnalyses({
+            evaluators,
+            example: { input, output },
+            artifacts,
+            kibanaUrl,
+            log,
+          });
+          return { ...artifacts, ...analyses };
         },
       },
       withScoreCollection(all, sink, log)

@@ -46,6 +46,8 @@ export const HUNT_STEP_ID = 'hunt';
 export const PACKAGE_REPORT_STEP_ID = 'package_report';
 export const WRITE_RUN_CONCLUSION_STEP_ID = 'write_run_conclusion';
 export const RESOLVE_RUN_OUTCOME_STEP_ID = 'resolve_run_outcome';
+/** Step inside the `hunt` child workflow whose output is the full coordinator response. */
+export const RUN_HUNT_COORDINATOR_STEP_ID = 'run_hunt_coordinator';
 
 /** Every step id the Worker yaml must still declare for the client/evaluators to work. */
 export const REQUIRED_WORKER_STEP_IDS = [
