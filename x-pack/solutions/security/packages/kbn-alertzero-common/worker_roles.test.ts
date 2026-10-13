@@ -13,7 +13,7 @@ import {
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-} from '@kbn/alertzero-common';
+} from './constants';
 import { WORKER_ROLE_DEFINITIONS, buildSecurityRoleUrl } from './worker_roles';
 
 describe('WORKER_ROLE_DEFINITIONS', () => {
