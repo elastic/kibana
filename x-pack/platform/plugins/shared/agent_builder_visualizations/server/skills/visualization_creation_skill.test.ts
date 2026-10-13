@@ -34,7 +34,8 @@ describe('visualizationCreationSkill', () => {
       platformCoreTools.executeEsql,
       platformCoreTools.createVisualization,
     ]);
-   
+  });
+
   it('finds unnamed data in one broad index search without probing it', () => {
     const { content } = visualizationCreationSkill;
     expect(content).toContain(
