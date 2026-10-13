@@ -26,15 +26,15 @@ export function useOnboardingApi() {
 
   return useMemo(
     () => ({
-      scheduleOnboarding: async (streamName: string, options?: ScheduleOnboardingOptions) => {
+      scheduleOnboarding: async (sourceId: string, options?: ScheduleOnboardingOptions) => {
         const { from, to } = getLast24HoursTimeRange();
 
         return significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_execute',
+          'POST /internal/streams/{sourceId}/onboarding/_execute',
           {
             signal,
             params: {
-              path: { streamName },
+              path: { sourceId },
               body: {
                 action: 'schedule' as const,
                 from,
@@ -46,35 +46,35 @@ export function useOnboardingApi() {
           }
         );
       },
-      getOnboardingStatus: async (streamName: string) => {
+      getOnboardingStatus: async (sourceId: string) => {
         return significantEventsRepositoryClient.fetch(
-          'GET /internal/streams/{streamName}/onboarding/_status',
+          'GET /internal/streams/{sourceId}/onboarding/_status',
           {
             signal,
             params: {
-              path: { streamName },
+              path: { sourceId },
             },
           }
         );
       },
-      getOnboardingStatuses: async (streamNames: string[]) => {
+      getOnboardingStatuses: async (sourceIds: string[]) => {
         return significantEventsRepositoryClient.fetch(
           'POST /internal/streams/onboarding/_bulk_status',
           {
             signal,
             params: {
-              body: { streamNames },
+              body: { sourceIds },
             },
           }
         );
       },
-      cancelOnboarding: async (streamName: string) => {
+      cancelOnboarding: async (sourceId: string) => {
         await significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/{streamName}/onboarding/_execute',
+          'POST /internal/streams/{sourceId}/onboarding/_execute',
           {
             signal,
             params: {
-              path: { streamName },
+              path: { sourceId },
               body: {
                 action: 'cancel' as const,
               },

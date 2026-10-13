@@ -19,6 +19,7 @@ const logger = loggingSystemMock.createLogger();
 const semanticFieldMappings = {
   '.kibana-threat-reports': {
     mappings: {
+      dynamic: 'strict',
       properties: {
         content: {
           properties: {
@@ -138,6 +139,34 @@ describe('getThreatIntelReadiness', () => {
         reasonCodes: ['reports_index_check_failed'],
       })
     );
+  });
+
+  describe('when the reports index exists without its template', () => {
+    const buildUnmanagedDeps = () => {
+      const deps = buildDefaultDeps();
+      deps.esClient.indices.getMapping.mockResolvedValue({
+        '.kibana-threat-reports': { mappings: { dynamic: 'true' } },
+      } as never);
+      return deps;
+    };
+
+    it('returns blocked', async () => {
+      const result = await getThreatIntelReadiness(buildUnmanagedDeps());
+
+      expect(result.status).toBe('blocked');
+    });
+
+    it('returns reports_index_unmanaged', async () => {
+      const result = await getThreatIntelReadiness(buildUnmanagedDeps());
+
+      expect(result.reasonCodes).toEqual(['reports_index_unmanaged']);
+    });
+  });
+
+  it('does not return reports_index_unmanaged for a strict-mapped index', async () => {
+    const result = await getThreatIntelReadiness(buildDefaultDeps());
+
+    expect(result.reasonCodes).not.toContain('reports_index_unmanaged');
   });
 
   it('returns ready when dependencies and usable reports are present', async () => {
