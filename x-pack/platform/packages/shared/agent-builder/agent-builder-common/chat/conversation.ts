@@ -585,7 +585,7 @@ export interface ConversationRoundAuthor {
   username?: string;
   /** Optional display name. */
   full_name?: string;
-  /** Absent for external authors and older rounds. */
+  /** Absent for external authors. */
   type?: UserPrincipalType;
 }
 
