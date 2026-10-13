@@ -89,7 +89,7 @@ export function getConnectorType(
   };
 }
 
-function getWorkflowsConnectorTypeArgs(
+export function getWorkflowsConnectorTypeArgs(
   workflowsManagementApi: WorkflowsManagementApi
 ): GetWorkflowsConnectorTypeArgs {
   // Create workflows service function for the connector
