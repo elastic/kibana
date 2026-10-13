@@ -37,6 +37,7 @@ import {
   savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
@@ -366,9 +367,10 @@ describe('Discover state', () => {
 
   describe('Session load warnings', () => {
     const warning: DiscoverSessionWarning = {
-      type: 'dropped_panel',
+      type: 'dropped_item',
       tab_id: 'tab-1',
-      panel_id: 'control-1',
+      key: 'control_panels',
+      item_id: 'control-1',
       message: 'Unable to transform control panel [control-1].',
     };
 
@@ -1935,7 +1937,6 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
-      const persistedDataViewId = savedSearchMockWithESQL.searchSource.getField('index')!.id;
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQL,
@@ -1955,7 +1956,9 @@ describe('Discover state', () => {
         state.runtimeStateManager,
         state.getCurrentTab().id
       );
-      expect(persistedDataViewId).toBe(currentDataView$.getValue()?.id);
+      expect(currentDataView$.getValue()).toEqual(
+        expect.objectContaining({ type: ESQL_TYPE, title: 'index-pattern-esql' })
+      );
     });
 
     test('onChangeDataView', async () => {

@@ -70,6 +70,7 @@ jest.mock('@kbn/core-di-browser', () => {
         http: { basePath: { prepend: (p: string) => p } },
         notifications: {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+          tours: { isEnabled: () => false },
         },
       };
 
@@ -230,13 +231,6 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('renders the experimental badge in the page header', async () => {
-    renderPage();
-    await waitForRules();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('marks the sequence builder entry point as experimental', async () => {
     renderPage();
     await waitForRules();
@@ -327,7 +321,10 @@ describe('RulesListPage', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
+        screen.getByRole('heading', {
+          level: 2,
+          name: /no universal rules yet\. let's get started!/i,
+        })
       ).toBeInTheDocument();
     });
     expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();

@@ -6,16 +6,30 @@
  */
 
 export type { AgentBuilderEvent } from './base/events';
-export { apiTargets, type ApiTarget } from './apis';
+export {
+  apiTargets,
+  type ApiTarget,
+  allApisSelector,
+  toApiNamespace,
+  toNamespaceSelector,
+  isApiWildcardSelector,
+  matchesApiSelector,
+} from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
   ConversationAttachmentAddedTriggerId,
   ConversationAttachmentUpdatedTriggerId,
   ConversationAttachmentDeletedTriggerId,
+  ConversationUpdatedTriggerId,
+  conversationWriteSources,
+  conversationChangeKinds,
   type ConversationMetadataUpdatedEvent,
   type AttachmentAddedTriggerEvent,
   type AttachmentUpdatedTriggerEvent,
   type AttachmentDeletedTriggerEvent,
+  type ConversationUpdatedTriggerEvent,
+  type ConversationWriteSource,
+  type ConversationChangeKind,
 } from './triggers';
 export {
   internalNamespaces as toolNamespaces,
@@ -160,11 +174,15 @@ export {
   accessControlRoleMeets,
   maxAccessControlRole,
   getDefaultAgentAccessControl,
+  agentApprovalsEqual,
+  normalizeAgentApprovals,
   type AgentAccessControl,
   type AgentAccessControlEntry,
   type AgentAccessControlPrincipalType,
   type AgentDefinition,
+  type AgentApprovals,
   type AgentConfiguration,
+  type AgentConfigurationInput,
   type AgentConfigurationOverrides,
   type RuntimeAgentConfigurationOverrides,
   agentIdRegexp,
@@ -182,6 +200,7 @@ export {
   type AutoApprovedApi,
   type InteractivityConfig,
   type InteractivityConfigInput,
+  applyAgentApprovals,
   createNonInteractiveConfig,
   isApiAutoApproved,
   normalizeInteractive,
@@ -215,6 +234,7 @@ export {
   type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
   DEFAULT_CONVERSATION_TITLE,
+  CHAT_MESSAGE_MAX_LENGTH,
   CONVERSATION_TITLE_MAX_LENGTH,
   CONVERSATION_ID_MAX_LENGTH,
   CONVERSATION_METADATA_KEY_MAX_LENGTH,
@@ -317,6 +337,8 @@ export {
   type ExecutionAbortedInterruption,
   type RoundInterruptedEventData,
   type RoundInterruptedEvent,
+  type SlackPayload,
+  type SurfacePayload,
   type ToolCallProgress,
   isToolCallEvent,
   isBrowserToolCallEvent,

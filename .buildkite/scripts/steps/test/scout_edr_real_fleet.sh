@@ -4,12 +4,34 @@ set -euo pipefail
 
 # Live Elastic Defend Scout: Docker Fleet Server + Endpoint VM (Vagrant/VirtualBox).
 # Must not run in the default Scout lane — see scout_ci_config.yml excluded_configs.
+# CI passes one target per step so ECH and Serverless retry independently.
+# Resolve it before sourcing CI setup, which bootstraps the workspace.
+
+TARGET="${1:-}"
+case "$TARGET" in
+  stateful)
+    ARCH=stateful
+    DOMAIN=classic
+    ;;
+  serverless)
+    ARCH=serverless
+    DOMAIN=security_complete
+    ;;
+  *)
+    echo "Usage: $0 stateful|serverless" >&2
+    exit 1
+    ;;
+esac
 
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/functional/ensure_virtualbox.sh
 
-CONFIG_PATH="x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
-MODE='--arch stateful --domain classic'
+# UI project drives the browser. API project enrolls a host and talks to Kibana over HTTP.
+# Each config boots its own stack and VM. Keep both out of default Scout (excluded_configs).
+CONFIGS=(
+  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/playwright.config.ts"
+  "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/playwright.config.ts"
+)
 
 upload_events_if_available() {
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
@@ -40,39 +62,42 @@ upload_events_if_available() {
   fi
 }
 
-echo "--- Scout EDR Real Fleet Tests"
-echo "Config: $CONFIG_PATH"
-echo "Mode: $MODE"
+SUITE_EXIT_CODE=0
 
-start=$(date +%s)
+for CONFIG_PATH in "${CONFIGS[@]}"; do
+  echo "--- Scout EDR Real Fleet Tests"
+  echo "Config: $CONFIG_PATH"
+  echo "Mode: --arch $ARCH --domain $DOMAIN"
 
-set +e
-node scripts/scout run-tests --location local $MODE --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
-EXIT_CODE=$?
-set -e
+  start=$(date +%s)
 
-timeSec=$(($(date +%s)-start))
-if [[ $timeSec -gt 60 ]]; then
-  min=$((timeSec/60))
-  sec=$((timeSec-(min*60)))
-  duration="${min}m ${sec}s"
-else
-  duration="${timeSec}s"
-fi
+  set +e
+  node scripts/scout run-tests --location local --arch "$ARCH" --domain "$DOMAIN" --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+  EXIT_CODE=$?
+  set -e
 
-if [[ $EXIT_CODE -eq 2 ]]; then
-  echo "No tests found for EDR Real Fleet"
-  echo "^^^ +++"
-  exit 10
-fi
+  timeSec=$(($(date +%s)-start))
+  if [[ $timeSec -gt 60 ]]; then
+    min=$((timeSec/60))
+    sec=$((timeSec-(min*60)))
+    duration="${min}m ${sec}s"
+  else
+    duration="${timeSec}s"
+  fi
 
-upload_events_if_available
+  upload_events_if_available
 
-if [[ $EXIT_CODE -ne 0 ]]; then
-  echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet (${duration})"
-  echo "^^^ +++"
-  exit 10
-fi
+  if [[ $EXIT_CODE -eq 2 ]]; then
+    echo "No tests found for EDR Real Fleet ($CONFIG_PATH, ${ARCH}/${DOMAIN})"
+    echo "^^^ +++"
+    SUITE_EXIT_CODE=10
+  elif [[ $EXIT_CODE -ne 0 ]]; then
+    echo "Scout test exited with code $EXIT_CODE for EDR Real Fleet ($CONFIG_PATH, ${ARCH}/${DOMAIN}, ${duration})"
+    echo "^^^ +++"
+    SUITE_EXIT_CODE=10
+  else
+    echo "EDR Real Fleet passed for $CONFIG_PATH (${ARCH}/${DOMAIN}, ${duration})"
+  fi
+done
 
-echo "EDR Real Fleet passed (${duration})"
-exit 0
+exit "$SUITE_EXIT_CODE"

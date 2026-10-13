@@ -15,6 +15,7 @@ import {
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import type { WorkflowExecutionsDataClient } from './data_access_layer';
+import { getBulkUpdaterWriteResult } from './data_access_layer/lib/bulk/bulk_updater_write_result';
 
 /**
  * An execution document is written by several independent writers while the run is in flight:
@@ -54,6 +55,25 @@ export class WorkflowExecutionRepository {
     }
 
     return doc;
+  }
+
+  /**
+   * Reads only the cancellation fields of a workflow execution (real-time GET with a source filter).
+   * Returns null when the document is missing or belongs to another space.
+   */
+  public async getWorkflowExecutionCancelState(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Pick<EsWorkflowExecution, 'cancelRequested' | 'cancelledAt' | 'cancelledBy'> | null> {
+    const { items } = await this.workflowExecutionsDataClient.getByIds([workflowExecutionId], {
+      sourceIncludes: ['spaceId', 'cancelRequested', 'cancelledAt', 'cancelledBy'],
+    });
+    const doc = items[0]?.document;
+    if (!doc || doc.spaceId !== spaceId) {
+      return null;
+    }
+    const { cancelRequested, cancelledAt, cancelledBy } = doc;
+    return { cancelRequested, cancelledAt, cancelledBy };
   }
 
   public async getWorkflowExecutionWithVersion(
@@ -502,31 +522,39 @@ export class WorkflowExecutionRepository {
 
   /**
    * CAS: promotes `queued` → `pending` only when the document still carries `queued` status.
-   * Uses an atomic Painless script update so concurrent drain iterations cannot both promote
-   * the same execution (which would allow a concurrency group to exceed maxConcurrency).
+   * Uses a bulk updater (read-modify-write with OCC) so concurrent drain iterations cannot
+   * both promote the same execution (which would allow a concurrency group to exceed maxConcurrency).
    */
   public async tryCasPromoteQueuedWorkflowExecutionToPending(params: {
     workflowExecutionId: string;
     spaceId: string;
   }): Promise<boolean> {
-    const { result } = await this.workflowExecutionsDataClient.scriptUpdate({
-      id: params.workflowExecutionId,
-      script:
-        'if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {' +
-        '  ctx._source.status = params.pendingStatus;' +
-        '} else {' +
-        "  ctx.op = 'noop';" +
-        '}',
-      params: {
-        queuedStatus: ExecutionStatus.QUEUED,
-        pendingStatus: ExecutionStatus.PENDING,
-        spaceId: params.spaceId,
-      },
-      // Near-real-time search must see this doc as PENDING before the next
-      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
+    const { items } = await this.workflowExecutionsDataClient.bulk({
       refresh: 'wait_for',
+      items: [
+        {
+          operation: 'update',
+          documentId: params.workflowExecutionId,
+          sourceFields: ['status', 'spaceId'] as const,
+          retryOnConflict: UPDATE_RETRY_ON_CONFLICT,
+          updater: (current) => {
+            if (current.status === ExecutionStatus.QUEUED && current.spaceId === params.spaceId) {
+              return { status: ExecutionStatus.PENDING };
+            }
+            return 'noop';
+          },
+        },
+      ],
     });
-    return result === 'updated';
+
+    const writeResult = getBulkUpdaterWriteResult(items[0]);
+    if (writeResult === 'conflict') {
+      // The CAS never landed; throwing avoids reading this as another drain iteration winning.
+      throw new Error(
+        `Version conflict promoting queued workflow execution ${params.workflowExecutionId} to pending`
+      );
+    }
+    return writeResult === 'updated';
   }
 
   /**

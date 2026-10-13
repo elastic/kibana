@@ -13,6 +13,7 @@ import type {
   RunAgentParams,
   ToolHandlerFn,
   RunApprovals,
+  AgentHandlerContext,
 } from '@kbn/agent-builder-server';
 import type {
   CreateScopedRunnerDepsMock,
@@ -30,6 +31,7 @@ import {
   createToolRegistryMock,
 } from '../../../test_utils';
 import { createScopedRunner, createRunner } from './runner';
+import { createEmptyConversation } from '../../../test_utils/conversations';
 import { createAgentHandler } from '../run_agent/create_handler';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
@@ -319,6 +321,34 @@ describe('AgentBuilder runner', () => {
       expect(response).toEqual({
         result: 'someResult',
       });
+    });
+
+    describe('conversation access', () => {
+      const runWith = async (params: Partial<RunAgentParams>) => {
+        const runnerDeps = createRunnerDepsMock();
+        runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+        await createRunner(runnerDeps).runAgent({
+          agentId: 'test-tool',
+          agentParams: {
+            nextInput: { message: 'dolly' },
+            conversation: createEmptyConversation({ id: 'conversation-1' }),
+          },
+          request: scopedRunnerDeps.request,
+          ...params,
+        } as RunAgentParams);
+        return (agentHandler.mock.calls[0][1] as AgentHandlerContext).conversationAccess;
+      };
+
+      it('defaults to readWrite', async () => {
+        expect(await runWith({})).toBe('readWrite');
+      });
+
+      it.each(['readWrite', 'readOnly', 'none'] as const)(
+        'passes %s to the agent handler',
+        async (conversationAccess) => {
+          expect(await runWith({ conversationAccess })).toBe(conversationAccess);
+        }
+      );
     });
 
     it.each([

@@ -27,6 +27,18 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return Promise.resolve(this.workflowExecutions.get(workflowExecutionId) || null);
   }
 
+  public async getWorkflowExecutionCancelState(
+    workflowExecutionId: string,
+    spaceId: string
+  ): Promise<Pick<EsWorkflowExecution, 'cancelRequested' | 'cancelledAt' | 'cancelledBy'> | null> {
+    const doc = this.workflowExecutions.get(workflowExecutionId);
+    if (!doc || doc.spaceId !== spaceId) {
+      return null;
+    }
+    const { cancelRequested, cancelledAt, cancelledBy } = doc;
+    return { cancelRequested, cancelledAt, cancelledBy };
+  }
+
   public async getWorkflowExecutionWithVersion(
     workflowExecutionId: string,
     spaceId: string
