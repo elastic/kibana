@@ -9,17 +9,18 @@ import type { ProfilingSchema } from '@kbn/profiling-utils';
 import qs from 'query-string';
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { AsyncStatus } from '../../../hooks/use_async';
 import { useSchemaQueryParam } from '../../../hooks/use_schema_query_param';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { useProfilingStatus } from '../profiling_status/use_profiling_status';
-import type { ProfilingAvailableSchemas } from './use_profiling_available_schemas';
-import { useProfilingAvailableSchemas } from './use_profiling_available_schemas';
+import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
+import { useProfilingDependencies } from '../profiling_dependencies/use_profiling_dependencies';
+import { useEnabledProfilingStatus } from '../profiling_status/use_enabled_profiling_status';
+import { useSelectDefaultSchema } from '../../../hooks/use_select_default_schema';
+import { getSupportedSchemas } from '../../../utils/get_supported_schemas';
+import type { SchemaSelectorProps } from '../../schema_selector';
 
-export interface ProfilingSchemaContextValue extends ProfilingAvailableSchemas {
-  /** Schema selected in the URL, undefined until a default is selected. */
-  selectedSchema?: ProfilingSchema;
-  onSchemaChange: (schema: ProfilingSchema) => void;
-}
+/** The schema selected in the URL and the schemas the selector offers */
+export type ProfilingSchemaContextValue = SchemaSelectorProps;
 
 export const ProfilingSchemaContext = React.createContext<ProfilingSchemaContextValue | undefined>(
   undefined
@@ -36,12 +37,24 @@ export function ProfilingSchemaContextProvider({
   kuery: string;
   children: React.ReactNode;
 }) {
+  const {
+    services: { fetchAvailableSchemas },
+  } = useProfilingDependencies();
   const history = useHistory();
   const schema = useSchemaQueryParam();
-  // Although the status is always settled and enabled here,
-  // the raw status is used anyway because `useProfilingAvailableSchemas` takes the async status
-  const profilingStatus = useProfilingStatus();
+  const { data: profilingStatus } = useEnabledProfilingStatus();
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
+
+  const schemasWithData = useTimeRangeAsync(
+    ({ http }) =>
+      fetchAvailableSchemas({
+        http,
+        timeFrom: new Date(timeRange.start).getTime(),
+        timeTo: new Date(timeRange.end).getTime(),
+        kuery,
+      }),
+    [fetchAvailableSchemas, timeRange.start, timeRange.end, kuery]
+  );
 
   const setSchemaInUrl = useCallback(
     (nextSchema: ProfilingSchema, { replace }: { replace?: boolean }) => {
@@ -61,18 +74,22 @@ export function ProfilingSchemaContextProvider({
   );
 
   // The default schema replaces the URL without a schema instead of adding a history entry
-  const onDefaultSchema = useCallback(
+  const onSelectDefaultSchema = useCallback(
     (nextSchema: ProfilingSchema) => setSchemaInUrl(nextSchema, { replace: true }),
     [setSchemaInUrl]
   );
 
-  const { schemas, supportedSchemas, isLoading, error } = useProfilingAvailableSchemas({
-    timeFrom: new Date(timeRange.start).getTime(),
-    timeTo: new Date(timeRange.end).getTime(),
-    kuery,
-    profilingStatus,
-    shouldSelectDefault: schema === undefined,
-    onDefaultSchema,
+  const schemas = schemasWithData.data?.schemas;
+  const { error } = schemasWithData;
+  const isLoading = schemasWithData.status !== AsyncStatus.Settled;
+  const supportedSchemas = useMemo(() => getSupportedSchemas(profilingStatus), [profilingStatus]);
+
+  useSelectDefaultSchema({
+    schemas,
+    supportedSchemas,
+    isLoading,
+    hasSelectedSchema: schema !== undefined,
+    onSelectDefaultSchema,
   });
 
   const onSchemaChange = useCallback(

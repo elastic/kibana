@@ -41,20 +41,27 @@ const createProfilingStatus = ({
 });
 
 describe('EmbeddableSchemaSelector', () => {
-  const rangeFrom = new Date('2023-04-18T00:00:00.000Z').getTime();
-  const rangeTo = new Date('2023-04-18T00:15:00.000Z').getTime();
-
-  const renderSchemaSelector = (schema?: ProfilingSchema) => {
+  const renderSchemaSelector = ({
+    schema,
+    schemas,
+    isLoadingSchemas = false,
+    schemasError,
+  }: {
+    schema?: ProfilingSchema;
+    schemas?: ProfilingSchema[];
+    isLoadingSchemas?: boolean;
+    schemasError?: Error;
+  }) => {
     const onSchemaChange = jest.fn();
 
     render(
       <EmbeddableSchemaSelector
         {...({} as ProfilingEmbeddablesDependencies)}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        kuery='host.name : "host-1"'
         schema={schema}
         onSchemaChange={onSchemaChange}
+        schemas={schemas}
+        isLoadingSchemas={isLoadingSchemas}
+        schemasError={schemasError}
       />
     );
 
@@ -63,26 +70,15 @@ describe('EmbeddableSchemaSelector', () => {
 
   const getSelectorProps = () => jest.mocked(SchemaSelector).mock.lastCall?.[0];
 
-  const mockSchemasWithData = (schemas: ProfilingSchema[]) =>
-    mockFetchAvailableSchemas.mockResolvedValue({ schemas });
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchProfilingStatus.mockResolvedValue(createProfilingStatus());
   });
 
-  it('checks which schemas have data for the time range and query', async () => {
-    mockSchemasWithData([ProfilingSchema.OTEL]);
-
-    renderSchemaSelector(ProfilingSchema.OTEL);
+  it('offers the schemas with data given by its consumer', async () => {
+    renderSchemaSelector({ schema: ProfilingSchema.OTEL, schemas: [ProfilingSchema.OTEL] });
 
     await waitFor(() => expect(getSelectorProps()?.isLoading).toBe(false));
-    expect(mockFetchAvailableSchemas).toHaveBeenCalledWith({
-      http: expect.any(Object),
-      timeFrom: rangeFrom,
-      timeTo: rangeTo,
-      kuery: 'host.name : "host-1"',
-    });
     expect(getSelectorProps()).toEqual(
       expect.objectContaining({
         selectedSchema: ProfilingSchema.OTEL,
@@ -90,46 +86,63 @@ describe('EmbeddableSchemaSelector', () => {
         supportedSchemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
       })
     );
+    expect(mockFetchAvailableSchemas).not.toHaveBeenCalled();
   });
 
   it.each([
     [[ProfilingSchema.ECS, ProfilingSchema.OTEL], ProfilingSchema.OTEL],
     [[ProfilingSchema.ECS], ProfilingSchema.ECS],
     [[ProfilingSchema.OTEL], ProfilingSchema.OTEL],
-  ])('selects the default schema when %j have data', async (schemasWithData, expectedSchema) => {
-    mockSchemasWithData(schemasWithData);
-
-    const { onSchemaChange } = renderSchemaSelector();
+  ])('selects the default schema when %j have data', async (schemas, expectedSchema) => {
+    const { onSchemaChange } = renderSchemaSelector({ schemas });
 
     await waitFor(() => expect(onSchemaChange).toHaveBeenCalledWith(expectedSchema));
   });
 
-  it('selects Universal Profiling on a cluster with only its data when no schema has data in the time range', async () => {
+  it('selects Universal Profiling on a cluster with only its data when no schema has data for the view', async () => {
     mockFetchProfilingStatus.mockResolvedValue(createProfilingStatus({ hasOtelData: false }));
-    mockSchemasWithData([]);
 
-    const { onSchemaChange } = renderSchemaSelector();
+    const { onSchemaChange } = renderSchemaSelector({ schemas: [] });
 
     await waitFor(() => expect(onSchemaChange).toHaveBeenCalledWith(ProfilingSchema.ECS));
   });
 
-  it('keeps the given schema', async () => {
-    mockSchemasWithData([ProfilingSchema.OTEL]);
+  it('selects the default schema when the schemas with data cannot be fetched', async () => {
+    const schemasError = new Error('Request failed');
 
-    const { onSchemaChange } = renderSchemaSelector(ProfilingSchema.ECS);
+    const { onSchemaChange } = renderSchemaSelector({ schemasError });
+
+    await waitFor(() => expect(onSchemaChange).toHaveBeenCalledWith(ProfilingSchema.OTEL));
+    expect(getSelectorProps()?.error).toBe(schemasError);
+  });
+
+  it('keeps the given schema', async () => {
+    const { onSchemaChange } = renderSchemaSelector({
+      schema: ProfilingSchema.ECS,
+      schemas: [ProfilingSchema.OTEL],
+    });
 
     await waitFor(() => expect(getSelectorProps()?.isLoading).toBe(false));
     expect(onSchemaChange).not.toHaveBeenCalled();
     expect(getSelectorProps()?.selectedSchema).toBe(ProfilingSchema.ECS);
   });
 
+  it('waits for the schemas with data before selecting a default schema', async () => {
+    const { onSchemaChange } = renderSchemaSelector({ isLoadingSchemas: true });
+
+    await waitFor(() => expect(mockFetchProfilingStatus).toHaveBeenCalled());
+    expect(getSelectorProps()?.isLoading).toBe(true);
+    expect(onSchemaChange).not.toHaveBeenCalled();
+  });
+
   it('waits for the profiling status before selecting a default schema', async () => {
     mockFetchProfilingStatus.mockReturnValue(new Promise(() => {}));
-    mockSchemasWithData([ProfilingSchema.ECS, ProfilingSchema.OTEL]);
 
-    const { onSchemaChange } = renderSchemaSelector();
+    const { onSchemaChange } = renderSchemaSelector({
+      schemas: [ProfilingSchema.ECS, ProfilingSchema.OTEL],
+    });
 
-    await waitFor(() => expect(mockFetchAvailableSchemas).toHaveBeenCalled());
+    await waitFor(() => expect(mockFetchProfilingStatus).toHaveBeenCalled());
     expect(getSelectorProps()?.isLoading).toBe(true);
     expect(onSchemaChange).not.toHaveBeenCalled();
   });

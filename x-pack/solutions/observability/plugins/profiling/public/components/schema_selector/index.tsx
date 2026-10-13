@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProfilingSchema } from '@kbn/profiling-utils';
-import type { ProfilingAvailableSchemas } from '../contexts/profiling_schema/use_profiling_available_schemas';
 import { useProfilingSchema } from '../contexts/profiling_schema/use_profiling_schema';
 
 const SCHEMA_LABEL = i18n.translate('xpack.profiling.schemaSelector.label', {
@@ -119,10 +118,18 @@ const getHelpText = ({
   return undefined;
 };
 
-export interface SchemaSelectorProps extends ProfilingAvailableSchemas {
+export interface SchemaSelectorProps {
   /** Undefined until a default is selected */
   selectedSchema?: ProfilingSchema;
   onSchemaChange: (schema: ProfilingSchema) => void;
+  /** Schemas with data, undefined while unknown */
+  schemas?: ProfilingSchema[];
+  /** Schemas the deployment supports, regardless of their data */
+  supportedSchemas: ProfilingSchema[];
+  /** Whether the schemas with data or the supported schemas are loading */
+  isLoading: boolean;
+  /** Set when the schemas with data cannot be fetched */
+  error?: Error;
 }
 
 export function SchemaSelector({

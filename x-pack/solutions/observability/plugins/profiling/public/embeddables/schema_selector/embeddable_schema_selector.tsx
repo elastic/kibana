@@ -6,11 +6,12 @@
  */
 
 import type { EmbeddableProfilingSchemaSelectorProps } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { AsyncStatus } from '../../hooks/use_async';
+import { useSelectDefaultSchema } from '../../hooks/use_select_default_schema';
+import { getSupportedSchemas } from '../../utils/get_supported_schemas';
 import { ProfilingStatusContextProvider } from '../../components/contexts/profiling_status/profiling_status_context';
 import { useProfilingStatus } from '../../components/contexts/profiling_status/use_profiling_status';
-import { useProfilingAvailableSchemas } from '../../components/contexts/profiling_schema/use_profiling_available_schemas';
-import { TimeRangeContextProvider } from '../../components/contexts/time_range_context';
 import { SchemaSelector } from '../../components/schema_selector';
 import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 import { ProfilingEmbeddableProvider } from '../profiling_embeddable_provider';
@@ -22,47 +23,57 @@ export type EmbeddableSchemaSelectorSharedComponent =
   React.FC<EmbeddableProfilingSchemaSelectorProps>;
 
 function EmbeddableSchemaSelectorContent({
-  rangeFrom,
-  rangeTo,
-  kuery,
   schema,
   onSchemaChange,
+  schemas,
+  isLoadingSchemas,
+  schemasError,
 }: EmbeddableProfilingSchemaSelectorProps) {
   const profilingStatus = useProfilingStatus();
-  const availableSchemas = useProfilingAvailableSchemas({
-    timeFrom: rangeFrom,
-    timeTo: rangeTo,
-    kuery,
-    profilingStatus,
-    shouldSelectDefault: schema === undefined,
-    onDefaultSchema: onSchemaChange,
+  const isLoading = isLoadingSchemas || profilingStatus.status !== AsyncStatus.Settled;
+  const supportedSchemas = useMemo(
+    () => getSupportedSchemas(profilingStatus.data),
+    [profilingStatus.data]
+  );
+
+  useSelectDefaultSchema({
+    schemas,
+    supportedSchemas,
+    isLoading,
+    hasSelectedSchema: schema !== undefined,
+    onSelectDefaultSchema: onSchemaChange,
   });
 
   return (
-    <SchemaSelector {...availableSchemas} selectedSchema={schema} onSchemaChange={onSchemaChange} />
+    <SchemaSelector
+      selectedSchema={schema}
+      onSchemaChange={onSchemaChange}
+      schemas={schemas}
+      supportedSchemas={supportedSchemas}
+      isLoading={isLoading}
+      error={schemasError}
+    />
   );
 }
 
 export function EmbeddableSchemaSelector({
-  rangeFrom,
-  rangeTo,
-  kuery,
   schema,
   onSchemaChange,
+  schemas,
+  isLoadingSchemas,
+  schemasError,
   ...deps
 }: EmbeddableSchemaSelectorProps) {
   return (
     <ProfilingEmbeddableProvider deps={deps}>
       <ProfilingStatusContextProvider>
-        <TimeRangeContextProvider>
-          <EmbeddableSchemaSelectorContent
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            kuery={kuery}
-            schema={schema}
-            onSchemaChange={onSchemaChange}
-          />
-        </TimeRangeContextProvider>
+        <EmbeddableSchemaSelectorContent
+          schema={schema}
+          onSchemaChange={onSchemaChange}
+          schemas={schemas}
+          isLoadingSchemas={isLoadingSchemas}
+          schemasError={schemasError}
+        />
       </ProfilingStatusContextProvider>
     </ProfilingEmbeddableProvider>
   );
