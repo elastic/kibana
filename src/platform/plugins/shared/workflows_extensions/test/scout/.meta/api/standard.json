@@ -1,5 +1,5 @@
 {
-  "sha1": "2bbbd98d6f7224d87d4e31cfa1ab65fa9a09bf6e",
+  "sha1": "e9bfc6d7b2f51c0b3184c706d89834cbe9ef4f23",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -17,8 +17,6 @@
         "@cloud-serverless-security_complete",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
-        "@local-serverless-workplaceai",
-        "@cloud-serverless-workplaceai",
         "@local-serverless-vectordb",
         "@cloud-serverless-vectordb"
       ],

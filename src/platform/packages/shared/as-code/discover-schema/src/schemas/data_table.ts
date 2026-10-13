@@ -24,25 +24,22 @@ export const sortSchema = z
       description: 'The name of the field to sort by.',
     }),
     direction: z.enum(['asc', 'desc']).meta({
-      description:
-        'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.',
+      description: 'The sort direction: `asc` for ascending or `desc` for descending.',
     }),
   })
   .strict();
 
-export const documentsDisplayModeSchema = z
-  .union([z.literal('table'), z.literal('json')])
-  .optional();
+export const documentsDisplayModeSchema = z.enum(['table', 'json']).optional();
 
 export const dataTableLimitsSchema = z
   .object({
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
-        'The number of rows to display per page in the data table. If omitted, defaults to the advanced setting "discover:sampleRowsPerPage". Has no effect on ES|QL tabs since Kibana 8.16.',
+        'The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.',
     }),
     sample_size: z.number().min(10).max(10000).optional().meta({
       description:
-        'Discover display option: controls how many documents to sample for the data table. If omitted, defaults to the advanced setting "discover:sampleSize".',
+        'The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.',
     }),
   })
   .strict()
@@ -56,55 +53,50 @@ export const dataTableSchema = z
       .optional()
       .meta({
         description:
-          'Ordered list of field names to display in the data table. If omitted, defaults to the advanced setting "defaultColumns" or the referenced saved object.',
+          'Ordered list of field names to display in the data table. If omitted, defaults to the `defaultColumns` advanced setting or the referenced saved object.',
       }),
     column_settings: z.record(z.string(), columnSettingsEntrySchema).optional().meta({
       description:
-        'Per-column presentation settings keyed by field name (e.g. widths). Keys should correspond to entries in `column_order` when both are set.',
+        'Per-column settings keyed by field name, such as width. Keys should correspond to entries in `column_order` when both are set.',
     }),
     sort: z.array(sortSchema).max(100).default([]).meta({
       description: 'Sort configuration for the data table (field and direction).',
     }),
     density: z
-      .union([
-        z.literal(DataGridDensity.COMPACT),
-        z.literal(DataGridDensity.EXPANDED),
-        z.literal(DataGridDensity.NORMAL),
-      ])
+      .enum([DataGridDensity.COMPACT, DataGridDensity.EXPANDED, DataGridDensity.NORMAL])
       .optional()
       .meta({
         description:
-          'Discover display option: controls table row spacing. Choose "compact", "expanded", or "normal". If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
+          'The table row spacing. If omitted, Discover or the embedding application determines the density from its current settings, such as the user preference.',
       }),
     header_row_height: z
       .union([z.number().min(1).max(5), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls table header row height. Use a number (1–5) or "auto" to size based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
+          'The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'Discover display option: controls table data row height. Use a number (1–20) or "auto" to size based on content. If omitted, defaults to the advanced setting "discover:rowHeightOption".',
+          'The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.',
       }),
     documents_display_mode: documentsDisplayModeSchema.meta({
       description:
-        'Discover display option: controls whether documents are shown as a formatted table ("table") or as a raw JSON tree ("json").',
+        'How documents are shown: `table` for a formatted table or `json` for a raw JSON tree.',
     }),
     hide_nulls: z.boolean().optional().meta({
-      description:
-        'Discover display option: controls whether fields with null values are hidden in JSON document view.',
+      description: 'When `true`, fields with null values are hidden in the JSON document view.',
     }),
     wrap_lines: z.boolean().optional().meta({
       description:
-        'Discover display option: controls whether long values wrap in JSON document view. When false, values are truncated to a single line.',
+        'When `true`, long values wrap in the JSON document view. When `false`, they are truncated to a single line.',
     }),
     default_rendered_nodes: z.number().min(10).max(200).optional().meta({
       description:
-        'Discover display option: controls how many nodes each JSON cell renders by default in JSON document view.',
+        'The number of nodes each JSON cell renders by default in the JSON document view.',
     }),
   })
   .strict()

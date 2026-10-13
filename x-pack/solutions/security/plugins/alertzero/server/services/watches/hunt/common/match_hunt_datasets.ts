@@ -260,18 +260,7 @@ export const matchDatasetsWithModel = async ({
   let output: DatasetMatchOutput;
   try {
     const structured = model.chatModel.withStructuredOutput(datasetMatchSchema);
-    const raw = await structured.invoke(buildPrompt(options, report));
-    // The structured-output contract is only as good as the provider honours it: a
-    // missing or NaN `confidence` would pass the threshold compare below, and a
-    // non-array `datasets` would throw outside this try. Validate before trusting.
-    const parsed = datasetMatchSchema.safeParse(raw);
-    if (!parsed.success) {
-      logger?.warn(
-        `Hunt dataset model matching returned an invalid shape: ${parsed.error.message}`
-      );
-      return undefined;
-    }
-    output = parsed.data;
+    output = await structured.invoke(buildPrompt(options, report));
   } catch (err) {
     logger?.warn(
       `Hunt dataset model matching failed: ${err instanceof Error ? err.message : String(err)}`

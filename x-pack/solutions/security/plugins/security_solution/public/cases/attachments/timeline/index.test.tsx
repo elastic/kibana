@@ -18,12 +18,16 @@ jest.mock('./timeline_link', () => ({
     savedObjectId,
     timelineId,
     title,
+    isDeleted,
   }: {
     savedObjectId: string;
     timelineId: string;
     title: string;
+    isDeleted?: boolean;
   }) => (
-    <div data-test-subj={`timeline-link-mock-${savedObjectId}`}>{`${title}|${timelineId}`}</div>
+    <div data-test-subj={`timeline-link-mock-${savedObjectId}`}>{`${
+      isDeleted ? 'deleted' : 'added'
+    }|${title}|${timelineId}`}</div>
   ),
 }));
 
@@ -57,11 +61,25 @@ describe('Timeline attachment', () => {
     );
   });
 
-  it('returns the removal label', () => {
+  it('renders the removal link with the cached title', async () => {
     const attachmentType = getTimelineAttachment();
-    expect(attachmentType.getRemovalActivity?.(baseProps)).toEqual({
-      event: REMOVED_TIMELINE_LABEL,
-    });
+    const removalActivity = attachmentType.getRemovalActivity?.(baseProps);
+
+    render(<>{removalActivity?.event}</>);
+
+    expect(await screen.findByTestId('timeline-link-mock-saved-object-id-1')).toHaveTextContent(
+      'deleted|My investigation|timeline-id-1'
+    );
+  });
+
+  it('returns the bare removal label when there is no cached title', () => {
+    const attachmentType = getTimelineAttachment();
+    expect(
+      attachmentType.getRemovalActivity?.({
+        ...baseProps,
+        metadata: undefined,
+      } as unknown as UnifiedReferenceAttachmentViewProps)
+    ).toEqual({ event: REMOVED_TIMELINE_LABEL });
   });
 
   it('exposes the case view timelines tab via getAttachmentList', async () => {

@@ -286,7 +286,14 @@ export const RecoveryConditionCanvas: React.FC<RecoveryConditionCanvasProps> = (
   );
 
   return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%', overflow: 'hidden' }}>
+    <EuiFlexGroup
+      gutterSize="none"
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        overflow: hidden;
+      `}
+    >
       <CollapsibleSidePanel
         title={sequenceRulesTitle}
         isOpen={isRuleListOpen}
