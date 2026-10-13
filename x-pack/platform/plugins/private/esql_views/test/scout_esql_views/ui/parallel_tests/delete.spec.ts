@@ -48,6 +48,7 @@ spaceTest.describe('ES|QL View deletion', { tag: tags.stateful.classic }, () => 
     await expect(await esqlViews.findViewRow(singleView.name)).toBeHidden();
     await expect.poll(() => getEsqlView(esClient, singleView.name)).toBeUndefined();
 
+    await esqlViews.search('delete-bulk');
     await esqlViews.selectView(firstBulkView.name);
     await esqlViews.selectView(secondBulkView.name);
     await esqlViews.requestBulkDelete();

@@ -84,10 +84,6 @@ export class EsqlViewsPage {
 
   async reload(): Promise<void> {
     await this.reloadButton.click();
-    await this.reloadButton.and(this.page.locator('[disabled]')).waitFor({ state: 'visible' });
-    await this.reloadButton
-      .and(this.page.locator(':not([disabled])'))
-      .waitFor({ state: 'visible' });
   }
 
   async openCreateFlyout(): Promise<void> {
@@ -147,8 +143,7 @@ export class EsqlViewsPage {
   }
 
   async selectView(name: string): Promise<void> {
-    const row = await this.findViewRow(name);
-    await row.getByRole('checkbox').check();
+    await this.getViewRow(name).getByRole('checkbox').check();
   }
 
   async requestBulkDelete(): Promise<void> {
