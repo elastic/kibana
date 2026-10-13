@@ -33,6 +33,8 @@ import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
   useAlertBasedTilesWithDelta as useAlertBasedTiles,
   useAlertBasedTilesSeries,
+  useEntitiesWithAnomaliesSeries,
+  useNewEntitySeries,
   useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
   useNewEntityCountWithDelta as useNewEntityCount,
   useRiskMoversCountWithDelta as useRiskMoversCount,
@@ -168,6 +170,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     entityFilters,
     skip: skipTileQueries,
   });
+  const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !anomaliesLoading && !anomaliesDeltaLoading,
+    count: anomaliesCount,
+  });
   const {
     count: newEntityCount,
     delta: newEntityDelta,
@@ -179,6 +189,14 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     timeRange,
     entityFilters,
     skip: skipTileQueries,
+  });
+  const { trend: newEntityTrend } = useNewEntitySeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !newEntityLoading && !newEntityDeltaLoading,
+    count: newEntityCount,
   });
   const {
     count: riskMoversCount,
@@ -319,6 +337,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: anomaliesCount,
         delta: anomaliesDelta,
         isDeltaLoading: anomaliesDeltaLoading,
+        trend: anomaliesTrend,
         isLoading: anomaliesLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
@@ -455,6 +474,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: newEntityCount,
         delta: newEntityDelta,
         isDeltaLoading: newEntityDeltaLoading,
+        trend: newEntityTrend,
         isLoading: newEntityLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -482,6 +502,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       anomaliesCount,
       anomaliesDelta,
       anomaliesDeltaLoading,
+      anomaliesTrend,
       anomaliesLoading,
       riskMoversCount,
       riskMoversDelta,
@@ -498,6 +519,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       newEntityCount,
       newEntityDelta,
       newEntityDeltaLoading,
+      newEntityTrend,
       newEntityLoading,
       riskMoversMissingIndex,
       timeRange,
