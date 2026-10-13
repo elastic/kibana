@@ -10,7 +10,7 @@ import { taskManagerMock } from '../mocks';
 import {
   calculateNextRunAtFromSchedule,
   getNextRunAt,
-  getRruleScheduleDurationMs,
+  getRRuleScheduleDurationMs,
 } from './get_next_run_at';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { RruleSchedule } from '../task';
@@ -239,18 +239,18 @@ describe('getNextRunAt', () => {
     });
   });
 
-  describe('getRruleScheduleDurationMs', () => {
+  describe('getRRuleScheduleDurationMs', () => {
     const from = new Date('2026-08-10T16:11:09.328Z');
 
     test('returns the gap between occurrences for an hourly rrule', () => {
       expect(
-        getRruleScheduleDurationMs({ freq: 4, interval: 1, tzid: 'UTC', byminute: [13] }, from)
+        getRRuleScheduleDurationMs({ freq: 4, interval: 1, tzid: 'UTC', byminute: [13] }, from)
       ).toEqual(60 * 60 * 1000);
     });
 
     test('throws when the rrule has no upcoming occurrences', () => {
       expect(() =>
-        getRruleScheduleDurationMs(
+        getRRuleScheduleDurationMs(
           { freq: 4, interval: 1, tzid: 'UTC', byminute: [13], count: 1 } as RruleSchedule['rrule'],
           from
         )
@@ -259,7 +259,7 @@ describe('getNextRunAt', () => {
 
     test('returns the gap between occurrences for a daily rrule', () => {
       expect(
-        getRruleScheduleDurationMs(
+        getRRuleScheduleDurationMs(
           { freq: 3, interval: 1, tzid: 'UTC', byhour: [12], byminute: [15] },
           from
         )
