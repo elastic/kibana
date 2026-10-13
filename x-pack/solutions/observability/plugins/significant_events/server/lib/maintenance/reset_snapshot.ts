@@ -28,8 +28,8 @@ export const collectResetSnapshot = async (
 ): Promise<SignificantEventsResetSnapshot> => {
   const [indicatorStreamsResult, ownedRuleStreamsResult, featureCountResult, queryCountResult] =
     await Promise.allSettled([
-      kiClient.getStreamNamesWithKnowledgeIndicators(),
-      kiClient.findStreamNamesWithOwnedRules(),
+      kiClient.getSourceIdsWithKnowledgeIndicators(),
+      kiClient.findSourceIdsWithOwnedRules(),
       kiClient.countKnowledgeIndicators(KI_TYPE_FEATURE),
       kiClient.countKnowledgeIndicators(KI_TYPE_QUERY),
     ]);
@@ -71,7 +71,7 @@ export const collectResetSnapshot = async (
       return [];
     }
     try {
-      const queryLinksByStream = await kiClient.getStreamToQueryLinksMap(streamNames, {
+      const queryLinksByStream = await kiClient.getSourceToQueryLinksMap(streamNames, {
         includeExpired: true,
       });
       return Object.values(queryLinksByStream)

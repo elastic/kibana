@@ -40,12 +40,10 @@ export const EditPrivateLocationSchema = z.strictObject({
     .min(1, { error: minLengthMessage(1) })
     .max(MAX_ROUTE_ID_LENGTH)
     .optional(),
-  /** @deprecated Accepted for backward compatibility and ignored; sharding follows the license. */
-  isAgentSharding: z.boolean().optional(),
 });
 
 const EditPrivateLocationQuery = z.strictObject({
-  locationId: routeId,
+  id: routeId,
 });
 
 export type EditPrivateLocationAttributes = Pick<PrivateLocationAttributes, 'label' | 'tags'> &
@@ -199,7 +197,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   z.infer<typeof EditPrivateLocationSchema>
 > = () => ({
   method: 'PUT',
-  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{locationId}',
+  path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS + '/{id}',
   validate: {},
   validation: {
     request: {
@@ -210,7 +208,7 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient } = routeContext;
-    const { locationId } = request.params;
+    const { id: locationId } = request.params;
     const {
       label: newLocationLabel,
       tags: newTags,
