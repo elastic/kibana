@@ -12,6 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getAlertsIndex } from '../../../entities_grid/queries/esql';
 import { buildAlertBasedTilesQuery } from '../entities_with_alerts_query';
 import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies_query';
+import { buildNewEntityCountQuery } from '../new_entity_query';
 
 /*
  * The tile counts must be exact, however many entities there are. ES|QL's COUNT_DISTINCT is only
@@ -20,6 +21,7 @@ import { buildEntitiesWithAnomaliesCountQuery } from '../entities_with_anomalies
  *
  * - 6,000 host entities, each with one high severity alert and one anomaly record in the last day.
  * - The first 3,500 are watchlisted.
+ * - Every entity was first seen in the last day and has a risk score above 0.
  * - 100 more entities are aliases that resolve to one of the 6,000, so they must not add to a count.
  */
 
@@ -58,6 +60,7 @@ const loadFixture = async (client: Client) => {
         'entity.name': KEYWORD,
         'entity.attributes.watchlists': KEYWORD,
         'entity.lifecycle.first_seen': DATE,
+        'entity.risk.calculated_score': { type: 'double' },
         'entity.relationships.resolution.resolved_to': KEYWORD,
       },
     },
@@ -96,6 +99,7 @@ const loadFixture = async (client: Client) => {
         'entity.id': idOf(i),
         'entity.name': `exact-${i}`,
         'entity.lifecycle.first_seen': timestamp,
+        'entity.risk.calculated_score': 10,
         ...(i < WATCHLISTED ? { 'entity.attributes.watchlists': 'w1' } : {}),
       }
     );
@@ -128,6 +132,7 @@ const loadFixture = async (client: Client) => {
         'entity.id': aliasId,
         'entity.name': `alias-${i}`,
         'entity.lifecycle.first_seen': timestamp,
+        'entity.risk.calculated_score': 10,
         'entity.relationships.resolution.resolved_to': idOf(i),
         ...(i < WATCHLISTED ? { 'entity.attributes.watchlists': 'w1' } : {}),
       }
@@ -194,6 +199,11 @@ describe('tile counts above the COUNT_DISTINCT precision, on Elasticsearch', () 
 
   it('counts the entities with anomalies exactly, with aliases collapsed into their entity', async () => {
     const result = await row(buildEntitiesWithAnomaliesCountQuery(ENTITY_INDEX, '24h', [], JOBS));
+    expect(Number(result.value)).toBe(ENTITIES);
+  });
+
+  it('counts the New entity tile exactly, with aliases collapsed into their entity', async () => {
+    const result = await row(buildNewEntityCountQuery(ENTITY_INDEX, '24h'));
     expect(Number(result.value)).toBe(ENTITIES);
   });
 

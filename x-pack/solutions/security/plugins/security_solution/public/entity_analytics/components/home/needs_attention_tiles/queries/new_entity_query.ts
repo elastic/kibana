@@ -43,5 +43,8 @@ export const buildNewEntityCountQuery = (
     `| WHERE ${firstSeenCondition(timeRange, period)} AND entity.risk.calculated_score > 0`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
-    `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,
+    // One row per resolved entity, keeping every entity.id of it for the table filter. A plain COUNT of
+    // those rows is exact; COUNT_DISTINCT would only estimate, and is approximate above about 3,000.
+    `| STATS entity_ids = VALUES(entity.id) BY effective_id`,
+    `| STATS value = COUNT(effective_id), entity_ids = VALUES(entity_ids)`,
   ].join('\n');

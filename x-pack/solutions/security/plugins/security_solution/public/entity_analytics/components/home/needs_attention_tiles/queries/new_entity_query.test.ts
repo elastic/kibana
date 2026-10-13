@@ -7,26 +7,39 @@
 
 import { buildNewEntityCountQuery } from './new_entity_query';
 
-// The expected text is the query exactly as the hook built it inline before it moved here.
+// The expected text of the query: the tile's rule, then one row per resolved entity, then an exact count.
 const expected = (range: string, filters: string[] = []) =>
   [
     'FROM .entities-v1',
     `| WHERE entity.lifecycle.first_seen >= NOW() - ${range} AND entity.risk.calculated_score > 0`,
     ...filters,
     '| EVAL effective_id = COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)',
-    '| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)',
+    '| STATS entity_ids = VALUES(entity.id) BY effective_id',
+    '| STATS value = COUNT(effective_id), entity_ids = VALUES(entity_ids)',
   ].join('\n');
 
 describe('buildNewEntityCountQuery', () => {
+  it('counts the resolved entities with a plain COUNT, not the approximate COUNT_DISTINCT', () => {
+    const query = buildNewEntityCountQuery('.entities-v1');
+    expect(query).not.toContain('COUNT_DISTINCT');
+    expect(query.indexOf('BY effective_id')).toBeLessThan(query.indexOf('value = COUNT('));
+  });
+
+  it('keeps every entity.id of each resolved entity in the id list', () => {
+    expect(buildNewEntityCountQuery('.entities-v1')).toContain(
+      'entity_ids = VALUES(entity.id) BY effective_id'
+    );
+  });
+
   it.each([
     ['24h', '24 hours'],
     ['7d', '7 days'],
     ['30d', '30 days'],
-  ] as const)('builds the query for %s as the hook did before it moved', (timeRange, range) => {
+  ] as const)('builds the query for %s', (timeRange, range) => {
     expect(buildNewEntityCountQuery('.entities-v1', timeRange)).toBe(expected(range));
   });
 
-  it('defaults to 7 days, as the hook did', () => {
+  it('defaults to 7 days', () => {
     expect(buildNewEntityCountQuery('.entities-v1')).toBe(expected('7 days'));
   });
 
