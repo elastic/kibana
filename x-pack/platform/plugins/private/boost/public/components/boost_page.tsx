@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../common/constants';
 import { useBoostServices } from '../hooks/use_boost_services';
 import { useBoostState, useUpdateMode } from '../hooks/use_boost_state';
+import { BOOST_DOCS_URL } from '../doc_links';
 import { BOOST_APP_TITLE } from '../translations';
 import { ProfilesTab } from './profiles/profiles_tab';
 import { RulesTab } from './rules/rules_tab';
@@ -70,10 +71,18 @@ export const BoostPage = () => {
   }
 
   const isAdvanced = state.settings.mode === 'advanced';
-  const selectedTab: AdvancedTab = tab === 'rules' ? 'rules' : 'profiles';
+  // Rules come first: they decide where each profile applies.
+  const selectedTab: AdvancedTab = tab === 'profiles' ? 'profiles' : 'rules';
 
   const tabs: AppHeaderTab[] | undefined = isAdvanced
     ? [
+        {
+          id: 'rules',
+          label: i18n.translate('xpack.boost.page.rulesTab', { defaultMessage: 'Boost rules' }),
+          isSelected: selectedTab === 'rules',
+          onClick: () => history.push('/rules'),
+          'data-test-subj': 'boostRulesTab',
+        },
         {
           id: 'profiles',
           label: i18n.translate('xpack.boost.page.profilesTab', {
@@ -83,26 +92,19 @@ export const BoostPage = () => {
           onClick: () => history.push('/profiles'),
           'data-test-subj': 'boostProfilesTab',
         },
-        {
-          id: 'rules',
-          label: i18n.translate('xpack.boost.page.rulesTab', { defaultMessage: 'Boost rules' }),
-          isSelected: selectedTab === 'rules',
-          onClick: () => history.push('/rules'),
-          'data-test-subj': 'boostRulesTab',
-        },
       ]
     : undefined;
 
   const onModeChange = (checked: boolean) =>
     updateMode(checked ? 'advanced' : 'simple', {
-      onSuccess: () => history.push(checked ? '/profiles' : '/'),
+      onSuccess: () => history.push(checked ? '/rules' : '/'),
     });
 
   return (
     <>
       <AppHeader
         title={BOOST_APP_TITLE}
-        description={BOOST_PAGE_DESCRIPTION}
+        description={{ text: BOOST_PAGE_DESCRIPTION, learnMoreUrl: BOOST_DOCS_URL }}
         tabs={tabs}
         spacing="bleed"
         menu={{

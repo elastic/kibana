@@ -13,7 +13,8 @@ import type {
   DataSourceType,
 } from './types';
 
-const PROFILE_TYPE_BY_DATA_SOURCE: Readonly<Record<DataSourceType, BoostProfileType>> = {
+/** The profile type that applies to each kind of data source. */
+export const PROFILE_TYPE_BY_DATA_SOURCE: Readonly<Record<DataSourceType, BoostProfileType>> = {
   index: 'indices',
   data_stream: 'data_streams',
 };
@@ -30,40 +31,55 @@ const getSpecificity = (pattern: string): [number, number] => [
   pattern.replace(/\*/g, '').length,
 ];
 
-/**
- * Orders matching rules the way the Elasticsearch boost rule resolver does: higher priority first,
- * then exact names over wildcards, then more specific wildcards. Rule name breaks remaining ties.
- */
-const compareRules = (a: BoostRule, b: BoostRule): number => {
-  const [aExact, aLength] = getSpecificity(a.index_pattern);
-  const [bExact, bLength] = getSpecificity(b.index_pattern);
-  return (
-    b.priority - a.priority || bExact - aExact || bLength - aLength || a.name.localeCompare(b.name)
-  );
+/** Sorts patterns from most to least specific. */
+const compareSpecificity = (a: string, b: string): number => {
+  const [aExact, aLength] = getSpecificity(a);
+  const [bExact, bLength] = getSpecificity(b);
+  return bExact - aExact || bLength - aLength;
 };
 
-/** Sorts rules in the order Elasticsearch considers them, with the default rules last. */
-export const sortRules = (rules: readonly BoostRule[]): BoostRule[] =>
-  [...rules].sort((a, b) => Number(a.is_builtin) - Number(b.is_builtin) || compareRules(a, b));
-
-const ruleMatches = (
-  { index_pattern: pattern, boost_profile: profileName }: BoostRule,
+/** Returns the rule's most specific pattern that matches the data source, if any. */
+const getMatchingPattern = (
+  { index_patterns: patterns, boost_profile: profileName }: BoostRule,
   dataSource: BoostDataSource,
   profilesByName: ReadonlyMap<string, BoostProfile>
-): boolean =>
-  profilesByName.get(profileName)?.type === PROFILE_TYPE_BY_DATA_SOURCE[dataSource.type] &&
-  matchesIndexPattern(pattern, dataSource.name);
+): string | undefined =>
+  profilesByName.get(profileName)?.type === PROFILE_TYPE_BY_DATA_SOURCE[dataSource.type]
+    ? patterns
+        .filter((pattern) => matchesIndexPattern(pattern, dataSource.name))
+        .sort(compareSpecificity)[0]
+    : undefined;
 
-/** Returns the rule that applies to a data source, or `undefined` if none matches. */
+interface RuleMatch {
+  rule: BoostRule;
+  pattern: string;
+}
+
+const isRuleMatch = (match: { rule: BoostRule; pattern?: string }): match is RuleMatch =>
+  match.pattern !== undefined;
+
+/**
+ * Returns the rule that applies to a data source, or `undefined` if none matches. Matching rules
+ * are ordered the way the Elasticsearch boost rule resolver does: higher priority first, then exact
+ * names over patterns, then more specific patterns. Rule name breaks remaining ties.
+ */
 export const resolveRule = (
   dataSource: BoostDataSource,
   rules: readonly BoostRule[],
   profilesByName: ReadonlyMap<string, BoostProfile>
 ): BoostRule | undefined =>
-  rules.filter((rule) => ruleMatches(rule, dataSource, profilesByName)).sort(compareRules)[0];
+  rules
+    .map((rule) => ({ rule, pattern: getMatchingPattern(rule, dataSource, profilesByName) }))
+    .filter(isRuleMatch)
+    .sort(
+      (a, b) =>
+        b.rule.priority - a.rule.priority ||
+        compareSpecificity(a.pattern, b.pattern) ||
+        a.rule.name.localeCompare(b.rule.name)
+    )[0]?.rule;
 
 export interface RuleCoverage {
-  /** Data sources of the rule's type that its pattern matches. */
+  /** Data sources of the rule's type that its patterns match. */
   matches: number;
   /** Matching data sources the rule actually applies to, after higher-ranked rules. */
   appliesTo: number;
@@ -83,7 +99,7 @@ export const getRuleCoverage = (
   dataSources.forEach((dataSource) => {
     rules.forEach((rule) => {
       const ruleCoverage = coverage.get(rule.name);
-      if (ruleCoverage && ruleMatches(rule, dataSource, profilesByName)) {
+      if (ruleCoverage && getMatchingPattern(rule, dataSource, profilesByName) !== undefined) {
         ruleCoverage.matches++;
       }
     });
@@ -94,24 +110,6 @@ export const getRuleCoverage = (
     }
   });
   return coverage;
-};
-
-/** Counts the data sources whose applied rule uses each profile. */
-export const countDataSourcesByProfile = (
-  dataSources: readonly BoostDataSource[],
-  rules: readonly BoostRule[],
-  profiles: readonly BoostProfile[]
-): Map<string, number> => {
-  const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
-  const counts = new Map<string, number>();
-
-  dataSources.forEach((dataSource) => {
-    const rule = resolveRule(dataSource, rules, profilesByName);
-    if (rule) {
-      counts.set(rule.boost_profile, (counts.get(rule.boost_profile) ?? 0) + 1);
-    }
-  });
-  return counts;
 };
 
 /** Counts the rules that reference each profile. */

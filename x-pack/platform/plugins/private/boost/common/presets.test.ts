@@ -117,9 +117,9 @@ describe('createDefaultRules', () => {
   it('creates one locked `*` rule per profile type', () => {
     const rules = createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS));
 
-    expect(rules.map(({ index_pattern: pattern, priority }) => [pattern, priority])).toEqual([
-      ['*', 0],
-      ['*', 0],
+    expect(rules.map(({ index_patterns: patterns, priority }) => [patterns, priority])).toEqual([
+      [['*'], 0],
+      [['*'], 0],
     ]);
   });
 });

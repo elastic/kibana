@@ -178,14 +178,14 @@ export const createDefaultRules = ({
 }: DefaultRuleProfiles): BoostRule[] => [
   {
     name: DEFAULT_INDICES_RULE_NAME,
-    index_pattern: '*',
+    index_patterns: ['*'],
     boost_profile: indicesProfile,
     priority: 0,
     is_builtin: true,
   },
   {
     name: DEFAULT_DATA_STREAMS_RULE_NAME,
-    index_pattern: '*',
+    index_patterns: ['*'],
     boost_profile: dataStreamsProfile,
     priority: 0,
     is_builtin: true,

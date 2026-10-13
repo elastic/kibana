@@ -13,6 +13,8 @@ import { MAX_BOOST, MIN_BOOST } from './constants';
 export const PROFILE_NAME_MAX_LENGTH = 255;
 export const MAX_AGE_MAX_DAYS = 3650;
 export const INDEX_PATTERN_MAX_LENGTH = 255;
+// Bounds request size; picked lists are otherwise unlimited.
+export const MAX_RULE_INDEX_PATTERNS = 1000;
 // Elasticsearch stores rule priorities as 32-bit integers.
 export const MAX_RULE_PRIORITY = 2_147_483_647;
 
@@ -29,6 +31,8 @@ export type BoostRangeError =
 export type MaxAgeError = 'required' | 'out_of_range' | 'below_previous_period';
 
 export type IndexPatternError = 'required' | 'too_long' | 'invalid_characters';
+
+export type IndexPatternsError = 'required' | 'too_many' | 'wildcard_in_list';
 
 export type RulePriorityError = 'required' | 'out_of_range';
 
@@ -78,6 +82,21 @@ export const getIndexPatternError = (pattern: string): IndexPatternError | undef
   }
   // A rule holds one pattern, so Elasticsearch rejects comma-separated lists.
   return /[,\s]/.test(pattern) ? 'invalid_characters' : undefined;
+};
+
+/** Validates a rule's targets: one pattern, or a list of names without `*` patterns. */
+export const getIndexPatternsError = (
+  patterns: readonly string[]
+): IndexPatternsError | undefined => {
+  if (patterns.length === 0) {
+    return 'required';
+  }
+  if (patterns.length > MAX_RULE_INDEX_PATTERNS) {
+    return 'too_many';
+  }
+  return patterns.length > 1 && patterns.some((pattern) => pattern.includes('*'))
+    ? 'wildcard_in_list'
+    : undefined;
 };
 
 /** Validates a rule priority: a whole number of 0 or more. */

@@ -1,0 +1,81 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { BoostRuleInput } from '../../../common/types';
+import type {
+  IndexPatternError,
+  ProfileNameError,
+  RulePriorityError,
+} from '../../../common/validation';
+import {
+  getIndexPatternError,
+  getRuleNameError,
+  getRulePriorityError,
+} from '../../../common/validation';
+
+/** How the rule chooses its targets: one name or `*` pattern, or a list of picked names. */
+export type RuleTargetMode = 'pattern' | 'pick';
+
+// Form fields hold strings so inputs can be empty or mid-edit; they're parsed on validation.
+export interface RuleDraft {
+  name: string;
+  profileName: string;
+  mode: RuleTargetMode;
+  pattern: string;
+  picked: string[];
+  priority: string;
+}
+
+export interface RuleDraftErrors {
+  name?: ProfileNameError;
+  profile?: 'required';
+  pattern?: IndexPatternError;
+  picked?: 'required';
+  priority?: RulePriorityError;
+}
+
+/** A new rule starts in pattern mode at priority 0, which Elasticsearch also defaults to. */
+export const createEmptyRuleDraft = (profileName = ''): RuleDraft => ({
+  name: '',
+  profileName,
+  mode: 'pattern',
+  pattern: '',
+  picked: [],
+  priority: '0',
+});
+
+const parseNumber = (value: string): number | undefined => {
+  const parsed = Number(value);
+  return value.trim() === '' || Number.isNaN(parsed) ? undefined : parsed;
+};
+
+/** The draft's targets in the shape a rule stores them. */
+export const getDraftPatterns = ({ mode, pattern, picked }: RuleDraft): string[] =>
+  mode === 'pattern' ? [pattern.trim()] : picked;
+
+/** Returns only the errors that apply to the draft's target mode. */
+export const getRuleDraftErrors = (
+  draft: RuleDraft,
+  takenNames: readonly string[]
+): RuleDraftErrors => ({
+  name: getRuleNameError(draft.name, takenNames),
+  profile: draft.profileName ? undefined : 'required',
+  pattern: draft.mode === 'pattern' ? getIndexPatternError(draft.pattern.trim()) : undefined,
+  picked: draft.mode === 'pick' && draft.picked.length === 0 ? 'required' : undefined,
+  priority: getRulePriorityError(parseNumber(draft.priority)),
+});
+
+export const hasRuleDraftErrors = (errors: RuleDraftErrors): boolean =>
+  Object.values(errors).some((error) => error !== undefined);
+
+/** Converts a draft that passed validation into an API payload. */
+export const ruleDraftToInput = (draft: RuleDraft): BoostRuleInput => ({
+  name: draft.name,
+  index_patterns: getDraftPatterns(draft),
+  boost_profile: draft.profileName,
+  priority: Number(draft.priority),
+});

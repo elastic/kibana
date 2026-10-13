@@ -40,25 +40,32 @@ export const SAMPLE_PROFILES: readonly BoostProfileInput[] = [
 export const SAMPLE_RULES: readonly BoostRuleInput[] = [
   {
     name: 'storefront-catalogs',
-    index_pattern: 'catalog-*',
+    index_patterns: ['catalog-*'],
+    boost_profile: 'storefront-search',
+    priority: 10,
+  },
+  {
+    // A picked list rather than a pattern.
+    name: 'storefront-core',
+    index_patterns: ['products', 'synonyms'],
     boost_profile: 'storefront-search',
     priority: 10,
   },
   {
     name: 'archives-on-demand',
-    index_pattern: 'archive-*',
+    index_patterns: ['archive-*'],
     boost_profile: BUILTIN_INDICES_PROFILE_NAMES.on_demand,
     priority: 0,
   },
   {
     name: 'clickstream',
-    index_pattern: 'clicks-*',
+    index_patterns: ['clicks-*'],
     boost_profile: 'clickstream-recent',
     priority: 10,
   },
   {
     name: 'mobile-clicks-weekly',
-    index_pattern: 'clicks-mobile',
+    index_patterns: ['clicks-mobile'],
     boost_profile: BUILTIN_DATA_STREAMS_PROFILE_NAMES.last_7_days,
     priority: 20,
   },

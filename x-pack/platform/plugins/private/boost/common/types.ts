@@ -47,7 +47,12 @@ export type BoostProfileInput =
 
 export interface BoostRule {
   name: string;
-  index_pattern: string;
+  /**
+   * What the rule applies to: one index pattern (a name or a `*` pattern), or a list of picked
+   * index or data stream names. Elasticsearch accepts a single `index_pattern` per rule today, so
+   * this assumes multi-pattern support.
+   */
+  index_patterns: string[];
   boost_profile: string;
   priority: number;
   is_builtin: boolean;

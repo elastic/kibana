@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataStreamsWindowId, IndicesPresetId, SimpleModeDefaults } from '../../common/types';
 import { useBoostServices } from '../hooks/use_boost_services';
 import { useUpdateSimpleDefaults } from '../hooks/use_boost_state';
+import { PROVISIONING_NOTE } from '../translations';
 import { PresetCards } from './preset_cards';
 import { TitleWithIcon } from './title_with_icon';
 import { DATA_STREAMS_WINDOW_OPTIONS, INDICES_PRESET_OPTIONS } from './preset_options';
@@ -77,11 +78,12 @@ export const SimpleModeSettings = ({
   const onSave = () =>
     saveDefaults(draft, {
       onSuccess: () =>
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.boost.simpleMode.savedToast', {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.boost.simpleMode.savedToast', {
             defaultMessage: 'Boost defaults saved',
-          })
-        ),
+          }),
+          text: PROVISIONING_NOTE,
+        }),
     });
 
   return (

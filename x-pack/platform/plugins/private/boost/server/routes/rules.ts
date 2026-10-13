@@ -8,12 +8,18 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import { BOOST_RULES_API_PATH, MANAGE_BOOST_PRIVILEGE } from '../../common/constants';
-import type { IndexPatternError, ProfileNameError } from '../../common/validation';
+import type {
+  IndexPatternError,
+  IndexPatternsError,
+  ProfileNameError,
+} from '../../common/validation';
 import {
   INDEX_PATTERN_MAX_LENGTH,
+  MAX_RULE_INDEX_PATTERNS,
   MAX_RULE_PRIORITY,
   PROFILE_NAME_MAX_LENGTH,
   getIndexPatternError,
+  getIndexPatternsError,
   getRuleNameError,
 } from '../../common/validation';
 import { createRule, deleteRule, getState, updateRule } from '../lib/boost_store';
@@ -34,6 +40,12 @@ const INDEX_PATTERN_MESSAGES: Record<IndexPatternError, string> = {
   invalid_characters: 'must be a single name or pattern, without commas or spaces',
 };
 
+const INDEX_PATTERNS_MESSAGES: Record<IndexPatternsError, string> = {
+  required: 'must include at least one name or pattern',
+  too_many: `must include at most ${MAX_RULE_INDEX_PATTERNS} names`,
+  wildcard_in_list: 'must be one pattern, or a list of names without * patterns',
+};
+
 const ruleNameSchema = schema.string({
   maxLength: PROFILE_NAME_MAX_LENGTH,
   validate: (name) => {
@@ -44,13 +56,23 @@ const ruleNameSchema = schema.string({
 
 const ruleSchema = schema.object({
   name: ruleNameSchema,
-  index_pattern: schema.string({
-    maxLength: INDEX_PATTERN_MAX_LENGTH,
-    validate: (pattern) => {
-      const error = getIndexPatternError(pattern);
-      return error && INDEX_PATTERN_MESSAGES[error];
-    },
-  }),
+  index_patterns: schema.arrayOf(
+    schema.string({
+      maxLength: INDEX_PATTERN_MAX_LENGTH,
+      validate: (pattern) => {
+        const error = getIndexPatternError(pattern);
+        return error && INDEX_PATTERN_MESSAGES[error];
+      },
+    }),
+    {
+      minSize: 1,
+      maxSize: MAX_RULE_INDEX_PATTERNS,
+      validate: (patterns) => {
+        const error = getIndexPatternsError(patterns);
+        return error && INDEX_PATTERNS_MESSAGES[error];
+      },
+    }
+  ),
   boost_profile: schema.string({ minLength: 1, maxLength: PROFILE_NAME_MAX_LENGTH }),
   // Matches Elasticsearch, which defaults a missing priority to 0.
   priority: schema.number({

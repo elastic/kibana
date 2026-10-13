@@ -10,3 +10,13 @@ import { i18n } from '@kbn/i18n';
 export const BOOST_APP_TITLE = i18n.translate('xpack.boost.appTitle', {
   defaultMessage: 'Search boost',
 });
+
+/** Boost changes aren't instant: Elasticsearch provisions resources to match them. */
+export const PROVISIONING_NOTE = i18n.translate('xpack.boost.provisioningNote', {
+  defaultMessage:
+    'Changes take effect as resources are provisioned, which can take a while for larger projects.',
+});
+
+export const LEARN_MORE_LABEL = i18n.translate('xpack.boost.learnMoreLink', {
+  defaultMessage: 'Learn more',
+});

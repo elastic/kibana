@@ -123,7 +123,7 @@ export const DeleteProfileModal = ({
       aria-labelledby={titleId}
       titleProps={{ id: titleId }}
       title={i18n.translate('xpack.boost.profilesTab.deleteModalTitle', {
-        defaultMessage: "Delete ''{profileName}'' boost profile?",
+        defaultMessage: 'Delete boost profile "{profileName}"?',
         values: { profileName: name },
       })}
       onCancel={onClose}

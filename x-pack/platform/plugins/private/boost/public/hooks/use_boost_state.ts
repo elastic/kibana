@@ -18,6 +18,7 @@ import {
 import type {
   BoostMode,
   BoostProfileInput,
+  BoostRuleInput,
   BoostState,
   SimpleModeDefaults,
 } from '../../common/types';
@@ -93,6 +94,15 @@ export const useDeleteProfile = () =>
       http.delete<BoostState>(`${BOOST_PROFILES_API_PATH}/${encodeURIComponent(name)}`),
     i18n.translate('xpack.boost.deleteProfileErrorTitle', {
       defaultMessage: 'Unable to delete boost profile',
+    })
+  );
+
+export const useCreateRule = () =>
+  useBoostMutation(
+    (http, rule: BoostRuleInput) =>
+      http.post<BoostState>(BOOST_RULES_API_PATH, { body: JSON.stringify(rule) }),
+    i18n.translate('xpack.boost.createRuleErrorTitle', {
+      defaultMessage: 'Unable to create boost rule',
     })
   );
 

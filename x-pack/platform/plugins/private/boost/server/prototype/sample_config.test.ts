@@ -9,6 +9,7 @@ import { BUILTIN_PROFILES } from '../../common/presets';
 import {
   getBoostRangeError,
   getIndexPatternError,
+  getIndexPatternsError,
   getMaxAgeError,
   getProfileNameError,
   getRuleNameError,
@@ -42,7 +43,10 @@ describe('sample config', () => {
 
     SAMPLE_RULES.forEach((rule) => {
       expect(getRuleNameError(rule.name)).toBeUndefined();
-      expect(getIndexPatternError(rule.index_pattern)).toBeUndefined();
+      expect(getIndexPatternsError(rule.index_patterns)).toBeUndefined();
+      rule.index_patterns.forEach((pattern) =>
+        expect(getIndexPatternError(pattern)).toBeUndefined()
+      );
       expect(getRulePriorityError(rule.priority)).toBeUndefined();
       expect(profileNames).toContain(rule.boost_profile);
     });

@@ -12,12 +12,10 @@ import {
   translateSimpleDefaults,
 } from './presets';
 import {
-  countDataSourcesByProfile,
   countRulesByProfile,
   getRuleCoverage,
   matchesIndexPattern,
   resolveRule,
-  sortRules,
 } from './resolution';
 import type { BoostDataSource, BoostProfile, BoostRule } from './types';
 
@@ -36,9 +34,9 @@ const profiles = [...BUILTIN_PROFILES, customIndicesProfile];
 const profilesByName = new Map(profiles.map((profile) => [profile.name, profile]));
 const defaultRules = createDefaultRules(translateSimpleDefaults(DEFAULT_SIMPLE_MODE_DEFAULTS));
 
-const rule = (name: string, pattern: string, priority = 0): BoostRule => ({
+const rule = (name: string, patterns: string | string[], priority = 0): BoostRule => ({
   name,
-  index_pattern: pattern,
+  index_patterns: typeof patterns === 'string' ? [patterns] : patterns,
   boost_profile: 'products-fast',
   priority,
   is_builtin: false,
@@ -93,42 +91,22 @@ describe('resolveRule', () => {
       resolveRule(index('products'), [...rules, rule('priority', '*', 10)], profilesByName)?.name
     ).toBe('priority');
   });
+
+  it('ranks a picked list by its exact names', () => {
+    const rules = [
+      ...defaultRules,
+      rule('wildcard', 'products*'),
+      rule('picked', ['users', 'products']),
+    ];
+    expect(resolveRule(index('products'), rules, profilesByName)?.name).toBe('picked');
+    expect(resolveRule(index('users'), rules, profilesByName)?.name).toBe('picked');
+    expect(resolveRule(index('products-2'), rules, profilesByName)?.name).toBe('wildcard');
+  });
 });
 
 describe('profile counts', () => {
-  it('counts data sources by the profile their applied rule uses', () => {
-    const counts = countDataSourcesByProfile(
-      [index('products'), index('users'), dataStream('clicks-web')],
-      [...defaultRules, rule('exact', 'products')],
-      profiles
-    );
-    expect(Object.fromEntries(counts)).toEqual({
-      'products-fast': 1,
-      'elastic-performant': 1,
-      'elastic-last-7-days': 1,
-    });
-  });
-
   it('counts rules by profile', () => {
     expect(countRulesByProfile([rule('a', 'x'), rule('b', 'y')]).get('products-fast')).toBe(2);
-  });
-});
-
-describe('sortRules', () => {
-  it('lists rules in evaluation order, with the default rules last', () => {
-    const rules = [
-      ...defaultRules,
-      rule('wildcard', 'prod*'),
-      rule('exact', 'products'),
-      rule('priority', 'x-*', 10),
-    ];
-    expect(sortRules(rules).map(({ name }) => name)).toEqual([
-      'priority',
-      'exact',
-      'wildcard',
-      'elastic-default-data-streams',
-      'elastic-default-indices',
-    ]);
   });
 });
 

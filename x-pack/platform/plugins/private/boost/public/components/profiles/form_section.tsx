@@ -19,7 +19,7 @@ import { FullWidthDivider } from './full_width_divider';
 
 interface FormSectionProps {
   title: string;
-  description?: string;
+  description?: ReactNode;
   /** Omit the divider for a section with nothing above it. */
   hasDivider?: boolean;
   children: ReactNode;

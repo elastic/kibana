@@ -1,0 +1,67 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { i18n } from '@kbn/i18n';
+import type { BoostProfileType } from '../../../common/types';
+import type {
+  IndexPatternError,
+  ProfileNameError,
+  RulePriorityError,
+} from '../../../common/validation';
+import { INDEX_PATTERN_MAX_LENGTH, PROFILE_NAME_MAX_LENGTH } from '../../../common/validation';
+
+export const RULE_NAME_ERROR_MESSAGES: Readonly<Record<ProfileNameError, string>> = {
+  required: i18n.translate('xpack.boost.ruleForm.nameRequired', {
+    defaultMessage: 'Enter a name.',
+  }),
+  too_long: i18n.translate('xpack.boost.ruleForm.nameTooLong', {
+    defaultMessage: 'Use {max} characters or fewer.',
+    values: { max: PROFILE_NAME_MAX_LENGTH },
+  }),
+  invalid_characters: i18n.translate('xpack.boost.ruleForm.nameInvalid', {
+    defaultMessage:
+      'Use lowercase letters, numbers, hyphens, and underscores, starting with a letter or number.',
+  }),
+  already_exists: i18n.translate('xpack.boost.ruleForm.nameTaken', {
+    defaultMessage: 'A boost rule with this name already exists.',
+  }),
+};
+
+export const PROFILE_REQUIRED_MESSAGE = i18n.translate('xpack.boost.ruleForm.profileRequired', {
+  defaultMessage: 'Select a boost profile.',
+});
+
+export const INDEX_PATTERN_ERROR_MESSAGES: Readonly<Record<IndexPatternError, string>> = {
+  required: i18n.translate('xpack.boost.ruleForm.patternRequired', {
+    defaultMessage: 'Enter a name or pattern.',
+  }),
+  too_long: i18n.translate('xpack.boost.ruleForm.patternTooLong', {
+    defaultMessage: 'Use {max} characters or fewer.',
+    values: { max: INDEX_PATTERN_MAX_LENGTH },
+  }),
+  invalid_characters: i18n.translate('xpack.boost.ruleForm.patternInvalid', {
+    defaultMessage: 'Enter one name or pattern, without commas or spaces.',
+  }),
+};
+
+export const PICKED_REQUIRED_MESSAGES: Readonly<Record<BoostProfileType, string>> = {
+  indices: i18n.translate('xpack.boost.ruleForm.pickedIndicesRequired', {
+    defaultMessage: 'Select at least one index.',
+  }),
+  data_streams: i18n.translate('xpack.boost.ruleForm.pickedDataStreamsRequired', {
+    defaultMessage: 'Select at least one data stream.',
+  }),
+};
+
+export const RULE_PRIORITY_ERROR_MESSAGES: Readonly<Record<RulePriorityError, string>> = {
+  required: i18n.translate('xpack.boost.ruleForm.priorityRequired', {
+    defaultMessage: 'Enter a priority.',
+  }),
+  out_of_range: i18n.translate('xpack.boost.ruleForm.priorityOutOfRange', {
+    defaultMessage: 'Enter a whole number of 0 or more.',
+  }),
+};

@@ -19,20 +19,23 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiLink,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { MAX_BOOST, MIN_BOOST } from '../../../common/constants';
 import type { BoostProfile, BoostProfileType } from '../../../common/types';
+import { BOOST_DOCS_URL } from '../../doc_links';
 import { useBoostServices } from '../../hooks/use_boost_services';
+import { LEARN_MORE_LABEL, PROVISIONING_NOTE } from '../../translations';
 import { useCreateProfile, useUpdateProfile } from '../../hooks/use_boost_state';
 import { CardLabel } from '../card_label';
 import { PROFILE_TYPE_LABELS } from '../format';
 import { PresetCards } from '../preset_cards';
 import type { PresetOption } from '../preset_options';
+import { RuleFlyout } from '../rules/rule_flyout';
 import { BoostRangeInputs } from './boost_range_inputs';
 import { FormSection, FormSubsection } from './form_section';
 import { FullWidthDivider } from './full_width_divider';
@@ -165,12 +168,13 @@ export const ProfileFlyout = ({
     const save = isEditing ? updateProfile : createProfile;
     save(draftToProfileInput(draft), {
       onSuccess: () => {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.boost.profileForm.savedToast', {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.boost.profileForm.savedToast', {
             defaultMessage: 'Saved boost profile "{name}"',
             values: { name: draft.name },
-          })
-        );
+          }),
+          text: PROVISIONING_NOTE,
+        });
         if (createRule) {
           setSavedProfileName(draft.name);
         } else {
@@ -181,36 +185,8 @@ export const ProfileFlyout = ({
   };
 
   if (savedProfileName) {
-    // Placeholder for the rule step, which arrives with the Boost rules tab.
-    return (
-      <EuiFlyout onClose={onClose} size="m" paddingSize="m" aria-labelledby={titleId} ownFocus>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h2 id={titleId}>
-              {i18n.translate('xpack.boost.profileForm.createRuleTitle', {
-                defaultMessage: 'Create boost rule',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <EuiText>
-            <p>
-              {i18n.translate('xpack.boost.profileForm.createRulePlaceholder', {
-                defaultMessage:
-                  'The rule form for "{name}" comes with the Boost rules tab, the next prototype step.',
-                values: { name: savedProfileName },
-              })}
-            </p>
-          </EuiText>
-        </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiButtonEmpty size="s" onClick={onClose} flush="left">
-            {i18n.translate('xpack.boost.profileForm.closeButton', { defaultMessage: 'Close' })}
-          </EuiButtonEmpty>
-        </EuiFlyoutFooter>
-      </EuiFlyout>
-    );
+    // The second step: a rule that puts the new profile to use.
+    return <RuleFlyout initialProfileName={savedProfileName} onClose={onClose} />;
   }
 
   const nameError = visibleErrors.name && PROFILE_NAME_ERROR_MESSAGES[visibleErrors.name];
@@ -229,7 +205,7 @@ export const ProfileFlyout = ({
           <h2 id={titleId}>
             {isEditing
               ? i18n.translate('xpack.boost.profileForm.editTitle', {
-                  defaultMessage: "Edit ''{profileName}'' boost profile",
+                  defaultMessage: 'Edit boost profile "{profileName}"',
                   values: { profileName: draft.name },
                 })
               : duplicateOf
@@ -304,11 +280,18 @@ export const ProfileFlyout = ({
           title={i18n.translate('xpack.boost.profileForm.boostTitle', {
             defaultMessage: 'Boost',
           })}
-          description={i18n.translate('xpack.boost.profileForm.boostDescription', {
-            defaultMessage:
-              'The default is 1. Higher values handle more queries; lower values cost less. Enter values from {min} to {max}.',
-            values: { min: MIN_BOOST, max: MAX_BOOST.toLocaleString(i18n.getLocale()) },
-          })}
+          description={
+            <>
+              {i18n.translate('xpack.boost.profileForm.boostDescription', {
+                defaultMessage:
+                  'The default is 1. Higher values handle more queries; lower values cost less. Enter values from {min} to {max}.',
+                values: { min: MIN_BOOST, max: MAX_BOOST.toLocaleString(i18n.getLocale()) },
+              })}{' '}
+              <EuiLink href={BOOST_DOCS_URL} target="_blank" external>
+                {LEARN_MORE_LABEL}
+              </EuiLink>
+            </>
+          }
         >
           {draft.type === 'indices' ? (
             <BoostRangeInputs

@@ -13,7 +13,7 @@ import type {
 } from '@elastic/eui';
 import {
   EuiBadge,
-  EuiCode,
+  EuiButton,
   EuiConfirmModal,
   EuiIconTip,
   EuiInMemoryTable,
@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleCoverage } from '../../../common/resolution';
-import { getRuleCoverage, sortRules } from '../../../common/resolution';
+import { getRuleCoverage } from '../../../common/resolution';
 import type {
   BoostDataSource,
   BoostProfile,
@@ -32,6 +32,8 @@ import type {
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useDeleteRule } from '../../hooks/use_boost_state';
 import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
+import { RuleTargets } from './rule_targets';
+import { RuleFlyout } from './rule_flyout';
 
 interface RulesTabProps {
   rules: BoostRule[];
@@ -100,13 +102,13 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
   const { notifications } = useBoostServices();
   const deleteModalTitleId = useGeneratedHtmlId();
   const [ruleToDelete, setRuleToDelete] = useState<RuleRow>();
+  const [isCreating, setIsCreating] = useState(false);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
 
-  // Rows start in evaluation order, so the table reads top to bottom the way rules are applied.
   const rows = useMemo<RuleRow[]>(() => {
     const profileTypes = new Map(profiles.map(({ name, type }) => [name, type]));
     const coverage = getRuleCoverage(dataSources, rules, profiles);
-    return sortRules(rules).map((rule) => ({
+    return rules.map((rule) => ({
       ...rule,
       profileType: profileTypes.get(rule.boost_profile),
       ...(coverage.get(rule.name) ?? { matches: 0, appliesTo: 0 }),
@@ -157,47 +159,35 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       ),
     },
     {
-      field: 'index_pattern',
-      name: i18n.translate('xpack.boost.rulesTab.indexPatternColumn', {
-        defaultMessage: 'Index pattern',
-      }),
-      sortable: true,
-      render: (pattern: string) => <EuiCode>{pattern}</EuiCode>,
-    },
-    {
       field: 'boost_profile',
       name: i18n.translate('xpack.boost.rulesTab.profileColumn', {
-        defaultMessage: 'Boost profile',
+        defaultMessage: 'Profile',
       }),
       sortable: true,
     },
     {
-      field: 'profileType',
-      name: i18n.translate('xpack.boost.rulesTab.typeColumn', { defaultMessage: 'Type' }),
-      width: '12%',
-      sortable: true,
-      render: (type?: BoostProfileType) => (type ? PROFILE_TYPE_LABELS[type] : null),
-    },
-    {
-      field: 'appliesTo',
+      field: 'index_patterns',
       name: i18n.translate('xpack.boost.rulesTab.targetsColumn', {
         defaultMessage: 'Targets',
       }),
-      nameTooltip: {
-        content: i18n.translate('xpack.boost.rulesTab.targetsColumnTooltip', {
-          defaultMessage:
-            'Indices or data streams this rule currently applies to. Where several rules match, the highest-ranked one applies.',
-        }),
-      },
+      render: (patterns: string[], { profileType }: RuleRow) => (
+        <RuleTargets patterns={patterns} type={profileType} />
+      ),
+    },
+    {
+      // Spelled out ("3 indices") and left-aligned; it still sorts numerically.
+      field: 'appliesTo',
+      name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
+        defaultMessage: 'Applies to',
+      }),
       width: '12%',
       sortable: true,
-      dataType: 'number',
       render: (appliesTo: number, row: RuleRow) => {
         // Default rules catch whatever no custom rule claims, so partial coverage is expected.
         const note = row.is_builtin ? undefined : getCoverageNote(row);
         return (
           <span>
-            {appliesTo}
+            {formatDataSourceCount(row.profileType, appliesTo)}
             {note && (
               <>
                 {' '}
@@ -244,6 +234,13 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         ],
       },
     ],
+    toolsRight: canEdit ? (
+      <EuiButton fill size="s" onClick={() => setIsCreating(true)} data-test-subj="createBoostRule">
+        {i18n.translate('xpack.boost.rulesTab.createButton', {
+          defaultMessage: 'Create boost rule',
+        })}
+      </EuiButton>
+    ) : undefined,
   };
 
   return (
@@ -256,7 +253,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         itemId="name"
         columns={columns}
         search={search}
-        sorting={true}
+        sorting={{ sort: { field: 'name', direction: 'asc' } }}
         pagination={
           rows.length > PAGE_SIZE
             ? { pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }
@@ -264,6 +261,8 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         }
         data-test-subj="boostRulesTable"
       />
+
+      {isCreating && <RuleFlyout onClose={() => setIsCreating(false)} />}
 
       {ruleToDelete && (
         <EuiConfirmModal

@@ -41,7 +41,12 @@ type SettingsAttributes = Pick<BoostSettings, 'mode' | 'simple'> & {
 
 type ProfileAttributes = BoostProfileInput & { kind: 'profile' };
 
-type RuleAttributes = BoostRuleInput & { kind: 'rule' };
+type RuleAttributes = Omit<BoostRuleInput, 'index_patterns'> & {
+  kind: 'rule';
+  index_patterns?: string[];
+  /** Rules saved before a rule could hold several targets. */
+  index_pattern?: string;
+};
 
 const PROTOTYPE_KIND_FILTER = (kind: 'profile' | 'rule') =>
   `${BOOST_SAVED_OBJECT_TYPE}.attributes.kind: ${kind}`;
@@ -117,7 +122,15 @@ const getCustomRules = async (client: SavedObjectsClientContract): Promise<Boost
   });
 
   return savedObjects
-    .map(({ attributes: { kind, ...rule } }) => ({ ...rule, is_builtin: false }))
+    .map(
+      ({
+        attributes: { kind, index_patterns: indexPatterns, index_pattern: legacyPattern, ...rule },
+      }) => ({
+        ...rule,
+        index_patterns: indexPatterns ?? (legacyPattern ? [legacyPattern] : []),
+        is_builtin: false,
+      })
+    )
     .sort((a, b) => b.priority - a.priority || a.name.localeCompare(b.name));
 };
 
@@ -278,7 +291,11 @@ const saveRule = async (
   rule: BoostRuleInput,
   overwrite: boolean
 ) => {
-  const attributes: RuleAttributes = { kind: 'rule', ...rule };
+  const attributes: RuleAttributes = {
+    kind: 'rule',
+    ...rule,
+    index_patterns: [...new Set(rule.index_patterns)],
+  };
   await client.create(BOOST_SAVED_OBJECT_TYPE, attributes, { id: ruleId(rule.name), overwrite });
 };
 

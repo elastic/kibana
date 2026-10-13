@@ -13,7 +13,7 @@ import type {
 } from '@elastic/eui';
 import { EuiBadge, EuiButton, EuiInMemoryTable, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { countDataSourcesByProfile, countRulesByProfile } from '../../../common/resolution';
+import { countRulesByProfile } from '../../../common/resolution';
 import type {
   BoostDataSource,
   BoostProfile,
@@ -33,7 +33,6 @@ interface ProfilesTabProps {
 
 // Data stream profiles report their recent period's boost.
 type ProfileRow = BoostProfile & {
-  dataSourceCount: number;
   ruleCount: number;
   minBoost: number;
   maxBoost: number;
@@ -68,7 +67,6 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
   const [profileToDelete, setProfileToDelete] = useState<BoostProfile>();
 
   const rows = useMemo<ProfileRow[]>(() => {
-    const dataSourceCounts = countDataSourcesByProfile(dataSources, rules, profiles);
     const ruleCounts = countRulesByProfile(rules);
     const defaultRuleProfiles = new Set(
       rules
@@ -80,14 +78,13 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         profile.type === 'indices' ? profile : profile.recent;
       return {
         ...profile,
-        dataSourceCount: dataSourceCounts.get(profile.name) ?? 0,
         ruleCount: ruleCounts.get(profile.name) ?? 0,
         minBoost,
         maxBoost,
         usedByDefaultRule: defaultRuleProfiles.has(profile.name),
       };
     });
-  }, [profiles, rules, dataSources]);
+  }, [profiles, rules]);
 
   // Wide enough for up to three icon buttons (two primary actions plus the "All actions" menu).
   const actionsColumn: EuiTableActionsColumnType<ProfileRow> = {
@@ -166,29 +163,6 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       render: (type: BoostProfile['type']) => PROFILE_TYPE_LABELS[type],
     },
     {
-      // Sits next to Type, which tells whether the count is of indices or data streams.
-      field: 'dataSourceCount',
-      name: i18n.translate('xpack.boost.profilesTab.targetsColumn', {
-        defaultMessage: 'Targets',
-      }),
-      nameTooltip: {
-        content: i18n.translate('xpack.boost.profilesTab.targetsColumnTooltip', {
-          defaultMessage:
-            'Indices or data streams this profile currently applies to, through its rules.',
-        }),
-      },
-      width: '12%',
-      sortable: true,
-      dataType: 'number',
-    },
-    {
-      field: 'ruleCount',
-      name: i18n.translate('xpack.boost.profilesTab.rulesColumn', { defaultMessage: 'Rules' }),
-      width: '12%',
-      sortable: true,
-      dataType: 'number',
-    },
-    {
       field: 'minBoost',
       name: i18n.translate('xpack.boost.profilesTab.minBoostColumn', {
         defaultMessage: 'Min boost',
@@ -207,6 +181,15 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
       sortable: true,
       dataType: 'number',
       render: formatBoost,
+    },
+    {
+      field: 'ruleCount',
+      name: i18n.translate('xpack.boost.profilesTab.rulesUsingColumn', {
+        defaultMessage: 'Rules using',
+      }),
+      width: '12%',
+      sortable: true,
+      dataType: 'number',
     },
     ...(canEdit ? [actionsColumn] : []),
   ];
