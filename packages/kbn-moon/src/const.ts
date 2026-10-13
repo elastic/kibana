@@ -29,6 +29,8 @@ export const MOON_CONST = {
   PROJECT_LAYER_UNKNOWN: 'unknown',
   DEFAULT_TOOLCHAIN: 'node',
   TAG_JEST_UNIT: 'jest-unit-tests',
+  TAG_FTR: 'ftr-tests',
+  TAG_FTR_DOMAIN_PREFIX: 'ftr-domain-',
   TAG_DEV: 'dev',
   TAG_PROD: 'prod',
   TAG_PACKAGE: 'package',
@@ -38,4 +40,5 @@ export const MOON_CONST = {
   TASK_NAME_JEST_CI: 'jestCI',
   TASK_NAME_LINT: 'lint',
   FILE_GROUP_SRC: 'src',
+  FILE_GROUP_FTR_CONFIG: 'ftr-config',
 };
