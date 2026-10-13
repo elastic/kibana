@@ -1,0 +1,266 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+
+import {
+  buildBackfillQuery,
+  pollBackfill,
+  resolveTargetIndices,
+  startBackfill,
+} from './backfill_client';
+import { ALERT_ENTITY_ID } from '../../../../../common/field_maps/field_names';
+
+const SIGNAL = new AbortController().signal;
+const WINDOW = { start: '2026-09-08T00:00:00.000Z', end: '2026-10-08T00:00:00.000Z' };
+const USABLE = new Set(['index-1']);
+const ALERTS_INDEX = '.alerts-security.alerts-default';
+
+describe('buildBackfillQuery', () => {
+  it('restricts the search to indices that can be written to', () => {
+    // Alerts are `dynamic: false`, so a write to an index without the mapping would succeed and be
+    // invisible to scoring.
+    const query = buildBackfillQuery(WINDOW, USABLE);
+
+    expect(query.bool?.filter).toContainEqual({ terms: { _index: ['index-1'] } });
+  });
+
+  it('skips alerts that are already stamped', () => {
+    // What makes a pass self-limiting: every stamped alert leaves the result set for good.
+    const query = buildBackfillQuery(WINDOW, USABLE);
+
+    expect(query.bool?.must_not).toEqual([{ exists: { field: ALERT_ENTITY_ID } }]);
+  });
+
+  it('excludes alerts that could never produce an EUID', () => {
+    // Without this clause the update-by-query walks alerts it can do nothing with.
+    const query = buildBackfillQuery(WINDOW, USABLE);
+    const derivability = (query.bool?.filter as Array<Record<string, unknown>>).find(
+      (clause) => clause.bool !== undefined
+    );
+
+    expect(derivability).toMatchObject({ bool: { minimum_should_match: 1 } });
+  });
+});
+
+describe('resolveTargetIndices', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const logger = loggerMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  const mockIndices = ({
+    mapped,
+    settings,
+  }: {
+    mapped: Record<string, boolean>;
+    settings: Record<string, Record<string, string>>;
+  }) => {
+    esClient.indices.getFieldMapping.mockResolvedValue(
+      Object.fromEntries(
+        Object.entries(mapped).map(([index, isMapped]) => [
+          index,
+          { mappings: isMapped ? { [ALERT_ENTITY_ID]: { full_name: ALERT_ENTITY_ID } } : {} },
+        ])
+      ) as never
+    );
+    esClient.indices.getSettings.mockResolvedValue(
+      Object.fromEntries(
+        Object.entries(settings).map(([index, flat]) => [index, { settings: flat }])
+      ) as never
+    );
+  };
+
+  it('partitions indices into writable, read-only and unmapped', async () => {
+    mockIndices({
+      mapped: { blocked: true, unmapped: false, fine: true },
+      settings: { blocked: { 'index.blocks.write': 'true' }, unmapped: {}, fine: {} },
+    });
+
+    const { usable, unusable } = await resolveTargetIndices({
+      esClient,
+      logger,
+      alertsIndex: ALERTS_INDEX,
+      signal: SIGNAL,
+    });
+
+    expect(usable).toEqual(new Set(['fine']));
+    // Drives the distinction between "no alerts index yet" and "indices exist but all blocked".
+    expect(unusable).toBe(2);
+  });
+
+  it('names the unmapped indices it skipped', async () => {
+    mockIndices({ mapped: { 'index-1': false }, settings: { 'index-1': {} } });
+
+    await resolveTargetIndices({ esClient, logger, alertsIndex: ALERTS_INDEX, signal: SIGNAL });
+
+    const [[message]] = logger.warn.mock.calls;
+    expect(message).toContain(ALERT_ENTITY_ID);
+    expect(message).toContain('index-1');
+  });
+
+  it('treats every write block as read-only', async () => {
+    // Flood-stage sets read_only_allow_delete specifically, so all three have to be checked.
+    mockIndices({
+      mapped: { a: true, b: true, c: true },
+      settings: {
+        a: { 'index.blocks.write': 'true' },
+        b: { 'index.blocks.read_only': 'true' },
+        c: { 'index.blocks.read_only_allow_delete': 'true' },
+      },
+    });
+
+    const { usable, unusable } = await resolveTargetIndices({
+      esClient,
+      logger,
+      alertsIndex: ALERTS_INDEX,
+      signal: SIGNAL,
+    });
+
+    expect(usable.size).toBe(0);
+    expect(unusable).toBe(3);
+  });
+});
+
+describe('startBackfill', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const logger = loggerMock.create();
+
+  const start = () =>
+    startBackfill({
+      esClient,
+      logger,
+      alertsIndex: ALERTS_INDEX,
+      query: buildBackfillQuery(WINDOW, USABLE),
+      alertsPerSecond: 500,
+      signal: SIGNAL,
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.updateByQuery.mockResolvedValue({ task: 'node:123' } as never);
+  });
+
+  it('returns the Elasticsearch task running the request', async () => {
+    await expect(start()).resolves.toBe('node:123');
+  });
+
+  it('does not wait for the request to finish', async () => {
+    // A window of millions of alerts outlasts any Kibana task run, and the request keeps going in
+    // Elasticsearch regardless of what this node does next.
+    await start();
+
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ wait_for_completion: false })
+    );
+  });
+
+  it('throttles and tolerates concurrent modification', async () => {
+    await start();
+
+    expect(esClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({ requests_per_second: 500, conflicts: 'proceed' })
+    );
+  });
+
+  it('writes the EUIDs as a flat dotted key', async () => {
+    // Alert _source stores kibana.alert.* flattened, matching the rule-execution enrichment.
+    await start();
+
+    const [[request]] = esClient.updateByQuery.mock.calls as unknown as Array<
+      [{ script: { source: string } }]
+    >;
+    expect(request.script.source).toContain(`ctx._source['${ALERT_ENTITY_ID}'] = euids;`);
+  });
+
+  it('leaves alerts that resolve to no EUID untouched', async () => {
+    await start();
+
+    const [[request]] = esClient.updateByQuery.mock.calls as unknown as Array<
+      [{ script: { source: string } }]
+    >;
+    expect(request.script.source).toContain("ctx.op = 'noop'");
+  });
+});
+
+describe('pollBackfill', () => {
+  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  const logger = loggerMock.create();
+
+  const poll = () => pollBackfill({ esClient, logger, esTaskId: 'node:123', signal: SIGNAL });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    esClient = elasticsearchServiceMock.createElasticsearchClient();
+  });
+
+  it('reports progress while the request is running', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: false,
+      task: { status: { updated: 4200, total: 10_000 } },
+    } as never);
+
+    await expect(poll()).resolves.toMatchObject({
+      completed: false,
+      updated: 4200,
+      total: 10_000,
+    });
+  });
+
+  it('reports completion with the final count', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 10_000 } },
+      response: { failures: [] },
+    } as never);
+
+    await expect(poll()).resolves.toMatchObject({ completed: true, updated: 10_000 });
+  });
+
+  it('surfaces failures the request reported', async () => {
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 1 } },
+      response: { failures: [{ cause: { type: 'mapper_parsing_exception' } }] },
+    } as never);
+
+    const { failures } = await poll();
+
+    expect(failures).toHaveLength(1);
+    expect(failures[0]).toContain('mapper_parsing_exception');
+  });
+
+  it('reports a vanished task rather than treating it as finished', async () => {
+    // The node running it restarted, or someone cancelled it. Alerts it had not reached are still
+    // unstamped, so the request has to be reissued rather than the space marked done.
+    esClient.tasks.get.mockRejectedValue({ meta: { statusCode: 404 } });
+
+    await expect(poll()).resolves.toMatchObject({ vanished: true, completed: false });
+  });
+
+  it('reports alerts another writer held', async () => {
+    // `conflicts: proceed` skips those rather than failing, so the count is the only trace of them.
+    esClient.tasks.get.mockResolvedValue({
+      completed: true,
+      task: { status: { updated: 4200, version_conflicts: 7 } },
+      response: { failures: [] },
+    } as never);
+
+    await expect(poll()).resolves.toMatchObject({ updated: 4200, versionConflicts: 7 });
+  });
+
+  it('rethrows anything that is not a missing task', async () => {
+    esClient.tasks.get.mockRejectedValue({ meta: { statusCode: 500 } });
+
+    await expect(poll()).rejects.toBeDefined();
+  });
+});

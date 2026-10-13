@@ -1,0 +1,300 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  BulkIndexByScrollFailure,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { getEuidPainlessSourceUpdateScript } from '@kbn/entity-store/common/domain/euid/painless';
+
+import { ALERT_ENTITY_ID } from '../../../../../common/field_maps/field_names';
+import { getEntityAnalyticsEntityTypes } from '../../../../../common/entity_analytics/utils';
+import type { Range } from '../../../../../common/entity_analytics/risk_engine';
+import { retryTransientEsErrors } from '../../utils/retry_transient_es_errors';
+
+export interface TargetIndices {
+  /** Concrete indices we can write the field to. */
+  usable: Set<string>;
+  /** Concrete indices that exist but are read-only or missing the mapping. */
+  unusable: number;
+}
+
+/**
+ * Selects alerts inside the pinned window that have no EUID stamped yet.
+ *
+ * What makes a pass self-limiting, and a reissued request safe: every alert stamped leaves the
+ * result set for good, so a new request picks up exactly what the previous one did not reach.
+ */
+export const buildBackfillQuery = (
+  window: Range,
+  usableIndices: Set<string>
+): QueryDslQueryContainer => ({
+  bool: {
+    filter: [
+      { range: { '@timestamp': { gte: window.start, lt: window.end } } },
+      // Restricted here rather than left to the update to fail, so alerts in indices we cannot
+      // write to are never matched and the script never runs against them.
+      { terms: { _index: [...usableIndices] } },
+      {
+        bool: {
+          should: getEntityAnalyticsEntityTypes().map((entityType) =>
+            euid.dsl.getEuidDocumentsContainsIdFilter(entityType)
+          ),
+          minimum_should_match: 1,
+        },
+      },
+    ],
+    must_not: [{ exists: { field: ALERT_ENTITY_ID } }],
+  },
+});
+
+/**
+ * The concrete indices behind the alias that can actually be updated, filtering out those blocked
+ * from writing and those without `ALERT_ENTITY_ID` in their mapping.
+ *
+ * The mapping should always be there — the alerting framework installs it on every concrete index
+ * at startup and retries on each restart. It is checked because alerts are mapped `dynamic: false`,
+ * so writing the field to an index that lacks it would succeed and then be invisible to scoring.
+ */
+export const resolveTargetIndices = async ({
+  esClient,
+  logger,
+  alertsIndex,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  alertsIndex: string;
+  signal: AbortSignal;
+}): Promise<TargetIndices> => {
+  const usable = new Set<string>();
+  const readOnly: string[] = [];
+  const unmapped: string[] = [];
+
+  const [fieldMappings, settings] = await Promise.all([
+    retryTransientEsErrors(
+      () =>
+        esClient.indices.getFieldMapping(
+          {
+            index: alertsIndex,
+            fields: ALERT_ENTITY_ID,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          },
+          { signal }
+        ),
+      { logger }
+    ),
+    retryTransientEsErrors(
+      () =>
+        esClient.indices.getSettings(
+          {
+            index: alertsIndex,
+            flat_settings: true,
+            ignore_unavailable: true,
+            allow_no_indices: true,
+          },
+          { signal }
+        ),
+      { logger }
+    ),
+  ]);
+
+  for (const [index, indexSettings] of Object.entries(settings)) {
+    const flat = indexSettings.settings as Record<string, string> | undefined;
+    const writeBlocked =
+      flat?.['index.blocks.write'] === 'true' ||
+      flat?.['index.blocks.read_only'] === 'true' ||
+      flat?.['index.blocks.read_only_allow_delete'] === 'true';
+
+    if (writeBlocked) {
+      readOnly.push(index);
+    } else if (Object.keys(fieldMappings[index]?.mappings ?? {}).length === 0) {
+      unmapped.push(index);
+    } else {
+      usable.add(index);
+    }
+  }
+
+  if (readOnly.length > 0) {
+    logger.warn(`Skipping ${readOnly.length} read-only alert index(es): ${readOnly.join(', ')}`);
+  }
+
+  if (unmapped.length > 0) {
+    logger.warn(
+      `Skipping ${
+        unmapped.length
+      } alert index(es) without the "${ALERT_ENTITY_ID}" mapping: ${unmapped.join(
+        ', '
+      )}. Their alerts keep using the risk scoring fallback.`
+    );
+  }
+
+  return { usable, unusable: readOnly.length + unmapped.length };
+};
+
+/** How many alerts are still waiting to be stamped, used to decide which space to run first. */
+export const countPendingAlerts = async ({
+  esClient,
+  logger,
+  alertsIndex,
+  query,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  alertsIndex: string;
+  query: QueryDslQueryContainer;
+  signal: AbortSignal;
+}): Promise<number> => {
+  const response = await retryTransientEsErrors(
+    () =>
+      esClient.count(
+        {
+          index: alertsIndex,
+          query,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        },
+        { signal }
+      ),
+    { logger }
+  );
+
+  return response.count;
+};
+
+/**
+ * Starts the update-by-query for one space and returns the Elasticsearch task running it.
+ *
+ * Deliberately asynchronous: a window of millions of alerts takes far longer than a Kibana task
+ * may run for, and the request keeps going in Elasticsearch regardless of what this Kibana node
+ * does afterwards. Progress is recovered by polling the returned id.
+ */
+export const startBackfill = async ({
+  esClient,
+  logger,
+  alertsIndex,
+  query,
+  alertsPerSecond,
+  maxDocs,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  alertsIndex: string;
+  query: QueryDslQueryContainer;
+  alertsPerSecond: number;
+  maxDocs: number;
+  signal: AbortSignal;
+}): Promise<string | undefined> => {
+  const script = getEuidPainlessSourceUpdateScript(
+    getEntityAnalyticsEntityTypes(),
+    // Alert `_source` stores `kibana.alert.*` as flattened dotted keys — the rule-execution
+    // enrichment writes `_source[ALERT_ENTITY_ID]` the same way. Do not unflatten here.
+    `ctx._source['${ALERT_ENTITY_ID}'] = euids;`
+  );
+
+  const response = await retryTransientEsErrors(
+    () =>
+      esClient.updateByQuery(
+        {
+          index: alertsIndex,
+          query,
+          script: { lang: 'painless', source: script },
+          // Alerts are modified concurrently by rule execution and by workflow status changes; a
+          // document that moved under us is re-read on the next pass rather than failing this one.
+          conflicts: 'proceed',
+          requests_per_second: alertsPerSecond,
+          // Bounds the transient disk growth and the running time of any one request; whatever is
+          // left over is picked up by the next one, which the query naturally excludes already.
+          max_docs: maxDocs,
+          wait_for_completion: false,
+          ignore_unavailable: true,
+          allow_no_indices: true,
+        },
+        { signal }
+      ),
+    { logger }
+  );
+
+  return typeof response.task === 'string' ? response.task : undefined;
+};
+
+export interface BackfillProgress {
+  completed: boolean;
+  updated: number;
+  /** Alerts the request matched when it started — what `updated` is counting towards. */
+  total: number;
+  /**
+   * Alerts the request stepped over because something else wrote them first. `conflicts: proceed`
+   * means these are skipped rather than retried and do not make the request fail, so a completed
+   * request with a non-zero count has left alerts unstamped.
+   */
+  versionConflicts: number;
+  /** True when the task id no longer resolves, so the request has to be started again. */
+  vanished: boolean;
+  failures: string[];
+}
+
+/**
+ * Reads the state of a running update-by-query.
+ *
+ * A task id stops resolving if the node running it restarted or someone cancelled it. That is
+ * reported rather than treated as completion, because the alerts it had not reached yet are still
+ * unstamped and the request has to be reissued.
+ */
+export const pollBackfill = async ({
+  esClient,
+  logger,
+  esTaskId,
+  signal,
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  esTaskId: string;
+  signal: AbortSignal;
+}): Promise<BackfillProgress> => {
+  try {
+    const task = await retryTransientEsErrors(
+      () => esClient.tasks.get({ task_id: esTaskId, wait_for_completion: false }, { signal }),
+      { logger }
+    );
+
+    const status = task.task?.status as
+      | { total?: number; updated?: number; version_conflicts?: number }
+      | undefined;
+    const response = task.response as { failures?: BulkIndexByScrollFailure[] } | undefined;
+    const failures = (response?.failures ?? []).map((failure) => JSON.stringify(failure));
+
+    return {
+      completed: task.completed === true,
+      updated: status?.updated ?? 0,
+      total: status?.total ?? 0,
+      versionConflicts: status?.version_conflicts ?? 0,
+      vanished: false,
+      failures,
+    };
+  } catch (e) {
+    if (e?.meta?.statusCode === 404) {
+      logger.warn(
+        `Update-by-query task "${esTaskId}" no longer exists; its alerts will be picked up by a new request.`
+      );
+      return {
+        completed: false,
+        updated: 0,
+        total: 0,
+        versionConflicts: 0,
+        vanished: true,
+        failures: [],
+      };
+    }
+    throw e;
+  }
+};
