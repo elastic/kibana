@@ -17,6 +17,7 @@ import type {
 import { TaskCost, TaskPriority, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import {
   BRIEF_RANGES,
+  BRIEF_JOB_DEADLINE_MS,
   BRIEF_TASK_TIMEOUT,
   EXECUTIVE_BRIEF_GENERATE_TASK_TYPE,
 } from '../../../../../common/entity_analytics/executive_brief/constants';
@@ -29,9 +30,6 @@ import { runSignals } from '../signals/run_signals';
 import type { SignalContext } from '../signals/types';
 import type { BriefStore } from '../store/brief_store';
 import type { BriefTelemetry } from '../telemetry/types';
-
-/** Matches BRIEF_TASK_TIMEOUT ('5m'); used to tell a timeout from an interruption. */
-const BRIEF_TASK_TIMEOUT_MS = 5 * 60 * 1000;
 
 const paramsSchema = schema.object({
   docId: schema.string({ minLength: 1, maxLength: 128 }),
@@ -74,7 +72,7 @@ const createGenerateBriefTaskRunner = (
   const startedAtMs = Date.now();
 
   const abortReason = (): BriefAbortReason =>
-    Date.now() - startedAtMs >= BRIEF_TASK_TIMEOUT_MS
+    Date.now() - startedAtMs >= BRIEF_JOB_DEADLINE_MS
       ? new BriefAbortReason('timeout', 'The brief took too long to generate and was stopped.')
       : new BriefAbortReason('interrupted', 'The brief generation was interrupted.');
 

@@ -30,11 +30,11 @@ export interface BriefJobView {
   /** Only while running. */
   stage?: BriefJobStage;
   startedAt: string;
-  /** The last heartbeat. */
+  /** The last stage change, or the finish time. */
   updatedAt: string;
   /**
    * Milliseconds from `startedAt` to `updatedAt`; only when succeeded or failed. For a job read as
-   * interrupted (no recent heartbeat), it runs to the last heartbeat.
+   * interrupted (past its deadline), it runs to its last stage change.
    */
   took?: number;
   /** Only when failed. */
@@ -44,12 +44,8 @@ export interface BriefJobView {
 /** GET status response: the latest job alone, for polling. */
 export type BriefStatusResponse = BriefJobView;
 
-/** POST response: the started (or reused) job. */
-export interface GenerateBriefResponse {
-  job: Pick<BriefJobView, 'id' | 'status' | 'stage'>;
-  /** True when an existing running job was returned instead of starting a new one. */
-  reused: boolean;
-}
+/** POST response: the started job. It replaces any job still in progress. */
+export type GenerateBriefResponse = BriefJobView;
 
 /**
  * Everything needed to render the brief; `verdict` and `assessments` are absent when nothing was

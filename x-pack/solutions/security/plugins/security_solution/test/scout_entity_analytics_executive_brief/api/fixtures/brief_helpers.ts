@@ -127,7 +127,11 @@ export const holdSubmitBrief = (llmProxy: LlmProxy, brief: Brief = HIGH_RISK_ENT
     when: (body) => getToolChoiceName(body.tool_choice) === SUBMIT_BRIEF_TOOL_NAME,
     responseMock: createToolCallMessage(SUBMIT_BRIEF_TOOL_NAME, brief),
   });
-  return { release: () => interceptor.completeAfterIntercept() };
+  return {
+    /** Resolves once the run is waiting on the held call. */
+    waitForCall: () => interceptor.waitForIntercept(),
+    release: () => interceptor.completeAfterIntercept(),
+  };
 };
 
 /** Reads the full brief with GET; throws unless it answers 200. */
@@ -213,7 +217,7 @@ export const generateBrief = async ({
     );
   }
 
-  const jobId = response.body.job.id;
+  const jobId = response.body.id;
   const document = await waitForBriefJob({ apiClient, headers, jobId, route });
   if (document.job.status !== 'succeeded') {
     throw new Error(`Executive brief job ${jobId} failed: ${JSON.stringify(document.job.error)}`);

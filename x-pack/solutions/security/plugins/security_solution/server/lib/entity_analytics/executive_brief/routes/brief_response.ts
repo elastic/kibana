@@ -16,13 +16,9 @@ import type {
 
 const isFinished = ({ status }: BriefJob): boolean => status === 'succeeded' || status === 'failed';
 
-/**
- * Maps a stored job to the job view shown by the GET routes. `took` runs from the start to the
- * last heartbeat, which finishing a job sets; for a stale job read as interrupted, that is the last
- * heartbeat it sent.
- */
+/** Maps a stored job to the job view returned by the routes; `took` is set once it finished. */
 export const toJobView = (job: BriefJob): BriefJobView => {
-  const updatedAt = job.heartbeat_at ?? job.started_at;
+  const updatedAt = job.updated_at ?? job.started_at;
   return {
     id: job.id,
     status: job.status,

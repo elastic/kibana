@@ -25,7 +25,8 @@ export interface BriefJob {
   status: BriefJobStatus;
   stage?: BriefJobStage;
   started_at: string;
-  heartbeat_at?: string;
+  /** The last stage change, or the finish time. */
+  updated_at?: string;
   error?: { code: BriefErrorCode; message: string };
 }
 

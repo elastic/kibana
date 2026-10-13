@@ -16,11 +16,10 @@ import {
 } from '../../../../../common/entity_analytics/executive_brief/constants';
 import { generateBriefRequestBodySchema } from '../../../../../common/entity_analytics/executive_brief/api';
 import type { GenerateBriefResponse } from '../../../../../common/entity_analytics/executive_brief/api';
-import type { BriefJob } from '../../../../../common/entity_analytics/executive_brief/document';
 import { resolveConnector } from '../pipeline/resolve_connector';
-import { isJobActive } from '../store/brief_store';
 import { BriefStoreConflictError } from '../store/errors';
 import { scheduleGenerateBriefTask } from '../tasks/generate_brief_task';
+import { toJobView } from './brief_response';
 import type { ExecutiveBriefRouteDeps } from './route_utils';
 import {
   BRIEF_MINIMUM_LICENSE,
@@ -31,13 +30,8 @@ import {
   noStableUserResponse,
 } from './route_utils';
 
-const toGenerateResponse = (job: BriefJob, reused: boolean): GenerateBriefResponse => ({
-  job: { id: job.id, status: job.status, ...(job.stage ? { stage: job.stage } : {}) },
-  reused,
-});
-
 /**
- * POST: starts a brief job for the caller in this space (or returns the running one) and
+ * POST: starts a brief job for the caller in this space, replacing any job in progress, and
  * schedules the generate task as the caller. Returns 202 with the job.
  */
 export const generateBriefRoute = ({
@@ -99,12 +93,6 @@ export const generateBriefRoute = ({
 
           const store = await getBriefStore();
 
-          // Dedupe before the cluster cap, so a second click returns the caller's own job.
-          const existing = await store.get({ ownerId: owner.id, spaceId });
-          if (existing && isJobActive(existing.document.job, new Date())) {
-            return response.accepted({ body: toGenerateResponse(existing.document.job, true) });
-          }
-
           const connector = await resolveConnector({
             connectorId: request.body.connectorId,
             request,
@@ -134,9 +122,6 @@ export const generateBriefRoute = ({
           const from = new Date(now - BRIEF_RANGE_MS[range]).toISOString();
 
           const started = await store.startJob({ owner, spaceId, jobId: uuidv4() });
-          if (started.reused) {
-            return response.accepted({ body: toGenerateResponse(started.job, true) });
-          }
 
           try {
             await scheduleGenerateBriefTask({
@@ -167,7 +152,8 @@ export const generateBriefRoute = ({
             throw scheduleError;
           }
 
-          return response.accepted({ body: toGenerateResponse(started.job, false) });
+          const body: GenerateBriefResponse = toJobView(started.job);
+          return response.accepted({ body });
         } catch (error) {
           if (error instanceof BriefStoreConflictError) {
             return briefErrorResponse(response, 409, 'conflict', error.message);

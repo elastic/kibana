@@ -14,7 +14,7 @@ import type {
   GenerateBriefResponse,
 } from '../../../../common/entity_analytics/executive_brief/api';
 import {
-  BRIEF_STALE_HEARTBEAT_MS,
+  BRIEF_JOB_DEADLINE_MS,
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../common/entity_analytics/executive_brief/constants';
 import {
@@ -67,7 +67,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const jobId = response.body.job.id;
+        const jobId = response.body.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
         expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
         expect(document.job.took).toBeGreaterThanOrEqual(0);
@@ -140,17 +140,17 @@ apiTest.describe(
     });
 
     apiTest(
-      'a running job that stopped sending heartbeats reads as interrupted',
+      'a running job past its deadline reads as interrupted',
       async ({ apiClient, esClient }) => {
         const { jobId } = await generateBrief({ apiClient, headers, connectorId });
         const { docId } = await getBriefDocId({ apiClient, headers, spaceId: 'default' });
-        const lastBeat = new Date(Date.now() - 2 * BRIEF_STALE_HEARTBEAT_MS).toISOString();
+        const startedAt = new Date(Date.now() - BRIEF_JOB_DEADLINE_MS - 60_000).toISOString();
 
         await esClient.update({
           index: EXECUTIVE_BRIEF_INDEX,
           id: docId,
           doc: {
-            job: { id: jobId, status: 'running', started_at: lastBeat, heartbeat_at: lastBeat },
+            job: { id: jobId, status: 'running', started_at: startedAt, updated_at: startedAt },
           },
           refresh: true,
         });
@@ -160,7 +160,7 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(read).toHaveStatusCode(200);
-        // `took` runs to the last heartbeat, here the start.
+        // `took` runs to the last stage change, here the start.
         expect(read.body.job).toMatchObject({
           id: jobId,
           status: 'failed',

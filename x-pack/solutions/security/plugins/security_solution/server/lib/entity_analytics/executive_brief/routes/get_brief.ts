@@ -12,7 +12,7 @@ import {
 } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type { BriefResponse } from '../../../../../common/entity_analytics/executive_brief/api';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
-import { withStaleJobAsInterrupted } from '../store/brief_store';
+import { withOverdueJobAsInterrupted } from '../store/brief_store';
 import { toBriefResponse } from './brief_response';
 import type { ExecutiveBriefRouteDeps } from './route_utils';
 import {
@@ -24,7 +24,7 @@ import {
   noStableUserResponse,
 } from './route_utils';
 
-/** GET: the caller's brief in this space (stale jobs read as interrupted), or 404. */
+/** GET: the caller's brief in this space (overdue jobs read as interrupted), or 404. */
 export const getBriefRoute = ({
   router,
   logger,
@@ -51,7 +51,7 @@ export const getBriefRoute = ({
             return briefErrorResponse(response, 404, 'not_found', 'No brief in this space.');
           }
           const body: BriefResponse = toBriefResponse(
-            withStaleJobAsInterrupted(stored.document, new Date())
+            withOverdueJobAsInterrupted(stored.document, new Date())
           );
           return response.ok({ body });
         } catch (error) {

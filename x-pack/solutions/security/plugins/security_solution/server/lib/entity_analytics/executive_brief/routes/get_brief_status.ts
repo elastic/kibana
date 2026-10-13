@@ -12,7 +12,7 @@ import {
 } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type { BriefStatusResponse } from '../../../../../common/entity_analytics/executive_brief/api';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
-import { staleJobAsInterrupted } from '../store/brief_store';
+import { overdueJobAsInterrupted } from '../store/brief_store';
 import { toJobView } from './brief_response';
 import type { ExecutiveBriefRouteDeps } from './route_utils';
 import {
@@ -50,7 +50,7 @@ export const getBriefStatusRoute = ({
           if (!job) {
             return briefErrorResponse(response, 404, 'not_found', 'No brief in this space.');
           }
-          const body: BriefStatusResponse = toJobView(staleJobAsInterrupted(job, new Date()));
+          const body: BriefStatusResponse = toJobView(overdueJobAsInterrupted(job, new Date()));
           return response.ok({ body });
         } catch (error) {
           return internalErrorResponse(response, logger, error, 'read the brief status');

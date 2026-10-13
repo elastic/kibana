@@ -45,7 +45,7 @@ export const BRIEF_LIMITS = {
 } as const;
 
 export const BRIEF_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
-export const BRIEF_HEARTBEAT_INTERVAL_MS = 10_000;
-/** A running job whose heartbeat is older than this is reported as interrupted. */
-export const BRIEF_STALE_HEARTBEAT_MS = 60_000;
-export const BRIEF_TASK_TIMEOUT = '5m' as const;
+/** Task Manager timeout for a generate run; generous because signals can be slow on large data. */
+export const BRIEF_TASK_TIMEOUT = '15m' as const;
+/** A job still pending or running this long after it started reads as interrupted. */
+export const BRIEF_JOB_DEADLINE_MS = 15 * 60 * 1000;

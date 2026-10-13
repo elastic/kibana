@@ -35,7 +35,7 @@ export const briefStorageSettings = {
         dynamic: false,
         properties: {
           status: types.keyword({}),
-          heartbeat_at: types.date({}),
+          started_at: types.date({}),
         },
       }),
       generated_at: types.date({}),

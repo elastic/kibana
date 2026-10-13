@@ -76,10 +76,10 @@ apiTest.describe(
           body: { range: '7d', connectorId },
         });
         expect(response).toHaveStatusCode(202);
-        expect(response.body.job.id).toBeDefined();
-        expect(response.body).toMatchObject({ job: { status: 'pending' }, reused: false });
+        expect(response.body.id).toBeDefined();
+        expect(response.body.status).toBe('pending');
 
-        const jobId = response.body.job.id;
+        const jobId = response.body.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
         await llmCall;
 
@@ -119,39 +119,57 @@ apiTest.describe(
       }
     );
 
-    apiTest('returns the running job instead of starting a second one', async ({ apiClient }) => {
-      const held = holdSubmitBrief(llmProxy);
+    apiTest(
+      'a second POST replaces the job in progress, and the replaced run writes nothing',
+      async ({ apiClient }) => {
+        const replacedBrief: Brief = {
+          ...HIGH_RISK_ENTITY_BRIEF,
+          verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, headline: 'From the replaced run' },
+        };
+        const held = holdSubmitBrief(llmProxy, replacedBrief);
 
-      const first = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
-        headers,
-        responseType: 'json',
-        body: { range: '7d', connectorId },
-      });
-      expect(first).toHaveStatusCode(202);
+        const first = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+          body: { range: '7d', connectorId },
+        });
+        expect(first).toHaveStatusCode(202);
+        await held.waitForCall();
 
-      const second = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
-        headers,
-        responseType: 'json',
-        body: { range: '24h', connectorId },
-      });
-      expect(second).toHaveStatusCode(202);
-      expect(second.body).toMatchObject({ job: { id: first.body.job.id }, reused: true });
+        // While the first job is in flight, its status has no duration yet.
+        const inFlight = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
+          headers,
+          responseType: 'json',
+        });
+        expect(inFlight.body).toMatchObject({ id: first.body.id, status: 'running' });
+        expect(inFlight.body.took).toBeUndefined();
 
-      // While the job is in flight, the status has no duration yet.
-      const inFlight = await apiClient.get<BriefStatusResponse>(briefStatusRoute(), {
-        headers,
-        responseType: 'json',
-      });
-      expect(inFlight).toHaveStatusCode(200);
-      expect(['pending', 'running']).toContain(inFlight.body.status);
-      expect(inFlight.body.took).toBeUndefined();
+        const secondCall = mockSubmitBrief(llmProxy);
+        const second = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+          body: { range: '24h', connectorId },
+        });
+        expect(second).toHaveStatusCode(202);
+        expect(second.body.id).not.toBe(first.body.id);
 
-      await held.release();
-      const document = await waitForBriefJob({ apiClient, headers, jobId: first.body.job.id });
-      expect(document.job.status).toBe('succeeded');
-      expect(document.metadata?.period.range).toBe('7d');
-      expect(llmProxy.interceptedRequests).toHaveLength(1);
-    });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: second.body.id });
+        await secondCall;
+        expect(document.job.status).toBe('succeeded');
+        expect(document.metadata?.period.range).toBe('24h');
+
+        // The replaced run gets its answer now, finds the newer job at its next write, and stops.
+        // Keep reading for a few seconds so a late write from it would be seen.
+        await held.release();
+        expect(llmProxy.interceptedRequests).toHaveLength(2);
+        for (let read = 0; read < 6; read++) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const after = await waitForBriefJob({ apiClient, headers, jobId: second.body.id });
+          expect(after.report?.verdict?.headline).toBe(HIGH_RISK_ENTITY_BRIEF.verdict.headline);
+          expect(after.metadata?.period.range).toBe('24h');
+        }
+      }
+    );
 
     apiTest(
       'sends a structural problem back to the model once and stores the repaired brief',
@@ -166,7 +184,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
         expect(document.metadata?.verification?.repaired).toBe(true);
@@ -191,7 +209,7 @@ apiTest.describe(
         const previousDocument = await waitForBriefJob({
           apiClient,
           headers,
-          jobId: previous.body.job.id,
+          jobId: previous.body.id,
         });
         expect(previousDocument.job.status).toBe('succeeded');
 
@@ -205,7 +223,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job).toMatchObject({
           status: 'failed',
           error: { code: 'llm_output' },
@@ -242,7 +260,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.verdict?.summary).toBe(
           `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk.`

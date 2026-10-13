@@ -12,7 +12,6 @@ import {
   InferenceTaskErrorCode,
   isInferenceError,
 } from '@kbn/inference-common';
-import { BRIEF_HEARTBEAT_INTERVAL_MS } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
   BriefErrorCode,
   BriefJobStage,
@@ -54,7 +53,7 @@ export interface RunBriefParams {
   docId: string;
   jobId: string;
   params: BriefParams;
-  store: Pick<BriefStore, 'markRunning' | 'heartbeat' | 'setStage' | 'completeJob' | 'failJob'>;
+  store: Pick<BriefStore, 'markRunning' | 'setStage' | 'completeJob' | 'failJob'>;
   /** Scoped to the requesting user. */
   signalContext: SignalContext;
   /** Bound to `params.connector_id`. */
@@ -63,7 +62,6 @@ export interface RunBriefParams {
   logger: Logger;
   telemetry: BriefTelemetry;
   deps: RunBriefDeps;
-  heartbeatIntervalMs?: number;
 }
 
 export type RunBriefOutcome =
@@ -195,8 +193,8 @@ const toCompletedEvent = ({
 
 /**
  * Runs one brief job and records progress on its document: running → gather (signals) →
- * compose → verify → succeeded, or failed with an error code. Heartbeats every 10 s; if a
- * heartbeat or stage write finds the job superseded, the run is aborted without writing.
+ * compose → verify → succeeded, or failed with an error code. Writes happen one at a time; if a
+ * stage write finds the job replaced by a newer one, the run stops without writing.
  * With no findings the AI is not called: the job succeeds with the signal coverage only.
  */
 export const runBrief = async ({
@@ -210,7 +208,6 @@ export const runBrief = async ({
   logger,
   telemetry,
   deps,
-  heartbeatIntervalMs = BRIEF_HEARTBEAT_INTERVAL_MS,
 }: RunBriefParams): Promise<RunBriefOutcome> => {
   const ids = { docId, jobId };
   const jobController = new AbortController();
@@ -310,7 +307,6 @@ export const runBrief = async ({
     }
   };
 
-  let heartbeatTimer: NodeJS.Timeout | undefined;
   try {
     let running: boolean;
     try {
@@ -325,18 +321,6 @@ export const runBrief = async ({
 
     const startedAtMs = Date.now();
     telemetry.jobStarted();
-    heartbeatTimer = setInterval(() => {
-      store
-        .heartbeat(ids)
-        .then((current) => {
-          if (!current) {
-            supersede();
-          }
-        })
-        .catch((error) => {
-          logger.warn(`Executive brief heartbeat failed for job ${jobId}: ${error.message}`);
-        });
-    }, heartbeatIntervalMs);
 
     let outcome: RunBriefOutcome;
     try {
@@ -357,9 +341,6 @@ export const runBrief = async ({
     );
     return outcome;
   } finally {
-    if (heartbeatTimer) {
-      clearInterval(heartbeatTimer);
-    }
     abortSignal.removeEventListener('abort', forwardAbort);
   }
 };

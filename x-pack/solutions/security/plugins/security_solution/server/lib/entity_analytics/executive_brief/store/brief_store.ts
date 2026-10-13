@@ -11,8 +11,8 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
+  BRIEF_JOB_DEADLINE_MS,
   BRIEF_RETENTION_MS,
-  BRIEF_STALE_HEARTBEAT_MS,
   EXECUTIVE_BRIEF_INDEX,
 } from '../../../../../common/entity_analytics/executive_brief/constants';
 import type {
@@ -50,31 +50,26 @@ const isInFlight = (job: BriefJob): boolean => job.status === 'pending' || job.s
 const addRetention = (iso: string): string =>
   new Date(Date.parse(iso) + BRIEF_RETENTION_MS).toISOString();
 
-/** A pending or running job whose heartbeat (or start, if it never beat) is too old. */
-const isJobStale = (job: BriefJob, now: Date): boolean =>
-  isInFlight(job) &&
-  now.getTime() - Date.parse(job.heartbeat_at ?? job.started_at) > BRIEF_STALE_HEARTBEAT_MS;
+/** A pending or running job past its deadline: its run stopped without finishing (e.g. a restart). */
+const isPastDeadline = (job: BriefJob, now: Date): boolean =>
+  isInFlight(job) && now.getTime() - Date.parse(job.started_at) > BRIEF_JOB_DEADLINE_MS;
 
-/** A pending or running job with a fresh heartbeat. */
-export const isJobActive = (job: BriefJob, now: Date): boolean =>
-  isInFlight(job) && !isJobStale(job, now);
-
-/** Reports a stale in-flight job as failed with `interrupted`, as the GET routes show it. */
-export const staleJobAsInterrupted = (job: BriefJob, now: Date): BriefJob =>
-  isJobStale(job, now)
+/** Reports an in-flight job past its deadline as failed with `interrupted`, as the routes show it. */
+export const overdueJobAsInterrupted = (job: BriefJob, now: Date): BriefJob =>
+  isPastDeadline(job, now)
     ? {
         ...job,
         status: 'failed',
         error: {
           code: 'interrupted',
-          message: 'The brief generation stopped responding and was interrupted.',
+          message: 'The brief generation stopped before finishing. Generate it again.',
         },
       }
     : job;
 
-/** The document with a stale in-flight job reported as interrupted. */
-export const withStaleJobAsInterrupted = (document: BriefDocument, now: Date): BriefDocument => {
-  const job = staleJobAsInterrupted(document.job, now);
+/** The document with an overdue in-flight job reported as interrupted. */
+export const withOverdueJobAsInterrupted = (document: BriefDocument, now: Date): BriefDocument => {
+  const job = overdueJobAsInterrupted(document.job, now);
   return job === document.job ? document : { ...document, job };
 };
 
@@ -88,8 +83,6 @@ export interface StoredBrief {
 export interface StartJobResult {
   docId: string;
   job: BriefJob;
-  /** True when a running job with a fresh heartbeat was returned instead of starting one. */
-  reused: boolean;
 }
 
 interface CompleteJobInput {
@@ -117,8 +110,9 @@ export interface BriefStoreOptions {
 
 /**
  * Owner-scoped access to brief documents. Reads used by routes always filter on owner, space and
- * expiry. Job writes (used by the task) are conditional on the stored `job.id` matching, and use
- * `if_seq_no`/`if_primary_term`, so a superseded or deleted job can never overwrite a newer one.
+ * expiry. Starting a job replaces any job in progress. Job writes (used by the task) are
+ * conditional on the stored `job.id` matching, and use `if_seq_no`/`if_primary_term`, so a
+ * replaced or deleted job stops at its next write and can never overwrite a newer one.
  */
 export class BriefStore {
   private readonly storageClient: BriefStorageClient;
@@ -173,9 +167,9 @@ export class BriefStore {
   }
 
   /**
-   * Starts a new pending job on the owner's document, keeping the previous (unexpired) brief.
-   * Returns the existing job instead when one is in flight with a fresh heartbeat. The write is
-   * conditional (`op_type: create` or `if_seq_no`), so concurrent starts can't both win.
+   * Starts a new pending job on the owner's document, keeping the previous (unexpired) brief and
+   * replacing any job in progress (its run stops at its next write). The write is conditional
+   * (`op_type: create` or `if_seq_no`), so concurrent starts can't both win.
    */
   async startJob({
     owner,
@@ -191,11 +185,6 @@ export class BriefStore {
     for (let attempt = 0; attempt < MAX_WRITE_ATTEMPTS; attempt++) {
       const now = this.now();
       const existing = await this.read(docId, ownerFilters(owner.id, spaceId));
-
-      if (existing && isJobActive(existing.document.job, now)) {
-        return { docId, job: existing.document.job, reused: true };
-      }
-
       const document = buildStartedDocument({
         previous: existing?.document,
         owner,
@@ -206,7 +195,7 @@ export class BriefStore {
 
       try {
         await this.write(docId, document, existing);
-        return { docId, job: document.job, reused: false };
+        return { docId, job: document.job };
       } catch (error) {
         if (!isConflictError(error)) {
           throw error;
@@ -222,15 +211,7 @@ export class BriefStore {
   async markRunning({ docId, jobId }: { docId: string; jobId: string }): Promise<boolean> {
     return this.updateInFlightJob(docId, jobId, (document, now) => ({
       ...document,
-      job: { ...document.job, status: 'running', stage: 'gather', heartbeat_at: now },
-    }));
-  }
-
-  /** Refreshes the heartbeat. False when the job is no longer this task's to run. */
-  async heartbeat({ docId, jobId }: { docId: string; jobId: string }): Promise<boolean> {
-    return this.updateInFlightJob(docId, jobId, (document, now) => ({
-      ...document,
-      job: { ...document.job, heartbeat_at: now },
+      job: { ...document.job, status: 'running', stage: 'gather', updated_at: now },
     }));
   }
 
@@ -245,7 +226,7 @@ export class BriefStore {
   }): Promise<boolean> {
     return this.updateInFlightJob(docId, jobId, (document, now) => ({
       ...document,
-      job: { ...document.job, stage, heartbeat_at: now },
+      job: { ...document.job, stage, updated_at: now },
     }));
   }
 
@@ -269,7 +250,7 @@ export class BriefStore {
           id: document.job.id,
           status: 'succeeded',
           started_at: document.job.started_at,
-          heartbeat_at: now,
+          updated_at: now,
         },
         generated_at: now,
         expires_at: addRetention(now),
@@ -302,7 +283,7 @@ export class BriefStore {
   }): Promise<boolean> {
     return this.updateInFlightJob(docId, jobId, (document, now) => ({
       ...document,
-      job: { ...document.job, status: 'failed', heartbeat_at: now, error },
+      job: { ...document.job, status: 'failed', updated_at: now, error },
       expires_at: document.brief ? document.expires_at : addRetention(document.job.started_at),
     }));
   }
@@ -318,9 +299,9 @@ export class BriefStore {
     return result === 'deleted';
   }
 
-  /** In-flight jobs with a fresh heartbeat, across all users and spaces (cluster cap). */
+  /** In-flight jobs within their deadline, across all users and spaces (cluster cap). */
   async countRunning(): Promise<number> {
-    const freshSince = new Date(this.now().getTime() - BRIEF_STALE_HEARTBEAT_MS).toISOString();
+    const since = new Date(this.now().getTime() - BRIEF_JOB_DEADLINE_MS).toISOString();
     const response = await this.storageClient.search({
       track_total_hits: true,
       size: 0,
@@ -328,7 +309,7 @@ export class BriefStore {
         bool: {
           filter: [
             { terms: { 'job.status': ['pending', 'running'] } },
-            { range: { 'job.heartbeat_at': { gte: freshSince } } },
+            { range: { 'job.started_at': { gte: since } } },
           ],
         },
       },
@@ -416,8 +397,9 @@ export class BriefStore {
   }
 
   /**
-   * Read-modify-write on an in-flight job, only while `job.id` matches. Retries on version
-   * conflicts (e.g. heartbeat racing a stage update); returns false when the job is gone.
+   * Read-modify-write on an in-flight job, only while `job.id` matches. A version conflict means
+   * another writer (e.g. a new job replacing this one), so it re-reads and returns false once the
+   * job is no longer this run's.
    */
   private async updateInFlightJob(
     docId: string,
@@ -456,14 +438,7 @@ const buildStartedDocument = ({
   now: Date;
 }): BriefDocument => {
   const startedAt = now.toISOString();
-  // Heartbeat starts with the job so a pending job counts towards the cluster cap and goes stale
-  // if the task never starts.
-  const job: BriefJob = {
-    id: jobId,
-    status: 'pending',
-    started_at: startedAt,
-    heartbeat_at: startedAt,
-  };
+  const job: BriefJob = { id: jobId, status: 'pending', started_at: startedAt };
   const keepPrevious =
     previous?.brief !== undefined && Date.parse(previous.expires_at) > now.getTime();
 

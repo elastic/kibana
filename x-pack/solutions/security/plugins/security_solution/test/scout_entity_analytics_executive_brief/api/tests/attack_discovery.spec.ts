@@ -102,7 +102,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
         expect(document.metadata?.signals.attack_discoveries.status).toBe('ok');
         const discoveryIds = (document.report?.facts ?? [])
@@ -139,7 +139,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({
@@ -168,7 +168,7 @@ apiTest.describe(
         });
         expect(response).toHaveStatusCode(202);
 
-        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.id });
         expect(document.job.status).toBe('succeeded');
         expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({ id: 1, severity: 'low' }),
