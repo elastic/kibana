@@ -22,9 +22,8 @@ interface SweepDeletedSpacesArgs {
 }
 
 /**
- * Deletes analytics documents whose space no longer exists. Deleting a space
- * removes the cases saved objects by namespace without going through the cases
- * service, so the analytics cascade deletes never fire for them.
+ * Deletes analytics docs of deleted spaces. Space deletion removes cases SOs by
+ * namespace, bypassing the cases service and its analytics cascade deletes.
  */
 export const sweepDeletedSpaces = async ({
   esClient,
@@ -32,9 +31,8 @@ export const sweepDeletedSpaces = async ({
   logger,
   signal,
 }: SweepDeletedSpacesArgs): Promise<void> => {
-  // Indexed space ids are read before existing spaces on purpose: a space that
-  // appears in the analytics indices but not in the later lookup was deleted
-  // in between, never created in between.
+  // Read indexed ids before existing spaces, so a space created mid-sweep is
+  // never mistaken for a deleted one.
   const indexedSpaceIds = await getIndexedSpaceIds(esClient, signal);
   if (indexedSpaceIds.length === 0 || signal.aborted) return;
 
