@@ -137,7 +137,7 @@ steps:
       provider: gcp
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      preemptible: true
     key: linting
     timeout_in_minutes: 60
     retry:
@@ -153,7 +153,7 @@ steps:
       provider: gcp
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      preemptible: true
     key: linting_with_types
     timeout_in_minutes: 60
     retry:
@@ -169,7 +169,7 @@ steps:
       provider: gcp
       machineType: n4-highcpu-32
       diskType: hyperdisk-balanced
-      zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
+      preemptible: true
     key: check_types
     timeout_in_minutes: 60
     env:
