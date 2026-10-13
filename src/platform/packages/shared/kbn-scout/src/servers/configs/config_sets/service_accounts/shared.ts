@@ -8,7 +8,8 @@
  */
 
 /**
- * Service accounts are off by default, so they need their own config set: the shared
- * configurations cannot reach the feature at all.
+ * Service accounts are on by default outside serverless, but off by default on serverless. The
+ * serverless configs need this flag to reach the feature, and the stateful config keeps it so
+ * every config in the set boots the same way.
  */
 export const serviceAccountsServerArgs = ['--xpack.security.serviceAccounts.enabled=true'];
