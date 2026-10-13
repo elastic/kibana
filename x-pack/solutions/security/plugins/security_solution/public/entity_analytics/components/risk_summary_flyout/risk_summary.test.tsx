@@ -350,6 +350,33 @@ describe('FlyoutRiskSummary', () => {
     });
   });
 
+  it('group view "Entity risk contributions" link opens the resolution-group risk inputs', () => {
+    const openDetailsPanel = jest.fn();
+    const { getByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={openDetailsPanel}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />,
+      { newEntityAnalyticsPage: true }
+    );
+
+    const link = getByTestId('resolutionRiskInputsTitleLink');
+    expect(link).toHaveTextContent('Entity risk contributions');
+    fireEvent.click(link);
+
+    expect(openDetailsPanel).toHaveBeenCalledWith({
+      tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
+      subTab: RiskScoreLeftPanelSubTab.RESOLUTION,
+    });
+  });
+
   it('renders resolution risk inputs link even when resolution score is loading', () => {
     const { getByTestId } = render(
       <TestProviders>
