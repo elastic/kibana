@@ -52,6 +52,9 @@ export interface SlackConversationsListChannel {
   is_private?: boolean;
   is_archived?: boolean;
   is_member?: boolean;
+  is_im?: boolean;
+  is_mpim?: boolean;
+  user?: string;
 }
 
 export interface SlackConversationsListResponse extends SlackErrorFields {

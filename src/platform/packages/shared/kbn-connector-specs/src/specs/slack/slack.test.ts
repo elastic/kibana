@@ -388,6 +388,24 @@ describe('Slack', () => {
       });
     });
 
+    it('should expose is_im and the counterpart user for DM conversations', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          ok: true,
+          channels: [{ id: 'D1', is_im: true, is_archived: false, user: 'U999' }],
+        },
+      });
+
+      const result = await Slack.actions.listChannels.handler(
+        mockContext,
+        SlackListChannelsInputSchema.parse({ types: ['im'] })
+      );
+
+      expect(result).toMatchObject({
+        channels: [{ id: 'D1', is_im: true, user: 'U999' }],
+      });
+    });
+
     it('should pass cursor, limit, types, and excludeArchived when provided', async () => {
       const mockResponse = {
         data: {
