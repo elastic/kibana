@@ -44,9 +44,11 @@ const createSourcesClient = (
     includedHiddenTypes: [NIGHTSHIFT_SOURCE_SO_TYPE],
   });
 
-  // Views live in the origin project. Validation and health probes read the data behind a
-  // source, which under CPS may live in linked projects, so they route across all of them.
-  const viewsEsClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
+  // Views live in the origin project. Reads run as the user; writes run as kibana_system, so the
+  // views stay in sync with their saved objects. The write routes require the `manage` privilege.
+  // Validation and health probes read the data behind a source, which under CPS may live in
+  // linked projects, so they route across all of them.
+  const userViewsEsClient = core.elasticsearch.client.asScoped(request).asCurrentUser;
   const dataEsClient = core.elasticsearch.client.asScoped(request, {
     projectRouting: 'expression',
     value: PROJECT_ROUTING_ALL,
@@ -54,7 +56,10 @@ const createSourcesClient = (
 
   return new SourcesClient({
     soClient,
-    viewsClient: new EsqlViewsClient(viewsEsClient),
+    viewsClient: new EsqlViewsClient({
+      userEsClient: userViewsEsClient,
+      internalEsClient: core.elasticsearch.client.asInternalUser,
+    }),
     dataEsClient,
     logger,
     username: core.security.authc.getCurrentUser(request)?.username ?? '<system>',
