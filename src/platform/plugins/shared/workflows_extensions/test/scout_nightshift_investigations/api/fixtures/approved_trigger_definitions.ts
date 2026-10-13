@@ -212,7 +212,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'significant-events.eventStatusChanged',
-    schemaHash: '3e544a3fb46812fba31c41ac77d21e18a70c3161522958e563fe005a248cd2b2',
+    schemaHash: '5d5e07122f98c29f16a1128c42b72e6412c2c048312e019c32a15e4dc81f521a',
   },
   {
     id: 'workflows.failed',
