@@ -32,7 +32,7 @@ are these same three choices, so an analysis stated this way is already the temp
 | **Bottom-Up** | One document | `document` | Summary, the questions the document answers, a query that reaches it by id | Every run over the filtered slice, replacing each document's KI | Dense, bounded corpora: knowledge bases, incident reports, articles, product docs. |
 | **Selective / Outlier** | One significant document in a stream | `event` | What happened, why it is notable, how to find the neighbours | Every run; only documents the significance verdict accepts | Log and event streams where most records are noise but outliers matter. |
 | **Atomic Facts** | One claim inside a document | `fact` | The claim, its source span, the query to the document | Immutable; no `expires_at` | Information-dense documents (contracts, papers) where one KI per document loses precision. |
-| **Cumulative / Wiki-style** | One recurring entity | `entity` | A profile grounded in aggregations over every document referencing it, with the numbers that separate it from siblings: one index for the `unit_profile` template; a unit drawn from several indices is a custom workflow | Every run, replacing each unit | Entities recurring across many documents: customers, products, hosts, services. |
+| **Cumulative / Wiki-style** | One recurring entity | `entity` | A profile grounded in aggregations over every document referencing it, with the numbers that separate it from siblings: one index for the `unit_profile` template; a unit drawn from several indices has no supported automation today | Every run, replacing each unit | Entities recurring across many documents: customers, products, hosts, services. |
 | **Detection / Feature** | One named condition / one inventory entry | `detection`, `feature` | A complete runnable query with a severity, thresholds quoting the observed baseline / a subtype and a stable slug | Every run | Observability data needing runnable detection conditions and structured inventory. |
 
 ## Choosing between strategies
@@ -42,8 +42,8 @@ Choose from the shape of the data, read off the row sample, the row count and th
 
 - **Long text bodies in a bounded corpus** — articles, incident reports, product docs → Bottom-Up.
 - **A keyword key with many rows per value in one index** — customers, products, hosts →
-  Cumulative, through the `unit_profile` template. When the unit needs a second index, it is a
-  custom workflow built through a subagent.
+  Cumulative, through the `unit_profile` template. When the unit needs a second index, there is no
+  supported automation for it today.
 - **Several sources the agent must route between or join** → Index/Table Metadata over all of
   them, in one install; then one deeper strategy for the source that matters most.
 - **A noisy event stream** where most records are routine → Selective / Outlier, with Detection /
@@ -92,11 +92,6 @@ Every generated automation carries its own cap on the KIs one run writes: at mos
 onboarding. It counts KIs, not source rows, so a strategy that writes several KIs per document, or
 one per index across many indices, spends it faster than the row count suggests. The cap lives in
 the template's own bound (`max_units`, `max_documents`) rather than in the Context Engine, which
-does not enforce one. A custom workflow has no template to carry the bound, so it carries its own:
-where one document yields several KIs, as atomic facts do (one KI per claim), bound that count
-with `maxItems` on the array in the `ai.prompt` output schema, ask for "up to N" in the prompt to
-match, and set the workflow's own `max_documents` const to 100 ÷ N, rounded down. A response with
-more items than `maxItems` fails the step rather than being cut short, so the prompt and the schema
-must agree. The budget is guidance for the automation: tell the user how many KIs a
+does not enforce one. The budget is guidance for the automation: tell the user how many KIs a
 run will write, but do not present the budget itself as a limit or a policy. It can be raised once
 the output has been reviewed and trusted.

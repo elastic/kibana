@@ -31,17 +31,10 @@ export const aiIndexAutomationsSkill = defineSkillType({
   getRegistryTools: () => [
     platformCoreTools.executeWorkflow,
     platformCoreTools.getWorkflowExecutionStatus,
-    platformCoreTools.generateEsql,
-    platformCoreTools.executeEsql,
     contextEngineAiIndexTools.queryAiIndices,
-    `${internalNamespaces.workflows}.validate_workflow`,
     `${internalNamespaces.workflows}.get_workflow`,
     `${internalNamespaces.workflows}.get_step_definitions`,
-    `${internalNamespaces.workflows}.get_trigger_definitions`,
-    `${internalNamespaces.workflows}.get_examples`,
-    `${internalNamespaces.workflows}.workflow_execute_step`,
     contextEngineAutomationTools.installAutomationTemplate,
-    contextEngineAutomationTools.saveAutomation,
     contextEngineAutomationTools.runAutomation,
   ],
 });
