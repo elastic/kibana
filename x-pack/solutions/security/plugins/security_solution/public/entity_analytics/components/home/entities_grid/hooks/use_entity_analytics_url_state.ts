@@ -57,7 +57,7 @@ export const MAX_EXPANDED_ENTITY_IDS = 20;
 // ── defaults ──────────────────────────────────────────────────────────────────
 
 const DEFAULTS = {
-  timeRange: '30d',
+  timeRange: '24h',
   rowsMode: 'resolved',
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',

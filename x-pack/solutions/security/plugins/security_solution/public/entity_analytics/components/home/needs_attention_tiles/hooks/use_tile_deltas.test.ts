@@ -10,7 +10,6 @@ import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
-import { getEntityFilterESQL } from '../../use_entity_filters_param';
 import { useAlertBasedTilesDelta } from './use_alert_based_tiles_delta';
 import { useEntitiesWithAnomaliesDelta } from './use_entities_with_anomalies_delta';
 import { useNewEntityDelta } from './use_new_entity_delta';
@@ -176,7 +175,7 @@ describe('useEntitiesWithAnomaliesDelta', () => {
 describe('useNewEntityDelta', () => {
   it('runs on the local cluster only, like the count, and applies the entity filters', () => {
     const entityFilters = { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] };
-    const clauses = getEntityFilterESQL(entityFilters);
+    const clauses = buildEntityFilterClauses(entityFilters);
     expect(clauses.length).toBeGreaterThan(0);
     renderHook(() => useNewEntityDelta({ ...base, count: 3, entityFilters }));
     expect(lastOptions().localOnly).toBe(true);
