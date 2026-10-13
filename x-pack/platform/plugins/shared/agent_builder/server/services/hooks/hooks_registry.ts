@@ -44,7 +44,7 @@ const validateCycleHookDefinition = ({
     }
   }
   if (typeof when === 'string') {
-    if (when !== 'first' && when !== 'every_cycle') {
+    if (when !== 'first' && when !== 'every_execution' && when !== 'every_cycle') {
       throw new Error(`Cycle hook "${id}": unknown trigger "${when}".`);
     }
   } else if (when !== undefined) {

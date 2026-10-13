@@ -247,6 +247,18 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const agentIdForEvents = agentId ?? conversation?.agent_id ?? 'unknown';
 
+  // The stored summary, with a cursor when it predates cycle-based compaction. What it covers is
+  // hidden at render time; the graph replaces it when it compacts.
+  const storedSummary = conversation?.state?.compaction_summary;
+  const compactionSummary =
+    conversation && storedSummary
+      ? translateLegacySummary({
+          summary: storedSummary,
+          entries: historyView(processedConversation).entries,
+          legacyEligibleIds: legacyEligibleRoundIds(sourceEvents(conversation)),
+        })
+      : undefined;
+
   // Started before the tool setup so a 'first' hook overlaps it, as the skill selection below does.
   const cycleHooks = new CycleHookRuntime({
     definitions: context.hooks.listCycleHooks(),
@@ -264,7 +276,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
     logger: logger.get('cycleHooks'),
   });
-  await cycleHooks.start();
+  await cycleHooks.start([], compactionSummary);
 
   // Closed on every exit so a late background append is refused rather than queued for nothing.
   try {
@@ -365,17 +377,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     // when the context is rendered.
     const resultTransformer = createSummarizationTransformer({ toolManager, toolRegistry });
 
-    // The stored summary, with a cursor when it predates cycle-based compaction. What it covers is
-    // hidden at render time; the graph replaces it when it compacts.
-    const storedSummary = conversation?.state?.compaction_summary;
-    const compactionSummary =
-      conversation && storedSummary
-        ? translateLegacySummary({
-            summary: storedSummary,
-            entries: historyView(processedConversation).entries,
-            legacyEligibleIds: legacyEligibleRoundIds(sourceEvents(conversation)),
-          })
-        : undefined;
     const previousRound = getPreviousRoundInfo(processedConversation.timeline);
 
     processedConversation.subagentRosterFallback = subagentTracker.snapshot();
@@ -756,8 +757,13 @@ const getPreviousRoundInfo = (
   };
 };
 
-const getRecursionLimit = (cycleLimit: number): number => {
-  // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
-  // in practice we have four steps per cycle (agent node + tool call node + background work + context management), and then a few other steps (compaction, prepare + answering), and some extra buffer
-  return Math.ceil(cycleLimit * 4.5 + 20);
+/**
+ * LangGraph's `recursionLimit` is the number of nodes a run may traverse. A cycle that calls tools
+ * spans five (background work, context management, cycle hooks, research, tool execution), so a
+ * run that spends its whole budget and then answers needs `5 * cycleLimit + 7`: the start node,
+ * init and finalize included. The rest is room for retries (two nodes each), compactions and the
+ * structured-answer nodes.
+ */
+export const getRecursionLimit = (cycleLimit: number): number => {
+  return Math.ceil(cycleLimit * 5.5 + 20);
 };

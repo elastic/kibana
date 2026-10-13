@@ -58,7 +58,16 @@ interface ActiveHook {
   lastAppendAt?: number;
   /** Set for a hook called in `start()`: the call, and what it appended during it. */
   early?: { done: Promise<void>; out: RunStepUpdate[] };
+  /** The handler's current call until it settles; a timed-out call keeps running in the background. */
+  running?: Promise<void>;
 }
+
+interface QueuedNote {
+  hookId: string;
+  update: RunStepUpdate;
+}
+
+const noop = () => {};
 
 /**
  * Runs the cycle hooks of one agent execution: creates their handlers once, calls the due ones at
@@ -68,7 +77,7 @@ interface ActiveHook {
  */
 export class CycleHookRuntime {
   private readonly hooks: ActiveHook[] = [];
-  private readonly queue: RunStepUpdate[] = [];
+  private readonly queue: QueuedNote[] = [];
   private closed = false;
   private readonly now: () => number;
   private readonly startedAt: number;
@@ -79,27 +88,34 @@ export class CycleHookRuntime {
   }
 
   /**
-   * Creates the handlers of the hooks that apply to this agent.
+   * Creates the handlers of the hooks that apply to this agent, all at once.
    *
-   * A `'first'` hook is called right away, so its work overlaps whatever runs before the first
-   * cycle, unless a hook due at cycle 0 was registered before it: that one can only run at cycle 0,
-   * and the `'first'` hook then takes its turn there. Early calls run one after another; `dispatch`
-   * waits for them and lands their notes at the hooks' positions.
+   * A hook due before the first model call (`'first'`, `'every_execution'`) is called right away,
+   * so its work overlaps whatever runs before the first cycle, unless an every-cycle hook was
+   * registered before it: that one can only run at cycle 0, and the early hook then takes its turn
+   * there. Early calls run one after another; `dispatch` waits for them and lands their notes at
+   * the hooks' positions. `summary` is the compaction summary the first model call will use.
    */
-  async start(seedSteps: ConversationRoundStep[] = []): Promise<void> {
+  async start(seedSteps: ConversationRoundStep[] = [], summary?: CompactionSummary): Promise<void> {
+    const { execution } = this.deps;
+    const definitions = this.deps.definitions.filter((def) => {
+      if (def.boundAgents && !def.boundAgents.includes(execution.agent.id)) {
+        return false;
+      }
+      // Once per round: the paused round being resumed already carries what the hook added.
+      return !(def.when === 'first' && execution.execution.resumed);
+    });
+    const handlers = await Promise.all(
+      definitions.map((def) =>
+        this.guarded(def, 'getHandler', () => def.getHandler(execution)).then(({ value }) => value)
+      )
+    );
+
     let chain: Promise<void> = Promise.resolve();
     const earlyOuts: RunStepUpdate[][] = [];
     let cycleZeroHookSeen = false;
-    for (const def of this.deps.definitions) {
-      if (def.boundAgents && !def.boundAgents.includes(this.deps.execution.agent.id)) {
-        continue;
-      }
-      if (def.when === 'first' && this.deps.execution.execution.resumed) {
-        continue;
-      }
-      const handler = await this.guarded(def, 'getHandler', () =>
-        def.getHandler(this.deps.execution)
-      );
+    for (const [index, def] of definitions.entries()) {
+      const handler = handlers[index];
       if (handler === undefined) {
         continue;
       }
@@ -112,7 +128,7 @@ export class CycleHookRuntime {
       const hook: ActiveHook = { def, handler, lastRunCycle: -1 };
       this.hooks.push(hook);
       const when = def.when ?? 'every_cycle';
-      if (when !== 'first') {
+      if (!isOncePerExecution(when)) {
         if (when === 'every_cycle') {
           cycleZeroHookSeen = true;
         }
@@ -128,7 +144,7 @@ export class CycleHookRuntime {
       chain = chain.then(() =>
         this.call(
           hook,
-          { cycle: 0, attempt: 0, steps: applyStepUpdates(seedSteps, before.flat()) },
+          { cycle: 0, attempt: 0, steps: applyStepUpdates(seedSteps, before.flat()), summary },
           out
         )
       );
@@ -139,10 +155,11 @@ export class CycleHookRuntime {
   /**
    * Returns the step updates to fold into the state before this cycle's prompt is rendered: the
    * notes queued since the last cycle, then, hook by hook, what an early call appended or what the
-   * handler appends now. A retry only drains the queue.
+   * handler appends now. A retry only drains the queue. A hook whose previous call is still running
+   * is skipped, so a handler never runs twice at once.
    */
   async dispatch(facts: CycleDispatchFacts): Promise<RunStepUpdate[]> {
-    const out = this.queue.splice(0);
+    const out = this.queue.splice(0).map((note) => note.update);
     for (const hook of this.hooks) {
       if (hook.early) {
         const { done, out: earlyOut } = hook.early;
@@ -154,42 +171,76 @@ export class CycleHookRuntime {
       if (facts.attempt > 0 || !isDue(hook, facts.cycle)) {
         continue;
       }
+      if (hook.running) {
+        this.deps.logger.warn(
+          `Cycle hook "${hook.def.id}": the previous call is still running, skipped at cycle ${facts.cycle}.`
+        );
+        continue;
+      }
       await this.call(hook, facts, out);
       hook.lastRunCycle = facts.cycle;
     }
     return out;
   }
 
-  /** After this, `append` rejects: the run is over and there is no prompt left to land in. */
+  /** After this, `append` throws: the run is over and there is no prompt left to land in. */
   close(): void {
     this.closed = true;
+    if (this.queue.length > 0) {
+      const hookIds = Array.from(new Set(this.queue.map((note) => `"${note.hookId}"`)));
+      this.deps.logger.debug(
+        `Cycle hooks: ${
+          this.queue.length
+        } queued note(s) dropped at the end of the run, from ${hookIds.join(', ')}.`
+      );
+      this.queue.length = 0;
+    }
   }
 
   private async call(hook: ActiveHook, facts: CycleDispatchFacts, out: RunStepUpdate[]) {
     const { id } = hook.def;
+    const { abortSignal: executionSignal } = this.deps.execution;
+    // The call's own signal: aborted when it times out, and with the execution.
+    const controller = new AbortController();
+    const abortWithExecution = () => controller.abort(executionSignal.reason);
+    if (executionSignal.aborted) {
+      abortWithExecution();
+    } else {
+      executionSignal.addEventListener('abort', abortWithExecution, { once: true });
+    }
     // While the handler runs, appended rows go into this cycle's prompt. Once it has returned or
     // timed out, a late append (from a promise it started) is queued for the next cycle instead.
     let inCall = true;
     const api: CycleHookApi = {
-      append: async (input) => {
+      append: (input) => {
         const update = this.toUpdate(id, input);
         hook.lastAppendAt = this.now();
-        (inCall ? out : this.queue).push(update);
+        if (inCall) {
+          out.push(update);
+        } else {
+          this.queue.push({ hookId: id, update });
+        }
       },
     };
     const now = this.now();
-    // The handler gets copies, made when read: nothing it does to them reaches the run.
+    // The handler gets copies: nothing it does to them reaches the run. The steps are copied once
+    // per call; a read after an append only re-applies the notes.
+    let base: ConversationRoundStep[] | undefined;
     let steps: { appended: number; value: ConversationRoundStep[] } | undefined;
     let previousToolCalls: ToolCallStep[] | undefined;
     const cycle: CycleContext = {
       index: facts.cycle,
+      abortSignal: controller.signal,
       timing: {
         sinceStartMs: now - this.startedAt,
         sinceLastAppendMs: hook.lastAppendAt === undefined ? undefined : now - hook.lastAppendAt,
       },
       get steps() {
+        if (!base) {
+          base = cloneDeep(facts.steps);
+        }
         if (steps?.appended !== out.length) {
-          steps = { appended: out.length, value: cloneDeep(applyStepUpdates(facts.steps, out)) };
+          steps = { appended: out.length, value: applyStepUpdates(base, cloneDeep(out)) };
         }
         return steps.value;
       },
@@ -201,10 +252,18 @@ export class CycleHookRuntime {
       },
       summary: cloneDeep(facts.summary),
     };
+    const run = Promise.resolve().then(() => hook.handler(cycle, api));
+    hook.running = run.then(noop, noop).finally(() => {
+      hook.running = undefined;
+    });
     try {
-      await this.guarded(hook.def, 'handler', () => hook.handler(cycle, api), facts.cycle);
+      const { timedOut } = await this.guarded(hook.def, 'handler', () => run, facts.cycle);
+      if (timedOut) {
+        controller.abort(new Error(`Cycle hook "${id}" timed out.`));
+      }
     } finally {
       inCall = false;
+      executionSignal.removeEventListener('abort', abortWithExecution);
     }
   }
 
@@ -223,13 +282,16 @@ export class CycleHookRuntime {
     return stepUpdates.append(createInjectedContextStep({ ...input, hook_id: hookId }));
   }
 
-  /** One span per call. A throw or a timeout is logged and yields `undefined`; the run goes on. */
+  /**
+   * One span per call. A throw or a timeout is logged and yields no value; the run goes on. A
+   * timed-out call is reported as such so the caller can abort its signal.
+   */
   private async guarded<T>(
     def: CycleHookDefinition,
     kind: 'getHandler' | 'handler',
     fn: () => T | Promise<T>,
     cycle?: number
-  ): Promise<T | undefined> {
+  ): Promise<{ value?: T; timedOut: boolean }> {
     const { id } = def;
     const timeoutMs = Math.min(
       def.timeout ?? DEFAULT_CYCLE_HOOK_TIMEOUT_MS,
@@ -252,25 +314,28 @@ export class CycleHookRuntime {
             this.deps.logger.warn(
               `Cycle hook "${id}" ${kind} timed out after ${timeoutMs}ms, skipped.`
             );
-            return undefined;
+            return { timedOut: true };
           }
-          return timed.value;
+          return { value: timed.value, timedOut: false };
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           this.deps.logger.warn(`Cycle hook "${id}" ${kind} failed, skipped: ${message}`);
-          return undefined;
+          return { timedOut: false };
         }
       }
     );
   }
 }
 
+const isOncePerExecution = (when: CycleTrigger): when is 'first' | 'every_execution' =>
+  when === 'first' || when === 'every_execution';
+
 const isDue = (hook: ActiveHook, cycle: number): boolean => {
   const when: CycleTrigger = hook.def.when ?? 'every_cycle';
   if (when === 'every_cycle') {
     return true;
   }
-  if (when === 'first') {
+  if (isOncePerExecution(when)) {
     return hook.lastRunCycle < 0;
   }
   return cycle > 0 && cycle % when.everyCycles === 0;

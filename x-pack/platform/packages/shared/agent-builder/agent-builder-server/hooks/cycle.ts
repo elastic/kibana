@@ -27,14 +27,12 @@ import type { InternalSkillDefinition } from '../skills';
 export const DEFAULT_CYCLE_HOOK_TIMEOUT_MS = 10_000;
 export const MAX_CYCLE_HOOK_TIMEOUT_MS = 60_000;
 
-/** The id a built-in agent is registered with. */
-export type AgentId = string;
-
 /**
- * When a cycle hook is called: once per round before the first model call, before every research
- * model call, or before every n-th cycle (5, 10, 15, ... for `{ everyCycles: 5 }`).
+ * When a cycle hook is called: once per round before its first model call, once per execution
+ * before its first model call (a resume included), before every research model call, or before
+ * every n-th cycle (5, 10, 15, ... for `{ everyCycles: 5 }`).
  */
-export type CycleTrigger = 'first' | 'every_cycle' | { everyCycles: number };
+export type CycleTrigger = 'first' | 'every_execution' | 'every_cycle' | { everyCycles: number };
 
 /**
  * A hook that runs at the top of agent-loop cycles and can add a note the model reads.
@@ -45,7 +43,7 @@ export interface CycleHookDefinition {
   /** When the handler is called. Defaults to every research cycle. */
   when?: CycleTrigger;
   /** Only run for these agents. Defaults to every agent. */
-  boundAgents?: readonly AgentId[];
+  boundAgents?: readonly string[];
   /** Wall time per call, in ms. Defaults to DEFAULT_CYCLE_HOOK_TIMEOUT_MS; at most MAX_CYCLE_HOOK_TIMEOUT_MS. */
   timeout?: number;
   /** Called once per execution. Returns the handler for that execution, or `undefined` to sit it out. */
@@ -120,6 +118,8 @@ export interface ExecutionSummary {
 export interface CycleContext {
   /** The cycle about to run, from 0. On a resume, the restored cycle. */
   readonly index: number;
+  /** Aborted when this call times out or the execution is aborted: stop, and append nothing. */
+  readonly abortSignal: AbortSignal;
   readonly timing: {
     /** Since this execution started. */
     readonly sinceStartMs: number;
@@ -140,9 +140,10 @@ export type InjectedContextInput = Omit<InjectedContextStepData, 'hook_id'>;
  * The one thing a handler can do.
  */
 export interface CycleHookApi {
-  /** Puts text in front of the model as an `injected_context` step stamped with the hook's id.
-   * Resolves when accepted, without waiting for the model.
-   * Rejects invalid input or calls after the run pauses or finishes.
+  /**
+   * Puts text in front of the model as an `injected_context` step stamped with the hook's id.
+   * Returns once accepted, without waiting for the model. Throws on invalid input, and once the
+   * run has paused or finished.
    */
-  append(input: InjectedContextInput): Promise<void>;
+  append(input: InjectedContextInput): void;
 }

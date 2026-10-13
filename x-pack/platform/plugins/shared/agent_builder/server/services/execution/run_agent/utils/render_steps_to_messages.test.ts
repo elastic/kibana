@@ -574,7 +574,8 @@ describe('injected context', () => {
 
     expect(message.getType()).toBe('human');
     expect(message.name).toBe('injected_context');
-    expect(message.content).toContain('<injected_context source="memory">');
+    expect(message.content).toContain('<injected_context');
+    expect(message.content).not.toContain('memory');
     expect(message.content).toContain('remember &lt;this&gt;');
   });
 

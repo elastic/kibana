@@ -117,7 +117,6 @@ export type {
 } from './hooks/types';
 export { HookLifecycle, HookExecutionMode } from './hooks/types';
 export type {
-  AgentId,
   CycleContext,
   CycleHandler,
   CycleHookApi,

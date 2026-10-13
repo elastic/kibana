@@ -29,7 +29,7 @@ import { createAgentHandlerContextMock } from '../../../test_utils/runner';
 import { createEmptyConversation, createRound } from '../../../test_utils/conversations';
 import { createMockedExecutableTool } from '../../../test_utils/tools';
 
-import { runDefaultAgentMode } from './run_chat_agent';
+import { getRecursionLimit, runDefaultAgentMode } from './run_chat_agent';
 import {
   addRoundCompleteEvent,
   prepareConversation,
@@ -674,6 +674,7 @@ describe('runDefaultAgentMode', () => {
 
     it('starts the cycle hooks before the tool setup and hands the runtime to the graph', async () => {
       const { context } = setup();
+      const start = jest.spyOn(CycleHookRuntime.prototype, 'start');
       const getHandler = jest.fn(() => undefined);
       (context.hooks.listCycleHooks as jest.Mock).mockReturnValue([{ id: 'memory', getHandler }]);
 
@@ -703,6 +704,9 @@ describe('runDefaultAgentMode', () => {
         selectToolsMock.mock.invocationCallOrder[0]
       );
       expect(createAgentGraphMock.mock.calls[0][0].cycleHooks).toBeInstanceOf(CycleHookRuntime);
+      // the early calls get the summary the first model call will use (none stored here)
+      expect(start).toHaveBeenCalledWith([], undefined);
+      start.mockRestore();
     });
 
     it('closes the cycle hook runtime once the round is extracted, before the post-round hooks', async () => {
@@ -1191,5 +1195,17 @@ describe('runDefaultAgentMode', () => {
         })
       );
     });
+  });
+});
+
+describe('getRecursionLimit', () => {
+  it('covers a run that spends its whole cycle budget and then answers, with room to spare', () => {
+    // start, init, five nodes per tool-calling cycle, then the answering cycle and finalize (pinned in graph.test)
+    const fullBudget = (cycleLimit: number) => 5 * cycleLimit + 7;
+
+    for (const cycleLimit of [1, 10, 30]) {
+      expect(getRecursionLimit(cycleLimit)).toBeGreaterThan(fullBudget(cycleLimit));
+    }
+    expect(getRecursionLimit(30)).toBe(185);
   });
 });

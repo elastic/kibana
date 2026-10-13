@@ -28,10 +28,12 @@ import { CycleHookRuntime, type CycleDispatchFacts } from './cycle_hook_runtime'
 const execution = {
   agent: { id: 'agent-1' },
   execution: { id: 'exec-1', resumed: false },
+  abortSignal: new AbortController().signal,
 } as unknown as CycleHookExecutionContext;
 const resumedExecution = {
   agent: { id: 'agent-1' },
   execution: { id: 'exec-2', resumed: true },
+  abortSignal: new AbortController().signal,
 } as unknown as CycleHookExecutionContext;
 
 const facts = (cycle: number, overrides: Partial<CycleDispatchFacts> = {}): CycleDispatchFacts => ({
@@ -418,7 +420,7 @@ describe('CycleHookRuntime', () => {
 
       runtime.close();
 
-      await expect(api!.append({ text: 'too late' })).rejects.toThrow(/the run has finished/);
+      expect(() => api!.append({ text: 'too late' })).toThrow(/the run has finished/);
     });
 
     it('rejects empty text and text over the cap, and the handler can catch it', async () => {
@@ -426,9 +428,13 @@ describe('CycleHookRuntime', () => {
       const runtime = createRuntime([
         hook('a', async (_cycle, api) => {
           for (const text of ['', '   ', 'x'.repeat(MODEL_CONTEXT_MAX_LENGTH + 1)]) {
-            await api.append({ text }).catch((err: Error) => errors.push(err.message));
+            try {
+              api.append({ text });
+            } catch (err) {
+              errors.push((err as Error).message);
+            }
           }
-          await api.append({ text: 'fine' });
+          api.append({ text: 'fine' });
         }),
       ]);
       await runtime.start();
@@ -537,25 +543,32 @@ describe('CycleHookRuntime', () => {
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('handler failed'));
     });
 
-    it('skips a handler that outruns its timeout and keeps calling it on later cycles', async () => {
+    it('skips a handler that outruns its timeout, and does not call it again until that call ends', async () => {
       const calls: number[] = [];
+      let finish: () => void = () => {};
       const runtime = createRuntime([
         hook(
           'slow',
           (cycle) => {
             calls.push(cycle.index);
-            return new Promise(() => {});
+            return new Promise<void>((resolve) => {
+              finish = resolve;
+            });
           },
           { timeout: 20 }
         ),
       ]);
       await runtime.start();
 
-      await runtime.dispatch(facts(0));
-      await runtime.dispatch(facts(1));
+      await runtime.dispatch(facts(0)); // times out; the call keeps running
+      await runtime.dispatch(facts(1)); // still running: skipped
+      finish();
+      await new Promise((resolve) => setImmediate(resolve));
+      await runtime.dispatch(facts(2));
 
-      expect(calls).toEqual([0, 1]);
+      expect(calls).toEqual([0, 2]);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('timed out after 20ms'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('still running'));
     });
 
     it('keeps a note a handler appended before it failed', async () => {
@@ -570,6 +583,141 @@ describe('CycleHookRuntime', () => {
       const steps = applyStepUpdates([], await runtime.dispatch(facts(0)));
 
       expect(texts(steps)).toEqual(['a:kept']);
+    });
+  });
+
+  describe('every_execution', () => {
+    it('runs on a resumed execution too, early, and once', async () => {
+      const handler = jest.fn((_cycle, api) => {
+        api.append({ text: 'again' });
+      });
+      const runtime = new CycleHookRuntime({
+        definitions: [hook('a', handler, { when: 'every_execution' })],
+        execution: resumedExecution,
+        logger,
+        now: () => clock,
+      });
+
+      await runtime.start();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      const atThree = await runtime.dispatch(facts(3));
+      await runtime.dispatch(facts(4));
+
+      expect(texts(applyStepUpdates([], atThree))).toEqual(['a:again']);
+      expect(handler).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('handler creation', () => {
+    it('creates the handlers in parallel, and still runs the hooks in registration order', async () => {
+      let releaseSlow: () => void = () => {};
+      const order: string[] = [];
+      const fastGetHandler = jest.fn((): CycleHandler => () => void order.push('fast'));
+      const runtime = createRuntime([
+        {
+          id: 'slow',
+          getHandler: () =>
+            new Promise<CycleHandler>((resolve) => {
+              releaseSlow = () => resolve(() => void order.push('slow'));
+            }),
+        },
+        { id: 'fast', getHandler: fastGetHandler },
+      ]);
+
+      const started = runtime.start();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(fastGetHandler).toHaveBeenCalledTimes(1); // without waiting for the slow one
+
+      releaseSlow();
+      await started;
+      await runtime.dispatch(facts(0));
+
+      expect(order).toEqual(['slow', 'fast']);
+    });
+
+    it('hands the stored summary to the early call', async () => {
+      const summary = { summarized_round_count: 2 } as CycleDispatchFacts['summary'];
+      let seen: unknown;
+      const runtime = createRuntime([
+        hook('a', (cycle) => void (seen = cycle.summary), { when: 'first' }),
+      ]);
+
+      await runtime.start([], summary);
+      await runtime.dispatch(facts(0, { summary }));
+
+      expect(seen).toEqual(summary);
+    });
+  });
+
+  describe('call signal', () => {
+    it("aborts the call's signal when the call times out", async () => {
+      let signal: AbortSignal | undefined;
+      const runtime = createRuntime([
+        hook(
+          'slow',
+          (cycle) => {
+            signal = cycle.abortSignal;
+            return new Promise(() => {});
+          },
+          { timeout: 20 }
+        ),
+      ]);
+      await runtime.start();
+
+      await runtime.dispatch(facts(0));
+
+      expect(signal?.aborted).toBe(true);
+    });
+
+    it("aborts the call's signal with the execution", async () => {
+      const controller = new AbortController();
+      let signal: AbortSignal | undefined;
+      const runtime = new CycleHookRuntime({
+        definitions: [
+          hook('a', (cycle) => {
+            signal = cycle.abortSignal;
+            return new Promise<void>((resolve) => {
+              cycle.abortSignal.addEventListener('abort', () => resolve());
+            });
+          }),
+        ],
+        execution: { ...execution, abortSignal: controller.signal },
+        logger,
+        now: () => clock,
+      });
+      await runtime.start();
+
+      const dispatching = runtime.dispatch(facts(0));
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(signal?.aborted).toBe(false);
+      controller.abort();
+      await dispatching;
+
+      expect(signal?.aborted).toBe(true);
+    });
+  });
+
+  describe('close', () => {
+    it('logs the queued notes it drops', async () => {
+      let late: () => void = () => {};
+      const runtime = createRuntime([
+        hook('bg', (_cycle, api) => {
+          void new Promise<void>((resolve) => {
+            late = resolve;
+          }).then(() => api.append({ text: 'late' }));
+        }),
+      ]);
+      await runtime.start();
+      await runtime.dispatch(facts(0));
+      late();
+      await new Promise((resolve) => setImmediate(resolve));
+
+      runtime.close();
+
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('1 queued note'));
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('"bg"'));
     });
   });
 });

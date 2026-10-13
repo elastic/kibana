@@ -296,6 +296,33 @@ describe('createAgentGraph', () => {
     });
   });
 
+  it('spans five nodes per tool-calling cycle: a run that spends its whole budget fits in 5n + 7', async () => {
+    // `getRecursionLimit` in run_chat_agent relies on this count; adding a node to the cycle must bump it.
+    const cycleLimit = 3;
+    const { graph, researchInvoke } = createTestGraph();
+    let call = 0;
+    researchInvoke.mockImplementation(async () => {
+      call += 1;
+      return call <= cycleLimit
+        ? new AIMessage({
+            content: '',
+            tool_calls: [{ id: `c${call}`, name: 'my_tool', args: {} }],
+          })
+        : new AIMessage({ content: 'done' });
+    });
+    // the hidden start node counts, then init, the cycles, the answering cycle and finalize
+    const nodes = 5 * cycleLimit + 7;
+
+    await expect(graph.invoke({ cycleLimit }, { recursionLimit: nodes - 1 })).rejects.toThrow(
+      /recursion limit/i
+    );
+    call = 0;
+    const result = await graph.invoke({ cycleLimit }, { recursionLimit: nodes });
+
+    expect(result.finalAnswer).toBe('done');
+    expect(researchInvoke).toHaveBeenCalledTimes(2 * (cycleLimit + 1));
+  });
+
   it('forcefully hands over to the answer agent past the budget in structured mode', async () => {
     const { graph, researchInvoke, structuredInvoke, promptFactory } = createTestGraph({
       structuredOutput: true,

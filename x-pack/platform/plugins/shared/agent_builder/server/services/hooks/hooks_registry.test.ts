@@ -216,8 +216,9 @@ describe('registerCycleHook', () => {
     registry.registerCycleHook(definition('a', { when: 'first' }));
     registry.registerCycleHook(definition('b', { when: 'every_cycle' }));
     registry.registerCycleHook(definition('c', { when: { everyCycles: 5 } }));
+    registry.registerCycleHook(definition('d', { when: 'every_execution' }));
 
-    expect(registry.getCycleHooks()).toHaveLength(3);
+    expect(registry.getCycleHooks()).toHaveLength(4);
   });
 
   it('rejects an unknown string trigger', () => {

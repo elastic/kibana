@@ -98,12 +98,12 @@ export const isPreExecutionWorkflowContextMessage = (message: BaseMessage): bool
 
 const INJECTED_CONTEXT_MESSAGE_NAME = 'injected_context';
 
-/** The user-role notice an `injected_context` step renders as. */
+/** The user-role notice an `injected_context` step renders as; the hook id is not for the model. */
 const createInjectedContextMessage = (step: InjectedContextStep): HumanMessage =>
   new HumanMessage({
     content: generateXmlTree({
       tagName: 'injected_context',
-      attributes: { source: step.hook_id },
+      attributes: {},
       children: [step.text],
     }),
     name: INJECTED_CONTEXT_MESSAGE_NAME,
