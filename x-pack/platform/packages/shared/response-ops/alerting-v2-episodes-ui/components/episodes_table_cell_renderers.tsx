@@ -97,9 +97,7 @@ const EpisodeConnectorSource = ({ source }: { source: string }) => {
  */
 export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
   const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
-  const connectorSource = getConnectorSource(
-    (row.flattened as unknown as AlertEpisode).source
-  );
+  const connectorSource = getConnectorSource((row.flattened as unknown as AlertEpisode).source);
 
   if (connectorSource) {
     return <EpisodeConnectorSource source={connectorSource} />;

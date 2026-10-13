@@ -21,6 +21,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 // and defaults it on, whereas we render subpanels ourselves.
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_header_data';
@@ -43,7 +44,6 @@ import { AlertEpisodeMetadataSection } from './metadata_section';
 import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
 import { EpisodeFooterActionMenu } from './footer_action_menu';
 import { EMPTY_VALUE } from '../../constants';
-import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { getConnectorSource, useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';

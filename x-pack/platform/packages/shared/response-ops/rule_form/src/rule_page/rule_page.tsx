@@ -18,10 +18,7 @@ import { css } from '@emotion/react';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
-import {
-  DISABLED_ACTIONS_WARNING_TITLE,
-  RULE_FORM_RETURN_TITLE,
-} from '../translations';
+import { DISABLED_ACTIONS_WARNING_TITLE, RULE_FORM_RETURN_TITLE } from '../translations';
 import type { RuleFormData } from '../types';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';

@@ -687,7 +687,6 @@ export const RULE_FORM_RETURN_TITLE = i18n.translate('responseOpsRuleForm.ruleFo
   defaultMessage: 'Return',
 });
 
-
 export const RULE_FORM_CANCEL_MODAL_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleFormCancelModalTitle',
   {

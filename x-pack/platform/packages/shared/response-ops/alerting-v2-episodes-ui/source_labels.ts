@@ -83,9 +83,7 @@ export const getEpisodeSourceIcon = (
     : undefined;
 };
 
-export const useEpisodeSource = (
-  sourceId?: string
-): { label: string; icon?: IconType } => {
+export const useEpisodeSource = (sourceId?: string): { label: string; icon?: IconType } => {
   const dataSource = useAdditionalEpisodesDataSource();
   const sources = dataSource ? [dataSource] : undefined;
   return {
