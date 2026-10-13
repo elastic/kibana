@@ -115,7 +115,7 @@ export function FieldMappingForm({
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup
-          gutterSize="m"
+          gutterSize="s"
           alignItems="flexStart"
           responsive={false}
           wrap

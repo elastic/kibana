@@ -17,7 +17,7 @@ interface StreamFeaturesApi {
   setFeatureDurability: (feature: Feature, expiresAt: string | undefined) => Promise<void>;
 }
 
-export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
+export function useStreamFeaturesApi(sourceId: string): StreamFeaturesApi {
   const { significantEventsRepositoryClient } = useKibana().dependencies.start.significantEvents;
 
   const { signal } = useAbortController();
@@ -26,11 +26,11 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
     () => ({
       deleteFeaturesInBulk: async (ids: string[]) => {
         await significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/{name}/features/_bulk',
+          'POST /internal/streams/{sourceId}/features/_bulk',
           {
             signal,
             params: {
-              path: { name: streamName },
+              path: { sourceId },
               body: {
                 operations: ids.map((id) => ({ delete: { id } })),
               },
@@ -40,11 +40,11 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
       },
       excludeFeaturesInBulk: async (ids: string[]) => {
         await significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/{name}/features/_bulk',
+          'POST /internal/streams/{sourceId}/features/_bulk',
           {
             signal,
             params: {
-              path: { name: streamName },
+              path: { sourceId },
               body: {
                 operations: ids.map((id) => ({ exclude: { id } })),
               },
@@ -54,11 +54,11 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
       },
       restoreFeaturesInBulk: async (ids: string[]) => {
         await significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/{name}/features/_bulk',
+          'POST /internal/streams/{sourceId}/features/_bulk',
           {
             signal,
             params: {
-              path: { name: streamName },
+              path: { sourceId },
               body: {
                 operations: ids.map((id) => ({ restore: { id } })),
               },
@@ -70,11 +70,11 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
         // `uuid` is derived server-side and rejected by the upsert schema; send the upsert shape only.
         const { uuid, ...featureUpsert } = feature;
         await significantEventsRepositoryClient.fetch(
-          'POST /internal/streams/{name}/features/_bulk',
+          'POST /internal/streams/{sourceId}/features/_bulk',
           {
             signal,
             params: {
-              path: { name: streamName },
+              path: { sourceId },
               body: {
                 operations: [{ index: { feature: { ...featureUpsert, expires_at: expiresAt } } }],
               },
@@ -83,6 +83,6 @@ export function useStreamFeaturesApi(streamName: string): StreamFeaturesApi {
         );
       },
     }),
-    [significantEventsRepositoryClient, signal, streamName]
+    [significantEventsRepositoryClient, signal, sourceId]
   );
 }
