@@ -88,7 +88,9 @@ const CASES_TRIGGER_FIXTURES: PublicTriggerDefinition[] = [
 const loadExtensions = async (): Promise<LoadedExtensions> => {
   const stepRegistry = new PublicStepRegistry(nullLogger);
   const triggerRegistry = new PublicTriggerRegistry();
-  registerInternalStepDefinitions(stepRegistry);
+  registerInternalStepDefinitions(stepRegistry, {
+    experimentalSteps: { javaScriptStep: true },
+  });
   registerInternalTriggerDefinitions(triggerRegistry);
   for (const fixture of CASES_TRIGGER_FIXTURES) {
     triggerRegistry.register(fixture);
