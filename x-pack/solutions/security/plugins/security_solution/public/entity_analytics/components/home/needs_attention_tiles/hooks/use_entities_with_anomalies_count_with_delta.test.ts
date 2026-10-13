@@ -11,6 +11,8 @@ import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { useEntitiesWithAnomaliesCountWithDelta } from './use_entities_with_anomalies_count_with_delta';
 import { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
 
@@ -135,6 +137,18 @@ describe('useEntitiesWithAnomaliesCountWithDelta', () => {
       { params: { query: key[1] } },
       expect.objectContaining({ strategy: 'esql_async' })
     );
+  });
+
+  it('applies the entity filters to the previous-period query, as it does to the count', () => {
+    const entityFilters = { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] };
+    const clauses = buildEntityFilterClauses(entityFilters);
+    expect(clauses.length).toBeGreaterThan(0);
+
+    renderHook(() => useEntitiesWithAnomaliesCountWithDelta({ ...opts, entityFilters }));
+    clauses.forEach((clause) => expect(lastCall()[0][1]).toContain(clause));
+
+    renderHook(() => useEntitiesWithAnomaliesCountWithDelta(opts));
+    clauses.forEach((clause) => expect(lastCall()[0][1]).not.toContain(clause));
   });
 
   it('counts an empty result as 0', async () => {

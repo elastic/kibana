@@ -10,6 +10,8 @@ import { of } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { useAlertBasedTilesWithDelta } from './use_alert_based_tiles_with_delta';
 import { parseAlertBasedTilesResponse, useAlertBasedTiles } from './use_entities_with_alerts_tiles';
 
@@ -115,7 +117,7 @@ describe('useAlertBasedTilesWithDelta', () => {
     expect(result.current.severeAlertsCount).toBe(50);
   });
 
-  it('runs the same alerts query as the count, for the previous period and with the entity filters', async () => {
+  it('runs the same alerts query as the count, for the previous period', async () => {
     mockSearch.mockReturnValue(
       of({
         rawResponse: {
@@ -140,6 +142,18 @@ describe('useAlertBasedTilesWithDelta', () => {
       { params: { query: key[1] } },
       expect.objectContaining({ strategy: 'esql_async' })
     );
+  });
+
+  it('applies the entity filters to the previous-period query, as it does to the count', () => {
+    const entityFilters = { ...EMPTY_ENTITY_FILTERS, assetCriticality: ['high_impact'] };
+    const clauses = buildEntityFilterClauses(entityFilters);
+    expect(clauses.length).toBeGreaterThan(0);
+
+    renderHook(() => useAlertBasedTilesWithDelta({ ...opts, entityFilters }));
+    clauses.forEach((clause) => expect(lastCall()[0][1]).toContain(clause));
+
+    renderHook(() => useAlertBasedTilesWithDelta(opts));
+    clauses.forEach((clause) => expect(lastCall()[0][1]).not.toContain(clause));
   });
 
   it('keeps the previous period fresh for 30 minutes', () => {
