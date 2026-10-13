@@ -108,6 +108,13 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/vega-sandbox/target_vega_sandbox'),
       resolve(bundles, 'kbn-vega-sandbox')
     );
+    await copyAll(
+      resolve(
+        buildSource,
+        'node_modules/@kbn/translation-resilience/target_translation_resilience'
+      ),
+      resolve(bundles, 'kbn-translation-resilience')
+    );
 
     // src/core/packages/apps/server-internal/src/core_app.ts
     await copyAll(

@@ -1,0 +1,21 @@
+{
+  "name": "@kbn/translation-resilience",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "build": "node ${REPO_ROOT:-`git rev-parse --show-toplevel`}/scripts/build_package.js $PWD --task-name target_translation_resilience"
+  },
+  "buildSourcePaths": {
+    "include": [
+      "src/**/*",
+      "index.ts",
+      "server.ts"
+    ],
+    "exclude": [
+      "**/*.config.js",
+      "**/*.test.*",
+      "**/__snapshots__/**"
+    ]
+  }
+}

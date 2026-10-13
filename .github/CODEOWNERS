@@ -451,6 +451,7 @@ src/platform/packages/private/kbn-telemetry-tools @elastic/kibana-core
 src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-dashboards
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-dashboards
 src/platform/packages/private/kbn-tinymath @elastic/kibana-dashboards
+src/platform/packages/private/kbn-translation-resilience @elastic/kibana-core
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-dashboards
 src/platform/packages/private/kbn-ui-shared-deps-npm @elastic/kibana-operations
 src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations

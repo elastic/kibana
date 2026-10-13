@@ -24,6 +24,10 @@ jest.doMock('@kbn/monaco/server', () => ({
   bundleDir: 'kbnMonacoBundleDir',
 }));
 
+jest.doMock('@kbn/translation-resilience/server', () => ({
+  bundleDir: 'kbnTranslationResilienceBundleDir',
+}));
+
 jest.doMock('@kbn/vega-sandbox/server', () => ({
   bundleDir: 'kbnVegaSandboxBundleDir',
 }));

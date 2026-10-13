@@ -11,6 +11,8 @@ export interface BootstrapTemplateData {
   colorMode: string;
   themeTagName: string;
   jsDependencyPaths: string[];
+  /** Standalone bundle requested only when the user opts in. Loaded before the other scripts. */
+  translationResilienceBundlePath: string;
   publicPathMap: string;
   useHMR?: boolean;
 }
@@ -19,6 +21,7 @@ export const renderTemplate = ({
   themeTagName,
   colorMode,
   jsDependencyPaths,
+  translationResilienceBundlePath,
   publicPathMap,
   useHMR = false,
 }: BootstrapTemplateData) => {
@@ -204,9 +207,15 @@ ${reactDevtoolsHookStub}
       detail: 'load_started',
     })
 
-    load([
+    var bundlePaths = [
       ${jsDependencyPaths.map((path) => `'${path}'`).join(',')}
-    ], async function () {
+    ];
+    // Before the shared-deps scripts, so the DOM patch is installed before React evaluates.
+    if (window.__kbnInstallTranslationResilience__) {
+      bundlePaths.unshift('${translationResilienceBundlePath}');
+    }
+
+    load(bundlePaths, async function () {
       // RSPack progressive loading: wait for async plugin chunks to load
       if (window.__kbnPluginsLoaded) {
         await window.__kbnPluginsLoaded;

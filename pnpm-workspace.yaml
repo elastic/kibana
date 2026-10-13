@@ -644,6 +644,7 @@ packages:
   - 'src/platform/packages/private/kbn-test-eui-helpers'
   - 'src/platform/packages/private/kbn-timelion-grammar'
   - 'src/platform/packages/private/kbn-tinymath'
+  - 'src/platform/packages/private/kbn-translation-resilience'
   - 'src/platform/packages/private/kbn-transpose-utils'
   - 'src/platform/packages/private/kbn-ui-shared-deps-npm'
   - 'src/platform/packages/private/kbn-ui-shared-deps-src'

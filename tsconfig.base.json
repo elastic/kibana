@@ -2797,6 +2797,8 @@
       "@kbn/tracing-utils/*": ["./src/platform/packages/shared/kbn-tracing-utils/*"],
       "@kbn/transform-plugin": ["./x-pack/platform/plugins/private/transform"],
       "@kbn/transform-plugin/*": ["./x-pack/platform/plugins/private/transform/*"],
+      "@kbn/translation-resilience": ["./src/platform/packages/private/kbn-translation-resilience"],
+      "@kbn/translation-resilience/*": ["./src/platform/packages/private/kbn-translation-resilience/*"],
       "@kbn/translations-plugin": ["./x-pack/platform/plugins/private/translations"],
       "@kbn/translations-plugin/*": ["./x-pack/platform/plugins/private/translations/*"],
       "@kbn/transpiler-config": ["./packages/kbn-transpiler-config"],

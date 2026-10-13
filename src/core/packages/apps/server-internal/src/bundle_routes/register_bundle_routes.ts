@@ -15,6 +15,7 @@ import { fromRoot } from '@kbn/repo-info';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
 import * as KbnMonaco from '@kbn/monaco/server';
+import { bundleDir as translationResilienceBundleDir } from '@kbn/translation-resilience/server';
 import * as KbnVegaSandbox from '@kbn/vega-sandbox/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
@@ -81,6 +82,14 @@ export function registerBundleRoutes({
     publicPath: staticAssets.prependPublicUrl(vegaSandboxPath) + '/',
     routePath: staticAssets.prependServerPath(vegaSandboxPath) + '/',
     bundlesPath: KbnVegaSandbox.bundleDir,
+    fileHashCache,
+    isDist,
+  });
+  const translationResiliencePath = '/bundles/kbn-translation-resilience/';
+  registerRouteForBundle(router, {
+    publicPath: staticAssets.prependPublicUrl(translationResiliencePath) + '/',
+    routePath: staticAssets.prependServerPath(translationResiliencePath) + '/',
+    bundlesPath: translationResilienceBundleDir,
     fileHashCache,
     isDist,
   });

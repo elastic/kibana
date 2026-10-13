@@ -3853,6 +3853,9 @@ importers:
       '@kbn/transform-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/transform
+      '@kbn/translation-resilience':
+        specifier: workspace:*
+        version: link:src/platform/packages/private/kbn-translation-resilience
       '@kbn/translations-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/translations
@@ -7776,6 +7779,8 @@ importers:
   src/platform/packages/private/kbn-timelion-grammar: {}
 
   src/platform/packages/private/kbn-tinymath: {}
+
+  src/platform/packages/private/kbn-translation-resilience: {}
 
   src/platform/packages/private/kbn-transpose-utils: {}
 

@@ -27,6 +27,10 @@ import { bootstrapRendererFactory } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import type { ThemeName } from '@kbn/core-ui-settings-common';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';
+import {
+  TRANSLATION_RESILIENCE_BUNDLE_DIR,
+  TRANSLATION_RESILIENCE_BUNDLE_FILE,
+} from '@kbn/translation-resilience';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
@@ -545,6 +549,7 @@ describe('bootstrapRenderer', () => {
       themeTagName: 'borealis',
       colorMode: 'light',
       jsDependencyPaths: ['path-1', 'path-2'],
+      translationResilienceBundlePath: `/base-path/buildShaShort/bundles/${TRANSLATION_RESILIENCE_BUNDLE_DIR}/${TRANSLATION_RESILIENCE_BUNDLE_FILE}`,
       publicPathMap: expect.any(String),
       useHMR: expect.any(Boolean),
     });

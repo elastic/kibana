@@ -152,9 +152,15 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       detail: 'load_started',
     })
 
-    load([
+    var bundlePaths = [
       '/js-1','/js-2'
-    ], async function () {
+    ];
+    // Before the shared-deps scripts, so the DOM patch is installed before React evaluates.
+    if (window.__kbnInstallTranslationResilience__) {
+      bundlePaths.unshift('/bundles/kbn-translation-resilience/translation_resilience.js');
+    }
+
+    load(bundlePaths, async function () {
       // RSPack progressive loading: wait for async plugin chunks to load
       if (window.__kbnPluginsLoaded) {
         await window.__kbnPluginsLoaded;
@@ -318,9 +324,15 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
       detail: 'load_started',
     })
 
-    load([
+    var bundlePaths = [
       '/js-1','/js-2'
-    ], async function () {
+    ];
+    // Before the shared-deps scripts, so the DOM patch is installed before React evaluates.
+    if (window.__kbnInstallTranslationResilience__) {
+      bundlePaths.unshift('/bundles/kbn-translation-resilience/translation_resilience.js');
+    }
+
+    load(bundlePaths, async function () {
       // RSPack progressive loading: wait for async plugin chunks to load
       if (window.__kbnPluginsLoaded) {
         await window.__kbnPluginsLoaded;

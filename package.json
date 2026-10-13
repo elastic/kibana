@@ -1310,6 +1310,7 @@
     "@kbn/tracing-config": "workspace:*",
     "@kbn/tracing-utils": "workspace:*",
     "@kbn/transform-plugin": "workspace:*",
+    "@kbn/translation-resilience": "workspace:*",
     "@kbn/translations-plugin": "workspace:*",
     "@kbn/transpose-utils": "workspace:*",
     "@kbn/triggers-actions-ui-example-plugin": "workspace:*",

@@ -22,6 +22,10 @@ import {
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
+import {
+  TRANSLATION_RESILIENCE_BUNDLE_DIR,
+  TRANSLATION_RESILIENCE_BUNDLE_FILE,
+} from '@kbn/translation-resilience';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
 import { getRspackDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
@@ -175,6 +179,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       colorMode,
       themeTagName,
       jsDependencyPaths,
+      translationResilienceBundlePath: `${bundlesHref}/${TRANSLATION_RESILIENCE_BUNDLE_DIR}/${TRANSLATION_RESILIENCE_BUNDLE_FILE}`,
       publicPathMap,
       useHMR,
     });

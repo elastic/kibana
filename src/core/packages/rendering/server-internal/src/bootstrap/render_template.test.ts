@@ -14,6 +14,8 @@ function mockParams() {
     themeTagName: 'borealis',
     colorMode: 'light',
     jsDependencyPaths: ['/js-1', '/js-2'],
+    translationResilienceBundlePath:
+      '/bundles/kbn-translation-resilience/translation_resilience.js',
     styleSheetPaths: ['/style-1', '/style-2'],
     publicPathMap: '{"foo": "bar"}',
   };
@@ -36,6 +38,16 @@ describe('renderTemplate', () => {
       colorMode: 'system',
     });
     expect(content).toMatchSnapshot();
+  });
+
+  test('requests the translation resilience bundle only when the user opts in', async () => {
+    const content = await renderTemplate(mockParams());
+
+    expect(content).toContain('if (window.__kbnInstallTranslationResilience__)');
+    expect(content).toContain(
+      "bundlePaths.unshift('/bundles/kbn-translation-resilience/translation_resilience.js')"
+    );
+    expect(content).toContain('load(bundlePaths, async function ()');
   });
 
   test('loads bundles from an IIFE instead of window.onload', async () => {
