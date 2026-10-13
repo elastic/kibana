@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { getConnectorSpec } from './get_connector_spec';
 
-export const getInfosecDemoWorkflowYaml = () =>
-  readFileSync(resolve(__dirname, '../../../../../common/examples/infosec_demo.yaml'), 'utf-8');
+/** True when the registered spec for this type id signs with a Kibana-managed key. */
+export const connectorTypePublishesKeys = (actionTypeId: string): boolean =>
+  getConnectorSpec(actionTypeId)?.signingKey !== undefined;
