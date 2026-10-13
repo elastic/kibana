@@ -32,7 +32,9 @@ import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
 import { shouldSkipFtrTests } from './selective_ftr.ts';
 import type { FtrDomainSelection } from './selective_ftr_domains.ts';
 import {
+  createMoonFtrModuleGraph,
   createRepoFtrModuleGraph,
+  diffFtrDomainSelections,
   resolveFtrDomains,
   summarizeFtrDomainSelection,
   includesFtrEntry,
@@ -290,6 +292,8 @@ function applyFtrDomainSelection(
     return;
   }
 
+  compareFtrDomainSelectionWithMoon(bk, selection, changedFiles, entries);
+
   if (selection.all) {
     console.log(`FTR domain selection: running every domain (${selection.reason})`);
     return;
@@ -324,6 +328,61 @@ function applyFtrDomainSelection(
       entriesByQueue.delete(queue);
     }
   }
+}
+
+/**
+ * Shadow mode: resolves the same selection with moon's project graph and reports where it
+ * differs from the git (tsconfig) graph. Never changes which configs run; moon errors are logged.
+ */
+function compareFtrDomainSelectionWithMoon(
+  bk: BuildkiteClient,
+  gitSelection: FtrDomainSelection,
+  changedFiles: string[],
+  entries: FTRManifestEntry[]
+): void {
+  let moonSelection: FtrDomainSelection;
+  try {
+    moonSelection = resolveFtrDomains({
+      changedFiles,
+      manifestEntries: entries,
+      graph: createMoonFtrModuleGraph(),
+    });
+  } catch (error) {
+    console.error('FTR domain selection moon shadow failed (no effect on this build)', error);
+    return;
+  }
+
+  const { onlyA: onlyGit, onlyB: onlyMoon } = diffFtrDomainSelections(
+    gitSelection,
+    moonSelection,
+    entries
+  );
+  if (onlyGit.length === 0 && onlyMoon.length === 0) {
+    console.log('FTR domain selection moon shadow: matches the git graph');
+    return;
+  }
+
+  const details = [
+    `git graph: ${gitSelection.reason}`,
+    `moon graph: ${moonSelection.reason}`,
+    `Configs only the git graph selects (${onlyGit.length}): ${onlyGit.join(', ') || 'none'}`,
+    `Configs only the moon graph selects (${onlyMoon.length}): ${onlyMoon.join(', ') || 'none'}`,
+  ];
+  console.warn(
+    ['FTR domain selection moon shadow: differs from the git graph', ...details].join('\n')
+  );
+  bk.setAnnotation(
+    'selective-testing-ftr-domains-moon-shadow',
+    'warning',
+    [
+      'FTR domain selection (moon shadow): the moon project graph selects different FTR configs than the git graph. The git graph decides this build.',
+      '',
+      `<details><summary>${onlyGit.length} only in git, ${onlyMoon.length} only in moon</summary>`,
+      '',
+      ...details.map((line) => `- ${line}`),
+      '</details>',
+    ].join('\n')
+  );
 }
 
 /**

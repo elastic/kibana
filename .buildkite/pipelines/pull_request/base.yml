@@ -103,9 +103,11 @@ steps:
     label: 'Pick Test Group Run Order'
     key: pick_test_group_run_order
     agents:
-      provider: k8s
-      image: docker.elastic.co/ci-agent-images/kibana/ci-minimal
-      imageUID: 1000
+      # Kibana VM image (not ci-minimal) so npm is available to install moon for the FTR moon shadow
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
     timeout_in_minutes: 15
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -133,6 +135,9 @@ steps:
             - '**/*.test.mjs'
             - '**/*.test.ts'
             - '**/*.test.tsx'
+            # moon project graph, for the FTR domain selection moon shadow
+            - '/.moon/'
+            - '**/moon.yml'
           cleanup_sparse_state: true
           post_checkout:
             unshallow: true

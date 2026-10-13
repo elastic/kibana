@@ -150,6 +150,10 @@ Some integration suites boot a full Kibana and snapshot a *global registry* (rul
 - `base` serverless configs declare `project` (the solution of their `serverlessProject`) and also run when that solution is selected. Serverless projects only load `platform` plus their own group's plugins, so other solutions cannot affect them. An entry without `project` always runs.
 - Every domain runs when an `FTR_CRITICAL_PATHS` file, a file outside any module, or a module without a `group` changes, or when detection fails. `LIMIT_SOLUTIONS` takes precedence when set.
 
+### Moon graph (shadow mode)
+
+The git (tsconfig `kbn_references`) graph decides the selection. Alongside it, `createMoonFtrModuleGraph` resolves the same rules with moon's project graph: each changed module's `kibana.jsonc` is piped to `moon query projects --affected --downstream deep`, so moon never diffs on its own. When the two select different configs, the build gets a `selective-testing-ftr-domains-moon-shadow` warning annotation listing them; a moon failure is logged and has no effect. The pick step skips bootstrap, so `pick_test_group_run_order.sh` installs the `@moonrepo/cli` version pinned in `package.json` and passes it as `MOON_BIN`, and the PR pick step's sparse checkout includes `/.moon/` and `**/moon.yml`.
+
 ## Scout selective testing: git -> Moon (shadow mode)
 
 `resolve_selective_testing.ts` still uses **git** as the authoritative strategy (written to `.scout/code_changes.json`, no behavior change). In parallel, it runs the **Moon** strategy above for observation only, and writes the result plus a diff of `affectedModules` to `.scout/code_changes.moon_shadow.json` (uploaded as a Buildkite artifact). Mismatches are logged as a warning via `ToolingLog`; a Moon failure is swallowed and logged, never fails the build.

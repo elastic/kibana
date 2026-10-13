@@ -15,6 +15,19 @@ if [[ ${STORE_CACHE} == "true" ]]; then
   echo "Store cache script running in the background with PID $store_cache_pid"
 fi
 
+if [[ -n "${FTR_DOMAIN_SELECTION:-}" && "${FTR_DOMAIN_SELECTION}" != "off" ]]; then
+  # This step skips bootstrap, so install the repo's pinned moon on its own. It only feeds the
+  # FTR domain selection moon shadow, so a failed install just disables that comparison.
+  echo '--- Install moon for FTR domain selection shadow'
+  MOON_VERSION=$(node -p "const p = require('./package.json'); (p.devDependencies || {})['@moonrepo/cli'] || p.dependencies['@moonrepo/cli']")
+  MOON_INSTALL_DIR="$(mktemp -d)"
+  if npm install --prefix "$MOON_INSTALL_DIR" --no-save --no-audit --no-fund --loglevel=error "@moonrepo/cli@${MOON_VERSION}"; then
+    export MOON_BIN="$MOON_INSTALL_DIR/node_modules/.bin/moon"
+  else
+    echo "Failed to install moon ${MOON_VERSION}; the FTR domain selection moon shadow will be skipped"
+  fi
+fi
+
 echo '--- Pick Test Group Run Order'
 node "$(dirname "${0}")/pick_test_group_run_order.ts"
 
