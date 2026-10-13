@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { existsSync } from 'fs';
 import path from 'path';
 import { getKibanaDir } from '../utils.ts';
-
-const REPO_ROOT = getKibanaDir();
 
 /**
  * Resolves `moon`'s absolute path — run via `node`, not yarn, so it's not on `PATH`.
@@ -23,12 +21,36 @@ function getMoonBinPath(): string {
     return process.env.MOON_BIN;
   }
 
-  const moonBinPath = path.resolve(REPO_ROOT, 'node_modules/.bin/moon');
+  const moonBinPath = path.resolve(getKibanaDir(), 'node_modules/.bin/moon');
   if (existsSync(moonBinPath)) {
     return moonBinPath;
   }
 
-  return execSync('pnpm --silent exec which moon', { cwd: REPO_ROOT, encoding: 'utf8' }).trim();
+  return execSync('pnpm --silent exec which moon', {
+    cwd: getKibanaDir(),
+    encoding: 'utf8',
+  }).trim();
+}
+
+/** Repo-relative paths changed between two commits, deleted files included, sorted. */
+export function listChangedFilesMoon({ base, head }: { base: string; head: string }): string[] {
+  const output = execFileSync(
+    getMoonBinPath(),
+    ['query', 'changed-files', '--base', base, '--head', head],
+    {
+      cwd: getKibanaDir(),
+      encoding: 'utf8',
+      maxBuffer: 30 * 1024 * 1024,
+      timeout: 120000, // a cold agent first downloads moon's toolchain plugins
+      stdio: ['ignore', 'pipe', 'pipe'],
+    }
+  );
+
+  const { files }: { files?: unknown } = JSON.parse(output);
+  if (!Array.isArray(files)) {
+    throw new Error('moon query changed-files returned no file list');
+  }
+  return files.map(String).sort();
 }
 
 const parseProjectIds = (output: string): Set<string> => {
@@ -47,7 +69,7 @@ export function getDownstreamProjectsMoon(files: readonly string[]): Set<string>
   }
 
   const output = execSync(`"${getMoonBinPath()}" query projects --affected --downstream deep`, {
-    cwd: REPO_ROOT,
+    cwd: getKibanaDir(),
     encoding: 'utf8',
     maxBuffer: 200 * 1024 * 1024, // every project's full config is serialized
     timeout: 120000, // a cold agent first downloads moon's toolchain plugins
@@ -62,7 +84,7 @@ export function getAffectedProjectsMoon(
   includeDownstream: boolean
 ): Set<string> {
   const execOptions = {
-    cwd: REPO_ROOT,
+    cwd: getKibanaDir(),
     encoding: 'utf8' as const,
     maxBuffer: 30 * 1024 * 1024, // 30MB buffer
   };

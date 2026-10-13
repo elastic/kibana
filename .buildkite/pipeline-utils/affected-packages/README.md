@@ -136,6 +136,8 @@ On pull request builds, Jest unit and integration test groups are narrowed to co
 
 Merge-queue builds select Jest unit tests affected by changes since the group's pinned base (`BUILDKITE_MERGE_QUEUE_BASE_COMMIT`), not the live target-branch comparison (`MERGE_QUEUE_MERGE_BASE`). If that base is missing or invalid, or CI cannot determine the comparison range, test selection fails.
 
+The pick step lists the changed files once, with git resolving the comparison base and `moon query changed-files --base <base> --head <head>` listing the files (deleted files included), and shares that list between Jest selection, FTR selection and the Scout-only-diff check. The step skips bootstrap, so `pick_test_group_run_order.sh` installs the `@moonrepo/cli` version pinned in `package.json` on PR and merge-queue builds and passes it as `MOON_BIN`; a failed install fails the step. The PR pick step's sparse checkout includes `/.moon/` and `**/moon.yml`.
+
 ### Always-run integration configs
 
 Some integration suites boot a full Kibana and snapshot a *global registry* (rule-type params, connector types, task types, …) populated at runtime by downstream publishers that sit **upstream** of the suite's own package. `includeDownstream` expansion never reaches them, so a publisher-only change can silently skip the snapshot. Configs listed in `ALWAYS_RUN_JEST_INTEGRATION_CONFIGS` (`const.ts`) are re-added after affected-filtering so they run on every PR regardless of the graph. Keep the list tiny — it is a deliberate escape hatch.
@@ -154,7 +156,7 @@ Some integration suites boot a full Kibana and snapshot a *global registry* (rul
 
 ### Moon graph (shadow mode)
 
-The git (tsconfig `kbn_references`) graph decides the selection. Alongside it, `createMoonFtrModuleGraph` resolves the same rules with moon's project graph: each changed module's `kibana.jsonc` is piped to `moon query projects --affected --downstream deep`, so moon never diffs on its own. When the two select different configs, the build gets a `selective-testing-ftr-domains-moon-shadow` warning annotation listing them; a moon failure is logged and has no effect. The pick step skips bootstrap, so `pick_test_group_run_order.sh` installs the `@moonrepo/cli` version pinned in `package.json` and passes it as `MOON_BIN`, and the PR pick step's sparse checkout includes `/.moon/` and `**/moon.yml`.
+The git (tsconfig `kbn_references`) graph decides the selection. Alongside it, `createMoonFtrModuleGraph` resolves the same rules with moon's project graph: each changed module's `kibana.jsonc` is piped to `moon query projects --affected --downstream deep`, so moon never diffs on its own. When the two select different configs, the build gets a `selective-testing-ftr-domains-moon-shadow` warning annotation listing them; a failure of this query is logged and has no effect.
 
 ## Scout selective testing: git -> Moon (shadow mode)
 

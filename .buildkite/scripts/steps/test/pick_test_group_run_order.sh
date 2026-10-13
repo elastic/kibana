@@ -15,17 +15,15 @@ if [[ ${STORE_CACHE} == "true" ]]; then
   echo "Store cache script running in the background with PID $store_cache_pid"
 fi
 
-if [[ "${FTR_DOMAIN_SELECTION:-off}" != "off" ]]; then
-  # This step skips bootstrap, so install the repo's pinned moon on its own. It only feeds the
-  # FTR domain selection moon shadow, so a failed install just disables that comparison.
-  echo '--- Install moon for FTR domain selection shadow'
+# PR and merge-queue builds list their changed files with moon (and run the FTR moon shadow).
+# This step skips bootstrap, so install the repo's pinned moon on its own.
+if [[ -n "${GITHUB_PR_NUMBER:-}" || "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-merge-queue" ]] &&
+  [[ ! -x node_modules/.bin/moon ]]; then
+  echo '--- Install moon'
   MOON_VERSION=$(node -p "require('./package.json').dependencies['@moonrepo/cli']")
   MOON_INSTALL_DIR="$(mktemp -d)"
-  if npm install --prefix "$MOON_INSTALL_DIR" --no-save --no-audit --no-fund --loglevel=error "@moonrepo/cli@${MOON_VERSION}"; then
-    export MOON_BIN="$MOON_INSTALL_DIR/node_modules/.bin/moon"
-  else
-    echo "Failed to install moon ${MOON_VERSION}; the FTR domain selection moon shadow will be skipped"
-  fi
+  retry 5 15 npm install --prefix "$MOON_INSTALL_DIR" --no-save --no-audit --no-fund --loglevel=error "@moonrepo/cli@${MOON_VERSION}"
+  export MOON_BIN="$MOON_INSTALL_DIR/node_modules/.bin/moon"
 fi
 
 echo '--- Pick Test Group Run Order'

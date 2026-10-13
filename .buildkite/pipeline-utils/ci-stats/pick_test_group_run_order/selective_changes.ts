@@ -8,10 +8,10 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { listChangedFiles } from '../../affected-packages/strategy_git.ts';
+import { listChangedFilesMoon } from '../../affected-packages/strategy_moon.ts';
 import { getKibanaDir } from '../../get_kibana_dir.ts';
 
-/** Lists changed files since the selection base; throws on Git or validation errors. */
+/** Lists changed files since the selection base via moon; throws on Git, moon or validation errors. */
 export const resolveSelectiveTestingChanges = (
   selectionBase: string | undefined,
   isMergeQueue: boolean
@@ -48,7 +48,7 @@ export const resolveSelectiveTestingChanges = (
     throw new Error(`${source}=${requestedBase} is not an ancestor of HEAD=${head}`);
   }
 
-  const changedFiles = listChangedFiles({ mergeBase: base, commit: head });
+  const changedFiles = listChangedFilesMoon({ base, head });
   console.log(
     `Selective testing comparison: base=${base} head=${head} changedFiles=${changedFiles.length}`
   );
