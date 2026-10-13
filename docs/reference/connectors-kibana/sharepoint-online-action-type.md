@@ -19,7 +19,16 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [sharepoint-online-connector-configuration]
 
-SharePoint Online connectors support three Microsoft Entra ID authentication types:
+SharePoint Online connectors support four authentication types:
+
+#### Quick Connect OAuth 2.0 (recommended)
+
+```{applies_to}
+serverless: preview
+stack: preview 9.6
+```
+
+Elastic's managed OAuth flow for SharePoint Online. No app registration is required — select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### OAuth client credentials (app-only auth)
 
@@ -132,6 +141,10 @@ Use `getDriveItems` to fetch metadata and `downloadUrl`, decide which items are 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 ## Get API credentials [sharepoint-online-api-credentials]
+
+### Quick Connect OAuth 2.0
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your SharePoint Online sites. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 ### OAuth client credentials (app-only auth)
 
