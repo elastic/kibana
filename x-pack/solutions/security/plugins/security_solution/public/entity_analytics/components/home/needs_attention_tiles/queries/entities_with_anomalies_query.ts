@@ -18,6 +18,61 @@ import {
 } from '../../entities_grid/queries/euid_pipeline';
 import { buildPeriodCondition } from './tile_period';
 import type { TilePeriod } from './tile_period';
+import { SERIES_BUCKET_COLUMN } from './tile_series_window';
+
+interface AnomalyTileHeadOptions {
+  entitiesIndexName: string;
+  /** The ES|QL condition that keeps the anomaly records of the window the query covers. */
+  windowCondition: string;
+  entityFilterClauses: string[];
+  jobIds: string[];
+  /** Set for the sparkline series: numbers each record by when it happened. */
+  bucketExpression?: string;
+}
+
+/**
+ * The stages the Entities with anomalies count and its sparkline series share, up to the resolved
+ * entity: the anomaly records of the window and installed jobs, their entity ids, the join to the
+ * entities, the entity filters and the resolution. The count and the series both start here, so
+ * they cannot drift apart.
+ */
+export const buildAnomalyTileHead = ({
+  entitiesIndexName,
+  windowCondition,
+  entityFilterClauses,
+  jobIds,
+  bucketExpression,
+}: AnomalyTileHeadOptions): string[] => {
+  const parts: string[] = [];
+
+  parts.push(`SET unmapped_fields="nullify";`);
+  parts.push(`FROM ${ML_ANOMALY_INDICES}`);
+  parts.push(
+    `| WHERE ${ANOMALY_RECORD_FILTER} AND ${windowCondition} AND ${buildAnomalyJobFilter(jobIds)}`
+  );
+
+  parts.push(...buildPerTypeEuidEvals());
+  parts.push(evalGuardedTypedEuids('derived_euids'));
+  parts.push(`| MV_EXPAND derived_euids`);
+  parts.push(`| WHERE derived_euids IS NOT NULL`);
+  if (bucketExpression) {
+    parts.push(`| EVAL ${SERIES_BUCKET_COLUMN} = ${bucketExpression}`);
+  }
+  // STATS BY on a temp column avoids grouping on the mapped entity.id field in the anomalies
+  // index rather than our computed EUID. RENAME after STATS produces entity.id for the JOIN.
+  parts.push(`| STATS BY ${bucketExpression ? `${SERIES_BUCKET_COLUMN}, ` : ''}derived_euids`);
+  parts.push(`| RENAME derived_euids AS \`entity.id\``);
+  parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
+
+  parts.push(`| WHERE entity.name IS NOT NULL`);
+  parts.push(...entityFilterClauses);
+
+  parts.push(
+    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
+  );
+
+  return parts;
+};
 
 /**
  * Builds a single ES|QL query that counts distinct entities with at least one
@@ -34,34 +89,12 @@ export const buildEntitiesWithAnomaliesCountQuery = (
   jobIds: string[] = [],
   period: TilePeriod = 'current'
 ): string => {
-  const parts: string[] = [];
-
-  parts.push(`SET unmapped_fields="nullify";`);
-  parts.push(`FROM ${ML_ANOMALY_INDICES}`);
-  parts.push(
-    `| WHERE ${ANOMALY_RECORD_FILTER} AND ${buildPeriodCondition(
-      '@timestamp',
-      timeRange,
-      period
-    )} AND ${buildAnomalyJobFilter(jobIds)}`
-  );
-
-  parts.push(...buildPerTypeEuidEvals());
-  parts.push(evalGuardedTypedEuids('derived_euids'));
-  parts.push(`| MV_EXPAND derived_euids`);
-  parts.push(`| WHERE derived_euids IS NOT NULL`);
-  // STATS BY on a temp column avoids grouping on the mapped entity.id field in the anomalies
-  // index rather than our computed EUID. RENAME after STATS produces entity.id for the JOIN.
-  parts.push(`| STATS BY derived_euids`);
-  parts.push(`| RENAME derived_euids AS \`entity.id\``);
-  parts.push(`| LOOKUP JOIN ${entitiesIndexName} ON entity.id`);
-
-  parts.push(`| WHERE entity.name IS NOT NULL`);
-  parts.push(...entityFilterClauses);
-
-  parts.push(
-    `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`
-  );
+  const parts = buildAnomalyTileHead({
+    entitiesIndexName,
+    windowCondition: buildPeriodCondition('@timestamp', timeRange, period),
+    entityFilterClauses,
+    jobIds,
+  });
   // One row per resolved entity, because several ids can resolve to the same one. A plain COUNT of
   // those rows is exact; COUNT_DISTINCT would only estimate, and is approximate above about 3,000.
   parts.push(`| STATS BY effective_id`);
