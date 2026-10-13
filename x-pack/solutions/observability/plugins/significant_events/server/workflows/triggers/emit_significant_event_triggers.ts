@@ -15,7 +15,7 @@ import type { TriggerEmitter } from './emit';
 
 type SignificantEventSource = Pick<
   SignificantEvent,
-  '@timestamp' | 'event_id' | 'title' | 'summary' | 'status' | 'severity' | 'stream_names'
+  '@timestamp' | 'event_id' | 'title' | 'summary' | 'status' | 'severity' | 'source_ids'
 >;
 
 const baseSignificantEventPayload = (
@@ -26,7 +26,7 @@ const baseSignificantEventPayload = (
   summary: significantEvent.summary,
   status: significantEvent.status,
   severity: significantEvent.severity,
-  stream_names: significantEvent.stream_names,
+  source_ids: significantEvent.source_ids,
   occurred_at: significantEvent['@timestamp'],
 });
 

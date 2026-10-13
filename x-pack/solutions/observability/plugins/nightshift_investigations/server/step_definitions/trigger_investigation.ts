@@ -48,11 +48,11 @@ const inputSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .optional()
     .describe('Caller-supplied prompt for the investigation agent'),
-  stream_names: z
+  source_ids: z
     .array(z.string().max(MAX_ID_LENGTH))
     .max(MAX_ARRAY_LENGTH)
     .optional()
-    .describe('Logical stream names to scope the investigation'),
+    .describe('Nightshift source ids to scope the investigation'),
   context: z
     .record(z.string(), z.unknown())
     .optional()
@@ -97,7 +97,7 @@ export const triggerInvestigationStepDefinition = (
         title: input.title,
         trigger_type: input.trigger_type ?? 'automatic',
         message: input.message,
-        stream_names: input.stream_names,
+        source_ids: input.source_ids,
         context: input.context,
         notificationDestinations: input.notificationDestinations,
       });

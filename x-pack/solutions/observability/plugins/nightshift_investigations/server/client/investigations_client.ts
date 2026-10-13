@@ -489,7 +489,7 @@ export class NightshiftInvestigationsClient {
     title,
     trigger_type,
     message,
-    stream_names,
+    source_ids,
     connector_id,
     context = {},
     notificationDestinations,
@@ -585,7 +585,7 @@ export class NightshiftInvestigationsClient {
       // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
       // investigation from the first round instead.
       ...(title ? { title } : {}),
-      stream_names: stream_names ?? [],
+      ...(source_ids?.length ? { source_ids } : {}),
       ...(connector_id?.trim() ? { connector_id: resolvedConnectorId } : {}),
       investigation_id: investigationId,
       subjects: newSubjects,

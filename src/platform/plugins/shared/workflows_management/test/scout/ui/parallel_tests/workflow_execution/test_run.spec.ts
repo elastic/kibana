@@ -19,7 +19,8 @@ import {
 } from '../../fixtures/workflows';
 import { getWorkflowWithEventInputYaml } from '../../fixtures/workflows/console_workflows';
 
-test.describe('Workflow execution - Test runs', { tag: [...tags.stateful.classic] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/288856
+test.describe.skip('Workflow execution - Test runs', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
