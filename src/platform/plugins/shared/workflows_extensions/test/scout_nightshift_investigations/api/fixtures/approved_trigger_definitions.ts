@@ -124,7 +124,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.v1.alertStatusChanged',
-    schemaHash: '41a93ede96a9ccea26254d116b83c7fd30785d22fbbb54ef31f555d8c4e52987',
+    schemaHash: '393ba21ad63d5b65d3b019c299b5f7d9e172d9eea52df67c069413b007c22a7a',
   },
   {
     id: 'cases.attachmentsAdded',
