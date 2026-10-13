@@ -124,13 +124,16 @@ spaceTest.describe(
       await discover.waitUntilSearchingHasFinished();
       await unifiedTabs.createNewTab();
 
-      const runButton = discover.getRecommendedQueryRunButton('Search all fields');
+      const runButton = discover.getRecommendedQueryRunButton('Aggregate with STATS');
       await runButton.hover();
       await expect(runButton).toHaveCSS('opacity', '1');
       await runButton.click();
       await discover.waitUntilSearchingHasFinished();
 
       await expect(discover.getRecommendedQueries()).toBeHidden();
+      expect(await discover.getEsqlQueryValue()).toContain('STATS count = COUNT(*)');
+      await expect(discover.getErrorCalloutTitle()).toBeHidden();
+      expect(await discover.getHitCount()).toBe('1');
     });
   }
 );

@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
+import { escapeEsqlColumnName } from '../../../definitions/utils/columns';
 import { METADATA_FIELDS } from '../metadata';
 import { prettifyQueryTemplate, prettifyQuery } from './utils';
 import { SuggestionCategory } from '../../../../language/autocomplete/utils/sorting/types';
@@ -29,13 +30,18 @@ export interface QueryTemplate {
 
 export const getRecommendedQueriesTemplates = ({
   fromCommand,
-  timeField,
-  categorizationField,
+  timeField: timeFieldName,
+  categorizationField: categorizationFieldName,
 }: {
   fromCommand: string;
   timeField?: string;
   categorizationField?: string;
 }): QueryTemplate[] => {
+  const timeField = timeFieldName ? escapeEsqlColumnName(timeFieldName) : undefined;
+  const categorizationField = categorizationFieldName
+    ? escapeEsqlColumnName(categorizationFieldName)
+    : undefined;
+
   // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
   const bucketExpression =
     timeField === '@timestamp' ? 'TBUCKET(100)' : `BUCKET(${timeField}, 100, ?_tstart, ?_tend)`;
