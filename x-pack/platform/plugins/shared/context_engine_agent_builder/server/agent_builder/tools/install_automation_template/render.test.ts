@@ -124,6 +124,29 @@ describe('automation template rendering', () => {
     expect(yaml).toContain('| WHERE code == \\"__KEEP__\\"');
   });
 
+  describe('document batches', () => {
+    it('discovers ids only', () => {
+      const query = renderUnitQuery(
+        renderDocumentOrchestrationTemplate(documentValues),
+        'discover_documents'
+      );
+
+      expect(query).toMatch(/\| KEEP _id\s*$/);
+    });
+
+    it('fetches title and body for the batch ids', () => {
+      const definition = parse(renderDocumentOrchestrationTemplate(documentValues));
+      const query = createWorkflowLiquidEngine().parseAndRenderSync(
+        findStep(definition.steps, 'fetch_documents')?.with?.query ?? '',
+        { consts: definition.consts, foreach: { item: [['a'], ['b"c'], ['d\\e']] } }
+      );
+
+      expect(query).toContain('| WHERE _id IN ("a", "b\\"c", "d\\\\e")');
+      expect(query).toContain('| EVAL body = SUBSTRING(`body`, 1, 12000)');
+      expect(query).toContain('| KEEP _id, `title`, body');
+    });
+  });
+
   describe('index metadata', () => {
     const twoSources = {
       aiIndexId: 'airline-loyalty',
