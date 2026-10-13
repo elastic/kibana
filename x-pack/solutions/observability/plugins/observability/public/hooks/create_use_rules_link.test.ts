@@ -21,7 +21,14 @@ const mockServices = (settingValue: boolean | undefined) => {
     services:
       settingValue === undefined
         ? {}
-        : { settings: { globalClient: { get: jest.fn().mockReturnValue(settingValue) } } },
+        : {
+            settings: {
+              globalClient: {
+                isDeclared: jest.fn().mockReturnValue(true),
+                get: jest.fn().mockReturnValue(settingValue),
+              },
+            },
+          },
   });
 };
 
@@ -55,10 +62,26 @@ describe('createUseRulesLink', () => {
 
     renderHook(() => createUseRulesLink()());
 
-    expect(useKibanaMock().services.settings.globalClient.get).toHaveBeenCalledWith(
-      ALERTING_V2_ENABLED_SETTING_ID,
-      false
-    );
+    const { globalClient } = useKibanaMock().services.settings;
+    expect(globalClient.isDeclared).toHaveBeenCalledWith(ALERTING_V2_ENABLED_SETTING_ID);
+    expect(globalClient.get).toHaveBeenCalledWith(ALERTING_V2_ENABLED_SETTING_ID);
+  });
+
+  it('links to the stack management rules app when the setting is not declared', () => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        settings: {
+          globalClient: {
+            isDeclared: jest.fn().mockReturnValue(false),
+            get: jest.fn().mockReturnValue(true),
+          },
+        },
+      },
+    });
+
+    renderHook(() => createUseRulesLink()());
+
+    expect(useLinkPropsMock).toHaveBeenCalledWith({ app: 'rules', pathname: '/' }, {});
   });
 
   it('falls back to the stack management rules app when settings are unavailable', () => {
