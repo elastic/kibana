@@ -44,6 +44,8 @@ type SettingsPageHeaderProps = Pick<
   NightshiftAppHeaderProps,
   | 'onManagementClick'
   | 'managementHref'
+  | 'onKnowledgeClick'
+  | 'knowledgeHref'
   | 'onSandboxSecretsClick'
   | 'onAutomationsClick'
   | 'automationsHref'

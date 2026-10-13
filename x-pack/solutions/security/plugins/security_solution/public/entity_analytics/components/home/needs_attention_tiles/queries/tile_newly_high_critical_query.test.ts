@@ -18,24 +18,24 @@ describe('buildNewlyHighCriticalCountQuery', () => {
     expect(query).toContain('FROM risk-score.risk-score-my-space');
   });
 
-  it('fetches a window wider than the period so both sides of the boundary are covered', () => {
-    const query24h = buildNewlyHighCriticalCountQuery('default', '.entities-v1', '24h');
-    const query7d = buildNewlyHighCriticalCountQuery('default', '.entities-v1', '7d');
-    const query30d = buildNewlyHighCriticalCountQuery('default', '.entities-v1', '30d');
-    expect(query24h).toContain('@timestamp >= NOW() - 26h');
-    expect(query7d).toContain('@timestamp >= NOW() - 170h');
-    expect(query30d).toContain('@timestamp >= NOW() - 722h');
-  });
-
-  it('labels docs as "boundary" or "current" using the correct period cutoff for each time range', () => {
+  it('reads only the two hours of risk score docs before the boundary of each time range', () => {
     expect(buildNewlyHighCriticalCountQuery('default', '.entities-v1', '24h')).toContain(
-      'CASE(@timestamp <= NOW() - 24h, "boundary", "current")'
+      '@timestamp >= NOW() - 1 days - 2 hours AND @timestamp <= NOW() - 1 days'
     );
     expect(buildNewlyHighCriticalCountQuery('default', '.entities-v1', '7d')).toContain(
-      'CASE(@timestamp <= NOW() - 7d, "boundary", "current")'
+      '@timestamp >= NOW() - 7 days - 2 hours AND @timestamp <= NOW() - 7 days'
     );
     expect(buildNewlyHighCriticalCountQuery('default', '.entities-v1', '30d')).toContain(
-      'CASE(@timestamp <= NOW() - 30d, "boundary", "current")'
+      '@timestamp >= NOW() - 30 days - 2 hours AND @timestamp <= NOW() - 30 days'
+    );
+  });
+
+  it('reads the current level from the High and Critical entity docs', () => {
+    const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
+    expect(query).toContain('FROM .entities-v1');
+    expect(query).toContain('WHERE entity.risk.calculated_level IN ("High", "Critical")');
+    expect(query).toContain(
+      'current_level_num = CASE(entity.risk.calculated_level == "Critical", 4, 3)'
     );
   });
 
@@ -66,14 +66,26 @@ describe('buildNewlyHighCriticalCountQuery', () => {
     expect(query).toContain('current_level_num >= 3');
   });
 
-  it('excludes entities that were already High or Critical at the boundary', () => {
+  it('qualifies entities whose level is strictly higher than at the boundary, or had none', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
-    expect(query).toContain('boundary_level_num IS NULL OR boundary_level_num < 3');
+    // High to Critical counts; Critical to Critical and Critical to High do not.
+    expect(query).toContain('boundary_level_num IS NULL OR current_level_num > boundary_level_num');
+    expect(query).not.toContain('boundary_level_num < 3');
   });
 
-  it('uses LAST(level_num, @timestamp) not MAX to record the actual level at each boundary', () => {
+  it('maps risk levels to numbers with nested single-condition CASEs', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
-    expect(query).toContain('STATS level_num = LAST(level_num, @timestamp) BY entity_euid, period');
+    expect(query).toContain('level_low = CASE(risk_level == "Low", 1, 0)');
+    expect(query).toContain('level_moderate = CASE(risk_level == "Moderate", 2, level_low)');
+    expect(query).toContain('level_high = CASE(risk_level == "High", 3, level_moderate)');
+    expect(query).toContain('level_num = CASE(risk_level == "Critical", 4, level_high)');
+  });
+
+  it('uses LAST(level_num, @timestamp) not MAX to record the actual level at the boundary', () => {
+    const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
+    expect(query).toContain(
+      'STATS boundary_level_num = LAST(level_num, @timestamp) BY entity_euid'
+    );
     expect(query).not.toMatch(/MAX\(level_num/);
   });
 
@@ -103,14 +115,13 @@ describe('buildNewlyHighCriticalCountQuery', () => {
 
   it('defaults to 24h when no time range is supplied', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
-    expect(query).toContain('@timestamp >= NOW() - 26h');
-    expect(query).toContain('CASE(@timestamp <= NOW() - 24h');
+    expect(query).toContain('@timestamp <= NOW() - 1 days');
   });
 
   it('deduplicates resolved entities and emits both value and entity_ids columns', () => {
     const query = buildNewlyHighCriticalCountQuery('default', '.entities-v1');
     expect(query).toContain('COALESCE(`entity.relationships.resolution.resolved_to`, entity.id)');
     expect(query).toContain('value = COUNT_DISTINCT(effective_id)');
-    expect(query).toContain('entity_ids = VALUES(entity.id)');
+    expect(query).toContain('entity_ids = VALUES(effective_id)');
   });
 });
