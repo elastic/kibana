@@ -8,7 +8,7 @@
  */
 
 import type { ScoutServerConfig } from '../../../../../types';
-import { buildEisServerConfig } from '../../agent_builder_smoke/stateful/classic.stateful.config';
+import { buildEisServerConfig } from '../../agent_builder_smoke/shared';
 import { serviceAccountsServerArgs } from '../../service_accounts/shared';
 
 /**

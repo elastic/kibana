@@ -9,7 +9,10 @@ import { expect } from '@kbn/scout-security/api';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
 import { getAd2Scenario } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { seedEndpointHosts } from '../../../../scout/edr_response_actions/common/seed_endpoint_hosts';
-import { completeHostAction } from '../../../../scout/edr_response_actions/common/complete_host_action';
+import {
+  completeHostAction,
+  deleteSubmittedHostActions,
+} from '../../../../scout/edr_response_actions/common/complete_host_action';
 import {
   assertExecutionCompleted,
   apiTest,
@@ -58,8 +61,10 @@ apiTest.describe(
     let scenario: SeededScenario | undefined;
     let serviceAccountId: string | undefined;
     let cleanupHosts: (() => Promise<void>) | undefined;
+    // Isolate actions submitted during the test; `cleanupHosts` only knows the seed-time ids.
+    const submittedActionIds: string[] = [];
 
-    apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+    apiTest.afterAll(async ({ apiClient, samlAuth, esClient, config }) => {
       // Every step runs even when an earlier one throws, so one failure cannot leak the seeded
       // host, the service account or the scenario alerts. Failures are reported together.
       const errors: unknown[] = [];
@@ -80,6 +85,9 @@ apiTest.describe(
       await attempt(async () => {
         if (api) await resetWorker(api, FORENSICS_WORKER_ID);
       });
+      await attempt(async () =>
+        deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds })
+      );
       await attempt(async () => cleanupHosts?.());
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
@@ -307,6 +315,7 @@ apiTest.describe(
           { timeoutMs: testData.ACTION_TIMEOUT_MS }
         );
         expect(action.agents).toContain(seededAgentId);
+        submittedActionIds.push(action.id);
         await completeHostAction({ esClient, config, action: action as never });
 
         // 6. The simulated acknowledgement only writes Fleet/Endpoint responses; it does not
