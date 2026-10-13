@@ -38,11 +38,6 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
       defaultMessage:
         'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
     }),
-  ruleAttachmentUnavailable: () =>
-    i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
-      defaultMessage:
-        'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
-    }),
   huntSupplyPrerequisitesUnmet: () =>
     i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
       defaultMessage:
