@@ -137,14 +137,11 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"") BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: [
-          'COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")',
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)',
-        ],
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"") BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")', 'order_date'],
         expectedSourceIds: {
           'COUNT(*) WHERE KQL("customer_gender:\\"MALE\\"")': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          order_date: ['col1'],
         },
       },
     },
@@ -159,11 +156,11 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['COUNT(*)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        esql: `${ecommerceFrom} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'order_date'],
         expectedSourceIds: {
           'COUNT(*)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          order_date: ['col1'],
         },
       },
     },
@@ -180,11 +177,11 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS SUM(taxful_total_price) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['SUM(taxful_total_price)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS SUM(taxful_total_price) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['SUM(taxful_total_price)', 'order_date'],
         expectedSourceIds: {
           'SUM(taxful_total_price)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          order_date: ['col1'],
         },
         expectedFormats: {
           'SUM(taxful_total_price)': {
@@ -207,11 +204,11 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: true,
-        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY BUCKET(order_date, 75, ?_tstart, ?_tend)`,
-        columnNames: ['AVG(taxful_total_price)', 'BUCKET(order_date, 75, ?_tstart, ?_tend)'],
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS AVG(taxful_total_price) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['AVG(taxful_total_price)', 'order_date'],
         expectedSourceIds: {
           'AVG(taxful_total_price)': ['col2'],
-          'BUCKET(order_date, 75, ?_tstart, ?_tend)': ['col1'],
+          order_date: ['col1'],
         },
         expectedFormats: {
           'AVG(taxful_total_price)': { id: 'bytes', params: { decimals: 2 } },

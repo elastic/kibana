@@ -56,6 +56,7 @@ export const openConversationDetailsFlyout = async ({
       flyoutMenuProps: { trailingActions },
       type: 'push',
       paddingSize: 'm',
+      resizable: true,
       css: flyoutMenuRowStyles,
       role: 'region',
       'data-test-subj': 'agentBuilderConversationDetailsFlyout-snapshot',

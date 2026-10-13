@@ -7,6 +7,7 @@
 
 import React, { lazy, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FlyoutOrigin } from '../../common/lib/telemetry';
@@ -110,6 +111,11 @@ export interface OpenDocumentFlyoutParams {
   onAlertUpdated?: () => void;
   /** Which UI trigger opened this flyout, when known. */
   origin?: FlyoutOrigin;
+  /**
+   * Size of the flyout this one replaces. A number is a pixel width; a string is an EUI flyout size.
+   * When set, the persisted Security flyout width is not applied.
+   */
+  originFlyoutSize?: EuiFlyoutProps['size'];
   /**
    * Flyout-history title to use for this open, when already known synchronously by the caller
    * (e.g. `getDocumentHistoryTitle(hit)`).
@@ -316,6 +322,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         indexName: params.indexName ?? '',
       });
       const onClose = buildOnClose(null);
+      const matchOriginFlyout = params.originFlyoutSize !== undefined;
       open(
         buildFromIndexContent(params),
         {
@@ -324,13 +331,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           session: sessionMode,
           title: params.title,
           onClose,
+          ...(matchOriginFlyout ? { size: params.originFlyoutSize, maxWidth: false } : {}),
         },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,
           session: sessionMode,
           origin: params.origin,
-        }
+        },
+        undefined,
+        matchOriginFlyout ? { persistWidth: false } : undefined
       );
     },
     [
@@ -395,6 +405,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       onAlertUpdated = noop,
       origin,
       title,
+      originFlyoutSize,
     }: OpenDocumentFlyoutParams) => {
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.documentFromPattern,
@@ -402,6 +413,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         indexName: indexName ?? '',
       });
       const onClose = buildOnClose(null);
+      const matchOriginFlyout = originFlyoutSize !== undefined;
       open(
         <DocumentFlyoutWrapperFromPattern
           documentId={documentId}
@@ -418,13 +430,16 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
           // title (e.g. "Alert: <rule name>") if they know it at call time.
           title: title ?? getAlertHistoryTitle(),
           onClose,
+          ...(matchOriginFlyout ? { size: originFlyoutSize, maxWidth: false } : {}),
         },
         {
           surface: FLYOUT_SURFACE.FLYOUT,
           flyoutType: FLYOUT_TYPE.DOCUMENT,
           session: sessionMode,
           origin,
-        }
+        },
+        undefined,
+        matchOriginFlyout ? { persistWidth: false } : undefined
       );
     },
     [open, defaultDocumentFlyoutProperties, historyKey, sessionMode, writeOnOpen, buildOnClose]

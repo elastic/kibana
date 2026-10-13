@@ -500,6 +500,7 @@ export enum RegistryDataStreamKeys {
   lifecycle = 'lifecycle',
   agent = 'agent',
   provider_permissions = 'provider_permissions',
+  use_otel_suffix = 'use_otel_suffix',
 }
 
 export interface RegistryDataStream {
@@ -520,6 +521,11 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
   [RegistryDataStreamKeys.provider_permissions]?: RegistryProviderPermissions[];
+  /**
+   * Opt-in to OTel Elasticsearch asset naming (`.otel` suffix, OTel component templates) for data
+   * streams that ship only mappings and ingest pipelines, i.e. without any `otelcol` stream.
+   */
+  [RegistryDataStreamKeys.use_otel_suffix]?: boolean;
 }
 
 export type InputOnlyRegistryDataStream = Omit<

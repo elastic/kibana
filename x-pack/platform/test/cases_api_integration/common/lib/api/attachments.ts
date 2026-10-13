@@ -6,18 +6,21 @@
  */
 
 import type SuperTest from 'supertest';
-import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
+  CASES_INTERNAL_URL,
+  CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common/constants';
+import {
+  getCaseBulkDeleteAttachmentsUrl,
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import type { Case } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
-  BulkGetAttachmentsResponse,
+  BulkGetUnifiedAttachmentsResponse,
   AttachmentRequestV2,
-  BulkCreateAttachmentsRequest,
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   AttachmentPatchRequest,
   AttachmentsFindResponse,
   UnifiedAttachmentsFindResponse,
@@ -33,7 +36,7 @@ import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
 import { createCase } from './case';
-import { postCaseReq } from '../mock';
+import { buildUnifiedAlertReq, postCaseReq } from '../mock';
 
 export const bulkGetAttachments = async ({
   supertest,
@@ -47,7 +50,7 @@ export const bulkGetAttachments = async ({
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<BulkGetAttachmentsResponse> => {
+}): Promise<BulkGetUnifiedAttachmentsResponse> => {
   const { body: comments } = await supertest
     .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_get`)
     .send({ ids: savedObjectIds })
@@ -124,7 +127,7 @@ export const bulkCreateAttachments = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  params: BulkCreateAttachmentsRequestV2;
+  params: BulkCreateUnifiedAttachmentsRequest;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
@@ -150,40 +153,36 @@ export const createCaseAndBulkCreateAttachments = async ({
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequestV2 }> => {
+}): Promise<{ theCase: Case; attachments: BulkCreateUnifiedAttachmentsRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
-  const attachments = getAttachments(numberOfAttachments);
+  const attachments = getUnifiedAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
     supertest,
     caseId: postedCase.id,
     params: attachments,
+    auth,
+    expectedHttpCode,
   });
 
   return { theCase: patchedCase, attachments };
 };
 
-export const getAttachments = (numberOfAttachments: number): BulkCreateAttachmentsRequest => {
-  return [...Array(numberOfAttachments)].map((_, index) => {
-    if (index % 10 === 0) {
-      return {
-        type: AttachmentType.user,
-        comment: `Test ${index + 1}`,
-        owner: 'securitySolutionFixture',
-      };
-    }
-
-    return {
-      type: AttachmentType.alert,
-      alertId: [`test-id-${index + 1}`],
-      index: [`test-index-${index + 1}`],
-      rule: {
-        id: `rule-test-id-${index + 1}`,
-        name: `Test ${index + 1}`,
-      },
-      owner: 'securitySolutionFixture',
-    };
-  });
-};
+export const getUnifiedAttachments = (
+  numberOfAttachments: number
+): BulkCreateUnifiedAttachmentsRequest =>
+  [...Array(numberOfAttachments)].map((_, index) =>
+    index % 10 === 0
+      ? {
+          type: COMMENT_ATTACHMENT_TYPE,
+          data: { content: `Test ${index + 1}` },
+          owner: 'securitySolutionFixture',
+        }
+      : buildUnifiedAlertReq('securitySolutionFixture', {
+          alertId: [`test-id-${index + 1}`],
+          index: [`test-index-${index + 1}`],
+          rule: { id: `rule-test-id-${index + 1}`, name: `Test ${index + 1}` },
+        })
+  );
 
 export const deleteComment = async ({
   supertest,
@@ -298,6 +297,30 @@ export const updateComment = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const bulkDeleteAttachments = async ({
+  supertest,
+  caseId,
+  savedObjectIds,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  savedObjectIds: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkDeleteAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .auth(auth.user.username, auth.user.password)
+    .send({ ids: savedObjectIds })
+    .expect(expectedHttpCode);
+
+  return body;
 };
 
 export const bulkDeleteFileAttachments = async ({

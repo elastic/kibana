@@ -6,9 +6,8 @@
  */
 
 import { describeCodecCases } from '../test_helpers/codec_cases';
+import { BandwidthLimitKey, LocationStatus } from './locations';
 import {
-  BandwidthLimitKey,
-  LocationStatus,
   LocationGeoCodec,
   LocationStatusCodec,
   ManifestLocationCodec,
@@ -18,7 +17,7 @@ import {
   ServiceLocationErrors,
   ServiceLocationsApiResponseCodec,
   ThrottlingOptionsCodec,
-} from './locations';
+} from '../schemas/locations';
 
 const geo = { lat: 41.25, lon: -95.86 };
 

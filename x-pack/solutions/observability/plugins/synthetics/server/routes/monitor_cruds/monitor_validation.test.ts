@@ -1310,6 +1310,73 @@ describe('normalizeAPIConfig', () => {
     });
   });
 
+  it.each(['[]', '["secret"]', '"secret"', '42', 'true', 'null'])(
+    'rejects params that are not a JSON object: %s',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+        errorMessage: 'Invalid params: Params must be a JSON object.',
+        formattedConfig: {
+          type: 'browser',
+          params,
+        },
+      });
+    }
+  );
+
+  it.each([[['secret']], [new Date()], [new Set()], ['secret'], [/regex/]])(
+    'rejects non-string params that are not a plain record of strings: %p',
+    (params) => {
+      expect(normalizeAPIConfig({ type: 'browser', params } as any).errorMessage).toMatch(
+        /^Invalid params: /
+      );
+    }
+  );
+
+  it.each([[false], [0], [null]])(
+    'rejects falsy params that would silently clear stored params: %p',
+    (params) => {
+      expect(
+        normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: '{"a":"b"}' })
+          .errorMessage
+      ).toMatch(/^Invalid params: /);
+    }
+  );
+
+  it('still treats empty string params as clearing them', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: '' } as any, { previousParams: '{"a":"b"}' })
+        .errorMessage
+    ).toBeUndefined();
+  });
+
+  it('tolerates null params when there is no stored value to lose', () => {
+    expect(
+      normalizeAPIConfig({ type: 'browser', params: null } as any).errorMessage
+    ).toBeUndefined();
+  });
+
+  it('accepts params objects with nested values', () => {
+    const params = '{"retries":3,"options":{"mode":"fast"}}';
+    expect(normalizeAPIConfig({ type: 'browser', params } as any)).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
+  it('keeps unchanged stored params that are not a JSON object', () => {
+    const params = '["secret"]';
+    expect(
+      normalizeAPIConfig({ type: 'browser', params } as any, { previousParams: params })
+    ).toEqual({
+      formattedConfig: {
+        type: 'browser',
+        params,
+      },
+    });
+  });
+
   it('playwright_options key mapping validation', function () {
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{}' } as any)).toEqual({
       formattedConfig: {

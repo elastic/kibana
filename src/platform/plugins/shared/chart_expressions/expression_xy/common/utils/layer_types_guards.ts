@@ -7,8 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LayerTypes } from '../constants';
-import type { DataLayerConfig, CommonXYLayerConfig } from '..';
+import { LayerTypes, REFERENCE_LINE } from '../constants';
+import type {
+  CommonXYLayerConfig,
+  CommonXYReferenceLineLayerConfig,
+  DataLayerConfig,
+  ReferenceLineConfig,
+} from '../types';
 
 export const isDataLayer = (layer: CommonXYLayerConfig): layer is DataLayerConfig =>
   layer.layerType === LayerTypes.DATA;
+
+export const isReferenceLine = (layer: CommonXYLayerConfig): layer is ReferenceLineConfig =>
+  layer.type === REFERENCE_LINE;
+
+export const isReferenceLineOrLayer = (
+  layer: CommonXYLayerConfig
+): layer is CommonXYReferenceLineLayerConfig => layer.layerType === LayerTypes.REFERENCELINE;

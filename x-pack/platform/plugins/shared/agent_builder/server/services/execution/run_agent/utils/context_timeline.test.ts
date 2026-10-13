@@ -25,7 +25,6 @@ import {
 } from '../../../../test_utils/timeline';
 import {
   customEvents,
-  dropTimelineRounds,
   eventsForContext,
   groupTimelineEntries,
   groupTimelineRounds,
@@ -37,7 +36,6 @@ import {
   lastExecutionTerminal,
   roundInterruption,
   roundResponse,
-  sliceTimelineRounds,
   type ContextTimelineEvent,
   type TimelineEntry,
 } from './context_timeline';
@@ -202,29 +200,6 @@ describe('groupTimelineRounds — interrupted rounds', () => {
   });
 });
 
-describe('dropTimelineRounds', () => {
-  const timeline = [...timelineFromRounds([{ id: 'a' }, { id: 'b' }]), ...independentIdsRound()];
-
-  it('removes exactly the events of the given rounds and keeps stored order', () => {
-    const dropped = dropTimelineRounds(timeline, new Set(['b']));
-
-    expect(groupTimelineRounds(dropped).map((round) => round.id)).toEqual(['a', 'exec-abc']);
-    expect(dropped.map((event) => event.id)).toEqual(
-      timeline.filter((event) => !event.id.startsWith('b::')).map((event) => event.id)
-    );
-  });
-
-  it('drops rounds whose ids follow no scheme through the trigger link', () => {
-    expect(dropTimelineRounds(timeline, new Set(['exec-abc'])).map((event) => event.id)).toEqual(
-      timeline.filter((event) => !['um', 'ec'].includes(event.id)).map((event) => event.id)
-    );
-  });
-
-  it('returns the timeline unchanged for an empty set', () => {
-    expect(dropTimelineRounds(timeline, new Set())).toBe(timeline);
-  });
-});
-
 describe('lastExecutionTerminal (re-export)', () => {
   it('returns the terminal event of the last execution', () => {
     expect(lastExecutionTerminal(pausedAndResumedRoundTimeline())?.id).toBe(
@@ -359,65 +334,5 @@ describe('groupTimelineEntries with custom events', () => {
   it('is ignored by groupTimelineRounds and selected by customEvents', () => {
     expect(groupTimelineRounds(timeline).map((round) => round.id)).toEqual(['a', 'b']);
     expect(customEvents(timeline).map((event) => event.id)).toEqual(['note']);
-  });
-});
-
-describe('sliceTimelineRounds with non-round events', () => {
-  /** A user message that triggered no execution, sent between rounds `b` and `c`. */
-  const standaloneMessage = {
-    id: 'm',
-    type: TimelineEventType.userMessage,
-    created_at: '2026-01-01T00:03:30.000Z',
-    actor: userActor,
-    data: { message: 'standalone' },
-  } as unknown as TimelineEvent;
-  const timeline: ContextTimelineEvent[] = [
-    customEventFixture({ id: 'n0', created_at: '2025-12-31T00:00:00.000Z' }),
-    ...completedRoundEvents('a', '2026-01-01T00:00:00.000Z'),
-    customEventFixture({ id: 'n1', created_at: '2026-01-01T00:01:00.000Z' }),
-    ...completedRoundEvents('b', '2026-01-01T00:02:00.000Z'),
-    customEventFixture({ id: 'n2', created_at: '2026-01-01T00:03:00.000Z' }),
-    standaloneMessage,
-    ...completedRoundEvents('c', '2026-01-01T00:04:00.000Z'),
-  ];
-  const entryIds = (events: ContextTimelineEvent[]) =>
-    Array.from(new Set(events.map((event) => event.id.split('::')[0])));
-
-  it('keeps every non-round event when slicing from the start', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 0))).toEqual([
-      'n0',
-      'a',
-      'n1',
-      'b',
-      'n2',
-      'm',
-      'c',
-    ]);
-  });
-
-  it('drops non-round events older than the first kept round (the cut) and keeps the newer ones', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 1))).toEqual(['b', 'n2', 'm', 'c']);
-  });
-
-  it('drops a standalone user message older than the cut', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 2))).toEqual(['c']);
-  });
-
-  it('keeps non-round events older than the first excluded round when an end bound is given', () => {
-    expect(entryIds(sliceTimelineRounds(timeline, 0, 2))).toEqual([
-      'n0',
-      'a',
-      'n1',
-      'b',
-      'n2',
-      'm',
-    ]);
-  });
-
-  it('when the cut removes every round, keeps only custom events after the last removed round ended', () => {
-    const late = customEventFixture({ id: 'n3', created_at: '2026-01-01T00:05:00.000Z' });
-
-    expect(entryIds(sliceTimelineRounds([...timeline, late], 3))).toEqual(['n3']);
-    expect(entryIds(sliceTimelineRounds(timeline, 3))).toEqual([]);
   });
 });

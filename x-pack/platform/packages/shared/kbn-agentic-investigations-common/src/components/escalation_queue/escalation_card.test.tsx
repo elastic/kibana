@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { EscalationQueueItem } from './types';
 import { EscalationCard } from './escalation_card';
 
 const openEscalation: EscalationQueueItem = {
   id: 'esc-open-1',
+  agentId: 'agent-1',
   title: 'Suspicious login from new country',
   status: 'open',
   createdAt: '2024-01-01T00:00:00Z',
@@ -27,13 +28,17 @@ const closedEscalation: EscalationQueueItem = {
   status: 'closed',
 };
 
-const renderCard = (escalation: EscalationQueueItem, hasBorder = false) => {
+const renderCard = (
+  escalation: EscalationQueueItem,
+  { onClickCard, href }: { onClickCard?: jest.Mock; href?: string } = {}
+) => {
   const renderAssignees = jest.fn(() => <span data-test-subj="assignees-widget" />);
   renderWithKibanaRenderContext(
     <EscalationCard
       escalation={escalation}
-      hasBorder={hasBorder}
       renderAssignees={renderAssignees}
+      onClickCard={onClickCard}
+      href={href}
     />
   );
   return { renderAssignees };
@@ -43,6 +48,33 @@ describe('EscalationCard', () => {
   it('renders the escalation title', () => {
     renderCard(openEscalation);
     expect(screen.getByText(openEscalation.title)).toBeInTheDocument();
+  });
+
+  describe('link mode (href provided)', () => {
+    it('renders the title as a link with the given href', () => {
+      renderCard(openEscalation, { href: '/agent-builder/esc-open-1' });
+
+      const link = screen.getByTestId(`escalationCardLink-${openEscalation.id}`);
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/agent-builder/esc-open-1');
+    });
+
+    it('calls onClickCard when the link is clicked (plain click)', () => {
+      const onClickCard = jest.fn();
+      renderCard(openEscalation, { href: '/agent-builder/esc-open-1', onClickCard });
+
+      fireEvent.click(screen.getByTestId(`escalationCardLink-${openEscalation.id}`));
+
+      expect(onClickCard).toHaveBeenCalledWith(openEscalation);
+    });
+
+    it('does not expose the panel as a button when an href is provided', () => {
+      renderCard(openEscalation, { href: '/agent-builder/esc-open-1', onClickCard: jest.fn() });
+
+      // EuiPanel renders a <div>; it must not have role="button" when a real link is present.
+      const card = screen.getByTestId(`escalationCard-${openEscalation.id}`);
+      expect(card).not.toHaveAttribute('role', 'button');
+    });
   });
 
   it('renders the linked-investigations badge when count is positive', () => {

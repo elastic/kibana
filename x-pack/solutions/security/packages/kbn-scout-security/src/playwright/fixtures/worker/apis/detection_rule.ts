@@ -15,6 +15,7 @@ const DETECTION_ENGINE_RULES_BULK_ACTION = '/api/detection_engine/rules/_bulk_ac
 
 export interface DetectionRuleApiService {
   createCustomQueryRule: (body: CustomQueryRule) => Promise<{ id: string }>;
+  disable: (id: string) => Promise<void>;
   deleteAll: () => Promise<void>;
 }
 
@@ -45,6 +46,19 @@ export const getDetectionRuleApiService = ({
           return { id: data.id };
         }
       );
+    },
+
+    disable: async (id: string) => {
+      await measurePerformanceAsync(log, 'security.detectionRule.disable', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${basePath}${DETECTION_ENGINE_RULES_BULK_ACTION}`,
+          body: {
+            action: 'disable',
+            ids: [id],
+          },
+        });
+      });
     },
 
     deleteAll: async () => {

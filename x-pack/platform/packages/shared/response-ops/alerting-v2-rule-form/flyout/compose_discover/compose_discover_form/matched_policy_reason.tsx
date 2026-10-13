@@ -47,19 +47,19 @@ const expressionTooltipBody = i18n.translate(
   }
 );
 
-export const getMatchedTags = (matcherTags: string[], ruleTags: string[]): string[] => {
-  const ruleTagSet = new Set(ruleTags);
-  const matched = matcherTags.filter((tag) => ruleTagSet.has(tag));
+export const getMatchedTags = (matcherTags: string[], routingTags: string[]): string[] => {
+  const routingTagSet = new Set(routingTags);
+  const matched = matcherTags.filter((tag) => routingTagSet.has(tag));
   return matched.length > 0 ? matched : matcherTags;
 };
 
 interface Props {
   category: MatchedActionPolicyCategory;
   matcher: PolicyMatcher | null | undefined;
-  ruleTags: string[];
+  routingTags: string[];
 }
 
-export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
+export const MatchedPolicyReason = ({ category, matcher, routingTags }: Props) => {
   const { euiTheme } = useEuiTheme();
   const trimmedExpression = matcher?.expression?.trim() || null;
   const matcherTags = matcher?.tags?.length ? matcher.tags : null;
@@ -87,12 +87,12 @@ export const MatchedPolicyReason = ({ category, matcher, ruleTags }: Props) => {
     );
   }
 
-  const matchedTags = matcherTags ? getMatchedTags(matcherTags, ruleTags) : null;
+  const matchedTags = matcherTags ? getMatchedTags(matcherTags, routingTags) : null;
   const tagsTooltipContent = matchedTags
     ? i18n.translate(
-        'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.tagsTooltip',
+        'xpack.responseOps.alertingV2RuleForm.linkedActionPolicies.reason.routingTagsTooltip',
         {
-          defaultMessage: 'Matching rule tags: {tags}',
+          defaultMessage: 'Matching routing tags: {tags}',
           values: { tags: matchedTags.join(', ') },
         }
       )

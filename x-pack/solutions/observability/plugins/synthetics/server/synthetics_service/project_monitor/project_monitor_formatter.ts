@@ -312,6 +312,7 @@ export class ProjectMonitorFormatter {
           privateLocations: this.privateLocations,
           spaceId: this.spaceId,
         });
+        const failedMonitorIds = new Set(failedMonitors.map(({ monitor }) => monitor.id));
 
         if (newMonitors.length > 0) {
           newMonitors.forEach((monitor) => {
@@ -326,6 +327,9 @@ export class ProjectMonitorFormatter {
                 details: monitor.error.message,
                 payload: monitor,
               });
+              return;
+            }
+            if (failedMonitorIds.has(monitor.id)) {
               return;
             }
             const journeyId = monitor.attributes[ConfigKey.JOURNEY_ID];

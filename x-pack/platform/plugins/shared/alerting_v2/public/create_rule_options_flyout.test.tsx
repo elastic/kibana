@@ -80,8 +80,23 @@ jest.mock('./components/action_policy/form_flyout/create_action_policy_form_flyo
   CreateActionPolicyFormFlyout: mockCreateActionPolicyFormFlyout,
 }));
 
-jest.mock('./hooks/use_is_action_policies_license_valid', () => ({
-  useIsActionPoliciesLicenseValid: () => true,
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./hooks/use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
+}));
+
+jest.mock('@kbn/core-di-browser', () => ({
+  ...jest.requireActual('@kbn/core-di-browser'),
+  useService: () => ({}),
+}));
+
+jest.mock('./application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    actionPolicyLocators: {
+      getRedirectUrl: ({ actionPolicyId }: { actionPolicyId: string }) =>
+        `/app/observability/alerting/action-policies/edit/${actionPolicyId}`,
+    },
+  }),
 }));
 
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
@@ -123,6 +138,7 @@ describe('CreateRuleOptionsFlyout', () => {
     capturedComposeProps = {};
     pendingResolvers.length = 0;
     mockServices = createMockServices();
+    mockCreateActionPolicyDisabledReason = undefined;
   });
 
   describe('loading state', () => {
@@ -147,6 +163,8 @@ describe('CreateRuleOptionsFlyout', () => {
   describe('selector → esql transition', () => {
     it('renders ComposeDiscoverFlyout when the ES|QL option is clicked', async () => {
       const onClose = jest.fn();
+      const disabledReason = 'Action policy creation is disabled';
+      mockCreateActionPolicyDisabledReason = disabledReason;
       renderFlyout({ onClose, initialQuery: 'FROM logs-*' });
       resolveServices(mockServices);
 
@@ -167,8 +185,11 @@ describe('CreateRuleOptionsFlyout', () => {
         (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
       ).toBe(mockCreateActionPolicyFormFlyout);
       expect(
-        (capturedComposeProps.services as AlertingV2KibanaServices).canCreateActionPolicy
-      ).toBe(true);
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
+      ).toBe(disabledReason);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).getActionPolicyEditHref!('ap-1')
+      ).toBe('/app/observability/alerting/action-policies/edit/ap-1');
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {

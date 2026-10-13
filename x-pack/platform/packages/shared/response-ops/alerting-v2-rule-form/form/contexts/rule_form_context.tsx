@@ -39,7 +39,14 @@ export interface RuleFormServices {
     onClose: () => void;
     onSuccess: () => void;
   }>;
-  canCreateActionPolicy?: boolean;
+  /** Explains why action policy creation is disabled. Absent → creation is enabled. */
+  createActionPolicyDisabledReason?: string;
+  /**
+   * Builds a host-aware href to an action policy's edit page. Injected by the host
+   * plugin from the action policies locator so links resolve to the correct app in
+   * every solution (Stack Management, Observability, Search, …).
+   */
+  getActionPolicyEditHref?: (actionPolicyId: string) => string;
   /**
    * ES|QL help/docs menu, injected by the host plugin from `@kbn/esql`. Absent →
    * the sandbox renders no menu.

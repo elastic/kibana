@@ -253,7 +253,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
-        'xpack.cloud.serverless.project_type (observability?|security?|search?|workplaceai?|vectordb?)',
+        'xpack.cloud.serverless.project_type (observability?|security?|search?|vectordb?)',
         'xpack.cloud.serverless.product_tier (never|complete?|essentials?|search_ai_lake?|logs_essentials?)',
         'xpack.cloud.serverless.orchestrator_target (string?)',
         'xpack.cloud.serverless.in_trial (boolean?)',
@@ -495,8 +495,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core');
-      await retry.tryWithRetries(
-        'injectedMetadata',
+      await retry.try(
         async () => {
           await browser.refresh();
           [injectedMetadata, loadingMessage] = await Promise.all([
@@ -505,7 +504,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           ]);
           expect(injectedMetadata).to.not.be.empty();
         },
-        { retryCount: 5 }
+        { description: 'injectedMetadata' }
       );
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 
@@ -523,8 +522,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       let injectedMetadata: Partial<{ legacyMetadata: any }> = { legacyMetadata: undefined };
       let loadingMessage: WebElementWrapper | null = null;
       await navigateTo('/render/core?isAnonymousPage=true');
-      await retry.tryWithRetries(
-        'injectedMetadata',
+      await retry.try(
         async () => {
           await browser.refresh();
           [injectedMetadata, loadingMessage] = await Promise.all([
@@ -533,7 +531,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           ]);
           expect(injectedMetadata).to.not.be.empty();
         },
-        { retryCount: 5 }
+        { description: 'injectedMetadata' }
       );
       const userSettings = injectedMetadata!.legacyMetadata?.uiSettings?.user;
 

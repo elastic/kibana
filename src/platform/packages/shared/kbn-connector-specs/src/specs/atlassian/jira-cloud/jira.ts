@@ -524,7 +524,7 @@ export const JiraConnector: ConnectorSpec = {
     },
 
     deleteIssue: {
-      isTool: false,
+      isTool: true,
       scope: 'destroy',
       description:
         'Permanently delete a Jira issue. This is irreversible. ' +
