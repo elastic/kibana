@@ -190,9 +190,6 @@ describe('AlertingPage', () => {
     expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Universal rules');
     expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Classic rules');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('link', { name: '[System] Metrics template' })
-    ).not.toBeInTheDocument();
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
     expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent(
       'Universal'
@@ -203,6 +200,22 @@ describe('AlertingPage', () => {
   it('should link v2 templates to the Observability rule library in Observability projects', async () => {
     mockIsAlertingV2Enabled.mockReturnValue(true);
     mockProjectType = 'observability';
+    renderComponent();
+
+    const link = await screen.findByRole('link', { name: '[System] Metrics template' });
+
+    expect(link).toHaveAttribute(
+      'href',
+      '/mock/app/r?l=ALERTING_V2_RULE_LIBRARY_LOCATOR&templateId=template-2'
+    );
+    expect(mockGetRuleLibraryRedirectUrl).toHaveBeenCalledWith({
+      templateId: 'template-2',
+      host: { app: 'observabilityAlerting', pathPrefix: '/rule-library' },
+    });
+  });
+
+  it('should link v2 templates to the Observability rule library on stateful clusters', async () => {
+    mockIsAlertingV2Enabled.mockReturnValue(true);
     renderComponent();
 
     const link = await screen.findByRole('link', { name: '[System] Metrics template' });

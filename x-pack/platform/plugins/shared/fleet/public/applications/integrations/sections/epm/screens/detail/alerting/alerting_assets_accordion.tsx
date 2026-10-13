@@ -61,11 +61,12 @@ const OBSERVABILITY_RULE_LIBRARY_HOST: LocatorHost = {
 const getAlertingAssetTitleHref = (
   asset: Pick<AlertingAsset, 'id' | 'attributes' | 'appLink'>,
   type: DisplayedAssetType,
-  getRuleLibraryUrl?: (templateId: string) => string | undefined
+  getRuleLibraryUrl: (templateId: string) => string | undefined
 ): string | undefined => {
   if (type === KibanaAssetType.alertingRuleTemplate && isV2AlertingAsset(asset)) {
-    // Alerting v2 rule templates have no management destination; only link where a rule library exists.
-    return getRuleLibraryUrl?.(asset.id);
+    // Alerting v2 rule templates have no management destination; link them to the rule library.
+    // v2 templates are only listed where the Observability rule library exists.
+    return getRuleLibraryUrl(asset.id);
   }
   return asset.appLink;
 };
@@ -163,13 +164,9 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
   type: DisplayedAssetType;
   savedObjects: AlertingAsset[];
 }> = ({ savedObjects, type }) => {
-  const { cloud } = useStartServices();
   const ruleLibraryLocator = useAlertingV2RuleLibraryLocator();
-  const isObservabilityProject = cloud?.serverless?.projectType === 'observability';
-  const getRuleLibraryUrl = isObservabilityProject
-    ? (templateId: string) =>
-        ruleLibraryLocator?.getRedirectUrl({ templateId, host: OBSERVABILITY_RULE_LIBRARY_HOST })
-    : undefined;
+  const getRuleLibraryUrl = (templateId: string) =>
+    ruleLibraryLocator?.getRedirectUrl({ templateId, host: OBSERVABILITY_RULE_LIBRARY_HOST });
   const {
     listedSavedObjects,
     visibleSavedObjects,
