@@ -96,3 +96,36 @@ export async function writeTriggerEvent(
   };
   await client.create({ documents: [doc] });
 }
+
+export interface TriggerEventWriteParams {
+  timestamp: string;
+  eventId: string;
+  triggerId: string;
+  spaceId: string;
+  subscriptions: string[];
+  payload: Record<string, unknown>;
+  sourceExecutionId?: string;
+}
+
+/**
+ * Writes multiple trigger-event docs in a single bulk request.
+ * No-op when `docs` is empty.
+ */
+export async function writeTriggerEventsBulk(
+  client: TriggerEventsDataStreamClient,
+  docs: TriggerEventWriteParams[]
+): Promise<void> {
+  if (docs.length === 0) return;
+  const documents: TriggerEventDocument[] = docs.map((params) => ({
+    '@timestamp': params.timestamp,
+    eventId: params.eventId,
+    triggerId: params.triggerId,
+    spaceId: params.spaceId,
+    subscriptions: params.subscriptions,
+    payload: params.payload,
+    ...(params.sourceExecutionId !== undefined && params.sourceExecutionId !== ''
+      ? { sourceExecutionId: params.sourceExecutionId }
+      : {}),
+  }));
+  await client.create({ documents });
+}

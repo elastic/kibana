@@ -30,7 +30,7 @@ import type {
   SearchTriggerEventLogParams,
   SearchTriggerEventLogResult,
 } from './trigger_events/event_logs/trigger_event_log_query';
-import type { EmitEvent } from './trigger_events/trigger_event_handler';
+import type { EmitBatch, EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowLogsQueryService } from './workflow_event_logger';
 
 export type {
@@ -61,6 +61,7 @@ export interface WorkflowsExecutionEnginePluginSetup {
 
 export interface TriggerEventsContract {
   emitEvent: EmitEvent;
+  emitBatch: EmitBatch;
   isEnabled: boolean;
   isLogEventsEnabled: boolean;
   maxEventChainDepth: number;

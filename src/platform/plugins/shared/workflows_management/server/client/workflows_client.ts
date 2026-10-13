@@ -34,6 +34,13 @@ export const createWorkflowsClientProvider = (
         }
         return workflowsExecutionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
       },
+      emitBatch: async (triggerId, payloads) => {
+        if (!isWorkflowsAvailable) {
+          logger.debug('Workflows is not available in this environment. Trigger batch ignored.');
+          return;
+        }
+        return workflowsExecutionEngine.triggerEvents.emitBatch({ triggerId, payloads, request });
+      },
       managedWorkflows: {
         install: async (pluginId, id, options) => {
           if (!isWorkflowsAvailable) {
