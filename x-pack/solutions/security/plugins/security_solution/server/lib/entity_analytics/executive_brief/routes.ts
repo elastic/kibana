@@ -36,9 +36,9 @@ import type {
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import { withMinimumLicense } from '../utils/with_minimum_license';
-import type { BriefKey, BriefStore } from './store/brief_store';
-import { BriefStoreConflictError } from './store/errors';
-import { getBriefOwner } from './store/owner_id';
+import type { ExecutiveBriefDataClient } from './data_client/data_client';
+import { ExecutiveBriefConflictError } from './data_client/errors';
+import type { BriefOwner } from './data_client/types';
 import { scheduleGenerateBriefTask } from './task';
 
 const ROUTE_SECURITY: RouteSecurity = {
@@ -69,7 +69,7 @@ export interface BriefRouteDeps {
   router: SecuritySolutionPluginRouter;
   logger: Logger;
   getStartServices: StartServicesAccessor<StartPlugins>;
-  getBriefStore: () => Promise<BriefStore>;
+  getDataClient: (owner: BriefOwner) => Promise<ExecutiveBriefDataClient>;
   /** `encryptedSavedObjects.canEncrypt`; Task Manager needs it to store the user's API key. */
   hasEncryptionKey: boolean;
 }
@@ -79,7 +79,7 @@ export const registerBriefRoutes = ({
   router,
   logger,
   getStartServices,
-  getBriefStore,
+  getDataClient,
   hasEncryptionKey,
 }: BriefRouteDeps): void => {
   /** Resolves the caller and space for `fn`, and maps errors to responses. */
@@ -88,27 +88,22 @@ export const registerBriefRoutes = ({
     request: KibanaRequest,
     response: KibanaResponseFactory,
     action: string,
-    fn: (key: BriefKey, store: BriefStore) => Promise<IKibanaResponse>
+    fn: (dataClient: ExecutiveBriefDataClient, owner: BriefOwner) => Promise<IKibanaResponse>
   ): Promise<IKibanaResponse> => {
     try {
-      const { security, elasticsearch } = await context.core;
-      const owner = await getBriefOwner({
-        authUser: security.authc.getCurrentUser(),
-        request,
-        esClient: elasticsearch.client.asCurrentUser,
-      });
-      if (!owner) {
+      const profileId = await (await context.core).userProfile.getCurrentProfileId();
+      if (!profileId) {
         return errorResponse(
           response,
           400,
           'no_stable_user',
-          'Executive briefs need a user with a stable identity (a user profile or realm user).'
+          'Executive briefs need a user with a user profile.'
         );
       }
-      const spaceId = (await context.securitySolution).getSpaceId();
-      return await fn({ ownerId: owner.id, spaceId }, await getBriefStore());
+      const owner = { profileId, spaceId: (await context.securitySolution).getSpaceId() };
+      return await fn(await getDataClient(owner), owner);
     } catch (error) {
-      if (error instanceof BriefStoreConflictError) {
+      if (error instanceof ExecutiveBriefConflictError) {
         return errorResponse(response, 409, 'conflict', error.message);
       }
       const { statusCode, message } = transformError(error);
@@ -151,7 +146,7 @@ export const registerBriefRoutes = ({
         },
       },
       withMinimumLicense((context, request, response) =>
-        forCaller(context, request, response, 'start a brief', async (key, store) => {
+        forCaller(context, request, response, 'start a brief', async (dataClient, owner) => {
           if (!hasEncryptionKey) {
             return errorResponse(
               response,
@@ -172,7 +167,7 @@ export const registerBriefRoutes = ({
               : 'No AI connector is configured. Configure a connector to generate a brief.';
             return errorResponse(response, 400, 'no_connector', message);
           }
-          if ((await store.countRunning(key)) >= BRIEF_LIMITS.maxRunningBriefs) {
+          if ((await dataClient.countRunning()) >= BRIEF_LIMITS.maxRunningBriefs) {
             return errorResponse(
               response,
               429,
@@ -183,11 +178,11 @@ export const registerBriefRoutes = ({
 
           // The server fixes the window; client timestamps are never trusted.
           const now = Date.now();
-          const { docId, job } = await store.startJob(key, uuidv4());
+          const job = await dataClient.startJob(uuidv4());
           const params = {
-            docId,
             jobId: job.id,
-            spaceId: key.spaceId,
+            profileId: owner.profileId,
+            spaceId: owner.spaceId,
             range,
             from: new Date(now - BRIEF_RANGE_MS[range]).toISOString(),
             to: new Date(now).toISOString(),
@@ -200,8 +195,8 @@ export const registerBriefRoutes = ({
               code: 'internal' as const,
               message: `Could not schedule: ${error.message}`,
             };
-            await store
-              .updateJob(docId, job.id, { job: { status: 'failed', error: failed } })
+            await dataClient
+              .updateJob(job.id, { job: { status: 'failed', error: failed } })
               .catch(() => false);
             throw error;
           }
@@ -216,8 +211,8 @@ export const registerBriefRoutes = ({
     .addVersion(
       { version: EXECUTIVE_BRIEF_API_VERSION, validate: false },
       withMinimumLicense((context, request, response) =>
-        forCaller(context, request, response, 'read the brief', async (key, store) => {
-          const body: GetExecutiveBriefResponse | undefined = await store.get(key);
+        forCaller(context, request, response, 'read the brief', async (dataClient) => {
+          const body: GetExecutiveBriefResponse | undefined = await dataClient.get();
           return body ? response.ok({ body }) : notFound(response);
         })
       )
@@ -228,8 +223,8 @@ export const registerBriefRoutes = ({
     .addVersion(
       { version: EXECUTIVE_BRIEF_API_VERSION, validate: false },
       withMinimumLicense((context, request, response) =>
-        forCaller(context, request, response, 'read the brief status', async (key, store) => {
-          const body: GetExecutiveBriefStatusResponse | undefined = await store.getJob(key);
+        forCaller(context, request, response, 'read the brief status', async (dataClient) => {
+          const body: GetExecutiveBriefStatusResponse | undefined = await dataClient.getJob();
           return body ? response.ok({ body }) : notFound(response);
         })
       )
@@ -241,8 +236,8 @@ export const registerBriefRoutes = ({
     .addVersion(
       { version: EXECUTIVE_BRIEF_API_VERSION, validate: false },
       withMinimumLicense((context, request, response) =>
-        forCaller(context, request, response, 'delete the brief', async (key, store) => {
-          const body: DeleteExecutiveBriefResponse = { deleted: await store.delete(key) };
+        forCaller(context, request, response, 'delete the brief', async (dataClient) => {
+          const body: DeleteExecutiveBriefResponse = { deleted: await dataClient.delete() };
           return response.ok({ body });
         })
       )

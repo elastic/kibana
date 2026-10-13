@@ -23,13 +23,6 @@ export const GetExecutiveBriefResponse = lazySchema(() =>
     job: BriefJob,
     report: BriefReport.optional(),
     metadata: BriefMetadata.optional(),
-    /**
-     * When the brief is deleted; 30 days after it was generated.
-     */
-    expiresAt: z
-      .string()
-      .datetime()
-      .describe('When the brief is deleted; 30 days after it was generated.'),
   })
 );
 export type GetExecutiveBriefResponse = z.infer<typeof GetExecutiveBriefResponse>;

@@ -6,4 +6,4 @@
  */
 
 /** Thrown when a write keeps conflicting with concurrent writes to the same document. */
-export class BriefStoreConflictError extends Error {}
+export class ExecutiveBriefConflictError extends Error {}

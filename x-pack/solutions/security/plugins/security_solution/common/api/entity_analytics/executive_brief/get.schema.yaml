@@ -20,7 +20,6 @@ paths:
                 type: object
                 required:
                   - job
-                  - expiresAt
                 properties:
                   job:
                     $ref: './common.schema.yaml#/components/schemas/BriefJob'
@@ -28,9 +27,5 @@ paths:
                     $ref: './common.schema.yaml#/components/schemas/BriefReport'
                   metadata:
                     $ref: './common.schema.yaml#/components/schemas/BriefMetadata'
-                  expiresAt:
-                    type: string
-                    format: date-time
-                    description: When the brief is deleted; 30 days after it was generated.
         '404':
           description: No brief in this space

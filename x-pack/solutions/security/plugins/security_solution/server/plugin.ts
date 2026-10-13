@@ -150,7 +150,7 @@ import {
 
 import { registerPrivilegeMonitoringTask } from './lib/entity_analytics/privilege_monitoring/tasks/privilege_monitoring_task';
 import { registerLeadGenerationTask } from './lib/entity_analytics/lead_generation/tasks';
-import { setupExecutiveBrief, startExecutiveBrief } from './lib/entity_analytics/executive_brief';
+import { setupExecutiveBrief } from './lib/entity_analytics/executive_brief';
 import { EXECUTIVE_BRIEF_INFERENCE_FEATURE_ID } from '../common/entity_analytics/executive_brief/constants';
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
@@ -1139,10 +1139,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         this.endpointAppContextService
       );
       this.telemetryWatcher.start(this.telemetryConfigProvider);
-    }
-
-    if (config.experimentalFeatures.entityAnalyticsExecutiveBriefEnabled) {
-      startExecutiveBrief({ taskManager: plugins.taskManager, logger });
     }
 
     if (plugins.taskManager) {

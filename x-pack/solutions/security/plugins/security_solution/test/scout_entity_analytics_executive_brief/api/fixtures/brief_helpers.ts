@@ -19,7 +19,7 @@ import type { EntityAnalyticsApi } from '@kbn/security-solution-test-api-clients
 import type { Brief } from '../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { GetExecutiveBriefResponse } from '../../../../common/api/entity_analytics/executive_brief/get.gen';
 import { EXECUTIVE_BRIEF_INDEX } from '../../../../common/entity_analytics/executive_brief/constants';
-import type { BriefDocument } from '../../../../server/lib/entity_analytics/executive_brief/store/storage';
+import type { BriefDocument } from '../../../../server/lib/entity_analytics/executive_brief/data_client/types';
 import { HIGH_RISK_ENTITY_BRIEF, SEEDED_ENTITY, SUBMIT_BRIEF_TOOL_NAME } from './constants';
 
 type Headers = Record<string, string>;
@@ -333,7 +333,6 @@ export const deleteAttackDiscoveryIndex = async (esClient: EsClient): Promise<vo
 interface CurrentUser {
   username: string;
   profile_uid?: string;
-  authentication_realm: { type: string; name: string };
 }
 
 /** The caller, as the security plugin reports it. */
@@ -351,10 +350,7 @@ export const getCurrentUser = async ({
   return body;
 };
 
-/**
- * The stored document id for the caller's brief in a space. Mirrors the server: the owner is the
- * profile uid (or `realm:[type,name,username]`), and the id is `sha256("<owner>:<space>")`.
- */
+/** The stored document id for the caller's brief in a space: `sha256("<profile id>:<space>")`. */
 export const getBriefDocId = async ({
   apiClient,
   headers,
@@ -364,12 +360,10 @@ export const getBriefDocId = async ({
   headers: Headers;
   spaceId: string;
 }): Promise<{ docId: string; ownerId: string }> => {
-  const {
-    username,
-    profile_uid: profileUid,
-    authentication_realm: realm,
-  } = await getCurrentUser({ apiClient, headers });
-  const ownerId = profileUid ?? `realm:${JSON.stringify([realm.type, realm.name, username])}`;
+  const { profile_uid: ownerId } = await getCurrentUser({ apiClient, headers });
+  if (!ownerId) {
+    throw new Error('Executive briefs need a user with a user profile');
+  }
   const docId = createHash('sha256').update(`${ownerId}:${spaceId}`).digest('hex');
   return { docId, ownerId };
 };

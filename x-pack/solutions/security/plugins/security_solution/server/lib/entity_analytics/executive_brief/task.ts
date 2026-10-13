@@ -19,8 +19,6 @@ import { hasFindings } from '../../../../common/entity_analytics/executive_brief
 import {
   BRIEF_JOB_DEADLINE_MS,
   BRIEF_TASK_TIMEOUT,
-  EXECUTIVE_BRIEF_CLEANUP_TASK_ID,
-  EXECUTIVE_BRIEF_CLEANUP_TASK_TYPE,
   EXECUTIVE_BRIEF_GENERATE_TASK_TYPE,
 } from '../../../../common/entity_analytics/executive_brief/constants';
 import type { StartPlugins } from '../../../plugin';
@@ -28,15 +26,17 @@ import type { ComposeBriefResult } from './composition/compose';
 import { BriefCompositionError, composeBrief } from './composition/compose';
 import type { GatherResult } from './signals';
 import { BRIEF_SIGNALS, runSignals } from './signals';
-import type { BriefStore, JobUpdate } from './store/brief_store';
+import type { ExecutiveBriefDataClient } from './data_client/data_client';
+import type { BriefOwner, JobUpdate } from './data_client/types';
 import type { BriefCompletedEvent } from './telemetry';
 import { ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT, withBriefSpan } from './telemetry';
 
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 
 const paramsSchema = schema.object({
-  docId: schema.string({ minLength: 1, maxLength: 128 }),
   jobId: schema.string({ minLength: 1, maxLength: 128 }),
+  // Resolved from the request at POST time; the brief belongs to this profile.
+  profileId: schema.string({ minLength: 1, maxLength: 256 }),
   spaceId: schema.string({ minLength: 1, maxLength: 1024 }),
   // The window and connector are fixed when the job starts.
   range: schema.oneOf([schema.literal('24h'), schema.literal('7d'), schema.literal('30d')]),
@@ -77,9 +77,9 @@ const toJobError = (error: unknown, abortSignal: AbortSignal, startedAtMs: numbe
  * silently. Reports the EBT completion event however the run ends.
  */
 const runBriefJob = async ({
-  params: { docId, jobId, spaceId, range, from, to, connectorId },
+  params: { jobId, spaceId, range, from, to, connectorId },
   fakeRequest,
-  store,
+  dataClient,
   coreStart,
   startPlugins,
   logger,
@@ -87,7 +87,7 @@ const runBriefJob = async ({
 }: {
   params: GenerateBriefTaskParams;
   fakeRequest: KibanaRequest;
-  store: BriefStore;
+  dataClient: ExecutiveBriefDataClient;
   coreStart: CoreStart;
   startPlugins: StartPlugins;
   logger: Logger;
@@ -95,11 +95,11 @@ const runBriefJob = async ({
 }): Promise<void> => {
   const startedAtMs = Date.now();
   const update = async (patch: JobUpdate): Promise<void> => {
-    if (!(await store.updateJob(docId, jobId, patch))) {
+    if (!(await dataClient.updateJob(jobId, patch))) {
       throw new SupersededError();
     }
   };
-  if (!(await store.updateJob(docId, jobId, { job: { status: 'running', stage: 'gather' } }))) {
+  if (!(await dataClient.updateJob(jobId, { job: { status: 'running', stage: 'gather' } }))) {
     logger.debug(`Executive brief job ${jobId} is no longer current; skipping`);
     return;
   }
@@ -169,8 +169,8 @@ const runBriefJob = async ({
       const jobError = toJobError(error, abortSignal, startedAtMs);
       run.errorCode = jobError.code;
       logger.error(`Executive brief job ${jobId} failed (${jobError.code}): ${jobError.message}`);
-      await store
-        .updateJob(docId, jobId, { job: { status: 'failed', error: jobError } })
+      await dataClient
+        .updateJob(jobId, { job: { status: 'failed', error: jobError } })
         .catch((writeError) => logger.error(`Could not record the failure: ${writeError.message}`));
     }
   }
@@ -202,16 +202,16 @@ const runBriefJob = async ({
   );
 };
 
-/** Registers the one-shot generate task and the daily retention cleanup. */
-export const registerBriefTasks = ({
+/** Registers the one-shot generate task. */
+export const registerBriefTask = ({
   taskManager,
   getStartServices,
-  getBriefStore,
+  getDataClient,
   logger,
 }: {
   taskManager: TaskManagerSetupContract;
   getStartServices: StartServicesAccessor<StartPlugins>;
-  getBriefStore: () => Promise<BriefStore>;
+  getDataClient: (owner: BriefOwner) => Promise<ExecutiveBriefDataClient>;
   logger: Logger;
 }): void => {
   taskManager.registerTaskDefinitions({
@@ -232,14 +232,15 @@ export const registerBriefTasks = ({
         run: async () => {
           // Validated against paramsSchema when the task was scheduled.
           const params = taskInstance.params as GenerateBriefTaskParams;
-          const store = await getBriefStore();
+          const { profileId, spaceId } = params;
+          const dataClient = await getDataClient({ profileId, spaceId });
           if (!fakeRequest) {
             const error = {
               code: 'internal' as const,
               message: 'The task has no user credentials.',
             };
-            await store
-              .updateJob(params.docId, params.jobId, { job: { status: 'failed', error } })
+            await dataClient
+              .updateJob(params.jobId, { job: { status: 'failed', error } })
               .catch(() => false);
             throwUnrecoverableError(
               new Error('Cannot generate an executive brief without an API key')
@@ -250,7 +251,7 @@ export const registerBriefTasks = ({
           await runBriefJob({
             params,
             fakeRequest,
-            store,
+            dataClient,
             coreStart,
             startPlugins,
             logger,
@@ -260,36 +261,6 @@ export const registerBriefTasks = ({
         },
       }),
     },
-    [EXECUTIVE_BRIEF_CLEANUP_TASK_TYPE]: {
-      title: 'Entity Analytics: executive brief retention cleanup',
-      description: 'Deletes executive briefs past their expiry date.',
-      // A single delete-by-query over a small index (one document per user and space).
-      timeout: '5m',
-      cost: TaskCost.Tiny,
-      priority: TaskPriority.Maintenance,
-      createTaskRunner: ({ signal }: RunContext) => ({
-        run: async () => {
-          try {
-            const deleted = await (await getBriefStore()).deleteExpired(signal);
-            logger.debug(`Executive brief cleanup deleted ${deleted} expired brief(s)`);
-          } catch (error) {
-            logger.error(`Executive brief cleanup failed: ${error.message}`);
-          }
-          return { state: {} };
-        },
-      }),
-    },
-  });
-};
-
-/** Ensures the daily cleanup is scheduled. */
-export const scheduleCleanupTask = async (taskManager: TaskManagerStartContract): Promise<void> => {
-  await taskManager.ensureScheduled({
-    id: EXECUTIVE_BRIEF_CLEANUP_TASK_ID,
-    taskType: EXECUTIVE_BRIEF_CLEANUP_TASK_TYPE,
-    schedule: { interval: '1d' },
-    state: {},
-    params: {},
   });
 };
 
