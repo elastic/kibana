@@ -155,7 +155,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
     id: '.google_cloud_monitoring',
     displayName: 'Google Cloud Monitoring',
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.googleCloudMonitoring.metadata.description',
+      'connectorSpecs.kibanaConnectorSpecs.googleCloudMonitoring.metadata.description',
       {
         defaultMessage:
           'Find, mute, and snooze GCP alerting policies, and enrich alerts with metric, uptime, and SLO data',
@@ -191,7 +191,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
         .meta({
           widget: 'text',
           label: i18n.translate(
-            'core.kibanaConnectorSpecs.googleCloudMonitoring.config.projectId.label',
+            'connectorSpecs.kibanaConnectorSpecs.googleCloudMonitoring.config.projectId.label',
             {
               defaultMessage: 'GCP Project ID',
             }
@@ -605,7 +605,7 @@ export const GoogleCloudMonitoring: ConnectorSpec = {
   test: {
     enabled: true,
     description: i18n.translate(
-      'core.kibanaConnectorSpecs.googleCloudMonitoring.test.description',
+      'connectorSpecs.kibanaConnectorSpecs.googleCloudMonitoring.test.description',
       {
         defaultMessage:
           'Verifies Cloud Monitoring API access by listing alert policies in the configured project',

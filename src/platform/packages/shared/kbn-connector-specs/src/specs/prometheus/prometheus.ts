@@ -121,10 +121,13 @@ export const Prometheus: ConnectorSpec = {
   metadata: {
     id: '.prometheus',
     displayName: 'Prometheus',
-    description: i18n.translate('core.kibanaConnectorSpecs.prometheus.metadata.description', {
-      defaultMessage:
-        'Run PromQL queries against Prometheus, and read, silence, and manage Alertmanager alerts',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.prometheus.metadata.description',
+      {
+        defaultMessage:
+          'Run PromQL queries against Prometheus, and read, silence, and manage Alertmanager alerts',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -137,17 +140,17 @@ export const Prometheus: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.auth.basic.label', {
+          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.prometheus.auth.basic.label', {
             defaultMessage: 'Username and password',
           }),
           meta: {
             username: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheus.auth.basic.usernameLabel',
+                'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.basic.usernameLabel',
                 { defaultMessage: 'Username' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheus.auth.basic.usernameHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.basic.usernameHelpText',
                 {
                   defaultMessage:
                     'The username configured for HTTP basic auth on the Alertmanager instance (basic_auth_users in its web.config.file, or a reverse proxy in front of it).',
@@ -156,11 +159,11 @@ export const Prometheus: ConnectorSpec = {
             },
             password: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheus.auth.basic.passwordLabel',
+                'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.basic.passwordLabel',
                 { defaultMessage: 'Password' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheus.auth.basic.passwordHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.basic.passwordHelpText',
                 {
                   defaultMessage: 'The password for the account above.',
                 }
@@ -173,16 +176,22 @@ export const Prometheus: ConnectorSpec = {
         type: 'bearer',
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.auth.bearer.label', {
-            defaultMessage: 'Bearer token',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.bearer.label',
+            {
+              defaultMessage: 'Bearer token',
+            }
+          ),
           meta: {
             token: {
-              label: i18n.translate('core.kibanaConnectorSpecs.prometheus.auth.bearer.tokenLabel', {
-                defaultMessage: 'Bearer token',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.bearer.tokenLabel',
+                {
+                  defaultMessage: 'Bearer token',
+                }
+              ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.prometheus.auth.bearer.tokenHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.prometheus.auth.bearer.tokenHelpText',
                 {
                   defaultMessage:
                     'A bearer token accepted by a reverse proxy or gateway placed in front of Alertmanager and Prometheus (neither has built-in bearer token support).',
@@ -200,13 +209,19 @@ export const Prometheus: ConnectorSpec = {
       baseUrl: UISchemas.url('https://alertmanager.example.com')
         .describe('The base URL of the Alertmanager instance.')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.config.baseUrl.label', {
-            defaultMessage: 'Alertmanager URL',
-          }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.prometheus.config.baseUrl.helpText', {
-            defaultMessage:
-              'The base URL of your self-hosted Alertmanager instance, e.g. https://alertmanager.example.com. Must be reachable from Kibana.',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.prometheus.config.baseUrl.label',
+            {
+              defaultMessage: 'Alertmanager URL',
+            }
+          ),
+          helpText: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.prometheus.config.baseUrl.helpText',
+            {
+              defaultMessage:
+                'The base URL of your self-hosted Alertmanager instance, e.g. https://alertmanager.example.com. Must be reachable from Kibana.',
+            }
+          ),
           validate: { allowedHosts: true },
         }),
       prometheusUrl: UISchemas.url('https://prometheus.example.com')
@@ -215,11 +230,14 @@ export const Prometheus: ConnectorSpec = {
           'Optional Prometheus server URL, for the queryPrometheus, queryRangePrometheus, listPrometheusAlerts, listPrometheusRules, listPrometheusTargets, getPrometheusSeries, and listPrometheusLabelValues actions.'
         )
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.prometheus.config.prometheusUrl.label', {
-            defaultMessage: 'Prometheus server URL (optional)',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.prometheus.config.prometheusUrl.label',
+            {
+              defaultMessage: 'Prometheus server URL (optional)',
+            }
+          ),
           helpText: i18n.translate(
-            'core.kibanaConnectorSpecs.prometheus.config.prometheusUrl.helpText',
+            'connectorSpecs.kibanaConnectorSpecs.prometheus.config.prometheusUrl.helpText',
             {
               defaultMessage:
                 'Optional. The base URL of the Prometheus server associated with this Alertmanager, e.g. https://prometheus.example.com. Only required for the PromQL query/queryRange actions and to inspect rules, targets, series, or label values — reuses the same credential as Alertmanager. Leave empty if not needed.',
@@ -557,7 +575,7 @@ export const Prometheus: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.prometheus.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.prometheus.test.description', {
       defaultMessage: 'Verifies the connection by reading the Alertmanager instance status',
     }),
     handler: async (ctx) => {

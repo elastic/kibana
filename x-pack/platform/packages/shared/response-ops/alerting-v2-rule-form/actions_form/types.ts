@@ -61,23 +61,23 @@ export interface InlineActionErrors {
 }
 
 const connectorRequired = (): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.connectorRequired', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.connectorRequired', {
     defaultMessage: 'Select a connector.',
   });
 
 const invalidYaml = (reason: string): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.invalidYaml', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.invalidYaml', {
     defaultMessage: 'Invalid YAML: {reason}',
     values: { reason },
   });
 
 const paramsNotAMap = (): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.paramsNotAMap', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.paramsNotAMap', {
     defaultMessage: 'Parameters must be a YAML map of field names to values.',
   });
 
 const fieldRequired = (field: string): string =>
-  i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.validation.fieldRequired', {
+  i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.validation.fieldRequired', {
     defaultMessage: '{field} is required.',
     values: { field },
   });

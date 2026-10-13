@@ -421,7 +421,7 @@ export const ArgocdConnector: ConnectorSpec = {
   metadata: {
     id: '.argocd',
     displayName: 'Argo CD',
-    description: i18n.translate('core.kibanaConnectorSpecs.argocd.metadata.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.argocd.metadata.description', {
       defaultMessage: 'Manage GitOps applications in Argo CD — sync, inspect health and resources',
     }),
     minimumLicense: 'enterprise',
@@ -436,17 +436,20 @@ export const ArgocdConnector: ConnectorSpec = {
         isRecommended: true,
         defaults: {},
         overrides: {
-          label: i18n.translate('core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.label', {
-            defaultMessage: 'API token',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.argocd.auth.bearerWithTls.label',
+            {
+              defaultMessage: 'API token',
+            }
+          ),
           meta: {
             token: {
               label: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenLabel',
+                'connectorSpecs.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenLabel',
                 { defaultMessage: 'Token' }
               ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.argocd.auth.bearerWithTls.tokenHelpText',
                 {
                   defaultMessage:
                     'A long-lived Argo CD account or project-role API token. Do not use short-lived session JWTs from username/password login.',
@@ -454,11 +457,14 @@ export const ArgocdConnector: ConnectorSpec = {
               ),
             },
             caCert: {
-              label: i18n.translate('core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caLabel', {
-                defaultMessage: 'Server CA certificate (PEM)',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caLabel',
+                {
+                  defaultMessage: 'Server CA certificate (PEM)',
+                }
+              ),
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.argocd.auth.bearerWithTls.caHelpText',
                 {
                   defaultMessage:
                     'Paste the PEM-encoded certificate authority used to verify the Argo CD server. Leave empty to rely on the system trust store or to disable verification.',
@@ -467,7 +473,7 @@ export const ArgocdConnector: ConnectorSpec = {
             },
             verificationMode: {
               helpText: i18n.translate(
-                'core.kibanaConnectorSpecs.argocd.auth.bearerWithTls.verificationModeHelpText',
+                'connectorSpecs.kibanaConnectorSpecs.argocd.auth.bearerWithTls.verificationModeHelpText',
                 {
                   defaultMessage:
                     'How to verify the Argo CD server TLS certificate. "full" verifies the certificate and hostname, "certificate" verifies the certificate only, and "none" disables verification (not recommended).',
@@ -487,7 +493,7 @@ export const ArgocdConnector: ConnectorSpec = {
         .url()
         .describe('Argo CD API server URL (e.g., https://argocd.example.com)')
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.argocd.config.apiUrl.label', {
+          label: i18n.translate('connectorSpecs.kibanaConnectorSpecs.argocd.config.apiUrl.label', {
             defaultMessage: 'API server URL',
           }),
           widget: 'text',
@@ -745,7 +751,7 @@ export const ArgocdConnector: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.argocd.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.argocd.test.description', {
       defaultMessage: 'Verifies connectivity by requesting Argo CD userinfo',
     }),
     handler: async (ctx) => {

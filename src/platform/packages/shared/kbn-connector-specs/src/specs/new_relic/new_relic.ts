@@ -149,10 +149,13 @@ export const NewRelic: ConnectorSpec = {
   metadata: {
     id: '.new_relic',
     displayName: 'New Relic',
-    description: i18n.translate('core.kibanaConnectorSpecs.newRelic.metadata.description', {
-      defaultMessage:
-        'Acknowledge and resolve New Relic AI issues, read issues and incidents, manage muting rules, and run NRQL queries over NerdGraph.',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.newRelic.metadata.description',
+      {
+        defaultMessage:
+          'Acknowledge and resolve New Relic AI issues, read issues and incidents, manage muting rules, and run NRQL queries over NerdGraph.',
+      }
+    ),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
     supportedFeatureIds: ['workflows', 'agentBuilder'],
@@ -167,13 +170,19 @@ export const NewRelic: ConnectorSpec = {
         overrides: {
           meta: {
             'API-Key': {
-              label: i18n.translate('core.kibanaConnectorSpecs.newRelic.auth.apiKey.label', {
-                defaultMessage: 'User API Key',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.newRelic.auth.apiKey.helpText', {
-                defaultMessage:
-                  'A New Relic User API key (prefixed NRAK-). Create one under your user profile > API keys.',
-              }),
+              label: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.newRelic.auth.apiKey.label',
+                {
+                  defaultMessage: 'User API Key',
+                }
+              ),
+              helpText: i18n.translate(
+                'connectorSpecs.kibanaConnectorSpecs.newRelic.auth.apiKey.helpText',
+                {
+                  defaultMessage:
+                    'A New Relic User API key (prefixed NRAK-). Create one under your user profile > API keys.',
+                }
+              ),
             },
           },
         },
@@ -191,14 +200,20 @@ export const NewRelic: ConnectorSpec = {
         .describe('New Relic account ID this connector manages.')
         .meta({
           widget: 'text',
-          label: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.accountId.label', {
-            defaultMessage: 'Account ID',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.newRelic.config.accountId.label',
+            {
+              defaultMessage: 'Account ID',
+            }
+          ),
           placeholder: '1234567',
-          helpText: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.accountId.helpText', {
-            defaultMessage:
-              'The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as one.newrelic.com/accounts/ACCOUNT_ID. To manage another account, create a separate connector instance.',
-          }),
+          helpText: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.newRelic.config.accountId.helpText',
+            {
+              defaultMessage:
+                'The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as one.newrelic.com/accounts/ACCOUNT_ID. To manage another account, create a separate connector instance.',
+            }
+          ),
         }),
       region: z
         .enum(['us', 'eu', 'jp'])
@@ -206,13 +221,19 @@ export const NewRelic: ConnectorSpec = {
         .describe('New Relic data center region for this account.')
         .meta({
           widget: 'select',
-          label: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.region.label', {
-            defaultMessage: 'Region',
-          }),
-          helpText: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.region.helpText', {
-            defaultMessage:
-              'The data center hosting your New Relic account: US (default), EU, or JP. Determines the NerdGraph endpoint used.',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.newRelic.config.region.label',
+            {
+              defaultMessage: 'Region',
+            }
+          ),
+          helpText: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.newRelic.config.region.helpText',
+            {
+              defaultMessage:
+                'The data center hosting your New Relic account: US (default), EU, or JP. Determines the NerdGraph endpoint used.',
+            }
+          ),
         }),
     })
   ),
@@ -798,7 +819,7 @@ export const NewRelic: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('core.kibanaConnectorSpecs.newRelic.test.description', {
+    description: i18n.translate('connectorSpecs.kibanaConnectorSpecs.newRelic.test.description', {
       defaultMessage: 'Verifies connectivity by requesting the current NerdGraph user context.',
     }),
     handler: async (ctx) => {

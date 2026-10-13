@@ -32,10 +32,13 @@ export const OnePasswordConnector: ConnectorSpec = {
   metadata: {
     id: '.1password',
     displayName: '1Password',
-    description: i18n.translate('core.kibanaConnectorSpecs.onePassword.metadata.description', {
-      defaultMessage:
-        'Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.onePassword.metadata.description',
+      {
+        defaultMessage:
+          'Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users',
+      }
+    ),
     minimumLicense: 'enterprise',
     supportedFeatureIds: ['workflows'],
     docsUrl: `https://www.elastic.co/docs/reference/kibana/connectors-kibana/one-password-action-type`,
@@ -67,14 +70,17 @@ export const OnePasswordConnector: ConnectorSpec = {
         .string()
         .min(1, {
           message: i18n.translate(
-            'core.kibanaConnectorSpecs.onePassword.config.accountUuidRequired',
+            'connectorSpecs.kibanaConnectorSpecs.onePassword.config.accountUuidRequired',
             { defaultMessage: 'Account UUID is required' }
           ),
         })
         .meta({
-          label: i18n.translate('core.kibanaConnectorSpecs.onePassword.config.accountUuid', {
-            defaultMessage: 'Account UUID',
-          }),
+          label: i18n.translate(
+            'connectorSpecs.kibanaConnectorSpecs.onePassword.config.accountUuid',
+            {
+              defaultMessage: 'Account UUID',
+            }
+          ),
         }),
     })
   ),
@@ -84,7 +90,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
+        'connectorSpecs.kibanaConnectorSpecs.onePassword.actions.listUsers.description',
         { defaultMessage: 'List users in the 1Password account, optionally filtered by state' }
       ),
       input: lazySchema(() =>
@@ -135,7 +141,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.getUser.description',
+        'connectorSpecs.kibanaConnectorSpecs.onePassword.actions.getUser.description',
         { defaultMessage: 'Get details for a single user by their UUID' }
       ),
       input: lazySchema(() =>
@@ -162,7 +168,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.suspendUser.description',
+        'connectorSpecs.kibanaConnectorSpecs.onePassword.actions.suspendUser.description',
         {
           defaultMessage:
             'Suspend an active user, preventing them from accessing the 1Password account',
@@ -192,7 +198,7 @@ export const OnePasswordConnector: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description: i18n.translate(
-        'core.kibanaConnectorSpecs.onePassword.actions.reactivateUser.description',
+        'connectorSpecs.kibanaConnectorSpecs.onePassword.actions.reactivateUser.description',
         { defaultMessage: 'Reactivate a suspended user, restoring their access to 1Password' }
       ),
       input: lazySchema(() =>
@@ -221,9 +227,12 @@ export const OnePasswordConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.onePassword.test.description', {
-      defaultMessage: 'Verifies the 1Password connection by listing users',
-    }),
+    description: i18n.translate(
+      'connectorSpecs.kibanaConnectorSpecs.onePassword.test.description',
+      {
+        defaultMessage: 'Verifies the 1Password connection by listing users',
+      }
+    ),
     handler: async (ctx) => {
       ctx.log.debug('1Password test handler');
       const { accountUuid } = ctx.config as { accountUuid: string };
