@@ -12,7 +12,6 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { ALERTING_V2_EXECUTION_HISTORY_APP_ID } from '@kbn/alerting-v2-constants';
 import { i18n } from '@kbn/i18n';
-import { experimentalBadge } from '../../components/experimental_badge';
 import {
   UniversalRulesOnlyCallout,
   universalRulesOnlyBadge,
@@ -108,7 +107,7 @@ export const ExecutionHistoryPage = () => {
       <AppHeader
         sticky={false}
         title={EXECUTION_HISTORY_PAGE_TITLE}
-        badges={[universalRulesOnlyBadge, experimentalBadge]}
+        badges={[universalRulesOnlyBadge]}
         spacing="bleed"
         tabs={tabs}
       />
