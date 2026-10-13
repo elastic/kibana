@@ -19,7 +19,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { stringify as stringifyQuery } from 'query-string';
+import queryString from 'query-string';
 
 import type {
   CreateListRequestBodyInput,
@@ -196,7 +196,7 @@ All list items in the same list must be the same type. For example, each list it
     const path = `${basePath}/api/lists`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -242,7 +242,7 @@ All list items in the same list must be the same type. For example, each list it
     const path = `${basePath}/api/lists/items`;
 
     return apiClient.delete<ScoutResponseBody<TResponseType, DeleteListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -267,7 +267,7 @@ All list items in the same list must be the same type. For example, each list it
     const path = `${basePath}/api/lists/items/_export`;
 
     return apiClient.post<ScoutResponseBody<TResponseType>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -292,7 +292,7 @@ All list items in the same list must be the same type. For example, each list it
     const path = `${basePath}/api/lists/items/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindListItemsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -317,7 +317,7 @@ All list items in the same list must be the same type. For example, each list it
     const path = `${basePath}/api/lists/_find`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, FindListsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -345,7 +345,7 @@ You can import items to a new or existing list.
     const path = `${basePath}/api/lists/items/_import`;
 
     return apiClient.post<ScoutResponseBody<TResponseType, ImportListItemsResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -414,7 +414,7 @@ You can import items to a new or existing list.
     const path = `${basePath}/api/lists`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadListResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',
@@ -460,7 +460,7 @@ You can import items to a new or existing list.
     const path = `${basePath}/api/lists/items`;
 
     return apiClient.get<ScoutResponseBody<TResponseType, ReadListItemResponse>>(
-      `${path}?${stringifyQuery(props.query, { arrayFormat: 'none' })}`,
+      `${path}?${queryString.stringify(props.query, { arrayFormat: 'none' })}`,
       {
         headers: {
           'kbn-xsrf': 'true',

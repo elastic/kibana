@@ -349,12 +349,30 @@ export class ComboBoxService extends FtrService {
    */
   public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.closeOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
-    if (isOptionsListOpen) {
-      const input = await comboBoxElement.findByTagName('input');
-      await input.pressKeys(this.browser.keys.ESCAPE);
+
+    // wait for potential other animations to finish (e.g. due to closing on selection)
+    const isOptionListClosed = await this.retry.tryWithRetries(
+      'wait for possible ongoing closing of the combobox listbox',
+      async () => {
+        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList');
+
+        return !isOpen;
+      },
+      {
+        timeout: 5000,
+        retryDelay: 500,
+        retryCount: 3,
+      }
+    );
+
+    if (!isOptionListClosed) {
+      // The input may be temporarily disabled or re-rendered (e.g. an auto-save triggered by a
+      // just-committed value), so re-resolve it on each attempt and verify the list is gone.
+      await this.retry.try(async () => {
+        const input = await comboBoxElement.findByTagName('input');
+        await input.pressKeys(this.browser.keys.ESCAPE);
+        await this.testSubjects.missingOrFail('~comboBoxOptionsList', { timeout: 1000 });
+      });
     }
   }
 
@@ -365,9 +383,7 @@ export class ComboBoxService extends FtrService {
    */
   public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
     this.log.debug('comboBox.openOptionsList');
-    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList', {
-      timeout: 50,
-    });
+    const isOptionsListOpen = await this.testSubjects.exists('~comboBoxOptionsList');
 
     if (!isOptionsListOpen) {
       await this.retry.try(async () => {

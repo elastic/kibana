@@ -18,7 +18,12 @@ export function offsetPreviousPeriodCoordinates({
   if (!previousPeriodTimeseries?.length) {
     return [];
   }
-  const currentPeriodStart = currentPeriodTimeseries?.[0].x ?? 0;
+  const currentPeriodStart = currentPeriodTimeseries?.[0]?.x;
+  // Without a current period there is nothing to align the previous period to,
+  // and falling back to a fixed offset would move it to arbitrary timestamps.
+  if (currentPeriodStart === undefined) {
+    return [];
+  }
   const dateDiff = currentPeriodStart - previousPeriodTimeseries[0].x;
 
   return previousPeriodTimeseries.map(({ x, y }) => {

@@ -16,6 +16,7 @@ export function createScenarios(
 ) {
   const { getService, getPageObjects } = context;
   const log = getService('log');
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
@@ -117,8 +118,9 @@ export function createScenarios(
   const tryDiscoverCsvFail = async () => {
     await PageObjects.reporting.openExportPopover();
     await PageObjects.reporting.clickGenerateReportButton();
-    const queueReportError = await PageObjects.reporting.getQueueReportError();
-    expect(queueReportError).to.be(true);
+    await retry.try(async () => {
+      expect(await PageObjects.reporting.getQueueReportError()).to.be(true);
+    });
   };
 
   const tryDiscoverCsvNotAvailable = async () => {
@@ -134,8 +136,9 @@ export function createScenarios(
     await PageObjects.reporting.openExportPopover();
     await PageObjects.reporting.selectExportItem('PDF');
     await PageObjects.reporting.clickGenerateReportButton();
-    const queueReportError = await PageObjects.reporting.getQueueReportError();
-    expect(queueReportError).to.be(true);
+    await retry.try(async () => {
+      expect(await PageObjects.reporting.getQueueReportError()).to.be(true);
+    });
   };
   const tryGeneratePdfNotAvailable = async () => {
     await PageObjects.exports.clickExportTopNavButton();

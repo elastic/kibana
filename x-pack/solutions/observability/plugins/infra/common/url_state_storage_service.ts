@@ -8,7 +8,7 @@
 import { url } from '@kbn/kibana-utils-plugin/common';
 import { encode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import { parse, stringify } from 'query-string';
+import qs from 'query-string';
 import type { DurationInputObject } from 'moment';
 import moment from 'moment';
 import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
@@ -43,7 +43,7 @@ export const replaceLogViewInQueryString = (logViewReference: LogViewReference) 
 export const replaceStateKeyInQueryString =
   <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
   (queryString: string) => {
-    const previousQueryValues = parse(queryString, { sort: false });
+    const previousQueryValues = qs.parse(queryString, { sort: false });
     const newValue =
       typeof urlState === 'undefined'
         ? previousQueryValues
@@ -51,7 +51,7 @@ export const replaceStateKeyInQueryString =
             ...previousQueryValues,
             [stateKey]: encodeRisonUrlState(urlState),
           };
-    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+    return qs.stringify(url.encodeQuery(newValue), { sort: false, encode: false });
   };
 
 export const replaceLogFilterInQueryString = (query: Query, time?: number, timeRange?: TimeRange) =>

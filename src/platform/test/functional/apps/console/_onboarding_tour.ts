@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('on Files tour step');
       expect(await isTourStepOpen('filesTourStep')).to.be(true);
       // Last tour step should contain the "Complete" button
-      expect(await testSubjects.exists('consoleCompleteTourButton')).to.be(true);
+      await testSubjects.existOrFail('consoleCompleteTourButton', { timeout: 5000 });
       await PageObjects.console.clickCompleteTour();
 
       // All steps should now be hidden

@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { parse } from 'query-string';
+import queryString from 'query-string';
 import {
   EuiButton,
   EuiLink,
@@ -71,7 +71,7 @@ export const GettingStarted = () => {
   const [isError, setIsError] = useState<boolean>(false);
   const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
   const { search } = useLocation();
-  const query = parse(search);
+  const query = queryString.parse(search);
   // using for A/B testing
   const [classicGuide] = useState<boolean>(false);
   const useCase = query.useCase as GuideFilterValues;

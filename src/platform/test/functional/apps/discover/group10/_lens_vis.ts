@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Sep 19, 2015 @ 00:00:00.000'
       );
 
-      expect(await discover.hasNoResults()).to.be(true);
+      await retry.waitFor('Discover no-results state', () => discover.hasNoResults());
 
       await timePicker.setAbsoluteRange(
         'Sep 20, 2015 @ 00:00:00.000',

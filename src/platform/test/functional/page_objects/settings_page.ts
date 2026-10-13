@@ -453,7 +453,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async isIndexPatternListEmpty() {
-    return !(await this.testSubjects.exists('indexPatternTable', { timeout: 5000 }));
+    return !(await this.testSubjects.waitForExists('indexPatternTable', { timeout: 5000 }));
   }
 
   async removeLogstashIndexPatternIfExist() {
@@ -882,7 +882,11 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.click('closeFlyoutButton');
 
     // We might have unsaved changes and we need to confirm inside the modal
-    if (await this.testSubjects.exists('runtimeFieldModifiedFieldConfirmModal')) {
+    if (
+      await this.testSubjects.waitForExists('runtimeFieldModifiedFieldConfirmModal', {
+        timeout: 2000,
+      })
+    ) {
       this.log.debug('Unsaved changes for the field: need to confirm');
       await this.testSubjects.click('confirmModalConfirmButton');
     }
@@ -1048,16 +1052,15 @@ export class SettingsPageObject extends FtrService {
 
   async openScriptedFieldHelp(activeTab: string) {
     this.log.debug('open Scripted Fields help');
-    let isOpen = await this.testSubjects.exists('scriptedFieldsHelpFlyout');
-    if (!isOpen) {
-      await this.retry.try(async () => {
-        await this.testSubjects.click('scriptedFieldsHelpLink');
-        isOpen = await this.testSubjects.exists('scriptedFieldsHelpFlyout');
-        if (!isOpen) {
-          throw new Error('Failed to open scripted fields help');
-        }
-      });
-    }
+    await this.retry.try(async () => {
+      // Re-check before clicking: a flyout that opened after the previous attempt's wait covers
+      // the help link with its overlay mask, so clicking again would be intercepted.
+      if (await this.testSubjects.exists('scriptedFieldsHelpFlyout')) return;
+      await this.testSubjects.click('scriptedFieldsHelpLink');
+      if (!(await this.testSubjects.waitForExists('scriptedFieldsHelpFlyout', { timeout: 5000 }))) {
+        throw new Error('Failed to open scripted fields help');
+      }
+    });
 
     if (activeTab) {
       // The flyout slides in with an entrance animation; a tab click issued before it settles can

@@ -5,6 +5,10 @@
     "helpers:pinGitHubActionDigests",
     "helpers:pinGitHubActionDigestsToSemver"
   ],
+  "gitIgnoredAuthors": [
+    "174716857+elastic-renovate-prod[bot]@users.noreply.github.com",
+    "42973632+kibanamachine@users.noreply.github.com"
+  ],
   "ignorePaths": ["**/__fixtures__/**", "**/fixtures/**"],
   "enabledManagers": ["npm", "github-actions", "custom.regex", "devcontainer"],
   "baseBranches": ["main", "9.0", "8.19", "8.18", "8.17", "7.17"],
@@ -1079,7 +1083,7 @@
     },
     {
       "groupName": "stylelint",
-      "matchDepNames": ["stylelint", "stylelint-scss"],
+      "matchDepNames": ["meow", "stylelint", "stylelint-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
@@ -1430,10 +1434,8 @@
     {
       "groupName": "reporting dependencies",
       "matchDepNames": [
-        "@types/extract-zip",
         "@types/opn",
         "@types/pdfmake",
-        "extract-zip",
         "opn",
         "pdfjs-dist",
         "pdfmake",
@@ -1899,13 +1901,14 @@
       "matchDepNames": [
         "@emotion/jest",
         "@jest/console",
+        "@ampproject/remapping",
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-cli",
         "jest-config",
@@ -1916,7 +1919,9 @@
         "jest-runtime",
         "jest-specific-snapshot",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest",
+        "magic-string"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2456,7 +2461,7 @@
     },
     {
       "groupName": "@swc/core",
-      "matchDepNames": ["@swc/core"],
+      "matchDepNames": ["@swc/core", "@swc/plugin-emotion"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],

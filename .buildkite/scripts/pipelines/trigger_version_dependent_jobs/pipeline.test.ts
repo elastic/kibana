@@ -14,7 +14,7 @@ import {
   getArtifactSnapshotPipelineTriggers,
   getESForwardPipelineTriggers,
   getArtifactStagingPipelineTriggers,
-} from './pipeline';
+} from './pipeline.ts';
 
 const versionsFile = getVersionsFile();
 

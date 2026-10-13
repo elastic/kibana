@@ -119,9 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // now check that operations won't show the incompatibility tooltip
         for (const operation of allOperations) {
           expect(
-            testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`, {
-              timeout: 500,
-            })
+            await testSubjects.exists(`lns-indexPatternDimension-${operation} incompatible`)
           ).to.eql(false);
         }
 

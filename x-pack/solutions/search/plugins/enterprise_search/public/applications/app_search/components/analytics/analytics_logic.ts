@@ -151,7 +151,10 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       const { engineName } = EngineLogic.values;
 
       try {
-        const { start, end, tag } = queryString.parse(history.location.search);
+        const { start, end, tag } = queryString.parse(history.location.search) as Record<
+          string,
+          string | string[] | null
+        >;
         const query = {
           start: start || DEFAULT_START_DATE,
           end: end || DEFAULT_END_DATE,
@@ -172,7 +175,10 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
       const { engineName } = EngineLogic.values;
 
       try {
-        const { start, end, tag } = queryString.parse(history.location.search);
+        const { start, end, tag } = queryString.parse(history.location.search) as Record<
+          string,
+          string | string[] | null
+        >;
         const queryParams = {
           start: start || DEFAULT_START_DATE,
           end: end || DEFAULT_END_DATE,

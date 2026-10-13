@@ -9,6 +9,7 @@
 
 import Path from 'path';
 import fs from 'fs/promises';
+import { getFips } from 'crypto';
 import { parse } from 'hjson';
 import {
   createTestServers,
@@ -82,6 +83,26 @@ const getClusterRoutingAllocations = (settings: Record<string, any>) => {
 };
 let esServer: TestElasticsearchUtils;
 
+/** The restored data archive keeps a basic license, which FIPS mode rejects at Kibana startup. */
+async function ensureLicenseAllowsFips(esClient: ElasticsearchClient): Promise<void> {
+  if (getFips() !== 1) {
+    return;
+  }
+
+  const { license } = await esClient.license.get();
+  if (license.type === 'trial' || license.type === 'platinum' || license.type === 'enterprise') {
+    return;
+  }
+
+  const started = await esClient.license.postStartTrial({ acknowledge: true });
+  if (!started.trial_was_started) {
+    const reason = started.error_message ?? 'trial was not started';
+    throw new Error(
+      `FIPS mode requires a trial, platinum, or enterprise license, but the cluster license is '${license.type}' and starting a trial failed: ${reason}`
+    );
+  }
+}
+
 async function updateRoutingAllocations(
   esClient: ElasticsearchClient,
   settingType: string = 'persistent',
@@ -115,6 +136,8 @@ describe('incompatible_cluster_routing_allocation', () => {
     const updatedSettings = await client.cluster.getSettings({ flat_settings: true });
 
     expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
+
+    await ensureLicenseAllowsFips(client);
 
     // Start Kibana
     root = createKbnRoot();

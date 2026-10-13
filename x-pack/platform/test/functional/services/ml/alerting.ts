@@ -57,11 +57,7 @@ export function MachineLearningAlertingProvider(
     },
 
     async selectResultType(resultType: string) {
-      if (
-        (await testSubjects.exists(`mlAnomalyAlertResult_${resultType}_selected`, {
-          timeout: 1000,
-        })) === false
-      ) {
+      if ((await testSubjects.exists(`mlAnomalyAlertResult_${resultType}_selected`)) === false) {
         await testSubjects.click(`mlAnomalyAlertResult_${resultType}`);
         await this.assertResultTypeSelection(resultType);
       }

@@ -272,7 +272,7 @@ export class HomePageObject extends FtrService {
   async loadSavedObjects() {
     await this.retry.try(async () => {
       await this.testSubjects.click('loadSavedObjects');
-      const successMsgExists = await this.testSubjects.exists('loadSavedObjects_success', {
+      const successMsgExists = await this.testSubjects.waitForExists('loadSavedObjects_success', {
         timeout: 5000,
       });
       if (!successMsgExists) {

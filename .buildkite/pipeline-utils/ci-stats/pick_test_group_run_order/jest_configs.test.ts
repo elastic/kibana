@@ -11,7 +11,9 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-jest.mock('../../../disabled_jest_configs.json', () => [], { virtual: false });
+jest.mock('../../load_buildkite_json.ts', () => ({
+  loadBuildkiteJson: jest.fn(() => []),
+}));
 
 let mockKibanaDir = process.cwd();
 
@@ -19,7 +21,11 @@ jest.mock('#pipeline-utils', () => ({
   getKibanaDir: () => mockKibanaDir,
 }));
 
-import { discoverJestUnitConfigs, globsForSolutions } from './jest_configs';
+import {
+  discoverJestIntegrationConfigs,
+  discoverJestUnitConfigs,
+  globsForSolutions,
+} from './jest_configs.ts';
 
 describe('globsForSolutions', () => {
   const PATTERNS = ['**/jest.config.js', '!**/__fixtures__/**'];
@@ -76,5 +82,23 @@ describe('discoverJestUnitConfigs', () => {
     process.chdir(otherCwd);
 
     expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/has_tests/jest.config.js']);
+  });
+
+  it('discovers CommonJS configs', () => {
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/unit'), { recursive: true });
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/unit/jest.config.cjs'), 'module.exports = {};');
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/unit/foo.test.ts'), '');
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/integration'), { recursive: true });
+    Fs.writeFileSync(
+      Path.join(repoRoot, 'pkg/integration/jest.integration.config.cjs'),
+      'module.exports = {};'
+    );
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/integration/integration_tests'));
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/integration/integration_tests/foo.test.ts'), '');
+
+    expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/unit/jest.config.cjs']);
+    expect(discoverJestIntegrationConfigs(undefined)).toEqual([
+      'pkg/integration/jest.integration.config.cjs',
+    ]);
   });
 });

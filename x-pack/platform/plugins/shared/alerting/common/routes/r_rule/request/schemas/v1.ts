@@ -13,6 +13,11 @@ import {
   validateRecurrenceByWeekdayV1,
 } from '../../validation';
 
+const MAX_BY_WEEKDAY_LENGTH = 10;
+const MAX_BY_WEEKDAY = 50;
+const MAX_BY_MONTHDAY = 31;
+const MAX_BY_MONTH = 12;
+
 export interface RRuleRequestSchemaLimits {
   /** Max length of the `dtstart` string. Omit for no limit. */
   maxDtstartLength?: number;
@@ -20,18 +25,18 @@ export interface RRuleRequestSchemaLimits {
   maxTzidLength?: number;
   /** Max length of the `until` string. Omit for no limit. */
   maxUntilLength?: number;
-  /** Max length of each `byweekday` element. Omit for no limit. */
+  /** Max length of each `byweekday` element. Max value is 10. */
   maxByweekdayLength?: number;
-  /** Max number of `byweekday` entries. Omit for no limit. */
+  /** Max number of `byweekday` entries. Max value is 50. */
   maxByweekday?: number;
-  /** Max number of `bymonthday` entries. Omit for no limit. */
+  /** Max number of `bymonthday` entries. Max value is 31. */
   maxBymonthday?: number;
-  /** Max number of `bymonth` entries. Omit for no limit. */
+  /** Max number of `bymonth` entries. Max value is 12. */
   maxBymonth?: number;
 }
 
 /**
- * Builds the r_rule request schema. Limits default to unbounded so the
+ * Builds the r_rule request schema. Some limits default to unbounded so the
  * shared/public consumers (e.g. the alerting rule APIs and snooze schedules)
  * keep their existing contract. Internal consumers that need request bounds
  * (e.g. the Maintenance Windows internal APIs) pass explicit limits.
@@ -67,21 +72,37 @@ export const getRRuleRequestSchema = (limits: RRuleRequestSchemaLimits = {}) =>
       })
     ),
     byweekday: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: limits.maxByweekdayLength }), {
-        minSize: 1,
-        maxSize: limits.maxByweekday,
-        validate: validateRecurrenceByWeekdayV1,
-      })
+      schema.arrayOf(
+        schema.string({
+          maxLength: Math.min(
+            limits.maxByweekdayLength || MAX_BY_WEEKDAY_LENGTH,
+            MAX_BY_WEEKDAY_LENGTH
+          ),
+        }),
+        {
+          minSize: 1,
+          maxSize: Math.min(limits.maxByweekday || MAX_BY_WEEKDAY, MAX_BY_WEEKDAY),
+          validate: validateRecurrenceByWeekdayV1,
+        }
+      )
     ),
     bymonthday: schema.maybe(
       schema.arrayOf(schema.number({ min: 1, max: 31 }), {
         minSize: 1,
-        maxSize: limits.maxBymonthday,
+        maxSize: Math.min(limits.maxBymonthday || MAX_BY_MONTHDAY, MAX_BY_MONTHDAY),
       })
     ),
     bymonth: schema.maybe(
-      schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1, maxSize: limits.maxBymonth })
+      schema.arrayOf(schema.number({ min: 1, max: 12 }), {
+        minSize: 1,
+        maxSize: Math.min(limits.maxBymonth || MAX_BY_MONTH, MAX_BY_MONTH),
+      })
     ),
   });
 
-export const rRuleRequestSchema = getRRuleRequestSchema();
+export const rRuleRequestSchema = getRRuleRequestSchema({
+  maxByweekdayLength: MAX_BY_WEEKDAY_LENGTH,
+  maxByweekday: MAX_BY_WEEKDAY,
+  maxBymonthday: MAX_BY_MONTHDAY,
+  maxBymonth: MAX_BY_MONTH,
+});

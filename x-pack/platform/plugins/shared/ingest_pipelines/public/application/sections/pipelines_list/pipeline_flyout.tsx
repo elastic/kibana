@@ -14,7 +14,7 @@ import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
 
 export interface Props {
-  pipeline: string | string[] | null | undefined;
+  pipeline: string | Array<string | null> | null | undefined;
   onEditClick: (pipelineName: string) => void;
   onCloneClick: (pipelineName: string) => void;
   onDeleteClick: (pipelineName: Pipeline[]) => void;

@@ -14,7 +14,7 @@ import type { TimePickerTimeDefaults } from '../components/shared/date_picker/ty
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
 
-function tryParseDate(date: string | string[] | null | undefined): Moment | undefined {
+function tryParseDate(date: string | Array<string | null> | null | undefined): Moment | undefined {
   return typeof date === 'string' ? datemath.parse(date) : undefined;
 }
 
