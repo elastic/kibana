@@ -91,4 +91,21 @@ describe('generateInsights', () => {
 
     expect(chatComplete).toHaveBeenCalledTimes(3);
   });
+
+  it('renders $ sequences in the query literally, like the product prompt template', async () => {
+    const { inferenceClient, chatComplete } = createInferenceClient(FENCED_JSON_REPLY);
+    const alertsWithDollars = ['alert cmd: $& whoami; price 5$$'];
+
+    await generateInsights({
+      inferenceClient,
+      log,
+      prompt: 'Analyze the alerts.',
+      alerts: alertsWithDollars,
+    });
+
+    const message = chatComplete.mock.calls[0]?.[0]?.messages[0];
+    if (message == null) throw new Error('chatComplete was not called with a message');
+    expect(message.content).toContain(alertsWithDollars[0]);
+    expect(message.content).not.toContain('{query}');
+  });
 });

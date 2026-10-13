@@ -109,8 +109,8 @@ export const getStructuredGenerationPrompt = ({
 }): string =>
   STRUCTURED_GENERATION_PROMPT_TEMPLATE.replace(
     '{format_instructions}',
-    formatInstructions
-  ).replace('{query}', query);
+    () => formatInstructions
+  ).replace('{query}', () => query);
 
 export const getChainWithFormatInstructions = <T extends GraphInsightTypes>({
   llm,
