@@ -21,4 +21,5 @@ export interface GetFleetStatusResponse {
   is_secrets_storage_enabled?: boolean;
   is_ssl_secrets_storage_enabled?: boolean;
   is_action_secrets_storage_enabled?: boolean;
+  is_fips_enabled?: boolean;
 }

@@ -7,7 +7,6 @@
 
 import * as rt from 'io-ts';
 import {
-  MAX_BULK_CREATE_ATTACHMENTS,
   MAX_COMMENTS_PER_PAGE,
   MAX_COMMENT_LENGTH,
   MAX_DELETE_FILES,
@@ -138,15 +137,7 @@ export const FindAttachmentsQueryParamsRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_COMMENTS_PER_PAGE }),
 ]);
 
-export const BulkCreateAttachmentsRequestRt = limitedArraySchema({
-  codec: AttachmentRequestRt,
-  min: 0,
-  max: MAX_BULK_CREATE_ATTACHMENTS,
-  fieldName: 'attachments',
-});
-
 export type FindAttachmentsQueryParams = rt.TypeOf<typeof FindAttachmentsQueryParamsRt>;
 export type AttachmentsFindResponse = rt.TypeOf<typeof AttachmentsFindResponseRt>;
 export type AttachmentRequest = rt.TypeOf<typeof AttachmentRequestRt>;
 export type AttachmentPatchRequest = rt.TypeOf<typeof AttachmentPatchRequestRt>;
-export type BulkCreateAttachmentsRequest = rt.TypeOf<typeof BulkCreateAttachmentsRequestRt>;

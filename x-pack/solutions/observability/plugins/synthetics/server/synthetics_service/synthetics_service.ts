@@ -26,6 +26,7 @@ import type { SyntheticsServerSetup } from '../types';
 import {
   legacySyntheticsMonitorTypeSingle,
   syntheticsMonitorSavedObjectType,
+  syntheticsMonitorSOTypes,
   syntheticsParamType,
 } from '../../common/types/saved_objects';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
@@ -41,6 +42,7 @@ import type { ServiceData } from './service_api_client';
 import { ServiceAPIClient } from './service_api_client';
 
 import type {
+  EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   ServiceLocations,
@@ -48,7 +50,7 @@ import type {
   SyntheticsParams,
   ThrottlingOptions,
 } from '../../common/runtime_types';
-import { ConfigKey } from '../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
@@ -58,6 +60,15 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
+
+type MonitorToDelete = Pick<
+  MonitorFields,
+  | ConfigKey.MONITOR_QUERY_ID
+  | ConfigKey.MONITOR_TYPE
+  | ConfigKey.LOCATIONS
+  | ConfigKey.SCHEDULE
+  | ConfigKey.NAMESPACE
+>;
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -350,6 +361,24 @@ export class SyntheticsService {
     );
   }
 
+  /** Pages through every monitor without decrypting it, reading only what a delete request needs. */
+  private getDeleteSOClientFinder({ pageSize }: { pageSize: number }) {
+    return this.server.coreStart.savedObjects
+      .createInternalRepository()
+      .createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
+        type: syntheticsMonitorSOTypes,
+        perPage: pageSize,
+        namespaces: [ALL_SPACES_ID],
+        fields: [
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.MONITOR_TYPE,
+          ConfigKey.LOCATIONS,
+          ConfigKey.SCHEDULE,
+          ConfigKey.NAMESPACE,
+        ],
+      });
+  }
+
   private getESClient() {
     if (!this.server.coreStart) {
       return;
@@ -620,7 +649,7 @@ export class SyntheticsService {
 
         const data = {
           output,
-          monitors: this.formatConfigs(configs, []),
+          monitors: this.formatDeleteConfigs(configs),
           license,
         };
         return await this.apiClient.delete(data);
@@ -632,16 +661,19 @@ export class SyntheticsService {
 
   async deleteAllConfigs() {
     const license = await this.getLicense();
-    const finder = await this.getSOClientFinder({ pageSize: 100 });
+    const finder = this.getDeleteSOClientFinder({ pageSize: 100 });
     const { output } = await this.getOutput();
     if (!output) {
       return;
     }
 
+    const pushErrors: ServiceLocationErrors = [];
     for await (const result of finder.find()) {
-      const monitors = this.normalizeConfigs(result.saved_objects, {}, []);
+      const monitors = this.formatDeleteConfigs(
+        result.saved_objects.map(({ attributes }) => ({ monitor: attributes }))
+      );
       const hasPublicLocations = monitors.some((config) =>
-        config.locations.some(({ isServiceManaged }) => isServiceManaged)
+        config.locations?.some(({ isServiceManaged }) => isServiceManaged)
       );
 
       if (hasPublicLocations) {
@@ -650,9 +682,12 @@ export class SyntheticsService {
           monitors,
           license,
         };
-        return await this.apiClient.delete(data);
+        pushErrors.push(...(await this.apiClient.delete(data)));
       }
     }
+
+    finder.close().catch(() => {});
+    return pushErrors;
   }
 
   async getSyntheticsParams({
@@ -745,6 +780,38 @@ export class SyntheticsService {
         params ?? {},
         mws
       );
+    });
+  }
+
+  /**
+   * The service finds the monitors to delete by id and type alone, so unlike the other pushes the
+   * body is never formatted: it carries no config, params or secrets. `locations` only routes the
+   * request and is dropped before it is sent. The namespace is kept so the body never claims the
+   * default one for a monitor that has its own. Browser monitors keep their schedule because services
+   * older than synthetics-service#2049 (v1.13.14) take it from the request to unschedule the monitor.
+   */
+  formatDeleteConfigs(
+    configs: Array<{ monitor: MonitorToDelete; heartbeatId?: string }>
+  ): Array<Partial<MonitorFields>> {
+    return configs.map(({ monitor, heartbeatId }) => {
+      const type = monitor[ConfigKey.MONITOR_TYPE];
+      const schedule = monitor[ConfigKey.SCHEDULE];
+
+      return {
+        [ConfigKey.MONITOR_QUERY_ID]: heartbeatId ?? monitor[ConfigKey.MONITOR_QUERY_ID],
+        [ConfigKey.MONITOR_TYPE]: type,
+        [ConfigKey.NAMESPACE]: monitor[ConfigKey.NAMESPACE],
+        [ConfigKey.LOCATIONS]: monitor[ConfigKey.LOCATIONS],
+        ...(type === MonitorTypeEnum.BROWSER && schedule
+          ? formatMonitorConfigFields(
+              [ConfigKey.SCHEDULE],
+              { [ConfigKey.SCHEDULE]: schedule },
+              this.logger,
+              {},
+              []
+            )
+          : {}),
+      };
     });
   }
 

@@ -27,6 +27,7 @@ export const ipLocationCommand = {
   name: Commands.IP_LOCATION,
   methods: ipLocationCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.ipLocationDoc', {
       defaultMessage:

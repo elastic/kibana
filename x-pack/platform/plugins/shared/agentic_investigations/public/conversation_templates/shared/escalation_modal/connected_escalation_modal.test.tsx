@@ -263,7 +263,7 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
 
-    const radio = document.getElementById('incident-esc-1') as HTMLInputElement;
+    const radio = document.getElementById('escalation-esc-1') as HTMLInputElement;
     expect(radio).toBeDisabled();
   });
 
@@ -287,7 +287,7 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
 
-    const radio = document.getElementById('incident-esc-2') as HTMLInputElement;
+    const radio = document.getElementById('escalation-esc-2') as HTMLInputElement;
     expect(radio).toBeDisabled();
   });
 
@@ -335,7 +335,7 @@ describe('ConnectedEscalationModal', () => {
 
     expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
     expect(
-      screen.getByText('Your user profile is unavailable. Private escalations cannot be created.')
+      screen.getByText('Your user profile is unavailable. Escalations cannot be created.')
     ).toBeInTheDocument();
   });
 
@@ -392,7 +392,7 @@ describe('ConnectedEscalationModal', () => {
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-3'));
     fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     const [, callbacks] = addMutate.mock.calls[0];

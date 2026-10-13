@@ -22,10 +22,8 @@ import {
 import { createElasticDefendPolicyManagementSkill } from './elastic_defend_policy_management';
 
 const endpointAppContextService = createMockEndpointAppContext().service;
-const getStartServices = jest.fn();
 const elasticDefendPolicyManagementSkill = createElasticDefendPolicyManagementSkill({
   endpointAppContextService,
-  getStartServices,
 });
 
 const ALL_SKILLS = [

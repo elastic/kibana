@@ -26,6 +26,7 @@ const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   platform: 'linux',
   tags: [],
   monitorsAssigned: null,
+  complete: false,
   ...overrides,
 });
 
@@ -34,7 +35,7 @@ const stats = (agents: AgentStat[]): LocationAgentStats => ({
   locationLabel: 'Local',
   agentPolicyId: 'policy-1',
   agentPolicyName: 'Synthetics policy',
-  isAgentSharding: false,
+  isShardingActive: false,
   agents,
 });
 
