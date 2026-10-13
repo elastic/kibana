@@ -20,8 +20,9 @@ import {
 } from '../../../synthetics_service/private_location/assign_by_condition';
 import type { MonitorConfigRepository } from '../../../services/monitor_config_repository';
 import { getSavedObjectKqlFilter } from '../../common';
-import { isAgentShardingActive } from '../../../synthetics_service/private_location/agent_sharding_license';
+import { isShardingEnabled } from '../../../synthetics_service/private_location/agent_sharding_license';
 import { PackagePolicyService } from '../../../synthetics_service/private_location/package_policy_service';
+import { isCompleteElasticAgent } from '../../../synthetics_service/private_location/get_agent_info';
 
 const BYTES_PER_MIB = 1024 * 1024;
 
@@ -42,7 +43,12 @@ interface EnrolledAgentMeta {
   lastCheckinMessage: string | null;
   platform: string | null;
   tags: string[];
+  /** Active agent that can run browser monitors. Inactive agents never count. */
+  complete: boolean;
 }
+
+// Listed with `showInactive: true` for display, but placement only targets active agents.
+const NOT_ACTIVE_STATUSES = new Set(['inactive', 'unenrolled', 'uninstalled']);
 
 interface AgentLocalMetadata {
   host?: { name?: string; hostname?: string; memory?: number };
@@ -103,6 +109,10 @@ export const getEnrolledAgents = async (
         lastCheckinMessage: agent.last_checkin_message ?? null,
         platform: meta?.os?.platform ?? meta?.os?.name ?? null,
         tags: agent.tags ?? [],
+        complete:
+          agent.active !== false &&
+          !NOT_ACTIVE_STATUSES.has(agent.status ?? '') &&
+          isCompleteElasticAgent(agent.local_metadata),
       });
     }
 
@@ -253,8 +263,8 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
     );
     const policyNameById = new Map(agentPolicies.map((policy) => [policy.id, policy.name]));
     const packagePolicyService = new PackagePolicyService(server);
-    const isAgentSharding = await isAgentShardingActive(server);
-    const visibleMonitorSpacesByLocation = isAgentSharding
+    const isShardingActive = await isShardingEnabled(server);
+    const visibleMonitorSpacesByLocation = isShardingActive
       ? await getVisibleMonitorSpacesByLocation(
           monitorConfigRepository,
           locations.map(({ id }) => id)
@@ -275,7 +285,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           getEnrolledAgents(server, location.agentPolicyId).catch(
             () => new Map<string, EnrolledAgentMeta>()
           ),
-          isAgentSharding
+          isShardingActive
             ? packagePolicyService
                 .listByAgentPolicy({ agentPolicyId: location.agentPolicyId })
                 .then((policies) => {
@@ -336,7 +346,8 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
               lastCheckinMessage: meta.lastCheckinMessage,
               platform: meta.platform,
               tags: meta.tags,
-              monitorsAssigned: isAgentSharding ? assignmentCounts.get(meta.agentId) ?? 0 : null,
+              monitorsAssigned: isShardingActive ? assignmentCounts.get(meta.agentId) ?? 0 : null,
+              complete: meta.complete,
             };
           })
           .sort((a, b) => {
@@ -349,7 +360,7 @@ export const getPrivateLocationAgentStats: SyntheticsRestApiRouteFactory<
           locationLabel: location.label,
           agentPolicyId: location.agentPolicyId,
           agentPolicyName: policyNameById.get(location.agentPolicyId) ?? location.agentPolicyId,
-          isAgentSharding,
+          isShardingActive,
           agents,
         };
       })

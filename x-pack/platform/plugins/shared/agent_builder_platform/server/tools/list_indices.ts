@@ -44,9 +44,8 @@ valid ES|QL source — check the views list before reporting that a name was not
       openWorldHint: false,
     },
     schema: listIndicesSchema,
-    handler: async ({ pattern }, { esClient, experimentalFeatures, logger }) => {
+    handler: async ({ pattern }, { esClient, logger }) => {
       logger.debug(`list indices tool called with pattern: ${pattern}`);
-      const includeDatasets = experimentalFeatures.datasets;
       const {
         indices,
         data_streams: dataStreams,
@@ -59,7 +58,7 @@ valid ES|QL source — check the views list before reporting that a name was not
         includeHidden: false,
         excludeIndicesRepresentedAsAlias: false,
         excludeIndicesRepresentedAsDatastream: true,
-        includeDatasets,
+        includeDatasets: true,
         includeViews: true,
         esClient: esClient.asCurrentUser,
       });

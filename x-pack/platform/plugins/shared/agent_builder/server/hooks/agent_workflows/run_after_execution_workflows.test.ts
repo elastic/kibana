@@ -12,10 +12,17 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolResultType,
   type ConversationRound,
+  type ToolCallStep,
 } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/workflows';
-import { runAfterExecutionWorkflows } from './run_after_execution_workflows';
+import {
+  MAX_TOOL_RESULT_ARRAY_ITEMS,
+  MAX_TOOL_RESULT_DATA_CHARS,
+  MAX_TOOL_RESULT_STRING_CHARS,
+  runAfterExecutionWorkflows,
+} from './run_after_execution_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
@@ -33,6 +40,31 @@ const getCurrentSpaceIdMock = jest.mocked(getCurrentSpaceId);
 type RunAfterExecutionWorkflowsParams = Parameters<typeof runAfterExecutionWorkflows>[0];
 type WorkflowApi = RunAfterExecutionWorkflowsParams['workflowApi'];
 type GetInternalServices = RunAfterExecutionWorkflowsParams['getInternalServices'];
+type Workflow = NonNullable<Awaited<ReturnType<WorkflowApi['getWorkflow']>>>;
+
+const makeWorkflow = (inputs?: Record<string, unknown>): Workflow =>
+  ({
+    definition: {
+      triggers: [
+        {
+          type: 'manual',
+          ...(inputs ? { inputs } : {}),
+        },
+      ],
+    },
+  } as unknown as Workflow);
+
+const existingWorkflowInputs = {
+  additionalProperties: false,
+  properties: {
+    prompt: { type: 'string' },
+    response: { type: 'string' },
+    conversation_id: { type: 'string' },
+    round_id: { type: 'string' },
+    agent_id: { type: 'string' },
+    tool_calls: { type: 'array' },
+  },
+};
 
 const makeRound = (overrides: Partial<ConversationRound> = {}): ConversationRound => ({
   id: 'round-1',
@@ -103,6 +135,7 @@ describe('runAfterExecutionWorkflows', () => {
     agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1'] },
     agentId: 'agent-1',
     conversationId: 'conv-1',
+    conversationAccess: 'readWrite',
     ...overrides,
   });
 
@@ -121,6 +154,24 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('early-exit guards', () => {
+    it('does nothing for an ephemeral run on an existing conversation', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ conversationAccess: 'readOnly' });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('still runs for a one-shot run that stores nothing', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ conversationAccess: 'none' });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
+    });
+
     it('does nothing when post_execution_workflow_ids is empty', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
@@ -216,7 +267,7 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: 'wf-1',
-          workflowParams: expect.objectContaining({
+          workflowParams: {
             prompt: 'my question',
             response: 'my answer',
             round_id: 'round-1',
@@ -225,10 +276,73 @@ describe('runAfterExecutionWorkflows', () => {
             round_connector_id: 'current-connector',
             workflow_context: workflowContext,
             tool_calls: [],
+          },
+        })
+      );
+    });
+
+    it('passes the in-memory round connector id to a workflow that declares it', async () => {
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+      getWorkflow.mockResolvedValue(
+        makeWorkflow({
+          additionalProperties: false,
+          properties: {
+            ...existingWorkflowInputs.properties,
+            round_connector_id: { type: 'string' },
+          },
+        })
+      );
+      const context = createContext({
+        round: makeRound({
+          model_usage: {
+            connector_id: 'round-connector',
+            llm_calls: 1,
+            input_tokens: 10,
+            output_tokens: 5,
+          },
+        }),
+      });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default', request);
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowParams: expect.objectContaining({
+            round_connector_id: 'round-connector',
           }),
         })
       );
     });
+
+    it.each([undefined, '', '   ', 'unknown', ' unknown '])(
+      'omits an unusable round connector id %p without looking up the workflow',
+      async (connectorId) => {
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+        const context = createContext({
+          round: makeRound({
+            model_usage:
+              connectorId === undefined
+                ? undefined
+                : {
+                    connector_id: connectorId,
+                    llm_calls: 1,
+                    input_tokens: 10,
+                    output_tokens: 5,
+                  },
+          }),
+        });
+
+        await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+        expect(getWorkflow).not.toHaveBeenCalled();
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams as Record<
+          string,
+          unknown
+        >;
+        expect(params).not.toHaveProperty('round_connector_id');
+      }
+    );
 
     it('omits agent_id, conversation_id, and round_connector_id when undefined or blank', async () => {
       const { workflowApi, getInternalServices } = createDeps();
@@ -327,6 +441,161 @@ describe('runAfterExecutionWorkflows', () => {
         expect(params).not.toHaveProperty('workflow_context');
       });
 
+      describe('tool_results', () => {
+        const toolResults = [
+          { tool_result_id: 'r-1', type: ToolResultType.other, data: { rows: 5000 } },
+        ];
+        const roundWithToolCall = makeRound({
+          steps: [
+            {
+              type: ConversationRoundStepType.toolCall,
+              tool_id: 'my-tool',
+              tool_call_id: 'tc-1',
+              params: { key: 'val' },
+              results: toolResults,
+            },
+          ],
+        });
+
+        it('sends tool call results to a workflow that declares tool_results', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition([...legacyInputNames, 'tool_results']),
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithToolCall }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(params.tool_results).toEqual([
+            { tool_id: 'my-tool', tool_call_id: 'tc-1', results: toolResults },
+          ]);
+          expect(params.tool_calls).toEqual([
+            { tool_id: 'my-tool', tool_call_id: 'tc-1', params: { key: 'val' } },
+          ]);
+        });
+
+        const sendResultData = async (data: Record<string, unknown>) => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition([...legacyInputNames, 'tool_results']),
+          });
+          const roundWithResult = makeRound({
+            steps: [
+              {
+                type: ConversationRoundStepType.toolCall,
+                tool_id: 'my-tool',
+                tool_call_id: 'tc-1',
+                params: {},
+                results: [{ tool_result_id: 'r-1', type: ToolResultType.other, data }],
+              },
+            ],
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithResult }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          return executeWorkflowMock.mock.calls[0][0].workflowParams.tool_results;
+        };
+
+        it('bounds long strings and arrays inside result data in place', async () => {
+          const toolResultsSent = await sendResultData({
+            stdout: 'x'.repeat(MAX_TOOL_RESULT_STRING_CHARS * 10),
+            rows: Array(MAX_TOOL_RESULT_ARRAY_ITEMS * 10).fill(1),
+            exit_code: 0,
+          });
+
+          expect(toolResultsSent).toEqual([
+            {
+              tool_id: 'my-tool',
+              tool_call_id: 'tc-1',
+              results: [
+                {
+                  tool_result_id: 'r-1',
+                  type: ToolResultType.other,
+                  data: {
+                    stdout: 'x'.repeat(MAX_TOOL_RESULT_STRING_CHARS),
+                    rows: Array(MAX_TOOL_RESULT_ARRAY_ITEMS).fill(1),
+                    exit_code: 0,
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('omits result data that is still too large after bounding', async () => {
+          const toolResultsSent = await sendResultData({
+            rows: Array(MAX_TOOL_RESULT_ARRAY_ITEMS).fill('x'.repeat(MAX_TOOL_RESULT_STRING_CHARS)),
+          });
+
+          expect(toolResultsSent).toEqual([
+            {
+              tool_id: 'my-tool',
+              tool_call_id: 'tc-1',
+              results: [
+                {
+                  tool_result_id: 'r-1',
+                  type: ToolResultType.other,
+                  data: {
+                    omitted: `result data exceeded ${MAX_TOOL_RESULT_DATA_CHARS} characters`,
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('omits tool calls whose step has no results', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition([...legacyInputNames, 'tool_results']),
+          });
+          const stepWithoutResults = {
+            type: ConversationRoundStepType.toolCall,
+            tool_id: 'other-tool',
+            tool_call_id: 'tc-2',
+            params: {},
+          } as ToolCallStep;
+          const roundWithMissingResults = makeRound({
+            steps: [...roundWithToolCall.steps, stepWithoutResults],
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithMissingResults }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(params.tool_results).toEqual([
+            { tool_id: 'my-tool', tool_call_id: 'tc-1', results: toolResults },
+          ]);
+        });
+
+        it('does not send tool_results to a workflow that does not declare it', async () => {
+          const { workflowApi, getInternalServices } = createDeps({
+            definition: strictDefinition(legacyInputNames),
+          });
+
+          await runAfterExecutionWorkflows({
+            context: createContext({ round: roundWithToolCall }),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+
+          const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+          expect(Object.keys(params).sort()).toEqual([...legacyInputNames].sort());
+        });
+      });
+
       it('sends the base inputs and still runs when the workflow cannot be read', async () => {
         const { workflowApi, getWorkflow, getInternalServices } = createDeps();
         getWorkflow.mockRejectedValue(new Error('boom'));
@@ -365,6 +634,64 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('error handling (non-throwing — fire-and-forget)', () => {
+    it.each([null, { definition: undefined }])(
+      'runs with original inputs when the lookup returns %p',
+      async (workflow) => {
+        const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+        getWorkflow.mockResolvedValue(workflow);
+
+        await expect(
+          runAfterExecutionWorkflows({
+            context: createContext(),
+            workflowApi,
+            getInternalServices,
+            logger,
+          })
+        ).resolves.toBeUndefined();
+
+        expect(executeWorkflowMock).toHaveBeenCalledWith(
+          expect.objectContaining({ workflowId: 'wf-1' })
+        );
+        const params = executeWorkflowMock.mock.calls[0][0].workflowParams;
+        expect(Object.keys(params).sort()).toEqual([...legacyInputNames].sort());
+      }
+    );
+
+    it('executes a later workflow after an earlier workflow lookup fails', async () => {
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+      getWorkflow.mockRejectedValueOnce(new Error('lookup failed')).mockResolvedValueOnce(
+        makeWorkflow({
+          properties: {
+            round_connector_id: { type: 'string' },
+          },
+        })
+      );
+      const context = createContext({
+        agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1', 'wf-2'] },
+      });
+
+      await expect(
+        runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger })
+      ).resolves.toBeUndefined();
+
+      expect(getWorkflow).toHaveBeenCalledTimes(2);
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(2);
+      expect(executeWorkflowMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ workflowId: 'wf-1' })
+      );
+      expect(executeWorkflowMock.mock.calls[0][0].workflowParams).not.toHaveProperty(
+        'round_connector_id'
+      );
+      expect(executeWorkflowMock).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          workflowId: 'wf-2',
+          workflowParams: expect.objectContaining({ round_connector_id: 'connector-1' }),
+        })
+      );
+    });
+
     it('logs an error and continues when executeWorkflow returns success: false', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       executeWorkflowMock.mockResolvedValueOnce({ success: false, error: 'Network error' });

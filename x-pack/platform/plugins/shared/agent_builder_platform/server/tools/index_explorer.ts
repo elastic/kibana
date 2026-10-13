@@ -50,7 +50,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },
-      { esClient, experimentalFeatures, modelProvider, logger }
+      { esClient, modelProvider, logger }
     ) => {
       logger.debug(
         `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
@@ -60,7 +60,7 @@ Tool result: [{ type: "index", name: '.alerts' }]
         nlQuery,
         indexPattern,
         limit,
-        includeDatasets: experimentalFeatures.datasets,
+        includeDatasets: true,
         includeViews: true,
         esClient: esClient.asCurrentUser,
         model,

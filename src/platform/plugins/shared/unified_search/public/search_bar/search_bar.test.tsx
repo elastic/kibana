@@ -595,7 +595,7 @@ describe('SearchBar', () => {
 
     await waitFor(() => {
       expect(trackQuerySubmitted).toHaveBeenCalledWith({
-        source: QuerySource.QUICK_SEARCH,
+        source: QuerySource.QUICK_SEARCH_KQL,
         query: 'FROM test | WHERE KQL("""hostname:web-01""")',
       });
     });

@@ -24,7 +24,7 @@ import type {
   DiscoverSessionInternalResponse,
 } from '../../server/api/internal_schema';
 import type { DiscoverSessionClient, DiscoverSessionClientGetResult } from './api_client';
-import { createSessionService } from './session_service';
+import { createDiscoverSessionService } from './session_service';
 
 const runtimeTab: DiscoverSessionTab = {
   id: 'logs-tab',
@@ -97,13 +97,13 @@ describe('Discover session service', () => {
   it('loads through REST with resolution metadata and warnings when the switch is enabled', async () => {
     const apiClient = createApiClient();
     const legacyClient = savedSearchPluginMock.createStartContract();
-    const sessionService = createSessionService({
+    const discoverSessionService = createDiscoverSessionService({
       apiClient,
       legacyClient,
       useHttpApi: true,
     });
 
-    const loaded = await sessionService.get('session-id');
+    const loaded = await discoverSessionService.get('session-id');
 
     expect(apiClient.get).toHaveBeenCalledWith('session-id');
     expect(apiClient.upsert).not.toHaveBeenCalled();
@@ -154,13 +154,13 @@ describe('Discover session service', () => {
       };
       apiClient.create.mockResolvedValue(saveResponse);
       apiClient.upsert.mockResolvedValue(saveResponse);
-      const sessionService = createSessionService({
+      const discoverSessionService = createDiscoverSessionService({
         apiClient,
         legacyClient,
         useHttpApi: true,
       });
 
-      const savedSession = await sessionService.save(submittedSession, { copyOnSave });
+      const savedSession = await discoverSessionService.save(submittedSession, { copyOnSave });
 
       expect(apiClient[method]).toHaveBeenCalledTimes(1);
       expect(apiClient[method]).toHaveBeenCalledWith(...idArgs, data);
@@ -192,13 +192,13 @@ describe('Discover session service', () => {
   it('creates a new session without an ID and keeps the submitted tabs', async () => {
     const { id: _id, ...newSession } = session;
     const apiClient = createApiClient();
-    const sessionService = createSessionService({
+    const discoverSessionService = createDiscoverSessionService({
       apiClient,
       legacyClient: savedSearchPluginMock.createStartContract(),
       useHttpApi: true,
     });
 
-    const savedSession = await sessionService.save(newSession, {});
+    const savedSession = await discoverSessionService.save(newSession, {});
 
     expect(apiClient.create).toHaveBeenCalledWith(apiData);
     expect(apiClient.upsert).not.toHaveBeenCalled();
@@ -213,14 +213,14 @@ describe('Discover session service', () => {
     const legacyClient = savedSearchPluginMock.createStartContract();
     jest.mocked(legacyClient.getDiscoverSession).mockResolvedValue(persistedSession);
     jest.mocked(legacyClient.saveDiscoverSession).mockResolvedValue(persistedSession);
-    const sessionService = createSessionService({
+    const discoverSessionService = createDiscoverSessionService({
       apiClient,
       legacyClient,
       useHttpApi: false,
     });
 
-    const loaded = await sessionService.get('session-id');
-    const savedSession = await sessionService.save(session, { copyOnSave: false });
+    const loaded = await discoverSessionService.get('session-id');
+    const savedSession = await discoverSessionService.save(session, { copyOnSave: false });
 
     expect(legacyClient.getDiscoverSession).toHaveBeenCalledWith('session-id');
     expect(legacyClient.saveDiscoverSession).toHaveBeenCalledWith(session, {

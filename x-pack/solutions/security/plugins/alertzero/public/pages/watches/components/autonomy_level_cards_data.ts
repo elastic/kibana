@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import {
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID,
+  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
@@ -253,7 +253,8 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
   },
   [SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.threatHunt.intro', {
-      defaultMessage: 'Decides how many checkpoints stand between its findings and action.',
+      defaultMessage:
+        'Hunt Watch runs on a fixed Manual autonomy: it hunts on its own, and every Proposal still waits for you.',
     }),
     levels: [
       {
@@ -261,8 +262,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
         who: i18n.translate(
           'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.who',
           {
-            defaultMessage:
-              'Two checkpoints: you approve what it hunts, and every Proposal waits for you.',
+            defaultMessage: 'Hunts on its own; every Proposal still waits for you.',
           }
         ),
         facts: [
@@ -273,7 +273,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
             ),
             value: factValue(
               'xpack.alertzero.watches.settings.autonomyCards.threatHunt.manual.huntValue',
-              '<you> approve before it hunts'
+              '<worker> hunts every report automatically'
             ),
           },
           {
@@ -423,7 +423,7 @@ const AUTONOMY_LEVEL_CARDS: Record<string, AutonomyLevelCardsCopy> = {
       },
     ],
   },
-  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_CREATION_ID]: {
+  [SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID]: {
     intro: i18n.translate('xpack.alertzero.watches.settings.autonomyCards.ruleCoverage.intro', {
       defaultMessage:
         'Decides whether an entry checkpoint stands before drafting. Installing always waits for your approval.',

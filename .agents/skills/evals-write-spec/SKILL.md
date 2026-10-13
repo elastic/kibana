@@ -176,7 +176,22 @@ See [evaluator-patterns.md](references/evaluator-patterns.md) for full examples.
 | `evaluationsEsClient` | worker | ES client for evaluation score storage |
 | `log` | worker | `ToolingLog` for structured logging |
 | `repetitions` | worker | Number of experiment repetitions |
+| `concurrency` | worker | Examples each experiment runs at once (`--concurrency` / `EVAL_CONCURRENCY`, else the config's `concurrency`, else 5) |
 | `config` | worker | Scout server config (hosts, auth) |
+
+### Concurrency
+
+`runExperiment` runs `concurrency` examples at once. Leave it out and the run's value applies, so `--concurrency` can raise or lower it. Only pass it when the suite has a real limit, and clamp rather than hard-code so the flag can still go lower:
+
+```ts
+evaluate('my eval', async ({ executorClient, concurrency: requestedConcurrency }) => {
+  // e.g. the suite's Scout config set sizes Task Manager for 16 concurrent tasks
+  const concurrency = Math.min(16, requestedConcurrency);
+  await executorClient.runExperiment({ datasets: [dataset], task, concurrency }, evaluators);
+});
+```
+
+A spec value that differs from an explicit `--concurrency` wins, and the run logs a warning. Put a suite-wide default in `createPlaywrightEvalsConfig({ concurrency })` instead of in each spec.
 
 ## The `evaluateDataset` Pattern
 

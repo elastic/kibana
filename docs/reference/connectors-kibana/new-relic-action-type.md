@@ -11,9 +11,11 @@ applies_to:
 
 The New Relic connector connects directly to New Relic's NerdGraph (GraphQL) API. It lets a workflow or agent claim and close New Relic AI issues, read issues and their underlying incidents, suppress notifications during a deploy or maintenance window with muting rules, record deployment markers, and run arbitrary NRQL queries for enrichment.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Overview
 
-This is a **custom connector** that uses New Relic's NerdGraph GraphQL API with API-key authentication.
+The New Relic connector uses New Relic's NerdGraph GraphQL API with API-key authentication.
 
 ## Create connectors in {{kib}} [define-new-relic-ui]
 

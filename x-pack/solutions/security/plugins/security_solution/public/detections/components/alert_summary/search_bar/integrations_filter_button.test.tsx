@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INTEGRATION_BUTTON_TEST_ID,
@@ -67,12 +68,12 @@ describe('<IntegrationFilterButton />', () => {
     const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
     await userEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
+    await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(getByTestId('first')).toBeVisible();
-    });
+    const option = getByTestId('first');
+    expect(option).toBeInTheDocument();
 
-    await userEvent.click(getByTestId('first'));
+    await userEvent.click(option);
 
     expect(setFilters).toHaveBeenCalledWith([
       {
@@ -113,13 +114,13 @@ describe('<IntegrationFilterButton />', () => {
     const { getByTestId } = render(<IntegrationFilterButton integrations={integrations} />);
 
     await userEvent.click(getByTestId(INTEGRATION_BUTTON_TEST_ID));
+    await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(getByTestId('second')).toBeVisible();
-    });
+    const option = getByTestId('second');
+    expect(option).toBeInTheDocument();
 
     // creates a new filter that
-    await userEvent.click(getByTestId('second'));
+    await userEvent.click(option);
     expect(setFilters).toHaveBeenCalledWith([]);
   });
 });

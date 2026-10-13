@@ -5,72 +5,62 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
-import type { Logger } from '@kbn/core/server';
-import type { EventClient } from './event_client';
+import type { RuleEventsClient } from './rule_events_client';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { toRuleEvent } from './to_rule_event';
 
 export const updateSignificantEventStatus = async ({
-  eventClient,
+  eventSearchClient,
   eventId,
   status,
   assessmentNote,
   alertEventsClient,
-  logger,
+  emitTrigger,
 }: {
-  eventClient: EventClient;
+  eventSearchClient: RuleEventsClient;
   eventId: string;
   status: SignificantEventStatus;
   assessmentNote?: string;
-  /** Optional — callers must attempt to pass in production; omitted only when client is unavailable or in legacy tests. */
-  alertEventsClient?: AlertEventsClientApi;
-  logger?: Logger;
+  alertEventsClient: AlertEventsClientApi;
+  emitTrigger?: TriggerEmitter;
 }): Promise<{
-  /** The written or matched version's event_uuid — absent when no event was found for eventId. */
-  event_uuid?: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> => {
-  const latest = await eventClient.findLatestByEventId(eventId);
+  const latest = await eventSearchClient.findLatestByEventId(eventId);
 
   if (!latest) {
     return { updated: 0, ignored: 1, status };
   }
 
   if (latest.status === status) {
-    return { event_uuid: latest.event_uuid, updated: 0, ignored: 1, status };
+    return { updated: 0, ignored: 1, status };
   }
 
-  const nextEventUuid = uuidv4();
   const now = new Date().toISOString();
+  // A blank note counts as omitted, so it cannot overwrite the existing one.
+  const note = assessmentNote?.trim();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
-    event_uuid: nextEventUuid,
-    previous_event_uuid: latest.event_uuid,
     status,
-    ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),
+    ...(note ? { assessment_note: note } : {}),
   };
 
-  // `wait_for` ensures the write is searchable before this resolves, so an immediate
-  // re-fetch (e.g. the UI invalidating its query right after this route responds) sees it.
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
-
-  // Dual-write to .rule-events (fire-and-forget). Errors are logged but never affect the result.
-  alertEventsClient?.createAlertEvent(toRuleEvent(updatedEvent)).catch((err) => {
-    logger?.error(`Failed to write to .rule-events: ${err instanceof Error ? err.message : err}`);
-  });
+  // `createAlertEvent` waits for a refresh, so an immediate re-fetch (e.g. the UI invalidating its
+  // query right after this route responds) sees the new version.
+  await alertEventsClient.createAlertEvent(toRuleEvent(updatedEvent));
 
   // Notify subscribed workflows of the status change (fire-and-forget).
   emitSignificantEventWriteTriggers({
-    eventClient,
+    emitTrigger,
     significantEvent: updatedEvent,
     priorSignificantEvent: latest,
   });
 
-  return { event_uuid: nextEventUuid, updated: 1, ignored: 0, status };
+  return { updated: 1, ignored: 0, status };
 };

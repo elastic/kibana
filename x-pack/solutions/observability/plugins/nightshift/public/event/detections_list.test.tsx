@@ -13,6 +13,7 @@ import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
 }));
 
@@ -42,12 +43,11 @@ const mockUseFetchEventLifecycle = useFetchEventLifecycle as jest.Mock;
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',
   event_id: 'evt-001',
-  event_uuid: 'evt-uuid-001',
-  status: 'open',
-  stream_names: ['logs.web-frontend'],
+  status: 'active',
+  source_ids: ['logs.web-frontend'],
   title: 'Event',
   summary: 'Summary',
-  severity: '60-high',
+  severity: 'high',
   confidence: 0.9,
   blast_radius: [
     {
@@ -55,7 +55,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
       subtype: 'service',
       feature_id: 'web-frontend',
       name: 'web-frontend',
-      stream_name: 'logs.web-frontend',
+      source_id: 'logs.web-frontend',
     },
   ],
   ...overrides,
@@ -65,7 +65,7 @@ const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDe
   detection_id: 'det-1',
   rule_name: 'latency-p95-spike',
   rule_uuid: 'rule-1',
-  stream_name: 'logs.web-frontend',
+  source_id: 'logs.web-frontend',
   change_point_type: 'spike',
   '@timestamp': '2026-07-10T12:00:00Z',
   ...overrides,
@@ -210,14 +210,14 @@ describe('DetectionsList', () => {
             subtype: 'service',
             feature_id: 'entity-one',
             name: 'entity-one',
-            stream_name: 'logs.web-frontend',
+            source_id: 'logs.web-frontend',
           },
           {
             type: 'entity',
             subtype: 'service',
             feature_id: 'entity-two',
             name: 'entity-two',
-            stream_name: 'logs.web-frontend',
+            source_id: 'logs.web-frontend',
           },
         ],
         causal_features: [
@@ -226,7 +226,7 @@ describe('DetectionsList', () => {
             subtype: 'service',
             feature_id: 'entity-three',
             name: 'entity-three',
-            stream_name: 'logs.web-frontend',
+            source_id: 'logs.web-frontend',
           },
         ],
       }),

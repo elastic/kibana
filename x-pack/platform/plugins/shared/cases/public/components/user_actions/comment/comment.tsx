@@ -133,7 +133,7 @@ const getCreateCommentUserAction = ({
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
-  // Migrated external-reference / `actions` attachments are projected to their
+  // External-reference / `actions` attachments are projected to their
   // unified shape by the cases server before reaching the client, so
   // legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {

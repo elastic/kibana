@@ -50,6 +50,7 @@ export interface InvestigationActionModalsProps<
    * host that opens one with no mutation to call cannot leave it stuck open.
    */
   onConfirmApproval?: (proposal: TProposal) => Promise<void>;
+  readOnly?: boolean;
   /**
    * Records a dismissal from the approval modal, with its structured reason. Awaited by the
    * modal — same contract as `onConfirmApproval` — so a rejection surfaces in its own error
@@ -103,6 +104,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
   recordId,
   investigation,
   approvalProposal,
+  readOnly,
   onCloseAction,
   onCloseApproval,
   onConfirmApproval,
@@ -117,6 +119,7 @@ export const InvestigationActionModals = <TProposal extends ApprovalProposal = A
     {approvalProposal ? (
       <ApprovalModal
         proposal={approvalProposal}
+        readOnly={readOnly}
         onConfirm={async () => {
           if (onConfirmApproval) {
             await onConfirmApproval(approvalProposal);

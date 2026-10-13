@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
+import { useConversationFlyoutSessionProps } from '../../../../hooks/use_conversation_flyout_session_props';
 
 const title = i18n.translate('xpack.agentBuilder.response.jsonFlyout.title', {
   defaultMessage: 'Raw response',
@@ -32,6 +33,7 @@ export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
   agentId,
   onClose,
 }) => {
+  const flyoutSessionProps = useConversationFlyoutSessionProps(title);
   const formattedJson = useMemo(() => {
     const { data } = executionTerminatedEvent;
     return JSON.stringify(
@@ -54,6 +56,7 @@ export const ExecutionJsonFlyout: React.FC<ExecutionJsonFlyoutProps> = ({
       css={css`
         z-index: ${euiThemeVars.euiZFlyout + 4};
       `}
+      {...flyoutSessionProps}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">

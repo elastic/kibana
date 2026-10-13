@@ -58,7 +58,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
   const context = {
-    core: Promise.resolve({ elasticsearch: { client: { asCurrentUser, asInternalUser } } }),
+    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    core: Promise.resolve({
+      uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
+      elasticsearch: { client: { asCurrentUser, asInternalUser } },
+    }),
   };
 
   return {

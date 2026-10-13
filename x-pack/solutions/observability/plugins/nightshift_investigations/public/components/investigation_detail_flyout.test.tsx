@@ -144,4 +144,43 @@ describe('InvestigationDetailFlyout', () => {
       screen.queryByTestId('nightshiftInvestigationDetailFlyoutProgressPending')
     ).not.toBeInTheDocument();
   });
+
+  it('renders the investigation template sections of a completed run', () => {
+    renderFlyout({
+      inv: investigation({
+        status: 'completed',
+        completed_at: '2026-09-15T12:10:00.000Z',
+        severity: 'high',
+        summary: 'Checkout **failed** for 30% of requests.',
+        conclusion: 'The 12:02 deploy shrank the connection pool.',
+        impact: {
+          summary: 'Order placement failed for 40 minutes in all regions.',
+          evidence: { description: 'Failed order placements per 5 minutes.' },
+        },
+        hypotheses: [
+          {
+            candidate: 'Connection pool exhaustion',
+            confidence: 0.9,
+            status: 'confirmed',
+            evidence: [{ description: 'Pool at 100%.' }],
+          },
+        ],
+      }),
+    });
+
+    expect(screen.getByText('What happened')).toBeInTheDocument();
+    expect(screen.getByText('failed').tagName).toBe('STRONG');
+    expect(screen.getByText('Impact')).toBeInTheDocument();
+    expect(
+      screen.getByText('Order placement failed for 40 minutes in all regions.')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOutputImpactEvidence')).toHaveTextContent(
+      'Failed order placements per 5 minutes.'
+    );
+    expect(screen.getByText('Conclusion')).toBeInTheDocument();
+    expect(screen.getByText('Investigation')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftInvestigationDetailFlyoutSeverity')).toHaveTextContent(
+      'High'
+    );
+  });
 });

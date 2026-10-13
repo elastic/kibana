@@ -12,6 +12,8 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getHeaderValue,
+  isSelectedActionEnabled,
+  type SelectedActions,
 } from '@kbn/connector-specs';
 import { clientTypes as defaultClientTypes } from '@kbn/connector-specs/server';
 import type {
@@ -94,8 +96,10 @@ export const generateExecutorFunction = ({
   networkSettings,
   platform,
   clientTypes = defaultClientTypes,
+  getJwtSigner,
 }: {
   actions: ConnectorSpec['actions'];
+  getJwtSigner?: (connectorId: string) => ActionContext['signJwt'];
   getAxiosInstanceWithAuth: GetAxiosInstanceWithAuthFn;
   getCredential: GetCredentialFn;
   getClientLeasePool: () => LeasePool<unknown>;
@@ -139,6 +143,13 @@ export const generateExecutorFunction = ({
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    const selectedActions = config.selectedActions as SelectedActions;
+    if (!isSelectedActionEnabled(subAction, selectedActions)) {
+      const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
       logger.error(errorMessage);
       throw new Error(errorMessage);
     }
@@ -246,6 +257,7 @@ export const generateExecutorFunction = ({
       config,
       getClient: getClient as ActionContext['getClient'],
       relay: authTypeUsesRelay(authTypeId) ? getRelayClient?.() : undefined,
+      signJwt: getJwtSigner?.(connectorId),
     };
 
     try {

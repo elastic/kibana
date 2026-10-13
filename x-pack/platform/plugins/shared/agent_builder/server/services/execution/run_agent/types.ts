@@ -17,6 +17,8 @@ export interface AiIndexCatalogEntry {
    */
   esqlTarget?: string;
   description?: string;
+  /** Whether this resolved AI Index accepts memory writes. */
+  memoryEnabled?: boolean;
 }
 
 export interface ResolvedConfiguration {
