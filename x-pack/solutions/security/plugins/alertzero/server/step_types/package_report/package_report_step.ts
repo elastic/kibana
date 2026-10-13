@@ -12,9 +12,12 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { packageReportStepCommonDefinition } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
 import type { HuntServices } from '../../services/watches/hunt/types';
+import { createAlsoRaisedByAppender } from '../../services/watches/hunt/packaging/converge_on_live_proposal';
+import { createInvestigationOpenChecker } from '../../services/watches/hunt/packaging/check_investigation_open';
 import { createOpenProposalChecker } from '../../services/watches/hunt/packaging/check_open_proposals';
 import { createExistingProposalsCounter } from '../../services/watches/hunt/packaging/check_existing_proposals';
 import { makeRehydrateProcessSelectors } from '../../services/watches/hunt/packaging/rehydrate_process_selectors';
+import { createProposalSlotResolver } from '../../services/watches/hunt/packaging/resolve_proposal_slot';
 import {
   PackageReportIdentityError,
   runPackageReport,
@@ -28,7 +31,7 @@ import {
 export interface PackageReportStepDependencies {
   getActionsService: () => ActionsService;
   getConversations: () => AgentBuilderPluginStart['conversations'];
-  /** For the existing-Proposals dedup guard; see `RunPackageReportDeps['countExistingProposals']`. */
+  /** For the Proposals look-ups: the settlement baseline, each finding's slot, and the converge revision. */
   getHuntServices: () => HuntServices;
   /**
    * Context Engine gate. When false, every coverage subject is skipped with reason `disabled`
@@ -130,6 +133,25 @@ export const getPackageReportStepDefinition = ({
           request,
           logger,
         });
+        const resolveProposalSlot = createProposalSlotResolver({
+          proposalsService: getHuntServices().getProposalsService(),
+          privileges: getHuntServices().getProposalPrivileges(),
+          isInvestigationOpen: createInvestigationOpenChecker({
+            conversationClient: client,
+            logger,
+          }),
+          investigationConversationId: input.investigationConversationId,
+          spaceId,
+          request,
+          logger,
+        });
+        const appendAlsoRaisedBy = createAlsoRaisedByAppender({
+          proposalsService: getHuntServices().getProposalsService(),
+          privileges: getHuntServices().getProposalPrivileges(),
+          spaceId,
+          request,
+          logger,
+        });
 
         const hasOpenProposal = createOpenProposalChecker({
           proposalsService: getHuntServices().getProposalsService(),
@@ -157,6 +179,8 @@ export const getPackageReportStepDefinition = ({
             resolveHostEnrollment: getResolveHostEnrollment(spaceId, scopedEsClient),
             rehydrateProcessSelectors,
             countExistingProposals,
+            resolveProposalSlot,
+            appendAlsoRaisedBy,
             getEsReportContextClient: getInternalEsClient,
             logger,
             hasOpenProposal,

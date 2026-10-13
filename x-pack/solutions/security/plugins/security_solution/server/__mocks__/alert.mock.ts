@@ -10,9 +10,13 @@
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 // We _must_ import from the restricted path or we pull in _everything_ including memory leaks from Kibana core
 import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server/authorization';
+import { RulesNotFoundError } from '@kbn/alerting-plugin/server/rules_client/lib/rules_not_found_error';
+import { RulesNotVisibleError } from '@kbn/alerting-plugin/server/rules_client/lib/rules_not_visible_error';
 
 module.exports = {
   parseDuration,
   ReadOperations,
   WriteOperations,
+  RulesNotFoundError,
+  RulesNotVisibleError,
 };
