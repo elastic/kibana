@@ -139,6 +139,7 @@ describe('formatFailure', () => {
       );
       expect(output.match(/release note/gi)).toHaveLength(1);
       expect(output).not.toContain('release_note:breaking');
+      expect(output).not.toContain('## Impact');
       expect(output).not.toContain('BREAKING CHANGES DETECTED');
       expect(output).not.toContain('Detected 0 breaking change(s)');
       expect(output).not.toContain('What to do next:');
@@ -176,7 +177,8 @@ describe('formatFailure', () => {
         '   - add an approved allowlist entry and coordinate with the owning team\n' +
         '   - add the `release_note:breaking` PR label (replacing any other `release_note:*` label)\n' +
         '   - add release note text to the PR description, see the Release note section below\n',
-      "Release note:\n\nAdd a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do."
+      "Release note:\n\nAdd a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.",
+      'For a breaking change, also add `## Impact` and `## Action` sections to the PR description: who and what the change affects, and the steps or workarounds API users need to adapt.'
     );
     expect(output).not.toContain('Optional: release note');
   });
@@ -211,6 +213,7 @@ describe('formatFailure', () => {
         '/api/approved',
         `Nothing here blocks merge. The approved breaking change(s) still ship with this PR, so:\n\n${RELEASE_NOTE_STEPS}`,
         'Release note:\n\nAdd a `## Release note` section to the PR description.',
+        'For a breaking change, also add `## Impact` and `## Action` sections to the PR description: who and what the change affects, and the steps or workarounds API users need to adapt.',
         `for tier definitions and the allowlist workflow: ${README_LINK}`
       );
       expect(output).not.toContain('Optional: release note');

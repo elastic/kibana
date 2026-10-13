@@ -177,6 +177,8 @@ describe('buildCommentBody', () => {
       '   - add release note text to the PR description, see the Release note section below.';
     const README_LINK = 'See the [`@kbn/api-contracts` README]';
     const OPTIONAL_PROMPT = 'Optional: release note describing the change in the PR description';
+    const BREAKING_CONTEXT =
+      'For a breaking change, also add `## Impact` and `## Action` sections to the PR description: who and what the change affects, and the steps or workarounds API users need to adapt.';
 
     it.each([
       ['stable', entry()],
@@ -185,6 +187,7 @@ describe('buildCommentBody', () => {
       const body = buildCommentBody([gatingEntry]);
 
       expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+      expect(body).toContain(BREAKING_CONTEXT);
     });
 
     it('groups the allowlist, label and release note under one If intentional step', () => {
@@ -236,6 +239,7 @@ describe('buildCommentBody', () => {
 
       expect(body).not.toContain('### Release note');
       expect(body).not.toContain('release_note:breaking');
+      expect(body).not.toContain('## Impact');
     });
 
     it.each([
@@ -248,6 +252,7 @@ describe('buildCommentBody', () => {
       expect(body.match(/release note/gi)).toHaveLength(1);
       expect(body).not.toContain('### Release note');
       expect(body).not.toContain('release_note:breaking');
+      expect(body).not.toContain('## Impact');
     });
 
     it('leaves the optional prompt out of a gating comment', () => {
@@ -297,6 +302,7 @@ describe('buildCommentBody', () => {
         expect(body).toContain(LABEL_BULLET.trimStart());
         expect(body).toContain(RELEASE_NOTE_BULLET.trimStart());
         expect(body).toContain(`### Release note\n\n${SENTENCE}\n`);
+        expect(body).toContain(BREAKING_CONTEXT);
         expect(body.endsWith('for tier definitions and the allowlist workflow.')).toBe(true);
         expect(body).not.toContain(OPTIONAL_PROMPT);
         expect(body).not.toContain('**If intentional**');
