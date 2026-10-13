@@ -112,11 +112,15 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
+  const isIncludedByElasticCapabilities = useCallback(
+    (skill: PublicSkillSummary) => getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
+    [areElasticCapabilitiesEnabled]
+  );
+
   const isSkillAutoIncluded = useCallback(
     (skill: PublicSkillSummary) =>
-      inheritedSkillIds.has(skill.id) ||
-      getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
-    [inheritedSkillIds, areElasticCapabilitiesEnabled]
+      inheritedSkillIds.has(skill.id) || isIncludedByElasticCapabilities(skill),
+    [inheritedSkillIds, isIncludedByElasticCapabilities]
   );
 
   const isSkillActive = useCallback(
@@ -182,7 +186,13 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }
 
   const columns = [
-    createCheckboxColumn(isSkillActive, isSkillAutoIncluded, handleToggleSkill, disabled),
+    createCheckboxColumn(
+      isSkillActive,
+      isSkillAutoIncluded,
+      isIncludedByElasticCapabilities,
+      handleToggleSkill,
+      disabled
+    ),
     createSkillDetailsColumn(),
     createTypeColumn(),
   ];
@@ -362,6 +372,7 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
 const createCheckboxColumn = (
   isSkillActive: (skill: PublicSkillSummary) => boolean,
   isSkillAutoIncluded: (skill: PublicSkillSummary) => boolean,
+  isIncludedByElasticCapabilities: (skill: PublicSkillSummary) => boolean,
   onToggle: (skillId: string) => void,
   disabled: boolean
 ) => ({
@@ -376,7 +387,8 @@ const createCheckboxColumn = (
         disabled={disabled || autoIncluded}
       />
     );
-    return autoIncluded ? (
+    // Inherited skills are locked too, but the tooltip only explains Elastic Capabilities.
+    return isIncludedByElasticCapabilities(skill) ? (
       <EuiToolTip content={labels.agentSkills.elasticCapabilitiesManagedTooltip}>
         {checkbox}
       </EuiToolTip>

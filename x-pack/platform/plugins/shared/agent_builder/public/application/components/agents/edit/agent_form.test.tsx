@@ -7,7 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
@@ -65,6 +65,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
 jest.mock('../../../hooks/use_navigation', () => ({
   useNavigation: () => ({
     navigateToAgentBuilderUrl: jest.fn(),
+    createAgentBuilderUrl: jest.fn(() => ''),
   }),
 }));
 
@@ -227,7 +228,7 @@ describe('AgentForm', () => {
     expect(screen.queryByTestId('agentBuilderAgentPreconfiguredTypeBadge')).not.toBeInTheDocument();
   });
 
-  it("counts a skill inherited from the agent's type in edit mode", () => {
+  const mockAgentInheritingKiRetrieval = () => {
     const kiRetrieval = {
       id: 'ki-retrieval',
       name: 'ki-retrieval',
@@ -249,10 +250,27 @@ describe('AgentForm', () => {
       inheritedSkillIds: new Set([kiRetrieval.id]),
       isLoading: false,
     });
+  };
+
+  it("counts a skill inherited from the agent's type in edit mode", () => {
+    mockAgentInheritingKiRetrieval();
 
     renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
 
     expect(useInheritedSkillIds).toHaveBeenCalledWith('test-agent-id');
     expect(screen.getByRole('tab', { name: /Skills/ })).toHaveTextContent('1');
+  });
+
+  it('shows no tooltip on an inherited skill when Elastic Capabilities is off', async () => {
+    mockAgentInheritingKiRetrieval();
+
+    renderWithIntl(<AgentForm editingAgentId="test-agent-id" onDelete={jest.fn()} />);
+    fireEvent.click(screen.getByRole('tab', { name: /Skills/ }));
+    const checkbox = screen.getByRole('checkbox');
+    fireEvent.mouseOver(checkbox);
+
+    expect(checkbox).toBeChecked();
+    expect(checkbox).toBeDisabled();
+    await expect(screen.findByRole('tooltip')).rejects.toThrow();
   });
 });
