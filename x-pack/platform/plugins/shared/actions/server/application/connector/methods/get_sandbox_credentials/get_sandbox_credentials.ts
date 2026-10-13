@@ -87,7 +87,7 @@ export async function getSandboxCredentials(
     logger: context.logger,
   });
 
-  // Spec auth types produce headers via the registry. Classic connectors (e.g. .http) often
+  // Spec auth types produce headers via the registry. Stack connectors (e.g. .http) often
   // store Authorization: ApiKey … in secretHeaders with secrets.authType unset (→ "none").
   const authHeaders = await getCredential({
     connectorId,

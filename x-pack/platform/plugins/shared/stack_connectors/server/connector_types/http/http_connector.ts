@@ -89,7 +89,7 @@ const connectorTypeDefinition: Omit<HttpConnectorType, 'id' | 'validate'> = {
 export const getConnectorType = (): HttpConnectorType => ({
   id: CONNECTOR_ID,
   ...connectorTypeDefinition,
-  // Classic connector: sandbox injection uses config.authType plus secretHeaders
+  // Stack connector: sandbox injection uses config.authType plus secretHeaders
   // rather than connector-spec auth type defs.
   isSandboxCapable,
   getSandboxAuthHeaders,

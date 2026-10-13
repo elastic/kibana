@@ -265,7 +265,7 @@ export interface ActionTypeCoreFields<
    */
   sandboxSupportedAuthTypes?: readonly string[];
   /**
-   * Per-instance check for classic connectors that are not driven by sandboxSupportedAuthTypes.
+   * Per-instance check for stack connectors that are not driven by sandboxSupportedAuthTypes.
    * Also called when listing connectors, where secrets are not decrypted and are passed as an
    * empty object, so implementations should decide from config alone when possible.
    */
@@ -275,7 +275,7 @@ export interface ActionTypeCoreFields<
   }) => boolean;
   /**
    * Builds auth headers for sandbox credential injection from the decrypted secrets of a
-   * classic connector. Headers from secretHeaders take precedence over these.
+   * stack connector. Headers from secretHeaders take precedence over these.
    */
   getSandboxAuthHeaders?: (args: {
     config: Record<string, unknown>;

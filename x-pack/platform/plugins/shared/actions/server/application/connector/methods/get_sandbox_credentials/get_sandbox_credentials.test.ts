@@ -369,7 +369,7 @@ describe('getSandboxCredentials()', () => {
     });
   });
 
-  describe('classic connector isSandboxCapable + secretHeaders', () => {
+  describe('stack connector isSandboxCapable + secretHeaders', () => {
     const httpConnectorTypeId = 'test.http-sandbox';
     const apiKey = 'super-secret-es-api-key-value';
 
