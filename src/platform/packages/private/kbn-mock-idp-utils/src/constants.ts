@@ -61,7 +61,6 @@ export const MOCK_IDP_UIAM_PROJECT_TYPES = [
   'elasticsearch',
   'observability',
   'security',
-  'workplaceai',
   'vectordb',
 ] as const;
 
