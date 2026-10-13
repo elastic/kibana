@@ -140,7 +140,7 @@ export const computeEventFacts = ({
   const episodeContext = isContinuation
     ? mergeEpisodeContext(priorDocs, rest, timestamp)
     : {
-        streamNames: rest.stream_names,
+        sourceIds: rest.source_ids,
         causalFeatures: rest.causal_features ?? [],
         blastRadius: rest.blast_radius ?? [],
         confidence: rest.confidence ?? 0,
@@ -218,7 +218,7 @@ export const buildPendingWrite = ({
       event_id: candidate.eventId,
       investigations: latestEvent?.investigations,
       signals,
-      stream_names: episodeContext.streamNames,
+      source_ids: episodeContext.sourceIds,
       causal_features: episodeContext.causalFeatures,
       blast_radius: episodeContext.blastRadius,
       severity,

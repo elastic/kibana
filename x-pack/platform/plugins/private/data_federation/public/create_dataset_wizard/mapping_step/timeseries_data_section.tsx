@@ -56,10 +56,10 @@ export function TimeseriesDataSection({
   const isTimestampPathMissing =
     shouldShowValidation && isEnabled && (timestampField?.path ?? '').trim() === '';
   const { euiTheme } = useEuiTheme();
-  const gutter = euiTheme.size.base;
+  const gutter = euiTheme.size.s;
   // The field mapping editor pads its form on both sides; matching it keeps both rows switching
   // layouts at the same viewport width.
-  const inset = `calc(${euiTheme.size.s} * 2)`;
+  const inset = `calc(${euiTheme.size.base} * 2)`;
   const typeFieldItemStyles = useMemo(
     () => getTypeFieldItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
     [gutter, inset]
@@ -83,6 +83,7 @@ export function TimeseriesDataSection({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSwitch
+            compressed
             showLabel={false}
             label={createDatasetWizardStrings.timeseriesDataLabel}
             checked={isEnabled}
@@ -116,7 +117,7 @@ export function TimeseriesDataSection({
         <>
           <EuiSpacer size="m" />
           <EuiFlexGroup
-            gutterSize="m"
+            gutterSize="s"
             alignItems="flexStart"
             responsive={false}
             wrap

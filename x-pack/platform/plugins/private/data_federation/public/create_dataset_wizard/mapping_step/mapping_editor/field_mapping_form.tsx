@@ -111,7 +111,7 @@ export function FieldMappingForm({
   const [draft, setDraft] = useState<FieldMappingFormValue>(value);
   const isDateType = Boolean(draft.type) && isDateLikeType(draft.type as DatasetMappingFieldType);
   const { euiTheme } = useEuiTheme();
-  const gutter = euiTheme.size.base;
+  const gutter = euiTheme.size.s;
   const remainingFieldCount = isDateType ? 3 : 2;
   const typeFieldItemStyles = useMemo(
     () => getTypeFieldItemStyles(remainingFieldCount, gutter),
@@ -138,7 +138,7 @@ export function FieldMappingForm({
     <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup
-          gutterSize="m"
+          gutterSize="s"
           alignItems="flexStart"
           responsive={false}
           wrap
