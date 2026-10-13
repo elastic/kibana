@@ -508,6 +508,36 @@ describe('redaction of JSON embedded in error strings', () => {
         '{"credentials": {"value":"zzsecret9"}}',
         ['zzsecret9'],
       ],
+      // Libra 4252529353: a cookie NAMED after a sensitive key (`token=`, `access_token=`)
+      // stopped the cookie span at position 0, so the whole header leaked; the header value
+      // is now redacted whole
+      [
+        'cookie header with a token-named cookie',
+        'Cookie: token=abc123; sid=secret456',
+        ['abc123', 'secret456'],
+      ],
+      [
+        'set-cookie header with a token-named cookie',
+        'Set-Cookie: access_token=abc123; sid=secret456',
+        ['abc123', 'secret456'],
+      ],
+      [
+        'multi-header cookie dump',
+        'Host: x\nCookie: token=abc123; sid=secret456\nAccept: *',
+        ['abc123', 'secret456'],
+      ],
+      // Libra 4243921647: a group following a bare `credentials` key was exempted wholesale;
+      // only groups whose keys are ALL diagnostic keys stay readable now
+      [
+        'credentials group carrying a generic value key',
+        'Invalid credentials: { reason: "expired", value: "secretValue" }',
+        ['secretValue'],
+      ],
+      [
+        'credentials group carrying a nested secret group',
+        'Invalid credentials: { reason: "expired", password: "hunter2" } please rotate',
+        ['hunter2'],
+      ],
       ['bare credentials with a secret value', 'credentials: zzsecret9', ['zzsecret9']],
       ['bare invalid_token with a secret value', 'invalid_token: zzsecret9', ['zzsecret9']],
     ])('redacts %s', (_label, input, secrets) => {

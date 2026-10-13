@@ -329,7 +329,11 @@ const findSecretValueEnd = (text: string, key: string, start: number): number =>
     return start + matchLength(AUTHORIZATION_VALUE, text, start);
   }
   if (normalized.endsWith('cookie') || normalized === 'cookies') {
-    return stopBeforeNextSensitiveKey(text, start, start + matchLength(COOKIE_VALUE, text, start));
+    // Cookie names are arbitrary and attacker/provider-chosen (`sid`, `token`, `theme`,
+    // `Signature`, ...), so per-name parsing leaks: `Cookie: token=abc123; sid=secret456`
+    // must redact the whole header value. Consume to the end of the line (a multi-header
+    // dump ends the value there); over-redacting a benign trailing cookie is fail-safe.
+    return endOfLine(text, start);
   }
   // a bare `credentials` / `invalid_token` value that is not prose may be a multi-word secret
   // (`admin letmein`, `Basic abc==`, a passphrase): redact the rest of the line, not one token
@@ -353,8 +357,8 @@ const isStructuralPosition = (text: string, index: number): boolean => {
 // Bare `credentials` / `invalid_token` also open ordinary prose ("Invalid credentials: { reason:
 // "expired" } please rotate", "credentials: [missing] for provider", "invalid_token: The access
 // token expired"). Only the bare (unquoted) key is exempted, and only when the value reads as a
-// placeholder, prose, or (for `credentials`) a group with an unquoted key. A quoted JSON key
-// position (`"credentials":{...}`) always redacts.
+// placeholder, prose, or (for `credentials`) a group whose keys are ALL known diagnostic keys.
+// A quoted JSON key position (`"credentials":{...}`) always redacts.
 const PROSE_KEYS = new Set(['credentials', 'invalidtoken']);
 const PLACEHOLDER_VALUE =
   /\[(?:missing|none|null|empty|invalid|required|provided|not provided|not set|unset|omitted|hidden|expired)\]/iy;
@@ -365,6 +369,31 @@ const PROSE_WORDS_VALUE =
   /(?:the|an?|is|are|was|were|has|have|had|not|no|missing|invalid|expired|required|revoked|for|must|cannot|could|did|does|do)[ \t]+[a-z]{2,}(?![\w-])/iy;
 const BARE_KEY_GROUP_VALUE =
   /\{[ \t]*(?:reason|message|error|detail|details|status|code|type|description)[ \t]*:/iy;
+// Keys a `credentials` group may carry and still count as a diagnostic (non-secret) form.
+const DIAGNOSTIC_GROUP_KEYS = new Set([
+  'reason',
+  'message',
+  'error',
+  'detail',
+  'details',
+  'status',
+  'code',
+  'type',
+  'description',
+]);
+// Every key inside a diagnostic group must be a known non-secret diagnostic key:
+// `{ reason: "expired" }` is prose, but `{ reason: "expired", value: "secret" }` or
+// `{ reason: "expired", password: "hunter2" }` redacts the whole group (fail closed).
+const isDiagnosticGroup = (group: string): boolean => {
+  const pattern = new RegExp(KEY_VALUE_PATTERN.source, KEY_VALUE_PATTERN.flags);
+  let match: RegExpExecArray | null;
+  let sawKey = false;
+  while ((match = pattern.exec(group)) !== null) {
+    sawKey = true;
+    if (!DIAGNOSTIC_GROUP_KEYS.has(normalizeKey(match[1]))) return false;
+  }
+  return sawKey;
+};
 
 const isProseValue = (
   text: string,
@@ -378,11 +407,11 @@ const isProseValue = (
   if (matchLength(PROSE_WORDS_VALUE, text, valueStart) > 0) return true;
   if (normalized !== 'credentials') return false;
   if (matchLength(PLACEHOLDER_VALUE, text, valueStart) > 0) return true;
-  // a group only counts as prose mid-sentence; at a key position it stays fail-closed
-  return (
-    !isStructuralPosition(text, match.index) &&
-    matchLength(BARE_KEY_GROUP_VALUE, text, valueStart) > 0
-  );
+  // a group only counts as prose mid-sentence; at a key position it stays fail-closed, and
+  // only when every key inside the group is a known diagnostic key
+  if (isStructuralPosition(text, match.index)) return false;
+  if (matchLength(BARE_KEY_GROUP_VALUE, text, valueStart) === 0) return false;
+  return isDiagnosticGroup(text.slice(valueStart, findBracketEnd(text, valueStart)));
 };
 
 // `key: value`, `key=value`, `"key":"value"` and the escaped forms found in JSON embedded in a
