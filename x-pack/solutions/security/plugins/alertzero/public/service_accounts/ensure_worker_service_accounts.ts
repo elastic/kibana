@@ -8,7 +8,6 @@
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
-  SECURITY_ROLES_URL,
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
@@ -43,6 +42,7 @@ export type WorkerServiceAccountResult =
 const LIST_PAGE_SIZE = 100;
 
 const isConflict = (error: unknown) => isHttpFetchError(error) && error.response?.status === 409;
+const isNotFound = (error: unknown) => isHttpFetchError(error) && error.response?.status === 404;
 
 const toMessage = (error: unknown): string => {
   const body = isHttpFetchError(error)
@@ -99,21 +99,25 @@ const createCustomRole =
     return definition.name;
   };
 
-/** Serverless ships the roles as predefined roles, which only the reserved-roles listing returns. */
-const findPredefinedRole = (http: HttpStart): PrepareRole => {
-  let roleNames: Promise<Set<string>> | undefined;
-  return async ({ name }) => {
-    roleNames ??= http
-      .get<Array<{ name: string }>>(SECURITY_ROLES_URL, {
-        version: SECURITY_ROLE_API_VERSION,
-        query: { includeReservedRoles: true },
-      })
-      .then((roles) => new Set(roles.map((role) => role.name)));
+/**
+ * Serverless ships the roles as reserved predefined roles, hidden from role listings but returned
+ * by name. A role with that name that is not reserved does not count.
+ */
+const findPredefinedRole =
+  (http: HttpStart): PrepareRole =>
+  async ({ name }) => {
     const roleName = getPredefinedWorkerRoleName(name);
-    if (!(await roleNames).has(roleName)) throw new Error(i18n.predefinedRoleMissing(roleName));
+    const role = await http
+      .get<{ metadata?: Record<string, unknown> }>(buildSecurityRoleUrl(roleName), {
+        version: SECURITY_ROLE_API_VERSION,
+      })
+      .catch((error: unknown) => {
+        if (isNotFound(error)) return undefined;
+        throw error;
+      });
+    if (role?.metadata?._reserved !== true) throw new Error(i18n.predefinedRoleMissing(roleName));
     return roleName;
   };
-};
 
 const ensureOne = async (
   http: HttpStart,

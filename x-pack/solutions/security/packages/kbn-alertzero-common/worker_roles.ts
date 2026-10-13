@@ -17,9 +17,8 @@ import {
 
 /** Security's public role API, used with `createOnly` so an existing role is never overwritten. */
 export const SECURITY_ROLE_API_VERSION = '2023-10-31' as const;
-export const SECURITY_ROLES_URL = '/api/security/role';
 export const buildSecurityRoleUrl = (roleName: string) =>
-  `${SECURITY_ROLES_URL}/${encodeURIComponent(roleName)}`;
+  `/api/security/role/${encodeURIComponent(roleName)}`;
 
 /**
  * On Serverless each worker role ships as a reserved predefined role, whose name must start with

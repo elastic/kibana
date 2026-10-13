@@ -81,7 +81,6 @@ export {
 } from './constants';
 
 export {
-  SECURITY_ROLES_URL,
   SECURITY_ROLE_API_VERSION,
   WORKER_ROLE_DEFINITIONS,
   buildSecurityRoleUrl,
