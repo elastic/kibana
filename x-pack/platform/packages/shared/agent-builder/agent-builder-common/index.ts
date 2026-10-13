@@ -14,6 +14,8 @@ export {
   toNamespaceSelector,
   isApiWildcardSelector,
   matchesApiSelector,
+  matchesAnyApiSelector,
+  type ApiReference,
 } from './apis';
 export {
   ConversationMetadataUpdatedTriggerId,
@@ -379,6 +381,9 @@ export {
   isTodosUpdatedEvent,
   TODOS_UPDATED_UI_EVENT,
   type TodosUpdatedUiEventData,
+  isApiStateChangedEvent,
+  API_STATE_CHANGED_UI_EVENT,
+  type ApiStateChangedEventData,
   type AskUserQuestionStep,
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
