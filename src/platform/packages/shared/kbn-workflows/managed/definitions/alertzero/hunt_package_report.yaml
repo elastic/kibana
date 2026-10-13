@@ -218,18 +218,36 @@ steps:
   # (clean run, no hits). A packaging failure or skip never reaches `dismiss`
   # (steps.decide_and_package.output stays nil in both cases), so this cannot
   # close an Investigation packaging never evaluated.
+  #
+  # Over `kibana.request`, not the `ai.conversation.metadata.patch` step: the
+  # in-process step resolves no profile uid from the workflow's fake request and
+  # its patch is refused with "Conversation <id> not found" on every Hunt
+  # Investigation, so a clean run's close never landed (the run ended
+  # run_incomplete with the Investigation left open). The internal metadata
+  # route runs the same patch with the identity resolved over HTTP, the same
+  # way it resolved when find_or_create minted the Investigation. This is the
+  # precedent hunt.yaml's attach_impact sets for exactly this refusal. The
+  # route is agent_builder's own, not this package's, and asks only for
+  # `readAgentBuilder`, which the identity these workflows run as already
+  # needs for the journal-note converse call.
+  #
   # Runs before resolve_package_status/resolve_package_summary on purpose: `continue: true`
   # swallows a failed patch, so those steps must read this step's error to avoid reporting
   # a close that never happened.
   - name: dismiss_investigation_if_clean
-    type: ai.conversation.metadata.patch
+    type: kibana.request
     if: "${{ steps.decide_and_package.output.status == 'packaged' and steps.decide_and_package.output.dismiss == true }}"
     with:
-      conversation_id: "{{ inputs.investigationConversationId }}"
-      updates:
-        status: closed
-        close_reason: benign
-        summary: "{{ steps.decide_and_package.output.closureSummary }}"
+      method: PATCH
+      path: "/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ inputs.investigationConversationId }}/metadata"
+      headers:
+        kbn-xsrf: "true"
+        Content-Type: application/json
+      body:
+        metadata:
+          status: closed
+          close_reason: benign
+          summary: "{{ steps.decide_and_package.output.closureSummary }}"
     on-failure:
       continue: true
 

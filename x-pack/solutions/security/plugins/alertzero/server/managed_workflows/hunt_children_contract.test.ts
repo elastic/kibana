@@ -191,6 +191,46 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
     expect(emitted.summary).toEqual(expect.stringContaining('package_summary'));
     expect(outputNames(workflow)).toEqual(expect.arrayContaining(['summary']));
   });
+
+  // The benign close runs over HTTP, not the `ai.conversation.metadata.patch` step: the
+  // in-process step resolves no profile uid from the workflow's fake request and its patch
+  // is refused with "Conversation <id> not found" on every Hunt Investigation, which is how
+  // a clean run used to end run_incomplete with the Investigation left open. The internal
+  // metadata route resolves the identity over HTTP, the same way find_or_create resolved it
+  // when it minted the Investigation (the attach_impact precedent in hunt.yaml).
+  describe('dismiss_investigation_if_clean', () => {
+    let close: NestedStep;
+
+    beforeEach(() => {
+      close = stepNamed(
+        parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID),
+        'dismiss_investigation_if_clean'
+      );
+    });
+
+    it('runs over HTTP, not the in-process metadata patch step', () => {
+      expect(close.type).toBe('kibana.request');
+    });
+
+    it('targets the internal conversation metadata route for the same Investigation', () => {
+      expect(close.with?.path).toBe(
+        '/s/{{ workflow.spaceId }}/internal/agent_builder/conversations/{{ inputs.investigationConversationId }}/metadata'
+      );
+    });
+
+    it('patches rather than replaces the metadata', () => {
+      expect(close.with?.method).toBe('PATCH');
+    });
+
+    it('sends the benign close fields the investigation template declares', () => {
+      const body = close.with?.body as { metadata: Record<string, string> };
+      expect(body.metadata).toMatchObject({ status: 'closed', close_reason: 'benign' });
+    });
+
+    it('swallows a failed close so the run reports it instead of aborting', () => {
+      expect(close['on-failure']?.continue).toBe(true);
+    });
+  });
 });
 
 describe(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID, () => {
@@ -332,6 +372,11 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       PROPOSAL_BY_ID_URL.replace('{id}', '{{ inputs.proposalId }}'),
       // Owned by agentic investigations; imported rather than typed so a moved route fails here.
       IMPACT_INTERNAL_URL,
+      // agent_builder's internal conversation metadata route, which the packaging child's
+      // benign close calls. Not exported as a constant from a shared package, so typed with
+      // the route's `{conversation_id}` swapped for the step's template, so a moved route
+      // fails here instead of 404ing on the first clean run.
+      '/internal/agent_builder/conversations/{{ inputs.investigationConversationId }}/metadata',
     ]);
     const SPACE_PREFIX = '/s/{{ workflow.spaceId }}';
     const stripSpacePrefix = (path: string): string | undefined =>
