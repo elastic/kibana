@@ -48257,6 +48257,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -48591,6 +48604,19 @@ paths:
                                 - otel
                                 - crowdstrike
                               type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
+                              type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
                               maxLength: 128
@@ -48818,6 +48844,19 @@ paths:
                           - otel
                           - crowdstrike
                         type: string
+                      serviceIds:
+                        description: Service IDs active when the stack was last launched or updated.
+                        items:
+                          maxLength: 128
+                          minLength: 1
+                          type: string
+                        maxItems: 1000
+                        type: array
+                      stackArn:
+                        description: CloudFormation stack ARN pasted by the user post-launch.
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
                       stackName:
                         description: CloudFormation stack name (128-char AWS limit).
                         maxLength: 128
@@ -48971,6 +49010,19 @@ paths:
                                 - unified
                                 - otel
                                 - crowdstrike
+                              type: string
+                            serviceIds:
+                              description: Service IDs active when the stack was last launched or updated.
+                              items:
+                                maxLength: 128
+                                minLength: 1
+                                type: string
+                              maxItems: 1000
+                              type: array
+                            stackArn:
+                              description: CloudFormation stack ARN pasted by the user post-launch.
+                              maxLength: 2048
+                              minLength: 1
                               type: string
                             stackName:
                               description: CloudFormation stack name (128-char AWS limit).
@@ -49232,6 +49284,19 @@ paths:
                                   - unified
                                   - otel
                                   - crowdstrike
+                                type: string
+                              serviceIds:
+                                description: Service IDs active when the stack was last launched or updated.
+                                items:
+                                  maxLength: 128
+                                  minLength: 1
+                                  type: string
+                                maxItems: 1000
+                                type: array
+                              stackArn:
+                                description: CloudFormation stack ARN pasted by the user post-launch.
+                                maxLength: 2048
+                                minLength: 1
                                 type: string
                               stackName:
                                 description: CloudFormation stack name (128-char AWS limit).
