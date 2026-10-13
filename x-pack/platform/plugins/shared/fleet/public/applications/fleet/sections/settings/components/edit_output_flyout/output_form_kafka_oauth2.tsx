@@ -502,7 +502,10 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
               )}
               helpText={i18n.translate(
                 'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2TimeoutHelpText',
-                { defaultMessage: 'How long a request to the token URL can take.' }
+                {
+                  defaultMessage:
+                    'How long a request to the token URL can take before it times out.',
+                }
               )}
               input={inputs.kafkaOAuth2TimeoutInput}
               testSubj="kafkaOAuth2TimeoutInput"
@@ -518,7 +521,7 @@ export const OutputFormKafkaOAuth2: React.FunctionComponent<{ inputs: OutputForm
                 'xpack.fleet.settings.editOutputFlyout.kafkaOAuth2ExpiryBufferHelpText',
                 {
                   defaultMessage:
-                    'How long before a token expires it is refreshed. 5 minutes if not set.',
+                    'How many seconds before a token expires it is refreshed. It defaults to 300 (5 minutes) when not set.',
                 }
               )}
               input={inputs.kafkaOAuth2ExpiryBufferInput}

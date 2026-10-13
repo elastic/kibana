@@ -161203,7 +161203,7 @@ components:
                 type: array
               type: object
             expiry_buffer:
-              description: How long, in seconds, before a token expires it is refreshed. It is 5 minutes when it is not set.
+              description: How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -161226,7 +161226,7 @@ components:
                 - RS512
               type: string
             timeout:
-              description: How long, in seconds, a request to the token endpoint can take. There is no limit when it is not set.
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -163642,7 +163642,7 @@ components:
                 type: array
               type: object
             expiry_buffer:
-              description: How long, in seconds, before a token expires it is refreshed. It is 5 minutes when it is not set.
+              description: How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -163665,7 +163665,7 @@ components:
                 - RS512
               type: string
             timeout:
-              description: How long, in seconds, a request to the token endpoint can take. There is no limit when it is not set.
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -169461,7 +169461,7 @@ components:
                 type: array
               type: object
             expiry_buffer:
-              description: How long, in seconds, before a token expires it is refreshed. It is 5 minutes when it is not set.
+              description: How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.
               maximum: 86400
               minimum: 0
               type: number
@@ -169484,7 +169484,7 @@ components:
                 - RS512
               type: string
             timeout:
-              description: How long, in seconds, a request to the token endpoint can take. There is no limit when it is not set.
+              description: How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.
               maximum: 86400
               minimum: 0
               type: number

@@ -293,7 +293,7 @@ const KafkaOAuth2Schema = schema.object({
       max: MAX_OAUTH2_DURATION_SECONDS,
       meta: {
         description:
-          'How long, in seconds, a request to the token endpoint can take. There is no limit when it is not set.',
+          'How long, in seconds, a request to the token endpoint can take before it times out. There is no limit when it is not set.',
       },
     })
   ),
@@ -303,7 +303,7 @@ const KafkaOAuth2Schema = schema.object({
       max: MAX_OAUTH2_DURATION_SECONDS,
       meta: {
         description:
-          'How long, in seconds, before a token expires it is refreshed. It is 5 minutes when it is not set.',
+          'How many seconds before a token expires it is refreshed. It defaults to `300` (5 minutes) when not set.',
       },
     })
   ),

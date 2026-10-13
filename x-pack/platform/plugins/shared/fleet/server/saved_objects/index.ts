@@ -1034,10 +1034,8 @@ export const getSavedObjectTypes = (
             },
           ],
           schemas: {
-            forwardCompatibility: (unknownAttributes: unknown) => {
-              const { oauth2: _, ...rest } = unknownAttributes as Record<string, unknown>;
-              return rest;
-            },
+            // `oauth2` is known to this version: it is kept when reading a newer document
+            forwardCompatibility: schema.object({}, { unknowns: 'allow' }),
             create: schema.object({}, { unknowns: 'allow' }),
           },
         },
