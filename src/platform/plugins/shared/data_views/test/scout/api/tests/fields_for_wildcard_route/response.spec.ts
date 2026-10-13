@@ -78,6 +78,8 @@ apiTest.describe(
     // Tracks the temporary index created by the "returns empty set" test so cleanup runs
     // from a hook even if the test times out before reaching its inline cleanup.
     let tempIndexName: string | undefined;
+    // Dedicated indices closed by the closed-index tests (basic_index is shared, so never close it).
+    const closedIndexNames: string[] = [];
 
     apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
@@ -88,6 +90,9 @@ apiTest.describe(
       if (tempIndexName) {
         await esClient.indices.delete({ index: tempIndexName, ignore_unavailable: true });
         tempIndexName = undefined;
+      }
+      for (const index of closedIndexNames.splice(0)) {
+        await esClient.indices.delete({ index, ignore_unavailable: true });
       }
     });
 
@@ -326,6 +331,54 @@ apiTest.describe(
         },
       });
     });
+
+    apiTest(
+      'returns 200 when index is closed and allow_no_index is true',
+      async ({ apiClient, esClient }) => {
+        const indexName = `fields-for-wildcard-closed-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}`;
+        closedIndexNames.push(indexName);
+        await esClient.indices.create({ index: indexName });
+        await esClient.indices.close({ index: indexName });
+
+        const response = await apiClient.get(
+          `${FIELDS_FOR_WILDCARD_PATH}?pattern=${indexName}&allow_no_index=true`,
+          {
+            headers: {
+              ...INTERNAL_COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ fields: [], indices: [] });
+      }
+    );
+
+    apiTest(
+      'returns 404 when index is closed and allow_no_index is false',
+      async ({ apiClient, esClient }) => {
+        const indexName = `fields-for-wildcard-closed-${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2)}`;
+        closedIndexNames.push(indexName);
+        await esClient.indices.create({ index: indexName });
+        await esClient.indices.close({ index: indexName });
+
+        const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?pattern=${indexName}`, {
+          headers: {
+            ...INTERNAL_COMMON_HEADERS,
+            ...adminApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        });
+
+        expect(response).toHaveStatusCode(404);
+      }
+    );
 
     apiTest(
       'returns empty set when no fields even if meta fields are supplied',
