@@ -95,6 +95,11 @@ export const getFindRuleTemplatesUrl = (
   return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
 };
 
+export const getRuleTemplateTagsUrl = (search?: string): string => {
+  const path = `${RULE_TEMPLATE_API_PATH}/tags`;
+  return search === undefined ? path : `${path}?${toQueryString({ search })}`;
+};
+
 const getSeriesActionUrl = (groupHash: string, suffix: string) =>
   `${SERIES_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
 
@@ -127,7 +132,9 @@ export const BULK_ASSIGN_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_assign
 export const BULK_ACTIVATE_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_activate`;
 export const BULK_DEACTIVATE_EPISODE_ACTION_URL = `${EPISODES_API_PATH}/_bulk_deactivate`;
 
-export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
+export const getListExecutionHistoryUrl = (
+  query?: Partial<ListPolicyExecutionHistoryRequest>
+): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {

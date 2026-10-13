@@ -122,23 +122,48 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   ),
   dataFormat: schema.maybe(DataFormatSchema),
   authMethod: schema.maybe(
-    schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-      meta: { description: 'Authentication method for managed integrations.' },
-    })
+    schema.oneOf(
+      [
+        schema.literal('identity_federation'),
+        schema.literal('static_keys'),
+        schema.literal('temporary_keys'),
+        schema.literal('shared_credentials'),
+        schema.literal('assume_role'),
+      ],
+      {
+        meta: {
+          description:
+            'Authentication method. Allowed values depend on the delivery mechanism:\n\n- managed_integration: identity_federation | static_keys\n- agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role',
+        },
+      }
+    )
   ),
-  agentPolicyId: schema.maybe(
-    schema.string({
+  agentPolicyIds: schema.maybe(
+    schema.arrayOf(schema.string(), {
+      maxSize: 1000,
       meta: {
         description:
-          'Agent policy ID created for agent-based deployments. Present only when agent_based is in mechanisms.',
+          'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
       },
     })
   ),
   packagePolicyIds: schema.maybe(
     schema.arrayOf(schema.string(), {
-      maxSize: 100,
+      maxSize: 1000,
       meta: {
-        description: 'Package policy IDs created for managed_integration services.',
+        description:
+          'Package policy IDs created for this deployment (managed_integration and agent_based).',
+      },
+    })
+  ),
+  policyIdsByInstance: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
+      validate: (v) => {
+        if (Object.keys(v).length > 1000) return 'policyIdsByInstance must not exceed 1000 entries';
+      },
+      meta: {
+        description:
+          'instanceId → policyId mapping persisted after deploy. Hydrated into the wizard on resume to enable cleanup of stale policies when services are removed.',
       },
     })
   ),
@@ -196,8 +221,29 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     ),
     dataFormat: schema.maybe(DataFormatSchema),
     authMethod: schema.maybe(
-      schema.oneOf([schema.literal('identity_federation'), schema.literal('static_keys')], {
-        meta: { description: 'Authentication method for managed integrations.' },
+      schema.oneOf(
+        [
+          schema.literal('identity_federation'),
+          schema.literal('static_keys'),
+          schema.literal('temporary_keys'),
+          schema.literal('shared_credentials'),
+          schema.literal('assume_role'),
+        ],
+        {
+          meta: {
+            description:
+              'Authentication method. Allowed values depend on the delivery mechanism:\n\n- managed_integration: identity_federation | static_keys\n- agent_based: static_keys (direct_access_keys) | temporary_keys | shared_credentials | assume_role',
+          },
+        }
+      )
+    ),
+    agentPolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Agent policy IDs for agent_based existing-policy deploys. Provided on create so that a mid-deploy tab-close leaves a record that hydrates back into existing mode.',
+        },
       })
     ),
   }),
@@ -215,6 +261,7 @@ export const GetCloudOnboardingDeploymentsByConnectorIdRequestSchema = {
   params: schema.object({
     connectorId: schema.string({
       minLength: 1,
+      maxLength: 255,
       meta: { description: 'The fleet-cloud-connector ID to list deployments for.' },
     }),
   }),
@@ -245,14 +292,75 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
+    services: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {
+        minSize: 1,
+        maxSize: 1000,
+        meta: {
+          description:
+            'Current service set for this deployment. Refreshed on each successful deploy so resume after an incremental service addition restores all deployed services.',
+        },
+      })
+    ),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
-    agentPolicyId: schema.maybe(schema.string({ maxLength: 255 })),
+    connectorId: schema.maybe(schema.nullable(schema.string({ maxLength: 255 }))),
+    authMethod: schema.maybe(
+      schema.nullable(
+        schema.oneOf(
+          [
+            schema.literal('identity_federation'),
+            schema.literal('static_keys'),
+            schema.literal('temporary_keys'),
+            schema.literal('shared_credentials'),
+            schema.literal('assume_role'),
+          ],
+          {
+            meta: {
+              description:
+                'Authentication method. Refreshed on each successful deploy so a credential-method change between deploys is reflected on resume.',
+            },
+          }
+        )
+      )
+    ),
+    agentPolicyIds: schema.maybe(
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Agent policy IDs for agent_based deployments. Single-element for new-policy deploys; multiple for existing-policy deploys targeting several policies.',
+        },
+      })
+    ),
     packagePolicyIds: schema.maybe(
-      schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })
+      schema.arrayOf(schema.string({ maxLength: 255 }), {
+        maxSize: 1000,
+        meta: {
+          description:
+            'Package policy IDs created for this deployment (managed_integration and agent_based).',
+        },
+      })
+    ),
+    policyIdsByInstance: schema.maybe(
+      schema.recordOf(schema.string({ maxLength: 255 }), schema.string({ maxLength: 255 }), {
+        validate: (v) => {
+          if (Object.keys(v).length > 1000)
+            return 'policyIdsByInstance must not exceed 1000 entries';
+        },
+      })
     ),
     apiKeyId: schema.maybe(schema.string({ maxLength: 255 })),
+    mechanisms: schema.maybe(
+      schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, {
+        maxSize: 10,
+        meta: {
+          description:
+            'Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.',
+        },
+      })
+    ),
     ecfStacks: schema.maybe(
       schema.arrayOf(EcfStackSchema, {
         maxSize: 10,

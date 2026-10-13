@@ -21,7 +21,7 @@ export interface FetchEpisodeActionsOptions {
 }
 
 /**
- * Executes an ES|QL query to fetch latest acknowledge action and assignee by episode.
+ * Executes an ES|QL query to fetch the latest acknowledge, assignee, and resolution state by episode.
  */
 export const fetchEpisodeActions = ({
   spaceId,

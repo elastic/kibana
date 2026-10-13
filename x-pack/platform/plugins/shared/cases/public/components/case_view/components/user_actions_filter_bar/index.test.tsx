@@ -95,6 +95,7 @@ describe('UserActionsFilterBar', () => {
     expect(screen.getByTestId('user-actions-filter-bar-filter-group')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-bar-type-button')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-bar-author-button')).toBeInTheDocument();
+    expect(screen.getByTestId('user-actions-filter-bar-source-button')).toBeInTheDocument();
     expect(screen.getByTestId('user-actions-filter-bar-sort-button')).toBeInTheDocument();
   });
 
@@ -214,6 +215,42 @@ describe('UserActionsFilterBar', () => {
     });
   });
 
+  it('changes the source filter to a single selected source', async () => {
+    renderBar();
+
+    await userEvent.click(screen.getByTestId('user-actions-filter-bar-source-button'));
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-source-option-agent'));
+
+    expect(onParamsChange).toHaveBeenCalledWith({
+      ...defaultParams,
+      sources: ['agent'],
+    });
+  });
+
+  it('adds a second source to an already selected source', async () => {
+    renderBar({ ...defaultParams, sources: ['agent'] });
+
+    await userEvent.click(screen.getByTestId('user-actions-filter-bar-source-button'));
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-source-option-user'));
+
+    expect(onParamsChange).toHaveBeenCalledWith({
+      ...defaultParams,
+      sources: ['agent', 'user'],
+    });
+  });
+
+  it('selects not recorded to match user actions with no source', async () => {
+    renderBar();
+
+    await userEvent.click(screen.getByTestId('user-actions-filter-bar-source-button'));
+    await userEvent.click(await screen.findByTestId('user-actions-filter-bar-source-option-none'));
+
+    expect(onParamsChange).toHaveBeenCalledWith({
+      ...defaultParams,
+      sources: ['none'],
+    });
+  });
+
   describe('clear filters', () => {
     it('is not rendered when no filter is active', () => {
       renderBar();
@@ -252,11 +289,12 @@ describe('UserActionsFilterBar', () => {
       expect(screen.getByTestId('user-actions-filter-bar-clear-filters')).toBeInTheDocument();
     });
 
-    it('resets type, authors, and search when clicked', async () => {
+    it('resets type, authors, sources, and search when clicked', async () => {
       renderBar({
         ...defaultParams,
         type: 'action',
         authors: ['participant_1'],
+        sources: ['agent'],
         search: 'foo',
       });
 
@@ -266,6 +304,7 @@ describe('UserActionsFilterBar', () => {
         ...defaultParams,
         type: 'all',
         authors: undefined,
+        sources: undefined,
         search: undefined,
       });
     });

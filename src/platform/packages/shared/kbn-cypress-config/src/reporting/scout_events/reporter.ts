@@ -103,7 +103,9 @@ export class ScoutCypressReporter {
   }
 
   private getFileOwners(filePath: string): string[] {
-    return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
+    // Cypress runs with the project directory (not the repo root) as its cwd, so always resolve
+    // against the repo root to avoid cwd-dependent owner lookups.
+    return getOwningTeamsForPath(path.resolve(REPO_ROOT, filePath), this.codeOwnersEntries);
   }
 
   private getOwnerAreas(owners: string[]): CodeOwnerArea[] {

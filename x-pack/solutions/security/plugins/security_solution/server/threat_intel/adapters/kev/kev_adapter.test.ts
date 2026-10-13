@@ -173,6 +173,15 @@ describe('kevAdapter', () => {
     }
   });
 
+  it('writes the neutral relevance and rank_score enrichment would have, since KEV skips it', async () => {
+    const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
+    for (const r of reports) {
+      expect(r.extracted?.relevance).toBe(0.5);
+      // severity.score (high = 70) * relevance, the enrich workflow's own formula.
+      expect(r.rank_score).toBe(35);
+    }
+  });
+
   it('extraction_method is kev (not pending — skipped by enrich_threat_report)', async () => {
     const reports = await kevAdapter.run(makeSource(), makeContext(makeEnvelope()));
     for (const r of reports) {

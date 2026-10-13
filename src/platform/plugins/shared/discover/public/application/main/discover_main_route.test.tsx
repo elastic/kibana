@@ -14,6 +14,9 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import type { MainRouteProps } from './discover_main_route';
 import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
+import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import type { DiscoverCustomizationService } from '../../customizations/customization_service';
 import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
@@ -131,6 +134,83 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
+  test('loads a Discover session when its URL is ambiguous', async () => {
+    const services = getServicesMock();
+    jest.spyOn(services.discoverSessionService, 'get').mockResolvedValueOnce({
+      session: createDiscoverSessionMock({
+        id: 'conflicting-session',
+        sharingSavedObjectProps: {
+          outcome: 'conflict',
+          aliasTargetId: 'other-session',
+          aliasPurpose: 'savedObjectConversion',
+        },
+      }),
+      warnings: [],
+    });
+    const props: MainRouteProps = {
+      customizationCallbacks: [],
+      customizationContext: mockCustomizationContext,
+      onAppLeave: jest.fn(),
+    };
+
+    renderWithI18n(
+      <MemoryRouter initialEntries={['/view/conflicting-session']}>
+        <Route path="/view/:id">
+          <DiscoverTestProvider services={services}>
+            <DiscoverMainRoute {...props} />
+          </DiscoverTestProvider>
+        </Route>
+      </MemoryRouter>
+    );
+
+    await waitForLoad();
+
+    expect(services.discoverSessionService.get).toHaveBeenCalledWith('conflicting-session');
+    expect(screen.queryByText('Cannot load this page')).not.toBeInTheDocument();
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
+  test('redirects and warns when the requested Discover session does not exist', async () => {
+    const id = 'missing-session';
+    const services = getServicesMock();
+    const replaceHistory = jest.spyOn(services.history, 'replace');
+    jest
+      .spyOn(services.discoverSessionService, 'get')
+      .mockRejectedValueOnce(new SavedObjectNotFound({ type: 'search', id }));
+    const props: MainRouteProps = {
+      customizationCallbacks: [],
+      customizationContext: mockCustomizationContext,
+      onAppLeave: jest.fn(),
+    };
+
+    renderWithI18n(
+      <MemoryRouter initialEntries={[`/view/${id}`]}>
+        <Route path="/view/:id">
+          <DiscoverTestProvider services={services}>
+            <DiscoverMainRoute {...props} />
+          </DiscoverTestProvider>
+        </Route>
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(services.toastNotifications.addWarning).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Saved object is missing',
+          text: expect.any(Function),
+        })
+      );
+    });
+
+    expect(services.discoverSessionService.get).toHaveBeenCalledWith(id);
+    expect(services.urlTracker.setTrackedUrl).toHaveBeenCalledWith('/');
+    expect(replaceHistory).toHaveBeenCalledWith(
+      `/?notFound=search&notFoundMessage=Could not locate that search (id: ${id})`
+    );
+    expect(screen.queryByText('Cannot load this page')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discover-main-app')).not.toBeInTheDocument();
+  });
+
   test('renders the main app when ad hoc data views exist', async () => {
     const defaultAdHocDataViews = [{ id: 'test', title: 'test' }];
     mockRootProfileState = {
@@ -162,6 +242,29 @@ describe('DiscoverMainRoute', () => {
 
     await waitForLoad();
 
+    expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
+  });
+
+  test('renders no data page when a root profile contributes an ad hoc data view but there is no ES data', async () => {
+    const defaultAdHocDataViews = [{ id: 'example-profile-data-view', title: 'my-example-*' }];
+    mockRootProfileState = {
+      ...defaultRootProfileState,
+      getDefaultAdHocDataViews: () => defaultAdHocDataViews,
+    };
+
+    setupComponent({ hasESData: false, hasDataView: false });
+
+    await waitForLoad();
+
+    // The profile contributed its ad hoc data view on this render.
+    expect(discoverServiceMock.data.dataViews.create).toHaveBeenCalledWith(
+      { ...defaultAdHocDataViews[0], managed: true },
+      true
+    );
+
+    // A profile-contributed data view stands in for a missing user data view (see the test above),
+    // but it must not stand in for missing data: over an empty deployment it would only ever return
+    // nothing, so onboarding still has to win.
     expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
   });
 

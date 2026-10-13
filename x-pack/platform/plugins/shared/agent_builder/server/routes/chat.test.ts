@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  CHAT_MESSAGE_MAX_LENGTH,
   ChatEventType,
   ConversationOriginType,
   TimelineEventType,
@@ -81,6 +82,24 @@ describe('promptResponseEntrySchema', () => {
 });
 
 describe('conversePayloadSchema', () => {
+  it('accepts an input of the maximum length', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH) })
+    ).not.toThrow();
+  });
+
+  it('rejects an input longer than the maximum length', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH + 1) })
+    ).toThrow(/input/);
+  });
+
+  it('rejects trigger_mode', () => {
+    expect(() => conversePayloadSchema.validate({ input: 'Hello', trigger_mode: 'never' })).toThrow(
+      /trigger_mode/
+    );
+  });
+
   it('rejects unsupported conversation access mode values', () => {
     expect(() =>
       conversePayloadSchema.validate({
@@ -158,6 +177,15 @@ describe('callbackConversePayloadSchema', () => {
 
   it('accepts origin and callback URL', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
+  });
+
+  it('rejects trigger_mode', () => {
+    expect(() =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        trigger_mode: 'never',
+      })
+    ).toThrow(/trigger_mode/);
   });
 
   it('accepts callback payloads without origin', () => {
@@ -310,6 +338,7 @@ describe('registerChatRoutes', () => {
     const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: 'execution-1',
+      conversationId: 'conversation-1',
       events$: of(),
     });
     const origin = {
@@ -384,7 +413,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1' },
+      payload: { execution_id: 'execution-1', conversation_id: 'conversation-1' },
     });
     expect(validateCallbackUrl).toHaveBeenCalledWith(
       'https://callback.example.com/events?token=abc'
@@ -409,6 +438,7 @@ describe('registerChatRoutes', () => {
     const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: 'execution-1',
+      conversationId: 'conversation-1',
       events$: of(),
     });
 
@@ -477,7 +507,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1' },
+      payload: { execution_id: 'execution-1', conversation_id: 'conversation-1' },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -509,6 +539,7 @@ describe('registerChatRoutes', () => {
     const validateCallbackUrl = jest.fn();
     const executeAgent = jest.fn().mockResolvedValue({
       executionId: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+      conversationId: 'conversation-1',
       events$: of(),
     });
 
@@ -581,6 +612,7 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: {
         execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
+        conversation_id: 'conversation-1',
       },
     });
     expect(executeAgent).toHaveBeenCalledWith(

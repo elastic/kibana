@@ -550,7 +550,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   <AccessForm
                     agent={accessFormAgent}
                     entries={field.value ?? []}
-                    ownerName={owner?.username}
+                    owner={owner}
                     isDisabled={isFormDisabled || !canChangeAccessControl}
                     onChange={field.onChange}
                   />

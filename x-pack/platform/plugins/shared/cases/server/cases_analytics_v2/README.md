@@ -626,6 +626,11 @@ deliberate differences driven by the user-action shape:
   and doc values, so an oversized payload (large bulk-edit) would read
   back as `null` in ES|QL; `wildcard` has no such cap and is built for
   large, opaque strings queried with grep-style predicates.
+- **Action source.** `source.{type,id,name,run_id}` mirrors the
+  user-action SO `source` (agent, workflow, rule, attack, api, user).
+  It is omitted when the SO has no `source`, and on rows indexed before
+  `.cases-activity` mapped it. `POST /internal/cases/_analyticsV2/reset`
+  backfills those.
 - **No `index.mode: lookup`.** `.cases-activity` is the **fact** table
   in the analytics model. ES|QL queries `FROM .cases-activity | LOOKUP
   JOIN .cases ON case.id`; the lookup-mode index is on the cases side.
@@ -711,9 +716,10 @@ cases_analytics_v2/
 ├── constants.ts       index name + administrator route URLs
 │
 ├── ensure_indices/
-│   ├── case.ts            idempotent bootstrap for .cases (lookup-mode)
-│   ├── activity.ts        idempotent bootstrap for .cases-activity (fact table)
-│   └── attachments.ts     idempotent bootstrap for .cases-attachments (fact table)
+│   ├── ensure_index.ts    shared idempotent bootstrap + additive mapping sync
+│   ├── case.ts            .cases (lookup-mode)
+│   ├── activity.ts        .cases-activity (fact table)
+│   └── attachments.ts     .cases-attachments (fact table)
 │
 ├── mappings/
 │   ├── case.ts                             CASE_INDEX_MAPPING (dynamic: strict)

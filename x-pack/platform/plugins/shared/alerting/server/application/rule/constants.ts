@@ -49,3 +49,10 @@ export const ruleExecutionStatusWarningReason = {
 export const MISSING_UIAM_API_KEY_TAG = i18n.translate('xpack.alerting.missingUiamApiKeyTag', {
   defaultMessage: 'Missing Elastic Cloud API Key',
 });
+
+export const LEGACY_MISSING_UIAM_API_KEY_TAG = i18n.translate(
+  'xpack.alerting.legacyMissingUiamApiKeyTag',
+  {
+    defaultMessage: 'Missing Universal Api Key',
+  }
+);

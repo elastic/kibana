@@ -24,6 +24,7 @@ export interface CreateCloudOnboardingDeploymentRequest {
     globalRegion?: string;
     dataFormat?: 'ecs' | 'otel';
     authMethod?: CloudOnboardingDeploymentAuthMethod;
+    agentPolicyIds?: string[];
   };
 }
 
@@ -42,12 +43,18 @@ export interface UpdateCloudOnboardingDeploymentRequest {
     statusMessage?: string;
     deploymentId?: string;
     deploymentName?: string;
+    services?: string[];
     serviceVars?: Record<string, Record<string, unknown>>;
     attemptCount?: number;
-    agentPolicyId?: string;
+    authMethod?: CloudOnboardingDeploymentAuthMethod | null;
+    agentPolicyIds?: string[];
     packagePolicyIds?: string[];
+    policyIdsByInstance?: Record<string, string>;
     apiKeyId?: string;
+    mechanisms?: DeploymentMethod[];
     ecfStacks?: CloudOnboardingEcfStack[];
+    /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
+    connectorId?: string | null;
   };
 }
 

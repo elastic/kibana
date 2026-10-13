@@ -10,13 +10,13 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
 
 export const configSchema = schema.object({
   /**
-   * Gates the whole managed MITRE data source. While false the plugin registers no Saved
-   * Object type, runs no population and exposes no data client, so a deployment carries no
-   * MITRE footprint at all and consumers fall back to the legacy blob in `security_solution`.
-   * Flipping this default to true is the enablement step tracked by
-   * https://github.com/elastic/security-team/issues/19076.
+   * Gates the whole managed MITRE data source. Enabled by default. Setting this to false
+   * makes the plugin register no Saved Object type, run no population and expose no data
+   * client, so consumers in `security_solution` fall back to the legacy
+   * `mitre_tactics_techniques.ts` blob. The legacy blob and this flag are scheduled for
+   * removal once the cutover is confirmed (https://github.com/elastic/security-team/issues/19076).
    */
-  managedSourceEnabled: schema.boolean({ defaultValue: false }),
+  managedSourceEnabled: schema.boolean({ defaultValue: true }),
 });
 
 export type MitreAttackConfig = TypeOf<typeof configSchema>;

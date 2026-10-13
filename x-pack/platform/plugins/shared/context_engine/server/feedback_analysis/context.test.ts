@@ -47,9 +47,9 @@ describe('buildFeedbackContext', () => {
   let aiIndexService: jest.Mocked<Pick<AiIndexService, 'get'>>;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'historySummaryFor'>>;
 
-  const build = (aiIndex: AiIndexHttpItem = buildAiIndex()) => {
+  const build = (aiIndex: AiIndexHttpItem = buildAiIndex(), spaceId = 'default') => {
     aiIndexService.get.mockResolvedValue(aiIndex);
-    return buildFeedbackContext('orders', {
+    return buildFeedbackContext('orders', spaceId, {
       esClient,
       aiIndexService: aiIndexService as unknown as AiIndexService,
       improvementsService: improvementsService as unknown as ImprovementsServiceApi,
@@ -85,6 +85,7 @@ describe('buildFeedbackContext', () => {
     });
     expect(context.briefing).toContain('# Feedback analysis for AI index `orders`');
     expect(context.output_schema).toHaveProperty('properties.improvements');
+    expect(aiIndexService.get).toHaveBeenCalledWith('orders', 'default');
   });
 
   it('carries the index, its KI summary and its signal patterns in the briefing rather than beside it', async () => {
@@ -111,6 +112,7 @@ describe('buildFeedbackContext', () => {
     expect(selectSignalsMock).toHaveBeenCalledWith(esClient, {
       destValue: 'ai-index-idx-orders',
       sources: [{ type: 'esql', value: 'FROM logs-orders' }],
+      spaceId: 'default',
       signalTimeRange: { type: 'relative', from: 'now-2d' },
       signalFilter: 'tags: coverage_gap',
     });
@@ -190,5 +192,15 @@ describe('buildFeedbackContext', () => {
     expect(improvementsService.historySummaryFor).toHaveBeenCalledWith('orders');
     expect(briefing).toContain('7 proposal(s) for this index — 7 rejected.');
     expect(briefing).toContain('FROM context-engine-improvements');
+  });
+
+  it('looks up the AI index in the given space', async () => {
+    await build(buildAiIndex(), 'marketing');
+
+    expect(aiIndexService.get).toHaveBeenCalledWith('orders', 'marketing');
+    expect(selectSignalsMock).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ spaceId: 'marketing' })
+    );
   });
 });

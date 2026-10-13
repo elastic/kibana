@@ -56,9 +56,21 @@ const resolveSegment = (schema: JsonSchema, segment: string): JsonSchema | null 
     return null;
   }
 
-  // Open maps (groupKey, rules, episode data) accept any key but don't describe their
-  // values, so everything below them is unconstrained.
-  return schema.properties?.[segment] ?? (schema.additionalProperties ? ANY_KEY_OBJECT : null);
+  const named = schema.properties?.[segment];
+  if (named) {
+    return named;
+  }
+
+  // Boolean `true` is an open map: any key, unconstrained values.
+  // A schema describes the value of every other key (typed maps such as `rules`).
+  const additional = schema.additionalProperties;
+  if (additional === true) {
+    return ANY_KEY_OBJECT;
+  }
+  if (additional && typeof additional === 'object') {
+    return additional;
+  }
+  return null;
 };
 
 const toPayloadRelativePath = (path: string): string => {

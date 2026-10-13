@@ -7,11 +7,17 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { z } from '@kbn/zod/v4';
+import { isContextLengthExceededError } from '@kbn/inference-common';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { logStageUsage } from '../lib/cost_tracker';
 import { MAX_URL_LENGTH } from '../../../common/threat_intel';
-
-const RELEVANCE_BODY_CHAR_LIMIT = 30_000;
+import {
+  fullArticleContext,
+  furtherShrinkOverflowArticleContext,
+  selectOverflowRetryArticleContext,
+  type ArticleContext,
+} from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -24,19 +30,22 @@ const RELEVANCE_REASON_CHAR_LIMIT = 2_000;
 /** A handful of links; the model is asked for the primary sources, not a crawl. */
 const MAX_PRIMARY_LINKS = 20;
 
-export const relevanceOutputSchema = z.object({
-  is_intelligence: z.boolean(),
-  quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
-  evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
-  needs_render: z.boolean(),
-  primary_links: z
-    .array(z.string())
-    .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
-  has_original_commentary: z.boolean(),
-  reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
-});
+export const relevanceOutputSchema = lazySchema(() =>
+  z.object({
+    is_intelligence: z.boolean(),
+    quality_class: z.enum(['intel', 'marketing', 'rollup', 'thought_leadership']),
+    evidence_tier: z.enum(['primary', 'pointer', 'mixed']),
+    needs_render: z.boolean(),
+    primary_links: z
+      .array(z.string())
+      .transform((v) => v.slice(0, MAX_PRIMARY_LINKS).map((link) => link.slice(0, MAX_URL_LENGTH))),
+    has_original_commentary: z.boolean(),
+    reason: boundedText(RELEVANCE_REASON_CHAR_LIMIT),
+  })
+);
 
 export type RelevanceOutput = z.infer<typeof relevanceOutputSchema>;
+export type RelevanceResult = RelevanceOutput & { context: Omit<ArticleContext, 'text'> };
 
 export interface AssessRelevanceParams {
   url?: string;
@@ -44,8 +53,7 @@ export interface AssessRelevanceParams {
   text: string;
 }
 
-const buildRelevancePrompt = (params: AssessRelevanceParams): string => {
-  const truncated = params.text.slice(0, RELEVANCE_BODY_CHAR_LIMIT);
+const buildRelevancePrompt = (params: AssessRelevanceParams, text: string): string => {
   const urlLine = params.url ? `Article URL: ${params.url}\n` : '';
   const titleLine = params.title ? `Article title: ${params.title}\n` : '';
 
@@ -104,7 +112,7 @@ reason (string):
   "Weekly newsletter linking CrowdStrike, Mandiant reports", "Needs render: navigation only, JS gate").
 
 ${urlLine}${titleLine}Article text:
-${truncated}`;
+${text}`;
 };
 
 /**
@@ -118,24 +126,49 @@ export const assessRelevance = async (
   model: ScopedModel,
   logger: Logger,
   params: AssessRelevanceParams
-): Promise<RelevanceOutput> => {
-  const prompt = buildRelevancePrompt(params);
+): Promise<RelevanceResult> => {
   const inferenceEndpointId = model.connector.connectorId;
 
   const structured = model.chatModel.withStructuredOutput(relevanceOutputSchema, {
     includeRaw: true,
   });
 
-  const result = (await structured.invoke(prompt)) as {
+  const invokeRelevance = async (
+    text: string
+  ): Promise<{ raw: { response_metadata: Record<string, unknown> }; parsed: RelevanceOutput }> => {
+    const invoked = (await structured.invoke(buildRelevancePrompt(params, text))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: RelevanceOutput | null;
+    };
+    return requireParsedStructuredOutput(invoked, 'assess_relevance');
+  };
+
+  let context = fullArticleContext(params.text);
+  let result: {
     raw: { response_metadata: Record<string, unknown> };
     parsed: RelevanceOutput;
   };
+  const startedAt = Date.now();
+  try {
+    result = await invokeRelevance(context.text);
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    context = selectOverflowRetryArticleContext(params.text);
+    try {
+      result = await invokeRelevance(context.text);
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      result = await invokeRelevance(context.text);
+    }
+  }
 
   logStageUsage(
     logger,
     'assess_relevance',
     inferenceEndpointId,
-    result.raw.response_metadata ?? {}
+    result.raw.response_metadata ?? {},
+    Date.now() - startedAt
   );
 
   logger.debug(
@@ -144,5 +177,6 @@ export const assessRelevance = async (
       `needs_render=${result.parsed.needs_render}`
   );
 
-  return result.parsed;
+  const { text: _text, ...contextMetadata } = context;
+  return { ...result.parsed, context: contextMetadata };
 };

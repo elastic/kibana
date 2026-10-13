@@ -15,8 +15,6 @@ import { RulesPageApp } from './rules_page_app';
 import type { TriggersAndActionsUiServices } from './rules_app';
 import type { ClassicRulesPageInternalDeps, ClassicRulesPageProps } from './classic_rules_page';
 
-export type { ClassicRulesPageInternalDeps, ClassicRulesPageProps } from './classic_rules_page';
-
 export const ComposableClassicRulesPage = ({
   coreStart,
   setBreadcrumbs,

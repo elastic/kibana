@@ -19,13 +19,11 @@ export {
 
 export {
   customContentStateSchema,
-  customContentUpdateSchema,
   customContentPanelUpdateSchema,
   readEsqlQuery,
   toEsqlQueryState,
   resolveEsqlQueryEdit,
 } from './schema';
-export type { CustomContentUpdate } from './schema';
 export type { ResolvedEsqlQueryEdit, CustomContentState } from './schema';
 
 export { stripMarkdownFences } from './strip_markdown_fences';

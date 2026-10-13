@@ -28,7 +28,7 @@ services. Add your a link to your example using the developerExamples `register`
 Run Kibana with developer examples via:
 
 ```
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 Then navigate to "Developer examples":

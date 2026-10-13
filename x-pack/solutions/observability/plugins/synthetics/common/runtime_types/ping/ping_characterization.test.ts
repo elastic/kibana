@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { describeCodecParity } from '../test_helpers/parity';
-import { GetPingsParamsType, PingStateType, PingType, PingsResponseType } from './ping';
-import { ErrorGroupsResponseType } from './error_groups';
-import { ErrorStatsType } from './error_stats';
+import { describeCodecCases } from '../test_helpers/codec_cases';
+
 import {
+  GetPingsParamsType,
+  PingStateType,
+  PingType,
+  PingsResponseType,
+  ErrorGroupsResponseType,
+  ErrorStatsType,
   FullScreenshotType,
   JourneyStepType,
   RefResultType,
@@ -17,8 +21,7 @@ import {
   ScreenshotImageBlobType,
   ScreenshotRefImageDataType,
   SyntheticsJourneyApiResponseType,
-} from './synthetics';
-import * as zodPing from '../zod/ping';
+} from '../schemas/ping';
 
 const observer = {
   name: 'us-central',
@@ -216,10 +219,9 @@ const refResult = {
   },
 };
 
-describeCodecParity({
+describeCodecCases({
   label: 'PingType',
-  ioTs: PingType,
-  zod: zodPing.PingType,
+  codec: PingType,
   valid: [
     fullPing,
     { monitor, docId: 'doc-1', observer, '@timestamp': '2024-01-01T00:00:00.000Z' },
@@ -231,10 +233,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'PingStateType',
-  ioTs: PingStateType,
-  zod: zodPing.PingStateType,
+  codec: PingStateType,
   valid: [
     {
       timestamp: '2024-01-01T00:00:00.000Z',
@@ -261,18 +262,16 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'PingsResponseType',
-  ioTs: PingsResponseType,
-  zod: zodPing.PingsResponseType,
+  codec: PingsResponseType,
   valid: [{ total: 1, pings: [fullPing] }],
   invalid: [{ total: 1 }, { total: '1', pings: [] }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'GetPingsParamsType',
-  ioTs: GetPingsParamsType,
-  zod: zodPing.GetPingsParamsType,
+  codec: GetPingsParamsType,
   valid: [
     { dateRange: { from: 'now-15m', to: 'now' } },
     {
@@ -291,10 +290,9 @@ describeCodecParity({
   invalid: [{}, { dateRange: { from: 'now-15m' } }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'JourneyStepType',
-  ioTs: JourneyStepType,
-  zod: zodPing.JourneyStepType,
+  codec: JourneyStepType,
   valid: [journeyStep],
   invalid: [
     { ...journeyStep, _id: 1 },
@@ -302,10 +300,9 @@ describeCodecParity({
   ],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'FullScreenshotType',
-  ioTs: FullScreenshotType,
-  zod: zodPing.FullScreenshotType,
+  codec: FullScreenshotType,
   valid: [
     {
       synthetics: {
@@ -319,42 +316,37 @@ describeCodecParity({
   invalid: [{ synthetics: { step: { name: 'x' }, type: 'step/screenshot_ref' } }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'RefResultType',
-  ioTs: RefResultType,
-  zod: zodPing.RefResultType,
+  codec: RefResultType,
   valid: [refResult],
   invalid: [{ ...refResult, synthetics: { ...refResult.synthetics, type: 'step/screenshot' } }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ScreenshotImageBlobType',
-  ioTs: ScreenshotImageBlobType,
-  zod: zodPing.ScreenshotImageBlobType,
+  codec: ScreenshotImageBlobType,
   valid: [{ stepName: null, maxSteps: 1, src: 'image data' }],
   invalid: [{ stepName: null, src: 'image data' }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ScreenshotBlockDocType',
-  ioTs: ScreenshotBlockDocType,
-  zod: zodPing.ScreenshotBlockDocType,
+  codec: ScreenshotBlockDocType,
   valid: [{ id: 'h1', synthetics: { blob: 'x', blob_mime: 'image/jpeg' } }],
   invalid: [{ id: 'h1', synthetics: { blob: 'x' } }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ScreenshotRefImageDataType',
-  ioTs: ScreenshotRefImageDataType,
-  zod: zodPing.ScreenshotRefImageDataType,
+  codec: ScreenshotRefImageDataType,
   valid: [{ stepName: null, maxSteps: 1, ref: { screenshotRef: refResult } }],
   invalid: [{ stepName: null, maxSteps: 1, ref: {} }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'SyntheticsJourneyApiResponseType',
-  ioTs: SyntheticsJourneyApiResponseType,
-  zod: zodPing.SyntheticsJourneyApiResponseType,
+  codec: SyntheticsJourneyApiResponseType,
   valid: [
     { checkGroup: 'cg-1', steps: [journeyStep] },
     {
@@ -373,10 +365,9 @@ describeCodecParity({
   invalid: [{ steps: [journeyStep] }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ErrorGroupsResponseType',
-  ioTs: ErrorGroupsResponseType,
-  zod: zodPing.ErrorGroupsResponseType,
+  codec: ErrorGroupsResponseType,
   valid: [
     {
       groups: [
@@ -411,10 +402,9 @@ describeCodecParity({
   invalid: [{ groups: [{ name: 'timeout', pattern: 'always' }] }],
 });
 
-describeCodecParity({
+describeCodecCases({
   label: 'ErrorStatsType',
-  ioTs: ErrorStatsType,
-  zod: zodPing.ErrorStatsType,
+  codec: ErrorStatsType,
   valid: [
     {
       totalChecks: 100,

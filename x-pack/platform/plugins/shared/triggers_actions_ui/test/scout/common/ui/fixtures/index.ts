@@ -10,11 +10,17 @@ import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 // The globalSearch page object is owned by the global_search plugin; reuse its fixture wiring.
 import type { GlobalSearchPageObjects } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
 import { extendPageObjects as extendPageObjectsWithGlobalSearch } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
-import { ClassicRulesPage, RuleDetailsPage, StackAlertsPage } from './page_objects';
+import {
+  ClassicRulesPage,
+  ProjectManagementNav,
+  RuleDetailsPage,
+  StackAlertsPage,
+} from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: GlobalSearchPageObjects & {
     classicRulesPage: ClassicRulesPage;
+    projectManagementNav: ProjectManagementNav;
     ruleDetailsPage: RuleDetailsPage;
     stackAlertsPage: StackAlertsPage;
   };
@@ -34,6 +40,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
     const extendedPageObjects = {
       ...extendPageObjectsWithGlobalSearch(pageObjects, page),
       classicRulesPage: createLazyPageObject(ClassicRulesPage, page),
+      projectManagementNav: createLazyPageObject(ProjectManagementNav, page),
       ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
       stackAlertsPage: createLazyPageObject(StackAlertsPage, page),
     };

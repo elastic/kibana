@@ -9,6 +9,7 @@ import type {
   ClickTriggerEvent,
   MultiClickTriggerEvent,
   BrushTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import type {
@@ -31,6 +32,12 @@ export function isLensMultiFilterEvent(
 
 export function isLensBrushEvent(event: ExpressionRendererEvent): event is BrushTriggerEvent {
   return event.name === 'brush';
+}
+
+export function isLensAnnotationClickEvent(
+  event: ExpressionRendererEvent
+): event is AnnotationClickTriggerEvent {
+  return event.name === 'annotationClick';
 }
 
 export function isLensEditEvent<T extends LensEditSupportedActions>(

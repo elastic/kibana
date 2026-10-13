@@ -262,7 +262,7 @@ export class CliDevMode {
           // stop the optimizer as soon as we get an exit signal
           takeUntil(exitSignal$)
         )
-        .subscribe(this.observer('@kbn/optimizer'))
+        .subscribe(this.observer('@kbn/rspack-optimizer'))
     );
 
     this.subscription.add(

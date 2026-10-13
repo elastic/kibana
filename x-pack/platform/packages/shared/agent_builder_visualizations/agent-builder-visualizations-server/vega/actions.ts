@@ -25,6 +25,8 @@ export interface AuthorSpecAction {
   title?: string;
   /** One-sentence factual description of the authored chart and presentation choices. */
   authoringNote?: string;
+  /** Raw model response, kept even when it fails to parse so a retry can repair it. */
+  response?: string;
   attempt: number;
   error?: string;
 }

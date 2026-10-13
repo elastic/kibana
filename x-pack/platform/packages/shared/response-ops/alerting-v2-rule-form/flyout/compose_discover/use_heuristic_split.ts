@@ -131,14 +131,10 @@ export function splitQuery(query: string): SplitResult {
   return { base, alertBlock, confidence: 'high', reason: 'split_succeeded' };
 }
 
-/** Splits a full ES|QL query (e.g. from Discover) into composed base + breach segment. */
-export function discoverQueryToComposed(inlinedQuery: string): {
-  format: 'composed';
-  base: string;
-  breach: { segment: string };
-} {
+/** Splits a full ES|QL query (e.g. from Discover) into base + breach segment. */
+export function discoverQueryToRuleQuery(inlinedQuery: string): RuleQuery {
   const { base, alertBlock } = splitQuery(inlinedQuery);
-  return { format: 'composed', base, breach: { segment: alertBlock } };
+  return { base, breach: { segment: alertBlock } };
 }
 
 /**
@@ -151,16 +147,14 @@ export function discoverQueryToComposed(inlinedQuery: string): {
  */
 export type SplitOutcome = 'success' | 'no_alert_condition' | 'split_failed' | 'empty';
 
-export type ComposedRuleQuery = Extract<RuleQuery, { format: 'composed' }>;
-
 export interface SplitRuleQueryResult {
-  query: ComposedRuleQuery;
+  query: RuleQuery;
   outcome: SplitOutcome;
 }
 
 /**
- * Maps a unified ES|QL query into a composed alert query and an outcome for
- * the form summary.
+ * Maps a unified ES|QL query into a rule query and an outcome for the form
+ * summary.
  *
  * - `success` — base and breach segment both set.
  * - `no_alert_condition` — base set, empty breach segment.
@@ -173,36 +167,16 @@ export function splitResultToRuleQuery(fullQuery: string): SplitRuleQueryResult 
   const hasAlert = alertBlock.trim().length > 0;
 
   if (hasBase && hasAlert) {
-    return {
-      query: { format: 'composed', base, breach: { segment: alertBlock } },
-      outcome: 'success',
-    };
+    return { query: { base, breach: { segment: alertBlock } }, outcome: 'success' };
   }
   if (hasBase) {
-    return {
-      query: { format: 'composed', base, breach: { segment: '' } },
-      outcome: 'no_alert_condition',
-    };
+    return { query: { base, breach: { segment: '' } }, outcome: 'no_alert_condition' };
   }
 
   return {
-    query: { format: 'composed', base, breach: { segment: alertBlock } },
+    query: { base, breach: { segment: alertBlock } },
     outcome: hasAlert ? 'split_failed' : 'empty',
   };
-}
-
-/**
- * Merges `splitResult` with `sandboxQuery.recovery` when the sandbox query is
- * composed and already has a recovery block; otherwise returns `splitResult`.
- */
-export function resolveUnifiedAlertApplyQuery(
-  sandboxQuery: RuleQuery,
-  splitResult: ComposedRuleQuery
-): ComposedRuleQuery {
-  if (sandboxQuery.format === 'composed' && sandboxQuery.recovery) {
-    return { ...splitResult, recovery: sandboxQuery.recovery };
-  }
-  return splitResult;
 }
 
 /**

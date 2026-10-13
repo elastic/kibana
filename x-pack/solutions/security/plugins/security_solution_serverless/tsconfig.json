@@ -23,6 +23,8 @@
     "@kbn/server-http-tools",
     "@kbn/serverless",
     "@kbn/security-solution-navigation",
+    "@kbn/alertzero-common",
+    "@kbn/alertzero-plugin",
     "@kbn/security-solution-upselling",
     "@kbn/kibana-react-plugin",
     "@kbn/core-chrome-browser",
@@ -49,7 +51,6 @@
     "@kbn/deeplinks-management",
     "@kbn/connector-schemas",
     "@kbn/management-settings-ids",
-    "@kbn/alerting-v2-utils",
     "@kbn/ai-assistant-common",
     "@kbn/deeplinks-workflows",
     "@kbn/workflows",
@@ -57,5 +58,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/navigation-plugin",
     "@kbn/scout-security",
+    "@kbn/deeplinks-security",
   ]
 }

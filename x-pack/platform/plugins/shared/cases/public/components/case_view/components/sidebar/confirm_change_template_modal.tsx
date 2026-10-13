@@ -86,7 +86,7 @@ const ConfirmChangeTemplateModalDescription: FC<{
   if (oldTemplate && newTemplate) {
     return (
       <FormattedMessage
-        id="xpack.cases.casesRedesign.details.confirmChangeTemplateDescription"
+        id="xpack.cases.details.confirmChangeTemplateDescription"
         defaultMessage="Are you sure you want to change from {oldTemplate} to {newTemplate}?"
         values={{
           oldTemplate: <TemplateNameWithFields template={oldTemplate} />,
@@ -99,7 +99,7 @@ const ConfirmChangeTemplateModalDescription: FC<{
   if (newTemplate) {
     return (
       <FormattedMessage
-        id="xpack.cases.casesRedesign.details.confirmApplyTemplateDescription"
+        id="xpack.cases.details.confirmApplyTemplateDescription"
         defaultMessage="Are you sure you want to apply {newTemplate}?"
         values={{
           newTemplate: <TemplateNameWithFields template={newTemplate} />,
@@ -111,7 +111,7 @@ const ConfirmChangeTemplateModalDescription: FC<{
   if (oldTemplate) {
     return (
       <FormattedMessage
-        id="xpack.cases.casesRedesign.details.confirmRemoveTemplateDescription"
+        id="xpack.cases.details.confirmRemoveTemplateDescription"
         defaultMessage="Are you sure you want to remove {oldTemplate}?"
         values={{
           oldTemplate: <TemplateNameWithFields template={oldTemplate} />,

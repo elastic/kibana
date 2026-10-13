@@ -10,6 +10,8 @@ import { Alert } from '../../alert';
 import {
   optimizeTaskStateForFlapping,
   getAlertIdsOverMaxLimit,
+  getRecoveredAlertIdsToStopTracking,
+  shouldKeepTrackingRecovered,
 } from './optimize_task_state_for_flapping';
 
 describe('optimizeTaskStateForFlapping', () => {
@@ -35,6 +37,9 @@ describe('optimizeTaskStateForFlapping', () => {
     );
 
     expect(Object.keys(recoveredAlerts)).toEqual(['1', '3']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Recovered alerts have exceeded the max alert limit of 2 : dropping 1 alert.'
+    );
   });
 
   test('should not remove alerts if the number of recovered alerts is not over the limit', () => {
@@ -65,7 +70,6 @@ describe('optimizeTaskStateForFlapping', () => {
   describe('getAlertIdsOverMaxLimit', () => {
     test('getAlertIdsOverMaxLimit should return longest recovered alerts', () => {
       const alertIds = getAlertIdsOverMaxLimit(
-        logger,
         {
           '1': alert1,
           '2': alert2,
@@ -82,7 +86,6 @@ describe('optimizeTaskStateForFlapping', () => {
 
     test('getAlertIdsOverMaxLimit should not return alerts if the num of recovered alerts is not at the limit', () => {
       const trimmedAlerts = getAlertIdsOverMaxLimit(
-        logger,
         {
           '1': alert1,
           '2': alert2,
@@ -90,6 +93,53 @@ describe('optimizeTaskStateForFlapping', () => {
         2
       );
       expect(trimmedAlerts).toEqual([]);
+    });
+  });
+
+  describe('shouldKeepTrackingRecovered', () => {
+    test('returns true when flapping', () => {
+      expect(
+        shouldKeepTrackingRecovered({ flapping: true, flappingHistory: [false, false] })
+      ).toEqual(true);
+    });
+
+    test('returns true when history has state changes', () => {
+      expect(
+        shouldKeepTrackingRecovered({ flapping: false, flappingHistory: [false, true] })
+      ).toEqual(true);
+    });
+
+    test('returns false when not flapping and history has no state changes', () => {
+      expect(
+        shouldKeepTrackingRecovered({ flapping: false, flappingHistory: [false, false] })
+      ).toEqual(false);
+    });
+  });
+
+  describe('getRecoveredAlertIdsToStopTracking', () => {
+    test('includes alerts that should not stay tracked', () => {
+      expect(
+        getRecoveredAlertIdsToStopTracking(
+          {
+            '4': alert4,
+            '5': alert5,
+          },
+          1000
+        )
+      ).toEqual(['5']);
+    });
+
+    test('includes alerts over the max limit even if they would stay tracked', () => {
+      expect(
+        getRecoveredAlertIdsToStopTracking(
+          {
+            '1': alert1,
+            '2': alert2,
+            '3': alert3,
+          },
+          2
+        )
+      ).toEqual(['2']);
     });
   });
 });

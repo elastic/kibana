@@ -17,7 +17,7 @@ import { commandDefinitions } from '@elastic/esql-definitions/commands';
 
 const GENERATED_COMMANDS_BASE_PATH = join(
   REPO_ROOT,
-  'src/platform/packages/shared/kbn-esql-language/src/commands/definitions/generated/commands'
+  'src/platform/packages/shared/esql/kbn-esql-language/src/commands/definitions/generated/commands'
 );
 
 async function generateElasticsearchCommandDefinitions(): Promise<void> {

@@ -14,7 +14,7 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout'
 import {
   ChromeComponentsProvider,
   ClassicHeader,
-  ChromeNextGlobalHeader,
+  ChromeHeader,
   ChromeAppHeaderRenderer,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
@@ -112,7 +112,7 @@ export class GridLayout implements LayoutService {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
         } else {
-          header = <ChromeNextGlobalHeader />;
+          header = <ChromeHeader />;
           if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
             applicationTopBar = <ChromeAppHeaderRenderer />;
           }

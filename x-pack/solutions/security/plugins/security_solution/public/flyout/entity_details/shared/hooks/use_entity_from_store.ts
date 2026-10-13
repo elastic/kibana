@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 import { useQuery, type QueryClient } from '@kbn/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { EntityType, SearchEntitiesFromEntityStoreResponse } from '@kbn/entity-store/public';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type {
@@ -123,6 +124,7 @@ export interface UseEntityFromStoreParams {
   identityFields?: Record<string, string> | null;
   entityType?: string;
   skip: boolean;
+  executionContext?: KibanaExecutionContext;
 }
 
 export type EntityStoreRecord = HostEntity | UserEntity | ServiceEntity;
@@ -149,7 +151,7 @@ export interface EntityFromStoreResult<T> {
 export function useEntityFromStore(
   params: UseEntityFromStoreParams
 ): EntityFromStoreResult<HostItem | UserItem> {
-  const { entityId, identityFields, entityType, skip } = params;
+  const { entityId, identityFields, entityType, skip, executionContext } = params;
   const euidApi = useEntityStoreEuidApi();
   const { fetchEntitiesListV2 } = useEntityAnalyticsRoutes();
 
@@ -247,6 +249,7 @@ export function useEntityFromStore(
           // The AI summary is loaded separately from the metadata datastream via
           // useFetchPersistedAiSummary, not from the entity store record.
         },
+        context: executionContext,
       });
     },
     enabled: !skip && (Boolean(entityId) || Boolean(storeFilter)),

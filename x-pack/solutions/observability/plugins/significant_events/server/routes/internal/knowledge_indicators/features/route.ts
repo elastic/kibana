@@ -1,0 +1,459 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
+import {
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  baseFeatureSchema,
+  featureUpsertSchema,
+  type Feature,
+} from '@kbn/significant-events-schema';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import { searchModeSchema } from '../../../utils/search_mode';
+import { createServerRoute } from '../../../create_server_route';
+import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
+import { StatusError } from '../../../../lib/errors/status_error';
+import {
+  filterReadableSourceIds,
+  requestedOrAllSourceIds,
+} from '../../../utils/resolve_source_ids';
+import type { KIBulkOperation } from '../../../../lib/knowledge_indicators';
+
+const MAX_INPUT_STRING_LENGTH = 255;
+
+const upsertFeatureRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features',
+  options: {
+    access: 'internal',
+    summary: 'Upserts a feature for a source',
+    description: 'Upserts the specified feature',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    body: lazySchema(() =>
+      baseFeatureSchema.and(z.object({ expires_at: isoDateTime().optional() }))
+    ),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ acknowledged: boolean }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, sourcesClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await sourcesClient.get(params.path.sourceId);
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const { id, expires_at, ...baseBody } = params.body;
+
+    if (id) {
+      const { hits } = await kiClient.getFeatures(params.path.sourceId, { id: [id] });
+      const [resolved] = hits;
+      if (resolved && resolved.source_id !== params.path.sourceId) {
+        throw new StatusError(
+          `Feature ${id} belongs to source '${resolved.source_id}', not '${params.path.sourceId}'`,
+          400
+        );
+      }
+    }
+
+    await kiClient.bulk(params.path.sourceId, [
+      {
+        index: {
+          feature: {
+            id,
+            ...baseBody,
+            updated_at: new Date().toISOString(),
+            expires_at,
+          },
+        },
+      },
+    ]);
+
+    return { acknowledged: true };
+  },
+});
+
+const deleteFeatureRoute = createServerRoute({
+  endpoint: 'DELETE /internal/streams/{sourceId}/features/{id}',
+  options: {
+    access: 'internal',
+    summary: 'Deletes a feature for a source',
+    description: 'Deletes the specified feature',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      sourceId: z.string().max(MAX_INPUT_STRING_LENGTH),
+      id: z.string().max(MAX_INPUT_STRING_LENGTH).max(MAX_INPUT_STRING_LENGTH),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ acknowledged: boolean }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, sourcesClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    await sourcesClient.get(params.path.sourceId);
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    await kiClient.bulk(params.path.sourceId, [
+      { delete: { type: 'feature', id: params.path.id } },
+    ]);
+
+    try {
+      await kiClient.reconcileSource(params.path.sourceId);
+    } catch (err) {
+      logger.warn(
+        `reconcileSource after feature delete failed for source "${params.path.sourceId}": ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+
+    return { acknowledged: true };
+  },
+});
+
+const listFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{sourceId}/features',
+  options: {
+    access: 'internal',
+    summary: 'Lists all features for a source',
+    description: 'Fetches all features for the specified source',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ sourceId: z.string().max(MAX_INPUT_STRING_LENGTH) }),
+    query: z.optional(
+      z.object({
+        query: z.string().max(MAX_TEXT_LENGTH).optional(),
+        search_mode: searchModeSchema.optional(),
+        include_excluded: BooleanFromString.optional(),
+      })
+    ),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ features: Feature[] }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { licensing, sourcesClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+    // The reader below runs as the internal user, so check the caller's own data access first.
+    await sourcesClient.assertReadable(params.path.sourceId);
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcluded,
+    } = params.query ?? {};
+    const { hits: features } = query
+      ? await kiClient.findFeatures(params.path.sourceId, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(params.path.sourceId, { includeExcluded });
+
+    return { features };
+  },
+});
+
+export const listAllFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/_features',
+  options: {
+    access: 'internal',
+    summary: 'Lists all features across sources',
+    description: 'Fetches all features the user has access to',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z
+      .object({
+        query: z
+          .string()
+          .max(MAX_TEXT_LENGTH)
+          .optional()
+          .describe('Free-text query for semantic/keyword search'),
+        search_mode: searchModeSchema.optional(),
+        include_excluded: BooleanFromString.optional(),
+      })
+      .optional(),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ features: Feature[] }> => {
+    const scopedClients = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({
+      server,
+      licensing: scopedClients.licensing,
+    });
+
+    // The reader below runs as the internal user, so keep only the sources the caller can read.
+    const sourceIds = await filterReadableSourceIds(
+      await requestedOrAllSourceIds(undefined, scopedClients.sourcesClient),
+      scopedClients.sourcesClient
+    );
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const {
+      query,
+      search_mode: searchMode,
+      include_excluded: includeExcluded,
+    } = params?.query ?? {};
+    const { hits: features } = query
+      ? await kiClient.findFeatures(sourceIds, query, { searchMode, includeExcluded })
+      : await kiClient.getFeatures(sourceIds, { includeExcluded });
+
+    return { features };
+  },
+});
+
+const bulkFeaturesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{sourceId}/features/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk changes to features',
+    description: 'Add or delete features in bulk for a given source',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+    body: z.object({
+      operations: z.array(
+        z.union([
+          z.object({
+            index: z.object({
+              feature: featureUpsertSchema,
+            }),
+          }),
+          z.object({
+            delete: z.object({
+              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            }),
+          }),
+          z.object({
+            exclude: z.object({
+              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            }),
+          }),
+          z.object({
+            restore: z.object({
+              id: z.string().max(MAX_INPUT_STRING_LENGTH),
+            }),
+          }),
+        ])
+      ),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ acknowledged: boolean }> => {
+    const scopedClients = await getScopedClients({
+      request,
+    });
+    const { sourcesClient, licensing } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const {
+      path: { sourceId },
+      body: { operations },
+    } = params;
+
+    await sourcesClient.get(sourceId);
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const kiOps: KIBulkOperation[] = operations.map((op) =>
+      'delete' in op ? { delete: { type: 'feature' as const, id: op.delete.id } } : op
+    );
+    await kiClient.bulk(sourceId, kiOps);
+
+    const hasShrinkingOp = operations.some((op) => 'delete' in op || 'exclude' in op);
+    if (hasShrinkingOp) {
+      try {
+        await kiClient.reconcileSource(sourceId);
+      } catch (err) {
+        logger.warn(
+          `reconcileSource after bulk feature ops failed for source "${sourceId}": ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
+    return { acknowledged: true };
+  },
+});
+
+const bulkFeaturesAcrossStreamsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/features/_bulk',
+  options: {
+    access: 'internal',
+    summary: 'Bulk feature operations across sources',
+    description:
+      'Performs bulk delete / exclude / restore operations on features across multiple sources in a single request. Client sends flat operations keyed by feature UUID; the server resolves which source owns each feature and applies the operations per source.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    body: z.object({
+      operations: z
+        .array(
+          z.union([
+            z.object({ delete: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+            z.object({ exclude: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+            z.object({ restore: z.object({ id: z.string().max(MAX_INPUT_STRING_LENGTH) }) }),
+          ])
+        )
+        .min(1),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ succeeded: number; failed: number; skipped: number }> => {
+    const scopedClients = await getScopedClients({
+      request,
+    });
+    const { licensing, sourcesClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+
+    // Resolve UUID → source_id server-side. UUIDs not found in storage are
+    // idempotent no-ops counted as `skipped` (matching the queries endpoint
+    // pattern, which uses getQueryLinks for the same purpose).
+    const opsByUuid = new Map<string, KIBulkOperation>();
+    for (const op of params.body.operations) {
+      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
+      const kiOp: KIBulkOperation =
+        'delete' in op ? { delete: { type: 'feature', id: op.delete.id } } : op;
+      opsByUuid.set(id, kiOp);
+    }
+    const requestedUuids = Array.from(opsByUuid.keys());
+    const resolved = await kiClient.findFeaturesByIds(requestedUuids);
+    const skippedFromLookup = requestedUuids.length - resolved.length;
+
+    // Group resolved ops by source.
+    const bySource = resolved.reduce<Record<string, KIBulkOperation[]>>(
+      (acc, { id: featureId, source_id: sourceId }) => {
+        const op = opsByUuid.get(featureId);
+        if (!op) {
+          return acc;
+        }
+        if (!acc[sourceId]) {
+          acc[sourceId] = [];
+        }
+        acc[sourceId].push(op);
+        return acc;
+      },
+      {}
+    );
+
+    // kiClient.bulk silently drops exclude/restore ops targeting computed
+    // features (and any stale UUIDs that slipped through between the lookup
+    // and the bulk call). Both classes show up as additional `skipped` count.
+    // Only thrown batches count as `failed`.
+    let succeeded = 0;
+    let failed = 0;
+    let skipped = skippedFromLookup;
+
+    const sourcesWithShrinkingOps = new Set<string>();
+
+    for (const [sourceId, ops] of Object.entries(bySource)) {
+      try {
+        const { applied, skipped: sourceSkipped } = await kiClient.bulk(sourceId, ops);
+        succeeded += applied;
+        skipped += sourceSkipped;
+        if (ops.some((op) => 'delete' in op || 'exclude' in op)) {
+          sourcesWithShrinkingOps.add(sourceId);
+        }
+      } catch (error) {
+        logger.error(
+          `Bulk feature operation failed for source ${sourceId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        failed += ops.length;
+      }
+    }
+
+    for (const sourceId of sourcesWithShrinkingOps) {
+      try {
+        await sourcesClient.get(sourceId);
+        await kiClient.reconcileSource(sourceId);
+      } catch (err) {
+        logger.warn(
+          `reconcileSource after bulk cross-source feature ops failed for source "${sourceId}": ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    }
+
+    return { succeeded, failed, skipped };
+  },
+});
+
+export const internalKIFeatureRoutes = {
+  ...upsertFeatureRoute,
+  ...deleteFeatureRoute,
+  ...listFeaturesRoute,
+  ...listAllFeaturesRoute,
+  ...bulkFeaturesRoute,
+  ...bulkFeaturesAcrossStreamsRoute,
+};

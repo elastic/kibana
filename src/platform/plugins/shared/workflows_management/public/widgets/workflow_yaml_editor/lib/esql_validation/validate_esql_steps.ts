@@ -12,6 +12,7 @@ import type { LineCounter } from 'yaml';
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import {
   applyLiquidMask,
   classifyLiquidPosition,
@@ -20,7 +21,6 @@ import {
 } from './classify_liquid_position';
 import { collectEsqlRegionsFromLookup, type EsqlStepRegion } from './extract_esql_region';
 import type { WorkflowLookup } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { YamlValidationResult } from '../../../../features/validate_workflow_yaml/model/types';
 
 type EsqlValidationDiagnostic = Awaited<ReturnType<typeof validateQuery>>['errors'][number];
 

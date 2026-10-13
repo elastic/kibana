@@ -49,7 +49,7 @@ YAML
 And start Kibana with that config:
 
 ```shell
-yarn start --config config/kibana.cloud.yml
+pnpm start --config config/kibana.cloud.yml
 ```
 
 Note that your local Kibana will run data migrations and probably render the cloud created Kibana unusable after your local Kibana starts up.

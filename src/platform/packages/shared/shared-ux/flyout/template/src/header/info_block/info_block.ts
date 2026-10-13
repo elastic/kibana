@@ -12,13 +12,7 @@ import { infoBlockPart } from './part';
 
 /** Declarative `FlyoutTemplate.Header.InfoBlock`. */
 export const InfoBlock = infoBlockPart.createComponent<FlyoutHeaderInfoBlockProps>({
-  resolve: ({ title, children, size, color, 'data-test-subj': dataTestSubj }) => ({
-    title,
-    value: children,
-    size,
-    color,
-    'data-test-subj': dataTestSubj,
-  }),
+  resolve: ({ children, id, ...blockProps }) => ({ ...blockProps, value: children }),
 });
 
 InfoBlock.displayName = 'FlyoutTemplate.Header.InfoBlock';

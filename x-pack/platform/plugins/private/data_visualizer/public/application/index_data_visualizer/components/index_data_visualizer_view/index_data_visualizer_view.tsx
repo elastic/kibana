@@ -35,6 +35,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { GetAdditionalLinks } from '@kbn/file-upload-common';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import {
   DV_FROZEN_TIER_PREFERENCE,
@@ -64,7 +65,6 @@ import { DocumentCountContent } from '../../../common/components/document_count_
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import {
   MIN_SAMPLER_PROBABILITY,

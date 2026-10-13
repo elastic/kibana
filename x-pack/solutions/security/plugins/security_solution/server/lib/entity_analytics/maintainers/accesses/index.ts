@@ -25,6 +25,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
+    relationshipsClient,
     signal,
     telemetry,
   }) => {
@@ -43,6 +44,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       namespace,
       crudClient,
       entityMetadataClient,
+      relationshipsClient,
       integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
       maintainerName: 'accesses_frequently_and_infrequently',
       signal,

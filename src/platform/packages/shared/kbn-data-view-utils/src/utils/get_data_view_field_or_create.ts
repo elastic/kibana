@@ -12,33 +12,35 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
-export const getDataViewFieldOrCreateFromColumnMeta = ({
+/** The data view field of an ES|QL column, created from the column when the data view has a different type. */
+export const getDataViewFieldOrCreateFromColumn = ({
   dataView,
   fieldName,
-  columnMeta,
+  column,
 }: {
   dataView: DataView;
   fieldName: string;
-  columnMeta?: DatatableColumnMeta; // based on ES|QL query
+  column?: { type: string; esType?: string; source?: 'index' | 'esql-result' };
 }) => {
   const dataViewField = dataView.fields.getByName(fieldName);
 
-  if (!columnMeta) {
+  if (!column) {
     return dataViewField;
   }
 
-  const fieldSpecFromColumnMeta = convertDatatableColumnToDataViewFieldSpec({
+  const fieldSpecFromColumn = convertDatatableColumnToDataViewFieldSpec({
     name: fieldName,
     id: fieldName,
-    meta: columnMeta,
+    meta: { type: column.type as DatatableColumnMeta['type'], esType: column.esType },
+    isComputedColumn: column.source === 'esql-result',
   });
 
   if (
     !dataViewField ||
-    dataViewField.type !== fieldSpecFromColumnMeta.type ||
-    !isEqual(dataViewField.esTypes, fieldSpecFromColumnMeta.esTypes)
+    dataViewField.type !== fieldSpecFromColumn.type ||
+    !isEqual(dataViewField.esTypes, fieldSpecFromColumn.esTypes)
   ) {
-    return dataView.fields.create(fieldSpecFromColumnMeta);
+    return dataView.fields.create(fieldSpecFromColumn);
   }
 
   return dataViewField;

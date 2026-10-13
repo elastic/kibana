@@ -23,6 +23,7 @@ import {
   type SourcesTablePagination,
   type SourcesTableSortingColumn,
 } from './state_machines/sources_table_state_machine';
+import { createUnitRepository } from '../../../services/unit_repository';
 
 export interface SourcesController {
   sources: SourceViewModel[];
@@ -36,6 +37,7 @@ export interface SourcesController {
   sourceName: string;
   sourceNameError?: SourceNameValidationError;
   canCreateSource: boolean;
+  isUnitSaving: boolean;
   createdSource?: SourceViewModel;
   unconfiguredNodeIds: string[];
   refreshUnit: () => void;
@@ -44,6 +46,7 @@ export interface SourcesController {
   setCreateSourceName: (sourceName: string) => void;
   validateCreateSourceName: () => void;
   deleteSource: (sourceId: string) => void;
+  deleteSources: (sourceIds: string[]) => void;
   generateApiKey: (sourceId: string) => void;
   revealedApiKey?: RevealedApiKey;
   apiKeyPrivileges?: SourceApiKeyPrivileges;
@@ -93,14 +96,26 @@ export const useSourcesTable = (): SourcesTableController => {
     core: {
       notifications: { toasts },
     },
+    dependencies: {
+      start: { streams },
+    },
   } = useKibana();
   const apiKeyGenerationDeps = useSourceApiKeyGenerationDeps();
   const loadSourceEnvironment = useSourceEnvironmentLoader();
+  const unitDefinitionRepository = useMemo(
+    () =>
+      createUnitRepository({
+        streamsRepositoryClient: streams.streamsRepositoryClient,
+      }),
+    [streams.streamsRepositoryClient]
+  );
   const tableActorRef = useActorRef(sourcesTableStateMachine, {
     input: {
       apiKeyGenerationDeps,
       toasts,
       loadSourceEnvironment,
+      loadUnitDefinition: unitDefinitionRepository.load,
+      persistUnitDefinition: unitDefinitionRepository.persist,
     },
   });
   const sourcesActorRef = useSelector(tableActorRef, (state) => state.context.sourcesRef);
@@ -197,7 +212,7 @@ export const useSourceEnvironmentLoader = (): SourceEnvironmentLoader => {
       start: { cloud },
     },
   } = useKibana();
-  const managedOtlpPrwEndpointEnabled = core.featureFlags.getBooleanValue(
+  const managedOtlpPrwEndpointEnabled = core.featureFlags.useBooleanValue(
     IS_MANAGED_OTLP_SERVICE_PRW_ENDPOINT_ENABLED,
     false
   );
@@ -270,6 +285,9 @@ export const useSources = ({
         state.context.availableSourceTypes.includes(creation.formData.sourceType)
     );
   });
+  const isUnitSaving = useSelector(sourcesActorRef, (state) =>
+    state.matches({ unitSave: 'saving' })
+  );
   const query = tableState?.query ?? '';
   const selectedSourceIds = useMemo(
     () => tableState?.selectedSourceIds ?? [],
@@ -311,6 +329,10 @@ export const useSources = ({
     (sourceId: string) => sourcesActorRef.send({ type: 'source.delete', sourceId }),
     [sourcesActorRef]
   );
+  const deleteSources = useCallback(
+    (sourceIds: string[]) => sourcesActorRef.send({ type: 'source.deleteMany', sourceIds }),
+    [sourcesActorRef]
+  );
 
   const generateApiKey = useCallback(
     (sourceId: string) => {
@@ -340,7 +362,8 @@ export const useSources = ({
       availableSourceTypes,
       sourceName,
       sourceNameError,
-      canCreateSource,
+      canCreateSource: canCreateSource && !isUnitSaving,
+      isUnitSaving,
       createdSource,
       unconfiguredNodeIds,
       refreshUnit: () => {
@@ -351,6 +374,7 @@ export const useSources = ({
       setCreateSourceName,
       validateCreateSourceName,
       deleteSource,
+      deleteSources,
       generateApiKey,
       revealedApiKey,
       apiKeyPrivileges,
@@ -377,10 +401,12 @@ export const useSources = ({
     [
       availableSourceTypes,
       canCreateSource,
+      isUnitSaving,
       createSource,
       createdSource,
       deleteApiKey,
       deleteSource,
+      deleteSources,
       generateApiKey,
       isGeneratingApiKey,
       isLoadingApiKeys,

@@ -11,12 +11,14 @@ import { buildAnalyzeChat } from './analyze_chat';
 const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
   id: 'my-index',
   managed: false,
+  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ds-my-index' },
   sources: [{ type: 'esql', value: 'FROM logs' }],
   automations: [
     { type: 'workflow', value: 'wf-1' },
     { type: 'workflow', value: 'wf-2' },
   ],
+  traces: [],
   feedback_analysis: { enabled: false, agent_id: 'agent-1' },
   date_created: '2026-01-01T00:00:00.000Z',
   date_modified: '2026-01-01T00:00:00.000Z',

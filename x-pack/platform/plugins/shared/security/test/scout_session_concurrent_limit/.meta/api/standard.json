@@ -1,5 +1,5 @@
 {
-  "sha1": "8f657d20b48f20ddaec2c756e146cbb9098bc155",
+  "sha1": "1c159b293d1b5dc4f99436b51427e3d5c93e7245",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_cleanup.spec.ts",
-        "line": 64,
+        "line": 63,
         "column": 8
       }
     },
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_cleanup.spec.ts",
-        "line": 83,
+        "line": 82,
         "column": 18
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_cleanup.spec.ts",
-        "line": 118,
+        "line": 117,
         "column": 11
       }
     },
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_cleanup.spec.ts",
-        "line": 195,
-        "column": 11
+        "line": 194,
+        "column": 12
       }
     },
     {
@@ -66,7 +66,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_cleanup.spec.ts",
         "line": 215,
-        "column": 11
+        "column": 14
       }
     },
     {
@@ -79,7 +79,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_cleanup.spec.ts",
         "line": 238,
-        "column": 9
+        "column": 5
       }
     },
     {
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_global.spec.ts",
-        "line": 58,
+        "line": 55,
         "column": 5
       }
     },
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_global.spec.ts",
-        "line": 73,
-        "column": 11
+        "line": 71,
+        "column": 23
       }
     },
     {
@@ -117,7 +117,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_global.spec.ts",
-        "line": 111,
+        "line": 108,
         "column": 11
       }
     },
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_global.spec.ts",
-        "line": 131,
-        "column": 5
+        "line": 129,
+        "column": 14
       }
     },
     {
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_session_concurrent_limit/api/tests/session_concurrent_limit_global.spec.ts",
-        "line": 157,
-        "column": 5
+        "line": 154,
+        "column": 11
       }
     }
   ]

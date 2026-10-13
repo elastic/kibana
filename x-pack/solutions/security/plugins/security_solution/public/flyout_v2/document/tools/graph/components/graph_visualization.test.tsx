@@ -233,6 +233,33 @@ describe('GraphVisualization', () => {
       expect(callbacks.onShowDocument).toHaveBeenCalledWith('doc-id', 'logs-*', true);
     });
 
+    it('routes a grouped-events node to onShowGrouped using document _ids, even without event.id', async () => {
+      const { getNodeDocumentMode } = jest.requireMock('@kbn/cloud-security-posture-graph');
+      getNodeDocumentMode.mockReturnValueOnce('grouped-events');
+
+      render(<GraphVisualization {...EVENT_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      onOpenEventPreview?.({
+        documentsData: [
+          { id: 'doc-1', type: 'event', index: 'logs-qualys_vmdr.user_activity-default' },
+          { id: 'doc-2', type: 'event', index: 'logs-qualys_vmdr.user_activity-default' },
+        ],
+      } as never);
+
+      expect(callbacks.onShowGrouped).toHaveBeenCalledWith({
+        docMode: 'grouped-events',
+        documentIds: ['doc-1', 'doc-2'],
+        dataViewId: 'experimental-data-view-pattern',
+        entityItems: [],
+      });
+      expect(mockToasts.addDanger).not.toHaveBeenCalled();
+    });
+
     it('forwards onOpenNetworkPreview straight to GraphInvestigation', async () => {
       render(<GraphVisualization {...EVENT_PROPS} />);
 

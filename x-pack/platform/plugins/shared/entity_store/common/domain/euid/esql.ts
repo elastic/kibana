@@ -16,7 +16,10 @@ import type {
   FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { getEntityDefinitionWithoutId } from '../definitions/registry';
+import {
+  getEntityDefinitionWithoutId,
+  type EntityDefinitionOptions,
+} from '../definitions/registry';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
 import {
   esqlIsNotNullOrEmpty,
@@ -414,8 +417,16 @@ export function getFieldEvaluationsEsqlFromDefinition(
  * @returns An ESQL filter string that checks if the document contains an entity id.
  */
 export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
+  return getEuidEsqlDocumentsContainsIdFilterFromDefinition(
+    getEntityDefinitionWithoutId(entityType)
+  );
+}
+
+/** Same filter for callers that already resolved a definition. */
+export function getEuidEsqlDocumentsContainsIdFilterFromDefinition(
+  definition: EntityDefinitionWithoutId
+) {
+  const { identityField } = definition;
 
   if (isSingleFieldIdentity(identityField)) {
     return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
@@ -440,9 +451,9 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
   outputColumn: string,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  { withTypeId = true, options }: { withTypeId?: boolean; options?: EntityDefinitionOptions } = {}
 ): string {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType, undefined, options);
   const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 

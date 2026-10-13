@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IconType } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
@@ -14,6 +15,8 @@ import type {
   EpisodesSortState,
 } from '../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { EpisodeAction } from '../actions/types';
+import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
 
 export interface EpisodeDataSourceServices {
   http: HttpStart;
@@ -64,12 +67,47 @@ export interface EpisodeSourceHistogram {
   isCapHit: boolean;
 }
 
+export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
+
+export interface SourceActionResult {
+  succeeded: number;
+  failed: number;
+  errors?: string[];
+}
+
+/**
+ * Extension that a data source registers to participate in a common episode action.
+ */
+export interface EpisodeActionExtension<TContext = void> {
+  actionId: string;
+  isCompatible: (ep: AlertEpisode) => boolean;
+  execute: (
+    episodes: AlertEpisode[],
+    http: HttpStart,
+    context?: TContext
+  ) => Promise<SourceActionResult>;
+}
+
+export interface SeverityExtension {
+  value: string;
+  label: string;
+  color: string;
+  sortRank: number;
+  filterDotColor?: string;
+}
+
 export interface EpisodeDataSource {
   id: string;
+  label: string;
+  icon?: IconType;
   queryKeyPrefix: readonly unknown[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;
   fetchTagOptions?: (params: FetchSourceTagOptionsParams) => Promise<string[]>;
   resolveRules?: (params: ResolveSourceRulesParams) => Promise<RuleResponse[]>;
+  actionExtensions?: Array<EpisodeActionExtension<any>>;
+  createActions?: (deps: EpisodeActionsDeps) => EpisodeAction[];
+  severityExtensions?: SeverityExtension[];
+  getRuleDetailsHref?: (ruleId: string) => string | null;
 }

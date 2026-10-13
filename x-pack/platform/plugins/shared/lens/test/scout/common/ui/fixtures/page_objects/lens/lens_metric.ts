@@ -19,6 +19,9 @@ export class LensMetric {
   readonly metricTilesLocator;
   readonly secondaryMetricBadge;
   private readonly secondaryMetricLabel;
+  private readonly secondaryMetric;
+  /** Name tooltip shown on hover when the secondary metric name display is set to `tooltip`. */
+  readonly secondaryMetricNameTooltip;
   /**
    * Added in a render pass after the one `waitForVisualization` settles on — callers that need
    * to assert it appears should poll `count()` before snapshotting via `getMetricVisualizationData`.
@@ -32,6 +35,8 @@ export class LensMetric {
     this.metricTilesLocator = this.metricTiles();
     this.secondaryMetricBadge = this.metricRoot().locator('.echBadge__content');
     this.secondaryMetricLabel = this.metricRoot().locator('.echSecondaryMetric__label');
+    this.secondaryMetric = this.metricRoot().locator('.echSecondaryMetric');
+    this.secondaryMetricNameTooltip = this.page.testSubj.locator('mtrVisSecondaryNameTooltip');
     this.metricProgressBar = this.progressBar();
     this.legacyMetricLabel = this.page.testSubj.locator('metric_label');
     this.legacyMetricValue = this.page.testSubj.locator('metric_value');
@@ -122,6 +127,11 @@ export class LensMetric {
       return undefined;
     }
     return (await this.secondaryMetricBadge.innerText()).trim();
+  }
+
+  /** Hovers the secondary metric, which reveals its name tooltip in `tooltip` name display mode. */
+  async hoverSecondaryMetric() {
+    await this.secondaryMetric.hover();
   }
 
   /** Returns the secondary metric's label text, or `undefined` if not rendered. */

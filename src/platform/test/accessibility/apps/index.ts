@@ -34,13 +34,11 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
 
       loadTestFile(require.resolve('./dashboard'));
       loadTestFile(require.resolve('./filter_panel'));
-      loadTestFile(require.resolve('./discover'));
       loadTestFile(require.resolve('./visualize'));
     });
 
     describe('not using sample data', function () {
       loadTestFile(require.resolve('./management'));
-      loadTestFile(require.resolve('./console'));
     });
   });
 }

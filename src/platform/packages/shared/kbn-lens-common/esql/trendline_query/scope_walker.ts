@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder, isFunctionExpression, isColumn } from '@elastic/esql';
+import { Builder, esql, isFunctionExpression, isColumn, isOptionNode, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 
 /**
@@ -28,6 +28,8 @@ export interface TrackedColumnState {
 interface TransferContext {
   /** When true, KEEP commands missing the column are extended to retain it. */
   ensureKept: boolean;
+  /** When true, STATS commands are grouped by the tracked column. */
+  ensureGrouped: boolean;
 }
 
 type CommandTransfer = (
@@ -69,27 +71,120 @@ const keepTransfer: CommandTransfer = (command, state, { ensureKept }) => {
   return state;
 };
 
+/** Removes the tracked column from DROP so it remains available downstream. */
+const dropTransfer: CommandTransfer = (command, state, { ensureKept }) => {
+  if (!ensureKept) return state;
+
+  const droppedColumnIndex = command.args.findIndex(
+    (arg) => isColumn(arg) && arg.name === state.name
+  );
+  if (droppedColumnIndex !== -1) command.args.splice(droppedColumnIndex, 1);
+  return state;
+};
+
+/**
+ * Carries the tracked column across an aggregation boundary by adding it to
+ * STATS BY. This keeps a time bucket produced upstream available downstream.
+ */
+const statsTransfer: CommandTransfer = (command, state, { ensureGrouped }) => {
+  if (!ensureGrouped) return state;
+
+  const byOption = command.args.find(isOptionNode);
+  const groupedAlias = byOption?.args.find((arg) => {
+    if (!isFunctionExpression(arg) || arg.name !== '=') return false;
+    const [left, rightArg] = arg.args;
+    // Right-hand assignment expressions are represented as argument lists, even when
+    // the grouping expression is a single column (`alias = tracked_column`).
+    const right = Array.isArray(rightArg) && rightArg.length === 1 ? rightArg[0] : rightArg;
+    return (
+      !Array.isArray(left) && !Array.isArray(right) && isColumn(right) && right.name === state.name
+    );
+  });
+  if (groupedAlias && isFunctionExpression(groupedAlias)) {
+    // The aggregation exposes the grouping under its left-hand alias, so later
+    // commands must track that output name rather than the upstream column.
+    const [alias] = groupedAlias.args;
+    if (!Array.isArray(alias) && isColumn(alias)) return { name: alias.name };
+  }
+
+  const isGrouped = byOption?.args.some((arg) => isColumn(arg) && arg.name === state.name);
+  if (isGrouped) return state;
+
+  if (byOption) {
+    byOption.args.push(Builder.expression.column(state.name));
+    return state;
+  }
+
+  // Parse a helper query to obtain a correctly typed BY option AST node.
+  const { root } = Parser.parse(`FROM _x | STATS _x BY ${esql.col(state.name)}`);
+  const helperStats = root.commands.find((candidate) => candidate.name === 'stats');
+  const helperByOption = helperStats?.args.find(isOptionNode);
+  if (!helperByOption) throw new Error('Expected BY option in helper STATS command');
+  command.args.push(helperByOption);
+  return state;
+};
+
 const identityTransfer: CommandTransfer = (_command, state) => state;
 
 const transferFns: Record<string, CommandTransfer> = {
   rename: renameTransfer,
   keep: keepTransfer,
+  drop: dropTransfer,
+  stats: statsTransfer,
 };
 
 /**
- * Walks a tracked column through pipeline commands, applying per-command
- * transfer functions, and returns its final scope state.
- *
- * With `ensureKept`, KEEP commands are mutated so the column survives the
- * whole pipeline segment.
+ * Folds the tracked column's scope state through the pipeline, applying each
+ * command's transfer function in order (RENAME remaps the name, KEEP projects
+ * it, all other commands preserve scope). With `ensureKept`, KEEP commands are
+ * mutated so the column survives the whole segment.
  */
-export const walkTrackedColumn = (
+const walkColumn = (
   commands: ESQLCommand[],
   columnName: string,
-  { ensureKept = false }: { ensureKept?: boolean } = {}
+  { ensureKept, ensureGrouped }: TransferContext
+): TrackedColumnState => {
+  let state = { name: columnName };
+  for (let index = 0; index < commands.length; index++) {
+    const command = commands[index];
+    state = (transferFns[command.name] ?? identityTransfer)(command, state, {
+      ensureKept,
+      ensureGrouped,
+    });
+  }
+  return state;
+};
+
+/**
+ * Resolves the final name of a column after walking pipeline commands.
+ * Read-only: never mutates the AST.
+ */
+export const resolveTrackedColumn = (
+  commands: ESQLCommand[],
+  columnName: string
 ): TrackedColumnState =>
-  commands.reduce<TrackedColumnState>(
-    (state, command) =>
-      (transferFns[command.name] ?? identityTransfer)(command, state, { ensureKept }),
-    { name: columnName }
+  walkColumn(commands, columnName, { ensureKept: false, ensureGrouped: false });
+
+/**
+ * Resolves the final name of a column and mutates KEEP commands along the way
+ * so the column survives the whole pipeline segment.
+ */
+export const trackColumnAndEnsureKept = (
+  commands: ESQLCommand[],
+  columnName: string,
+  {
+    ensureGrouped = false,
+    containingCommands = commands,
+  }: { ensureGrouped?: boolean; containingCommands?: ESQLCommand[] } = {}
+): TrackedColumnState => {
+  const state = walkColumn(commands, columnName, { ensureKept: true, ensureGrouped });
+  // Removing the only DROP argument leaves invalid ES|QL. Use object identity
+  // to remove that command from its containing pipeline when walking a slice.
+  const emptiedDrops = new Set(
+    commands.filter((command) => command.name === 'drop' && command.args.length === 0)
   );
+  for (let index = containingCommands.length - 1; index >= 0; index--) {
+    if (emptiedDrops.has(containingCommands[index])) containingCommands.splice(index, 1);
+  }
+  return state;
+};

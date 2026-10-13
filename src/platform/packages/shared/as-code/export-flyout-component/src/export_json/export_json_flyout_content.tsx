@@ -131,7 +131,7 @@ export const ExportJsonFlyoutContent = <
                       'asCodeExport.exportJson.technicalPreviewBadgeTooltip',
                       {
                         defaultMessage:
-                          'This functionality is experimental and not supported. It may change or be removed at any time.',
+                          'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                       }
                     )}
                     size="s"

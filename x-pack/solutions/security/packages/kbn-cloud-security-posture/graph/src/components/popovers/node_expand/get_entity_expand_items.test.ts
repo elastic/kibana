@@ -17,6 +17,7 @@ import {
   getEntityExpandItems,
   fieldForRole,
   getEntityFilterSpec,
+  getEntityFilterSpecClauses,
   getRelatedEventsFilter,
 } from './get_entity_expand_items';
 import type { EntityFilterActions, EuidFilterApi } from './get_entity_expand_items';
@@ -395,6 +396,20 @@ describe('getEntityFilterSpec', () => {
     expect(JSON.stringify(dsl.bool.must)).toContain('must_not');
   });
 
+  it('uses the resolved identity when a user node has no namespace source fields', () => {
+    const spec = getEntityFilterSpec(
+      'user:multi-actor-2@example.com@gcp',
+      { 'user.id': 'multi-actor-2@example.com' },
+      euidApi,
+      'actor'
+    );
+
+    expect(spec).toEqual({
+      kind: 'resolvedIdentity',
+      fields: { 'user.id': 'multi-actor-2@example.com' },
+    });
+  });
+
   it('rewrites identity fields to the target namespace for the target role', () => {
     const spec = getEntityFilterSpec(
       'user:multi-actor-1@example.com@gcp',
@@ -564,5 +579,59 @@ describe('getRelatedEventsFilter', () => {
     expect(
       getRelatedEventsFilter('user:a@b.com@gcp', { 'user.id': ['', 'a@b.com'] }, 'user')
     ).toEqual({ field: 'related.user', values: ['a@b.com'] });
+  });
+});
+
+describe('getEntityFilterSpecClauses', () => {
+  it('preserves the EUID DSL and namespace translation metadata', () => {
+    const dsl = { term: { 'user.id': 'alice' } };
+    const namespaceSourceValues = { 'data_stream.dataset': 'okta.system' };
+    const getNamespaceSourcePrefix = jest.fn();
+    expect(
+      getEntityFilterSpecClauses(
+        { kind: 'dsl', dsl, namespaceSourceValues, getNamespaceSourcePrefix },
+        'actor'
+      )
+    ).toEqual([{ type: 'entityDsl', dsl, namespaceSourceValues, getNamespaceSourcePrefix }]);
+  });
+
+  it('ANDs every component of a resolved target identity', () => {
+    expect(
+      getEntityFilterSpecClauses(
+        {
+          kind: 'resolvedIdentity',
+          fields: { 'user.name': 'alice', 'host.id': 'workstation' },
+        },
+        'target'
+      )
+    ).toEqual([
+      {
+        type: 'entityDsl',
+        dsl: {
+          bool: {
+            filter: [
+              { term: { 'user.target.name': 'alice' } },
+              { term: { 'host.target.id': 'workstation' } },
+            ],
+          },
+        },
+      },
+    ]);
+  });
+
+  it('keeps fallback candidates as separate additive clauses in the requested role', () => {
+    expect(
+      getEntityFilterSpecClauses(
+        {
+          kind: 'candidateFields',
+          fields: { 'user.id': ['alice', 'alice-id'], 'user.name': 'Alice' },
+        },
+        'target'
+      )
+    ).toEqual([
+      { type: 'equals', field: 'user.target.id', value: 'alice' },
+      { type: 'equals', field: 'user.target.id', value: 'alice-id' },
+      { type: 'equals', field: 'user.target.name', value: 'Alice' },
+    ]);
   });
 });
