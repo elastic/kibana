@@ -137,7 +137,7 @@ describe('createUnresolveAction', () => {
     expect(onSuccess).not.toHaveBeenCalled();
   });
 
-  it('execute: error path calls notifications.toasts.addDanger with BULK_ERROR_TOAST', async () => {
+  it('execute: shows the request error in an expandable error toast', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkActivateEpisodeActions').mockRejectedValue(new Error('network error'));
     const onSuccess = jest.fn();
@@ -145,7 +145,10 @@ describe('createUnresolveAction', () => {
       episodes: [makeEpisode()],
       onSuccess,
     });
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalledWith(
+      expect.objectContaining({ stack: 'e1 — network error' }),
+      expect.objectContaining({ toastMessage: 'network error' })
+    );
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

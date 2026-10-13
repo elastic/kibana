@@ -94,4 +94,16 @@ describe('createSnoozeAction', () => {
     expect(deps.http.post).not.toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
+
+  it('execute: error path calls notifications.toasts.addError', async () => {
+    const deps = makeDeps();
+    jest.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
+    jest.spyOn(bulk, 'bulkSnoozeSeriesActions').mockRejectedValue(new Error('network error'));
+    const onSuccess = jest.fn();
+
+    await createSnoozeAction(deps).execute({ episodes: [makeEpisode()], onSuccess });
+
+    expect(deps.notifications.toasts.addError).toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
 });

@@ -6,6 +6,7 @@
  */
 
 import { isAlertActionNoOpCode, type BulkResponse } from '@kbn/alerting-v2-schemas';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import * as i18n from './translations';
 
 export const uniqueByGroup = <T extends { group_hash: string }>(items: T[]): T[] => {
@@ -20,6 +21,8 @@ export interface BulkOutcome {
   failed: number;
   /** Alerts that already satisfied the request, so the server left them alone. */
   unchanged: number;
+  /** Per-alert failures that should be shown to the user. */
+  errors: BulkResponse['errors'];
 }
 
 /**
@@ -32,29 +35,27 @@ export const readBulkOutcome = ({
   affected_count: processed,
   errors,
 }: BulkResponse): BulkOutcome => {
-  const unchanged = errors.filter(({ error }) => isAlertActionNoOpCode(error.code)).length;
-  return { processed, failed: errors.length - unchanged, unchanged };
+  const failures = errors.filter(({ error }) => !isAlertActionNoOpCode(error.code));
+  const unchanged = errors.length - failures.length;
+  return { processed, failed: failures.length, unchanged, errors: failures };
 };
 
-/**
- * Builds the toast for a bulk alert-action response: success when every alert
- * the server could change was changed, a partial-success warning otherwise.
- * Unchanged alerts count towards neither, so a request that asked for nothing
- * new reports exactly that rather than a failure.
- */
-export const successOrPartialToast = (
-  response: BulkResponse
-): { title: string; color: 'success' | 'warning' } => {
-  const { processed, failed, unchanged } = readBulkOutcome(response);
+export interface BulkActionErrorDetail {
+  id?: string;
+  message: string;
+}
 
-  if (failed > 0) {
-    return {
-      title: i18n.getBulkPartialSuccessToast(processed, processed + failed),
-      color: 'warning',
-    };
+export const getErrorMessage = (error: unknown): string => {
+  if (!(error instanceof Error)) {
+    return error == null ? i18n.UNKNOWN_ERROR : String(error);
   }
 
-  return processed === 0 && unchanged > 0
-    ? { title: i18n.BULK_NO_CHANGES_TOAST, color: 'success' }
-    : { title: i18n.getBulkSuccessToast(processed), color: 'success' };
+  const httpError = error as IHttpFetchError<{ message?: string }>;
+  return httpError.body?.message ?? error.message;
 };
+
+/** Builds the error consumed by Core's expandable error toast. */
+export const createBulkActionError = (errors: BulkActionErrorDetail[], failed: number): Error =>
+  Object.assign(new Error(i18n.getBulkErrorDetailsHeading(failed)), {
+    stack: errors.map(({ id, message }) => (id ? `${id} — ${message}` : message)).join('\n'),
+  });

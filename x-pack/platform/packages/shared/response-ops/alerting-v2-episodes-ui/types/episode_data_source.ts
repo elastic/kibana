@@ -72,6 +72,7 @@ export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';
 export interface SourceActionResult {
   succeeded: number;
   failed: number;
+  unchanged?: number;
   errors?: string[];
 }
 
