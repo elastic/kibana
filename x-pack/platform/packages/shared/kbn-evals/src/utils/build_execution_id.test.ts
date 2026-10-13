@@ -33,6 +33,34 @@ describe('buildExecutionId', () => {
     expect(suiteA).not.toBe(suiteB);
   });
 
+  it('appends the reasoning effort to the model segment', () => {
+    expect(
+      buildExecutionId({
+        baseExecutionId: 'bk-build-1',
+        suiteId: 'significant-events',
+        modelId: 'claude-opus',
+        reasoningEffort: 'high',
+      })
+    ).toBe('bk-build-1::significant-events::claude-opus@high');
+  });
+
+  it('gives the same model at two reasoning efforts distinct execution ids', () => {
+    const low = buildExecutionId({
+      baseExecutionId: 'bk-build-1',
+      suiteId: 'significant-events',
+      modelId: 'claude-opus',
+      reasoningEffort: 'low',
+    });
+    const high = buildExecutionId({
+      baseExecutionId: 'bk-build-1',
+      suiteId: 'significant-events',
+      modelId: 'claude-opus',
+      reasoningEffort: 'high',
+    });
+
+    expect(low).not.toBe(high);
+  });
+
   it('omits the suite id when no suite id is provided (e.g. in-tool evals)', () => {
     expect(
       buildExecutionId({

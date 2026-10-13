@@ -9,6 +9,7 @@ interface BuildExecutionIdArgs {
   baseExecutionId?: string;
   suiteId?: string;
   modelId?: string;
+  reasoningEffort?: string;
 }
 
 /**
@@ -33,12 +34,15 @@ export function buildExecutionId({
   baseExecutionId,
   suiteId,
   modelId,
+  reasoningEffort,
 }: BuildExecutionIdArgs): string | undefined {
   if (!baseExecutionId) {
     return baseExecutionId;
   }
 
-  return [baseExecutionId, suiteId, modelId]
+  const modelSegment = modelId && reasoningEffort ? `${modelId}@${reasoningEffort}` : modelId;
+
+  return [baseExecutionId, suiteId, modelSegment]
     .filter((part): part is string => Boolean(part))
     .join('::');
 }

@@ -304,6 +304,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         baseExecutionId: process.env.TEST_RUN_ID,
         suiteId,
         modelId: model.id,
+        reasoningEffort: model.reasoningEffort,
       });
 
       workerExecutionId.current = executionId;

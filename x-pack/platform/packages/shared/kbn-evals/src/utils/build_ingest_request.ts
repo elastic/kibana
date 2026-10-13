@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Model as InferenceModel } from '@kbn/inference-common';
 import type { IngestScoresRequestBodyInput } from '@kbn/evals-common';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { BuildkiteCiMetadata } from './ci_metadata';
 import type { GitMetadata } from './git_metadata';
 import type { EvaluationCompleteEvent, DatasetRunResult, EvaluatorKind } from '../types';
+import type { EvalModel } from './build_model_from_connector';
 
 // TODO: Keep this in sync with `buildScoreDocuments` in `@kbn/evals-runner`, the
 // workflow/plugin implementation of the same score-ingestion contract. The two are
@@ -26,8 +26,8 @@ type BuildIngestRequestSource =
   | { kind: 'experiments'; experiments: DatasetRunResult[] };
 
 interface BuildIngestRequestArgs {
-  taskModel: InferenceModel;
-  evaluatorModel: InferenceModel;
+  taskModel: EvalModel;
+  evaluatorModel: EvalModel;
   repetitions: number;
   hostName: string;
   gitMetadata: GitMetadata;
@@ -45,9 +45,9 @@ interface BuildableScore {
   score: IngestScore;
 }
 
-/** Narrows an inference model to the `{ id, family?, provider? }` shape scores are stamped with. */
+/** Narrows an eval model to the `{ id, family?, provider?, reasoning_effort? }` shape scores are stamped with. */
 export function toScoreModel(
-  model: InferenceModel
+  model: EvalModel
 ): IngestScoresRequestBodyInput['task_model'] | undefined {
   if (!model.id) {
     return undefined;
@@ -56,6 +56,7 @@ export function toScoreModel(
     id: model.id,
     ...(model.family && { family: model.family }),
     ...(model.provider && { provider: model.provider }),
+    ...(model.reasoningEffort && { reasoning_effort: model.reasoningEffort }),
   };
 }
 

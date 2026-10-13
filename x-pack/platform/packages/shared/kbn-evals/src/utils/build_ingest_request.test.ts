@@ -96,6 +96,20 @@ describe('buildIngestRequest', () => {
     expect(requests[0].scores).toHaveLength(1);
   });
 
+  it('stamps the reasoning effort on the task and judge models when set', () => {
+    const [request] = buildIngestRequest({
+      taskModel: { ...taskModel, reasoningEffort: 'high' },
+      evaluatorModel: { ...evaluatorModel, reasoningEffort: 'low' },
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: { kind: 'event', event: createEvent() },
+    });
+
+    expect(request.task_model).toEqual({ ...taskModel, reasoning_effort: 'high' });
+    expect(request.evaluator_model).toEqual({ ...evaluatorModel, reasoning_effort: 'low' });
+  });
+
   it('includes space_ids when provided and omits them otherwise', () => {
     const withSpaces = buildIngestRequest({
       taskModel,

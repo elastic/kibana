@@ -16,7 +16,7 @@ jest.mock('../utils/tracing', () => ({
 }));
 
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
-import type { Model } from '@kbn/inference-common';
+import type { EvalModel } from '../utils/build_model_from_connector';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { EvaluationDataset, Evaluator } from '../types';
 import { getCurrentTraceId, withEvaluatorSpan, withTaskSpan } from '../utils/tracing';
@@ -30,7 +30,7 @@ describe('KibanaEvalsClient', () => {
     error: jest.fn(),
   } as any;
 
-  const model: Model = {
+  const model: EvalModel = {
     id: 'gpt-4',
     family: ModelFamily.GPT,
     provider: ModelProvider.OpenAI,
@@ -87,6 +87,31 @@ describe('KibanaEvalsClient', () => {
     expect(onEvaluationComplete).toHaveBeenCalledWith(
       expect.objectContaining({ datasetId: 'stored-dataset-id', exampleId: 'stored-example-id' })
     );
+  });
+
+  it('gives the same model at two reasoning efforts distinct experiment ids', async () => {
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const run = async (reasoningEffort?: EvalModel['reasoningEffort']) => {
+      const [result] = await createClient({ model: { ...model, reasoningEffort } }).runExperiment(
+        { datasets: [dataset], task: async () => ({ ok: true }) },
+        []
+      );
+      return result;
+    };
+
+    const [unset, unsetAgain, low, high] = await Promise.all([
+      run(),
+      run(),
+      run('low'),
+      run('high'),
+    ]);
+
+    expect(unset.id).toBe(unsetAgain.id);
+    expect(new Set([unset.id, low.id, high.id]).size).toBe(3);
   });
 
   it('computes a stable datasetId for datasets with the same name', async () => {
