@@ -61,7 +61,7 @@ import {
   toEntityDescriptorMode,
   urlParamKeyForHistoryKey,
 } from '../shared/url_state/flyout_v2_url_param';
-import { EntityViewMode } from '../../flyout/entity_details/shared/types';
+import type { EntityViewMode } from '../../flyout/entity_details/shared/types';
 
 // Lazy-loaded so consumers of this hook don't statically pull the entity flyout graph into their
 // bundle; each chunk only loads when the corresponding flyout is actually opened.
