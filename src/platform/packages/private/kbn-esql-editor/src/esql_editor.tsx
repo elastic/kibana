@@ -109,6 +109,7 @@ const BREAKPOINT_WIDTH = 540;
 
 export interface ESQLEditorFocusApi {
   focus: () => void;
+  acceptPendingVisorReview: () => boolean;
 }
 
 export type ESQLEditorApi = RestorableStateProviderApi & ESQLEditorFocusApi;
@@ -152,7 +153,16 @@ const ESQLEditorInternal = function ESQLEditor({
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  useImperativeHandle(editorApiRef, () => ({ focus: () => editorRef.current?.focus() }), []);
+
+  const acceptPendingVisorReviewRef = useRef<() => boolean>(() => false);
+  useImperativeHandle(
+    editorApiRef,
+    () => ({
+      focus: () => editorRef.current?.focus(),
+      acceptPendingVisorReview: () => acceptPendingVisorReviewRef.current(),
+    }),
+    []
+  );
   const editorModelUriRef = useRef<string | undefined>(undefined);
   const containerRef = useRef<HTMLElement>(null);
   const suppressSuggestionsRef = useRef(false);
@@ -353,6 +363,7 @@ const ESQLEditorInternal = function ESQLEditor({
     onTextLangQuerySubmit,
     onQueryUpdate,
     telemetryService,
+    acceptPendingReviewRef: acceptPendingVisorReviewRef,
   });
 
   // Measure keystroke to React commit by waiting for the code state update.
@@ -701,13 +712,14 @@ const ESQLEditorInternal = function ESQLEditor({
     [onUpdateAndSubmitQuery]
   );
 
-  const { showVisorReview } = useVisorNlToEsql({
+  const { showVisorReview, acceptVisorReview } = useVisorNlToEsql({
     editorRef,
     editorModel,
     onSubmit: visorNlOnSubmit,
     onAfterInsert: expandToFitContent,
     telemetryService,
   });
+  acceptPendingVisorReviewRef.current = acceptVisorReview;
 
   useEffect(() => {
     onVisorNlResultReady?.(showVisorReview);

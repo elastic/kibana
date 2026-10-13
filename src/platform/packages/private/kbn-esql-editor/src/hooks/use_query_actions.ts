@@ -26,6 +26,7 @@ interface UseQueryActionsParams {
   onTextLangQuerySubmit: ESQLEditorProps['onTextLangQuerySubmit'];
   onQueryUpdate: (value: string) => void;
   telemetryService: ESQLEditorTelemetryService;
+  acceptPendingReviewRef: React.MutableRefObject<() => boolean>;
 }
 
 export const useQueryActions = ({
@@ -37,6 +38,7 @@ export const useQueryActions = ({
   onTextLangQuerySubmit,
   onQueryUpdate,
   telemetryService,
+  acceptPendingReviewRef,
 }: UseQueryActionsParams) => {
   const [isQueryLoading, setIsQueryLoading] = useState(true);
   // Read via ref inside onQuerySubmit to avoid recreating the callback on every loading toggle,
@@ -51,6 +53,9 @@ export const useQueryActions = ({
         abortControllerRef.current.abort();
         setIsQueryLoading(false);
       } else {
+        // Running with a pending AI proposal accepts it: the editor still holds both the
+        // original and generated lines, and accepting submits the generated query itself.
+        if (acceptPendingReviewRef.current()) return;
         setIsQueryLoading(true);
         const abc = new AbortController();
         abortControllerRef.current = abc;
@@ -66,7 +71,14 @@ export const useQueryActions = ({
         onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
       }
     },
-    [isLoading, allowQueryCancellation, onTextLangQuerySubmit, telemetryService, editorRef]
+    [
+      isLoading,
+      allowQueryCancellation,
+      onTextLangQuerySubmit,
+      telemetryService,
+      editorRef,
+      acceptPendingReviewRef,
+    ]
   );
 
   const onUpdateAndSubmitQuery = useCallback(

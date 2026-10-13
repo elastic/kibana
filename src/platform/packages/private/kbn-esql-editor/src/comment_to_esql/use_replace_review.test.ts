@@ -220,6 +220,35 @@ describe('useReplaceReview', () => {
     expect(params.onAfterAccept).toHaveBeenCalledWith(REVIEW_STATE);
   });
 
+  it('accept reports whether a review was pending', () => {
+    const params = makeParams();
+    const { editor, executeEdits } = buildEditor();
+    params.editorRef.current = editor;
+    params.editorModel.current = buildModel();
+
+    const { result } = renderHook(() => useReplaceReview(params));
+
+    let accepted: boolean | undefined;
+    act(() => {
+      accepted = result.current.accept();
+    });
+    expect(accepted).toBe(false);
+    expect(executeEdits).not.toHaveBeenCalled();
+
+    act(() => result.current.showReview(REVIEW_STATE));
+    act(() => {
+      accepted = result.current.accept();
+    });
+    expect(accepted).toBe(true);
+    expect(params.onAfterAccept).toHaveBeenCalledWith(REVIEW_STATE);
+
+    act(() => {
+      accepted = result.current.accept();
+    });
+    expect(accepted).toBe(false);
+    expect(params.onAfterAccept).toHaveBeenCalledTimes(1);
+  });
+
   it('cleanup clears decorations and resets the context key', () => {
     const params = makeParams();
     const { editor, clearDecorations, contextKeySet } = buildEditor();

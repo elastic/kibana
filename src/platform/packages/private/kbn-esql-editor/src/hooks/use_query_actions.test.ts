@@ -53,6 +53,7 @@ const defaultParams = () => ({
     .mockResolvedValue(undefined) as unknown as ESQLEditorProps['onTextLangQuerySubmit'],
   onQueryUpdate: jest.fn(),
   telemetryService: createMockTelemetryService(),
+  acceptPendingReviewRef: { current: jest.fn(() => false) },
 });
 
 describe('useQueryActions', () => {
@@ -116,7 +117,22 @@ describe('useQueryActions', () => {
 
       // Should have cancelled, not submitted
       expect(params.onTextLangQuerySubmit).not.toHaveBeenCalled();
+      expect(params.acceptPendingReviewRef.current).not.toHaveBeenCalled();
       expect(result.current.isQueryLoading).toBe(false);
+    });
+
+    it('accepts a pending AI review instead of submitting', () => {
+      const params = defaultParams();
+      params.acceptPendingReviewRef.current.mockReturnValue(true);
+      const { result } = renderHook(() => useQueryActions(params));
+
+      act(() => {
+        result.current.onQuerySubmit(QuerySource.MANUAL);
+      });
+
+      expect(params.acceptPendingReviewRef.current).toHaveBeenCalledTimes(1);
+      expect(params.onTextLangQuerySubmit).not.toHaveBeenCalled();
+      expect(params.telemetryService.trackQuerySubmitted).not.toHaveBeenCalled();
     });
   });
 

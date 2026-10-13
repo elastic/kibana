@@ -41,6 +41,7 @@ interface UseReplaceReviewParams {
  *  - showReview  — call after inserting the generated lines into the model
  *  - cleanup     — clears decorations/widget/keybindings without reverting editor content
  *  - reject      — reverts the editor to before the suggestion and cleans up
+ *  - accept      — keeps the suggestion and drops the original lines; false if nothing was pending
  */
 export const useReplaceReview = ({
   editorRef,
@@ -82,7 +83,7 @@ export const useReplaceReview = ({
 
     cleanup();
 
-    if (!editor || !model || !state) return;
+    if (!editor || !model || !state) return false;
 
     editor.executeEdits(`${editSourceId}-accept`, [
       {
@@ -97,6 +98,7 @@ export const useReplaceReview = ({
     ]);
 
     onAfterAccept?.(state);
+    return true;
   }, [editorRef, editorModel, cleanup, editSourceId, onAfterAccept]);
 
   const reject = useCallback(() => {
@@ -190,12 +192,14 @@ export const useReplaceReview = ({
           // eslint-disable-next-line no-bitwise
           keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.Enter],
           precondition: contextKeyId,
-          run: () => accept(),
+          run: () => {
+            accept();
+          },
         }),
       ];
     },
     [editorRef, euiTheme, contextKeyId, acceptAction, rejectAction, accept, reject]
   );
 
-  return { showReview, cleanup, reject };
+  return { showReview, cleanup, reject, accept };
 };

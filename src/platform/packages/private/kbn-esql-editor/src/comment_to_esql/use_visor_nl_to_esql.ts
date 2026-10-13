@@ -82,7 +82,11 @@ export const useVisorNlToEsql = ({
     []
   );
 
-  const { showReview, reject } = useReplaceReview({
+  const {
+    showReview,
+    reject,
+    accept: acceptVisorReview,
+  } = useReplaceReview({
     editorRef,
     editorModel,
     euiTheme,
@@ -151,5 +155,5 @@ export const useVisorNlToEsql = ({
     [editorRef, editorModel, reject, showReview, onAfterInsert]
   );
 
-  return { showVisorReview };
+  return { showVisorReview, acceptVisorReview };
 };

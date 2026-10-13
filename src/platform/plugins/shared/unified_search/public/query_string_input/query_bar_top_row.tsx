@@ -588,10 +588,12 @@ export const QueryBarTopRow = React.memo(
 
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        // Accepting a pending NL proposal submits the generated query itself.
+        if (esqlEditorRef.current?.acceptPendingVisorReview()) return;
         if (persistedLog && queryRef.current && isOfQueryType(queryRef.current)) {
           persistedLog.add(queryRef.current.query);
         }
-        event.preventDefault();
         onSubmit(
           {
             query: queryRef.current,
