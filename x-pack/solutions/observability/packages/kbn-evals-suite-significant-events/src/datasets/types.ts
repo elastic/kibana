@@ -33,7 +33,7 @@ export interface SnapshotSourceOverride {
 export interface KIQueryGenerationScenario {
   input: {
     scenario_id: string;
-    stream_name: string;
+    source_id: string;
     stream_description: string;
   };
   output: {
@@ -102,7 +102,7 @@ export type { ChronicSeedInput };
 export interface DiscoveryScenario {
   input: {
     scenario_id: string;
-    stream_name: string;
+    source_id: string;
     detections: Array<Partial<Detection>>;
     /**
      * Seeds a synthetic chronic rate-flat failure pattern (steady logs + one backed query KI)

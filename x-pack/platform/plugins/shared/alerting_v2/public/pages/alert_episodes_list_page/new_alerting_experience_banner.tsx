@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiIllustration, EuiSpacer } from '@elastic/eui';
-import { aerospace } from '@elastic/eui-illustrations';
+import { observabilityVideo } from '@elastic/eui-illustrations';
 import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -53,7 +53,7 @@ export const NewAlertingExperienceBanner = () => {
         headingElement="h3"
         title={TITLE}
         text={DESCRIPTION}
-        media={<EuiIllustration type={aerospace} alt={ILLUSTRATION_ALT} />}
+        media={<EuiIllustration type={observabilityVideo} alt={ILLUSTRATION_ALT} />}
         onDismiss={() => setIsDismissed(true)}
         dismissButtonProps={{ 'data-test-subj': 'newAlertingExperienceBannerDismiss' }}
       />
