@@ -28,7 +28,7 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
  * Continuous KI extraction workflow
  *
  * A scheduled workflow that periodically identifies knowledge indicators (KI)
- * across eligible streams. It selects streams, schedules feature identification
+ * across eligible sources. It selects sources, schedules feature identification
  * tasks, and polls their status until completion or timeout.
  */
 
@@ -37,21 +37,22 @@ export const SIGNIFICANT_EVENT_TIERED_FEATURES = [SIGNIFICANT_EVENTS_TIERED_FEAT
 // The continuous extraction workflow used to be a normal workflow created at
 // this hardcoded id in the default space. It is now a managed workflow
 // (`system-streams-ki-continuous-onboarding`). This constant is retained so the
-// legacy workflow can be deleted on-demand when the user disables continuous
-// KI extraction.
+// legacy workflow can be deleted at startup.
+// TODO: remove with the legacy default-space cleanup.
+// https://github.com/elastic/kibana/issues/294271
 export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
   'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.
 //
-// The coordinator starts onboarding for each eligible stream (features AND
-// queries generation) and then polls every stream
-// until it reaches a terminal state. Per-stream onboarding is capped at 30m
+// The coordinator starts onboarding for each eligible source (features AND
+// queries generation) and then polls every source
+// until it reaches a terminal state. Per-source onboarding is capped at 30m
 // and runs in parallel, so the interval must comfortably exceed that ceiling.
 export const COORDINATOR_INTERVAL_MINUTES = 35;
 
-// Stream selection: how many streams to process per run and how often
+// Source selection: how many sources to process per run and how often
 export const DEFAULT_EXTRACTION_INTERVAL_HOURS = 12;
 export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;
@@ -126,3 +127,14 @@ export const DEFAULT_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 80;
 export const MIN_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 0;
 // 101 means "no rule is exempt" — severity scores top out at 100.
 export const MAX_SIG_EVENTS_FLAKY_RULE_EXEMPT_SEVERITY_SCORE = 101;
+
+/**
+ * Agent Builder agent and tool IDs. Plain strings so consumers (e.g. evals) can import them
+ * without loading any server implementation code.
+ */
+export const SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID = 'significant-events.discovery';
+export const KI_QUERY_GENERATION_AGENT_ID = 'significant-events.ki-query-generation';
+export const FEATURE_IDENTIFICATION_AGENT_ID = 'significant-events.feature-identification';
+export const SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID =
+  'platform.sig_events.ki_queries_validate';
+export const FINALIZE_FEATURES_TOOL_ID = 'platform_sig_events_ki_feature_finalize';

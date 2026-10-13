@@ -8,10 +8,18 @@
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-browser';
 
-import type { ListServiceAccountsResponse } from '../../common/service_accounts';
+import type {
+  DeleteServiceAccountResponse,
+  ListServiceAccountsResponse,
+  ListServiceAccountWorkloadsResponse,
+} from '../../common/service_accounts';
 
 export type {
+  DeleteServiceAccountConflictAttributes,
+  DeleteServiceAccountResponse,
+  ListServiceAccountWorkloadsResponse,
   ListServiceAccountsResponse,
+  ServiceAccountBoundWorkload,
   ServiceAccountDirectoryCreator,
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
@@ -19,6 +27,11 @@ export type {
 export interface ListServiceAccountsParams {
   limit?: number;
   after?: string;
+}
+
+export interface DeleteServiceAccountOptions {
+  /** Deletes the account even when workloads are still bound to it. Those workloads stop running. */
+  force?: boolean;
 }
 
 export class ServiceAccountsAPIClient {
@@ -37,5 +50,25 @@ export class ServiceAccountsAPIClient {
         ...(params.after !== undefined ? { after: params.after } : {}),
       },
     });
+  }
+
+  /**
+   * Deletes the account. Unless `force` is set, rejects with a 409 carrying
+   * `DeleteServiceAccountConflictAttributes` when workloads are still bound to it.
+   */
+  public async delete(
+    id: string,
+    { force = false }: DeleteServiceAccountOptions = {}
+  ): Promise<DeleteServiceAccountResponse> {
+    return await this.http.delete<DeleteServiceAccountResponse>(
+      `/internal/security/service_account/${encodeURIComponent(id)}`,
+      { query: { ...(force ? { force: true } : {}) } }
+    );
+  }
+
+  public async listWorkloads(id: string): Promise<ListServiceAccountWorkloadsResponse> {
+    return await this.http.get<ListServiceAccountWorkloadsResponse>(
+      `/internal/security/service_account/${encodeURIComponent(id)}/workloads`
+    );
   }
 }

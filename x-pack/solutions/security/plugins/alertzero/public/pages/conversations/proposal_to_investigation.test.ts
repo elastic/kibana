@@ -25,57 +25,29 @@ const baseProposal: ProposalItem = {
 
 describe('proposalToInvestigation', () => {
   describe('title derivation', () => {
-    it('titles the card with the investigation it belongs to', () => {
+    it('titles the card with the proposal title', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
-        conversationTitle: 'My conversation',
-        actionWorkflowId: 'wf-1',
-      });
-      expect(result.title).toBe('My conversation');
-    });
-
-    it('never titles the card with the action, which is already the call to action', () => {
-      // Titling by action name loses the only thing that says which incident this
-      // decision is about, and repeats the CTA label right beside it.
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        // What the server stores when the caller names nothing itself.
         title: 'Isolate host',
-        action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
         actionWorkflowId: 'system-alertzero-action-isolate-host',
       });
 
-      expect(result.title).not.toBe('Isolate host');
-      expect(result.title).not.toBe('system-alertzero-action-isolate-host');
+      expect(result.title).toBe('Isolate host');
       expect(result.primaryActionLabel).toBe('Isolate host');
     });
 
-    // The card renders the summary as plain text, so a markdown comment
-    // arrived as literal asterisks and headings.
-    it('summarises the row with the title rather than the markdown comment', () => {
+    it('puts the conversation title on the second line', () => {
       const result = proposalToInvestigation({
         ...baseProposal,
-        title: 'Tune the Okta rule',
-        comment: '**Bold heading**\n\nSome *markdown* body',
+        conversationTitle: 'My conversation',
       });
 
-      expect(result.summary).toBe('Tune the Okta rule');
-    });
-
-    it('labels the row with the proposal title over the action name', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        title: 'Tune the Okta rule',
-        action: { name: 'Edit rule' } as ProposalWithMetadata['action'],
-        actionWorkflowId: 'system-alertzero-action-edit-rule',
-      });
-
-      expect(result.primaryActionLabel).toBe('Tune the Okta rule');
+      expect(result.summary).toBe('My conversation');
     });
 
     it('falls back to a placeholder when the conversation title could not be read', () => {
       const result = proposalToInvestigation({ ...baseProposal });
-      expect(result.title).toBe('Untitled investigation');
+      expect(result.summary).toBe('Untitled investigation');
     });
   });
 
@@ -114,7 +86,7 @@ describe('proposalToInvestigation', () => {
         status: 'succeeded',
         actionInput: { alertIds: ['a1', 'a2', 'a3'], reason: 'false_positive' },
       });
-      expect(result.primaryActionLabel).toBe('3 alerts closed as false positive');
+      expect(result.title).toBe('3 alerts closed as false positive');
     });
 
     it('singularises "alert" when count is 1', () => {
@@ -124,7 +96,7 @@ describe('proposalToInvestigation', () => {
         status: 'succeeded',
         actionInput: { alertIds: ['a1'], reason: 'false_positive' },
       });
-      expect(result.primaryActionLabel).toBe('1 alert closed as false positive');
+      expect(result.title).toBe('1 alert closed as false positive');
     });
 
     it.each(['no_action', 'expired', 'failed'] as const)(
@@ -138,7 +110,7 @@ describe('proposalToInvestigation', () => {
           action: closeAction,
           actionInput: { alertIds: ['a1', 'a2'], reason: 'false_positive' },
         });
-        expect(result.primaryActionLabel).toBe('Close alerts as false positive');
+        expect(result.title).toBe('Close alerts as false positive');
       }
     );
 
@@ -151,7 +123,7 @@ describe('proposalToInvestigation', () => {
         action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
         actionInput: { alertIds: ['a1'] },
       });
-      expect(result.primaryActionLabel).toBe('Isolate host');
+      expect(result.title).toBe('Isolate host');
     });
 
     it('falls back to the proposal title when alertIds is absent', () => {
@@ -161,7 +133,16 @@ describe('proposalToInvestigation', () => {
         status: 'succeeded',
         title: 'Close alerts as false positive',
       });
-      expect(result.primaryActionLabel).toBe('Close alerts as false positive');
+      expect(result.title).toBe('Close alerts as false positive');
+    });
+
+    it('labels a decided row with its conversation title, which the compact row prints second', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt,
+        conversationTitle: 'My conversation',
+      });
+      expect(result.primaryActionLabel).toBe('My conversation');
     });
 
     it('does not override primaryActionLabel for pending proposals', () => {

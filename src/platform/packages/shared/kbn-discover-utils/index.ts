@@ -73,6 +73,7 @@ export {
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  getDataViewFieldFromDataSource,
   DiscoverFlyouts,
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,

@@ -14,7 +14,7 @@ import type { InstructionMode } from '../automation_form_values';
 const onInstructionsChange = jest.fn();
 
 const Instructions = () => {
-  const [mode, setMode] = useState<InstructionMode>('ask');
+  const [mode, setMode] = useState<InstructionMode>('investigate');
   return (
     <I18nProvider>
       <AutomationInstructions
@@ -38,20 +38,20 @@ describe('AutomationInstructions', () => {
     expect(onInstructionsChange).toHaveBeenCalledWith('Find the cause');
   });
 
-  it('switches between Ask and Investigate modes', async () => {
+  it('switches between Investigate and Ask modes', async () => {
     render(<Instructions />);
 
     expect(screen.getByTestId('automationInstructions')).toHaveAttribute(
       'placeholder',
-      'Ask a question when this automation runs…'
+      'Describe how Nightshift should investigate and respond when this automation runs…'
     );
     fireEvent.click(screen.getByTestId('automationInstructionMode'));
-    fireEvent.click(await screen.findByTestId('automationInstructionMode-investigate'));
+    fireEvent.click(await screen.findByTestId('automationInstructionMode-ask'));
 
-    expect(screen.getByTestId('automationInstructionMode')).toHaveTextContent('Investigate');
+    expect(screen.getByTestId('automationInstructionMode')).toHaveTextContent('Ask');
     expect(screen.getByTestId('automationInstructions')).toHaveAttribute(
       'placeholder',
-      'Describe how Nightshift should investigate and respond when this automation runs…'
+      'Ask a question when this automation runs…'
     );
   });
 });

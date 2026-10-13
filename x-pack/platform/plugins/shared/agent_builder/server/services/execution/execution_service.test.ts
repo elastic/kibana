@@ -158,6 +158,7 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
+    security: {} as any,
     taskManager,
     inference,
     conversationService: conversationService as any,
@@ -1316,6 +1317,19 @@ describe('AgentExecutionService', () => {
       const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
       const { roundId } = agentParams as { roundId?: string };
       expect(events[0].id).toBe(`${roundId}::user_message`);
+    });
+
+    it('writes nothing to an existing conversation it does not store, and records the run as such', async () => {
+      await converse({ storeConversation: false });
+
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect(agentParams).toMatchObject({
+        conversationId: 'conversation-1',
+        storeConversation: false,
+        conversationOperation: 'UPDATE',
+      });
     });
 
     it('writes the opening user message without waiting for a refresh', async () => {

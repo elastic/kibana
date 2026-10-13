@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
+import { EuiComboBox, EuiFormHelpText, EuiFormRow, EuiTextColor } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
 import type { FieldConfig, FieldHook, ValidationConfig } from '../../shared_imports';
@@ -25,6 +26,7 @@ interface Props {
   options$: Observable<TimestampOption[]>;
   isLoadingOptions$: Observable<boolean>;
   matchedIndices$: Observable<MatchedIndicesSet>;
+  optionsError$: Observable<Error | undefined>;
   disabled?: boolean;
 }
 
@@ -72,14 +74,49 @@ const timestampFieldHelp = i18n.translate('indexPatternEditor.editor.form.timeFi
   defaultMessage: 'Select a timestamp field for use with the global time filter.',
 });
 
+const getTimestampOptionsErrorText = (error: Error) =>
+  i18n.translate('indexPatternEditor.editor.form.timeFieldsError', {
+    defaultMessage: "Couldn't retrieve the list of timestamp fields: {message}",
+    values: { message: error.message },
+  });
+
+const getHelpText = ({
+  options,
+  isLoadingOptions,
+  hasMatchedIndices,
+  optionsError,
+}: {
+  options: TimestampOption[];
+  isLoadingOptions: boolean;
+  hasMatchedIndices: boolean;
+  optionsError?: Error;
+}): ReactNode => {
+  if (!isLoadingOptions && optionsError) {
+    return (
+      <EuiTextColor color="danger" data-test-subj="timestampFieldError">
+        {getTimestampOptionsErrorText(optionsError)}
+      </EuiTextColor>
+    );
+  }
+  if (!isLoadingOptions && hasMatchedIndices && !options.length) {
+    return noTimestampOptionText;
+  }
+  if (options.length) {
+    return timestampFieldHelp;
+  }
+  return <>&nbsp;</>;
+};
+
 export const TimestampField = ({
   options$,
   isLoadingOptions$,
   matchedIndices$,
+  optionsError$,
   disabled,
 }: Props) => {
   const options = useObservable<TimestampOption[]>(options$, []);
   const isLoadingOptions = useObservable<boolean>(isLoadingOptions$, false);
+  const optionsError = useObservable<Error | undefined>(optionsError$);
   const hasMatchedIndices = !!useObservable(matchedIndices$, matchedIndiciesDefault)
     .exactMatchedIndices.length;
 
@@ -89,10 +126,7 @@ export const TimestampField = ({
   }));
 
   const timestampConfig = useMemo(() => getTimestampConfig(options), [options]);
-  const selectTimestampHelp = options.length ? timestampFieldHelp : '';
-
-  const timestampNoFieldsHelp =
-    options.length === 0 && !isLoadingOptions && hasMatchedIndices ? noTimestampOptionText : '';
+  const helpText = getHelpText({ options, isLoadingOptions, hasMatchedIndices, optionsError });
 
   return (
     <UseField<EuiComboBoxOptionOption<string>> config={timestampConfig} path="timestampField">
@@ -107,8 +141,7 @@ export const TimestampField = ({
             optionsAsComboBoxOptions={optionsAsComboBoxOptions}
             isLoadingOptions={isLoadingOptions}
             disabled={disabled}
-            timestampNoFieldsHelp={timestampNoFieldsHelp}
-            selectTimestampHelp={selectTimestampHelp}
+            helpText={helpText}
           />
         );
       }}
@@ -121,8 +154,7 @@ interface TimestampFieldRendererProps {
   optionsAsComboBoxOptions: Array<EuiComboBoxOptionOption<string>>;
   isLoadingOptions: boolean;
   disabled?: boolean;
-  timestampNoFieldsHelp: string;
-  selectTimestampHelp: string;
+  helpText: ReactNode;
 }
 
 const TimestampFieldRenderer = ({
@@ -130,8 +162,7 @@ const TimestampFieldRenderer = ({
   optionsAsComboBoxOptions,
   isLoadingOptions,
   disabled,
-  timestampNoFieldsHelp,
-  selectTimestampHelp,
+  helpText,
 }: TimestampFieldRendererProps) => {
   const { label, value, setValue, reset } = field;
   const wasValueInTheListRef = useRef(false);
@@ -202,9 +233,7 @@ const TimestampFieldRenderer = ({
             data-is-loading={isLoadingOptions ? '1' : '0'}
             fullWidth
           />
-          <EuiFormHelpText>
-            {timestampNoFieldsHelp || selectTimestampHelp || <>&nbsp;</>}
-          </EuiFormHelpText>
+          <EuiFormHelpText>{helpText}</EuiFormHelpText>
         </>
       </EuiFormRow>
     </>

@@ -49,7 +49,7 @@ apiTest.describe(
             severity: 'high',
             summary: 'Suspicious PowerShell',
             close_reason: 'resolved', // Intentionally set; the escalation must NOT inherit it.
-            workflow_execution_id: 'wf-scout-test',
+            workflow_execution_ids: ['wf-scout-test'],
           },
         },
         responseType: 'json',
@@ -106,7 +106,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'does NOT copy workflow_execution_id — investigation-only field',
+      'does NOT copy workflow_execution_ids — investigation-only field',
       async ({ apiClient }) => {
         const response = await apiClient.post(CREATE_ESCALATION_PATH, {
           headers: { ...INTERNAL_HEADERS, ...cookieHeader },
@@ -119,7 +119,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        expect(response.body.metadata?.workflow_execution_id).toBeUndefined();
+        expect(response.body.metadata?.workflow_execution_ids).toBeUndefined();
         if (response.body.id) createdIds.push(response.body.id);
       }
     );

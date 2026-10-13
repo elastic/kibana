@@ -82,8 +82,7 @@ const defaultProps: RulesListTableProps = {
   onBulkDisable: jest.fn(),
   onBulkDelete: jest.fn(),
   onBulkUpdateApiKey: jest.fn(),
-  onNavigateToDetails: jest.fn(),
-  onExpand: jest.fn(),
+  onOpenSummary: jest.fn(),
   onQuickEdit: jest.fn(),
   onEdit: jest.fn(),
   onClone: jest.fn(),
@@ -133,19 +132,23 @@ describe('RulesListTable', () => {
     it('renders a generic empty state when there are no rules', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: false });
 
-      expect(screen.getByText('No rules found.')).toBeInTheDocument();
+      expect(screen.getByText('No Universal rules found.')).toBeInTheDocument();
     });
 
     it('renders a search-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: 'prod' });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders a filter-specific empty state when no rules match', () => {
       renderTable({ items: [], totalItemCount: 0, search: '', hasActiveFilters: true });
 
-      expect(screen.getByText('No rules match your search or filters.')).toBeInTheDocument();
+      expect(
+        screen.getByText('No Universal rules match your search or filters.')
+      ).toBeInTheDocument();
     });
 
     it('renders the Source column with extracted index pattern', () => {
@@ -569,13 +572,20 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
     });
 
-    it('calls onNavigateToDetails when rule name link is clicked', () => {
-      const onNavigateToDetails = jest.fn();
-      renderTable({ onNavigateToDetails });
+    it('calls onOpenSummary when rule name link is clicked', () => {
+      const onOpenSummary = jest.fn();
+      renderTable({ onOpenSummary });
 
       fireEvent.click(screen.getByTestId('ruleNameLink-rule-1'));
 
-      expect(onNavigateToDetails).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(onOpenSummary).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+    });
+
+    it('does not render an expand button', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('expandRule-rule-2')).not.toBeInTheDocument();
     });
   });
 
@@ -624,29 +634,11 @@ describe('RulesListTable', () => {
       expect(screen.getByTestId('ruleEnabledBadge-rule-2')).toHaveTextContent('Disabled');
     });
 
-    it('keeps read-only affordances (name link, expand) available', () => {
+    it('keeps the rule name link available', () => {
       renderTable({ canWrite: false });
 
       expect(screen.getByTestId('ruleNameLink-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-    });
-  });
-
-  describe('expand button', () => {
-    it('renders an expand button for each row', () => {
-      renderTable();
-
-      expect(screen.getByTestId('expandRule-rule-1')).toBeInTheDocument();
-      expect(screen.getByTestId('expandRule-rule-2')).toBeInTheDocument();
-    });
-
-    it('calls onExpand with the row rule when the expand button is clicked', () => {
-      const onExpand = jest.fn();
-      renderTable({ onExpand });
-
-      fireEvent.click(screen.getByTestId('expandRule-rule-1'));
-
-      expect(onExpand).toHaveBeenCalledWith(expect.objectContaining({ id: 'rule-1' }));
+      expect(screen.queryByTestId('expandRule-rule-1')).not.toBeInTheDocument();
     });
   });
 });
