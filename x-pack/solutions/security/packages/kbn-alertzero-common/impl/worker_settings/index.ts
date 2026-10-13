@@ -72,6 +72,7 @@ export {
 export {
   applyWorkerSettingsWrite,
   diffWorkerSettings,
+  formatCrossFieldIssues,
   formatWorkerSettingsIssues,
   touchesWorkerSettings,
 } from './contract';
@@ -94,6 +95,17 @@ export {
   RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
 } from './detection_watch';
-export { ALERT_TRIAGE_DEFAULT_EXTRAS } from './floor_watch';
+export {
+  ALERT_TRIAGE_DEFAULT_EXTRAS,
+  BUDGET_PER_HOUR_DEFAULT,
+  BUDGET_PER_HOUR_MAX,
+  BUDGET_PER_HOUR_MIN,
+  TRIAGE_ALERT_COST,
+  TRIAGE_BATCH_OVERHEAD_COST,
+  getMinBudgetPerHour,
+  LOOKBACK_HOURS_DEFAULT,
+  LOOKBACK_HOURS_MAX,
+  LOOKBACK_HOURS_MIN,
+} from './floor_watch';
 export { CONTINUOUS_THREAT_HUNT_SETTINGS } from './hunt_watch';
 export type { WorkerSettingsDeclaration } from './types';

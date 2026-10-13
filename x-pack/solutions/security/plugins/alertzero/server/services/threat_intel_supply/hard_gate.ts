@@ -31,6 +31,22 @@ const checkReportsIndexState = async (
 };
 
 /**
+ * The reports index template sets `dynamic: strict`; an index created by a write
+ * before the template existed does not. Failed reads count as managed.
+ */
+const checkReportsIndexManaged = async (esClient: ElasticsearchClient): Promise<boolean> => {
+  try {
+    const response = await esClient.indices.getMapping({
+      index: THREAT_REPORTS_INDEX,
+      expand_wildcards: ['open', 'hidden'],
+    });
+    return Object.values(response).every((entry) => entry.mappings?.dynamic === 'strict');
+  } catch {
+    return true;
+  }
+};
+
+/**
  * Verifies report-content semantic_text embedding endpoints. Missing or
  * unreachable endpoints yield `embedding_endpoint_unavailable`.
  */
@@ -73,8 +89,9 @@ const checkEmbeddingEndpoints = async (
 
 /**
  * Hard-gate for enabling Continuous Threat Hunt: readiness `blocked` (reports
- * index missing / unreadable) or `embedding_endpoint_unavailable`. Does not
- * gate on GenAI enrich connector or usable-report count.
+ * index missing / unreadable / created without its template) or
+ * `embedding_endpoint_unavailable`. Does not gate on GenAI enrich connector or
+ * usable-report count.
  */
 export const evaluateHuntSupplyHardGate = async ({
   esClient,
@@ -93,6 +110,11 @@ export const evaluateHuntSupplyHardGate = async ({
   }
 
   if (reportsIndexState !== 'exists') {
+    return { ok: false, reasonCodes };
+  }
+
+  if (!(await checkReportsIndexManaged(esClient))) {
+    reasonCodes.push('reports_index_unmanaged');
     return { ok: false, reasonCodes };
   }
 

@@ -7,6 +7,12 @@
 
 import { parse } from 'yaml';
 import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
+import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
+import {
+  ASSET_CRITICALITY_LEVELS,
+  CONFIRMED_FINDING_CRITICALITY,
+  CRITICAL_FINDING_CRITICALITY,
+} from '../../common/proposals/asset_criticality';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
@@ -320,6 +326,10 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
+      // The gate reads the Proposal under its id to tell a lost race from any other failed create.
+      // Imported rather than typed, with the route's own `{id}` swapped for the gate's template,
+      // so a moved route fails here instead of 404ing on the first lost race.
+      PROPOSAL_BY_ID_URL.replace('{id}', '{{ inputs.proposalId }}'),
       // Owned by agentic investigations; imported rather than typed so a moved route fails here.
       IMPACT_INTERNAL_URL,
     ]);
@@ -367,6 +377,61 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
+    });
+  });
+
+  // Packaging ranks the asset criticality levels when it resolves a slot, and the proposal gate
+  // ranks them again in Liquid when it says whether a race winner covers a finding. Both read
+  // the same list, and the action only accepts what its own definition declares, so a level added
+  // in one place and not the others would start being proposed while reading as unknown, or be
+  // proposed and then refused. This keeps the three together.
+  describe('asset criticality levels', () => {
+    const definitionYaml = (id: string): string => {
+      const definition = getManagedWorkflowDefinition(id);
+      if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
+        throw new Error(`Managed definition ${id} has no yaml`);
+      }
+      return definition.yaml;
+    };
+
+    /** Finds an `enum` declared under a property of this name, wherever the schema nests it. */
+    const enumOf = (node: unknown, property: string): unknown[] | undefined => {
+      if (!node || typeof node !== 'object') {
+        return undefined;
+      }
+      const record = node as Record<string, unknown>;
+      const declared = record[property] as { enum?: unknown[] } | undefined;
+      if (declared?.enum) {
+        return declared.enum;
+      }
+      for (const value of Object.values(record)) {
+        const found = enumOf(value, property);
+        if (found) {
+          return found;
+        }
+      }
+      return undefined;
+    };
+
+    it('are the ones the Set asset criticality action accepts, in the order the resolver ranks them', () => {
+      const action = parse(definitionYaml('system-alertzero-action-set-asset-criticality'));
+
+      // The action's enum is the source; the order is the shared list's, weakest first.
+      expect(enumOf(action, 'criticality_level')).toEqual([...ASSET_CRITICALITY_LEVELS]);
+    });
+
+    it('include both levels packaging proposes, the critical one ranked above the confirmed one', () => {
+      expect(ASSET_CRITICALITY_LEVELS).toContain(CONFIRMED_FINDING_CRITICALITY);
+      expect(ASSET_CRITICALITY_LEVELS).toContain(CRITICAL_FINDING_CRITICALITY);
+      expect(ASSET_CRITICALITY_LEVELS.indexOf(CRITICAL_FINDING_CRITICALITY)).toBeGreaterThan(
+        ASSET_CRITICALITY_LEVELS.indexOf(CONFIRMED_FINDING_CRITICALITY)
+      );
+    });
+
+    it('are the list the proposal gate ranks in its lost-race note', () => {
+      const gate = definitionYaml(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
+
+      expect(gate).toContain(`'${ASSET_CRITICALITY_LEVELS.join(',')}' | split: ','`);
     });
   });
 });

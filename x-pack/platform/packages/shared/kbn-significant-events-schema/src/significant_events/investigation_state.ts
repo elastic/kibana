@@ -129,7 +129,7 @@ export const investigationImpactEntitySchema = lazySchema(() =>
     type: z.string().max(MAX_ID_LENGTH).optional(),
     /** KI feature_id when this entity is backed by a Knowledge Indicator. */
     feature_id: z.string().max(MAX_ID_LENGTH).optional(),
-    stream_name: z.string().max(MAX_ID_LENGTH).optional(),
+    source_slug: z.string().max(MAX_ID_LENGTH).optional(),
     /** Evidence of this entity's impact — ideally a chart of its failure signal. */
     evidence: investigationEvidenceSchema.optional(),
   })
