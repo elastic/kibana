@@ -19,7 +19,7 @@ import type {
   AgentTypeRegistry,
   AiIndexResolver,
 } from '@kbn/agent-builder-server/agents';
-import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { chatAgentTypeId, kiRetrievalSkillId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { defaultAiIndices } from './default_ai_indices';
 import { createConfigurationResolver } from './resolve_configuration';
@@ -75,7 +75,11 @@ export class AgentsService {
 
     this.typeRegistry.register({
       id: chatAgentTypeId,
-      baseConfiguration: { ai_indices: Object.keys(defaultAiIndices) },
+      // The skill hides itself in spaces where the Context Engine is off.
+      baseConfiguration: {
+        ai_indices: Object.keys(defaultAiIndices),
+        skill_ids: [kiRetrievalSkillId],
+      },
     });
 
     return {
