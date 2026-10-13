@@ -8,8 +8,8 @@
 // Placeholder model for the prototype. Real estimates will come from Elasticsearch, which knows the
 // resource curves and the project's data. These constants are illustrative, not pricing.
 
-/** Estimates are expressed per this much data. */
-export const ESTIMATE_DATA_GB = 10;
+/** Estimates are expressed per GB of data. */
+const ESTIMATE_DATA_GB = 1;
 // Data stream estimates spread that data evenly across this many days of age.
 const DATA_STREAM_AGE_DAYS = 30;
 const DATA_STREAM_GB_PER_DAY = ESTIMATE_DATA_GB / DATA_STREAM_AGE_DAYS;
@@ -24,6 +24,9 @@ const PREWARM_AT_REST_MULTIPLIER = 1.1;
 const PIN_AT_REST_MULTIPLIER = 1.1;
 // Share of each period's data kept cached at boost 1, loosely following the design doc's curves.
 const PERIOD_CACHE_RATIOS = { recent: 1, standard: 0.5, background: 0.05 } as const;
+
+/** A round, illustrative price for proofs of concept. It isn't Elastic pricing, which varies by region. */
+export const ILLUSTRATIVE_USD_PER_VCU_HOUR = 0.1;
 
 export interface IndicesEstimateInput {
   minBoost: number;
