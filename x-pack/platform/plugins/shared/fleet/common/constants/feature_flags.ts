@@ -16,3 +16,9 @@ export const ENABLE_KAFKA_OAUTH2_AUTH_FLAG = 'fleet.enableKafkaOAuth2Auth';
 
 /** LaunchDarkly flag that gates creation and management of OTLP outputs. Fallback is false. */
 export const ENABLE_OTLP_OUTPUT_FLAG = 'fleet.enableOtlpOutput';
+
+/**
+ * LaunchDarkly flag that makes Fleet also deploy and assign agents to a `<policy id>#sentinel` copy of every
+ * agent policy, so version-specific policy code paths are exercised by default. Fallback is false.
+ */
+export const ENABLE_SENTINEL_POLICY_VERSION_FLAG = 'fleet.enableSentinelPolicyVersion';
