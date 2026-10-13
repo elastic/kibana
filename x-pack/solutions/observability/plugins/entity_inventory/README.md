@@ -8,4 +8,4 @@ The plugin is disabled by default. To enable it, add the following to `kibana.ym
 xpack.entityInventory.enabled: true
 ```
 
-It currently contains no functionality: no routes, UI or query logic.
+At start it logs the names of the entity definitions registered in the entity store. It has no routes, UI or query logic yet.
