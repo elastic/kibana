@@ -12,6 +12,7 @@ import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import type {
   LensAppState,
   LensAppServices,
@@ -47,7 +48,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
-import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
+import { trackCreateUiCounterEvents, trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
@@ -344,6 +345,7 @@ export function App({
       if (telemetryEvents && telemetryEvents.length) {
         trackSaveUiCounterEvents(telemetryEvents);
       }
+      const isNewVisualization = !persistedDoc;
       try {
         const newState = await runSaveLensVisualization(
           {
@@ -364,6 +366,9 @@ export function App({
           saveProps,
           options
         );
+        if (isNewVisualization) {
+          trackCreateUiCounterEvents(isTextBasedAttributes(currentDoc) ? 'esql' : 'dsl');
+        }
         if (newState) {
           dispatchSetState(newState);
           setIsSaveModalVisible(false);

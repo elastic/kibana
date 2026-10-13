@@ -31,11 +31,19 @@ const RENDER_EVENT_PREFIX = `render_lens_`;
 
 const SAVE_EVENT_PREFIX = `save_lens_`;
 
+const CREATE_EVENT_PREFIX = `create_lens_`;
+
 /** @internal **/
 export const trackSaveUiCounterEvents = (
   events: string | string[],
   context?: KibanaExecutionContext
 ) => trackUiCounterEvents(events, context, SAVE_EVENT_PREFIX);
+
+/** @internal **/
+export const trackCreateUiCounterEvents = (
+  events: string | string[],
+  context?: KibanaExecutionContext
+) => trackUiCounterEvents(events, context, CREATE_EVENT_PREFIX);
 
 /** @internal **/
 export const trackUiCounterEvents = (

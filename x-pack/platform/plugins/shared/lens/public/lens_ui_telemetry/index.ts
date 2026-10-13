@@ -10,5 +10,6 @@ export {
   getUsageCollectionStart,
   trackUiCounterEvents,
   trackSaveUiCounterEvents,
+  trackCreateUiCounterEvents,
   getExecutionContextEvents,
 } from './track_counter_events';
