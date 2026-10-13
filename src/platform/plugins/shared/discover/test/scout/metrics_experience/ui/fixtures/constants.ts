@@ -40,6 +40,16 @@ export const PARTIAL_DIMENSION_SCENARIO = {
  */
 export const DISCOVER_TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 
+/**
+ * Local storage key prefix for the "Recently explored" metrics list. Mirrors
+ * `RECENT_METRICS_STORAGE_KEY` in the Discover plugin's
+ * `public/context_awareness/profile_providers/common/metrics_data_source_profile/accessor/recent_metrics_storage.ts`
+ * (not exported); keep in sync if that key ever changes. The full key appends
+ * `-${btoa(basePath)}`, where `basePath` includes the space prefix.
+ */
+export const RECENTLY_EXPLORED_METRICS_STORAGE_KEY_PREFIX =
+  'discover:metricsExperience:recentlyExplored';
+
 // The Security serverless viewer role only grants read access to `metrics-endpoint.metadata_current_*`.
 // Our test index doesn't match that pattern. Instead of renaming the index to fit, we prefer a custom role that explicitly grants read access.
 const METRICS_ES_INDEX_PRIVILEGES = [
