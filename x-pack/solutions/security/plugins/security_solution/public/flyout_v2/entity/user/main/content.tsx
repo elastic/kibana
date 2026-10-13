@@ -94,6 +94,11 @@ export interface ContentProps {
    * their `useQueryInspector` registration
    */
   riskScoreQueryId: string;
+  /**
+   * True when the flyout shows a resolution group (alias records were loaded for the open target).
+   * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
+   */
+  isGroupView?: boolean;
 }
 
 /**
@@ -120,6 +125,7 @@ export const Content = ({
   hideHeaderIcons = false,
   onShowEntity,
   riskScoreQueryId,
+  isGroupView = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
   const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
@@ -178,6 +184,7 @@ export const Content = ({
               entityId={entityRecord?.entity?.id}
               prefetchedResolutionRisk={prefetchedResolutionRisk}
               hideHeaderIcon={hideHeaderIcons}
+              isGroupView={isGroupView}
             />
             <EuiHorizontalRule />
           </>

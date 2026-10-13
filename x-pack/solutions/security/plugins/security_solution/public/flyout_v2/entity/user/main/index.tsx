@@ -200,6 +200,7 @@ export const User: FC<UserProps> = memo(function User({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
+      isGroupView,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
@@ -490,6 +491,7 @@ export const User: FC<UserProps> = memo(function User({
             onShowEntity={onShowRelatedEntityFromResolution}
             hideHeaderIcons
             riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+            isGroupView={isGroupView}
           />
         )}
       </EuiFlyoutBody>

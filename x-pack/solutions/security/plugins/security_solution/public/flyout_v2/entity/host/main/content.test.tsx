@@ -21,6 +21,9 @@ const mockResolutionSection = jest.fn((_props: { openDetailsPanel?: unknown }) =
 const mockVisualizationsSection = jest.fn((_props: { openDetailsPanel?: unknown }) => (
   <div data-test-subj="visualizationsSection" />
 ));
+const mockFlyoutRiskSummary = jest.fn((_props: { isGroupView?: boolean }) => (
+  <div data-test-subj="flyoutRiskSummary" />
+));
 
 jest.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => ({
   ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
@@ -29,7 +32,7 @@ jest.mock('../../../../common/hooks/use_has_entity_resolution_license', () => ({
   useHasEntityResolutionLicense: jest.fn(() => false),
 }));
 jest.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => ({
-  FlyoutRiskSummary: () => <div data-test-subj="flyoutRiskSummary" />,
+  FlyoutRiskSummary: (props: { isGroupView?: boolean }) => mockFlyoutRiskSummary(props),
 }));
 jest.mock(
   '../../../../flyout/entity_details/shared/components/right/visualizations_section',
@@ -173,11 +176,36 @@ describe('Content — resolution section placement', () => {
     ).toBe(true);
   });
 
-  it('moves the resolution section above visualizations when the flag is on and a resolution score exists', () => {
+  it('moves the resolution section above visualizations when the flag is on', () => {
     const { container } = renderContent(true);
     const html = container.innerHTML;
     expect(appearsBefore(html, 'flyoutRiskSummary', RESOLUTION_SECTION_TEST_ID)).toBe(true);
     expect(appearsBefore(html, RESOLUTION_SECTION_TEST_ID, 'visualizationsSection')).toBe(true);
+  });
+});
+
+describe('Content — group view', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+  const riskScoreState = { hasEngineBeenInstalled: true, data: [{}], loading: false } as never;
+
+  it('defaults the risk summary to the single-entity view', () => {
+    render(<Content {...defaultProps} riskScoreState={riskScoreState} />, {
+      wrapper: TestProviders,
+    });
+    expect(mockFlyoutRiskSummary).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isGroupView: false })
+    );
+  });
+
+  it('forwards isGroupView to the risk summary', () => {
+    render(<Content {...defaultProps} riskScoreState={riskScoreState} isGroupView />, {
+      wrapper: TestProviders,
+    });
+    expect(mockFlyoutRiskSummary).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isGroupView: true })
+    );
   });
 });
 

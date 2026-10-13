@@ -63,6 +63,11 @@ interface ServicePanelContentProps {
    * system flyout, where sections are opened via {@link openDetailsPanel} instead.
    */
   hideHeaderIcons?: boolean;
+  /**
+   * True when the flyout shows a resolution group (alias records were loaded for the open target).
+   * The risk summary then shows only the group's risk score. See {@link RiskSummaryProps.isGroupView}.
+   */
+  isGroupView?: boolean;
 }
 
 export const ServicePanelContent = ({
@@ -84,6 +89,7 @@ export const ServicePanelContent = ({
   onShowEntity,
   riskScoreQueryId,
   hideHeaderIcons = false,
+  isGroupView = false,
 }: ServicePanelContentProps) => {
   const observedFields = useObservedServiceItems(observedService);
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
@@ -125,6 +131,7 @@ export const ServicePanelContent = ({
             entityId={entityRecord?.entity?.id}
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             hideHeaderIcon={hideHeaderIcons}
+            isGroupView={isGroupView}
           />
           <EuiHorizontalRule />
         </>

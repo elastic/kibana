@@ -481,7 +481,7 @@ describe('FlyoutRiskSummary', () => {
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
   });
 
-  it('shows only the resolution score when the new entity analytics page flag is on', () => {
+  it('shows only the resolution score in the group view', () => {
     const { getByTestId, queryByTestId, getAllByTestId } = renderSummary(
       <FlyoutRiskSummary
         riskScoreData={mockHostRiskScoreState}
@@ -492,8 +492,8 @@ describe('FlyoutRiskSummary', () => {
         isPreviewMode={false}
         entityType={EntityType.host}
         entityId="host:alias-entity"
-      />,
-      { newEntityAnalyticsPage: true }
+        isGroupView
+      />
     );
 
     expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
@@ -506,7 +506,7 @@ describe('FlyoutRiskSummary', () => {
     ).toBeTruthy();
   });
 
-  it('labels the resolution score as the entity risk score when the new entity analytics page flag is on', () => {
+  it('labels the resolution score as the entity risk score in the group view', () => {
     const { getByTestId } = renderSummary(
       <FlyoutRiskSummary
         riskScoreData={mockHostRiskScoreState}
@@ -517,8 +517,8 @@ describe('FlyoutRiskSummary', () => {
         isPreviewMode={false}
         entityType={EntityType.host}
         entityId="host:alias-entity"
-      />,
-      { newEntityAnalyticsPage: true }
+        isGroupView
+      />
     );
 
     expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
@@ -541,7 +541,7 @@ describe('FlyoutRiskSummary', () => {
     );
   });
 
-  it('labels the resolution score as the resolution group when the flag is off', () => {
+  it('shows the resolution score alongside the entity score, labelled as the resolution group, when the flag is off', () => {
     const { getByTestId } = renderSummary(
       <FlyoutRiskSummary
         riskScoreData={mockHostRiskScoreState}
@@ -555,9 +555,31 @@ describe('FlyoutRiskSummary', () => {
       />
     );
 
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
     expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
       'Resolution group risk contributions'
     );
+    expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Entity risk contributions');
+  });
+
+  it('shows only the entity score outside the group view when the flag is on, even with a resolution score', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+      />,
+      { newEntityAnalyticsPage: true }
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
     expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Entity risk contributions');
   });
 
@@ -580,15 +602,15 @@ describe('FlyoutRiskSummary', () => {
         isPreviewMode={false}
         entityType={EntityType.host}
         entityId="host:alias-entity"
-      />,
-      { newEntityAnalyticsPage: true }
+        isGroupView
+      />
     );
 
     expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
     expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
   });
 
-  it('keeps the individual score when the group has no resolution score and the flag is on', () => {
+  it('keeps the individual score when the group view has no resolution score', () => {
     const { getByTestId, queryByTestId } = renderSummary(
       <FlyoutRiskSummary
         riskScoreData={mockHostRiskScoreState}
@@ -607,15 +629,15 @@ describe('FlyoutRiskSummary', () => {
         isPreviewMode={false}
         entityType={EntityType.host}
         entityId="host:alias-entity"
-      />,
-      { newEntityAnalyticsPage: true }
+        isGroupView
+      />
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
   });
 
-  it('keeps the individual score for an ungrouped entity when the flag is on', () => {
+  it('keeps the individual score in the group view when no resolution score was fetched', () => {
     const { getByTestId, queryByTestId } = renderSummary(
       <FlyoutRiskSummary
         riskScoreData={mockHostRiskScoreState}
@@ -625,11 +647,34 @@ describe('FlyoutRiskSummary', () => {
         recalculatingScore={false}
         isPreviewMode={false}
         entityType={EntityType.host}
-      />,
-      { newEntityAnalyticsPage: true }
+        isGroupView
+      />
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+  });
+
+  it('shows only the resolution score in the group view when the flag is on', () => {
+    const { getByTestId, queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={mockHostEntityRiskScoresWithResolution}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+        isGroupView
+      />,
+      { newEntityAnalyticsPage: true }
+    );
+
+    expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+    expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+    expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
+      'Entity risk contributions'
+    );
   });
 });

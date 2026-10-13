@@ -8,55 +8,40 @@
 import { shouldShowOnlyResolutionRisk } from './show_only_resolution_risk';
 
 describe('shouldShowOnlyResolutionRisk', () => {
-  it('stays off when the facelift flag is off', () => {
+  it('is on when the group view has a resolution score', () => {
     expect(
       shouldShowOnlyResolutionRisk({
-        enabled: false,
-        hasResolutionGroup: true,
-        hasResolutionScore: true,
-        resolutionLoading: false,
-      })
-    ).toBe(false);
-  });
-
-  it('is on when a resolution group has a score', () => {
-    expect(
-      shouldShowOnlyResolutionRisk({
-        enabled: true,
-        hasResolutionGroup: true,
+        isGroupView: true,
         hasResolutionScore: true,
         resolutionLoading: false,
       })
     ).toBe(true);
   });
 
-  it('is on while the resolution score for a group is still loading', () => {
+  it('is on while the resolution score for the group view is still loading', () => {
     expect(
       shouldShowOnlyResolutionRisk({
-        enabled: true,
-        hasResolutionGroup: true,
+        isGroupView: true,
         hasResolutionScore: false,
         resolutionLoading: true,
       })
     ).toBe(true);
   });
 
-  it('is off for an ungrouped entity', () => {
+  it('is off outside the group view even when a resolution score is available', () => {
     expect(
       shouldShowOnlyResolutionRisk({
-        enabled: true,
-        hasResolutionGroup: false,
-        hasResolutionScore: false,
+        isGroupView: false,
+        hasResolutionScore: true,
         resolutionLoading: false,
       })
     ).toBe(false);
   });
 
-  it('is off when a group has finished loading without a resolution score', () => {
+  it('is off when the group view has finished loading without a resolution score', () => {
     expect(
       shouldShowOnlyResolutionRisk({
-        enabled: true,
-        hasResolutionGroup: true,
+        isGroupView: true,
         hasResolutionScore: false,
         resolutionLoading: false,
       })

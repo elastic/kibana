@@ -94,6 +94,12 @@ export interface RiskSummaryProps<T extends EntityType> {
   prefetchedResolutionRisk?: EntityRiskScore<T>;
   /** When true, hides the chevron icon in the section headers. Used by the v2 flyout. */
   hideHeaderIcon?: boolean;
+  /**
+   * True when the flyout shows a resolution group (the panel loaded alias records for the open
+   * target). The summary then shows only the group's risk score, labelled as the entity risk
+   * score. Defaults to `false`: single-entity views show only the individual score.
+   */
+  isGroupView?: boolean;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -107,6 +113,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   isPreviewMode,
   prefetchedResolutionRisk,
   hideHeaderIcon,
+  isGroupView = false,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -217,6 +224,13 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     [goToEntityInsightsTab]
   );
 
+  // Group view: the group score is presented as the entity's score, so the link reads like the
+  // entity link but still opens the resolution-group inputs.
+  const groupViewTabLink = useMemo(
+    () => ({ callback: resolutionTabLink.callback, tooltip: entityTabLink.tooltip }),
+    [entityTabLink.tooltip, resolutionTabLink.callback]
+  );
+
   const hasResolutionGroup = entityRiskScores?.resolution.hasResolutionGroup ?? false;
   const resolutionTargetEntityId = entityRiskScores?.resolution.resolutionTargetEntityId;
   const resolutionRiskData =
@@ -228,10 +242,13 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     () => getItems(resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled),
     [resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled]
   );
-  const showResolutionRiskSummary = hasResolutionGroup && Boolean(resolutionEntityData?.risk);
+  // Legacy behavior (new entity analytics page flag off): a grouped entity shows its own score
+  // plus a second "Resolution group risk score" panel. With the flag on, the group score is only
+  // shown in the group view (see `showOnlyResolutionRisk`), so a single-entity view never shows it.
+  const showResolutionRiskSummary =
+    !isNewEntityAnalyticsPage && hasResolutionGroup && Boolean(resolutionEntityData?.risk);
   const showOnlyResolutionRisk = shouldShowOnlyResolutionRisk({
-    enabled: isNewEntityAnalyticsPage,
-    hasResolutionGroup,
+    isGroupView,
     hasResolutionScore: Boolean(resolutionEntityData?.risk),
     resolutionLoading: entityResolutionRiskScore?.loading ?? false,
   });
@@ -363,7 +380,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     >
       <EuiSpacer size="m" />
 
-      {/* Show individual risk score when USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG is disabled or when only individual score is available */}
+      {/* Individual risk score: shown outside the group view, or when the group has no resolution score */}
       {!showOnlyResolutionRisk && (
         <RiskContributionsPanel
           data-test-subj="entityRiskInputs"
@@ -393,11 +410,11 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       {showResolutionPanel && (
         <>
           {!showOnlyResolutionRisk && <EuiSpacer size="m" />}
-          {/* Show resolution risk score when USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG is enabled or when resolution score is available */}
+          {/* Resolution-group risk score: the only score in the group view, otherwise a second panel when available */}
           <RiskContributionsPanel
             data-test-subj="resolutionRiskInputs"
             title={showOnlyResolutionRisk ? entityPanelTitle : resolutionPanelTitle}
-            link={resolutionTabLink}
+            link={showOnlyResolutionRisk ? groupViewTabLink : resolutionTabLink}
             iconType={panelIconType}
             visualization={{
               isReady: Boolean(resolutionRiskData),

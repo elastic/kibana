@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-// True when the USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG is true and
-// entity has a resolution group
+/**
+ * True when the flyout shows a resolution group (the panel loaded alias records for the open
+ * target, which only happens in `resolved` mode on the new entity analytics page) and the group's
+ * risk score is available or still loading. In that case the summary shows only the group score,
+ * labelled as the entity risk score; otherwise it falls back to the individual score.
+ */
 export const shouldShowOnlyResolutionRisk = ({
-  enabled,
-  hasResolutionGroup,
+  isGroupView,
   hasResolutionScore,
   resolutionLoading,
 }: {
-  enabled: boolean;
-  hasResolutionGroup: boolean;
+  isGroupView: boolean;
   hasResolutionScore: boolean;
   resolutionLoading: boolean;
-}): boolean => enabled && hasResolutionGroup && (hasResolutionScore || resolutionLoading);
+}): boolean => isGroupView && (hasResolutionScore || resolutionLoading);
