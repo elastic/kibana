@@ -96,7 +96,6 @@ export async function runExcludeExperiment({
         !excludedFeatures.some((excluded) =>
           isDuplicateFeature(feature, {
             ...excluded,
-            stream_name: feature.stream_name,
             confidence: 0,
             description: excluded.description ?? '',
           })
