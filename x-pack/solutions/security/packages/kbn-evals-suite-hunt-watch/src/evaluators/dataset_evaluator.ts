@@ -17,7 +17,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { collectHuntArtifacts, type HuntArtifacts } from '../collect';
 import type { HuntWatchClient } from '../hunt_watch_client';
 import { resetHuntReport } from '../seed_hunt_data';
-import type { HuntWatchExample } from '../types';
+import type { HuntExpected, HuntWatchExample } from '../types';
 import { CODE_SCORERS, scoreCanaryTripped, type CodeScore } from './code_scores';
 import { logRunSummary, withScoreCollection, type ScoreSink } from './run_summary';
 
@@ -27,16 +27,12 @@ const DIRECTION = 'maximize' as const;
 
 const toCodeEvaluator = (
   name: string,
-  scorer: (example: HuntWatchExample, artifacts: HuntArtifacts) => CodeScore
+  scorer: (expected: HuntExpected, artifacts: HuntArtifacts) => CodeScore
 ): HuntEvaluator => ({
   name,
   kind: 'CODE',
   direction: DIRECTION,
-  evaluate: async ({ input, output, expected }) => {
-    const example = { input, output: expected } as unknown as HuntWatchExample;
-    const { score, label, explanation, metadata } = scorer(example, output);
-    return { score, label, explanation, metadata };
-  },
+  evaluate: async ({ output, expected }) => scorer(expected.expected, output),
 });
 
 export const createCodeEvaluators = (): HuntEvaluator[] =>
@@ -56,22 +52,21 @@ export const createNarrativeRubricEvaluator = (
   kind: 'LLM',
   direction: DIRECTION,
   evaluate: async ({ input, output, expected }) => {
-    const criteria = (expected as unknown as HuntWatchExample['output']).criteria ?? [];
-    const narrative = Object.values(output.reports)
-      .map((r) => r.narrative)
-      .filter(Boolean)
-      .join('\n\n---\n\n');
+    const { criteria } = expected;
     if (criteria.length === 0) {
       return { score: null, label: 'N/A', explanation: 'row has no rubric criteria' };
     }
-    const reports = (expected as unknown as HuntWatchExample['output']).expected.reports;
-    if (reports.every((r) => r.investigationStatus === 'none')) {
+    if (expected.expected.reports.every((r) => r.investigationStatus === 'none')) {
       return {
         score: null,
         label: 'N/A',
         explanation: 'row expects no Investigation, so there is no narrative to judge',
       };
     }
+    const narrative = Object.values(output.reports)
+      .map((r) => r.narrative)
+      .filter(Boolean)
+      .join('\n\n---\n\n');
     if (!narrative) {
       return { score: null, label: 'MISSING', explanation: 'no narrative was posted to evaluate' };
     }

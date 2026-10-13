@@ -27,14 +27,10 @@ export {
 } from '@kbn/workflows/managed';
 
 /**
- * Public workflows_management API version (`Elastic-Api-Version` header). Inlined: the source
- * of truth (API_VERSION in workflows_management route constants) lives in the plugin, not a
- * package.
+ * Public API version shared by `/api/workflows/*`, `/api/agent_builder/*` and `/api/spaces/*`.
+ * Inlined: the workflows source of truth lives in the plugin, not a package.
  */
-export const WORKFLOWS_API_VERSION = '2023-10-31';
-
-/** Internal AlertZero API version used by `/internal/alertzero/*` routes. */
-export const ALERTZERO_INTERNAL_API_VERSION = '1';
+export const PUBLIC_API_VERSION = '2023-10-31';
 
 /**
  * Step ids from the managed Worker yaml
@@ -79,9 +75,6 @@ export const EVAL_SPACE_IDS = [
 
 /** Index pattern that resolves to no indices/data streams/aliases, used to induce `blocked`. */
 export const HUNT_BLOCKED_INDEX_PATTERN = 'logs-hunt-eval-nonexistent-*';
-
-/** Public (versioned) API version shared by `/api/workflows/*` and `/api/agent_builder/*`. */
-export const PUBLIC_API_VERSION = '2023-10-31';
 
 /**
  * Fixture report ids from the Demo C+ generator (elastic/kibana#291895, on `main`). Id scheme is

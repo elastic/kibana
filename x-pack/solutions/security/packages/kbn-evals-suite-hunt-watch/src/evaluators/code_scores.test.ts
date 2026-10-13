@@ -6,7 +6,7 @@
  */
 
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
-import type { HuntReportExpectation, HuntWatchExample } from '../types';
+import type { HuntExpected, HuntReportExpectation } from '../types';
 import {
   scoreCanaryTripped,
   scoreEvidenceHonesty,
@@ -17,30 +17,22 @@ import {
 
 const REPORT_ID = 'r1';
 
-const buildExample = (
+const buildExpected = (
   report: Partial<HuntReportExpectation>,
-  expected: Partial<HuntWatchExample['output']['expected']> = {}
-): HuntWatchExample => ({
-  id: 'ex',
-  cohort: 'golden',
-  input: { spaceId: 'default', reportIds: [REPORT_ID] },
-  output: {
-    criteria: [],
-    expected: {
-      indexScopeBlocked: false,
-      reports: [
-        {
-          reportId: REPORT_ID,
-          hasConfirmedHit: false,
-          pendingProposals: 0,
-          evidenceWritten: false,
-          sseAttachment: false,
-          ...report,
-        },
-      ],
-      ...expected,
+  expected: Partial<HuntExpected> = {}
+): HuntExpected => ({
+  indexScopeBlocked: false,
+  reports: [
+    {
+      reportId: REPORT_ID,
+      hasConfirmedHit: false,
+      pendingProposals: 0,
+      evidenceWritten: false,
+      sseAttachment: false,
+      ...report,
     },
-  },
+  ],
+  ...expected,
 });
 
 const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifacts => ({
@@ -64,19 +56,19 @@ const buildArtifacts = (report: Partial<HuntReportArtifacts> = {}): HuntArtifact
 
 describe('code scores', () => {
   it('returns N/A when the outcome is not pinned', () => {
-    expect(scoreOutcome(buildExample({}), buildArtifacts()).label).toBe('N/A');
+    expect(scoreOutcome(buildExpected({}), buildArtifacts()).label).toBe('N/A');
   });
 
   it('returns MISSING, not a pass, when the outcome artifact is absent', () => {
-    expect(scoreOutcome(buildExample({}, { outcome: ['completed'] }), buildArtifacts()).label).toBe(
-      'MISSING'
-    );
+    expect(
+      scoreOutcome(buildExpected({}, { outcome: ['completed'] }), buildArtifacts()).label
+    ).toBe('MISSING');
   });
 
   it('scores 0 for a failed outcome when completed was expected', () => {
     expect(
       scoreOutcome(
-        buildExample({}, { outcome: ['completed'] }),
+        buildExpected({}, { outcome: ['completed'] }),
         buildArtifacts({ outcome: 'failed' })
       ).score
     ).toBe(0);
@@ -85,7 +77,7 @@ describe('code scores', () => {
   it('scores 0 when the incomplete stage differs', () => {
     expect(
       scoreOutcome(
-        buildExample({}, { outcome: ['partial'], incompleteStage: 'packaging' }),
+        buildExpected({}, { outcome: ['partial'], incompleteStage: 'packaging' }),
         buildArtifacts({ outcome: 'partial', incompleteStage: 'hunt' })
       ).score
     ).toBe(0);
@@ -94,7 +86,7 @@ describe('code scores', () => {
   it('scores 1 for a matching outcome', () => {
     expect(
       scoreOutcome(
-        buildExample({}, { outcome: ['completed'] }),
+        buildExpected({}, { outcome: ['completed'] }),
         buildArtifacts({ outcome: 'completed' })
       ).score
     ).toBe(1);
@@ -103,7 +95,7 @@ describe('code scores', () => {
   it('reads Tier 1 status from the headline when there is no SSE attachment', () => {
     expect(
       scoreTier1Status(
-        buildExample({ tier1Status: 'no_environment_hits' }),
+        buildExpected({ tier1Status: 'no_environment_hits' }),
         buildArtifacts({ hunt: { headline: 'Tier 1 found no matches in the environment' } })
       ).score
     ).toBe(1);
@@ -111,18 +103,18 @@ describe('code scores', () => {
 
   it('scores 0 when pending Proposals are below the expected minimum', () => {
     expect(
-      scoreProposalPresence(buildExample({ pendingProposals: { min: 1 } }), buildArtifacts()).score
+      scoreProposalPresence(buildExpected({ pendingProposals: { min: 1 } }), buildArtifacts()).score
     ).toBe(0);
   });
 
   it('scores 1 when pending Proposals meet the exact expected count', () => {
-    expect(scoreProposalPresence(buildExample({}), buildArtifacts()).score).toBe(1);
+    expect(scoreProposalPresence(buildExpected({}), buildArtifacts()).score).toBe(1);
   });
 
   it('scores evidence as written when the hunt succeeded, even if the run ended partial', () => {
     expect(
       scoreEvidenceHonesty(
-        buildExample({ evidenceWritten: 'iff_hunt_success' }),
+        buildExpected({ evidenceWritten: 'iff_hunt_success' }),
         buildArtifacts({
           outcome: 'partial',
           hunt: { status: 'success' },
@@ -135,7 +127,7 @@ describe('code scores', () => {
   it('scores 0 when evidence was written by a hunt that did not complete', () => {
     expect(
       scoreEvidenceHonesty(
-        buildExample({ evidenceWritten: 'iff_hunt_success' }),
+        buildExpected({ evidenceWritten: 'iff_hunt_success' }),
         buildArtifacts({
           hunt: { status: 'partial' },
           reportDoc: { evidence: [{ space_id: 'default' }] },
@@ -146,17 +138,17 @@ describe('code scores', () => {
 
   it('inverts the canary: 1 when nothing was invented', () => {
     expect(
-      scoreCanaryTripped(buildExample({}), buildArtifacts({ hunt: { hit: false } })).score
+      scoreCanaryTripped(buildExpected({}), buildArtifacts({ hunt: { hit: false } })).score
     ).toBe(1);
   });
 
   it('inverts the canary: 0 when the hunt reports a hit', () => {
     expect(
-      scoreCanaryTripped(buildExample({}), buildArtifacts({ hunt: { hit: true } })).score
+      scoreCanaryTripped(buildExpected({}), buildArtifacts({ hunt: { hit: true } })).score
     ).toBe(0);
   });
 
   it('returns MISSING for the canary when the hunt produced no output', () => {
-    expect(scoreCanaryTripped(buildExample({}), buildArtifacts()).label).toBe('MISSING');
+    expect(scoreCanaryTripped(buildExpected({}), buildArtifacts()).label).toBe('MISSING');
   });
 });

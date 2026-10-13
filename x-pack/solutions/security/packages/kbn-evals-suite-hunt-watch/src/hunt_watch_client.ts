@@ -13,11 +13,10 @@ import type {
   WorkflowExecutionDto,
   WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { HUNT_WORKER_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+import { HUNT_WORKER_WORKFLOW_ID, PUBLIC_API_VERSION } from './constants';
+import { apiVersion, sleep, spacePath } from './kibana_api';
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-const shouldStopPolling = (status: ExecutionStatus) => TerminalExecutionStatuses.includes(status);
+const isTerminal = (status: ExecutionStatus) => TerminalExecutionStatuses.includes(status);
 
 export interface HuntWatchRunResult {
   spaceId: string;
@@ -36,56 +35,46 @@ export class HuntWatchClient {
 
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
-  private workerWorkflowId(spaceId: string): string {
-    return `${HUNT_WORKER_WORKFLOW_ID}-${spaceId}`;
+  private executionPath(spaceId: string, workflowExecutionId: string, suffix = ''): string {
+    return spacePath(
+      spaceId,
+      `/api/workflows/executions/${encodeURIComponent(workflowExecutionId)}${suffix}`
+    );
   }
 
   private async pollExecution({
     spaceId,
     workflowExecutionId,
-    isDone,
     maxWaitMs,
     pollIntervalMs,
   }: {
     spaceId: string;
     workflowExecutionId: string;
-    isDone: (status: ExecutionStatus) => boolean;
     maxWaitMs: number;
     pollIntervalMs: number;
   }): Promise<WorkflowExecutionDto> {
     const deadline = Date.now() + maxWaitMs;
-    let execution: WorkflowExecutionDto | undefined;
-
-    while (Date.now() < deadline) {
+    let execution: WorkflowExecutionDto;
+    do {
       execution = await this.fetch<WorkflowExecutionDto>(
-        `/s/${encodeURIComponent(spaceId)}/api/workflows/executions/${encodeURIComponent(
-          workflowExecutionId
-        )}`,
+        this.executionPath(spaceId, workflowExecutionId),
         {
           method: 'GET',
-          version: WORKFLOWS_API_VERSION,
-          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+          headers: apiVersion(PUBLIC_API_VERSION),
           query: { includeOutput: true },
         }
       );
-
-      if (isDone(execution.status)) break;
+      if (isTerminal(execution.status)) break;
       await sleep(pollIntervalMs);
-    }
-
-    if (!execution) {
-      throw new Error(`No execution state returned while polling ${workflowExecutionId}`);
-    }
+    } while (Date.now() < deadline);
     return execution;
   }
 
   /**
-   * Manually triggers the per-space Worker with named `reportIds`, then polls to a terminal
-   * state. Per-space `concurrency: { strategy: drop, max: 1 }` on the Worker means a second
-   * concurrent trigger in the same space is silently dropped rather than queued — a run request
-   * that is accepted but whose execution immediately ends with no step executions is treated as
-   * a dropped trigger and throws naming the space and report ids, rather than returning a
-   * execution that looks like an empty-but-successful sweep.
+   * Manually triggers the per-space Worker with named `reportIds` and polls to a terminal state.
+   * An accepted run whose execution ends with no step executions is a trigger dropped by the
+   * Worker's per-space `concurrency: { strategy: drop, max: 1 }`, and throws rather than
+   * returning what looks like an empty sweep.
    */
   async run({
     spaceId,
@@ -98,15 +87,12 @@ export class HuntWatchClient {
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<HuntWatchRunResult> {
-    const workflowId = this.workerWorkflowId(spaceId);
+    const workflowId = `${HUNT_WORKER_WORKFLOW_ID}-${spaceId}`;
     const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
-      `/s/${encodeURIComponent(spaceId)}/api/workflows/workflow/${encodeURIComponent(
-        workflowId
-      )}/run`,
+      spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(workflowId)}/run`),
       {
         method: 'POST',
-        version: WORKFLOWS_API_VERSION,
-        headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+        headers: apiVersion(PUBLIC_API_VERSION),
         body: JSON.stringify({ inputs: { reportIds } }),
       }
     );
@@ -121,12 +107,11 @@ export class HuntWatchClient {
     const execution = await this.pollExecution({
       spaceId,
       workflowExecutionId,
-      isDone: shouldStopPolling,
       maxWaitMs,
       pollIntervalMs,
     });
 
-    if (!shouldStopPolling(execution.status)) {
+    if (!isTerminal(execution.status)) {
       this.log.warning(
         `Worker execution ${workflowExecutionId} in space "${spaceId}" did not reach a terminal ` +
           `state within ${maxWaitMs}ms (last status: ${execution.status})`
@@ -138,10 +123,9 @@ export class HuntWatchClient {
       throw new Error(
         `Worker execution ${workflowExecutionId} in space "${spaceId}" ended with no step ` +
           `executions for reportIds=[${reportIds.join(', ')}]. The Worker's per-space ` +
-          `"concurrency: { strategy: drop, max: 1 }" setting silently drops a trigger that races ` +
-          `another sweep in the same space — this suite runs with workers:1 and concurrency:1 ` +
-          `specifically to avoid that, so an empty step tree here means something else is also ` +
-          `triggering this space's Worker (e.g. the scheduled trigger) during the eval run.`
+          `"concurrency: { strategy: drop, max: 1 }" drops a trigger that races another sweep; ` +
+          `this suite runs one row at a time, so something else (e.g. the scheduled trigger) is ` +
+          `also running this space's Worker.`
       );
     }
 
@@ -151,16 +135,10 @@ export class HuntWatchClient {
   async cancelPending(): Promise<void> {
     await Promise.allSettled(
       this.pendingExecutions.map(({ spaceId, workflowExecutionId }) =>
-        this.fetch(
-          `/s/${encodeURIComponent(spaceId)}/api/workflows/executions/${encodeURIComponent(
-            workflowExecutionId
-          )}/cancel`,
-          {
-            method: 'POST',
-            version: WORKFLOWS_API_VERSION,
-            headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-          }
-        ).then(() => this.log.debug(`Cancelled Worker execution ${workflowExecutionId}`))
+        this.fetch(this.executionPath(spaceId, workflowExecutionId, '/cancel'), {
+          method: 'POST',
+          headers: apiVersion(PUBLIC_API_VERSION),
+        }).then(() => this.log.debug(`Cancelled Worker execution ${workflowExecutionId}`))
       )
     );
     this.pendingExecutions.length = 0;

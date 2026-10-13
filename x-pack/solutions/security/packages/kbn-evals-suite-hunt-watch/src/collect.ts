@@ -27,8 +27,7 @@ import {
   WRITE_RUN_CONCLUSION_STEP_ID,
 } from './constants';
 import { buildHuntInvestigationConversationId } from './seed_hunt_data';
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { apiVersion, httpStatus, isEsNotFound, sleep, spacePath } from './kibana_api';
 
 const REPORT_FAN_OUT_STEP_ID = 'report_fan_out';
 
@@ -133,8 +132,6 @@ const findStepOutput = (
   stepId: string
 ): WorkflowStepExecutionDto | undefined => steps.find((s) => s.stepId === stepId);
 
-const spacePrefix = (spaceId: string) => `/s/${encodeURIComponent(spaceId)}`;
-
 /** Reads an Investigation conversation in a space, or `undefined` when it does not exist there. */
 export const getConversation = async ({
   fetch,
@@ -147,17 +144,11 @@ export const getConversation = async ({
 }): Promise<InvestigationConversation | undefined> => {
   try {
     return await fetch<InvestigationConversation>(
-      `${spacePrefix(spaceId)}/api/agent_builder/conversations/${encodeURIComponent(
-        conversationId
-      )}`,
-      {
-        method: 'GET',
-        version: PUBLIC_API_VERSION,
-        headers: { 'elastic-api-version': PUBLIC_API_VERSION },
-      }
+      spacePath(spaceId, `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`),
+      { method: 'GET', headers: apiVersion(PUBLIC_API_VERSION) }
     );
   } catch (error) {
-    if (/Status: 404|404 Not Found/.test(String(error))) return undefined;
+    if (httpStatus(error) === 404) return undefined;
     throw error;
   }
 };
@@ -186,11 +177,10 @@ const listProposalsWhenSettled = async ({
 
   while (Date.now() < deadline) {
     const response = await fetch<{ proposals: ProposalWithMetadata[] }>(
-      `${spacePrefix(spaceId)}${PROPOSALS_INTERNAL_URL}`,
+      spacePath(spaceId, PROPOSALS_INTERNAL_URL),
       {
         method: 'GET',
-        version: PROPOSALS_API_VERSION,
-        headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
+        headers: apiVersion(PROPOSALS_API_VERSION),
         query: { conversationId, size: 100 },
       }
     );
@@ -256,9 +246,7 @@ export const collectHuntArtifacts = async ({
       .get<{ evidence?: unknown }>({ index: THREAT_REPORTS_INDEX, id: reportId })
       .then((r) => r._source)
       .catch((error) => {
-        if ((error as { meta?: { statusCode?: number } })?.meta?.statusCode === 404) {
-          return undefined;
-        }
+        if (isEsNotFound(error)) return undefined;
         throw error;
       });
 

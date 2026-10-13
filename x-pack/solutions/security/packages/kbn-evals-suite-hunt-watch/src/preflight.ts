@@ -32,9 +32,11 @@ import {
   HUNT_B_SPACE_ID,
   HUNT_BLOCKED_INDEX_PATTERN,
   HUNT_BLOCKED_SPACE_ID,
+  PUBLIC_API_VERSION,
 } from './constants';
-import { ensureJudgeConnectorAccessible } from './workflow_fixture';
+import { ensureJudgeConnectorAccessible, type ListWorkersResponse } from './workflow_fixture';
 import { ensureEntityStoreRunning } from './entity_store';
+import { apiVersion, errorMessage, httpStatus, spacePath } from './kibana_api';
 
 /** `securitySolution:defaultIndex` — not exported from a package, so inlined (mirrors
  * `DEFAULT_INDEX_KEY` in `security_solution/common/constants.ts`). */
@@ -54,51 +56,37 @@ const ALERTZERO_TIER_FEATURE_IDS: readonly string[] = [
   ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
 ];
 
-const spacePath = (spaceId: string, path: string): string =>
-  `/s/${encodeURIComponent(spaceId)}${path}`;
-
-const getHttpStatus = (err: unknown): number | undefined =>
-  typeof err === 'object' && err !== null && 'status' in err
-    ? (err as { status?: number }).status
-    : undefined;
-
-/** Creates `hunt-a` / `hunt-b` / `hunt-blocked` if missing. Idempotent. */
-const ensureEvalSpacesExist = async ({
+const ensureSpaceExists = async ({
   fetch,
   log,
+  spaceId,
 }: {
   fetch: HttpHandler;
   log: ToolingLog;
+  spaceId: string;
 }): Promise<void> => {
-  for (const spaceId of NON_DEFAULT_EVAL_SPACE_IDS) {
-    let exists = false;
-    try {
-      await fetch(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
-        method: 'GET',
-        version: '2023-10-31',
-      });
-      exists = true;
-      log.debug(`[hunt-watch] space "${spaceId}" already exists`);
-    } catch (err) {
-      if (getHttpStatus(err) !== 404) {
-        throw err;
-      }
-    }
+  const exists = await fetch(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
+    method: 'GET',
+    headers: apiVersion(PUBLIC_API_VERSION),
+  })
+    .then(() => true)
+    .catch((err) => {
+      if (httpStatus(err) !== 404) throw err;
+      return false;
+    });
+  if (exists) return;
 
-    if (!exists) {
-      log.info(`[hunt-watch] creating eval space "${spaceId}"`);
-      await fetch('/api/spaces/space', {
-        method: 'POST',
-        version: '2023-10-31',
-        body: JSON.stringify({
-          id: spaceId,
-          name: spaceId,
-          description: 'Eval-only space created by the hunt-watch suite preflight fixture.',
-          disabledFeatures: [],
-        }),
-      });
-    }
-  }
+  log.info(`[hunt-watch] creating eval space "${spaceId}"`);
+  await fetch('/api/spaces/space', {
+    method: 'POST',
+    headers: apiVersion(PUBLIC_API_VERSION),
+    body: JSON.stringify({
+      id: spaceId,
+      name: spaceId,
+      description: 'Eval-only space created by the hunt-watch suite preflight fixture.',
+      disabledFeatures: [],
+    }),
+  });
 };
 
 interface UiSettingsGetResponse {
@@ -132,7 +120,6 @@ const setUiSettings = async ({
 }): Promise<void> => {
   await fetch(spacePath(spaceId, '/internal/kibana/settings'), {
     method: 'POST',
-    headers: { 'kbn-xsrf': 'true' },
     body: JSON.stringify({ changes }),
   });
 };
@@ -208,8 +195,7 @@ const bridgeSubjectModel = async ({
       data: { features: Array<{ feature_id: string; endpoints: Array<{ id: string }> }> };
     }>(spacePath(spaceId, '/internal/search_inference_endpoints/settings'), {
       method: 'GET',
-      version: SEARCH_INFERENCE_ENDPOINTS_API_VERSION,
-      headers: { 'elastic-api-version': SEARCH_INFERENCE_ENDPOINTS_API_VERSION },
+      headers: apiVersion(SEARCH_INFERENCE_ENDPOINTS_API_VERSION),
     });
 
     const assignedTierFeatures = settingsResponse.data.features.filter(
@@ -228,10 +214,6 @@ const bridgeSubjectModel = async ({
     }
   }
 };
-
-interface ListWorkersResponse {
-  workers: Array<{ id: string; settingsRevision: number | null }>;
-}
 
 interface ServiceAccountEntry {
   id: string;
@@ -289,13 +271,12 @@ const ensureWorkerServiceAccount = async ({
   try {
     await fetch(buildSecurityRoleUrl(name), {
       method: 'PUT',
-      version: SECURITY_ROLE_API_VERSION,
-      headers: { 'elastic-api-version': SECURITY_ROLE_API_VERSION, 'kbn-xsrf': 'true' },
+      headers: apiVersion(SECURITY_ROLE_API_VERSION),
       query: { createOnly: true },
       body: JSON.stringify(role),
     });
   } catch (err) {
-    if (getHttpStatus(err) !== 409) throw err;
+    if (httpStatus(err) !== 409) throw err;
   }
 
   const existing = (await listServiceAccounts(fetch)).find((account) => account.name === name);
@@ -312,7 +293,6 @@ const ensureWorkerServiceAccount = async ({
   try {
     const created = await fetch<{ id: string }>(SECURITY_SERVICE_ACCOUNT_URL, {
       method: 'POST',
-      headers: { 'kbn-xsrf': 'true' },
       body: JSON.stringify({
         name,
         description: `Eval-only service account for the hunt-watch suite's "${workerId}" worker.`,
@@ -321,7 +301,7 @@ const ensureWorkerServiceAccount = async ({
     });
     return created.id;
   } catch (err) {
-    if (getHttpStatus(err) !== 409) throw err;
+    if (httpStatus(err) !== 409) throw err;
     // Created concurrently (e.g. a previous run against this same long-lived stack).
     const concurrent = (await listServiceAccounts(fetch)).find((account) => account.name === name);
     if (!concurrent) throw err;
@@ -353,8 +333,7 @@ const enableWorkerInEvalSpaces = async ({
 
     const listed = await fetch<ListWorkersResponse>(spacePath(spaceId, ALERTZERO_WORKERS_URL), {
       method: 'GET',
-      version: API_VERSIONS.internal.v1,
-      headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
+      headers: apiVersion(API_VERSIONS.internal.v1),
     });
     const current = listed.workers.find(
       (w) => w.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
@@ -365,11 +344,7 @@ const enableWorkerInEvalSpaces = async ({
         spacePath(spaceId, buildWorkerUrl(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)),
         {
           method: 'PATCH',
-          version: API_VERSIONS.internal.v1,
-          headers: {
-            'elastic-api-version': API_VERSIONS.internal.v1,
-            'kbn-xsrf': 'true',
-          },
+          headers: apiVersion(API_VERSIONS.internal.v1),
           body: JSON.stringify({
             enabled: true,
             settings: { serviceAccountId },
@@ -381,9 +356,9 @@ const enableWorkerInEvalSpaces = async ({
       throw new Error(
         `[hunt-watch] failed to enable the Worker in space "${spaceId}". If the error names ` +
           `"noModel" / "no AI model is available", the subject-model bridge ` +
-          `(genAiSettings:defaultAIConnector) must run before this step. Original error: ${
-            err instanceof Error ? err.message : String(err)
-          }`
+          `(genAiSettings:defaultAIConnector) must run before this step. Original error: ${errorMessage(
+            err
+          )}`
       );
     }
   }
@@ -400,11 +375,7 @@ const assertThreatIntelSupplyReady = async ({
   for (const spaceId of EVAL_SPACE_IDS) {
     const status = await fetch<HuntThreatIntelSupplyStatus>(
       spacePath(spaceId, HUNT_THREAT_INTEL_SUPPLY_URL),
-      {
-        method: 'GET',
-        version: API_VERSIONS.internal.v1,
-        headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
-      }
+      { method: 'GET', headers: apiVersion(API_VERSIONS.internal.v1) }
     );
 
     if (!status.huntEnabled || !status.hardGate.ok || status.drift) {
@@ -446,7 +417,9 @@ export const runPreflight = async ({
   connectorId: string;
   evaluationConnector: EvalConnector;
 }): Promise<PreflightCleanup> => {
-  await ensureEvalSpacesExist({ fetch, log });
+  for (const spaceId of NON_DEFAULT_EVAL_SPACE_IDS) {
+    await ensureSpaceExists({ fetch, log, spaceId });
+  }
   await configureIndexScope({ fetch, log });
   await bridgeSubjectModel({ fetch, log, connectorId });
   await enableWorkerInEvalSpaces({ fetch, log });
@@ -464,9 +437,9 @@ export const runPreflight = async ({
         });
       } catch (err) {
         log.warning(
-          `[hunt-watch] failed to restore genAiSettings:defaultAIConnector in space "${spaceId}": ${
-            err instanceof Error ? err.message : String(err)
-          }`
+          `[hunt-watch] failed to restore genAiSettings:defaultAIConnector in space "${spaceId}": ${errorMessage(
+            err
+          )}`
         );
       }
     }
@@ -474,14 +447,10 @@ export const runPreflight = async ({
       try {
         await fetch(`/api/spaces/space/${encodeURIComponent(spaceId)}`, {
           method: 'DELETE',
-          version: '2023-10-31',
+          headers: apiVersion(PUBLIC_API_VERSION),
         });
       } catch (err) {
-        log.warning(
-          `[hunt-watch] failed to delete eval space "${spaceId}": ${
-            err instanceof Error ? err.message : String(err)
-          }`
-        );
+        log.warning(`[hunt-watch] failed to delete eval space "${spaceId}": ${errorMessage(err)}`);
       }
     }
   };

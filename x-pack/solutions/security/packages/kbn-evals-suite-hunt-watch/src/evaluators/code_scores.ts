@@ -6,7 +6,7 @@
  */
 
 import type { HuntArtifacts, HuntReportArtifacts } from '../collect';
-import type { HuntReportExpectation, HuntTier1Status, HuntWatchExample } from '../types';
+import type { HuntExpected, HuntReportExpectation, HuntTier1Status } from '../types';
 
 /**
  * Score of one CODE check. `score: null` is never a pass: `label: 'N/A'` means the check does not
@@ -70,17 +70,17 @@ const foldReports = (
 };
 
 const reportScores = (
-  example: HuntWatchExample,
+  expected: HuntExpected,
   artifacts: HuntArtifacts,
   check: (expected: HuntReportExpectation, actual: HuntReportArtifacts) => CodeScore,
   emptyExplanation: string
 ): CodeScore =>
   foldReports(
-    example.output.expected.reports.map((expected) => {
-      const actual = artifacts.reports[expected.reportId];
+    expected.reports.map((report) => {
+      const actual = artifacts.reports[report.reportId];
       return {
-        reportId: expected.reportId,
-        result: actual ? check(expected, actual) : missing('no artifacts collected'),
+        reportId: report.reportId,
+        result: actual ? check(report, actual) : missing('no artifacts collected'),
       };
     }),
     emptyExplanation
@@ -104,12 +104,12 @@ const tier2Executed = (actual: HuntReportArtifacts): boolean | undefined => {
   return (actual.hunt.behaviors ?? []).some((b) => b.execution?.executed === true);
 };
 
-export const scoreOutcome = (example: HuntWatchExample, artifacts: HuntArtifacts): CodeScore => {
-  const { outcome, incompleteStage } = example.output.expected;
+export const scoreOutcome = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore => {
+  const { outcome, incompleteStage } = expected;
   if (!outcome) return notApplicable('outcome label is not pinned for this row');
 
   return reportScores(
-    example,
+    expected,
     artifacts,
     (_expected, actual) => {
       if (!actual.outcome) return missing('no resolve_run_outcome output for this report');
@@ -129,8 +129,8 @@ export const scoreOutcome = (example: HuntWatchExample, artifacts: HuntArtifacts
   );
 };
 
-export const scoreIndexScope = (example: HuntWatchExample, artifacts: HuntArtifacts): CodeScore => {
-  const { indexScopeBlocked } = example.output.expected;
+export const scoreIndexScope = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore => {
+  const { indexScopeBlocked } = expected;
   if (artifacts.indexScopeBlocked === undefined) {
     return missing('resolve_index_scope_gate produced no output');
   }
@@ -141,7 +141,7 @@ export const scoreIndexScope = (example: HuntWatchExample, artifacts: HuntArtifa
   }
   if (!indexScopeBlocked) return pass('scope gate open, as expected');
 
-  const leaked = example.output.expected.reports
+  const leaked = expected.reports
     .map((r) => artifacts.reports[r.reportId])
     .filter((r) => r && (r.stages.hunt || r.conversation))
     .map((r) => r.reportId);
@@ -151,10 +151,10 @@ export const scoreIndexScope = (example: HuntWatchExample, artifacts: HuntArtifa
 };
 
 export const scoreCandidateSelection = (
-  example: HuntWatchExample,
+  expected: HuntExpected,
   artifacts: HuntArtifacts
 ): CodeScore => {
-  const { reports, skipped, indexScopeBlocked } = example.output.expected;
+  const { reports, skipped, indexScopeBlocked } = expected;
   const problems: string[] = [];
 
   if (!indexScopeBlocked) {
@@ -184,14 +184,14 @@ const STAGE_ORDER = [
 ] as const;
 
 export const scoreStageProgression = (
-  example: HuntWatchExample,
+  expected: HuntExpected,
   artifacts: HuntArtifacts
 ): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
-      if (!expectsHunt(expected)) return notApplicable('report is not hunted in this row');
+    (report, actual) => {
+      if (!expectsHunt(report)) return notApplicable('report is not hunted in this row');
       const absent = STAGE_ORDER.filter((id) => !actual.stages[id]);
       if (absent.length > 0) return fail(`stages missing: ${absent.join(', ')}`);
       const notDone = STAGE_ORDER.filter((id) => actual.stages[id].status !== 'completed');
@@ -209,28 +209,25 @@ export const scoreStageProgression = (
     'no hunted reports'
   );
 
-export const scoreHitConsistency = (
-  example: HuntWatchExample,
-  artifacts: HuntArtifacts
-): CodeScore =>
+export const scoreHitConsistency = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
-      if (!expectsHunt(expected)) return notApplicable('report is not hunted in this row');
+    (report, actual) => {
+      if (!expectsHunt(report)) return notApplicable('report is not hunted in this row');
       if (!actual.hunt) return missing('hunt step produced no output');
-      if (actual.hunt.hit !== expected.hasConfirmedHit) {
-        return fail(`hunt hit=${actual.hunt.hit}, expected ${expected.hasConfirmedHit}`, {
+      if (actual.hunt.hit !== report.hasConfirmedHit) {
+        return fail(`hunt hit=${actual.hunt.hit}, report ${report.hasConfirmedHit}`, {
           headline: actual.hunt.headline,
         });
       }
       const sse = actual.sseEvents[0]?.hunt_result;
-      if (sse && sse.has_confirmed_hit !== expected.hasConfirmedHit) {
+      if (sse && sse.has_confirmed_hit !== report.hasConfirmedHit) {
         return fail(
-          `SSE has_confirmed_hit=${sse.has_confirmed_hit}, expected ${expected.hasConfirmedHit}`
+          `SSE has_confirmed_hit=${sse.has_confirmed_hit}, report ${report.hasConfirmedHit}`
         );
       }
-      if (expected.hasConfirmedHit && (sse?.hit_sources ?? []).length === 0) {
+      if (report.hasConfirmedHit && (sse?.hit_sources ?? []).length === 0) {
         return fail('confirmed hit carries no hit_sources');
       }
       return pass(`hit=${actual.hunt.hit}`);
@@ -238,60 +235,54 @@ export const scoreHitConsistency = (
     'no hunted reports'
   );
 
-export const scoreTier1Status = (example: HuntWatchExample, artifacts: HuntArtifacts): CodeScore =>
+export const scoreTier1Status = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
-      if (!expected.tier1Status) return notApplicable('Tier 1 status not pinned');
+    (report, actual) => {
+      if (!report.tier1Status) return notApplicable('Tier 1 status not pinned');
       const status = resolveTier1Status(actual);
       if (!status) {
         return missing(`could not determine Tier 1 status (headline: "${actual.hunt?.headline}")`);
       }
-      return status === expected.tier1Status
+      return status === report.tier1Status
         ? pass(`tier1 ${status}`)
-        : fail(`tier1 "${status}", expected "${expected.tier1Status}"`);
+        : fail(`tier1 "${status}", report "${report.tier1Status}"`);
     },
     'no Tier 1 expectations'
   );
 
-export const scoreTier2Execution = (
-  example: HuntWatchExample,
-  artifacts: HuntArtifacts
-): CodeScore =>
+export const scoreTier2Execution = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
-      if (expected.tier2Executed === undefined) return notApplicable('Tier 2 not pinned');
+    (report, actual) => {
+      if (report.tier2Executed === undefined) return notApplicable('Tier 2 not pinned');
       const executed = tier2Executed(actual);
       if (executed === undefined) return missing('hunt step produced no output');
-      return executed === expected.tier2Executed
+      return executed === report.tier2Executed
         ? pass(`tier2 executed=${executed}`)
-        : fail(`tier2 executed=${executed}, expected ${expected.tier2Executed}`);
+        : fail(`tier2 executed=${executed}, report ${report.tier2Executed}`);
     },
     'no Tier 2 expectations'
   );
 
-export const scoreSseAttachment = (
-  example: HuntWatchExample,
-  artifacts: HuntArtifacts
-): CodeScore =>
+export const scoreSseAttachment = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
+    (report, actual) => {
       if (!actual.conversation) {
-        return expected.sseAttachment
+        return report.sseAttachment
           ? missing('no Investigation conversation to read attachments from')
           : pass('no Investigation, so no attachment');
       }
       const count = actual.sseEvents.length;
-      if (expected.sseAttachment) {
+      if (report.sseAttachment) {
         const valid = actual.sseEvents.filter((e) => e.severity && e.hunt_result);
         return valid.length > 0
           ? pass(`${valid.length} SSE attachment(s) with severity and hunt_result`)
-          : fail(`expected an SSE attachment with a hunt_result, found ${count}`);
+          : fail(`report an SSE attachment with a hunt_result, found ${count}`);
       }
       return count === 0
         ? pass('no SSE attachment')
@@ -305,45 +296,42 @@ const hasEvidence = (doc: HuntReportArtifacts['reportDoc']): boolean => {
   return Array.isArray(evidence) ? evidence.length > 0 : Boolean(evidence);
 };
 
-export const scoreEvidenceHonesty = (
-  example: HuntWatchExample,
-  artifacts: HuntArtifacts
-): CodeScore =>
+export const scoreEvidenceHonesty = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
+    (report, actual) => {
       if (!actual.reportDoc) return missing('report doc not found');
       const written = hasEvidence(actual.reportDoc);
       const huntStatus = actual.hunt?.status;
       const want =
-        expected.evidenceWritten === 'iff_hunt_success'
+        report.evidenceWritten === 'iff_hunt_success'
           ? huntStatus === 'success'
-          : expected.evidenceWritten;
+          : report.evidenceWritten;
       return written === want
         ? pass(`evidence written=${written} (hunt ${huntStatus})`)
         : fail(
-            `evidence written=${written}, expected ${want} (hunt ${huntStatus}, outcome ${actual.outcome})`
+            `evidence written=${written}, report ${want} (hunt ${huntStatus}, outcome ${actual.outcome})`
           );
     },
     'no reports'
   );
 
 export const scoreProposalPresence = (
-  example: HuntWatchExample,
+  expected: HuntExpected,
   artifacts: HuntArtifacts
 ): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
+    (report, actual) => {
       const pending = actual.proposals.filter((p) => p.status === 'pending');
-      const want = expected.pendingProposals;
+      const want = report.pendingProposals;
       const ok = typeof want === 'number' ? pending.length === want : pending.length >= want.min;
       const wanted = typeof want === 'number' ? `${want}` : `>= ${want.min}`;
       return ok
         ? pass(`${pending.length} pending Proposal(s)`, { total: actual.proposals.length })
-        : fail(`${pending.length} pending Proposal(s), expected ${wanted}`, {
+        : fail(`${pending.length} pending Proposal(s), report ${wanted}`, {
             total: actual.proposals.length,
             statuses: actual.proposals.map((p) => p.status),
           });
@@ -352,24 +340,24 @@ export const scoreProposalPresence = (
   );
 
 export const scoreInvestigationStatus = (
-  example: HuntWatchExample,
+  expected: HuntExpected,
   artifacts: HuntArtifacts
 ): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
-    (expected, actual) => {
-      if (!expected.investigationStatus) return notApplicable('Investigation status not pinned');
-      if (expected.investigationStatus === 'none') {
+    (report, actual) => {
+      if (!report.investigationStatus) return notApplicable('Investigation status not pinned');
+      if (report.investigationStatus === 'none') {
         return actual.conversation
-          ? fail('an Investigation was created, expected none')
+          ? fail('an Investigation was created, report none')
           : pass('no Investigation created');
       }
       if (!actual.conversation) return missing('no Investigation conversation found');
       const status = actual.conversation.metadata?.status;
-      return status === expected.investigationStatus
+      return status === report.investigationStatus
         ? pass(`Investigation ${status}`)
-        : fail(`Investigation status "${status}", expected "${expected.investigationStatus}"`);
+        : fail(`Investigation status "${status}", report "${report.investigationStatus}"`);
     },
     'no Investigation expectations'
   );
@@ -379,12 +367,9 @@ export const scoreInvestigationStatus = (
  * no Proposals, no SSE attachment, and no narrative claiming a hit. A 0 is a Worker that found
  * something in nothing.
  */
-export const scoreCanaryTripped = (
-  example: HuntWatchExample,
-  artifacts: HuntArtifacts
-): CodeScore =>
+export const scoreCanaryTripped = (expected: HuntExpected, artifacts: HuntArtifacts): CodeScore =>
   reportScores(
-    example,
+    expected,
     artifacts,
     (_expected, actual) => {
       if (!actual.hunt) return missing('hunt step produced no output');

@@ -25,6 +25,7 @@ import {
   SPACE_COPY_SOURCES,
   THREAT_REPORTS_INDEX,
 } from './constants';
+import { apiVersion, httpStatus, isEsNotFound, sleep, spacePath } from './kibana_api';
 
 const GENERATOR_CLI = Path.join(
   'x-pack',
@@ -97,9 +98,6 @@ export const buildCanaryReportDoc = (timestamp: string) => ({
   },
 });
 
-const isNotFound = (error: unknown): boolean =>
-  (error as { meta?: { statusCode?: number } })?.meta?.statusCode === 404;
-
 /** The suite never creates the index: Kibana creates it when threat intel bootstraps. */
 export const assertThreatReportsIndexExists = async ({ esClient }: { esClient: Client }) => {
   const exists = await esClient.indices.exists({ index: THREAT_REPORTS_INDEX });
@@ -156,7 +154,7 @@ const copyReportToSpace = async ({
   const { _source: source } = await esClient
     .get<Record<string, unknown>>({ index: THREAT_REPORTS_INDEX, id: sourceReportId })
     .catch((error) => {
-      if (!isNotFound(error)) throw error;
+      if (!isEsNotFound(error)) throw error;
       throw new Error(
         `Source report ${sourceReportId} is missing from ${THREAT_REPORTS_INDEX}: the generator ` +
           'did not write it (it logs a warning, not an error, when the historic window is too ' +
@@ -233,7 +231,7 @@ export const deleteSeededReports = async ({
       query: { ids: { values: [...ALL_SEEDED_REPORT_IDS] } },
     });
   } catch (error) {
-    if (!isNotFound(error)) throw error;
+    if (!isEsNotFound(error)) throw error;
   }
   log.debug(`Deleted ${ALL_SEEDED_REPORT_IDS.length} seeded threat report id(s)`);
 };
@@ -280,23 +278,20 @@ interface ProposalsListResponse {
 /** Statuses the Worker's candidate query treats as an open Proposal (`OPEN_PROPOSAL_STATUSES`). */
 const OPEN_PROPOSAL_STATUSES = ['pending', 'executing'] as const;
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 const listOpenProposals = async ({
   fetch,
-  spacePrefix,
+  spaceId,
   conversationId,
 }: {
   fetch: HttpHandler;
-  spacePrefix: string;
+  spaceId: string;
   conversationId: string;
 }): Promise<ProposalsListResponse['proposals']> => {
   const open: ProposalsListResponse['proposals'] = [];
   for (const status of OPEN_PROPOSAL_STATUSES) {
-    const page = await fetch<ProposalsListResponse>(`${spacePrefix}${PROPOSALS_INTERNAL_URL}`, {
+    const page = await fetch<ProposalsListResponse>(spacePath(spaceId, PROPOSALS_INTERNAL_URL), {
       method: 'GET',
-      version: PROPOSALS_API_VERSION,
-      headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
+      headers: apiVersion(PROPOSALS_API_VERSION),
       query: { conversationId, status, excludeSuperseded: true, size: 100 },
     });
     open.push(...page.proposals);
@@ -324,19 +319,17 @@ export const resetHuntReport = async ({
   spaceId: string;
 }) => {
   const conversationId = buildHuntInvestigationConversationId(reportId);
-  const spacePrefix = `/s/${encodeURIComponent(spaceId)}`;
 
-  const open = await listOpenProposals({ fetch, spacePrefix, conversationId }).catch((error) => {
+  const open = await listOpenProposals({ fetch, spaceId, conversationId }).catch((error) => {
     log.debug(`Could not list proposals for ${conversationId}: ${String(error)}`);
     return [] as ProposalsListResponse['proposals'];
   });
 
   // Only a pending Proposal can be dismissed; an executing one settles on its own.
   for (const { id } of open.filter((p) => p.status === 'pending')) {
-    await fetch(`${spacePrefix}${PROPOSAL_DISMISS_URL.replace('{id}', encodeURIComponent(id))}`, {
+    await fetch(spacePath(spaceId, PROPOSAL_DISMISS_URL.replace('{id}', encodeURIComponent(id))), {
       method: 'POST',
-      version: PROPOSALS_API_VERSION,
-      headers: { 'elastic-api-version': PROPOSALS_API_VERSION, 'kbn-xsrf': 'true' },
+      headers: apiVersion(PROPOSALS_API_VERSION),
       body: JSON.stringify({ dismissReason: 'no_reason', rationale: 'eval pre-run reset' }),
     });
   }
@@ -350,7 +343,7 @@ export const resetHuntReport = async ({
     let remaining = open;
     while (remaining.length > 0 && Date.now() < deadline) {
       await sleep(2_000);
-      remaining = await listOpenProposals({ fetch, spacePrefix, conversationId });
+      remaining = await listOpenProposals({ fetch, spaceId, conversationId });
     }
     if (remaining.length > 0) {
       throw new Error(
@@ -363,16 +356,10 @@ export const resetHuntReport = async ({
   }
 
   await fetch(
-    `${spacePrefix}/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`,
-    {
-      method: 'DELETE',
-      version: PUBLIC_API_VERSION,
-      headers: { 'elastic-api-version': PUBLIC_API_VERSION, 'kbn-xsrf': 'true' },
-    }
+    spacePath(spaceId, `/api/agent_builder/conversations/${encodeURIComponent(conversationId)}`),
+    { method: 'DELETE', headers: apiVersion(PUBLIC_API_VERSION) }
   ).catch((error) => {
-    // 404 means there was nothing to delete. The scout fetch wrapper surfaces it only in the
-    // message (`Status: 404`), not as a structured status.
-    if (!/Status: 404|404 Not Found/.test(String(error))) throw error;
+    if (httpStatus(error) !== 404) throw error;
   });
 
   try {
@@ -384,6 +371,6 @@ export const resetHuntReport = async ({
     });
   } catch (error) {
     // Unknown ids (the `no-candidates` row) have no doc to clear.
-    if (!isNotFound(error)) throw error;
+    if (!isEsNotFound(error)) throw error;
   }
 };

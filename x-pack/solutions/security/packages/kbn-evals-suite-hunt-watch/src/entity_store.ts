@@ -7,13 +7,10 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { PUBLIC_API_VERSION } from './constants';
+import { apiVersion, errorMessage, sleep } from './kibana_api';
 
-const COMMON_HEADERS = { 'elastic-api-version': '2023-10-31' };
-const INSTALL_HEADERS = {
-  ...COMMON_HEADERS,
-  'kbn-xsrf': 'true',
-  'x-elastic-internal-origin': 'kibana',
-};
+const HEADERS = apiVersion(PUBLIC_API_VERSION);
 
 const INSTALL_URL = '/api/security/entity_store/install';
 const STATUS_URL = '/api/security/entity_store/status';
@@ -21,12 +18,10 @@ const STATUS_URL = '/api/security/entity_store/status';
 const DEFAULT_POLL_INTERVAL_MS = 2_000;
 const DEFAULT_TIMEOUT_MS = 120_000;
 
-const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
-
 const getEntityStoreStatus = async (fetch: HttpHandler): Promise<string | undefined> => {
   const response = await fetch<{ status?: string }>(STATUS_URL, {
     method: 'GET',
-    headers: COMMON_HEADERS,
+    headers: HEADERS,
   });
   return response.status;
 };
@@ -59,16 +54,16 @@ export const ensureEntityStoreRunning = async ({
     // omitted body fails validation with "expected object, received null".
     await fetch(INSTALL_URL, {
       method: 'POST',
-      headers: INSTALL_HEADERS,
+      headers: HEADERS,
       body: JSON.stringify({}),
     });
   } catch (err) {
     // The engine may already exist from a previous run; fall through to polling rather than
     // failing outright, since the real signal we care about is status.
     log.warning(
-      `[hunt-watch] Entity Store install request failed, will still poll for status: ${
-        err instanceof Error ? err.message : String(err)
-      }`
+      `[hunt-watch] Entity Store install request failed, will still poll for status: ${errorMessage(
+        err
+      )}`
     );
   }
 

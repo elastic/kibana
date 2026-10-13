@@ -10,6 +10,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   ALERTZERO_WORKERS_URL,
+  API_VERSIONS,
   SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
 } from '@kbn/alertzero-common';
 import {
@@ -18,10 +19,10 @@ import {
   HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   HUNT_PACKAGE_REPORT_WORKFLOW_ID,
   HUNT_PROPOSAL_GATE_WORKFLOW_ID,
+  PUBLIC_API_VERSION,
   REQUIRED_WORKER_STEP_IDS,
-  WORKFLOWS_API_VERSION,
-  ALERTZERO_INTERNAL_API_VERSION,
 } from './constants';
+import { apiVersion, errorMessage, spacePath } from './kibana_api';
 
 // The model connector (used by the Worker's `hunt` child's ai.agent step) is not checked here —
 // if it is misconfigured the workflow execution will fail loudly on its own. Only the judge
@@ -55,7 +56,7 @@ export const ensureJudgeConnectorAccessible = async ({
   } catch (err) {
     throw new Error(
       `Inference endpoint [${inferenceId}] for AI connector "${connector.name}" (${connector.id}) is not accessible. ` +
-        `Original error: ${err instanceof Error ? err.message : String(err)}`
+        `Original error: ${errorMessage(err)}`
     );
   }
 };
@@ -111,26 +112,21 @@ const fetchWorkflowYaml = async ({
    * children do not carry one. */
   spaceId?: string;
 }): Promise<WorkflowDocument> => {
-  const base = spaceId ? `/s/${encodeURIComponent(spaceId)}` : '';
-  return fetch<WorkflowDocument>(
-    `${base}/api/workflows/workflow/${encodeURIComponent(workflowId)}`,
-    {
-      method: 'GET',
-      version: WORKFLOWS_API_VERSION,
-      headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-    }
-  );
+  const path = `/api/workflows/workflow/${encodeURIComponent(workflowId)}`;
+  return fetch<WorkflowDocument>(spaceId ? spacePath(spaceId, path) : path, {
+    method: 'GET',
+    headers: apiVersion(PUBLIC_API_VERSION),
+  });
 };
 
-interface AlertZeroWorker {
-  id: string;
-  enabled: boolean;
-  state: string;
-  workflowId?: string | null;
-}
-
-interface ListWorkersResponse {
-  workers: AlertZeroWorker[];
+export interface ListWorkersResponse {
+  workers: Array<{
+    id: string;
+    enabled: boolean;
+    state: string;
+    workflowId?: string | null;
+    settingsRevision: number | null;
+  }>;
 }
 
 /**
@@ -154,44 +150,39 @@ export const assertWorkflowInstalled = async ({
   spaceIds: readonly string[];
 }): Promise<void> => {
   for (const workflowId of GLOBAL_HUNT_CHILD_WORKFLOW_IDS) {
+    // Only the Worker yaml below is checked for step ids; fetching each child proves it exists,
+    // since an uninstalled child otherwise surfaces as an opaque poll timeout inside
+    // report_fan_out rather than a setup failure.
     log.info(`Checking managed hunt child workflow: ${workflowId}`);
-    let workflow: WorkflowDocument;
     try {
-      workflow = await fetchWorkflowYaml({ fetch, workflowId });
+      await fetchWorkflowYaml({ fetch, workflowId });
     } catch (err) {
       throw new Error(
         `Managed hunt child workflow "${workflowId}" is not installed. The four hunt children are ` +
           `installed globally at plugin start by the alertzero plugin, so this usually means the ` +
           `alertzero plugin is disabled or the Workflows feature is unavailable. This suite does ` +
           `not create these workflows itself: it must measure the workflows that ship. ` +
-          `Original error: ${err instanceof Error ? err.message : String(err)}`
+          `Original error: ${errorMessage(err)}`
       );
     }
-
-    // The Worker yaml is the one that declares the step ids the client and evaluators address
-    // by name, so only pin step ids against it below. Still fetch each child above to prove the
-    // document exists — an uninstalled child workflow previously surfaced downstream as an
-    // opaque "step not found" poll timeout inside report_fan_out, not a setup failure.
-    void workflow;
   }
 
   log.info(`Checking managed Worker workflow: ${HUNT_WORKER_WORKFLOW_ID}`);
   let workerYaml: string | undefined;
 
   for (const spaceId of spaceIds) {
-    const workersUrl = `/s/${encodeURIComponent(spaceId)}${ALERTZERO_WORKERS_URL}`;
+    const workersUrl = spacePath(spaceId, ALERTZERO_WORKERS_URL);
     let listed: ListWorkersResponse;
     try {
       listed = await fetch<ListWorkersResponse>(workersUrl, {
         method: 'GET',
-        version: ALERTZERO_INTERNAL_API_VERSION,
-        headers: { 'elastic-api-version': ALERTZERO_INTERNAL_API_VERSION },
+        headers: apiVersion(API_VERSIONS.internal.v1),
       });
     } catch (err) {
       throw new Error(
         `"${workersUrl}" is not reachable. This suite does not enable AlertZero itself for this ` +
           `check — the Scout config set must set "--xpack.alertzero.enabled=true". Original ` +
-          `error: ${err instanceof Error ? err.message : String(err)}`
+          `error: ${errorMessage(err)}`
       );
     }
 
@@ -229,7 +220,6 @@ export const assertWorkflowInstalled = async ({
   }
 
   if (!workerYaml) {
-    // spaceIds was empty — a caller bug, not an environment failure, so fail loud distinctly.
     throw new Error('assertWorkflowInstalled called with no spaceIds to check');
   }
 
