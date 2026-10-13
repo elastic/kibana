@@ -79,14 +79,17 @@ export const RulesListContainer = () => {
   }, [hostTabs, mode, authorizedToReadAnyRules, history]);
 
   const rulesListMenu = useMemo<AppMenuConfig>(() => {
+    // Outside the Stack Management tabs, Classic sits next to Universal rules, so the
+    // header actions say which kind of rule they act on.
+    const isAlongsideUniversal = mode !== RULES_PAGE_MODE.triggersActionsTabs;
     const extraItems: NonNullable<AppMenuConfig['items']> =
-      mode !== RULES_PAGE_MODE.triggersActionsTabs && authorizedToReadAnyRules
+      isAlongsideUniversal && authorizedToReadAnyRules
         ? [
             {
               id: 'rulesLogs',
               order: 200,
               label: i18n.translate('xpack.triggersActionsUI.rulesPage.logsLink.title', {
-                defaultMessage: 'Logs',
+                defaultMessage: 'Classic rule logs',
               }),
               iconType: 'table' as const,
               run: () => history.push('/logs'),
@@ -99,6 +102,11 @@ export const RulesListContainer = () => {
       authorizedToCreateAnyRules,
       canShowSettings,
       extraItems,
+      createRuleLabel: isAlongsideUniversal
+        ? i18n.translate('xpack.triggersActionsUI.rulesPage.createClassicRuleButtonLabel', {
+            defaultMessage: 'Create Classic rule',
+          })
+        : undefined,
       onCreateRule: openCreateRuleModal,
       onOpenSettings: openSettingsFlyout,
     });
