@@ -30,16 +30,16 @@ import {
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 const ENGINE_METADATA_TYPE_FIELD = 'entity.EngineMetadata.Type';
-const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
+export const MAX_RESOLUTION_SEARCH_SIZE = 10_000;
 
 interface ResolutionClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
   /**
-   * Latest-entities index already resolved by the caller. Without it every
-   * operation re-resolves the name (several Elasticsearch calls), which
-   * dominates per-group cost in the resolution maintainer.
+   * Latest-entities index already resolved by the caller; reads by the caller
+   * and writes here must use the same one. Without it every operation
+   * re-resolves the name, which costs several Elasticsearch calls.
    */
   latestIndex?: string;
 }

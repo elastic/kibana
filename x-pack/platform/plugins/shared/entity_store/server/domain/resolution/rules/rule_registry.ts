@@ -63,19 +63,19 @@ export type EsqlMatchSpec = {
 );
 
 /**
- * Customer-authored matcher. Both expressions must already be normalized by
- * `normalizeEsqlExpression`, so each is exactly one ES|QL expression.
+ * Customer-authored matcher. Both expressions must come from
+ * `parseSingleEsqlExpression`, so each is exactly one ES|QL expression.
  */
 export interface EsqlExpressionMatchSpec {
   /** At least one namespace; custom rules never scan every namespace. */
   namespaces: readonly string[];
   /** Per-entity boolean expression, ANDed with the engine's own filters. */
   filterExpression?: string;
-  /** Per-entity key; the engine wraps it in `TO_STRING(...)`. */
   matchValueExpression: string;
-  declineSameNamespaceDuplicates?: boolean;
+  declineSameNamespaceDuplicates: boolean;
 }
 
+/** Any matcher spec: a built-in field rule or a custom expression rule. */
 export type MatcherSpec = EsqlMatchSpec | EsqlExpressionMatchSpec;
 
 export const isExpressionMatchSpec = (spec: MatcherSpec): spec is EsqlExpressionMatchSpec =>

@@ -18,9 +18,12 @@ import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
-import { CUSTOM_RULES_SOFT_DEADLINE_MS, runCustomResolutionRules } from './custom_rules';
+import { CUSTOM_RULES_DEADLINE_MARGIN_MS, runCustomResolutionRules } from './custom_rules';
 
 export const MAINTAINER_ID = 'automated-resolution';
+
+const MAINTAINER_TIMEOUT_MINUTES = 5;
+const MAINTAINER_TIMEOUT_MS = MAINTAINER_TIMEOUT_MINUTES * 60 * 1000;
 
 const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
@@ -33,6 +36,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
   id: MAINTAINER_ID,
   description: 'Automatically resolves entities using field-matching rules',
   interval: '5m',
+  timeout: `${MAINTAINER_TIMEOUT_MINUTES}m`,
   initialState: createInitialState(),
   minLicense: 'enterprise',
   run: async ({ status, signal, logger, esClient, resolutionRulesClient, telemetry }) => {
@@ -40,7 +44,6 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
     const namespace = status.metadata.namespace;
     const state = migrate(status.state, logger);
 
-    // The matchers read this index; their writes must go to the same one.
     const index = await resolveLatestEntitiesIndexName(esClient, namespace);
     const resolutionClient = new ResolutionClient({
       logger,
@@ -84,7 +87,6 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
         if (ruleConfig.matcher) {
           rules[ruleConfig.id] = await runEsqlMatcherRule({
             state: ruleState,
-            namespace,
             esClient,
             logger,
             resolutionClient,
@@ -98,7 +100,6 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
           rules[ruleConfig.id] = await runRelatedUserAliasResolution({
             state: ruleState,
-            namespace,
             esClient,
             logger,
             resolutionClient,
@@ -121,10 +122,8 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
 
     if (!signal.aborted) {
       await runCustomResolutionRules({
-        previousRules: state.rules,
         rules,
         resolutionRulesClient,
-        namespace,
         index,
         esClient,
         logger,
@@ -132,7 +131,7 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
         signal,
         telemetry,
         mutatedIds,
-        deadline: runStartedAt + CUSTOM_RULES_SOFT_DEADLINE_MS,
+        deadline: runStartedAt + MAINTAINER_TIMEOUT_MS - CUSTOM_RULES_DEADLINE_MARGIN_MS,
       });
     }
 

@@ -9,7 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { RESOLUTION_RULE_IDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { CustomResolutionRule } from '../../custom';
-import { fingerprintMatchSpec, toExpressionMatchSpec, toRuleDefinition } from '../../custom';
+import { fingerprintDefinition, toRuleDefinition } from '../../custom';
 import { runEsqlMatcherRule } from '../../matcher';
 import type { ResolutionRulesClient } from '../../rule_client';
 import type { ResolutionClient } from '../../../resolution_client';
@@ -22,6 +22,7 @@ jest.mock('../../matcher', () => ({
   runEsqlMatcherRule: jest.fn(),
 }));
 
+const INDEX = '.entities.v2.latest.default';
 const WATERMARKED: PerRuleState = { lastProcessedTimestamp: '2026-10-01T00:00:00Z', lastRun: null };
 const EMPTY: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
@@ -35,38 +36,56 @@ const rule = (id: string, overrides: Partial<CustomResolutionRule> = {}): Custom
   ...overrides,
 });
 
-const hashOf = (customRule: CustomResolutionRule) =>
-  fingerprintMatchSpec(toExpressionMatchSpec(toRuleDefinition(customRule)));
+const fingerprintOf = (customRule: CustomResolutionRule) =>
+  fingerprintDefinition(toRuleDefinition(customRule));
+
+const watermarked = (id: string, lastAttemptAt = '2026-10-01T00:00:00Z') => ({
+  [`custom:${id}`]: {
+    ...WATERMARKED,
+    definitionFingerprint: fingerprintOf(rule(id)),
+    lastAttemptAt,
+  },
+});
+
+interface RunOptions {
+  previous?: Record<string, PerRuleState>;
+  signal?: AbortSignal;
+  deadline?: number;
+  /** What a re-read just before running returns; defaults to the listed rule. */
+  reread?: (id: string) => CustomResolutionRule | undefined;
+}
 
 const run = async (
   customRules: CustomResolutionRule[] | Error,
-  previousRules: Record<string, PerRuleState> = {},
-  signal: AbortSignal = new AbortController().signal,
-  deadline: number = Date.now() + 60_000
+  { previous = {}, signal = new AbortController().signal, deadline, reread }: RunOptions = {}
 ) => {
   const esClient = {
     indices: { refresh: jest.fn().mockResolvedValue({}) },
   } as unknown as ElasticsearchClient;
   const logger = loggerMock.create();
-  const rules: Record<string, PerRuleState> = { ...previousRules };
+  const rules: Record<string, PerRuleState> = { ...previous };
+  const listed = customRules instanceof Error ? [] : customRules;
   await runCustomResolutionRules({
-    previousRules,
     rules,
     resolutionRulesClient: {
       getCustomRules:
         customRules instanceof Error
           ? jest.fn().mockRejectedValue(customRules)
           : jest.fn().mockResolvedValue(customRules),
+      getCustomRule: jest
+        .fn()
+        .mockImplementation(async (id: string) =>
+          reread ? reread(id) : listed.find((candidate) => candidate.id === id)
+        ),
     } as unknown as ResolutionRulesClient,
-    namespace: 'default',
-    index: '.entities.v2.latest.default',
+    index: INDEX,
     esClient,
     logger,
     resolutionClient: {} as ResolutionClient,
     signal,
     telemetry: { report: jest.fn() } as unknown as MaintainerTelemetryClient,
     mutatedIds: new Set(),
-    deadline,
+    deadline: deadline ?? Date.now() + 60_000,
   });
   return { rules, logger };
 };
@@ -85,35 +104,45 @@ describe('runCustomResolutionRules', () => {
 
     expect(runEsqlMatcherRule).toHaveBeenCalledTimes(1);
     const [deps] = (runEsqlMatcherRule as jest.Mock).mock.calls[0];
-    expect(deps.ruleId).toBe('custom:a');
-    expect(deps.spec).toEqual({
-      namespaces: ['local', 'active_directory'],
-      matchValueExpression: 'TO_LOWER(user.name)',
-      declineSameNamespaceDuplicates: true,
+    expect(deps).toMatchObject({
+      ruleId: 'custom:a',
+      telemetryRuleId: 'custom',
+      index: INDEX,
+      spec: {
+        namespaces: ['local', 'active_directory'],
+        matchValueExpression: 'TO_LOWER(user.name)',
+        declineSameNamespaceDuplicates: true,
+      },
     });
     expect(rules['custom:a']).toEqual({
       ...WATERMARKED,
-      definitionHash: hashOf(rule('a')),
+      definitionFingerprint: fingerprintOf(rule('a')),
       lastAttemptAt: expect.any(String),
     });
   });
 
+  it('passes the same-namespace opt-out to the matcher', async () => {
+    await run([rule('a', { decline_same_namespace_duplicates: false })]);
+
+    expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].spec).toMatchObject({
+      declineSameNamespaceDuplicates: false,
+    });
+  });
+
   it('resumes from the watermark when the definition is unchanged', async () => {
-    const previous = { 'custom:a': { ...WATERMARKED, definitionHash: hashOf(rule('a')) } };
-    await run([rule('a')], previous);
+    await run([rule('a')], { previous: watermarked('a') });
 
     expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].state).toEqual(WATERMARKED);
   });
 
   it('rescans from scratch when the definition changed', async () => {
-    const previous = { 'custom:a': { ...WATERMARKED, definitionHash: hashOf(rule('a')) } };
-    await run([rule('a', { match_value: 'TO_UPPER(user.name)' })], previous);
+    await run([rule('a', { match_value: 'TO_UPPER(user.name)' })], { previous: watermarked('a') });
 
     expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].state).toEqual(EMPTY);
   });
 
   it('rescans when the stored state has no fingerprint', async () => {
-    await run([rule('a')], { 'custom:a': WATERMARKED });
+    await run([rule('a')], { previous: { 'custom:a': WATERMARKED } });
 
     expect((runEsqlMatcherRule as jest.Mock).mock.calls[0][0].state).toEqual(EMPTY);
   });
@@ -138,38 +167,116 @@ describe('runCustomResolutionRules', () => {
 
   it('keeps the watermark of a failed rule and records the attempt', async () => {
     (runEsqlMatcherRule as jest.Mock).mockRejectedValueOnce(new Error('boom'));
-    const previous = { 'custom:a': { ...WATERMARKED, definitionHash: hashOf(rule('a')) } };
-    const { rules } = await run([rule('a')], previous);
+    const previous = watermarked('a');
+    const { rules } = await run([rule('a')], { previous });
 
     expect(rules['custom:a']).toEqual({
-      ...WATERMARKED,
-      definitionHash: hashOf(rule('a')),
+      ...previous['custom:a'],
       lastAttemptAt: expect.any(String),
     });
+    expect(rules['custom:a']).not.toEqual(previous['custom:a']);
+  });
+
+  it('skips a rule that no longer validates without stopping the others', async () => {
+    const { logger } = await run([rule('bad', { match_value: 'a | LIMIT 1' }), rule('good')]);
+
+    expect(calledRuleIds()).toEqual(['custom:good']);
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'bad' failed"));
+  });
+
+  it('keeps the state of a disabled rule without running it', async () => {
+    const previous = watermarked('a');
+    const { rules } = await run([rule('a', { enabled: false })], { previous });
+
+    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
+    expect(rules['custom:a']).toBe(previous['custom:a']);
+  });
+
+  it.each([
+    ['disabled', (id: string) => rule(id, { enabled: false })],
+    ['deleted', () => undefined],
+  ])('skips a rule %s after the list was loaded', async (_case, reread) => {
+    await run([rule('a'), rule('b')], { reread: (id) => (id === 'a' ? reread(id) : rule(id)) });
+
+    expect(calledRuleIds()).toEqual(['custom:b']);
+  });
+
+  it('runs the re-read definition when the rule was edited after the list was loaded', async () => {
+    const edited = rule('a', { match_value: 'TO_UPPER(user.name)' });
+    await run([rule('a')], { previous: watermarked('a'), reread: () => edited });
+
+    const [deps] = (runEsqlMatcherRule as jest.Mock).mock.calls[0];
+    expect(deps.spec.matchValueExpression).toBe('TO_UPPER(user.name)');
+    expect(deps.state).toEqual(EMPTY);
+  });
+
+  it('drops the state of deleted custom rules and nothing else', async () => {
+    const ootbState = WATERMARKED;
+    const { rules } = await run([rule('kept', { enabled: false })], {
+      previous: {
+        ...watermarked('deleted'),
+        ...watermarked('kept'),
+        [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH]: ootbState,
+        future_ootb_rule: ootbState,
+      },
+    });
+
+    expect(Object.keys(rules).sort()).toEqual(
+      [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH, 'custom:kept', 'future_ootb_rule'].sort()
+    );
+  });
+
+  it('leaves all state alone when the rules cannot be loaded', async () => {
+    const previous = watermarked('a');
+    const { rules, logger } = await run(new Error('forbidden'), { previous });
+
+    expect(rules).toEqual(previous);
+    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to load'));
+  });
+
+  it('stops before the next rule once the task is aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await run([rule('a')], { signal: controller.signal });
+
+    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
   });
 
   describe('soft deadline', () => {
-    const watermarked = (id: string, lastAttemptAt: string) => ({
-      [`custom:${id}`]: { ...WATERMARKED, definitionHash: hashOf(rule(id)), lastAttemptAt },
+    beforeEach(() => {
+      jest.useFakeTimers({ now: new Date('2026-10-13T10:00:00Z') });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
     });
 
     // Behaves like the matcher: works until its signal fires, then returns the
     // state it was given.
-    const runUntilAborted = async ({
-      signal,
-      state,
-    }: {
-      signal: AbortSignal;
-      state: PerRuleState;
-    }) => {
-      while (!signal.aborted) {
-        await new Promise((resolve) => setTimeout(resolve, 5));
-      }
-      return state;
+    const runUntilAborted = ({ signal, state }: { signal: AbortSignal; state: PerRuleState }) =>
+      new Promise<PerRuleState>((resolve) => {
+        if (signal.aborted) {
+          resolve(state);
+        }
+        signal.addEventListener('abort', () => resolve(state));
+      });
+
+    const runWithDeadlineAfter = async (
+      ms: number,
+      customRules: CustomResolutionRule[],
+      options: RunOptions = {}
+    ) => {
+      const pending = run(customRules, { ...options, deadline: Date.now() + ms });
+      await jest.advanceTimersByTimeAsync(ms);
+      return pending;
     };
 
-    it('starts no custom rule once the deadline has passed', async () => {
-      const { rules, logger } = await run([rule('a')], {}, undefined, Date.now() - 1);
+    it('starts no custom rule once the deadline has passed, but still prunes deleted ones', async () => {
+      const { rules, logger } = await run([rule('a')], {
+        previous: watermarked('deleted'),
+        deadline: Date.now() - 1,
+      });
 
       expect(runEsqlMatcherRule).not.toHaveBeenCalled();
       expect(rules).toEqual({});
@@ -183,20 +290,15 @@ describe('runCustomResolutionRules', () => {
         ...watermarked('b', '2026-10-02T00:00:00Z'),
       };
 
-      const { rules, logger } = await run(
-        [rule('a'), rule('b')],
+      const { rules, logger } = await runWithDeadlineAfter(1_000, [rule('a'), rule('b')], {
         previous,
-        undefined,
-        Date.now() + 30
-      );
+      });
 
       expect(calledRuleIds()).toEqual(['custom:a']);
       expect(rules['custom:a']).toEqual({
-        ...WATERMARKED,
-        definitionHash: hashOf(rule('a')),
-        lastAttemptAt: expect.any(String),
+        ...previous['custom:a'],
+        lastAttemptAt: '2026-10-13T10:00:00.000Z',
       });
-      expect(rules['custom:a']).not.toEqual(previous['custom:a']);
       expect(rules['custom:b']).toBe(previous['custom:b']);
       expect(logger.info).toHaveBeenCalledWith(
         expect.stringContaining('custom:a: stopped at the soft deadline')
@@ -211,78 +313,33 @@ describe('runCustomResolutionRules', () => {
         await runUntilAborted(deps);
         throw new Error('Request aborted');
       });
-      const { logger } = await run([rule('a')], {}, undefined, Date.now() + 30);
+      const { logger } = await runWithDeadlineAfter(1_000, [rule('a')]);
 
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('starts with the rule that was attempted least recently', async () => {
-      const previous = {
-        ...watermarked('a', '2026-10-13T10:05:00Z'),
-        ...watermarked('b', '2026-10-13T10:00:00Z'),
-        ...watermarked('c', '2026-10-13T09:55:00Z'),
-      };
-      await run([rule('a'), rule('b'), rule('c')], previous);
+      await run([rule('a'), rule('b'), rule('c')], {
+        previous: {
+          ...watermarked('a', '2026-10-13T10:05:00Z'),
+          ...watermarked('b', '2026-10-13T10:00:00Z'),
+          ...watermarked('c', '2026-10-13T09:55:00Z'),
+        },
+      });
 
       expect(calledRuleIds()).toEqual(['custom:c', 'custom:b', 'custom:a']);
     });
 
-    it('passes the task abort through: an aborted task is not a deadline', async () => {
+    it('treats a task abort as an abort, not as reaching the deadline', async () => {
       const controller = new AbortController();
       (runEsqlMatcherRule as jest.Mock).mockImplementationOnce(async (deps) => {
         controller.abort();
         return runUntilAborted(deps);
       });
-      const { logger } = await run([rule('a'), rule('b')], {}, controller.signal);
+      const { logger } = await run([rule('a'), rule('b')], { signal: controller.signal });
 
       expect(calledRuleIds()).toEqual(['custom:a']);
       expect(logger.info).not.toHaveBeenCalledWith(expect.stringContaining('soft deadline'));
     });
-  });
-
-  it('skips a rule that no longer validates without stopping the others', async () => {
-    const { logger } = await run([rule('bad', { match_value: 'a | LIMIT 1' }), rule('good')]);
-
-    expect(calledRuleIds()).toEqual(['custom:good']);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("'bad' failed"));
-  });
-
-  it('keeps the state of a disabled rule without running it', async () => {
-    const state = { ...WATERMARKED, definitionHash: 'x' };
-    const { rules } = await run([rule('a', { enabled: false })], { 'custom:a': state });
-
-    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
-    expect(rules['custom:a']).toBe(state);
-  });
-
-  it('drops the state of deleted custom rules and nothing else', async () => {
-    const ootbState = WATERMARKED;
-    const { rules } = await run([rule('kept', { enabled: false })], {
-      'custom:deleted': { ...WATERMARKED, definitionHash: 'x' },
-      'custom:kept': { ...WATERMARKED, definitionHash: 'y' },
-      [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH]: ootbState,
-      future_ootb_rule: ootbState,
-    });
-
-    expect(Object.keys(rules).sort()).toEqual(
-      [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH, 'custom:kept', 'future_ootb_rule'].sort()
-    );
-  });
-
-  it('leaves all state alone when the rules cannot be loaded', async () => {
-    const previous = { 'custom:a': { ...WATERMARKED, definitionHash: 'x' } };
-    const { rules, logger } = await run(new Error('forbidden'), previous);
-
-    expect(rules).toEqual(previous);
-    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('failed to load'));
-  });
-
-  it('stops before the next rule once aborted', async () => {
-    const controller = new AbortController();
-    controller.abort();
-    await run([rule('a')], {}, controller.signal);
-
-    expect(runEsqlMatcherRule).not.toHaveBeenCalled();
   });
 });

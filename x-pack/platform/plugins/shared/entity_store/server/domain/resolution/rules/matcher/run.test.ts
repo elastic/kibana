@@ -18,10 +18,6 @@ import { runEsqlMatcherRule } from './run';
 import type { RunEsqlMatcherDeps } from './run';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
 
-jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
-  resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
-}));
-
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
 const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)!
@@ -42,7 +38,7 @@ const createDeps = (
   overrides: Partial<RunEsqlMatcherDeps> = {}
 ): RunEsqlMatcherDeps => ({
   state,
-  namespace: 'default',
+  index: '.entities.v2.latest.default',
   esClient,
   logger: loggerMock.create(),
   resolutionClient,

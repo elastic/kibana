@@ -8,12 +8,14 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
 import { MATCH_GROUP_COLUMNS, RESOLVED_TO_FIELD } from '../matcher/constants';
+import { PREVIEW_MAX_PAGES, PREVIEW_SAMPLE_SIZE } from './constants';
 import { previewCustomRule } from './preview';
 
 const INDEX = '.entities.v2.latest.default';
 const SPEC: EsqlExpressionMatchSpec = {
   namespaces: ['local', 'active_directory'],
   matchValueExpression: 'TO_LOWER(user.name)',
+  declineSameNamespaceDuplicates: true,
 };
 
 interface Group {
@@ -36,7 +38,8 @@ const MATCH_COLUMNS = [
   MATCH_GROUP_COLUMNS.totalN,
 ].map((name) => ({ name, type: 'keyword' }));
 
-const groupsResponse = (groups: Group[]) => ({
+const groupsResponse = (groups: Group[], isPartial = false) => ({
+  ...(isPartial && { is_partial: true }),
   columns: MATCH_COLUMNS,
   values: groups.map((group) => [
     group.key,
@@ -49,19 +52,23 @@ const groupsResponse = (groups: Group[]) => ({
   ]),
 });
 
-const setup = (groups: Group[], aliasCounts: Record<string, number> = {}) => {
+const setup = (
+  groups: Group[] | ((query: string) => Group[]),
+  aliasCounts: Record<string, number> = {},
+  { isPartial = false } = {}
+) => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockImplementation((async ({ query }: { query: string }) => {
-    if (query.includes('STATS n = COUNT(*)')) {
+    if (query.includes('STATS alias_count = COUNT(*)')) {
       return {
         columns: [
-          { name: 'n', type: 'long' },
+          { name: 'alias_count', type: 'long' },
           { name: RESOLVED_TO_FIELD, type: 'keyword' },
         ],
         values: Object.entries(aliasCounts).map(([id, n]) => [n, id]),
       };
     }
-    return groupsResponse(groups);
+    return groupsResponse(typeof groups === 'function' ? groups(query) : groups, isPartial);
   }) as never);
   esClient.search.mockImplementation((async ({ query }: { query: unknown }) => {
     const ids = (query as { bool: { filter: Array<{ terms: Record<string, string[]> }> } }).bool
@@ -115,7 +122,7 @@ describe('previewCustomRule', () => {
       scanned_groups: 4,
       truncated: false,
       would_link_groups: 1,
-      would_join_existing_groups: 0,
+      would_extend_existing_groups: 0,
       would_merge_existing_groups: 0,
       skipped: { oversized: 1, same_namespace_duplicates: 1, nothing_to_link: 1 },
     });
@@ -126,7 +133,7 @@ describe('previewCustomRule', () => {
         target: 'user:JD12345@active_directory',
         aliases: ['user:jd12345@HOST-A@local', 'user:jd12345@HOST-B@local'],
         existing_targets: [],
-        cascade_aliases: 0,
+        cascade_alias_count: 0,
       },
     ]);
     expect(preview.not_modeled.length).toBeGreaterThan(0);
@@ -166,11 +173,98 @@ describe('previewCustomRule', () => {
 
     const preview = await previewCustomRule({ esClient, index: INDEX, spec: SPEC });
 
-    expect(preview.would_join_existing_groups).toBe(1);
+    expect(preview.would_extend_existing_groups).toBe(1);
     expect(preview.would_merge_existing_groups).toBe(1);
     expect(preview.sample[0]).toMatchObject({
       target: 'user:m@active_directory',
-      cascade_aliases: 7,
+      cascade_alias_count: 7,
     });
+  });
+
+  it('reports partial results instead of failing', async () => {
+    const esClient = setup(
+      [
+        {
+          key: 'jd12345',
+          ids: ['user:JD12345@active_directory', 'user:jd12345@HOST-A@local'],
+          namespaces: ['active_directory', 'local'],
+        },
+      ],
+      {},
+      { isPartial: true }
+    );
+
+    const preview = await previewCustomRule({ esClient, index: INDEX, spec: SPEC });
+
+    expect(preview.partial).toBe(true);
+    expect(preview.would_link_groups).toBe(1);
+  });
+
+  it('follows the cursor across pages, stops at the page limit, and samples the largest groups', async () => {
+    const pageSize = 3;
+    const keys = Array.from(
+      { length: pageSize * (PREVIEW_MAX_PAGES + 2) },
+      (_, i) => `user${String(i).padStart(3, '0')}`
+    );
+    // Group size grows with the key, so the largest groups are on the last pages read.
+    const groupFor = (key: string, i: number): Group => ({
+      key,
+      ids: [
+        `user:${key}@active_directory`,
+        ...Array.from({ length: (i % 7) + 1 }, (_, host) => `user:${key}@HOST-${host}@local`),
+      ],
+      namespaces: ['active_directory', 'local'],
+    });
+    const cursors: Array<string | undefined> = [];
+    const esClient = setup((query) => {
+      const after = /match_value > "([^"]+)"/.exec(query)?.[1];
+      cursors.push(after);
+      const start = after === undefined ? 0 : keys.indexOf(after) + 1;
+      return keys.slice(start, start + pageSize).map((key) => groupFor(key, keys.indexOf(key)));
+    });
+
+    const preview = await previewCustomRule({ esClient, index: INDEX, spec: SPEC, pageSize });
+
+    expect(cursors).toEqual([
+      undefined,
+      ...keys
+        .slice(0, pageSize * (PREVIEW_MAX_PAGES - 1))
+        .filter((_, i) => i % pageSize === pageSize - 1),
+    ]);
+    expect(preview.truncated).toBe(true);
+    expect(preview.scanned_groups).toBe(pageSize * PREVIEW_MAX_PAGES);
+    expect(preview.would_link_groups).toBe(pageSize * PREVIEW_MAX_PAGES);
+    expect(preview.sample).toHaveLength(PREVIEW_SAMPLE_SIZE);
+    const sampledKeys = new Set(preview.sample.map(({ match_value: key }) => key));
+    const sizeOf = (key: string) => groupFor(key, keys.indexOf(key)).ids.length;
+    const scannedKeys = keys.slice(0, pageSize * PREVIEW_MAX_PAGES);
+    const smallestSampled = Math.min(...[...sampledKeys].map(sizeOf));
+    const largestLeftOut = Math.max(
+      ...scannedKeys.filter((key) => !sampledKeys.has(key)).map(sizeOf)
+    );
+    expect(smallestSampled).toBeGreaterThanOrEqual(largestLeftOut);
+  });
+
+  it('stops between pages once the caller aborts', async () => {
+    const controller = new AbortController();
+    const esClient = setup(() => {
+      controller.abort();
+      return Array.from({ length: 2 }, (_, i) => ({
+        key: `k${i}`,
+        ids: [`user:k${i}@active_directory`, `user:k${i}@HOST-A@local`],
+        namespaces: ['active_directory', 'local'],
+      }));
+    });
+
+    await expect(
+      previewCustomRule({
+        esClient,
+        index: INDEX,
+        spec: SPEC,
+        pageSize: 2,
+        signal: controller.signal,
+      })
+    ).rejects.toThrow('aborted');
+    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
   });
 });

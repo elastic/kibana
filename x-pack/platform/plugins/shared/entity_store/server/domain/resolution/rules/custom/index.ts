@@ -7,22 +7,18 @@
 
 export {
   CustomResolutionRulesClient,
+  findCustomResolutionRule,
   findCustomResolutionRules,
   toRuleDefinition,
   type CustomResolutionRule,
-  type CustomResolutionRuleCreate,
-  type CustomResolutionRuleUpdate,
-  type CustomResolutionRulePreviewRequest,
 } from './client';
-export {
-  CUSTOM_RULE_STATE_KEY_PREFIX,
-  customRuleStateKey,
-  MAX_CUSTOM_RULE_EXPRESSION_LENGTH,
-  MAX_CUSTOM_RULE_ID_LENGTH,
-  MAX_CUSTOM_RULE_NAME_LENGTH,
-  MAX_CUSTOM_RULE_NAMESPACES,
-  MAX_CUSTOM_RULE_NAMESPACE_LENGTH,
-} from './constants';
-export { fingerprintMatchSpec, toExpressionMatchSpec } from './match_spec';
+export { CUSTOM_RULE_STATE_KEY_PREFIX, customRuleStateKey } from './constants';
+export { fingerprintDefinition, toExpressionMatchSpec } from './match_spec';
 export type { CustomRulePreview, CustomRulePreviewSample } from './preview';
 export { CustomResolutionRuleType, CustomResolutionRuleTypeName } from './saved_object';
+export {
+  CustomResolutionRuleCreate,
+  CustomResolutionRuleIdParams,
+  CustomResolutionRulePreviewRequest,
+  CustomResolutionRuleUpdate,
+} from './schemas';

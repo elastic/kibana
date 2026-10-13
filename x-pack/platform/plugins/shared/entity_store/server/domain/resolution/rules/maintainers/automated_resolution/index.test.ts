@@ -96,6 +96,13 @@ const runConfig = async (
     resolutionRulesClient: {
       getEffectiveRules: jest.fn().mockResolvedValue(effectiveRules),
       getCustomRules,
+      getCustomRule: jest
+        .fn()
+        .mockImplementation(async (id: string) =>
+          ((await getCustomRules().catch(() => [])) as Array<{ id: string }>).find(
+            (candidate) => candidate.id === id
+          )
+        ),
     },
     telemetry: { report: jest.fn() },
   } as unknown as EntityMaintainerTaskMethodContext;
@@ -117,6 +124,10 @@ describe('automatedResolutionMaintainerConfig', () => {
   it('registers under the stable maintainer id and requires enterprise license', () => {
     expect(automatedResolutionMaintainerConfig.id).toBe(MAINTAINER_ID);
     expect(automatedResolutionMaintainerConfig.minLicense).toBe('enterprise');
+  });
+
+  it('sets the task timeout the custom-rules deadline is derived from', () => {
+    expect(automatedResolutionMaintainerConfig.timeout).toBe('5m');
   });
 
   it('seeds initialState with versioned empty rules map (rules backfill on first run)', () => {
@@ -149,11 +160,26 @@ describe('automatedResolutionMaintainerConfig', () => {
     expect(result.rules[EMAIL_RULE]).toEqual(matcherState);
   });
 
-  it('gives every rule the index resolved once for the run', async () => {
+  it('gives every rule the index resolved once for the run, custom rules included', async () => {
     await runConfig(
       createEsClient(),
       { version: AUTOMATED_RESOLUTION_STATE_VERSION, rules: watermarkedRules },
-      DEFAULT_EFFECTIVE_RULES.map((rule) => ({ ...rule, enabled: true }))
+      DEFAULT_EFFECTIVE_RULES.map((rule) => ({ ...rule, enabled: true })),
+      undefined,
+      jest.fn().mockResolvedValue([
+        {
+          id: 'rule-1',
+          name: 'custom',
+          namespaces: ['local', 'active_directory'],
+          match_value: 'TO_LOWER(user.name)',
+          decline_same_namespace_duplicates: true,
+          enabled: true,
+        },
+      ])
+    );
+
+    expect((runEsqlMatcherRule as jest.Mock).mock.calls.map(([deps]) => deps.ruleId)).toContain(
+      'custom:rule-1'
     );
 
     const indexes = [
@@ -312,7 +338,7 @@ describe('automatedResolutionMaintainerConfig', () => {
       expect(ruleIds.slice(0, -1)).not.toContain('custom:rule-1');
       expect(result.rules['custom:rule-1']).toEqual({
         ...matcherState,
-        definitionHash: expect.any(String),
+        definitionFingerprint: expect.any(String),
         lastAttemptAt: expect.any(String),
       });
     });

@@ -13,14 +13,24 @@ import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
 import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import {
   CustomResolutionRuleNotFoundError,
+  EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
 } from '../../../errors';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
 import { buildMatcherValidationQuery } from '../matcher';
 import { MAX_CUSTOM_RULES_PER_SPACE } from './constants';
-import { toExpressionMatchSpec, type CustomResolutionRuleDefinition } from './match_spec';
+import {
+  canonicalDefinitionKey,
+  toExpressionMatchSpec,
+  type CustomResolutionRuleDefinition,
+} from './match_spec';
 import { previewCustomRule, type CustomRulePreview } from './preview';
 import { CustomResolutionRuleTypeName, type CustomResolutionRuleAttributes } from './saved_object';
+import type {
+  CustomResolutionRuleCreate,
+  CustomResolutionRulePreviewRequest,
+  CustomResolutionRuleUpdate,
+} from './schemas';
 
 // Above the per-space cap, so a rule created in a race is still found.
 const FIND_PAGE_SIZE = 100;
@@ -37,41 +47,7 @@ export interface CustomResolutionRule {
   updated_at?: string;
 }
 
-export interface CustomResolutionRuleCreate {
-  name: string;
-  namespaces: string[];
-  filter?: string;
-  match_value: string;
-  decline_same_namespace_duplicates?: boolean;
-  enabled?: boolean;
-}
-
-export interface CustomResolutionRuleUpdate {
-  name?: string;
-  namespaces?: string[];
-  /** `null` removes the filter. */
-  filter?: string | null;
-  match_value?: string;
-  decline_same_namespace_duplicates?: boolean;
-  enabled?: boolean;
-}
-
-export type CustomResolutionRulePreviewRequest = Omit<
-  CustomResolutionRuleCreate,
-  'name' | 'enabled'
->;
-
-type CustomResolutionRuleBody = Omit<CustomResolutionRule, 'id' | 'created_at' | 'updated_at'>;
-
-const isSameDefinition = (
-  a: CustomResolutionRuleDefinition,
-  b: CustomResolutionRuleDefinition
-): boolean =>
-  a.filter === b.filter &&
-  a.matchValue === b.matchValue &&
-  a.declineSameNamespaceDuplicates === b.declineSameNamespaceDuplicates &&
-  a.namespaces.length === b.namespaces.length &&
-  a.namespaces.every((namespace, i) => namespace === b.namespaces[i]);
+type CustomResolutionRuleFields = Omit<CustomResolutionRule, 'id' | 'created_at' | 'updated_at'>;
 
 const toRule = ({
   id,
@@ -81,7 +57,7 @@ const toRule = ({
 }: SavedObject<CustomResolutionRuleAttributes>): CustomResolutionRule => ({
   id,
   name: attributes.name,
-  namespaces: attributes.namespaces,
+  namespaces: attributes.entityNamespaces,
   ...(attributes.filter !== undefined && { filter: attributes.filter }),
   match_value: attributes.matchValue,
   decline_same_namespace_duplicates: attributes.declineSameNamespaceDuplicates,
@@ -90,9 +66,9 @@ const toRule = ({
   ...(updatedAt && { updated_at: updatedAt }),
 });
 
-const toAttributes = (rule: CustomResolutionRuleBody): CustomResolutionRuleAttributes => ({
+const toAttributes = (rule: CustomResolutionRuleFields): CustomResolutionRuleAttributes => ({
   name: rule.name,
-  namespaces: rule.namespaces,
+  entityNamespaces: rule.namespaces,
   ...(rule.filter !== undefined && { filter: rule.filter }),
   matchValue: rule.match_value,
   declineSameNamespaceDuplicates: rule.decline_same_namespace_duplicates,
@@ -126,6 +102,23 @@ export const findCustomResolutionRules = async (
     );
 };
 
+/** One saved custom rule in the SO client's space, or undefined if it's gone. */
+export const findCustomResolutionRule = async (
+  soClient: SavedObjectsClientContract,
+  id: string
+): Promise<CustomResolutionRule | undefined> => {
+  try {
+    return toRule(
+      await soClient.get<CustomResolutionRuleAttributes>(CustomResolutionRuleTypeName, id)
+    );
+  } catch (error) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  }
+};
+
 const isEsBadRequest = (error: unknown): error is esErrors.ResponseError =>
   error instanceof esErrors.ResponseError && error.statusCode === 400;
 
@@ -150,23 +143,11 @@ export class CustomResolutionRulesClient {
   }
 
   async get(id: string): Promise<CustomResolutionRule> {
-    try {
-      return toRule(
-        await this.deps.soClient.get<CustomResolutionRuleAttributes>(
-          CustomResolutionRuleTypeName,
-          id
-        )
-      );
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        throw new CustomResolutionRuleNotFoundError(id);
-      }
-      throw error;
-    }
+    return toRule(await this.getSavedObject(id));
   }
 
   async create(input: CustomResolutionRuleCreate): Promise<CustomResolutionRule> {
-    const rule: CustomResolutionRuleBody = {
+    const rule: CustomResolutionRuleFields = {
       name: input.name,
       namespaces: input.namespaces,
       ...(input.filter !== undefined && { filter: input.filter }),
@@ -179,7 +160,6 @@ export class CustomResolutionRulesClient {
     const existing = await this.list();
     if (existing.length >= MAX_CUSTOM_RULES_PER_SPACE) {
       throw new InvalidCustomResolutionRuleError(
-        'rule',
         `a space can hold at most ${MAX_CUSTOM_RULES_PER_SPACE} custom rules`
       );
     }
@@ -195,10 +175,15 @@ export class CustomResolutionRulesClient {
     return toRule(created);
   }
 
+  /**
+   * Partial update. Writes with the version it read, so a concurrent update
+   * fails with a conflict instead of silently undoing the other write.
+   */
   async update(id: string, patch: CustomResolutionRuleUpdate): Promise<CustomResolutionRule> {
-    const current = await this.get(id);
+    const savedObject = await this.getSavedObject(id);
+    const current = toRule(savedObject);
     const nextFilter = patch.filter === null ? undefined : patch.filter ?? current.filter;
-    const next: CustomResolutionRuleBody = {
+    const next: CustomResolutionRuleFields = {
       name: patch.name ?? current.name,
       namespaces: patch.namespaces ?? current.namespaces,
       ...(nextFilter !== undefined && { filter: nextFilter }),
@@ -208,10 +193,13 @@ export class CustomResolutionRulesClient {
       enabled: patch.enabled ?? current.enabled,
     };
 
-    // Renaming or disabling must work even if the rule no longer validates
-    // (a field it reads was removed), so only a changed definition is checked.
+    // Renaming or disabling must work even if the rule no longer validates (a
+    // field it reads was removed). A changed definition, or turning the rule
+    // on, is checked.
     const nextDefinition = toRuleDefinition(next);
-    if (!isSameDefinition(toRuleDefinition(current), nextDefinition)) {
+    const definitionChanged =
+      canonicalDefinitionKey(toRuleDefinition(current)) !== canonicalDefinitionKey(nextDefinition);
+    if (definitionChanged || (next.enabled && !current.enabled)) {
       await this.validate(nextDefinition);
     }
 
@@ -219,7 +207,7 @@ export class CustomResolutionRulesClient {
       CustomResolutionRuleTypeName,
       id,
       toAttributes(next),
-      { refresh: 'wait_for', mergeAttributes: false }
+      { refresh: 'wait_for', mergeAttributes: false, version: savedObject.version }
     );
     this.deps.logger.info(`Updated custom resolution rule '${id}' (enabled=${next.enabled})`);
     return {
@@ -242,35 +230,50 @@ export class CustomResolutionRulesClient {
     this.deps.logger.info(`Deleted custom resolution rule '${id}'`);
   }
 
-  async preview(request: CustomResolutionRulePreviewRequest): Promise<CustomRulePreview> {
+  async preview(
+    request: CustomResolutionRulePreviewRequest,
+    signal?: AbortSignal
+  ): Promise<CustomRulePreview> {
     const definition = toRuleDefinition({
       ...request,
       decline_same_namespace_duplicates: request.decline_same_namespace_duplicates ?? true,
     });
     const { spec, index } = await this.validate(definition);
-    return previewCustomRule({ esClient: this.deps.esClient, index, spec });
+    return previewCustomRule({ esClient: this.deps.esClient, index, spec, signal });
+  }
+
+  private async getSavedObject(id: string): Promise<SavedObject<CustomResolutionRuleAttributes>> {
+    try {
+      return await this.deps.soClient.get<CustomResolutionRuleAttributes>(
+        CustomResolutionRuleTypeName,
+        id
+      );
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        throw new CustomResolutionRuleNotFoundError(id);
+      }
+      throw error;
+    }
   }
 
   /**
-   * Parses both expressions, then runs the composed query once with no rows
-   * and without nullifying unmapped fields, so Elasticsearch rejects unknown
-   * fields and type errors.
-   *
    * @throws InvalidCustomResolutionRuleError
+   * @throws EntityStoreNotInstalledError
    */
   private async validate(
     definition: CustomResolutionRuleDefinition
   ): Promise<{ spec: EsqlExpressionMatchSpec; index: string }> {
     const spec = toExpressionMatchSpec(definition);
-    const index = await resolveLatestEntitiesIndexName(this.deps.esClient, this.deps.namespace);
+    const { esClient, namespace } = this.deps;
+    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+    if (!(await esClient.indices.exists({ index }))) {
+      throw new EntityStoreNotInstalledError();
+    }
     try {
-      await executeEsqlQuery({
-        esClient: this.deps.esClient,
-        query: buildMatcherValidationQuery({ index, spec }),
-      });
+      await executeEsqlQuery({ esClient, query: buildMatcherValidationQuery({ index, spec }) });
     } catch (error) {
       if (isEsBadRequest(error)) {
-        throw new InvalidCustomResolutionRuleError('rule', esReason(error));
+        throw new InvalidCustomResolutionRuleError(esReason(error));
       }
       throw error;
     }

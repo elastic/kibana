@@ -64,6 +64,19 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | POST | `/internal/security/entity_store/entity_maintainers/run/{id}` | Run maintainer immediately |
 | POST | `/internal/security/entity_store/entity_maintainers/init` | Initialize maintainers |
 
+### Custom Resolution Rules
+
+All require the Enterprise license. Writes need `securitySolution-entity-analytics-manage` plus saved-objects access to `entity-resolution-custom-rule` (admin roles only). See [resolution.md](resolution.md#custom-resolution-rules).
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/internal/security/entity_store/resolution/custom_rules` | List rules in the space |
+| POST | `/internal/security/entity_store/resolution/custom_rules` | Create (validated; `enabled` defaults to `false`) |
+| POST | `/internal/security/entity_store/resolution/custom_rules/_preview` | Read-only preview of what a rule would link |
+| GET | `/internal/security/entity_store/resolution/custom_rules/{id}` | Get a rule |
+| PUT | `/internal/security/entity_store/resolution/custom_rules/{id}` | Partial update; `"filter": null` removes the filter; 409 on a concurrent update |
+| DELETE | `/internal/security/entity_store/resolution/custom_rules/{id}` | Delete; links stay, and state is pruned on the next run |
+
 ### Utility / Debugging
 
 | Method | Path | Description |

@@ -22,9 +22,9 @@ import {
   triggerMaintainerRun,
 } from '../../../common/fixtures/helpers';
 
-// The Elevance case: CrowdStrike endpoint users are `local` entities, one per
-// user per host, and only their lowercased user.name matches the AD account.
-const ELEVANCE_RULE = {
+// Endpoint users are `local` entities, one per user per host; only their
+// lowercased user.name matches the AD account.
+const LOCAL_USERS_TO_AD_RULE = {
   namespaces: ['local', 'active_directory'],
   filter:
     'NOT ENDS_WITH(user.name, "$") AND NOT TO_LOWER(user.name) IN ("administrator", "admin", "guest", "defaultaccount")',
@@ -69,10 +69,22 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
     );
     const rules = (
       maintainer?.customState as {
-        rules?: Record<string, { definitionHash?: unknown; lastProcessedTimestamp?: unknown }>;
+        rules?: Record<
+          string,
+          { definitionFingerprint?: unknown; lastProcessedTimestamp?: unknown }
+        >;
       } | null
     )?.rules;
     return rules?.[`custom:${ruleId}`];
+  };
+
+  const listRules = async (apiClient: Parameters<typeof triggerMaintainerRun>[0]) => {
+    const list = await apiClient.get(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+      headers,
+      responseType: 'json',
+    });
+    expect(list.statusCode).toBe(200);
+    return (list.body as { rules: Array<{ id: string }> }).rules;
   };
 
   apiTest.beforeAll(async ({ esClient, samlAuth }) => {
@@ -91,119 +103,142 @@ apiTest.describe('Custom resolution rules', { tag: ENTITY_STORE_TAGS }, () => {
   });
 
   apiTest.afterEach(async ({ apiClient }) => {
-    const list = await apiClient.get(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
-      headers,
-      responseType: 'json',
-    });
-    for (const { id } of (list.body as { rules: Array<{ id: string }> }).rules) {
+    for (const { id } of await listRules(apiClient)) {
       await apiClient.delete(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(id), { headers });
     }
   });
 
-  apiTest('rejects invalid rules with a clear error', async ({ apiClient }) => {
-    const create = (body: Record<string, unknown>) =>
-      apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+  apiTest('rejects invalid rules with a clear error and saves nothing', async ({ apiClient }) => {
+    const cases: Array<[string, Record<string, unknown>, string]> = [
+      ['pipe injection', { filter: 'true | DROP user.name' }, "Invalid 'filter'"],
+      ['unknown field', { match_value: 'TO_LOWER(user.nmae)' }, 'user.nmae'],
+      ['non-boolean filter', { filter: 'TO_LOWER(user.name)' }, 'must be [boolean]'],
+      ['syntax error', { match_value: 'TO_LOWER(user.name' }, 'ES|QL syntax error'],
+      ['malformed namespace', { namespaces: ['Active Directory'] }, "Invalid 'namespaces'"],
+      [
+        'oversized expression',
+        { match_value: `TO_LOWER(user.name)${' '.repeat(2049)}` },
+        'match_value',
+      ],
+      ['unknown request field', { lookup: { index: 'x' } }, 'Excess keys'],
+    ];
+
+    for (const [name, override, expectedMessage] of cases) {
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
         headers,
         responseType: 'json',
-        body: { name: 'invalid', ...ELEVANCE_RULE, ...body },
+        body: { name: 'invalid', ...LOCAL_USERS_TO_AD_RULE, ...override },
       });
+      expect(response.statusCode, name).toBe(400);
+      expect(response.body.message, name).toContain(expectedMessage);
+    }
 
-    const injection = await create({ filter: 'true | DROP user.name' });
-    expect(injection.statusCode).toBe(400);
-    expect(injection.body.message).toContain("'filter'");
-
-    const unknownField = await create({ match_value: 'TO_LOWER(user.nmae)' });
-    expect(unknownField.statusCode).toBe(400);
-    expect(unknownField.body.message).toContain('user.nmae');
-
-    const nonBooleanFilter = await create({ filter: 'TO_LOWER(user.name)' });
-    expect(nonBooleanFilter.statusCode).toBe(400);
-
-    const badNamespace = await create({ namespaces: ['Active Directory'] });
-    expect(badNamespace.statusCode).toBe(400);
-
-    const oversized = await create({ match_value: `TO_LOWER(user.name)${' '.repeat(2049)}` });
-    expect(oversized.statusCode).toBe(400);
-
-    const unknownKey = await create({ lookup: { index: 'x' } });
-    expect(unknownKey.statusCode).toBe(400);
+    expect(await listRules(apiClient)).toHaveLength(0);
   });
 
   apiTest(
-    'previews, links local users to AD, stops on disable, and cleans up on delete',
+    'previews, links local users to AD, stops on disable, resumes on enable, and cleans up on delete',
     async ({ apiClient, esClient }) => {
-      await seedUser(esClient, AD_USER, 'active_directory', 'JD12345');
-      await seedUser(esClient, LAPTOP_USER, 'local', 'jd12345');
-      await seedUser(esClient, SECOND_HOST_USER, 'local', 'jd12345');
-      await seedUser(esClient, AD_ADMIN, 'active_directory', 'Administrator');
-      await seedUser(esClient, LOCAL_ADMIN, 'local', 'Administrator');
+      let ruleId = '';
 
-      // Preview writes nothing and reports the one group the filter lets through.
-      const preview = await apiClient.post(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES_PREVIEW,
-        { headers, responseType: 'json', body: ELEVANCE_RULE }
-      );
-      expect(preview.statusCode).toBe(200);
-      expect(preview.body.would_link_groups).toBe(1);
-      expect(preview.body.sample).toStrictEqual([
-        expect.objectContaining({
-          match_value: 'jd12345',
-          target: AD_USER,
-          aliases: expect.arrayContaining([LAPTOP_USER, SECOND_HOST_USER]),
-        }),
-      ]);
-      await assertNotResolved(esClient, LAPTOP_USER, 1_000);
-
-      const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
-        headers,
-        responseType: 'json',
-        body: { name: 'CrowdStrike local users to AD', ...ELEVANCE_RULE, enabled: true },
-      });
-      expect(created.statusCode).toBe(200);
-      const ruleId: string = created.body.id;
-      expect(created.body).toMatchObject({
-        enabled: true,
-        decline_same_namespace_duplicates: true,
+      await apiTest.step('seed AD and endpoint users', async () => {
+        await seedUser(esClient, AD_USER, 'active_directory', 'JD12345');
+        await seedUser(esClient, LAPTOP_USER, 'local', 'jd12345');
+        await seedUser(esClient, SECOND_HOST_USER, 'local', 'jd12345');
+        await seedUser(esClient, AD_ADMIN, 'active_directory', 'Administrator');
+        await seedUser(esClient, LOCAL_ADMIN, 'local', 'Administrator');
       });
 
-      await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
-      await waitForResolution(esClient, LAPTOP_USER, AD_USER);
-      await waitForResolution(esClient, SECOND_HOST_USER, AD_USER);
-      await assertNotResolved(esClient, LOCAL_ADMIN, 1_000);
-      const ruleState = await readCustomRuleState(apiClient, ruleId);
-      expect(typeof ruleState?.definitionHash).toBe('string');
-      expect(typeof ruleState?.lastProcessedTimestamp).toBe('string');
+      await apiTest.step('preview reports the one group the filter lets through', async () => {
+        const preview = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES_PREVIEW,
+          { headers, responseType: 'json', body: LOCAL_USERS_TO_AD_RULE }
+        );
+        expect(preview.statusCode).toBe(200);
+        expect(preview.body.would_link_groups).toBe(1);
+        expect(preview.body.sample).toStrictEqual([
+          expect.objectContaining({
+            match_value: 'jd12345',
+            target: AD_USER,
+            aliases: expect.arrayContaining([LAPTOP_USER, SECOND_HOST_USER]),
+          }),
+        ]);
+        await assertNotResolved(esClient, LAPTOP_USER, 1_000);
+      });
 
-      // Disabled: a new laptop entity for the same user stays unlinked.
-      const disabled = await apiClient.put(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
-        { headers, responseType: 'json', body: { enabled: false } }
+      await apiTest.step('the maintainer applies the saved rule', async () => {
+        const created = await apiClient.post(ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES, {
+          headers,
+          responseType: 'json',
+          body: { name: 'Endpoint local users to AD', ...LOCAL_USERS_TO_AD_RULE, enabled: true },
+        });
+        expect(created.statusCode).toBe(200);
+        ruleId = created.body.id;
+        expect(created.body).toMatchObject({
+          enabled: true,
+          decline_same_namespace_duplicates: true,
+        });
+
+        await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+        await waitForResolution(esClient, LAPTOP_USER, AD_USER);
+        await waitForResolution(esClient, SECOND_HOST_USER, AD_USER);
+        await assertNotResolved(esClient, LOCAL_ADMIN, 1_000);
+        const ruleState = await readCustomRuleState(apiClient, ruleId);
+        expect(typeof ruleState?.definitionFingerprint).toBe('string');
+        expect(typeof ruleState?.lastProcessedTimestamp).toBe('string');
+      });
+
+      await apiTest.step('a disabled rule leaves a new laptop entity unlinked', async () => {
+        const disabled = await apiClient.put(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+          { headers, responseType: 'json', body: { enabled: false } }
+        );
+        expect(disabled.statusCode).toBe(200);
+        expect(disabled.body.enabled).toBe(false);
+
+        await seedUser(esClient, LATE_HOST_USER, 'local', 'jd12345');
+        await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+        await assertNotResolved(esClient, LATE_HOST_USER);
+      });
+
+      await apiTest.step(
+        're-enabled, the rule links that entity into the existing group',
+        async () => {
+          const watermarkBefore = (await readCustomRuleState(apiClient, ruleId))
+            ?.lastProcessedTimestamp;
+          const enabled = await apiClient.put(
+            ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+            { headers, responseType: 'json', body: { enabled: true } }
+          );
+          expect(enabled.statusCode).toBe(200);
+
+          await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+          await waitForResolution(esClient, LATE_HOST_USER, AD_USER);
+          const watermarkAfter = (await readCustomRuleState(apiClient, ruleId))
+            ?.lastProcessedTimestamp;
+          expect(Date.parse(String(watermarkAfter))).toBeGreaterThan(
+            Date.parse(String(watermarkBefore))
+          );
+        }
       );
-      expect(disabled.statusCode).toBe(200);
-      expect(disabled.body.enabled).toBe(false);
 
-      await seedUser(esClient, LATE_HOST_USER, 'local', 'jd12345');
-      await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
-      await assertNotResolved(esClient, LATE_HOST_USER);
+      await apiTest.step('delete removes the rule and its saved progress, links stay', async () => {
+        const deleted = await apiClient.delete(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+          { headers, responseType: 'json' }
+        );
+        expect(deleted.statusCode).toBe(200);
 
-      // Deleted: the rule is gone and its saved progress is dropped on the next run.
-      const deleted = await apiClient.delete(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
-        { headers, responseType: 'json' }
-      );
-      expect(deleted.statusCode).toBe(200);
+        const missing = await apiClient.get(
+          ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
+          { headers, responseType: 'json' }
+        );
+        expect(missing.statusCode).toBe(404);
 
-      const missing = await apiClient.get(
-        ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE(ruleId),
-        { headers, responseType: 'json' }
-      );
-      expect(missing.statusCode).toBe(404);
-
-      await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
-      expect(await readCustomRuleState(apiClient, ruleId)).toBeUndefined();
-
-      // Links the rule already made are kept.
-      await waitForResolution(esClient, LAPTOP_USER, AD_USER);
+        await triggerMaintainerRun(apiClient, headers, 'automated-resolution', { sync: true });
+        expect(await readCustomRuleState(apiClient, ruleId)).toBeUndefined();
+        await waitForResolution(esClient, LAPTOP_USER, AD_USER);
+      });
     }
   );
 });

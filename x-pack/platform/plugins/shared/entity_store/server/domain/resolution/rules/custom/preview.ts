@@ -6,12 +6,15 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { escapeEsqlStringLiteral } from '../../../../../common/esql/strings';
 import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
+import { MAX_RESOLUTION_SEARCH_SIZE } from '../../resolution_client';
 import type { EsqlExpressionMatchSpec } from '../rule_registry';
 import {
+  GROUP_SIZE_CEILING,
   MATCHER_PAGE_SIZE,
-  assertCompleteEsqlResults,
+  RESOLVED_TO_FIELD,
   buildMatchGroupsQuery,
   classifyMatchGroup,
   fetchEntities,
@@ -19,7 +22,6 @@ import {
   planMatchGroupLink,
   type MatchGroupRow,
 } from '../matcher';
-import { RESOLVED_TO_FIELD } from '../matcher/constants';
 import { PREVIEW_MAX_PAGES, PREVIEW_SAMPLE_SIZE } from './constants';
 
 export interface CustomRulePreviewSample {
@@ -29,17 +31,19 @@ export interface CustomRulePreviewSample {
   aliases: string[];
   /** Targets of group members that are already aliases elsewhere. */
   existing_targets: string[];
-  /** Aliases of `aliases` entries that cascade would move onto `target`. */
-  cascade_aliases: number;
+  /** Existing aliases of `aliases` that cascade would move onto `target`. */
+  cascade_alias_count: number;
 }
 
 export interface CustomRulePreview {
   scanned_groups: number;
   /** True when the scan stopped before the last page; counts are a lower bound. */
   truncated: boolean;
+  /** True when Elasticsearch returned partial results for a page; counts are a lower bound. */
+  partial: boolean;
   would_link_groups: number;
   /** Groups to link where at least one member already belongs to a resolution group. */
-  would_join_existing_groups: number;
+  would_extend_existing_groups: number;
   /** Groups to link that join two or more existing resolution groups into one. */
   would_merge_existing_groups: number;
   skipped: {
@@ -56,12 +60,20 @@ const NOT_MODELED = [
   'Each group is evaluated on its own. In a real run, a group that shares an entity with a group linked earlier in the same run is skipped until the next run.',
   'Links made by other rules in the same run are not modeled.',
   'Entities that arrive after this preview are not included.',
-  'Join and merge counts only see group members that match this rule. A matched entity that is already the target of other aliases is visible only in sample[].cascade_aliases.',
-  'The 100-entity group ceiling counts only entities in the group. Cascade can move up to 10,000 existing aliases per group, and a larger alias tree makes the real run skip the group.',
+  'Groups whose members already resolve to one target are not returned at all.',
+  'Extend and merge counts only see group members that match this rule. A matched entity that is already the target of other aliases is visible only in sample[].cascade_alias_count.',
+  `The ${GROUP_SIZE_CEILING}-entity group ceiling counts only entities in the group. Cascade can move up to ${MAX_RESOLUTION_SEARCH_SIZE} existing aliases per group, and a larger alias tree makes the real run skip the group.`,
 ];
 
 const linkableIds = (row: MatchGroupRow): Set<string> =>
   new Set([...row.unresolvedIds, ...row.existingTargetIds]);
+
+// The engine's 'candidate' verdict still includes groups with only one linkable
+// entity; those turn into no-ops once the entities are read.
+const hasSomethingToLink = (row: MatchGroupRow): boolean => linkableIds(row).size >= 2;
+
+const isPartial = (response: ESQLSearchResponse): boolean =>
+  (response as ESQLSearchResponse & { is_partial?: boolean }).is_partial === true;
 
 const keepLargest = (sample: MatchGroupRow[], row: MatchGroupRow): void => {
   if (sample.length < PREVIEW_SAMPLE_SIZE) {
@@ -74,30 +86,31 @@ const keepLargest = (sample: MatchGroupRow[], row: MatchGroupRow): void => {
   sample.sort((a, b) => b.groupSize - a.groupSize);
 };
 
-const countAliasesByTarget = async (
+const countExistingAliasesOf = async (
   esClient: ElasticsearchClient,
   index: string,
-  targetIds: string[]
+  entityIds: string[],
+  signal?: AbortSignal
 ): Promise<Map<string, number>> => {
   const counts = new Map<string, number>();
-  if (targetIds.length === 0) {
+  if (entityIds.length === 0) {
     return counts;
   }
-  const ids = targetIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
+  const ids = entityIds.map((id) => `"${escapeEsqlStringLiteral(id)}"`).join(', ');
   const response = await executeEsqlQuery({
     esClient,
+    signal,
     query: [
       `FROM "${escapeEsqlStringLiteral(index)}"`,
       `| WHERE ${RESOLVED_TO_FIELD} IN (${ids})`,
-      `| STATS n = COUNT(*) BY ${RESOLVED_TO_FIELD}`,
-      `| LIMIT ${targetIds.length}`,
+      `| STATS alias_count = COUNT(*) BY ${RESOLVED_TO_FIELD}`,
+      `| LIMIT ${entityIds.length}`,
     ].join('\n'),
   });
-  assertCompleteEsqlResults(response, 'preview cascade');
-  const nIndex = response.columns.findIndex((column) => column.name === 'n');
+  const countIndex = response.columns.findIndex((column) => column.name === 'alias_count');
   const idIndex = response.columns.findIndex((column) => column.name === RESOLVED_TO_FIELD);
   for (const row of response.values) {
-    counts.set(String(row[idIndex]), Number(row[nIndex]));
+    counts.set(String(row[idIndex]), Number(row[countIndex]));
   }
   return counts;
 };
@@ -105,7 +118,8 @@ const countAliasesByTarget = async (
 const buildSample = async (
   esClient: ElasticsearchClient,
   index: string,
-  rows: MatchGroupRow[]
+  rows: MatchGroupRow[],
+  signal?: AbortSignal
 ): Promise<CustomRulePreviewSample[]> => {
   const ids = [...new Set(rows.flatMap((row) => [...linkableIds(row)]))];
   const entities = await fetchEntities(esClient, index, ids);
@@ -114,10 +128,11 @@ const buildSample = async (
     const plan = planMatchGroupLink(row, entities);
     return plan && plan.aliasIds.length > 0 ? [{ row, ...plan }] : [];
   });
-  const cascade = await countAliasesByTarget(
+  const aliasCounts = await countExistingAliasesOf(
     esClient,
     index,
-    planned.flatMap(({ aliasIds }) => aliasIds)
+    planned.flatMap(({ aliasIds }) => aliasIds),
+    signal
   );
 
   return planned.map(({ row, target, aliasIds }) => ({
@@ -126,29 +141,33 @@ const buildSample = async (
     target: target.entityId,
     aliases: aliasIds,
     existing_targets: row.existingTargetIds,
-    cascade_aliases: aliasIds.reduce((sum, id) => sum + (cascade.get(id) ?? 0), 0),
+    cascade_alias_count: aliasIds.reduce((sum, id) => sum + (aliasCounts.get(id) ?? 0), 0),
   }));
 };
 
 /**
- * Runs a custom rule's full first scan with nothing written, and reports what
- * the engine would do with each group.
+ * Runs a custom rule's first-scan query read-only (up to PREVIEW_MAX_PAGES
+ * pages) and classifies each group as the engine would.
  */
 export const previewCustomRule = async ({
   esClient,
   index,
   spec,
+  signal,
+  pageSize = MATCHER_PAGE_SIZE,
 }: {
   esClient: ElasticsearchClient;
   index: string;
   spec: EsqlExpressionMatchSpec;
+  signal?: AbortSignal;
+  pageSize?: number;
 }): Promise<CustomRulePreview> => {
-  const declineSameNamespaceDuplicates = spec.declineSameNamespaceDuplicates !== false;
   const preview: CustomRulePreview = {
     scanned_groups: 0,
     truncated: false,
+    partial: false,
     would_link_groups: 0,
-    would_join_existing_groups: 0,
+    would_extend_existing_groups: 0,
     would_merge_existing_groups: 0,
     skipped: { oversized: 0, same_namespace_duplicates: 0, nothing_to_link: 0 },
     sample: [],
@@ -162,41 +181,45 @@ export const previewCustomRule = async ({
       preview.truncated = true;
       break;
     }
+    if (signal?.aborted) {
+      throw new Error('Custom rule preview aborted');
+    }
     const response = await executeEsqlQuery({
       esClient,
-      query: buildMatchGroupsQuery({ index, spec, afterMatchValue }),
+      signal,
+      query: buildMatchGroupsQuery({ index, spec, afterMatchValue, pageSize }),
     });
-    assertCompleteEsqlResults(response, 'preview');
+    preview.partial ||= isPartial(response);
     const rows = parseMatchGroupRows(response);
 
     for (const row of rows) {
       preview.scanned_groups++;
-      const verdict = classifyMatchGroup(row, declineSameNamespaceDuplicates);
+      const verdict = classifyMatchGroup(row, spec.declineSameNamespaceDuplicates);
       if (verdict === 'oversized') {
         preview.skipped.oversized++;
       } else if (verdict === 'ambiguous') {
         preview.skipped.same_namespace_duplicates++;
-      } else if (verdict === 'noop' || linkableIds(row).size < 2) {
+      } else if (verdict === 'noop' || !hasSomethingToLink(row)) {
         preview.skipped.nothing_to_link++;
       } else {
         preview.would_link_groups++;
-        const existingTargets = new Set(row.existingTargetIds).size;
-        if (existingTargets >= 1) {
-          preview.would_join_existing_groups++;
+        const distinctExistingTargetCount = new Set(row.existingTargetIds).size;
+        if (distinctExistingTargetCount >= 1) {
+          preview.would_extend_existing_groups++;
         }
-        if (existingTargets >= 2) {
+        if (distinctExistingTargetCount >= 2) {
           preview.would_merge_existing_groups++;
         }
         keepLargest(sampleRows, row);
       }
     }
 
-    if (rows.length < MATCHER_PAGE_SIZE) {
+    if (rows.length < pageSize) {
       break;
     }
     afterMatchValue = rows[rows.length - 1].matchValue;
   }
 
-  preview.sample = await buildSample(esClient, index, sampleRows);
+  preview.sample = await buildSample(esClient, index, sampleRows, signal);
   return preview;
 };

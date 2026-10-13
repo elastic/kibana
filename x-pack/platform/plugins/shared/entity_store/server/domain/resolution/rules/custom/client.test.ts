@@ -11,6 +11,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   CustomResolutionRuleNotFoundError,
+  EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
 } from '../../../errors';
 import { CustomResolutionRulesClient } from './client';
@@ -21,18 +22,18 @@ jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
   resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
 }));
 
-const ELEVANCE = {
-  name: 'CrowdStrike local users to AD',
+const LOCAL_USERS_TO_AD = {
+  name: 'Endpoint local users to AD',
   namespaces: ['local', 'active_directory'],
   filter: 'NOT ENDS_WITH(user.name, "$")',
   match_value: 'TO_LOWER(user.name)',
 };
 
 const ATTRIBUTES: CustomResolutionRuleAttributes = {
-  name: ELEVANCE.name,
-  namespaces: ELEVANCE.namespaces,
-  filter: ELEVANCE.filter,
-  matchValue: ELEVANCE.match_value,
+  name: LOCAL_USERS_TO_AD.name,
+  entityNamespaces: LOCAL_USERS_TO_AD.namespaces,
+  filter: LOCAL_USERS_TO_AD.filter,
+  matchValue: LOCAL_USERS_TO_AD.match_value,
   declineSameNamespaceDuplicates: true,
   enabled: false,
 };
@@ -42,13 +43,14 @@ const savedObject = (id: string, attributes = ATTRIBUTES) => ({
   type: CustomResolutionRuleTypeName,
   attributes,
   references: [],
+  version: 'WzEsMV0=',
   created_at: '2026-10-12T00:00:00.000Z',
   updated_at: '2026-10-12T00:00:00.000Z',
 });
 
-const esqlBadRequest = (reason: string) =>
+const esResponseError = (statusCode: number, reason: string) =>
   new esErrors.ResponseError({
-    statusCode: 400,
+    statusCode,
     body: { error: { type: 'verification_exception', reason } },
     headers: {},
     warnings: [],
@@ -59,6 +61,7 @@ const setup = () => {
   const soClient = savedObjectsClientMock.create();
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as never);
+  esClient.indices.exists.mockResolvedValue(true as never);
   soClient.find.mockResolvedValue({ saved_objects: [], total: 0, per_page: 100, page: 1 });
   soClient.create.mockImplementation(async (_type, attributes) =>
     savedObject('new-id', attributes as CustomResolutionRuleAttributes)
@@ -76,14 +79,14 @@ describe('CustomResolutionRulesClient', () => {
   describe('create', () => {
     it('saves a validated rule, disabled by default, with the same-namespace check on', async () => {
       const { client, soClient, esClient } = setup();
-      const rule = await client.create(ELEVANCE);
+      const rule = await client.create(LOCAL_USERS_TO_AD);
 
       expect(soClient.create).toHaveBeenCalledWith(CustomResolutionRuleTypeName, ATTRIBUTES, {
         refresh: 'wait_for',
       });
       expect(rule).toEqual({
         id: 'new-id',
-        ...ELEVANCE,
+        ...LOCAL_USERS_TO_AD,
         decline_same_namespace_duplicates: true,
         enabled: false,
         created_at: '2026-10-12T00:00:00.000Z',
@@ -95,9 +98,9 @@ describe('CustomResolutionRulesClient', () => {
       expect(query).toContain('| LIMIT 0');
     });
 
-    it('stores what the user wrote, not the normalized expression', async () => {
+    it('stores what the user wrote, not the re-printed expression', async () => {
       const { client, soClient } = setup();
-      await client.create({ ...ELEVANCE, match_value: 'TO_LOWER(user.name) // key' });
+      await client.create({ ...LOCAL_USERS_TO_AD, match_value: 'TO_LOWER(user.name) // key' });
 
       expect(soClient.create.mock.calls[0][1]).toMatchObject({
         matchValue: 'TO_LOWER(user.name) // key',
@@ -107,8 +110,8 @@ describe('CustomResolutionRulesClient', () => {
     it('rejects an expression that is not a single expression before touching Elasticsearch', async () => {
       const { client, soClient, esClient } = setup();
       await expect(
-        client.create({ ...ELEVANCE, filter: 'true | DROP user.name' })
-      ).rejects.toBeInstanceOf(InvalidCustomResolutionRuleError);
+        client.create({ ...LOCAL_USERS_TO_AD, filter: 'true | DROP user.name' })
+      ).rejects.toThrow("Invalid 'filter' in custom resolution rule");
       expect(esClient.esql.query).not.toHaveBeenCalled();
       expect(soClient.create).not.toHaveBeenCalled();
     });
@@ -116,20 +119,34 @@ describe('CustomResolutionRulesClient', () => {
     it('turns an Elasticsearch verification error into a validation error', async () => {
       const { client, soClient, esClient } = setup();
       esClient.esql.query.mockRejectedValue(
-        esqlBadRequest('Found 1 problem\nline 3:9: Unknown column [user.nmae]')
+        esResponseError(400, 'Found 1 problem\nline 3:9: Unknown column [user.nmae]')
       );
 
-      await expect(client.create({ ...ELEVANCE, match_value: 'user.nmae' })).rejects.toThrow(
-        'Unknown column [user.nmae]'
+      await expect(
+        client.create({ ...LOCAL_USERS_TO_AD, match_value: 'user.nmae' })
+      ).rejects.toThrow(
+        'Invalid custom resolution rule: Found 1 problem\nline 3:9: Unknown column [user.nmae]'
       );
       expect(soClient.create).not.toHaveBeenCalled();
     });
 
-    it('rethrows Elasticsearch errors that are not about the rule', async () => {
+    it('reports a space without an entity store as not installed', async () => {
       const { client, esClient } = setup();
-      esClient.esql.query.mockRejectedValue(new Error('connection reset'));
+      esClient.indices.exists.mockResolvedValue(false as never);
 
-      await expect(client.create(ELEVANCE)).rejects.toThrow('connection reset');
+      await expect(client.create(LOCAL_USERS_TO_AD)).rejects.toBeInstanceOf(
+        EntityStoreNotInstalledError
+      );
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('rethrows Elasticsearch errors that are not a bad request', async () => {
+      const { client, esClient } = setup();
+      esClient.esql.query.mockRejectedValue(esResponseError(503, 'no shards available'));
+
+      const error = await client.create(LOCAL_USERS_TO_AD).catch((e) => e);
+      expect(error).toBeInstanceOf(esErrors.ResponseError);
+      expect(error).not.toBeInstanceOf(InvalidCustomResolutionRuleError);
     });
 
     it(`refuses more than ${MAX_CUSTOM_RULES_PER_SPACE} rules per space`, async () => {
@@ -143,40 +160,81 @@ describe('CustomResolutionRulesClient', () => {
         page: 1,
       } as never);
 
-      await expect(client.create(ELEVANCE)).rejects.toBeInstanceOf(
-        InvalidCustomResolutionRuleError
+      await expect(client.create(LOCAL_USERS_TO_AD)).rejects.toThrow(
+        `Invalid custom resolution rule: a space can hold at most ${MAX_CUSTOM_RULES_PER_SPACE} custom rules`
       );
       expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('lets a saved-objects authorization error through for the route to map', async () => {
+      const { client, soClient } = setup();
+      soClient.create.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(new Error('x'))
+      );
+
+      const error = await client.create(LOCAL_USERS_TO_AD).catch((e) => e);
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
   });
 
   describe('update', () => {
-    it('enables a rule without re-validating an unchanged definition', async () => {
+    it('renames a rule without re-validating, writing with the version it read', async () => {
       const { client, soClient, esClient } = setup();
       soClient.get.mockResolvedValue(savedObject('a'));
       soClient.update.mockResolvedValue({ ...savedObject('a'), updated_at: 'later' } as never);
 
-      const rule = await client.update('a', { enabled: true });
+      const rule = await client.update('a', { name: 'renamed' });
 
       expect(esClient.esql.query).not.toHaveBeenCalled();
       expect(soClient.update).toHaveBeenCalledWith(
         CustomResolutionRuleTypeName,
         'a',
-        { ...ATTRIBUTES, enabled: true },
-        { refresh: 'wait_for', mergeAttributes: false }
+        { ...ATTRIBUTES, name: 'renamed' },
+        { refresh: 'wait_for', mergeAttributes: false, version: 'WzEsMV0=' }
       );
-      expect(rule).toMatchObject({ id: 'a', enabled: true, updated_at: 'later' });
+      expect(rule).toMatchObject({ id: 'a', name: 'renamed', updated_at: 'later' });
+    });
+
+    it('disables a rule without re-validating', async () => {
+      const { client, soClient, esClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a', { ...ATTRIBUTES, enabled: true }));
+      soClient.update.mockResolvedValue(savedObject('a') as never);
+
+      await client.update('a', { enabled: false });
+
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('validates when a disabled rule is turned on', async () => {
+      const { client, soClient, esClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a'));
+      esClient.esql.query.mockRejectedValue(esResponseError(400, 'Unknown column [user.name]'));
+
+      await expect(client.update('a', { enabled: true })).rejects.toBeInstanceOf(
+        InvalidCustomResolutionRuleError
+      );
+      expect(soClient.update).not.toHaveBeenCalled();
     });
 
     it('validates a changed definition', async () => {
       const { client, soClient, esClient } = setup();
       soClient.get.mockResolvedValue(savedObject('a'));
-      esClient.esql.query.mockRejectedValue(esqlBadRequest('Unknown column [x]'));
+      esClient.esql.query.mockRejectedValue(esResponseError(400, 'Unknown column [x]'));
 
       await expect(client.update('a', { match_value: 'x' })).rejects.toBeInstanceOf(
         InvalidCustomResolutionRuleError
       );
       expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('does not count reordered namespaces as a definition change', async () => {
+      const { client, soClient, esClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a'));
+      soClient.update.mockResolvedValue(savedObject('a') as never);
+
+      await client.update('a', { namespaces: ['active_directory', 'local'] });
+
+      expect(esClient.esql.query).not.toHaveBeenCalled();
     });
 
     it('removes the filter when it is set to null', async () => {
@@ -188,6 +246,17 @@ describe('CustomResolutionRulesClient', () => {
 
       expect(soClient.update.mock.calls[0][2]).not.toHaveProperty('filter');
       expect(rule).not.toHaveProperty('filter');
+    });
+
+    it('lets a version conflict through for the route to map', async () => {
+      const { client, soClient } = setup();
+      soClient.get.mockResolvedValue(savedObject('a'));
+      soClient.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError(CustomResolutionRuleTypeName, 'a')
+      );
+
+      const error = await client.update('a', { name: 'x' }).catch((e) => e);
+      expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
     });
 
     it('reports a missing rule as not found', async () => {

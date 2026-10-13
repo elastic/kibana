@@ -5,34 +5,42 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { AuthzEnabled } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 import { buildStrictRouteValidationWithZod } from '../../utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../../common';
-import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../../constants';
-import type { EntityStorePluginRouter } from '../../../../types';
+import {
+  RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS,
+  RESOLUTION_ENTITY_STORE_PERMISSIONS,
+} from '../../../constants';
+import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '../../../../types';
 import { wrapMiddlewares } from '../../../middleware';
 import { enterpriseLicenseMiddleware } from '../../../middleware/enterprise_license';
 import {
   CustomResolutionRuleNotFoundError,
+  EntityStoreNotInstalledError,
   InvalidCustomResolutionRuleError,
 } from '../../../../domain/errors';
 import {
-  customRuleCreateBodySchema,
-  customRuleIdParamsSchema,
-  customRulePreviewBodySchema,
-  customRuleUpdateBodySchema,
-} from './schemas';
+  CustomResolutionRuleCreate,
+  CustomResolutionRuleIdParams,
+  CustomResolutionRulePreviewRequest,
+  CustomResolutionRuleUpdate,
+  type CustomResolutionRulesClient,
+} from '../../../../domain/resolution/rules';
 
-// Internal routes stay out of the public API reference; this is an
-// engagement-only escape hatch, documented only in an internal runbook.
-const ROUTE_CONFIG = {
-  access: 'internal',
-  security: { authz: RESOLUTION_ENTITY_STORE_PERMISSIONS },
-  enableQueryVersion: true,
-} as const;
+export const CUSTOM_RULES_ROUTE_MIDDLEWARES = [enterpriseLicenseMiddleware] as const;
 
-const toErrorResponse = (
+const routeConfig = (authz: AuthzEnabled) =>
+  ({ access: 'internal', security: { authz }, enableQueryVersion: true } as const);
+
+const READ = routeConfig(RESOLUTION_ENTITY_STORE_PERMISSIONS);
+const MANAGE = routeConfig(RESOLUTION_ENTITY_STORE_MANAGE_PERMISSIONS);
+
+/** Maps known errors to a response; rethrows anything else after logging it. */
+const toErrorResponseOrThrow = (
   error: unknown,
   res: KibanaResponseFactory,
   logger: Logger
@@ -40,172 +48,179 @@ const toErrorResponse = (
   if (error instanceof InvalidCustomResolutionRuleError) {
     return res.badRequest({ body: { message: error.message } });
   }
-  if (error instanceof CustomResolutionRuleNotFoundError) {
+  if (
+    error instanceof CustomResolutionRuleNotFoundError ||
+    error instanceof EntityStoreNotInstalledError
+  ) {
     return res.notFound({ body: { message: error.message } });
+  }
+  if (error instanceof Error && SavedObjectsErrorHelpers.isForbiddenError(error)) {
+    return res.forbidden({
+      body: {
+        message:
+          'Managing custom resolution rules requires all Kibana privileges in this space, or Saved Objects Management',
+      },
+    });
+  }
+  if (error instanceof Error && SavedObjectsErrorHelpers.isConflictError(error)) {
+    return res.conflict({
+      body: { message: 'The rule was changed by another request; read it again and retry' },
+    });
   }
   logger.error(error instanceof Error ? error : String(error));
   throw error;
 };
 
+const withCustomRulesClient =
+  <P, Q, B>(
+    handler: (
+      client: CustomResolutionRulesClient,
+      req: KibanaRequest<P, Q, B>,
+      res: KibanaResponseFactory
+    ) => Promise<IKibanaResponse>
+  ) =>
+  async (
+    ctx: EntityStoreRequestHandlerContext,
+    req: KibanaRequest<P, Q, B>,
+    res: KibanaResponseFactory
+  ): Promise<IKibanaResponse> => {
+    const { logger, customResolutionRulesClient } = await ctx.entityStore;
+    try {
+      return await handler(customResolutionRulesClient, req, res);
+    } catch (error) {
+      return toErrorResponseOrThrow(error, res, logger);
+    }
+  };
+
+const abortSignalFor = (req: KibanaRequest): AbortSignal => {
+  const controller = new AbortController();
+  req.events.aborted$.subscribe(() => controller.abort());
+  return controller.signal;
+};
+
 export function registerCustomResolutionRulesRoutes(router: EntityStorePluginRouter) {
+  const { RESOLUTION_CUSTOM_RULES, RESOLUTION_CUSTOM_RULE, RESOLUTION_CUSTOM_RULES_PREVIEW } =
+    ENTITY_STORE_ROUTES.internal;
+  const version = API_VERSIONS.internal.v2;
+  const idParams = buildStrictRouteValidationWithZod(CustomResolutionRuleIdParams);
+
   router.versioned
-    .get({
-      ...ROUTE_CONFIG,
-      path: ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
-      summary: 'List custom entity resolution rules',
-    })
+    .get({ ...READ, path: RESOLUTION_CUSTOM_RULES, summary: 'List custom entity resolution rules' })
     .addVersion(
-      { version: API_VERSIONS.internal.v2, validate: false },
+      { version, validate: false },
       wrapMiddlewares(
-        async (ctx, _req, res): Promise<IKibanaResponse> => {
-          const { logger, customResolutionRulesClient } = await ctx.entityStore;
-          try {
-            return res.ok({ body: { rules: await customResolutionRulesClient.list() } });
-          } catch (error) {
-            return toErrorResponse(error, res, logger);
-          }
-        },
-        [enterpriseLicenseMiddleware]
+        withCustomRulesClient(async (client, _req, res) =>
+          res.ok({ body: { rules: await client.list() } })
+        ),
+        CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 
   router.versioned
     .post({
-      ...ROUTE_CONFIG,
-      path: ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES,
+      ...MANAGE,
+      path: RESOLUTION_CUSTOM_RULES,
       summary: 'Create a custom entity resolution rule',
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version,
         validate: {
-          request: { body: buildStrictRouteValidationWithZod(customRuleCreateBodySchema) },
+          request: { body: buildStrictRouteValidationWithZod(CustomResolutionRuleCreate) },
         },
       },
       wrapMiddlewares(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { logger, customResolutionRulesClient } = await ctx.entityStore;
-          try {
-            return res.ok({ body: await customResolutionRulesClient.create(req.body) });
-          } catch (error) {
-            return toErrorResponse(error, res, logger);
-          }
-        },
-        [enterpriseLicenseMiddleware]
+        withCustomRulesClient(
+          async (client, req: KibanaRequest<unknown, unknown, CustomResolutionRuleCreate>, res) =>
+            res.ok({ body: await client.create(req.body) })
+        ),
+        CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 
   router.versioned
     .post({
-      ...ROUTE_CONFIG,
-      path: ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULES_PREVIEW,
+      ...READ,
+      path: RESOLUTION_CUSTOM_RULES_PREVIEW,
       summary: 'Preview what a custom entity resolution rule would link',
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version,
         validate: {
-          request: { body: buildStrictRouteValidationWithZod(customRulePreviewBodySchema) },
+          request: { body: buildStrictRouteValidationWithZod(CustomResolutionRulePreviewRequest) },
         },
       },
       wrapMiddlewares(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { logger, customResolutionRulesClient } = await ctx.entityStore;
-          try {
-            return res.ok({ body: await customResolutionRulesClient.preview(req.body) });
-          } catch (error) {
-            return toErrorResponse(error, res, logger);
-          }
-        },
-        [enterpriseLicenseMiddleware]
+        withCustomRulesClient(
+          async (
+            client,
+            req: KibanaRequest<unknown, unknown, CustomResolutionRulePreviewRequest>,
+            res
+          ) => res.ok({ body: await client.preview(req.body, abortSignalFor(req)) })
+        ),
+        CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 
   router.versioned
-    .get({
-      ...ROUTE_CONFIG,
-      path: ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE,
-      summary: 'Get a custom entity resolution rule',
-    })
+    .get({ ...READ, path: RESOLUTION_CUSTOM_RULE, summary: 'Get a custom entity resolution rule' })
     .addVersion(
-      {
-        version: API_VERSIONS.internal.v2,
-        validate: {
-          request: { params: buildStrictRouteValidationWithZod(customRuleIdParamsSchema) },
-        },
-      },
+      { version, validate: { request: { params: idParams } } },
       wrapMiddlewares(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { logger, customResolutionRulesClient } = await ctx.entityStore;
-          try {
-            return res.ok({ body: await customResolutionRulesClient.get(req.params.id) });
-          } catch (error) {
-            return toErrorResponse(error, res, logger);
-          }
-        },
-        [enterpriseLicenseMiddleware]
+        withCustomRulesClient(async (client, req: KibanaRequest<{ id: string }>, res) =>
+          res.ok({ body: await client.get(req.params.id) })
+        ),
+        CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 
   router.versioned
     .put({
-      ...ROUTE_CONFIG,
-      path: ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE,
+      ...MANAGE,
+      path: RESOLUTION_CUSTOM_RULE,
       summary: 'Update a custom entity resolution rule',
       description:
         'Partial update. Changing namespaces, filter, match_value or decline_same_namespace_duplicates makes the rule rescan from scratch on the next maintainer run.',
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v2,
+        version,
         validate: {
           request: {
-            params: buildStrictRouteValidationWithZod(customRuleIdParamsSchema),
-            body: buildStrictRouteValidationWithZod(customRuleUpdateBodySchema),
+            params: idParams,
+            body: buildStrictRouteValidationWithZod(CustomResolutionRuleUpdate),
           },
         },
       },
       wrapMiddlewares(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { logger, customResolutionRulesClient } = await ctx.entityStore;
-          try {
-            return res.ok({
-              body: await customResolutionRulesClient.update(req.params.id, req.body),
-            });
-          } catch (error) {
-            return toErrorResponse(error, res, logger);
-          }
-        },
-        [enterpriseLicenseMiddleware]
+        withCustomRulesClient(
+          async (
+            client,
+            req: KibanaRequest<{ id: string }, unknown, CustomResolutionRuleUpdate>,
+            res
+          ) => res.ok({ body: await client.update(req.params.id, req.body) })
+        ),
+        CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 
   router.versioned
     .delete({
-      ...ROUTE_CONFIG,
-      path: ENTITY_STORE_ROUTES.internal.RESOLUTION_CUSTOM_RULE,
+      ...MANAGE,
+      path: RESOLUTION_CUSTOM_RULE,
       summary: 'Delete a custom entity resolution rule',
       description:
         'Deletes the rule. The next maintainer run drops its saved progress. Links the rule already made are kept.',
     })
     .addVersion(
-      {
-        version: API_VERSIONS.internal.v2,
-        validate: {
-          request: { params: buildStrictRouteValidationWithZod(customRuleIdParamsSchema) },
-        },
-      },
+      { version, validate: { request: { params: idParams } } },
       wrapMiddlewares(
-        async (ctx, req, res): Promise<IKibanaResponse> => {
-          const { logger, customResolutionRulesClient } = await ctx.entityStore;
-          try {
-            await customResolutionRulesClient.delete(req.params.id);
-            return res.ok({ body: { deleted: true } });
-          } catch (error) {
-            return toErrorResponse(error, res, logger);
-          }
-        },
-        [enterpriseLicenseMiddleware]
+        withCustomRulesClient(async (client, req: KibanaRequest<{ id: string }>, res) => {
+          await client.delete(req.params.id);
+          return res.ok({ body: { deleted: true } });
+        }),
+        CUSTOM_RULES_ROUTE_MIDDLEWARES
       )
     );
 }

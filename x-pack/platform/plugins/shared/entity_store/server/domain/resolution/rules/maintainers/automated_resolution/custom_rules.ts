@@ -13,7 +13,7 @@ import type { ResolutionClient } from '../../../resolution_client';
 import {
   CUSTOM_RULE_STATE_KEY_PREFIX,
   customRuleStateKey,
-  fingerprintMatchSpec,
+  fingerprintDefinition,
   toExpressionMatchSpec,
   toRuleDefinition,
   type CustomResolutionRule,
@@ -25,13 +25,19 @@ import type { CustomRuleState, PerRuleState } from './types';
 
 const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
+/** Time left before the maintainer's task timeout when custom rules stop. */
+export const CUSTOM_RULES_DEADLINE_MARGIN_MS = 60 * 1000;
+
+/** Telemetry scope value for every custom rule; ids are per deployment. */
+const CUSTOM_RULE_TELEMETRY_ID = 'custom';
+
 export interface RunCustomRulesDeps {
-  /** State read at the start of the run. */
-  previousRules: Readonly<Record<string, PerRuleState>>;
-  /** State this run returns; custom-rule entries are written and pruned here. */
+  /**
+   * Rule state for this run, starting as the state read at the start of the
+   * run. Custom-rule entries are read, written and pruned here.
+   */
   rules: Record<string, PerRuleState>;
   resolutionRulesClient: ResolutionRulesClient;
-  namespace: string;
   index: string;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -39,50 +45,34 @@ export interface RunCustomRulesDeps {
   signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
   mutatedIds: Set<string>;
-  /** Epoch ms after which no custom-rule work starts and running rules stop between groups. */
+  /**
+   * Epoch ms after which no custom rule starts and a running one stops between
+   * groups. A run that ends on its own saves every rule's state; a run Task
+   * Manager cancels saves none, OOTB rules included.
+   */
   deadline: number;
 }
 
-/**
- * Custom rules stop this long after the run starts, a minute before the
- * maintainer's 5m task timeout. A run that ends on its own saves every rule's
- * state; a run Task Manager cancels saves none, OOTB rules included.
- */
-export const CUSTOM_RULES_SOFT_DEADLINE_MS = 4 * 60 * 1000;
-
-const lastAttemptOf = (state: PerRuleState | undefined): string =>
-  (state as Partial<CustomRuleState> | undefined)?.lastAttemptAt ?? '';
+const asCustomState = (state: PerRuleState | undefined): Partial<CustomRuleState> =>
+  (state ?? {}) as Partial<CustomRuleState>;
 
 // Least recently started first, so one heavy rule that keeps reaching the
-// deadline cannot starve the rules after it.
+// deadline can't starve the rules after it.
 const byLeastRecentAttempt =
-  (previousRules: Readonly<Record<string, PerRuleState>>) =>
+  (rules: Readonly<Record<string, PerRuleState>>) =>
   (a: CustomResolutionRule, b: CustomResolutionRule): number =>
-    lastAttemptOf(previousRules[customRuleStateKey(a.id)]).localeCompare(
-      lastAttemptOf(previousRules[customRuleStateKey(b.id)])
+    (asCustomState(rules[customRuleStateKey(a.id)]).lastAttemptAt ?? '').localeCompare(
+      asCustomState(rules[customRuleStateKey(b.id)]).lastAttemptAt ?? ''
     );
 
 const readPriorState = (
   previous: PerRuleState | undefined,
-  definitionHash: string
+  definitionFingerprint: string
 ): PerRuleState => {
-  if (!previous || (previous as Partial<CustomRuleState>).definitionHash !== definitionHash) {
+  if (!previous || asCustomState(previous).definitionFingerprint !== definitionFingerprint) {
     return EMPTY_RULE_STATE;
   }
   return { lastProcessedTimestamp: previous.lastProcessedTimestamp, lastRun: previous.lastRun };
-};
-
-const compileRule = (
-  rule: CustomResolutionRule,
-  logger: Logger
-): { spec: EsqlExpressionMatchSpec; definitionHash: string } | undefined => {
-  try {
-    const spec = toExpressionMatchSpec(toRuleDefinition(rule));
-    return { spec, definitionHash: fingerprintMatchSpec(spec) };
-  } catch (error) {
-    logger.warn(`Custom resolution rule '${rule.id}' failed: ${getErrorMessage(error)}`);
-    return undefined;
-  }
 };
 
 const pruneDeletedRules = (
@@ -97,6 +87,22 @@ const pruneDeletedRules = (
   }
 };
 
+const compileRule = (
+  rule: CustomResolutionRule,
+  logger: Logger
+): { spec: EsqlExpressionMatchSpec; definitionFingerprint: string } | undefined => {
+  try {
+    const definition = toRuleDefinition(rule);
+    return {
+      spec: toExpressionMatchSpec(definition),
+      definitionFingerprint: fingerprintDefinition(definition),
+    };
+  } catch (error) {
+    logger.warn(`Custom resolution rule '${rule.id}' failed: ${getErrorMessage(error)}`);
+    return undefined;
+  }
+};
+
 /**
  * Applies saved custom rules after the OOTB rules. Each rule is isolated: an
  * invalid or failing rule is logged and skipped, and nothing here throws.
@@ -104,17 +110,10 @@ const pruneDeletedRules = (
  * Rules run least recently attempted first, until `deadline`. A rule cut off
  * mid-scan keeps its previous watermark and repeats its query next run; the
  * matcher skips groups it already linked, so the links it made still count as
- * progress. The deadline bounds the run, so custom rules need no OOTB-style
- * one-first-scan-per-run slot.
+ * progress.
  */
 export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promise<void> {
   const { rules, resolutionRulesClient, logger, signal } = deps;
-
-  const remainingMs = deps.deadline - Date.now();
-  if (remainingMs <= 0) {
-    logger.info('Skipping custom resolution rules this run; the soft deadline has passed');
-    return;
-  }
 
   let customRules: CustomResolutionRule[];
   try {
@@ -126,33 +125,39 @@ export async function runCustomResolutionRules(deps: RunCustomRulesDeps): Promis
 
   pruneDeletedRules(rules, customRules);
 
-  const soft = new AbortController();
-  const timer = setTimeout(() => soft.abort(), remainingMs);
-  const onTaskAbort = () => soft.abort();
+  const remainingMs = deps.deadline - Date.now();
+  if (remainingMs <= 0) {
+    logger.info('Skipping custom resolution rules this run; the soft deadline has passed');
+    return;
+  }
+
+  const deadlineController = new AbortController();
+  const timer = setTimeout(() => deadlineController.abort(), remainingMs);
+  const onTaskAbort = () => deadlineController.abort();
   signal.addEventListener('abort', onTaskAbort);
   if (signal.aborted) {
-    soft.abort();
+    deadlineController.abort();
   }
   try {
-    await runRulesUntil(deps, customRules, soft.signal);
+    await runEnabledRulesUntilAborted(deps, customRules, deadlineController.signal);
   } finally {
     clearTimeout(timer);
     signal.removeEventListener('abort', onTaskAbort);
   }
 }
 
-async function runRulesUntil(
+async function runEnabledRulesUntilAborted(
   deps: RunCustomRulesDeps,
   customRules: CustomResolutionRule[],
   softSignal: AbortSignal
 ): Promise<void> {
-  const { previousRules, rules, index, esClient, logger, signal } = deps;
+  const { rules, resolutionRulesClient, index, esClient, logger, signal } = deps;
   const reachedDeadline = () => softSignal.aborted && !signal.aborted;
   const enabledRules = customRules
     .filter(({ enabled }) => enabled)
-    .sort(byLeastRecentAttempt(previousRules));
+    .sort(byLeastRecentAttempt(rules));
 
-  for (const [position, rule] of enabledRules.entries()) {
+  for (const [position, listed] of enabledRules.entries()) {
     if (softSignal.aborted) {
       const left = enabledRules.length - position;
       if (reachedDeadline()) {
@@ -160,9 +165,25 @@ async function runRulesUntil(
           `Custom resolution rules reached the soft deadline; ${left} rule(s) continue next run`
         );
       } else {
-        logger.debug(`Aborted automated-resolution before custom rule '${rule.id}'`);
+        logger.debug(`Aborted automated-resolution before custom rule '${listed.id}'`);
       }
       return;
+    }
+
+    // Re-read right before running: a disable, delete or edit since the list
+    // was loaded must take effect now, not after the deadline.
+    let rule: CustomResolutionRule | undefined;
+    try {
+      rule = await resolutionRulesClient.getCustomRule(listed.id);
+    } catch (error) {
+      logger.warn(`Custom resolution rule '${listed.id}' failed: ${getErrorMessage(error)}`);
+      continue;
+    }
+    if (!rule?.enabled) {
+      logger.debug(
+        `Skipping custom resolution rule '${listed.id}': disabled or deleted since load`
+      );
+      continue;
     }
 
     const stateKey = customRuleStateKey(rule.id);
@@ -170,15 +191,14 @@ async function runRulesUntil(
     if (!compiled) {
       continue;
     }
-    const { spec, definitionHash } = compiled;
+    const { spec, definitionFingerprint } = compiled;
 
-    const ruleState = readPriorState(previousRules[stateKey], definitionHash);
+    const ruleState = readPriorState(rules[stateKey], definitionFingerprint);
     const lastAttemptAt = new Date().toISOString();
-    let next: PerRuleState = ruleState;
+    let matcherResultState: PerRuleState = ruleState;
     try {
-      next = await runEsqlMatcherRule({
+      matcherResultState = await runEsqlMatcherRule({
         state: ruleState,
-        namespace: deps.namespace,
         esClient,
         logger,
         resolutionClient: deps.resolutionClient,
@@ -186,6 +206,7 @@ async function runRulesUntil(
         telemetry: deps.telemetry,
         spec,
         ruleId: stateKey,
+        telemetryRuleId: CUSTOM_RULE_TELEMETRY_ID,
         mutatedIds: deps.mutatedIds,
         index,
       });
@@ -201,8 +222,12 @@ async function runRulesUntil(
     }
 
     // Written even when the rule failed or stopped early: the attempt time
-    // orders the next run, and `next` still holds the previous watermark.
-    const nextState: CustomRuleState = { ...next, definitionHash, lastAttemptAt };
+    // orders the next run, and the state still holds the previous watermark.
+    const nextState: CustomRuleState = {
+      ...matcherResultState,
+      definitionFingerprint,
+      lastAttemptAt,
+    };
     rules[stateKey] = nextState;
   }
 }

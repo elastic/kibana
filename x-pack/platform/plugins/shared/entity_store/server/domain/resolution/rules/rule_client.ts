@@ -6,7 +6,13 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
+import {
+  SECURITY_EXTENSION_ID,
+  SavedObjectsErrorHelpers,
+  type KibanaRequest,
+  type Logger,
+  type SavedObjectsServiceStart,
+} from '@kbn/core/server';
 import type { ResolutionRuleId } from '../../../../common';
 import { EntityResolutionRuleTypeName } from './saved_object';
 import { EntityResolutionRuleAttributes } from './saved_object';
@@ -15,7 +21,11 @@ import {
   getResolutionRuleConfig,
   type ResolutionRuleConfig,
 } from './rule_registry';
-import { findCustomResolutionRules, type CustomResolutionRule } from './custom';
+import {
+  findCustomResolutionRule,
+  findCustomResolutionRules,
+  type CustomResolutionRule,
+} from './custom';
 
 export interface EffectiveResolutionRule {
   id: ResolutionRuleConfig['id'];
@@ -24,6 +34,18 @@ export interface EffectiveResolutionRule {
   managed: true;
   enabled: boolean;
 }
+
+/**
+ * Saved-objects client for the maintainer's reads of resolution rules.
+ * `find` returns an empty page, not an error, when the API key owner can't
+ * read a type, so rules and overrides would silently not apply. Rules are
+ * written only through the user-scoped client in the HTTP routes.
+ */
+export const getMaintainerRulesSavedObjectsClient = (
+  savedObjects: Pick<SavedObjectsServiceStart, 'getScopedClient'>,
+  request: KibanaRequest
+): SavedObjectsClientContract =>
+  savedObjects.getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
 
 export class ResolutionRulesClient {
   constructor(
@@ -42,9 +64,12 @@ export class ResolutionRulesClient {
     );
   }
 
-  /** Saved custom rules in this space, oldest first. */
   getCustomRules(): Promise<CustomResolutionRule[]> {
     return findCustomResolutionRules(this.soClient);
+  }
+
+  getCustomRule(id: string): Promise<CustomResolutionRule | undefined> {
+    return findCustomResolutionRule(this.soClient, id);
   }
 
   async isEnabled(id: ResolutionRuleId): Promise<boolean> {

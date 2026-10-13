@@ -308,14 +308,24 @@ describe('automated-resolution state migration', () => {
     expect(output.rules[relatedUserId].lastRun).toEqual(relatedLastRun);
   });
 
-  it('keeps a custom rule definition hash and drops a malformed one', () => {
+  it('keeps custom rule fingerprints and attempt times, and drops malformed ones', () => {
     const watermark = '2026-10-01T00:00:00Z';
     const output = migrate(
       {
         version: AUTOMATED_RESOLUTION_STATE_VERSION,
         rules: {
-          'custom:a': { lastProcessedTimestamp: watermark, lastRun: null, definitionHash: 'abc' },
-          'custom:b': { lastProcessedTimestamp: watermark, lastRun: null, definitionHash: 42 },
+          'custom:a': {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            definitionFingerprint: 'abc',
+            lastAttemptAt: '2026-10-13T10:00:00.000Z',
+          },
+          'custom:b': {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            definitionFingerprint: 42,
+            lastAttemptAt: 1760349600000,
+          },
         },
       },
       loggerMock.create()
@@ -324,7 +334,8 @@ describe('automated-resolution state migration', () => {
     expect(output.rules['custom:a']).toEqual({
       lastProcessedTimestamp: watermark,
       lastRun: null,
-      definitionHash: 'abc',
+      definitionFingerprint: 'abc',
+      lastAttemptAt: '2026-10-13T10:00:00.000Z',
     });
     expect(output.rules['custom:b']).toEqual({ lastProcessedTimestamp: watermark, lastRun: null });
   });

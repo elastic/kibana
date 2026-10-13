@@ -6,7 +6,11 @@
  */
 
 export class InvalidCustomResolutionRuleError extends Error {
-  constructor(field: string, reason: string) {
-    super(`Invalid custom resolution rule '${field}': ${reason}`);
+  constructor(reason: string, attribute?: string) {
+    super(
+      attribute
+        ? `Invalid '${attribute}' in custom resolution rule: ${reason}`
+        : `Invalid custom resolution rule: ${reason}`
+    );
   }
 }

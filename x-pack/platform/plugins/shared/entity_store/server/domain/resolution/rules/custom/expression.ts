@@ -6,41 +6,47 @@
  */
 
 import { BasicPrettyPrinter, Parser, Walker } from '@elastic/esql';
-import { getErrorMessage } from '../../../../../common';
 import { InvalidCustomResolutionRuleError } from '../../../errors';
+
+const SYNTAX_ERROR_PREFIX = 'SyntaxError: ';
+
+// `parseExpression` only says "Invalid command: EVAL …" on a syntax error, so
+// the reason comes from parsing the expression inside a throwaway query.
+const describeParseFailure = (source: string): string => {
+  const syntaxError = Parser.parse(`FROM a | EVAL ${source}`).errors.find(({ message }) =>
+    message.startsWith(SYNTAX_ERROR_PREFIX)
+  );
+  return syntaxError
+    ? `ES|QL syntax error: ${syntaxError.message.slice(SYNTAX_ERROR_PREFIX.length)}`
+    : 'must be a single ES|QL expression';
+};
 
 /**
  * Parses `source` as exactly one ES|QL expression and returns it re-printed
  * from the parsed tree. The matcher only ever composes the re-printed text, so
  * comments, pipes and extra commands in the input can never reach the query.
  *
- * @throws InvalidCustomResolutionRuleError naming `field`
+ * @throws InvalidCustomResolutionRuleError naming `attribute`
  */
-export const normalizeEsqlExpression = (field: string, source: string): string => {
-  let parsed: ReturnType<typeof Parser.parseExpression>;
+export const parseSingleEsqlExpression = (attribute: string, source: string): string => {
+  let root: ReturnType<typeof Parser.parseExpression>['root'];
   try {
-    parsed = Parser.parseExpression(source);
-  } catch (error) {
-    throw new InvalidCustomResolutionRuleError(
-      field,
-      `must be a single ES|QL expression (${getErrorMessage(error)})`
-    );
-  }
-
-  const { root, errors } = parsed;
-  if (errors.length > 0) {
-    throw new InvalidCustomResolutionRuleError(
-      field,
-      `ES|QL syntax error: ${errors.map((error) => error.message).join('; ')}`
-    );
+    // Keep the author's parentheses: re-deriving them from precedence can
+    // change meaning, e.g. `a * (b / c)` under integer division.
+    ({ root } = Parser.parseExpression(source, { withParens: true }));
+  } catch {
+    throw new InvalidCustomResolutionRuleError(describeParseFailure(source), attribute);
   }
 
   if (root.type === 'map') {
-    throw new InvalidCustomResolutionRuleError(field, 'must be an expression, not a map');
+    throw new InvalidCustomResolutionRuleError('must be an expression, not a map', attribute);
   }
 
   if (root.type === 'function' && root.subtype === 'binary-expression' && root.name === '=') {
-    throw new InvalidCustomResolutionRuleError(field, 'must be an expression, not an assignment');
+    throw new InvalidCustomResolutionRuleError(
+      'must be an expression, not an assignment',
+      attribute
+    );
   }
 
   let hasParam = false;
@@ -53,8 +59,8 @@ export const normalizeEsqlExpression = (field: string, source: string): string =
   });
   if (hasParam) {
     throw new InvalidCustomResolutionRuleError(
-      field,
-      'query parameters (`?name`) are not supported'
+      'query parameters (`?name`) are not supported',
+      attribute
     );
   }
 

@@ -137,15 +137,16 @@ describe('ES|QL matcher query builder', () => {
   });
 
   describe('expression (custom rule) specs', () => {
-    const ELEVANCE: EsqlExpressionMatchSpec = {
+    const LOCAL_USERS_TO_AD: EsqlExpressionMatchSpec = {
       namespaces: ['local', 'active_directory'],
       filterExpression:
         'NOT ENDS_WITH(user.name, "$") AND NOT (TO_LOWER(user.name) IN ("administrator", "admin"))',
       matchValueExpression: 'TO_LOWER(user.name)',
+      declineSameNamespaceDuplicates: true,
     };
 
     it('ANDs the filter after the engine filters and stringifies the key', async () => {
-      const query = buildMatchGroupsQuery({ index: INDEX, spec: ELEVANCE });
+      const query = buildMatchGroupsQuery({ index: INDEX, spec: LOCAL_USERS_TO_AD });
       expect(query).toContain(
         [
           '| WHERE entity.EngineMetadata.Type == "user"',
@@ -162,23 +163,23 @@ describe('ES|QL matcher query builder', () => {
     });
 
     it('drops groups whose members all resolve to one root', async () => {
-      const query = buildMatchGroupsQuery({ index: INDEX, spec: ELEVANCE });
+      const query = buildMatchGroupsQuery({ index: INDEX, spec: LOCAL_USERS_TO_AD });
       expect(query).toContain(
         '| EVAL root = COALESCE(entity.relationships.resolution.resolved_to, entity.id)'
       );
-      expect(query).toContain('roots = COUNT_DISTINCT(root)');
-      expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1 AND roots >= 2');
+      expect(query).toContain('min_root = MIN(root),\n        max_root = MAX(root)');
+      expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1 AND min_root != max_root');
       await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
     });
 
     it('leaves the OOTB query without the root filter', () => {
       const query = buildMatchGroupsQuery({ index: INDEX, spec: EMAIL });
-      expect(query).not.toContain('COUNT_DISTINCT');
+      expect(query).not.toContain('root');
       expect(query).toContain('| WHERE total_n >= 2 AND new_n >= 1\n');
     });
 
     it('checks single-valued keys on the result, not on a source field', () => {
-      const query = buildMatchGroupsQuery({ index: INDEX, spec: ELEVANCE });
+      const query = buildMatchGroupsQuery({ index: INDEX, spec: LOCAL_USERS_TO_AD });
       expect(query).not.toContain('MV_COUNT(user.name)');
       expect(query).toContain('MV_COUNT(match_value) == 1');
     });
@@ -186,7 +187,11 @@ describe('ES|QL matcher query builder', () => {
     it('omits the filter clause when the rule has none', () => {
       const query = buildMatchGroupsQuery({
         index: INDEX,
-        spec: { namespaces: ['okta'], matchValueExpression: 'user.name' },
+        spec: {
+          namespaces: ['okta'],
+          matchValueExpression: 'user.name',
+          declineSameNamespaceDuplicates: true,
+        },
       });
       expect(query).toContain(
         '| WHERE entity.EngineMetadata.Type == "user"\n    AND entity.namespace IN ("okta")\n| EVAL'
@@ -196,7 +201,7 @@ describe('ES|QL matcher query builder', () => {
     it('uses the same filter and key for the watermark query', async () => {
       const query = buildWatermarkQuery({
         index: INDEX,
-        spec: ELEVANCE,
+        spec: LOCAL_USERS_TO_AD,
         watermark: '2026-08-01T00:00:00.000Z',
       });
       expect(query).toContain('    AND (NOT ENDS_WITH(user.name, "$")');
@@ -206,7 +211,7 @@ describe('ES|QL matcher query builder', () => {
     });
 
     it('builds a validation query without nullifying unmapped fields', async () => {
-      const query = buildMatcherValidationQuery({ index: INDEX, spec: ELEVANCE });
+      const query = buildMatcherValidationQuery({ index: INDEX, spec: LOCAL_USERS_TO_AD });
       expect(query).not.toContain('unmapped_fields');
       expect(query.startsWith(`FROM "${INDEX}"`)).toBe(true);
       expect(query.endsWith('| KEEP match_value\n| LIMIT 0')).toBe(true);

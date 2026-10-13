@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { GROUP_SIZE_CEILING, MATCHER_PAGE_SIZE } from './constants';
+export { GROUP_SIZE_CEILING, MATCHER_PAGE_SIZE, RESOLVED_TO_FIELD } from './constants';
 export { buildMatchGroupsQuery, buildMatcherValidationQuery, buildWatermarkQuery } from './query';
 export {
   assertCompleteEsqlResults,

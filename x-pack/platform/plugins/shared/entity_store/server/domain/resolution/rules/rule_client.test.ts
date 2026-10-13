@@ -7,10 +7,14 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  SECURITY_EXTENSION_ID,
+  SavedObjectsErrorHelpers,
+  type KibanaRequest,
+} from '@kbn/core/server';
 import { RESOLUTION_RULE_IDS, RESOLUTION_RULE_KINDS } from '../../../../common';
 import { EntityResolutionRuleTypeName } from './saved_object';
-import { ResolutionRulesClient } from './rule_client';
+import { ResolutionRulesClient, getMaintainerRulesSavedObjectsClient } from './rule_client';
 import { RESOLUTION_RULE_CONFIGS } from './rule_registry';
 
 const NAMESPACE = 'default';
@@ -114,5 +118,26 @@ describe('ResolutionRulesClient', () => {
     const error = await client.setEnabled('unknown' as never, true).catch((err) => err);
 
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
+  });
+
+  it('returns undefined for a custom rule that no longer exists', async () => {
+    const client = createClient({
+      get: jest.fn().mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError()),
+    });
+
+    await expect(client.getCustomRule('gone')).resolves.toBeUndefined();
+  });
+});
+
+describe('getMaintainerRulesSavedObjectsClient', () => {
+  it('excludes the security extension so unreadable rules cannot silently vanish', () => {
+    const getScopedClient = jest.fn().mockReturnValue({});
+    const request = {} as KibanaRequest;
+
+    getMaintainerRulesSavedObjectsClient({ getScopedClient }, request);
+
+    expect(getScopedClient).toHaveBeenCalledWith(request, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
   });
 });

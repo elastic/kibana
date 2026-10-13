@@ -6,9 +6,9 @@
  */
 
 import { InvalidCustomResolutionRuleError } from '../../../errors';
-import { normalizeEsqlExpression } from './expression';
+import { parseSingleEsqlExpression } from './expression';
 
-describe('normalizeEsqlExpression', () => {
+describe('parseSingleEsqlExpression', () => {
   it.each([
     ['TO_LOWER(user.name)', 'TO_LOWER(user.name)'],
     [
@@ -23,14 +23,18 @@ describe('normalizeEsqlExpression', () => {
     ],
     ['"a\\"b\\\\c"', '"a\\"b\\\\c"'],
   ])('accepts %s', (source, expected) => {
-    expect(normalizeEsqlExpression('match_value', source)).toBe(expected);
+    expect(parseSingleEsqlExpression('match_value', source)).toBe(expected);
+  });
+
+  it('keeps the author’s parentheses so precedence cannot change the meaning', () => {
+    expect(parseSingleEsqlExpression('match_value', 'a * (b / c)')).toBe('a * (b / c)');
   });
 
   it('strips comments so they cannot swallow the rest of the composed query', () => {
-    expect(normalizeEsqlExpression('filter', 'user.name IS NOT NULL // trailing')).toBe(
+    expect(parseSingleEsqlExpression('filter', 'user.name IS NOT NULL // trailing')).toBe(
       'user.name IS NOT NULL'
     );
-    expect(normalizeEsqlExpression('filter', 'user.name /* x */ IS NOT NULL')).toBe(
+    expect(parseSingleEsqlExpression('filter', 'user.name /* x */ IS NOT NULL')).toBe(
       'user.name IS NOT NULL'
     );
   });
@@ -49,22 +53,35 @@ describe('normalizeEsqlExpression', () => {
     ['an unnamed parameter', 'CASE(user.name == ?, "a", "b")'],
     ['a syntax error', 'TO_LOWER(user.name'],
   ])('rejects %s', (_case, source) => {
-    expect(() => normalizeEsqlExpression('filter', source)).toThrow(
+    expect(() => parseSingleEsqlExpression('filter', source)).toThrow(
       InvalidCustomResolutionRuleError
     );
   });
 
-  it('names the field in the error', () => {
-    expect(() => normalizeEsqlExpression('match_value', 'a, b')).toThrow(
-      "Invalid custom resolution rule 'match_value'"
+  it('names the attribute in the error', () => {
+    expect(() => parseSingleEsqlExpression('match_value', 'a, b')).toThrow(
+      "Invalid 'match_value' in custom resolution rule: must be a single ES|QL expression"
     );
   });
 
-  it('is stable when its output is normalized again', () => {
-    const once = normalizeEsqlExpression(
+  it('reports the syntax error itself, not the internal EVAL wrapper', () => {
+    let message = '';
+    try {
+      parseSingleEsqlExpression('match_value', 'TO_LOWER(user.name');
+    } catch (error) {
+      message = (error as Error).message;
+    }
+    expect(message).toContain('ES|QL syntax error:');
+    expect(message).toContain("'TO_LOWER(user.name'");
+    expect(message).not.toContain('EVAL');
+    expect(message).not.toContain('FROM a');
+  });
+
+  it('is stable when its output is parsed again', () => {
+    const once = parseSingleEsqlExpression(
       'filter',
       'NOT user.name IN ("a")  AND   user.id::keyword == "x"'
     );
-    expect(normalizeEsqlExpression('filter', once)).toBe(once);
+    expect(parseSingleEsqlExpression('filter', once)).toBe(once);
   });
 });

@@ -7,12 +7,13 @@
 
 import { InvalidCustomResolutionRuleError } from '../../../errors';
 import {
-  fingerprintMatchSpec,
+  canonicalDefinitionKey,
+  fingerprintDefinition,
   toExpressionMatchSpec,
   type CustomResolutionRuleDefinition,
 } from './match_spec';
 
-const ELEVANCE: CustomResolutionRuleDefinition = {
+const LOCAL_USERS_TO_AD: CustomResolutionRuleDefinition = {
   namespaces: ['local', 'active_directory'],
   filter: 'NOT ENDS_WITH(user.name, "$")',
   matchValue: 'TO_LOWER(user.name)',
@@ -20,9 +21,9 @@ const ELEVANCE: CustomResolutionRuleDefinition = {
 };
 
 describe('toExpressionMatchSpec', () => {
-  it('normalizes both expressions', () => {
+  it('parses both expressions', () => {
     expect(
-      toExpressionMatchSpec({ ...ELEVANCE, matchValue: 'TO_LOWER(user.name) // key' })
+      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, matchValue: 'TO_LOWER(user.name) // key' })
     ).toEqual({
       namespaces: ['local', 'active_directory'],
       filterExpression: 'NOT ENDS_WITH(user.name, "$")',
@@ -31,8 +32,14 @@ describe('toExpressionMatchSpec', () => {
     });
   });
 
+  it('passes the same-namespace opt-out through', () => {
+    expect(
+      toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, declineSameNamespaceDuplicates: false })
+    ).toMatchObject({ declineSameNamespaceDuplicates: false });
+  });
+
   it('leaves the filter out when the rule has none', () => {
-    const { filter, ...withoutFilter } = ELEVANCE;
+    const { filter, ...withoutFilter } = LOCAL_USERS_TO_AD;
     expect(toExpressionMatchSpec(withoutFilter)).not.toHaveProperty('filterExpression');
   });
 
@@ -44,24 +51,27 @@ describe('toExpressionMatchSpec', () => {
     ['an invalid filter', { filter: 'user.name | LIMIT 1' }],
     ['an invalid match value', { matchValue: 'a = 1' }],
   ])('rejects %s', (_case, override) => {
-    expect(() => toExpressionMatchSpec({ ...ELEVANCE, ...override })).toThrow(
+    expect(() => toExpressionMatchSpec({ ...LOCAL_USERS_TO_AD, ...override })).toThrow(
       InvalidCustomResolutionRuleError
     );
   });
 });
 
-describe('fingerprintMatchSpec', () => {
-  const fingerprint = (definition: CustomResolutionRuleDefinition) =>
-    fingerprintMatchSpec(toExpressionMatchSpec(definition));
-
-  it('ignores namespace order and formatting differences', () => {
+describe('fingerprintDefinition', () => {
+  it('ignores namespace order and surrounding whitespace', () => {
     expect(
-      fingerprint({
-        ...ELEVANCE,
+      fingerprintDefinition({
+        ...LOCAL_USERS_TO_AD,
         namespaces: ['active_directory', 'local'],
-        matchValue: 'TO_LOWER(  user.name ) /* same */',
+        matchValue: '  TO_LOWER(user.name)\n',
       })
-    ).toBe(fingerprint(ELEVANCE));
+    ).toBe(fingerprintDefinition(LOCAL_USERS_TO_AD));
+  });
+
+  it('is built from the stored source, so a printer upgrade cannot change it', () => {
+    expect(canonicalDefinitionKey(LOCAL_USERS_TO_AD)).toContain(
+      'NOT ENDS_WITH(user.name, \\"$\\")'
+    );
   });
 
   it.each([
@@ -70,11 +80,13 @@ describe('fingerprintMatchSpec', () => {
     ['match value', { matchValue: 'TO_UPPER(user.name)' }],
     ['same-namespace check', { declineSameNamespaceDuplicates: false }],
   ])('changes when the %s change', (_case, override) => {
-    expect(fingerprint({ ...ELEVANCE, ...override })).not.toBe(fingerprint(ELEVANCE));
+    expect(fingerprintDefinition({ ...LOCAL_USERS_TO_AD, ...override })).not.toBe(
+      fingerprintDefinition(LOCAL_USERS_TO_AD)
+    );
   });
 
   it('changes when the filter is removed', () => {
-    const { filter, ...withoutFilter } = ELEVANCE;
-    expect(fingerprint(withoutFilter)).not.toBe(fingerprint(ELEVANCE));
+    const { filter, ...withoutFilter } = LOCAL_USERS_TO_AD;
+    expect(fingerprintDefinition(withoutFilter)).not.toBe(fingerprintDefinition(LOCAL_USERS_TO_AD));
   });
 });

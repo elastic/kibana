@@ -19,7 +19,8 @@ export const CustomResolutionRuleTypeName = 'entity-resolution-custom-rule';
 
 export interface CustomResolutionRuleAttributes {
   name: string;
-  namespaces: string[];
+  // Not `namespaces`: that name is the saved object's own spaces field.
+  entityNamespaces: string[];
   filter?: string;
   matchValue: string;
   declineSameNamespaceDuplicates: boolean;
@@ -28,7 +29,7 @@ export interface CustomResolutionRuleAttributes {
 
 const customResolutionRuleAttributesSchemaV1 = schema.object({
   name: schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_NAME_LENGTH }),
-  namespaces: schema.arrayOf(
+  entityNamespaces: schema.arrayOf(
     schema.string({ minLength: 1, maxLength: MAX_CUSTOM_RULE_NAMESPACE_LENGTH }),
     { minSize: 1, maxSize: MAX_CUSTOM_RULE_NAMESPACES }
   ),

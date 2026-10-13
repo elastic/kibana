@@ -27,7 +27,7 @@ import { EntityMetadataClient } from './domain/entity_metadata';
 import { RelationshipsClient } from './domain/relationships';
 import { ResolutionClient } from './domain/resolution';
 import { ResolutionRulesClient } from './domain/resolution/rules';
-import { CustomResolutionRulesClient } from './domain/resolution/rules/custom';
+import { CustomResolutionRulesClient } from './domain/resolution/rules';
 import type { TelemetryReporter } from './telemetry/events';
 import { createWorkflowTriggerEmitter } from './workflow/create_workflow_trigger_emitter';
 

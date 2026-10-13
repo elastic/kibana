@@ -14,7 +14,6 @@ import { USER_ENTITY_NAMESPACE } from '../../../../../common/domain/definitions/
 import { getFieldValue } from '../../../../../common/domain/euid/commons';
 import { executeEsqlQuery } from '../../../../infra/elasticsearch/esql';
 import { searchEntitiesByIds } from '../../../../infra/elasticsearch/resolution';
-import { resolveLatestEntitiesIndexName } from '../../../asset_manager/resolve_entity_store_indices';
 import { ResolutionSearchTruncatedError } from '../../../errors';
 import type { ResolutionClient } from '../../resolution_client';
 import { selectTarget, type TargetSelectionEntity } from '../../target_selection';
@@ -33,7 +32,6 @@ import { buildMatchGroupsQuery, buildWatermarkQuery } from './query';
 
 export interface RunEsqlMatcherDeps {
   state: PerRuleState;
-  namespace: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   resolutionClient: ResolutionClient;
@@ -48,8 +46,9 @@ export interface RunEsqlMatcherDeps {
    * documents Elasticsearch has not refreshed yet.
    */
   mutatedIds?: Set<string>;
-  /** Latest index the caller resolved; must match the one `resolutionClient` writes to. */
-  index?: string;
+  index: string;
+  /** Telemetry scope value; defaults to `ruleId`. Keeps per-deployment ids out of telemetry. */
+  telemetryRuleId?: string;
 }
 
 export interface MatchGroupRow {
@@ -122,11 +121,10 @@ const recordOversizedGroup = (stats: BucketStats, groupSize: number): void => {
 };
 
 export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerRuleState> {
-  const { state, namespace, esClient, logger, resolutionClient, signal, telemetry, spec, ruleId } =
+  const { state, esClient, logger, resolutionClient, signal, telemetry, spec, ruleId, index } =
     deps;
   const pageSize = deps.pageSize ?? MATCHER_PAGE_SIZE;
   const mutatedIds = deps.mutatedIds ?? new Set<string>();
-  const index = deps.index ?? (await resolveLatestEntitiesIndexName(esClient, namespace));
 
   const maxTimestamp = await readWatermarkCandidate(
     esClient,
@@ -196,7 +194,7 @@ export async function runEsqlMatcherRule(deps: RunEsqlMatcherDeps): Promise<PerR
   );
 
   telemetry.report({
-    scope: { kind: 'rule', value: ruleId },
+    scope: { kind: 'rule', value: deps.telemetryRuleId ?? ruleId },
     funnel: {
       scanned: stats.examinedBuckets,
       qualified: stats.appliedBuckets + skippedBuckets,
@@ -274,10 +272,7 @@ function countNonLocalUnresolved(row: MatchGroupRow): {
   };
 }
 
-/**
- * The engine's per-group checks that need only the match-group row, in the
- * order the matcher applies them.
- */
+/** The engine's per-group checks that need only the match-group row. */
 export function classifyMatchGroup(
   row: MatchGroupRow,
   declineSameNamespaceDuplicates: boolean
@@ -302,10 +297,7 @@ export function classifyMatchGroup(
   return 'candidate';
 }
 
-/**
- * Picks the target and aliases for a candidate group from its fetched
- * entities. Returns null when Elasticsearch returned none of them.
- */
+/** Picks the target and aliases for a candidate group; null when no linkable entity was fetched. */
 export function planMatchGroupLink(
   row: MatchGroupRow,
   entities: Map<string, FetchedEntity>
