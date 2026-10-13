@@ -95,17 +95,22 @@ const makeConversation = ({
   status,
   owner = true,
   templateId = 'investigation',
+  workflowExecutionIds,
 }: {
   id: string;
   title?: string;
   status?: 'open' | 'closed';
   owner?: boolean;
   templateId?: string;
+  workflowExecutionIds?: string[];
 }) => ({
   id,
   title,
   template_id: templateId,
-  metadata: status ? { status } : {},
+  metadata: {
+    ...(status ? { status } : {}),
+    ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
+  },
   permissions: { rename: owner, delete: owner, update_access_control: owner },
 });
 
@@ -1629,6 +1634,26 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+    // The run is recorded, so the investigation reads as in progress while it runs.
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+      workflow_execution_ids: ['exec-1'],
+    });
+  });
+
+  it('appends the run to the runs an investigation already records, once', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1', workflowExecutionIds: ['exec-0'] }));
+
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+      workflow_execution_ids: ['exec-0', 'exec-1'],
+    });
+
+    conversations.patchMetadata.mockClear();
+    withConversations(
+      makeConversation({ id: 'inv-1', workflowExecutionIds: ['exec-0', 'exec-1'] })
+    );
+    await makeClient().ensureOrCreate('inv-1', 'exec-1');
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
@@ -1662,7 +1687,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
     await makeClient().ensureOrCreate('inv-1', 'exec-1');
 
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', { status: 'open' });
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+      status: 'open',
+      workflow_execution_ids: ['exec-1'],
+    });
   });
 
   it('reopens an investigation another identity owns', async () => {
@@ -1671,7 +1699,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
     await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
 
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', { status: 'open' });
+    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+      status: 'open',
+      workflow_execution_ids: ['exec-1'],
+    });
   });
 
   it('starts an investigation for a run started without one, from its context', async () => {

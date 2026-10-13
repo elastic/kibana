@@ -23,12 +23,19 @@ export interface InvestigationConversation {
   title: string;
   /** `metadata.status`; a missing status reads as open. */
   status: 'open' | 'closed';
+  /** `metadata.workflow_execution_ids`: the workflow runs that worked on the investigation. */
+  workflowExecutionIds: string[];
   /** This call created the conversation. */
   created: boolean;
 }
 
 type ConversationWithAccess = Pick<Conversation, 'id' | 'title' | 'metadata' | 'template_id'> & {
   permissions: ConversationPermissions;
+};
+
+const toWorkflowExecutionIds = (metadata: ConversationWithAccess['metadata']): string[] => {
+  const ids = metadata?.workflow_execution_ids;
+  return Array.isArray(ids) ? ids.filter((id): id is string => typeof id === 'string') : [];
 };
 
 const toInvestigationConversation = (
@@ -43,6 +50,7 @@ const toInvestigationConversation = (
     id: conversation.id,
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
+    workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
     created,
   };
 };

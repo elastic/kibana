@@ -113,9 +113,10 @@ steps:
       agent_id: nightshift.investigation
 
   # Gets or creates the investigation conversation and records the run's subjects before lifecycle
-  # emission, so a running investigation is always visible. Runs as this workflow's identity, which
-  # must own the conversation. The server derives everything from the execution document; retries
-  # cover startup races. A run continuing a closed investigation reopens it.
+  # emission, so a running investigation is always visible, and records this run's execution id so
+  # the investigation reads as in progress while it runs. The server derives everything from the
+  # execution document; retries cover startup races. A run continuing a closed investigation
+  # reopens it.
   - name: persist_investigation_started
     type: kibana.request
     with:

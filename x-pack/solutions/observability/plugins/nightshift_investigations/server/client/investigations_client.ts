@@ -792,8 +792,16 @@ export class NightshiftInvestigationsClient {
       }
     }
 
-    if (conversation.status === 'closed') {
-      await conversations.patchMetadata(conversation.id, { status: 'open' });
+    // The run's execution id marks the investigation in progress while the run works on it.
+    const { status, workflowExecutionIds } = conversation;
+    const recordsExecution = !workflowExecutionIds.includes(executionId);
+    if (status === 'closed' || recordsExecution) {
+      await conversations.patchMetadata(conversation.id, {
+        ...(status === 'closed' ? { status: 'open' } : {}),
+        ...(recordsExecution
+          ? { workflow_execution_ids: [...workflowExecutionIds, executionId] }
+          : {}),
+      });
     }
 
     return conversation.id;
