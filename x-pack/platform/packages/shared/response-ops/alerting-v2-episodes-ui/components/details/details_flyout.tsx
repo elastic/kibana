@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiLink,
-  EuiPanel,
-  EuiSkeletonTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiLink, EuiPanel, EuiSkeletonTitle, EuiToolTip } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { FlyoutTemplate } from '@kbn/flyout-template';
@@ -43,8 +36,10 @@ import { AlertEpisodeMetadataSection } from './metadata_section';
 import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
 import { EpisodeFooterActionMenu } from './footer_action_menu';
 import { EMPTY_VALUE } from '../../constants';
+import { useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
+import { useAlertDetailsFlyoutWidth } from './use_alert_details_flyout_width';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -52,14 +47,6 @@ import * as flappingI18n from '../flapping/translations';
 import { FlappingPopover } from '../flapping/flapping_badge';
 
 type TabId = 'overview' | 'timeline' | 'metadata';
-
-/**
- * Mirrors `FLYOUT_MIN_CELL_WIDTH` and `FLYOUT_MAX_GRID_COLUMNS` in
- * `@kbn/flyout-info-blocks`, to estimate an initial width that allows 4 info blocks
- * to be displayed in one line
- */
-const INFO_BLOCKS_MIN_CELL_WIDTH = 140;
-const INFO_BLOCKS_COLUMNS = 4;
 
 /**
  * Groups the episode flyout and anything opened from it into one navigation history.
@@ -155,6 +142,7 @@ const SnoozedBadgeLabel = ({
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
   groupHash: string | undefined;
+  sourceId?: string;
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
@@ -165,13 +153,13 @@ export interface AlertEpisodeDetailsFlyoutProps {
 export const AlertEpisodeDetailsFlyout = ({
   episodeId,
   groupHash,
+  sourceId,
   onClose,
   services,
   actions,
   getRuleDetailsHref,
   getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
@@ -185,6 +173,7 @@ export const AlertEpisodeDetailsFlyout = ({
     groupAction,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
+  const { systemName: sourceLabel } = useEpisodeSource(sourceId);
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
@@ -193,8 +182,7 @@ export const AlertEpisodeDetailsFlyout = ({
     [actions, episodes]
   );
 
-  // Narrowest width that keeps the header's four info blocks on one row
-  const initialWidth = INFO_BLOCKS_COLUMNS * INFO_BLOCKS_MIN_CELL_WIDTH + euiTheme.base * 2;
+  const initialWidth = useAlertDetailsFlyoutWidth();
 
   // Footer "Take action" popover anchor, captured from the PrimaryAction button's onClick.
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
@@ -300,6 +288,12 @@ export const AlertEpisodeDetailsFlyout = ({
         onTabChange={handleTabChange}
       >
         <FlyoutTemplate.Header title={titleNode} description={descriptionNode}>
+          <FlyoutTemplate.Header.Badge
+            color="hollow"
+            data-test-subj="alertingV2EpisodeFlyoutSourceBadge"
+          >
+            {sourceLabel}
+          </FlyoutTemplate.Header.Badge>
           {/* Status badge */}
           {status && (
             <FlyoutTemplate.Header.Badge color={EPISODE_STATUS_BADGE_COLORS[status]}>

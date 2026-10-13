@@ -6,7 +6,7 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest, getPlaywrightTagsFor } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -102,7 +102,13 @@ const getConversationId = (streamText: string): string => {
  */
 apiTest.describe(
   'Custom content — Refine with chat tool UI events',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  // Local-only: the LLM proxy binds to the runner's loopback, unreachable from a Cloud Kibana.
+  {
+    tag: [
+      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+      ...getPlaywrightTagsFor('serverless', 'search', 'local'),
+    ],
+  },
   () => {
     let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;

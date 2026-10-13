@@ -23,6 +23,7 @@ import type {
 } from '../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { KeyValueDisplay } from '../key_value_display';
+import { getAgentActionState } from '../response_action/response_action_results/utils';
 
 const LABELS = Object.freeze<Record<string, string>>({
   path: i18n.translate('xpack.securitySolution.endpointUploadActionResult.savedTo', {
@@ -58,6 +59,10 @@ interface EndpointUploadActionResultProps {
   'data-test-subj'?: string;
 }
 
+/**
+ * DO NOT USE as it is undergoing refactoring. Use `<ResponseActionResults>` component instead
+ * @deprecated
+ */
 export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
   ({ action: _action, agentId, textSize = 's', 'data-test-subj': dataTestSubj }) => {
     const action = _action as ActionDetails<
@@ -78,13 +83,13 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
       for (const agent of agents) {
         hosts.push({
           name: action.hosts[agent].name,
-          state: action.agentState[agent],
+          state: getAgentActionState(action, agent),
           result: action.outputs?.[agent],
         });
       }
 
       return hosts;
-    }, [action.agentState, action.agents, action.hosts, action.outputs, agentId]);
+    }, [action, agentId]);
 
     const showHostName = outputs.length > 1;
 
@@ -119,6 +124,19 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
             );
           }
 
+          // Error result
+          if (!state.wasSuccessful) {
+            return (
+              <HostUploadResult
+                name={showHostName ? name : undefined}
+                data-test-subj={getTestId('actionFailure')}
+                key={name}
+              >
+                <EndpointActionFailureMessage action={action as ActionDetails} agentId={agentId} />
+              </HostUploadResult>
+            );
+          }
+
           // if we don't have an agent result (for whatever reason)
           if (!result) {
             return (
@@ -128,19 +146,6 @@ export const EndpointUploadActionResult = memo<EndpointUploadActionResultProps>(
                 key={name}
               >
                 {LABELS.noAgentResponse}
-              </HostUploadResult>
-            );
-          }
-
-          // Error result
-          if (!state.wasSuccessful) {
-            return (
-              <HostUploadResult
-                name={showHostName ? name : undefined}
-                data-test-subj={getTestId('actionFailure')}
-                key={name}
-              >
-                <EndpointActionFailureMessage action={action as ActionDetails} />
               </HostUploadResult>
             );
           }

@@ -361,6 +361,48 @@ describe('conversations utils', () => {
       expect(conversationClient.appendEvents).toHaveBeenCalledTimes(1);
     });
 
+    it('passes appendRefresh to the append on UPDATE, and leaves the default otherwise', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
+      conversationClient.appendEvents.mockResolvedValue(conversation);
+
+      const persist = (appendRefresh?: false) =>
+        persistUserMessage({
+          conversation,
+          conversationClient,
+          eventId: 'round-1::user_message',
+          receivedAt: new Date(),
+          input: { message: 'hi' },
+          appendRefresh,
+        });
+
+      await persist(false);
+      await persist();
+
+      const [[, withRefresh], [, withDefault]] = conversationClient.appendEvents.mock.calls;
+      expect(withRefresh).toEqual({ access: 'converse', source: 'execution', refresh: false });
+      expect(withDefault).toEqual({ access: 'converse', source: 'execution' });
+    });
+
+    it('ignores appendRefresh on CREATE: the create still refreshes', async () => {
+      const conversationClient = createConversationClientMock();
+      const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');
+
+      await persistUserMessage({
+        conversation,
+        conversationClient,
+        eventId: 'round-1::user_message',
+        receivedAt: new Date(),
+        input: { message: 'hi' },
+        appendRefresh: false,
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
     it('falls back to appendEvents when CREATE races another writer (conversationAlreadyExists)', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'CREATE');

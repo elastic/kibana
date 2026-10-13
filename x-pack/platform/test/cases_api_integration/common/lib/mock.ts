@@ -203,7 +203,7 @@ export const getFilesAttachmentReq = (
   };
 };
 
-// SO-backed external reference (the migrated `.files` type) for legacy-wire-shape specs.
+// SO-backed external reference (the mapped `.files` type) for legacy-wire-shape specs.
 export const postExternalReferenceSOReq: ExternalReferenceSOAttachmentPayload =
   getFilesAttachmentReq();
 

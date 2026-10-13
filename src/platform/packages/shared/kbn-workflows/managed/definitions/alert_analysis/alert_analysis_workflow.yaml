@@ -161,7 +161,6 @@ outputs:
     - connector_id
     - agent_id
     - impacted_entities
-    - impacted_entities_truncated
     - missing_alert_ids
   properties:
     verdicts:
@@ -175,6 +174,7 @@ outputs:
           - rationale
           - contributing_factors
           - host_name
+          - host_entity_key
           - user_name
         properties:
           alert_id:
@@ -202,6 +202,9 @@ outputs:
           host_name:
             type: string
             maxLength: 512
+          host_entity_key:
+            type: string
+            maxLength: 512
           user_name:
             type: string
             maxLength: 512
@@ -216,47 +219,25 @@ outputs:
       maxLength: 64
     impacted_entities:
       type: array
-      maxItems: 50
+      maxItems: 100
       items:
         type: object
         required:
-          - entity_type
+          - id
           - name
-          - alert_count
-          - verdicts
+          - type
         properties:
-          entity_type:
+          id:
+            type: string
+            maxLength: 256
+          name:
+            type: string
+            maxLength: 512
+          type:
             type: string
             enum:
               - host
               - user
-          name:
-            type: string
-            maxLength: 512
-          alert_count:
-            type: integer
-            minimum: 0
-          verdicts:
-            type: object
-            required:
-              - true_positive
-              - false_positive
-              - inconclusive
-            properties:
-              true_positive:
-                type: integer
-                minimum: 0
-              false_positive:
-                type: integer
-                minimum: 0
-              inconclusive:
-                type: integer
-                minimum: 0
-    impacted_entities_truncated:
-      type: string
-      enum:
-        - "true"
-        - "false"
     missing_alert_ids:
       type: array
       description: >
@@ -385,10 +366,8 @@ steps:
       # First successful batch connector id (first-non-empty-wins in collect_batch_verdicts).
       # Empty on the skip path = no LLM call was made.
       resolved_connector_id: ""
-      # Entity × verdict rows for security.impact (Worker path only).
+      # Host/user entities for investigations.attachImpact (Worker path only).
       impacted_entities: []
-      # true when impacted_entities was truncated to 50.
-      impacted_entities_truncated: "false"
       # Alert ids with no agent verdict (apply_verdicts no-match branch).
       missing_alert_ids: []
 
@@ -1710,6 +1689,12 @@ steps:
                                 # workflow.output / Zod maxLength (512) so a long caller-supplied name
                                 # cannot fail emit after tags/notes are already written.
                                 host_name: "{{ foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
+                                # The value after `host:` in the Entity Store id (EUID): host.id when the
+                                # alert has one, else host.name. Two alerts for the same host that report
+                                # different identity fields are two Entity Store entities, so they are two
+                                # impact entities here too. host.hostname, the Entity Store's third
+                                # fallback, is not read.
+                                host_entity_key: "{{ foreach.item.host.id | default: foreach.item.host.name | default: '__missing__' | truncate: 512, '' }}"
                                 user_name: "{{ foreach.item.user.name | default: '__missing__' | truncate: 512, '' }}"
 
                           - name: accumulate_output_verdict
@@ -2039,55 +2024,37 @@ steps:
             with:
               generated_summary: "{{ variables.batch_summaries | compact | join: ' ' | truncate: 2000, ' [truncated]' }}"
 
-          # Build one entity row per unique host, then per unique user, collecting
-          # per-entity verdict counts. The Worker passes this to the security.impact
-          # attachment so the Investigation shows what the alert batch touched.
+          # Build one impact entity per unique host, then per unique user. The Worker passes
+          # these to the shared `investigations.attachImpact` step, so each row is
+          # { id, name, type } with a type-prefixed id (a host and a user can share a name).
+          # Alerts without the field carry `__missing__` and are skipped. A host's id uses the
+          # Entity Store's own key (`host_entity_key`: host.id, else host.name) so it matches the
+          # Entity Store id for that host; users still use the name.
+          # The id is cut to 251 characters so the prefixed value fits the shared 256-character
+          # entity id limit; an over-long id would fail the whole attachImpact call and the output
+          # validation below. `name` keeps the full value. Two names that share their first 251
+          # characters therefore share an id and merge into one entity; hostnames cap at 253
+          # characters, so this is accepted rather than dropping the entity.
           #
-          # Cap the unique-name lists BEFORE the loops: a 1000-alert batch can have
-          # ~2000 unique host+user names, and each iteration rescans all verdicts.
-          # Hosts take the first up-to-50 slots; users get the remainder. Truncation
-          # is computed from the uncapped counts.
+          # Hosts and users are each capped at 50, so the list never exceeds the shared
+          # MAX_ENTITY_IDS (100).
           - name: collect_unique_entity_names
             type: data.set
             with:
-              host_names_all: "${{ variables.output_verdicts | map: 'host_name' | uniq }}"
-              user_names_all: "${{ variables.output_verdicts | map: 'user_name' | uniq }}"
-
-          - name: plan_host_entity_iteration
-            type: data.set
-            with:
-              entity_name_count: "${{ variables.host_names_all.size | plus: variables.user_names_all.size }}"
-              host_names_for_entities: "${{ variables.host_names_all | slice: 0, 50 }}"
-
-          # Budget/truncation need the capped host list from the previous step — Liquid cannot
-          # read a sibling key from the same data.set `with` block.
-          - name: plan_user_entity_iteration
-            type: data.set
-            with:
-              impacted_entities_truncated: >-
-                {% if variables.entity_name_count > 50 %}true{% else %}false{% endif %}
-              user_entity_budget: "${{ 50 | minus: variables.host_names_for_entities.size }}"
-
-          - name: slice_user_names_for_entities
-            type: data.set
-            with:
-              user_names_for_entities: "${{ variables.user_names_all | slice: 0, variables.user_entity_budget }}"
+              host_keys_for_entities: "${{ variables.output_verdicts | reject: 'host_entity_key', '__missing__' | map: 'host_entity_key' | uniq | slice: 0, 50 }}"
+              user_names_for_entities: "${{ variables.output_verdicts | reject: 'user_name', '__missing__' | map: 'user_name' | uniq | slice: 0, 50 }}"
 
           - name: build_host_entities
             type: foreach
-            foreach: "${{ variables.host_names_for_entities }}"
+            foreach: "${{ variables.host_keys_for_entities }}"
             steps:
               - name: build_host_entity
                 type: data.set
                 with:
                   current_entity:
-                    entity_type: host
-                    name: "{{ foreach.item }}"
-                    alert_count: "${{ variables.output_verdicts | where: 'host_name', foreach.item | size }}"
-                    verdicts:
-                      true_positive: "${{ variables.output_verdicts | where: 'host_name', foreach.item | where: 'classification', 'true_positive' | size }}"
-                      false_positive: "${{ variables.output_verdicts | where: 'host_name', foreach.item | where: 'classification', 'false_positive' | size }}"
-                      inconclusive: "${{ variables.output_verdicts | where: 'host_name', foreach.item | where: 'classification', 'inconclusive' | size }}"
+                    id: "host:{{ foreach.item | truncate: 251, '' }}"
+                    name: "{% assign verdict = variables.output_verdicts | where: 'host_entity_key', foreach.item | first %}{% if verdict.host_name == '__missing__' %}{{ foreach.item }}{% else %}{{ verdict.host_name }}{% endif %}"
+                    type: host
               - name: push_host_entity
                 type: data.set
                 with:
@@ -2101,24 +2068,13 @@ steps:
                 type: data.set
                 with:
                   current_entity:
-                    entity_type: user
+                    id: "user:{{ foreach.item | truncate: 251, '' }}"
                     name: "{{ foreach.item }}"
-                    alert_count: "${{ variables.output_verdicts | where: 'user_name', foreach.item | size }}"
-                    verdicts:
-                      true_positive: "${{ variables.output_verdicts | where: 'user_name', foreach.item | where: 'classification', 'true_positive' | size }}"
-                      false_positive: "${{ variables.output_verdicts | where: 'user_name', foreach.item | where: 'classification', 'false_positive' | size }}"
-                      inconclusive: "${{ variables.output_verdicts | where: 'user_name', foreach.item | where: 'classification', 'inconclusive' | size }}"
+                    type: user
               - name: push_user_entity
                 type: data.set
                 with:
                   impacted_entities: "${{ variables.impacted_entities | push: variables.current_entity }}"
-
-          # Safety slice — lists were already capped above; keep ≤50 if a future change
-          # reorders host/user budgeting.
-          - name: cap_impacted_entities
-            type: data.set
-            with:
-              impacted_entities: "${{ variables.impacted_entities | slice: 0, 50 }}"
 
       # -----------------------------------------------------------------------
       # Auto-close: close every alert that meets the FP thresholds, in bulk
@@ -2224,9 +2180,7 @@ steps:
       connector_id: "{{ variables.resolved_connector_id }}"
       # Agent / model id resolved at run time, passed through for Worker attribution.
       agent_id: "{{ variables.agent_id }}"
-      # Structured entity × verdict array for the security.impact attachment.
+      # Host/user entities for the Worker's investigations.attachImpact step.
       impacted_entities: "${{ variables.impacted_entities }}"
-      # "true" when the list was capped at 50; "false" otherwise.
-      impacted_entities_truncated: "{{ variables.impacted_entities_truncated }}"
       # Alert ids the agent omitted; empty when every analyzed alert got a verdict.
       missing_alert_ids: "${{ variables.missing_alert_ids }}"

@@ -17,11 +17,14 @@ project:
   owner: '@elastic/security-solution'
   sourceRoot: x-pack/platform/plugins/shared/agentic_investigations
 dependsOn:
+  - '@kbn/dev-cli-runner'
+  - '@kbn/tooling-log'
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/core-security-server'
   - '@kbn/features-plugin'
   - '@kbn/i18n'
+  - '@kbn/i18n-react'
   - '@kbn/logging-mocks'
   - '@kbn/security-plugin-types-server'
   - '@kbn/spaces-plugin'
@@ -32,6 +35,7 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/zod-helpers'
   - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/es-query'
   - '@kbn/agent-builder-platform-plugin'
@@ -42,6 +46,15 @@ dependsOn:
   - '@kbn/user-profile-components'
   - '@kbn/proposals-plugin'
   - '@kbn/proposals-common'
+  - '@kbn/agentic-investigations-common'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/i18n-react'
+  - '@kbn/ui-callout'
+  - '@kbn/shared-ux-error-boundary'
+  - '@kbn/proposals-ui'
+  - '@kbn/charts-theme'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/visualization-utils'
 tags:
   - plugin
   - prod
@@ -54,6 +67,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - scripts/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

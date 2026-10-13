@@ -181,14 +181,16 @@ export const useTopNavLinks = ({
       items.push(alertsAppMenuItem);
     }
 
+    const { searchSessionsManagement } = services;
     if (
       !!appId &&
+      searchSessionsManagement &&
       services.data.search.isBackgroundSearchEnabled &&
       services.capabilities.discover_v2.storeSearchSession
     ) {
       const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
         onClick: ({ context: { onFinishAction } }) => {
-          services.data.search.showSearchSessionsFlyout({
+          searchSessionsManagement.openFlyout({
             appId,
             trackingProps: { openedFrom: 'background search button' },
             onBackgroundSearchOpened: ({ session, event }) => {

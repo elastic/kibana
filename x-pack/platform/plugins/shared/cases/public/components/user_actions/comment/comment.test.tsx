@@ -174,7 +174,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('removed attachment')).toBeInTheDocument();
     });
 
-    it('resolves a migrated external reference through the unified registry', async () => {
+    it('resolves an external reference through the unified registry', async () => {
       // A legacy external-reference delete payload whose type maps to a unified type
       // (endpoint -> security.endpoint) picks up the unified type's removal label.
       const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();

@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -190,6 +190,12 @@ Send message
     - `unfurlLinks` (optional): Turn on unfurling of primarily text-based content.
     - `unfurlMedia` (optional): Turn on unfurling of media content.
 
+Update message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Edit a message the connector posted earlier, using Slack `chat.update`. The new text replaces the old text, and Slack removes any blocks the message had, so a Block Kit or richly formatted message comes back as plain text.
+    - `channel` (required): Conversation ID that holds the message (for example, `C123...`). Slack does not accept a channel name here.
+    - `messageTs` (required): Timestamp of the message to edit, as returned in `ts` by **Send message**.
+    - `text` (required): New message text, at most 4,000 characters.
+
 ## Connector networking configuration [slack-v2-connector-networking-configuration]
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
@@ -203,7 +209,7 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
 3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
    - `channels:read` — list and resolve public channel IDs
    - `channels:history` — read public channel history (for **Get conversation history**)
-   - `chat:write` — send messages
+   - `chat:write` — send messages and edit the messages you sent
    - `files:read` — access shared files (for **Get file info**, **List files**)
    - `groups:read` — list private channels (including for **List channels** when `types` includes `private_channel`)
    - `groups:history` — read private channel history (for **Get conversation history** on private channels)
@@ -235,7 +241,7 @@ To use Bot Token authentication, you need a Slack app with a bot token.
 3. Under **OAuth & Permissions**, add the following **Bot Token Scopes**:
    - `channels:read` — list public channels
    - `channels:history` — read public channel message history
-   - `chat:write` — send messages as the bot
+   - `chat:write` — send messages as the bot and edit the messages it sent
    - `files:read` — access file metadata
    - `groups:read` — list private channels the bot is a member of
    - `groups:history` — read private channel history
