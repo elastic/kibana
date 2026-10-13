@@ -190,16 +190,24 @@ export const reindexServiceFactory = (
   };
 
   /**
-   * Returns whether the index is managed by ILM and, if so, its ILM lifecycle date.
+   * Returns whether the index is managed by ILM and, if so, its lifecycle date and whether its current phase rolls over.
    */
   const getIlmLifecycle = async (
     indexName: string
-  ): Promise<{ managed: boolean; lifecycleDate?: number }> => {
+  ): Promise<{ managed: boolean; lifecycleDate?: number; hasRolloverAction?: boolean }> => {
     const { indices } = await esClient.ilm.explainLifecycle({ index: indexName });
     const ilmExplain = indices[indexName];
-    return ilmExplain?.managed
-      ? { managed: true, lifecycleDate: ilmExplain.lifecycle_date_millis }
-      : { managed: false };
+    if (!ilmExplain?.managed) {
+      return { managed: false };
+    }
+    const { lifecycle_date_millis: lifecycleDate, phase_execution: phaseExecution } = ilmExplain;
+    // Not cached until ILM enters the first phase
+    const phaseDefinition = phaseExecution?.phase_definition;
+    return {
+      managed: true,
+      lifecycleDate,
+      hasRolloverAction: phaseDefinition && phaseDefinition.actions?.rollover !== undefined,
+    };
   };
 
   /**
@@ -228,7 +236,12 @@ export const reindexServiceFactory = (
     );
 
     // Preserve the ILM age of the source index, otherwise it is computed from the new index creation date
-    const { managed, lifecycleDate } = await getIlmLifecycle(indexName);
+    const { managed, lifecycleDate, hasRolloverAction } = await getIlmLifecycle(indexName);
+    // Indices pending rollover get their lifecycle date at rollover time, which origination_date would override.
+    // ILM sets indexing_complete once the index has rolled over.
+    const isRolloverPending =
+      (hasRolloverAction ?? settings['index.lifecycle.rollover_alias'] !== undefined) &&
+      settings['index.lifecycle.indexing_complete'] !== 'true';
 
     let createIndex;
     try {
@@ -240,9 +253,10 @@ export const reindexServiceFactory = (
             // Reindexing optimizations
             'index.number_of_replicas': 0,
             'index.refresh_interval': -1,
-            ...(lifecycleDate !== undefined && {
-              'index.lifecycle.origination_date': lifecycleDate,
-            }),
+            ...(lifecycleDate !== undefined &&
+              !isRolloverPending && {
+                'index.lifecycle.origination_date': lifecycleDate,
+              }),
             // Pause ILM until the reindex completes, otherwise phases already due (e.g. readonly) would block writes
             ...(managed && { 'index.lifecycle.skip': true }),
           },

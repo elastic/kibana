@@ -526,6 +526,66 @@ describe('reindexService', () => {
         });
       });
 
+      const rolloverPhase = { actions: { rollover: { max_docs: 2 } } };
+      const deletePhase = { actions: { delete: {} } };
+      it.each([
+        ['pending rollover', rolloverPhase, {}, false],
+        [
+          'already rolled over',
+          rolloverPhase,
+          { 'index.lifecycle.indexing_complete': 'true' },
+          true,
+        ],
+        ['with a rollover alias but no rollover action', deletePhase, {}, true],
+        ['not yet in a phase, with a rollover alias', undefined, {}, false],
+      ])(
+        'handles the ILM lifecycle date of an index %s',
+        async (_, phaseDefinition, extraSettings, preservesLifecycleDate) => {
+          actions.getFlatSettings.mockResolvedValueOnce({
+            ...settingsMappings,
+            settings: {
+              ...settingsMappings.settings,
+              'index.lifecycle.rollover_alias': 'myAlias',
+              ...extraSettings,
+            },
+          });
+          clusterClient.asCurrentUser.ilm.explainLifecycle.mockResponse({
+            indices: {
+              myIndex: {
+                index: 'myIndex',
+                managed: true,
+                lifecycle_date_millis: 1700000000000,
+                skip: false,
+                phase_execution: {
+                  policy: 'myPolicy',
+                  version: 1,
+                  modified_date_in_millis: 1700000000000,
+                  phase_definition: phaseDefinition,
+                },
+              },
+            },
+          });
+          clusterClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+            acknowledged: true,
+          });
+          await service.processNextStep(reindexOp);
+          expect(clusterClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
+            method: 'POST',
+            path: `_create_from/myIndex/myIndex-reindex-0`,
+            body: {
+              settings_override: {
+                'index.number_of_replicas': 0,
+                'index.refresh_interval': -1,
+                ...(preservesLifecycleDate && {
+                  'index.lifecycle.origination_date': 1700000000000,
+                }),
+                'index.lifecycle.skip': true,
+              },
+            },
+          });
+        }
+      );
+
       it('fails if create index is not acknowledged', async () => {
         clusterClient.asCurrentUser.indices.get.mockResponseOnce(
           // @ts-expect-error not full interface

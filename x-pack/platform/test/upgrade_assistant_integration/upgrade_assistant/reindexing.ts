@@ -32,6 +32,14 @@ export default function ({ getService }: FtrProviderContext) {
       return lifecycleDate;
     });
 
+  // ILM caches the phase definition once the index enters its first phase
+  const waitForIlmPhaseDefinition = async (index: string) =>
+    retry.try(async () => {
+      const { indices } = await es.ilm.explainLifecycle({ index });
+      const explain = indices[index];
+      expect(explain.managed && explain.phase_execution?.phase_definition).to.be.ok();
+    });
+
   // Utility function that keeps polling API until reindex operation has completed or failed.
   const waitForReindexToComplete = async (indexName: string) => {
     let lastState;
@@ -253,6 +261,119 @@ export default function ({ getService }: FtrProviderContext) {
       // Cleanup
       await es.indices.delete({ index: newIndexName });
       await es.ilm.deleteLifecycle({ name: policyName });
+    });
+
+    it('should not pin the ILM lifecycle date of a write index pending rollover', async () => {
+      const indexName = 'ilm-rollover-data-000001';
+      const aliasName = 'ilm-rollover-data';
+      const policyName = 'ua-reindex-ilm-rollover-policy';
+
+      await es.ilm.putLifecycle({
+        name: policyName,
+        policy: { phases: { hot: { actions: { rollover: { max_docs: 1000 } } } } },
+      });
+      await es.indices.create({
+        index: indexName,
+        aliases: { [aliasName]: { is_write_index: true } },
+        settings: {
+          'index.lifecycle.name': policyName,
+          'index.lifecycle.rollover_alias': aliasName,
+        },
+      });
+      await es.cluster.putSettings({ persistent: { 'indices.lifecycle.poll_interval': '1s' } });
+
+      let newIndexName: string | undefined;
+      let rolledOverIndexName: string | undefined;
+      try {
+        await waitForIlmPhaseDefinition(indexName);
+
+        await supertest
+          .post(`/api/upgrade_assistant/reindex/${indexName}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const lastState = await waitForReindexToComplete(indexName);
+        newIndexName = lastState.newIndexName;
+        expect(lastState.errorMessage).to.equal(null);
+        expect(lastState.status).to.equal(ReindexStatus.completed);
+
+        const settings = await es.indices.getSettings({
+          index: lastState.newIndexName,
+          flat_settings: true,
+        });
+        expect(settings[lastState.newIndexName].settings).not.to.have.property(
+          'index.lifecycle.origination_date'
+        );
+
+        // The lifecycle date comes from the rollover, as it would without the reindex
+        rolledOverIndexName = (await es.indices.rollover({ alias: aliasName })).new_index;
+        const { metadata } = await es.cluster.state({
+          metric: 'metadata',
+          index: lastState.newIndexName,
+        });
+        const rolloverTime =
+          metadata?.indices?.[lastState.newIndexName]?.rollover_info?.[aliasName]?.time;
+        expect(rolloverTime).to.be.a('number');
+        await retry.try(async () => {
+          expect(await getLifecycleDateMillis(lastState.newIndexName)).to.equal(rolloverTime);
+        });
+      } finally {
+        await es.cluster.putSettings({ persistent: { 'indices.lifecycle.poll_interval': null } });
+        if (rolledOverIndexName) {
+          await es.indices.delete({ index: rolledOverIndexName, ignore_unavailable: true });
+        }
+        // Deleting the new index first also removes the alias, so the original name can be cleaned up if left over
+        if (newIndexName) {
+          await es.indices.delete({ index: newIndexName, ignore_unavailable: true });
+        }
+        await es.indices.delete({ index: indexName, ignore_unavailable: true });
+        await es.ilm.deleteLifecycle({ name: policyName });
+      }
+    });
+
+    it('should preserve the ILM lifecycle date of an index with a rollover alias but no rollover action', async () => {
+      const indexName = 'ilm-rollover-alias-data';
+      const policyName = 'ua-reindex-ilm-no-rollover-policy';
+
+      await es.ilm.putLifecycle({
+        name: policyName,
+        policy: { phases: { hot: { actions: { set_priority: { priority: 100 } } } } },
+      });
+      await es.indices.create({
+        index: indexName,
+        settings: {
+          'index.lifecycle.name': policyName,
+          'index.lifecycle.rollover_alias': 'ilm-rollover-alias',
+        },
+      });
+      await es.cluster.putSettings({ persistent: { 'indices.lifecycle.poll_interval': '1s' } });
+
+      let newIndexName: string | undefined;
+      try {
+        await waitForIlmPhaseDefinition(indexName);
+        const originalLifecycleDate = await getLifecycleDateMillis(indexName);
+
+        await supertest
+          .post(`/api/upgrade_assistant/reindex/${indexName}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const lastState = await waitForReindexToComplete(indexName);
+        newIndexName = lastState.newIndexName;
+        expect(lastState.errorMessage).to.equal(null);
+        expect(lastState.status).to.equal(ReindexStatus.completed);
+        expect(await getLifecycleDateMillis(lastState.newIndexName)).to.equal(
+          originalLifecycleDate
+        );
+      } finally {
+        await es.cluster.putSettings({ persistent: { 'indices.lifecycle.poll_interval': null } });
+        // Deleting the new index first also removes the alias, so the original name can be cleaned up if left over
+        if (newIndexName) {
+          await es.indices.delete({ index: newIndexName, ignore_unavailable: true });
+        }
+        await es.indices.delete({ index: indexName, ignore_unavailable: true });
+        await es.ilm.deleteLifecycle({ name: policyName });
+      }
     });
 
     it('should reindex an ILM-managed index whose write-blocking phase is already due', async () => {
