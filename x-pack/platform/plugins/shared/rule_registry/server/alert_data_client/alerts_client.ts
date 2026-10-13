@@ -101,6 +101,9 @@ const isValidAlert = (source?: estypes.SearchHit<ParsedTechnicalFields>): source
   );
 };
 
+const isAbsentLookup = (item: { found?: boolean; error?: unknown }): boolean =>
+  item.found === false || item.error != null;
+
 /**
  * Reads an authorization field from an alert hit, preferring the `fields` API (which is
  * populated even when `_source` is disabled) and falling back to `_source` for `mget`
@@ -300,11 +303,14 @@ export class AlertsClient {
   }
 
   /**
-   * Accepts an array of ES documents and executes ensureAuthorized for the given operation
+   * Accepts an array of ES documents and executes ensureAuthorized for the given operation.
+   * Present documents missing ruleTypeId or consumer are rejected; not-found and errored lookups are skipped.
    */
   private async ensureAllAuthorized(
     items: Array<{
       _id: string;
+      found?: boolean;
+      error?: unknown;
       // this is typed kind of crazy to fit the output of es api response to this
       fields?: Record<string, unknown[]>;
       _source?: {
@@ -318,9 +324,12 @@ export class AlertsClient {
     // Deduplicate authorization checks: authorization is granted per (ruleTypeId, consumer)
     // pair, so we only need to call `ensureAuthorized` once per unique pair.
     const ownersAndRuleTypeIds = new Map<string, { ruleTypeId: string; consumer: string }>();
-    const unauthorizableIds: string[] = [];
+    const invalidAlertIds: string[] = [];
 
     items.forEach((hit) => {
+      if (isAbsentLookup(hit)) {
+        return;
+      }
       hitIds.push(hit._id);
 
       const ruleTypeId = getAlertAuthField(hit, ALERT_RULE_TYPE_ID);
@@ -329,13 +338,13 @@ export class AlertsClient {
       if (ruleTypeId != null && consumer != null) {
         ownersAndRuleTypeIds.set(`${ruleTypeId}|${consumer}`, { ruleTypeId, consumer });
       } else {
-        unauthorizableIds.push(hit._id);
+        invalidAlertIds.push(hit._id);
       }
     });
 
     try {
-      if (unauthorizableIds.length > 0) {
-        const errorMessage = `Invalid alert found with id of "${unauthorizableIds.join(
+      if (invalidAlertIds.length > 0) {
+        const errorMessage = `Invalid alert found with id of "${invalidAlertIds.join(
           ', '
         )}" and operation ${operation}`;
         this.logger.error(errorMessage);
@@ -488,6 +497,10 @@ export class AlertsClient {
       const updateRequests = [];
 
       for (const item of mgetRes.docs) {
+        if (isAbsentLookup(item)) {
+          continue;
+        }
+
         if (validate) {
           // @ts-expect-error doesn't handle error branch in MGetResponse
           validate(item?._source);
@@ -510,6 +523,10 @@ export class AlertsClient {
       }
 
       const bulkUpdateRequest = updateRequests.flat();
+
+      if (bulkUpdateRequest.length === 0) {
+        return { errors: false, items: [], took: 0 };
+      }
 
       const bulkUpdateResponse = await this.esClient.bulk({
         refresh: 'wait_for',
