@@ -34,11 +34,11 @@ const discoverSessionTabPresentationSchema = z
     hide_chart: z
       .boolean()
       .default(false)
-      .meta({ description: 'When `true`, the chart is hidden. Defaults to `false`.' }),
+      .meta({ description: 'When `true`, the chart is hidden.' }),
     hide_table: z
       .boolean()
       .default(false)
-      .meta({ description: 'When `true`, the data table is hidden. Defaults to `false`.' }),
+      .meta({ description: 'When `true`, the data table is hidden.' }),
     breakdown_field: z
       .string()
       .max(MAX_BREAKDOWN_FIELD_LENGTH)
@@ -66,8 +66,7 @@ const discoverSessionTabIdentitySchema = z
 export const discoverSessionApiDefaultTabTypeStateSchema = z
   .object({
     type: z.literal(`${DiscoverTabType.Default}`).default(DiscoverTabType.Default).meta({
-      description:
-        'The tab type. `default` tabs have no type-specific settings. Defaults to `default`.',
+      description: 'The tab type. `default` tabs have no type-specific settings.',
     }),
   })
   .strict();

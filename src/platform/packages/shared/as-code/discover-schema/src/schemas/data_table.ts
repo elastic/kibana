@@ -35,11 +35,11 @@ export const dataTableLimitsSchema = z
   .object({
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
-        'The number of rows to display per page in the data table. Minimum `1`. Maximum `10000`. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.',
+        'The number of rows to display per page in the data table. If omitted, defaults to the `discover:sampleRowsPerPage` advanced setting. Has no effect on ES|QL tabs since Kibana 8.16.',
     }),
     sample_size: z.number().min(10).max(10000).optional().meta({
       description:
-        'The number of documents to sample for the data table. Minimum `10`. Maximum `10000`. If omitted, defaults to the `discover:sampleSize` advanced setting.',
+        'The number of documents to sample for the data table. If omitted, defaults to the `discover:sampleSize` advanced setting.',
     }),
   })
   .strict()
@@ -74,14 +74,14 @@ export const dataTableSchema = z
       .optional()
       .meta({
         description:
-          'The table header row height, as a number of lines from `1` to `5`, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
+          'The table header row height, as a number of lines, or `auto` to size it based on content. If omitted, Discover or the embedding application determines the height from its current settings, such as the user preference.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'The table data row height, as a number of lines from `1` to `20`, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.',
+          'The table data row height, as a number of lines, or `auto` to size it based on content. If omitted, defaults to the `discover:rowHeightOption` advanced setting.',
       }),
     documents_display_mode: documentsDisplayModeSchema.meta({
       description:
@@ -96,7 +96,7 @@ export const dataTableSchema = z
     }),
     default_rendered_nodes: z.number().min(10).max(200).optional().meta({
       description:
-        'The number of nodes each JSON cell renders by default in the JSON document view. Minimum `10`. Maximum `200`.',
+        'The number of nodes each JSON cell renders by default in the JSON document view.',
     }),
   })
   .strict()

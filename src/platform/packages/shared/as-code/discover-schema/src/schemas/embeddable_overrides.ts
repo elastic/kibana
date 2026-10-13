@@ -41,22 +41,22 @@ export const discoverSessionApiEmbeddableOverridesSchema = z
       .optional()
       .meta({
         description:
-          'The table header row height, as a number of lines from `1` to `5`, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+          'The table header row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
       }),
     row_height: z
       .union([z.number().min(1).max(20), z.literal('auto')])
       .optional()
       .meta({
         description:
-          'The table data row height, as a number of lines from `1` to `20`, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.',
+          'The table data row height, as a number of lines, or `auto`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:rowHeightOption` advanced setting.',
       }),
     rows_per_page: z.number().min(1).max(10000).optional().meta({
       description:
-        'The number of rows per page. Minimum `1`. Maximum `10000`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.',
+        'The number of rows per page. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleRowsPerPage` advanced setting.',
     }),
     sample_size: z.number().min(10).max(10000).optional().meta({
       description:
-        'The number of documents to sample. Minimum `10`. Maximum `10000`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.',
+        'The number of documents to sample. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, falls back to the source or to the `discover:sampleSize` advanced setting.',
     }),
     documents_display_mode: documentsDisplayModeSchema.meta({
       description:
@@ -72,7 +72,7 @@ export const discoverSessionApiEmbeddableOverridesSchema = z
     }),
     default_rendered_nodes: z.number().min(10).max(200).optional().meta({
       description:
-        'The number of nodes each JSON cell renders by default in the JSON document view. Minimum `10`. Maximum `200`. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
+        'The number of nodes each JSON cell renders by default in the JSON document view. When set, overrides the referenced saved object or the inline tab config in `tabs`. If omitted, the source configuration is used.',
     }),
   })
   .strict()

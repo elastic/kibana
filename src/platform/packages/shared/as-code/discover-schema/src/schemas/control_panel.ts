@@ -22,7 +22,7 @@ const discoverSessionControlWidthSchema = z
   .enum([CONTROL_WIDTH_SMALL, CONTROL_WIDTH_MEDIUM, CONTROL_WIDTH_LARGE])
   .default(DEFAULT_PINNED_CONTROL_STATE.width as typeof CONTROL_WIDTH_MEDIUM)
   .meta({
-    description: 'The minimum width of the control. Defaults to `medium`.',
+    description: 'The minimum width of the control.',
   });
 
 export const discoverSessionApiControlPanelSchema = z
@@ -30,14 +30,9 @@ export const discoverSessionApiControlPanelSchema = z
     id: z.string().min(1).meta({ description: 'The unique ID of the control.' }),
     type: z.literal(ESQL_CONTROL),
     width: discoverSessionControlWidthSchema,
-    grow: z
-      .boolean()
-      .default(DEFAULT_PINNED_CONTROL_STATE.grow)
-      .meta({
-        description:
-          'When `true`, the control expands to fill any available horizontal space. ' +
-          'Defaults to `false`.',
-      }),
+    grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
+      description: 'When `true`, the control expands to fill any available horizontal space.',
+    }),
     config: optionsListESQLControlSchema,
   })
   .strict()
