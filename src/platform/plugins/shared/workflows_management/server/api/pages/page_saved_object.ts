@@ -10,11 +10,13 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { PAGE_SECRET_MAX_LENGTH, PAGE_WORKFLOW_ID_MAX_LENGTH } from './constants';
+import { PAGE_WORKFLOW_ID_MAX_LENGTH } from './constants';
 
 export const WORKFLOW_PAGE_SAVED_OBJECT_TYPE = 'workflow-page';
 
 const SECRET_HASH_HEX_LENGTH = 64;
+// The schema sees the stored value: ESO ciphertext of a 43-character secret, about 184 characters.
+const ENCRYPTED_SECRET_MAX_LENGTH = 1024;
 const CREATED_AT_MAX_LENGTH = 32;
 
 /**
@@ -32,7 +34,7 @@ export interface WorkflowPageAttributes {
 
 const workflowPageSchemaV1 = schema.object({
   workflowId: schema.string({ maxLength: PAGE_WORKFLOW_ID_MAX_LENGTH }),
-  secret: schema.string({ maxLength: PAGE_SECRET_MAX_LENGTH }),
+  secret: schema.string({ maxLength: ENCRYPTED_SECRET_MAX_LENGTH }),
   secretHash: schema.string({
     minLength: SECRET_HASH_HEX_LENGTH,
     maxLength: SECRET_HASH_HEX_LENGTH,
