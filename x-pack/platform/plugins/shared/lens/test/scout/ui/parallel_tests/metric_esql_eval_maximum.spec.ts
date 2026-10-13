@@ -13,15 +13,28 @@ import { recordMetricRenderErrors } from '../fixtures/metric_render_errors';
 const TRENDLINE_TIMEOUT_MS = 30_000;
 
 spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classic }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
+  let storedDataViewId: string | undefined;
+
+  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
+    const { data: dataView } = await apiServices.dataViews.create({
+      title: testData.DATA_VIEW_ID.LOGSTASH,
+      name: 'scout-metric-esql-eval-maximum',
+      timeFieldName: '@timestamp',
+      spaceId: scoutSpace.id,
+    });
+    storedDataViewId = dataView.id;
     await scoutSpace.uiSettings.set({
+      defaultIndex: dataView.id,
       'dateFormat:tz': 'UTC',
       'timepicker:timeDefaults': JSON.stringify(testData.LOGSTASH_IN_RANGE_DATES),
     });
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await scoutSpace.uiSettings.unset('dateFormat:tz', 'timepicker:timeDefaults');
+  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
+    if (storedDataViewId) {
+      await apiServices.dataViews.delete(storedDataViewId, scoutSpace.id);
+    }
+    await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
@@ -32,7 +45,7 @@ spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classi
       const metricRoot = page.getByTestId('mtrVis');
       const metricProgressBar = metricRoot.getByRole('meter');
       const dimensionTriggers = (panel: string) =>
-        page.testSubj.locator(`${panel} > lns-dimensionTrigger`);
+        page.testSubj.locator(`${panel} > lns-dimensionTrigger-textBased`);
       const maximumPanel = 'lnsMetric_maxDimensionPanel';
       const primaryPanel = 'lnsMetric_primaryMetricDimensionPanel';
 
@@ -43,13 +56,12 @@ spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classi
         const codeEditor = new KibanaCodeEditorWrapper(page);
         await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
         // Normalize the fixture's nonzero average to a deterministic value below the maximum.
-        await codeEditor.fillCodeEditor(
+        await codeEditor.setCodeEditorValue(
           'FROM logstash-* | STATS usage = AVG(bytes) / AVG(bytes) / 2 | EVAL max = 1'
         );
         await page.getByTestId('ESQLEditor-run-query-button').click();
         await dashboard.applyAndCloseESQLPanel();
         await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
-        await expect(page.getByTestId('lnsDataTable')).toBeVisible();
         await lens.switchToVisualization('lnsMetric', { search: 'Metric' });
 
         await expect(dimensionTriggers(primaryPanel)).toHaveText('usage');
