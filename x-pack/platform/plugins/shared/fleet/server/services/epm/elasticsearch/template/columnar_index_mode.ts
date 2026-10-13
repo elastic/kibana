@@ -99,20 +99,28 @@ export function stripColumnarIncompatibleMappings(componentTemplates: TemplateMa
  *
  * - A data stream that is not columnar-ready (`unsupported` or nothing declared) never gets it.
  * - An explicit user choice, stored once per installation, always wins.
- * - Without a user choice, `default` readiness applies to data streams that are new to the
- *   installation: a fresh install, or a data stream added in a later package version. Existing
- *   data streams keep whatever mode their index template already has, so an `opt_in` ->
+ * - Without a user choice, `default` readiness applies to new installations. A data stream that a
+ *   later package version adds to an existing installation follows what the installation already
+ *   uses: it only gets columnar when it is `default` and the installation is on columnar, so an
+ *   integration that already has data on LogsDB never gains a columnar data stream.
+ * - Existing data streams keep whatever mode their index template already has, so an `opt_in` ->
  *   `default` package upgrade never flips them.
  */
 export function resolveLogsdbColumnarIndexMode({
   readiness,
   userChoice,
-  isNewDataStream,
+  isNewInstall,
+  isNewDataStream = false,
+  installationUsesColumnar = false,
   currentIndexMode,
 }: {
   readiness?: ReturnType<typeof getLogsdbColumnarReadiness>;
   userChoice?: boolean;
-  isNewDataStream: boolean;
+  isNewInstall: boolean;
+  /** The data stream has no index template yet in an existing installation. */
+  isNewDataStream?: boolean;
+  /** A logs data stream of the existing installation is on `logsdb_columnar`. */
+  installationUsesColumnar?: boolean;
   currentIndexMode?: string;
 }): typeof LOGSDB_COLUMNAR_INDEX_MODE | undefined {
   if (!isLogsdbColumnarReady(readiness)) {
@@ -121,8 +129,13 @@ export function resolveLogsdbColumnarIndexMode({
   if (userChoice !== undefined) {
     return userChoice ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
   }
-  if (isNewDataStream) {
+  if (isNewInstall) {
     return readiness === 'default' ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
+  }
+  if (isNewDataStream) {
+    return readiness === 'default' && installationUsesColumnar
+      ? LOGSDB_COLUMNAR_INDEX_MODE
+      : undefined;
   }
   return currentIndexMode === LOGSDB_COLUMNAR_INDEX_MODE ? LOGSDB_COLUMNAR_INDEX_MODE : undefined;
 }
@@ -223,6 +236,9 @@ export async function resolveColumnarIndexModes({
       : new Map<string, string | undefined>();
 
   const resolved = new Map<string, string | undefined>();
+  // Only looked up when a `default` data stream is new to an existing installation without a
+  // user choice: it then follows what the installation already uses.
+  let installationUsesColumnar: boolean | undefined;
 
   for (const dataStream of logsDataStreams) {
     const templateName = getRegistryDataStreamAssetBaseName(dataStream);
@@ -242,15 +258,28 @@ export async function resolveColumnarIndexModes({
       );
     }
 
+    // Without an ES client the current templates are unknown: treat every data stream as
+    // existing so that none of them flips.
+    const isNewDataStream =
+      !isNewInstall && esClient !== undefined && !currentIndexModes.has(templateName);
+    if (
+      isNewDataStream &&
+      esClient &&
+      userChoice === undefined &&
+      readiness === 'default' &&
+      installationUsesColumnar === undefined
+    ) {
+      installationUsesColumnar = await isLogsdbColumnarActive(esClient, installedPkg?.installed_es);
+    }
+
     resolved.set(
       templateName,
       resolveLogsdbColumnarIndexMode({
         readiness,
         userChoice,
-        // Without an ES client the current templates are unknown: treat every data stream as
-        // existing so that none of them flips.
-        isNewDataStream:
-          isNewInstall || (esClient !== undefined && !currentIndexModes.has(templateName)),
+        isNewInstall,
+        isNewDataStream,
+        installationUsesColumnar,
         currentIndexMode,
       })
     );
