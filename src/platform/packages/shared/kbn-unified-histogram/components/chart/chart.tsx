@@ -408,6 +408,7 @@ export function UnifiedHistogramChart({
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
           controlsState={controlsState}
+          telemetrySource="discover"
         />
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
