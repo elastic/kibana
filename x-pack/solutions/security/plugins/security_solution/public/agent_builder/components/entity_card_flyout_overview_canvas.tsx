@@ -34,10 +34,8 @@ import { useObservedHost } from '../../flyout_v2/entity/host/main/hooks/use_obse
 import { EntityType } from '../../../common/entity_analytics/types';
 import {
   buildRiskScoreStateFromEntityRecord,
-  getHeaderRiskLevel,
   getRiskFromEntityRecord,
 } from '../../flyout/entity_details/shared/entity_store_risk_utils';
-import { useNewEntityAnalyticsPage } from '../../entity_analytics/hooks/use_new_entity_analytics_page';
 import { useEntityFromStore } from '../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import {
@@ -414,9 +412,6 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
-  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
-  const headerRiskLevel = getHeaderRiskLevel(observedHost.entityRecord, isNewEntityAnalyticsPage);
-
   return (
     <>
       <FlyoutHeader>
@@ -426,7 +421,12 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
           entityId={panelDisplayEntityId}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}
-          riskLevel={headerRiskLevel}
+          riskLevel={
+            observedHost.entityRecord
+              ? ((getRiskFromEntityRecord(observedHost.entityRecord)?.calculated_level ??
+                  'Unknown') as RiskSeverity)
+              : undefined
+          }
         />
       </FlyoutHeader>
       <FlyoutBody>
@@ -725,12 +725,6 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
     />
   ) : undefined;
 
-  const isNewEntityAnalyticsPage = useNewEntityAnalyticsPage();
-  const headerRiskLevel = getHeaderRiskLevel(
-    entityFromStoreResult.entityRecord,
-    isNewEntityAnalyticsPage
-  );
-
   return (
     <>
       <UserPanelHeader
@@ -740,7 +734,12 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
         entityId={panelDisplayEntityId}
         identityFields={documentEntityIdentifiers}
         isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={headerRiskLevel}
+        riskLevel={
+          entityFromStoreResult.entityRecord
+            ? ((getRiskFromEntityRecord(entityFromStoreResult.entityRecord)?.calculated_level ??
+                'Unknown') as RiskSeverity)
+            : undefined
+        }
       />
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (
