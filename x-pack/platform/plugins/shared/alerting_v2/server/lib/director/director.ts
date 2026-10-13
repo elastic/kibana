@@ -17,6 +17,7 @@ import { getLatestAlertEventStateQuery, type LatestAlertEventState } from './que
 import type { AlertEpisodeStatus } from '../../resources/datastreams/alert_events';
 import {
   alertEpisodeStatus,
+  alertEventStatus,
   alertEventType,
   type AlertEventDocument,
 } from '../../resources/datastreams/alert_events';
@@ -95,6 +96,11 @@ interface ResolveEpisodeIdResult {
 
 export interface DirectorRunStats {
   readonly newEpisodeIds: readonly string[];
+  /**
+   * `no_data` events dropped because they carried no lifecycle change for an
+   * already-held group (see {@link DirectorService.isRedundantNoDataEvent}).
+   */
+  readonly suppressedNoDataEventCount: number;
 }
 
 export interface DirectorRunResult {
@@ -118,7 +124,7 @@ export class DirectorService {
     spaceId,
   }: RunDirectorParams): Promise<DirectorRunResult> {
     if (alertEvents.length === 0) {
-      return { alertEvents: [], stats: { newEpisodeIds: [] } };
+      return { alertEvents: [], stats: { newEpisodeIds: [], suppressedNoDataEventCount: 0 } };
     }
 
     const logger = this.logger.forSubsystem('director').withLabels({
@@ -153,25 +159,43 @@ export class DirectorService {
       executionContext.throwIfAborted();
 
       const newEpisodeIds: string[] = [];
+      const processed: AlertEventDocument[] = [];
+      let suppressedNoDataEventCount = 0;
       const evaluatedAt = new Date().toISOString();
-      const processed = alertEvents.map((currentAlertEvent) => {
+
+      for (const currentAlertEvent of alertEvents) {
+        const previousAlertEvent = alertStateByGroupHash.get(currentAlertEvent.group_hash);
         const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
-          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
+          previousAlertEvent,
           strategy,
           evaluatedAt,
           logger,
         });
 
+        if (this.isRedundantNoDataEvent(alertEvent, previousAlertEvent)) {
+          suppressedNoDataEventCount++;
+          continue;
+        }
+
         if (isNewEpisode && alertEvent.alert) {
           newEpisodeIds.push(alertEvent.alert.id);
         }
 
-        return alertEvent;
-      });
+        processed.push(alertEvent);
+      }
 
-      return { alertEvents: processed, stats: { newEpisodeIds } };
+      if (suppressedNoDataEventCount > 0) {
+        logger.debug({
+          message: `Dropped ${suppressedNoDataEventCount} redundant no_data alert event(s) for held groups`,
+        });
+      }
+
+      return {
+        alertEvents: processed,
+        stats: { newEpisodeIds, suppressedNoDataEventCount },
+      };
     } finally {
       try {
         await scope.disposeAll();
@@ -274,6 +298,50 @@ export class DirectorService {
       },
       isNewEpisode: isNew,
     };
+  }
+
+  /**
+   * A `no_data` event is recorded only when it changes something.
+   *
+   * The executor re-synthesizes a `no_data` event for every active group that
+   * is absent from the breach set and has no data, on every run. The first
+   * one after a `breached`/`recovered` event is the group's transition into
+   * no-data and is always written: it is the marker a `LAST(alert.status)`
+   * reader recovers the held status from. Every later one resolves — through
+   * the strategy (`keep_last`) or the user `activate` lock — to the same
+   * episode id, status and status_count already persisted, so it carries no
+   * lifecycle information and would only keep the stream growing for as long
+   * as the group stays absent. Those are dropped.
+   *
+   * Only `no_data` is ever dropped. `breached` and `recovered` are the
+   * engine's liveness signal and are always written, which is also what makes
+   * a group that resumes reporting resume event writing with no extra logic.
+   * Comparing the strategy's *output* (rather than skipping synthesis
+   * upstream) keeps a mid-absence policy change effective: `keep_last` →
+   * `resolve` resolves to `inactive`, differs, and is written.
+   */
+  private isRedundantNoDataEvent(
+    alertEvent: AlertEventDocument,
+    previousAlertEvent?: LatestAlertEventState
+  ): boolean {
+    if (alertEvent.status !== alertEventStatus.no_data || !previousAlertEvent) {
+      return false;
+    }
+
+    if (previousAlertEvent.last_status !== alertEventStatus.no_data) {
+      return false;
+    }
+
+    const { alert } = alertEvent;
+    if (!alert) {
+      return false;
+    }
+
+    return (
+      alert.id === previousAlertEvent.last_episode_id &&
+      alert.status === previousAlertEvent.last_episode_status &&
+      (alert.status_count ?? null) === (previousAlertEvent.last_episode_status_count ?? null)
+    );
   }
 
   /**

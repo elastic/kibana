@@ -92,7 +92,10 @@ describe('DirectorService', () => {
         alertEvents: [],
       });
 
-      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeIds: [] } });
+      expect(result).toEqual({
+        alertEvents: [],
+        stats: { newEpisodeIds: [], suppressedNoDataEventCount: 0 },
+      });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
@@ -1116,6 +1119,113 @@ describe('DirectorService', () => {
         expect(c).toBe('existing-episode-c');
         expect(new Set(result.stats.newEpisodeIds)).toEqual(new Set([a, b]));
       });
+    });
+  });
+
+  describe('no_data idle suppression', () => {
+    // `keep_last` holds the episode status on a `no_data` event. The executor
+    // re-synthesizes a `no_data` event for an absent group on every run, so
+    // without suppression a held group would write one identical event per run.
+    const keepLastRule = createRuleResponse({ no_data: { strategy: 'keep_last' } });
+
+    // Persisted state of a group already held in no-data: the last event was
+    // the `no_data` transition marker and the episode is held `active`.
+    const heldState = (
+      overrides: Partial<LatestAlertEventStateInput> = {}
+    ): LatestAlertEventStateInput => ({
+      last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+      last_status: 'no_data',
+      last_episode_id: 'held-episode',
+      last_episode_status: alertEpisodeStatus.active,
+      last_episode_status_count: null,
+      group_hash: 'hash-1',
+      ...overrides,
+    });
+
+    const noDataEvent = createAlertEvent({
+      group_hash: 'hash-1',
+      status: 'no_data',
+      alert: undefined,
+    });
+
+    const run = (
+      alertEvents: Parameters<DirectorService['run']>[0]['alertEvents'],
+      ruleOverride = keepLastRule
+    ) =>
+      directorService.run({
+        spaceId: 'default',
+        rule: ruleOverride,
+        executionContext: testExecutionContext,
+        alertEvents,
+      });
+
+    it('writes the transition marker when a group first enters no_data', async () => {
+      // Previous raw status is `breached`: this `no_data` is the transition.
+      mockEsClient.esql.query.mockResolvedValue(
+        createLatestAlertEventStateResponse([heldState({ last_status: 'breached' })])
+      );
+
+      const result = await run([noDataEvent]);
+
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.alertEvents[0].status).toBe('no_data');
+      expect(result.alertEvents[0].alert).toEqual({
+        id: 'held-episode',
+        status: alertEpisodeStatus.active,
+      });
+      expect(result.stats).toEqual({ newEpisodeIds: [], suppressedNoDataEventCount: 0 });
+    });
+
+    it('drops a no_data continuation when the previous event was no_data and nothing changed', async () => {
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
+
+      const result = await run([noDataEvent]);
+
+      expect(result.alertEvents).toEqual([]);
+      expect(result.stats).toEqual({ newEpisodeIds: [], suppressedNoDataEventCount: 1 });
+    });
+
+    it('writes nothing across repeated executions while the group stays absent', async () => {
+      // The persisted state never advances while the group is held, so every
+      // subsequent run sees the same marker and must drop its event.
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
+
+      for (let execution = 0; execution < 5; execution++) {
+        const result = await run([noDataEvent]);
+
+        expect(result.alertEvents).toEqual([]);
+        expect(result.stats.suppressedNoDataEventCount).toBe(1);
+      }
+    });
+
+    it('resumes writing when data returns breaching', async () => {
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
+
+      const result = await run([
+        createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined }),
+      ]);
+
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.alertEvents[0].alert).toEqual({
+        id: 'held-episode',
+        status: alertEpisodeStatus.active,
+      });
+      expect(result.stats.suppressedNoDataEventCount).toBe(0);
+    });
+
+    it('resumes writing when data returns recovered', async () => {
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([heldState()]));
+
+      const result = await run([
+        createAlertEvent({ group_hash: 'hash-1', status: 'recovered', alert: undefined }),
+      ]);
+
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.alertEvents[0].alert).toMatchObject({
+        id: 'held-episode',
+        status: alertEpisodeStatus.recovering,
+      });
+      expect(result.stats.suppressedNoDataEventCount).toBe(0);
     });
   });
 });
