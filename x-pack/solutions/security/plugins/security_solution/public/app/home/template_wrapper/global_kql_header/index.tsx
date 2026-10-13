@@ -5,23 +5,26 @@
  * 2.0.
  */
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 import { OutPortal } from 'react-reverse-portal';
 import { useGlobalHeaderPortal } from '../../../../common/hooks/use_global_header_portal';
 
-const StyledStickyWrapper = styled.div`
-  position: sticky;
-  z-index: ${(props) => props.theme.eui.euiZHeaderBelowDataGrid};
-  top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
-`;
-
 export const GlobalKQLHeader = React.memo(() => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
+  const { euiTheme } = useEuiTheme();
+
+  // Above DashboardTopNav (levels.mask) so the Security search bar stays on top when both stick.
+  const stickyStyles = css`
+    position: sticky;
+    z-index: ${Number(euiTheme.levels.mask) + 1};
+    top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
+  `;
 
   return (
-    <StyledStickyWrapper id="securitySolutionStickyKQL">
+    <div id="securitySolutionStickyKQL" css={stickyStyles}>
       <OutPortal node={globalKQLHeaderPortalNode} />
-    </StyledStickyWrapper>
+    </div>
   );
 });
 

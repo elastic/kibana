@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EDIT_DASHBOARD_TITLE } from '../pages/details/translations';
 
+/** Syncs dashboard title into Security breadcrumbs (SpyRoute); chrome shows the visible title. */
 const DashboardTitleComponent = ({
   dashboardContainer,
   onTitleLoaded,
@@ -27,7 +27,7 @@ const DashboardTitleComponent = ({
     onTitleLoaded(title);
   }, [dashboardContainer, title, onTitleLoaded]);
 
-  return dashboardTitle != null ? <span>{title}</span> : <EuiLoadingSpinner size="m" />;
+  return null;
 };
 
 export const DashboardTitle = React.memo(DashboardTitleComponent);

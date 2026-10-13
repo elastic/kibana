@@ -27,7 +27,8 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, type UseEuiTheme } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 import { ControlClone } from './components/control_clone';
 import { ControlPanel } from './components/control_panel';
@@ -96,6 +97,8 @@ export const ControlsRenderer = ({
     [onControlsChanged, controlsInOrder]
   );
 
+  const styles = useMemoCss(controlsGroupStyles);
+
   if (controlsInOrder.length === 0) {
     return null;
   }
@@ -118,7 +121,7 @@ export const ControlsRenderer = ({
         <EuiFlexGroup
           component="ul"
           className={`controlGroup ${isEditFlyoutOpen ? 'controlsGroup--editing' : ''}`}
-          css={controlsGroupStyles.controlsGroup}
+          css={styles.controlsGroup}
           alignItems="center"
           gutterSize="s"
           wrap={true}
@@ -151,9 +154,12 @@ export const ControlsRenderer = ({
 };
 
 const controlsGroupStyles = {
-  controlsGroup: css({
-    '&.controlsGroup--editing .controlFrameFloatingActions': {
-      visibility: 'hidden !important' as 'hidden',
-    },
-  }),
+  controlsGroup: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      backgroundColor: euiTheme.colors.backgroundBaseRecessed,
+      paddingTop: euiTheme.size.s,
+      '&.controlsGroup--editing .controlFrameFloatingActions': {
+        visibility: 'hidden !important' as 'hidden',
+      },
+    }),
 };
