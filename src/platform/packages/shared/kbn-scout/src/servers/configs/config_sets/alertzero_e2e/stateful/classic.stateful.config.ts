@@ -80,6 +80,12 @@ export const servers: ScoutServerConfig = {
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--uiSettings.overrides.securitySolution:enableAlertZero=true',
+      // Attack Discovery workflows + Context Engine (the review and forensics workflows are
+      // workflow runs; context engine is what the forensics skill reads), mirroring the
+      // evals_attack_discovery_agent_builder set.
+      '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
+      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
+      '--uiSettings.overrides.contextEngine:enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',

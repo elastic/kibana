@@ -32,12 +32,15 @@ export interface SeededScenario {
 export const seedAttackScenario = async (
   esClient: EsClient,
   api: AlertZeroApi,
-  { scenarioKey = ATTACK_SCENARIO_KEY }: { scenarioKey?: string } = {}
+  {
+    scenarioKey = ATTACK_SCENARIO_KEY,
+    agentIdByHost,
+  }: { scenarioKey?: string; agentIdByHost?: Readonly<Record<string, string>> } = {}
 ): Promise<SeededScenario> => {
   const runMarker = `alertzero-e2e-${Date.now().toString(36)}${Math.random()
     .toString(36)
     .slice(2, 8)}`;
-  const plan = buildAd2SeedPlan({ scenarioKey, runMarker, baseTime: new Date() });
+  const plan = buildAd2SeedPlan({ scenarioKey, runMarker, baseTime: new Date(), agentIdByHost });
 
   // Creates the alerts index + mappings the seeded alerts are written into.
   ok(await api.public('POST', '/api/detection_engine/index'), 'create the detection alerts index');
@@ -192,6 +195,35 @@ interface ExecutionChild {
 
 const EXECUTIONS_URL = '/api/workflows/executions';
 const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
+
+/**
+ * Polls an execution until it reaches the given status. Used before POSTing an approve: the
+ * route answers 409 while the execution backing the proposal has not parked in
+ * `waiting_for_input` yet, so the test waits for that state instead of retrying the 409.
+ */
+export const waitForExecutionStatus = async (
+  api: AlertZeroApi,
+  label: string,
+  executionId: string,
+  status: string,
+  { timeoutMs }: { timeoutMs: number }
+): Promise<WorkflowExecution> => {
+  try {
+    return await pollUntil(
+      label,
+      async () => {
+        const current = ok(
+          await api.public<WorkflowExecution>('GET', `${EXECUTIONS_URL}/${executionId}`),
+          `read execution ${executionId}`
+        );
+        return current.status === status ? current : undefined;
+      },
+      { timeoutMs }
+    );
+  } catch (error) {
+    throw new Error(`${(error as Error).message}\n${await describeExecution(api, executionId)}`);
+  }
+};
 
 const formatStep = (step: ExecutionStep) =>
   `${step.stepId}${step.stepType ? ` (${step.stepType})` : ''}: ${step.status}${

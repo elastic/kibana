@@ -8,6 +8,7 @@
 import { mkdirSync, writeFileSync } from 'fs';
 import { expect } from '@kbn/scout-security/api';
 import type { ListProposalsResponse } from '@kbn/proposals-common';
+import { getAd2Scenario } from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { seedEndpointHosts } from '../../../scout/edr_response_actions/common/seed_endpoint_hosts';
 import { completeHostAction } from '../../../scout/edr_response_actions/common/complete_host_action';
 import {
@@ -26,11 +27,13 @@ import {
   seedAttackScenario,
   updateWorker,
   waitForExecution,
+  waitForExecutionStatus,
   waitForNewExecution,
 } from '../fixtures';
 import type { SeededScenario } from '../fixtures';
 
 const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
+const FORENSICS_WORKER_ID = testData.FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID;
 
 // Media capture hook (run_scout.sh's SCOUT_KEEP_STACK path): when ORCA_MEDIA_EJECT=1 this spec
 // ejects the ids the off-board capture script needs, and the seeded host is left in place so the
@@ -79,6 +82,9 @@ apiTest.describe(
       await attempt(async () => {
         if (api) await resetWorker(api, WORKER_ID);
       });
+      await attempt(async () => {
+        if (api) await resetWorker(api, FORENSICS_WORKER_ID);
+      });
       // Media ejection (ORCA_MEDIA_EJECT=1) needs the seeded host to survive the run: the capture
       // script photographs the live stack after this spec, and the host it releases is this one.
       if (!MEDIA_EJECT) await attempt(async () => cleanupHosts?.());
@@ -101,7 +107,19 @@ apiTest.describe(
         apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 3 * testData.PROPOSAL_TIMEOUT_MS);
         const api = await getAdminApi(apiClient, samlAuth);
 
-        scenario = await seedAttackScenario(esClient, api);
+        // Explicit setup: force the per-space anonymization fields install before the workflows
+        // run. On a cold space the first `anonymization_fields` read lazily installs it
+        // mid-run, which stalls the first model call long enough to time the run out; doing it
+        // up front keeps that cost out of the measured path. The lazy install racing real
+        // traffic may itself be a product bug — noted, not fixed here.
+        ok(
+          await api.public('GET', '/api/security_ai_assistant/anonymization_fields/_find'),
+          'warm up the anonymization fields install'
+        );
+
+        // Seed the enrolled endpoint host first: its real agent id is stamped onto the scenario
+        // alerts below. The seed plan otherwise mints a synthetic agent id no Defend agent ever
+        // enrolled under, so the isolate action would end in HOST_NOT_ENROLLED.
         const hosts = await seedEndpointHosts({
           esClient,
           kbnClient,
@@ -111,6 +129,14 @@ apiTest.describe(
           isolation: false,
         });
         cleanupHosts = hosts.cleanup;
+
+        const scenarioHost = getAd2Scenario(testData.ATTACK_SCENARIO_KEY, 'clean')?.host;
+        if (!scenarioHost) {
+          throw new Error(`Unknown attack scenario ${testData.ATTACK_SCENARIO_KEY}`);
+        }
+        scenario = await seedAttackScenario(esClient, api, {
+          agentIdByHost: { [scenarioHost]: hosts.hosts[0].agentId },
+        });
 
         serviceAccountId = await createServiceAccount(api);
         // Save settings BEFORE reading the workflow id: the settings write is what installs the
@@ -136,6 +162,26 @@ apiTest.describe(
         if (!workerWorkflowId) {
           throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
         }
+
+        // The forensics Worker stays disabled by default. Enable it under the same service
+        // account, or the handoff-to-forensics approval cannot start its workflow and no
+        // Isolate proposal can ever exist. Settings first, then enable, mirroring the AD worker.
+        const forensicsBeforeSave = await getWorker(api, FORENSICS_WORKER_ID);
+        await updateWorker(api, FORENSICS_WORKER_ID, {
+          settingsRevision: forensicsBeforeSave.settingsRevision ?? null,
+          settings: { serviceAccountId },
+        });
+        await pollUntil(
+          `worker ${FORENSICS_WORKER_ID} to have a workflow installed`,
+          async () => {
+            const candidate = await getWorker(api, FORENSICS_WORKER_ID);
+            return candidate.workflowId ? candidate : undefined;
+          },
+          { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+        );
+        expect((await updateWorker(api, FORENSICS_WORKER_ID, { enabled: true })).enabled).toBe(
+          true
+        );
 
         // 1. Run Attack Discovery over the seeded window. Enabling the worker makes Task Manager
         // run it at once, as its service account; that scheduled run is the one under test. The
@@ -179,13 +225,34 @@ apiTest.describe(
         );
         expect(investigate.actionInput).toBeDefined();
 
+        // Approve exactly as the approval modal does — but only once the execution backing the
+        // proposal has parked in `waiting_for_input`. Approving earlier answers 409; retrying
+        // the 409 blindly would green the test without the run actually waiting for the human.
+        const approveProposal = async (
+          label: string,
+          proposal: { id: string; actionInput?: unknown; workflowExecutionId?: string }
+        ) => {
+          if (proposal.workflowExecutionId) {
+            // Resolves only once the status equals `waiting_for_input`; a timeout names the
+            // execution's last known state, so the assert is the poll itself.
+            await waitForExecutionStatus(
+              api,
+              `the ${label} proposal execution to wait for input`,
+              proposal.workflowExecutionId,
+              'waiting_for_input',
+              { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+            );
+          }
+          ok(
+            await api.internal('POST', `/internal/proposals/${proposal.id}/approve`, {
+              body: { actionInput: proposal.actionInput },
+            }),
+            `approve the ${label} proposal`
+          );
+        };
+
         // 3. Approve it exactly as the approval modal does; forensics now runs.
-        ok(
-          await api.internal('POST', `/internal/proposals/${investigate.id}/approve`, {
-            body: { actionInput: investigate.actionInput },
-          }),
-          'approve the Investigate proposal'
-        );
+        await approveProposal('Investigate', investigate);
 
         // 4. Forensics ends in an Isolate proposal for the compromised host.
         const isolate = await pollUntil(
@@ -193,12 +260,7 @@ apiTest.describe(
           () => findPending(testData.ISOLATE_HOST_ACTION_ID),
           { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
         );
-        ok(
-          await api.internal('POST', `/internal/proposals/${isolate.id}/approve`, {
-            body: { actionInput: isolate.actionInput },
-          }),
-          'approve the Isolate proposal'
-        );
+        await approveProposal('Isolate', isolate);
 
         // 5. The approval creates a Defend isolate action. Complete it as the agent would.
         const action = await pollUntil(

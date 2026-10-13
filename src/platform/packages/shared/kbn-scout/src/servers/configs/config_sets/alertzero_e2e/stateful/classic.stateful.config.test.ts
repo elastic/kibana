@@ -7,10 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { servers } from './classic.stateful.config';
+// The config set builds on `agent_builder_smoke`, whose module-load path throws in CI when
+// `KIBANA_TESTING_AI_CONNECTORS` is unset (it refuses to start a server without connectors).
+// A unit test of the arg list does not need a live EIS connection, so the import is guarded:
+// when no connector source is configured, the load runs against an empty stub instead.
+const EMPTY_CONNECTORS_ENV = process.env.KIBANA_TESTING_AI_CONNECTORS;
+if (process.env.KIBANA_TESTING_AI_CONNECTORS === undefined) {
+  process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from('{}').toString('base64');
+}
+
+const loadServers = (): { kbnTestServer: { serverArgs: string[] } } => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  return require('./classic.stateful.config').servers;
+};
+
+afterAll(() => {
+  if (EMPTY_CONNECTORS_ENV === undefined) {
+    delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+  }
+});
 
 describe('alertzero_e2e config set', () => {
-  const args = servers.kbnTestServer.serverArgs;
+  const args = loadServers().kbnTestServer.serverArgs;
 
   it('enables alertzero and the plugins it requires', () => {
     expect(args).toEqual(
@@ -32,6 +50,16 @@ describe('alertzero_e2e config set', () => {
 
   it('turns the AlertZero advanced setting on, or every AlertZero route answers 404', () => {
     expect(args).toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
+  });
+
+  it('enables Attack Discovery workflows and the Context Engine the review/forensics flows need', () => {
+    expect(args).toEqual(
+      expect.arrayContaining([
+        '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
+        '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
+        '--uiSettings.overrides.contextEngine:enabled=true',
+      ])
+    );
   });
 
   it('enables endpointForensicAnalysisSkill, or the forensics Worker is never listed and no Isolate proposal can exist', () => {
