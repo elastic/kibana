@@ -67,7 +67,12 @@ export interface WatchdogWorkerData {
   admissionLimits?: AdmissionLimits;
   /** Overrides of the profiling thresholds, for tests. */
   profiling?: { afterMs: number; maxMs: number; cooldownMs: number; sampleIntervalMs: number };
+  /** PoC startup A/B: no debugger, debugger enabled without sampling, or sampling (default). */
+  debuggerMode?: DebuggerMode;
 }
+
+export const DEBUGGER_MODES = ['off', 'enable', 'sample'] as const;
+export type DebuggerMode = (typeof DEBUGGER_MODES)[number];
 
 export interface WatchdogLogMeta extends LogMeta {
   kibana: { event_loop_watchdog: Record<string, unknown> };

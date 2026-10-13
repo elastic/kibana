@@ -100,9 +100,10 @@ describe('runWatchdogWorker (debugger sampling)', () => {
     start();
     await sleep(50);
     expect(posted.slice(0, 2)).toEqual(['Debugger.enable', 'skip:true']);
-    expect(logs[0].message).toMatch(
-      /^Event loop watchdog debugger enabled in [\d.]+ms \(2 scripts\)$/
-    );
+    expect(logs.map(({ message }) => message)).toEqual([
+      'Event loop watchdog debugger mode: sample',
+      expect.stringMatching(/^Event loop watchdog debugger enabled in [\d.]+ms \(2 scripts\)$/),
+    ]);
   });
 
   it('samples the stack while a block lasts, allowing pauses only around each sample', async () => {

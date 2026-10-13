@@ -26,7 +26,7 @@ import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InternalThreadsStart } from '@kbn/core-threads-server-internal';
 import { ServiceStatusLevels, type ServiceStatus } from '@kbn/core-status-common';
 import { EventLoopWatchdog } from './event_loop_watchdog';
-import { RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
+import { DEBUGGER_MODES, RUNNING_FALLBACK_MS, RUNNING_GRACE_MS } from './types';
 
 /** Feature flag enabling the event-loop watchdog (and its profiling session) at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
@@ -79,6 +79,8 @@ export class EventLoopWatchdogService {
       logger: this.logger,
       sanitizeRoot: REPO_ROOT,
       diagnosticDir: resolveDiagnosticDir(),
+      // PoC startup A/B: each process picks a mode at random (logged by the worker).
+      debuggerMode: DEBUGGER_MODES[Math.floor(Math.random() * DEBUGGER_MODES.length)],
     });
     this.watchdog.start();
   }

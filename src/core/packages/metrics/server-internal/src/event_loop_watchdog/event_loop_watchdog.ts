@@ -34,6 +34,7 @@ export interface EventLoopWatchdogParams {
   diagnosticDir?: string;
   admissionLimits?: AdmissionLimits;
   profiling?: WatchdogWorkerData['profiling'];
+  debuggerMode?: WatchdogWorkerData['debuggerMode'];
   workerEntry?: string;
 }
 
@@ -60,6 +61,7 @@ export class EventLoopWatchdog {
       diagnosticDir,
       admissionLimits,
       profiling,
+      debuggerMode,
       workerEntry,
     } = this.params;
     const shared = new BigInt64Array(
@@ -80,6 +82,7 @@ export class EventLoopWatchdog {
       diagnosticDir,
       admissionLimits,
       profiling,
+      debuggerMode,
     };
     this.worker = threads.createWorker<MainToWorkerMessage, WorkerToMainMessage>({
       filename: workerEntry ?? WORKER_ENTRY,

@@ -88,6 +88,7 @@ export const runWatchdogWorker = (
 ): void => {
   const {
     sanitizeRoot,
+    debuggerMode = 'sample',
     profiling: { afterMs, maxMs, cooldownMs, sampleIntervalMs } = {
       afterMs: PROFILE_AFTER_MS,
       maxMs: MAX_PROFILE_MS,
@@ -145,13 +146,20 @@ export const runWatchdogWorker = (
     unrequestedPauses++;
     post('Debugger.resume').catch((error) => disable(`could not resume a pause: ${error.message}`));
   });
-  session.connectToMainThread();
+  log('info', `Event loop watchdog debugger mode: ${debuggerMode}`, {
+    tags: ['event-loop-watchdog'],
+    kibana: { event_loop_watchdog: { debugger: { mode: debuggerMode } } },
+  });
+  if (debuggerMode !== 'off') session.connectToMainThread();
   const enableRequestedAtUs = monotonicUs();
   // Pipelined, so that no `debugger;` statement can pause in between. Pauses stay skipped except
   // for the instant of each requested sample.
-  Promise.all([post('Debugger.enable'), post('Debugger.setSkipAllPauses', { skip: true })])
+  (debuggerMode === 'off'
+    ? new Promise<never>(() => {})
+    : Promise.all([post('Debugger.enable'), post('Debugger.setSkipAllPauses', { skip: true })])
+  )
     .then(() => {
-      enabled = true;
+      enabled = debuggerMode === 'sample';
       const enableMs = round((monotonicUs() - enableRequestedAtUs) / 1000);
       log(
         'info',
