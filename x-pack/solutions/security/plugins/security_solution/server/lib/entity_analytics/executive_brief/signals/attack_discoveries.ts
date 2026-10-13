@@ -42,7 +42,7 @@ const AD_FIELDS = [
   'kibana.alert.workflow_status',
 ];
 
-export interface DiscoveryInfo {
+interface DiscoveryInfo {
   id: string;
   title: string;
   /** 0..100, when the discovery carries one. */
@@ -60,7 +60,7 @@ const strings = (value: unknown): string[] =>
 const first = (value: unknown): unknown => (Array.isArray(value) ? value[0] : value);
 
 /** Own-or-shared visibility: never another analyst's private discovery. */
-export const buildDiscoveryVisibilityQuery = (
+const buildDiscoveryVisibilityQuery = (
   username: string | undefined
 ): estypes.QueryDslQueryContainer => ({
   bool: {
@@ -126,7 +126,7 @@ const jaccard = (a: string[], b: string[]): number => {
  * Scheduled runs regenerate overlapping discoveries for the same attack: keep the first (highest
  * risk, then newest) of any group whose alert-id overlap is at least 0.5 (Jaccard).
  */
-export const dedupeDiscoveries = (discoveries: DiscoveryInfo[]): DiscoveryInfo[] => {
+const dedupeDiscoveries = (discoveries: DiscoveryInfo[]): DiscoveryInfo[] => {
   const ordered = [...discoveries].sort(
     (a, b) =>
       (b.riskScore ?? -1) - (a.riskScore ?? -1) ||

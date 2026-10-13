@@ -13,13 +13,13 @@ import type { SubmittedToolCall } from './compose_brief';
 const MAX_PROBLEMS = 20;
 const MAX_PROBLEM_LENGTH = 400;
 
-export const REPAIR_INSTRUCTIONS = `The brief was rejected. Fix every problem listed and call ${SUBMIT_BRIEF_TOOL_NAME} again with the complete corrected brief (the verdict and every area, not only the fixed parts). Keep what was not listed. Cite only ids from the evidence and quote only numbers from the facts you cite.`;
+const REPAIR_INSTRUCTIONS = `The brief was rejected. Fix every problem listed and call ${SUBMIT_BRIEF_TOOL_NAME} again with the complete corrected brief (the verdict and every area, not only the fixed parts). Keep what was not listed. Cite only ids from the evidence and quote only numbers from the facts you cite.`;
 
 const clip = (text: string): string =>
   text.length > MAX_PROBLEM_LENGTH ? `${text.slice(0, MAX_PROBLEM_LENGTH - 1)}…` : text;
 
 /** The problems, bounded so a pathological output can't blow up the follow-up prompt. */
-export const formatProblems = (errors: readonly string[]): string[] => {
+const formatProblems = (errors: readonly string[]): string[] => {
   const shown = errors.slice(0, MAX_PROBLEMS).map(clip);
   return errors.length > MAX_PROBLEMS
     ? [...shown, `…and ${errors.length - MAX_PROBLEMS} more problems.`]

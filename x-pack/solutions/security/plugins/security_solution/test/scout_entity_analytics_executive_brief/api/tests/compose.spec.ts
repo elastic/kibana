@@ -9,6 +9,7 @@ import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
+import type { Brief } from '../../../../common/entity_analytics/executive_brief/brief';
 import {
   BRIEF_ROUTE,
   EXECUTIVE_BRIEF_TAGS,
@@ -27,6 +28,12 @@ import {
   seedHighRiskEntity,
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
+
+/** A verdict above `clear` that cites nothing: a structural problem only the model can fix. */
+const UNCITED_VERDICT_BRIEF: Brief = {
+  ...HIGH_RISK_ENTITY_BRIEF,
+  verdict: { ...HIGH_RISK_ENTITY_BRIEF.verdict, evidence: [] },
+};
 
 apiTest.describe(
   'Executive brief - composing a brief from findings',
@@ -130,5 +137,107 @@ apiTest.describe(
       expect(document.report?.period.range).toBe('7d');
       expect(llmProxy.interceptedRequests).toHaveLength(1);
     });
+
+    apiTest(
+      'sends a structural problem back to the model once and stores the repaired brief',
+      async ({ apiClient }) => {
+        mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
+        mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
+
+        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+          body: { range: '7d', connectorId },
+        });
+        expect(response).toHaveStatusCode(202);
+
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        expect(document.generation.status).toBe('succeeded');
+        expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
+        expect(document.provenance?.verification?.repaired).toBe(true);
+
+        // The repair answers the rejected tool call with the problems.
+        expect(llmProxy.interceptedRequests).toHaveLength(2);
+        const repairMessages = llmProxy.interceptedRequests[1].requestBody.messages;
+        expect(repairMessages[repairMessages.length - 1]).toMatchObject({ role: 'tool' });
+      }
+    );
+
+    apiTest(
+      'fails with llm_output when the repaired brief is still invalid, keeping the previous brief',
+      async ({ apiClient }) => {
+        mockSubmitBrief(llmProxy, HIGH_RISK_ENTITY_BRIEF);
+        const previous = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+          body: { range: '7d', connectorId },
+        });
+        expect(previous).toHaveStatusCode(202);
+        const previousDocument = await waitForBriefJob({
+          apiClient,
+          headers,
+          jobId: previous.body.job.id,
+        });
+        expect(previousDocument.generation.status).toBe('succeeded');
+
+        llmProxy.clear();
+        mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
+        mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
+        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+          body: { range: '24h', connectorId },
+        });
+        expect(response).toHaveStatusCode(202);
+
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        expect(document.generation).toMatchObject({
+          status: 'failed',
+          error: { code: 'llm_output' },
+        });
+        expect(llmProxy.interceptedRequests).toHaveLength(2);
+        // The last successful brief is still served.
+        expect(document.report).toStrictEqual(previousDocument.report);
+      }
+    );
+
+    apiTest(
+      'links name mentions to the entity and drops areas that mention unknown entities',
+      async ({ apiClient }) => {
+        mockSubmitBrief(llmProxy, {
+          verdict: {
+            ...HIGH_RISK_ENTITY_BRIEF.verdict,
+            summary: `{{ user.name ${SEEDED_ENTITY.name} }} is at high risk.`,
+          },
+          areas: [
+            HIGH_RISK_ENTITY_BRIEF.areas[0],
+            {
+              id: 'response',
+              level: 'watch',
+              summary: '{{ entity.id user:not-in-evidence }} needs a response.',
+              evidence: ['F-1'],
+            },
+          ],
+        });
+
+        const response = await apiClient.post<GenerateBriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+          body: { range: '7d', connectorId },
+        });
+        expect(response).toHaveStatusCode(202);
+
+        const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
+        expect(document.generation.status).toBe('succeeded');
+        expect(document.report?.verdict?.summary).toBe(
+          `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk.`
+        );
+        expect(document.report?.areas?.map(({ id }) => id)).toStrictEqual(['threats']);
+        expect(document.provenance?.verification).toMatchObject({
+          dropped: { citation: 1 },
+          repaired: false,
+        });
+      }
+    );
   }
 );

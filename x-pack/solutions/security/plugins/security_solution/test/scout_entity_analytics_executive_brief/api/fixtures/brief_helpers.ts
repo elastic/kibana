@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
 import { createLlmProxy, createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type {
   ApiClientFixture,
@@ -245,11 +246,119 @@ export const deleteSeededEntities = async (esClient: EsClient): Promise<void> =>
   await esClient.indices.delete({ index: ENTITIES_LATEST_INDEX, ignore_unavailable: true });
 };
 
+/** Scheduled Attack Discovery alerts for the default space: the alias the signal reads, and its index. */
+const ATTACK_DISCOVERY_ALIAS = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default`;
+const ATTACK_DISCOVERY_INDEX = `.internal${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-default-000001`;
+
+export interface SeededDiscovery {
+  id: string;
+  title: string;
+  alertIds: string[];
+  /** 0..100; the signal derives the fact severity from it. */
+  riskScore: number;
+  /** Owners of a private discovery; a discovery without users is shared. */
+  users?: string[];
+}
+
+/**
+ * Creates the Attack Discovery alerts index with explicit mappings for the fields the signal
+ * queries, unless the alerting framework has already created it.
+ */
+export const createAttackDiscoveryIndex = async (esClient: EsClient): Promise<void> => {
+  if (await esClient.indices.exists({ index: ATTACK_DISCOVERY_ALIAS })) {
+    return;
+  }
+  const keyword = { type: 'keyword' } as const;
+  await esClient.indices.create({
+    index: ATTACK_DISCOVERY_INDEX,
+    aliases: { [ATTACK_DISCOVERY_ALIAS]: { is_write_index: true } },
+    mappings: {
+      properties: {
+        '@timestamp': { type: 'date' },
+        kibana: {
+          properties: {
+            alert: {
+              properties: {
+                risk_score: { type: 'float' },
+                workflow_status: keyword,
+                attack_discovery: {
+                  properties: {
+                    alert_ids: keyword,
+                    title: { type: 'text' },
+                    mitre_attack_tactics: keyword,
+                    users: { type: 'nested', properties: { id: keyword, name: keyword } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+};
+
+/** Writes open Attack Discovery alerts from an hour ago, inside every brief range. */
+export const seedAttackDiscoveries = async (
+  esClient: EsClient,
+  discoveries: readonly SeededDiscovery[]
+): Promise<void> => {
+  const timestamp = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  await esClient.bulk({
+    refresh: true,
+    operations: discoveries.flatMap(({ id, title, alertIds, riskScore, users }) => [
+      { index: { _index: ATTACK_DISCOVERY_ALIAS, _id: id } },
+      {
+        '@timestamp': timestamp,
+        'kibana.alert.risk_score': riskScore,
+        'kibana.alert.workflow_status': 'open',
+        'kibana.alert.attack_discovery.alert_ids': alertIds,
+        'kibana.alert.attack_discovery.title': title,
+        'kibana.alert.attack_discovery.mitre_attack_tactics': ['Initial Access'],
+        ...(users
+          ? { 'kibana.alert.attack_discovery.users': users.map((name) => ({ name })) }
+          : {}),
+      },
+    ]),
+  });
+};
+
+/** Removes every seeded Attack Discovery alert, so each test starts without one. */
+export const deleteAttackDiscoveries = async (esClient: EsClient): Promise<void> => {
+  await esClient.deleteByQuery({
+    index: ATTACK_DISCOVERY_ALIAS,
+    query: { match_all: {} },
+    conflicts: 'proceed',
+    refresh: true,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+  });
+};
+
+export const deleteAttackDiscoveryIndex = async (esClient: EsClient): Promise<void> => {
+  await esClient.indices.delete({ index: ATTACK_DISCOVERY_INDEX, ignore_unavailable: true });
+};
+
 interface CurrentUser {
   username: string;
   profile_uid?: string;
   authentication_realm: { type: string; name: string };
 }
+
+/** The caller, as the security plugin reports it. */
+export const getCurrentUser = async ({
+  apiClient,
+  headers,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Headers;
+}): Promise<CurrentUser> => {
+  const { body } = await apiClient.get<CurrentUser>('internal/security/me', {
+    headers: { ...INTERNAL_HEADERS, ...headers },
+    responseType: 'json',
+  });
+  return body;
+};
 
 /**
  * The stored document id for the caller's brief in a space. Mirrors the server: the owner is the
@@ -264,11 +373,11 @@ export const getBriefDocId = async ({
   headers: Headers;
   spaceId: string;
 }): Promise<{ docId: string; ownerId: string }> => {
-  const { body } = await apiClient.get<CurrentUser>('internal/security/me', {
-    headers: { ...INTERNAL_HEADERS, ...headers },
-    responseType: 'json',
-  });
-  const { username, profile_uid: profileUid, authentication_realm: realm } = body;
+  const {
+    username,
+    profile_uid: profileUid,
+    authentication_realm: realm,
+  } = await getCurrentUser({ apiClient, headers });
   const ownerId = profileUid ?? `realm:${JSON.stringify([realm.type, realm.name, username])}`;
   const docId = createHash('sha256').update(`${ownerId}:${spaceId}`).digest('hex');
   return { docId, ownerId };

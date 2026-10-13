@@ -35,7 +35,7 @@ export const isAddressed = (fact: Fact, index: EvidenceIndex): boolean => {
 };
 
 /** Critical or high attack discoveries that nobody is handling. */
-export const unaddressedSevereDiscoveries = (index: EvidenceIndex): Fact[] =>
+const unaddressedSevereDiscoveries = (index: EvidenceIndex): Fact[] =>
   index.evidence.facts.filter(
     (fact) =>
       fact.kind === 'attack_discovery' &&

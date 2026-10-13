@@ -12,9 +12,9 @@ import type {
 } from '../../../../../../common/entity_analytics/executive_brief/evidence';
 
 export const ROD = 'user:a.rodriguez@corp';
-export const LAPTOP = 'host:laptop-fin03';
+const LAPTOP = 'host:laptop-fin03';
 export const DOCKER = 'host:docker-host-prod-01';
-export const CHEN = 'user:j.chen';
+const CHEN = 'user:j.chen';
 
 /**
  * - F-1: open critical attack discovery on ROD (privileged user), LAPTOP and DOCKER, 12 alerts.

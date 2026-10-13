@@ -61,7 +61,7 @@ export const toStableUserId = async ({
 };
 
 /** Looks up the API key creator's profile uid, since `getCurrentUser` often omits it for API keys. */
-export const resolveApiKeyOwnerProfileUid = async ({
+const resolveApiKeyOwnerProfileUid = async ({
   request,
   esClient,
 }: {

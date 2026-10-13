@@ -49,7 +49,7 @@ export const maskNonQuantities = (text: string): string =>
   MASKS.reduce((masked, pattern) => masked.replace(pattern, ' '), text);
 
 /** The numbers written in `text`, as written (e.g. "1,204"), ignoring the given identifiers. */
-export const findNumbers = (text: string, identifierPattern?: RegExp): string[] =>
+const findNumbers = (text: string, identifierPattern?: RegExp): string[] =>
   maskNonQuantities(identifierPattern ? text.replace(identifierPattern, ' ') : text).match(
     NUMBER_PATTERN
   ) ?? [];

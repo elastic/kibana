@@ -42,7 +42,7 @@ const BRIEF_FIELDS = [
 const MAX_WRITE_ATTEMPTS = 3;
 
 /** Deterministic document id: one brief document per owner and space. */
-export const getBriefDocId = (ownerId: string, spaceId: string): string =>
+const getBriefDocId = (ownerId: string, spaceId: string): string =>
   createHash('sha256').update(`${ownerId}:${spaceId}`).digest('hex');
 
 const isInFlight = (job: BriefJob): boolean => job.status === 'pending' || job.status === 'running';
@@ -51,7 +51,7 @@ const addRetention = (iso: string): string =>
   new Date(Date.parse(iso) + BRIEF_RETENTION_MS).toISOString();
 
 /** A pending or running job whose heartbeat (or start, if it never beat) is too old. */
-export const isJobStale = (job: BriefJob, now: Date): boolean =>
+const isJobStale = (job: BriefJob, now: Date): boolean =>
   isInFlight(job) &&
   now.getTime() - Date.parse(job.heartbeat_at ?? job.started_at) > BRIEF_STALE_HEARTBEAT_MS;
 
@@ -89,7 +89,7 @@ export interface StartJobResult {
   reused: boolean;
 }
 
-export interface CompleteJobInput {
+interface CompleteJobInput {
   evidence: Evidence;
   params: BriefParams;
   /** Absent when the evidence had no findings, so the AI was not called. */

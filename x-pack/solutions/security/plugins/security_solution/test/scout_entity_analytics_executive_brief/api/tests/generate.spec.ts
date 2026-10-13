@@ -8,7 +8,14 @@
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { apiTest } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import type { GenerateBriefResponse } from '../../../../common/entity_analytics/executive_brief/api';
+import type {
+  BriefResponse,
+  GenerateBriefResponse,
+} from '../../../../common/entity_analytics/executive_brief/api';
+import {
+  BRIEF_STALE_HEARTBEAT_MS,
+  EXECUTIVE_BRIEF_INDEX,
+} from '../../../../common/entity_analytics/executive_brief/constants';
 import {
   BRIEF_ROUTE,
   BRIEF_SIGNAL_IDS,
@@ -20,6 +27,7 @@ import {
   deleteAllBriefs,
   deleteBriefConnector,
   generateBrief,
+  getBriefDocId,
   waitForBriefJob,
 } from '../fixtures/brief_helpers';
 
@@ -108,5 +116,34 @@ apiTest.describe(
       const deletedAgain = await apiClient.delete(BRIEF_ROUTE, { headers, responseType: 'json' });
       expect(deletedAgain.body).toStrictEqual({ deleted: false });
     });
+
+    apiTest(
+      'a running job that stopped sending heartbeats reads as interrupted',
+      async ({ apiClient, esClient }) => {
+        const { jobId } = await generateBrief({ apiClient, headers, connectorId });
+        const { docId } = await getBriefDocId({ apiClient, headers, spaceId: 'default' });
+        const lastBeat = new Date(Date.now() - 2 * BRIEF_STALE_HEARTBEAT_MS).toISOString();
+
+        await esClient.update({
+          index: EXECUTIVE_BRIEF_INDEX,
+          id: docId,
+          doc: {
+            job: { id: jobId, status: 'running', started_at: lastBeat, heartbeat_at: lastBeat },
+          },
+          refresh: true,
+        });
+
+        const read = await apiClient.get<BriefResponse>(BRIEF_ROUTE, {
+          headers,
+          responseType: 'json',
+        });
+        expect(read).toHaveStatusCode(200);
+        expect(read.body.generation).toMatchObject({
+          jobId,
+          status: 'failed',
+          error: { code: 'interrupted' },
+        });
+      }
+    );
   }
 );
