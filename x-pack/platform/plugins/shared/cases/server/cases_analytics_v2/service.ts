@@ -98,6 +98,11 @@ interface CasesAnalyticsV2StartDeps {
   internalSavedObjectsClient: SavedObjectsClientContract;
   /** Data views plugin start contract — needed to create managed Cases data views. */
   dataViewsService: DataViewsServerPluginStart;
+  /**
+   * Whether the Spaces plugin is enabled. Without it the `space` SO type isn't
+   * registered and the reconciliation task skips the deleted-spaces sweep.
+   */
+  spacesEnabled: boolean;
 }
 
 /**
@@ -213,6 +218,8 @@ export class CasesAnalyticsV2Service {
    * right ES client to the data views service factory.
    */
   private esClient: ElasticsearchClient | undefined;
+  /** Captured at start; gates the reconciliation task's deleted-spaces sweep. */
+  private spacesEnabled = false;
   /**
    * Per-space data view sub-service. Constructed at start. `undefined`
    * until start runs (or forever if v2 is disabled).
@@ -272,6 +279,7 @@ export class CasesAnalyticsV2Service {
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
+          deletedSpacesSweepEnabled: this.spacesEnabled,
         };
       },
     });
@@ -432,6 +440,7 @@ export class CasesAnalyticsV2Service {
     // hook.
     this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
     this.esClient = deps.esClient;
+    this.spacesEnabled = deps.spacesEnabled;
     this.taskManager = deps.taskManager;
 
     // Construct the per-space data view sub-service. No data views are

@@ -438,7 +438,9 @@ export class CasePlugin
         //    request that arrived in `default` 404s on the existence check
         //    (even with `force: true`).
         //  - The reconciliation task lists the hidden `space` SOs to delete
-        //    analytics documents of deleted spaces.
+        //    analytics documents of deleted spaces. Only opted in when Spaces
+        //    is enabled: it registers the type, and opting in an unregistered
+        //    type throws.
         // The cases SO types are hidden, so they must be opted in
         // explicitly. `index-pattern` is a globally-registered SO type
         // (data-views plugin); opting it in here grants the internal client
@@ -448,6 +450,7 @@ export class CasePlugin
         // unified `cases-attachments` type is registered unconditionally
         // since #275225), so both are opted in here and the attachments
         // reconciliation runner always walks both source types.
+        const spacesEnabled = plugins.spaces != null;
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
@@ -456,7 +459,7 @@ export class CasePlugin
           CASE_TEMPLATE_SAVED_OBJECT,
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
-          'space',
+          ...(spacesEnabled ? ['space'] : []),
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
         void this.casesAnalyticsV2Service.start({
@@ -464,6 +467,7 @@ export class CasePlugin
           taskManager: plugins.taskManager,
           internalSavedObjectsClient: v2InternalSavedObjectsClient,
           dataViewsService: plugins.dataViews,
+          spacesEnabled,
         });
       }
     }

@@ -57,6 +57,8 @@ interface RegisterReconciliationTaskArgs {
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
     attachmentsWriter: CasesAttachmentsV2WriterContract;
+    /** False when the Spaces plugin is disabled, so there are no `space` SOs to compare against. */
+    deletedSpacesSweepEnabled: boolean;
   }>;
 }
 
@@ -206,7 +208,7 @@ export function registerReconciliationTask({
           }
 
           let deletedSpacesError: unknown;
-          if (!signal.aborted) {
+          if (deps.deletedSpacesSweepEnabled && !signal.aborted) {
             try {
               await sweepDeletedSpaces({
                 esClient: deps.esClient,
