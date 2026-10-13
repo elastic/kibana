@@ -32,7 +32,11 @@ import type {
   SelectedSyntheticsMonitor,
   SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
-import { ConfigKey, isExternalSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  isExternalSyntheticsMonitor,
+  MonitorTypeEnum,
+} from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { MonitorMaintenanceWindows } from './monitor_maintenance_windows';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
@@ -194,6 +198,7 @@ export const MonitorDetailsPanel = ({
             configId={configId}
             monitorLocations={monitor.locations}
             hasMaintenanceWindows={!isEmpty(maintenanceWindows)}
+            isBrowserMonitor={monitor.type === MonitorTypeEnum.BROWSER}
           />
         )}
 

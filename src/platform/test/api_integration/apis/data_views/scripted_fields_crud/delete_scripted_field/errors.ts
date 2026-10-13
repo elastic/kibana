@@ -14,6 +14,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
+  // Migration recommendation: MIGRATE TO SCOUT (API)
+  // 404, non-scripted-field and too-long ID errors for DELETE.
+  // Validation errors only (no happy paths): the scripted field routes are registered on serverless too,
+  // so tag these `tags.deploymentAgnostic` in the condensed spec; only the `main.ts` happy paths are
+  // `tags.stateful.classic` (see create_scripted_field/main.ts).
+  // Target: src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud.spec.ts
   describe('errors', () => {
     const basicIndex = 'b*sic_index';
     let indexPattern: any;

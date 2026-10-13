@@ -24,6 +24,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiPageSection } from '@elastic/eui';
 import { ALERTING_V2_RULES_TAB_ID } from '@kbn/alerting-v2-constants';
+import { AlertingNavPromo } from '@kbn/observability-plugin/public';
 import {
   OBSERVABILITY_ALERTING_ACTION_POLICIES_PATH,
   OBSERVABILITY_ALERTING_ALERTS_PATH,
@@ -187,6 +188,9 @@ export const ObservabilityAlertingApp = ({
             createActions={createObservabilityEpisodeActions}
             manageRulesHref={manageRulesHref}
           />
+          <Route exact path={OBSERVABILITY_ALERTING_ALERTS_PATH}>
+            <AlertingNavPromo coreStart={coreStart} />
+          </Route>
         </EuiPageSection>
       </Route>
       <Route path={OBSERVABILITY_ALERTING_RULES_V1_PATH}>
