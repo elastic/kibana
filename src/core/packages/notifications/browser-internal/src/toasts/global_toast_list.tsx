@@ -9,7 +9,7 @@
 
 import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
 import { EuiGlobalToastList } from '@elastic/eui';
-import React, { useEffect, useState, type FunctionComponent, useCallback } from 'react';
+import React, { useEffect, useState, type FunctionComponent, useCallback, useRef } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,7 @@ import { MountWrapper } from '@kbn/core-mount-utils-browser-internal';
 import type { ToastWithRichTitle } from './deduplicate_toasts';
 import { deduplicateToasts } from './deduplicate_toasts';
 import type { ToastsTelemetry } from './telemetry';
+import { ToastAnnouncer } from './toast_announcer';
 
 interface Props {
   toasts$: Observable<Toast[]>;
@@ -31,11 +32,9 @@ interface State {
   idToToasts: Record<string, Toast[]>;
 }
 
-const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
-  ...toast,
-  title: toast.title instanceof Function ? <MountWrapper mount={toast.title} /> : toast.title,
-  text: toast.text instanceof Function ? <MountWrapper mount={toast.text} /> : toast.text,
-});
+type ToastContentPart = 'title' | 'text';
+
+const getContentNodeKey = (toastId: string, part: ToastContentPart) => `${toastId}:${part}`;
 
 export const GlobalToastList: FunctionComponent<Props> = ({
   toasts$,
@@ -44,6 +43,43 @@ export const GlobalToastList: FunctionComponent<Props> = ({
 }) => {
   const [toasts, setToasts] = useState<State['toasts']>([]);
   const [idToToasts, setIdToToasts] = useState<State['idToToasts']>({});
+  const contentNodes = useRef(new Map<string, HTMLElement>());
+
+  const renderContent = (
+    toastId: string,
+    part: ToastContentPart,
+    content: ToastWithRichTitle[ToastContentPart]
+  ) => {
+    if (!(content instanceof Function)) {
+      return content;
+    }
+    const key = getContentNodeKey(toastId, part);
+    return (
+      <span
+        ref={(node) => {
+          if (node) {
+            contentNodes.current.set(key, node);
+          } else {
+            contentNodes.current.delete(key);
+          }
+        }}
+      >
+        <MountWrapper mount={content} />
+      </span>
+    );
+  };
+
+  const convertToEui = (toast: ToastWithRichTitle): EuiToast => ({
+    ...toast,
+    title: renderContent(toast.id, 'title', toast.title),
+    text: renderContent(toast.id, 'text', toast.text),
+  });
+
+  const getMountedText = useCallback(
+    (toastId: string, part: ToastContentPart) =>
+      contentNodes.current.get(getContentNodeKey(toastId, part))?.textContent ?? '',
+    []
+  );
 
   const reportToastDismissal = useCallback(
     (representedToasts: State['idToToasts'][number]) => {
@@ -95,19 +131,27 @@ export const GlobalToastList: FunctionComponent<Props> = ({
   );
 
   return (
-    <EuiGlobalToastList
-      aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
-        defaultMessage: 'Notification message list',
-      })}
-      data-test-subj="globalToastList"
-      toasts={toasts.map(convertToEui)}
-      dismissToast={closeToastsRepresentedById}
-      /**
-       * This prop is overridden by the individual toasts that are added.
-       * Use `Infinity` here so that it's obvious a timeout hasn't been
-       * provided in development.
-       */
-      toastLifeTimeMs={Infinity}
-    />
+    <>
+      <EuiGlobalToastList
+        aria-label={i18n.translate('core.notifications.globalToast.ariaLabel', {
+          defaultMessage: 'Notification message list',
+        })}
+        /**
+         * Announcements are handled by `ToastAnnouncer`, which waits for open modals to close
+         * so that toasts added while a modal is open are not lost to screen readers.
+         */
+        aria-live="off"
+        data-test-subj="globalToastList"
+        toasts={toasts.map(convertToEui)}
+        dismissToast={closeToastsRepresentedById}
+        /**
+         * This prop is overridden by the individual toasts that are added.
+         * Use `Infinity` here so that it's obvious a timeout hasn't been
+         * provided in development.
+         */
+        toastLifeTimeMs={Infinity}
+      />
+      <ToastAnnouncer idToToasts={idToToasts} getMountedText={getMountedText} />
+    </>
   );
 };
