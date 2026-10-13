@@ -424,6 +424,9 @@ function dateStringToDate(
   return null;
 }
 
+const usesMilliseconds = (bound: DateString): boolean =>
+  bound.startsWith('now') && bound.includes('ms');
+
 /**
  * Builds a complete {@link TimeRange} from start/end datemath strings,
  * resolving dates, types, and offsets automatically.
@@ -437,8 +440,12 @@ function buildRange(
 ): TimeRange {
   const startType = dateStringToType(start);
   const endType = dateStringToType(end);
-  // Anchor both bounds to the same instant, truncated to the last whole second
-  const forceNow = moment().startOf('second').toDate();
+  // Anchor both bounds to the same instant. Truncate to the last whole second
+  // unless a bound uses milliseconds, where the sub-second part is meaningful.
+  const now = moment();
+  const forceNow = (
+    usesMilliseconds(start) || usesMilliseconds(end) ? now : now.startOf('second')
+  ).toDate();
   const range: TimeRange = {
     value: text,
     start,

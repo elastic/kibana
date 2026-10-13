@@ -766,6 +766,38 @@ describe('"now" anchoring', () => {
     expect(range.startDate?.toISOString()).toBe('2025-07-15T11:00:00.123Z');
     expect(range.endDate?.toISOString()).toBe('2025-07-15T11:30:00.456Z');
   });
+
+  it('keeps milliseconds in "now" when a bound uses the ms unit', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('-500ms', { roundRelativeTime: false });
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T12:00:00.250Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.750Z');
+  });
+
+  it('shares the un-truncated anchor with the other bound when one bound uses ms', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('now-1h to now-200ms', { roundRelativeTime: false });
+
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T11:00:00.750Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.550Z');
+  });
+
+  it('rounds the ms bound to the second when roundRelativeTime is on, leaving "now" un-truncated', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-07-15T12:00:00.750Z'));
+
+    const range = textToTimeRange('-500ms', { roundRelativeTime: true });
+
+    expect(range.start).toBe('now-500ms/s');
+    expect(range.end).toBe('now');
+    expect(range.startDate?.toISOString()).toBe('2025-07-15T12:00:00.000Z');
+    expect(range.endDate?.toISOString()).toBe('2025-07-15T12:00:00.750Z');
+  });
 });
 
 describe('matchPreset', () => {
