@@ -113,16 +113,12 @@ export function FieldMappingForm({
   const { euiTheme } = useEuiTheme();
   const gutter = euiTheme.size.s;
   const remainingFieldCount = isDateType ? 3 : 2;
-  const typeFieldItemStyles = useMemo(
-    () => getTypeFieldItemStyles(remainingFieldCount, gutter),
-    [gutter, remainingFieldCount]
-  );
-  const remainingFieldsGroupStyles = useMemo(
-    () => getRemainingFieldsGroupItemStyles(remainingFieldCount, gutter),
-    [gutter, remainingFieldCount]
-  );
-  const remainingFieldsGridStyles = useMemo(
-    () => getRemainingFieldsGridStyles(remainingFieldCount, gutter),
+  const { typeFieldItemStyles, remainingFieldsGroupStyles, remainingFieldsGridStyles } = useMemo(
+    () => ({
+      typeFieldItemStyles: getTypeFieldItemStyles(remainingFieldCount, gutter),
+      remainingFieldsGroupStyles: getRemainingFieldsGroupItemStyles(remainingFieldCount, gutter),
+      remainingFieldsGridStyles: getRemainingFieldsGridStyles(remainingFieldCount, gutter),
+    }),
     [gutter, remainingFieldCount]
   );
 

@@ -60,16 +60,16 @@ export function TimeseriesDataSection({
   // The field mapping editor pads its form on both sides; matching it keeps both rows switching
   // layouts at the same viewport width.
   const inset = `calc(${euiTheme.size.base} * 2)`;
-  const typeFieldItemStyles = useMemo(
-    () => getTypeFieldItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
-    [gutter, inset]
-  );
-  const remainingFieldsGroupStyles = useMemo(
-    () => getRemainingFieldsGroupItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
-    [gutter, inset]
-  );
-  const remainingFieldsGridStyles = useMemo(
-    () => getRemainingFieldsGridStyles(REMAINING_FIELD_COUNT, gutter, inset),
+  const { typeFieldItemStyles, remainingFieldsGroupStyles, remainingFieldsGridStyles } = useMemo(
+    () => ({
+      typeFieldItemStyles: getTypeFieldItemStyles(REMAINING_FIELD_COUNT, gutter, inset),
+      remainingFieldsGroupStyles: getRemainingFieldsGroupItemStyles(
+        REMAINING_FIELD_COUNT,
+        gutter,
+        inset
+      ),
+      remainingFieldsGridStyles: getRemainingFieldsGridStyles(REMAINING_FIELD_COUNT, gutter, inset),
+    }),
     [gutter, inset]
   );
 
