@@ -588,24 +588,22 @@ export const RuleDetailsPage = connector(
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />
           <RuleCustomizationsContextProvider rule={rule}>
-            <Display show={!globalFullScreen}>
-              <RuleDetailsAppHeader
-                rule={rule}
-                ruleId={ruleId}
-                ruleLoading={ruleLoading}
-                isExistingRule={isExistingRule}
-                hasActionsPrivileges={hasActionsPrivileges}
-                createdBy={createdBy}
-                updatedBy={updatedBy}
-                tabs={pageTabs}
-                refreshRule={refreshRule}
-                onRuleEnabledChange={handleOnChangeEnabledRule}
-                startMlJobsIfNeeded={startMlJobsIfNeeded}
-                showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
-                showManualRuleRunConfirmation={showManualRuleRunConfirmation}
-                confirmDeletion={confirmDeletion}
-              />
-            </Display>
+            <RuleDetailsAppHeader
+              rule={rule}
+              ruleId={ruleId}
+              ruleLoading={ruleLoading}
+              isExistingRule={isExistingRule}
+              hasActionsPrivileges={hasActionsPrivileges}
+              createdBy={createdBy}
+              updatedBy={updatedBy}
+              tabs={pageTabs}
+              refreshRule={refreshRule}
+              onRuleEnabledChange={handleOnChangeEnabledRule}
+              startMlJobsIfNeeded={startMlJobsIfNeeded}
+              showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
+              showManualRuleRunConfirmation={showManualRuleRunConfirmation}
+              confirmDeletion={confirmDeletion}
+            />
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
               <NeedAdminForUpdateRulesCallOut />
               <MissingDetectionsPrivilegesCallOut />
