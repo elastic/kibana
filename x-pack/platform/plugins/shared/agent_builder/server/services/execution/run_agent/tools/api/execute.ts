@@ -107,7 +107,8 @@ The response is the raw API response body.`,
               createNonInteractiveDeclinedResult(
                 `API "${api}" is destructive and needs the user to confirm it, which is not possible ` +
                   `in a non-interactive execution. Use a non-destructive API, or tell the user to run this from a conversation. ` +
-                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run.`,
+                  `The caller that started this execution can also pre-approve "${api}" on the ${target} target for the whole run, ` +
+                  `or it can be added to the agent's auto-approved APIs so that it is pre-approved for every run of this agent.`,
                 { target, api, method, path }
               ),
             ],

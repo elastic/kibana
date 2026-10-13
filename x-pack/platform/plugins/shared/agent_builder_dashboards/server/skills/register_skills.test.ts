@@ -37,6 +37,13 @@ describe('registerSkills', () => {
     expect(skill.content).toContain('platform.core.sml_attach');
   });
 
+  it('finds unnamed data in one broad index search without probing it', () => {
+    expect(skill.content).toContain(
+      'find it in one `platform.core.list_indices` call with a broad pattern around the topic (e.g. `*log*`, not `logs-*`)'
+    );
+    expect(skill.content).toContain('Do not query the data before generating');
+  });
+
   it('inlines the dashboard design guidance directly in the skill body', () => {
     expect(skill.content).toContain('Dashboard Composition Guidelines');
     expect(skill.content).toContain('Grid Packing Rules');

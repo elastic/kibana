@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { uniqBy } from 'lodash';
 import type { WithRequiredProperty } from '@kbn/utility-types';
 import type { ApiTarget } from '../apis';
-import { apiTargets } from '../apis';
-import { matchesApiSelector } from '../apis/known_apis';
+import { apiTargets, matchesApiSelector } from '../apis';
+import type { AgentApprovals } from './definition';
 import { AgentExecutionMode } from './execution_mode';
 
 export interface AutoApprovedApi {
@@ -84,6 +85,34 @@ export const toAutoApprovedApis = (
   apisByTarget: Partial<Record<ApiTarget, readonly string[]>>
 ): AutoApprovedApi[] =>
   apiTargets.flatMap((target) => (apisByTarget[target] ?? []).map((api) => ({ target, api })));
+
+/**
+ * Adds an agent's stored auto-approval defaults to a run's interactivity config.
+ *
+ * @param interactivity - Resolved interactivity config for the run, carrying the caller's grant.
+ * @param approvals - The agent's stored defaults. Omit them when they don't apply to the runner.
+ * @returns The config with the stored selectors added, or `interactivity` unchanged when there
+ * are none.
+ */
+export const applyAgentApprovals = ({
+  interactivity,
+  approvals,
+}: {
+  interactivity: InteractivityConfig;
+  approvals?: AgentApprovals;
+}): InteractivityConfig => {
+  const storedApis = toAutoApprovedApis(approvals?.auto_approved_apis ?? {});
+  if (storedApis.length === 0) {
+    return interactivity;
+  }
+  return {
+    ...interactivity,
+    auto_approved_apis: uniqBy(
+      [...(interactivity.auto_approved_apis ?? []), ...storedApis],
+      ({ target, api }) => `${target}:${api}`
+    ),
+  };
+};
 
 /**
  * Builds the interactivity config for runs with no live user, carrying over pre-approved APIs.
