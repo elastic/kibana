@@ -58,8 +58,7 @@ import type { SearchMode } from '../../../../common/queries';
 import type { RevisionReader } from './revision_reader';
 import type { RuleUnbackedFilter } from './types';
 import {
-  createSearchEmbeddingModelResolver,
-  invalidateSearchEmbeddingModel,
+  readSearchEmbeddingModel,
   type SearchEmbeddingModel,
   type SearchEmbeddingModelResolver,
 } from './search_embedding_model';
@@ -124,10 +123,8 @@ export class IndicatorSearcher {
     >,
     private readonly revisionReader: RevisionReader,
     private readonly space: string,
-    private readonly resolveEmbeddingModel: SearchEmbeddingModelResolver = createSearchEmbeddingModelResolver(
-      esClient,
-      logger
-    )
+    private readonly resolveEmbeddingModel: SearchEmbeddingModelResolver = () =>
+      readSearchEmbeddingModel(esClient, logger)
   ) {}
 
   async findIndicators(
@@ -327,7 +324,6 @@ export class IndicatorSearcher {
     return { hits };
   }
 
-  /** A failed dense query drops the cached model so a recreated endpoint is re-read next time. */
   private async rank(
     mode: SearchMode,
     where: LatestSourceWhereCondition,
@@ -338,14 +334,7 @@ export class IndicatorSearcher {
     const model: SearchEmbeddingModel =
       mode === 'keyword' ? { kind: 'unknown' } : await this.resolveEmbeddingModel();
     const query = this.buildRankQuery(mode, where, queryText, types, limit, model);
-    try {
-      return esqlToObjects<RankedIndicatorRow>(await queryEsql({ esClient: this.esClient, query }));
-    } catch (error) {
-      if (model.kind === 'dense') {
-        invalidateSearchEmbeddingModel();
-      }
-      throw error;
-    }
+    return esqlToObjects<RankedIndicatorRow>(await queryEsql({ esClient: this.esClient, query }));
   }
 
   /**

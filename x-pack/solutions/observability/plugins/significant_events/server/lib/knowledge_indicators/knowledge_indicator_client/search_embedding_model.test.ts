@@ -7,101 +7,63 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import {
-  createSearchEmbeddingModelResolver,
-  invalidateSearchEmbeddingModel,
-} from './search_embedding_model';
+import { readSearchEmbeddingModel } from './search_embedding_model';
 
-const mappingResponse = (searchEmbedding: Record<string, unknown> | undefined) => ({
-  '.ds-ki-000001': {
-    mappings: { properties: { search_embedding: searchEmbedding } },
-  },
+const mappingWith = (searchEmbedding: Record<string, unknown> | undefined) => ({
+  '.ds-ki-000001': { mappings: { properties: { search_embedding: searchEmbedding } } },
 });
 
-describe('createSearchEmbeddingModelResolver', () => {
+describe('readSearchEmbeddingModel', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggingSystemMock.createLogger();
-  let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
-  let counter = 0;
-  let dataStream: string;
 
   beforeEach(() => {
-    esClient = elasticsearchServiceMock.createElasticsearchClient();
-    dataStream = `.ki-test-${counter++}`;
+    jest.clearAllMocks();
   });
 
   it('reads a dense model with its inference endpoint', async () => {
     esClient.indices.getMapping.mockResolvedValue(
-      mappingResponse({
+      mappingWith({
         type: 'semantic_text',
-        inference_id: '.jina-embeddings-v5-text-small',
+        inference_id: '.jina-v5',
         model_settings: { task_type: 'text_embedding', dimensions: 1024 },
       })
     );
 
-    const resolve = createSearchEmbeddingModelResolver(esClient, logger, dataStream);
-
-    expect(await resolve()).toEqual({
+    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
       kind: 'dense',
-      inferenceId: '.jina-embeddings-v5-text-small',
+      inferenceId: '.jina-v5',
     });
   });
 
   it('reads a sparse model', async () => {
     esClient.indices.getMapping.mockResolvedValue(
-      mappingResponse({
+      mappingWith({
         type: 'semantic_text',
-        inference_id: '.elser-2-elasticsearch',
+        inference_id: '.elser-2-elastic',
         model_settings: { task_type: 'sparse_embedding' },
       })
     );
 
-    const resolve = createSearchEmbeddingModelResolver(esClient, logger, dataStream);
-
-    expect(await resolve()).toEqual({ kind: 'sparse' });
+    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
+      kind: 'sparse',
+    });
   });
 
-  it('does not cache unknown', async () => {
-    esClient.indices.getMapping.mockResolvedValueOnce(mappingResponse({ type: 'semantic_text' }));
-    esClient.indices.getMapping.mockResolvedValueOnce(
-      mappingResponse({
-        type: 'semantic_text',
-        inference_id: '.elser-2-elasticsearch',
-        model_settings: { task_type: 'sparse_embedding' },
-      })
-    );
-    const resolve = createSearchEmbeddingModelResolver(esClient, logger, dataStream);
+  it('is unknown before the first embedded document sets the model', async () => {
+    esClient.indices.getMapping.mockResolvedValue(mappingWith({ type: 'semantic_text' }));
 
-    expect(await resolve()).toEqual({ kind: 'unknown' });
-    expect(await resolve()).toEqual({ kind: 'sparse' });
-    expect(esClient.indices.getMapping).toHaveBeenCalledTimes(2);
+    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
+      kind: 'unknown',
+    });
   });
 
-  it('caches a known model until invalidated', async () => {
-    esClient.indices.getMapping.mockResolvedValue(
-      mappingResponse({
-        type: 'semantic_text',
-        inference_id: 'dense-endpoint',
-        model_settings: { task_type: 'text_embedding' },
-      })
-    );
-    const resolve = createSearchEmbeddingModelResolver(esClient, logger, dataStream);
-
-    await resolve();
-    await resolve();
-    expect(esClient.indices.getMapping).toHaveBeenCalledTimes(1);
-
-    invalidateSearchEmbeddingModel(dataStream);
-    await resolve();
-    expect(esClient.indices.getMapping).toHaveBeenCalledTimes(2);
-  });
-
-  it('warns and returns unknown when the mapping cannot be read', async () => {
+  it('warns and is unknown when the mapping cannot be read', async () => {
     esClient.indices.getMapping.mockRejectedValue(new Error('index_not_found_exception'));
-    const resolve = createSearchEmbeddingModelResolver(esClient, logger, dataStream);
 
-    expect(await resolve()).toEqual({ kind: 'unknown' });
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('ranking with MATCH: index_not_found_exception')
-    );
+    await expect(readSearchEmbeddingModel(esClient, logger, 'ki')).resolves.toEqual({
+      kind: 'unknown',
+    });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('index_not_found_exception'));
   });
 });

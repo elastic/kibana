@@ -9,20 +9,12 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { IndicatorSearcher } from './indicator_searcher';
 import type { RevisionReader } from './revision_reader';
-import {
-  invalidateSearchEmbeddingModel,
-  type SearchEmbeddingModel,
-} from './search_embedding_model';
+import type { SearchEmbeddingModel } from './search_embedding_model';
 import { queryEsql } from '../../significant_events/latest_source_query';
 
 jest.mock('../../significant_events/latest_source_query', () => ({
   ...jest.requireActual('../../significant_events/latest_source_query'),
   queryEsql: jest.fn(),
-}));
-
-jest.mock('./search_embedding_model', () => ({
-  ...jest.requireActual('./search_embedding_model'),
-  invalidateSearchEmbeddingModel: jest.fn(),
 }));
 
 const SPACE = 'team-a';
@@ -110,14 +102,5 @@ describe('IndicatorSearcher ranking function per embedding model', () => {
 
     expect(resolveEmbeddingModel).not.toHaveBeenCalled();
     expect(rankQuery().print('basic')).not.toContain('KNN(');
-  });
-
-  it('drops the cached dense model when its ranking query fails', async () => {
-    resolveEmbeddingModel.mockResolvedValue({ kind: 'dense', inferenceId: 'gone' });
-    (queryEsql as jest.Mock).mockRejectedValue(new Error('Inference endpoint not found [gone]'));
-
-    await expect(run()).rejects.toThrow('Inference endpoint not found');
-
-    expect(invalidateSearchEmbeddingModel).toHaveBeenCalledTimes(1);
   });
 });

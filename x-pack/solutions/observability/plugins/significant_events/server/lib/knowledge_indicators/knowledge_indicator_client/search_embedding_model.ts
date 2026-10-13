@@ -17,16 +17,6 @@ export type SearchEmbeddingModel =
 
 export type SearchEmbeddingModelResolver = () => Promise<SearchEmbeddingModel>;
 
-/** Model settings never change once set; the TTL only covers a data stream reset. */
-const CACHE_TTL_MS = 10 * 60 * 1000;
-
-interface CacheEntry {
-  model: SearchEmbeddingModel;
-  expiresAt: number;
-}
-
-const cache = new Map<string, CacheEntry>();
-
 interface SemanticTextMapping {
   type?: string;
   inference_id?: string;
@@ -44,49 +34,29 @@ const readModel = (mapping: SemanticTextMapping | undefined): SearchEmbeddingMod
   return { kind: 'unknown' };
 };
 
-/** Reads the model from the mapping; `unknown` is never cached so the first indexed document is picked up. */
-export const createSearchEmbeddingModelResolver = (
+/** Reads the `search_embedding` model from the backing-index mappings of the data stream. */
+export const readSearchEmbeddingModel = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   dataStream: string = KNOWLEDGE_INDICATORS_DATA_STREAM
-): SearchEmbeddingModelResolver => {
-  return async () => {
-    const cached = cache.get(dataStream);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.model;
-    }
-
-    let model: SearchEmbeddingModel = { kind: 'unknown' };
-    try {
-      const mappings = await esClient.indices.getMapping({ index: dataStream });
-      for (const { mappings: indexMappings } of Object.values(mappings ?? {})) {
-        const field = indexMappings?.properties?.[SEARCH_EMBEDDING] as
-          | SemanticTextMapping
-          | undefined;
-        const candidate = readModel(field);
-        if (candidate.kind !== 'unknown') {
-          model = candidate;
-          break;
-        }
+): Promise<SearchEmbeddingModel> => {
+  try {
+    const mappings = await esClient.indices.getMapping({ index: dataStream });
+    for (const { mappings: indexMappings } of Object.values(mappings ?? {})) {
+      const field = indexMappings?.properties?.[SEARCH_EMBEDDING] as
+        | SemanticTextMapping
+        | undefined;
+      const model = readModel(field);
+      if (model.kind !== 'unknown') {
+        return model;
       }
-    } catch (error) {
-      logger.warn(
-        `Could not read the search_embedding mapping of [${dataStream}], ranking with MATCH: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-      return model;
     }
-
-    if (model.kind !== 'unknown') {
-      cache.set(dataStream, { model, expiresAt: Date.now() + CACHE_TTL_MS });
-    }
-    return model;
-  };
-};
-
-export const invalidateSearchEmbeddingModel = (
-  dataStream: string = KNOWLEDGE_INDICATORS_DATA_STREAM
-): void => {
-  cache.delete(dataStream);
+  } catch (error) {
+    logger.warn(
+      `Could not read the search_embedding mapping of [${dataStream}], ranking with MATCH: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+  return { kind: 'unknown' };
 };
