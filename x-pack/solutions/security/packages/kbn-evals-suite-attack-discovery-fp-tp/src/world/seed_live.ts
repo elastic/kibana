@@ -540,6 +540,31 @@ const ALERTS_STREAM_TIMEOUT_MS = 180_000;
 const ALERTS_STREAM_POLL_INTERVAL_MS = 5_000;
 const VALIDATE_EXECUTION_TIMEOUT_MS = 300_000;
 const VALIDATE_POLL_INTERVAL_MS = 3_000;
+const SPACE_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/;
+
+/**
+ * Refuses to run the serverless path against the default space: its bootstrap
+ * is not undone by cleanup (shared reasoning mapping, stopped Entity Store
+ * extraction, enabled no-match rule), so it must stay in a dedicated space.
+ */
+export const assertServerlessSpace = (space: string | undefined): string => {
+  if (space === undefined || space.length === 0) {
+    throw new Error('--serverless needs an explicit --space (a dedicated one, not "default")');
+  }
+  if (space === 'default') {
+    throw new Error(
+      '--serverless refuses the default space: seeding there would stop Entity Store ' +
+        'extraction, rewrite the shared reasoning mapping and leave an enabled rule in the ' +
+        'space — none of which cleanup undoes. Use a dedicated space.'
+    );
+  }
+  if (!SPACE_ID_PATTERN.test(space)) {
+    throw new Error(
+      `--space "${space}" is not a valid Kibana space id (expected [a-z0-9][a-z0-9_-]{0,63})`
+    );
+  }
+  return space;
+};
 
 export interface FpTpServerlessSeedPlan extends FpTpLiveSeedPlan {
   /** The space every Kibana call is scoped to. */
@@ -557,7 +582,7 @@ export interface FpTpServerlessSeedPlan extends FpTpLiveSeedPlan {
 export interface FpTpValidateInputs {
   readonly alerts_context_count: number;
   readonly anonymized_alerts: ReadonlyArray<{ metadata: unknown; page_content: string }>;
-  readonly api_config: { readonly connector_id: string };
+  readonly api_config: { readonly connector_id: string; readonly action_type_id?: string };
   readonly attack_discoveries: readonly Record<string, unknown>[];
   readonly generation_uuid: string;
   readonly generation_source: string;
@@ -606,7 +631,7 @@ export const toAnonymizedAlerts = (
     };
   });
 
-const ensureBootstrapNoMatchRule = async (kbnRequest: FpTpLiveKbnRequest): Promise<void> => {
+export const ensureBootstrapNoMatchRule = async (kbnRequest: FpTpLiveKbnRequest): Promise<void> => {
   const existing = await kbnRequest({
     method: 'GET',
     path: `/api/detection_engine/rules?rule_id=${FP_TP_BOOTSTRAP_RULE_ID}`,
@@ -648,7 +673,7 @@ const ensureBootstrapNoMatchRule = async (kbnRequest: FpTpLiveKbnRequest): Promi
   }
 };
 
-const waitForAlertsDataStream = async (esClient: EsClient, index: string): Promise<void> => {
+export const waitForAlertsDataStream = async (esClient: EsClient, index: string): Promise<void> => {
   const deadline = Date.now() + ALERTS_STREAM_TIMEOUT_MS;
   while (Date.now() < deadline) {
     if (await esClient.indices.exists({ index })) {
@@ -662,12 +687,13 @@ const waitForAlertsDataStream = async (esClient: EsClient, index: string): Promi
 };
 
 /**
- * Reads the per-space inference settings and returns the connector id mapped to
- * the FP/TP reasoning feature, if any.
+ * Reads the per-space inference feature settings. Throws when the read fails:
+ * callers build a PUT body from the result, so a silent failure would wipe
+ * every other feature mapping.
  */
-export const readReasoningConnectorId = async (
+const readInferenceFeatures = async (
   kbnRequest: FpTpLiveKbnRequest
-): Promise<string | undefined> => {
+): Promise<unknown[] | undefined> => {
   const settings = await kbnRequest({
     method: 'GET',
     path: '/internal/search_inference_endpoints/settings',
@@ -680,8 +706,10 @@ export const readReasoningConnectorId = async (
       )}`
     );
   }
-  const features = (settings.body as { data?: { features?: unknown[] } } | undefined)?.data
-    ?.features;
+  return (settings.body as { data?: { features?: unknown[] } } | undefined)?.data?.features;
+};
+
+const connectorIdFromFeatures = (features: unknown[] | undefined): string | undefined => {
   if (!Array.isArray(features)) {
     return undefined;
   }
@@ -698,21 +726,24 @@ export const readReasoningConnectorId = async (
   return undefined;
 };
 
-const ensureReasoningMapping = async (
+/**
+ * Reads the per-space inference settings and returns the connector id mapped to
+ * the FP/TP reasoning feature, if any.
+ */
+export const readReasoningConnectorId = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<string | undefined> => connectorIdFromFeatures(await readInferenceFeatures(kbnRequest));
+
+export const ensureReasoningMapping = async (
   kbnRequest: FpTpLiveKbnRequest,
   connectorId: string
 ): Promise<void> => {
-  const existing = await readReasoningConnectorId(kbnRequest);
-  if (existing === connectorId) {
+  // One read feeds both the no-op check and the PUT body, and a failed read
+  // throws: an empty `others` here would make the PUT wipe every other feature.
+  const features = await readInferenceFeatures(kbnRequest);
+  if (connectorIdFromFeatures(features) === connectorId) {
     return;
   }
-  const settings = await kbnRequest({
-    method: 'GET',
-    path: '/internal/search_inference_endpoints/settings',
-    version: INFERENCE_SETTINGS_API_VERSION,
-  });
-  const features = (settings.body as { data?: { features?: unknown[] } } | undefined)?.data
-    ?.features;
   const others = Array.isArray(features)
     ? features.filter(
         (feature) => (feature as { feature_id?: string }).feature_id !== FP_TP_REASONING_FEATURE_ID
@@ -738,7 +769,7 @@ const ensureReasoningMapping = async (
   }
 };
 
-const runValidateWorkflow = async (
+export const runValidateWorkflow = async (
   kbnRequest: FpTpLiveKbnRequest,
   inputs: FpTpValidateInputs
 ): Promise<void> => {
@@ -794,7 +825,7 @@ const runValidateWorkflow = async (
  * derives the document `_id` (== `kibana.alert.uuid`) from a hash including the
  * authenticated user, so the seeder reads it back instead of recomputing it.
  */
-const findPersistedAttackId = async (
+export const findPersistedAttackId = async (
   esClient: EsClient,
   index: string,
   title: string
@@ -827,8 +858,32 @@ export const buildServerlessPlan = (
     index: toServerlessEventIndex(index, space),
     id,
   }));
+  // Re-scope the shifted documents to the space: alerts land in
+  // .alerts-security.alerts-<space> but are authored tagged to 'default', and
+  // events keep data_stream.namespace 'default' while indexing into
+  // logs-...-<space>. Copies only — the caller's world stays untouched.
+  const spaceWorld: FpTpWorld = {
+    ...base.world,
+    attack:
+      base.world.attack === undefined
+        ? undefined
+        : { ...base.world.attack, 'kibana.space_ids': [space] },
+    alerts: base.world.alerts.map((alert) => ({
+      ...alert,
+      source: { ...alert.source, 'kibana.space_ids': [space] },
+    })),
+    events: base.world.events.map((event, position) => ({
+      ...event,
+      index: serverlessEvents[position].index,
+      source: {
+        ...event.source,
+        data_stream: { ...(event.source.data_stream as object | undefined), namespace: space },
+      },
+    })),
+  };
   return {
     ...base,
+    world: spaceWorld,
     space,
     alertsIndex,
     adhocAttackIndex: fpTpAdhocAttackIndexForSpace(space),
@@ -837,12 +892,12 @@ export const buildServerlessPlan = (
     // Bulk `create` (never `index`): the alerts index is a product-managed data
     // stream on serverless, and create keeps a leftover id loud (409) instead
     // of silently overwriting a previous seed.
-    alertOperations: base.world.alerts.flatMap((alert) => [
+    alertOperations: spaceWorld.alerts.flatMap((alert) => [
       { create: { _index: alertsIndex, _id: alert.id } },
       alert.source,
     ]),
-    eventOperations: base.world.events.flatMap((event, position) => [
-      { create: { _index: serverlessEvents[position].index, _id: event.id } },
+    eventOperations: spaceWorld.events.flatMap((event) => [
+      { create: { _index: event.index, _id: event.id } },
       event.source,
     ]),
   };
@@ -909,6 +964,7 @@ export const seedTwinLiveServerless = async ({
   reasoningConnectorId: string;
   now?: Date;
 }): Promise<{ summary: FpTpLiveSeedSummary; cleanup: () => Promise<void> }> => {
+  assertServerlessSpace(space);
   const world = twinToWorld(twin);
   const plan = buildServerlessPlan(world, space, now);
 
@@ -941,7 +997,7 @@ export const seedTwinLiveServerless = async ({
       await runValidateWorkflow(kbnRequest, {
         alerts_context_count: world.alerts.length,
         anonymized_alerts: toAnonymizedAlerts(world.alerts),
-        api_config: { connector_id: reasoningConnectorId },
+        api_config: { connector_id: reasoningConnectorId, action_type_id: '.inference' },
         attack_discoveries: [toValidateAttackDiscovery(world.attack)],
         generation_uuid: `${FP_TP_TWIN_SEED_LABEL}-${Date.now()}`,
         generation_source: 'fptp-seeder',

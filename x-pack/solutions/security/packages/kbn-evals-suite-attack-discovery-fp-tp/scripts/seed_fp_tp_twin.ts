@@ -9,6 +9,7 @@ import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getFpTpScenario } from '../src/scenarios';
 import {
+  assertServerlessSpace,
   createLiveKbnRequest,
   FP_TP_TWIN_SEED_LABEL,
   seedTwinLive,
@@ -41,6 +42,9 @@ run(
         '--serverless needs --reasoningConnectorId: the connector the space maps the ' +
           'alertzero_reasoning inference feature to (and the validate workflow bookkeeps).'
       );
+    }
+    if (serverless) {
+      assertServerlessSpace(space);
     }
 
     const esClient = new Client({
@@ -123,7 +127,8 @@ run(
         --username                      Kibana/ES username for Basic auth (Default: elastic)
         --password                      Kibana/ES password for Basic auth (Default: changeme)
         --apiKey                        ApiKey for Kibana and ES auth; overrides Basic auth
-        --space                         Kibana space to seed into (Default: default)
+        --space                         Kibana space to seed into (Default: default; with
+                                        --serverless a dedicated non-default space is required)
         --serverless                    Space-scoped serverless seeding: detection-engine
                                         bootstrap + no-match rule, Entity Store CRUD,
                                         seeder-owned event namespace, managed validate run

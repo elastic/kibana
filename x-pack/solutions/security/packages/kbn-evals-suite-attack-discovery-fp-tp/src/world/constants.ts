@@ -53,8 +53,15 @@ export const fpTpEntityReadAliasForSpace = (space: string): string => `entities-
  * collide with; the analysis workflow reads the `logs-endpoint.events.*`
  * wildcard, so the seeder-owned namespace stays in scope.
  */
-export const toServerlessEventIndex = (index: string, namespace: string): string =>
-  index.endsWith('-default') ? `${index.slice(0, -'-default'.length)}-${namespace}` : index;
+export const toServerlessEventIndex = (index: string, namespace: string): string => {
+  if (!index.endsWith('-default')) {
+    throw new Error(
+      `Cannot seed ${index} on serverless: only scenario-authored -default event indices ` +
+        'are rewritten to the seeder-owned namespace'
+    );
+  }
+  return `${index.slice(0, -'-default'.length)}-${namespace}`;
+};
 
 /**
  * Id of the always-enabled no-match query rule the seeder keeps in a space. On

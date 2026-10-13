@@ -62,6 +62,7 @@ export {
   twinToWorld,
   toAnonymizedAlerts,
   toValidateAttackDiscovery,
+  assertServerlessSpace,
 } from './seed_live';
 export type {
   FpTpLiveKbnRequest,

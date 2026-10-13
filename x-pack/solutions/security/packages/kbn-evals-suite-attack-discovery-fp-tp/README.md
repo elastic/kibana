@@ -98,7 +98,7 @@ Classic stack (Basic auth, default space):
 node scripts/seed_fp_tp_twin.ts --scenario encoded-powershell --variant fp
 ```
 
-Serverless project (ApiKey auth, one Kibana space per seed):
+Serverless project (ApiKey auth, one dedicated Kibana space per seed; `--space` is required and must not be `default`):
 
 ```bash
 node scripts/seed_fp_tp_twin.ts --serverless \
@@ -114,7 +114,7 @@ On serverless the seeder cannot write the way the classic path does, so it:
 - maps the space's `alertzero_reasoning` inference feature to `--reasoningConnectorId`;
 - persists the Attack Discovery by running the managed `system-attack-discovery-validate` workflow, never by writing the ad-hoc index.
 
-Re-running a seed removes the previous one first, so it is safe to repeat. The API key needs access to the space's detection-engine, workflows, and Entity Store APIs plus the `.alerts-security.alerts-*`, `.adhoc.alerts-security.attack.discovery.alerts-*`, `logs-endpoint.events.*`, and `entities-latest-*` indices.
+Re-running a seed removes the previous one first, so it is safe to repeat. Teardown removes the seeded alerts, events, entities and persisted discovery only: the bootstrap no-match rule, the `alertzero_reasoning` mapping and the stopped Entity Store extraction stay in the space, which is why the serverless path refuses the `default` space (it validates `--space` against `[a-z0-9][a-z0-9_-]{0,63}`) and belongs in a space dedicated to seeding. The API key needs access to the space's detection-engine, workflows, and Entity Store APIs plus the `.alerts-security.alerts-*`, `.adhoc.alerts-security.attack.discovery.alerts-*`, `logs-endpoint.events.*`, and `entities-latest-*` indices.
 
 ## Reproducibility
 
