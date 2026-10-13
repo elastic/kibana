@@ -44,14 +44,6 @@ export const COLUMN_NAME = i18n.translate('genAiSettings.documentation.column.na
   defaultMessage: 'Name',
 });
 
-export const COLUMN_STATUS = i18n.translate('genAiSettings.documentation.column.status', {
-  defaultMessage: 'Status',
-});
-
-export const COLUMN_DETAILS = i18n.translate('genAiSettings.documentation.column.details', {
-  defaultMessage: 'Details',
-});
-
 export const COLUMN_ACTIONS = i18n.translate('genAiSettings.documentation.column.actions', {
   defaultMessage: 'Actions',
 });
@@ -59,13 +51,6 @@ export const COLUMN_ACTIONS = i18n.translate('genAiSettings.documentation.column
 export const STATUS_INSTALLED = i18n.translate('genAiSettings.documentation.status.installed', {
   defaultMessage: 'Installed',
 });
-
-export const STATUS_NOT_INSTALLED = i18n.translate(
-  'genAiSettings.documentation.status.notInstalled',
-  {
-    defaultMessage: 'Not installed',
-  }
-);
 
 export const STATUS_INSTALLING = i18n.translate('genAiSettings.documentation.status.installing', {
   defaultMessage: 'Installing...',
@@ -93,20 +78,16 @@ export const STATUS_ERROR = i18n.translate('genAiSettings.documentation.status.e
   defaultMessage: 'Error',
 });
 
-export const STATUS_NOT_AVAILABLE = i18n.translate(
-  'genAiSettings.documentation.status.notAvailable',
-  {
-    defaultMessage: 'Not available',
-  }
-);
-
 export const ACTION_INSTALL = i18n.translate('genAiSettings.documentation.action.install', {
   defaultMessage: 'Install',
 });
 
-export const ACTION_UPDATE = i18n.translate('genAiSettings.documentation.action.update', {
-  defaultMessage: 'Update',
-});
+export const ACTION_INSTALL_UPDATE = i18n.translate(
+  'genAiSettings.documentation.action.installUpdate',
+  {
+    defaultMessage: 'Install update',
+  }
+);
 
 export const ACTION_UNINSTALL = i18n.translate('genAiSettings.documentation.action.uninstall', {
   defaultMessage: 'Uninstall',
@@ -156,20 +137,45 @@ export const TECH_PREVIEW = i18n.translate('genAiSettings.documentation.techPrev
   defaultMessage: 'TECH PREVIEW',
 });
 
-export const UPDATE_AVAILABLE = i18n.translate('genAiSettings.documentation.updateAvailable', {
-  defaultMessage: 'Update available',
+export const NEW_VERSION = i18n.translate('genAiSettings.documentation.newVersion', {
+  defaultMessage: 'New version',
 });
 
+export const ROW_ACTIONS_ARIA_LABEL = i18n.translate(
+  'genAiSettings.documentation.rowActions.ariaLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const CURRENT_DOCUMENTATION = i18n.translate(
+  'genAiSettings.documentation.currentDocumentation',
+  {
+    defaultMessage: 'Current documentation',
+  }
+);
+
+export const VERSION_BADGE_ARIA_LABEL = i18n.translate(
+  'genAiSettings.documentation.versionBadge.ariaLabel',
+  {
+    defaultMessage: 'View current documentation details',
+  }
+);
+
 export const DETAIL_VERSION = i18n.translate('genAiSettings.documentation.detail.version', {
-  defaultMessage: 'Version',
+  defaultMessage: 'Version:',
 });
 
 export const DETAIL_INSTALLED = i18n.translate('genAiSettings.documentation.detail.installed', {
-  defaultMessage: 'Installed',
+  defaultMessage: 'Installed:',
+});
+
+export const DETAIL_DATE = i18n.translate('genAiSettings.documentation.detail.date', {
+  defaultMessage: 'Date:',
 });
 
 export const DETAIL_INFERENCE = i18n.translate('genAiSettings.documentation.detail.inference', {
-  defaultMessage: 'Inference',
+  defaultMessage: 'Inference:',
 });
 
 export const SHOWING = i18n.translate('genAiSettings.documentation.showing', {

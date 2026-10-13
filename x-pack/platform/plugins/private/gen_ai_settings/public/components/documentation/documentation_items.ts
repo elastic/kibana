@@ -50,7 +50,11 @@ export interface NormalizedDocStatus {
    * this is the installed release, for example `9.6 | Sep 28, 2026`.
    */
   artifactLastModified?: string;
-  /** Major.minor stack version of that same zip. Omitted for date-only artifacts. */
+  /**
+   * Installed release version shown on the version badge.
+   * Product docs use a major.minor stack version. Security labs uses its content version.
+   * Omitted when the artifact is identified only by its last-modified date.
+   */
   installedStackVersion?: string;
 }
 
@@ -191,6 +195,7 @@ export const DOCUMENTATION_ITEMS_CONFIG: readonly DocumentationItemConfig[] = [
           : {}),
         failureReason: res.failureReason,
         ...(status === 'installed' && res.updatedAt ? { installedAt: res.updatedAt } : {}),
+        ...(status === 'installed' && res.version ? { installedStackVersion: res.version } : {}),
         ...(status === 'installed' && res.artifactLastModified
           ? { artifactLastModified: res.artifactLastModified }
           : {}),

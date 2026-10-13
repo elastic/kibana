@@ -6,12 +6,16 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import moment from 'moment-timezone';
 import {
   EuiBasicTable,
   EuiBadge,
   EuiBetaBadge,
+  EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -19,11 +23,16 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiPopover,
+  EuiPopoverFooter,
+  EuiPopoverTitle,
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
+  useGeneratedHtmlId,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -139,56 +148,6 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
     });
   }, [docsConfig, statusQueries, inferenceIdByResourceType]);
 
-  const getErrorSuggestion = useCallback(
-    (failureReason: string, endpointId: string): string | null => {
-      if (failureReason.includes('model_deployment_timeout_exception')) {
-        return i18n.getModelDeploymentTimeoutSuggestion(endpointId);
-      }
-      return null;
-    },
-    []
-  );
-
-  const getStatusBadge = useCallback(
-    (item: DocumentationItem) => {
-      switch (item.status) {
-        case 'installed':
-        case 'uninstalling':
-          return <EuiBadge color="success">{i18n.STATUS_INSTALLED}</EuiBadge>;
-        case 'error': {
-          if (!item.failureReason) {
-            return <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>;
-          }
-          const suggestion = getErrorSuggestion(item.failureReason, item.inferenceId ?? '');
-          return (
-            <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {item.failureReason}
-                </EuiText>
-              </EuiFlexItem>
-              {suggestion && (
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">{suggestion}</EuiText>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          );
-        }
-        case 'not_available':
-          return <EuiBadge color="warning">{i18n.STATUS_NOT_AVAILABLE}</EuiBadge>;
-        case 'installing':
-        case 'uninstalled':
-        default:
-          return <EuiBadge color="hollow">{i18n.STATUS_NOT_INSTALLED}</EuiBadge>;
-      }
-    },
-    [getErrorSuggestion]
-  );
-
   const getActionButton = useCallback(
     (item: DocumentationItem) => {
       return (
@@ -218,6 +177,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
             <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
             </EuiFlexItem>
+            <DocumentationVersionBadge item={item} />
             {item.isTechPreview && (
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge label={i18n.TECH_PREVIEW} size="s" alignment="middle" />
@@ -227,26 +187,14 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         ),
       },
       {
-        field: 'status',
-        name: i18n.COLUMN_STATUS,
-        sortable: false,
-        width: '160px',
-        render: (_: DocumentationStatus, item: DocumentationItem) => getStatusBadge(item),
-      },
-      {
-        name: i18n.COLUMN_DETAILS,
-        render: (item: DocumentationItem) => <DocumentationDetails item={item} />,
-      },
-      {
         field: 'actions',
         name: i18n.COLUMN_ACTIONS,
         sortable: false,
-        width: '160px',
         align: 'right',
         render: (_: unknown, item: DocumentationItem) => getActionButton(item),
       },
     ],
-    [getStatusBadge, getActionButton]
+    [getActionButton]
   );
 
   return (
@@ -281,126 +229,320 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
   );
 };
 
-const DateValue: React.FC<{ value: string }> = ({ value }) => (
-  <>
-    <FormattedDate value={value} year="numeric" month="short" day="2-digit" />{' '}
-    <FormattedTime value={value} hour="numeric" minute="2-digit" />
-  </>
-);
+/** Kibana advanced setting `dateFormat`, used when the UI setting is unavailable. */
+const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-/** Calendar day of a zip LastModified. The day is the date half of a release version. */
-const VersionDate: React.FC<{ value: string }> = ({ value }) => (
-  <FormattedDate value={value} year="numeric" month="short" day="numeric" />
-);
+/** Formats a timestamp with Kibana's `dateFormat` and `dateFormat:tz` settings. */
+const UiSettingDate: React.FC<{ value: string }> = ({ value }) => {
+  const { uiSettings } = useKibana().services;
+  const dateFormatSetting = uiSettings.get('dateFormat');
+  const dateFormat =
+    typeof dateFormatSetting === 'string' && dateFormatSetting.length > 0
+      ? dateFormatSetting
+      : DEFAULT_DATE_FORMAT;
+  const timeZoneSetting = uiSettings.get('dateFormat:tz');
+  const timeZone =
+    typeof timeZoneSetting === 'string' && timeZoneSetting.length > 0 ? timeZoneSetting : 'Browser';
 
-/**
- * A documentation release is the stack version plus the zip's GCS LastModified,
- * for example `9.6 | Sep 28, 2026`. Date-only artifacts show the day on its own.
- */
-const ReleaseVersion: React.FC<{
-  stackVersion?: string;
-  lastModified?: string;
-}> = ({ stackVersion, lastModified }) => {
-  const date = lastModified ? <VersionDate value={lastModified} /> : null;
+  const formatted = useMemo(() => {
+    const date = moment(value);
+    if (!date.isValid()) {
+      return value;
+    }
+    if (timeZone !== 'Browser') {
+      return date.tz(timeZone).format(dateFormat);
+    }
+    return date.format(dateFormat);
+  }, [dateFormat, timeZone, value]);
 
-  if (stackVersion && date) {
-    return (
-      <FormattedMessage
-        id="genAiSettings.documentation.releaseVersion"
-        defaultMessage="{version} | {date}"
-        values={{ version: stackVersion, date }}
-      />
-    );
-  }
-
-  if (stackVersion) {
-    return <>{stackVersion}</>;
-  }
-
-  return date;
+  return <>{formatted}</>;
 };
 
-/** Sits above Update. The badge is the cue; the tooltip names the newer release. */
-const UpdateAvailableCallout: React.FC<{ item: DocumentationItem }> = ({ item }) => {
-  const badge = (
-    <EuiBadge color="warning" data-test-subj={`documentation-update-available-${item.id}`}>
-      {i18n.UPDATE_AVAILABLE}
-    </EuiBadge>
+const hasInstallDetails = (item: DocumentationItem): boolean =>
+  (item.status === 'installed' || item.status === 'uninstalling') &&
+  Boolean(
+    item.installedStackVersion || item.artifactLastModified || item.installedAt || item.inferenceId
   );
-  const hasRelease = Boolean(item.availableStackVersion || item.availableArtifactLastModified);
-  if (!hasRelease) {
-    return badge;
+
+/** Version string for the badge and the popover. Date-only artifacts use the zip day. */
+const releaseVersionNode = (item: DocumentationItem): React.ReactNode => {
+  if (item.installedStackVersion) {
+    return item.installedStackVersion;
   }
+  if (item.artifactLastModified) {
+    return <UiSettingDate value={item.artifactLastModified} />;
+  }
+  return null;
+};
+
+const DetailValue: React.FC<{
+  children: React.ReactNode;
+  'data-test-subj': string;
+  truncate?: boolean;
+  tooltip?: string;
+}> = ({ children, 'data-test-subj': dataTestSubj, truncate = false, tooltip }) => {
+  const { euiTheme } = useEuiTheme();
+  const value = (
+    <span
+      css={{
+        display: truncate ? 'block' : 'inline',
+        fontWeight: euiTheme.font.weight.bold,
+        ...(truncate
+          ? {
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap' as const,
+            }
+          : {}),
+      }}
+    >
+      {children}
+    </span>
+  );
 
   return (
-    <EuiToolTip
-      position="top"
-      content={
-        <ReleaseVersion
-          stackVersion={item.availableStackVersion}
-          lastModified={item.availableArtifactLastModified}
-        />
-      }
-    >
-      {badge}
-    </EuiToolTip>
+    <EuiDescriptionListDescription data-test-subj={dataTestSubj}>
+      {tooltip ? (
+        <EuiToolTip content={tooltip} position="top">
+          {value}
+        </EuiToolTip>
+      ) : (
+        value
+      )}
+    </EuiDescriptionListDescription>
   );
 };
 
 const DocumentationDetails: React.FC<{ item: DocumentationItem }> = ({ item }) => {
-  if (item.status !== 'installed' && item.status !== 'uninstalling') {
-    return null;
-  }
-
-  const hasDetails = Boolean(
-    item.artifactLastModified || item.installedStackVersion || item.installedAt || item.inferenceId
-  );
-  if (!hasDetails) {
+  const version = releaseVersionNode(item);
+  if (!version && !item.installedAt && !item.inferenceId) {
     return null;
   }
 
   return (
-    <EuiText size="xs">
-      <EuiDescriptionList
-        type="column"
-        compressed
-        columnWidths={['6rem', '1fr']}
-        data-test-subj={`documentation-details-${item.id}`}
+    <EuiDescriptionList
+      type="column"
+      compressed
+      columnWidths={['6.5rem', '12rem']}
+      data-test-subj={`documentation-details-${item.id}`}
+    >
+      {version ? (
+        <>
+          <EuiDescriptionListTitle>{i18n.DETAIL_VERSION}</EuiDescriptionListTitle>
+          <DetailValue data-test-subj={`documentation-version-at-${item.id}`}>
+            {version}
+          </DetailValue>
+        </>
+      ) : null}
+      {item.inferenceId ? (
+        <>
+          <EuiDescriptionListTitle>{i18n.DETAIL_INFERENCE}</EuiDescriptionListTitle>
+          <DetailValue
+            data-test-subj={`documentation-inference-model-${item.id}`}
+            truncate
+            tooltip={item.inferenceId}
+          >
+            {item.inferenceId}
+          </DetailValue>
+        </>
+      ) : null}
+      {item.installedAt ? (
+        <>
+          <EuiDescriptionListTitle>{i18n.DETAIL_INSTALLED}</EuiDescriptionListTitle>
+          <DetailValue data-test-subj={`documentation-installed-at-${item.id}`}>
+            <UiSettingDate value={item.installedAt} />
+          </DetailValue>
+        </>
+      ) : null}
+    </EuiDescriptionList>
+  );
+};
+
+/** Version badge beside the doc name. Hover shows it is clickable; click opens the details popover. */
+const DocumentationVersionBadge: React.FC<{ item: DocumentationItem }> = ({ item }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const popoverTitleId = useGeneratedHtmlId();
+
+  if (!hasInstallDetails(item)) {
+    return null;
+  }
+
+  const version = releaseVersionNode(item);
+  const badgeContent =
+    version ?? (item.installedAt ? <UiSettingDate value={item.installedAt} /> : null);
+  if (!badgeContent) {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiPopover
+        button={
+          <EuiBadge
+            color="hollow"
+            iconType="info"
+            onClick={() => setIsOpen((open) => !open)}
+            onClickAriaLabel={i18n.VERSION_BADGE_ARIA_LABEL}
+            data-test-subj={`documentation-version-badge-${item.id}`}
+          >
+            {badgeContent}
+          </EuiBadge>
+        }
+        isOpen={isOpen}
+        closePopover={closePopover}
+        aria-labelledby={popoverTitleId}
+        anchorPosition="downLeft"
+        panelPaddingSize="m"
+        panelStyle={{ width: 360 }}
+        panelProps={{ 'data-test-subj': `documentation-version-popover-${item.id}` }}
       >
-        {item.installedStackVersion || item.artifactLastModified ? (
-          <>
-            <EuiDescriptionListTitle>{i18n.DETAIL_VERSION}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription data-test-subj={`documentation-version-at-${item.id}`}>
-              <ReleaseVersion
-                stackVersion={item.installedStackVersion}
-                lastModified={
-                  item.artifactLastModified ??
-                  (item.installedStackVersion ? item.installedAt : undefined)
-                }
-              />
-            </EuiDescriptionListDescription>
-          </>
-        ) : null}
-        {item.installedAt ? (
-          <>
-            <EuiDescriptionListTitle>{i18n.DETAIL_INSTALLED}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription data-test-subj={`documentation-installed-at-${item.id}`}>
-              <DateValue value={item.installedAt} />
-            </EuiDescriptionListDescription>
-          </>
-        ) : null}
-        {item.inferenceId ? (
-          <>
-            <EuiDescriptionListTitle>{i18n.DETAIL_INFERENCE}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription
-              data-test-subj={`documentation-inference-model-${item.id}`}
+        <EuiPopoverTitle id={popoverTitleId}>{i18n.CURRENT_DOCUMENTATION}</EuiPopoverTitle>
+        <DocumentationDetails item={item} />
+      </EuiPopover>
+    </EuiFlexItem>
+  );
+};
+
+const DocumentationActionsMenu: React.FC<{
+  itemId: string;
+  isDisabled: boolean;
+  onUninstall: () => void;
+}> = ({ itemId, isDisabled, onUninstall }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const buttonLabel = isDisabled ? i18n.INSUFFICIENT_PRIVILEGES : i18n.ROW_ACTIONS_ARIA_LABEL;
+
+  return (
+    <EuiPopover
+      button={
+        <EuiToolTip content={buttonLabel} position="top" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="ellipsis"
+            aria-label={buttonLabel}
+            color="text"
+            size="xs"
+            isDisabled={isDisabled}
+            onClick={() => setIsOpen((open) => !open)}
+            data-test-subj={`documentation-actions-${itemId}`}
+          />
+        </EuiToolTip>
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+      anchorPosition="downRight"
+      panelPaddingSize="none"
+      aria-label={i18n.ROW_ACTIONS_ARIA_LABEL}
+    >
+      <EuiContextMenuPanel
+        size="s"
+        items={[
+          <EuiContextMenuItem
+            key="uninstall"
+            icon="trash"
+            disabled={isDisabled}
+            data-test-subj={`documentation-uninstall-${itemId}`}
+            onClick={() => {
+              closePopover();
+              onUninstall();
+            }}
+          >
+            {i18n.ACTION_UNINSTALL}
+          </EuiContextMenuItem>,
+        ]}
+      />
+    </EuiPopover>
+  );
+};
+
+const InstallUpdateControl: React.FC<{
+  item: DocumentationItem;
+  isDisabled: boolean;
+  isLoading: boolean;
+  onInstallUpdate: () => void;
+}> = ({ item, isDisabled, isLoading, onInstallUpdate }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const closePopover = useCallback(() => setIsOpen(false), []);
+  const popoverTitleId = useGeneratedHtmlId();
+  const hasVersion = Boolean(item.availableStackVersion);
+  const hasDate = Boolean(item.availableArtifactLastModified);
+  const updateButton = (
+    <EuiButton
+      color="accent"
+      fill
+      size="s"
+      isDisabled={isDisabled}
+      isLoading={isLoading}
+      onClick={() => setIsOpen((open) => !open)}
+      data-test-subj={`documentation-install-update-${item.id}`}
+    >
+      {i18n.ACTION_INSTALL_UPDATE}
+    </EuiButton>
+  );
+
+  return (
+    <EuiPopover
+      button={
+        isDisabled ? (
+          <EuiToolTip content={i18n.INSUFFICIENT_PRIVILEGES} position="top">
+            {updateButton}
+          </EuiToolTip>
+        ) : (
+          updateButton
+        )
+      }
+      isOpen={isOpen}
+      closePopover={closePopover}
+      aria-labelledby={popoverTitleId}
+      anchorPosition="downRight"
+      panelPaddingSize="m"
+      panelStyle={{ width: 420 }}
+      panelProps={{ 'data-test-subj': `documentation-update-popover-${item.id}` }}
+    >
+      <EuiPopoverTitle id={popoverTitleId}>{i18n.NEW_VERSION}</EuiPopoverTitle>
+      {hasVersion || hasDate ? (
+        <EuiDescriptionList type="column" compressed columnWidths={['6.5rem', '16rem']}>
+          {hasVersion ? (
+            <>
+              <EuiDescriptionListTitle>{i18n.DETAIL_VERSION}</EuiDescriptionListTitle>
+              <DetailValue data-test-subj={`documentation-update-version-${item.id}`}>
+                {item.availableStackVersion}
+              </DetailValue>
+            </>
+          ) : null}
+          {hasDate && item.availableArtifactLastModified ? (
+            <>
+              <EuiDescriptionListTitle>
+                {hasVersion ? i18n.DETAIL_DATE : i18n.DETAIL_VERSION}
+              </EuiDescriptionListTitle>
+              <DetailValue data-test-subj={`documentation-update-date-${item.id}`}>
+                <UiSettingDate value={item.availableArtifactLastModified} />
+              </DetailValue>
+            </>
+          ) : null}
+        </EuiDescriptionList>
+      ) : null}
+      <EuiPopoverFooter paddingSize="s">
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="accent"
+              fill
+              size="s"
+              isDisabled={isDisabled}
+              isLoading={isLoading}
+              data-test-subj={`documentation-update-${item.id}`}
+              onClick={() => {
+                closePopover();
+                onInstallUpdate();
+              }}
             >
-              {item.inferenceId}
-            </EuiDescriptionListDescription>
-          </>
-        ) : null}
-      </EuiDescriptionList>
-    </EuiText>
+              {i18n.ACTION_INSTALL_UPDATE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
+    </EuiPopover>
   );
 };
 
@@ -569,14 +711,15 @@ const DocumentationRowActions: React.FC<{
   // Stubbed items show disabled install button
   if (item.isStubbed && item.status !== 'not_available') {
     return wrapWithPrivilegeTooltip(
-      <EuiButtonEmpty
-        size="xs"
+      <EuiButton
+        color="text"
+        size="s"
         iconType="download"
         isDisabled={true}
         data-test-subj={`documentation-install-${item.id}`}
       >
         {i18n.ACTION_INSTALL}
-      </EuiButtonEmpty>
+      </EuiButton>
     );
   }
 
@@ -595,32 +738,53 @@ const DocumentationRowActions: React.FC<{
     );
   }
 
-  // Error state - show retry
+  // Error state - show the failure next to retry now that the Status column is gone
   if (item.status === 'error') {
+    const suggestion = item.failureReason?.includes('model_deployment_timeout_exception')
+      ? i18n.getModelDeploymentTimeoutSuggestion(item.inferenceId ?? '')
+      : null;
     return wrapWithPrivilegeTooltip(
-      <EuiButtonEmpty
-        size="xs"
-        iconType="refresh"
-        onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
-        isDisabled={isActionDisabled}
-        data-test-subj={`documentation-retry-${item.id}`}
-      >
-        {i18n.ACTION_RETRY}
-      </EuiButtonEmpty>
+      <EuiFlexGroup direction="column" alignItems="flexEnd" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={false}>
+          {item.failureReason ? (
+            <EuiText size="xs" color="subdued">
+              {item.failureReason}
+            </EuiText>
+          ) : (
+            <EuiBadge color="danger">{i18n.STATUS_ERROR}</EuiBadge>
+          )}
+        </EuiFlexItem>
+        {suggestion ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">{suggestion}</EuiText>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="xs"
+            iconType="refresh"
+            onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
+            isDisabled={isActionDisabled}
+            data-test-subj={`documentation-retry-${item.id}`}
+          >
+            {i18n.ACTION_RETRY}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
   // Uninstalling - show loading state
   if (isItemUninstalling) {
     return (
-      <EuiButtonEmpty
-        size="xs"
+      <EuiButton
+        size="s"
         isLoading={true}
         isDisabled={true}
         data-test-subj={`documentation-uninstalling-${item.id}`}
       >
         {i18n.STATUS_UNINSTALLING}
-      </EuiButtonEmpty>
+      </EuiButton>
     );
   }
 
@@ -628,90 +792,76 @@ const DocumentationRowActions: React.FC<{
   // including the gap before status flips to `installing`.
   if (isUpdating) {
     return (
-      <EuiButtonEmpty
-        size="xs"
+      <EuiButton
+        size="s"
         isLoading={true}
         isDisabled={true}
         data-test-subj={`documentation-updating-${item.id}`}
+        data-status={item.status}
       >
         {i18n.STATUS_UPDATING}
-      </EuiButtonEmpty>
+      </EuiButton>
     );
   }
 
-  // Installed - show uninstall button, with the installation time underneath
+  // Installed: badge plus an overflow menu for uninstall.
+  // A newer release replaces the badge with Install update, which opens the new-version popover.
   if (item.status === 'installed') {
-    const uninstallButton = (
-      <EuiButtonEmpty
-        size="xs"
-        iconType="return"
-        onClick={isActionDisabled ? undefined : () => uninstallMutation.mutate(installVars)}
+    const actionsMenu = (
+      <DocumentationActionsMenu
+        itemId={item.id}
         isDisabled={isActionDisabled}
-        data-test-subj={`documentation-uninstall-${item.id}`}
-      >
-        {i18n.ACTION_UNINSTALL}
-      </EuiButtonEmpty>
+        onUninstall={() => uninstallMutation.mutate(installVars)}
+      />
     );
-
-    const actions = item.updateAvailable ? (
-      <EuiFlexGroup direction="column" gutterSize="xs" alignItems="flexEnd" responsive={false}>
+    const actions = (
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
-          <UpdateAvailableCallout item={item} />
+          {item.updateAvailable ? (
+            <InstallUpdateControl
+              item={item}
+              isDisabled={isActionDisabled}
+              isLoading={isProductDoc ? updateMutation.isLoading : installMutation.isLoading}
+              onInstallUpdate={onUpdate}
+            />
+          ) : (
+            <EuiBadge iconType="check" data-test-subj={`documentation-installed-badge-${item.id}`}>
+              {i18n.STATUS_INSTALLED}
+            </EuiBadge>
+          )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="flexEnd"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                iconType="refresh"
-                onClick={isActionDisabled ? undefined : onUpdate}
-                isDisabled={isActionDisabled}
-                isLoading={isProductDoc ? updateMutation.isLoading : installMutation.isLoading}
-                data-test-subj={`documentation-update-${item.id}`}
-              >
-                {i18n.ACTION_UPDATE}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{uninstallButton}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{actionsMenu}</EuiFlexItem>
       </EuiFlexGroup>
-    ) : (
-      uninstallButton
     );
 
-    return wrapWithPrivilegeTooltip(actions);
+    return actions;
   }
 
   // Installing - show loading state
   if (isItemInstalling) {
     return (
-      <EuiButtonEmpty
-        size="xs"
+      <EuiButton
+        size="s"
         isLoading={true}
         isDisabled={true}
         data-test-subj={`documentation-installing-${item.id}`}
       >
         {i18n.STATUS_INSTALLING}
-      </EuiButtonEmpty>
+      </EuiButton>
     );
   }
 
   // Default - show install button
   return wrapWithPrivilegeTooltip(
-    <EuiButtonEmpty
-      size="xs"
+    <EuiButton
+      color="text"
+      size="s"
       iconType="download"
       onClick={isActionDisabled ? undefined : () => installMutation.mutate(installVars)}
       isDisabled={isActionDisabled}
       data-test-subj={`documentation-install-${item.id}`}
     >
       {i18n.ACTION_INSTALL}
-    </EuiButtonEmpty>
+    </EuiButton>
   );
 };

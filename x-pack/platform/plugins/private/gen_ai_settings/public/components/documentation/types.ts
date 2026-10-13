@@ -37,7 +37,11 @@ export interface DocumentationItem {
    * as the installed release, for example `9.6 | Sep 28, 2026`.
    */
   artifactLastModified?: string;
-  /** Major.minor stack version of that same zip. Omitted for date-only artifacts. */
+  /**
+   * Installed release version shown on the version badge.
+   * Product docs use a major.minor stack version. Security labs uses its content version.
+   * Omitted when the artifact is identified only by its last-modified date.
+   */
   installedStackVersion?: string;
 }
 
