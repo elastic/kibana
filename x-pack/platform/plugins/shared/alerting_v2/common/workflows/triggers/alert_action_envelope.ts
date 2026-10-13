@@ -6,16 +6,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { lazySchema, z } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 
 export const alertActionEnvelopeSchema = lazySchema(() =>
   z
     .object({
-      occurredAt: z.iso.datetime().describe(
+      occurredAt: isoDateTime().describe(
         i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.occurredAt', {
           defaultMessage: 'ISO timestamp of when the action occurred.',
         })
       ),
+      groupHash: z
+        .string()
+        .min(1)
+        .max(128)
+        .describe(
+          i18n.translate('xpack.alertingVTwo.triggers.alertAction.schema.groupHash', {
+            defaultMessage: 'Stable hash of the alert series the alert belongs to.',
+          })
+        ),
       groupHash: z
         .string()
         .min(1)

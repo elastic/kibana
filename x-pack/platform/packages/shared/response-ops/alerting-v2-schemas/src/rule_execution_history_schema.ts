@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
@@ -55,14 +55,8 @@ export const listRuleExecutionsRequestSchema = lazySchema(() =>
     .object({
       rule_ids: ruleIdArraySchema.optional().describe(`Rule id filter. `),
       outcomes: outcomeArraySchema.optional().describe('Outcome filter. '),
-      from: z.iso
-        .datetime()
-        .optional()
-        .describe('Inclusive ISO datetime lower bound on event.start.'),
-      to: z.iso
-        .datetime()
-        .optional()
-        .describe('Inclusive ISO datetime upper bound on event.start.'),
+      from: isoDateTime().optional().describe('Inclusive ISO datetime lower bound on event.start.'),
+      to: isoDateTime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
       sort_field: z
         .enum(['started_at', 'duration_ms'])
         .default('started_at')
@@ -101,8 +95,8 @@ export const ruleExecutionViewSchema = lazySchema(() =>
           ),
       }),
       space_id: z.string(),
-      started_at: z.iso.datetime(),
-      ended_at: z.iso.datetime(),
+      started_at: isoDateTime(),
+      ended_at: isoDateTime(),
       timings: z.object({
         duration_ms: z
           .number()

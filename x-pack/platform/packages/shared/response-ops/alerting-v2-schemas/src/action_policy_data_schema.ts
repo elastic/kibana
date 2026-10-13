@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { durationSchema, queryIntSchema } from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
@@ -225,9 +225,9 @@ export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSche
 export const snoozeActionPolicyBodySchema = lazySchema(() =>
   z
     .object({
-      snoozed_until: z.iso
-        .datetime()
-        .describe('The ISO datetime until which the action policy should be snoozed.'),
+      snoozed_until: isoDateTime().describe(
+        'The ISO datetime until which the action policy should be snoozed.'
+      ),
     })
     .strict()
     .meta({ id: 'alerting_snooze_action_policy_request' })
@@ -243,9 +243,9 @@ export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema
 export const bulkSnoozeActionPoliciesBodySchema = lazySchema(() =>
   bulkByIdsSchema
     .extend({
-      snoozed_until: z.iso
-        .datetime()
-        .describe('The ISO datetime until which the targeted action policies should be snoozed.'),
+      snoozed_until: isoDateTime().describe(
+        'The ISO datetime until which the targeted action policies should be snoozed.'
+      ),
     })
     .strict()
     .meta({ id: 'alerting_bulk_snooze_action_policies_request' })

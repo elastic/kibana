@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { lazySchema, z } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { arrayOrSingleSchema, ESTIMATED_COUNT_NOTE, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
@@ -78,14 +78,12 @@ export const listPolicyExecutionHistoryRequestSchema = lazySchema(() =>
       per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
         .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
         .describe(`Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}.`),
-      from: z.iso
-        .datetime()
+      from: isoDateTime()
         .optional()
         .describe(
           'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
         ),
-      to: z.iso
-        .datetime()
+      to: isoDateTime()
         .optional()
         .describe('Inclusive ISO datetime upper bound on the event timestamp.'),
       alert_ids: idFilterArraySchema
@@ -146,7 +144,7 @@ const alertRefSchema = lazySchema(() => z.object({ id: z.string() }));
 export const policyExecutionHistoryItemSchema = lazySchema(() =>
   z
     .object({
-      dispatched_at: z.iso.datetime(),
+      dispatched_at: isoDateTime(),
       policy: namedRefSchema,
       outcome: policyExecutionOutcomeSchema,
       alert_count: z.number(),
