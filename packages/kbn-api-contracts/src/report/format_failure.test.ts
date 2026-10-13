@@ -126,6 +126,7 @@ describe('formatFailure', () => {
     it.each([
       ['report-only', [reportOnlyEntry]],
       ['experimental', [experimentalEntry('/api/exp')]],
+      ['non-gating', [reportOnlyEntry, experimentalEntry('/api/exp')]],
     ])('lists %s changes without a failure header or allowlist prompt', (_, entries) => {
       const output = formatFailure(entries);
 
@@ -168,20 +169,26 @@ describe('formatFailure', () => {
     expect(output).not.toContain('issues/new');
   });
 
-  it('asks for the release_note:breaking label and a release note when a change gates', () => {
-    const output = formatFailure([stableEntry('/api/test')]);
+  it.each([
+    ['stable', stableEntry('/api/test')],
+    ['tech_preview', techPreviewEntry('/api/preview', 'delete')],
+  ])(
+    'asks for the release_note:breaking label and a release note when a %s change gates',
+    (_tier, change) => {
+      const output = formatFailure([change]);
 
-    expectOutputContains(
-      output,
-      '3. If intentional:\n' +
-        '   - add an approved allowlist entry and coordinate with the owning team\n' +
-        '   - add the `release_note:breaking` PR label (replacing any other `release_note:*` label)\n' +
-        '   - add release note text to the PR description, see the Release note section below\n',
-      "Release note:\n\nAdd a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.",
-      'For a breaking change, also add `## Impact` and `## Action` sections to the PR description: who and what the change affects, and the steps or workarounds API users need to adapt.'
-    );
-    expect(output).not.toContain('Optional: release note');
-  });
+      expectOutputContains(
+        output,
+        '3. If intentional:\n' +
+          '   - add an approved allowlist entry and coordinate with the owning team\n' +
+          '   - add the `release_note:breaking` PR label (replacing any other `release_note:*` label)\n' +
+          '   - add release note text to the PR description, see the Release note section below\n',
+        "Release note:\n\nAdd a `## Release note` section to the PR description. The release notes script publishes that text as this change's entry in the Breaking changes section of the Kibana release notes, so write it for API users: what changed, how it affects them, and what they need to do.",
+        'For a breaking change, also add `## Impact` and `## Action` sections to the PR description: who and what the change affects, and the steps or workarounds API users need to adapt.'
+      );
+      expect(output).not.toContain('Optional: release note');
+    }
+  );
 
   describe('allowlisted changes', () => {
     const allowlistedEntry: ImpactReportEntry = {

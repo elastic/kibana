@@ -275,6 +275,7 @@ describe('buildCommentBody', () => {
         `### What to do\n\nNothing here blocks merge. ${OPTIONAL_PROMPT}\n\nSee the [\`@kbn/api-contracts\` README]`
       );
       expect(body).toContain('for tier definitions and the rule policy.');
+      expect(body).not.toContain('## Impact');
       expect(body).not.toContain('**If intentional**');
     });
 
