@@ -172,6 +172,7 @@ const PerOsRansomwareProtectionRow = memo<PerOsRansomwareProtectionRowProps>(
             onChange={onChange}
             mode={mode}
             protection="ransomware"
+            os={os}
             data-test-subj={getTestId('notifyUser')}
           />
         )}

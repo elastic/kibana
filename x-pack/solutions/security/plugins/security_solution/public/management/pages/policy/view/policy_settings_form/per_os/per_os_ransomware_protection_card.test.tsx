@@ -105,6 +105,25 @@ describe('PerOsRansomwareProtectionCard', () => {
     expect(updatedPolicy.mac).toEqual(macBefore);
   });
 
+  it.each([
+    ['windows', '7.12+'],
+    ['mac', '9.4+'],
+    ['linux', '9.6+'],
+  ] as const)(
+    'shows the minimum agent version for %s ransomware notifications',
+    async (os, version) => {
+      policy[os].ransomware = { mode: ProtectionModes.prevent, supported: true };
+      policy[os].popup.ransomware = { enabled: true, message: '' };
+      render();
+
+      await userEvent.hover(renderResult.getByTestId(testSubj[os].notifyTooltipIcon));
+
+      expect(
+        await renderResult.findByTestId(testSubj[os].notifySupportedVersion)
+      ).toHaveTextContent(`Agent version ${version}`);
+    }
+  );
+
   it('a policy lacking linux.ransomware renders the Linux row as off', () => {
     delete policy.linux.ransomware;
     render();

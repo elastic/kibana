@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '../protection_notice_supported_endpoint_version';
+import { getProtectionNoticeSupportedEndpointVersion } from '../protection_notice_supported_endpoint_version';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { getEmptyValue } from '../../../../../../common/components/empty_value';
 import { useLicense } from '../../../../../../common/hooks/use_license';
@@ -250,16 +250,18 @@ NotifyUserOption.displayName = 'NotifyUserOption';
 export const SupportedVersionForProtectionNotice = React.memo(
   ({
     protection,
+    os,
     'data-test-subj': dataTestSubj,
   }: {
     protection: string;
+    /** Set when the notice describes a single OS row rather than the whole protection. */
+    os?: keyof UIPolicyConfig;
     'data-test-subj'?: string;
   }) => {
-    const version = useMemo(() => {
-      return PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION[
-        protection as keyof typeof PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION
-      ];
-    }, [protection]);
+    const version = useMemo(
+      () => getProtectionNoticeSupportedEndpointVersion(protection, os),
+      [protection, os]
+    );
 
     if (!version) {
       return null;
