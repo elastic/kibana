@@ -25,8 +25,13 @@ import {
   buildJoinedPageSteps,
   compareEntityIds,
   fetchPerIdChunk,
+  getMaxAliasGroups,
 } from './esql';
-import { buildEntitiesInViewSteps, buildEntityFilterConditions } from './entities_in_view';
+import {
+  buildEntitiesInViewSteps,
+  buildEntityFilterConditions,
+  buildSearchedTargetsQuery,
+} from './entities_in_view';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, Row, PageCursor, SortDir } from '../common';
 import { SPLIT_SORT_MIN_VIEW_SIZE, buildEmptyRowsQuery } from './split_sort';
@@ -55,14 +60,6 @@ const buildUnfilteredGroupSizeSortQuery = (args: QueryArgs): string =>
     '| RENAME group_key AS `entity.id`',
     ...buildJoinedPageSteps(args, GROUP_SIZE_FIELD),
   ].join('\n');
-
-/**
- * Upper bound on the groups with aliases that the entity filters keep. Below it, the size-one
- * branch reads enough targets to fill the page after dropping the targets that have aliases.
- * Above it, a page of size-one groups can come back short. The page, its extra row and the
- * groups are read in one query, so together they stay within the ES|QL result cap.
- */
-const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_ROWS - pageSize - 1;
 
 /**
  * Entity filters without a search: build the groups that have aliases from the alias docs only
@@ -210,15 +207,6 @@ const buildGroupSizesQuery = ({ namespace }: QueryArgs, targetIds: readonly stri
     `| LIMIT ${targetIds.length}`,
   ].join('\n');
 };
-
-/** The targets among `targetIds` that the search matches. */
-const buildSearchedTargetsQuery = (args: QueryArgs, targetIds: readonly string[]): string =>
-  [
-    ...buildEntitiesInViewSteps(args),
-    `| WHERE ${ENTITY_ID_FIELD} IN (${toList(targetIds)})`,
-    `| KEEP \`entity.id\``,
-    `| LIMIT ${targetIds.length}`,
-  ].join('\n');
 
 /** Adds the entity fields to the page rows in `ids`, which carry only id and size. */
 const fetchWithEntityDocs = async (

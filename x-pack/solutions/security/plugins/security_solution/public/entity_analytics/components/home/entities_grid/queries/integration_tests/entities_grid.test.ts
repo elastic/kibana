@@ -97,6 +97,39 @@ const EXPECTED_ORDERS: ReadonlyArray<[string, SortDir, string[]]> = [
     'desc',
     ['host:h1', 'user:bob@okta', 'host:h2', 'host:h3', 'service:payments', 'user:alice@okta'],
   ],
+  // Criticality sorts by its label. host:h1 is extreme through one of its aliases.
+  [
+    'asset.criticality',
+    'desc',
+    ['host:h2', 'user:alice@okta', 'host:h1', 'host:h3', 'service:payments', 'user:bob@okta'],
+  ],
+  [
+    'asset.criticality',
+    'asc',
+    ['host:h1', 'user:alice@okta', 'host:h2', 'host:h3', 'service:payments', 'user:bob@okta'],
+  ],
+  // host:h1 was first seen 40 days ago through one of its aliases, and the others 20 days ago.
+  [
+    'entity.lifecycle.first_seen',
+    'asc',
+    ['host:h1', 'host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta'],
+  ],
+  [
+    'entity.lifecycle.first_seen',
+    'desc',
+    ['host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta', 'host:h1'],
+  ],
+  // host:h1 was last seen half an hour ago through one of its aliases, and the others an hour ago.
+  [
+    '@timestamp',
+    'desc',
+    ['host:h1', 'host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta'],
+  ],
+  [
+    '@timestamp',
+    'asc',
+    ['host:h2', 'host:h3', 'service:payments', 'user:alice@okta', 'user:bob@okta', 'host:h1'],
+  ],
 ];
 
 const NO_FILTERS: ActiveFilters = {
@@ -114,6 +147,7 @@ const WEB_SEARCH = { search: { esql: 'KQL("""entity.name: web*""")' } };
 const SEARCH_CASES: readonly FilterCase[] = [
   ['a name search', WEB_SEARCH, 'alert_count', 'desc', ['host:h1', 'host:h2', 'host:h3']],
   ['a name search', WEB_SEARCH, 'group_size', 'desc', ['host:h1', 'host:h2', 'host:h3']],
+  ['a name search', WEB_SEARCH, 'asset.criticality', 'desc', ['host:h2', 'host:h1', 'host:h3']],
 ];
 
 const FILTER_CASES: readonly FilterCase[] = [

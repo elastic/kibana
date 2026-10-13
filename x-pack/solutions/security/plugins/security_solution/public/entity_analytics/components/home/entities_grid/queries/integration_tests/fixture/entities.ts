@@ -48,7 +48,14 @@ const ENTITIES: readonly EntitySeed[] = [
     criticality: 'high_impact',
     sources: ['okta'],
   },
-  { id: 'host:h2', type: 'host', name: 'web-2', risk: [50, 'Moderate'], watchlists: ['wl-1'] },
+  {
+    id: 'host:h2',
+    type: 'host',
+    name: 'web-2',
+    risk: [50, 'Moderate'],
+    criticality: 'medium_impact',
+    watchlists: ['wl-1'],
+  },
   { id: 'host:h3', type: 'host', name: 'web-3' },
   // The aliases of host:h1 differ from it in every column that its group shows.
   {
@@ -72,7 +79,13 @@ const ENTITIES: readonly EntitySeed[] = [
     watchlists: ['wl-3'],
   },
   { id: 'service:payments', type: 'service', name: 'payments', risk: [20, 'Low'] },
-  { id: 'user:alice@okta', type: 'user', name: 'alice', risk: [70, 'High'] },
+  {
+    id: 'user:alice@okta',
+    type: 'user',
+    name: 'alice',
+    risk: [70, 'High'],
+    criticality: 'low_impact',
+  },
   { id: 'user:bob@okta', type: 'user', name: 'bob', groupRisk: [85, 'High'] },
   { id: 'user:carol@okta', type: 'user', name: 'carol', resolvedTo: 'user:bob@okta' },
 ];

@@ -70,6 +70,13 @@ ones they remove. `buildEntitiesInViewConditions` then tests the main entities o
 values, corrected by those two lists, so the sorts, the count and the enrichers all read the same
 rows without knowing about groups.
 
+Sorting by criticality, first seen or last seen reads the groups with aliases and the other
+entities apart (`fetchGroupedSortPage`): the groups come from the alias docs and carry the
+group's value, the other entities sort natively by their own value, with as many extra rows as
+there are groups, since an entity that heads a group is dropped for its group row. The two
+streams are merged in the order of the sort, from the same cursor. A search can't run after the
+group join, so its matches among the group heads are read separately.
+
 ## Which query runs
 
 A view is **large** when it has at least `SPLIT_SORT_MIN_VIEW_SIZE` entities (`split_sort.ts`).
@@ -129,6 +136,7 @@ below is one less than what its query can return: the extra row tells that there
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | The count fails | the view counts as small, so the small view queries run |
 | A computed column fails | its cells stay empty, the other columns still load, and the grid shows an error toast |
+| More than `getMaxAliasGroups` groups with aliases pass the filters, when sorting by criticality, first seen or last seen | the grid shows an error toast: a page from a partial list of groups would be in the wrong order |
 | More than `MAX_GROUP_VALUE_CORRECTIONS` groups pass the filters on the group values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
 
 ## Checking a change

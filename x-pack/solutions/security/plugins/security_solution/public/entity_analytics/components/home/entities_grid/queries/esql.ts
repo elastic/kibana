@@ -76,6 +76,14 @@ export const ESQL_MAX_QUERY_LENGTH = 1_000_000;
 export const toList = (items: readonly string[]) => items.map(escapeStringValue).join(', ');
 
 /**
+ * Upper bound on the groups with aliases that the entity filters keep. Below it, the size-one
+ * branch reads enough targets to fill the page after dropping the targets that have aliases.
+ * Above it, a page of size-one groups can come back short. The page, its extra row and the
+ * groups are read in one query, so together they stay within the ES|QL result cap.
+ */
+export const getMaxAliasGroups = (pageSize: number): number => ESQL_MAX_RESULT_ROWS - pageSize - 1;
+
+/**
  * Ids per IN list.
  *
  * Why: an ES|QL statement is capped at 1MB, and entity ids run to about 100 characters, so a

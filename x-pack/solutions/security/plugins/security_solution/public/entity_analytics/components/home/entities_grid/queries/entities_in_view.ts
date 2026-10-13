@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RESOLVED_TO_FIELD } from '../common';
+import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
-import { ENTITY_TYPE_FILTER, getEntityAlias } from './esql';
+import { ENTITY_TYPE_FILTER, getEntityAlias, toList } from './esql';
 import { buildGroupValueCondition } from './group_values';
 
 // ── entities in view ─────────────────────────────────────────────────────────
@@ -41,3 +41,12 @@ export const buildEntitiesInViewCountQuery = (args: QueryArgs): string =>
 
 /** Marks rows that come from the entities in view rather than from the foreign index. */
 export const IN_VIEW_FIELD = '_in_view';
+
+/** The targets among `targetIds` that the search matches. */
+export const buildSearchedTargetsQuery = (args: QueryArgs, targetIds: readonly string[]): string =>
+  [
+    ...buildEntitiesInViewSteps(args),
+    `| WHERE ${ENTITY_ID_FIELD} IN (${toList(targetIds)})`,
+    `| KEEP \`entity.id\``,
+    `| LIMIT ${targetIds.length}`,
+  ].join('\n');

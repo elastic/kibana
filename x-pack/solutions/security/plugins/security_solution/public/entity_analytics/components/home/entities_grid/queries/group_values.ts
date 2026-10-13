@@ -94,6 +94,19 @@ const buildGroupValueSteps = (): string[] => [
   )}, ${LAST_SEEN_FIELD} = ${buildExtreme('GREATEST', LAST_SEEN_FIELD, 'alias_last_seen')}`,
 ];
 
+/** The columns that show the group's value and sort: their sort has to see the groups. */
+export const GROUP_VALUE_SORT_FIELDS: readonly string[] = [
+  CRITICALITY_FIELD,
+  FIRST_SEEN_FIELD,
+  '@timestamp',
+];
+
+/** The groups with aliases as rows: the alias docs per group, with the group values over them. */
+export const buildGroupRowSteps = (args: Pick<QueryArgs, 'concreteEntityIndexName'>): string[] => [
+  ...buildAliasGroupSteps(args),
+  ...buildGroupValueSteps(),
+];
+
 /**
  * One row per group with aliases among `targetIds`, with its group values under the entity
  * field names, so the page rows take them as they are.
@@ -105,8 +118,7 @@ export const buildGroupValuesQuery = (
   [
     `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IN (${toList(targetIds)})`,
-    ...buildAliasGroupSteps(args),
-    ...buildGroupValueSteps(),
+    ...buildGroupRowSteps(args),
     `| KEEP \`entity.id\`, ${GROUP_VALUE_FIELDS.join(', ')}`,
   ].join('\n');
 
