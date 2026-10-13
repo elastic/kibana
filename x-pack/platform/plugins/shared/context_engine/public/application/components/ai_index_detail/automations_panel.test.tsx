@@ -38,6 +38,9 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: jest.fn(),
     createWorkflow: jest.fn(),
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
 }));
 
 jest.mock('./automation_row', () => ({
@@ -327,7 +330,9 @@ describe('AutomationsPanel', () => {
       editorResult({ automations: oneAutomation, workflowIds: ['wf-1'] })
     );
     mockUseWorkflowSummaries.mockReturnValue(
-      summariesResult([['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true }]])
+      summariesResult([
+        ['wf-1', { id: 'wf-1', name: 'My workflow', enabled: true, definition: undefined }],
+      ])
     );
 
     renderPanel();

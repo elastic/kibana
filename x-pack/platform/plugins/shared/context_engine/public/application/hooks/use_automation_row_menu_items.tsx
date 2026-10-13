@@ -15,7 +15,10 @@ export interface UseAutomationRowMenuItemsParams {
   editHref: string;
   isReadOnly: boolean;
   isDisabled: boolean;
+  canRun: boolean;
+  isRunDisabled: boolean;
   onCloseMenu: () => void;
+  onRun: () => void;
   onPreview: () => void;
   onDelete: () => void;
 }
@@ -24,12 +27,40 @@ export const useAutomationRowMenuItems = ({
   editHref,
   isReadOnly,
   isDisabled,
+  canRun,
+  isRunDisabled,
   onCloseMenu,
+  onRun,
   onPreview,
   onDelete,
 }: UseAutomationRowMenuItemsParams): React.ReactElement[] => {
   return useMemo(() => {
-    const items = [
+    const items: React.ReactElement[] = [];
+
+    if (canRun) {
+      items.push(
+        <EuiContextMenuItem
+          key="run"
+          icon="play"
+          disabled={isRunDisabled}
+          data-test-subj="contextRunAutomationButton"
+          {...getEbtProps({
+            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+            action: CONTEXT_ENGINE_UI_EBT.action.automations.RUN_WORKFLOW,
+          })}
+          onClick={() => {
+            onCloseMenu();
+            onRun();
+          }}
+        >
+          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runAction', {
+            defaultMessage: 'Run',
+          })}
+        </EuiContextMenuItem>
+      );
+    }
+
+    items.push(
       <EuiContextMenuItem
         key="view"
         icon="eye"
@@ -46,8 +77,8 @@ export const useAutomationRowMenuItems = ({
         {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.viewAction', {
           defaultMessage: 'View',
         })}
-      </EuiContextMenuItem>,
-    ];
+      </EuiContextMenuItem>
+    );
 
     if (!isReadOnly) {
       items.push(
@@ -89,5 +120,15 @@ export const useAutomationRowMenuItems = ({
     }
 
     return items;
-  }, [editHref, isDisabled, isReadOnly, onCloseMenu, onDelete, onPreview]);
+  }, [
+    canRun,
+    editHref,
+    isDisabled,
+    isReadOnly,
+    isRunDisabled,
+    onCloseMenu,
+    onDelete,
+    onPreview,
+    onRun,
+  ]);
 };

@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useMemo } from 'react';
 
@@ -13,6 +14,7 @@ export interface WorkflowSummary {
   id: string;
   name?: string;
   enabled?: boolean;
+  definition: WorkflowYaml | null | undefined;
 }
 
 const is403 = (error: unknown): boolean => {
@@ -37,7 +39,7 @@ export const useWorkflowSummaries = (workflowIds: string[]) => {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['context_engine', 'workflow_summaries', ids],
-    queryFn: () => api.mgetWorkflows({ ids }),
+    queryFn: () => api.mgetWorkflows({ ids, source: ['id', 'name', 'enabled', 'definition'] }),
     enabled: ids.length > 0,
     // Editing the automations changes the query key, which would otherwise drop the resolved summaries.
     keepPreviousData: true,
@@ -54,6 +56,7 @@ export const useWorkflowSummaries = (workflowIds: string[]) => {
         id: workflow.id,
         name: workflow.name,
         enabled: workflow.enabled,
+        definition: workflow.definition,
       });
     }
     return byId;

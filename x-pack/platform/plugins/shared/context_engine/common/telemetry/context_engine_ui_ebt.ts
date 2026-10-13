@@ -87,6 +87,7 @@ const ebtAction = {
     CREATE: 'create_automation',
     ADD_MENU: 'open_add_automation_menu',
     ROW_ACTIONS_MENU: 'open_automation_actions_menu',
+    RUN_WORKFLOW: 'run_automation',
     PREVIEW_WORKFLOW: 'preview_automation',
     OPEN_WORKFLOW: 'open_workflow',
     REMOVE: 'remove_automation',

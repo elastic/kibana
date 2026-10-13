@@ -8,9 +8,65 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import React from 'react';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { AutomationRow } from './automation_row';
+
+const mockRunAutomation = jest.fn();
+
+jest.mock('../../hooks/use_run_automation', () => ({
+  useRunAutomation: () => ({
+    runAutomation: mockRunAutomation,
+    isRunning: false,
+  }),
+}));
+
+jest.mock('@kbn/workflows-ui', () => ({
+  RunWorkflowInputsModal: ({
+    onSubmit,
+    onCancel,
+  }: {
+    workflowName: string;
+    onSubmit: (values: Record<string, string>) => void;
+    onCancel: () => void;
+  }) => (
+    <div data-test-subj="contextRunWorkflowInputsModalStub">
+      <button type="button" onClick={() => onSubmit({ ticketId: 'T-1' })}>
+        Submit inputs
+      </button>
+      <button type="button" onClick={onCancel}>
+        Cancel inputs
+      </button>
+    </div>
+  ),
+  requiresUserSuppliedInputs: jest.requireActual('@kbn/workflows-ui').requiresUserSuppliedInputs,
+}));
+
+const workflowWithoutManualInputs: WorkflowYaml = {
+  version: '1',
+  name: 'No inputs workflow',
+  enabled: true,
+  triggers: [{ type: 'manual' }],
+  steps: [{ name: 'step1', type: 'console', with: { message: 'hi' } }],
+};
+
+const workflowWithRequiredInputs: WorkflowYaml = {
+  version: '1',
+  name: 'Inputs workflow',
+  enabled: true,
+  triggers: [
+    {
+      type: 'manual',
+      inputs: {
+        type: 'object',
+        properties: { ticketId: { type: 'string' } },
+        required: ['ticketId'],
+      },
+    },
+  ],
+  steps: [{ name: 'step1', type: 'console', with: { message: 'hi' } }],
+};
 
 jest.mock('./workflow_yaml_preview_flyout', () => ({
   WorkflowYamlPreviewFlyout: ({
@@ -73,6 +129,8 @@ const createDefaultProps = (
   editHref: '/app/workflows/workflow-1',
   isReadOnly: false,
   isDisabled: false,
+  definition: undefined,
+  canRun: false,
   onDelete: jest.fn().mockResolvedValue(true),
   ...overrides,
 });
@@ -90,6 +148,10 @@ const openActionsMenu = () => {
 };
 
 describe('AutomationRow', () => {
+  beforeEach(() => {
+    mockRunAutomation.mockClear();
+  });
+
   it('renders the resolved workflow name when provided', () => {
     renderAutomationRow({ name: 'Resolved Workflow Name' });
 
@@ -146,6 +208,7 @@ describe('AutomationRow', () => {
     openActionsMenu();
 
     expect(screen.getByTestId('contextPreviewWorkflowButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextRunAutomationButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextOpenWorkflowButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextRemoveAutomationButton')).not.toBeInTheDocument();
   });
@@ -212,5 +275,45 @@ describe('AutomationRow', () => {
 
     expect(onDelete).not.toHaveBeenCalled();
     expect(screen.queryByTestId('contextAutomationDeleteConfirmModalStub')).not.toBeInTheDocument();
+  });
+
+  it('runs the workflow directly when Run is chosen and no manual inputs are required', () => {
+    renderAutomationRow({
+      canRun: true,
+      definition: workflowWithoutManualInputs,
+    });
+
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
+
+    expect(mockRunAutomation).toHaveBeenCalledWith('workflow-value-id');
+    expect(screen.queryByTestId('contextRunWorkflowInputsModalStub')).not.toBeInTheDocument();
+  });
+
+  it('opens the inputs modal when Run is chosen and manual inputs are required', () => {
+    renderAutomationRow({
+      canRun: true,
+      definition: workflowWithRequiredInputs,
+    });
+
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
+
+    expect(mockRunAutomation).not.toHaveBeenCalled();
+    expect(screen.getByTestId('contextRunWorkflowInputsModalStub')).toBeInTheDocument();
+  });
+
+  it('runs the workflow with submitted input values from the inputs modal', () => {
+    renderAutomationRow({
+      canRun: true,
+      definition: workflowWithRequiredInputs,
+    });
+
+    openActionsMenu();
+    fireEvent.click(screen.getByTestId('contextRunAutomationButton'));
+    fireEvent.click(screen.getByRole('button', { name: 'Submit inputs' }));
+
+    expect(mockRunAutomation).toHaveBeenCalledWith('workflow-value-id', { ticketId: 'T-1' });
+    expect(screen.queryByTestId('contextRunWorkflowInputsModalStub')).not.toBeInTheDocument();
   });
 });
