@@ -141,7 +141,15 @@ export const Service: FC<ServiceProps> = memo(function Service({
 
   const { inspect, loading } = riskScoreState;
   const { setQuery, deleteQuery } = useGlobalTime();
-  const observedService = useObservedService(documentEntityIdentifiers, scopeId);
+  const observedServiceGroup = useMemo(
+    () => ({ entityRecord: entityFromStoreResult.entityRecord, aliasRecords }),
+    [entityFromStoreResult.entityRecord, aliasRecords]
+  );
+  const observedService = useObservedService(
+    documentEntityIdentifiers,
+    scopeId,
+    observedServiceGroup
+  );
 
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({

@@ -7,12 +7,16 @@
 
 import type { Entity } from '../../../../common/api/entity_analytics';
 import {
+  combineEntityGroupFilters,
+  getEntityGroupLifecycle,
+  getEntityGroupRecords,
   getMaxCriticality,
   getResolvedFromRecordCount,
   getUnionEntitySources,
   getUnionWatchlistIds,
   getWatchlistIds,
   isEntityGroupView,
+  mergeEntityGroupDetails,
 } from './entity_store_group_utils';
 
 describe('isEntityGroupView', () => {
@@ -116,6 +120,99 @@ describe('getUnionWatchlistIds', () => {
         withWatchlists(['wl-1', 'wl-3']),
       ])
     ).toEqual(['wl-2', 'wl-1', 'wl-3']);
+  });
+});
+
+describe('getEntityGroupRecords', () => {
+  it('returns the target followed by its aliases, dropping missing entries', () => {
+    expect(getEntityGroupRecords({ id: 'target' }, [{ id: 'alias' }])).toEqual([
+      { id: 'target' },
+      { id: 'alias' },
+    ]);
+    expect(getEntityGroupRecords(null, [{ id: 'alias' }])).toEqual([{ id: 'alias' }]);
+    expect(getEntityGroupRecords({ id: 'target' }, undefined)).toEqual([{ id: 'target' }]);
+    expect(getEntityGroupRecords(undefined, [])).toEqual([]);
+  });
+});
+
+describe('combineEntityGroupFilters', () => {
+  const build = (record: { name?: string }) =>
+    record.name ? { term: { 'host.name': record.name } } : undefined;
+
+  it('is undefined when no record yields a filter', () => {
+    expect(combineEntityGroupFilters([], build)).toBeUndefined();
+    expect(combineEntityGroupFilters([{}], build)).toBeUndefined();
+  });
+
+  it('returns a single filter unchanged', () => {
+    expect(combineEntityGroupFilters([{ name: 'a' }, {}], build)).toEqual({
+      term: { 'host.name': 'a' },
+    });
+  });
+
+  it('ORs several filters in a bool.should', () => {
+    expect(combineEntityGroupFilters([{ name: 'a' }, {}, { name: 'b' }], build)).toEqual({
+      bool: {
+        should: [{ term: { 'host.name': 'a' } }, { term: { 'host.name': 'b' } }],
+        minimum_should_match: 1,
+      },
+    });
+  });
+});
+
+describe('mergeEntityGroupDetails', () => {
+  it('returns the details untouched when there are no aliases', () => {
+    const details = { host: { name: 'a' } };
+    expect(mergeEntityGroupDetails(details, [])).toBe(details);
+    expect(mergeEntityGroupDetails(details, undefined)).toBe(details);
+  });
+
+  it('keeps agreeing scalars and turns disagreeing scalars into a de-duplicated array', () => {
+    expect(
+      mergeEntityGroupDetails(
+        { host: { name: 'a', os: { family: 'linux' }, architecture: 'x86_64' } },
+        [
+          { host: { name: 'b', os: { family: 'linux' }, architecture: 'x86_64' } },
+          { host: { name: 'c', os: { family: 'windows' } } },
+        ]
+      )
+    ).toEqual({
+      host: { name: ['a', 'b', 'c'], os: { family: ['linux', 'windows'] }, architecture: 'x86_64' },
+    });
+  });
+
+  it('unions arrays and adds attributes only present on an alias', () => {
+    expect(
+      mergeEntityGroupDetails({ host: { ip: ['10.0.0.1', '10.0.0.2'] } }, [
+        { host: { ip: '10.0.0.2', mac: ['aa'] }, cloud: { provider: 'aws' } },
+      ])
+    ).toEqual({
+      host: { ip: ['10.0.0.1', '10.0.0.2'], mac: ['aa'] },
+      cloud: { provider: 'aws' },
+    });
+  });
+});
+
+describe('getEntityGroupLifecycle', () => {
+  const withLifecycle = (first_seen?: string, last_seen?: string, last_activity?: string) => ({
+    entity: { lifecycle: { first_seen, last_seen, last_activity } },
+  });
+
+  it('is null when no record carries lifecycle data', () => {
+    expect(getEntityGroupLifecycle([{}, { entity: {} }])).toEqual({
+      firstSeen: null,
+      lastSeen: null,
+    });
+  });
+
+  it('takes the earliest first-seen and latest last-seen across records', () => {
+    expect(
+      getEntityGroupLifecycle([
+        withLifecycle('2024-02-01T00:00:00.000Z', '2024-02-10T00:00:00.000Z'),
+        withLifecycle('2024-01-01T00:00:00.000Z', '2024-01-10T00:00:00.000Z'),
+        withLifecycle(undefined, '2024-02-05T00:00:00.000Z', '2024-03-01T00:00:00.000Z'),
+      ])
+    ).toEqual({ firstSeen: '2024-01-01T00:00:00.000Z', lastSeen: '2024-03-01T00:00:00.000Z' });
   });
 });
 

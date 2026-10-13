@@ -25,6 +25,7 @@ import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared
 import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 import type { EntityRiskScore, UserItem } from '../../../../../common/search_strategy';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { VisualizationsSection } from '../../../../flyout/entity_details/shared/components/right/visualizations_section';
 import { ResolutionSection } from '../../../../entity_analytics/components/entity_resolution/resolution_section';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
@@ -32,7 +33,6 @@ import {
   AnomaliesSection,
   EMPTY_ANOMALY_OVERVIEW,
 } from '../../../../entity_analytics/components/anomalies/anomalies_section';
-import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export type ObservedUserData = Omit<ObservedEntityData<UserItem>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -62,6 +62,11 @@ export interface ContentProps {
   isPreviewMode: boolean;
   /** When using Entity Store v2: entity record for asset criticality upsert. */
   entityRecord?: Entity;
+  /**
+   * Resolution-group aliases of `entityRecord` (empty outside the group view). Insights (alerts,
+   * misconfigurations, vulnerabilities) are then counted across the whole group.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
   noEntityInStore?: boolean;
@@ -116,6 +121,7 @@ export const Content = ({
   onAssetCriticalityChange,
   isPreviewMode,
   entityRecord,
+  aliasRecords,
   refetchEntityRecord,
   noEntityInStore = false,
   entityStoreV2Enabled,
@@ -225,6 +231,7 @@ export const Content = ({
       )}
       <EntityInsight
         entityRecord={entityRecord}
+        aliasRecords={aliasRecords}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
