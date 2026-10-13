@@ -38,7 +38,7 @@ export class InstallRuleTemplateRoute extends BaseAlertingRoute {
     access: 'internal' as const,
     summary: 'Install a rule template',
     description:
-      'Creates a rule from the request body and records the rule template it was installed from. The body is a create rule payload: the template defaults, plus any changes made before installing.',
+      'Creates a rule from the request body and records the rule template it was installed from. The body is a create rule payload, including the template defaults plus any changes made before installing.',
   } as const;
   static schemas = {
     request: {
