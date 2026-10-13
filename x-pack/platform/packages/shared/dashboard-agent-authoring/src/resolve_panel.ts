@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
+import type { OperationFailure } from './utils';
+
+/**
+ * Type-agnostic primitives for inline panel content resolution: the resolution
+ * result, the failure helper, and the request fields shared by every panel type.
+ * Each renderer contributes its own request shape (see `operations/panels/<type>`),
+ * and the panels barrel aggregates them into the `ResolvePanelContent` contract,
+ * which the host implements and injects.
+ */
+
+/** Resolved panel content: the embeddable `type` plus its by-value `config`. */
+export type PanelContent = Pick<AttachmentPanel, 'type' | 'config'>;
+
+export type PanelContentAttempt =
+  | {
+      type: 'success';
+      panelContent: PanelContent;
+      authoringNote?: string;
+    }
+  | {
+      type: 'failure';
+      failure: OperationFailure;
+    };
+
+/** Operations that can trigger inline panel resolution. */
+export type InlinePanelOperationType = 'add_section' | 'add_panels' | 'edit_panels';
+
+/** One-sentence note describing a chart authored during the current turn. */
+export interface PanelAuthoringNote {
+  panelId: string;
+  authoringNote: string;
+}
+
+/**
+ * Fields common to every panel resolution request, independent of renderer.
+ * Per-renderer modules extend this with a `renderer` discriminator and their
+ * own payload (e.g. `panels/vis` adds the natural-language / ES|QL fields).
+ */
+export interface PanelResolutionRequestBase {
+  operationType: InlinePanelOperationType;
+  /** Human-facing identifier for failure attribution (panelId or the query). */
+  identifier: string;
+  /** Present when editing an existing panel; `edit_panels` has checked it matches the renderer. */
+  existingPanel?: AttachmentPanel;
+}
+
+export const createPanelFailureResult = (
+  type: OperationFailure['type'],
+  identifier: string,
+  error: string
+): Extract<PanelContentAttempt, { type: 'failure' }> => ({
+  type: 'failure',
+  failure: {
+    type,
+    identifier,
+    error,
+  },
+});

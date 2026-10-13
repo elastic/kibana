@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { SUBJECT_CLAIM_INDEX_NAME } from '../../../common/subjects/constants';
@@ -129,13 +130,33 @@ export class SubjectClaimsService {
 
   /** Maintenance: removes every claim in the space. */
   async deleteAllInSpace(spaceId: string): Promise<number> {
+    return this.deleteMatching([{ term: { spaceId } }]);
+  }
+
+  /** Maintenance: removes the claims the given investigations hold in the space. */
+  async deleteByConversationIds(conversationIds: string[], spaceId: string): Promise<number> {
+    if (conversationIds.length === 0) {
+      return 0;
+    }
+    return this.deleteMatching([
+      { term: { spaceId } },
+      { terms: { conversationId: conversationIds } },
+    ]);
+  }
+
+  /** Maintenance: removes every claim in every space. Callers authorize this themselves. */
+  async deleteAllAcrossSpaces(): Promise<number> {
+    return this.deleteMatching([]);
+  }
+
+  private async deleteMatching(filter: QueryDslQueryContainer[]): Promise<number> {
     let deleted = 0;
     for (let page = 0; page < MAX_DELETE_PAGES; page++) {
       const response = await this.search({
         track_total_hits: false,
         size: DELETE_PAGE_SIZE,
         _source: false,
-        query: { bool: { filter: [{ term: { spaceId } }] } },
+        query: { bool: { filter } },
       });
       const ids = response.hits.hits.flatMap((hit) => (hit._id !== undefined ? [hit._id] : []));
       if (ids.length === 0) {

@@ -83,6 +83,8 @@ export interface EntityStoreApiRequestHandlerContext {
   resolutionClient: ResolutionClient;
   entityResolutionRuleClient: ResolutionRulesClient;
   featureFlags: FeatureFlags;
+  /** Cloud feature flag gating the dual-process (priority + non-priority) extraction architecture. */
+  isDualProcessEnabled: () => Promise<boolean>;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
   security: SecurityPluginStart;

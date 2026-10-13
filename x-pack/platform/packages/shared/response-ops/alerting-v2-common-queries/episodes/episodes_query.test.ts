@@ -92,6 +92,12 @@ describe('duration lower bound flag', () => {
     );
   });
 
+  it('keeps the source field in the list query', () => {
+    const listQuery = buildEpisodesQuery(SPACE_ID).print('basic');
+
+    expect(listQuery).toMatch(/KEEP .*\bsource\b/);
+  });
+
   it('flags episodes whose start was not seen, in the list query only', () => {
     const listQuery = buildEpisodesQuery(SPACE_ID).print('basic');
     const baseQuery = buildEpisodesBaseQuery(SPACE_ID).print('basic');

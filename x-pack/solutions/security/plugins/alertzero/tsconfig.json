@@ -27,6 +27,7 @@
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
     "@kbn/app-header",
+    "@kbn/deeplinks-management",
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",
@@ -69,6 +70,7 @@
     "@kbn/proposals-ui",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/core-chrome-browser-mocks",
-    "@kbn/context-engine-plugin"
+    "@kbn/context-engine-plugin",
+    "@kbn/task-manager-plugin"
   ]
 }

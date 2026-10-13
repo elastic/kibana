@@ -15,6 +15,7 @@ import type { CortexPageStore } from '../cortex/page_store';
 import type { SandboxSecretsClient } from '../sandbox_secrets';
 import type { CustomContextClient } from '../custom_context';
 import type { DecisionTreeStore } from '../decision_trees/store';
+import type { MemoryPageStore } from '../memory/page_store';
 import type { GetTriggerEmitter } from '../types';
 
 export type GetInvestigationsClient = (
@@ -35,6 +36,9 @@ export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
 
 export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
 
+/** Request-scoped store: reads and writes run as the caller's Elasticsearch user. */
+export type GetMemoryPageStore = (request: KibanaRequest) => MemoryPageStore;
+
 export interface NightshiftInvestigationsRouteHandlerResources
   extends DefaultRouteHandlerResources {
   getInvestigationsClient: GetInvestigationsClient;
@@ -48,4 +52,6 @@ export interface NightshiftInvestigationsRouteHandlerResources
   customContextClient: CustomContextClient;
   getDecisionTreeStore: GetDecisionTreeStore;
   isDecisionTreesEnabled: () => boolean;
+  getMemoryPageStore: GetMemoryPageStore;
+  isMemoryEnabled: () => boolean;
 }

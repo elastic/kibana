@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/core-http-browser'
   - '@kbn/app-header'
+  - '@kbn/deeplinks-management'
   - '@kbn/deeplinks-security'
   - '@kbn/deeplinks-workflows'
   - '@kbn/spaces-plugin'
@@ -81,6 +82,7 @@ dependsOn:
   - '@kbn/core-chrome-browser-context-mocks'
   - '@kbn/core-chrome-browser-mocks'
   - '@kbn/context-engine-plugin'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod

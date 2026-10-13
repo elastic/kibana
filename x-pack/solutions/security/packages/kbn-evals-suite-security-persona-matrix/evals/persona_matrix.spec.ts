@@ -9,7 +9,11 @@ import { tags } from '@kbn/scout';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { evaluate } from '../src/evaluate';
 import { personaMatrixDataset } from '../src/datasets';
-import { seedChrysalisAlerts, cleanupChrysalisAlerts } from '../src/fixtures/chrysalis_seed';
+import {
+  seedChrysalisAlerts,
+  cleanupChrysalisAlerts,
+  seedProfile,
+} from '../src/fixtures/chrysalis_seed';
 import {
   seedPersonaMatrixTools,
   cleanupPersonaMatrixTools,
@@ -23,7 +27,6 @@ evaluate.describe('Security Persona Matrix', { tag: tags.stateful.classic }, () 
   evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
     await seedChrysalisAlerts({ esClient: esClient as unknown as EsClient, log, count: 3 });
     log.info('[persona-matrix] seeded Chrysalis alerts');
-    const seedProfile = process.env.SEED_PROFILE === 'parity' ? 'parity' : 'minimal';
     await seedPersonaMatrixTools({ kbnClient, log, parity: seedProfile === 'parity' });
     log.info(
       `[persona-matrix] seeded persona-matrix tools (profile: ${seedProfile}${

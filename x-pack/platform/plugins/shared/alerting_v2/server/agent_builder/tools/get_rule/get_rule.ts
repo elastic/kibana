@@ -86,7 +86,7 @@ export const getRuleTool = ({
           code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_GET_RULE_FAILED,
           labels: {
             rule_id: ruleId,
-            episode_id: alertId,
+            alert_id: alertId,
             space_id: toolContext.spaceId,
           },
           error,

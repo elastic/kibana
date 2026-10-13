@@ -25,6 +25,7 @@ import {
   ChatTriggerMode,
   ConversationOriginType,
   ConversationRoundStatus,
+  EventActorType,
   ExecutionStatus,
   TimelineEventType,
   createRequestAbortedError,
@@ -92,6 +93,7 @@ jest.mock('./task/heartbeat_reporter', () => ({
 
 const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
+const mockTaskManagerRunSoon = jest.fn();
 
 import { createAgentExecutionService } from './execution_service';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
@@ -102,6 +104,7 @@ describe('AgentExecutionService', () => {
   const taskManager = {
     schedule: mockTaskManagerSchedule,
     ensureScheduled: mockTaskManagerEnsureScheduled,
+    runSoon: mockTaskManagerRunSoon,
   } as any;
 
   const uiSettings = {
@@ -156,6 +159,7 @@ describe('AgentExecutionService', () => {
   const service = createAgentExecutionService({
     logger,
     elasticsearch,
+    security: {} as any,
     taskManager,
     inference,
     conversationService: conversationService as any,
@@ -236,6 +240,50 @@ describe('AgentExecutionService', () => {
           scope: ['agent-builder'],
         }),
         { request, cloneApiKey: true }
+      );
+      expect(mockTaskManagerRunSoon).not.toHaveBeenCalled();
+    });
+
+    it('requests an immediate claim of the scheduled task when asked to', async () => {
+      mockTaskManagerRunSoon.mockResolvedValue({ id: 'task-id' });
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+        requestImmediateClaim: true,
+      });
+
+      expect(mockTaskManagerRunSoon).toHaveBeenCalledWith(`agent-${result.executionId}`, {
+        requestImmediateClaim: true,
+      });
+      expect(mockTaskManagerRunSoon.mock.invocationCallOrder[0]).toBeGreaterThan(
+        mockTaskManagerEnsureScheduled.mock.invocationCallOrder[0]
+      );
+    });
+
+    it('does not fail the execution when the immediate claim request fails', async () => {
+      mockTaskManagerRunSoon.mockRejectedValue(new Error('task is already running'));
+
+      const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request: httpServerMock.createKibanaRequest(),
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+        },
+        useTaskManager: true,
+        requestImmediateClaim: true,
+      });
+      await new Promise(process.nextTick);
+
+      expect(result.executionId).toBeDefined();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Could not request an immediate claim')
       );
     });
   });
@@ -745,14 +793,22 @@ describe('AgentExecutionService', () => {
       } as never);
 
       await service.abortExecution('exec-1', {
-        reason: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+        reason: {
+          source: 'api',
+          actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+        },
         waitForTerminal: false,
       });
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
         ExecutionStatus.aborted,
-        { abortReason: { source: 'api', actor: { id: 'u1', username: 'alice' } } }
+        {
+          abortReason: {
+            source: 'api',
+            actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+          },
+        }
       );
     });
 
@@ -778,7 +834,10 @@ describe('AgentExecutionService', () => {
         status: ExecutionStatus.running,
       } as never);
 
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // the client mock's create() answers with a fixed id, so match the aborted id loosely
@@ -789,7 +848,7 @@ describe('AgentExecutionService', () => {
           abortReason: {
             source: 'caller',
             parent_execution_id: 'parent-1',
-            actor: { id: 'u1', username: 'alice' },
+            actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
           },
         }
       );
@@ -1272,6 +1331,26 @@ describe('AgentExecutionService', () => {
       expect(events[0].id).toBe(`${roundId}::user_message`);
     });
 
+    it('writes nothing to an existing conversation it does not store, and records the run as such', async () => {
+      await converse({ storeConversation: false });
+
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      expect(conversationClient.create).not.toHaveBeenCalled();
+      const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+      expect(agentParams).toMatchObject({
+        conversationId: 'conversation-1',
+        storeConversation: false,
+        conversationOperation: 'UPDATE',
+      });
+    });
+
+    it('writes the opening user message without waiting for a refresh', async () => {
+      await converse();
+
+      const [, options] = conversationClient.appendEvents.mock.calls[0];
+      expect(options).toMatchObject({ refresh: false });
+    });
+
     it('falls back to the conversation owner when the requester has no author, as the round rewrite does', async () => {
       await converse();
 
@@ -1430,6 +1509,8 @@ describe('AgentExecutionService', () => {
       expect(events[0]).toMatchObject({ data: { message: 'Pool limit is now 200' } });
       // A standalone message must not look round-derived, or a round write would drop it.
       expect(events[0].id).not.toContain('::user_message');
+      // The caller refreshes its conversation list from the response, so the write waits for it.
+      expect(conversationClient.appendEvents.mock.calls[0][1]).not.toHaveProperty('refresh');
 
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
       expect(mockHandleAgentExecution).not.toHaveBeenCalled();
