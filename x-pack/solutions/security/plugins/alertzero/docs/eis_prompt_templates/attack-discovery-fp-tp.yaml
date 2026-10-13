@@ -10,23 +10,17 @@ variables_schema:
       type: string
       maxLength: 50000
     cited_alerts:
-      type: array
-      maxItems: 100
-      items:
-        type: string
-        maxLength: 8000
+      type: string
+      maxLength: 200000
+      description: JSON text of the cited alert hits.
     entities:
-      type: array
-      maxItems: 50
-      items:
-        type: string
-        maxLength: 4000
+      type: string
+      maxLength: 200000
+      description: JSON text of the entity-store hits.
     events:
-      type: array
-      maxItems: 50
-      items:
-        type: string
-        maxLength: 8000
+      type: string
+      maxLength: 200000
+      description: JSON text of the raw-event hits.
     entities_failed:
       type: boolean
     events_failed:
@@ -66,22 +60,20 @@ messages:
       {{ .discovery }}
       </discovery>
       <cited_alerts>
-      {{ json .cited_alerts }}
+      {{ .cited_alerts }}
       </cited_alerts>
       <entities failed="{{ .entities_failed }}">
-      {{ json .entities }}
+      {{ .entities }}
       </entities>
       <events failed="{{ .events_failed }}">
-      {{ json .events }}
+      {{ .events }}
       </events>
 examples:
   - name: empty-world
     variables:
       discovery: 'Discovery claiming credential theft on host-a'
-      cited_alerts:
-        - '_id alert-1 | host.name host-a | rule: Credential Access'
-        - '_id alert-2 | host.name host-a | rule: Suspicious PowerShell'
-      entities: []
-      events: []
+      cited_alerts: '[{"_id":"alert-1","host.name":"host-a"},{"_id":"alert-2","host.name":"host-a"}]'
+      entities: '[]'
+      events: '[]'
       entities_failed: false
       events_failed: false

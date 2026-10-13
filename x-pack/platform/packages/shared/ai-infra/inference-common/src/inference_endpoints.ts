@@ -87,6 +87,13 @@ export interface EisInferenceEndpointCapabilities {
     max_input_tokens?: number;
     max_output_tokens?: number;
   };
+  /**
+   * Present when EIS requires this endpoint to be called with a prompt template
+   * instead of caller-authored messages.
+   */
+  templates?: {
+    policy?: 'none' | 'required';
+  };
 }
 
 export type EisInferenceEndpointMetadata = {

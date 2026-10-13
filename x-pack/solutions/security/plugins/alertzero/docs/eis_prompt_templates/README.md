@@ -1,8 +1,8 @@
 # EIS prompt templates (draft)
 
-Proposed prompt templates for OpenAI cyber models on the Elastic Inference Service. EIS owns the files, renders them, and rejects raw `messages` when an endpoint's `capabilities.templates.policy` is `required`. Kibana does not load this directory.
+Proposed prompt templates for OpenAI cyber models on the Elastic Inference Service. EIS owns and renders these files. Kibana pins the filename stem as `template.id` and does not load this directory at runtime.
 
-The filename stem is the template id. Kibana pins that id and sends `template.variables`. When the selected connector is not template-only, Kibana keeps sending `messages` as it does today.
+When the selected connector advertises `capabilities.templates.policy: required`, Kibana sends `{ template: { id, variables } }` and omits `messages`. Any other connector keeps today's messages path, and the template fields are ignored. A template-only connector with no pinned id for that call is not sent messages.
 
 These three cover the current messages-only calls:
 

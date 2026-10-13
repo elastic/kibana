@@ -20,6 +20,7 @@ import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
   getDefaultAttackDiscoveryGraph,
+  resolveAttackDiscoveryTemplateCompletion,
 } from '.';
 import { getLlmType } from '../../lib/helpers/get_llm_type';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
@@ -110,6 +111,11 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     },
   });
 
+  const completeWithTemplate = await resolveAttackDiscoveryTemplateCompletion({
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    connectorId,
+  });
+
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
@@ -125,6 +131,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     replacements,
     size,
     start,
+    ...(completeWithTemplate ? { completeWithTemplate } : {}),
   });
 
   logger.debug(() => `Invoking Attack Discovery graph with ${alerts.length} pre-retrieved alerts`);

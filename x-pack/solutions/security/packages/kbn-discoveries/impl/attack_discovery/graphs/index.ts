@@ -29,3 +29,14 @@ export type {
   InvokeAttackDiscoveryGraphWithDocs,
   InvokeAttackDiscoveryGraphWithDocsParams,
 } from './invoke_attack_discovery_graph';
+
+export {
+  ATTACK_DISCOVERY_TEMPLATE_ID,
+  createAttackDiscoveryTemplateCompletion,
+  resolveAttackDiscoveryTemplateCompletion,
+} from './template_completion';
+export type {
+  AttackDiscoveryTemplateCompletion,
+  AttackDiscoveryTemplatePhase,
+  AttackDiscoveryTemplateRequest,
+} from './template_completion';

@@ -79,10 +79,18 @@ export {
 } from './impl/attack_discovery/graphs';
 export type {
   AttackDiscoveryPrompts,
+  AttackDiscoveryTemplateCompletion,
+  AttackDiscoveryTemplatePhase,
+  AttackDiscoveryTemplateRequest,
   CombinedPrompts,
   DefaultAttackDiscoveryGraph,
   GenerationPrompts,
   GetDefaultAttackDiscoveryGraphParams,
+} from './impl/attack_discovery/graphs';
+export {
+  ATTACK_DISCOVERY_TEMPLATE_ID,
+  createAttackDiscoveryTemplateCompletion,
+  resolveAttackDiscoveryTemplateCompletion,
 } from './impl/attack_discovery/graphs';
 export {
   filterHallucinatedAlerts,

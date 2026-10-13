@@ -147,6 +147,7 @@ export {
   getContextWindowSize,
   contextWindowFromModelName,
   getSupportedReasoningEffortLevels,
+  isTemplateRequiredConnector,
   validateReasoningEffort,
   type InferenceConnector,
   type InferenceConnectorCapabilities,

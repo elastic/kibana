@@ -6,6 +6,7 @@
  */
 
 import type { InferenceConnector } from './connectors';
+import type { EisInferenceEndpointMetadata } from '../inference_endpoints';
 import { getModelDefinition } from './known_models';
 import { getConnectorDefaultModel } from './connector_config';
 import { elasticModelDictionary } from '../const';
@@ -36,6 +37,13 @@ export const getContextWindowSize = (connector: InferenceConnector): number | un
  *
  * @returns The advertised levels, or `undefined` when support is unknown.
  */
+/**
+ * True when EIS will reject raw messages for this endpoint and requires `template`.
+ */
+export const isTemplateRequiredConnector = (
+  connector: Pick<InferenceConnector, 'metadata'> | { metadata?: EisInferenceEndpointMetadata }
+): boolean => connector.metadata?.capabilities?.templates?.policy === 'required';
+
 export const getSupportedReasoningEffortLevels = (
   connector: InferenceConnector
 ): string[] | undefined => {

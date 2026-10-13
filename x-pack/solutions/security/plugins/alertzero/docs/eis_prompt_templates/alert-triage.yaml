@@ -4,26 +4,16 @@ owner: security
 variables_schema:
   type: object
   additionalProperties: false
-  required: [alerts]
+  required: [alerts_text]
   properties:
-    alerts:
-      type: array
-      maxItems: 50
-      items:
-        type: object
-        additionalProperties: false
-        required: [id, text]
-        properties:
-          id:
-            type: string
-            maxLength: 512
-          text:
-            type: string
-            maxLength: 8000
+    alerts_text:
+      type: string
+      maxLength: 200000
+      description: The batch already rendered as <alert id="..."> blocks. One verdict per id inside this text.
 messages:
   - role: system
     content: |
-      Classify every alert you are given. Return one verdict per alert id, in the same order, and no extras. Copy each id verbatim.
+      Classify every alert in the user message. Each alert is an <alert id="..."> block. Return one verdict per alert id, in the same order, and no extras. Copy each id verbatim.
 
       classification is false_positive, true_positive, or inconclusive.
       confidence_score is a number from 0 to 1.
@@ -45,12 +35,8 @@ messages:
       }
   - role: user
     content: |
-      <alerts>
-      {{ json .alerts }}
-      </alerts>
+      {{ .alerts_text }}
 examples:
   - name: one-alert
     variables:
-      alerts:
-        - id: abc123
-          text: 'rule: Unusual AWS API call | user: analyst@example.com | host: jump-01'
+      alerts_text: '<alert id="abc123">rule: Unusual AWS API call | user: analyst@example.com | host: jump-01</alert>'

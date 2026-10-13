@@ -57,6 +57,14 @@ export type InferenceAdapterChatCompleteOptions = {
   maxContentLength?: number;
   cacheControl?: ChatCompleteCacheControl;
   sessionId?: string;
+  /**
+   * EIS prompt template. Only the inference endpoint adapter sends this.
+   * When set, that adapter omits messages and tools.
+   */
+  template?: {
+    id: string;
+    variables: Record<string, unknown>;
+  };
 } & ToolOptions;
 
 /**
