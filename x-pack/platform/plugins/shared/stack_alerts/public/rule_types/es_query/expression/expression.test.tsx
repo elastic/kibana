@@ -160,7 +160,7 @@ const applicationMock = {
   navigateToUrl: jest.fn(),
 };
 const mockIsAlertingV2Enabled = jest.fn(() => true);
-const settingsMock = { globalClient: { get: mockIsAlertingV2Enabled } };
+const settingsMock = { globalClient: { get: mockIsAlertingV2Enabled, isDeclared: () => true } };
 
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>
   Promise.resolve(searchSourceMock)
