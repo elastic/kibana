@@ -352,11 +352,8 @@ export function QuickSearchVisor({
   }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
   const hasNoSource = useMemo(() => !getIndexPatternFromESQLQuery(query), [query]);
-  // KQL needs a source from the editor, so AI is the only usable mode while the editor has none.
-  const isKqlDisabled = hasNoSource && showAskAiButton;
-  const isAiUnavailable = !isNlToEsqlEnabled || hasConnector === false;
-  const isVisorInputDisabled = hasNoSource && isAiUnavailable;
-  const isKqlMode = !isKqlDisabled && visorMode === VisorMode.KQL;
+  // KQL needs a source from the editor. AI is the only usable mode while there is none, and without AI the input is disabled.
+  const isKqlMode = visorMode === VisorMode.KQL && !(hasNoSource && showAskAiButton);
   const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible);
 
   if (!KQLComponent) {
@@ -368,7 +365,7 @@ export function QuickSearchVisor({
       <VisorLayout
         showModeToggle={showAskAiButton}
         isKqlMode
-        isKqlDisabled={isKqlDisabled}
+        isKqlDisabled={hasNoSource}
         onModeChange={onVisorModeChange}
         styles={styles}
         isVisible={isVisible}
@@ -381,8 +378,8 @@ export function QuickSearchVisor({
             bubbleSubmitEvent={false}
             query={{ query: searchValue, language: 'kuery' }}
             disableAutoFocus={true}
-            isDisabled={isVisorInputDisabled}
-            placeholder={isVisorInputDisabled ? kqlNoSourcePlaceholder : searchPlaceholder}
+            isDisabled={hasNoSource}
+            placeholder={hasNoSource ? kqlNoSourcePlaceholder : searchPlaceholder}
             onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
             onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
             appName="esqlEditorVisor"
@@ -407,7 +404,7 @@ export function QuickSearchVisor({
     <VisorLayout
       showModeToggle={showAskAiButton}
       isKqlMode={false}
-      isKqlDisabled={isKqlDisabled}
+      isKqlDisabled={hasNoSource}
       onModeChange={onVisorModeChange}
       styles={styles}
       isVisible={isVisible}

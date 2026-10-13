@@ -9,8 +9,8 @@
 
 import { selectRecommendedQueries } from './select_recommended_queries';
 
-const query = (label: string) => ({ label, description: '', queryString: `FROM logs | ${label}` });
-const queries = (...labels: string[]) => labels.map(query);
+const queries = (...labels: string[]) =>
+  labels.map((label) => ({ label, description: '', queryString: `FROM logs | ${label}` }));
 const labels = (items: Array<{ label: string }>) => items.map((item) => item.label);
 
 describe('selectRecommendedQueries', () => {
@@ -20,7 +20,6 @@ describe('selectRecommendedQueries', () => {
         selectRecommendedQueries({
           extensionQueries: [],
           staticQueries: queries('s1', 's2', 's3', 's4', 's5', 's6', 's7'),
-          sourceCommand: 'FROM',
         })
       )
     ).toEqual(['s1', 's2', 's3', 's4', 's5', 's6']);
@@ -30,47 +29,32 @@ describe('selectRecommendedQueries', () => {
     expect(
       labels(
         selectRecommendedQueries({
-          extensionQueries: queries('e1'),
+          extensionQueries: queries('e1', 'e2'),
           staticQueries: queries('s1', 's2'),
-          sourceCommand: 'FROM',
         })
       )
-    ).toEqual(['e1', 's1', 's2']);
+    ).toEqual(['e1', 'e2', 's1', 's2']);
   });
 
-  it('keeps two static queries visible when many extension queries match a FROM source', () => {
+  it('fills the slots the extension queries leave with the static ones', () => {
     expect(
       labels(
         selectRecommendedQueries({
-          extensionQueries: queries('e1', 'e2', 'e3', 'e4', 'e5'),
-          staticQueries: queries('s1', 's2', 's3'),
-          sourceCommand: 'FROM',
+          extensionQueries: queries('e1', 'e2', 'e3'),
+          staticQueries: queries('s1', 's2', 's3', 's4', 's5'),
         })
       )
-    ).toEqual(['e1', 'e2', 'e3', 'e4', 's1', 's2']);
+    ).toEqual(['e1', 'e2', 'e3', 's1', 's2', 's3']);
   });
 
-  it('gives all the slots to the extension queries of a TS source', () => {
+  it('shows no static query when there are enough extension queries to fill the slots', () => {
     expect(
       labels(
         selectRecommendedQueries({
           extensionQueries: queries('e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'e7'),
           staticQueries: queries('s1', 's2'),
-          sourceCommand: 'TS',
         })
       )
     ).toEqual(['e1', 'e2', 'e3', 'e4', 'e5', 'e6']);
-  });
-
-  it('fills the slots a TS source leaves with the static queries', () => {
-    expect(
-      labels(
-        selectRecommendedQueries({
-          extensionQueries: queries('e1'),
-          staticQueries: queries('s1', 's2', 's3', 's4', 's5', 's6'),
-          sourceCommand: 'TS',
-        })
-      )
-    ).toEqual(['e1', 's1', 's2', 's3', 's4', 's5']);
   });
 });

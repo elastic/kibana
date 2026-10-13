@@ -12,14 +12,10 @@ import useObservable from 'react-use/lib/useObservable';
 import { getEditorExtensions } from '@kbn/esql-utils';
 import { ESQL_CLASSIC_SOLUTION_ID } from '@kbn/esql-types';
 import type { ESQLRegistrySolutionId, RecommendedQuery } from '@kbn/esql-types';
+import type { QueryTemplate } from '@kbn/esql-language';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import type { RecommendedQueryItem } from './recommended_queries';
 
-const toRecommendedQueryItem = ({
-  name,
-  query,
-  description,
-}: RecommendedQuery): RecommendedQueryItem => ({
+const toQueryTemplate = ({ name, query, description }: RecommendedQuery): QueryTemplate => ({
   label: name,
   description: description ?? '',
   queryString: query,
@@ -31,11 +27,11 @@ export const useExtensionQueries = ({
 }: {
   sourceQuery?: string;
   isEnabled: boolean;
-}): { queries: RecommendedQueryItem[]; isLoading: boolean } => {
+}): { queries: QueryTemplate[]; isLoading: boolean } => {
   const { core } = useDiscoverServices();
   const activeSolutionNavId = useObservable(core.chrome.getActiveSolutionNavId$());
   const solutionId = (activeSolutionNavId as ESQLRegistrySolutionId) ?? ESQL_CLASSIC_SOLUTION_ID;
-  const [queries, setQueries] = useState<RecommendedQueryItem[]>([]);
+  const [queries, setQueries] = useState<QueryTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(isEnabled);
 
   useEffect(() => {
@@ -56,7 +52,7 @@ export const useExtensionQueries = ({
     )
       .then((extensions) => {
         if (abortController.signal.aborted) return;
-        setQueries((extensions?.recommendedQueries ?? []).map(toRecommendedQueryItem));
+        setQueries((extensions?.recommendedQueries ?? []).map(toQueryTemplate));
         setIsLoading(false);
       })
       .catch(() => {

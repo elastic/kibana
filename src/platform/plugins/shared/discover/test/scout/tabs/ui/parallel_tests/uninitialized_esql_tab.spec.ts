@@ -63,23 +63,20 @@ spaceTest.describe(
       }
     );
 
-    spaceTest('does not open query history on a new ES|QL tab', async ({ pageObjects }) => {
-      const { discover, unifiedTabs, esqlEditor } = pageObjects;
-      const historyPanel = esqlEditor.historyPanel;
+    spaceTest(
+      'builds the recommended queries from the source of the previous tab',
+      async ({ pageObjects }) => {
+        const { discover, unifiedTabs } = pageObjects;
 
-      await discover.goto({ queryMode: 'esql' });
-      await discover.waitUntilSearchingHasFinished();
+        await discover.goto({ queryMode: 'esql' });
+        await discover.waitUntilSearchingHasFinished();
+        await unifiedTabs.createNewTab();
 
-      await unifiedTabs.createNewTab();
-
-      await expect(historyPanel).toBeHidden();
-      await esqlEditor.setQuery(QUERY);
-
-      await discover.submitQuery();
-      await discover.waitUntilSearchingHasFinished();
-
-      await expect(historyPanel).toBeHidden();
-    });
+        await expect(discover.getRecommendedQueries()).toBeVisible();
+        await expect(discover.getRecommendedQueryRunButton('Search all fields')).toBeAttached();
+        await expect(discover.getRecommendedQueries()).toContainText('FROM logstash-*');
+      }
+    );
 
     spaceTest(
       'keeps manually opened query history open across searches',

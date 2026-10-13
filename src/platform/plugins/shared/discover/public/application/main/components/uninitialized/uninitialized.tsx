@@ -74,9 +74,8 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
         staticQueries: sources
           ? getRecommendedQueriesTemplates({ fromCommand: `FROM ${sources}`, timeField })
           : [],
-        sourceCommand,
       }),
-    [extensionQueries, sources, sourceCommand, timeField]
+    [extensionQueries, sources, timeField]
   );
   const onRunQuery = useCallback(
     (query: string) => {

@@ -23,6 +23,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import type { QueryTemplate } from '@kbn/esql-language';
 
 const RUN_BUTTON_CLASS = 'discoverRecommendedQuery__run';
 
@@ -48,14 +49,8 @@ const runLabel = (label: string) =>
     values: { label },
   });
 
-export interface RecommendedQueryItem {
-  label: string;
-  description: string;
-  queryString: string;
-}
-
 export interface RecommendedQueriesProps {
-  queries: readonly RecommendedQueryItem[];
+  queries: readonly QueryTemplate[];
   onRunQuery: (query: string) => void;
 }
 
@@ -63,7 +58,7 @@ const RecommendedQueryCard = ({
   query: { label, description, queryString },
   onRunQuery,
 }: {
-  query: RecommendedQueryItem;
+  query: QueryTemplate;
   onRunQuery: (query: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();

@@ -7,28 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RecommendedQueryItem } from './recommended_queries';
+import type { QueryTemplate } from '@kbn/esql-language';
 
 export const MAX_RECOMMENDED_QUERIES = 6;
-
-// Keeps the basics visible when a source matches many extension queries.
-const RESERVED_STATIC_QUERIES = 2;
 
 export const selectRecommendedQueries = ({
   extensionQueries,
   staticQueries,
-  sourceCommand,
 }: {
-  extensionQueries: readonly RecommendedQueryItem[];
-  staticQueries: readonly RecommendedQueryItem[];
-  sourceCommand: string;
-}): RecommendedQueryItem[] => {
-  // The static queries are FROM queries, so TS sources give the slots to their own extension queries.
-  const reservedSlots =
-    sourceCommand === 'FROM' ? Math.min(RESERVED_STATIC_QUERIES, staticQueries.length) : 0;
-
-  return [
-    ...extensionQueries.slice(0, MAX_RECOMMENDED_QUERIES - reservedSlots),
-    ...staticQueries,
-  ].slice(0, MAX_RECOMMENDED_QUERIES);
-};
+  extensionQueries: readonly QueryTemplate[];
+  staticQueries: readonly QueryTemplate[];
+}): QueryTemplate[] => [...extensionQueries, ...staticQueries].slice(0, MAX_RECOMMENDED_QUERIES);
