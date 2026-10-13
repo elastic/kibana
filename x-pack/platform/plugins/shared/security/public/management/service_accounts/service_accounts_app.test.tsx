@@ -60,7 +60,7 @@ const renderApp = async ({
   const getRoles = jest.fn().mockResolvedValue(roleOptions);
   const onCreated = jest.fn();
   const onDeleted = jest.fn();
-  const onDeleteError = jest.fn();
+  const onError = jest.fn();
   const view = renderWithI18n(
     <EuiProvider>
       <MockAppHeaderProvider>
@@ -73,7 +73,7 @@ const renderApp = async ({
             createRoleUrl={canCreateRole ? '/app/management/security/roles/edit' : undefined}
             onCreated={onCreated}
             onDeleted={onDeleted}
-            onDeleteError={onDeleteError}
+            onError={onError}
           />
         </Router>
       </MockAppHeaderProvider>
@@ -89,7 +89,7 @@ const renderApp = async ({
     getRoles,
     onCreated,
     onDeleted,
-    onDeleteError,
+    onError,
     unmount: view.unmount,
   };
 };
@@ -481,7 +481,7 @@ describe('ServiceAccountsApp', () => {
     });
 
     it('refreshes the directory when the account was already deleted elsewhere', async () => {
-      const { list, deleteAccount, onDeleted, onDeleteError } = await renderApp({
+      const { list, deleteAccount, onDeleted, onError } = await renderApp({
         pathname: '/',
         serviceAccounts: [directoryEntry],
       });
@@ -500,7 +500,7 @@ describe('ServiceAccountsApp', () => {
       await waitFor(() =>
         expect(onDeleted).toHaveBeenCalledWith(directoryEntry, { status: 'already_deleted' })
       );
-      expect(onDeleteError).not.toHaveBeenCalled();
+      expect(onError).not.toHaveBeenCalled();
       expect(screen.queryByTestId('serviceAccountDeleteConfirmModal')).not.toBeInTheDocument();
       await waitFor(() => expect(list).toHaveBeenCalledTimes(2));
     });
@@ -510,6 +510,31 @@ describe('ServiceAccountsApp', () => {
 
       expect(await screen.findByTestId('serviceAccountsTable')).toBeVisible();
       expect(screen.queryByTestId('serviceAccountsDeleteAction')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('viewing the workloads of an account', () => {
+    it('opens the workloads bound to the account from its row', async () => {
+      const { listWorkloads } = await renderApp({
+        pathname: '/',
+        serviceAccounts: [
+          {
+            id: 'kibana/workflow-runner',
+            name: 'workflow-runner',
+            roles: ['workflow_reader'],
+            enabled: true,
+            assumable: true,
+            workloadCount: 2,
+          },
+        ],
+      });
+
+      fireEvent.click(await screen.findByTestId('serviceAccountViewWorkloads'));
+
+      const modal = await screen.findByTestId('serviceAccountWorkloadsModal');
+      expect(listWorkloads).toHaveBeenCalledWith('kibana/workflow-runner');
+      fireEvent.click(within(modal).getByTestId('serviceAccountWorkloadsModalClose'));
+      expect(screen.queryByTestId('serviceAccountWorkloadsModal')).not.toBeInTheDocument();
     });
   });
 });
