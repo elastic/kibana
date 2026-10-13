@@ -74,10 +74,7 @@ const collect = (results: SignalResult[]): Pick<Evidence, 'entities' | 'facts'> 
   return { entities, facts };
 };
 
-/**
- * Runs the signals through a bounded pool, each in its own span, within the gather budget. A failed
- * signal is recorded in its outcome; only an aborted job throws. Evidence follows signal order.
- */
+/** Runs the signals in a bounded pool within the gather budget; a failure is recorded, only an abort throws. */
 export const runSignals = async (
   signals: readonly Signal[],
   input: SignalInput

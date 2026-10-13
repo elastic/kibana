@@ -25,8 +25,8 @@ import type { VerificationSummary } from '../../../../../common/api/entity_analy
 import { Brief } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { Evidence } from '../signals';
 import { withBriefSpan } from '../telemetry';
-import type { VerifyBriefResult } from '../verification/verify_brief';
-import { verifyBrief } from '../verification/verify_brief';
+import type { VerifyBriefResult } from '../verification/verify';
+import { verifyBrief } from '../verification/verify';
 import { formatEvidence } from './format_evidence';
 import {
   buildSystemPrompt,
@@ -60,17 +60,18 @@ export class BriefCompositionError extends Error {
 const NON_RETRYABLE_STATUSES = new Set([400, 401, 402, 403, 404, 405, 406, 407, 409]);
 
 /** The plugin's default retry policy minus tool validation errors, which get our single repair. */
-const shouldRetry = (error: Error): boolean =>
-  isInferenceProviderError(error)
-    ? error.status === undefined || !NON_RETRYABLE_STATUSES.has(error.status)
-    : isInferenceRequestAbortedError(error);
+const shouldRetry = (error: Error): boolean => {
+  if (isInferenceProviderError(error)) {
+    return error.status === undefined || !NON_RETRYABLE_STATUSES.has(error.status);
+  }
+  return isInferenceRequestAbortedError(error);
+};
 
 const parseArguments = (raw: string | undefined): ToolCallArguments => {
   try {
     const parsed: unknown = JSON.parse(raw ?? '');
-    return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)
-      ? { ...parsed }
-      : {};
+    const isObject = typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+    return isObject ? { ...parsed } : {};
   } catch {
     return {};
   }
@@ -79,30 +80,22 @@ const parseArguments = (raw: string | undefined): ToolCallArguments => {
 /** The problems go back as the response to the model's tool call, or as a user message without one. */
 const repairMessages = (toolCall: ToolCall | undefined, errors: string[]): Message[] => {
   const problems = errors.slice(0, 20).map((error) => error.slice(0, 400));
-  return toolCall
-    ? [
-        { role: MessageRole.Assistant, content: '', toolCalls: [toolCall] },
-        {
-          role: MessageRole.Tool,
-          name: SUBMIT_BRIEF_TOOL_NAME,
-          toolCallId: toolCall.toolCallId,
-          response: { status: 'rejected', instructions: REPAIR_INSTRUCTIONS, problems },
-        },
-      ]
-    : [
-        {
-          role: MessageRole.User,
-          content: `${REPAIR_INSTRUCTIONS}\n\nProblems:\n${problems
-            .map((p) => `- ${p}`)
-            .join('\n')}`,
-        },
-      ];
+  if (!toolCall) {
+    const list = problems.map((problem) => `- ${problem}`).join('\n');
+    return [{ role: MessageRole.User, content: `${REPAIR_INSTRUCTIONS}\n\nProblems:\n${list}` }];
+  }
+  return [
+    { role: MessageRole.Assistant, content: '', toolCalls: [toolCall] },
+    {
+      role: MessageRole.Tool,
+      name: SUBMIT_BRIEF_TOOL_NAME,
+      toolCallId: toolCall.toolCallId,
+      response: { status: 'rejected', instructions: REPAIR_INSTRUCTIONS, problems },
+    },
+  ];
 };
 
-/**
- * Compose → verify → (one repair) → verified brief; a second failure is `llm_output`, a connector
- * failure `llm_error`. Calls are streamed to keep token usage when the plugin rejects a tool call.
- */
+/** Compose → verify → at most one repair; fails with `llm_output` or `llm_error`, keeping the tokens used. */
 export const composeBrief = async ({
   inferenceClient,
   evidence,
@@ -145,6 +138,7 @@ export const composeBrief = async ({
           tools: { [SUBMIT_BRIEF_TOOL_NAME]: getSubmitBriefTool() },
           toolChoice: { function: SUBMIT_BRIEF_TOOL_NAME },
           abortSignal,
+          // Streamed, so the token usage survives the plugin rejecting a tool call.
           stream: true,
           retryConfiguration: { retryOn: shouldRetry },
         })
@@ -212,8 +206,10 @@ export const composeBrief = async ({
       }
       const verified = verifyBrief(parsed.data, evidence, timeRange.range);
       verified.notes.forEach((note) => logger.debug(`Executive brief verification: ${note}`));
-      const errors = verified.structuralErrors;
-      return errors.length > 0 ? { toolCall, errors } : { toolCall, verified, errors };
+      if (verified.structuralErrors.length > 0) {
+        return { toolCall, errors: verified.structuralErrors };
+      }
+      return { toolCall, verified, errors: [] };
     });
   };
 
@@ -231,5 +227,5 @@ export const composeBrief = async ({
     );
   }
   const { brief, summary } = current.verified;
-  return { brief, verification: { ...summary, repaired }, ...(model ? { model } : {}), tokens };
+  return { brief, verification: { ...summary, repaired }, model, tokens };
 };

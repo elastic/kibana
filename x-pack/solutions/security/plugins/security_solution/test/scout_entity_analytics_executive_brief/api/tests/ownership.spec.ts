@@ -108,12 +108,12 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       });
       expect(defaultSpaceRead.body.job.id).toBe(jobId);
 
-      const { ownerId } = await getBriefDocId({
+      const { profileId } = await getBriefDocId({
         apiClient,
         headers: ownerHeaders,
         spaceId: 'default',
       });
-      expect(await countStoredBriefs(esClient, ownerId)).toBe(2);
+      expect(await countStoredBriefs(esClient, profileId)).toBe(2);
     }
   );
 
@@ -135,7 +135,7 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       expect(document.job).toMatchObject({ id: secondJobId, status: 'succeeded' });
 
       // Same document (deterministic id per owner and space), now holding the second job.
-      const { docId, ownerId } = await getBriefDocId({
+      const { docId, profileId } = await getBriefDocId({
         apiClient,
         headers: ownerHeaders,
         spaceId: 'default',
@@ -143,11 +143,11 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       const stored = await readStoredBrief(esClient, docId);
       expect(stored).toMatchObject({
         schemaVersion: 1,
-        owner: { id: ownerId },
+        profileId,
         spaceId: 'default',
         job: { id: secondJobId, status: 'succeeded' },
       });
-      expect(await countStoredBriefs(esClient, ownerId)).toBe(1);
+      expect(await countStoredBriefs(esClient, profileId)).toBe(1);
     }
   );
 });

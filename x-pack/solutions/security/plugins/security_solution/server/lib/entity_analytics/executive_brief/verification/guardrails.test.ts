@@ -31,10 +31,7 @@ const toClaim = (claim: Claim) =>
 
 type Levels = Partial<Record<AssessmentKey, AttentionLevel>>;
 
-/**
- * The valid brief at the given verdict level, with only the given assessments at the given levels
- * (and cited ids, where given).
- */
+/** The valid brief at `verdict`, with only the given assessments, at their levels and cited ids. */
 const brief = (
   verdict: AttentionLevel,
   assessments: Partial<Record<AssessmentKey, Claim>>

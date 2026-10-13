@@ -13,8 +13,7 @@ import {
   rawTextLimit,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { entityDisplayName, entityTypeOf } from '../signals/engine/entity_record';
-import type { BriefCheck } from './context';
-import { failClaim, mapAssessments } from './context';
+import type { CheckContext } from './verify';
 
 /** A `{{ field value }}` token (Attack Discovery's syntax). */
 export const MENTION_PATTERN = /\{\{\s*([\w.]+)\s+([^{}]*?)\s*\}\}/g;
@@ -34,10 +33,7 @@ const NAME_FIELD_BY_TYPE = {
 
 export const toMention = (euid: string): string => `{{ ${ENTITY_MENTION_FIELD} ${euid} }}`;
 
-/**
- * Trims prose to `max` visible characters, counting a mention as its display name, and to
- * `rawTextLimit(max)` raw characters. Cuts at a word boundary and never inside a mention.
- */
+/** Trims to `max` visible and `rawTextLimit(max)` raw characters, at a word boundary, never inside a mention. */
 export const clampVisible = (
   text: string,
   max: number,
@@ -75,14 +71,9 @@ export const clampVisible = (
   return `${kept.replace(/[\s,;:.-]+$/, '')}…`;
 };
 
-/**
- * Mentions: prose refers to entities as `{{ entity.id <euid> }}`. A token naming an EUID that is
- * not in the evidence fails its claim, like an invented id. A name-based token
- * (`{{ host.name web-01 }}`) is upgraded when exactly one evidence entity matches; other tokens
- * become plain text, and a token cut off by trimming is removed. Prose is then trimmed.
- */
-export const checkMentions: BriefCheck = (brief, context) => {
-  const { entities } = context;
+/** Upgrades or unlinks mentions, fails a claim that mentions an unknown EUID, and trims the prose. */
+export const checkMentions = (context: CheckContext): void => {
+  const { brief, entities } = context;
   const nameOf = (euid: string): string => {
     const record = entities.get(euid);
     return record ? entityDisplayName(record, euid) : euid;
@@ -99,13 +90,14 @@ export const checkMentions: BriefCheck = (brief, context) => {
   const prose = (key: AssessmentKey | undefined, text: string, max: number): string => {
     const resolved = text
       .replace(MENTION_PATTERN, (token, field: string, value: string) => {
+        if (field === ENTITY_MENTION_FIELD && entities.has(value)) {
+          return toMention(value);
+        }
         if (field === ENTITY_MENTION_FIELD) {
-          if (entities.has(value)) {
-            return toMention(value);
-          }
           unknown.set(key, [...(unknown.get(key) ?? []), value]);
           return token;
         }
+        // A name token naming exactly one entity becomes its EUID token; others become plain text.
         const matches = byName.get(`${field} ${value}`) ?? [];
         if (matches.length === 1) {
           return toMention(matches[0]);
@@ -121,20 +113,14 @@ export const checkMentions: BriefCheck = (brief, context) => {
     return clampVisible(resolved, max, nameOf);
   };
 
-  const result = {
-    verdict: {
-      ...brief.verdict,
-      headline: prose(undefined, brief.verdict.headline, BRIEF_TEXT_LIMITS.verdictHeadline),
-      summary: prose(undefined, brief.verdict.summary, BRIEF_TEXT_LIMITS.verdictSummary),
-    },
-    assessments: mapAssessments(brief.assessments, (assessment, key) => ({
-      ...assessment,
-      summary: prose(key, assessment.summary, BRIEF_TEXT_LIMITS.assessmentSummary),
-    })),
-  };
+  const { verdict } = brief;
+  verdict.headline = prose(undefined, verdict.headline, BRIEF_TEXT_LIMITS.verdictHeadline);
+  verdict.summary = prose(undefined, verdict.summary, BRIEF_TEXT_LIMITS.verdictSummary);
+  for (const [key, assessment] of context.assessments()) {
+    assessment.summary = prose(key, assessment.summary, BRIEF_TEXT_LIMITS.assessmentSummary);
+  }
   unknown.forEach((euids, key) =>
-    failClaim(
-      context,
+    context.fail(
       key,
       'citation',
       `its text mentions entities that are not in the evidence: ${uniq(euids).join(', ')}`
@@ -143,5 +129,4 @@ export const checkMentions: BriefCheck = (brief, context) => {
   if (unlinked.length > 0) {
     context.notes.push(`unlinked mentions: ${uniq(unlinked).join(', ')}`);
   }
-  return result;
 };

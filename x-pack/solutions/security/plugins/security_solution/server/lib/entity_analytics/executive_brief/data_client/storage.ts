@@ -19,7 +19,7 @@ const storageSettings = {
   name: EXECUTIVE_BRIEF_INDEX,
   schema: {
     properties: {
-      owner: types.object({ dynamic: false, properties: { id: types.keyword({}) } }),
+      profileId: types.keyword({}),
       spaceId: types.keyword({}),
       schemaVersion: types.long({ index: false, doc_values: false }),
       job: types.object({

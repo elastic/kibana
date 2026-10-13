@@ -8,9 +8,8 @@
 import { uniq } from 'lodash';
 import { getEntityRisk } from '../../../../../common/entity_analytics/executive_brief/entity_risk';
 import type { AssessmentKey } from '../../../../../common/entity_analytics/executive_brief/brief';
-import type { BriefCheck, CheckContext } from './context';
-import { assessmentsOf, citedFacts, failClaim, verdictFactIds } from './context';
 import { MENTION_PATTERN } from './mentions';
+import type { CheckContext } from './verify';
 
 const NUMBER_PATTERN = /\d+(?:,\d{3})*(?:\.\d+)?/g;
 
@@ -53,21 +52,16 @@ const toValue = (token: string): number => Number(token.replace(/,/g, ''));
 /** A value and the ways it may be written: rounded, one decimal, a share as a percentage. */
 const variants = (value: number): number[] => {
   const abs = Math.abs(value);
-  return [
-    abs,
-    Math.round(abs),
-    Math.round(abs * 10) / 10,
-    ...(abs > 0 && abs <= 1 ? [Math.round(abs * 100)] : []),
-  ];
+  const written = [abs, Math.round(abs), Math.round(abs * 10) / 10];
+  if (abs > 0 && abs <= 1) {
+    written.push(Math.round(abs * 100));
+  }
+  return written;
 };
 
-/**
- * The numbers a claim may quote: those of the facts it cites (including numbers in their titles
- * and details), the risk scores of the entities it names or cites, simple counts of what it cites,
- * and the window length.
- */
+/** What a claim may quote: its cited facts' numbers, its entities' risk scores, counts of both, and the window. */
 const allowedNumbers = (texts: string[], factIds: number[], context: CheckContext): Set<number> => {
-  const facts = citedFacts(context, factIds);
+  const facts = context.citedFacts(factIds);
   const euids = uniq([
     ...[...context.entities.keys()].filter((euid) => texts.some((text) => text.includes(euid))),
     ...facts.flatMap(({ entityIds }) => entityIds),
@@ -90,31 +84,13 @@ const allowedNumbers = (texts: string[], factIds: number[], context: CheckContex
   return new Set(values.filter(Number.isFinite).flatMap(variants));
 };
 
-/**
- * Numbers: every number in a claim's prose must come from what the claim cites (the verdict: what
- * its assessments cite), even when it appears elsewhere in the evidence. Otherwise an assessment is
- * dropped, or the verdict gets a structural error. Dates, times, ordinals, identifiers, mention
- * tokens and the evidence's entity ids and names are masked first.
- */
-export const checkNumbers: BriefCheck = (brief, context) => {
-  const claims: Array<{ key?: AssessmentKey; fields: Record<string, string>; factIds: number[] }> =
-    [
-      {
-        fields: {
-          'verdict.headline': brief.verdict.headline,
-          'verdict.summary': brief.verdict.summary,
-        },
-        factIds: verdictFactIds(brief, context),
-      },
-      ...assessmentsOf(brief.assessments)
-        .filter(([key]) => !context.dropped.has(key))
-        .map(([key, { summary, factIds }]) => ({
-          key,
-          fields: { [`assessments.${key}.summary`]: summary },
-          factIds,
-        })),
-    ];
-  claims.forEach(({ key, fields, factIds }) => {
+/** Fails a claim whose prose has a number that isn't in what it cites (the verdict: what its assessments cite). */
+export const checkNumbers = (context: CheckContext): void => {
+  const check = (
+    key: AssessmentKey | undefined,
+    fields: Record<string, string>,
+    factIds: number[]
+  ) => {
     const allowed = allowedNumbers(Object.values(fields), factIds, context);
     const unsupported = Object.entries(fields).flatMap(([path, text]) =>
       findNumbers(text, context)
@@ -122,13 +98,15 @@ export const checkNumbers: BriefCheck = (brief, context) => {
         .map((token) => `${path}: "${token}"`)
     );
     if (unsupported.length > 0) {
-      failClaim(
-        context,
-        key,
-        'number',
-        `numbers not found in the facts or entities it cites: ${uniq(unsupported).join(', ')}`
-      );
+      const tokens = uniq(unsupported).join(', ');
+      context.fail(key, 'number', `numbers not found in the facts or entities it cites: ${tokens}`);
     }
-  });
-  return brief;
+  };
+
+  const { headline, summary } = context.brief.verdict;
+  const verdictFields = { 'verdict.headline': headline, 'verdict.summary': summary };
+  check(undefined, verdictFields, context.verdictFactIds());
+  for (const [key, assessment] of context.assessments()) {
+    check(key, { [`assessments.${key}.summary`]: assessment.summary }, assessment.factIds);
+  }
 };

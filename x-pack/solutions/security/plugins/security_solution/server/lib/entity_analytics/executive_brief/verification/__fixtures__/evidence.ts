@@ -10,19 +10,14 @@ import type {
   Fact,
 } from '../../../../../../common/api/entity_analytics/executive_brief/common.gen';
 import type { Evidence } from '../../signals';
-import type { BriefCheck } from '../context';
-import { createCheckContext } from '../context';
+import { CheckContext } from '../verify';
 
 export const ROD = 'user:a.rodriguez@corp';
 const LAPTOP = 'host:laptop-fin03';
 export const DOCKER = 'host:docker-host-prod-01';
 const CHEN = 'user:j.chen';
 
-/**
- * - Fact 1: open critical attack discovery on ROD (privileged user), LAPTOP and DOCKER, 12 alerts.
- * - Fact 2: acknowledged high attack discovery on CHEN, 3 alerts.
- * - Fact 3: ROD at critical risk (92.5).
- */
+/** Facts: 1, an open critical discovery on ROD, LAPTOP and DOCKER; 2, an acknowledged high one; 3, ROD's risk. */
 export const FIXTURE_EVIDENCE: Evidence = {
   entities: {
     [ROD]: {
@@ -117,14 +112,14 @@ export const buildValidBrief = (): FullBrief => ({
   },
 });
 
-/** Runs one check against the evidence; returns the checked brief and the context it filled. */
+/** Runs one rule on a copy of `brief`; returns the context it filled, including the checked brief. */
 export const runCheck = (
-  check: BriefCheck,
+  check: (context: CheckContext) => void,
   brief: Brief,
   evidence: Evidence = FIXTURE_EVIDENCE,
   range?: string
-) => {
-  const context = createCheckContext(evidence, range);
-  const checked = check(brief, context);
-  return { ...context, brief: checked };
+): CheckContext => {
+  const context = new CheckContext(brief, evidence, range);
+  check(context);
+  return context;
 };

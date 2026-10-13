@@ -29,27 +29,25 @@ const isInFlight = ({ status }: Pick<BriefJob, 'status'>): boolean =>
 const hasStatusCode = (error: unknown, statusCode: number): boolean =>
   isResponseError(error) && error.statusCode === statusCode;
 
+/** A finished job has no stage, and records how long it took. */
+const finished = (job: BriefJob, finishedAt: number): BriefJob => ({
+  ...omit(job, 'stage'),
+  took: finishedAt - Date.parse(job.startedAt),
+});
+
 /** An in-flight job past its deadline stopped without finishing (e.g. a restart). */
 const overdueAsInterrupted = (job: BriefJob): BriefJob => {
   if (!isInFlight(job) || Date.now() - Date.parse(job.startedAt) <= BRIEF_JOB_DEADLINE_MS) {
     return job;
   }
-  return {
-    ...omit(job, 'stage'),
-    status: 'failed',
-    took: Date.parse(job.updatedAt) - Date.parse(job.startedAt),
-    error: {
-      code: 'interrupted',
-      message: 'The brief generation stopped before finishing. Generate it again.',
-    },
+  const error = {
+    code: 'interrupted' as const,
+    message: 'The brief generation stopped before finishing. Generate it again.',
   };
+  return { ...finished(job, Date.parse(job.updatedAt)), status: 'failed', error };
 };
 
-/**
- * The caller's brief in a space, stored as one document with a deterministic id. Starting a job
- * replaces any job in progress. Job updates are conditional on the stored `job.id` and use
- * `if_seq_no`/`if_primary_term`, so a replaced or deleted job stops at its next write.
- */
+/** The caller's brief in a space; writes are conditional, so a replaced or deleted job stops at its next write. */
 export class ExecutiveBriefDataClient {
   private readonly storage: ExecutiveBriefStorage;
   private readonly owner: BriefOwner;
@@ -73,7 +71,7 @@ export class ExecutiveBriefDataClient {
 
   /** The job alone, without reading the report. */
   async getJob(): Promise<BriefJob | undefined> {
-    const document = await this.readOwned(['owner', 'spaceId', 'job']);
+    const document = await this.readOwned(['profileId', 'spaceId', 'job']);
     return document && overdueAsInterrupted(document.job);
   }
 
@@ -83,7 +81,7 @@ export class ExecutiveBriefDataClient {
       const existing = await this.read();
       const startedAt = new Date().toISOString();
       const document: BriefDocument = {
-        owner: { id: this.owner.profileId },
+        profileId: this.owner.profileId,
         spaceId: this.owner.spaceId,
         schemaVersion: 1,
         job: { id: jobId, status: 'pending', startedAt, updatedAt: startedAt },
@@ -110,9 +108,7 @@ export class ExecutiveBriefDataClient {
       const job: BriefJob = { ...stored.document.job, ...update.job, updatedAt: now.toISOString() };
       const document: BriefDocument = {
         ...stored.document,
-        job: isInFlight(job)
-          ? job
-          : { ...omit(job, 'stage'), took: now.getTime() - Date.parse(job.startedAt) },
+        job: isInFlight(job) ? job : finished(job, now.getTime()),
         report: update.report ?? stored.document.report,
         metadata: update.metadata ?? stored.document.metadata,
       };
@@ -152,7 +148,7 @@ export class ExecutiveBriefDataClient {
   private async readOwned(source?: string[]): Promise<BriefDocument | undefined> {
     const document = (await this.read(source))?.document;
     const { profileId, spaceId } = this.owner;
-    if (!document || document.owner.id !== profileId || document.spaceId !== spaceId) {
+    if (!document || document.profileId !== profileId || document.spaceId !== spaceId) {
       return undefined;
     }
     return document;

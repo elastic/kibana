@@ -53,29 +53,23 @@ class SupersededError extends Error {}
 type JobError = NonNullable<BriefJob['error']>;
 
 const toJobError = (error: unknown, abortSignal: AbortSignal, startedAtMs: number): JobError => {
+  if (abortSignal.aborted && Date.now() - startedAtMs >= BRIEF_JOB_DEADLINE_MS) {
+    return { code: 'timeout', message: 'The brief took too long to generate and was stopped.' };
+  }
   if (abortSignal.aborted) {
-    return Date.now() - startedAtMs >= BRIEF_JOB_DEADLINE_MS
-      ? {
-          code: 'timeout',
-          message: 'The brief took too long to generate and was stopped.',
-        }
-      : { code: 'interrupted', message: 'The brief generation was interrupted.' };
+    return { code: 'interrupted', message: 'The brief generation was interrupted.' };
   }
   const message = (error instanceof Error ? error.message : String(error)).slice(
     0,
     MAX_ERROR_MESSAGE_LENGTH
   );
-  return {
-    code: error instanceof BriefCompositionError ? error.code : 'internal',
-    message,
-  };
+  if (error instanceof BriefCompositionError) {
+    return { code: error.code, message };
+  }
+  return { code: 'internal', message };
 };
 
-/**
- * Runs one job: running → gather (signals) → compose → verify → succeeded, or failed with an error
- * code. With no findings the AI is not called. A write that finds the job replaced stops the run
- * silently. Reports the EBT completion event however the run ends.
- */
+/** Runs one job (gather → compose → verify), stopping silently once replaced; always reports the EBT event. */
 const runBriefJob = async ({
   params: { jobId, profileId, spaceId, range, from, to, connectorId },
   fakeRequest,
@@ -127,22 +121,23 @@ const runBriefJob = async ({
         })
       );
       run.evidence = evidence;
-      const composed = hasFindings(evidence)
-        ? await withBriefSpan('compose', {}, () =>
-            composeBrief({
-              inferenceClient: startPlugins.inference.getClient({
-                request: fakeRequest,
-                bindTo: { connectorId },
-              }),
-              evidence,
-              timeRange: { from, to, range },
-              abortSignal,
-              logger,
-              onStage: (stage) => update({ job: { stage } }),
-            })
-          )
-        : undefined;
-      run.composed = composed;
+      // With no findings the AI is not called.
+      if (hasFindings(evidence)) {
+        run.composed = await withBriefSpan('compose', {}, () =>
+          composeBrief({
+            inferenceClient: startPlugins.inference.getClient({
+              request: fakeRequest,
+              bindTo: { connectorId },
+            }),
+            evidence,
+            timeRange: { from, to, range },
+            abortSignal,
+            logger,
+            onStage: (stage) => update({ job: { stage } }),
+          })
+        );
+      }
+      const { composed } = run;
       abortSignal.throwIfAborted();
       await update({
         job: { status: 'succeeded' },
@@ -151,8 +146,9 @@ const runBriefJob = async ({
           generatedAt: new Date().toISOString(),
           period: { range, from, to },
           connectorId,
-          ...(composed?.model ? { model: composed.model } : {}),
-          ...(composed ? { tokens: composed.tokens, verification: composed.verification } : {}),
+          model: composed?.model,
+          tokens: composed?.tokens,
+          verification: composed?.verification,
           signals: Object.fromEntries(
             evidence.signals.map(({ id, status, took }) => [id, { status, took }])
           ),
@@ -178,9 +174,9 @@ const runBriefJob = async ({
   const tokens = composed?.tokens ?? failedTokens;
   const event: BriefCompletedEvent = {
     outcome: errorCode ? 'failed' : 'succeeded',
-    ...(errorCode ? { errorCode } : {}),
+    errorCode,
     range,
-    ...(composed?.model ? { model: composed.model } : {}),
+    model: composed?.model,
     durationMs: Date.now() - startedAtMs,
     signals: (evidence?.signals ?? []).map(({ id, status, took, factCount }) => ({
       id,
@@ -190,7 +186,7 @@ const runBriefJob = async ({
     })),
     entityCount: Object.keys(evidence?.entities ?? {}).length,
     factCount: evidence?.facts.length ?? 0,
-    ...(tokens ? { tokens: { prompt: tokens.prompt, completion: tokens.completion } } : {}),
+    tokens: tokens && { prompt: tokens.prompt, completion: tokens.completion },
     repaired: composed?.verification.repaired ?? false,
     levelsLowered: composed?.verification.lowered ?? 0,
     verificationDropped: composed?.verification.dropped ?? {},

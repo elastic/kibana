@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { maxBy } from 'lodash';
 import type {
   AttentionLevel,
   Fact,
 } from '../../../../../common/api/entity_analytics/executive_brief/common.gen';
-import type { BriefCheck, CheckContext } from './context';
-import { citedFacts, keptAssessments, mapAssessments, verdictFactIds } from './context';
+import type { CheckContext } from './verify';
 
 const LEVEL_RANK: Record<AttentionLevel, number> = { clear: 0, watch: 1, action: 2, urgent: 3 };
 
-const higher = (a: AttentionLevel, b: AttentionLevel): AttentionLevel =>
-  LEVEL_RANK[a] >= LEVEL_RANK[b] ? a : b;
+const highest = (levels: AttentionLevel[]): AttentionLevel | undefined =>
+  maxBy(levels, (level) => LEVEL_RANK[level]);
 
 const HANDLED_STATUS = /^(?:acknowledged|closed|in[-_ ]progress|resolved)$/i;
 
@@ -41,19 +41,11 @@ const supportOf = (fact: Fact, context: CheckContext): AttentionLevel => {
   }
 };
 
-/**
- * Guardrails: small deterministic bounds on the AI's judgement.
- * - Ceiling: a level never exceeds what its cited facts support (the verdict: what its kept
- *   assessments cite, so a verdict without them is `clear`); higher levels are lowered.
- * - Floors (structural): the verdict is never `clear` while an unaddressed critical or high attack
- *   discovery exists, and never calmer than its most severe assessment.
- */
-export const checkGuardrails: BriefCheck = (brief, context) => {
+/** Lowers each level to what its cited facts support, then checks the verdict's floors (structural). */
+export const checkGuardrails = (context: CheckContext): void => {
   const cap = (path: string, level: AttentionLevel, factIds: readonly number[]): AttentionLevel => {
-    const ceiling = citedFacts(context, factIds).reduce<AttentionLevel>(
-      (supported, fact) => higher(supported, supportOf(fact, context)),
-      'clear'
-    );
+    const supported = context.citedFacts(factIds).map((fact) => supportOf(fact, context));
+    const ceiling = highest(supported) ?? 'clear';
     if (LEVEL_RANK[level] <= LEVEL_RANK[ceiling]) {
       return level;
     }
@@ -62,39 +54,29 @@ export const checkGuardrails: BriefCheck = (brief, context) => {
     return ceiling;
   };
 
-  const assessments = mapAssessments(brief.assessments, (assessment, key) =>
-    context.dropped.has(key)
-      ? assessment
-      : {
-          ...assessment,
-          level: cap(`assessments.${key}.level`, assessment.level, assessment.factIds),
-        }
-  );
-  const capped = { ...brief, assessments };
-  const level = cap('verdict.level', brief.verdict.level, verdictFactIds(capped, context));
+  for (const [key, assessment] of context.assessments()) {
+    assessment.level = cap(`assessments.${key}.level`, assessment.level, assessment.factIds);
+  }
+  const { verdict } = context.brief;
+  verdict.level = cap('verdict.level', verdict.level, context.verdictFactIds());
 
-  const discoveries = context.evidence.facts.filter(
-    (fact) =>
-      fact.source?.type === 'attack_discovery' &&
-      (fact.severity === 'critical' || fact.severity === 'high') &&
-      !isAddressed(fact, context)
-  );
-  if (level === 'clear' && discoveries.length > 0) {
+  // Unaddressed critical or high discoveries are the facts that support `urgent`.
+  const discoveryIds = context.evidence.facts
+    .filter(
+      (fact) => fact.source?.type === 'attack_discovery' && supportOf(fact, context) === 'urgent'
+    )
+    .map(({ id }) => id);
+  if (verdict.level === 'clear' && discoveryIds.length > 0) {
+    const ids = discoveryIds.join(', ');
     context.structuralErrors.push(
-      `verdict.level: cannot be "clear" while unaddressed critical or high attack discoveries exist (fact ids ${discoveries
-        .map(({ id }) => id)
-        .join(', ')}).`
+      `verdict.level: cannot be "clear" while unaddressed critical or high attack discoveries exist (fact ids ${ids}).`
     );
   }
 
-  const worst = keptAssessments(capped, context).reduce<AttentionLevel | undefined>(
-    (acc, assessment) => (acc ? higher(acc, assessment.level) : assessment.level),
-    undefined
-  );
-  if (worst && LEVEL_RANK[level] < LEVEL_RANK[worst]) {
+  const worst = highest(context.assessments().map(([, { level }]) => level));
+  if (worst && LEVEL_RANK[verdict.level] < LEVEL_RANK[worst]) {
     context.structuralErrors.push(
-      `verdict.level: "${level}" is lower than the most severe assessment ("${worst}"); the verdict must be at least as severe as every assessment.`
+      `verdict.level: "${verdict.level}" is lower than the most severe assessment ("${worst}"); the verdict must be at least as severe as every assessment.`
     );
   }
-  return { verdict: { ...brief.verdict, level }, assessments };
 };

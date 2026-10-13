@@ -76,10 +76,7 @@ const toFact = (record: Entity): Omit<Fact, 'id'> => {
   };
 };
 
-/**
- * Golden entities at High or Critical risk (the resolution-group score when there is one), with
- * asset criticality and watchlists from the whole resolution group.
- */
+/** Golden entities at High or Critical risk, with criticality and watchlists from their resolution group. */
 export const highRiskEntitiesSignal: Signal = {
   id: SIGNAL_ID,
   title: 'High-risk entities',

@@ -121,11 +121,7 @@ const visibleTo = ({ username, profileId }: SignalInput): estypes.QueryDslQueryC
   };
 };
 
-/**
- * Discoveries in the window the user can see (never another analyst's private one), not closed,
- * highest total risk then newest first. Scheduled runs regenerate overlapping discoveries for the
- * same attack, so a discovery whose alerts overlap a kept one by at least 0.5 is dropped.
- */
+/** Discoveries in the window the user can see, not closed, highest total risk then newest first. */
 const fetchDiscoveries = async (input: SignalInput): Promise<Discovery[]> => {
   const { esClient, spaceId, timeRange, abortSignal } = input;
   const response = await esClient.search(
@@ -166,6 +162,7 @@ const fetchDiscoveries = async (input: SignalInput): Promise<Discovery[]> => {
     throw new SignalUnavailableError('Attack Discovery has not run in this space yet.');
   }
 
+  // Scheduled runs regenerate the same attack: drop a discovery whose alerts overlap a kept one.
   const kept: Discovery[] = [];
   for (const discovery of response.hits.hits.flatMap((hit) => parseDiscovery(hit) ?? [])) {
     const { alertIds } = discovery;

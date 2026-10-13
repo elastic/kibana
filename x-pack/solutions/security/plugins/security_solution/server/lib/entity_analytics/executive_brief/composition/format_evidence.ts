@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, groupBy, uniq } from 'lodash';
+import { compact, groupBy, orderBy, uniq } from 'lodash';
 import type { Entity } from '@kbn/entity-store/common';
 import type {
   Fact,
@@ -15,7 +15,7 @@ import { getEntityRisk } from '../../../../../common/entity_analytics/executive_
 import { entityDisplayName, entityTypeOf, watchlistsOf } from '../signals/engine/entity_record';
 import { BRIEF_SIGNALS } from '../signals';
 import type { Evidence, SignalOutcome } from '../signals';
-import { alternationPattern } from '../verification/context';
+import { alternationPattern } from '../verification/verify';
 import { toMention } from '../verification/mentions';
 
 const SEVERITY_RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
@@ -24,20 +24,20 @@ const UUID_PATTERN = /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 
 type CleanText = (text: string) => string;
 
+const cleanPart = (part: string): string =>
+  part.replace(UUID_PATTERN, '[id]').replace(/"/g, "'").replace(/\s+/g, ' ');
+
 /** Removes UUIDs and keeps text on one line without double quotes, leaving the EUIDs intact. */
 const createTextCleaner = (euids: readonly string[]): CleanText => {
   const pattern = alternationPattern(euids);
-  const euidPattern = pattern && new RegExp(`(${pattern.source})`);
+  if (!pattern) {
+    return (text) => cleanPart(text).trim();
+  }
   // Splitting on a capturing group puts the EUIDs at the odd indexes.
-  return (text) =>
-    (euidPattern ? text.split(euidPattern) : [text])
-      .map((part, index) =>
-        index % 2 === 1
-          ? part
-          : part.replace(UUID_PATTERN, '[id]').replace(/"/g, "'").replace(/\s+/g, ' ')
-      )
-      .join('')
-      .trim();
+  const euidPattern = new RegExp(`(${pattern.source})`);
+  const cleanUnlessEuid = (part: string, index: number) =>
+    index % 2 === 1 ? part : cleanPart(part);
+  return (text) => text.split(euidPattern).map(cleanUnlessEuid).join('').trim();
 };
 
 const formatNumber = (value: number): string => String(Math.round(value * 10) / 10);
@@ -81,51 +81,58 @@ const formatSignal = (
   { id, status, reason, factCount }: SignalOutcome,
   clean: CleanText
 ): string => {
-  if (status === 'ok' || status === 'empty') {
-    const found =
-      status === 'ok' ? `${factCount} fact${factCount === 1 ? '' : 's'}` : 'nothing found';
-    return `- ${signalTitle(id)}: checked, ${found}`;
+  const title = signalTitle(id);
+  if (status === 'ok') {
+    return `- ${title}: checked, ${factCount} fact${factCount === 1 ? '' : 's'}`;
   }
+  if (status === 'empty') {
+    return `- ${title}: checked, nothing found`;
+  }
+  const label = status === 'timeout' ? 'timed out' : status;
   const why = reason ? `: ${clean(reason)}` : '';
-  return `- ${signalTitle(id)}: not checked (${status === 'timeout' ? 'timed out' : status}${why})`;
+  return `- ${title}: not checked (${label}${why})`;
 };
 
-const compareFacts = (a: Fact, b: Fact): number =>
-  (a.severity ? SEVERITY_RANK[a.severity] : 4) - (b.severity ? SEVERITY_RANK[b.severity] : 4) ||
-  (Date.parse(b.timestamp ?? '') || 0) - (Date.parse(a.timestamp ?? '') || 0) ||
-  a.id - b.id;
+const severityRank = ({ severity }: Fact): number => (severity ? SEVERITY_RANK[severity] : 4);
+const timeOf = ({ timestamp }: Fact): number => Date.parse(timestamp ?? '') || 0;
 
-/**
- * The prompt's evidence block: entities by mention token, facts by the ids the brief cites (grouped
- * by signal, in run order), and how each signal's run went. Deterministic for the same input.
- */
+/** Most severe first, then newest first, then by id. */
+const sortFacts = (facts: Fact[]): Fact[] =>
+  orderBy(facts, [severityRank, timeOf, 'id'], ['asc', 'desc', 'asc']);
+
+/** `lines`, or a single `fallback` line when there are none. */
+const orElse = (lines: string[], fallback: string): string[] =>
+  lines.length > 0 ? lines : [fallback];
+
+/** The prompt's evidence block: entities, facts grouped by signal in run order, and each signal's run. */
 export const formatEvidence = (evidence: Evidence): string => {
   const { signals } = evidence;
   const entities = Object.entries(evidence.entities);
   const clean = createTextCleaner(entities.map(([euid]) => euid));
   const bySignal = groupBy(evidence.facts, 'signalId');
-  const factLines = uniq([...signals.map(({ id }) => id), ...Object.keys(bySignal)]).flatMap(
-    (signalId) => {
-      const facts = [...(bySignal[signalId] ?? [])].sort(compareFacts);
-      return facts.length > 0
-        ? [
-            '',
-            `### ${signalTitle(signalId)} (${facts.length})`,
-            ...facts.map((fact) => formatFact(fact, clean)),
-          ]
-        : [];
+  const signalIds = uniq([...signals.map(({ id }) => id), ...Object.keys(bySignal)]);
+  const factLines = signalIds.flatMap((signalId) => {
+    const facts = sortFacts(bySignal[signalId] ?? []);
+    if (facts.length === 0) {
+      return [];
     }
-  );
+    const header = `### ${signalTitle(signalId)} (${facts.length})`;
+    return ['', header, ...facts.map((fact) => formatFact(fact, clean))];
+  });
   return [
     `## Entities (${entities.length})`,
-    ...(entities.length > 0
-      ? entities.map(([euid, record]) => formatEntity(euid, record, clean))
-      : ['None']),
+    ...orElse(
+      entities.map(([euid, record]) => formatEntity(euid, record, clean)),
+      'None'
+    ),
     '',
     `## Facts (${evidence.facts.length})`,
-    ...(factLines.length > 0 ? factLines : ['None found in this window.']),
+    ...orElse(factLines, 'None found in this window.'),
     '',
     '## Signals',
-    ...(signals.length > 0 ? signals.map((signal) => formatSignal(signal, clean)) : ['None ran']),
+    ...orElse(
+      signals.map((signal) => formatSignal(signal, clean)),
+      'None ran'
+    ),
   ].join('\n');
 };

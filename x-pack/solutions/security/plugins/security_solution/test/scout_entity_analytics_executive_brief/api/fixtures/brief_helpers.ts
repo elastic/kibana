@@ -359,13 +359,13 @@ export const getBriefDocId = async ({
   apiClient: ApiClientFixture;
   headers: Headers;
   spaceId: string;
-}): Promise<{ docId: string; ownerId: string }> => {
-  const { profile_uid: ownerId } = await getCurrentUser({ apiClient, headers });
-  if (!ownerId) {
+}): Promise<{ docId: string; profileId: string }> => {
+  const { profile_uid: profileId } = await getCurrentUser({ apiClient, headers });
+  if (!profileId) {
     throw new Error('Executive briefs need a user with a user profile');
   }
-  const docId = createHash('sha256').update(`${ownerId}:${spaceId}`).digest('hex');
-  return { docId, ownerId };
+  const docId = createHash('sha256').update(`${profileId}:${spaceId}`).digest('hex');
+  return { docId, profileId };
 };
 
 /** Reads a stored brief document directly from the index, bypassing the owner filter. */
@@ -381,10 +381,10 @@ export const readStoredBrief = async (
   return response.hits.hits[0]?._source;
 };
 
-export const countStoredBriefs = async (esClient: EsClient, ownerId: string): Promise<number> => {
+export const countStoredBriefs = async (esClient: EsClient, profileId: string): Promise<number> => {
   const response = await esClient.count({
     index: EXECUTIVE_BRIEF_INDEX,
-    query: { term: { 'owner.id': ownerId } },
+    query: { term: { profileId } },
     ignore_unavailable: true,
   });
   return response.count;

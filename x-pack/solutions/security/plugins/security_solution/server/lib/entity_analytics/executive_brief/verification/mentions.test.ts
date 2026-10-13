@@ -55,13 +55,13 @@ describe('checkMentions', () => {
   ])('%s', (_name, summary, expected, evidence) => {
     const outcome = runAssessment(summary, evidence);
     expect(outcome.brief.assessments.threats?.summary).toBe(expected);
-    expect([...outcome.dropped]).toEqual([]);
+    expect(outcome.dropped).toEqual({});
   });
 
   it('fails a claim that mentions an EUID not in the evidence', () => {
-    expect([...runAssessment('{{ entity.id user:mallory }} logged on.').dropped]).toEqual([
-      ['threats', 'citation'],
-    ]);
+    const { brief, dropped } = runAssessment('{{ entity.id user:mallory }} logged on.');
+    expect(dropped).toEqual({ citation: 1 });
+    expect(brief.assessments.threats).toBeUndefined();
   });
 
   describe('clampVisible', () => {

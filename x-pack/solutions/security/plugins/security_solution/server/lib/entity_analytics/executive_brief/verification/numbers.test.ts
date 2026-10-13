@@ -25,7 +25,7 @@ const run = (brief: Brief) => runCheck(checkNumbers, brief, EVIDENCE, '7d');
 const runAssessment = (summary: string) => {
   const brief = buildValidBrief();
   brief.assessments.threats = { ...brief.assessments.threats, summary, factIds: [1] };
-  return [...run(brief).dropped];
+  return run(brief).dropped;
 };
 
 describe('checkNumbers', () => {
@@ -39,11 +39,11 @@ describe('checkNumbers', () => {
   });
 
   it('keeps a number from a cited fact', () => {
-    expect(runAssessment('The attack has 12 alerts.')).toEqual([]);
+    expect(runAssessment('The attack has 12 alerts.')).toEqual({});
   });
 
   it('drops a claim with an invented number', () => {
-    expect(runAssessment('The attack has 250 alerts.')).toEqual([['threats', 'number']]);
+    expect(runAssessment('The attack has 250 alerts.')).toEqual({ number: 1 });
   });
 
   it.each([
@@ -52,6 +52,6 @@ describe('checkNumbers', () => {
     ['entity names', 'The 10 finance host is in the attack.'],
     ['EUIDs', `${DIGIT_HOST} is in the attack.`],
   ])('masks %s', (_name, summary) => {
-    expect(runAssessment(summary)).toEqual([]);
+    expect(runAssessment(summary)).toEqual({});
   });
 });

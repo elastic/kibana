@@ -49,8 +49,6 @@ const briefDroppedSchema = (check: string) =>
     },
   } as const);
 
-// One event per finished executive brief job. Counts and codes only: no free text, entity names
-// or prompts.
 export const ENTITY_ANALYTICS_EXECUTIVE_BRIEF_COMPLETED_EVENT: EventTypeOpts<BriefCompletedEvent> =
   {
     eventType: 'entity_analytics_executive_brief_completed',

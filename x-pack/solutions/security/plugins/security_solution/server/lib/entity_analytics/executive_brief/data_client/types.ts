@@ -14,7 +14,7 @@ import type {
 /** One document per user profile and space; `report` and `metadata` hold the last successful run. */
 export interface BriefDocument {
   /** The owner's user profile id. */
-  owner: { id: string };
+  profileId: string;
   spaceId: string;
   schemaVersion: 1;
   job: BriefJob;
