@@ -291,7 +291,7 @@ describe('GitHub named events', () => {
             pull_request: {
               properties: {
                 number: { type: 'integer' },
-                merged: { anyOf: [{ type: 'boolean' }, { type: 'null' }] },
+                merged: { type: ['boolean', 'null'] },
               },
             },
           },
