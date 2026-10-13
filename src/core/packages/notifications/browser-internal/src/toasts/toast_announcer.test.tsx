@@ -21,7 +21,7 @@ toastsTelemetry.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSe
 
 const renderToastList = (initialToasts: Toast[] = []) => {
   const toasts$ = new BehaviorSubject<Toast[]>(initialToasts);
-  render(
+  const { container } = render(
     <GlobalToastList
       toasts$={toasts$}
       dismissToast={jest.fn()}
@@ -31,7 +31,7 @@ const renderToastList = (initialToasts: Toast[] = []) => {
     />
   );
   const addToast = (toast: Toast) => act(() => toasts$.next([...toasts$.getValue(), toast]));
-  return { toasts$, addToast };
+  return { toasts$, addToast, container };
 };
 
 const advanceTimers = async (ms: number) => {
@@ -123,6 +123,27 @@ describe('ToastAnnouncer', () => {
     await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
 
     expect(getAnnouncement()).toContain('Success: Synonyms set deleted');
+  });
+
+  it.each([
+    ['aria-hidden', 'true'],
+    ['inert', ''],
+  ])('waits until an ancestor no longer hides the announcer with %s', async (attribute, value) => {
+    const { addToast, container } = renderToastList();
+    container.setAttribute(attribute, value);
+
+    addToast({ id: '1', title: 'Field saved', color: 'success' });
+    await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS * 10);
+
+    // The visual toast renders the title too, so check for the announcement prefix
+    expect(container.textContent).not.toContain('Success:');
+
+    await act(async () => {
+      container.removeAttribute(attribute);
+    });
+    await advanceTimers(TOAST_ANNOUNCEMENT_DELAY_MS);
+
+    expect(getAnnouncement()).toContain('Success: Field saved');
   });
 
   it('does not announce a toast that was dismissed before it could be announced', async () => {

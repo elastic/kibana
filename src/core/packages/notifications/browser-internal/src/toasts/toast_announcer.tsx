@@ -19,13 +19,34 @@ import type { Toast } from '@kbn/core-notifications-browser';
 export const TOAST_ANNOUNCEMENT_DELAY_MS = 500;
 
 /**
- * Screen readers exclude everything outside an open `aria-modal` element (EuiModal,
- * EuiConfirmModal, overlay EuiFlyout, EuiPopover with `ownFocus`) from the accessibility
- * tree, including live regions. Updates made there while it's open are never announced.
+ * Content hidden from the accessibility tree is never announced, including live regions,
+ * and updates made while hidden are not replayed once it becomes visible again.
  */
-const MODAL_SELECTOR = '[aria-modal="true"]';
+const HIDDEN_ANCESTOR_SELECTOR = '[aria-hidden="true"], [inert]';
 
-const isBlockedByModal = (): boolean => document.querySelector(MODAL_SELECTOR) !== null;
+/**
+ * While a modal is open, screen readers ignore everything outside it. This covers
+ * `aria-modal` elements (EuiModal, EuiConfirmModal, overlay EuiFlyout, EuiPopover
+ * with `ownFocus`) and native `<dialog>` elements opened with `showModal()`.
+ */
+const OPEN_MODAL_SELECTOR = '[aria-modal="true"]';
+const OPEN_NATIVE_MODAL_SELECTOR = 'dialog:modal';
+
+const OBSERVED_ATTRIBUTES = ['aria-modal', 'aria-hidden', 'inert', 'open'];
+
+const hasOpenNativeModal = (): boolean => {
+  try {
+    return document.querySelector(OPEN_NATIVE_MODAL_SELECTOR) !== null;
+  } catch {
+    // `:modal` is not supported by every environment (e.g. older browsers, jsdom)
+    return false;
+  }
+};
+
+const isHiddenFromAssistiveTech = (element: HTMLElement | null): boolean =>
+  element?.closest(HIDDEN_ANCESTOR_SELECTOR) != null ||
+  document.querySelector(OPEN_MODAL_SELECTOR) !== null ||
+  hasOpenNativeModal();
 
 interface Announcement {
   id: string;
@@ -65,13 +86,14 @@ const getAnnouncementMessage = (color: Toast['color'], content: string): string 
 };
 
 /**
- * Announces newly added toasts to assistive technologies once no `aria-modal` element
+ * Announces newly added toasts to assistive technologies once nothing (e.g. an open modal)
  * hides the announcement from them.
  */
 export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMountedText }) => {
   const [pendingIds, setPendingIds] = useState<string[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const seenToastIds = useRef(new Set<string>());
+  const announcerRef = useRef<HTMLDivElement>(null);
   const latestIdToToasts = useRef(idToToasts);
   latestIdToToasts.current = idToToasts;
   const latestGetMountedText = useRef(getMountedText);
@@ -139,27 +161,29 @@ export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMounte
       }
     };
 
-    const waitForModalToClose = () => {
+    const isHidden = () => isHiddenFromAssistiveTech(announcerRef.current);
+
+    const waitUntilExposed = () => {
       observer = new MutationObserver(() => {
-        if (isBlockedByModal()) {
+        if (isHidden()) {
           return;
         }
         observer?.disconnect();
         observer = undefined;
         scheduleAnnouncement();
       });
-      observer.observe(document.body, {
+      observer.observe(document.documentElement, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['aria-modal'],
+        attributeFilter: OBSERVED_ATTRIBUTES,
       });
     };
 
     const scheduleAnnouncement = () => {
       timeoutId = setTimeout(() => {
-        if (isBlockedByModal()) {
-          waitForModalToClose();
+        if (isHidden()) {
+          waitUntilExposed();
           return;
         }
         announce();
@@ -187,5 +211,9 @@ export const ToastAnnouncer: FunctionComponent<Props> = ({ idToToasts, getMounte
     [announcements]
   );
 
-  return <EuiScreenReaderLive>{announcementContent}</EuiScreenReaderLive>;
+  return (
+    <div ref={announcerRef}>
+      <EuiScreenReaderLive>{announcementContent}</EuiScreenReaderLive>
+    </div>
+  );
 };
