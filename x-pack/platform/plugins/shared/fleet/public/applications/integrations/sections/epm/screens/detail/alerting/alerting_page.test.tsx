@@ -217,18 +217,22 @@ describe('AlertingPage', () => {
     });
   });
 
-  it('should not link v2 templates in non-Observability projects', async () => {
+  it('should hide Universal rules and show only the Classic count in non-Observability projects', async () => {
     mockIsAlertingV2Enabled.mockReturnValue(true);
     mockProjectType = 'security';
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
+      expect(screen.getByText('[System] Logs template')).toBeInTheDocument();
     });
 
+    expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fleetAlertingEngineTabs')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
     expect(
-      screen.queryByRole('link', { name: '[System] Metrics template' })
-    ).not.toBeInTheDocument();
+      screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
+    ).toHaveTextContent('1');
     expect(mockGetRuleLibraryRedirectUrl).not.toHaveBeenCalled();
   });
 

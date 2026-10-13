@@ -132,16 +132,19 @@ const AlertingEngineBadge: React.FunctionComponent<{
 
 const useAlertingEngineAssets = (savedObjects: AlertingAsset[], type: DisplayedAssetType) => {
   const startServices = useStartServices();
+  const projectType = startServices.cloud?.serverless?.projectType;
   const isAlertingRuleTemplate = type === KibanaAssetType.alertingRuleTemplate;
   const hasV2Templates = savedObjects.some(isV2AlertingAsset);
-  const alertingV2Enabled = isAlertingV2Enabled(startServices);
-  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && alertingV2Enabled;
+  // Universal rules are only offered on Observability projects among serverless project types.
+  const isUniversalRulesAvailable =
+    isAlertingV2Enabled(startServices) && (!projectType || projectType === 'observability');
+  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && isUniversalRulesAvailable;
   const [selectedEngineTab, setSelectedEngineTab] = useState<AlertingEngine>(
     hasV2Templates ? 'v2' : 'v1'
   );
 
   const listedSavedObjects = listAlertingAssets(savedObjects, {
-    hideV2: isAlertingRuleTemplate && !alertingV2Enabled,
+    hideV2: isAlertingRuleTemplate && !isUniversalRulesAvailable,
   });
   const visibleSavedObjects = showEngineUi
     ? filterAlertingAssetsByEngine(listedSavedObjects, selectedEngineTab)
