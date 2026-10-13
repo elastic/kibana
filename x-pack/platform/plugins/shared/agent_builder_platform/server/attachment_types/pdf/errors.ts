@@ -5,36 +5,34 @@
  * 2.0.
  */
 
+import { createAttachmentInvalidError, createInternalError } from '@kbn/agent-builder-common';
 import { MAX_PDF_BYTES } from '@kbn/agent-builder-common/attachments';
-
-export type PdfErrorCode =
-  | 'not_available'
-  | 'file_not_found'
-  | 'too_big'
-  | 'not_a_pdf'
-  | 'extraction_failed'
-  | 'text_too_long'
-  | 'timeout';
-
-export class PdfError extends Error {
-  constructor(public readonly code: PdfErrorCode, message: string) {
-    super(message);
-    this.name = 'PdfError';
-  }
-}
 
 export const pdfErrors = {
   notAvailable: () =>
-    new PdfError('not_available', 'PDF reading is not available on this deployment.'),
-  fileNotFound: () => new PdfError('file_not_found', 'PDF file not found.'),
+    createInternalError('PDF reading is not available on this deployment.', {
+      pdfErrorCode: 'not_available',
+      statusCode: 503,
+    }),
+  fileNotFound: () =>
+    createAttachmentInvalidError('PDF file not found.', { pdfErrorCode: 'file_not_found' }),
   tooBig: () =>
-    new PdfError('too_big', `The PDF is larger than ${MAX_PDF_BYTES / (1024 * 1024)} MB.`),
-  notAPdf: () => new PdfError('not_a_pdf', 'The file is not a valid PDF.'),
+    createAttachmentInvalidError(`The PDF is larger than ${MAX_PDF_BYTES / (1024 * 1024)} MB.`, {
+      pdfErrorCode: 'too_big',
+    }),
+  notAPdf: () =>
+    createAttachmentInvalidError('The file is not a valid PDF.', { pdfErrorCode: 'not_a_pdf' }),
   extractionFailed: () =>
-    new PdfError('extraction_failed', 'Could not read the PDF. Try again later.'),
+    createInternalError('Could not read the PDF. Try again later.', {
+      pdfErrorCode: 'extraction_failed',
+    }),
   textTooLong: () =>
-    new PdfError('text_too_long', 'The text of the PDF is too long. Try a smaller PDF.'),
-  timeout: () => new PdfError('timeout', 'Reading the PDF took too long. Try a smaller PDF.'),
+    createAttachmentInvalidError('The text of the PDF is too long. Try a smaller PDF.', {
+      pdfErrorCode: 'text_too_long',
+    }),
+  timeout: () =>
+    createInternalError('Reading the PDF took too long. Try a smaller PDF.', {
+      pdfErrorCode: 'timeout',
+      statusCode: 504,
+    }),
 };
-
-export const isPdfError = (error: unknown): error is PdfError => error instanceof PdfError;

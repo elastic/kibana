@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isAttachmentInvalidError } from '@kbn/agent-builder-common';
 import type { PdfAttachmentData } from '@kbn/agent-builder-common/attachments';
 import {
   AttachmentType,
@@ -23,7 +24,7 @@ import {
 } from '@kbn/files-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { StreamTooLargeError, streamToBuffer } from '../utils/stream_to_buffer';
-import { isPdfError, pdfErrors } from './errors';
+import { pdfErrors } from './errors';
 import { extractDocument } from './extract_document';
 import { isPdfExtractionAvailable } from './extraction_availability';
 
@@ -96,7 +97,7 @@ export const createPdfAttachmentType = ({
       try {
         await getPdfFile(fileService, parse.data.file_id);
       } catch (error) {
-        if (isPdfError(error)) {
+        if (isAttachmentInvalidError(error)) {
           return { valid: false, error: error.message };
         }
         throw error;

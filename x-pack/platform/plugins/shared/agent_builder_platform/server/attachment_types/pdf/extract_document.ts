@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   ElasticGenAIAttributes,
@@ -19,7 +20,7 @@ import {
   USE_FAKE_EXTRACTION,
   // FAKE_EXTRACTION:end
 } from './constants';
-import { isPdfError, pdfErrors } from './errors';
+import { pdfErrors } from './errors';
 // FAKE_EXTRACTION:start - remove when Jina Reader document_extraction is live
 import { fakeExtractDocument } from './fake_extract_document';
 // FAKE_EXTRACTION:end
@@ -116,7 +117,7 @@ export const extractDocument = ({
         return content;
       } catch (error) {
         if (timedOut || (error as Error).name === 'TimeoutError') throw pdfErrors.timeout();
-        if (signal?.aborted || isPdfError(error)) throw error;
+        if (signal?.aborted || isAgentBuilderError(error)) throw error;
         logger.error(`Document extraction failed for the PDF: ${getErrorDetails(error)}`);
         throw pdfErrors.extractionFailed();
       } finally {
