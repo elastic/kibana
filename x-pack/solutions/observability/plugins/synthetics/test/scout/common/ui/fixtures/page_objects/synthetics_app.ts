@@ -53,7 +53,7 @@ export class SyntheticsAppPage {
   }
 
   async navigateToSettingsTab(tabText: string) {
-    await this.page.click(`text=${tabText}`);
+    await this.page.getByRole('tab', { name: tabText, exact: true }).click();
   }
 
   async navigateToFleetIntegrationPolicies() {
@@ -357,7 +357,7 @@ export class SyntheticsAppPage {
   }) {
     await this.page.testSubj.click('addPrivateLocationButton');
     await this.page.testSubj.fill('syntheticsLocationFormFieldText', name);
-    await this.page.click('[aria-label="Select agent policy"]');
+    await this.page.testSubj.click('syntheticsAgentPolicySelect');
     await this.page.click(`button[role="option"]:has-text("${agentPolicy}Agents: 0")`);
     if (tags?.length) {
       await this.page.click('.euiComboBox__inputWrap');

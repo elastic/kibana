@@ -91,6 +91,8 @@ const createDeps = ({
       inference: inferenceMock.createStartContract(),
       agentService,
       searchInferenceEndpoints,
+      security: {} as any,
+      elasticsearch: {} as any,
     },
   };
 };

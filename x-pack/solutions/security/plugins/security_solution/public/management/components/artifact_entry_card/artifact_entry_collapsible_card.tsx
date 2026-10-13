@@ -20,6 +20,8 @@ import { CardCompressedHeader } from './components/card_compressed_header';
 export interface ArtifactEntryCollapsibleCardProps extends CommonArtifactEntryCardProps {
   onExpandCollapse: () => void;
   expanded?: boolean;
+  /** When true, shows a read-only Enabled column for artifacts that support the `disabled` tag. */
+  showEnabledColumn?: boolean;
 }
 
 export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardProps>(
@@ -31,6 +33,8 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
     expanded = false,
     'data-test-subj': dataTestSubj,
     Decorator,
+    CriteriaComponent = CriteriaConditions,
+    showEnabledColumn = false,
     ...commonProps
   }) => {
     const artifact = useNormalizedArtifact(item);
@@ -44,6 +48,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             actions={actions}
             policies={policies}
             expanded={expanded}
+            showEnabledColumn={showEnabledColumn}
             onExpandCollapse={onExpandCollapse}
             data-test-subj={getTestId('header')}
           />
@@ -55,7 +60,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             <CardSectionPanel>
               {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-              <CriteriaConditions
+              <CriteriaComponent
                 os={artifact.os as CriteriaConditionsProps['os']}
                 entries={artifact.entries}
                 data-test-subj={getTestId('criteriaConditions')}

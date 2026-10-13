@@ -17,6 +17,7 @@ import {
   deleteServiceAccounts,
   type ServiceAccountPrincipal,
 } from '../fixtures/service_account_cleanup';
+import { unbindWorkloads, workloadPath } from '../fixtures/service_account_workloads';
 
 const SERVICE_ACCOUNT_ENDPOINT = 'internal/security/service_account';
 const HEADERS = { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'kibana' };
@@ -25,8 +26,6 @@ const OPERATOR_TOKEN_NAME = 'operator-token';
 
 const uniqueName = () => `sa-delete-${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
 const accountPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
-/** The test plugin's endpoint for its `job` workload with the given id. */
-const workloadPath = (workloadId: string) => `internal/service_accounts_test/${workloadId}`;
 
 apiTest.describe(
   'Delete Elasticsearch service accounts',
@@ -88,20 +87,10 @@ apiTest.describe(
       adminHeaders = { ...(await samlAuth.asInteractiveUser('admin')).cookieHeader, ...HEADERS };
     });
 
-    apiTest.afterAll(async ({ apiClient, esClient, config, samlAuth }) => {
+    apiTest.afterAll(async ({ esClient, kbnClient, config }) => {
       const failures: Error[] = [];
-      const headers = { ...(await samlAuth.asInteractiveUser('admin')).cookieHeader, ...HEADERS };
       const cleanup = [
-        async () => {
-          for (const workloadId of boundWorkloads) {
-            const unbound = await apiClient.post(workloadPath(workloadId), {
-              headers,
-              body: { operation: 'unbind' },
-              responseType: 'json',
-            });
-            expect(unbound).toHaveStatusCode(200);
-          }
-        },
+        async () => unbindWorkloads(kbnClient, boundWorkloads),
         async () => {
           for (const { namespace, name } of created) {
             await esClient.security.deleteServiceToken(

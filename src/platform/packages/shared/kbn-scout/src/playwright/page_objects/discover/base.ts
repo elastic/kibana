@@ -39,10 +39,7 @@ export interface TimeoutOptions {
 export const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
-/**
- * Base class for DiscoverApp that holds shared dependencies and typed properties.
- * Do not instantiate directly — use {@link DiscoverApp} instead.
- */
+/** Shared dependencies and constructor for the DiscoverApp inheritance chain. */
 export class DiscoverAppBase {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   protected readonly esqlEditor: EsqlEditor;

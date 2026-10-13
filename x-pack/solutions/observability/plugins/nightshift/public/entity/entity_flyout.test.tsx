@@ -31,7 +31,7 @@ jest.mock('../hooks/use_kibana', () => ({
 const mockFeature: Feature = {
   uuid: 'feature-uuid-1',
   id: 'synthetics-task-manager',
-  stream_name: 'logs.synthetics',
+  source_id: 'logs.synthetics',
   type: 'entity',
   subtype: 'service',
   title: 'synthetics-task-manager',
@@ -71,7 +71,6 @@ describe('EntityFlyout', () => {
     expect(screen.getByText('Entity')).toBeInTheDocument();
     expect(screen.getByText('Service')).toBeInTheDocument();
     expect(screen.getByText('82% confidence')).toBeInTheDocument();
-    expect(screen.getByText('logs.synthetics')).toBeInTheDocument();
   });
 
   it('does not render the Service badge for non-service entities', () => {
@@ -126,7 +125,7 @@ describe('EntityFlyout', () => {
         {
           id: mockFeature.uuid,
           type: KI_FEATURE_ATTACHMENT_TYPE,
-          origin: encodeFeatureAttachmentOrigin(mockFeature.stream_name, mockFeature.id),
+          origin: encodeFeatureAttachmentOrigin(mockFeature.source_id, mockFeature.id),
           description: '[Entity] synthetics-task-manager',
           data: mockFeature,
         },

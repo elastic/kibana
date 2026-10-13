@@ -14,6 +14,12 @@ import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
 import type { ListWorkersResponse } from '@kbn/alertzero-common';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
+import {
+  ensureWorkerServiceAccounts,
+  type CoreServiceAccounts,
+} from '../../service_accounts/ensure_worker_service_accounts';
+import { workerName } from '../watches/workers/translations';
+import * as onboardingI18n from './translations';
 
 const PARTIAL_SUCCESS_WARNING = i18n.translate('xpack.alertzero.onboarding.partialSuccessWarning', {
   defaultMessage:
@@ -25,12 +31,11 @@ type WorkerEnabledMap = Record<string, boolean>;
 export const useEnableWorkers = (
   workerIds: readonly string[],
   workerEnabled: WorkerEnabledMap,
-  serviceAccountId: string | undefined,
   onSuccess?: () => void,
   onSavingChange?: (saving: boolean) => void
 ) => {
   const queryClient = useQueryClient();
-  const { services } = useKibana<CoreStart>();
+  const { services } = useKibana<CoreStart & { serviceAccounts?: CoreServiceAccounts }>();
   const [isSaving, setIsSaving] = useState(false);
 
   const handleEnableAndContinue = async () => {
@@ -47,6 +52,25 @@ export const useEnableWorkers = (
 
     setIsSaving(true);
     onSavingChange?.(true);
+    // Workers being turned on without a service account get their prebuilt one first. A Worker
+    // whose account cannot be set up stays off; pressing the button again retries it.
+    const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
+    const needsAccount = idsToUpdate.filter(
+      (id) => workerEnabled[id] === true && !workerById.get(id)?.settings?.serviceAccountId
+    );
+    const accounts = await ensureWorkerServiceAccounts(
+      services.http!,
+      services.serviceAccounts,
+      needsAccount
+    );
+    const accountFailures = needsAccount.flatMap((id) => {
+      const account = accounts.get(id);
+      return account && !account.ok
+        ? [{ name: workerName(id, workerById.get(id)?.name), error: account.error }]
+        : [];
+    });
+    const idsToPatch = idsToUpdate.filter((id) => accounts.get(id)?.ok !== false);
+
     // Direct http.patch calls instead of useUpdateWorker so no replaceWorkerInList
     // fires per-PATCH. LandingPage's showQueue guard must only react to real server
     // state changes (background refetches), not optimistic per-PATCH cache writes
@@ -54,25 +78,35 @@ export const useEnableWorkers = (
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
     const results = await Promise.allSettled(
-      idsToUpdate.map((id) => {
+      idsToPatch.map((id) => {
         const turningOn = workerEnabled[id] === true;
-        const worker = cached.workers.find((candidate) => candidate.id === id);
+        const account = accounts.get(id);
+        // An existing binding is kept; only a newly set up account is written.
+        const body =
+          turningOn && account?.ok
+            ? {
+                enabled: true,
+                settings: { serviceAccountId: account.serviceAccountId },
+                settingsRevision: workerById.get(id)?.settingsRevision ?? null,
+              }
+            : { enabled: turningOn };
         return services.http!.patch(buildWorkerUrl(id), {
           version: API_VERSIONS.internal.v1,
-          body: JSON.stringify(
-            turningOn
-              ? {
-                  enabled: true,
-                  settings: { serviceAccountId },
-                  settingsRevision: worker?.settingsRevision ?? null,
-                }
-              : { enabled: false }
-          ),
+          body: JSON.stringify(body),
         });
       })
     );
 
-    let hadFailure = false;
+    if (accountFailures.length > 0) {
+      services.notifications!.toasts.addDanger({
+        title: onboardingI18n.SERVICE_ACCOUNT_SETUP_FAILED_TITLE,
+        text: onboardingI18n.serviceAccountSetupFailedText(
+          accountFailures.map(({ name, error }) => `${name}: ${error}`).join('; ')
+        ),
+      });
+    }
+
+    let hadFailure = accountFailures.length > 0;
     let hadSuccess = false;
     results.forEach((result) => {
       if (result.status === 'rejected') {

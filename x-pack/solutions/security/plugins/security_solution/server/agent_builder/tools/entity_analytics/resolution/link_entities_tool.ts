@@ -20,7 +20,7 @@ import { requireResolvedEntity } from '../entity_resolution';
 import { createToolTelemetryTracker } from '../tool_telemetry_tracker';
 import { checkResolutionAccess } from './check_resolution_access';
 import { formatEntityIdsForPrompt } from '../shared/entity_ids_preview';
-import { resolveEntityIdsForResolution, type UnresolvedEntityResult } from './resolve_entity_ids';
+import { resolveEntityIds, type UnresolvedEntityResult } from '../shared/resolve_entity_ids';
 import { getResolutionToolAvailability } from './resolution_availability';
 
 const MAX_ENTITIES_PER_CALL = 100;
@@ -180,7 +180,7 @@ Entity references that don't resolve to a canonical id are excluded from the bat
           return { results: [resolvedTarget.result] };
         }
 
-        const { resolved, unresolved } = await resolveEntityIdsForResolution({
+        const { resolved, unresolved } = await resolveEntityIds({
           esClient: client,
           spaceId,
           entityIds: params.entityIds,
