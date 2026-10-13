@@ -9,6 +9,7 @@ import type { NodeStats } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_ARRAY_ITEMS, MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceMapServiceDependencyInfoResponse {
   currentPeriod: NodeStats;
@@ -22,9 +23,12 @@ export const serviceMapDependencyNodeRoute = defineRoute<ServiceMapServiceDepend
       z.object({
         query: z
           .object({
-            dependencies: z.union([z.string(), z.array(z.string())]),
+            dependencies: z.union([
+              z.string().max(MAX_FIELD_VALUE_LENGTH),
+              z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS),
+            ]),
           })
-          .merge(z.object({ sourceServiceName: z.string() }).partial())
+          .merge(z.object({ sourceServiceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }).partial())
           .merge(environmentSchema)
           .merge(rangeSchema)
           .merge(offsetSchema),

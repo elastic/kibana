@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { privilegesTypeSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface CreateAgentKeyResponse {
   agentKey: SecurityCreateApiKeyResponse;
@@ -18,7 +19,7 @@ export const createAgentKeyRoute = defineRoute<CreateAgentKeyResponse>()({
   params: lazySchema(() =>
     z.object({
       body: z.object({
-        name: z.string(),
+        name: z.string().max(MAX_FIELD_VALUE_LENGTH),
         privileges: privilegesTypeSchema,
       }),
     })

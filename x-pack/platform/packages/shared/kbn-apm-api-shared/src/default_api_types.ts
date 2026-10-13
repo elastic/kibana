@@ -8,13 +8,7 @@ import { z } from '@kbn/zod/v4';
 import { isoToEpoch } from '@kbn/zod-helpers/v4';
 import type { BoolQuery } from '@kbn/es-query';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-types';
-
-// Upper bounds for unbounded query-string inputs, to satisfy the CodeQL
-// "unbounded string in route validation" rule (DoS hardening). Values are
-// generous so they never reject legitimate input.
-const MAX_KUERY_LENGTH = 10_000; // KQL expressions can be long
-const MAX_FILTERS_LENGTH = 100_000; // serialized ES bool query (JSON string)
-const MAX_QUERY_PARAM_LENGTH = 1_024; // short params: ISO/datemath dates, offsets
+import { MAX_FILTERS_LENGTH, MAX_KUERY_LENGTH, MAX_QUERY_PARAM_LENGTH } from './constants';
 
 export const rangeSchema = z.object({
   start: z.string().max(MAX_QUERY_PARAM_LENGTH).transform(isoToEpoch),

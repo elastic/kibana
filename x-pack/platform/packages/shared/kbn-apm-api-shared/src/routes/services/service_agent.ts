@@ -9,6 +9,7 @@ import type { ServerlessType } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceAgentResponse {
   agentName?: string;
@@ -23,7 +24,7 @@ export const serviceAgentRoute = defineRoute<ServiceAgentResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/agent',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: rangeSchema.extend(environmentSchema.shape),
     })
   ),

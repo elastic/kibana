@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface LinkedChildrenResponse {
   spanLinksDetails: SpanLinkDetails[];
@@ -18,8 +19,8 @@ export const linkedChildrenRoute = defineRoute<LinkedChildrenResponse>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        traceId: z.string(),
-        spanId: z.string(),
+        traceId: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        spanId: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: kuerySchema.merge(rangeSchema),
     })

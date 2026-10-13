@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { Environment } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface EnvironmentsResponse {
   environments: Environment[];
@@ -17,7 +18,7 @@ export const environmentsRoute = defineRoute<EnvironmentsResponse>()({
   endpoint: 'GET /internal/apm/environments',
   params: lazySchema(() =>
     z.object({
-      query: rangeSchema.extend({ serviceName: z.string().optional() }),
+      query: rangeSchema.extend({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() }),
     })
   ),
 });

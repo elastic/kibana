@@ -9,6 +9,7 @@ import type { Coordinate, YUnit, ChartType } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface FetchAndTransformMetrics {
   title: string;
@@ -34,10 +35,10 @@ export const metricsChartsRoute = defineRoute<MetricsChartsResponse>()({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
       query: z
-        .object({ agentName: z.string() })
-        .merge(z.object({ serviceNodeName: z.string() }).partial())
+        .object({ agentName: z.string().max(MAX_FIELD_VALUE_LENGTH) })
+        .merge(z.object({ serviceNodeName: z.string().max(MAX_FIELD_VALUE_LENGTH) }).partial())
         .merge(environmentSchema)
         .merge(kuerySchema)
         .merge(rangeSchema),

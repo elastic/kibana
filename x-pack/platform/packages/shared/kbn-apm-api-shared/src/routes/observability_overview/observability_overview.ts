@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ObservabilityOverviewResponse {
   serviceCount: number;
@@ -21,8 +22,8 @@ export const observabilityOverviewRoute = defineRoute<ObservabilityOverviewRespo
   params: lazySchema(() =>
     z.object({
       query: rangeSchema.extend({
-        bucketSize: z.coerce.number(),
-        intervalString: z.string(),
+        bucketSize: z.coerce.number().min(1),
+        intervalString: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
     })
   ),

@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { SavedServiceGroup } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import { MAX_DESCRIPTION_LENGTH, MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from '../../constants';
 
 export type SaveServiceGroupResponse = SavedServiceGroup;
 
@@ -14,12 +15,14 @@ export const serviceGroupSaveRoute = defineRoute<SaveServiceGroupResponse>()({
   endpoint: 'POST /internal/apm/service-group',
   params: lazySchema(() =>
     z.object({
-      query: z.object({ serviceGroupId: z.string().optional() }).optional(),
+      query: z
+        .object({ serviceGroupId: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() })
+        .optional(),
       body: z.object({
-        groupName: z.string(),
-        kuery: z.string(),
-        description: z.string().optional(),
-        color: z.string().optional(),
+        groupName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        kuery: z.string().max(MAX_KUERY_LENGTH),
+        description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
+        color: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
       }),
     })
   ),

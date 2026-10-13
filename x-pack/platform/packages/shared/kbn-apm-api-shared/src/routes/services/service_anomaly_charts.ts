@@ -9,6 +9,7 @@ import type { ServiceAnomalyTimeseries } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceAnomalyChartsResponse {
   allAnomalyTimeseries: ServiceAnomalyTimeseries[];
@@ -18,8 +19,10 @@ export const serviceAnomalyChartsRoute = defineRoute<ServiceAnomalyChartsRespons
   endpoint: 'GET /internal/apm/services/{serviceName}/anomaly_charts',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string() }),
-      query: rangeSchema.merge(environmentSchema).merge(z.object({ transactionType: z.string() })),
+      path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
+      query: rangeSchema
+        .merge(environmentSchema)
+        .merge(z.object({ transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH) })),
     })
   ),
 });

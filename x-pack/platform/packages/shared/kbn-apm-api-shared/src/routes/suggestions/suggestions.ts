@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface SuggestionsResponse {
   terms: string[];
@@ -18,11 +19,11 @@ export const suggestionsRoute = defineRoute<SuggestionsResponse>()({
     z.object({
       query: z
         .object({
-          fieldName: z.string(),
-          fieldValue: z.string(),
+          fieldName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+          fieldValue: z.string().max(MAX_FIELD_VALUE_LENGTH),
         })
         .merge(rangeSchema)
-        .extend({ serviceName: z.string().optional() }),
+        .extend({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional() }),
     })
   ),
 });

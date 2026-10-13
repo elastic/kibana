@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { FocusedTraceItems } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface UnifiedTracesByIdSummaryResponse {
   traceItems?: FocusedTraceItems;
@@ -19,12 +20,12 @@ export const unifiedTracesByIdSummaryRoute = defineRoute<UnifiedTracesByIdSummar
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        traceId: z.string(),
+        traceId: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: rangeSchema.merge(
         z.object({
-          maxTraceItems: z.coerce.number().optional(),
-          docId: z.string().optional(),
+          maxTraceItems: z.coerce.number().int().min(1).optional(),
+          docId: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
       ),
     })

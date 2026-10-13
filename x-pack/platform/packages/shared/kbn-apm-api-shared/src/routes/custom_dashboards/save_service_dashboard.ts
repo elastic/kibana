@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { SavedApmCustomDashboard } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from '../../constants';
 
 export type SaveServiceDashboardResponse = SavedApmCustomDashboard;
 
@@ -16,12 +17,12 @@ export const saveServiceDashboardRoute = defineRoute<SaveServiceDashboardRespons
     z.object({
       query: z
         .object({
-          customDashboardId: z.string().optional(),
+          customDashboardId: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .optional(),
       body: z.object({
-        dashboardSavedObjectId: z.string(),
-        kuery: z.string().optional(),
+        dashboardSavedObjectId: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        kuery: z.string().max(MAX_KUERY_LENGTH).optional(),
         serviceNameFilterEnabled: z.boolean(),
         serviceEnvironmentFilterEnabled: z.boolean(),
       }),

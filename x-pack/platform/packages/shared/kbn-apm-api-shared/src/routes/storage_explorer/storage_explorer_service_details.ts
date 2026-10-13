@@ -9,6 +9,7 @@ import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { indexLifecyclePhaseSchema, environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, probabilitySchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface StorageDetailsResponse {
   processorEventStats: Array<{
@@ -32,7 +33,7 @@ export const storageExplorerServiceDetailsRoute = defineRoute<StorageDetailsResp
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: indexLifecyclePhaseSchema
         .merge(probabilitySchema)

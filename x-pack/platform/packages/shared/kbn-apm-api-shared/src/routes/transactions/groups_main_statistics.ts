@@ -10,6 +10,7 @@ import { latencyAggregationTypeSchema } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, transactionDataSourceSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from '../../constants';
 
 export interface MergedServiceTransactionGroupsResponse {
   transactionGroups: Array<{
@@ -31,17 +32,17 @@ export const transactionGroupsMainStatisticsRoute =
     endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: z
-          .object({ searchQuery: z.string() })
+          .object({ searchQuery: z.string().max(MAX_KUERY_LENGTH) })
           .partial()
           .merge(environmentSchema)
           .merge(rangeSchema)
           .merge(
             z.object({
-              kuery: z.string(),
+              kuery: z.string().max(MAX_KUERY_LENGTH),
               useDurationSummary: BooleanFromString.default(false),
-              transactionType: z.string(),
+              transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
               latencyAggregationType: latencyAggregationTypeSchema,
             })
           )

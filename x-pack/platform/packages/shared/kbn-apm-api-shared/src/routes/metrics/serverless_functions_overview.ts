@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ServerlessFunctionsOverviewResponse = Array<{
   serverlessId: string;
@@ -28,7 +29,7 @@ export const serverlessFunctionsOverviewRoute =
     endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: environmentSchema.merge(kuerySchema).merge(rangeSchema),
       })
     ),

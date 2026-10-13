@@ -143,7 +143,11 @@ const unifiedTracesByIdSummaryRoute = createApmServerRoute({
     const { traceId } = params.path;
     const { start, end, docId } = params.query;
 
-    const maxTraceItems = params.query.maxTraceItems ?? config.ui.maxTraceItems;
+    // A request may lower the configured cap but never raise it.
+    const maxTraceItems = Math.min(
+      params.query.maxTraceItems ?? config.ui.maxTraceItems,
+      config.ui.maxTraceItems
+    );
 
     const [{ traceItems, unifiedTraceErrors }, traceSummaryCount] = await Promise.all([
       getUnifiedTraceItems({

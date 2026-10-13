@@ -10,6 +10,12 @@ import { latencyAggregationTypeSchema } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+  MAX_NUM_BUCKETS,
+} from '../../constants';
 
 export interface ServiceInstancesDetailedStat {
   serviceNodeName: string;
@@ -29,6 +35,7 @@ export interface ServiceInstancesDetailedStatisticsResponse {
 // then validate the parsed value as an array of strings.
 const serviceNodeIdsSchema = z
   .string()
+  .max(MAX_JSON_ARRAY_PARAM_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -37,7 +44,7 @@ const serviceNodeIdsSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.array(z.string()));
+  .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS));
 
 export const serviceInstancesDetailedStatisticsRoute =
   defineRoute<ServiceInstancesDetailedStatisticsResponse>()({
@@ -45,13 +52,13 @@ export const serviceInstancesDetailedStatisticsRoute =
       'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: z
           .object({
             latencyAggregationType: latencyAggregationTypeSchema,
-            transactionType: z.string(),
+            transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
             serviceNodeIds: serviceNodeIdsSchema,
-            numBuckets: z.coerce.number(),
+            numBuckets: z.coerce.number().int().min(1).max(MAX_NUM_BUCKETS),
           })
           .merge(environmentSchema)
           .merge(kuerySchema)

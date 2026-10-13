@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentStringSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import { MAX_ARRAY_ITEMS } from '../../constants';
 
 export interface CreateAnomalyDetectionJobsResponse {
   jobCreated: true;
@@ -17,7 +18,7 @@ export const createAnomalyDetectionJobsRoute = defineRoute<CreateAnomalyDetectio
   params: lazySchema(() =>
     z.object({
       body: z.object({
-        environments: z.array(environmentStringSchema),
+        environments: z.array(environmentStringSchema).max(MAX_ARRAY_ITEMS),
       }),
     })
   ),

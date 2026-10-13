@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, kuerySchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export type ServiceDependenciesBreakdownResponse = Array<{
   title: string;
@@ -23,7 +24,7 @@ export const serviceDependenciesBreakdownRoute =
     endpoint: 'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: environmentSchema.merge(rangeSchema).merge(kuerySchema),
       })
     ),

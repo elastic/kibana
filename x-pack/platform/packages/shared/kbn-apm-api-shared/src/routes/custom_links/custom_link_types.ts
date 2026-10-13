@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
+import { MAX_ARRAY_ITEMS } from '../../constants';
 
 export const filterOptionsSchema = z
   .object({
@@ -29,12 +30,14 @@ export const payloadSchema = z
     z
       .object({
         id: z.string().max(1024),
-        filters: z.array(
-          z.object({
-            key: filterKeySchema,
-            value: z.string().max(1024),
-          })
-        ),
+        filters: z
+          .array(
+            z.object({
+              key: filterKeySchema,
+              value: z.string().max(1024),
+            })
+          )
+          .max(MAX_ARRAY_ITEMS),
       })
       .partial()
   );

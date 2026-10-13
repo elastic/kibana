@@ -9,11 +9,12 @@ import type { SearchHit } from '@kbn/es-types';
 import type { AgentConfiguration } from '@kbn/apm-common';
 import { serviceSchema } from '@kbn/apm-common';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 const searchParamsSchema = z.object({ service: serviceSchema }).extend({
-  etag: z.string().optional(),
+  etag: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
   mark_as_applied_by_agent: z.boolean().optional(),
-  error: z.string().optional(),
+  error: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
 });
 
 export type AgentConfigSearchParams = z.infer<typeof searchParamsSchema>;

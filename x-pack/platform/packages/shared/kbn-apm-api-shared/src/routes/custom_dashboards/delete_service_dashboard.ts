@@ -6,13 +6,14 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export const deleteServiceDashboardRoute = defineRoute<void>()({
   endpoint: 'DELETE /internal/apm/custom-dashboard',
   params: lazySchema(() =>
     z.object({
       query: z.object({
-        customDashboardId: z.string(),
+        customDashboardId: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
     })
   ),

@@ -7,6 +7,7 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { SavedServiceGroup } from '@kbn/apm-types';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ServiceGroupResponse {
   serviceGroup: SavedServiceGroup;
@@ -16,7 +17,7 @@ export const serviceGroupRoute = defineRoute<ServiceGroupResponse>()({
   endpoint: 'GET /internal/apm/service-group',
   params: lazySchema(() =>
     z.object({
-      query: z.object({ serviceGroup: z.string() }),
+      query: z.object({ serviceGroup: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
     })
   ),
 });

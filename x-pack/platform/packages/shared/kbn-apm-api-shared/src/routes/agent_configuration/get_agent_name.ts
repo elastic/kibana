@@ -6,6 +6,7 @@
  */
 import { z, lazySchema } from '@kbn/zod/v4';
 import { defineRoute } from '../types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface AgentConfigurationAgentNameResponse {
   agentName: string | undefined;
@@ -15,7 +16,7 @@ export const agentConfigurationAgentNameRoute = defineRoute<AgentConfigurationAg
   endpoint: 'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
   params: lazySchema(() =>
     z.object({
-      query: z.object({ serviceName: z.string() }),
+      query: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
     })
   ),
 });

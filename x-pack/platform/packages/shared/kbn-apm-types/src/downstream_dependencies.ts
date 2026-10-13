@@ -5,12 +5,13 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
+import { MAX_FIELD_VALUE_LENGTH } from './request_limits';
 
 export const downstreamDependenciesRouteRt = z.object({
-  serviceName: z.string(),
-  start: z.string(),
-  end: z.string(),
-  serviceEnvironment: z.string().optional(),
+  serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+  start: z.string().max(MAX_FIELD_VALUE_LENGTH),
+  end: z.string().max(MAX_FIELD_VALUE_LENGTH),
+  serviceEnvironment: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
 });
 
 export interface APMDownstreamDependency {

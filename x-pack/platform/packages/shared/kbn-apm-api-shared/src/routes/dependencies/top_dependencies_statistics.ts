@@ -8,6 +8,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+  MAX_NUM_BUCKETS,
+} from '../../constants';
 
 interface Statistics {
   latency: Array<{ x: number; y: number }>;
@@ -24,6 +30,7 @@ export interface DependenciesTimeseriesStatisticsResponse {
 // then validate the parsed value is an array of strings.
 const dependencyNamesJsonSchema = z
   .string()
+  .max(MAX_JSON_ARRAY_PARAM_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -32,7 +39,7 @@ const dependencyNamesJsonSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.array(z.string()));
+  .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS));
 
 export const topDependenciesStatisticsRoute =
   defineRoute<DependenciesTimeseriesStatisticsResponse>()({
@@ -43,7 +50,7 @@ export const topDependenciesStatisticsRoute =
           .merge(kuerySchema)
           .merge(rangeSchema)
           .merge(offsetSchema)
-          .merge(z.object({ numBuckets: z.coerce.number() })),
+          .merge(z.object({ numBuckets: z.coerce.number().int().min(1).max(MAX_NUM_BUCKETS) })),
         body: z.object({ dependencyNames: dependencyNamesJsonSchema }),
       })
     ),

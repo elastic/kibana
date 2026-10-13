@@ -15,6 +15,11 @@ import {
   offsetSchema,
   transactionDataSourceSchema,
 } from '../../default_api_types';
+import {
+  MAX_ARRAY_ITEMS,
+  MAX_FIELD_VALUE_LENGTH,
+  MAX_JSON_ARRAY_PARAM_LENGTH,
+} from '../../constants';
 
 export interface ServiceTransactionGroupDetailedStat {
   transactionName: string;
@@ -33,6 +38,7 @@ export interface ServiceTransactionGroupDetailedStatisticsResponse {
 // then validate the parsed value as an array of strings.
 const transactionNamesSchema = z
   .string()
+  .max(MAX_JSON_ARRAY_PARAM_LENGTH)
   .transform((value, ctx) => {
     try {
       return JSON.parse(value);
@@ -41,14 +47,14 @@ const transactionNamesSchema = z
       return z.NEVER;
     }
   })
-  .pipe(z.array(z.string()));
+  .pipe(z.array(z.string().max(MAX_FIELD_VALUE_LENGTH)).max(MAX_ARRAY_ITEMS));
 
 export const transactionGroupsDetailedStatisticsRoute =
   defineRoute<ServiceTransactionGroupDetailedStatisticsResponse>()({
     endpoint: 'GET /internal/apm/services/{serviceName}/transactions/groups/detailed_statistics',
     params: lazySchema(() =>
       z.object({
-        path: z.object({ serviceName: z.string() }),
+        path: z.object({ serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH) }),
         query: environmentSchema
           .merge(kuerySchema)
           .merge(rangeSchema)
@@ -56,14 +62,14 @@ export const transactionGroupsDetailedStatisticsRoute =
           .merge(transactionDataSourceSchema)
           .merge(
             z.object({
-              bucketSizeInSeconds: z.coerce.number(),
+              bucketSizeInSeconds: z.coerce.number().min(1),
               useDurationSummary: BooleanFromString.default(false),
             })
           )
           .merge(
             z.object({
               transactionNames: transactionNamesSchema,
-              transactionType: z.string(),
+              transactionType: z.string().max(MAX_FIELD_VALUE_LENGTH),
               latencyAggregationType: latencyAggregationTypeSchema,
             })
           ),

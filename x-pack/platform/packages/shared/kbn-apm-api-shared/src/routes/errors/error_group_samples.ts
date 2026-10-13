@@ -8,6 +8,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface ErrorGroupSampleIdsResponse {
   errorSampleIds: string[];
@@ -18,7 +19,10 @@ export const errorGroupSamplesRoute = defineRoute<ErrorGroupSampleIdsResponse>()
   endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
   params: lazySchema(() =>
     z.object({
-      path: z.object({ serviceName: z.string(), groupId: z.string() }),
+      path: z.object({
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
+        groupId: z.string().max(MAX_FIELD_VALUE_LENGTH),
+      }),
       query: environmentSchema.merge(kuerySchema).merge(rangeSchema),
     })
   ),

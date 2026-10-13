@@ -9,6 +9,7 @@ import type { ConnectionStats, Node } from '@kbn/apm-types';
 import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema, kuerySchema } from '../../default_api_types';
+import { MAX_NUM_BUCKETS } from '../../constants';
 
 export interface TopDependenciesResponse {
   dependencies: Array<{
@@ -26,7 +27,7 @@ export const topDependenciesRoute = defineRoute<TopDependenciesResponse>()({
       query: rangeSchema
         .merge(environmentSchema)
         .merge(kuerySchema)
-        .merge(z.object({ numBuckets: z.coerce.number() })),
+        .merge(z.object({ numBuckets: z.coerce.number().int().min(1).max(MAX_NUM_BUCKETS) })),
     })
   ),
 });

@@ -16,6 +16,7 @@ import {
   probabilitySchema,
   serviceTransactionDataSourceSchema,
 } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH, MAX_KUERY_LENGTH } from '../../constants';
 
 export interface MergedServiceStat {
   serviceName: string;
@@ -44,8 +45,8 @@ export const servicesListRoute = defineRoute<ServicesItemsResponse>()({
   params: z.object({
     query: z
       .object({
-        searchQuery: z.string(),
-        serviceGroup: z.string(),
+        searchQuery: z.string().max(MAX_KUERY_LENGTH),
+        serviceGroup: z.string().max(MAX_FIELD_VALUE_LENGTH),
       })
       .partial()
       .merge(probabilitySchema)

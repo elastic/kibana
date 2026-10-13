@@ -70,4 +70,51 @@ describe('alertParamsSchema', () => {
 
     expectParseError(result);
   });
+
+  describe('input limits', () => {
+    it.each(['serviceName', 'errorGroupingKey', 'transactionType', 'transactionName', 'interval'])(
+      'rejects an over-long %s',
+      (field) => {
+        expectParseSuccess(
+          alertParamsSchema.safeParse({ ...baseParams, [field]: 'a'.repeat(1024) })
+        );
+        expectParseError(alertParamsSchema.safeParse({ ...baseParams, [field]: 'a'.repeat(1025) }));
+      }
+    );
+
+    it('accepts ten groupBy fields and rejects eleven', () => {
+      expectParseSuccess(
+        alertParamsSchema.safeParse({
+          ...baseParams,
+          groupBy: Array.from({ length: 10 }, () => 'a'),
+        })
+      );
+      expectParseError(
+        alertParamsSchema.safeParse({
+          ...baseParams,
+          groupBy: Array.from({ length: 11 }, () => 'a'),
+        })
+      );
+    });
+
+    it('rejects an over-long groupBy item', () => {
+      expectParseError(alertParamsSchema.safeParse({ ...baseParams, groupBy: ['a'.repeat(1025)] }));
+    });
+
+    it('rejects an over-long serialized searchConfiguration', () => {
+      expectParseError(
+        alertParamsSchema.safeParse({ ...baseParams, searchConfiguration: 'a'.repeat(100_001) })
+      );
+    });
+
+    it('rejects an over-long query and language inside searchConfiguration', () => {
+      const withQuery = (query: string, language = 'kuery') => ({
+        ...baseParams,
+        searchConfiguration: JSON.stringify({ query: { query, language } }),
+      });
+
+      expectParseError(alertParamsSchema.safeParse(withQuery('a'.repeat(10_001))));
+      expectParseError(alertParamsSchema.safeParse(withQuery('a', 'k'.repeat(65))));
+    });
+  });
 });

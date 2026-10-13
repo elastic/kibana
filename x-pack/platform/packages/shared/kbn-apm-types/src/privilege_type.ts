@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_ARRAY_ITEMS } from './request_limits';
 
 export enum PrivilegeType {
   EVENT = 'event:write',
@@ -16,6 +17,6 @@ export enum ClusterPrivilegeType {
   MANAGE_OWN_API_KEY = 'manage_own_api_key',
 }
 
-export const privilegesTypeSchema = z.array(
-  z.union([z.literal(PrivilegeType.EVENT), z.literal(PrivilegeType.AGENT_CONFIG)])
-);
+export const privilegesTypeSchema = z
+  .array(z.union([z.literal(PrivilegeType.EVENT), z.literal(PrivilegeType.AGENT_CONFIG)]))
+  .max(MAX_ARRAY_ITEMS);

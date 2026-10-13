@@ -9,6 +9,7 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { Error as ApmError, TraceItem, Transaction } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 export interface UnifiedTracesByIdResponse {
   traceItems: TraceItem[];
@@ -24,12 +25,12 @@ export const unifiedTracesByIdRoute = defineRoute<UnifiedTracesByIdResponse>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        traceId: z.string(),
+        traceId: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: rangeSchema.merge(
         z.object({
-          serviceName: z.string().optional(),
-          entryTransactionId: z.string().optional(),
+          serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
+          entryTransactionId: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
           ecsOnly: BooleanFromString.optional(),
         })
       ),

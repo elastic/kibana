@@ -9,6 +9,7 @@ import { environmentSchema } from '@kbn/apm-types';
 import type { Maybe } from '@kbn/apm-types-shared';
 import { defineRoute } from '../types';
 import { kuerySchema, rangeSchema, offsetSchema } from '../../default_api_types';
+import { MAX_FIELD_VALUE_LENGTH } from '../../constants';
 
 type Timeseries = Array<{ x: number; y: number }>;
 
@@ -45,11 +46,11 @@ export const mobileLocationStatsRoute = defineRoute<MobileLocationStats>()({
   params: lazySchema(() =>
     z.object({
       path: z.object({
-        serviceName: z.string(),
+        serviceName: z.string().max(MAX_FIELD_VALUE_LENGTH),
       }),
       query: z
         .object({
-          locationField: z.string().optional(),
+          locationField: z.string().max(MAX_FIELD_VALUE_LENGTH).optional(),
         })
         .merge(kuerySchema)
         .merge(rangeSchema)
