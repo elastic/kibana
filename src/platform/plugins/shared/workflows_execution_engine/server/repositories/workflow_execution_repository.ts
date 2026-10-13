@@ -191,8 +191,9 @@ export class WorkflowExecutionRepository {
   }
 
   /**
-   * A conflict-only bulk response made no writes, so its `refresh` option does not make the
-   * earlier attempt's document searchable; refresh explicitly when the caller asked for it.
+   * A conflicted create item made no write in this request, so the request's `refresh` option
+   * does not cover the document persisted by the earlier attempt; refresh explicitly when the
+   * caller asked for it.
    */
   private async refreshAfterRecoveredCreate(
     refresh: boolean | 'wait_for' | undefined
