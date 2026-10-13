@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useCallback } from 'react';
 
 import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -16,7 +15,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { isMac } from '@kbn/shared-ux-utility';
 
 import { useKibana } from '../../hooks/use_kibana';
-import { searchParamNames } from '../../search_param_names';
+import { useSidebarCollapsed } from '../../hooks/use_sidebar_collapsed';
 
 import {
   CONDENSED_SIDEBAR_WIDTH,
@@ -33,26 +32,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const {
     services: { analytics },
   } = useKibana();
-  const history = useHistory();
-  // An entry point (e.g. "Open chat" on an investigation) can ask for a collapsed sidebar via the
-  // `sidebarCollapsed` search param. It is read once as the initial state and then removed from
-  // the URL, so the state has a single owner and toggling never touches the URL.
-  const [isCondensed, setIsCondensed] = useState(
-    () =>
-      new URLSearchParams(history.location.search).get(searchParamNames.sidebarCollapsed) === 'true'
-  );
-
-  useEffect(() => {
-    const { pathname, search, hash, state } = history.location;
-    const searchParams = new URLSearchParams(search);
-    if (!searchParams.has(searchParamNames.sidebarCollapsed)) {
-      return;
-    }
-    searchParams.delete(searchParamNames.sidebarCollapsed);
-    history.replace({ pathname, search: searchParams.toString(), hash, state });
-    // `history` is stable, so this runs once on mount; the param is a one-shot hint consumed by
-    // the initial state above.
-  }, [history]);
+  const [isCondensed, setIsCondensed] = useSidebarCollapsed();
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -73,7 +53,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         setIsCondensed(nextIsCondensed);
       }
     },
-    [analytics, isCondensed]
+    [analytics, isCondensed, setIsCondensed]
   );
 
   const sidebarStyles = css`
