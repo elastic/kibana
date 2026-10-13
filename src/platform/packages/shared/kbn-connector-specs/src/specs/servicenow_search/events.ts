@@ -51,19 +51,21 @@ const optionalSnId = (description: string) => snId(description).optional();
 const optionalSnValue = (description: string) =>
   z.string().min(1).max(SERVICENOW_VALUE_MAX).optional().describe(description);
 
-const ChangedFieldSchema = z.object({
-  field: snId('Name of the field that changed.'),
-  previous: z
-    .string()
-    .max(SERVICENOW_VALUE_MAX)
-    .optional()
-    .describe('Previous value, when ServiceNow sent one.'),
-  current: z
-    .string()
-    .max(SERVICENOW_VALUE_MAX)
-    .optional()
-    .describe('Current value, when ServiceNow sent one.'),
-});
+const ChangedFieldSchema = lazySchema(() =>
+  z.object({
+    field: snId('Name of the field that changed.'),
+    previous: z
+      .string()
+      .max(SERVICENOW_VALUE_MAX)
+      .optional()
+      .describe('Previous value, when ServiceNow sent one.'),
+    current: z
+      .string()
+      .max(SERVICENOW_VALUE_MAX)
+      .optional()
+      .describe('Current value, when ServiceNow sent one.'),
+  })
+);
 
 const IncidentCreatedEventSchema = lazySchema(() =>
   z.object({

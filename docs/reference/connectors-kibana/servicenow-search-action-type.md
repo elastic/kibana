@@ -11,7 +11,11 @@ applies_to:
 
 The {{sn}} connector enables federated search and data retrieval from {{sn}} tables using the ServiceNow Table API.
 
-You can use this connector in **Agent Builder** and **Workflows**. With **Receive events** turned on, {{sn}} can also start a workflow when an incident, journal entry, or change approval changes.
+You can use this connector in **Agent Builder** and **Workflows**.
+
+Some capabilities of this connector are only available from a certain version:
+
+- {applies_to}`serverless: unavailable` {applies_to}`stack: preview 9.6+` Events that start a workflow when an incident changes, a comment or work note is added, or a change approval changes state.
 
 ::::{note}
 For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
