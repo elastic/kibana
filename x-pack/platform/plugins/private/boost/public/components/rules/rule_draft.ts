@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BoostRuleInput } from '../../../common/types';
+import type { BoostRule, BoostRuleInput } from '../../../common/types';
 import type {
   IndexPatternError,
   ProfileNameError,
@@ -47,6 +47,27 @@ export const createEmptyRuleDraft = (profileName = ''): RuleDraft => ({
   picked: [],
   priority: '0',
 });
+
+/**
+ * Opens an existing rule in the mode that shows its targets: a `*` pattern, or a name that isn't an
+ * existing data source, stays in pattern mode, since the picker can only list what exists.
+ */
+export const ruleToDraft = (
+  { name, boost_profile: profileName, index_patterns: patterns, priority }: BoostRule,
+  existingNames: ReadonlySet<string>
+): RuleDraft => {
+  const [firstPattern = ''] = patterns;
+  const isPattern =
+    patterns.length === 1 && (firstPattern.includes('*') || !existingNames.has(firstPattern));
+  return {
+    name,
+    profileName,
+    mode: isPattern ? 'pattern' : 'pick',
+    pattern: isPattern ? firstPattern : '',
+    picked: isPattern ? [] : patterns,
+    priority: String(priority),
+  };
+};
 
 const parseNumber = (value: string): number | undefined => {
   const parsed = Number(value);

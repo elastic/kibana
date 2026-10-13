@@ -15,7 +15,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiConfirmModal,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiScreenReaderOnly,
   useGeneratedHtmlId,
@@ -52,57 +51,12 @@ const DEFAULT_BADGE_LABEL = i18n.translate('xpack.boost.rulesTab.defaultBadge', 
 
 const isCustomRule = ({ is_builtin: isBuiltin }: BoostRule) => !isBuiltin;
 
-/** Explains a custom rule's coverage when it doesn't apply to everything it matches. */
-const getCoverageNote = ({
-  profileType,
-  matches,
-  appliesTo,
-}: RuleRow): { text: string; isWarning: boolean } | undefined => {
-  if (matches === 0) {
-    return {
-      text:
-        profileType === 'data_streams'
-          ? i18n.translate('xpack.boost.rulesTab.noDataStreamMatches', {
-              defaultMessage:
-                "Doesn't match any data streams yet. Data streams created later that match will use this rule.",
-            })
-          : i18n.translate('xpack.boost.rulesTab.noIndexMatches', {
-              defaultMessage:
-                "Doesn't match any indices yet. Indices created later that match will use this rule.",
-            }),
-      isWarning: false,
-    };
-  }
-  if (appliesTo === 0) {
-    return {
-      text: i18n.translate('xpack.boost.rulesTab.fullyOverridden', {
-        defaultMessage:
-          'Matches {matches}, but higher-ranked rules apply to all of them, so this rule has no effect.',
-        values: { matches: formatDataSourceCount(profileType, matches) },
-      }),
-      isWarning: true,
-    };
-  }
-  if (appliesTo < matches) {
-    return {
-      text: i18n.translate('xpack.boost.rulesTab.partlyOverridden', {
-        defaultMessage: 'Matches {matches}. Higher-ranked rules apply to {overridden} of them.',
-        values: {
-          matches: formatDataSourceCount(profileType, matches),
-          overridden: matches - appliesTo,
-        },
-      }),
-      isWarning: false,
-    };
-  }
-  return undefined;
-};
-
 export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProps) => {
   const { notifications } = useBoostServices();
   const deleteModalTitleId = useGeneratedHtmlId();
   const [ruleToDelete, setRuleToDelete] = useState<RuleRow>();
-  const [isCreating, setIsCreating] = useState(false);
+  // Undefined while closed; an empty object creates a rule, and `rule` edits one.
+  const [flyout, setFlyout] = useState<{ rule?: BoostRule }>();
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
 
   const rows = useMemo<RuleRow[]>(() => {
@@ -115,8 +69,9 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
     }));
   }, [rules, profiles, dataSources]);
 
+  // Wide enough for two icon buttons: Edit, and Delete for custom rules.
   const actionsColumn: EuiTableActionsColumnType<RuleRow> = {
-    width: '64px',
+    width: '72px',
     name: (
       <EuiScreenReaderOnly>
         <span>
@@ -125,6 +80,16 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       </EuiScreenReaderOnly>
     ),
     actions: [
+      {
+        name: i18n.translate('xpack.boost.rulesTab.editAction', { defaultMessage: 'Edit' }),
+        description: i18n.translate('xpack.boost.rulesTab.editActionDescription', {
+          defaultMessage: 'Edit this boost rule',
+        }),
+        icon: 'pencil',
+        type: 'icon',
+        onClick: (rule) => setFlyout({ rule }),
+        'data-test-subj': 'editBoostRule',
+      },
       {
         name: i18n.translate('xpack.boost.rulesTab.deleteAction', { defaultMessage: 'Delete' }),
         description: i18n.translate('xpack.boost.rulesTab.deleteActionDescription', {
@@ -170,39 +135,10 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       name: i18n.translate('xpack.boost.rulesTab.targetsColumn', {
         defaultMessage: 'Targets',
       }),
+      width: '16%',
       render: (patterns: string[], { profileType }: RuleRow) => (
         <RuleTargets patterns={patterns} type={profileType} />
       ),
-    },
-    {
-      // Spelled out ("3 indices") and left-aligned; it still sorts numerically.
-      field: 'appliesTo',
-      name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
-        defaultMessage: 'Applies to',
-      }),
-      width: '12%',
-      sortable: true,
-      render: (appliesTo: number, row: RuleRow) => {
-        // Default rules catch whatever no custom rule claims, so partial coverage is expected.
-        const note = row.is_builtin ? undefined : getCoverageNote(row);
-        return (
-          <span>
-            {formatDataSourceCount(row.profileType, appliesTo)}
-            {note && (
-              <>
-                {' '}
-                <EuiIconTip
-                  type={note.isWarning ? 'warning' : 'info'}
-                  color={note.isWarning ? 'warning' : 'subdued'}
-                  size="s"
-                  content={note.text}
-                  aria-label={note.text}
-                />
-              </>
-            )}
-          </span>
-        );
-      },
     },
     {
       field: 'priority',
@@ -212,6 +148,17 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       width: '12%',
       sortable: true,
       dataType: 'number',
+    },
+    {
+      // Spelled out ("3 indices") and left-aligned; it still sorts numerically.
+      field: 'appliesTo',
+      name: i18n.translate('xpack.boost.rulesTab.appliesToColumn', {
+        defaultMessage: 'Applies to',
+      }),
+      width: '12%',
+      sortable: true,
+      render: (appliesTo: number, { profileType }: RuleRow) =>
+        formatDataSourceCount(profileType, appliesTo),
     },
     ...(canEdit ? [actionsColumn] : []),
   ];
@@ -235,7 +182,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
       },
     ],
     toolsRight: canEdit ? (
-      <EuiButton fill size="s" onClick={() => setIsCreating(true)} data-test-subj="createBoostRule">
+      <EuiButton fill size="s" onClick={() => setFlyout({})} data-test-subj="createBoostRule">
         {i18n.translate('xpack.boost.rulesTab.createButton', {
           defaultMessage: 'Create boost rule',
         })}
@@ -262,7 +209,7 @@ export const RulesTab = ({ rules, profiles, dataSources, canEdit }: RulesTabProp
         data-test-subj="boostRulesTable"
       />
 
-      {isCreating && <RuleFlyout onClose={() => setIsCreating(false)} />}
+      {flyout && <RuleFlyout rule={flyout.rule} onClose={() => setFlyout(undefined)} />}
 
       {ruleToDelete && (
         <EuiConfirmModal

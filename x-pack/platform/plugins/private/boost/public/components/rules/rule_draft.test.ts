@@ -10,6 +10,7 @@ import {
   getRuleDraftErrors,
   hasRuleDraftErrors,
   ruleDraftToInput,
+  ruleToDraft,
 } from './rule_draft';
 
 const validDraft = {
@@ -60,6 +61,35 @@ describe('rule drafts', () => {
     expect(
       ruleDraftToInput({ ...validDraft, mode: 'pick', picked: ['products', 'users'] })
         .index_patterns
+    ).toEqual(['products', 'users']);
+  });
+});
+
+describe('ruleToDraft', () => {
+  const rule = {
+    name: 'storefront',
+    boost_profile: 'storefront-search',
+    priority: 10,
+    is_builtin: false,
+  };
+  const existing = new Set(['products', 'users']);
+
+  it('opens patterns and unknown names in pattern mode', () => {
+    expect(ruleToDraft({ ...rule, index_patterns: ['catalog-*'] }, existing)).toMatchObject({
+      mode: 'pattern',
+      pattern: 'catalog-*',
+      priority: '10',
+    });
+    expect(ruleToDraft({ ...rule, index_patterns: ['outlet'] }, existing).mode).toBe('pattern');
+  });
+
+  it('opens existing names in pick mode', () => {
+    expect(ruleToDraft({ ...rule, index_patterns: ['products'] }, existing)).toMatchObject({
+      mode: 'pick',
+      picked: ['products'],
+    });
+    expect(
+      ruleToDraft({ ...rule, index_patterns: ['products', 'users'] }, existing).picked
     ).toEqual(['products', 'users']);
   });
 });

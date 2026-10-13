@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButtonEmpty,
   EuiCode,
   EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
@@ -39,19 +37,23 @@ const SEARCHABLE_FROM = 10;
 export const RuleTargets = ({ patterns, type }: RuleTargetsProps) => {
   const hiddenCount = patterns.length - VISIBLE_PATTERNS;
 
+  // Inline text in one span, since table cells are flex containers that would stretch each code
+  // element into a flex item.
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-      {patterns.slice(0, VISIBLE_PATTERNS).map((pattern) => (
-        <EuiFlexItem key={pattern} grow={false}>
+    <span>
+      {patterns.slice(0, VISIBLE_PATTERNS).map((pattern, index) => (
+        <Fragment key={pattern}>
+          {index > 0 && ' '}
           <EuiCode>{pattern}</EuiCode>
-        </EuiFlexItem>
+        </Fragment>
       ))}
       {hiddenCount > 0 && (
-        <EuiFlexItem grow={false}>
+        <>
+          {' '}
           <AllPatternsPopover patterns={patterns} type={type} hiddenCount={hiddenCount} />
-        </EuiFlexItem>
+        </>
       )}
-    </EuiFlexGroup>
+    </span>
   );
 };
 
@@ -80,17 +82,12 @@ const AllPatternsPopover = ({ patterns, type, hiddenCount }: AllPatternsPopoverP
       }}
       anchorPosition="downLeft"
       button={
-        <EuiButtonEmpty
-          size="xs"
-          flush="both"
-          onClick={() => setIsOpen(!isOpen)}
-          aria-expanded={isOpen}
-        >
+        <EuiLink onClick={() => setIsOpen(!isOpen)} aria-expanded={isOpen}>
           {i18n.translate('xpack.boost.ruleTargets.moreButton', {
             defaultMessage: '+{count} more',
             values: { count: hiddenCount },
           })}
-        </EuiButtonEmpty>
+        </EuiLink>
       }
     >
       <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>

@@ -9,6 +9,7 @@ import type { HttpStart, IHttpFetchError } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import {
+  BOOST_DEFAULT_RULES_API_PATH,
   BOOST_MODE_API_PATH,
   BOOST_PROFILES_API_PATH,
   BOOST_RULES_API_PATH,
@@ -18,6 +19,7 @@ import {
 import type {
   BoostMode,
   BoostProfileInput,
+  BoostProfileType,
   BoostRuleInput,
   BoostState,
   SimpleModeDefaults,
@@ -103,6 +105,29 @@ export const useCreateRule = () =>
       http.post<BoostState>(BOOST_RULES_API_PATH, { body: JSON.stringify(rule) }),
     i18n.translate('xpack.boost.createRuleErrorTitle', {
       defaultMessage: 'Unable to create boost rule',
+    })
+  );
+
+export const useUpdateRule = () =>
+  useBoostMutation(
+    (http, rule: BoostRuleInput) =>
+      http.put<BoostState>(`${BOOST_RULES_API_PATH}/${encodeURIComponent(rule.name)}`, {
+        body: JSON.stringify(rule),
+      }),
+    i18n.translate('xpack.boost.updateRuleErrorTitle', {
+      defaultMessage: 'Unable to save boost rule',
+    })
+  );
+
+/** Points a default rule at a profile of its type, which also syncs simple mode for managed ones. */
+export const useUpdateDefaultRule = () =>
+  useBoostMutation(
+    (http, { type, profileName }: { type: BoostProfileType; profileName: string }) =>
+      http.put<BoostState>(`${BOOST_DEFAULT_RULES_API_PATH}/${encodeURIComponent(type)}`, {
+        body: JSON.stringify({ boost_profile: profileName }),
+      }),
+    i18n.translate('xpack.boost.updateDefaultRuleErrorTitle', {
+      defaultMessage: 'Unable to save boost rule',
     })
   );
 
