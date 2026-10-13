@@ -31,24 +31,6 @@ export const indexPanelsById = (
   return index;
 };
 
-/**
- * Returns the first free y-position in the outer grid. A section occupies one outer row; its
- * panels use section-relative coordinates.
- */
-export const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
-  return widgets.reduce((maxY, widget) => {
-    if (isSection(widget)) {
-      return Math.max(maxY, widget.grid.y + 1);
-    }
-
-    return Math.max(maxY, widget.grid.y + widget.grid.h);
-  }, 0);
-};
-
-/** Returns the first free y-position below the given panels. */
-export const getPanelsBottomY = (panels: AttachmentPanel[]): number =>
-  panels.reduce((maxY, { grid }) => Math.max(maxY, grid.y + grid.h), 0);
-
 export const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
   return panels.findIndex((widget) => isSection(widget) && widget.id === sectionId);
 };

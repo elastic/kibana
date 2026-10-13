@@ -6,12 +6,21 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { panelGridSchema } from '@kbn/agent-builder-dashboards-common';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { controlInputSchema } from '../controls';
+import { GRID_COLUMNS } from '../layout';
 import { upsertPanelContentSchema } from '../operations/panels';
 
 const idSchema = z.string().min(1).max(256);
+
+const panelSizeSchema = z
+  .object({
+    w: z.number().int().min(1).max(GRID_COLUMNS).describe('Width in grid columns, out of 48.'),
+    h: z.number().int().min(1).max(100).describe('Height in grid rows.'),
+  })
+  .describe(
+    'Explicit panel size. Set it only when the user asks for a specific size (e.g. "make it full width" or "make it bigger"); otherwise the layout step sizes the panel. Positions always come from the layout step.'
+  );
 
 const upsertSectionSchema = z.object({
   id: idSchema.describe(
@@ -44,11 +53,7 @@ const upsertPanelSchema = z.object({
     .describe(
       'Panel content. Required for new panels. For an existing panel, edits it (e.g. a request with a query describing the change) and must match its kind; to change the kind, remove the panel and add a new one with a new id. Omit to only move or resize the panel.'
     ),
-  grid: panelGridSchema
-    .optional()
-    .describe(
-      "Panel position and size in its container (48-column grid; positions in a section are relative to the section). Required for new panels; for existing panels, replaces the grid when set. When omitted, an existing panel keeps its grid, or, when it moves to another container, is placed below that container's panels."
-    ),
+  size: panelSizeSchema.optional(),
 });
 
 /**
@@ -75,7 +80,7 @@ export const upsertDashboardSchema = z.object({
     .max(50)
     .optional()
     .describe(
-      'Sections to create or update. Sections group related panels under a collapsible title. New sections are added below all other widgets, in the order listed.'
+      'Sections to create or update. Sections group related panels under a collapsible title. The layout step positions new sections.'
     ),
   panels: z
     .array(upsertPanelSchema)
@@ -90,6 +95,14 @@ export const upsertDashboardSchema = z.object({
     .optional()
     .describe(
       'Controls to add. Use options_list_control for categorical/keyword fields, range_slider_control for numeric fields, time_slider_control for time sub-range filtering (at most one per dashboard).'
+    ),
+  layout: z
+    .string()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe(
+      'Layout instructions from the user, e.g. "put the metrics in one row" or "move the error chart next to the latency chart". Arranges the whole dashboard again. Omit it otherwise: new, moved, and removed panels are placed automatically.'
     ),
   remove: z
     .array(idSchema)

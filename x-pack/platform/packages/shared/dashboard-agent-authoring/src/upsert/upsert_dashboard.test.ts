@@ -177,8 +177,8 @@ describe('executeDashboardUpsert', () => {
         title: 'Updated title',
         remove: ['existing-panel'],
         panels: [
-          { id: 'metric', grid: GRID, content: metricAttachment },
-          { id: 'summary', grid: GRID, content: markdownContent('### Updated summary') },
+          { id: 'metric', content: metricAttachment },
+          { id: 'summary', content: markdownContent('### Updated summary') },
         ],
       },
       logger,
@@ -239,7 +239,7 @@ describe('executeDashboardUpsert', () => {
     const result = await executeDashboardUpsert({
       upsert: {
         title: 'New dashboard',
-        panels: [{ id: 'summary', grid: GRID, content: markdownContent('Hello') }],
+        panels: [{ id: 'summary', content: markdownContent('Hello') }],
       },
       logger,
     });
@@ -258,9 +258,9 @@ describe('executeDashboardUpsert', () => {
       },
       upsert: {
         panels: [
-          { id: 'metric-1', grid: GRID, content: metricAttachment },
-          { id: 'metric-2', grid: GRID, content: metricAttachment },
-          { id: 'metric-3', grid: GRID, content: metricAttachment },
+          { id: 'metric-1', content: metricAttachment },
+          { id: 'metric-2', content: metricAttachment },
+          { id: 'metric-3', content: metricAttachment },
         ],
       },
       logger,
@@ -285,14 +285,13 @@ describe('executeDashboardUpsert', () => {
       },
       upsert: {
         panels: [
-          { id: 'summary', grid: GRID, content: markdownContent('### Summary') },
-          { id: 'section-metric', section: 'section-a', grid: GRID, content: metricAttachment },
-          { id: 'total-requests', grid: GRID, content: metricRequest('show total requests') },
-          { id: 'top-metric', grid: GRID, content: metricAttachment },
+          { id: 'summary', content: markdownContent('### Summary') },
+          { id: 'section-metric', section: 'section-a', content: metricAttachment },
+          { id: 'total-requests', content: metricRequest('show total requests') },
+          { id: 'top-metric', content: metricAttachment },
           {
             id: 'p95-latency',
             section: 'section-a',
-            grid: GRID,
             content: metricRequest('show p95 latency'),
           },
         ],
@@ -345,7 +344,6 @@ describe('executeDashboardUpsert', () => {
         panels: [
           {
             id: 'charts',
-            grid: GRID,
             content: {
               source: 'config',
               type: 'ml_anomaly_charts',
@@ -354,7 +352,6 @@ describe('executeDashboardUpsert', () => {
           },
           {
             id: 'swimlane',
-            grid: GRID,
             content: {
               source: 'config',
               type: 'ml_anomaly_swimlane',
@@ -363,7 +360,6 @@ describe('executeDashboardUpsert', () => {
           },
           {
             id: 'smv',
-            grid: GRID,
             content: {
               source: 'config',
               type: 'ml_single_metric_viewer',
@@ -393,13 +389,13 @@ describe('executeDashboardUpsert', () => {
     );
   });
 
-  it('creates new panels at the given grid and keeps existing panels in place', async () => {
+  it('packs new panels below existing panels, which keep their place, without a layout call', async () => {
     const result = await executeDashboardUpsert({
       dashboardData: { title: 'Test', panels: [createLensPanel('existing', 0)] },
       upsert: {
         panels: [
-          { id: 'beside', content: metricAttachment, grid: { x: 24, y: 0, w: 24, h: 9 } },
-          { id: 'below', content: markdownContent('Notes'), grid: { x: 0, y: 9, w: 48, h: 6 } },
+          { id: 'beside', content: metricAttachment, size: { w: 24, h: 9 } },
+          { id: 'below', content: markdownContent('Notes') },
         ],
       },
       logger,
@@ -408,8 +404,8 @@ describe('executeDashboardUpsert', () => {
 
     expect(result.failures).toEqual([]);
     expect(findPanel(result.dashboardData, 'existing')?.grid).toEqual({ x: 0, y: 0, w: 24, h: 9 });
-    expect(findPanel(result.dashboardData, 'beside')?.grid).toEqual({ x: 24, y: 0, w: 24, h: 9 });
-    expect(findPanel(result.dashboardData, 'below')?.grid).toEqual({ x: 0, y: 9, w: 48, h: 6 });
+    expect(findPanel(result.dashboardData, 'beside')?.grid).toEqual({ x: 0, y: 9, w: 24, h: 9 });
+    expect(findPanel(result.dashboardData, 'below')?.grid).toEqual({ x: 0, y: 18, w: 48, h: 6 });
   });
 
   describe('rejected changes', () => {
@@ -423,16 +419,9 @@ describe('executeDashboardUpsert', () => {
       error: string;
     }>([
       {
-        name: 'a new panel without grid',
-        panels: [],
-        upsert: { panels: [{ id: 'metric', content: metricAttachment }] },
-        identifier: 'metric',
-        error: 'Panel "metric" is new. Provide `grid` ({ x, y, w, h }) to create it.',
-      },
-      {
         name: 'a panel without content that does not exist',
         panels: [],
-        upsert: { panels: [{ id: 'missing-panel', grid: GRID }] },
+        upsert: { panels: [{ id: 'missing-panel' }] },
         identifier: 'missing-panel',
         error: 'Panel "missing-panel" does not exist. Provide content to create it.',
       },
@@ -564,9 +553,7 @@ describe('executeDashboardUpsert', () => {
         name: 'a new Lens panel without chartType',
         panels: [],
         upsert: {
-          panels: [
-            { id: 'trend', grid: GRID, content: { source: 'request', query: 'show trend' } },
-          ],
+          panels: [{ id: 'trend', content: { source: 'request', query: 'show trend' } }],
         },
         identifier: 'trend',
         error: 'Panel "trend" is new. Provide `chartType` to create a Lens panel.',
@@ -578,7 +565,6 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'kpi',
-              grid: GRID,
               content: { source: 'request', renderer: 'custom_content', esql: 'FROM logs' },
             },
           ],
@@ -710,11 +696,10 @@ describe('executeDashboardUpsert', () => {
         ],
         panels: [
           { id: 'top-panel', section: 'overview' },
-          { id: 'nested-panel', section: 'details', grid: { x: 0, y: 0, w: 48, h: 8 } },
-          { id: 'summary', section: 'overview', grid: GRID, content: markdownContent('Summary') },
+          { id: 'nested-panel', section: 'details', size: { w: 48, h: 8 } },
+          { id: 'summary', section: 'overview', content: markdownContent('Summary') },
           {
             id: 'total-requests',
-            grid: GRID,
             section: 'details',
             content: metricRequest('show total requests'),
           },
@@ -768,11 +753,10 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'summary',
-              grid: GRID,
               section: 'overview',
               content: markdownContent('### Section Summary'),
             },
-            { id: 'metric', section: 'overview', grid: GRID, content: metricAttachment },
+            { id: 'metric', section: 'overview', content: metricAttachment },
           ],
         },
         logger,
@@ -910,7 +894,7 @@ describe('executeDashboardUpsert', () => {
             createSection('section-a', 'Section A', 0, [createLensPanel('section-panel-1', 0)]),
           ],
         },
-        upsert: { panels: [{ id: 'section-panel-1', grid: { x: 12, y: 0, w: 12, h: 6 } }] },
+        upsert: { panels: [{ id: 'section-panel-1', size: { w: 12, h: 6 } }] },
         logger,
       });
 
@@ -918,7 +902,7 @@ describe('executeDashboardUpsert', () => {
       expect(getSection(result.dashboardData, 'section-a')?.panels).toEqual([
         expect.objectContaining({
           id: 'section-panel-1',
-          grid: { x: 12, y: 0, w: 12, h: 6 },
+          grid: { x: 0, y: 0, w: 12, h: 6 },
           config: ESQL_METRIC_CONFIG,
         }),
       ]);
@@ -1010,7 +994,6 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'total-requests',
-              grid: GRID,
               content: {
                 source: 'request',
                 chartType: SupportedChartType.Metric,
@@ -1021,7 +1004,6 @@ describe('executeDashboardUpsert', () => {
             {
               id: 'error-rate',
               section: 'section-a',
-              grid: GRID,
               content: metricRequest('show error rate'),
             },
           ],
@@ -1081,17 +1063,15 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'total-requests',
-              grid: GRID,
               section: 'overview',
               content: metricRequest('show total requests'),
             },
             {
               id: 'error-rate',
               section: 'errors',
-              grid: GRID,
               content: metricRequest('show error rate'),
             },
-            { id: 'top-level', grid: GRID, content: metricRequest('show latency') },
+            { id: 'top-level', content: metricRequest('show latency') },
           ],
         },
         logger,
@@ -1153,11 +1133,10 @@ describe('executeDashboardUpsert', () => {
             panels: [
               {
                 id: 'total-requests',
-                grid: GRID,
                 section: 'overview',
                 content: metricRequest('show total requests'),
               },
-              { id: 'error-rate', grid: GRID, content: metricRequest('show error rate') },
+              { id: 'error-rate', content: metricRequest('show error rate') },
             ],
           },
           logger,
@@ -1169,7 +1148,7 @@ describe('executeDashboardUpsert', () => {
       await expect(
         executeDashboardUpsert({
           dashboardData: { title: 'Test', panels: [] },
-          upsert: { panels: [{ id: 'metric', grid: GRID, content: metricAttachment }] },
+          upsert: { panels: [{ id: 'metric', content: metricAttachment }] },
           logger,
         })
       ).rejects.toThrow('Attachment panel resolver is required for attachment-source panels.');
@@ -1286,8 +1265,8 @@ describe('executeDashboardUpsert', () => {
         },
         upsert: {
           panels: [
-            { id: 'total-requests', grid: GRID, content: metricRequest('show total requests') },
-            { id: 'p95-latency', grid: GRID, content: metricRequest('show p95 latency') },
+            { id: 'total-requests', content: metricRequest('show total requests') },
+            { id: 'p95-latency', content: metricRequest('show p95 latency') },
           ],
         },
         logger,
@@ -1634,7 +1613,6 @@ describe('executeDashboardUpsert', () => {
           panels: [
             {
               id: 'error-rate-kpi',
-              grid: GRID,
               content: {
                 source: 'request',
                 renderer: 'custom_content',
@@ -1686,8 +1664,8 @@ describe('executeDashboardUpsert', () => {
         dashboardData: { title: 'Dashboard', panels: [] },
         upsert: {
           panels: [
-            { id: 'total-requests', grid: GRID, content: metricRequest('show total requests') },
-            { id: 'p95-latency', grid: GRID, content: metricRequest('show p95 latency') },
+            { id: 'total-requests', content: metricRequest('show total requests') },
+            { id: 'p95-latency', content: metricRequest('show p95 latency') },
           ],
         },
         logger,
@@ -2166,7 +2144,6 @@ describe('executeDashboardUpsert attachment-source panels', () => {
           {
             id: 'chart',
             section: 'overview',
-            grid: GRID,
             content: attachmentContent('att-missing'),
           },
         ],
@@ -2194,8 +2171,8 @@ describe('executeDashboardUpsert attachment-source panels', () => {
       dashboardData: { title: 'Test', panels: [] },
       upsert: {
         panels: [
-          { id: 'chart', grid: GRID, content: attachmentContent('att-1') },
-          { id: 'missing-chart', grid: GRID, content: attachmentContent('att-missing') },
+          { id: 'chart', content: attachmentContent('att-1') },
+          { id: 'missing-chart', content: attachmentContent('att-missing') },
         ],
       },
       logger,

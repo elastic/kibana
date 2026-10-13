@@ -23,6 +23,11 @@ import {
 import { DASHBOARD_FAILURE_TYPES } from '../failure_types';
 import { appendControls } from '../controls';
 import {
+  arrangeDashboardLayout,
+  getDefaultPanelSize,
+  type ArrangeDashboardLayout,
+} from '../layout';
+import {
   buildConfigPanelContent,
   canEditPanel,
   type ResolvePanelContent,
@@ -37,7 +42,6 @@ import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from '..
 import type { PanelAuthoringNote, PanelContentAttempt } from '../resolve_panel';
 import type { DashboardFailure } from '../utils';
 import { discardInvalidChanges, type ValidateDashboard } from '../validate_dashboard';
-import { placeNewWidgets } from './placement';
 import type { DashboardUpsert, UpsertPanelItem, UpsertSectionItem } from './schema';
 
 type RecordFailure = (identifier: string, error: string) => void;
@@ -55,6 +59,7 @@ interface ExecuteDashboardUpsertParams {
   resolvePanelContent?: ResolvePanelContent;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
   resolveControlFieldCapabilities?: ResolveControlFieldCapabilities;
+  arrangeLayout?: ArrangeDashboardLayout;
   finalizeDashboard?: FinalizeDashboard;
   validateDashboard?: ValidateDashboard;
 }
@@ -160,7 +165,7 @@ const upsertSections = (
       id,
       title,
       collapsed: collapsed ?? false,
-      // Placed below all other widgets once the rest of the upsert is applied.
+      // Positioned by the layout step once every change is applied.
       grid: { y: 0 },
       panels: [],
     };
@@ -284,11 +289,6 @@ const planPanels = ({
       }
       return [{ item, existingPanel }];
     }
-    if (!existingPanel && !item.grid) {
-      recordFailure(id, `Panel "${id}" is new. Provide \`grid\` ({ x, y, w, h }) to create it.`);
-      return [];
-    }
-
     const contentPlan = planPanelContent({
       id,
       content,
@@ -332,12 +332,14 @@ const applyPanel = ({
   plan: PanelPlan;
   attempt?: Extract<PanelContentAttempt, { type: 'success' }>;
 }): DashboardAttachmentData => {
-  const { id, section, grid } = item;
+  const { id, section, size } = item;
 
   if (!existingPanel) {
-    if (!attempt || !grid) {
+    if (!attempt) {
       return dashboardData;
     }
+    // Positioned by the layout step once every change is applied.
+    const grid = { x: 0, y: 0, ...(size ?? getDefaultPanelSize(attempt.panelContent)) };
     return appendPanelsToDashboard({
       dashboardData,
       panelsToAdd: [{ id, ...attempt.panelContent, grid }],
@@ -348,7 +350,7 @@ const applyPanel = ({
   const transformPanel = (panel: AttachmentPanel): AttachmentPanel => ({
     ...panel,
     ...(attempt ? attempt.panelContent : {}),
-    grid: grid ?? panel.grid,
+    grid: { ...panel.grid, ...size },
   });
 
   const currentSectionId = getPanelSectionId(dashboardData, id);
@@ -521,7 +523,8 @@ const getChangedIds = ({
  * Environment-agnostic dashboard upsert: applies the desired dashboard fields, sections, panels,
  * controls, and removals to a prior dashboard payload (or an empty one), keyed by id. New panels and
  * sections keep the ids the caller chose. Panel content is resolved in parallel through the
- * injected resolvers. The host can complete the result with `finalizeDashboard` (e.g. a default
+ * injected resolvers. The layout step then positions what the call touched, through the injected
+ * `arrangeLayout` model call when provided. The host can complete the result with `finalizeDashboard` (e.g. a default
  * time range) before it is validated; changes that make the dashboard invalid are discarded when
  * the host provides `validateDashboard`.
  */
@@ -532,6 +535,7 @@ export const executeDashboardUpsert = async ({
   resolvePanelContent,
   resolveAttachmentPanel,
   resolveControlFieldCapabilities,
+  arrangeLayout,
   finalizeDashboard,
   validateDashboard,
 }: ExecuteDashboardUpsertParams): Promise<DashboardUpsertResult> => {
@@ -559,22 +563,16 @@ export const executeDashboardUpsert = async ({
   const attempts = await Promise.all(plans.map((plan) => plan.resolveContent?.()));
 
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
-  const movedPanelSources = new Map<string, string | null>();
+  const fixedSizePanelIds = new Set<string>();
   plans.forEach((plan, planIndex) => {
     const attempt = attempts[planIndex];
-    const { id, section, grid } = plan.item;
+    const { id, size } = plan.item;
     if (attempt?.type === 'failure') {
       failures.push({ ...attempt.failure, identifier: id });
       return;
     }
-    const currentSectionId = getPanelSectionId(nextDashboardData, id) ?? null;
-    if (
-      plan.existingPanel &&
-      grid === undefined &&
-      section !== undefined &&
-      section !== currentSectionId
-    ) {
-      movedPanelSources.set(id, currentSectionId);
+    if (size) {
+      fixedSizePanelIds.add(id);
     }
     nextDashboardData = applyPanel({ dashboardData: nextDashboardData, plan, attempt });
     if (attempt?.authoringNote) {
@@ -601,13 +599,16 @@ export const executeDashboardUpsert = async ({
     });
   }
 
-  const originalSectionIds = getSectionIds(originalDashboardData);
-  nextDashboardData = placeNewWidgets({
+  nextDashboardData = await arrangeDashboardLayout({
+    originalDashboardData,
     dashboardData: nextDashboardData,
-    movedPanelSources,
-    newSectionIds: new Set(
-      [...getSectionIds(nextDashboardData)].filter((id) => !originalSectionIds.has(id))
+    fixedSizePanelIds,
+    instructions: upsert.layout,
+    authoringNotesByPanelId: new Map(
+      panelAuthoringNotes.map(({ panelId, authoringNote }) => [panelId, authoringNote])
     ),
+    arrangeLayout,
+    logger,
   });
 
   if (finalizeDashboard) {

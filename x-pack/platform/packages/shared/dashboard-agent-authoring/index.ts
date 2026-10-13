@@ -12,6 +12,9 @@ export {
 } from './src/upsert';
 export type { DashboardUpsert, DashboardUpsertResult, FinalizeDashboard } from './src/upsert';
 
+export { buildLayoutPrompt, layoutArrangementSchema } from './src/layout';
+export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
+
 export { getErrorMessage } from './src/utils';
 export type { DashboardFailure } from './src/utils';
 

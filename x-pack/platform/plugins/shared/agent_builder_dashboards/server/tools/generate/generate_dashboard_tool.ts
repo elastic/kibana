@@ -33,6 +33,7 @@ import {
 import { retrieveLatestVersion } from './attachment_state';
 import { createAttachmentPanelResolver } from './resolvers/attachment_panel_resolver';
 import { createControlFieldCapabilitiesResolver } from './resolvers/control_field_capabilities_resolver';
+import { createLayoutArranger } from './layout_arranger';
 import { createPanelResolver } from './resolvers/panel_resolver';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
@@ -131,8 +132,9 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 - \`panels\`: panels to create, edit, move between sections, or resize, by id. To change a panel's kind, remove it and add a new panel with a new id. Panel content is generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), authored by value (\`source: "config"\`: markdown or ML anomaly panels), or taken from an existing visualization attachment (\`source: "attachment"\`).
 - \`controls\`: interactive filters pinned above the dashboard (dropdown, range slider, or time slider).
 - \`remove\`: ids of panels, sections, or controls to remove.
+- \`layout\`: the user's layout instructions, if any.
 
-The result lists the ids the call created and updated, so a mistyped id that created a new panel instead of updating one is visible.`,
+Panel positions and sizes are arranged automatically after the changes are applied. The result lists the ids the call created and updated, so a mistyped id that created a new panel instead of updating one is visible.`,
     schema: generateDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, ...upsert },
@@ -163,6 +165,7 @@ The result lists the ids the call created and updated, so a mistyped id that cre
             resolveControlFieldCapabilities: createControlFieldCapabilitiesResolver({
               esClient: esClient.asCurrentUser,
             }),
+            arrangeLayout: createLayoutArranger({ modelProvider }),
             finalizeDashboard: (generatedDashboardData) =>
               applyDefaultDashboardTimeRange({
                 dashboardData: generatedDashboardData,
