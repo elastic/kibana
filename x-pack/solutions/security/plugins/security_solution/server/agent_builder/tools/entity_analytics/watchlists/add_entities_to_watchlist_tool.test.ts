@@ -20,17 +20,35 @@ import {
 } from '../../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../../lib/telemetry/event_based/events';
+import { resolveSingleEntity, type ResolveSingleEntityResult } from '../entity_resolution';
 import { getWatchlistToolAvailability } from './watchlist_availability';
 import {
   addEntitiesToWatchlistTool,
   SECURITY_ADD_ENTITIES_TO_WATCHLIST_TOOL_ID,
 } from './add_entities_to_watchlist_tool';
+import type { UnresolvedEntityResult } from '../shared/resolve_entity_ids';
 
 jest.mock('./watchlist_availability', () => ({
   getWatchlistToolAvailability: jest.fn(),
 }));
 
+jest.mock('../entity_resolution', () => ({
+  resolveSingleEntity: jest.fn(),
+}));
+
 const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as jest.Mock;
+const mockResolveSingleEntity = resolveSingleEntity as jest.MockedFunction<
+  typeof resolveSingleEntity
+>;
+
+const resolvedEntity = (euid: string): ResolveSingleEntityResult => ({
+  status: 'resolved',
+  source: 'exact_id',
+  query: '',
+  columns: [],
+  values: [],
+  identity: { identifierType: 'user', identifier: euid, entityStoreId: euid },
+});
 
 const mockExperimentalFeatures = {
   entityAnalyticsWatchlistEnabled: true,
@@ -119,6 +137,14 @@ const buildHandlerContextWithPrompts = (
   return ctx;
 };
 
+const seedResolvedState = (
+  ctx: ReturnType<typeof buildHandlerContextWithPrompts>,
+  resolved: string[],
+  unresolved: UnresolvedEntityResult[] = []
+) => {
+  (ctx.stateManager.getState as jest.Mock).mockReturnValue({ resolved, unresolved });
+};
+
 describe('addEntitiesToWatchlistTool', () => {
   const mocks = createToolTestMocks();
   const tool = addEntitiesToWatchlistTool(
@@ -138,6 +164,8 @@ describe('addEntitiesToWatchlistTool', () => {
       has_read_permissions: true,
       has_write_permissions: true,
     });
+    mockResolveSingleEntity.mockReset();
+    mockResolveSingleEntity.mockImplementation(async ({ entityId }) => resolvedEntity(entityId));
   });
 
   describe('availability', () => {
@@ -240,6 +268,160 @@ describe('addEntitiesToWatchlistTool', () => {
         expect(askArgs.message).toContain('2 entities');
         expect(askArgs.message).toContain('user:alice');
         expect(askArgs.message).toContain('host:server01');
+        expect(ctx.stateManager.setState).toHaveBeenCalledWith({
+          resolved: ['user:alice', 'host:server01'],
+          unresolved: [],
+        });
+      });
+
+      it('on unprompted: confirmation lists the resolved EUID, not the reference that was passed', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockResolveSingleEntity.mockResolvedValueOnce(resolvedEntity('user:jane@acme.com@okta'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1', entityIds: ['jane'] }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.message).toContain('user:jane@acme.com@okta');
+        expect(askArgs.message).toMatch(/1 entity\b/);
+        expect(ctx.stateManager.setState).toHaveBeenCalledWith({
+          resolved: ['user:jane@acme.com@okta'],
+          unresolved: [],
+        });
+        expect(mockAssignFn).not.toHaveBeenCalled();
+      });
+
+      it('on unprompted with a partial miss: confirms only resolved ids and counts the rest', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        const unresolved: UnresolvedEntityResult[] = [
+          {
+            entityId: 'bob',
+            status: 'ambiguous',
+            matchCount: 2,
+            candidateEntityIds: ['user:bob@okta', 'user:bob@entra_id'],
+          },
+        ];
+        mockResolveSingleEntity
+          .mockResolvedValueOnce(resolvedEntity('user:jane@acme.com@okta'))
+          .mockResolvedValueOnce({
+            status: 'ambiguous',
+            source: 'rlike_name',
+            query: '',
+            columns: [],
+            values: [],
+            matchCount: 2,
+            candidateEntityIds: ['user:bob@okta', 'user:bob@entra_id'],
+          });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        await tool.handler({ watchlistId: 'wl-1', entityIds: ['jane', 'bob'] }, ctx);
+
+        const askArgs = (ctx.prompts.askForConfirmation as jest.Mock).mock.calls[0][0];
+        expect(askArgs.message).toContain('user:jane@acme.com@okta');
+        expect(askArgs.message).toContain('1 entity could not be resolved and will not be added.');
+        expect(askArgs.message).not.toContain('user:bob@okta');
+        expect(ctx.stateManager.setState).toHaveBeenCalledWith({
+          resolved: ['user:jane@acme.com@okta'],
+          unresolved,
+        });
+        expect(mockAssignFn).not.toHaveBeenCalled();
+      });
+
+      it('when nothing resolves and a reference is ambiguous: returns candidates and skips confirmation', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockResolveSingleEntity.mockResolvedValueOnce({
+          status: 'ambiguous',
+          source: 'rlike_name',
+          query: '',
+          columns: [],
+          values: [],
+          matchCount: 2,
+          candidateEntityIds: ['user:bob@okta', 'user:bob@entra_id'],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { watchlistId: 'wl-1', entityIds: ['bob'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockAssignFn).not.toHaveBeenCalled();
+        const other = result.results[0] as OtherResult;
+        expect(other.type).toBe(ToolResultType.other);
+        expect(other.data).toMatchObject({
+          message: expect.stringMatching(/pick an entity id/i),
+          unresolvedReferences: [
+            {
+              entityId: 'bob',
+              status: 'ambiguous',
+              matchCount: 2,
+              candidateEntityIds: ['user:bob@okta', 'user:bob@entra_id'],
+            },
+          ],
+        });
+      });
+
+      it('when nothing resolves and nothing is ambiguous: returns an error and skips confirmation', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockResolveSingleEntity.mockResolvedValueOnce({
+          status: 'not_found',
+          source: 'rlike_name',
+          query: '',
+          columns: [],
+          values: [],
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { watchlistId: 'wl-1', entityIds: ['nobody'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        expect(mockAssignFn).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.type).toBe(ToolResultType.error);
+        expect(error.data.message).toBe(
+          'None of the given entities could be resolved to a canonical id.'
+        );
+        expect(error.data.metadata).toEqual({
+          unresolvedReferences: [{ entityId: 'nobody', status: 'not_found' }],
+        });
+      });
+
+      it('when a match has no canonical entity.id: reports no_identity and skips confirmation', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockResolveSingleEntity.mockResolvedValueOnce({
+          status: 'resolved',
+          source: 'exact_id',
+          query: '',
+          columns: [],
+          values: [],
+          identity: { identifierType: 'user', identifier: 'jane' },
+        });
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.unprompted,
+        });
+
+        const result = (await tool.handler(
+          { watchlistId: 'wl-1', entityIds: ['jane'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(ctx.prompts.askForConfirmation).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.data.metadata).toEqual({
+          unresolvedReferences: [{ entityId: 'jane', status: 'no_identity' }],
+        });
       });
 
       it('on unprompted with one entity: uses singular "entity" wording', async () => {
@@ -254,21 +436,23 @@ describe('addEntitiesToWatchlistTool', () => {
         expect(askArgs.message).toMatch(/1 entity\b/);
       });
 
-      it('on accept: calls service.assign with the supplied ids and returns the result with watchlist context', async () => {
+      it('on accept: assigns the resolved ids saved at confirmation, not the original references', async () => {
         mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist({ name: 'Privileged Users' }));
-        const assignResult = buildAssignSuccess(['user:alice', 'host:server01']);
+        const assignResult = buildAssignSuccess(['user:jane@acme.com@okta', 'host:server01']);
         mockAssignFn.mockResolvedValueOnce(assignResult);
 
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
         });
+        seedResolvedState(ctx, ['user:jane@acme.com@okta', 'host:server01']);
 
         const result = (await tool.handler(
-          { watchlistId: 'wl-1', entityIds: ['user:alice', 'host:server01'] },
+          { watchlistId: 'wl-1', entityIds: ['jane', 'server01'] },
           ctx
         )) as ToolHandlerStandardReturn;
 
-        expect(mockAssignFn).toHaveBeenCalledWith(['user:alice', 'host:server01']);
+        expect(mockResolveSingleEntity).not.toHaveBeenCalled();
+        expect(mockAssignFn).toHaveBeenCalledWith(['user:jane@acme.com@okta', 'host:server01']);
         const other = result.results[0] as OtherResult;
         expect(other.type).toBe(ToolResultType.other);
         expect(other.data).toMatchObject({
@@ -276,6 +460,41 @@ describe('addEntitiesToWatchlistTool', () => {
           watchlistName: 'Privileged Users',
           ...assignResult,
         });
+      });
+
+      it('on accept: includes unresolved references stored with the confirmation', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        mockAssignFn.mockResolvedValueOnce(buildAssignSuccess(['user:jane@acme.com@okta']));
+        const unresolved: UnresolvedEntityResult[] = [{ entityId: 'nobody', status: 'not_found' }];
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+        seedResolvedState(ctx, ['user:jane@acme.com@okta'], unresolved);
+
+        const result = (await tool.handler(
+          { watchlistId: 'wl-1', entityIds: ['jane', 'nobody'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        const other = result.results[0] as OtherResult;
+        expect(other.data).toMatchObject({ unresolvedReferences: unresolved });
+      });
+
+      it('on accept without saved resolution state: returns an error and does not assign', async () => {
+        mockGetWatchlistFn.mockResolvedValueOnce(buildWatchlist());
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+
+        const result = (await tool.handler(
+          { watchlistId: 'wl-1', entityIds: ['user:alice'] },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        expect(mockAssignFn).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.type).toBe(ToolResultType.error);
+        expect(error.data.message).toMatch(/state not found/i);
       });
 
       it('on reject: returns an error result without calling assign', async () => {
@@ -320,6 +539,7 @@ describe('addEntitiesToWatchlistTool', () => {
       const ctx = buildHandlerContextWithPrompts(mocks, {
         checkStatus: ConfirmationStatus.accepted,
       });
+      seedResolvedState(ctx, ['user:a']);
 
       const result = (await tool.handler(
         { watchlistId: 'wl-1', entityIds: ['user:a'] },
@@ -349,6 +569,7 @@ describe('addEntitiesToWatchlistTool', () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
         });
+        seedResolvedState(ctx, ['user:a', 'user:b']);
 
         await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:a', 'user:b'] }, ctx);
 
@@ -420,6 +641,7 @@ describe('addEntitiesToWatchlistTool', () => {
         const ctx = buildHandlerContextWithPrompts(mocks, {
           checkStatus: ConfirmationStatus.accepted,
         });
+        seedResolvedState(ctx, ['user:a']);
 
         await tool.handler({ watchlistId: 'wl-1', entityIds: ['user:a'] }, ctx);
 

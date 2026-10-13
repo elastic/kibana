@@ -291,6 +291,19 @@ const expandOpenApiNullable = (node: Record<string, unknown>): Record<string, un
 const expandJsonSchemaTypeArraysToAnyOf = <T>(schema: T): T =>
   expandJsonSchemaTypeArraysToAnyOfNode(schema) as T;
 
+/** Applies fixSchemaArrayProperties to each entry of a $defs/definitions block. */
+function mapDefs(
+  defs: Record<string, ToolSchemaType> | undefined
+): Record<string, ToolSchemaType> | undefined {
+  return defs
+    ? Object.fromEntries(
+        Object.entries(defs as Record<string, ToolSchemaType>).map(([key, def]) => {
+          return [key, fixSchemaArrayPropertiesPart(def)];
+        })
+      )
+    : undefined;
+}
+
 /**
  * Claude is prone to ignoring the "array" part of an array type,
  * so this function patches it to add a message on each
@@ -317,6 +330,10 @@ function fixSchemaArrayPropertiesPart<T extends ToolSchemaType>(schemaPart: T): 
           return [key, fixSchemaArrayPropertiesPart(childSchemaPart)];
         })
       ),
+      ...('$defs' in cleaned && cleaned.$defs ? { $defs: mapDefs(cleaned.$defs) } : {}),
+      ...('definitions' in cleaned && cleaned.definitions
+        ? { definitions: mapDefs(cleaned.definitions) }
+        : {}),
     };
   }
 

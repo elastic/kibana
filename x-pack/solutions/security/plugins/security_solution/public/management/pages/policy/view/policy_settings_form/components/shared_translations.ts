@@ -40,7 +40,7 @@ export const CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL = i18n.translate(
 export const CUSTOM_YARA_SIGNATURES_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.protections.customYaraSignaturesLabel',
   {
-    defaultMessage: 'Apply custom YARA signatures',
+    defaultMessage: 'Apply custom YARA signatures in detection mode',
   }
 );
 
@@ -48,7 +48,7 @@ export const CUSTOM_YARA_SIGNATURES_HINT = i18n.translate(
   'xpack.securitySolution.endpoint.policyDetailsConfig.customYaraSignaturesTooltip',
   {
     defaultMessage:
-      'Endpoints enabled with this policy will apply custom YARA signatures from the custom YARA signatures page.',
+      'Endpoints enabled with this policy will apply custom YARA signatures from the Custom YARA signatures page. Signatures only detect threats and do not block them, even when the protection level is Prevent.',
   }
 );
 

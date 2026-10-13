@@ -18,6 +18,7 @@ import {
   reconcileInstances,
   groupByPackage,
   buildGroupPolicyNameStem,
+  DEFAULT_NAMESPACE,
 } from './deploy_group_helpers';
 export { collectDeployResults } from './deploy_group_helpers';
 
@@ -96,7 +97,9 @@ export function buildDeployGroups(
     }
   }
 
-  return groupByPackage(originals, duplicates, storedServiceVars);
+  // An instance without a namespace deploys into the default one, so it shares a policy with the
+  // instances that name it explicitly.
+  return groupByPackage(originals, duplicates, storedServiceVars, DEFAULT_NAMESPACE);
 }
 
 function buildAgentlessPolicyName(group: DeployGroup): string {

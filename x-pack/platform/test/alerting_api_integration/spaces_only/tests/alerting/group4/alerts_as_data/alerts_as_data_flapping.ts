@@ -110,10 +110,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 4 more times
       for (let i = 0; i < 4; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -147,10 +144,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -178,10 +172,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 7 more times
       for (let i = 0; i < 7; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -256,10 +247,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 4 more times
       for (let i = 0; i < 4; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -298,10 +286,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -328,10 +313,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 3 more times
       for (let i = 0; i < 3; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -400,10 +382,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 8 more times
       for (let i = 0; i < 8; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -460,10 +439,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 5 more times
       for (let i = 0; i < 5; i++) {
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -525,11 +501,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        await waitForRuleTaskIdle(ruleId);
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
 
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
@@ -559,11 +531,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 1 more time
       for (let i = 0; i < 1; i++) {
-        await waitForRuleTaskIdle(ruleId);
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -587,11 +555,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 6 more times
       for (let i = 0; i < 6; i++) {
-        await waitForRuleTaskIdle(ruleId);
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -615,11 +579,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
 
       // Run the rule 3 more times
       for (let i = 0; i < 3; i++) {
-        await waitForRuleTaskIdle(ruleId);
-        const response = await supertestWithoutAuth
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-          .set('kbn-xsrf', 'foo');
-        expect(response.status).to.eql(204);
+        await runRuleSoon(ruleId);
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
       }
 
@@ -687,12 +647,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(rule1Id, new Map([['execute', { equal: 1 }]]));
       // Run them all
       for (let i = 0; i < 7; i++) {
-        await retry.try(async () => {
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${rule1Id}/_run_soon`)
-            .set('kbn-xsrf', 'foo');
-          expect(response.status).to.eql(204);
-        });
+        await runRuleSoon(rule1Id);
 
         await waitForEventLogDocs(rule1Id, new Map([['execute', { equal: ++run }]]));
 
@@ -738,12 +693,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(rule2Id, new Map([['execute', { equal: 1 }]]));
       // Run them all
       for (let i = 0; i < 7; i++) {
-        await retry.try(async () => {
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${rule2Id}/_run_soon`)
-            .set('kbn-xsrf', 'foo');
-          expect(response.status).to.eql(204);
-        });
+        await runRuleSoon(rule2Id);
 
         await waitForEventLogDocs(rule2Id, new Map([['execute', { equal: ++run }]]));
 
@@ -825,12 +775,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
       // Run them all
       for (let i = 0; i < 7; i++) {
-        await retry.try(async () => {
-          const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-            .set('kbn-xsrf', 'foo');
-          expect(response.status).to.eql(204);
-        });
+        await runRuleSoon(ruleId);
 
         await waitForEventLogDocs(ruleId, new Map([['execute', { equal: ++run }]]));
 
@@ -961,10 +906,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // --------------------------
       // RUN 2 - 10 recovered, 12 new
       // --------------------------
-      let response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(response.status).to.eql(204);
+      await runRuleSoon(ruleId);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
       executeEvent = events[1];
@@ -1039,10 +981,7 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       // --------------------------
       // RUN 3 - 22 recovered, 5 new
       // --------------------------
-      response = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(response.status).to.eql(204);
+      await runRuleSoon(ruleId);
 
       events = await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 3 }]]));
       executeEvent = events[1];
@@ -1124,8 +1063,10 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
     return JSON.parse(task._source!.task.state);
   }
 
-  // The `execute` event log doc is written before Task Manager returns the task to `idle`, so `_run_soon` must wait for `idle` to avoid a 200 soft failure.
-  async function waitForRuleTaskIdle(ruleId: string) {
+  // Task Manager returns the task to `idle` only after the `execute` event log doc
+  // is written, so `_run_soon` soft-fails with a 200 if it lands while the task is
+  // still running (or if the task update hits a 409 conflict).
+  async function runRuleSoon(ruleId: string) {
     await retry.try(async () => {
       const task = await es.get<TaskManagerDoc>({
         id: `task:${ruleId}`,
@@ -1135,6 +1076,11 @@ export default function createAlertsAsDataFlappingTest({ getService }: FtrProvid
       if (status !== TaskStatus.Idle) {
         throw new Error(`Expected task:${ruleId} to be idle but was ${status}`);
       }
+
+      const response = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(response.status).to.eql(204);
     });
   }
 
