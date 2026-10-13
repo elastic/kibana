@@ -15,8 +15,8 @@ You can use this connector in **Agent Builder** and **Workflows**.
 
 Some capabilities of this connector are only available from a certain version:
 
-- {applies_to}`serverless: preview` {applies_to}`stack: preview` Write actions to create, update, close, and delete records, add comments and work notes, and upload attachments.
-- {applies_to}`serverless: preview` {applies_to}`stack: preview` Lookup actions to find choice values, user IDs, and the identity of the connector account before you write.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Write actions to create, update, close, and delete records, add comments and work notes, and upload attachments.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Lookup actions to find choice values, user IDs, and the identity of the connector account before you write.
 
 ::::{note}
 For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and cases, refer to [ServiceNow ITSM](/reference/connectors-kibana/servicenow-action-type.md), [ServiceNow SecOps](/reference/connectors-kibana/servicenow-sir-action-type.md), and [ServiceNow ITOM](/reference/connectors-kibana/servicenow-itom-action-type.md).
@@ -29,10 +29,10 @@ In {{sn}}, you need:
 - The `admin` role, to register an OAuth application in the Application Registry.
 - A {{sn}} user with the roles for the actions you plan to use. With OAuth 2.0 Client Credentials, this is the user associated with the OAuth client. With OAuth 2.0 Authorization Code, this is the account that signs in to authorize the connector.
   - **Read operations** (Search, Get record, List records): `itil` for incidents, `knowledge` for knowledge articles.
-  - {applies_to}`serverless: preview` {applies_to}`stack: preview` **Write operations** (Create/Update/Close incident, Add comment, Add work note): `itil` with write permissions.
-  - {applies_to}`serverless: preview` {applies_to}`stack: preview` **Security incidents** (Create security incident): `sn_si_incident_write`.
-  - {applies_to}`serverless: preview` {applies_to}`stack: preview` **Delete record**: admin or equivalent role on the target table.
-  - {applies_to}`serverless: preview` {applies_to}`stack: preview` **ITOM events** (Create event): `evt_mgmt_integration`, or `evt_mgmt_operator` or `evt_mgmt_admin`.
+  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Write operations** (Create/Update/Close incident, Add comment, Add work note): `itil` with write permissions.
+  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Security incidents** (Create security incident): `sn_si_incident_write`.
+  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Delete record**: admin or equivalent role on the target table.
+  - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **ITOM events** (Create event): `evt_mgmt_integration`, or `evt_mgmt_operator` or `evt_mgmt_admin`.
 
 In {{kib}}, you need:
 
@@ -182,7 +182,7 @@ Get attachment
 ### Lookup actions [servicenow-search-lookup-actions]
 ```{applies_to}
 serverless: preview
-stack: preview
+stack: preview 9.6+
 ```
 
 Use these actions to find the choice values, user IDs, and account identity you need before you write to {{sn}}.
@@ -205,7 +205,7 @@ Who am I
 ### Write actions [servicenow-search-write-actions]
 ```{applies_to}
 serverless: preview
-stack: preview
+stack: preview 9.6+
 ```
 
 These actions change data in {{sn}}. The connector user needs the write roles listed in [Prerequisites](#servicenow-search-prerequisites).
