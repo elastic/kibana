@@ -209,6 +209,17 @@ describe('getRiskTileDelta', () => {
     });
   });
 
+  it('shows no spinner when the previous period can never be queried', () => {
+    expect(
+      getRiskTileDelta({
+        ...ready,
+        previous: undefined,
+        hasHistory: undefined,
+        isUnavailable: true,
+      })
+    ).toEqual({ delta: undefined, isDeltaLoading: false });
+  });
+
   it('shows no spinner for a skipped tile', () => {
     expect(getRiskTileDelta({ ...ready, previous: undefined, skip: true })).toEqual({
       delta: undefined,

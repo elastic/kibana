@@ -72,7 +72,10 @@ const usePreviousPeriodAlertBasedTiles = ({
     }
   );
 
-  return { previous, isFetching, isError };
+  // Once the index has loaded, a missing one means the query can never run.
+  const isUnavailable = !skip && !isIndexLoading && !resolvedIndex?.indexName;
+
+  return { previous, isFetching, isError, isUnavailable };
 };
 
 /**
@@ -83,7 +86,7 @@ const usePreviousPeriodAlertBasedTiles = ({
  */
 export const useAlertBasedTilesWithDelta = (opts: AlertBasedTilesOptions) => {
   const main = useAlertBasedTiles(opts);
-  const { previous, isFetching, isError } = usePreviousPeriodAlertBasedTiles({
+  const { previous, isFetching, isError, isUnavailable } = usePreviousPeriodAlertBasedTiles({
     ...opts,
     skip: opts.skip || main.isLoading,
   });
@@ -96,6 +99,6 @@ export const useAlertBasedTilesWithDelta = (opts: AlertBasedTilesOptions) => {
       ? main.severeAlertsCount - previous.severeAlertsCount
       : undefined,
     watchlistedDelta: hasPrevious ? main.watchlistedCount - previous.watchlistedCount : undefined,
-    isDeltaLoading: !opts.skip && !hasPrevious && !isError,
+    isDeltaLoading: !opts.skip && !hasPrevious && !isError && !isUnavailable,
   };
 };

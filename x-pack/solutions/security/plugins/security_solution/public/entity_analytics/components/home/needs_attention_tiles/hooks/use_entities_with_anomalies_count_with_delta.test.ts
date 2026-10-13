@@ -113,6 +113,29 @@ describe('useEntitiesWithAnomaliesCountWithDelta', () => {
     expect(stale.result.current.isDeltaLoading).toBe(true);
   });
 
+  it('stops the spinner when no security job is installed, and keeps it while the jobs load', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: false });
+    const none = renderHook(() => useEntitiesWithAnomaliesCountWithDelta(opts));
+    expect(none.result.current.delta).toBeUndefined();
+    expect(none.result.current.isDeltaLoading).toBe(false);
+
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: true });
+    const loading = renderHook(() => useEntitiesWithAnomaliesCountWithDelta(opts));
+    expect(loading.result.current.isDeltaLoading).toBe(true);
+  });
+
+  it('stops the spinner when no entities index resolves', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    });
+    const { result } = renderHook(() => useEntitiesWithAnomaliesCountWithDelta(opts));
+    expect(result.current.isDeltaLoading).toBe(false);
+  });
+
   it('shows neither a delta nor a spinner when the previous-period query fails, and keeps the count', () => {
     mockUseQuery.mockReturnValue(queryResult({ data: undefined, isError: true }));
     const { result } = renderHook(() => useEntitiesWithAnomaliesCountWithDelta(opts));

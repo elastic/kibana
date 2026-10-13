@@ -13,6 +13,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { buildRiskHistoryExistsQuery } from '../queries/risk_previous_period';
+import { readFirstNumber } from './read_first_number';
 import {
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
@@ -37,12 +38,6 @@ interface PreviousPeriodRiskTileOptions {
     entityFilterClauses: string[]
   ) => string;
 }
-
-const readFirstNumber = (raw: ESQLSearchResponse, column: string): number => {
-  const index = raw.columns?.findIndex((c) => c.name === column) ?? 0;
-  const value = raw.values?.[0]?.[index];
-  return typeof value === 'number' ? value : 0;
-};
 
 /**
  * Runs a risk tile's previous-period query, and a cheap query that checks the risk history reaches
@@ -109,6 +104,8 @@ export const usePreviousPeriodRiskTile = ({
     hasHistory: historyExists.data,
     isFetching: previousQuery.isFetching || historyExists.isFetching,
     isError: previousQuery.isError || historyExists.isError,
+    // Once the index has loaded, a missing one means the queries can never run.
+    isUnavailable: !skip && !isIndexLoading && !index,
   };
 };
 
@@ -124,6 +121,7 @@ export const getRiskTileDelta = ({
   hasHistory,
   isFetching,
   isError,
+  isUnavailable = false,
 }: {
   count: number;
   skip?: boolean;
@@ -131,10 +129,11 @@ export const getRiskTileDelta = ({
   hasHistory: boolean | undefined;
   isFetching: boolean;
   isError: boolean;
+  isUnavailable?: boolean;
 }) => {
   const isReady = previous !== undefined && hasHistory !== undefined && !isFetching;
   return {
     delta: isReady && hasHistory ? count - previous : undefined,
-    isDeltaLoading: !skip && !isReady && !isError,
+    isDeltaLoading: !skip && !isReady && !isError && !isUnavailable,
   };
 };

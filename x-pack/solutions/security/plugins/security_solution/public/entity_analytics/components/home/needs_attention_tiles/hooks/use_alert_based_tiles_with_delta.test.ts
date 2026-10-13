@@ -109,6 +109,26 @@ describe('useAlertBasedTilesWithDelta', () => {
     expect(result.current.isDeltaLoading).toBe(true);
   });
 
+  it('stops the spinner when no entities index resolves', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    mockUseIndexName.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    });
+    const { result } = renderHook(() => useAlertBasedTilesWithDelta(opts));
+    expect(result.current.isDeltaLoading).toBe(false);
+  });
+
+  it('keeps the spinner while the entities index resolves', () => {
+    mockUseQuery.mockReturnValue(queryResult({ data: undefined }));
+    mockUseIndexName.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+    const { result } = renderHook(() => useAlertBasedTilesWithDelta(opts));
+    expect(result.current.isDeltaLoading).toBe(true);
+  });
+
   it('shows neither a delta nor a spinner when the previous-period query fails, and keeps the count', () => {
     mockUseQuery.mockReturnValue(queryResult({ data: undefined, isError: true }));
     const { result } = renderHook(() => useAlertBasedTilesWithDelta(opts));

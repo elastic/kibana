@@ -17,6 +17,7 @@ import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_a
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
+import { readFirstNumber } from './read_first_number';
 
 type AnomaliesCountOptions = Parameters<typeof useEntitiesWithAnomaliesCount>[0];
 
@@ -67,10 +68,7 @@ const usePreviousPeriodAnomaliesCount = ({
       const result = await lastValueFrom(
         data.search.search({ params: { query } }, { abortSignal: signal, strategy: 'esql_async' })
       );
-      const raw = result.rawResponse as unknown as ESQLSearchResponse;
-      const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
-      const value = raw.values?.[0]?.[valueIndex];
-      return typeof value === 'number' ? value : 0;
+      return readFirstNumber(result.rawResponse as unknown as ESQLSearchResponse, 'value');
     },
     {
       enabled: isEnabled && Boolean(query),
@@ -81,7 +79,14 @@ const usePreviousPeriodAnomaliesCount = ({
     }
   );
 
-  return { previous, isFetching, isError };
+  // Once the jobs and the index have loaded, a missing one means the query can never run.
+  const isUnavailable =
+    !skip &&
+    !isIndexLoading &&
+    !isJobsLoading &&
+    (jobIds.length === 0 || !resolvedIndex?.indexName);
+
+  return { previous, isFetching, isError, isUnavailable };
 };
 
 /**
@@ -92,7 +97,7 @@ const usePreviousPeriodAnomaliesCount = ({
  */
 export const useEntitiesWithAnomaliesCountWithDelta = (opts: AnomaliesCountOptions) => {
   const main = useEntitiesWithAnomaliesCount(opts);
-  const { previous, isFetching, isError } = usePreviousPeriodAnomaliesCount({
+  const { previous, isFetching, isError, isUnavailable } = usePreviousPeriodAnomaliesCount({
     ...opts,
     skip: opts.skip || main.isLoading,
   });
@@ -102,6 +107,6 @@ export const useEntitiesWithAnomaliesCountWithDelta = (opts: AnomaliesCountOptio
   return {
     ...main,
     delta: hasPrevious ? main.count - previous : undefined,
-    isDeltaLoading: !opts.skip && !hasPrevious && !isError,
+    isDeltaLoading: !opts.skip && !hasPrevious && !isError && !isUnavailable,
   };
 };

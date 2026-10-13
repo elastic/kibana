@@ -15,6 +15,7 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
 import { EMPTY_ENTITY_FILTERS, getEntityFilterESQL } from '../../use_entity_filters_param';
 import { useNewEntityCount } from './use_new_entity_count';
+import { readFirstNumber } from './read_first_number';
 
 type NewEntityCountOptions = Parameters<typeof useNewEntityCount>[0];
 
@@ -58,10 +59,7 @@ const usePreviousPeriodNewEntityCount = ({
           { abortSignal: signal, strategy: 'esql_async', projectRouting: '_alias:_origin' }
         )
       );
-      const raw = result.rawResponse as unknown as ESQLSearchResponse;
-      const valueIndex = raw.columns?.findIndex((c) => c.name === 'value') ?? 0;
-      const value = raw.values?.[0]?.[valueIndex];
-      return typeof value === 'number' ? value : 0;
+      return readFirstNumber(result.rawResponse as unknown as ESQLSearchResponse, 'value');
     },
     {
       enabled: !skip && !isIndexLoading && Boolean(index),
@@ -72,7 +70,10 @@ const usePreviousPeriodNewEntityCount = ({
     }
   );
 
-  return { previous, isFetching, isError };
+  // Once the index has loaded, a missing one means the query can never run.
+  const isUnavailable = !skip && !isIndexLoading && !index;
+
+  return { previous, isFetching, isError, isUnavailable };
 };
 
 /**
@@ -82,7 +83,7 @@ const usePreviousPeriodNewEntityCount = ({
  */
 export const useNewEntityCountWithDelta = (opts: NewEntityCountOptions) => {
   const main = useNewEntityCount(opts);
-  const { previous, isFetching, isError } = usePreviousPeriodNewEntityCount({
+  const { previous, isFetching, isError, isUnavailable } = usePreviousPeriodNewEntityCount({
     ...opts,
     skip: opts.skip || main.isLoading,
   });
@@ -92,6 +93,6 @@ export const useNewEntityCountWithDelta = (opts: NewEntityCountOptions) => {
   return {
     ...main,
     delta: hasPrevious ? main.count - previous : undefined,
-    isDeltaLoading: !opts.skip && !hasPrevious && !isError,
+    isDeltaLoading: !opts.skip && !hasPrevious && !isError && !isUnavailable,
   };
 };
