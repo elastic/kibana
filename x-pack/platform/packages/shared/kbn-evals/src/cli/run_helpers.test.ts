@@ -98,6 +98,49 @@ describe('--concurrency forwarding', () => {
     expect(env).not.toHaveProperty('EVAL_CONCURRENCY');
   });
 
+  it('forwards --reasoning-effort to the env and the re-run args', () => {
+    const flagsReader = readFlags(['--reasoning-effort', 'high']);
+
+    const env = buildEvalRunEnv({
+      evaluationConnectorId: 'judge',
+      requiresEisCcm: false,
+      skipServer: true,
+      profileEnvOverrides: {},
+      suiteScoutEnv: {},
+      flagsReader,
+      log,
+    });
+    const args = buildEvalRunArgs({
+      suiteId: 'significant-events',
+      evaluationConnectorId: 'judge',
+      projects: ['eis-claude-opus'],
+      flagsReader,
+    });
+
+    expect(env.EVAL_REASONING_EFFORT).toBe('high');
+    expect(args).toEqual(expect.arrayContaining(['--reasoning-effort', 'high']));
+  });
+
+  it('rejects an unknown --reasoning-effort with a flag error', () => {
+    expect(() =>
+      buildEvalRunEnv({
+        evaluationConnectorId: 'judge',
+        requiresEisCcm: false,
+        skipServer: true,
+        profileEnvOverrides: {},
+        suiteScoutEnv: {},
+        flagsReader: readFlags(['--reasoning-effort', 'max']),
+        log,
+      })
+    ).toThrow(
+      expect.objectContaining({
+        message:
+          '--reasoning-effort must be one of none, minimal, low, medium, high, xhigh, got "max".',
+        showHelp: true,
+      })
+    );
+  });
+
   it('passes --concurrency on to the re-run args', () => {
     const args = buildEvalRunArgs({
       suiteId: 'agent-builder',

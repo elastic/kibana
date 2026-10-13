@@ -9,6 +9,7 @@ import { spawn } from 'child_process';
 import type { Command } from '@kbn/dev-cli-runner';
 import {
   readConcurrencyFlag,
+  readReasoningEffortFlag,
   readSpaceIdsFlag,
   resolveEvalSuite,
   resolveEvaluationConnectorId,
@@ -41,12 +42,14 @@ export const runSuiteCmd: Command<void> = {
     node scripts/evals run --suite streams --dry-run
     node scripts/evals run --suite streams --space-ids marketing,sales
     node scripts/evals run --suite agent-builder --concurrency 8
+    node scripts/evals run --suite significant-events --model eis-anthropic-claude-4.6-opus --reasoning-effort high
   `,
   flags: {
     string: [
       'suite',
       'config',
       'project',
+      'reasoning-effort',
       'evaluation-connector-id',
       'repetitions',
       'concurrency',
@@ -100,6 +103,11 @@ export const runSuiteCmd: Command<void> = {
     const concurrency = readConcurrencyFlag(flagsReader);
     if (concurrency) {
       envOverrides.EVAL_CONCURRENCY = concurrency;
+    }
+
+    const reasoningEffort = readReasoningEffortFlag(flagsReader);
+    if (reasoningEffort) {
+      envOverrides.EVAL_REASONING_EFFORT = reasoningEffort;
     }
 
     const spaceIds = readSpaceIdsFlag(flagsReader);

@@ -31,6 +31,12 @@ const ENV_DOCS = [
     example: 'EVAL_CONCURRENCY=8',
   },
   {
+    name: 'EVAL_REASONING_EFFORT',
+    description:
+      'Reasoning effort the task model runs at (none, minimal, low, medium, high, xhigh), recorded with the scores. A connector definition that sets its own reasoningEffort still wins.',
+    example: 'EVAL_REASONING_EFFORT=high',
+  },
+  {
     name: 'KBN_EVALS_SKIP_CONNECTOR_SETUP',
     description:
       'Skip automatic connector setup/teardown. Use this option when evaluating with pre-defined connectors.',
