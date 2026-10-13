@@ -78,39 +78,25 @@ const globalTempHackStyles = (
       ${logicalCSS('left', layoutVar('application.left', '0px'))};
       ${logicalCSS('right', layoutVar('application.right', '0px'))};
       ${logicalCSS('bottom', layoutVar('application.bottom', '0px'))};
-      ${appearance === 'framed' && `border-radius: ${_euiTheme.border.radius.frame};`}
+      ${appearance === 'framed' &&
+      `--euiOverlayMaskBorderRadius: ${_euiTheme.border.radius.frame};`}
     }
 
     .euiFlyout[class*='right'] {
-      // match the application area border-radius on the right edge,
-      // but not for side-by-side child flyouts since they aren't positioned at the rightmost edge
+      // match the application area border-radius on the right edge by setting the CSS variable
+      // used internally by EuiFlyout which controls the main flyout, flyout footer border radius
+      // and overrides --euiOverlayMaskBorderRadius for flyouts
       ${appearance === 'framed' &&
-      `&:not([data-managed-flyout-layout-mode="side-by-side"][data-managed-flyout-level="child"]) {
-          border-top-right-radius: ${_euiTheme.border.radius.frame};
-          border-bottom-right-radius: ${_euiTheme.border.radius.frame};
-          // EUI clips overlay-right flyout shadows with a sharp polygon; round it to match
-          // the framed radius so the shadow doesn't square off at the top/bottom-right.
-          clip-path: inset(
-            0 0 0 -50% round 0 ${_euiTheme.border.radius.frame}
-              ${_euiTheme.border.radius.frame} 0
-          ) !important;
-          .euiFlyoutFooter {
-            border-bottom-right-radius: ${_euiTheme.border.radius.frame};
-          }
-        }
-        // Preserve EUI's unclipped shadow when a child flyout is stacked on top.
-        &.euiFlyout--hasChild {
-          clip-path: none !important;
-        }`}
+      `
+        --euiFlyoutBorderRadius: ${_euiTheme.border.radius.frame};
+      `}
     }
 
     // When overlay is above the header (full-viewport modal style), restore square corners
-    // and EUI's original shadow clip; positioning is left to the flyout's reference container.
     .euiOverlayMask[data-relative-to-header='above']
       + [data-euiportal='true']
       .euiFlyout[class*='right'] {
-      border-radius: 0;
-      clip-path: polygon(-50% 0, 100% 0, 100% 100%, -50% 100%) !important;
+      --euiFlyoutBorderRadius: 0;
     }
   }
 
