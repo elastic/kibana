@@ -114,6 +114,7 @@ import {
   APP_ID,
   DISCOVER_DRILLDOWN_TYPE,
   getEditPath,
+  LENS_ICON,
   NOT_INTERNATIONALIZED_PRODUCT_NAME,
 } from '../common/constants';
 import type { FormatFactory } from '../common/types';
@@ -430,7 +431,7 @@ export class LensPlugin {
         savedObjectName: i18n.translate('xpack.lens.mapSavedObjectLabel', {
           defaultMessage: 'Lens',
         }),
-        getIconForSavedObject: () => 'productLens',
+        getIconForSavedObject: () => LENS_ICON,
       });
 
       embeddable.registerDrilldown(DISCOVER_DRILLDOWN_TYPE, async () => {

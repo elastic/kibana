@@ -164,7 +164,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                 savedObjectMetaData={[
                   {
                     type: 'index-pattern',
-                    getIconForSavedObject: () => 'table',
+                    getIconForSavedObject: () => 'indexPatternApp',
                     name: i18n.translate(
                       'xpack.ml.newJob.wizard.datafeedStep.dataView.step1.dataView',
                       {

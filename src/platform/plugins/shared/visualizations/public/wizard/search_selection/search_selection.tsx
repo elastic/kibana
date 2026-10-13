@@ -61,7 +61,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
             savedObjectMetaData={[
               {
                 type: 'search',
-                getIconForSavedObject: () => 'productDiscover',
+                getIconForSavedObject: () => 'discoverApp',
                 name: i18n.translate(
                   'visualizations.newVisWizard.searchSelection.savedObjectType.search',
                   {
@@ -72,7 +72,7 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
               },
               {
                 type: 'index-pattern',
-                getIconForSavedObject: () => 'table',
+                getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
                   'visualizations.newVisWizard.searchSelection.savedObjectType.dataView',
                   {

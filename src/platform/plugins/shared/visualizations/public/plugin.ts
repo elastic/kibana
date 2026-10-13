@@ -512,7 +512,7 @@ export class VisualizationsPlugin
       }),
       getIconForSavedObject: (savedObject) => {
         const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return visState.type === 'vega' ? VegaIcon : 'chartMix';
+        return visState.type === 'vega' ? VegaIcon : 'visualizeApp';
       },
     });
     embeddable.registerLegacyURLTransform(

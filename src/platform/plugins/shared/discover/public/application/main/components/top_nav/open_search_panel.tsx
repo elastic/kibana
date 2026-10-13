@@ -72,7 +72,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           savedObjectMetaData={[
             {
               type: SavedSearchType,
-              getIconForSavedObject: () => 'productDiscover',
+              getIconForSavedObject: () => 'discoverApp',
               name: i18n.translate('discover.savedSearch.savedObjectName', {
                 defaultMessage: 'Discover session',
               }),
