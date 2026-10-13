@@ -1,11 +1,25 @@
 {
-  "sha1": "bf08bdc3296de5457b62ee3257215ee10f7957fc",
+  "sha1": "6e7d3fe2d6ba1dff6fa38ce96b374689f6f33ee7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "e82d748e4d78420-f516b1f17d085ef",
+      "id": "d26af6f4779bb94-fed40caaf10d9e8",
+      "title": "AlertZero e2e - attack discovery to host isolation turns a seeded attack chain into an approved host isolation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/attack_discovery_to_isolate.spec.ts",
+        "line": 95,
+        "column": 21
+      }
+    },
+    {
+      "id": "f71b7e19573c864-f516b1f17d085ef",
       "title": "Threat Intel - report ingest API ingests a pasted report, then dedups an identical repeat",
       "expectedStatus": "passed",
       "tags": [
@@ -19,7 +33,7 @@
       }
     },
     {
-      "id": "e82d748e4d78420-35b6f23f231b0cb",
+      "id": "f71b7e19573c864-35b6f23f231b0cb",
       "title": "Threat Intel - report ingest API rejects a report body that fails schema validation",
       "expectedStatus": "passed",
       "tags": [
@@ -33,7 +47,7 @@
       }
     },
     {
-      "id": "e82d748e4d78420-53949f0f794f735",
+      "id": "f71b7e19573c864-53949f0f794f735",
       "title": "Threat Intel - report ingest API extracts indicators from pasted text without calling a model",
       "expectedStatus": "passed",
       "tags": [
@@ -47,7 +61,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-7d3321514ba68c7",
+      "id": "7157ea8e83a720a-7d3321514ba68c7",
       "title": "Threat Intel - source catalog API returns the source catalog and creates the space-filtered indicator alias",
       "expectedStatus": "passed",
       "tags": [
@@ -61,7 +75,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-d4894bee88697ad",
+      "id": "7157ea8e83a720a-d4894bee88697ad",
       "title": "Threat Intel - source catalog API stays consistent on a second call once the alias is memoized",
       "expectedStatus": "passed",
       "tags": [
@@ -75,7 +89,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-0f54cc42eb18431",
+      "id": "7157ea8e83a720a-0f54cc42eb18431",
       "title": "Threat Intel - source catalog API returns 404 when updating a source that does not exist",
       "expectedStatus": "passed",
       "tags": [
@@ -89,7 +103,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-57f339f81c76436",
+      "id": "7157ea8e83a720a-57f339f81c76436",
       "title": "Threat Intel - source catalog API denies a read-only Security user write access to the source catalog",
       "expectedStatus": "passed",
       "tags": [
@@ -100,6 +114,62 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/source_catalog.spec.ts",
         "line": 107,
         "column": 11
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-83d619f856d1450",
+      "title": "AlertZero e2e - worker control lists the managed security workers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 45,
+        "column": 5
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-0ad915243afad21",
+      "title": "AlertZero e2e - worker control refuses to enable a worker that has no service account",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 54,
+        "column": 24
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-594cee81ef81e87",
+      "title": "AlertZero e2e - worker control resets a worker that a previous spec left enabled with a service account bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 71,
+        "column": 14
+      }
+    },
+    {
+      "id": "5a884990e42f7bf-9e1a0a3f30d75e1",
+      "title": "AlertZero e2e - worker control enables a worker once a service account is selected, then disables it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/worker_control.spec.ts",
+        "line": 95,
+        "column": 21
       }
     }
   ]
