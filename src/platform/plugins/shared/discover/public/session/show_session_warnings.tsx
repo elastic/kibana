@@ -50,7 +50,7 @@ export const showSessionWarnings = ({
             });
 
       return (
-        <li key={`${index}-${warning.tab_id}`}>
+        <li key={`${index}-${warning.tab_id}`} data-test-subj="discoverSessionWarningDetailsItem">
           <strong>{title}</strong>
           <p css={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{warning.message}</p>
         </li>
@@ -61,6 +61,7 @@ export const showSessionWarnings = ({
       toMountPoint(
         <EuiModal
           aria-labelledby="discoverSessionWarningDetailsTitle"
+          data-test-subj="discoverSessionWarningDetailsModal"
           onClose={() => modal.close()}
         >
           <EuiModalHeader>
@@ -77,7 +78,10 @@ export const showSessionWarnings = ({
             </EuiText>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => modal.close()}>
+            <EuiButtonEmpty
+              data-test-subj="discoverSessionWarningDetailsCloseButton"
+              onClick={() => modal.close()}
+            >
               <FormattedMessage
                 id="discover.sessionLoadWarnings.closeButtonLabel"
                 defaultMessage="Close"

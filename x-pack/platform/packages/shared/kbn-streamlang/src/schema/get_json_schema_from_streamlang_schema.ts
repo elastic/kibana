@@ -494,8 +494,8 @@ function enhanceConditionBlockSchema(
 
 /**
  * Extract the `action` const value from a processor schema option.
- * Handles both flat objects (`properties.action.const`) and `allOf` schemas
- * produced by `z.intersection()` (e.g. `network_direction`).
+ * Handles flat objects (`properties.action.const`) and the `allOf` / `anyOf`
+ * schemas produced by `z.intersection()` (e.g. `network_direction`).
  */
 function extractActionConstFromOption(option: Record<string, unknown>): string | undefined {
   const directAction = (option?.properties as Record<string, unknown> | undefined)?.action as
@@ -503,13 +503,10 @@ function extractActionConstFromOption(option: Record<string, unknown>): string |
     | undefined;
   if (directAction?.const) return directAction.const;
 
-  if (Array.isArray(option?.allOf)) {
-    for (const item of option.allOf as Array<Record<string, unknown>>) {
-      const itemAction = (item?.properties as Record<string, unknown> | undefined)?.action as
-        | { const?: string }
-        | undefined;
-      if (itemAction?.const) return itemAction.const;
-    }
+  const branches = [option?.allOf, option?.anyOf].filter(Array.isArray).flat();
+  for (const branch of branches as Array<Record<string, unknown>>) {
+    const branchAction = extractActionConstFromOption(branch);
+    if (branchAction) return branchAction;
   }
   return undefined;
 }
