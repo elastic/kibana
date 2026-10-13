@@ -215,7 +215,9 @@ describe('Email rule resolution', () => {
 
       mockCascadeLinkEntities.mockResolvedValueOnce({
         linked: ['user-2'],
+        retargeted: [],
         skipped: [],
+        cascadesBlocked: 0,
         target_id: 'user-1',
         entity_type: 'user',
       });
@@ -260,7 +262,9 @@ describe('Email rule resolution', () => {
 
       mockCascadeLinkEntities.mockResolvedValueOnce({
         linked: ['user-2', 'user-3'],
+        retargeted: [],
         skipped: [],
+        cascadesBlocked: 0,
         target_id: 'user-1',
         entity_type: 'user',
       });
@@ -340,7 +344,9 @@ describe('Email rule resolution', () => {
 
       mockCascadeLinkEntities.mockResolvedValueOnce({
         linked: ['user-entra'],
+        retargeted: [],
         skipped: [],
+        cascadesBlocked: 0,
         target_id: 'user-okta',
       });
 
@@ -370,7 +376,9 @@ describe('Email rule resolution', () => {
 
       mockCascadeLinkEntities.mockResolvedValueOnce({
         linked: ['user-new'],
+        retargeted: [],
         skipped: [],
+        cascadesBlocked: 0,
         target_id: 'user-existing-target',
       });
 
@@ -635,7 +643,9 @@ describe('Email rule resolution', () => {
 
       mockCascadeLinkEntities.mockResolvedValueOnce({
         linked: ['user-2'],
+        retargeted: [],
         skipped: [],
+        cascadesBlocked: 0,
         target_id: 'user-1',
       });
 
@@ -645,6 +655,51 @@ describe('Email rule resolution', () => {
 
       // Watermark should advance to maxTimestamp
       expect(result.lastProcessedTimestamp).toBe('2026-03-10T00:00:00Z');
+    });
+
+    it('should skip a bucket overlapping ids written earlier in the run and hold the watermark', async () => {
+      const state = createInitialState({ lastProcessedTimestamp: '2026-03-09T00:00:00Z' });
+      const logger = loggerMock.create();
+      mockEsClient.search
+        .mockResolvedValueOnce(
+          createCollectNewEmailsResponse(
+            ['alice@corp.com', 'alice@entra.com'],
+            '2026-03-10T00:00:00Z'
+          ) as any
+        )
+        .mockResolvedValueOnce(
+          createFindMatchingGroupsResponse([
+            {
+              email: 'alice@corp.com',
+              unresolved: [
+                { id: 'alice-ad', namespace: 'active_directory' },
+                { id: 'alice-okta', namespace: 'okta' },
+              ],
+              existingTargets: [],
+            },
+            {
+              email: 'alice@entra.com',
+              unresolved: [{ id: 'alice-new', namespace: 'entra_id' }],
+              existingTargets: ['alice-okta'],
+            },
+          ]) as any
+        );
+
+      mockCascadeLinkEntities.mockResolvedValueOnce({
+        linked: ['alice-okta'],
+        retargeted: ['alice-entra'],
+        skipped: [],
+        cascadesBlocked: 0,
+        target_id: 'alice-ad',
+      });
+
+      const result = await runEmailRuleResolution(
+        createDeps(state, mockEsClient, mockResolutionClient, { logger })
+      );
+
+      expect(mockCascadeLinkEntities).toHaveBeenCalledTimes(1);
+      expect(mockCascadeLinkEntities).toHaveBeenCalledWith('alice-ad', ['alice-okta']);
+      expect(result.lastProcessedTimestamp).toBe('2026-03-09T00:00:00Z');
     });
 
     it('should log warning when top_hits truncation occurs', async () => {
@@ -673,7 +728,9 @@ describe('Email rule resolution', () => {
 
       mockCascadeLinkEntities.mockResolvedValueOnce({
         linked: ['user-2'],
+        retargeted: [],
         skipped: [],
+        cascadesBlocked: 0,
         target_id: 'user-1',
       });
 
