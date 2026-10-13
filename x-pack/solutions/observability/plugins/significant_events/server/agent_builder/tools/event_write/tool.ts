@@ -76,7 +76,7 @@ export const eventsWriteItemSchema = lazySchema(() =>
       status: z
         .never({
           error:
-            'status is not an input: the server derives it from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
+            'status is not an input: it follows from the per-rule verdicts you write. A breach opens or keeps an event active, healthy verdicts for every member start recovering, and only an operator or a close workflow closes it.',
         })
         .optional(),
       event_id: z
@@ -186,7 +186,7 @@ const eventsWriteItemsSchema = lazySchema(() =>
     .describe(
       i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
         defaultMessage:
-          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: the server derives it from the verdicts.',
+          'Non-empty array of event objects. One call assigns every batch detection. Omit event_id only for new events; supply the accepted existing event_id for every continuation. Each detection rule_uuid may appear exactly once in the complete request, including within an item. A confirms item must not include not_checked signals. A new event must carry a confirms signal (or an off_topic signal with an observed error); a continuation may carry any verdict, including refutes for a rule that turned healthy. Status is not an input: it follows from the verdicts.',
       })
     )
 );
