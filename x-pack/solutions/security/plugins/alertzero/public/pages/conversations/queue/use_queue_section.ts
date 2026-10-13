@@ -44,6 +44,10 @@ export interface QueueSection {
    * not blank rows still worth reading.
    */
   hasLoadError: boolean;
+  /** The rows' fetch error behind `hasLoadError`, for its telemetry class; never shown. */
+  loadError: unknown;
+  /** The rows are being fetched again, which hides a load error until the retry settles. */
+  isRefetchingRows: boolean;
   /** The analyst's own Show more failed, as opposed to a poll they never asked for. */
   hasLoadMoreError: boolean;
   hasCountError: boolean;
@@ -171,6 +175,8 @@ const useSection = (
     retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
+    loadError: proposals.length === 0 ? pagesQuery.error : undefined,
+    isRefetchingRows: Boolean(pagesQuery.isFetching),
     hasLoadMoreError,
     hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),

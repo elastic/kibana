@@ -1198,3 +1198,240 @@ describe('ConversationsPage assignee picker', () => {
     expect(screen.queryByTestId('mock-assign-prop-1')).not.toBeInTheDocument();
   });
 });
+
+describe('ConversationsPage telemetry', () => {
+  const secondProposal: ProposalItem = {
+    ...proposal,
+    id: 'prop-2',
+    conversationId: 'inv-2',
+    conversationTitle: 'Second investigation',
+    title: 'Second action',
+    status: 'executing',
+    entityIds: ['host-1'],
+  };
+
+  beforeEach(() => {
+    mockProposals({ investigate: [{ ...proposal, entityIds: ['user-1'] }, secondProposal] });
+    // The server builds the Impact pills for the whole queue.
+    mockUseProposalImpactPills.mockReturnValue({
+      data: [
+        { entityId: 'host-1', count: 1 },
+        { entityId: 'user-1', count: 1 },
+      ],
+    });
+  });
+
+  afterEach(() => jest.clearAllMocks());
+
+  const reportedEvents = (core: ReturnType<typeof renderPage>['core'], eventType: string) =>
+    (core.analytics.reportEvent as jest.Mock).mock.calls.filter(([type]) => type === eventType);
+
+  describe('alertzero_ui_home_opened', () => {
+    it('reports once, with the open count as a range, when the queue data arrives', () => {
+      mockOpenCount(12);
+
+      const { core, rerender } = renderPage('/');
+      // A poll that returns a new count is the same visit.
+      mockOpenCount(60);
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([
+        [
+          'alertzero_ui_home_opened',
+          { default_filters_changed: false, queue_size_bucket: '11_50' },
+        ],
+      ]);
+    });
+
+    it('waits for the queue data', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        error: undefined,
+      });
+
+      const { core, rerender } = renderPage('/');
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([]);
+
+      mockOpenCount(0);
+      rerender();
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([
+        ['alertzero_ui_home_opened', { default_filters_changed: false, queue_size_bucket: '0' }],
+      ]);
+    });
+
+    it('reports once under StrictMode, which runs effects twice', () => {
+      mockOpenCount(3);
+      const core = coreMock.createStart();
+      core.application.capabilities = {
+        ...core.application.capabilities,
+        proposals: { showProposals: true, decideProposals: true },
+      };
+
+      render(
+        <React.StrictMode>
+          <I18nProvider>
+            <EuiProvider>
+              <KibanaContextProvider
+                services={{ ...core, agentBuilder: agentBuilderMocks.createStart() }}
+              >
+                <QueryClientProvider client={new QueryClient()}>
+                  <Router history={createMemoryHistory({ initialEntries: ['/'] })}>
+                    <ConversationsPage />
+                  </Router>
+                </QueryClientProvider>
+              </KibanaContextProvider>
+            </EuiProvider>
+          </I18nProvider>
+        </React.StrictMode>
+      );
+
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toHaveLength(1);
+    });
+  });
+
+  describe('alertzero_ui_queue_filtered', () => {
+    it('reports an Impact filter change, and its clearing, without the entity', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_queue_filtered')).toEqual([
+        ['alertzero_ui_queue_filtered', { filter_type: 'impact' }],
+        ['alertzero_ui_queue_filtered', { filter_type: 'impact' }],
+      ]);
+    });
+  });
+
+  describe('alertzero_ui_brief_card_clicked', () => {
+    it('reports the card position and whether its proposal is pending', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Second action' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([
+        [
+          'alertzero_ui_brief_card_clicked',
+          { conversation_type: 'investigation', has_pending_proposal: false, position_in_list: 1 },
+        ],
+      ]);
+    });
+
+    it('counts the position in the filtered list the analyst sees', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Second action' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([
+        [
+          'alertzero_ui_brief_card_clicked',
+          { conversation_type: 'investigation', has_pending_proposal: false, position_in_list: 0 },
+        ],
+      ]);
+    });
+
+    it('does not report a flyout opened from the URL, such as a copied link', async () => {
+      const { agentBuilder, core } = renderPage('/?selectedConversationId=inv-1');
+
+      await waitFor(() => expect(agentBuilder.openConversationDetails).toHaveBeenCalled());
+      expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([]);
+    });
+  });
+
+  describe('alertzero_ui_error_shown', () => {
+    it('reports a failed queue header once, however often it re-renders', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('boom'),
+      });
+
+      const { core, rerender } = renderPage('/');
+      rerender();
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+      ]);
+    });
+
+    it('reports a failed queue section once', () => {
+      mockUseProposalsByCategory.mockImplementation((category: string) => ({
+        data: undefined,
+        fetchNextPage: jest.fn(),
+        hasNextPage: undefined,
+        isFetchingNextPage: false,
+        isInitialLoading: false,
+        error: category === 'investigate' ? new Error('boom') : undefined,
+      }));
+
+      const { core, rerender } = renderPage('/');
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+      ]);
+    });
+
+    it('reports a failing queue header once while polls retry it', () => {
+      const failed = {
+        data: undefined,
+        isLoading: false,
+        isFetching: false,
+        error: new Error('boom'),
+      };
+      mockUseProposalChartsSummary.mockReturnValue(failed);
+      const { core, rerender } = renderPage('/');
+      // A query without data drops its error while it refetches, so the header loads again.
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: true,
+        isFetching: true,
+        error: null,
+      });
+      rerender();
+      mockUseProposalChartsSummary.mockReturnValue(failed);
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1);
+    });
+
+    it('reports a failing queue section once while polls retry it', () => {
+      const failedPage = (isRetrying: boolean) => (category: string) => ({
+        data: undefined,
+        fetchNextPage: jest.fn(),
+        hasNextPage: undefined,
+        isFetchingNextPage: false,
+        isFetching: category === 'investigate' && isRetrying,
+        isInitialLoading: category === 'investigate' && isRetrying,
+        error: category === 'investigate' && !isRetrying ? new Error('boom') : undefined,
+      });
+      // A non-empty queue, so the page never swaps the sections for the idle panel.
+      mockOpenCount(3);
+      mockUseProposalsByCategory.mockImplementation(failedPage(false));
+      const { core, rerender } = renderPage('/');
+      mockUseProposalsByCategory.mockImplementation(failedPage(true));
+      rerender();
+      mockUseProposalsByCategory.mockImplementation(failedPage(false));
+      rerender();
+
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toHaveLength(1);
+    });
+
+    it('never sends the error message', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('index [secret-index] not found'),
+      });
+
+      const { core } = renderPage('/');
+
+      expect(JSON.stringify(reportedEvents(core, 'alertzero_ui_error_shown'))).not.toContain(
+        'secret-index'
+      );
+    });
+  });
+});

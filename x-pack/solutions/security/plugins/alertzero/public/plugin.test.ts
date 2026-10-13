@@ -272,6 +272,37 @@ describe('AlertZeroPublicPlugin workflow step registration', () => {
   });
 });
 
+describe('AlertZeroPublicPlugin UI telemetry registration', () => {
+  const setupPlugin = (enabled: boolean) => {
+    const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled })));
+    const coreSetup = coreMock.createSetup();
+
+    plugin.setup(
+      coreSetup as never,
+      {
+        workflowsExtensions: { registerStepDefinition: jest.fn() },
+      } as never
+    );
+
+    return (coreSetup.analytics.registerEventType as jest.Mock).mock.calls.map(
+      ([{ eventType }]) => eventType
+    );
+  };
+
+  it('registers the four AlertZero UI events', () => {
+    expect(setupPlugin(true)).toEqual([
+      'alertzero_ui_home_opened',
+      'alertzero_ui_queue_filtered',
+      'alertzero_ui_brief_card_clicked',
+      'alertzero_ui_error_shown',
+    ]);
+  });
+
+  it('registers no UI event when the deployment kill switch is off', () => {
+    expect(setupPlugin(false)).toEqual([]);
+  });
+});
+
 describe('AlertZeroPublicPlugin conversation template UI registration', () => {
   it('leaves the investigation and escalation template UI to the agenticInvestigations plugin', () => {
     const plugin = new AlertZeroPublicPlugin(createContext(createConfig({ enabled: true })));
