@@ -460,9 +460,7 @@ export const updatePackageHandler: FleetRequestHandler<
   }
 
   const body: UpdatePackageResponse = {
-    // Same projection as the GET so the caller sees the stored choices (`installationInfo`)
-    // instead of the raw saved object.
-    item: soToInstallationInfo(packageInfo) as PackageInfo,
+    item: packageInfo,
     ...(warnings && { warnings }),
   };
 

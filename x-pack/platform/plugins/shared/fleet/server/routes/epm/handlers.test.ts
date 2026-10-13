@@ -43,7 +43,6 @@ jest.mock('../../services/package_policies/package_policies_aggregation', () => 
 jest.mock('../../services/epm/packages/rollback', () => {
   return {
     rollbackInstallation: jest.fn(),
-    isIntegrationRollbackTTLExpired: jest.fn().mockReturnValue(false),
   };
 });
 
@@ -214,57 +213,6 @@ describe('updatePackageHandler — ILM policy validation', () => {
     expect(hasPrivileges).not.toHaveBeenCalled();
     expect(getLifecycle).not.toHaveBeenCalled();
     expect(updatePackage).toHaveBeenCalled();
-  });
-});
-
-describe('updatePackageHandler — response', () => {
-  const updateContext = {
-    core: Promise.resolve({ elasticsearch: { client: { asInternalUser: {} } } }),
-    fleet: Promise.resolve({ internalSoClient: { getCurrentNamespace: () => 'default' } }),
-  } as any;
-  const updateResponse = { ok: jest.fn() } as any;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (appContextService.getTaskManagerStart as jest.Mock).mockReturnValue({});
-  });
-
-  it('exposes the stored installation choices through installationInfo, like the GET does', async () => {
-    (updatePackage as jest.Mock).mockResolvedValue({
-      packageInfo: {
-        name: 'nginx',
-        version: '1.0.0',
-        savedObject: {
-          id: 'nginx',
-          type: 'epm-packages',
-          attributes: {
-            name: 'nginx',
-            version: '1.0.0',
-            installed_es: [],
-            keep_policies_up_to_date: false,
-            logsdb_columnar_enabled: true,
-          },
-        },
-      },
-      namespaceCustomizationDiff: { addedNamespaces: [], removedNamespaces: [] },
-      ilmPolicyChanges: [],
-    });
-
-    await updatePackageHandler(
-      updateContext,
-      { params: { pkgName: 'nginx' }, body: { logsdb_columnar: true } } as any,
-      updateResponse
-    );
-
-    const { body } = updateResponse.ok.mock.calls[0][0];
-    expect(body.item.installationInfo).toEqual(
-      expect.objectContaining({
-        name: 'nginx',
-        keep_policies_up_to_date: false,
-        logsdb_columnar_enabled: true,
-      })
-    );
-    expect(body.item).not.toHaveProperty('savedObject');
   });
 });
 
