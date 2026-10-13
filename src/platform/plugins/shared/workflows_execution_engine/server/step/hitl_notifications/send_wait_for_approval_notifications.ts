@@ -23,8 +23,8 @@ import {
   buildSlack2SendMessageInput,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
-  serviceNowCommentLink,
   SERVICENOW_COMMENT_MAX_LENGTH,
+  serviceNowCommentLink,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
