@@ -1145,6 +1145,9 @@ describe('Agents CRUD test', () => {
         'status:inactive',
         'NOT status:online',
         'a:b and status : (online or offline)',
+        'fleet-agents.status : inactive',
+        'fleet-agents.status:inactive',
+        'fleet-agents.attributes.status : inactive',
       ])(
         'keeps the status runtime field for the kuery %s that references the status',
         async (kuery) => {

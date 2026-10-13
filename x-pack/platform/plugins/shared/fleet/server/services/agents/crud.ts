@@ -50,7 +50,8 @@ const INACTIVE_AGENT_CONDITION = `status:inactive`;
 
 /**
  * Whether the kuery filters on the `status` field, which only exists as a runtime field. Parsed from the
- * KQL, so that `status : inactive` is found too. Falls back to a text search for a kuery that does not parse.
+ * KQL with the same prefixes removed as in the query (`fleet-agents.status`), so that `status : inactive` is
+ * found too. Falls back to a text search for a kuery that does not parse.
  */
 function kueryReferencesStatusField(kuery?: string): boolean {
   if (!kuery) {
@@ -61,7 +62,7 @@ function kueryReferencesStatusField(kuery?: string): boolean {
     ((node.arguments?.[0]?.type === 'literal' && node.arguments[0].value === 'status') ||
       (node.arguments ?? []).some(referencesStatus));
   try {
-    return referencesStatus(fromKueryExpression(kuery));
+    return referencesStatus(fromKueryExpression(removeSOAttributes(kuery)));
   } catch (error) {
     return kuery.toLowerCase().includes('status:');
   }
