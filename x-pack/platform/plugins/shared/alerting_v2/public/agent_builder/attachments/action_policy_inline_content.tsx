@@ -67,7 +67,7 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
               title: DISPATCH_PER_LABEL,
               content: (
                 <EuiText size="xs">
-                  <strong>{getGroupingModeLabel(data.grouping_mode)}</strong>
+                  <strong>{getGroupingModeLabel(data.grouping?.mode)}</strong>
                 </EuiText>
               ),
               'data-test-subj': 'actionPolicyInlineDispatchPer',
@@ -76,7 +76,7 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
               title: FREQUENCY_LABEL,
               content: (
                 <EuiText size="xs">
-                  <strong>{getFrequencyLabel(data.throttle, data.grouping_mode)}</strong>
+                  <strong>{getFrequencyLabel(data.throttle, data.grouping?.mode)}</strong>
                 </EuiText>
               ),
               'data-test-subj': 'actionPolicyInlineFrequency',

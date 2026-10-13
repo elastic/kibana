@@ -137,11 +137,12 @@ const SINGLE_CHAR_INTERVAL: Record<string, string> = {
 const DEFAULT_DATE_HISTOGRAM_INTERVAL_MS = moment.duration(1, 'h').as('ms');
 
 /**
- * Format a name for SORT.
+ * Format a result column reference for SORT / LIMIT BY.
  * - Field paths (e.g. agent.keyword): per-segment escape — never wrap the whole path.
- * - Expression/agg output names (e.g. COUNT(bytes)): quote as a single identifier.
+ * - Expression/agg output names (e.g. COUNT(bytes), BUCKET(timestamp, 1 day)): quote as a
+ *   single identifier.
  */
-const quoteEsqlSortField = (name: string): string => {
+const quoteEsqlColumnRef = (name: string): string => {
   const trimmed = name.trim();
   if (trimmed.includes('(') || trimmed.includes(')')) {
     return escapeEsqlColumnName(trimmed, { asExpression: true });
@@ -403,8 +404,32 @@ export function generateEsqlQuery(
   const termsBuckets = bucketEsAggsEntries.flatMap(([, col], index) =>
     isColumnOfType<TermsIndexPatternColumn>('terms', col) ? [{ col, index }] : []
   );
+
+  // Lens nests buckets in column order: the last Top values dimension is the innermost one,
+  // buckets before it are its outer groups (`LIMIT n BY`) and buckets after it, such as a date
+  // histogram, split each of its values further.
+  const innerTermsBucket = termsBuckets.at(-1);
+  const leadingBucketEntries = innerTermsBucket
+    ? bucketEsAggsEntries.slice(0, innerTermsBucket.index)
+    : [];
+  const hasTrailingBuckets = innerTermsBucket
+    ? innerTermsBucket.index < bucketEsAggsEntries.length - 1
+    : false;
+  // An outer Top values dimension is ranked over the whole data set, so a non-terms bucket
+  // above it (top N per date bucket) cannot be expressed with the `IN (subquery)` filter.
+  const firstLeadingTermsIndex = leadingBucketEntries.findIndex(([, col]) =>
+    isColumnOfType<TermsIndexPatternColumn>('terms', col)
+  );
+  const hasOuterTermsBelowOtherBucket =
+    firstLeadingTermsIndex > -1 &&
+    leadingBucketEntries
+      .slice(0, firstLeadingTermsIndex)
+      .some(([, col]) => !isColumnOfType<TermsIndexPatternColumn>('terms', col));
+
   const termsConversionContext = {
-    hasDateHistogram,
+    // Buckets after the inner Top values dimension are not supported yet: a date histogram
+    // below Top values needs the global `IN (subquery)` ranking instead of `LIMIT n BY`.
+    hasUnsupportedDateHistogramNesting: hasOuterTermsBelowOtherBucket || hasTrailingBuckets,
     termsBucketCount: termsBuckets.length,
   };
   // Fail fast on terms blockers before building bucket expressions; metric
@@ -455,20 +480,11 @@ export function generateEsqlQuery(
       }
     }
 
-    if (isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col)) {
-      const column = col;
-      if (
-        column.params?.dropPartials &&
-        // set to false when detached from time picker
-        (indexPattern.timeFieldName === indexPattern.getFieldByName(column.sourceField)?.name ||
-          !column.params?.ignoreTimeRange)
-      ) {
-        return getEsqlQueryFailedResult('drop_partials_not_supported');
-      }
-
-      if (column.params?.includeEmptyRows) {
-        return getEsqlQueryFailedResult('include_empty_rows_not_supported');
-      }
+    if (
+      isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', col) &&
+      col.params?.includeEmptyRows
+    ) {
+      return getEsqlQueryFailedResult('include_empty_rows_not_supported');
     }
 
     const rawResult = toESQL(
@@ -555,9 +571,6 @@ export function generateEsqlQuery(
   const validMetrics = dedupeFragmentsByOutputName(metricsResult);
   const validBuckets = dedupeFragmentsByOutputName(bucketsResult);
 
-  // Last terms dimension is the innermost Top values (Lens bucket order).
-  const innerTermsBucket = termsBuckets.at(-1);
-
   if (validBuckets.length > 0) {
     // Alias bucket expressions that use named params so column names are stable.
     // `esql.col()` escapes alias names that are not valid bare identifiers
@@ -593,7 +606,7 @@ export function generateEsqlQuery(
         }
 
         return expr
-          ? { expr: quoteEsqlSortField(expr), direction: orderDirection.toUpperCase() }
+          ? { expr: quoteEsqlColumnRef(expr), direction: orderDirection.toUpperCase() }
           : undefined;
       };
 
@@ -604,8 +617,10 @@ export function generateEsqlQuery(
         return getEsqlQueryFailedResult('terms_rank_metric_not_supported');
       }
 
+      // Only buckets above the inner Top values group its `LIMIT n BY`; buckets below it
+      // are gated for now (see `hasUnsupportedDateHistogramNesting`).
       const outerBuckets = [...resolvedBucketExprs.entries()]
-        .filter(([index]) => index !== innerTermsBucket.index)
+        .filter(([index]) => index < innerTermsBucket.index)
         .sort(([a], [b]) => a - b);
 
       const outerSortKeys: EsqlSortKey[] = [];
@@ -620,7 +635,7 @@ export function generateEsqlQuery(
         const [, col] = bucketEsAggsEntries[index];
 
         if (!isColumnOfType<TermsIndexPatternColumn>('terms', col)) {
-          outerSortKeys.push({ expr: quoteEsqlSortField(bucketExpr), direction: 'ASC' });
+          outerSortKeys.push({ expr: quoteEsqlColumnRef(bucketExpr), direction: 'ASC' });
           continue;
         }
 
@@ -678,7 +693,10 @@ export function generateEsqlQuery(
       if (outerBuckets.length === 0) {
         queryParts.push(`LIMIT ${size}`);
       } else {
-        queryParts.push(`LIMIT ${size} BY ${outerBuckets.map(([, expr]) => expr).join(', ')}`);
+        // LIMIT BY groups by result column name, so expression names such as BUCKET(...) are quoted.
+        queryParts.push(
+          `LIMIT ${size} BY ${outerBuckets.map(([, expr]) => quoteEsqlColumnRef(expr)).join(', ')}`
+        );
         // The ranking above is consumed by LIMIT BY, so outer dimensions are ordered
         // afterwards; the inner key trails it to keep each group internally ranked.
         queryParts.push(`SORT ${formatSortKeys([...outerSortKeys, innerSortKey])}`);
@@ -707,7 +725,7 @@ export function generateEsqlQuery(
         }
         sortExprs.push(bucketExpr);
       });
-      const sortFields = sortExprs.map((bucketExpr) => `${quoteEsqlSortField(bucketExpr)} ASC`);
+      const sortFields = sortExprs.map((bucketExpr) => `${quoteEsqlColumnRef(bucketExpr)} ASC`);
 
       // Only add SORT clause if there are non-date fields to sort by
       if (sortFields.length > 0) {

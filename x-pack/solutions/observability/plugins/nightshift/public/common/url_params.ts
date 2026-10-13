@@ -68,6 +68,9 @@ export const clearNightshiftInvestigationIdParam = (params: URLSearchParams): vo
   params.delete(NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM);
 };
 
+export const getNightshiftInvestigationPath = (investigationId: string): string =>
+  `/?${NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM}=${encodeURIComponent(investigationId)}`;
+
 export const buildNightshiftInvestigationFlyoutShareUrl = (investigationId: string): string => {
   const url = new URL(window.location.href);
   url.searchParams.set(NIGHTSHIFT_INVESTIGATION_ID_QUERY_PARAM, investigationId);
