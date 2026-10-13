@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import type { AppMenuItemType } from '@kbn/app-menu';
 import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
@@ -46,6 +46,9 @@ import type { TimeRange } from '../../../rule_gaps/types';
 import * as actionI18n from '../../../common/translations';
 import * as i18n from './translations';
 import { useAddRuleToChatMenuItem } from './use_add_rule_to_chat_menu_item';
+
+/** A refresh is often faster than a frame, so its loading state is kept visible for at least this long. */
+const MIN_REFRESH_FEEDBACK_MS = 500;
 
 interface UseRuleDetailsMenuProps {
   rule: Rule | null;
@@ -102,6 +105,21 @@ export const useRuleDetailsMenu = ({
   const mlCapabilities = useMlCapabilities();
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
   const addRuleToChatMenuItem = useAddRuleToChatMenuItem(rule);
+  const [isRefreshFeedbackVisible, setIsRefreshFeedbackVisible] = useState(false);
+  const refreshFeedbackTimeout = useRef<ReturnType<typeof setTimeout>>();
+  const isRefreshing = ruleLoading || isRefreshFeedbackVisible;
+
+  useEffect(() => () => clearTimeout(refreshFeedbackTimeout.current), []);
+
+  const refreshRuleWithFeedback = useCallback(() => {
+    refreshRule();
+    setIsRefreshFeedbackVisible(true);
+    clearTimeout(refreshFeedbackTimeout.current);
+    refreshFeedbackTimeout.current = setTimeout(
+      () => setIsRefreshFeedbackVisible(false),
+      MIN_REFRESH_FEEDBACK_MS
+    );
+  }, [refreshRule]);
   const canDuplicateRuleWithActions = canEditRuleWithActions(rule, hasActionsPrivileges);
   const isRuleEditButtonEnabled =
     canEditRules || canEditCustomHighlightedFields || canEditInvestigationGuides;
@@ -132,10 +150,10 @@ export const useRuleDetailsMenu = ({
           id: 'refreshRuleStatus',
           label: i18n.REFRESH_STATUS,
           iconType: 'refresh',
-          isLoading: ruleLoading,
-          disableButton: !isExistingRule || ruleLoading,
+          isLoading: isRefreshing,
+          disableButton: !isExistingRule || isRefreshing,
           testId: 'ruleLastExecutionStatusRefreshButton',
-          run: refreshRule,
+          run: refreshRuleWithFeedback,
         },
         ...(isRuleChangesHistoryEnabled
           ? [
@@ -266,8 +284,8 @@ export const useRuleDetailsMenu = ({
       ruleId,
       hasMlPermissions,
       hasActionsPrivileges,
-      ruleLoading,
-      refreshRule,
+      isRefreshing,
+      refreshRuleWithFeedback,
       snoozeMenuItem,
       addRuleToChatMenuItem,
       getSecuritySolutionUrl,

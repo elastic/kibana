@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -45,6 +45,26 @@ const confirmDeletion = jest.fn(async () => false);
 const refreshRule = jest.fn();
 const executeBulkAction = jest.fn();
 
+const getMenuProps = (rule = mockRule('rule-id'), ruleLoading = false) => ({
+  rule,
+  ruleId: 'rule-id',
+  ruleLoading,
+  isExistingRule: true,
+  hasActionsPrivileges: true,
+  refreshRule,
+  snoozeMenuItem: {
+    id: 'snoozeRule',
+    label: 'Set snooze',
+    iconType: 'bell' as const,
+    overflow: true as const,
+    run: jest.fn(),
+    testId: 'rules-details-snooze-rule',
+  },
+  showBulkDuplicateExceptionsConfirmation: async () => null,
+  showManualRuleRunConfirmation: async () => null,
+  confirmDeletion,
+});
+
 const RuleMenu = ({
   rule = mockRule('rule-id'),
   ruleLoading = false,
@@ -52,25 +72,7 @@ const RuleMenu = ({
   rule?: ReturnType<typeof mockRule>;
   ruleLoading?: boolean;
 }) => {
-  const menu = useRuleDetailsMenu({
-    rule,
-    ruleId: 'rule-id',
-    ruleLoading,
-    isExistingRule: true,
-    hasActionsPrivileges: true,
-    refreshRule,
-    snoozeMenuItem: {
-      id: 'snoozeRule',
-      label: 'Set snooze',
-      iconType: 'bell',
-      overflow: true,
-      run: jest.fn(),
-      testId: 'rules-details-snooze-rule',
-    },
-    showBulkDuplicateExceptionsConfirmation: async () => null,
-    showManualRuleRunConfirmation: async () => null,
-    confirmDeletion,
-  });
+  const menu = useRuleDetailsMenu(getMenuProps(rule, ruleLoading));
   return <SecurityAppHeader title="Rule" menu={menu} />;
 };
 
@@ -163,5 +165,51 @@ describe('rule details app menu', () => {
     await openAppMenuOverflow();
 
     expect(screen.getByTestId('ruleLastExecutionStatusRefreshButton')).toBeDisabled();
+  });
+
+  describe('"Refresh status" feedback', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const renderMenuHook = () =>
+      renderHook(() => useRuleDetailsMenu(getMenuProps()), {
+        wrapper: ({ children }: { children: React.ReactNode }) => (
+          <TestProviders>
+            <MemoryRouter>{children}</MemoryRouter>
+          </TestProviders>
+        ),
+      });
+
+    const getRefreshItem = (menu: ReturnType<typeof useRuleDetailsMenu>) =>
+      menu.items?.find(({ id }) => id === 'refreshRuleStatus');
+
+    it('keeps the loading state visible for a minimum time even when the refresh is instant', () => {
+      const { result } = renderMenuHook();
+      expect(getRefreshItem(result.current)?.isLoading).toBe(false);
+
+      act(() => {
+        getRefreshItem(result.current)?.run?.();
+      });
+
+      expect(refreshRule).toHaveBeenCalledTimes(1);
+      expect(getRefreshItem(result.current)?.isLoading).toBe(true);
+      expect(getRefreshItem(result.current)?.disableButton).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+      expect(getRefreshItem(result.current)?.isLoading).toBe(true);
+
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+      expect(getRefreshItem(result.current)?.isLoading).toBe(false);
+      expect(getRefreshItem(result.current)?.disableButton).toBe(false);
+    });
   });
 });
