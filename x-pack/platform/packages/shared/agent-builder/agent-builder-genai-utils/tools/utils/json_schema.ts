@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import { z, inlineRootJsonSchemaRef, type ZodType } from '@kbn/zod/v4';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { JSONSchema } from 'zod/v4/core/json-schema';
+
+/** Converts a tool input Zod schema to JSON Schema for LLM providers (inlines root `.meta({ id })` `$ref`s). */
+export const zodToolInputToJsonSchema = (schema: ZodType): JSONSchema => {
+  const { $schema: _$schema, ...rest } = z.toJSONSchema(schema, {
+    io: 'input',
+    unrepresentable: 'any',
+  }) as Record<string, unknown>;
+  return inlineRootJsonSchemaRef(rest) as JSONSchema;
+};
 
 /**
  * Wraps a JSON schema in an object if not already an object'.

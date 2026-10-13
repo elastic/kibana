@@ -14,12 +14,12 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { needsInterval } from '@kbn/alerting-v2-schemas';
 import { normalizeMatcher } from '@kbn/alerting-v2-utils';
-import { z } from '@kbn/zod/v4';
+import { isoDateTime } from '@kbn/zod/v4';
 import type { ActionPolicySavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import type { ApiKeyAttributes } from '../services/api_key_service/api_key_service';
 
-const isoDateTimeString = z.string().datetime();
+const isoDateTimeString = isoDateTime();
 
 export function validateDateString(dateString: string): void {
   const result = isoDateTimeString.safeParse(dateString);

@@ -1,12 +1,12 @@
 {
-  "sha1": "7e2f03be824ce018ad0dbbb560ee18b1ea839d45",
+  "sha1": "16e7c57c493262482e4f6dcabfdb729a0fa2a712",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "f3ddbbb53c28ebe-21381b726c466b4",
-      "title": "Reset alerting v2 nav settings",
+      "id": "f3ddbbb53c28ebe-e56c37aa9bfdb56",
+      "title": "Disable alerting v2",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 6,
+        "line": 14,
         "column": 1
       }
     },
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 22,
+        "line": 24,
         "column": 1
       }
     },
@@ -941,6 +941,22 @@
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/rules/rules_page_rules_tab/rules_page_rules_tab.viewer.spec.ts",
         "line": 27,
         "column": 72
+      }
+    },
+    {
+      "id": "cdecdef6b56efc9-7f9ce254f0965d8",
+      "title": "Restore the default alerting v2 settings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

@@ -48,9 +48,9 @@ export function useKnowledgeIndicatorsBulkDelete({
         .filter((ki) => ki.kind === 'query')
         .map((ki) => ki.query.id);
 
-      // At most two HTTP requests regardless of how many streams are involved:
-      // one for the cross-stream feature bulk delete, one for the cross-stream
-      // query bulk delete. Both endpoints group by stream server-side.
+      // At most two HTTP requests regardless of how many sources are involved:
+      // one for the cross-source feature bulk delete, one for the cross-source
+      // query bulk delete. Both endpoints group by source server-side.
       const featuresPromise: Promise<BulkOperationResult> =
         features.length > 0
           ? deleteFeaturesInBulk(features)

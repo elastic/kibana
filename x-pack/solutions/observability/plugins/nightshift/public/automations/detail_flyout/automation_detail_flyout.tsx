@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiAvatar,
@@ -35,6 +36,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { NIGHTSHIFT_APP_ROUTE } from '../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
@@ -469,7 +471,7 @@ export const AutomationDetailFlyout = ({
                           <div
                             css={{
                               inlineSize: '100%',
-                              color: isLimitHigh ? limitColor : undefined,
+                              color: isLimitHigh ? euiTheme.colors.textWarning : undefined,
                             }}
                           >
                             {usedToday} / {automation.runtime.dailyDispatchLimit ?? '—'}
@@ -584,10 +586,13 @@ export const AutomationDetailFlyout = ({
               >
                 {isEditing ? (
                   <>
-                    <EuiButton
+                    <EuiButtonEmpty
                       data-test-subj="automationCancelEditButton"
+                      {...getEbtProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_AUTOMATION_EDIT,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                      })}
                       size="s"
-                      color="text"
                       onClick={() => {
                         setValues(originalValues);
                         setIsNameInvalid(false);
@@ -595,11 +600,15 @@ export const AutomationDetailFlyout = ({
                       }}
                     >
                       {labels.cancel}
-                    </EuiButton>
+                    </EuiButtonEmpty>
                     <EuiToolTip content={blocker}>
                       <EuiButton
                         fill
                         data-test-subj="automationSaveButton"
+                        {...getEbtProps({
+                          action: NIGHTSHIFT_EBT_ACTIONS.SAVE_AUTOMATION,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                        })}
                         size="s"
                         disabled={!valid || !isDirty || updateAutomation.isLoading}
                         onClick={save}
@@ -613,6 +622,10 @@ export const AutomationDetailFlyout = ({
                     <>
                       <EuiButton
                         data-test-subj="automationEditButton"
+                        {...getEbtProps({
+                          action: NIGHTSHIFT_EBT_ACTIONS.EDIT_AUTOMATION,
+                          element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                        })}
                         size="s"
                         iconType="pencil"
                         onClick={() => startEditing()}
@@ -649,6 +662,10 @@ export const AutomationDetailFlyout = ({
                                   name: labels.clone,
                                   icon: 'copy',
                                   'data-test-subj': 'automationCloneButton',
+                                  ...getEbtProps({
+                                    action: NIGHTSHIFT_EBT_ACTIONS.CLONE_AUTOMATION,
+                                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                                  }),
                                   onClick: () => {
                                     onClone(automation);
                                     setIsActionsOpen(false);
@@ -660,6 +677,10 @@ export const AutomationDetailFlyout = ({
                                   icon: 'trash',
                                   color: 'danger',
                                   'data-test-subj': 'automationDeleteButton',
+                                  ...getEbtProps({
+                                    action: NIGHTSHIFT_EBT_ACTIONS.DELETE_AUTOMATION,
+                                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                                  }),
                                   onClick: () => {
                                     onDelete(automation);
                                     setIsActionsOpen(false);
