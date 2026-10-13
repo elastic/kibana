@@ -30,7 +30,7 @@ import {
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
-import { ruleCreateTelemetryEvents } from '../lib/telemetry/rule_created_event';
+import { ruleChangeTelemetryEvents } from '../lib/telemetry/rule_changed_event';
 
 /**
  * Core platform setup-phase registrations (feature privileges, saved objects,
@@ -61,7 +61,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     // Event types must be registered during setup, before the first `reportEvent`.
     const analyticsSetup = container.get(CoreSetup('analytics'));
-    ruleCreateTelemetryEvents.forEach((eventConfig) =>
+    ruleChangeTelemetryEvents.forEach((eventConfig) =>
       analyticsSetup.registerEventType(eventConfig)
     );
 

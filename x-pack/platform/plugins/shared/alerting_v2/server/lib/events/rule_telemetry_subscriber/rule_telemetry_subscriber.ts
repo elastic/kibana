@@ -12,14 +12,21 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
-import { buildRuleCreatedEventData, RULE_CREATED_EVENT } from '../../telemetry/rule_created_event';
+import {
+  buildRuleChangedEventData,
+  RULE_CHANGED_EVENT,
+  RULE_OPERATIONS,
+  type RuleOperation,
+} from '../../telemetry/rule_changed_event';
 import {
   AlertingDomainEventBusToken,
   type AlertingDomainEvent,
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
-import { RULE_CREATED_EVENT_TYPE, type RuleEvent } from '../rule_event_publisher/events';
+import type { RuleEvent } from '../rule_event_publisher/events';
+
+type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
 
 /**
  * Singleton bus subscriber that reports rule-lifecycle domain events as
@@ -54,11 +61,11 @@ export class RuleTelemetrySubscriber {
       return;
     }
 
-    this.#subscriptions.push(
-      this.bus.subscribe(RULE_CREATED_EVENT_TYPE, (event) =>
-        this.#reportRuleCreated(event as RuleEvent)
-      )
-    );
+    for (const eventType of RULE_OPERATIONS) {
+      this.#subscriptions.push(
+        this.bus.subscribe<ReportedRuleEvent>(eventType, (event) => this.#reportRuleChanged(event))
+      );
+    }
   }
 
   public stop(): void {
@@ -69,18 +76,22 @@ export class RuleTelemetrySubscriber {
     this.#subscriptions = [];
   }
 
-  #reportRuleCreated(event: RuleEvent): void {
-    const { ruleId, spaceId, rule } = event.payload;
+  #reportRuleChanged(event: ReportedRuleEvent): void {
+    const { type: operation, payload } = event;
+    const { ruleId, spaceId, rule, channel, app } = payload;
 
     if (!rule) {
       return;
     }
 
     try {
-      this.analytics.reportEvent(RULE_CREATED_EVENT.eventType, buildRuleCreatedEventData(rule));
+      this.analytics.reportEvent(
+        RULE_CHANGED_EVENT.eventType,
+        buildRuleChangedEventData(rule, { operation, channel, app })
+      );
     } catch (err) {
       this.logger.debug({
-        message: () => `Failed to report rule created telemetry event: ${err}`,
+        message: () => `Failed to report rule changed telemetry event: ${err}`,
         labels: { event_type: event.type, rule_id: ruleId, space_id: spaceId },
       });
     }

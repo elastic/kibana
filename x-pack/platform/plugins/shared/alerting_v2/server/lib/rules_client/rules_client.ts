@@ -75,6 +75,12 @@ import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
+import {
+  resolveRuleEventOrigin,
+  type RuleEventOrigin,
+  type CreateRulesClientOptions,
+} from './rule_event_origin';
+import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -203,6 +209,7 @@ export class RulesClient {
   private readonly config: PluginConfig;
   private readonly logger: LoggerServiceContract;
   private readonly eventContext: AlertingPublisherContext;
+  private readonly eventOrigin: RuleEventOrigin;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -219,9 +226,11 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginToken) origin: EventOrigin
+    @inject(EventOriginToken) origin: EventOrigin,
+    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
   ) {
     this.eventContext = { request, origin };
+    this.eventOrigin = resolveRuleEventOrigin(request, rulesClientOptions);
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
   }
@@ -649,7 +658,7 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.eventOrigin },
     ]);
     return rule;
   }
@@ -708,7 +717,7 @@ export class RulesClient {
         references: doc.references,
       });
       items.push(rule);
-      createdRules.push({ ruleId: rule.id, spaceId, rule });
+      createdRules.push({ ruleId: rule.id, spaceId, rule, ...this.eventOrigin });
     }
 
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, createdRules);
@@ -794,7 +803,7 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.eventOrigin },
     ]);
 
     return rule;
@@ -864,7 +873,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule },
+      { ruleId: id, spaceId: this.spaceId, rule, ...this.eventOrigin },
     ]);
   }
 
@@ -970,7 +979,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.eventOrigin },
     ]);
     return rule;
   }
@@ -1015,7 +1024,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.eventOrigin },
     ]);
     return rule;
   }
@@ -1220,8 +1229,9 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
+              ...this.eventOrigin,
             }
-          : { ruleId: result.id, spaceId }
+          : { ruleId: result.id, spaceId, ...this.eventOrigin }
       );
     }
 
@@ -1342,7 +1352,7 @@ export class RulesClient {
           attrs: item.attrs,
           references: item.references,
         });
-        enabledRules.push({ ruleId: rule.id, spaceId, rule });
+        enabledRules.push({ ruleId: rule.id, spaceId, rule, ...this.eventOrigin });
       }
 
       await this.removeExecutorTasks({
@@ -1423,7 +1433,7 @@ export class RulesClient {
           references: item.references,
         });
         affectedCount += 1;
-        disabledRules.push({ ruleId: rule.id, spaceId, rule });
+        disabledRules.push({ ruleId: rule.id, spaceId, rule, ...this.eventOrigin });
       }
     }
 
@@ -1547,7 +1557,7 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
-      updatedRules.push({ ruleId: rule.id, spaceId, rule });
+      updatedRules.push({ ruleId: rule.id, spaceId, rule, ...this.eventOrigin });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, updatedRules);
@@ -1864,7 +1874,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, ...this.eventOrigin },
     ]);
     return { rule, created: false };
   }

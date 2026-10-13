@@ -14,6 +14,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus } from '../event_bus';
+import type { RuleEventChannel } from '../../rules_client/rule_event_origin';
 import {
   RULE_CREATED_EVENT_TYPE,
   RULE_DELETED_EVENT_TYPE,
@@ -33,6 +34,10 @@ export interface EventRule {
   ruleId: string;
   spaceId: string;
   rule?: RuleResponse;
+  /** Channel the change was made through. */
+  channel: RuleEventChannel;
+  /** App the change was made from, when known. */
+  app?: string;
 }
 
 /**
@@ -99,10 +104,12 @@ export class RuleEventPublisher implements RuleEventPublisherContract {
   }
 
   private toEventPayload(rule: EventRule, correlationId?: string): RuleEventPayload {
-    const { ruleId, spaceId, rule: domainRule } = rule;
+    const { ruleId, spaceId, rule: domainRule, channel, app } = rule;
     return {
       ruleId,
       spaceId,
+      channel,
+      ...(app ? { app } : {}),
       ...(correlationId ? { correlationId } : {}),
       ...(domainRule ? { rule: domainRule } : {}),
     };

@@ -119,6 +119,8 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/sem
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
+/** Reported as `app` on the Alerting v2 rule created telemetry event for the rules this plugin creates. */
+const RULE_CREATION_APP = 'nightshift';
 
 export class SignificantEventsPlugin
   implements
@@ -236,7 +238,9 @@ export class SignificantEventsPlugin
       });
 
       const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID);
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, DEFAULT_SPACE_ID, {
+          app: RULE_CREATION_APP,
+        });
 
       let alertEventsClientPromise: Promise<AlertEventsClientApi> | undefined;
       const getAlertEventsClient = (): Promise<AlertEventsClientApi> => {

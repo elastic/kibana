@@ -10,8 +10,16 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { LoggerService } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createRuleResponse } from '../../test_utils';
-import { RULE_CREATED_EVENT } from '../../telemetry/rule_created_event';
-import { RULE_CREATED_EVENT_TYPE, type RuleEvent } from '../rule_event_publisher/events';
+import { RULE_CHANGED_EVENT, RULE_OPERATIONS } from '../../telemetry/rule_changed_event';
+import {
+  RULE_CREATED_EVENT_TYPE,
+  RULE_DELETED_EVENT_TYPE,
+  RULE_DISABLED_EVENT_TYPE,
+  RULE_ENABLED_EVENT_TYPE,
+  RULE_UPDATED_EVENT_TYPE,
+  type RuleEvent,
+  type RuleEventPayload,
+} from '../rule_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { EventBus, Subscription } from '../event_bus';
@@ -28,10 +36,16 @@ const rule = createRuleResponse({
   metadata: { template: { id: 'template-1' } },
 });
 
-const createdEvent = (payload: RuleEvent['payload']): RuleEvent => ({
-  type: RULE_CREATED_EVENT_TYPE,
-  payload,
+const eventOfType = (
+  type: RuleEvent['type'],
+  payload: Omit<RuleEventPayload, 'channel'> & Partial<Pick<RuleEventPayload, 'channel'>>
+): RuleEvent => ({
+  type,
+  payload: { channel: 'api', ...payload },
 });
+
+const createdEvent = (...args: [Parameters<typeof eventOfType>[1]]): RuleEvent =>
+  eventOfType(RULE_CREATED_EVENT_TYPE, ...args);
 
 describe('RuleTelemetrySubscriber', () => {
   let bus: jest.Mocked<EventBus<AlertingDomainEvent, AlertingPublisherContext>>;
@@ -41,10 +55,10 @@ describe('RuleTelemetrySubscriber', () => {
   let subscriber: RuleTelemetrySubscriber;
   let context: AlertingPublisherContext;
 
-  const handler = (): CapturedHandler => {
-    const call = bus.subscribe.mock.calls.find(([type]) => type === RULE_CREATED_EVENT_TYPE);
+  const handler = (type: string = RULE_CREATED_EVENT_TYPE): CapturedHandler => {
+    const call = bus.subscribe.mock.calls.find(([subscribedType]) => subscribedType === type);
     if (!call) {
-      throw new Error(`No handler registered for "${RULE_CREATED_EVENT_TYPE}"`);
+      throw new Error(`No handler registered for "${type}"`);
     }
     return call[1] as CapturedHandler;
   };
@@ -58,35 +72,80 @@ describe('RuleTelemetrySubscriber', () => {
   });
 
   describe('start()', () => {
-    it('subscribes a single handler to the rule created event', () => {
+    it('subscribes a handler to each reported rule event type', () => {
       subscriber.start();
 
-      expect(bus.subscribe).toHaveBeenCalledTimes(1);
-      expect(bus.subscribe).toHaveBeenCalledWith(RULE_CREATED_EVENT_TYPE, expect.any(Function));
+      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
+      for (const type of [
+        RULE_CREATED_EVENT_TYPE,
+        RULE_UPDATED_EVENT_TYPE,
+        RULE_DELETED_EVENT_TYPE,
+        RULE_ENABLED_EVENT_TYPE,
+        RULE_DISABLED_EVENT_TYPE,
+      ]) {
+        expect(bus.subscribe).toHaveBeenCalledWith(type, expect.any(Function));
+      }
     });
 
     it('is idempotent: a second call does not double-subscribe', () => {
       subscriber.start();
       subscriber.start();
 
-      expect(bus.subscribe).toHaveBeenCalledTimes(1);
+      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
     });
   });
 
   describe('event dispatch', () => {
-    it('reports the rule created event with the projected rule data', async () => {
+    it.each(RULE_OPERATIONS)(
+      'reports %s with the event type as the operation and the projected rule data',
+      async (type) => {
+        subscriber.start();
+
+        await handler(type)(
+          eventOfType(type, { ruleId: 'rule-1', spaceId: 'default', rule }),
+          context
+        );
+
+        expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+        expect(analytics.reportEvent).toHaveBeenCalledWith(RULE_CHANGED_EVENT.eventType, {
+          rule_id: 'rule-1',
+          operation: type,
+          template_id: 'template-1',
+          created_at: rule.created_at,
+          kind: 'alert',
+          enabled: true,
+          channel: 'api',
+        });
+      }
+    );
+
+    it('forwards the channel and app from the event payload', async () => {
+      subscriber.start();
+
+      await handler()(
+        createdEvent({
+          ruleId: 'rule-1',
+          spaceId: 'default',
+          rule,
+          channel: 'ui',
+          app: 'discover',
+        }),
+        context
+      );
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        RULE_CHANGED_EVENT.eventType,
+        expect.objectContaining({ rule_id: 'rule-1', channel: 'ui', app: 'discover' })
+      );
+    });
+
+    it('omits app when the event payload has none', async () => {
       subscriber.start();
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context);
 
-      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-      expect(analytics.reportEvent).toHaveBeenCalledWith(RULE_CREATED_EVENT.eventType, {
-        rule_id: 'rule-1',
-        template_id: 'template-1',
-        created_at: rule.created_at,
-        kind: 'alert',
-        enabled: true,
-      });
+      const [, data] = analytics.reportEvent.mock.calls[0];
+      expect(data).not.toHaveProperty('app');
     });
 
     it('omits template_id and builder_type for rules without them', async () => {
@@ -107,6 +166,10 @@ describe('RuleTelemetrySubscriber', () => {
       subscriber.start();
 
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default' }), context);
+      await handler(RULE_DELETED_EVENT_TYPE)(
+        eventOfType(RULE_DELETED_EVENT_TYPE, { ruleId: 'rule-1', spaceId: 'default' }),
+        context
+      );
 
       expect(analytics.reportEvent).not.toHaveBeenCalled();
     });
@@ -141,7 +204,7 @@ describe('RuleTelemetrySubscriber', () => {
       subscriber.start();
       subscriber.stop();
 
-      expect(unsubscribe).toHaveBeenCalledTimes(1);
+      expect(unsubscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length);
     });
 
     it('allows a subsequent start() to re-subscribe', () => {
@@ -149,7 +212,7 @@ describe('RuleTelemetrySubscriber', () => {
       subscriber.stop();
       subscriber.start();
 
-      expect(bus.subscribe).toHaveBeenCalledTimes(2);
+      expect(bus.subscribe).toHaveBeenCalledTimes(RULE_OPERATIONS.length * 2);
     });
 
     it('is safe to call when no subscriptions are active', () => {
