@@ -284,7 +284,7 @@ describe('<User />', () => {
         },
       };
 
-      it('shows the resolution risk level when the feature flag is on and mode is resolved', () => {
+      it('shows the resolution risk level when the feature flag is on, mode is resolved and aliases are returned', () => {
         mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
         withStoreRecords(recordWithResolutionRisk, [aliasRecord]);
 
@@ -310,9 +310,29 @@ describe('<User />', () => {
         expect(getByTestId('user-panel-header')).toHaveTextContent('Risk: Low');
       });
 
+      it('shows the individual risk level in resolved mode when no aliases are returned', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(recordWithResolutionRisk);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+          </TestProviders>
+        );
+
+        expect(getByTestId('user-panel-header')).toHaveTextContent('Risk: Low');
+      });
+
       it('shows the individual risk level when the feature flag is off even in resolved mode', () => {
         mockedUseNewEntityAnalyticsPage.mockReturnValue(false);
-        withStoreRecords(recordWithResolutionRisk, [aliasRecord]);
+        // Aliases only come back for a resolved-mode lookup, which the panel downgrades to single
+        // when the flag is off.
+        withStoreRecords(recordWithResolutionRisk);
+        mockedUseEntityFromStore.mockImplementation(({ mode }: { mode?: string }) => ({
+          ...emptyEntityFromStore,
+          entityRecord: recordWithResolutionRisk,
+          aliasRecords: mode === 'resolved' ? [aliasRecord] : [],
+        }));
 
         const { getByTestId } = render(
           <TestProviders>

@@ -172,7 +172,8 @@ export const Service: FC<ServiceProps> = memo(function Service({
 
   const entityStoreEntityId = entityFromStoreResult.entityRecord?.entity?.id;
   const resolvedFromCount = getResolvedFromRecordCount(aliasRecords);
-  const riskLevel = getHeaderRiskLevel(entityFromStoreResult.entityRecord, mode === 'resolved');
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(entityFromStoreResult.entityRecord, isGroupView);
 
   // Group view is read-only: a single criticality edit can't target every member.
   const onCriticalitySave =

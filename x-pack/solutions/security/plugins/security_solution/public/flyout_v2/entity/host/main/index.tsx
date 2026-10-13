@@ -419,7 +419,8 @@ export const Host: FC<HostProps> = memo(function Host({
     ]
   );
 
-  const riskLevel = getHeaderRiskLevel(observedHost.entityRecord, mode === 'resolved');
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(observedHost.entityRecord, isGroupView);
 
   return (
     <>

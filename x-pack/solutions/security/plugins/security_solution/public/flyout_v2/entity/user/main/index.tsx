@@ -438,7 +438,8 @@ export const User: FC<UserProps> = memo(function User({
     ]
   );
 
-  const riskLevel = getHeaderRiskLevel(observedUser.entityRecord, mode === 'resolved');
+  // Group view shows the resolution-group risk level; a lone target shows its own.
+  const riskLevel = getHeaderRiskLevel(observedUser.entityRecord, isGroupView);
 
   return (
     <>
