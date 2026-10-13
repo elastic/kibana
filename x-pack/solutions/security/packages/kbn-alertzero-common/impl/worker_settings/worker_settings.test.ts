@@ -72,7 +72,12 @@ describe('Worker settings declarations', () => {
     expect(createDefaultWorkerSettings(TRIAGE)).toEqual({
       workerId: TRIAGE,
       autonomy: 'manual',
-      extras: { autoCloseConfidenceScoreMinThreshold: 0.85 },
+      scheduleInterval: '15m',
+      extras: {
+        autoCloseConfidenceScoreMinThreshold: 0.85,
+        budgetPerHour: 1300,
+        lookbackHours: 24,
+      },
     });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
   });
@@ -85,6 +90,22 @@ describe('Worker settings declarations', () => {
       autonomy: 'manual',
       scheduleInterval: '4h',
     });
+  });
+
+  it('allows only Manual autonomy for Continuous Threat Hunt', () => {
+    expect(getAllowedAutonomyLevels(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID)).toEqual(
+      ['manual']
+    );
+  });
+
+  it('rejects Assisted autonomy for Continuous Threat Hunt', () => {
+    expect(
+      issuesOf(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID, {
+        workerId: SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID,
+        autonomy: 'assisted',
+        scheduleInterval: '4h',
+      })
+    ).toContain('autonomy');
   });
 
   it('rejects an extras field on Continuous Threat Hunt, which owns no dials', () => {
@@ -111,8 +132,13 @@ describe('Worker settings declarations', () => {
   });
 
   it('rejects a schedule interval on a Worker that owns no schedule', () => {
+    const endpointAnalysis = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
     expect(
-      issuesOf(TRIAGE, { workerId: TRIAGE, autonomy: 'manual', scheduleInterval: '2h' })
+      issuesOf(endpointAnalysis, {
+        workerId: endpointAnalysis,
+        autonomy: 'manual',
+        scheduleInterval: '2h',
+      })
     ).toContain('scheduleInterval');
   });
 

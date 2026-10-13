@@ -76,6 +76,7 @@ describe('SettingsPage', () => {
       services: {
         application: {
           getUrlForApp: (_appId: string, { path }: { path: string }) => `/app/nightshift${path}`,
+          capabilities: { nightshift: { manage: true } },
         },
       },
     } as never);

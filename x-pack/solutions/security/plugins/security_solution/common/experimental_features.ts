@@ -377,7 +377,7 @@ export const allowedExperimentalValues = Object.freeze({
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.
    */
-  riskScoreCreateMissingEntitiesEnabled: false,
+  riskScoreCreateMissingEntitiesEnabled: true,
 
   /**
    * Enables the SIEM Rule Migrations Agent Builder tools.
