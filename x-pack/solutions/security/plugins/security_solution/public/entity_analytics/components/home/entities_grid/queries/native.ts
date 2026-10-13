@@ -14,8 +14,11 @@ import {
   buildSortSuffix,
   getEntityAlias,
 } from './esql';
-import { buildGroupRowsOutput, withGroupedRows } from './grouped_sort';
-import { GROUP_VALUE_SORT_FIELDS, buildGroupRowSteps } from './group_values';
+import { buildResolvedEntityRowsOutput, withResolvedEntityRows } from './resolved_entity_sort';
+import {
+  RESOLVED_ENTITY_VALUE_SORT_FIELDS,
+  buildResolvedEntityRowSteps,
+} from './resolved_entity_values';
 import type { QueryArgs } from '../common';
 import type { ColumnQuerySpec } from './types';
 
@@ -34,24 +37,24 @@ const buildNativeEntitySortQuery = (args: QueryArgs): string => {
   ].join('\n');
 };
 
-/** The groups with aliases that pass the filters, with the group's values of the columns. */
-const buildGroupValueRowsQuery = (args: QueryArgs): string =>
+/** The resolved entities with aliases that pass the filters, with the resolved entity's values of the columns. */
+const buildResolvedEntityValueRowsQuery = (args: QueryArgs): string =>
   [
     `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
-    ...buildGroupRowSteps(args),
-    ...buildGroupRowsOutput(args),
+    ...buildResolvedEntityRowSteps(args),
+    ...buildResolvedEntityRowsOutput(args),
   ].join('\n');
 
-/** Resolved rows show the group's value in these columns, so their sort has to see the groups. */
-const isGroupValueSort = ({ rowsMode, sort }: QueryArgs): boolean =>
-  rowsMode === 'resolved' && GROUP_VALUE_SORT_FIELDS.includes(sort.field);
+/** Resolved rows show the resolved entity's value in these columns, so their sort has to see the resolved entities. */
+const isResolvedEntityValueSort = ({ rowsMode, sort }: QueryArgs): boolean =>
+  rowsMode === 'resolved' && RESOLVED_ENTITY_VALUE_SORT_FIELDS.includes(sort.field);
 
 /** Sort of a column whose value is on the entity doc. */
 export const nativeSortQuerySpec = {
-  fetchSortPage: withGroupedRows(
+  fetchSortPage: withResolvedEntityRows(
     (args, { runQuery }) => runQuery(buildNativeEntitySortQuery(args)),
-    buildGroupValueRowsQuery,
-    isGroupValueSort
+    buildResolvedEntityValueRowsQuery,
+    isResolvedEntityValueSort
   ),
 } satisfies ColumnQuerySpec;

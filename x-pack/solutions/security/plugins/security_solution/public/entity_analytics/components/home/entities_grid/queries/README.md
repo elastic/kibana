@@ -43,51 +43,52 @@ see the comment on `useEntityGridData` in `../hooks/use_entity_grid_data.ts`.
   cases, records, risk change) reads them for just those rows. If the sort query already read a
   column, it is skipped (an alert sort already has the alert counts).
 
-## Resolved rows show their group's values
+## Resolved rows show their resolved entity's values
 
-A resolved row is a group: its main entity and the entities resolved to it. Its columns show
-the group's value, and the records of an expanded group show their own.
+A resolved row is a resolved entity: the main entity that other entities, its aliases, resolve to. Its
+columns show the value over the resolved entity and its aliases together, and the records of an
+expanded group show their own.
 
-- **Risk score**: the group's score, which the risk engine stores on the main entity
+- **Risk score**: the resolved entity's score, which the risk engine stores on the main entity
   (`entity.relationships.resolution.risk.*`), or the entity's own score when it has none. The
   sort, the cursor and the risk level filter use it too (`buildEffectiveRiskSteps`).
-- **Risk score change**: the group's score now minus the group's last score before the window,
-  from the group's risk score docs (`score_type` is `resolution`). An entity without a group
+- **Risk score change**: the resolved entity's score now minus the resolved entity's last score before the window,
+  from the resolved entity's risk score docs (`score_type` is `resolution`). An entity without a resolved entity
   score compares its own scores. Individual rows read only the own scores.
-- **Alerts, last alert and anomalies**: the members' alerts and anomalies added up, and the latest
-  alert of the members. A page reads them for the entities of its groups and rolls them up
-  (`groupEnricher`); an alert or anomaly maps to one entity of a type, so an entity's own count
-  is not counted again in a group.
-- **Cases**: the distinct open and in-progress cases of the members, so a case attached to two
-  members counts once. The page asks the case counts route to include the members, which it reads
-  from the entity index, and the route counts the distinct cases of a group over its members.
-- **Criticality**: the highest of the members. **Sources** and **watchlists**: the distinct
-  values of the members. **First seen** and **last seen**: the earliest and the latest of the
-  members (`group_values.ts`).
+- **Alerts, last alert and anomalies**: the aliases' alerts and anomalies added up, and the latest
+  alert of the aliases. A page reads them for the entities of its resolved entitys and rolls them up
+  (`resolvedEntityEnricher`); an alert or anomaly maps to one entity of a type, so an entity's own count
+  is not counted again in a resolved entity.
+- **Cases**: the distinct open and in-progress cases of the aliases, so a case attached to two
+  aliases counts once. The page asks the case counts route to include the aliases, which it reads
+  from the entity index, and the route counts the distinct cases of a resolved entity over its aliases.
+- **Criticality**: the highest of the aliases. **Sources** and **watchlists**: the distinct
+  values of the aliases. **First seen** and **last seen**: the earliest and the latest of the
+  aliases (`resolved_entity_values.ts`).
 
-Most entities are alone in their group and keep their own values, so only the groups with
-aliases are read: `withGroupValues` reads them for each page of resolved rows, after the page is
+Most entities are alone in their resolved entity and keep their own values, so only the resolved entities with
+aliases are read: `withResolvedEntityValues` reads them for each page of resolved rows, after the page is
 sorted. The cursor comes from the rows as sorted, so paging is not affected.
 
-The filters on criticality, sources and watchlists test the group's value (`groupValueExpression`),
+The filters on criticality, sources and watchlists test the resolved entity's value (`resolvedEntityValueExpression`),
 so they are kept apart from the other entity filters. The entity docs hold only the own value, so
-before any query runs, `fetchGroupValueCorrections` lists the groups that pass differently from
-their main entity: the ones the filters add (the group passes, the main entity doesn't) and the
+before any query runs, `fetchResolvedEntityFilterOverrides` lists the resolved entities that pass differently from
+their main entity: the ones the filters add (the resolved entity passes, the main entity doesn't) and the
 ones they remove. `buildEntitiesInViewConditions` then tests the main entities on their own
 values, corrected by those two lists, so the sorts, the count and the enrichers all read the same
 rows without knowing about groups.
 
-Sorting by criticality, first seen or last seen reads the groups with aliases and the other
-entities apart (`fetchGroupedSortPage`): the groups come from the alias docs and carry the
-group's value, the other entities sort natively by their own value, with as many extra rows as
-there are groups, since an entity that heads a group is dropped for its group row. The two
+Sorting by criticality, first seen or last seen reads the resolved entities with aliases and the other
+entities apart (`fetchResolvedEntitySortPage`): the resolved entities come from the alias docs and carry the
+resolved entity's value, the other entities sort natively by their own value, with as many extra rows as
+there are groups, since an entity that is a resolved entity is dropped for its resolved entity row. The two
 streams are merged in the order of the sort, from the same cursor. A search can't run after the
-group join, so its matches among the group heads are read separately.
+group join, so its matches among the resolved entities are read separately.
 
-Sorting by alerts, last alert or anomalies works the same way, with the group rows from a roll-up
+Sorting by alerts, last alert or anomalies works the same way, with the resolved entity rows from a aggregation
 in the query: the alerts (or anomaly records) are counted per entity in one pass, as in the other
-plans, next to a small branch that maps the aliases and the heads of the groups to their group,
-and the counts are then added up per group. The other entities keep their plans.
+plans, next to a small branch that maps the aliases and the resolved entities to their resolved entity,
+and the counts are then added up per resolved entity. The other entities keep their plans.
 
 ## Which query runs
 
@@ -148,9 +149,9 @@ below is one less than what its query can return: the extra row tells that there
 | A list of ids is longer than `ID_LIST_CHUNK_SIZE` | it is split into several queries: an ES\|QL query can't be longer than 1MB, and ids can be about 100 characters long |
 | The count fails | the view counts as small, so the small view queries run |
 | A computed column fails | its cells stay empty, the other columns still load, and the grid shows an error toast |
-| The groups of a page have more than `MAX_PAGE_MEMBERS` members | the alert and anomaly cells stay empty and the grid shows an error toast: their members can't be read to total them |
-| More than `getMaxAliasGroups` groups with aliases pass the filters, when sorting by criticality, first seen, last seen, alerts, last alert or anomalies | the grid shows an error toast: a page from a partial list of groups would be in the wrong order |
-| More than `MAX_GROUP_VALUE_CORRECTIONS` groups pass the filters on the group values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
+| The resolved entities of a page have more than `MAX_PAGE_ALIASES` aliases | the alert and anomaly cells stay empty and the grid shows an error toast: their aliases can't be read to total them |
+| More than `getMaxAliasGroups` resolved entities with aliases pass the filters, when sorting by criticality, first seen, last seen, alerts, last alert or anomalies | the grid shows an error toast: a page from a partial list of resolved entities would be in the wrong order |
+| More than `MAX_RESOLVED_ENTITY_FILTER_OVERRIDES` groups pass the filters on the resolved entity values differently from their main entity | the grid shows an error toast; the filter can't list them (an ES\|QL query can't be longer than 1MB) |
 
 ## Checking a change
 

@@ -12,7 +12,7 @@ import {
   getEntityAlias,
   buildLookback,
   buildJoinedPageSteps,
-  buildGroupHeadSteps,
+  buildResolvedEntitySteps,
   ENTITY_TYPE_FILTER,
   toList,
 } from './esql';
@@ -28,9 +28,13 @@ import {
 import { buildAlertEuidPipeline } from './euid_pipeline';
 import { buildEntitiesInViewConditions, IN_VIEW_FIELD } from './entities_in_view';
 import type { QueryArgs, Row } from '../common';
-import { buildGroupRowsOutput, withGroupedRows } from './grouped_sort';
-import { GROUP_KEY_FIELD, buildGroupRollUpSteps, groupEnricher } from './group_members';
-import type { RollUp } from './group_members';
+import { buildResolvedEntityRowsOutput, withResolvedEntityRows } from './resolved_entity_sort';
+import {
+  RESOLVED_ENTITY_KEY_FIELD,
+  buildResolvedEntityAggregationSteps,
+  resolvedEntityEnricher,
+} from './resolved_entity_aliases';
+import type { ResolvedEntityAggregation } from './resolved_entity_aliases';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './types';
@@ -139,19 +143,19 @@ const buildAlertSortQuery = (args: QueryArgs, sortField: string): string => {
   ].join('\n');
 };
 
-/** A group's alerts are those of its members: the counts add up, and the last alert is the latest. */
-const ALERT_ROLL_UPS: Readonly<Record<string, RollUp>> = {
-  [LAST_SEEN_ALERT_FIELD]: 'max',
-  ...Object.fromEntries(ALERT_COUNT_FIELDS.map((field) => [field, 'sum' as const])),
+/** A resolved entity's alerts are those of its aliases: the counts add up, and the last alert is the latest. */
+const RESOLVED_ALERT_AGGREGATIONS: Readonly<Record<string, ResolvedEntityAggregation>> = {
+  [LAST_SEEN_ALERT_FIELD]: 'MAX',
+  ...Object.fromEntries(ALERT_COUNT_FIELDS.map((field) => [field, 'SUM' as const])),
 };
 
 /**
- * Alerts of the groups with aliases that pass the filters, as the rows of the grid. Like the sort
+ * Alerts of the resolved entities with aliases that pass the filters, as the rows of the grid. Like the sort
  * query, the alerts and the entity index share one FROM, as FORK can't run inside a subquery:
- * the extra branch maps the aliases and the heads of the groups to their group, so one pass over
- * the alerts counts them per entity, and the counts are rolled up per group.
+ * the extra branch maps the aliases to their resolved entity, so one pass over
+ * the alerts counts them per entity, and the counts are aggregated per resolved entity.
  */
-const buildGroupAlertRowsQuery = (args: QueryArgs): string => {
+const buildResolvedEntityAlertRowsQuery = (args: QueryArgs): string => {
   const { namespace, timeRange, concreteEntityIndexName } = args;
   const isEntityDoc = `_index == "${concreteEntityIndexName}"`;
   return [
@@ -163,17 +167,17 @@ const buildGroupAlertRowsQuery = (args: QueryArgs): string => {
       alertBranchCondition: `NOT ${isEntityDoc}`,
       extraBranch: [
         `WHERE ${isEntityDoc}`,
-        `| EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${GROUP_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
-        `| KEEP _ea_entity_id, ${GROUP_KEY_FIELD}`,
+        `| EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${RESOLVED_ENTITY_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
+        `| KEEP _ea_entity_id, ${RESOLVED_ENTITY_KEY_FIELD}`,
       ],
     }),
     `| STATS ${[
-      ...buildAlertAggregations(`${GROUP_KEY_FIELD} IS NULL`),
-      `${GROUP_KEY_FIELD} = MAX(${GROUP_KEY_FIELD})`,
+      ...buildAlertAggregations(`${RESOLVED_ENTITY_KEY_FIELD} IS NULL`),
+      `${RESOLVED_ENTITY_KEY_FIELD} = MAX(${RESOLVED_ENTITY_KEY_FIELD})`,
     ].join(', ')} BY \`entity.id\``,
-    ...buildGroupRollUpSteps(ALERT_ROLL_UPS),
-    ...buildGroupHeadSteps(concreteEntityIndexName),
-    ...buildGroupRowsOutput(args, ALERT_FIELDS),
+    ...buildResolvedEntityAggregationSteps(RESOLVED_ALERT_AGGREGATIONS),
+    ...buildResolvedEntitySteps(concreteEntityIndexName),
+    ...buildResolvedEntityRowsOutput(args, ALERT_FIELDS),
   ].join('\n');
 };
 
@@ -253,15 +257,18 @@ const alertCountSplitSortPlan = getAlertSplitSortPlan(ALERT_COUNT_FIELD);
 const lastSeenAlertSplitSortPlan = getAlertSplitSortPlan(LAST_SEEN_ALERT_FIELD);
 
 /**
- * The page of a plan; for resolved rows, the groups with aliases have the alerts of their members
+ * The page of a plan; for resolved rows, the resolved entities with aliases have the alerts of their aliases
  * and are read apart from the other entities.
  */
 const fetchAlertSortPage = (plan: SplitSortPlan): SortPageFetcher =>
-  withGroupedRows((args, ctx) => fetchSplitSortPage(plan, args, ctx), buildGroupAlertRowsQuery);
+  withResolvedEntityRows(
+    (args, ctx) => fetchSplitSortPage(plan, args, ctx),
+    buildResolvedEntityAlertRowsQuery
+  );
 
 export const alertCountQuerySpec = {
   fetchSortPage: fetchAlertSortPage(alertCountSplitSortPlan),
-  enricher: groupEnricher(alertsEnricher, ALERT_ROLL_UPS),
+  enricher: resolvedEntityEnricher(alertsEnricher, RESOLVED_ALERT_AGGREGATIONS),
 } satisfies ColumnQuerySpec;
 
 export const lastSeenAlertQuerySpec = {

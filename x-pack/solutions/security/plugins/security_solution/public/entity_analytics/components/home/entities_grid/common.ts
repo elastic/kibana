@@ -130,7 +130,7 @@ export interface PageCursor {
  * main entity's own value: the entity docs hold only the own value, so these groups are added
  * to or removed from the entities that pass on their own.
  */
-export interface GroupValueCorrections {
+export interface ResolvedEntityFilterOverrides {
   /** Groups that pass, though their main entity does not. */
   include: readonly string[];
   /** Groups that do not pass, though their main entity does. */
@@ -159,11 +159,11 @@ export interface QueryArgs {
   /**
    * The filters on the columns that show the group's value (criticality, sources, watchlists)
    * of resolved rows. They are written on the entity fields, so on a single entity they test its
-   * own value, and on a group (see `buildGroupValuesQuery`) the group's.
+   * own value, and on a group (see `buildResolvedEntityValuesQuery`) the group's.
    */
-  groupValueExpression?: string;
-  /** What `groupValueExpression` needs to test the groups with aliases: see {@link GroupValueCorrections}. */
-  groupValueCorrections?: GroupValueCorrections;
+  resolvedEntityValueExpression?: string;
+  /** What `resolvedEntityValueExpression` needs to test the groups with aliases: see {@link ResolvedEntityFilterOverrides}. */
+  resolvedEntityFilterOverrides?: ResolvedEntityFilterOverrides;
   /** Extra native entity-doc fields from Fields (not catalog / not enrich). */
   keepFields?: readonly string[];
   /** Installed security ML jobs; the anomaly columns count only their records. */

@@ -8,13 +8,13 @@
 import { ENTITY_ID_FIELD, RESOLVED_TO_FIELD } from '../common';
 import type { QueryArgs } from '../common';
 import { ENTITY_TYPE_FILTER, getEntityAlias, toList } from './esql';
-import { buildGroupValueCondition } from './group_values';
+import { buildResolvedEntityValueCondition } from './resolved_entity_values';
 
 // ── entities in view ─────────────────────────────────────────────────────────
 
 /** Conditions of the entity filters on entity docs, which hold the entities' own values. */
 export const buildEntityFilterConditions = (args: QueryArgs): string[] => {
-  const groupValueCondition = buildGroupValueCondition(args);
+  const groupValueCondition = buildResolvedEntityValueCondition(args);
   return [
     ...(args.entityExpression ? [args.entityExpression] : []),
     ...(groupValueCondition ? [groupValueCondition] : []),

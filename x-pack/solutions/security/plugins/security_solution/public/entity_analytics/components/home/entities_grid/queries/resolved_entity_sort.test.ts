@@ -7,7 +7,7 @@
 
 import type { QueryArgs, Row } from '../common';
 import type { SortPageContext } from './types';
-import { fetchGroupedSortPage, withGroupedRows } from './grouped_sort';
+import { fetchResolvedEntitySortPage, withResolvedEntityRows } from './resolved_entity_sort';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
@@ -47,18 +47,18 @@ const createPlan = ({
   return {
     runQuery,
     fetchEntityRows,
-    options: { buildGroupRowsQuery: () => GROUP_ROWS_QUERY, fetchEntityRows },
+    options: { buildResolvedEntityRowsQuery: () => GROUP_ROWS_QUERY, fetchEntityRows },
   };
 };
 
-describe('fetchGroupedSortPage', () => {
+describe('fetchResolvedEntitySortPage', () => {
   it('merges the groups and the other entities in the order of the sort', async () => {
     const { runQuery, options } = createPlan({
       groups: [row('host:g1', 'medium_impact'), row('host:g2', 'low_impact')],
       entities: [row('host:e1', 'low_impact'), row('host:e2', 'high_impact'), row('host:e3', null)],
     });
 
-    const page = await fetchGroupedSortPage({ ...ARGS, pageSize: 10 }, runQuery, options);
+    const page = await fetchResolvedEntitySortPage({ ...ARGS, pageSize: 10 }, runQuery, options);
 
     // Criticality sorts by its label, so medium comes before low and high.
     expect(getIds(page)).toEqual(['host:g1', 'host:e1', 'host:g2', 'host:e2', 'host:e3']);
@@ -70,7 +70,7 @@ describe('fetchGroupedSortPage', () => {
       entities: [row('host:a', 'low_impact'), row('host:c', null)],
     });
     const fetch = (direction: 'asc' | 'desc') =>
-      fetchGroupedSortPage(
+      fetchResolvedEntitySortPage(
         { ...ARGS, pageSize: 10, sort: { field: 'asset.criticality', direction } },
         runQuery,
         options
@@ -89,7 +89,7 @@ describe('fetchGroupedSortPage', () => {
       ],
     });
 
-    const page = await fetchGroupedSortPage(
+    const page = await fetchResolvedEntitySortPage(
       { ...ARGS, pageSize: 10, sort: { field: 'alert_count', direction: 'desc' } },
       runQuery,
       options
@@ -104,7 +104,7 @@ describe('fetchGroupedSortPage', () => {
       entities: [row('host:g1', 'low_impact'), row('host:e1', 'low_impact')],
     });
 
-    const page = await fetchGroupedSortPage({ ...ARGS, pageSize: 10 }, runQuery, options);
+    const page = await fetchResolvedEntitySortPage({ ...ARGS, pageSize: 10 }, runQuery, options);
 
     expect(page).toEqual([row('host:e1', 'low_impact'), row('host:g1', 'extreme_impact')]);
   });
@@ -115,7 +115,7 @@ describe('fetchGroupedSortPage', () => {
       entities: [],
     });
 
-    await fetchGroupedSortPage(ARGS, runQuery, options);
+    await fetchResolvedEntitySortPage(ARGS, runQuery, options);
 
     expect(fetchEntityRows).toHaveBeenCalledWith(2);
   });
@@ -126,7 +126,7 @@ describe('fetchGroupedSortPage', () => {
       entities: [row('host:e1', 'low_impact'), row('host:e2', 'low_impact')],
     });
 
-    const page = await fetchGroupedSortPage(
+    const page = await fetchResolvedEntitySortPage(
       {
         ...ARGS,
         pageSize: 2,
@@ -152,7 +152,7 @@ describe('fetchGroupedSortPage', () => {
       searched: ['host:g2'],
     });
 
-    const page = await fetchGroupedSortPage(
+    const page = await fetchResolvedEntitySortPage(
       { ...ARGS, pageSize: 10, searchExpression: 'KQL("""entity.name: web*""")' },
       runQuery,
       options
@@ -164,7 +164,7 @@ describe('fetchGroupedSortPage', () => {
   it('does not search without a search', async () => {
     const { runQuery, options } = createPlan({ groups: [row('host:g1', null)], entities: [] });
 
-    await fetchGroupedSortPage(ARGS, runQuery, options);
+    await fetchResolvedEntitySortPage(ARGS, runQuery, options);
 
     expect(runQuery).toHaveBeenCalledTimes(1);
   });
@@ -175,14 +175,16 @@ describe('fetchGroupedSortPage', () => {
       entities: [],
     });
 
-    await expect(fetchGroupedSortPage(ARGS, runQuery, options)).rejects.toThrow('Too many groups');
+    await expect(fetchResolvedEntitySortPage(ARGS, runQuery, options)).rejects.toThrow(
+      'Too many groups'
+    );
   });
 });
 
-describe('withGroupedRows', () => {
+describe('withResolvedEntityRows', () => {
   const entityPage = [row('host:b', 'low_impact')];
 
-  const createFetcher = (isGrouped?: (args: QueryArgs) => boolean) => {
+  const createFetcher = (isResolvedEntityRows?: (args: QueryArgs) => boolean) => {
     const fetchPage = jest.fn(async (_args: QueryArgs, _ctx: SortPageContext) => entityPage);
     const runQuery = jest.fn(async (_query: string): Promise<Row[]> => []);
     const ctx = { runQuery, fetchViewSize: async () => 0 };
@@ -190,7 +192,7 @@ describe('withGroupedRows', () => {
       fetchPage,
       runQuery,
       fetchSortPage: (args: QueryArgs) =>
-        withGroupedRows(fetchPage, () => GROUP_ROWS_QUERY, isGrouped)(args, ctx),
+        withResolvedEntityRows(fetchPage, () => GROUP_ROWS_QUERY, isResolvedEntityRows)(args, ctx),
     };
   };
 

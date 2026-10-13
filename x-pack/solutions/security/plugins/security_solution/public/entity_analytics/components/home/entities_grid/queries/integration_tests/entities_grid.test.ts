@@ -13,7 +13,10 @@ import type { PageCursor, QueryArgs, Row, SortDir } from '../../common';
 import { COLUMN_ENRICHERS, findSortPageFetcher } from '../../grid_columns';
 import { toEsql } from '../../active_filters';
 import type { ActiveFilters } from '../../active_filters';
-import { fetchGroupValueCorrections, withGroupValues } from '../group_values';
+import {
+  fetchResolvedEntityFilterOverrides,
+  withResolvedEntityValues,
+} from '../resolved_entity_values';
 import { buildEntitiesInViewCountQuery } from '../entities_in_view';
 import { SPLIT_SORT_MIN_VIEW_SIZE } from '../split_sort';
 import type { EsqlRunner } from '../types';
@@ -267,7 +270,10 @@ describe('entities grid on Elasticsearch', () => {
       // The grid reads the groups the filters on the group values add or remove first.
       return {
         ...args,
-        groupValueCorrections: await fetchGroupValueCorrections(args, cluster.runQuery),
+        resolvedEntityFilterOverrides: await fetchResolvedEntityFilterOverrides(
+          args,
+          cluster.runQuery
+        ),
       };
     };
 
@@ -322,7 +328,7 @@ describe('entities grid on Elasticsearch', () => {
 
   describe('the values of the groups', () => {
     const fetchGroupRows = async (ids: string[]): Promise<Map<unknown, Row>> => {
-      const rows = await withGroupValues(
+      const rows = await withResolvedEntityValues(
         ids.map((id) => ({ 'entity.id': id })),
         BASE_ARGS,
         cluster.runQuery

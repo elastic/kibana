@@ -36,7 +36,7 @@ export interface ActiveFilters {
 
 type ActiveFiltersEsql = Pick<
   QueryArgs,
-  'searchExpression' | 'entityExpression' | 'groupValueExpression'
+  'searchExpression' | 'entityExpression' | 'resolvedEntityValueExpression'
 >;
 
 export const toEsql = ({
@@ -45,7 +45,7 @@ export const toEsql = ({
   tileEntityIds,
   rowsMode,
 }: ActiveFilters): ActiveFiltersEsql => {
-  const { entityExpression, groupValueExpression } = buildEntityFilterExpressions(
+  const { entityExpression, resolvedEntityValueExpression } = buildEntityFilterExpressions(
     entityFilters,
     rowsMode
   );
@@ -55,7 +55,7 @@ export const toEsql = ({
       entityExpression,
       tileEntityIds == null ? undefined : buildTileWhereExpression(tileEntityIds, rowsMode)
     ),
-    groupValueExpression,
+    resolvedEntityValueExpression,
   };
 };
 

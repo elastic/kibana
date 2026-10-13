@@ -7,7 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { QueryArgs, Row } from '../common';
-import { groupEnricher } from './group_members';
+import { resolvedEntityEnricher } from './resolved_entity_aliases';
 import type { PageEnricher, RunContext } from './types';
 
 const ARGS: QueryArgs = {
@@ -46,10 +46,10 @@ const createBaseEnricher = (
   ),
 });
 
-const ROLL_UPS = { alert_count: 'sum', last_seen_alert: 'max' } as const;
+const AGGREGATIONS = { alert_count: 'SUM', last_seen_alert: 'MAX' } as const;
 
-describe('groupEnricher', () => {
-  it("totals the counts and takes the latest time of a group's members", async () => {
+describe('resolvedEntityEnricher', () => {
+  it('totals the counts and takes the latest time of a resolved entity and its aliases', async () => {
     const base = createBaseEnricher({
       'host:head': { alert_count: 2, last_seen_alert: '2026-10-01T00:00:00.000Z' },
       'host:a1': { alert_count: 3, last_seen_alert: '2026-10-05T00:00:00.000Z' },
@@ -58,7 +58,7 @@ describe('groupEnricher', () => {
     });
     const ctx = createContext([alias('host:a1', 'host:head'), alias('host:a2', 'host:head')]);
 
-    const fields = await groupEnricher(base, ROLL_UPS).fetch(HEAD_ROWS, ARGS, ctx);
+    const fields = await resolvedEntityEnricher(base, AGGREGATIONS).fetch(HEAD_ROWS, ARGS, ctx);
 
     expect(Object.fromEntries(fields)).toEqual({
       'host:head': { alert_count: 6, last_seen_alert: '2026-10-05T00:00:00.000Z' },
@@ -70,7 +70,7 @@ describe('groupEnricher', () => {
     const base = createBaseEnricher({});
     const ctx = createContext([alias('host:a1', 'host:head')]);
 
-    await groupEnricher(base, ROLL_UPS).fetch(HEAD_ROWS, ARGS, ctx);
+    await resolvedEntityEnricher(base, AGGREGATIONS).fetch(HEAD_ROWS, ARGS, ctx);
 
     expect(ctx.runQuery).toHaveBeenCalledTimes(1);
     expect(ctx.runQuery).toHaveBeenCalledWith(
@@ -91,7 +91,11 @@ describe('groupEnricher', () => {
     });
     const ctx = createContext([alias('host:a1', 'host:head')]);
 
-    const fields = await groupEnricher(base, ROLL_UPS).fetch([HEAD_ROWS[0]], ARGS, ctx);
+    const fields = await resolvedEntityEnricher(base, AGGREGATIONS).fetch(
+      [HEAD_ROWS[0]],
+      ARGS,
+      ctx
+    );
 
     expect(fields.get('host:head')).toEqual({ alert_count: null, last_seen_alert: null });
   });
@@ -100,28 +104,32 @@ describe('groupEnricher', () => {
     const base = createBaseEnricher({});
     const members = Array.from({ length: 450 }, (_, i) => alias(`host:a${i}`, 'host:head'));
 
-    await groupEnricher(base, ROLL_UPS).fetch([HEAD_ROWS[0]], ARGS, createContext(members));
+    await resolvedEntityEnricher(base, AGGREGATIONS).fetch(
+      [HEAD_ROWS[0]],
+      ARGS,
+      createContext(members)
+    );
 
     expect(base.fetch).toHaveBeenCalledTimes(3);
   });
 
-  it('fails when the groups of the page have too many members to read', async () => {
+  it('fails when the resolved entities of the page have too many aliases to read', async () => {
     const members = Array.from({ length: 10_000 }, (_, i) => alias(`host:a${i}`, 'host:head'));
 
     await expect(
-      groupEnricher(createBaseEnricher({}), ROLL_UPS).fetch(
+      resolvedEntityEnricher(createBaseEnricher({}), AGGREGATIONS).fetch(
         [HEAD_ROWS[0]],
         ARGS,
         createContext(members)
       )
-    ).rejects.toThrow('too many members');
+    ).rejects.toThrow('too many aliases');
   });
 
   it('reads individual rows as they are, without a query for members', async () => {
     const base = createBaseEnricher({ 'host:head': { alert_count: 2 } });
     const ctx = createContext([alias('host:a1', 'host:head')]);
 
-    const fields = await groupEnricher(base, ROLL_UPS).fetch(
+    const fields = await resolvedEntityEnricher(base, AGGREGATIONS).fetch(
       [HEAD_ROWS[0]],
       { ...ARGS, rowsMode: 'individual' },
       ctx

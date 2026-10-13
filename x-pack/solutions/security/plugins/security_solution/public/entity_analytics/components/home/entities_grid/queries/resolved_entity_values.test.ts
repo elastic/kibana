@@ -7,12 +7,12 @@
 
 import type { QueryArgs, Row } from '../common';
 import {
-  buildGroupValueCondition,
-  buildGroupValueCorrectionsQuery,
-  buildGroupValuesQuery,
-  fetchGroupValueCorrections,
-  withGroupValues,
-} from './group_values';
+  buildResolvedEntityValueCondition,
+  buildResolvedEntityFilterOverridesQuery,
+  buildResolvedEntityValuesQuery,
+  fetchResolvedEntityFilterOverrides,
+  withResolvedEntityValues,
+} from './resolved_entity_values';
 
 const ARGS: QueryArgs = {
   namespace: 'default',
@@ -27,13 +27,13 @@ const ARGS: QueryArgs = {
 
 const row = (id: string, extra: Row = {}): Row => ({ 'entity.id': id, ...extra });
 
-describe('buildGroupValuesQuery', () => {
+describe('buildResolvedEntityValuesQuery', () => {
   it('reads the aliases of the targets, then joins the targets own values in', () => {
-    expect(buildGroupValuesQuery(ARGS, ['host:a', 'host:b'])).toMatchSnapshot();
+    expect(buildResolvedEntityValuesQuery(ARGS, ['host:a', 'host:b'])).toMatchSnapshot();
   });
 });
 
-describe('withGroupValues', () => {
+describe('withResolvedEntityValues', () => {
   const GROUP_VALUES = row('host:a', {
     'asset.criticality': 'extreme_impact',
     'entity.source': ['aws', 'okta'],
@@ -42,7 +42,7 @@ describe('withGroupValues', () => {
   it("gives a row the values of its group, and keeps its other fields and the other rows' as they are", async () => {
     const runQuery = jest.fn(async () => [GROUP_VALUES]);
 
-    const rows = await withGroupValues(
+    const rows = await withResolvedEntityValues(
       [
         row('host:a', { 'entity.name': 'a', 'asset.criticality': 'low_impact' }),
         row('host:b', { 'entity.name': 'b', 'asset.criticality': 'low_impact' }),
@@ -64,7 +64,7 @@ describe('withGroupValues', () => {
   it('reads the groups of every row in one query', async () => {
     const runQuery = jest.fn(async () => []);
 
-    await withGroupValues([row('host:a'), row('host:b')], ARGS, runQuery);
+    await withResolvedEntityValues([row('host:a'), row('host:b')], ARGS, runQuery);
 
     expect(runQuery).toHaveBeenCalledTimes(1);
     expect(runQuery).toHaveBeenCalledWith(expect.stringContaining('IN ("host:a", "host:b")'));
@@ -74,7 +74,7 @@ describe('withGroupValues', () => {
     const runQuery = jest.fn(async () => []);
     const manyRows = Array.from({ length: 2_001 }, (_, i) => row(`host:${i}`));
 
-    await withGroupValues(manyRows, ARGS, runQuery);
+    await withResolvedEntityValues(manyRows, ARGS, runQuery);
 
     expect(runQuery).toHaveBeenCalledTimes(2);
   });
@@ -83,7 +83,7 @@ describe('withGroupValues', () => {
     const runQuery = jest.fn(async () => [GROUP_VALUES]);
     const individualRows = [row('host:a', { 'asset.criticality': 'low_impact' })];
 
-    const rows = await withGroupValues(
+    const rows = await withResolvedEntityValues(
       individualRows,
       { ...ARGS, rowsMode: 'individual' },
       runQuery
@@ -96,36 +96,36 @@ describe('withGroupValues', () => {
   it('does not query without rows', async () => {
     const runQuery = jest.fn(async () => []);
 
-    expect(await withGroupValues([], ARGS, runQuery)).toEqual([]);
+    expect(await withResolvedEntityValues([], ARGS, runQuery)).toEqual([]);
     expect(runQuery).not.toHaveBeenCalled();
   });
 });
 
-describe('buildGroupValueCorrectionsQuery', () => {
+describe('buildResolvedEntityFilterOverridesQuery', () => {
   it('compares the group with its main entity on the filters, and keeps the groups that differ', () => {
     expect(
-      buildGroupValueCorrectionsQuery({
+      buildResolvedEntityFilterOverridesQuery({
         ...ARGS,
-        groupValueExpression: 'asset.criticality IN ("high_impact")',
+        resolvedEntityValueExpression: 'asset.criticality IN ("high_impact")',
       })
     ).toMatchSnapshot();
   });
 });
 
-describe('fetchGroupValueCorrections', () => {
+describe('fetchResolvedEntityFilterOverrides', () => {
   const FILTERED_ARGS: QueryArgs = {
     ...ARGS,
-    groupValueExpression: 'asset.criticality IN ("high_impact")',
+    resolvedEntityValueExpression: 'asset.criticality IN ("high_impact")',
   };
 
   it('splits the groups into those the filters add and those they remove', async () => {
     const runQuery = jest.fn(async () => [
-      row('host:a', { group_matches: true }),
-      row('host:b', { group_matches: false }),
-      row('host:c', { group_matches: true }),
+      row('host:a', { resolved_entity_matches: true }),
+      row('host:b', { resolved_entity_matches: false }),
+      row('host:c', { resolved_entity_matches: true }),
     ]);
 
-    expect(await fetchGroupValueCorrections(FILTERED_ARGS, runQuery)).toEqual({
+    expect(await fetchResolvedEntityFilterOverrides(FILTERED_ARGS, runQuery)).toEqual({
       include: ['host:a', 'host:c'],
       exclude: ['host:b'],
     });
@@ -134,7 +134,10 @@ describe('fetchGroupValueCorrections', () => {
   it('has no corrections, and no query, without filters on the group values', async () => {
     const runQuery = jest.fn(async () => []);
 
-    expect(await fetchGroupValueCorrections(ARGS, runQuery)).toEqual({ include: [], exclude: [] });
+    expect(await fetchResolvedEntityFilterOverrides(ARGS, runQuery)).toEqual({
+      include: [],
+      exclude: [],
+    });
     expect(runQuery).not.toHaveBeenCalled();
   });
 
@@ -142,56 +145,61 @@ describe('fetchGroupValueCorrections', () => {
     const runQuery = jest.fn(async () => []);
 
     expect(
-      await fetchGroupValueCorrections({ ...FILTERED_ARGS, rowsMode: 'individual' }, runQuery)
+      await fetchResolvedEntityFilterOverrides(
+        { ...FILTERED_ARGS, rowsMode: 'individual' },
+        runQuery
+      )
     ).toEqual({ include: [], exclude: [] });
     expect(runQuery).not.toHaveBeenCalled();
   });
 
   it('fails when too many groups differ to list them in the filter', async () => {
     const runQuery = jest.fn(async () =>
-      Array.from({ length: 4_001 }, (_, i) => row(`host:${i}`, { group_matches: true }))
+      Array.from({ length: 4_001 }, (_, i) => row(`host:${i}`, { resolved_entity_matches: true }))
     );
 
-    await expect(fetchGroupValueCorrections(FILTERED_ARGS, runQuery)).rejects.toThrow(
+    await expect(fetchResolvedEntityFilterOverrides(FILTERED_ARGS, runQuery)).rejects.toThrow(
       'too many groups'
     );
   });
 });
 
-describe('buildGroupValueCondition', () => {
+describe('buildResolvedEntityValueCondition', () => {
   const EXPRESSION = 'asset.criticality IN ("high_impact")';
 
   it('is nothing without filters on the group values', () => {
-    expect(buildGroupValueCondition({})).toBeUndefined();
+    expect(buildResolvedEntityValueCondition({})).toBeUndefined();
   });
 
   it('is the filters themselves without corrections', () => {
-    expect(buildGroupValueCondition({ groupValueExpression: EXPRESSION })).toBe(`(${EXPRESSION})`);
+    expect(buildResolvedEntityValueCondition({ resolvedEntityValueExpression: EXPRESSION })).toBe(
+      `(${EXPRESSION})`
+    );
   });
 
   it('removes the groups that do not pass, though their main entity does', () => {
     expect(
-      buildGroupValueCondition({
-        groupValueExpression: EXPRESSION,
-        groupValueCorrections: { include: [], exclude: ['host:a'] },
+      buildResolvedEntityValueCondition({
+        resolvedEntityValueExpression: EXPRESSION,
+        resolvedEntityFilterOverrides: { include: [], exclude: ['host:a'] },
       })
     ).toBe(`(${EXPRESSION}) AND NOT entity.id IN ("host:a")`);
   });
 
   it('adds the groups that pass, though their main entity does not', () => {
     expect(
-      buildGroupValueCondition({
-        groupValueExpression: EXPRESSION,
-        groupValueCorrections: { include: ['host:b'], exclude: [] },
+      buildResolvedEntityValueCondition({
+        resolvedEntityValueExpression: EXPRESSION,
+        resolvedEntityFilterOverrides: { include: ['host:b'], exclude: [] },
       })
     ).toBe(`((${EXPRESSION})) OR entity.id IN ("host:b")`);
   });
 
   it('removes and adds groups', () => {
     expect(
-      buildGroupValueCondition({
-        groupValueExpression: EXPRESSION,
-        groupValueCorrections: { include: ['host:b'], exclude: ['host:a'] },
+      buildResolvedEntityValueCondition({
+        resolvedEntityValueExpression: EXPRESSION,
+        resolvedEntityFilterOverrides: { include: ['host:b'], exclude: ['host:a'] },
       })
     ).toBe(`((${EXPRESSION}) AND NOT entity.id IN ("host:a")) OR entity.id IN ("host:b")`);
   });

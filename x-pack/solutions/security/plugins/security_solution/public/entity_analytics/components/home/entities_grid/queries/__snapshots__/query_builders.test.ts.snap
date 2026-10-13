@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`entities grid query builders count builds the count query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders count builds the count query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -23,7 +25,9 @@ exports[`entities grid query builders count builds the count query with no filte
 | STATS total = COUNT(*)"
 `;
 
-exports[`entities grid query builders enrich queries alert_count builds its query from the page rows 1`] = `
+exports[
+  `entities grid query builders enrich queries alert_count builds its query from the page rows 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
@@ -101,7 +105,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders enrich queries anomaly_count builds its query from the page rows 1`] = `
+exports[
+  `entities grid query builders enrich queries anomaly_count builds its query from the page rows 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IN (\\"host:h-1\\", \\"host:web-2\\", \\"user:alice@h-1@local\\", \\"user:bob@corp.com@okta\\", \\"service:payments\\")
@@ -165,9 +171,13 @@ TRUE, _euid_branch_1_formula, NULL))
 ]
 `;
 
-exports[`entities grid query builders enrich queries case_count builds its query from the page rows 1`] = `Array []`;
+exports[
+  `entities grid query builders enrich queries case_count builds its query from the page rows 1`
+] = `Array []`;
 
-exports[`entities grid query builders enrich queries group_size builds its query from the page rows 1`] = `
+exports[
+  `entities grid query builders enrich queries group_size builds its query from the page rows 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -178,7 +188,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders enrich queries risk_score_change builds its query from the page rows 1`] = `
+exports[
+  `entities grid query builders enrich queries risk_score_change builds its query from the page rows 1`
+] = `
 Array [
   "FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
@@ -216,7 +228,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by @timestamp builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by @timestamp builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -241,7 +255,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by @timestamp builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by @timestamp builds the sort query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -267,7 +283,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by @timestamp builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by @timestamp builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -342,16 +360,16 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -438,7 +456,9 @@ FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by alert_count builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by alert_count builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
 | FORK (
@@ -502,16 +522,16 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -599,7 +619,9 @@ FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by alert_count builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by alert_count builds the sort query with entity filters and no search 1`
+] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
 | FORK (
@@ -663,16 +685,16 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -760,7 +782,9 @@ FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by alert_count builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by alert_count builds the sort query with filters and a cursor 1`
+] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
@@ -898,15 +922,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -985,7 +1009,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by anomaly_count builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by anomaly_count builds the sort query with a cursor on an empty value 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
@@ -1042,15 +1068,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -1130,7 +1156,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by anomaly_count builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by anomaly_count builds the sort query with entity filters and no search 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
@@ -1187,15 +1215,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -1276,7 +1304,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by anomaly_count builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by anomaly_count builds the sort query with filters and a cursor 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM (
 FROM .ml-anomalies-shared*
@@ -1373,7 +1403,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by asset.criticality builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by asset.criticality builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -1398,7 +1430,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by asset.criticality builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by asset.criticality builds the sort query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -1424,7 +1458,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by asset.criticality builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by asset.criticality builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -1435,7 +1471,9 @@ exports[`entities grid query builders sort by asset.criticality builds the sort 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query 1`] = `
+exports[
+  `entities grid query builders sort by entity.EngineMetadata.Type builds the sort query 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1445,7 +1483,9 @@ exports[`entities grid query builders sort by entity.EngineMetadata.Type builds 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1456,7 +1496,9 @@ exports[`entities grid query builders sort by entity.EngineMetadata.Type builds 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1467,7 +1509,9 @@ exports[`entities grid query builders sort by entity.EngineMetadata.Type builds 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by entity.EngineMetadata.Type builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -1478,7 +1522,9 @@ exports[`entities grid query builders sort by entity.EngineMetadata.Type builds 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query 1`] = `
+exports[
+  `entities grid query builders sort by entity.lifecycle.first_seen builds the sort query 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -1502,7 +1548,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -1527,7 +1575,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
 | EVAL rank = CASE(asset.criticality == \\"extreme_impact\\", 4, asset.criticality == \\"high_impact\\", 3, asset.criticality == \\"medium_impact\\", 2, asset.criticality == \\"low_impact\\", 1)
@@ -1553,7 +1603,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by entity.lifecycle.first_seen builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -1574,7 +1626,9 @@ exports[`entities grid query builders sort by entity.name builds the sort query 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.name builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by entity.name builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1585,7 +1639,9 @@ exports[`entities grid query builders sort by entity.name builds the sort query 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.name builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by entity.name builds the sort query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1596,7 +1652,9 @@ exports[`entities grid query builders sort by entity.name builds the sort query 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.name builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by entity.name builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -1607,7 +1665,9 @@ exports[`entities grid query builders sort by entity.name builds the sort query 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query 1`] = `
+exports[
+  `entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1617,7 +1677,9 @@ exports[`entities grid query builders sort by entity.risk.calculated_score_norm 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1628,7 +1690,9 @@ exports[`entities grid query builders sort by entity.risk.calculated_score_norm 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with entity filters and no search 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE entity.relationships.resolution.resolved_to IS NULL
@@ -1639,7 +1703,9 @@ exports[`entities grid query builders sort by entity.risk.calculated_score_norm 
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by entity.risk.calculated_score_norm builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -1666,7 +1732,9 @@ exports[`entities grid query builders sort by group_size builds the sort query 1
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by group_size builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by group_size builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | EVAL group_key = COALESCE(entity.relationships.resolution.resolved_to, entity.id), is_head = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
@@ -1683,7 +1751,9 @@ exports[`entities grid query builders sort by group_size builds the sort query w
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by group_size builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by group_size builds the sort query with entity filters and no search 1`
+] = `
 "FROM (
   FROM entities-latest-default
   | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
@@ -1713,7 +1783,9 @@ exports[`entities grid query builders sort by group_size builds the sort query w
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by group_size builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by group_size builds the sort query with filters and a cursor 1`
+] = `
 "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
 | WHERE KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")
@@ -1786,16 +1858,16 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -1882,7 +1954,9 @@ FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by last_seen_alert builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by last_seen_alert builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
 | FORK (
@@ -1946,16 +2020,16 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -2043,7 +2117,9 @@ FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by last_seen_alert builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by last_seen_alert builds the sort query with entity filters and no search 1`
+] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
 | FORK (
@@ -2107,16 +2183,16 @@ exports[`entities grid query builders sort by last_seen_alert builds the sort qu
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -2204,7 +2280,9 @@ FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by last_seen_alert builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by last_seen_alert builds the sort query with filters and a cursor 1`
+] = `
 "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND (entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")) AND (KQL(\\"\\"\\"entity.name: *gateway* or user.name: alice\\"\\"\\")) AND (asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")))
 | FORK (
@@ -2314,7 +2392,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by risk_score_change builds the sort query with a cursor on an empty value 1`] = `
+exports[
+  `entities grid query builders sort by risk_score_change builds the sort query with a cursor on an empty value 1`
+] = `
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
@@ -2344,7 +2424,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by risk_score_change builds the sort query with entity filters and no search 1`] = `
+exports[
+  `entities grid query builders sort by risk_score_change builds the sort query with entity filters and no search 1`
+] = `
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
@@ -2374,7 +2456,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort by risk_score_change builds the sort query with filters and a cursor 1`] = `
+exports[
+  `entities grid query builders sort by risk_score_change builds the sort query with filters and a cursor 1`
+] = `
 "FROM (
 FROM risk-score.risk-score-default
 | WHERE \`@timestamp\` >= NOW() - 7 days - 2 hours AND \`@timestamp\` <= NOW() - 7 days
@@ -2402,7 +2486,9 @@ FROM entities-latest-default
 | LIMIT 26"
 `;
 
-exports[`entities grid query builders sort page by alert_count on a large view runs the queries of a page after a value with entity filters 1`] = `
+exports[
+  `entities grid query builders sort page by alert_count on a large view runs the queries of a page after a value with entity filters 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -2467,16 +2553,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -2642,7 +2728,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by alert_count on a large view runs the queries of a page after an empty value 1`] = `
+exports[
+  `entities grid query builders sort page by alert_count on a large view runs the queries of a page after an empty value 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -2707,16 +2795,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -2806,7 +2894,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page ascending 1`] = `
+exports[
+  `entities grid query builders sort page by alert_count on a large view runs the queries of the first page ascending 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -2871,16 +2961,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -3041,7 +3131,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page descending 1`] = `
+exports[
+  `entities grid query builders sort page by alert_count on a large view runs the queries of the first page descending 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -3106,16 +3198,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -3276,7 +3368,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by alert_count on a large view runs the queries of the first page with a search 1`] = `
+exports[
+  `entities grid query builders sort page by alert_count on a large view runs the queries of the first page with a search 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -3341,16 +3435,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -3444,7 +3538,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of a page after a value with entity filters 1`] = `
+exports[
+  `entities grid query builders sort page by anomaly_count on a large view runs the queries of a page after a value with entity filters 1`
+] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM (
@@ -3502,15 +3598,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -3650,7 +3746,9 @@ TRUE, _euid_branch_1_formula, NULL))
 ]
 `;
 
-exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of a page after an empty value 1`] = `
+exports[
+  `entities grid query builders sort page by anomaly_count on a large view runs the queries of a page after an empty value 1`
+] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM (
@@ -3708,15 +3806,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -3793,7 +3891,9 @@ TRUE, _euid_branch_1_formula, NULL))
 ]
 `;
 
-exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page ascending 1`] = `
+exports[
+  `entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page ascending 1`
+] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM (
@@ -3851,15 +3951,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -3994,7 +4094,9 @@ TRUE, _euid_branch_1_formula, NULL))
 ]
 `;
 
-exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page descending 1`] = `
+exports[
+  `entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page descending 1`
+] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM (
@@ -4052,15 +4154,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -4195,7 +4297,9 @@ TRUE, _euid_branch_1_formula, NULL))
 ]
 `;
 
-exports[`entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page with a search 1`] = `
+exports[
+  `entities grid query builders sort page by anomaly_count on a large view runs the queries of the first page with a search 1`
+] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
 FROM (
@@ -4253,15 +4357,15 @@ TRUE, _euid_branch_1_formula, NULL))
 ), (
 FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
-| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
+| EVAL member = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
 | MV_EXPAND member
-| KEEP member, _ea_group_key
+| KEEP member, _ea_resolved_entity_key
 | RENAME member AS \`entity.id\`
 )
-| STATS anomaly_count = MAX(anomaly_count), _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS anomaly_count = SUM(anomaly_count) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS anomaly_count = MAX(anomaly_count), _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS anomaly_count = SUM(anomaly_count) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -4348,7 +4452,9 @@ FROM entities-latest-default
 ]
 `;
 
-exports[`entities grid query builders sort page by group_size on a large view runs the queries of a page after a value with entity filters 1`] = `
+exports[
+  `entities grid query builders sort page by group_size on a large view runs the queries of a page after a value with entity filters 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
@@ -4377,7 +4483,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by group_size on a large view runs the queries of a page after an empty value 1`] = `
+exports[
+  `entities grid query builders sort page by group_size on a large view runs the queries of a page after an empty value 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
@@ -4401,7 +4509,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by group_size on a large view runs the queries of the first page ascending 1`] = `
+exports[
+  `entities grid query builders sort page by group_size on a large view runs the queries of the first page ascending 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
@@ -4428,7 +4538,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by group_size on a large view runs the queries of the first page descending 1`] = `
+exports[
+  `entities grid query builders sort page by group_size on a large view runs the queries of the first page descending 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL
@@ -4455,7 +4567,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by group_size on a large view runs the queries of the first page with a search 1`] = `
+exports[
+  `entities grid query builders sort page by group_size on a large view runs the queries of the first page with a search 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -4477,7 +4591,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after a value with entity filters 1`] = `
+exports[
+  `entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after a value with entity filters 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -4542,16 +4658,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | WHERE asset.criticality IN (\\"high_impact\\", \\"extreme_impact\\")
@@ -4717,7 +4833,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after an empty value 1`] = `
+exports[
+  `entities grid query builders sort page by last_seen_alert on a large view runs the queries of a page after an empty value 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -4782,16 +4900,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -4881,7 +4999,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page ascending 1`] = `
+exports[
+  `entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page ascending 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -4946,16 +5066,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -5116,7 +5236,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page descending 1`] = `
+exports[
+  `entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page descending 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -5181,16 +5303,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -5351,7 +5473,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page with a search 1`] = `
+exports[
+  `entities grid query builders sort page by last_seen_alert on a large view runs the queries of the first page with a search 1`
+] = `
 Array [
   "FROM .alerts-security.alerts-default, entities-latest-default METADATA _index
 | WHERE (NOT _index == \\".entities.v2.latest.default-00001\\" AND \`@timestamp\` >= NOW() - 7 days AND (kibana.alert.workflow_status IS NULL OR kibana.alert.workflow_status != \\"closed\\")) OR (_index == \\".entities.v2.latest.default-00001\\" AND entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NOT NULL)
@@ -5416,16 +5540,16 @@ Array [
   )
   (
     WHERE _index == \\".entities.v2.latest.default-00001\\"
-    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_group_key = entity.relationships.resolution.resolved_to
-    | KEEP _ea_entity_id, _ea_group_key
+    | EVAL _ea_entity_id = MV_APPEND(\`entity.id\`, entity.relationships.resolution.resolved_to), _ea_resolved_entity_key = entity.relationships.resolution.resolved_to
+    | KEEP _ea_entity_id, _ea_resolved_entity_key
   )
 | MV_EXPAND _ea_entity_id
 | WHERE _ea_entity_id IS NOT NULL
 | RENAME _ea_entity_id AS \`entity.id\`
-| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_group_key IS NULL, alert_count = COUNT(*) WHERE _ea_group_key IS NULL, alert_critical = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_group_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_group_key = MAX(_ea_group_key) BY \`entity.id\`
-| WHERE _ea_group_key IS NOT NULL
-| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_group_key
-| RENAME _ea_group_key AS \`entity.id\`
+| STATS last_seen_alert = MAX(\`@timestamp\`) WHERE _ea_resolved_entity_key IS NULL, alert_count = COUNT(*) WHERE _ea_resolved_entity_key IS NULL, alert_critical = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"critical\\", alert_high = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"high\\", alert_medium = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"medium\\", alert_low = COUNT(*) WHERE _ea_resolved_entity_key IS NULL AND \`kibana.alert.severity\` == \\"low\\", _ea_resolved_entity_key = MAX(_ea_resolved_entity_key) BY \`entity.id\`
+| WHERE _ea_resolved_entity_key IS NOT NULL
+| STATS last_seen_alert = MAX(last_seen_alert), alert_count = SUM(alert_count), alert_critical = SUM(alert_critical), alert_high = SUM(alert_high), alert_medium = SUM(alert_medium), alert_low = SUM(alert_low) BY _ea_resolved_entity_key
+| RENAME _ea_resolved_entity_key AS \`entity.id\`
 | LOOKUP JOIN .entities.v2.latest.default-00001 ON \`entity.id\`
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\") AND entity.relationships.resolution.resolved_to IS NULL
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
@@ -5519,7 +5643,9 @@ Array [
 ]
 `;
 
-exports[`entities grid query builders sort page by risk_score_change on a large view runs the queries of a page after a value with entity filters 1`] = `
+exports[
+  `entities grid query builders sort page by risk_score_change on a large view runs the queries of a page after a value with entity filters 1`
+] = `
 Array [
   "FROM (
 FROM risk-score.risk-score-default
@@ -5592,7 +5718,9 @@ FROM entities-latest-default
 ]
 `;
 
-exports[`entities grid query builders sort page by risk_score_change on a large view runs the queries of a page after an empty value 1`] = `
+exports[
+  `entities grid query builders sort page by risk_score_change on a large view runs the queries of a page after an empty value 1`
+] = `
 Array [
   "FROM entities-latest-default
 | WHERE entity.EngineMetadata.Type IN (\\"user\\", \\"host\\", \\"service\\")
@@ -5635,7 +5763,9 @@ FROM entities-latest-default
 ]
 `;
 
-exports[`entities grid query builders sort page by risk_score_change on a large view runs the queries of the first page ascending 1`] = `
+exports[
+  `entities grid query builders sort page by risk_score_change on a large view runs the queries of the first page ascending 1`
+] = `
 Array [
   "FROM (
 FROM risk-score.risk-score-default
@@ -5704,7 +5834,9 @@ FROM entities-latest-default
 ]
 `;
 
-exports[`entities grid query builders sort page by risk_score_change on a large view runs the queries of the first page descending 1`] = `
+exports[
+  `entities grid query builders sort page by risk_score_change on a large view runs the queries of the first page descending 1`
+] = `
 Array [
   "FROM (
 FROM risk-score.risk-score-default
@@ -5773,7 +5905,9 @@ FROM entities-latest-default
 ]
 `;
 
-exports[`entities grid query builders sort page by risk_score_change on a large view runs the queries of the first page with a search 1`] = `
+exports[
+  `entities grid query builders sort page by risk_score_change on a large view runs the queries of the first page with a search 1`
+] = `
 Array [
   "FROM (
 FROM risk-score.risk-score-default

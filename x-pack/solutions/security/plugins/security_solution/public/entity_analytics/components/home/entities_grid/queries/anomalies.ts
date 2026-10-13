@@ -11,7 +11,7 @@ import {
   ANOMALY_RECORD_FILTER,
   buildAnomalyJobFilter,
   buildLookback,
-  buildGroupHeadSteps,
+  buildResolvedEntitySteps,
   ENTITY_TYPE_FILTER,
   getEntityAlias,
   toList,
@@ -26,8 +26,12 @@ import {
 import { buildEuidStages } from './euid_pipeline';
 import { buildMergedForeignSortQuery } from './foreign_sort';
 import type { QueryArgs, Row } from '../common';
-import { buildGroupRowsOutput, withGroupedRows } from './grouped_sort';
-import { GROUP_KEY_FIELD, buildGroupRollUpSteps, groupEnricher } from './group_members';
+import { buildResolvedEntityRowsOutput, withResolvedEntityRows } from './resolved_entity_sort';
+import {
+  RESOLVED_ENTITY_KEY_FIELD,
+  buildResolvedEntityAggregationSteps,
+  resolvedEntityEnricher,
+} from './resolved_entity_aliases';
 import { buildEntityListSortPlan, fetchSplitSortPage } from './split_sort';
 import type { SplitSortPlan } from './split_sort';
 import type { ColumnQuerySpec, PageEnricher, SortPageFetcher } from './types';
@@ -66,15 +70,15 @@ const buildAnomalyCountSortQuery = (args: QueryArgs): string =>
     sortField: ANOMALY_COUNT_FIELD,
   });
 
-/** A group's anomalies are those of its members. */
-const ANOMALY_ROLL_UPS = { [ANOMALY_COUNT_FIELD]: 'sum' } as const;
+/** A resolved entity's anomalies are those of its aliases. */
+const RESOLVED_ANOMALY_AGGREGATIONS = { [ANOMALY_COUNT_FIELD]: 'SUM' } as const;
 
 /**
- * Anomalies of the groups with aliases that pass the filters, as the rows of the grid. The
- * counts per entity merge with the aliases and the heads of the groups, mapped to their group,
- * and the counts are rolled up per group.
+ * Anomalies of the resolved entities with aliases that pass the filters, as the rows of the grid. The
+ * counts per entity merge with the aliases, mapped to their resolved entity,
+ * and the counts are aggregated per resolved entity.
  */
-const buildGroupAnomalyRowsQuery = (args: QueryArgs): string =>
+const buildResolvedEntityAnomalyRowsQuery = (args: QueryArgs): string =>
   [
     SET_UNMAPPED_NULLIFY,
     'FROM (',
@@ -83,15 +87,15 @@ const buildGroupAnomalyRowsQuery = (args: QueryArgs): string =>
     '), (',
     `FROM ${getEntityAlias(args.namespace)}`,
     `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NOT NULL`,
-    `| EVAL member = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${GROUP_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
+    `| EVAL member = MV_APPEND(\`entity.id\`, ${RESOLVED_TO_FIELD}), ${RESOLVED_ENTITY_KEY_FIELD} = ${RESOLVED_TO_FIELD}`,
     '| MV_EXPAND member',
-    `| KEEP member, ${GROUP_KEY_FIELD}`,
+    `| KEEP member, ${RESOLVED_ENTITY_KEY_FIELD}`,
     '| RENAME member AS `entity.id`',
     ')',
-    `| STATS ${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD}), ${GROUP_KEY_FIELD} = MAX(${GROUP_KEY_FIELD}) BY \`entity.id\``,
-    ...buildGroupRollUpSteps(ANOMALY_ROLL_UPS),
-    ...buildGroupHeadSteps(args.concreteEntityIndexName),
-    ...buildGroupRowsOutput(args, [ANOMALY_COUNT_FIELD]),
+    `| STATS ${ANOMALY_COUNT_FIELD} = MAX(${ANOMALY_COUNT_FIELD}), ${RESOLVED_ENTITY_KEY_FIELD} = MAX(${RESOLVED_ENTITY_KEY_FIELD}) BY \`entity.id\``,
+    ...buildResolvedEntityAggregationSteps(RESOLVED_ANOMALY_AGGREGATIONS),
+    ...buildResolvedEntitySteps(args.concreteEntityIndexName),
+    ...buildResolvedEntityRowsOutput(args, [ANOMALY_COUNT_FIELD]),
   ].join('\n');
 
 // ── split sort (see split_sort.ts) ───────────────────────────────────────────
@@ -133,15 +137,15 @@ const anomalyCountEnricher: PageEnricher = {
 // ── query spec ────────────────────────────────────────────────────────────────
 
 /**
- * The page of the plan; for resolved rows, the groups with aliases have the anomalies of their
- * members and are read apart from the other entities.
+ * The page of the plan; for resolved rows, the resolved entities with aliases have the anomalies of their
+ * aliases and are read apart from the other entities.
  */
-const fetchAnomalyCountSortPage: SortPageFetcher = withGroupedRows(
+const fetchAnomalyCountSortPage: SortPageFetcher = withResolvedEntityRows(
   (args, ctx) => fetchSplitSortPage(anomalySplitSortPlan, args, ctx),
-  buildGroupAnomalyRowsQuery
+  buildResolvedEntityAnomalyRowsQuery
 );
 
 export const anomalyCountQuerySpec = {
   fetchSortPage: fetchAnomalyCountSortPage,
-  enricher: groupEnricher(anomalyCountEnricher, ANOMALY_ROLL_UPS),
+  enricher: resolvedEntityEnricher(anomalyCountEnricher, RESOLVED_ANOMALY_AGGREGATIONS),
 } satisfies ColumnQuerySpec;

@@ -53,7 +53,7 @@ describe('toEsql', () => {
       searchExpression: 'KQL("""entity.name: web-1""")',
       entityExpression:
         'entity.EngineMetadata.Type IN ("host") AND entity.id IN ("host:a", "host:b")',
-      groupValueExpression: 'MV_CONTAINS(entity.attributes.watchlists, "w1")',
+      resolvedEntityValueExpression: 'MV_CONTAINS(entity.attributes.watchlists, "w1")',
     });
   });
 
@@ -69,7 +69,7 @@ describe('toEsql', () => {
       expect(toEsql({ ...NONE, entityFilters: filters })).toEqual({
         searchExpression: undefined,
         entityExpression: undefined,
-        groupValueExpression:
+        resolvedEntityValueExpression:
           'asset.criticality IN ("high_impact") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND MV_CONTAINS(entity.source, "okta")',
       });
     });
@@ -79,7 +79,7 @@ describe('toEsql', () => {
         searchExpression: undefined,
         entityExpression:
           'asset.criticality IN ("high_impact") AND MV_CONTAINS(entity.attributes.watchlists, "w1") AND MV_CONTAINS(entity.source, "okta")',
-        groupValueExpression: undefined,
+        resolvedEntityValueExpression: undefined,
       });
     });
   });

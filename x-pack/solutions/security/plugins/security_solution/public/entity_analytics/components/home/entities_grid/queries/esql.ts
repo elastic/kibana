@@ -142,8 +142,8 @@ const quoteField = (field: string): string =>
   PLAIN_FIELD_NAME.test(field) ? field : `\`${field.replace(/`/g, '``')}\``;
 
 /**
- * The risk score a resolved row shows: its group's, or its own when it has no group score. The
- * group's score is on the main entity, which is the row.
+ * The risk score a resolved row shows: its resolved entity's, or its own when it has no resolution score. The
+ * resolved entity's score is on the main entity, which is the row.
  */
 export const buildEffectiveRiskSteps = ({ rowsMode }: Pick<QueryArgs, 'rowsMode'>): string[] =>
   rowsMode === 'resolved'
@@ -245,10 +245,10 @@ export const buildJoinedPageSteps = (
 export const ENTITY_TYPE_FILTER = `${ENTITY_TYPE_FIELD} IN (${toList(ALLOWED_ENTITY_TYPES)})`;
 
 /**
- * After a step that left one row per group under `entity.id`: joins the entity doc of the group's
- * main entity and drops the groups whose main entity is missing.
+ * After a step that left one row per resolved entity under `entity.id`: joins the entity doc of the resolved entity's
+ * main entity and drops the resolved entities whose main entity is missing.
  */
-export const buildGroupHeadSteps = (concreteEntityIndexName: string): string[] => [
+export const buildResolvedEntitySteps = (concreteEntityIndexName: string): string[] => [
   buildLookupJoinClause(concreteEntityIndexName),
   `| WHERE ${ENTITY_TYPE_FILTER} AND ${RESOLVED_TO_FIELD} IS NULL`,
 ];

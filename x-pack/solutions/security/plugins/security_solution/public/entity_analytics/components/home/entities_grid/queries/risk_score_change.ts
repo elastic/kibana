@@ -60,10 +60,10 @@ const buildReferenceScoreDocs = ({ namespace, timeRange, rowsMode }: QueryArgs):
 
 /**
  * The reference score per `key`, from the docs of `buildReferenceScoreDocs` with their `score`.
- * A resolved row's current score is its group's, so its reference is the group's last score, or
+ * A resolved row's current score is its resolved entity's, so its reference is the resolved entity's last score, or
  * the entity's own last score when it has no group score. Every other row's current score is its
- * own, and so is its reference: the risk engine writes the group's score next to it, with the
- * same key and time, so the group's docs must not be among them.
+ * own, and so is its reference: the risk engine writes the resolved entity's score next to it, with the
+ * same key and time, so the resolved entity's docs must not be among them.
  */
 const buildReferenceScoreStats = ({ rowsMode }: QueryArgs, key: string): string[] =>
   rowsMode === 'resolved'

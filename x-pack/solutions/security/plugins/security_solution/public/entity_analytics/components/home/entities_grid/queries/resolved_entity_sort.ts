@@ -11,16 +11,16 @@ import { buildKeepClause, compareEntityIds, fetchPerIdChunk, getMaxAliasGroups }
 import { buildEntityFilterConditions, buildSearchedTargetsQuery } from './entities_in_view';
 import type { EsqlRunner, SortPageFetcher } from './types';
 
-// A sort by a column that shows the group's value reads the groups with aliases and the other
-// entities apart. Most entities are alone in their group and sort natively, by their own value.
-// The few groups with aliases come from the alias docs, and the two streams are merged here.
+// A sort by a column that shows the resolved entity's value reads the resolved entities with aliases and the other
+// entities apart. Most entities have no aliases and sort natively, by their own value.
+// The few resolved entities with aliases come from the alias docs, and the two streams are merged here.
 
 /**
- * The end of every query of group rows: the filters on the entity fields, which by now hold the
- * group's values, and the fields of the rows. `columns` are the group's own columns that the
+ * The end of every query of resolved entity rows: the filters on the entity fields, which by now hold the
+ * resolved entity's values, and the fields of the rows. `columns` are the resolved entity's own columns that the
  * rows carry.
  */
-export const buildGroupRowsOutput = (
+export const buildResolvedEntityRowsOutput = (
   args: QueryArgs,
   columns: readonly string[] = []
 ): string[] => [
@@ -55,34 +55,34 @@ const isAfterCursor = (field: string, direction: SortDir, cursor: PageCursor | n
   return (row: Row): boolean => getEntityId(row) !== cursor.entityId && compare(row, cursorRow) > 0;
 };
 
-export interface GroupedSortOptions {
-  /** The groups with aliases that pass the filters, as rows with the group's values. */
-  buildGroupRowsQuery: (args: QueryArgs) => string;
+export interface ResolvedEntitySortOptions {
+  /** The resolved entities with aliases that pass the filters, as rows with the resolved entity's values. */
+  buildResolvedEntityRowsQuery: (args: QueryArgs) => string;
   /**
-   * The other entities, sorted and filtered by their own value like the rows of a group of one,
-   * with `extraRows` more than the page and its extra row, as the heads of groups are dropped.
+   * The other entities, sorted and filtered by their own value like the rows of a resolved entity without aliases,
+   * with `extraRows` more than the page and its extra row, as resolved entities are dropped.
    */
   fetchEntityRows: (extraRows: number) => Promise<Row[]>;
 }
 
 /**
- * One page of rows plus one, sorted by a column that shows the group's value.
+ * One page of rows plus one, sorted by a column that shows the resolved entity's value.
  *
- * The groups with aliases that pass the filters are read first. The other entities are read
+ * The resolved entities with aliases that pass the filters are read first. The other entities are read
  * sorted and filtered by their own value, with as many extra rows as there are groups, since an
- * entity that heads a group is dropped for its group row. A search can't run after the group
- * join, so its matches among the group heads are read separately.
+ * entity that is itself a resolved entity is dropped for its row. A search can't run after the
+ * join of the resolved entities, so its matches among them are read separately.
  *
  * It fails when there are more groups than one query returns: a page from a partial list of
  * groups would be in the wrong order.
  */
-export const fetchGroupedSortPage = async (
+export const fetchResolvedEntitySortPage = async (
   args: QueryArgs,
   runQuery: EsqlRunner,
-  { buildGroupRowsQuery, fetchEntityRows }: GroupedSortOptions
+  { buildResolvedEntityRowsQuery, fetchEntityRows }: ResolvedEntitySortOptions
 ): Promise<Row[]> => {
   const { sort, cursor, pageSize } = args;
-  const groups = await runQuery(buildGroupRowsQuery(args));
+  const groups = await runQuery(buildResolvedEntityRowsQuery(args));
   if (groups.length > getMaxAliasGroups(pageSize)) {
     throw new Error('Too many groups of entities to sort by this column');
   }
@@ -111,20 +111,20 @@ export const fetchGroupedSortPage = async (
 };
 
 /**
- * A sort page fetcher that, for the rows `isGrouped` says show their group's value, reads the
- * groups with aliases apart from the other entities, which `fetchPage` reads like the rows of a
+ * A sort page fetcher that, for the rows `isResolvedEntityRows` says show their resolved entity's value, reads the
+ * resolved entities with aliases apart from the other entities, which `fetchPage` reads like the rows of a
  * group of one. Other rows are read by `fetchPage` as they are.
  */
-export const withGroupedRows =
+export const withResolvedEntityRows =
   (
     fetchPage: SortPageFetcher,
-    buildGroupRowsQuery: (args: QueryArgs) => string,
-    isGrouped: (args: QueryArgs) => boolean = ({ rowsMode }) => rowsMode === 'resolved'
+    buildResolvedEntityRowsQuery: (args: QueryArgs) => string,
+    isResolvedEntityRows: (args: QueryArgs) => boolean = ({ rowsMode }) => rowsMode === 'resolved'
   ): SortPageFetcher =>
   (args, ctx) =>
-    isGrouped(args)
-      ? fetchGroupedSortPage(args, ctx.runQuery, {
-          buildGroupRowsQuery,
+    isResolvedEntityRows(args)
+      ? fetchResolvedEntitySortPage(args, ctx.runQuery, {
+          buildResolvedEntityRowsQuery,
           fetchEntityRows: (extraRows) =>
             fetchPage({ ...args, pageSize: args.pageSize + extraRows }, ctx),
         })
