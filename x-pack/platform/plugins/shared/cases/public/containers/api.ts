@@ -10,7 +10,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/const
 import type { CaseCustomField, User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
@@ -60,6 +60,7 @@ import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
+  getCaseBulkDeleteObservablesUrl,
   getCaseSimilarCasesUrl,
 } from '../../common/api';
 import {
@@ -546,7 +547,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateAttachmentsRequestV2;
+  attachments: BulkCreateUnifiedAttachmentsRequest;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {
@@ -691,6 +692,22 @@ export const deleteObservable = async (
     method: 'DELETE',
     signal,
   });
+};
+
+export const bulkDeleteObservables = async (
+  caseId: string,
+  observableIds: string[],
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getCaseBulkDeleteObservablesUrl(caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ observableIds }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const getSimilarCases = async ({

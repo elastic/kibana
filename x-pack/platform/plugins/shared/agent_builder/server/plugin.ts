@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { ConversationUpdatedOptIn } from '@kbn/agent-builder-server';
 import {
   CHAT_ATTACHMENT_IMAGES_FILE_KIND,
   CHAT_ATTACHMENT_PDFS_FILE_KIND,
@@ -80,6 +81,7 @@ export class AgentBuilderPlugin
   private teardownTracing?: () => Promise<void>;
   private startDeps?: AgentBuilderStartDependencies;
   private readonly conversationEventBus = createConversationEventBus();
+  private readonly conversationUpdatedOptIns: ConversationUpdatedOptIn[] = [];
   private recommendedEndpointsPoller?: RecommendedEndpointsPoller;
   constructor(context: PluginInitializerContext<AgentBuilderConfig>) {
     this.logger = context.logger.get();
@@ -335,6 +337,11 @@ export class AgentBuilderPlugin
           serviceSetups.conversationTemplates
         ),
       },
+      conversations: {
+        enableUpdatedTrigger: (optIn) => {
+          this.conversationUpdatedOptIns.push(optIn);
+        },
+      },
       topSnippets: this.config.topSnippets,
     };
   }
@@ -397,7 +404,8 @@ export class AgentBuilderPlugin
     registerConversationWorkflowEventBridge(
       this.conversationEventBus,
       startDeps.workflowsExtensions,
-      this.logger
+      this.logger,
+      this.conversationUpdatedOptIns
     );
 
     const {
