@@ -25,7 +25,7 @@ export interface QueryTemplate {
   category?: SuggestionCategory;
 }
 
-// Order starts with the simple ones and goes to more complex ones
+// Ordered by relevance: the first ones are the most useful and are the ones Discover shows in its empty state
 
 export const getRecommendedQueriesTemplates = ({
   fromCommand,
@@ -53,7 +53,7 @@ export const getRecommendedQueriesTemplates = ({
       description: i18n.translate(
         'kbn-esql-language.recommendedQueries.searchExample.description',
         {
-          defaultMessage: 'Use WHERE to filter/search data',
+          defaultMessage: 'Filter documents with a KQL expression',
         }
       ),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
@@ -66,7 +66,7 @@ export const getRecommendedQueriesTemplates = ({
       description: i18n.translate(
         'kbn-esql-language.recommendedQueries.aggregateExample.description',
         {
-          defaultMessage: 'Count aggregation',
+          defaultMessage: 'Count documents, optionally grouped by a field',
         }
       ),
       queryString: `${fromCommand}  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
@@ -74,13 +74,39 @@ export const getRecommendedQueriesTemplates = ({
     ...(timeField
       ? [
           {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.dateHistogram.label', {
+              defaultMessage: 'Create a date histogram',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.dateHistogram.description',
+              {
+                defaultMessage: 'Count documents per time bucket, ready to chart',
+              }
+            ),
+            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
+          },
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.categorize.label', {
+              // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
+              // the capability aiops.enabled can be used to check both of these conditions
+              defaultMessage: 'Detect change points',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.categorize.description',
+              {
+                defaultMessage: 'Spot spikes and dips in event volume over time',
+              }
+            ),
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} /* To use CHANGE_POINT BY, set grouping field(s) - e.g. BY host, buckets = ... */ | CHANGE_POINT count ON buckets /* Use the BY operator to group by the field - e.g. ON buckets BY host */ | WHERE type IS NOT NULL /* Filter to only include change points. */`,
+          },
+          {
             label: i18n.translate('kbn-esql-language.recommendedQueries.sortByTime.label', {
               defaultMessage: 'Sort by time',
             }),
             description: i18n.translate(
               'kbn-esql-language.recommendedQueries.sortByTime.description',
               {
-                defaultMessage: 'Sort by time',
+                defaultMessage: 'Order documents from oldest to newest',
               }
             ),
             queryString: `${fromCommand}| SORT ${timeField} /* Data is not sorted by default */`,
@@ -92,7 +118,7 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate(
               'kbn-esql-language.recommendedQueries.dateIntervals.description',
               {
-                defaultMessage: 'Count aggregation over time',
+                defaultMessage: 'Group documents into 5-minute buckets',
               }
             ),
             queryString: `${fromCommand}| EVAL buckets = DATE_TRUNC(5 m, ${timeField}) | STATS count = COUNT(*) BY buckets /* try out different intervals */`,
@@ -104,24 +130,12 @@ export const getRecommendedQueriesTemplates = ({
         defaultMessage: 'Create a conditional with CASE',
       }),
       description: i18n.translate('kbn-esql-language.recommendedQueries.caseExample.description', {
-        defaultMessage: 'Conditional',
+        defaultMessage: 'Label results with conditional logic',
       }),
       queryString: `${fromCommand}| STATS count = COUNT(*)| EVAL newField = CASE(count < 100, "groupA", count > 100 and count < 500, "groupB", "Other")| KEEP newField`,
     },
     ...(timeField
       ? [
-          {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.dateHistogram.label', {
-              defaultMessage: 'Create a date histogram',
-            }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.dateHistogram.description',
-              {
-                defaultMessage: 'Count aggregation over time',
-              }
-            ),
-            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
-          },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.label', {
               defaultMessage: 'Calculate the event rate',
@@ -129,24 +143,10 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate(
               'kbn-esql-language.recommendedQueries.eventRate.description',
               {
-                defaultMessage: 'Event rate over time',
+                defaultMessage: 'Average events per second since the earliest document',
               }
             ),
             queryString: `${fromCommand}| STATS count = COUNT(*), min_timestamp = MIN(${timeField}) /* MIN(dateField) finds the earliest timestamp in the dataset. */ | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) /* Calculates the event rate by dividing the total count of events by the time difference (in seconds) between the earliest event and the current time. */ | KEEP event_rate`,
-          },
-          {
-            label: i18n.translate('kbn-esql-language.recommendedQueries.categorize.label', {
-              // TODO this item should be hidden if AIOps is disabled or we're not running with a platinum license
-              // the capability aiops.enabled can be used to check both of these conditions
-              defaultMessage: 'Detect change points',
-            }),
-            description: i18n.translate(
-              'kbn-esql-language.recommendedQueries.categorize.description',
-              {
-                defaultMessage: 'Change point on count aggregation',
-              }
-            ),
-            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression} /* To use CHANGE_POINT BY, set grouping field(s) - e.g. BY host, buckets = ... */ | CHANGE_POINT count ON buckets /* Use the BY operator to group by the field - e.g. ON buckets BY host */ | WHERE type IS NOT NULL /* Filter to only include change points. */`,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
@@ -155,7 +155,7 @@ export const getRecommendedQueriesTemplates = ({
             description: i18n.translate(
               'kbn-esql-language.recommendedQueries.lastHour.description',
               {
-                defaultMessage: 'A more complicated example',
+                defaultMessage: 'Compare the last hour with the rest of the data',
               }
             ),
             queryString: `${fromCommand} | SORT ${timeField} | EVAL now = NOW() | EVAL key = CASE(${timeField} < (now - 1 hour) AND ${timeField} > (now - 2 hour), "Last hour", "Other") | STATS count = COUNT(*) BY key | EVAL count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count) | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG)) | STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits)`,

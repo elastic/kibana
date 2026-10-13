@@ -23,7 +23,6 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { QueryTemplate } from '@kbn/esql-language';
 
 const RUN_BUTTON_CLASS = 'discoverRecommendedQuery__run';
 
@@ -49,8 +48,14 @@ const runLabel = (label: string) =>
     values: { label },
   });
 
+export interface RecommendedQueryItem {
+  label: string;
+  description: string;
+  queryString: string;
+}
+
 export interface RecommendedQueriesProps {
-  queries: readonly QueryTemplate[];
+  queries: readonly RecommendedQueryItem[];
   onRunQuery: (query: string) => void;
 }
 
@@ -58,7 +63,7 @@ const RecommendedQueryCard = ({
   query: { label, description, queryString },
   onRunQuery,
 }: {
-  query: QueryTemplate;
+  query: RecommendedQueryItem;
   onRunQuery: (query: string) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -129,7 +134,7 @@ export const RecommendedQueries = ({ queries, onRunQuery }: RecommendedQueriesPr
       </EuiTitle>
       <EuiFlexGrid columns={3} gutterSize="m" css={{ marginTop: euiTheme.size.base }}>
         {queries.map((query) => (
-          <EuiFlexItem key={query.label}>
+          <EuiFlexItem key={query.queryString}>
             <RecommendedQueryCard query={query} onRunQuery={onRunQuery} />
           </EuiFlexItem>
         ))}

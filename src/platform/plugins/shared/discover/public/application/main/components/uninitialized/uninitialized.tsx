@@ -10,26 +10,38 @@
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { DataSource } from '@kbn/data-source';
 import { getRecommendedQueriesTemplates, shouldBeQuotedSource } from '@kbn/esql-language';
-import { splitIndexPatternSources } from '@kbn/esql-utils';
+import {
+  getInitialESQLQuery,
+  getSourceCommandFromESQLQuery,
+  splitIndexPatternSources,
+} from '@kbn/esql-utils';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
+  useCurrentDataSource,
   useCurrentDataView,
   useCurrentTabAction,
   useInternalStateDispatch,
 } from '../../state_management/redux';
 import { RecommendedQueries } from './recommended_queries';
+import { selectRecommendedQueries } from './select_recommended_queries';
+import { useExtensionQueries } from './use_extension_queries';
 import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
-
-const MAX_RECOMMENDED_QUERIES = 6;
 
 // Cluster and selector separators are valid unquoted, so only the other special characters force quotes.
 const quoteSourceIfNeeded = (source: string) =>
   shouldBeQuotedSource(source.replace(/:/g, '')) ? `"${source}"` : source;
 
-const getFromCommand = (indexPattern: string) =>
-  `FROM ${splitIndexPatternSources(indexPattern).map(quoteSourceIfNeeded).join(',')}`;
+const getSources = (indexPattern: string) =>
+  splitIndexPatternSources(indexPattern).map(quoteSourceIfNeeded).join(',');
+
+const getSourceCommand = (dataSource: DataSource): string => {
+  const query =
+    dataSource.kind === 'esql' ? dataSource.query : getInitialESQLQuery(dataSource.getDataView());
+  return getSourceCommandFromESQLQuery(query) || 'FROM';
+};
 
 interface Props {
   onRefresh: () => void;
@@ -38,6 +50,7 @@ interface Props {
 export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   const isEsqlMode = useIsEsqlMode();
   const currentDataView = useCurrentDataView();
+  const currentDataSource = useCurrentDataSource();
   const { canSwitchLanguageMode, isDataViewMode, switchLanguageMode } = useCurrentTabMenuActions({
     currentDataView,
     switchToEsqlMetric: 'esql:uninitialized_query_in_esql_clicked',
@@ -45,18 +58,25 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
   const dispatch = useInternalStateDispatch();
   const updateESQLQuery = useCurrentTabAction(internalStateActions.updateESQLQuery);
 
-  // The new ES|QL tab inherits the data view of the previous tab, which gives us a source.
-  const indexPattern = currentDataView?.getIndexPattern();
-  const timeField = currentDataView?.timeFieldName;
+  // The new ES|QL tab inherits the data source of the previous tab, which gives us a source.
+  const indexPattern = currentDataSource.title;
+  const timeField = currentDataSource.timeFieldName;
+  const sources = indexPattern ? getSources(indexPattern) : undefined;
+  const sourceCommand = useMemo(() => getSourceCommand(currentDataSource), [currentDataSource]);
+  const { queries: extensionQueries, isLoading: isLoadingExtensionQueries } = useExtensionQueries({
+    sourceQuery: sources ? `${sourceCommand} ${sources}` : undefined,
+    isEnabled: isEsqlMode,
+  });
   const recommendedQueries = useMemo(
     () =>
-      indexPattern
-        ? getRecommendedQueriesTemplates({
-            fromCommand: getFromCommand(indexPattern),
-            timeField,
-          }).slice(0, MAX_RECOMMENDED_QUERIES)
-        : [],
-    [indexPattern, timeField]
+      selectRecommendedQueries({
+        extensionQueries,
+        staticQueries: sources
+          ? getRecommendedQueriesTemplates({ fromCommand: `FROM ${sources}`, timeField })
+          : [],
+        sourceCommand,
+      }),
+    [extensionQueries, sources, sourceCommand, timeField]
   );
   const onRunQuery = useCallback(
     (query: string) => {
@@ -127,7 +147,10 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
 
   return (
     <div data-test-subj="discoverUninitialized">
-      <RecommendedQueries queries={recommendedQueries} onRunQuery={onRunQuery} />
+      <RecommendedQueries
+        queries={isLoadingExtensionQueries ? [] : recommendedQueries}
+        onRunQuery={onRunQuery}
+      />
     </div>
   );
 };
