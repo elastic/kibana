@@ -111,7 +111,9 @@ describe('composeVerifiedBrief', () => {
       expect.objectContaining({ content: expect.stringContaining('<evidence>') }),
     ]);
     // Entities are shown by EUID and name; the platform's anonymisation applies to the call.
-    expect(JSON.stringify(messages)).toContain('user:a.rodriguez@corp \\"a.rodriguez\\" (user');
+    expect(JSON.stringify(messages)).toContain(
+      '{{ entity.id user:a.rodriguez@corp }} \\"a.rodriguez\\" (user'
+    );
 
     const retryOn = retryConfiguration?.retryOn as (error: Error) => boolean;
     expect(retryOn(toolValidationError())).toBe(false);

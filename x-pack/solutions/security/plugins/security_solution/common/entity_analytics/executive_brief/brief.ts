@@ -20,15 +20,28 @@ export type AttentionLevel = (typeof ATTENTION_LEVELS)[number];
 export const AREA_IDS = ['threats', 'response'] as const;
 export type AreaId = (typeof AREA_IDS)[number];
 
-/** Maximum lengths of the brief's prose fields; longer AI output is trimmed server-side. */
+/**
+ * Prose mentions an entity as `{{ entity.id <euid> }}`: Attack Discovery's `{{ field value }}`
+ * syntax, keyed by EUID so it names exactly one Entity Store entity. Resolve the display name
+ * from the entities that come with the brief.
+ */
+export const ENTITY_MENTION_FIELD = 'entity.id';
+
+/**
+ * Maximum visible lengths of the brief's prose fields, counting a mention as its display name;
+ * longer AI output is trimmed server-side.
+ */
 export const BRIEF_TEXT_LIMITS = {
   verdictHeadline: 160,
   verdictSummary: 700,
   areaSummary: 200,
 } as const;
 
+/** Mention tokens are longer than the names they show, so raw prose is bounded more loosely. */
+export const rawTextLimit = (visibleLimit: number): number => visibleLimit * 4;
+
 const evidenceIds = z.array(z.string().max(16)).max(24);
-const shortText = (max: number) => z.string().min(1).max(max);
+const shortText = (max: number) => z.string().min(1).max(rawTextLimit(max));
 
 export const briefSchema = lazySchema(() =>
   z.object({

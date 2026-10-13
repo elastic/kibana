@@ -23,6 +23,7 @@ import type { Brief } from '../../../../../common/entity_analytics/executive_bri
 import {
   AREA_IDS,
   BRIEF_TEXT_LIMITS,
+  rawTextLimit,
   briefSchema,
 } from '../../../../../common/entity_analytics/executive_brief/brief';
 import { getSubmitBriefTool, SUBMIT_BRIEF_TOOL_NAME } from './brief_tool_schema';
@@ -81,8 +82,12 @@ const isRecord = (value: unknown): value is JsonRecord =>
 const cap = (value: unknown, max: number): unknown =>
   Array.isArray(value) ? value.slice(0, max) : value;
 
-/** Trims over-long prose at a word boundary, so a long headline doesn't cost a repair round-trip. */
-const clampText = (value: unknown, max: number): unknown => {
+/**
+ * Trims prose beyond the raw bound at a word boundary, so it doesn't cost a repair round-trip.
+ * Verification then trims to the visible limit, counting mentions as names.
+ */
+const clampText = (value: unknown, visibleLimit: number): unknown => {
+  const max = rawTextLimit(visibleLimit);
   if (typeof value !== 'string' || value.length <= max) {
     return value;
   }

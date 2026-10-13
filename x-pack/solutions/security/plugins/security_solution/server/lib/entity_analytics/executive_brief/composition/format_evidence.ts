@@ -16,6 +16,7 @@ import type {
 } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { LINK_VERBS } from '../../../../../common/entity_analytics/executive_brief/evidence';
 import { entityDisplayName, entityTypeOf, watchlistsOf } from '../entity_record';
+import { toMention } from '../verification/mentions';
 
 /**
  * Renders evidence as compact text for the prompt. Generic over facts and links: a new signal or
@@ -73,7 +74,7 @@ const formatEntity = (euid: string, record: Entity, clean: CleanText): string =>
   if (others.length > 0) {
     parts.push(`watchlists: ${others.map(clean).join(', ')}`);
   }
-  return `${euid} "${clean(entityDisplayName(record, euid))}" (${parts.join(' · ')})`;
+  return `${toMention(euid)} "${clean(entityDisplayName(record, euid))}" (${parts.join(' · ')})`;
 };
 
 const formatFact = (fact: Fact, clean: CleanText): string => {

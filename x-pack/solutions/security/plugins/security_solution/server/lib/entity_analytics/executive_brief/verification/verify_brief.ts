@@ -14,6 +14,7 @@ import type { Evidence } from '../../../../../common/entity_analytics/executive_
 import { checkCitations } from './citations';
 import { buildEvidenceIndex } from './evidence_index';
 import { checkGuardrails } from './guardrails';
+import { checkMentions } from './mentions';
 import { createNumbersCheck } from './numbers';
 import type { BriefCheck, ItemDrop } from './types';
 
@@ -34,7 +35,7 @@ export interface VerifyBriefResult {
 
 /**
  * Verifies an AI-written brief against the evidence it was written from. Checks run in order
- * (citations, numbers, guardrails); each sees the previous one's clean-ups and skips items already
+ * (mentions, citations, numbers, guardrails); each sees the previous one's clean-ups and skips items already
  * marked for removal. Failing areas are dropped at the end; verdict problems are returned as
  * structural errors for the repair round-trip.
  */
@@ -45,6 +46,7 @@ export const verifyBrief = (
 ): VerifyBriefResult => {
   const index = buildEvidenceIndex(evidence);
   const checks: readonly BriefCheck[] = [
+    checkMentions,
     checkCitations,
     createNumbersCheck(range),
     checkGuardrails,

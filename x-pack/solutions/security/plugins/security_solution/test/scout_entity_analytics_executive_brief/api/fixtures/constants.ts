@@ -41,14 +41,14 @@ export const SEEDED_ENTITY = {
 
 /**
  * A model answer for the seeded high-risk entity: it cites F-1 at `watch`, which the evidence
- * supports, so verification keeps it unchanged. The prose has no digits, so the number check has
- * nothing to drop, and no ids, so there is no citation group to strip.
+ * supports, and mentions the entity by its EUID token, so verification keeps it unchanged. The
+ * prose has no other digits or ids, so the number and citation checks have nothing to change.
  */
 export const HIGH_RISK_ENTITY_BRIEF: Brief = {
   verdict: {
     level: 'watch',
     headline: 'One user is at high risk and worth monitoring',
-    summary: 'A single user is at high risk. No attack discoveries were found in this period.',
+    summary: `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk. No attack discoveries were found in this period.`,
     evidence: ['F-1'],
   },
   areas: [
