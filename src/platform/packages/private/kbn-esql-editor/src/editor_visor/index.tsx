@@ -54,7 +54,6 @@ function AskAiButton({
   const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
   const hoverIconCss = css`
     &:hover,
-    &:focus,
     &:focus-visible {
       .euiIcon,
       .euiIcon [fill]:not([fill='none']) {
@@ -80,7 +79,9 @@ function AskAiButton({
           data-test-subj="esqlVisorAskAiButton"
           css={[
             styles.modeIconButton,
-            isSelected ? styles.aiButtonSelected : styles.aiButtonSparkleHover,
+            isSelected
+              ? styles.aiButtonSelected
+              : [styles.aiButtonSparkleHover, styles.aiButtonIdleHover],
             isSelected ? iconGradientCss : hoverIconCss,
           ]}
         />

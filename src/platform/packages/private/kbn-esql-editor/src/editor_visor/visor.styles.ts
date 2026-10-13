@@ -136,23 +136,6 @@ export const visorStyles = (
       block-size: ${euiTheme.size.l};
       max-block-size: ${euiTheme.size.l};
 
-      /* The group already draws the border. Keep the outlined gradient on the icon and label. */
-      &::after {
-        content: none;
-      }
-
-      &.euiButtonIcon:hover,
-      &.euiButtonIcon:focus,
-      &.euiButtonIcon:focus-visible {
-        background: ${aiButtonHoverBackground} !important;
-
-        /* EUI paints hover with an opaque ::before overlay. Drop it so the AI gradient shows. */
-        &::before {
-          background-color: transparent !important;
-        }
-      }
-
-      /* Starts at the resting icon so hover eases in instead of snapping to the dim frame. */
       @keyframes esqlVisorSparkleTwinkle {
         0%,
         100% {
@@ -166,8 +149,8 @@ export const visorStyles = (
       }
 
       ${euiCanAnimate} {
-        &:hover:not(:active) svg path,
-        &:focus-visible:not(:active) svg path {
+        &:hover svg path,
+        &:focus-visible svg path {
           transform-box: fill-box;
           transform-origin: center;
           animation-name: esqlVisorSparkleTwinkle;
@@ -176,14 +159,25 @@ export const visorStyles = (
           animation-iteration-count: infinite;
         }
 
-        &:hover:not(:active) svg path:nth-of-type(2),
-        &:focus-visible:not(:active) svg path:nth-of-type(2) {
+        &:hover svg path:nth-of-type(2),
+        &:focus-visible svg path:nth-of-type(2) {
           animation-delay: ${euiTheme.animation.slow};
         }
 
-        &:hover:not(:active) svg path:nth-of-type(3),
-        &:focus-visible:not(:active) svg path:nth-of-type(3) {
+        &:hover svg path:nth-of-type(3),
+        &:focus-visible svg path:nth-of-type(3) {
           animation-delay: ${euiTheme.animation.extraSlow};
+        }
+      }
+    `,
+    aiButtonIdleHover: css`
+      &.euiButtonIcon:hover,
+      &.euiButtonIcon:focus-visible {
+        background: ${aiButtonHoverBackground} !important;
+
+        /* EUI paints hover with an opaque ::before overlay. Drop it so the AI gradient shows. */
+        &::before {
+          background-color: transparent !important;
         }
       }
     `,
@@ -200,10 +194,6 @@ export const visorStyles = (
         &::before {
           background-color: transparent !important;
         }
-      }
-
-      svg path {
-        animation: none;
       }
     `,
     nlInput: css`
