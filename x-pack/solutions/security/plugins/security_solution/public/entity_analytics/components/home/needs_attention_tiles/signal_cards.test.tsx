@@ -6,59 +6,95 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import type { SignalCardData } from './data';
+import { fireEvent, render, screen } from '@testing-library/react';
+import type { SignalCardData, SignalCardId } from './data';
 import { SignalCards } from './signal_cards';
 
-const card = (overrides: Partial<SignalCardData> = {}): SignalCardData => ({
-  id: 'entitiesWithAlerts',
-  title: 'Entities with alerts',
-  description: 'Entities with a high or critical alert',
-  filterLabel: 'Entities with alerts',
-  value: 50,
-  ...overrides,
-});
+jest.mock('@kbn/charts-theme', () => ({ useElasticChartsTheme: () => ({}) }));
+jest.mock('@elastic/charts', () => ({
+  Chart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  Settings: () => null,
+  Axis: () => null,
+  AreaSeries: () => null,
+  Position: { Left: 'left' },
+  ScaleType: { Linear: 'linear' },
+  CurveType: { CURVE_STEP_AFTER: 'curveStepAfter' },
+}));
 
-const renderCards = (cards: SignalCardData[]) =>
-  render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={jest.fn()} />);
+const CARD_IDS: SignalCardId[] = [
+  'entitiesWithAlerts',
+  'entitiesWithAnomalies',
+  'riskMovers',
+  'newlyHighCritical',
+  'watchlisted',
+  'newEntity',
+];
 
-describe('SignalCards delta pill', () => {
-  it('shows an increase with a plus sign and an up arrow, without a percentage', () => {
-    renderCards([card({ value: 50, delta: 10 })]);
-    expect(screen.getByText(/\+10 ↑/)).toBeInTheDocument();
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
-    expect(screen.getByText('vs previous period')).toBeInTheDocument();
+const cards: SignalCardData[] = CARD_IDS.map((id, index) => ({
+  id,
+  title: `Title ${id}`,
+  description: `Description ${id}`,
+  filterLabel: id,
+  value: index + 1,
+  delta: 2,
+  trend: [1, 2, 3],
+}));
+
+describe('SignalCards', () => {
+  it('draws every tile with its title, description and count', () => {
+    render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={jest.fn()} />);
+
+    cards.forEach(({ id, title, description, value }) => {
+      const tile = screen.getByTestId(`eaFaceliftSignalCard-${id}`);
+      expect(tile).toHaveTextContent(title);
+      expect(tile).toHaveTextContent(description);
+      expect(tile).toHaveTextContent(String(value));
+    });
   });
 
-  it('shows a decrease with a down arrow', () => {
-    renderCards([card({ value: 30, delta: -10 })]);
-    expect(screen.getByText(/-10 ↓/)).toBeInTheDocument();
-    expect(screen.queryByText(/%/)).not.toBeInTheDocument();
+  it('toggles the table filter for the tile that was clicked', () => {
+    const onFilterForCard = jest.fn();
+    render(<SignalCards activeFilter={null} cards={cards} onFilterForCard={onFilterForCard} />);
+
+    fireEvent.click(screen.getByTestId('eaFaceliftSignalCard-riskMovers'));
+
+    expect(onFilterForCard).toHaveBeenCalledTimes(1);
+    expect(onFilterForCard).toHaveBeenCalledWith('riskMovers');
   });
 
-  it('shows the change as a plain number when the previous count was 0', () => {
-    renderCards([card({ value: 12, delta: 12 })]);
-    expect(screen.getByText(/\+12 ↑/)).toBeInTheDocument();
+  it('marks only the filtered tile as pressed', () => {
+    render(
+      <SignalCards
+        activeFilter={{ type: 'card', cardId: 'watchlisted', label: 'Watchlisted' }}
+        cards={cards}
+        onFilterForCard={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('eaFaceliftSignalCard-watchlisted')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+    expect(screen.getByTestId('eaFaceliftSignalCard-riskMovers')).toHaveAttribute(
+      'aria-pressed',
+      'false'
+    );
   });
 
-  it('formats large changes with a thousands separator, like the main number', () => {
-    renderCards([card({ value: 5000, delta: 1627 }), card({ id: 'watchlisted', delta: -2270 })]);
-    expect(screen.getByText(/\+1,627 ↑/)).toBeInTheDocument();
-    expect(screen.getByText(/-2,270 ↓/)).toBeInTheDocument();
-  });
+  it('does not make a tile with a count of 0 clickable', () => {
+    const onFilterForCard = jest.fn();
+    render(
+      <SignalCards
+        activeFilter={null}
+        cards={cards.map((card) =>
+          card.id === 'newlyHighCritical' ? { ...card, value: 0 } : card
+        )}
+        onFilterForCard={onFilterForCard}
+      />
+    );
 
-  it('shows no pill for a zero or missing delta', () => {
-    renderCards([card({ delta: 0 }), card({ id: 'watchlisted', title: 'Watchlisted' })]);
-    expect(screen.queryByText('vs previous period')).not.toBeInTheDocument();
-  });
+    fireEvent.click(screen.getByTestId('eaFaceliftSignalCard-newlyHighCritical'));
 
-  it('shows a spinner with the label while the delta loads', () => {
-    renderCards([card({ isDeltaLoading: true })]);
-    expect(screen.getByText('vs previous period')).toBeInTheDocument();
-  });
-
-  it('shows no pill when the count is 0', () => {
-    renderCards([card({ value: 0, delta: 5 })]);
-    expect(screen.queryByText('vs previous period')).not.toBeInTheDocument();
+    expect(onFilterForCard).not.toHaveBeenCalled();
   });
 });

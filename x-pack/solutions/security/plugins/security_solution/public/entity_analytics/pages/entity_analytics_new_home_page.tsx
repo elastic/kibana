@@ -32,6 +32,7 @@ import {
 import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
   useAlertBasedTilesWithDelta as useAlertBasedTiles,
+  useAlertBasedTilesSeries,
   useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
   useNewEntityCountWithDelta as useNewEntityCount,
   useRiskMoversCountWithDelta as useRiskMoversCount,
@@ -143,6 +144,17 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     timeRange,
     entityFilters,
     skip: skipTileQueries,
+  });
+
+  // The sparklines start after the counts and their deltas, so they never delay them.
+  const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
+    spaceId: resolvedSpaceId,
+    timeRange,
+    entityFilters,
+    skip: skipTileQueries,
+    isReady: !alertBasedLoading && !isDeltaLoading,
+    severeAlertsCount: alertsCount,
+    watchlistedCount,
   });
   const {
     count: anomaliesCount,
@@ -278,6 +290,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: alertsCount,
         delta: alertsDelta,
         isDeltaLoading,
+        trend: alertsTrend,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
@@ -416,6 +429,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
         value: watchlistedCount,
         delta: watchlistedDelta,
         isDeltaLoading,
+        trend: watchlistedTrend,
         isLoading: alertBasedLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
@@ -461,6 +475,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     [
       alertsCount,
       alertsDelta,
+      alertsTrend,
       alertBasedLoading,
       isDeltaLoading,
       anomaliesCount,
@@ -478,6 +493,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       newlyHCMissingIndex,
       watchlistedCount,
       watchlistedDelta,
+      watchlistedTrend,
       newEntityCount,
       newEntityDelta,
       newEntityDeltaLoading,

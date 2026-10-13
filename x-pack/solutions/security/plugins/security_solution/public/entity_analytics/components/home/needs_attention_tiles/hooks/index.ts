@@ -7,6 +7,7 @@
 
 export { useAlertBasedTiles } from './use_entities_with_alerts_tiles';
 export { useAlertBasedTilesWithDelta } from './use_alert_based_tiles_with_delta';
+export { useAlertBasedTilesSeries } from './use_alert_based_tiles_series';
 export { useEntitiesWithAnomaliesCount } from './use_entities_with_anomalies_count';
 export { useEntitiesWithAnomaliesCountWithDelta } from './use_entities_with_anomalies_count_with_delta';
 export { useNewEntityCount } from './use_new_entity_count';
