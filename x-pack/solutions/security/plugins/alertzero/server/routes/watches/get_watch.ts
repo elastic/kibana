@@ -26,8 +26,7 @@ export const registerGetWatchRoute = ({
   router,
   logger,
   getSpaceId,
-  getWatchProjection,
-  getInvestigationStore,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -59,41 +58,6 @@ export const registerGetWatchRoute = ({
             });
           }
 
-          const result = await projection.get(watchId, getSpaceId(request));
-          if (!result) {
-            return response.notFound({
-              body: { message: `Watch "${watchId}" not found` },
-            });
-          }
-
-          // Enrich with real activity metrics — same source as the list route,
-          // scoped to this one watch.
-          const store = getInvestigationStore?.();
-          if (store) {
-            try {
-              const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-              const metricsByWatch = await store.getWatchActivityMetrics(esClient, [watchId]);
-              const metrics = metricsByWatch[watchId];
-              if (metrics) {
-                const body: GetWatchResponse = {
-                  watch: {
-                    ...result.watch,
-                    metrics: {
-                      ...result.watch.metrics,
-                      runs7d: metrics.runs7d,
-                      acceptedPct: metrics.acceptedPct,
-                      lastRun: metrics.lastRun ?? result.watch.metrics.lastRun,
-                    },
-                  },
-                };
-                return response.ok({ body });
-              }
-            } catch (error) {
-              logger.debug(`Failed to enrich watch activity metrics for ${watchId}: ${error}`);
-            }
-          }
-
-          const body: GetWatchResponse = result;
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to get watch: ${error}`);

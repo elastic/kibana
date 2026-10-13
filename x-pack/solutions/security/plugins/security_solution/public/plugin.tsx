@@ -437,12 +437,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         uiSettings: core.uiSettings,
         registerImpactEntityOpener: plugins.agenticInvestigations?.registerImpactEntityOpener,
       });
-      // Threat-intelligence attachment renderers. Registered unconditionally;
-      // when the skill flag is off, server tools never emit these types.
-      registerThreatIntelligenceAttachments({
-        attachments: plugins.agentBuilder.attachments,
-        core,
-      });
       if (this.experimentalFeatures.rulePreviewAttachmentEnabled) {
         registerRulePreviewAttachment({
           attachments: plugins.agentBuilder.attachments,
