@@ -186,6 +186,8 @@ export class WaitForApprovalStepImpl implements NodeImplementation, CancellableN
       approveLabel,
       rejectLabel,
       resumeLinks,
+      renderTemplate: (template) =>
+        String(this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(template)),
       connectorExecutor: this.connectorExecutor,
       abortController: this.stepExecutionRuntime.abortController,
     });

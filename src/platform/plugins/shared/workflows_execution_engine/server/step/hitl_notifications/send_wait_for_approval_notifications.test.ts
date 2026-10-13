@@ -80,6 +80,7 @@ describe('send_wait_for_approval_notifications', () => {
       approveLabel: 'Approve',
       rejectLabel: 'Decline',
       resumeLinks,
+      renderTemplate: (template: string) => template,
       abortController: new AbortController(),
     };
 
@@ -209,6 +210,10 @@ describe('send_wait_for_approval_notifications', () => {
 
       await sendWaitForApprovalNotifications({
         ...baseNotifyArgs,
+        resumeLinks: {
+          approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+          rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+        },
         channels: {
           servicenow: { 'connector-id': 'snow-1', table: 'incident', 'sys-id': 'abc123' },
         },
@@ -224,11 +229,58 @@ describe('send_wait_for_approval_notifications', () => {
             table: 'incident',
             sysId: 'abc123',
             comment:
-              'Approve change?\n\nApprove: https://kibana.example/approve\nDecline: https://kibana.example/reject',
+              'Approve change?\n\n[code]<a href="https://kibana.example/approve?token=abc&amp;approved=true">Approve</a>[/code]\n[code]<a href="https://kibana.example/reject?token=abc&amp;approved=false">Decline</a>[/code]',
           },
         },
         abortController: expect.any(AbortController),
       });
+    });
+
+    it('renders ServiceNow table and sys-id before adding the comment', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          servicenow: {
+            'connector-id': 'snow-1',
+            table: '{{ inputs.table }}',
+            'sys-id': '{{ inputs.incident_sys_id }}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{ inputs.table }}', 'incident')
+            .replace('{{ inputs.incident_sys_id }}', '8728d657c377cb10f3f11a2ed40131b1'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({
+          table: 'incident',
+          sysId: '8728d657c377cb10f3f11a2ed40131b1',
+        })
+      );
+    });
+
+    it('throws when a ServiceNow field renders empty', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            servicenow: {
+              'connector-id': 'snow-1',
+              table: 'incident',
+              'sys-id': '{{ inputs.incident_sys_id }}',
+            },
+          },
+          renderTemplate: (template) => (template === 'incident' ? template : ' '),
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL ServiceNow "sys-id" rendered empty');
+      expect(execute).not.toHaveBeenCalled();
     });
 
     it('throws when a configured connector fails', async () => {

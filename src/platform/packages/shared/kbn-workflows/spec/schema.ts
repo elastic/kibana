@@ -385,9 +385,15 @@ export const HitlServiceNowChannelSchema = z.object({
     .min(1)
     .max(200)
     .describe(
-      'The ServiceNow table containing the record (e.g., incident, change_request, problem)'
+      'ServiceNow table name, or Liquid that renders to one (e.g. incident, {{ inputs.table }}).'
     ),
-  'sys-id': z.string().min(1).max(200).describe('The sys_id of the record to add the comment to'),
+  'sys-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'sys_id of the record, or Liquid that renders to one (e.g. {{ inputs.incident_sys_id }}).'
+    ),
 });
 
 const hitlChannelDescriptions = {

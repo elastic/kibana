@@ -14,6 +14,8 @@ import {
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
   fitHitlTextPreservingSuffix,
+  renderServiceNowField,
+  serviceNowCommentLink,
   SERVICENOW_COMMENT_MAX_LENGTH,
   slackApiChannelTarget,
 } from './hitl_connector_helpers';
@@ -66,7 +68,10 @@ function buildServiceNowApprovalComment({
 }): string {
   return fitHitlTextPreservingSuffix(
     message,
-    `${approveLabel}: ${approveUrl}\n${rejectLabel}: ${rejectUrl}`,
+    `${serviceNowCommentLink(approveLabel, approveUrl)}\n${serviceNowCommentLink(
+      rejectLabel,
+      rejectUrl
+    )}`,
     SERVICENOW_COMMENT_MAX_LENGTH
   );
 }
@@ -158,6 +163,7 @@ export async function sendWaitForApprovalNotifications({
   approveLabel,
   rejectLabel,
   resumeLinks,
+  renderTemplate,
   connectorExecutor,
   abortController,
 }: {
@@ -166,6 +172,7 @@ export async function sendWaitForApprovalNotifications({
   approveLabel: string;
   rejectLabel: string;
   resumeLinks: WaitForApprovalResumeLinks;
+  renderTemplate: (template: string) => string;
   connectorExecutor: ConnectorExecutor;
   abortController: AbortController;
 }): Promise<void> {
@@ -226,12 +233,14 @@ export async function sendWaitForApprovalNotifications({
   const serviceNowTable = serviceNowConfig?.table;
   const serviceNowSysId = serviceNowConfig?.['sys-id'];
   if (serviceNowConnectorId && serviceNowTable && serviceNowSysId) {
+    const table = renderServiceNowField(serviceNowTable, renderTemplate, 'table');
+    const sysId = renderServiceNowField(serviceNowSysId, renderTemplate, 'sys-id');
     const result = await connectorExecutor.execute({
       connectorType: 'servicenow_search',
       connectorNameOrId: serviceNowConnectorId,
       input: buildServiceNowAddCommentInput(
-        serviceNowTable,
-        serviceNowSysId,
+        table,
+        sysId,
         buildServiceNowApprovalComment(linkParams)
       ),
       abortController,

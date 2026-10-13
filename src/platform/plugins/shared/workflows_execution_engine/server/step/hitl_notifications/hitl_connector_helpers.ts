@@ -80,6 +80,32 @@ export function fitHitlRenderedTextPreservingLink(
   return `${prefix}${link}${after}`;
 }
 
+function escapeServiceNowHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/** ServiceNow journal HTML. The activity stream renders this as an anchor. */
+export function serviceNowCommentLink(label: string, url: string): string {
+  return `[code]<a href="${escapeServiceNowHtml(url)}">${escapeServiceNowHtml(label)}</a>[/code]`;
+}
+
+/** Renders a required ServiceNow channel field and rejects a blank result. */
+export function renderServiceNowField(
+  value: string,
+  renderTemplate: (template: string) => string,
+  field: 'table' | 'sys-id'
+): string {
+  const rendered = renderTemplate(value).trim();
+  if (rendered.length === 0) {
+    throw new Error(`HITL ServiceNow "${field}" rendered empty`);
+  }
+  return rendered;
+}
+
 /** Builds Actions params for a ServiceNow `addComment` call. */
 export function buildServiceNowAddCommentInput(table: string, sysId: string, comment: string) {
   return {

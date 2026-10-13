@@ -109,7 +109,8 @@ describe('sendWaitForInputNotifications', () => {
         subActionParams: {
           table: 'incident',
           sysId: 'abc123',
-          comment: 'Please provide input\n\nOpen form: https://kibana.example/form',
+          comment:
+            'Please provide input\n\n[code]<a href="https://kibana.example/form">Open form</a>[/code]',
         },
       },
       abortController: expect.any(AbortController),
@@ -135,6 +136,35 @@ describe('sendWaitForInputNotifications', () => {
 
     expect(execute.mock.calls[0][0].input.subActionParams.comment).toBe(
       'Ticket form: https://kibana.example/form'
+    );
+  });
+
+  it('renders ServiceNow table and sys-id before adding the comment', async () => {
+    const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+    await sendWaitForInputNotifications({
+      channels: {
+        servicenow: {
+          'connector-id': 'snow-1',
+          table: '{{ inputs.table }}',
+          'sys-id': '{{ inputs.incident_sys_id }}',
+        },
+      },
+      stepMessage: 'Please provide input',
+      formUrl: 'https://kibana.example/form',
+      renderTemplate: (template) =>
+        template
+          .replace('{{ inputs.table }}', 'incident')
+          .replace('{{ inputs.incident_sys_id }}', '8728d657c377cb10f3f11a2ed40131b1'),
+      connectorExecutor: { execute } as never,
+      abortController: new AbortController(),
+    });
+
+    expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+      expect.objectContaining({
+        table: 'incident',
+        sysId: '8728d657c377cb10f3f11a2ed40131b1',
+      })
     );
   });
 });
