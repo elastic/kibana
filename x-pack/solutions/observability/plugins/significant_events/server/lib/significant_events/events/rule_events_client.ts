@@ -228,7 +228,7 @@ export type UpdateEventStatusResult =
  */
 export class RuleEventsClient {
   constructor(
-    private readonly clients: {
+    private readonly options: {
       esClient: ElasticsearchClient;
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
@@ -241,7 +241,7 @@ export class RuleEventsClient {
   ): ComposerQuery {
     // `created_at` is the earliest `@timestamp` for the series. Compute it across the full lineage
     // before latest-reduction so a later time bound cannot hide the series' true creation time.
-    let query = buildBaseQuery(this.clients.space)
+    let query = buildBaseQuery(this.options.space)
       .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`;
 
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
@@ -290,7 +290,7 @@ export class RuleEventsClient {
 
   async findLatest(options: CommonSearchOptions = {}): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
-      query: buildBaseQuery(this.clients.space),
+      query: buildBaseQuery(this.options.space),
       from: options.from,
       to: options.to,
     });
@@ -298,7 +298,7 @@ export class RuleEventsClient {
     query = withDataJsonProjection(query).keep('_source', 'data_json');
 
     const hits = await executeEsqlQuery<RuleEventSourceRow>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query,
       fields: ['data_json'],
     });
@@ -325,9 +325,9 @@ export class RuleEventsClient {
       .pipe`STATS total = COUNT(*)`.keep('total');
 
     const [total, hits] = await Promise.all([
-      executeCountQuery({ esClient: this.clients.esClient, query: countQuery }),
+      executeCountQuery({ esClient: this.options.esClient, query: countQuery }),
       executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
-        esClient: this.clients.esClient,
+        esClient: this.options.esClient,
         query: dataQuery,
         fields: ['data_json', 'created_at'],
       }),
@@ -353,7 +353,7 @@ export class RuleEventsClient {
     }
 
     const hits = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query: withDataJsonProjection(query)
         .sort([GROUP_HASH_FIELD, 'ASC'])
         .limit(options.batchSize)
@@ -381,7 +381,7 @@ export class RuleEventsClient {
     options: CommonSearchOptions & { sourceIds?: string[]; ruleUuids?: string[] }
   ): Promise<{ hits: SignificantEvent[] }> {
     let query = applyTimeRange({
-      query: buildBaseQuery(this.clients.space),
+      query: buildBaseQuery(this.options.space),
       from: options.from,
       to: options.to,
     });
@@ -400,7 +400,7 @@ export class RuleEventsClient {
     }
 
     const hits = await executeEsqlQuery<RuleEventSourceRow>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query: withDataJsonProjection(query).keep('_source', 'data_json').limit(MAX_DEDUP_SCAN_LIMIT),
       fields: ['data_json'],
     });
@@ -409,14 +409,14 @@ export class RuleEventsClient {
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
     const query = withDataJsonProjection(
-      buildBaseQuery(this.clients.space).where`${eventIdEquals(eventId)}`
+      buildBaseQuery(this.options.space).where`${eventIdEquals(eventId)}`
         .pipe`INLINE STATS created_at = MIN(@timestamp) BY ${esql.col(GROUP_HASH_FIELD)}`
     )
       .sort(['@timestamp', 'ASC'])
       .keep('_source', 'data_json', 'created_at');
 
     const hits = await executeEsqlQuery<RuleEventSourceRowWithCreatedAt>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query,
       fields: ['data_json', 'created_at'],
     });
@@ -436,12 +436,12 @@ export class RuleEventsClient {
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
     if (!eventIds.length) return new Map();
 
-    let query = buildBaseQuery(this.clients.space).where`${eventIdIn(eventIds)}`;
+    let query = buildBaseQuery(this.options.space).where`${eventIdIn(eventIds)}`;
     query = pickLatestPerGroup(query, GROUP_HASH_FIELD);
     query = withDataJsonProjection(query).keep('_source', 'data_json').limit(eventIds.length);
 
     const hits = await executeEsqlQuery<RuleEventSourceRow>({
-      esClient: this.clients.esClient,
+      esClient: this.options.esClient,
       query,
       fields: ['data_json'],
     });
@@ -527,7 +527,7 @@ export class RuleEventsClient {
     event: SignificantEvent;
     prior?: SignificantEvent;
   }): Promise<void> {
-    const { getAlertEventsClient, emitTrigger } = this.clients;
+    const { getAlertEventsClient, emitTrigger } = this.options;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
