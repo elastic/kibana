@@ -6,6 +6,9 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { AiIndexBudgetStatusResponse } from '@kbn/context-engine-plugin/common/budgets';
+import type { BudgetServiceApi } from '@kbn/context-engine-plugin/server';
 import {
   AI_INDEX_AUTOMATIONS_SKILL_ID,
   AI_INDEX_SOURCES_SKILL_ID,
@@ -107,6 +110,64 @@ describe('createAiIndexAttachmentType', () => {
     expect(representation.value).toContain('Sources: esql:FROM tickets');
     expect(representation.value).toContain('Existing automations (workflow ids): wf-1');
     expect(representation.value).toContain('Traces: none configured');
+  });
+
+  describe('budget', () => {
+    const bucket = (costUsd: number, limitUsd?: number) => ({
+      ...(limitUsd !== undefined && { limit_usd: limitUsd }),
+      spend: {
+        cost_usd: costUsd,
+        unpriced_tokens: 0,
+        tokens: { input_tokens: 0, output_tokens: 0, cached_tokens: 0 },
+      },
+      state: 'ok' as const,
+    });
+    const status: AiIndexBudgetStatusResponse = {
+      ai_index_id: 'my-ai-index',
+      period: { start: '2026-10-01T00:00:00.000Z', end: '2026-11-01T00:00:00.000Z' },
+      pricing: { source: 'elastic_price_catalog' },
+      config: { automations_monthly_usd: 50, cost_tier: 'cheap' },
+      cost_tier: 'cheap',
+      ai_index: { automations: bucket(12.3, 50), suggestions: bucket(1) },
+      space: { automations: bucket(70, 100), suggestions: bucket(4, 20) },
+    };
+
+    const formatWith = async (getBudgetService: () => Promise<BudgetServiceApi>) => {
+      const formatted = await createAiIndexAttachmentType({
+        getBudgetService,
+        logger: loggingSystemMock.createLogger(),
+      }).format({ id: 'attachment-1', type: attachmentType.id, data: validData }, formatContext);
+      const representation = await formatted.getRepresentation?.();
+      if (representation?.type !== 'text') {
+        throw new Error('expected a text representation');
+      }
+      return representation.value;
+    };
+
+    it('adds the cost tier and the tighter of the index and space remainders', async () => {
+      const getAiIndexStatus = jest.fn().mockResolvedValue(status);
+      const value = await formatWith(async () => ({
+        getAiIndexStatus,
+        getSpaceStatus: jest.fn(),
+        checkAdmission: jest.fn(),
+        setAiIndexBudget: jest.fn(),
+      }));
+
+      expect(getAiIndexStatus).toHaveBeenCalledWith('default', 'my-ai-index');
+      expect(value).toContain('Cost tier: cheap');
+      expect(value).toContain('reset 2026-11-01');
+      expect(value).toContain('- Automation runs: $30.00 left this month');
+      expect(value).toContain('- Automation suggestions: $16.00 left this month');
+    });
+
+    it('keeps the snapshot when the budget cannot be read', async () => {
+      const value = await formatWith(async () => {
+        throw new Error('boom');
+      });
+
+      expect(value).toContain('AI index: my-ai-index');
+      expect(value).not.toContain('Cost tier');
+    });
   });
 
   it('validates attachment data with traces including derived query', async () => {

@@ -63,6 +63,8 @@ export interface UsageStats {
   'agentBuilder:deductiveEndpoint': string;
   'agentBuilder:deductiveApiKey': string;
   'contextEngine:enabled': boolean;
+  'contextEngine:budgets:suggestionsMonthlyUsd': number;
+  'contextEngine:budgets:automationsMonthlyUsd': number;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
   'agentBuilder:tracing:includeRealIds': boolean;

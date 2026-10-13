@@ -6,6 +6,7 @@
  */
 
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -24,9 +25,14 @@ import type { AiIndexDataReadServiceApi } from './ai_indices/data_read_service';
 import type { AiIndexService } from './ai_indices/service';
 import type { ImprovementsServiceApi } from './improvements/service';
 import type { SignalsServiceApi } from './signals/service';
+import type { BudgetServiceApi, SpendSource } from './budgets';
 
 export interface ContextEnginePluginSetup {
   registerAiIndex: (id: string, properties: AiIndexProperties) => void;
+  budgets: {
+    /** Adds a source of AI spend to count against the Context Engine budgets. Setup only. */
+    registerSpendSource: (source: SpendSource) => void;
+  };
 }
 
 export interface GetAiIndexDataReadServiceParams {
@@ -50,6 +56,8 @@ export interface ContextEnginePluginStart {
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
+  /** Month-to-date AI spend, limits, and admission checks for the Context Engine budgets. */
+  getBudgetService: () => BudgetServiceApi;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */
@@ -68,6 +76,8 @@ export interface ContextEngineSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+  /** Provides the base URL of the Elastic price catalog used to price EIS usage. */
+  cloud?: CloudSetup;
   /** Optional in the manifest; without it a feedback analysis schedule cannot be enabled. */
   workflowsManagement?: { management: WorkflowEnablementApi };
 }

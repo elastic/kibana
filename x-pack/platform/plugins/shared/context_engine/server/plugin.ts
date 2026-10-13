@@ -33,6 +33,17 @@ import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
+import { registerBudgetRoutes } from './routes/budgets';
+import type { SpendSource } from './budgets';
+import {
+  BudgetService,
+  CONTEXT_ENGINE_BUDGET_GUARD_ID,
+  createPriceCatalog,
+  createWorkflowBudgetAdmissionGuard,
+  createWorkflowExecutionsSpendSource,
+  readSpaceBudgetLimits,
+  registerBudgetUiSettings,
+} from './budgets';
 import type {
   FeedbackAnalysisScheduleService,
   WorkflowEnablementApi,
@@ -55,6 +66,9 @@ import { resolveSpaceId } from './utils/resolve_space_id';
 
 /** Must match the `pluginId` on the managed workflow definition. */
 const CONTEXT_ENGINE_WORKFLOW_OWNER = 'contextEngine';
+
+/** Public Elastic Cloud host serving the inference price catalog, used outside Elastic Cloud. */
+const DEFAULT_PRICE_CATALOG_BASE_URL = 'https://cloud.elastic.co';
 
 export class ContextEnginePlugin
   implements
@@ -81,6 +95,9 @@ export class ContextEnginePlugin
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private readonly spendSources: SpendSource[] = [];
+  private budgetService?: BudgetService;
+  private priceCatalogBaseUrl = DEFAULT_PRICE_CATALOG_BASE_URL;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
     (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
@@ -205,6 +222,13 @@ export class ContextEnginePlugin
       return this.createImprovementsService(esClient, spaceId);
     };
 
+    const getBudgetService = () => {
+      if (!this.budgetService) {
+        throw new Error('Budget service not available — plugin has not started');
+      }
+      return this.budgetService;
+    };
+
     const getScheduleService = () => {
       if (!this.scheduleService) {
         throw new Error('Schedule service not available — plugin has not started');
@@ -310,8 +334,42 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    registerBudgetUiSettings(coreSetup.uiSettings);
+    this.priceCatalogBaseUrl = setupDeps.cloud?.baseUrl ?? DEFAULT_PRICE_CATALOG_BASE_URL;
+    this.spendSources.push(
+      createWorkflowExecutionsSpendSource({
+        getEsClient: () => {
+          if (!this.esClient) {
+            throw new Error('Elasticsearch client not available — plugin has not started');
+          }
+          return this.esClient;
+        },
+      })
+    );
+    setupDeps.workflowsExtensions.registerExecutionAdmissionGuard(
+      CONTEXT_ENGINE_BUDGET_GUARD_ID,
+      createWorkflowBudgetAdmissionGuard({ getAiIndexService, getBudgetService })
+    );
+    registerBudgetRoutes({
+      router,
+      logger: this.logger.get('budgets'),
+      getBudgetService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      budgets: {
+        registerSpendSource: (source) => {
+          if (this.budgetService) {
+            throw new Error(`Cannot register spend source "${source.id}" after setup`);
+          }
+          this.spendSources.push(source);
+        },
+      },
     };
   }
 
@@ -376,6 +434,24 @@ export class ContextEnginePlugin
       logger: this.logger.get('signals'),
     });
     const signalsService = this.signalsService;
+
+    const budgetService = new BudgetService({
+      aiIndexService,
+      priceCatalog: createPriceCatalog({
+        fetchFn: (url, init) => fetch(url, init),
+        baseUrl: this.priceCatalogBaseUrl,
+        logger: this.logger.get('budgets', 'pricing'),
+      }),
+      getSpendSources: () => this.spendSources,
+      getSpaceLimits: (spaceId) =>
+        readSpaceBudgetLimits({
+          savedObjects: coreStart.savedObjects,
+          uiSettings: coreStart.uiSettings,
+          spaceId,
+        }),
+      logger: this.logger.get('budgets'),
+    });
+    this.budgetService = budgetService;
 
     const improvementsLogger = this.logger.get('improvements');
     this.createImprovementsService = (esClient: ElasticsearchClient, spaceId: string) =>
@@ -442,6 +518,7 @@ export class ContextEnginePlugin
       getAiIndexDataReadService: (params) => createAiIndexDataReadService(params),
       getSignalsService: () => signalsService,
       getImprovementsService: (esClient, spaceId) => createImprovementsService(esClient, spaceId),
+      getBudgetService: () => budgetService,
     };
   }
 

@@ -16,6 +16,7 @@ import { KI_SUMMARY_PAGE_SIZE } from '../../../common/constants';
 import {
   AiIndexCreatedCallout,
   AutomationsPanel,
+  BudgetPanel,
   DescriptionPanel,
   LockedSectionPanel,
   MemoryPanel,
@@ -242,6 +243,12 @@ export const AiIndexDetailPage = () => {
                 />
               }
             />
+          )}
+          {showAutomationsPanel && (
+            <>
+              <EuiSpacer size="m" />
+              <BudgetPanel aiIndexId={aiIndex?.id} />
+            </>
           )}
           <EuiSpacer size="m" />
           {showSignalsSection &&

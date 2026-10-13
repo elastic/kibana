@@ -14,6 +14,11 @@ export const contextEngineQueryKeys = {
     ki: (aiIndexId: string, index: string, kiId: string) =>
       ['context_engine', 'ai_index', aiIndexId, 'ki', index, kiId] as const,
   },
+  budgets: {
+    all: () => ['context_engine', 'budgets'] as const,
+    aiIndex: (aiIndexId: string) => ['context_engine', 'budgets', 'ai_index', aiIndexId] as const,
+    space: () => ['context_engine', 'budgets', 'space'] as const,
+  },
   connectors: {
     list: () => ['context_engine', 'connectors', 'list'] as const,
     types: () => ['context_engine', 'connectors', 'types'] as const,

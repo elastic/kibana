@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AiIndexResolver } from '@kbn/agent-builder-server';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
@@ -87,6 +88,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       coreSetup,
       agentBuilder,
       workflowsManagement: {} as any,
+      logger: loggingSystemMock.createLogger(),
     });
 
     if (!resolver) {

@@ -5,8 +5,12 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { AiIndexTraceWithQuery } from '@kbn/context-engine-plugin/common/http_api/ai_indices';
+import type { AiIndexBudgetStatusResponse } from '@kbn/context-engine-plugin/common/budgets';
+import type { BudgetServiceApi } from '@kbn/context-engine-plugin/server';
+import { formatBudget } from './format_budget';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
   aiIndexAttachmentDataSchema,
@@ -21,47 +25,72 @@ import {
  * Server-side definition for the `ai_index` attachment type — a read-only snapshot
  * of a Context Engine AI index.
  */
-export const createAiIndexAttachmentType = (): AttachmentTypeDefinition<
-  typeof AI_INDEX_ATTACHMENT_TYPE,
-  AiIndexAttachmentData
-> => ({
-  id: AI_INDEX_ATTACHMENT_TYPE,
-  isReadonly: true,
-  validate: (input) => {
-    const parsed = aiIndexAttachmentDataSchema.safeParse(input);
-    if (parsed.success) {
-      return { valid: true, data: parsed.data };
+export const createAiIndexAttachmentType = ({
+  getBudgetService,
+  logger,
+}: {
+  getBudgetService?: () => Promise<BudgetServiceApi>;
+  logger?: Logger;
+} = {}): AttachmentTypeDefinition<typeof AI_INDEX_ATTACHMENT_TYPE, AiIndexAttachmentData> => {
+  // The snapshot stays useful without its budget, so a failed lookup only drops that section.
+  const readBudget = async (
+    aiIndexId: string,
+    spaceId: string
+  ): Promise<AiIndexBudgetStatusResponse | undefined> => {
+    if (!getBudgetService) {
+      return undefined;
     }
-    return {
-      valid: false,
-      error: parsed.error.issues
-        .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
-        .join('; '),
-    };
-  },
-  format: (attachment) => {
-    return {
-      getRepresentation: () => ({ type: 'text', value: formatAiIndex(attachment.data) }),
-    };
-  },
-  // The attachment carries the index snapshot and the authority to write to it, nothing more.
-  // How a setup conversation goes and how the agent talks live in the Context Engine agent's
-  // instructions (server/agent/instructions/context_engine_setup.md.text): there they are part of
-  // the system prompt, instead of arriving in a user message for whichever agent has the attachment.
-  getAgentDescription: () =>
-    [
-      'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
-      'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
-      're-run discovery for destination or sources already listed here.',
-      'This attachment authorizes you to apply changes to this index, not only to propose them: it',
-      `provides \`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\` and`,
-      `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` for this index.`,
-    ].join(' '),
-  getTools: () => [
-    CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
-    CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-  ],
-});
+    try {
+      return await (await getBudgetService()).getAiIndexStatus(spaceId, aiIndexId);
+    } catch (error) {
+      logger?.warn(`Could not read the budget of AI index [${aiIndexId}]: ${error.message}`);
+      return undefined;
+    }
+  };
+
+  return {
+    id: AI_INDEX_ATTACHMENT_TYPE,
+    isReadonly: true,
+    validate: (input) => {
+      const parsed = aiIndexAttachmentDataSchema.safeParse(input);
+      if (parsed.success) {
+        return { valid: true, data: parsed.data };
+      }
+      return {
+        valid: false,
+        error: parsed.error.issues
+          .map((issue) => `${issue.path.join('.') || '<root>'}: ${issue.message}`)
+          .join('; '),
+      };
+    },
+    format: (attachment, { spaceId }) => {
+      return {
+        getRepresentation: async () => {
+          const budget = await readBudget(attachment.data.id, spaceId);
+          const value = formatAiIndex(attachment.data);
+          return { type: 'text', value: budget ? `${value}\n${formatBudget(budget)}` : value };
+        },
+      };
+    },
+    // The attachment carries the index snapshot and the authority to write to it, nothing more.
+    // How a setup conversation goes and how the agent talks live in the Context Engine agent's
+    // instructions (server/agent/instructions/context_engine_setup.md.text): there they are part of
+    // the system prompt, instead of arriving in a user message for whichever agent has the attachment.
+    getAgentDescription: () =>
+      [
+        'An `ai_index` attachment is a read-only snapshot of a Context Engine AI index (destination,',
+        'sources, workflow automations, and traces). Use it to scope the conversation to this index — do not',
+        're-run discovery for destination or sources already listed here.',
+        'This attachment authorizes you to apply changes to this index, not only to propose them: it',
+        `provides \`${CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID}\` and`,
+        `\`${CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID}\` for this index.`,
+      ].join(' '),
+    getTools: () => [
+      CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+      CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+    ],
+  };
+};
 
 const formatAiIndex = (data: AiIndexAttachmentData): string => {
   const parts: string[] = [`AI index: ${data.id}`];

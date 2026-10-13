@@ -15,6 +15,7 @@ import type {
   AiIndexSource,
   AiIndexTrace,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexBudget } from '../../common/budgets';
 
 export const aiIndicesIndexName = '.contextengine-ai-indices';
 
@@ -61,6 +62,13 @@ const storageSettings = {
           allowed_actions: types.keyword({}),
         },
       }),
+      budget: types.object({
+        properties: {
+          suggestions_monthly_usd: types.double({}),
+          automations_monthly_usd: types.double({}),
+          cost_tier: types.keyword({}),
+        },
+      }),
     },
   },
 } satisfies IndexStorageSettings;
@@ -68,6 +76,7 @@ const storageSettings = {
 interface AiIndexDocumentFields {
   description?: string;
   feedback_analysis?: AiIndexFeedbackAnalysis;
+  budget?: AiIndexBudget;
   // Optional for backward compatibility with entries written before memory
   // support existed; absence is treated as enabled (`true`) on read.
   memory_enabled?: boolean;

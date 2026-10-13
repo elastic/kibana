@@ -188,6 +188,31 @@ describe('aiPromptStepDefinition', () => {
         });
       });
 
+      it('reports normalized token usage with the resolved connector', async () => {
+        mockChatModel.invoke.mockResolvedValue({
+          content: 'AI generated response',
+          response_metadata: { model: 'gpt-3.5-turbo' },
+          usage_metadata: {
+            input_tokens: 120,
+            output_tokens: 30,
+            total_tokens: 150,
+            input_token_details: { cache_read: 20 },
+          },
+        });
+
+        const result = await handler(mockContext);
+
+        expect(result.output.metadata).toEqual({
+          model: 'gpt-3.5-turbo',
+          usage: {
+            connectorId: 'resolved-connector-id',
+            inputTokens: 120,
+            outputTokens: 30,
+            cachedTokens: 20,
+          },
+        });
+      });
+
       it('should handle missing temperature in input', async () => {
         const contextWithoutTemperature = {
           ...mockContext,

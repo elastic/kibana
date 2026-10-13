@@ -17,6 +17,7 @@ import {
   AiIndexManagedRowList,
   AiIndexOnboardingPanel,
 } from './components/ai_index_list';
+import { SpaceBudgetCallout } from './components/space_budget_callout';
 import { useAiIndexListMode } from './hooks/use_ai_index_list_mode';
 import { useListAiIndices } from './hooks/use_list_ai_indices';
 import { useNavigation } from './hooks/use_navigation';
@@ -112,6 +113,7 @@ const ContextLandingPageContent = ({
               </>
             ) : (
               <>
+                <SpaceBudgetCallout />
                 <ContentListToolbar data-test-subj="contextAiIndexList">
                   <ContentListToolbar.Filters>
                     <AiIndexOwnerFilter />

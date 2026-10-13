@@ -19,6 +19,8 @@ export const AI_INDEX_KI_SUMMARY_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexI
 export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/feedback_analysis`;
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
+export const AI_INDEX_BUDGET_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/budget`;
+export const SPACE_BUDGETS_PATH = `${INTERNAL_API_PATH}/budgets`;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
@@ -135,6 +137,12 @@ export const MAX_IMPROVEMENT_RATIONALE_LENGTH = 4096;
 
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
+
+/** Space-scoped monthly spend limits in USD. `0` means no limit. */
+export const CONTEXT_ENGINE_SUGGESTIONS_BUDGET_SETTING_ID =
+  'contextEngine:budgets:suggestionsMonthlyUsd';
+export const CONTEXT_ENGINE_AUTOMATIONS_BUDGET_SETTING_ID =
+  'contextEngine:budgets:automationsMonthlyUsd';
 
 /** Task Manager type, id, and schedule for the global signal-generation task. */
 export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';

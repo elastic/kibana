@@ -407,24 +407,33 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('names the default connector for every prompt step, inside and outside the templates', () => {
+      expect(content).toMatch(/give it\s+`connector-id-by-feature: context_engine_prompt`/);
       expect(content).toMatch(
-        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
+        /how every prompt step in every automation\s+this skill produces picks its model/
       );
-      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
       expect(content).toMatch(
-        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
+        /a workflow you assemble outside\s+the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
       );
-      expect(content).toMatch(/Use a different connector only when the user names one/);
+      expect(content).toMatch(/Use a fixed\s+`connector-id` only when the user names a connector/);
+      expect(content).not.toMatch(/gemini-3\.5/);
     });
 
     it('says the templates carry the default connector and it is not a placeholder', () => {
       expect(content).toMatch(
-        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
+        /Every `ai\.prompt` step in the templates carries `connector-id-by-feature: context_engine_prompt`/
       );
       expect(content).toMatch(/That is the default, not a placeholder/);
       expect(content).toMatch(
-        /put the same id on any prompt step you add or write outside the templates/
+        /put the same line on any prompt step you\s+add or write outside the templates/
       );
+    });
+
+    it('shapes the design by the cost tier and the remaining budget the attachment reports', () => {
+      expect(content).toMatch(/## Cost tier and budget/);
+      expect(content).toMatch(/\*\*cheap\*\* — keep the configured model/);
+      expect(content).toMatch(/When you\s+add a schedule, run it daily at most/);
+      expect(content).toMatch(/\*\*expensive\*\* — a larger model is acceptable/);
+      expect(content).toMatch(/propose a narrower design rather than one that will be\s+paused/);
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {

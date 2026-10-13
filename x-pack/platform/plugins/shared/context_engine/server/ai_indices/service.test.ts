@@ -745,6 +745,82 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('budget', () => {
+    const budget = { automations_monthly_usd: 20, cost_tier: 'cheap' as const };
+
+    it('setBudget writes the block and leaves the rest of the entry untouched', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+
+      await expect(service.setBudget('customer_support', DEFAULT_SPACE, budget)).resolves.toEqual(
+        budget
+      );
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document).toEqual(
+        expect.objectContaining({
+          budget,
+          automations: aiIndexDocument.automations,
+          date_created: aiIndexDocument.date_created,
+        })
+      );
+      expect(indexArgs.if_seq_no).toBe(7);
+    });
+
+    it('setBudget is permitted on managed AI indices', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, managed: true }));
+
+      await service.setBudget('customer_support', DEFAULT_SPACE, budget);
+
+      expect(storageClient.index.mock.calls[0][0].document?.managed).toBe(true);
+    });
+
+    it('setBudget throws when the AI index does not exist', async () => {
+      await expect(service.setBudget('missing', DEFAULT_SPACE, budget)).rejects.toBeInstanceOf(
+        AiIndexNotFoundError
+      );
+    });
+
+    it('a full replace keeps the stored budget', async () => {
+      mockSearchHits(storedHit({ ...aiIndexDocument, budget }));
+
+      await service.put('customer_support', DEFAULT_SPACE, properties);
+
+      expect(storageClient.index.mock.calls[0][0].document?.budget).toEqual(budget);
+    });
+
+    it('getBudget returns an empty budget when none is configured', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+
+      await expect(service.getBudget('customer_support', DEFAULT_SPACE)).resolves.toEqual({});
+    });
+
+    it('listBudgetTargets returns automations and budgets of the space', async () => {
+      mockSearchHits(
+        storedHit({ ...aiIndexDocument, budget }),
+        storedHit({ ...aiIndexDocument, id: 'other', automations: [] }, { id: 'other' })
+      );
+
+      await expect(service.listBudgetTargets(DEFAULT_SPACE)).resolves.toEqual([
+        { id: 'customer_support', automationWorkflowIds: ['nightly-refresh'], budget },
+        { id: 'other', automationWorkflowIds: [], budget: {} },
+      ]);
+    });
+
+    it('findByAutomation looks the workflow up among the space automations', async () => {
+      mockSearchHits(storedHit(aiIndexDocument));
+
+      await expect(service.findByAutomation('nightly-refresh', DEFAULT_SPACE)).resolves.toBe(
+        'customer_support'
+      );
+      const [searchArgs] = storageClient.search.mock.calls[0];
+      expect(JSON.stringify(searchArgs.query)).toContain('"automations.value":"nightly-refresh"');
+    });
+
+    it('findByAutomation returns undefined for workflows of no AI index', async () => {
+      await expect(service.findByAutomation('unrelated', DEFAULT_SPACE)).resolves.toBeUndefined();
+    });
+  });
+
   describe('setFeedbackAnalysis', () => {
     const feedbackAnalysis = {
       enabled: true,

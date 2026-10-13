@@ -53,6 +53,7 @@ jest.mock('./lib/get_user', () => ({
 
 const mockRunWorkflow = jest.fn();
 const mockCheckAndSkipIfExistingScheduledExecution = jest.fn();
+const mockCheckExecutionAdmission = jest.fn();
 jest.mock('./execution_functions', () => {
   const actual = jest.requireActual('./execution_functions');
   return {
@@ -140,7 +141,7 @@ describe('workflow:scheduled task runner', () => {
       {
         taskManager: taskManagerMock.createStart(),
         actions: {} as never,
-        workflowsExtensions: {} as never,
+        workflowsExtensions: { checkExecutionAdmission: mockCheckExecutionAdmission } as never,
         licensing: licensingMock.createStart(),
       },
       {} as never,
@@ -161,7 +162,7 @@ describe('workflow:scheduled task runner', () => {
       taskManager: taskManagerMock.createStart(),
       actions: {} as never,
       cloud: {} as never,
-      workflowsExtensions: {} as never,
+      workflowsExtensions: { checkExecutionAdmission: mockCheckExecutionAdmission } as never,
       licensing: licensingMock.createStart(),
     });
   };
@@ -175,6 +176,52 @@ describe('workflow:scheduled task runner', () => {
     mockCreateWorkflowExecution.mockResolvedValue(undefined);
     mockGetWorkflowExecutionById.mockResolvedValue(null);
     mockRunWorkflow.mockResolvedValue(undefined);
+    mockCheckExecutionAdmission.mockResolvedValue({ admitted: true });
+  });
+
+  it('skips the run when an execution admission guard refuses it', async () => {
+    setupPlugin();
+    mockGetWorkflow.mockResolvedValue({
+      id: workflowId,
+      enabled: true,
+      yaml: 'name: test',
+      definition: {
+        name: 'test',
+        enabled: true,
+        triggers: [{ type: 'scheduled' }],
+        steps: [],
+      },
+    });
+    mockCheckExecutionAdmission.mockResolvedValue({
+      admitted: false,
+      guardId: 'contextEngine.budget',
+      reason: 'Budget spent.',
+    });
+
+    const setCustomTaskRunEventFields = jest.fn();
+    const runner = taskDefinitions[WORKFLOW_SCHEDULED_TASK_TYPE]!.createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: createTaskInstance(),
+        fakeRequest: {} as KibanaRequest,
+        setCustomTaskRunEventFields,
+      })
+    );
+
+    const result = await runner.run();
+
+    expect(result).toEqual({ state: taskState });
+    expect(mockCheckExecutionAdmission).toHaveBeenCalledWith({
+      workflowId,
+      spaceId,
+      triggeredBy: 'scheduled',
+    });
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(mockRunWorkflow).not.toHaveBeenCalled();
+    expect(setCustomTaskRunEventFields).toHaveBeenCalledWith({
+      workflow_id: workflowId,
+      space_id: spaceId,
+      outcome: 'skipped',
+    });
   });
 
   it('requests task deletion when the workflow document is missing', async () => {

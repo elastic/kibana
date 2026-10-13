@@ -29,11 +29,14 @@ import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
+import { useAiIndexBudget } from '../../hooks/use_ai_index_budget';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
 import { useSuggestAutomation } from '../../hooks/use_suggest_automation';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { getAiIndexDetailPath } from '../../paths';
+import { formatResetDate, getBucketState } from '../../utils/budgets';
+import { AutomationsBudgetCallout } from './budget_callout';
 import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 import { AiIndexDetailPanelEmptyState } from './ai_index_detail_panel_empty_prompt';
 import { AutomationRow } from './automation_row';
@@ -72,6 +75,9 @@ export const AutomationsPanel = ({
     missingReadPrivilege,
   } = useWorkflowSummaries(workflowIds);
   const { canSuggest, suggestAutomation } = useSuggestAutomation({ aiIndex, isManaged, onSaved });
+  const { budget } = useAiIndexBudget(aiIndex?.id);
+  const isSuggestionsBudgetSpent =
+    budget !== undefined && getBucketState(budget, 'suggestions') === 'exhausted';
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
@@ -120,6 +126,19 @@ export const AutomationsPanel = ({
             key="suggest"
             icon="productAgent"
             onClick={handleSuggest}
+            disabled={isSuggestionsBudgetSpent}
+            toolTipContent={
+              isSuggestionsBudgetSpent && budget
+                ? i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.automations.suggestBudgetSpentTooltip',
+                    {
+                      defaultMessage:
+                        'The monthly AI budget for automation suggestions is spent. It resets on {resetDate}.',
+                      values: { resetDate: formatResetDate(budget.period.end) },
+                    }
+                  )
+                : undefined
+            }
             data-test-subj="contextSuggestAutomationButton"
             {...getEbtProps({
               element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
@@ -217,6 +236,7 @@ export const AutomationsPanel = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      {budget && hasAutomations && <AutomationsBudgetCallout budget={budget} />}
       {missingReadPrivilege && (
         <>
           <EuiCallOut

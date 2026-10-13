@@ -130,7 +130,9 @@ describe('user-interactive task priority', () => {
       taskManager,
       actions: {} as any,
       cloud: {} as any,
-      workflowsExtensions: {} as any,
+      workflowsExtensions: {
+        checkExecutionAdmission: jest.fn().mockResolvedValue({ admitted: true }),
+      } as any,
       licensing: licensingMock.createStart(),
     });
   });

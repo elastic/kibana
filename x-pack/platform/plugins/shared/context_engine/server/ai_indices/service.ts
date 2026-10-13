@@ -23,6 +23,7 @@ import type {
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
 import { isIndexPattern } from '../../common/ai_index_dest';
+import type { AiIndexBudget } from '../../common/budgets';
 import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
 import {
@@ -75,6 +76,12 @@ const mergeManagedAiIndex = (
 });
 
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
+
+export interface AiIndexBudgetTarget {
+  id: string;
+  automationWorkflowIds: string[];
+  budget: AiIndexBudget;
+}
 
 export interface AiIndexManagedBootstrap {
   isManaged: (id: string) => boolean;
@@ -177,7 +184,14 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      {
+        ...properties,
+        // The budget is not part of the public definition, so a full replace keeps it.
+        ...(existing?.document.budget !== undefined && { budget: existing.document.budget }),
+        id: aiIndexId,
+        space: spaceId,
+        managed: false,
+      },
       existing
     );
   }
@@ -206,6 +220,7 @@ export class AiIndexService {
       spaceId,
       {
         ...properties,
+        ...(existing?.document.budget !== undefined && { budget: existing.document.budget }),
         id: aiIndexId,
         space: spaceId,
         managed: true,
@@ -301,6 +316,87 @@ export class AiIndexService {
     );
 
     return feedbackAnalysis;
+  }
+
+  /**
+   * Replaces only the budget block. Like {@link setFeedbackAnalysis} this is permitted on
+   * managed entries, since how much an index may spend is operator preference.
+   */
+  async setBudget(
+    aiIndexId: string,
+    spaceId: string,
+    budget: AiIndexBudget
+  ): Promise<AiIndexBudget> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    await this.writeDocument(
+      aiIndexId,
+      spaceId,
+      {
+        ...existing.document,
+        memory_enabled: resolveMemoryEnabled(existing.document),
+        budget,
+      },
+      existing
+    );
+    return budget;
+  }
+
+  /** The stored budget of an AI index; `{}` when none is configured. */
+  async getBudget(aiIndexId: string, spaceId: string): Promise<AiIndexBudget> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    return existing.document.budget ?? {};
+  }
+
+  /** Every AI index in the space with what budget enforcement needs: automations and budget. */
+  async listBudgetTargets(spaceId: string): Promise<AiIndexBudgetTarget[]> {
+    const response = await this.storageClient.search({
+      size: MAX_AI_INDICES,
+      track_total_hits: false,
+      query: createSpaceDslFilter(spaceId),
+    });
+    return response.hits.hits.flatMap((hit) => {
+      if (!hit._source || hit._id === undefined) {
+        return [];
+      }
+      const document = toAiIndexDocument(hit._source, hit._id);
+      return [
+        {
+          id: document.id,
+          automationWorkflowIds: document.automations
+            .filter(({ type }) => type === 'workflow')
+            .map(({ value }) => value),
+          budget: document.budget ?? {},
+        },
+      ];
+    });
+  }
+
+  /** The AI index a workflow is attached to as an automation, if any. */
+  async findByAutomation(workflowId: string, spaceId: string): Promise<string | undefined> {
+    const response = await this.storageClient.search({
+      size: 1,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            createSpaceDslFilter(spaceId),
+            { term: { 'automations.type': 'workflow' } },
+            { term: { 'automations.value': workflowId } },
+          ],
+        },
+      },
+    });
+    const [hit] = response.hits.hits;
+    if (!hit?._source || hit._id === undefined) {
+      return undefined;
+    }
+    return toAiIndexDocument(hit._source, hit._id).id;
   }
 
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {
