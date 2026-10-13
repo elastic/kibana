@@ -23,7 +23,7 @@ const TS_EARLIER = '2024-01-01T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
   status: 'active',
-  stream_names: ['logs.checkout'],
+  source_ids: ['logs.checkout'],
   title: 'Checkout latency',
   symptom_hypothesis: 'Checkout requests are delayed because the payment dependency is timing out.',
   summary: 'P99 latency breached SLO',
@@ -45,7 +45,7 @@ const makeStoredEvent = (
     event_id: eventId,
     status: 'active',
     severity: 'high',
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     signals: [],
     title: 'Test event',
     symptom_hypothesis: 'Test hypothesis',
@@ -236,7 +236,7 @@ describe('eventsWriteHandler', () => {
     it('writes when an unchanged snapshot adds a detection rule not present in its history', async () => {
       const ruleOne: SignalEntry = {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         description: 'Rule one detected an issue',
         verdict: 'confirms',
         metadata: {
@@ -248,7 +248,7 @@ describe('eventsWriteHandler', () => {
       };
       const ruleTwo: SignalEntry = {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         description: 'Rule two detected an issue',
         verdict: 'confirms',
         metadata: {
@@ -285,7 +285,7 @@ describe('eventsWriteHandler', () => {
     it('skips when an unchanged snapshot resubmits a rule absent from the latest version', async () => {
       const ruleOne: SignalEntry = {
         type: 'detection',
-        stream_name: 'logs.checkout',
+        source_id: 'logs.checkout',
         description: 'Rule one detected an issue',
         verdict: 'confirms',
         metadata: {
@@ -404,7 +404,7 @@ describe('eventsWriteBulkHandler', () => {
 describe('eventsWriteBulkHandler — dedup mode', () => {
   const makeDetectionSignal = (ruleUuid = 'rule-abc'): SignalEntry => ({
     type: 'detection',
-    stream_name: 'logs.checkout',
+    source_id: 'logs.checkout',
     description: 'High Latency',
     verdict: 'confirms',
     metadata: {
@@ -563,7 +563,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
 describe('eventsWriteBulkHandler — agent-proposed severity', () => {
   const failingSignal = (ruleUuid: string): SignalEntry => ({
     type: 'detection',
-    stream_name: 'logs.checkout',
+    source_id: 'logs.checkout',
     description: `Found: ${ruleUuid} failing. Impact: requests blocked.`,
     verdict: 'confirms',
     metadata: {
@@ -622,7 +622,7 @@ describe('eventsWriteBulkHandler — investigation severity calibration', () => 
     verdict: Extract<SignalEntry, { type: 'detection' }>['verdict'] = 'confirms'
   ): Extract<SignalEntry, { type: 'detection' }> => ({
     type: 'detection',
-    stream_name: 'logs.checkout',
+    source_id: 'logs.checkout',
     description: `Signal for ${ruleUuid}`,
     verdict,
     metadata: {
@@ -734,7 +734,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 
   const makeDetectionSignal = (ruleUuid: string): DetectionSignal => ({
     type: 'detection',
-    stream_name: 'logs.app',
+    source_id: 'logs.app',
     description: `Signal for ${ruleUuid}`,
     verdict: 'confirms',
     metadata: {
@@ -751,7 +751,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
     type: 'entity',
     subtype: 'service',
     name: featureId,
-    stream_name: 'logs.app',
+    source_id: 'logs.app',
   });
 
   const makeSnapshotInput = (
