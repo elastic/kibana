@@ -22,6 +22,9 @@ describe('WorkflowExecutionState', () => {
   beforeEach(() => {
     workflowExecutionRepository = {} as unknown as WorkflowExecutionRepository;
     workflowExecutionRepository.updateWorkflowExecution = jest.fn();
+    workflowExecutionRepository.getWorkflowExecutionCancelState = jest
+      .fn()
+      .mockResolvedValue(undefined);
 
     stepExecutionRepository = {} as unknown as StepExecutionRepository;
     stepExecutionRepository.bulkUpsert = jest.fn();
@@ -258,9 +261,41 @@ describe('WorkflowExecutionState', () => {
 
   describe('flush', () => {
     beforeEach(() => {
-      workflowExecutionRepository.getWorkflowExecutionById = jest
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest
         .fn()
-        .mockResolvedValue({} as EsWorkflowExecution);
+        .mockResolvedValue({ cancelRequested: false });
+    });
+
+    it('should pick up an external cancellation even when there are no pending changes', async () => {
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest.fn().mockResolvedValue({
+        cancelRequested: true,
+        cancelledAt: '2025-08-05T20:02:00.000Z',
+        cancelledBy: 'user',
+      });
+
+      await underTest.flushWorkflowAndSteps();
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(underTest.getWorkflowExecution()).toEqual(
+        expect.objectContaining({
+          cancelRequested: true,
+          cancelledAt: '2025-08-05T20:02:00.000Z',
+          cancelledBy: 'user',
+        })
+      );
+    });
+
+    it('should keep in-memory changes when merging the external cancellation', async () => {
+      underTest.updateWorkflowExecution({ currentNodeId: 'node-in-memory' });
+      workflowExecutionRepository.getWorkflowExecutionCancelState = jest
+        .fn()
+        .mockResolvedValue({ cancelRequested: true });
+
+      await underTest.flushWorkflowAndSteps();
+
+      expect(underTest.getWorkflowExecution()).toEqual(
+        expect.objectContaining({ cancelRequested: true, currentNodeId: 'node-in-memory' })
+      );
     });
 
     it('should flush workflow execution changes', async () => {

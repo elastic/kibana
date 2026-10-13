@@ -127,6 +127,7 @@ describe('runNode', () => {
       },
       workflowExecutionState: {
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
+        refreshCancelState: jest.fn().mockResolvedValue(undefined),
       } as unknown as jest.Mocked<WorkflowExecutionState>,
       workflowLogger: createMockWorkflowEventLogger(),
       workflowExecutionRepository: {

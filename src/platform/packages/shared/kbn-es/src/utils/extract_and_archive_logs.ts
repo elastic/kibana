@@ -59,11 +59,19 @@ export async function extractAndArchiveLogs({
       continue;
     }
 
-    const { stdout } = await execa('docker', ['logs', name]);
     const targetFile = `${name}-${nodeId}.log`;
     const targetPath = join(outputFolder, targetFile);
 
-    await Fsp.writeFile(targetPath, stdout);
+    const logFile = await Fsp.open(targetPath, 'w');
+    try {
+      await execa('docker', ['logs', name], {
+        stdout: logFile.fd,
+        stderr: logFile.fd,
+        buffer: false,
+      });
+    } finally {
+      await logFile.close();
+    }
     logFiles.push(targetFile);
 
     log.info(`Archived logs for ${name} to ${targetPath}`);

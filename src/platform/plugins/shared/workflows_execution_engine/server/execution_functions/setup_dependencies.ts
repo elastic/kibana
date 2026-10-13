@@ -161,7 +161,8 @@ export async function setupDependencies(
   const workflowExecutionState = new WorkflowExecutionState(
     workflowExecution as EsWorkflowExecution,
     workflowExecutionRepository,
-    stepExecutionRepository
+    stepExecutionRepository,
+    logger
   );
 
   const stepIoService = new StepIoService({

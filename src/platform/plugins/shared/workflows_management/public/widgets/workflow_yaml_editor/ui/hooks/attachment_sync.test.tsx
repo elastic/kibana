@@ -44,6 +44,9 @@ jest.mock('../../../../features/ai_integration', () => ({
     dispose: jest.fn(),
     getDiffHunks: () => [],
     hasPendingProposals: () => false,
+    suspend: jest.fn(),
+    resume: jest.fn(),
+    hasSuspendedProposals: () => false,
     applyAfterYaml: (yaml: string) => appliedYaml.push(yaml),
   })),
 }));

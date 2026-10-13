@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { FleetPackagePolicyGenerator } from '../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
@@ -73,16 +72,16 @@ const createServiceDeps = (grants: Grants) => {
     })
   );
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
+  const createRequestScopedSoClient = jest.spyOn(
+    endpointAppContextService.savedObjects,
+    'createRequestScopedSoClient'
+  );
 
   const getById = jest.spyOn(scopedFleet.packagePolicy, 'get');
   getById.mockResolvedValue(createEndpointPolicy());
 
   const service = createEndpointPolicyManagementService({
     endpointAppContextService,
-    getStartServices,
     request,
     spaceId: SPACE_ID,
   });
@@ -90,7 +89,7 @@ const createServiceDeps = (grants: Grants) => {
   return {
     service,
     endpointAppContextService,
-    getStartServices,
+    createRequestScopedSoClient,
     getById,
     request,
   };
@@ -197,7 +196,7 @@ describe('createEndpointPolicyManagementService', () => {
 
       await expect(call(deps.service)).rejects.toBeInstanceOf(EndpointAuthorizationError);
       expect(deps.endpointAppContextService.getInternalFleetServices).not.toHaveBeenCalled();
-      expect(deps.getStartServices).not.toHaveBeenCalled();
+      expect(deps.createRequestScopedSoClient).not.toHaveBeenCalled();
       expect(deps.getById).not.toHaveBeenCalled();
       expect(mockedReadPolicyBaseline).not.toHaveBeenCalled();
     });
@@ -283,7 +282,6 @@ describe('createEndpointPolicyManagementService', () => {
 
       const expectedDeps = {
         endpointAppContextService: deps.endpointAppContextService,
-        getStartServices: deps.getStartServices,
         request: deps.request,
         spaceId: SPACE_ID,
       };

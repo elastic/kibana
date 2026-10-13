@@ -24,6 +24,7 @@ import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getActionsConfigurationUtilities } from '../actions_config';
+import { defaultInboundEventsLimitConfigs } from '../config';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import {
@@ -41,6 +42,7 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -559,7 +561,9 @@ describe('create()', () => {
         enabled: false,
         maxBodyBytes: new ByteSizeValue(1024 * 1024),
         maxEmitted: 25,
+        ...defaultInboundEventsLimitConfigs,
       },
+      connectorSigningKeys: { enabled: false },
     });
 
     const localActionTypeRegistryParams = {
@@ -1933,6 +1937,80 @@ describe('delete()', () => {
       await actionsClient.delete({ id: '1' });
 
       expect(callOrder).toEqual(['deleteConnectorTokens', 'soDelete']);
+    });
+
+    test('does not delete a signing key record when connector signing keys are disabled', async () => {
+      await actionsClient.delete({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_signing_key',
+        '1'
+      );
+    });
+
+    test('deletes any signing key record when connector signing keys are enabled, also when the stored type does not publish keys', async () => {
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        connectorSigningKeysEnabled: true,
+      });
+      unsecuredSavedObjectsClient.delete.mockImplementation(async (type, id) => {
+        if (type === 'connector_signing_key') {
+          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+        }
+        return {};
+      });
+
+      await client.delete({ id: '1' });
+
+      expect(unsecuredSavedObjectsClient.delete.mock.calls).toEqual([
+        ['action', '1'],
+        ['connector_signing_key', '1'],
+      ]);
+    });
+
+    test('keeps the signing key when the connector delete fails', async () => {
+      const client = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        authTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        inMemoryConnectors: [],
+        actionExecutor,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        connectorTokenClient,
+        getEventLogClient,
+        encryptedSavedObjectsClient,
+        isESOCanEncrypt,
+        getAxiosInstanceWithAuth,
+        connectorSigningKeysEnabled: true,
+      });
+      unsecuredSavedObjectsClient.delete.mockRejectedValueOnce(new Error('delete failed'));
+
+      await expect(client.delete({ id: '1' })).rejects.toThrow('delete failed');
+
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalledWith(
+        'connector_signing_key',
+        '1'
+      );
     });
 
     describe('when connector has authMode per-user', () => {

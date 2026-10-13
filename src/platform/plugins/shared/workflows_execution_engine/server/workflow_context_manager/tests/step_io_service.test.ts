@@ -22,6 +22,7 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
 function buildHarness(opts: { maxBytes?: number } = {}) {
   const workflowExecutionRepository = {
     updateWorkflowExecution: jest.fn(),
+    getWorkflowExecutionCancelState: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {
