@@ -6,6 +6,8 @@
  */
 
 import { REPORT_CLASSES_BY_CHAIN, phaseOrder } from './phases';
+import { buildReportSpecs } from '../fixtures/report_documents';
+import { loadManifest, loadSamples } from '../fixtures/load_corpus';
 
 /**
  * Pins the `extracted.*` field names the suite writes against what
@@ -37,28 +39,39 @@ export interface ThreatReportDocument {
 }
 
 describe('extracted.* field names vs load_report_context', () => {
+  // Derived from the REAL documents the suite writes (both arms), not from a
+  // hand-written copy of the list: a new extracted.* key added to a fixture
+  // must land here or the pin fails.
+  const manifest = loadManifest();
+  const samples = loadSamples();
+  const writtenExtractedFields = (): string[] => {
+    const fields = new Set<string>();
+    for (const arm of ['A', 'B'] as const) {
+      for (const spec of buildReportSpecs(manifest, samples, arm)) {
+        for (const key of Object.keys(spec.document)) {
+          if (key.startsWith('extracted.')) fields.add(key);
+        }
+      }
+    }
+    return [...fields].sort();
+  };
+
   it('every extracted.* field the suite writes is read by load_report_context', () => {
-    const suiteExtractedFields = [
-      'extracted.iocs',
-      'extracted.ttps.techniques',
-      'extracted.vulnerability.vendor',
-      'extracted.vulnerability.product',
-    ];
-    for (const field of suiteExtractedFields) {
+    const written = writtenExtractedFields();
+    // Non-vacuous: the suite must actually write these two at minimum.
+    expect(written).toEqual(
+      expect.arrayContaining(['extracted.iocs', 'extracted.ttps.techniques'])
+    );
+    for (const field of written) {
       expect(LOAD_REPORT_CONTEXT_FIELDS).toContain(field);
     }
   });
 
   it('a report document using a wrong extracted.* name fails the pin', () => {
     const bad: Record<string, unknown> = { 'extracted.ioc_list': [] };
-    const suiteExtractedFields = [
-      'extracted.iocs',
-      'extracted.ttps.techniques',
-      'extracted.vulnerability.vendor',
-      'extracted.vulnerability.product',
-    ];
+    const known = writtenExtractedFields();
     const badKeys = Object.keys(bad).filter((k) => k.startsWith('extracted.'));
-    const unknown = badKeys.filter((k) => !suiteExtractedFields.includes(k));
+    const unknown = badKeys.filter((k) => !known.includes(k));
     expect(unknown).toEqual(['extracted.ioc_list']);
   });
 

@@ -11,6 +11,7 @@ import { loadManifest, loadSamples, type CorpusSample } from '../fixtures/load_c
 import {
   PhaseSeeder,
   buildPhasePlan,
+  ownedSeededIds,
   rebaseTimestamp,
   seededIndexNames,
   stripAzqaEntityIds,
@@ -149,6 +150,35 @@ describe('PhaseSeeder', () => {
     expect(req.operations[0]).toEqual({
       create: { _index: 'logs-ti-default', _id: 'aaaaaaaa#0#fixture' },
     });
+  });
+
+  it('reset deletes only the ids this evaluation owns, never a match_all wipe', async () => {
+    // Regression (Libra): the seeded indices are shared with other evaluations
+    // on the same stack; a match_all delete would wipe their documents too.
+    const { client, deleteByQuery } = makeClient();
+    await new PhaseSeeder(client, twinSample()).reset();
+    const req = deleteByQuery.mock.calls[0][0] as { query: Record<string, unknown> };
+    expect(req.query).not.toHaveProperty('match_all');
+    expect(req.query).toEqual({
+      ids: {
+        values: expect.arrayContaining([
+          'aaaaaaaa#0#fixture',
+          'aaaaaaaa#0#positive',
+          'aaaaaaaa#1#positive',
+          'aaaaaaaa#0#negative',
+          'aaaaaaaa#1#negative',
+        ]),
+      },
+    });
+  });
+
+  it('ownedSeededIds covers every phase plan id of the real corpus', () => {
+    const owned = new Set(ownedSeededIds(samples));
+    for (const phase of ['E0', 'E+', 'E-'] as const) {
+      for (const d of buildPhasePlan(phase, samples, NOW).docs) {
+        expect(owned.has(d.id)).toBe(true);
+      }
+    }
   });
 
   it('throws on any bulk item error so a half-seeded phase never runs', async () => {

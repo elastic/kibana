@@ -45,6 +45,27 @@ export interface CandidatesResponse {
   skipped: Array<{ id: string; reason: string }>;
 }
 
+/**
+ * The per-batch candidates control (design v6 §4a): `ids` must equal the
+ * requested batch as a SET — same length, no duplicates, no foreign ids. A
+ * same-length response with a duplicate or a foreign id is a violation even
+ * though the counts match.
+ */
+export const candidatesMatchBatch = (
+  batch: readonly string[],
+  response: Pick<CandidatesResponse, 'ids' | 'skipped'>
+): boolean => {
+  if (response.skipped.length > 0) return false;
+  if (response.ids.length !== batch.length) return false;
+  const wanted = new Set(batch);
+  const seen = new Set<string>();
+  for (const id of response.ids) {
+    if (!wanted.has(id) || seen.has(id)) return false;
+    seen.add(id);
+  }
+  return true;
+};
+
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
@@ -143,7 +164,7 @@ export class HuntWatchClient {
       const batch = reportIds.slice(i, i + REPORT_IDS_CAP);
       const candidates = await this.selectCandidates(batch);
       onCandidates?.(batch, candidates);
-      const perBatchOk = candidates.ids.length === batch.length && candidates.skipped.length === 0;
+      const perBatchOk = candidatesMatchBatch(batch, candidates);
       if (perBatchOk) {
         const sweep = await this.triggerSweep(batch);
         const sweepRuns = await this.readSweepCoordinatorOutputs(sweep.executionId);

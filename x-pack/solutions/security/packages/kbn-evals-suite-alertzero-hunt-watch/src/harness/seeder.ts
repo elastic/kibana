@@ -122,6 +122,24 @@ export const seededIndexNames = (samples: Record<string, CorpusSample>): string[
   return [...names].sort();
 };
 
+/**
+ * Every document id this evaluation can own across all phases (fixtures,
+ * positives, negatives) in the label-space id scheme. The reset deletes only
+ * these ids, never a match_all wipe: the seeded indices live on a shared stack
+ * where other suites' documents must survive a hunt-watch run.
+ */
+export const ownedSeededIds = (samples: Record<string, CorpusSample>): string[] => {
+  const ids = new Set<string>();
+  for (const [fileName, s] of Object.entries(samples)) {
+    const base = sampleBase(fileName);
+    (s.fixtures ?? []).forEach((_, i) => ids.add(fixtureId(base, i)));
+    for (const side of ['positive', 'negative'] as const) {
+      (s[side]?.docs ?? []).forEach((_, i) => ids.add(seededDocId(base, i, side)));
+    }
+  }
+  return [...ids].sort();
+};
+
 export type SeederEsClient = Client;
 
 export class PhaseSeeder {
@@ -130,11 +148,15 @@ export class PhaseSeeder {
     private readonly samples: Record<string, CorpusSample>
   ) {}
 
-  /** Empties every seeded index, so each phase starts from nothing. */
+  /**
+   * Deletes every document this evaluation owns (all phases), by id. A
+   * match_all wipe would also remove documents other evaluations seeded into
+   * the same indices on a shared stack.
+   */
   async reset(): Promise<void> {
     await this.esClient.deleteByQuery({
       index: seededIndexNames(this.samples),
-      query: { match_all: {} },
+      query: { ids: { values: ownedSeededIds(this.samples) } },
       refresh: true,
       conflicts: 'proceed',
       ignore_unavailable: true,

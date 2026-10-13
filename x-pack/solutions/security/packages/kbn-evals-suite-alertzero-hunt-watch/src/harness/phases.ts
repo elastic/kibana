@@ -82,12 +82,15 @@ export const corpusGateAlertsMustBeZero = (alertCount: number): ControlFailure |
  * C2 leak audit gate (design v1): R-beh text must contain no host/user/IoC
  * token present in E+. Evaluated over the report text and the seeded docs.
  */
-export const leakAuditTokens = (seededDocTexts: string[]): string[] => {
+export const leakAuditTokens = (seededDocTexts: string[], extraTokens: string[] = []): string[] => {
   const tokens = new Set<string>();
   for (const text of seededDocTexts) {
     for (const m of text.matchAll(/\bhost\.name[":\s]+([A-Za-z0-9._-]+)/g)) tokens.add(m[1]);
     for (const m of text.matchAll(/\buser\.name[":\s]+([A-Za-z0-9._\\-]+)/g)) tokens.add(m[1]);
   }
+  // Seeded IoCs (sinkhole zones, payload hashes): an R-beh narrative carrying
+  // one leaks exact Tier 1 evidence into the behaviour-only recall measurement.
+  for (const t of extraTokens) tokens.add(t);
   return [...tokens];
 };
 

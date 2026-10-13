@@ -73,6 +73,9 @@ export const evaluate = base.extend<
       const otherFeatures = (existing.data.data?.features ?? []).filter(
         (feature) => !TIER_FEATURE_IDS.has(feature.feature_id)
       );
+      const previousFeatures = (existing.data.data?.features ?? []).filter((feature) =>
+        TIER_FEATURE_IDS.has(feature.feature_id)
+      );
 
       await kbnClient.request({
         path: INFERENCE_SETTINGS_URL,
@@ -86,7 +89,18 @@ export const evaluate = base.extend<
         },
         headers: INTERNAL_API_HEADERS,
       });
-      await use();
+      try {
+        await use();
+      } finally {
+        // Restore the pre-suite picks even when the sweep fails, so later
+        // evaluations on this stack keep their own model settings.
+        await kbnClient.request({
+          path: INFERENCE_SETTINGS_URL,
+          method: 'PUT',
+          body: { features: [...otherFeatures, ...previousFeatures] },
+          headers: INTERNAL_API_HEADERS,
+        });
+      }
     },
     { scope: 'worker', auto: true },
   ],

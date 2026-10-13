@@ -9,7 +9,7 @@ import { tags } from '@kbn/evals';
 import { evaluate } from '../../src/evaluate';
 import { buildLabels } from '../../src/datasets/labels';
 import { loadManifest, loadSamples } from '../../src/fixtures/load_corpus';
-import { buildReportSpecs } from '../../src/fixtures/report_documents';
+import { buildReportSpecs, PAYLOAD_HASHES } from '../../src/fixtures/report_documents';
 import {
   HUNT_REPORTS_PER_PHASE,
   corpusGateAlertsMustBeZero,
@@ -64,7 +64,15 @@ const ALERTS_INDEX = '.alerts-security.alerts-default';
 evaluate(
   GREP_TITLE,
   { tag: tags.stateful.classic },
-  async ({ executorClient, huntWatchClient, esClient, log }) => {
+  async ({ executorClient, huntWatchClient, esClient, log, repetitions }) => {
+    // The sweep runs in this Playwright task once; runExperiment's task only
+    // replays the recorded outputs. Repeating it would re-publish one sweep as
+    // independent measurements, so anything but 1 is a misconfiguration.
+    if (repetitions !== 1) {
+      throw new Error(
+        `hunt_watch requires repetitions=1 (got ${repetitions}): the sweep is recorded once and replayed by the experiment task, so extra repetitions cannot rerun the hunt`
+      );
+    }
     const manifest = loadManifest();
     const samples = loadSamples();
     const labels = buildLabels({ manifest, samples });
@@ -159,7 +167,13 @@ evaluate(
     const positiveDocs = Object.values(samples).flatMap((s) =>
       (s.positive?.docs ?? []).map((d) => d.doc)
     );
-    failures.push(...leakAuditFailures(specs, positiveDocs, phaseList));
+    failures.push(
+      ...leakAuditFailures(specs, positiveDocs, phaseList, [
+        ...manifest.sinkhole_zones,
+        PAYLOAD_HASHES.md5,
+        PAYLOAD_HASHES.sha256,
+      ])
+    );
 
     // C3a (infra, E+) invalidates its cells; C3b (detection) is reported separately.
     const c3a = c3aFailure(records);

@@ -644,3 +644,39 @@ describe('NB-8: recall is null, not 0, on a zero denominator', () => {
     expect(base).not.toBe(mutant);
   });
 });
+
+describe('unscorable planted behaviours never enter the Tier 2 denominator', () => {
+  // Regression (Libra PRRT_...riz5T): steps with techniques: [] (the vendored
+  // Defend-promotion and Okta-app-modify steps) cannot be recalled by a
+  // technique-matching criterion, so counting them guarantees misses even for
+  // a perfect hunt.
+  const planted = [
+    { techniques: ['T1047'], positiveDocIds: ['a#0#positive'] },
+    { techniques: [], positiveDocIds: ['b#0#positive'] },
+  ];
+  const perfectHunt = [{ techniqueId: 'T1047', hit: true, hitIds: ['a#0#positive'] }];
+
+  it('a perfect hunt over one scorable step scores 1.0, not 0.5', () => {
+    const { recall, denominator } = seededHitRecallTier2({
+      behaviours: perfectHunt,
+      plantedBehaviours: planted,
+    });
+    expect(denominator).toBe(1);
+    expect(recall).toBe(1);
+  });
+
+  it('all-techniqueless planted behaviours leave the denominator at 0 (n/a)', () => {
+    const { recall, denominator } = seededHitRecallTier2({
+      behaviours: perfectHunt,
+      plantedBehaviours: [{ techniques: [], positiveDocIds: ['b#0#positive'] }],
+    });
+    expect(denominator).toBe(0);
+    expect(recall).toBeNull();
+  });
+
+  it('MUTANT: including unscorable steps in the denominator scores 0.5', () => {
+    const mutant = 1 / planted.length;
+    expect(mutant).toBe(0.5);
+    expect(mutant).not.toBe(1);
+  });
+});

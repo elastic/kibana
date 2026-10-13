@@ -185,7 +185,12 @@ export const seededHitRecallTier2 = ({
   behaviours,
   plantedBehaviours,
 }: M1Tier2Input): { recall: number | null; denominator: number } => {
-  const recalled = plantedBehaviours.filter((planted) =>
+  // Steps with no technique labels (e.g. the vendored Defend-promotion and
+  // Okta-app-modify steps carry techniques: []) can never be recalled — the
+  // criterion requires at least one matching technique — so they must not sit
+  // in the denominator as guaranteed misses.
+  const scorable = plantedBehaviours.filter((p) => p.techniques.length > 0);
+  const recalled = scorable.filter((planted) =>
     behaviours.some(
       (b) =>
         b.hit &&
@@ -194,7 +199,7 @@ export const seededHitRecallTier2 = ({
         b.hitIds.some((id) => planted.positiveDocIds.includes(id))
     )
   );
-  const denominator = plantedBehaviours.length;
+  const denominator = scorable.length;
   // [NB-8] Zero denominator means "not applicable", not "recalled nothing":
   // null, never 0 (0 would drag a pooled mean down with cells that measure
   // nothing).
@@ -225,6 +230,12 @@ export interface M2ClassifyInput {
   };
   /** MUTANT hook (rev7 R3-B2): restrict true ids to OTHER chains. */
   crossChainOnly?: boolean;
+  /**
+   * Tier 1 IoC hits are not technique-scoped: any planted positive doc is a
+   * true hit regardless of technique. When set, the true set is the full
+   * chain-agnostic union instead of the technique-matched one.
+   */
+  techniqueIndependentIsTrue?: boolean;
 }
 
 export type IdBucketValue = 'true' | 'false' | 'twin-retained';
@@ -238,11 +249,15 @@ export const classifyHitIds = ({
   planted,
   buckets,
   crossChainOnly = false,
+  techniqueIndependentIsTrue = false,
 }: M2ClassifyInput): Record<string, IdBucketValue> => {
   const trueSet = new Set<string>();
   const unrestrictedMatched = new Set<string>();
   for (const prefix of Object.keys(chainOf)) {
-    if ((techOf[prefix] ?? []).some((k) => techniqueRelated(technique, k))) {
+    if (
+      techniqueIndependentIsTrue ||
+      (techOf[prefix] ?? []).some((k) => techniqueRelated(technique, k))
+    ) {
       for (const id of planted(prefix)) {
         unrestrictedMatched.add(id);
         if (!crossChainOnly || chainOf[prefix] !== chainOf[target ?? '']) trueSet.add(id);

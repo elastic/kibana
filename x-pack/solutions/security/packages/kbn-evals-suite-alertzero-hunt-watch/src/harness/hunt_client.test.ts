@@ -7,7 +7,7 @@
 
 import type { KbnClient } from '@kbn/kbn-client';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { HuntWatchClient, isTerminal } from './hunt_client';
+import { HuntWatchClient, candidatesMatchBatch, isTerminal } from './hunt_client';
 
 interface Req {
   path: string;
@@ -226,5 +226,62 @@ describe('HuntWatchClient.runHunts', () => {
     });
     await client.runHunts(ids);
     expect(batches.map((b) => b.length)).toEqual([10, 10, 3]);
+  });
+
+  it('a same-length candidates response with a foreign id invalidates the batch', async () => {
+    // Regression (Libra): the old guard compared lengths only, so a response
+    // that swapped one requested id for a foreign one passed the control.
+    const request = jest.fn(async (req: Req) => {
+      if (req.path === '/internal/alertzero/hunt/candidates') {
+        return { data: { ids: ['rep-0', 'foreign-9'], skipped: [] } };
+      }
+      throw new Error('sweep must not run for an invalid batch');
+    });
+    const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
+      huntWorkerWorkflowId: 'worker-1',
+      esClient: { indices: { refresh: async () => ({}) } },
+    });
+    const { runs, invalidBatches } = await client.runHunts(['rep-0', 'rep-1']);
+    expect(runs.size).toBe(0);
+    expect(invalidBatches).toHaveLength(1);
+  });
+
+  it('a same-length candidates response with a duplicate id invalidates the batch', async () => {
+    const request = jest.fn(async (req: Req) => {
+      if (req.path === '/internal/alertzero/hunt/candidates') {
+        return { data: { ids: ['rep-0', 'rep-0'], skipped: [] } };
+      }
+      throw new Error('sweep must not run for an invalid batch');
+    });
+    const client = new HuntWatchClient({ request } as unknown as KbnClient, log, {
+      huntWorkerWorkflowId: 'worker-1',
+      esClient: { indices: { refresh: async () => ({}) } },
+    });
+    const { runs, invalidBatches } = await client.runHunts(['rep-0', 'rep-1']);
+    expect(runs.size).toBe(0);
+    expect(invalidBatches).toHaveLength(1);
+  });
+});
+
+describe('candidatesMatchBatch (per-batch ids == batch control)', () => {
+  const ok = { ids: ['a', 'b'], skipped: [] };
+  it('an exact set matches', () => {
+    expect(candidatesMatchBatch(['a', 'b'], ok)).toBe(true);
+  });
+  it('order does not matter', () => {
+    expect(candidatesMatchBatch(['b', 'a'], ok)).toBe(true);
+  });
+  it('a foreign id of the same length fails', () => {
+    expect(candidatesMatchBatch(['a', 'c'], ok)).toBe(false);
+  });
+  it('a duplicate id of the same length fails', () => {
+    expect(candidatesMatchBatch(['a', 'a'], { ids: ['a', 'b'], skipped: [] })).toBe(false);
+    expect(candidatesMatchBatch(['a', 'b'], { ids: ['a', 'a'], skipped: [] })).toBe(false);
+  });
+  it('a length mismatch or any skipped entry fails', () => {
+    expect(candidatesMatchBatch(['a'], ok)).toBe(false);
+    expect(
+      candidatesMatchBatch(['a', 'b'], { ids: ['a', 'b'], skipped: [{ id: 'a', reason: 'x' }] })
+    ).toBe(false);
   });
 });

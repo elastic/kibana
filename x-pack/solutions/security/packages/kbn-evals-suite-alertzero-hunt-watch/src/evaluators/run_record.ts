@@ -14,6 +14,10 @@ export interface HuntRunRecord {
   phase: 'E0' | 'E+' | 'E-';
   reportClass: string;
   sampleBase?: string;
+  /** Manifest chain this report belongs to (undefined for decoys). */
+  chain?: string;
+  /** IoC values this report's document asks Tier 1 to hunt (R-ioc reports). */
+  reportIocValues?: string[];
   /** The minted report id the Worker was asked to hunt. */
   reportId?: string;
   /**

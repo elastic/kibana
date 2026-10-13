@@ -30,7 +30,7 @@ export interface ReportSpec {
   document: Record<string, unknown>;
 }
 
-const PAYLOAD_HASHES = {
+export const PAYLOAD_HASHES = {
   md5: 'd41d8cd98f00b204e9800998ecf8427e',
   sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
 };
@@ -50,13 +50,18 @@ const titleCase = (s: string): string =>
  * family as the C2 audit in harness/phases.ts; duplicated because fixtures
  * cannot import the harness — the harness imports the fixtures).
  */
-const redactSeededTokens = (text: string, seededTexts: string[]): string => {
+const redactSeededTokens = (text: string, seededTexts: string[], extraTokens: string[] = []) => {
   const tokens = new Set<string>();
   for (const seeded of seededTexts) {
     for (const m of seeded.matchAll(/(?:^|\.)((?:user|host)\.name): ([A-Za-z0-9._\\-]+)\s*$/gm)) {
       tokens.add(m[2].split('@')[0]);
       tokens.add(m[2]);
     }
+  }
+  // Seeded IoCs (sinkhole zones, payload hashes) plant Tier 1 evidence; a
+  // behaviour narrative that carries one turns Tier 2 recall into an IoC match.
+  for (const t of extraTokens) {
+    if (t.length > 0) tokens.add(t);
   }
   let out = text;
   for (const t of tokens) {
@@ -78,7 +83,8 @@ const flattenLeaves = (doc: unknown, prefix = ''): string => {
 
 const behaviourNarrative = (
   chainSteps: ReadonlyArray<Record<string, unknown>>,
-  seededTexts: string[]
+  seededTexts: string[],
+  iocTokens: string[] = []
 ): string =>
   `${redactSeededTokens(
     chainSteps
@@ -87,7 +93,8 @@ const behaviourNarrative = (
       .map((s) => s.replace(/\(.*?\)/g, '').trim())
       .filter((s) => s.length > 0)
       .join('. '),
-    seededTexts
+    seededTexts,
+    iocTokens
   )}. Observations are consistent with a multi-stage intrusion; the report describes execution flow only.`;
 
 const DECOY_NARRATIVES: Record<string, string> = {
@@ -156,7 +163,8 @@ export const buildReportSpecs = (
         'content.title': `Behaviour report: ${titleCase(chain.key)} campaign`,
         'content.body_text': behaviourNarrative(
           chain.steps ?? [],
-          Object.values(samples).map((s) => flattenLeaves(s))
+          Object.values(samples).map((s) => flattenLeaves(s)),
+          [...zones, PAYLOAD_HASHES.md5, PAYLOAD_HASHES.sha256]
         ),
         'source.name': 'g5-ad2-seeded-recall',
         'severity.level': 'high',

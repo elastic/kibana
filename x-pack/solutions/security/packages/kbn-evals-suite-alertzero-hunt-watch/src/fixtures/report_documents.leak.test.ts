@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildReportSpecs } from './report_documents';
+import { buildReportSpecs, PAYLOAD_HASHES } from './report_documents';
 import { loadManifest, loadSamples } from './load_corpus';
 import { leakAuditHolds, leakAuditTokens } from '../harness/phases';
 import { flattenDocText } from '../harness/examples';
@@ -38,4 +38,29 @@ describe('R-beh narratives vs the C2 leak audit (live-run regression)', () => {
       expect(text).not.toMatch(/jordan\.park|karen\.d|alice\.chen|www-data|srv-files-02|dc-fs-09/);
     }
   });
+
+  it.each(['A', 'B'])(
+    'arm %s: no R-beh body text leaks a seeded IoC (sinkhole zone or payload hash)',
+    (arm) => {
+      // Regression (Libra): the Linux chain's manifest step text names
+      // drops.example.io, which also occurs in the positive command lines —
+      // the narrow host/user extractor missed it. The narrative must redact
+      // seeded IoCs too, and the audit must catch them when it does not.
+      const iocTokens = [
+        ...leakAuditTokens(seededTexts, [
+          ...manifest.sinkhole_zones,
+          PAYLOAD_HASHES.md5,
+          PAYLOAD_HASHES.sha256,
+        ]),
+      ];
+      const specs = buildReportSpecs(manifest, samples, arm as 'A' | 'B');
+      const rBeh = specs.filter((spec) => spec.reportClass.startsWith('R-beh'));
+      // Non-vacuous: the manifest does plant at least one zone token that the
+      // bare host/user extraction misses.
+      expect(manifest.sinkhole_zones.length).toBeGreaterThan(0);
+      for (const spec of rBeh) {
+        expect(leakAuditHolds(JSON.stringify(spec.document), iocTokens)).toBeNull();
+      }
+    }
+  );
 });

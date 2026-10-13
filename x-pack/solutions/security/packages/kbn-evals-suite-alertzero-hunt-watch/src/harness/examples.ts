@@ -24,7 +24,8 @@ export const cellKey = (phase: Phase, runKey: string): string => `${phase}|${run
 
 /** A cell with a coordinator output. */
 export const toRunRecord = (
-  spec: Pick<ReportSpec, 'runKey' | 'reportClass' | 'sampleBase'>,
+  spec: Partial<Pick<ReportSpec, 'runKey' | 'reportClass' | 'sampleBase' | 'chain' | 'document'>> &
+    Pick<ReportSpec, 'runKey' | 'reportClass'>,
   phase: Phase,
   reportId: string,
   run: CoordinatorRun
@@ -33,6 +34,10 @@ export const toRunRecord = (
   phase,
   reportClass: spec.reportClass,
   sampleBase: spec.sampleBase,
+  chain: spec.chain,
+  reportIocValues: Array.isArray(spec.document?.['extracted.iocs'])
+    ? ((spec.document?.['extracted.iocs'] ?? []) as Array<{ value: string }>).map((i) => i.value)
+    : undefined,
   reportId,
   run,
   tier1HitIds: (run.tier1_hits ?? []).map((h) => h._id),
@@ -98,9 +103,13 @@ export const flattenDocText = (doc: unknown, prefix = ''): string => {
 export const leakAuditFailures = (
   specs: Array<Pick<ReportSpec, 'runKey' | 'reportClass' | 'document'>>,
   positiveDocs: Array<Record<string, unknown>>,
-  phases: readonly Phase[]
+  phases: readonly Phase[],
+  extraTokens: string[] = []
 ): ControlFailure[] => {
-  const tokens = leakAuditTokens(positiveDocs.map((d) => flattenDocText(d)));
+  const tokens = leakAuditTokens(
+    positiveDocs.map((d) => flattenDocText(d)),
+    extraTokens
+  );
   const failures: ControlFailure[] = [];
   for (const spec of specs.filter((s) => s.reportClass.startsWith('R-beh'))) {
     const failure = leakAuditHolds(JSON.stringify(spec.document), tokens);

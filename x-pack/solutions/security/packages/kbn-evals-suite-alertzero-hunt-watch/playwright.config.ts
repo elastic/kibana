@@ -13,4 +13,9 @@ export default createPlaywrightEvalsConfig({
   // calls) plus ingest/refresh/poll overhead; pinned by
   // src/harness/playwright_budget.test.ts.
   timeout: 60 * 60_000,
+  // The sweep runs inside the Playwright task, not inside the experiment
+  // task: runExperiment's task merely replays the recorded run records, so
+  // repetitions > 1 would publish repeated "independent" measurements of one
+  // sweep. Pinned to 1 here and asserted in the spec.
+  repetitions: 1,
 });
