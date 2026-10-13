@@ -48,7 +48,7 @@ apiTest.describe('Executive brief - retention', { tag: EXECUTIVE_BRIEF_TAGS }, (
 
     const read = await apiClient.get<BriefResponse>(BRIEF_ROUTE, { headers, responseType: 'json' });
     expect(read).toHaveStatusCode(200);
-    const { generatedAt, expiresAt } = read.body.report ?? {};
+    const { generatedAt, expiresAt } = read.body.metadata ?? {};
     expect(generatedAt).toBeDefined();
     expect(Date.parse(expiresAt ?? '') - Date.parse(generatedAt ?? '')).toBe(BRIEF_RETENTION_MS);
   });

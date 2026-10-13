@@ -23,16 +23,9 @@ export const generateBriefRequestBodySchema = lazySchema(() =>
 
 export type GenerateBriefRequestBody = z.infer<typeof generateBriefRequestBodySchema>;
 
-/** POST response: the started (or reused) job. */
-export interface GenerateBriefResponse {
-  job: { id: string; status: BriefJobStatus; stage?: BriefJobStage };
-  /** True when an existing running job was returned instead of starting a new one. */
-  reused: boolean;
-}
-
-/** The latest generation run; it can be newer than the report (running or failed). */
-export interface BriefGeneration {
-  jobId: string;
+/** The latest run; it can be newer than the report (running or failed). */
+export interface BriefJobView {
+  id: string;
   status: BriefJobStatus;
   /** Only while running. */
   stage?: BriefJobStage;
@@ -43,32 +36,39 @@ export interface BriefGeneration {
   error?: { code: BriefErrorCode; message: string };
 }
 
-/** The last successful brief. `verdict` and `areas` are absent when nothing was found. */
-export interface BriefReport {
-  generatedAt: string;
-  expiresAt: string;
-  period: { range: BriefRange; from: string; to: string };
-  verdict?: Brief['verdict'];
-  areas?: Brief['areas'];
+/** POST response: the started (or reused) job. */
+export interface GenerateBriefResponse {
+  job: Pick<BriefJobView, 'id' | 'status' | 'stage'>;
+  /** True when an existing running job was returned instead of starting a new one. */
+  reused: boolean;
 }
 
-/** How the report was built. `tokens` and `verification` are absent when the AI wasn't called. */
-export interface BriefProvenance {
-  connectorId: string;
-  model?: string;
-  tokens?: { prompt: number; completion: number; total: number };
-  verification?: VerificationSummary;
-  /** What each signal checked, and with what result. */
-  signals: SignalRun[];
+/** Everything needed to render the brief; `verdict` and `areas` are absent when nothing was found. */
+export interface BriefReport {
+  verdict?: Brief['verdict'];
+  areas?: Brief['areas'];
   /** Entity Store records of the entities the facts and links reference, keyed by EUID. */
   entities: Record<string, Entity>;
   facts: Fact[];
   links: Link[];
 }
 
-/** GET response. `report` and `provenance` are present together, once a run has succeeded. */
+/** About the report; `tokens` and `verification` are absent when the AI wasn't called. */
+export interface BriefMetadata {
+  generatedAt: string;
+  expiresAt: string;
+  period: { range: BriefRange; from: string; to: string };
+  connectorId: string;
+  model?: string;
+  tokens?: { prompt: number; completion: number; total: number };
+  verification?: VerificationSummary;
+  /** What each signal checked, and with what result. */
+  signals: SignalRun[];
+}
+
+/** GET response. `report` and `metadata` are present together, once a run has succeeded. */
 export interface BriefResponse {
-  generation: BriefGeneration;
+  job: BriefJobView;
   report?: BriefReport;
-  provenance?: BriefProvenance;
+  metadata?: BriefMetadata;
 }

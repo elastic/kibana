@@ -6,7 +6,7 @@
  */
 
 import type {
-  BriefGeneration,
+  BriefJobView,
   BriefResponse,
 } from '../../../../../common/entity_analytics/executive_brief/api';
 import type {
@@ -14,8 +14,8 @@ import type {
   BriefJob,
 } from '../../../../../common/entity_analytics/executive_brief/document';
 
-const toGeneration = (job: BriefJob): BriefGeneration => ({
-  jobId: job.id,
+const toJobView = (job: BriefJob): BriefJobView => ({
+  id: job.id,
   status: job.status,
   ...(job.status === 'running' && job.stage ? { stage: job.stage } : {}),
   startedAt: job.started_at,
@@ -23,30 +23,30 @@ const toGeneration = (job: BriefJob): BriefGeneration => ({
   ...(job.status === 'failed' && job.error ? { error: job.error } : {}),
 });
 
-/** Maps the stored document to the GET response: the latest run, the report and its provenance. */
+/** Maps the stored document to the GET response: the latest job, the report and its metadata. */
 export const toBriefResponse = (document: BriefDocument): BriefResponse => {
-  const generation = toGeneration(document.job);
+  const job = toJobView(document.job);
   const { generated_at: generatedAt, params, evidence, brief } = document;
   if (!generatedAt || !params || !evidence) {
-    return { generation };
+    return { job };
   }
   return {
-    generation,
+    job,
     report: {
+      ...(brief ? { verdict: brief.verdict, areas: brief.areas } : {}),
+      entities: evidence.entities,
+      facts: evidence.facts,
+      links: evidence.links,
+    },
+    metadata: {
       generatedAt,
       expiresAt: document.expires_at,
       period: { range: params.range, from: params.from, to: params.to },
-      ...(brief ? { verdict: brief.verdict, areas: brief.areas } : {}),
-    },
-    provenance: {
       connectorId: params.connector_id,
       ...(document.model ? { model: document.model } : {}),
       ...(document.tokens ? { tokens: document.tokens } : {}),
       ...(document.verification ? { verification: document.verification } : {}),
       signals: evidence.signals,
-      entities: evidence.entities,
-      facts: evidence.facts,
-      links: evidence.links,
     },
   };
 };

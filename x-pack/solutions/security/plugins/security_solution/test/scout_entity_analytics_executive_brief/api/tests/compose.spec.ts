@@ -79,24 +79,24 @@ apiTest.describe(
         const document = await waitForBriefJob({ apiClient, headers, jobId });
         await llmCall;
 
-        expect(document.generation).toMatchObject({ jobId, status: 'succeeded' });
-        expect(document.report?.period.range).toBe('7d');
+        expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
         expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
         expect(document.report?.areas).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.areas);
-        expect(document.provenance).toMatchObject({
+        expect(document.metadata).toMatchObject({
+          period: { range: '7d' },
           connectorId,
           verification: { lowered: 0, repaired: false },
         });
         // Entities are Entity Store records keyed by EUID; facts reference them by EUID.
-        expect(Object.keys(document.provenance?.entities ?? {})).toStrictEqual([SEEDED_ENTITY.id]);
-        expect(document.provenance?.entities[SEEDED_ENTITY.id]).toMatchObject({
+        expect(Object.keys(document.report?.entities ?? {})).toStrictEqual([SEEDED_ENTITY.id]);
+        expect(document.report?.entities[SEEDED_ENTITY.id]).toMatchObject({
           entity: {
             id: SEEDED_ENTITY.id,
             name: SEEDED_ENTITY.name,
             risk: { calculated_level: SEEDED_ENTITY.riskLevel },
           },
         });
-        expect(document.provenance?.facts).toStrictEqual([
+        expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({
             id: 1,
             kind: 'high_risk_entity',
@@ -104,7 +104,7 @@ apiTest.describe(
             entityIds: [SEEDED_ENTITY.id],
           }),
         ]);
-        expect(document.provenance?.links).toStrictEqual([]);
+        expect(document.report?.links).toStrictEqual([]);
 
         // One LLM call, with the brief tool forced.
         expect(llmProxy.interceptedRequests).toHaveLength(1);
@@ -134,8 +134,8 @@ apiTest.describe(
 
       await held.release();
       const document = await waitForBriefJob({ apiClient, headers, jobId: first.body.job.id });
-      expect(document.generation.status).toBe('succeeded');
-      expect(document.report?.period.range).toBe('7d');
+      expect(document.job.status).toBe('succeeded');
+      expect(document.metadata?.period.range).toBe('7d');
       expect(llmProxy.interceptedRequests).toHaveLength(1);
     });
 
@@ -153,9 +153,9 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
-        expect(document.generation.status).toBe('succeeded');
+        expect(document.job.status).toBe('succeeded');
         expect(document.report?.verdict).toStrictEqual(HIGH_RISK_ENTITY_BRIEF.verdict);
-        expect(document.provenance?.verification?.repaired).toBe(true);
+        expect(document.metadata?.verification?.repaired).toBe(true);
 
         // The repair answers the rejected tool call with the problems.
         expect(llmProxy.interceptedRequests).toHaveLength(2);
@@ -179,7 +179,7 @@ apiTest.describe(
           headers,
           jobId: previous.body.job.id,
         });
-        expect(previousDocument.generation.status).toBe('succeeded');
+        expect(previousDocument.job.status).toBe('succeeded');
 
         llmProxy.clear();
         mockSubmitBrief(llmProxy, UNCITED_VERDICT_BRIEF);
@@ -192,13 +192,14 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
-        expect(document.generation).toMatchObject({
+        expect(document.job).toMatchObject({
           status: 'failed',
           error: { code: 'llm_output' },
         });
         expect(llmProxy.interceptedRequests).toHaveLength(2);
         // The last successful brief is still served.
         expect(document.report).toStrictEqual(previousDocument.report);
+        expect(document.metadata).toStrictEqual(previousDocument.metadata);
       }
     );
 
@@ -230,12 +231,12 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
-        expect(document.generation.status).toBe('succeeded');
+        expect(document.job.status).toBe('succeeded');
         expect(document.report?.verdict?.summary).toBe(
           `{{ entity.id ${SEEDED_ENTITY.id} }} is at high risk.`
         );
         expect(document.report?.areas?.map(({ id }) => id)).toStrictEqual(['threats']);
-        expect(document.provenance?.verification).toMatchObject({
+        expect(document.metadata?.verification).toMatchObject({
           dropped: { citation: 1 },
           repaired: false,
         });

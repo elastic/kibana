@@ -67,14 +67,11 @@ apiTest.describe(
 
         const jobId = response.body.job.id;
         const document = await waitForBriefJob({ apiClient, headers, jobId });
-        expect(document.generation).toMatchObject({ jobId, status: 'succeeded' });
-        expect(document.report).toBeDefined();
-        expect(document.report?.verdict).toBeUndefined();
-        expect(document.report?.areas).toBeUndefined();
-        expect(document.provenance?.tokens).toBeUndefined();
-        expect(document.provenance?.verification).toBeUndefined();
-        expect(document.provenance?.facts).toHaveLength(0);
-        expect(document.provenance?.signals.map(({ id }) => id).sort()).toStrictEqual(
+        expect(document.job).toMatchObject({ id: jobId, status: 'succeeded' });
+        expect(document.report).toStrictEqual({ entities: {}, facts: [], links: [] });
+        expect(document.metadata?.tokens).toBeUndefined();
+        expect(document.metadata?.verification).toBeUndefined();
+        expect(document.metadata?.signals.map(({ id }) => id).sort()).toStrictEqual(
           [...BRIEF_SIGNAL_IDS].sort()
         );
         expect(llmProxy.interceptedRequests).toHaveLength(0);
@@ -138,8 +135,8 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(read).toHaveStatusCode(200);
-        expect(read.body.generation).toMatchObject({
-          jobId,
+        expect(read.body.job).toMatchObject({
+          id: jobId,
           status: 'failed',
           error: { code: 'interrupted' },
         });

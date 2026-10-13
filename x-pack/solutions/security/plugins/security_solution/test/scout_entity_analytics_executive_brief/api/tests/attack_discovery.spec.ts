@@ -107,8 +107,8 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
-        expect(document.generation.status).toBe('succeeded');
-        const discoveryIds = (document.provenance?.facts ?? [])
+        expect(document.job.status).toBe('succeeded');
+        const discoveryIds = (document.report?.facts ?? [])
           .filter(({ kind }) => kind === 'attack_discovery')
           .map(({ source }) => source?.id)
           .sort();
@@ -143,8 +143,8 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
-        expect(document.generation.status).toBe('succeeded');
-        expect(document.provenance?.facts).toStrictEqual([
+        expect(document.job.status).toBe('succeeded');
+        expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({
             id: 1,
             kind: 'attack_discovery',
@@ -172,13 +172,13 @@ apiTest.describe(
         expect(response).toHaveStatusCode(202);
 
         const document = await waitForBriefJob({ apiClient, headers, jobId: response.body.job.id });
-        expect(document.generation.status).toBe('succeeded');
-        expect(document.provenance?.facts).toStrictEqual([
+        expect(document.job.status).toBe('succeeded');
+        expect(document.report?.facts).toStrictEqual([
           expect.objectContaining({ id: 1, severity: 'low' }),
         ]);
         expect(document.report?.verdict?.level).toBe('watch');
         expect(document.report?.areas?.map(({ level }) => level)).toStrictEqual(['watch']);
-        expect(document.provenance?.verification?.lowered).toBeGreaterThanOrEqual(1);
+        expect(document.metadata?.verification?.lowered).toBeGreaterThanOrEqual(1);
       }
     );
   }

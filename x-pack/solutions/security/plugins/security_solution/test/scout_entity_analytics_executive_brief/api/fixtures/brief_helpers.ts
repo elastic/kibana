@@ -149,10 +149,9 @@ export const waitForBriefJob = async ({
       responseType: 'json',
     });
     if (response.statusCode === 200) {
-      const { generation } = response.body;
-      const { status, stage } = generation;
-      lastStatus = `${generation.jobId}: ${status}${stage ? ` (${stage})` : ''}`;
-      if (generation.jobId === jobId && (status === 'succeeded' || status === 'failed')) {
+      const { id, status, stage } = response.body.job;
+      lastStatus = `${id}: ${status}${stage ? ` (${stage})` : ''}`;
+      if (id === jobId && (status === 'succeeded' || status === 'failed')) {
         return response.body;
       }
     }
@@ -192,10 +191,8 @@ export const generateBrief = async ({
 
   const jobId = response.body.job.id;
   const document = await waitForBriefJob({ apiClient, headers, jobId, route });
-  if (document.generation.status !== 'succeeded') {
-    throw new Error(
-      `Executive brief job ${jobId} failed: ${JSON.stringify(document.generation.error)}`
-    );
+  if (document.job.status !== 'succeeded') {
+    throw new Error(`Executive brief job ${jobId} failed: ${JSON.stringify(document.job.error)}`);
   }
   return { jobId, document };
 };

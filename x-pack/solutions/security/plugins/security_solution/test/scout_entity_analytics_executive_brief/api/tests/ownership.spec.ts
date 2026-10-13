@@ -88,7 +88,7 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
       responseType: 'json',
     });
     expect(ownerRead).toHaveStatusCode(200);
-    expect(ownerRead.body.generation).toMatchObject({ jobId, status: 'succeeded' });
+    expect(ownerRead.body.job).toMatchObject({ id: jobId, status: 'succeeded' });
   });
 
   apiTest(
@@ -119,7 +119,7 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
         headers: ownerHeaders,
         responseType: 'json',
       });
-      expect(defaultSpaceRead.body.generation.jobId).toBe(jobId);
+      expect(defaultSpaceRead.body.job.id).toBe(jobId);
 
       const { ownerId } = await getBriefDocId({
         apiClient,
@@ -143,7 +143,7 @@ apiTest.describe('Executive brief - ownership', { tag: EXECUTIVE_BRIEF_TAGS }, (
     });
 
     expect(secondJobId).not.toBe(firstJobId);
-    expect(document.generation).toMatchObject({ jobId: secondJobId, status: 'succeeded' });
+    expect(document.job).toMatchObject({ id: secondJobId, status: 'succeeded' });
 
     // Same document (deterministic id per owner and space), now holding the second job.
     const { docId, ownerId } = await getBriefDocId({
