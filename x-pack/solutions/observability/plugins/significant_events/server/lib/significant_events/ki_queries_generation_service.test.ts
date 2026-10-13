@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { Streams } from '@kbn/streams-schema';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { EbtTelemetryClient } from '../telemetry/ebt';
 import {
   generateKIQueries,
@@ -24,17 +24,19 @@ const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as jest.
   typeof executeKIQueryGenerationAgent
 >;
 
-const definition = { name: 'logs.test' } as Streams.all.Definition;
+const source = {
+  id: 'source-1',
+  slug: 'checkout',
+  title: 'Checkout',
+  view_name: '$.nightshift.sources.default.checkout',
+} as NightshiftSource;
 
 const makeDeps = (
   overrides: Partial<GenerateKIQueriesDependencies> = {}
 ): GenerateKIQueriesDependencies => ({
-  streamsClient: {
-    getStream: jest.fn().mockResolvedValue(definition),
-  } as unknown as GenerateKIQueriesDependencies['streamsClient'],
   kiClient: {
-    getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
-      'logs.test': [
+    getSourceToQueryLinksMap: jest.fn().mockResolvedValue({
+      'source-1': [
         {
           query: {
             id: 'query-1',
@@ -44,7 +46,7 @@ const makeDeps = (
             description: 'Tracks error rate',
             esql: {
               query:
-                'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+                'FROM $.nightshift.sources.default.checkout | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
             },
           },
         },
@@ -90,7 +92,7 @@ describe('generateKIQueries', () => {
     } as unknown as EbtTelemetryClient;
 
     const result = await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'test-connector', runId: 'run-1' },
+      { source, connectorId: 'test-connector', runId: 'run-1' },
       makeDeps({ telemetry, logger })
     );
 
@@ -112,6 +114,7 @@ describe('generateKIQueries', () => {
     expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({
         interactionId: 'run-1',
+        source,
         existingQueries: [
           {
             id: 'query-1',
@@ -119,7 +122,7 @@ describe('generateKIQueries', () => {
             type: 'stats',
             severity_score: 65,
             description: 'Tracks error rate',
-            esql: 'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+            esql: 'FROM $.nightshift.sources.default.checkout | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
           },
         ],
       })
@@ -128,6 +131,7 @@ describe('generateKIQueries', () => {
       expect.objectContaining({
         count: 1,
         connector_id: 'test-connector',
+        source_id: 'source-1',
         input_tokens_used: 10,
         output_tokens_used: 20,
       })
@@ -138,7 +142,7 @@ describe('generateKIQueries', () => {
     const resolveModel = jest.fn().mockResolvedValue('canonical-connector');
 
     await generateKIQueries(
-      { streamName: 'logs.test', connectorId: 'connector-alias', runId: 'run-1' },
+      { source, connectorId: 'connector-alias', runId: 'run-1' },
       makeDeps({ resolveModel, logger })
     );
 

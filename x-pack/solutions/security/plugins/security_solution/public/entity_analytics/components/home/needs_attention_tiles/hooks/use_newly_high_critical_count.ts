@@ -16,12 +16,12 @@ import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewlyHighCriticalCountQuery } from '../queries/tile_newly_high_critical_query';
-import type { TimeRange } from '../../use_time_range_param';
 import {
-  getEntityFilterESQL,
   EMPTY_ENTITY_FILTERS,
   type EntityFilters,
-} from '../../use_entity_filters_param';
+  type TimeRange,
+} from '../../entities_grid/common';
+import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 
 export const useNewlyHighCriticalCount = ({
   spaceId,
@@ -50,7 +50,7 @@ export const useNewlyHighCriticalCount = ({
             spaceId,
             resolvedIndex.indexName,
             timeRange,
-            getEntityFilterESQL(entityFilters)
+            buildEntityFilterClauses(entityFilters)
           )
         : null,
     [spaceId, resolvedIndex?.indexName, timeRange, entityFilters]

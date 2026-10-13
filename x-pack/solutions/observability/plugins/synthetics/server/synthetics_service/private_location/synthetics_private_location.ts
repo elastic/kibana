@@ -7,6 +7,7 @@
 import type { NewPackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
 import { escapeQuotes } from '@kbn/es-query';
@@ -29,6 +30,7 @@ import type {
   HeartbeatConfig,
   MonitorFields,
   PrivateLocation,
+  ServiceLocationErrors,
 } from '../../../common/runtime_types';
 import {
   ConfigKey,
@@ -41,12 +43,23 @@ import type { PrivateLocationAttributes } from '../../runtime_types/private_loca
 import { PackagePolicyService } from './package_policy_service';
 import { rebalanceByCost } from './assign_shards';
 import {
+  EMPTY_REBALANCE_RESULT,
+  summarizeRebalance,
+  type RebalanceShardsResult,
+} from './rebalance_stats';
+import {
   toConditionUpdates,
   toClearedConditionUpdates,
   toMonitorPlacements,
 } from './rebalance_writes';
 import { getPrivateLocations } from '../get_private_locations';
-import { agentIdFromCondition, assignAgentById, isEqlSafeLiteral } from './assign_by_condition';
+import {
+  agentIdFromCondition,
+  assignAgentById,
+  isEqlSafeLiteral,
+  UNASSIGNED_CONDITION,
+} from './assign_by_condition';
+import { isCompleteElasticAgent } from './get_agent_info';
 import { getAgentShardingMode, type AgentShardingMode } from './agent_sharding_license';
 
 export interface PrivateConfig {
@@ -56,7 +69,16 @@ export interface PrivateConfig {
 
 interface EnrolledAgents {
   agentIds: string[];
+  /** Enrolled agents on the elastic-agent-complete image. Browser monitors pin only to these. */
+  completeAgentIds?: string[];
 }
+
+type BulkCreatedPolicies = Awaited<ReturnType<PackagePolicyService['bulkCreate']>>;
+
+export type CreatePackagePoliciesResult = BulkCreatedPolicies & {
+  /** Test runs skipped because the location cannot run the monitor. */
+  errors?: ServiceLocationErrors;
+};
 
 export interface FailedPolicyUpdate {
   packagePolicy: NewPackagePolicyWithId;
@@ -226,19 +248,25 @@ export class SyntheticsPrivateLocation {
       newPolicy.policy_ids = [privateLocation.agentPolicyId];
       if (shardingMode === 'active') {
         const agentIds = conditionHosts?.agentIds ?? [];
+        const isBrowser = config.type === MonitorTypeEnum.BROWSER;
+        // An omitted condition runs the monitor on every agent. Browser monitors
+        // only run on elastic-agent-complete, so they must not use that fallback.
+        const eligibleAgentIds = isBrowser ? conditionHosts?.completeAgentIds ?? [] : agentIds;
         const existingAgentId = agentIdFromCondition(existingCondition);
 
-        if (existingAgentId && agentIds.includes(existingAgentId)) {
+        if (existingAgentId && eligibleAgentIds.includes(existingAgentId)) {
           // Keep a valid existing pin during edits. Health and balancing moves
           // belong to the rebalance task, not the monitor CRUD path.
           newPolicy.condition = existingCondition;
-        } else if (agentIds.length > 0) {
-          const assigned = assignAgentById(config.id, agentIds);
+        } else if (eligibleAgentIds.length > 0) {
+          const assigned = assignAgentById(config.id, eligibleAgentIds);
           if (assigned) {
             newPolicy.condition = assigned.condition;
           }
+        } else if (isBrowser) {
+          newPolicy.condition = UNASSIGNED_CONDITION;
         }
-        // No agents: omit condition. Rebalance pins a real agent once someone enrolls.
+        // Lightweight with no agents: omit condition. Rebalance pins a real agent once someone enrolls.
       } else if (shardingMode === 'unknown') {
         // License unreadable: keep whatever pin exists until it can be read again.
         if (existingCondition) {
@@ -313,6 +341,7 @@ export class SyntheticsPrivateLocation {
    */
   private async getEnrolledAgents(agentPolicyId: string): Promise<EnrolledAgents> {
     const agentIds = new Set<string>();
+    const completeAgentIds = new Set<string>();
     const perPage = 1000;
     let page = 1;
 
@@ -327,6 +356,9 @@ export class SyntheticsPrivateLocation {
       for (const agent of agents) {
         if (agent.id && isEqlSafeLiteral(agent.id)) {
           agentIds.add(agent.id);
+          if (isCompleteElasticAgent(agent.local_metadata)) {
+            completeAgentIds.add(agent.id);
+          }
         }
       }
 
@@ -336,7 +368,7 @@ export class SyntheticsPrivateLocation {
       page += 1;
     }
 
-    return { agentIds: [...agentIds] };
+    return { agentIds: [...agentIds], completeAgentIds: [...completeAgentIds] };
   }
 
   /** Resolves each touched location at most once per monitor batch. */
@@ -376,21 +408,25 @@ export class SyntheticsPrivateLocation {
     maintenanceWindows: MaintenanceWindow[],
     testRunId?: string,
     runOnce?: boolean
-  ) {
+  ): Promise<CreatePackagePoliciesResult> {
     if (configs.length === 0) {
       return { created: [], failed: [] };
     }
     const newPolicies: NewPackagePolicyWithId[] = [];
+    const locationErrors: ServiceLocationErrors = [];
     const newPolicyTemplate = await this.buildNewPolicy(spaceId);
     const referencedPrivateLocations = this.getReferencedPrivateLocations(
       configs,
       privateLocations
     );
     const shardingMode = await getAgentShardingMode(this.server);
-    const enrolledAgentsByLocation =
-      shardingMode === 'active'
-        ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
-        : new Map<string, EnrolledAgents>();
+    // Test runs need the browser check in every sharding mode.
+    const needsEnrolledAgents =
+      shardingMode === 'active' ||
+      (Boolean(testRunId) && configs.some(({ config }) => config.type === MonitorTypeEnum.BROWSER));
+    const enrolledAgentsByLocation = needsEnrolledAgents
+      ? await this.getEnrolledAgentsByLocation(referencedPrivateLocations)
+      : new Map<string, EnrolledAgents>();
 
     for (const { config, globalParams } of configs) {
       try {
@@ -405,6 +441,20 @@ export class SyntheticsPrivateLocation {
             );
           }
 
+          const enrolledAgents = enrolledAgentsByLocation.get(location.id);
+          // No agent here can run the test, so it would wait forever for results.
+          if (
+            testRunId &&
+            config.type === MonitorTypeEnum.BROWSER &&
+            !enrolledAgents?.completeAgentIds?.length
+          ) {
+            locationErrors.push({
+              locationId: location.id,
+              error: { reason: browserNeedsCompleteAgentReason(location.label), status: 400 },
+            });
+            continue;
+          }
+
           const newPolicy = await this.generateNewPolicy(
             config,
             location,
@@ -414,7 +464,7 @@ export class SyntheticsPrivateLocation {
             maintenanceWindows,
             testRunId,
             runOnce,
-            enrolledAgentsByLocation.get(location.id),
+            enrolledAgents,
             undefined,
             shardingMode
           );
@@ -444,6 +494,9 @@ export class SyntheticsPrivateLocation {
     }
 
     if (newPolicies.length === 0) {
+      if (locationErrors.length > 0) {
+        return { created: [], failed: [], errors: locationErrors };
+      }
       throw new Error('Failed to build package policies for all monitors');
     }
 
@@ -456,7 +509,7 @@ export class SyntheticsPrivateLocation {
         // ignore await here, we don't want to wait for this to finish
         void scheduleTestNowCleanUp(this.server, result.created);
       }
-      return result;
+      return locationErrors.length > 0 ? { ...result, errors: locationErrors } : result;
     } catch (e) {
       this.server.logger.error(e);
       throw e;
@@ -809,22 +862,28 @@ export class SyntheticsPrivateLocation {
    * bounce. Failover is independent of that gate: a dead agent's monitors are
    * placed on any of the full `healthyAgentIds`, so they evacuate immediately
    * even when the only currently-live agents aren't stable yet.
+   *
+   * Browser monitors are placed only on `browserAgentIds` (elastic-agent-complete).
+   * An empty list pins them to a sentinel that matches no agent, so they do not
+   * run on the standard image.
    */
   async rebalanceShards({
     location,
     healthyAgentIds,
     recoveryAgentIds,
+    browserAgentIds,
     capacities,
     signal,
   }: {
     location: { id: string; label?: string; agentPolicyId: string };
     healthyAgentIds: string[];
     recoveryAgentIds?: string[];
+    browserAgentIds: string[];
     capacities?: ReadonlyMap<string, number>;
     signal: AbortSignal;
-  }): Promise<{ total: number; moved: number }> {
+  }): Promise<RebalanceShardsResult> {
     if (healthyAgentIds.length === 0) {
-      return { total: 0, moved: 0 };
+      return EMPTY_REBALANCE_RESULT;
     }
     signal.throwIfAborted();
     const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
@@ -832,14 +891,22 @@ export class SyntheticsPrivateLocation {
       signal,
     });
     if (pkgPolicies.length === 0) {
-      return { total: 0, moved: 0 };
+      return {
+        ...EMPTY_REBALANCE_RESULT,
+        monitorsPerAgent: Object.fromEntries(healthyAgentIds.map((agentId) => [agentId, 0])),
+      };
     }
 
     const monitors = toMonitorPlacements(pkgPolicies, location.id);
-    const assignment = rebalanceByCost(monitors, healthyAgentIds, { capacities, recoveryAgentIds });
+    const assignment = rebalanceByCost(monitors, healthyAgentIds, {
+      capacities,
+      recoveryAgentIds,
+      browserAgentIds,
+    });
     const updatesBySpace = toConditionUpdates(pkgPolicies, assignment, location.id);
 
     let moved = 0;
+    let failedMoves = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
       signal.throwIfAborted();
       // Update in the policy's own recorded space (grouped in toConditionUpdates),
@@ -850,6 +917,7 @@ export class SyntheticsPrivateLocation {
       });
       // Count only successful moves (a failed bulkUpdate leaves the old pin).
       moved += policiesToUpdate.length - failed.length;
+      failedMoves += failed.length;
       if (failed.length > 0) {
         // Not terminal: the rebalance is idempotent and retried every cycle, so
         // the next run re-attempts these same moves. warn (not error) — no
@@ -862,7 +930,12 @@ export class SyntheticsPrivateLocation {
       }
     }
 
-    return { total: pkgPolicies.length, moved };
+    return {
+      total: pkgPolicies.length,
+      moved,
+      failed: failedMoves,
+      ...summarizeRebalance({ monitors, assignment, healthyAgentIds }),
+    };
   }
 
   /**
@@ -912,3 +985,10 @@ const throwAddEditError = (hasPolicy: boolean, location?: string, name?: string)
 const deletePolicyError = (name: string, location?: string) => {
   return `Unable to delete Synthetics package policy for monitor ${name} with private location ${location}`;
 };
+
+const browserNeedsCompleteAgentReason = (locationLabel: string) =>
+  i18n.translate('xpack.synthetics.privateLocation.browserNeedsCompleteAgent', {
+    defaultMessage:
+      'Browser monitors run only on the elastic-agent-complete image, and no complete agent is enrolled in {locationLabel}.',
+    values: { locationLabel },
+  });

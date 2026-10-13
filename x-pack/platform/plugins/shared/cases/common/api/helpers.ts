@@ -15,6 +15,7 @@ import {
   INTERNAL_CASE_FIND_USER_ACTIONS_URL,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_BULK_GET_ATTACHMENTS_URL,
+  INTERNAL_BULK_DELETE_ATTACHMENTS_URL,
   INTERNAL_CONNECTORS_URL,
   INTERNAL_CASE_USERS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
@@ -42,6 +43,10 @@ export const getCaseFindAttachmentsUrl = (caseId: string): string => {
 
 export const getCaseAttachmentDetailsUrl = (caseId: string, attachmentId: string): string => {
   return CASE_ATTACHMENT_DETAILS_URL.replace('{case_id}', caseId).replace('{id}', attachmentId);
+};
+
+export const getCaseBulkDeleteAttachmentsUrl = (caseId: string): string => {
+  return INTERNAL_BULK_DELETE_ATTACHMENTS_URL.replace('{case_id}', caseId);
 };
 
 export const getCaseUserActionStatsUrl = (id: string): string => {

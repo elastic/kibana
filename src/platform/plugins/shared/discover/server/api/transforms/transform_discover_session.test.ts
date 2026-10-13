@@ -25,6 +25,7 @@ import { DiscoverTabType, UnifiedHistogramSuggestionType } from '@kbn/discover-s
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';
 import { type DiscoverSessionTabTypeState, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { SCHEMA_DISCOVER_SESSION_LATEST } from '@kbn/saved-search-plugin/server';
 import { fromStoredSearchEmbeddableByValue } from '../../../common/embeddable/transform_utils';
 import { toByValuePanelState } from '../../../common/embeddable/transform_utils.fixtures';
 import {
@@ -235,7 +236,8 @@ describe('discover session API transforms', () => {
         type: 'dropped_property',
         tab_id: id,
         key: 'control_panels',
-        message: 'Unable to transform control panels. Error: controlGroupJson is not valid JSON',
+        value: '{',
+        message: 'Invalid JSON.',
       })),
     });
     expect(session).toStrictEqual(original);
@@ -260,6 +262,7 @@ describe('discover session API transforms', () => {
       ...classicTab,
       attributes: {
         ...classicTab.attributes,
+        timeRange: { from: 'now/d', to: 'now/d', mode: 'relative' },
         tabTypeState: metricsTab.attributes.tabTypeState,
         visContext: metricsTab.attributes.visContext,
         controlGroupJson: '{', // Invalid JSON: this mapper must leave control parsing to the caller.
@@ -752,14 +755,17 @@ describe('discover session API transforms', () => {
       expect(references).toEqual([]);
     });
 
-    it('enables time restore when time_range is present', () => {
+    it('enables time restore and persists only date bounds when time_range includes mode', () => {
       const [classicTab] = apiData.tabs;
-      const { attributes } = transformDiscoverSessionIn({
+      const request = discoverSessionApiDataSchema.parse({
         ...apiData,
-        tabs: [classicTab],
+        tabs: [{ ...classicTab, time_range: { from: 'now-15m', to: 'now', mode: 'relative' } }],
       });
+      const { attributes } = transformDiscoverSessionIn(request);
 
       expect(attributes.tabs[0].attributes.timeRestore).toBe(true);
+      expect(attributes.tabs[0].attributes.timeRange).toEqual({ from: 'now-15m', to: 'now' });
+      expect(() => SCHEMA_DISCOVER_SESSION_LATEST.validate(attributes)).not.toThrow();
     });
 
     it.each([5000, 0])(
