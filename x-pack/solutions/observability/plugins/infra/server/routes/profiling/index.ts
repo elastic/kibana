@@ -155,12 +155,8 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
 
       const schemas = await fetchProfilingSchemas(params, profilingDataAccess, coreRequestContext);
 
-      return response.ok({
-        body: schemas,
-        headers: {
-          'cache-control': CACHE_CONTROL_HEADER_VALUE,
-        },
-      });
+      // Not cached like the profiling data, so that data arriving in another schema is offered right away
+      return response.ok({ body: schemas });
     }
   );
 }
