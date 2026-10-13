@@ -24,9 +24,9 @@ import type { SandboxSecretsClient } from '../../sandbox_secrets';
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
 /**
- * Upper bound (and default) for a sandbox command's own timeout. It sits just under the sandbox
- * client's 5-minute RPC deadline so a slow command returns "Command timed out." with its partial
- * output instead of the RPC being cut off.
+ * Upper bound (and default) for a sandbox command's own timeout. The sandbox client adds a 10s
+ * margin to derive the RPC deadline, so no command call can block an investigation for more than
+ * 5 minutes; a slow command returns "Command timed out." with its partial output.
  */
 export const MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS = 290;
 
