@@ -1055,6 +1055,20 @@ describe('SourcesClient', () => {
       expect(callOrder).toEqual(['view', 'so']);
     });
 
+    it('does not delete the view when the caller cannot write the saved object', async () => {
+      const { client, soClient, viewsClient } = setup();
+      soClient.get.mockResolvedValue(makeSavedObject());
+      soClient.update.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(new Error('read only'))
+      );
+
+      await expect(client.delete('source-1')).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(viewsClient.deleteView).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
     it('leaves the saved object in place when the view cannot be deleted', async () => {
       const { client, soClient, viewsClient } = setup();
       soClient.get.mockResolvedValue(makeSavedObject());
