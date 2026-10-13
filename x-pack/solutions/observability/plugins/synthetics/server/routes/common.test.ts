@@ -113,7 +113,8 @@ describe('getSavedObjectKqlFilter', () => {
 describe('parseMappingKey', () => {
   it.each([
     ['name', 'name.keyword'],
-    ['tags', 'tags.keyword'],
+    ['tags', 'tags'],
+    ['tags.keyword', 'tags'],
     ['type', 'type.keyword'],
     ['schedule', 'schedule.number'],
     ['schedule.keyword', 'schedule.number'],

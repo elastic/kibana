@@ -379,8 +379,9 @@ export function parseMappingKey(key: string | undefined) {
       return 'schedule.number';
     case 'project_id.keyword':
       return 'project_id';
+    case 'tags.keyword':
+      return 'tags';
     case 'name':
-    case 'tags':
     case 'type':
       return `${key}.keyword`;
     default:
