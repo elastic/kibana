@@ -82,11 +82,10 @@ export {
 
 export {
   SECURITY_ROLE_API_VERSION,
-  WORKER_ROLE_DEFINITIONS,
+  WORKER_SERVICE_ACCOUNT_NAMES,
   buildSecurityRoleUrl,
   getWorkerRoleName,
 } from './worker_roles';
-export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
 
 export type {
   ScanFailureWorker,

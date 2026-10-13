@@ -10,10 +10,9 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import {
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
-  WORKER_ROLE_DEFINITIONS,
+  WORKER_SERVICE_ACCOUNT_NAMES,
   buildSecurityRoleUrl,
   getWorkerRoleName,
-  type WorkerRoleDefinition,
 } from '@kbn/alertzero-common';
 import * as i18n from './translations';
 
@@ -82,7 +81,7 @@ const toResult = (account: ServiceAccountEntry): WorkerServiceAccountResult =>
     : { ok: false, error: i18n.accountUnusable(account.name) };
 
 /** Returns the name of the worker's built-in role, or throws if this deployment lacks it. */
-type FindRole = (definition: WorkerRoleDefinition) => Promise<string>;
+type FindRole = (accountName: string) => Promise<string>;
 
 /**
  * The roles ship built in: as Elasticsearch reserved roles on stateful and as predefined roles on
@@ -90,8 +89,8 @@ type FindRole = (definition: WorkerRoleDefinition) => Promise<string>;
  */
 const findBuiltInRole =
   (http: HttpStart, isServerless: boolean): FindRole =>
-  async ({ name }) => {
-    const roleName = getWorkerRoleName(name, { isServerless });
+  async (accountName) => {
+    const roleName = getWorkerRoleName(accountName, { isServerless });
     const missing = () =>
       new Error(
         isServerless ? i18n.predefinedRoleMissing(roleName) : i18n.reservedRoleMissing(roleName)
@@ -115,16 +114,16 @@ const ensureOne = async (
   accounts: ServiceAccountEntry[],
   workerId: string
 ): Promise<WorkerServiceAccountResult> => {
-  const definition = WORKER_ROLE_DEFINITIONS[workerId];
-  if (!definition) return { ok: false, error: i18n.NO_PREBUILT_ROLE };
+  const accountName = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
+  if (!accountName) return { ok: false, error: i18n.NO_PREBUILT_ROLE };
 
-  const existing = findByName(accounts, definition.name);
+  const existing = findByName(accounts, accountName);
   if (existing) return toResult(existing);
 
   try {
-    const roleName = await findRole(definition);
+    const roleName = await findRole(accountName);
     const created = await serviceAccounts.create({
-      name: definition.name,
+      name: accountName,
       description: i18n.accountDescription(roleName),
       roles: [roleName],
     });
@@ -135,7 +134,7 @@ const ensureOne = async (
     // other failure, so callers always get a result for this worker.
     return listAccounts(http).then(
       (current): WorkerServiceAccountResult => {
-        const concurrent = findByName(current, definition.name);
+        const concurrent = findByName(current, accountName);
         return concurrent ? toResult(concurrent) : { ok: false, error: toMessage(error) };
       },
       (listError): WorkerServiceAccountResult => ({ ok: false, error: toMessage(listError) })

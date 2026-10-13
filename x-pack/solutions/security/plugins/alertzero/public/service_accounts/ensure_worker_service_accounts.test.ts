@@ -9,7 +9,7 @@ import type { HttpStart } from '@kbn/core/public';
 import {
   SECURITY_SERVICE_ACCOUNT_URL,
   SECURITY_ROLE_API_VERSION,
-  WORKER_ROLE_DEFINITIONS,
+  WORKER_SERVICE_ACCOUNT_NAMES,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
   buildSecurityRoleUrl,
@@ -52,7 +52,7 @@ interface RoleEntry {
 const reserved = (name: string): RoleEntry => ({ name, metadata: { _reserved: true } });
 
 /** Every worker's built-in role on both stateful and Serverless. */
-const ALL_BUILT_IN_ROLES = Object.values(WORKER_ROLE_DEFINITIONS).flatMap(({ name }) => [
+const ALL_BUILT_IN_ROLES = Object.values(WORKER_SERVICE_ACCOUNT_NAMES).flatMap((name) => [
   reserved(getWorkerRoleName(name, STATEFUL)),
   reserved(getWorkerRoleName(name, SERVERLESS)),
 ]);
@@ -97,7 +97,7 @@ const roleLookupCalls = (get: jest.Mock) => get.mock.calls.filter(([url]) => isR
 
 describe('ensureWorkerServiceAccounts', () => {
   it('reuses an existing account without looking up its role', async () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
     const { http, get, put, serviceAccounts } = setup({
       pages: [
         { serviceAccounts: [account('other')], nextPage: 'cursor' },
@@ -130,7 +130,7 @@ describe('ensureWorkerServiceAccounts', () => {
   });
 
   it('reports an existing account that Kibana cannot run as', async () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
     const { http, serviceAccounts } = setup({
       pages: [{ serviceAccounts: [account(name, { assumable: false })] }],
     });
@@ -142,7 +142,7 @@ describe('ensureWorkerServiceAccounts', () => {
   });
 
   it('picks up an account created concurrently', async () => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
     const { http, get, serviceAccounts } = setup();
     // After the first page, account listings see the account the other tab created.
     get.mockImplementation(async (url: string) =>
@@ -208,9 +208,9 @@ describe('ensureWorkerServiceAccounts', () => {
     ['stateful', STATEFUL, 'Elasticsearch has no built-in'],
     ['Serverless', SERVERLESS, 'does not exist in this project'],
   ])('on %s', (_flavor, options, missingMessage) => {
-    const { name } = WORKER_ROLE_DEFINITIONS[TRIAGE];
+    const name = WORKER_SERVICE_ACCOUNT_NAMES[TRIAGE];
     const roleName = getWorkerRoleName(name, options);
-    const tuningRoleName = getWorkerRoleName(WORKER_ROLE_DEFINITIONS[TUNING].name, options);
+    const tuningRoleName = getWorkerRoleName(WORKER_SERVICE_ACCOUNT_NAMES[TUNING], options);
 
     it('creates the account with the built-in role and never creates a role', async () => {
       const { http, get, put, serviceAccounts } = setup();
