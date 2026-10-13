@@ -10,13 +10,11 @@ import React, { Suspense, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
-import { AiButtonIcon } from '@kbn/ui-ai-components';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
-import { searchPlaceholder } from '../editor_visor/visor_i18n';
 import { KeyboardShortcuts } from '../editor_footer/keyboard_shortcuts';
 import { QueryWrapComponent } from '../editor_footer/query_wrap_component';
-import { MagnifySparklesIcon } from './magnify_sparkles_icon';
+import { VisorToggleButton } from './visor_toggle_button';
 import { CreateViewModal, createViewLabel } from '../save_as_view/create_view_modal';
 import { ViewCreatedSource } from '../telemetry/telemetry_service';
 import { useApplySavedView } from '../save_as_view/use_apply_saved_view';
@@ -181,32 +179,12 @@ export function ESQLMenu({
       </EuiFlexItem>
       {isInline && !hideVisor && (
         <EuiFlexItem grow={false}>
-          {isVisorOpen && isNlToEsqlEnabled ? (
-            <AiButtonIcon
-              iconType={MagnifySparklesIcon as unknown as 'sparkles'}
-              size="xs"
-              iconSize="m"
-              aria-label={searchPlaceholder}
-              aria-pressed
-              withToolTip
-              toolTipContent={visorTooltip}
-              onClick={onToggleVisor}
-              data-test-subj="esql-menu-button"
-            />
-          ) : (
-            <EuiToolTip position="top" content={visorTooltip} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType={isNlToEsqlEnabled ? MagnifySparklesIcon : 'search'}
-                size="xs"
-                aria-label={searchPlaceholder}
-                aria-pressed={isVisorOpen}
-                onClick={onToggleVisor}
-                isDisabled={!onToggleVisor}
-                data-test-subj="esql-menu-button"
-                color="text"
-              />
-            </EuiToolTip>
-          )}
+          <VisorToggleButton
+            isNlToEsqlEnabled={isNlToEsqlEnabled}
+            isVisorOpen={isVisorOpen}
+            tooltip={visorTooltip}
+            onToggle={onToggleVisor}
+          />
         </EuiFlexItem>
       )}
       {queryToSave !== undefined && (
