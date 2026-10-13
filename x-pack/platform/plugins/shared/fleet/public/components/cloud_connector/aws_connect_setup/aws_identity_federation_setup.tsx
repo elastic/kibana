@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import {
   EuiAccordion,
   EuiButton,
+  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,6 +17,7 @@ import {
   EuiLink,
   EuiSkeletonText,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,6 +33,8 @@ import type {
 import { hasPendingIacConfirm } from '../../../hooks/use_request/pending_cloud_connector_iac';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
+import { useIacCallback } from '../hooks/use_iac_callback';
+import type { IacCallbackReceived } from '../hooks/use_iac_callback';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -131,6 +135,36 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
   const trimmedStackArn = stackArn.trim();
   const stackArnInvalid = isStackArnInvalid(stackArn);
 
+  // The launched stack can report its role and stack ARNs back instead of the user pasting them.
+  // The record is created at Launch (through the template hook) and polled here.
+  const {
+    status: callbackStatus,
+    received: callbackReceived,
+    start: startCallback,
+    cancel: cancelCallback,
+  } = useIacCallback({ enabled: isIacProvisionerEnabled });
+  // Values that arrived while the user had already typed something; offered, not applied.
+  const [offeredValues, setOfferedValues] = useState<IacCallbackReceived | undefined>(undefined);
+  const [appliedValues, setAppliedValues] = useState<IacCallbackReceived | undefined>(undefined);
+  const applyReceivedValues = useCallback((values: IacCallbackReceived) => {
+    setRoleArn(values.roleArn);
+    setStackArn(values.stackArn);
+    setAppliedValues(values);
+    setOfferedValues(undefined);
+  }, []);
+  const lastHandledRef = useRef<IacCallbackReceived | undefined>(undefined);
+  useEffect(() => {
+    if (!callbackReceived || lastHandledRef.current === callbackReceived) return;
+    lastHandledRef.current = callbackReceived;
+    if (roleArn === '' && stackArn === '') {
+      applyReceivedValues(callbackReceived);
+    } else {
+      setOfferedValues(callbackReceived);
+    }
+    // Only a newly received set should run this; the fields are read, not watched.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [callbackReceived, applyReceivedValues]);
+
   const hasSetInitialTab = useRef(false);
   useEffect(() => {
     if (hasSetInitialTab.current) return;
@@ -186,6 +220,8 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     // undefined → static template: a plain href with the provisioner off, the hook's
     // missing-context fallback (window.open + fallback telemetry) with it on.
     integrations,
+    // Only the rendered template carries the callback parameters; the hook applies them there.
+    getLaunchStackParams: startCallback,
   });
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
@@ -195,9 +231,13 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
       setRoleArn('');
       setConnectorName('');
       setStackArn('');
+      setAppliedValues(undefined);
+      setOfferedValues(undefined);
       // The template details belong to the identity just created; a second Create without a new
       // Launch must not re-post it.
       clearIacConfirm();
+      // The callback has done its job (or never will): kill its key.
+      cancelCallback();
     }
   );
 
@@ -286,6 +326,66 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
             data-test-subj="awsIdentityFederationSetup-launchCloudFormation"
             errorCalloutTestSubj="awsIdentityFederationSetup-templateError"
           />
+          {callbackStatus === 'pending' && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiText
+                size="s"
+                color="subdued"
+                data-test-subj="awsIdentityFederationSetup-callbackPending"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.cloudConnector.iacCallback.pendingHint"
+                  defaultMessage="Waiting for CloudFormation to report the role… or paste the values below."
+                />
+              </EuiText>
+            </>
+          )}
+          {appliedValues && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="success"
+                iconType="check"
+                data-test-subj="awsIdentityFederationSetup-callbackReceived"
+                title={i18n.translate('xpack.fleet.cloudConnector.iacCallback.receivedTitle', {
+                  defaultMessage: 'Received from CloudFormation — account {accountId}',
+                  values: { accountId: appliedValues.awsAccountId },
+                })}
+              />
+            </>
+          )}
+          {offeredValues && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiCallOut
+                announceOnMount
+                size="s"
+                color="warning"
+                iconType="info"
+                data-test-subj="awsIdentityFederationSetup-callbackOffered"
+                title={i18n.translate('xpack.fleet.cloudConnector.iacCallback.offeredTitle', {
+                  defaultMessage:
+                    'CloudFormation reported a role for account {accountId}, but the fields below already have values.',
+                  values: { accountId: offeredValues.awsAccountId },
+                })}
+              >
+                <EuiButton
+                  size="s"
+                  color="warning"
+                  onClick={() => applyReceivedValues(offeredValues)}
+                  data-test-subj="awsIdentityFederationSetup-callbackUseValues"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.cloudConnector.iacCallback.useValuesButton"
+                    defaultMessage="Use these values"
+                  />
+                </EuiButton>
+              </EuiCallOut>
+            </>
+          )}
           {/* Whichever template Launch opened, the stack it creates has an ARN worth recording:
               it is what the identity's details link to and what a later update targets. */}
           <EuiSpacer size="m" />
