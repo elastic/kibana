@@ -49,7 +49,7 @@ const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
 
 const RELAY_SERVICE_ACCOUNT_NAME_PREFIX = 'nightshift-relay-agent-builder';
 
-const RELAY_SERVICE_ACCOUNT_ROLES = ['viewer'];
+const RELAY_SERVICE_ACCOUNT_ROLES = ['_nightshift_agent'];
 
 /**
  * Selects the server-owned Relay platform assumer. The id (`relay-service`) is
