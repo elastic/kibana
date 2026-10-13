@@ -17,13 +17,6 @@ import {
 } from './rule_template_schema';
 import { FIND_MAX_RESULT_WINDOW, RULE_TEMPLATE_MAX_PER_PAGE } from './constants';
 
-// Test schema structure with eager factories so metadata IDs belong to the schemas
-// passed to Zod's JSON schema generator, without lazy proxy identity mismatches.
-jest.mock('@kbn/zod/v4', () => ({
-  ...jest.requireActual('@kbn/zod/v4'),
-  lazySchema: <T extends object>(factory: () => T): T => factory(),
-}));
-
 const exampleTemplateAttributes = {
   engine: 'v2' as const,
   rule: {
@@ -249,7 +242,110 @@ describe('rule template create-rule schema coupling', () => {
         "schema": Object {
           "additionalProperties": false,
           "definitions": Object {
-            "alerting_rule_artifact": Object {
+            "__schema0": Object {
+              "additionalProperties": false,
+              "description": "Rule metadata.",
+              "properties": Object {
+                "builder": Object {
+                  "additionalProperties": false,
+                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL; send \`null\` on PATCH to clear it.",
+                  "properties": Object {
+                    "type": Object {
+                      "description": "Rule builder type.",
+                      "maxLength": 64,
+                      "minLength": 1,
+                      "type": "string",
+                    },
+                  },
+                  "required": Array [
+                    "type",
+                  ],
+                  "type": "object",
+                },
+                "description": Object {
+                  "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
+                  "maxLength": 1024,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "name": Object {
+                  "description": "Rule name (must be unique within the space).",
+                  "maxLength": 256,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "routing_tags": Object {
+                  "description": "Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\".",
+                  "items": Object {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "maxItems": 20,
+                  "minItems": 1,
+                  "type": "array",
+                },
+                "tags": Object {
+                  "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
+                  "items": Object {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string",
+                  },
+                  "maxItems": 20,
+                  "minItems": 1,
+                  "type": "array",
+                },
+              },
+              "required": Array [
+                "name",
+              ],
+              "type": "object",
+            },
+            "__schema1": Object {
+              "additionalProperties": false,
+              "description": "Execution schedule configuration.",
+              "properties": Object {
+                "every": Object {
+                  "description": "Execution interval, e.g. 1m, 5m, 1h.",
+                  "maxLength": 32,
+                  "type": "string",
+                },
+                "lookback": Object {
+                  "description": "Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.",
+                  "maxLength": 32,
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "every",
+              ],
+              "type": "object",
+            },
+            "__schema2": Object {
+              "additionalProperties": false,
+              "description": "ES|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it.",
+              "properties": Object {
+                "base": Object {
+                  "description": "ES|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`.",
+                  "maxLength": 10000,
+                  "minLength": 1,
+                  "type": "string",
+                },
+                "breach": Object {
+                  "allOf": Array [
+                    Object {
+                      "$ref": "#/definitions/alerting_rule_breach",
+                    },
+                  ],
+                },
+              },
+              "required": Array [
+                "base",
+              ],
+              "type": "object",
+            },
+            "__schema3": Object {
               "additionalProperties": false,
               "properties": Object {
                 "data": Object {
@@ -316,66 +412,6 @@ describe('rule template create-rule schema coupling', () => {
               },
               "required": Array [
                 "fields",
-              ],
-              "type": "object",
-            },
-            "alerting_rule_metadata": Object {
-              "additionalProperties": false,
-              "description": "Rule metadata.",
-              "properties": Object {
-                "builder": Object {
-                  "additionalProperties": false,
-                  "description": "Identifies the rule builder that authored this rule (e.g. \\"threshold\\"). Absent for rules authored directly in ES|QL; send \`null\` on PATCH to clear it.",
-                  "properties": Object {
-                    "type": Object {
-                      "description": "Rule builder type.",
-                      "maxLength": 64,
-                      "minLength": 1,
-                      "type": "string",
-                    },
-                  },
-                  "required": Array [
-                    "type",
-                  ],
-                  "type": "object",
-                },
-                "description": Object {
-                  "description": "Human-readable description of the rule. Omit to leave it unset; send \`null\` on PATCH to clear it. An empty string is rejected.",
-                  "maxLength": 1024,
-                  "minLength": 1,
-                  "type": "string",
-                },
-                "name": Object {
-                  "description": "Rule name (must be unique within the space).",
-                  "maxLength": 256,
-                  "minLength": 1,
-                  "type": "string",
-                },
-                "routing_tags": Object {
-                  "description": "Routing tags that link alerts from this rule to action policies. An action policy applies when its \`matcher.tags\` contains at least one of these tags. Only allowed when kind is \\"alert\\".",
-                  "items": Object {
-                    "maxLength": 128,
-                    "minLength": 1,
-                    "type": "string",
-                  },
-                  "maxItems": 20,
-                  "minItems": 1,
-                  "type": "array",
-                },
-                "tags": Object {
-                  "description": "Tags for categorization, e.g. [\\"production\\", \\"infra\\"].",
-                  "items": Object {
-                    "maxLength": 128,
-                    "minLength": 1,
-                    "type": "string",
-                  },
-                  "maxItems": 20,
-                  "minItems": 1,
-                  "type": "array",
-                },
-              },
-              "required": Array [
-                "name",
               ],
               "type": "object",
             },
@@ -470,29 +506,6 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_rule_query": Object {
-              "additionalProperties": false,
-              "description": "ES|QL query the rule evaluates. \`base\` is required. \`breach\` is an optional clause appended to it.",
-              "properties": Object {
-                "base": Object {
-                  "description": "ES|QL query that specifies the data to evaluate. Must include a \`FROM\` clause. Kibana applies the time filter from \`schedule.lookback\` using \`time_field\`.",
-                  "maxLength": 10000,
-                  "minLength": 1,
-                  "type": "string",
-                },
-                "breach": Object {
-                  "allOf": Array [
-                    Object {
-                      "$ref": "#/definitions/alerting_rule_breach",
-                    },
-                  ],
-                },
-              },
-              "required": Array [
-                "base",
-              ],
-              "type": "object",
-            },
             "alerting_rule_recovery": Object {
               "description": "When an alert recovers. Required when \`kind\` is \`alert\`. Not allowed when \`kind\` is \`signal\`.",
               "oneOf": Array [
@@ -580,26 +593,6 @@ describe('rule template create-rule schema coupling', () => {
               ],
               "type": "object",
             },
-            "alerting_rule_schedule": Object {
-              "additionalProperties": false,
-              "description": "Execution schedule configuration.",
-              "properties": Object {
-                "every": Object {
-                  "description": "Execution interval, e.g. 1m, 5m, 1h.",
-                  "maxLength": 32,
-                  "type": "string",
-                },
-                "lookback": Object {
-                  "description": "Lookback window for the query, e.g. 5m, 1h. Can also be expressed in ES|QL.",
-                  "maxLength": 32,
-                  "type": "string",
-                },
-              },
-              "required": Array [
-                "every",
-              ],
-              "type": "object",
-            },
             "alerting_rule_state_transition": Object {
               "additionalProperties": false,
               "description": "Specifies how many consecutive matches, or how long a condition must hold, before an alert becomes \`active\` or \`inactive\`. Allowed only when \`kind\` is \`alert\`.",
@@ -678,7 +671,7 @@ describe('rule template create-rule schema coupling', () => {
             "artifacts": Object {
               "description": "Optional objects attached to the rule, such as a runbook or a dashboard. Each item has \`id\`, \`type\`, and \`data\`. The shape of \`data\` depends on \`type\`. For example, a \`runbook\` uses \`content\` and a \`dashboard\` uses \`dashboard_id\`. Known types are validated against that shape. Unknown types are stored when \`id\`, \`type\`, and \`data\` are present. An empty array is rejected: omit \`artifacts\` on create, or send \`null\` on PATCH to clear.",
               "items": Object {
-                "$ref": "#/definitions/alerting_rule_artifact",
+                "$ref": "#/definitions/__schema3",
               },
               "maxItems": 100,
               "minItems": 1,
@@ -707,7 +700,7 @@ describe('rule template create-rule schema coupling', () => {
               "description": "Whether the rule creates alerts (\`alert\`) or only stores matching events (\`signal\`).",
             },
             "metadata": Object {
-              "$ref": "#/definitions/alerting_rule_metadata",
+              "$ref": "#/definitions/__schema0",
             },
             "no_data": Object {
               "allOf": Array [
@@ -717,7 +710,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "query": Object {
-              "$ref": "#/definitions/alerting_rule_query",
+              "$ref": "#/definitions/__schema2",
             },
             "recovery": Object {
               "allOf": Array [
@@ -727,7 +720,7 @@ describe('rule template create-rule schema coupling', () => {
               ],
             },
             "schedule": Object {
-              "$ref": "#/definitions/alerting_rule_schedule",
+              "$ref": "#/definitions/__schema1",
             },
             "state_transition": Object {
               "allOf": Array [
