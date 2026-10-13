@@ -529,6 +529,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         api: isServerless
           ? `${KIBANA_SERVERLESS_APIS}group/endpoint-security-entity-analytics-api`
           : `${KIBANA_APIS}group/endpoint-security-entity-analytics-api`,
+        explore: {
+          landing: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/explore`,
+          hostsPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/hosts-page`,
+          networkPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/network-page`,
+          usersPage: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/users-page`,
+        },
         riskScorePrerequisites: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring-requirements`,
         entityRiskScoring: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/entity-risk-scoring`,
         assetCriticality: `${ELASTIC_DOCS}solutions/security/advanced-entity-analytics/asset-criticality`,
@@ -683,6 +689,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
       actionTypes: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
       actionPolicies: `${ELASTIC_DOCS}explore-analyze/alerting/experimental-alerting-system/action-policies/about-action-policies`,
+      compareAlertingSystems: `${ELASTIC_DOCS}explore-analyze/alerting/compare-alerting-systems`,
       apmRulesErrorCount: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-error-count-threshold-rule`,
       apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
       apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
@@ -976,6 +983,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       secureLogstash: `${ELASTIC_DOCS}reference/fleet/secure-logstash-connections`,
       agentPolicy: `${ELASTIC_DOCS}reference/fleet/agent-policy`,
       agentlessIntegrations: `${ELASTIC_DOCS}solutions/security/get-started/agentless-integrations`,
+      cloudConnectorDeployment: `${ELASTIC_DOCS}manage-data/ingest/managed-integrations/cloud-connector-deployment`,
       api: `${ELASTIC_DOCS}reference/fleet/fleet-api-docs`,
       managedOtlp: `${ELASTIC_DOCS}reference/opentelemetry/motlp`,
       uninstallAgent: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/uninstall-elastic-agent`,
@@ -1123,6 +1131,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       datasets: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets`,
       datasetSettings: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-datasets#dataset-settings`,
       authentication: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#authentication`,
+      grantReadAccess: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-sources#grant-read-access`,
       staticCredentials: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-static-credentials`,
       federatedIdentity: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-federated-identity`,
       querying: `${ELASTIC_DOCS}reference/query-languages/esql/esql-data-federation-querying`,

@@ -13,7 +13,7 @@ export interface IndexSizeEntry {
 export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
-  GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
+  GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{id}',
   SYNTHETICS_MONITORS_BULK_CREATE = '/api/synthetics/monitors/_bulk_create',
   SYNTHETICS_MONITORS_BULK_UPDATE = '/api/synthetics/monitors/_bulk_update',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
@@ -35,6 +35,7 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_HEALTH = '/internal/synthetics/monitors/_health',
   SYNTHETICS_MONITOR_HEALTH = '/internal/synthetics/monitors/{monitorId}/_health',
   PRIVATE_LOCATIONS_CLEANUP = `/internal/synthetics/private_locations/_cleanup`,
+  PRIVATE_LOCATION_RESET = `/internal/synthetics/private_locations/{id}/_reset`,
   SYNC_GLOBAL_PARAMS = `/internal/synthetics/sync_global_params`,
   SYNC_GLOBAL_PARAMS_SETTINGS = `/internal/synthetics/sync_global_params/_settings`,
 
@@ -48,6 +49,7 @@ export enum SYNTHETICS_API_URLS {
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
   PRIVATE_LOCATION_AGENT_STATS = `/internal/synthetics/private_locations/agent_stats`,
   PRIVATE_LOCATION_OUTDATED_MW_AGENTS = `/internal/synthetics/private_locations/outdated_mw_agents`,
+  PRIVATE_LOCATION_MISSING_COMPLETE_AGENTS = `/internal/synthetics/private_locations/missing_complete_agents`,
   MONITOR_AGENT_ASSIGNMENT = `/internal/synthetics/monitors/{monitorId}/agent_assignment`,
   ENABLE_DEFAULT_ALERTING = `/internal/synthetics/enable_default_alerting`,
   GET_ACTIONS_CONNECTORS = `/internal/synthetics/get_actions_connectors`,

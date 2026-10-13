@@ -24,6 +24,7 @@ const LEGACY_SYNTHETICS_MONITOR_TYPE = 'synthetics-monitor';
 interface LocationMonitorCount {
   id: string;
   count: number;
+  browserCount: number;
 }
 
 /**
@@ -106,7 +107,11 @@ apiTest.describe(
 
         const counts = await getLocationMonitorCounts(apiClient);
         const locationCount = counts.find(({ id }) => id === privateLocation.id);
-        expect(locationCount).toStrictEqual({ id: privateLocation.id, count: 2 });
+        expect(locationCount).toStrictEqual({
+          id: privateLocation.id,
+          count: 2,
+          browserCount: 0,
+        });
       }
     );
   }

@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isEqual } from 'lodash';
 import type { Observable } from 'rxjs';
 import { switchMap, from, firstValueFrom } from 'rxjs';
+import type { Refresh } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -135,6 +136,7 @@ export const persistUserMessage = async ({
   user,
   additionalEvents = [],
   attachments,
+  appendRefresh,
 }: {
   conversation: ConversationWithOperation;
   conversationClient: ConversationClient;
@@ -148,6 +150,11 @@ export const persistUserMessage = async ({
   /** Attachment change events to store in the same write, after the message. */
   additionalEvents?: TimelineEvent[];
   attachments?: { snapshot: VersionedAttachment[]; produced: VersionedAttachment[] };
+  /**
+   * Refresh of the write onto an existing conversation. Creating one always refreshes: the
+   * origin lookup finds conversations by search.
+   */
+  appendRefresh?: Refresh;
 }): Promise<string> => {
   const event = userMessageEvent(
     {
@@ -201,7 +208,11 @@ export const persistUserMessage = async ({
 
   await conversationClient.appendEvents(
     { id: conversation.id, events, ...(attachments ? { attachments } : {}) },
-    { access: 'converse', source: 'execution' }
+    {
+      access: 'converse',
+      source: 'execution',
+      ...(appendRefresh !== undefined ? { refresh: appendRefresh } : {}),
+    }
   );
 
   return event.id;
