@@ -33,7 +33,7 @@ import { EntityFiltersBar } from '../components/home/entity_filters_bar';
 import {
   useAlertBasedTilesWithDelta as useAlertBasedTiles,
   useEntitiesWithAnomaliesCountWithDelta as useEntitiesWithAnomaliesCount,
-  useNewEntityCount,
+  useNewEntityCountWithDelta as useNewEntityCount,
   useRiskMoversCount,
   useNewlyHighCriticalCount,
 } from '../components/home/needs_attention_tiles/hooks';
@@ -158,8 +158,10 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
   });
   const {
     count: newEntityCount,
+    delta: newEntityDelta,
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
+    isDeltaLoading: newEntityDeltaLoading,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -428,6 +430,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           defaultMessage: 'New entity',
         }),
         value: newEntityCount,
+        delta: newEntityDelta,
+        isDeltaLoading: newEntityDeltaLoading,
         isLoading: newEntityLoading,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
@@ -463,6 +467,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
       watchlistedCount,
       watchlistedDelta,
       newEntityCount,
+      newEntityDelta,
+      newEntityDeltaLoading,
       newEntityLoading,
       riskMoversMissingIndex,
       timeRange,

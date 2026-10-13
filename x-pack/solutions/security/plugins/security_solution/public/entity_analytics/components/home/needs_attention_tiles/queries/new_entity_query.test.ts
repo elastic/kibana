@@ -37,3 +37,36 @@ describe('buildNewEntityCountQuery', () => {
     );
   });
 });
+
+describe('buildNewEntityCountQuery for the previous period', () => {
+  it.each(['24h', '7d', '30d'] as const)(
+    'builds the same query when the current period is passed explicitly for %s',
+    (range) => {
+      expect(buildNewEntityCountQuery('.entities-v1', range, [], 'current')).toBe(
+        buildNewEntityCountQuery('.entities-v1', range)
+      );
+    }
+  );
+
+  it.each([
+    ['24h', '48 hours', '24 hours'],
+    ['7d', '14 days', '7 days'],
+    ['30d', '60 days', '30 days'],
+  ] as const)('keeps first_seen inside [2 x range, range) ago for %s', (range, from, to) => {
+    expect(buildNewEntityCountQuery('.entities-v1', range, [], 'previous')).toContain(
+      `| WHERE entity.lifecycle.first_seen >= NOW() - ${from} AND entity.lifecycle.first_seen < NOW() - ${to} AND entity.risk.calculated_score > 0`
+    );
+  });
+
+  it('changes nothing but the first_seen condition', () => {
+    const filters = ['| WHERE x'];
+    const current = buildNewEntityCountQuery('.entities-v1', '7d', filters, 'current');
+    const previous = buildNewEntityCountQuery('.entities-v1', '7d', filters, 'previous');
+    expect(
+      previous.replace(
+        'entity.lifecycle.first_seen >= NOW() - 14 days AND entity.lifecycle.first_seen < NOW() - 7 days',
+        'entity.lifecycle.first_seen >= NOW() - 7 days'
+      )
+    ).toBe(current);
+  });
+});
