@@ -139,6 +139,9 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
             />
           }
           rowProps={tableRowProps}
+          tableLayout="auto"
+          scrollableInline
+          responsiveBreakpoint={false}
         />
       )}
     </div>
