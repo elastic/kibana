@@ -78,6 +78,7 @@ describe('bundlePluginServer', () => {
     expect(bundle).toContain('require("fs")');
     expect(bundle).toContain('require("./lib/lazy.js")');
     expect(bundle).toContain('require.resolve("./lib/worker.js")');
+    expect(Fs.existsSync(Path.join(server, 'plugin.chunk-1.js'))).toBe(false);
 
     const loaded = requireFromTest(Path.join(server, 'plugin.js'));
     expect(Fs.realpathSync(loaded.dir)).toBe(Fs.realpathSync(server));
@@ -224,6 +225,254 @@ describe('bundlePluginServer', () => {
     expect(bundle).not.toContain(root);
     const loaded = requireFromTest(Path.join(moved, 'server', 'plugin.js'));
     expect(Fs.realpathSync(loaded.dir)).toBe(Fs.realpathSync(Path.join(moved, 'server', 'lib')));
+  });
+
+  it('keeps top-level conditional requires on disk until the branch runs', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    Fs.mkdirSync(server, { recursive: true });
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      [
+        '"use strict";',
+        'const flag = require("./flag");',
+        'exports.flag = flag.state;',
+        'exports.flagAgain = process.env.KBN_BUNDLE_FLAG_AGAIN === "1" ? require("./flag").state : null;',
+        'exports.heavy = process.env.KBN_BUNDLE_LOAD_HEAVY === "1" ? require("./heavy") : null;',
+        'exports.skipped = process.env.KBN_BUNDLE_LOAD_SKIPPED && require("./skipped");',
+        'exports.fallback = process.env.KBN_BUNDLE_OR || require("./fallback");',
+        'exports.nullish = process.env.KBN_BUNDLE_NULLISH ?? require("./nullish");',
+        'switch (process.env.KBN_BUNDLE_SWITCH) {',
+        '  case "a":',
+        '    exports.switched = require("./case-a");',
+        '    break;',
+        '  default:',
+        '    exports.switched = "default";',
+        '}',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'flag.js'),
+      '"use strict";\nexports.state = { marker: "flag-marker" };\n'
+    );
+    for (const name of ['heavy', 'skipped', 'fallback', 'nullish', 'case-a']) {
+      Fs.writeFileSync(
+        Path.join(server, `${name}.js`),
+        `"use strict";\nexports.marker = "${name}-marker";\n`
+      );
+    }
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    expect(bundle).toContain('flag-marker');
+    for (const name of ['heavy', 'skipped', 'fallback', 'nullish', 'case-a']) {
+      expect(bundle).not.toContain(`${name}-marker`);
+    }
+    expect(bundle).toContain('require("./heavy.js")');
+    expect(bundle).toContain('require("./skipped.js")');
+    expect(bundle).toContain('require("./case-a.js")');
+
+    process.env.KBN_BUNDLE_FLAG_AGAIN = '1';
+    process.env.KBN_BUNDLE_LOAD_HEAVY = '1';
+    delete process.env.KBN_BUNDLE_LOAD_SKIPPED;
+    delete process.env.KBN_BUNDLE_OR;
+    delete process.env.KBN_BUNDLE_NULLISH;
+    delete process.env.KBN_BUNDLE_SWITCH;
+    try {
+      const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+      expect(loaded.flag).toBe(loaded.flagAgain);
+      expect(loaded.flag.marker).toBe('flag-marker');
+      expect(loaded.heavy.marker).toBe('heavy-marker');
+      expect(loaded.fallback.marker).toBe('fallback-marker');
+      expect(loaded.nullish.marker).toBe('nullish-marker');
+      expect(loaded.skipped).toBeFalsy();
+      expect(loaded.switched).toBe('default');
+
+      const heavyPath = requireFromTest.resolve(Path.join(server, 'heavy.js'));
+      const skippedPath = requireFromTest.resolve(Path.join(server, 'skipped.js'));
+      const casePath = requireFromTest.resolve(Path.join(server, 'case-a.js'));
+      expect(requireFromTest.cache[heavyPath]?.filename).toBe(heavyPath);
+      expect(requireFromTest.cache[skippedPath]).toBeUndefined();
+      expect(requireFromTest.cache[casePath]).toBeUndefined();
+    } finally {
+      delete process.env.KBN_BUNDLE_FLAG_AGAIN;
+      delete process.env.KBN_BUNDLE_LOAD_HEAVY;
+    }
+  });
+
+  it('keeps one instance when an outside conditional requires an inlined module', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    Fs.mkdirSync(server, { recursive: true });
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      [
+        '"use strict";',
+        'exports.priv = require("./private");',
+        'exports.hub = require("./hub");',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'index.js'),
+      '"use strict";\nif (true) exports.hub = require("./hub");\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'private.js'),
+      '"use strict";\nexports.marker = "private-marker";\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'hub.js'),
+      '"use strict";\nexports.state = { marker: "hub-marker" };\n'
+    );
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    expect(bundle).toContain('private-marker');
+    expect(bundle).not.toContain('hub-marker');
+
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.hub).toBe(requireFromTest(Path.join(server, 'index.js')).hub);
+  });
+
+  it('splits the eager graph into chunks under the large-object threshold', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    const lib = Path.join(server, 'lib');
+    Fs.mkdirSync(lib, { recursive: true });
+    const pad = 'x'.repeat(70 * 1024);
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      [
+        '"use strict";',
+        'exports.a = require("./lib/a");',
+        'exports.b = require("./lib/b");',
+        'exports.shared = require("./lib/shared");',
+        'exports.again = process.env.KBN_BUNDLE_AGAIN === "1" ? require("./lib/b") : null;',
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(lib, 'a.js'),
+      [
+        '"use strict";',
+        'exports.marker = "a-marker";',
+        'exports.shared = require("./shared");',
+        'exports.dir = __dirname;',
+        `exports.pad = "${pad}";`,
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(lib, 'b.js'),
+      [
+        '"use strict";',
+        'exports.marker = "b-marker";',
+        'exports.shared = require("./shared");',
+        'exports.dir = __dirname;',
+        `exports.pad = "${pad}";`,
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(lib, 'shared.js'),
+      '"use strict";\nexports.state = { marker: "shared-marker" };\n'
+    );
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    const chunkPath = Path.join(server, 'plugin.chunk-1.js');
+    const chunk = Fs.readFileSync(chunkPath, 'utf8');
+    expect(Fs.existsSync(Path.join(server, 'plugin.chunk-2.js'))).toBe(false);
+    expect(Fs.existsSync(Path.join(server, 'plugin.bundle.js'))).toBe(false);
+    expect(bundle).toContain('a-marker');
+    expect(bundle).not.toContain('b-marker');
+    expect(bundle).not.toContain('shared-marker');
+    expect(bundle).toContain('require("./plugin.chunk-1.js")');
+    expect(chunk).toContain('b-marker');
+    expect(chunk).toContain('shared-marker');
+    expect(bundle.length).toBeLessThan(128 * 1024);
+    expect(chunk.length).toBeLessThan(128 * 1024);
+    expect(Fs.readFileSync(Path.join(lib, 'a.js'), 'utf8')).toContain('a-marker');
+
+    delete process.env.KBN_BUNDLE_AGAIN;
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.a.marker).toBe('a-marker');
+    expect(loaded.b.marker).toBe('b-marker');
+    expect(loaded.a.shared.state).toBe(loaded.shared.state);
+    expect(loaded.b.shared.state).toBe(loaded.shared.state);
+    expect(loaded.again).toBeNull();
+    expect(Fs.realpathSync(loaded.a.dir)).toBe(Fs.realpathSync(lib));
+    expect(Fs.realpathSync(loaded.b.dir)).toBe(Fs.realpathSync(lib));
+
+    const moved = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'kbn-plugin-bundle-moved-'));
+    directories.push(moved);
+    Fs.cpSync(root, moved, { recursive: true });
+    const movedBundle = Fs.readFileSync(Path.join(moved, 'server', 'plugin.js'), 'utf8');
+    const movedChunk = Fs.readFileSync(Path.join(moved, 'server', 'plugin.chunk-1.js'), 'utf8');
+    expect(movedBundle).not.toContain(root);
+    expect(movedChunk).not.toContain(root);
+    const movedLoaded = requireFromTest(Path.join(moved, 'server', 'plugin.js'));
+    const movedLib = Path.join(moved, 'server', 'lib');
+    expect(Fs.realpathSync(movedLoaded.a.dir)).toBe(Fs.realpathSync(movedLib));
+    expect(Fs.realpathSync(movedLoaded.b.dir)).toBe(Fs.realpathSync(movedLib));
+    expect(movedLoaded.a.shared.state).toBe(movedLoaded.b.shared.state);
+  });
+
+  it('keeps a require cycle together when it exceeds the chunk budget', async () => {
+    const root = makePlugin();
+    const server = Path.join(root, 'server');
+    Fs.mkdirSync(server, { recursive: true });
+    const pad = 'x'.repeat(70 * 1024);
+
+    Fs.writeFileSync(
+      Path.join(server, 'plugin.js'),
+      '"use strict";\nexports.a = require("./a");\n'
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'a.js'),
+      [
+        '"use strict";',
+        'const b = require("./b");',
+        'exports.marker = "a-marker";',
+        'exports.b = b;',
+        `exports.pad = "${pad}";`,
+        '',
+      ].join('\n')
+    );
+    Fs.writeFileSync(
+      Path.join(server, 'b.js'),
+      [
+        '"use strict";',
+        'const a = require("./a");',
+        'exports.marker = "b-marker";',
+        'exports.a = a;',
+        `exports.pad = "${pad}";`,
+        '',
+      ].join('\n')
+    );
+
+    await bundlePluginServer(root);
+
+    const bundle = Fs.readFileSync(Path.join(server, 'plugin.js'), 'utf8');
+    const chunk = Fs.readFileSync(Path.join(server, 'plugin.chunk-1.js'), 'utf8');
+    expect(Fs.existsSync(Path.join(server, 'plugin.chunk-2.js'))).toBe(false);
+    expect(bundle).not.toContain('a-marker');
+    expect(bundle).not.toContain('b-marker');
+    expect(chunk).toContain('a-marker');
+    expect(chunk).toContain('b-marker');
+
+    const loaded = requireFromTest(Path.join(server, 'plugin.js'));
+    expect(loaded.a.marker).toBe('a-marker');
+    expect(loaded.a.b.marker).toBe('b-marker');
+    expect(loaded.a.b.a).toBe(loaded.a);
   });
 
   it('leaves a plugin entry with no local files unchanged', async () => {

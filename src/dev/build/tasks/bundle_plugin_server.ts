@@ -32,6 +32,18 @@ const FUNCTION_NODES = new Set([
   'PrivateSetter',
 ]);
 
+const SHORT_CIRCUIT_OPERATORS = new Set(['&&', '||', '??']);
+
+/**
+ * V8 keeps a script's source in large-object space once it reaches 128 KiB,
+ * and that space is not compacted. Stay under it after esbuild's wrappers and
+ * the injected `__dirname` lines. A single file, or a require cycle, larger
+ * than the budget is emitted as its own chunk and may still cross 128 KiB.
+ */
+const CHUNK_SOURCE_BUDGET = 96 * 1024;
+
+const BUNDLE_BANNER = 'var __kbnBundleDirname = __dirname;\n';
+
 /**
  * Bundle each plugin's `server/plugin.js` startup graph.
  *
@@ -54,9 +66,11 @@ export const BundlePluginServers: Task = {
 };
 
 /**
- * Replace `server/plugin.js` with one CommonJS bundle of the files that only
- * that entry loads. Packages, lazy requires, and modules also required from outside
- * the bundle stay as separate files so Node loads a single instance of each.
+ * Replace `server/plugin.js` with a CommonJS bundle of the files that only
+ * that entry loads. Packages, conditional branches, lazy requires, and modules
+ * also required from outside the bundle stay as separate files so Node loads a
+ * single instance of each. The eager graph is split into chunks that stay
+ * under V8's large-object threshold.
  */
 export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
   const packageRoot = Fs.realpathSync(pkgDistPath);
@@ -65,43 +79,112 @@ export async function bundlePluginServer(pkgDistPath: string): Promise<void> {
     return;
   }
 
-  const closure = collectInlineGraph(entry, packageRoot);
+  const entryReal = Fs.realpathSync(entry);
+  const closure = collectInlineGraph(entryReal, packageRoot);
   // A single file has no local import walk to collapse.
   if (closure.size < 2) {
     return;
   }
 
-  const outfile = Path.resolve(packageRoot, 'server', 'plugin.bundle.js');
   const serverDir = Path.dirname(entry);
+  const chunks = packChunks(entryReal, closure);
+  const moduleChunk = new Map<string, string>();
+  chunks.forEach((modules, index) => {
+    const filename = chunkFilename(index);
+    for (const file of modules) {
+      moduleChunk.set(file, filename);
+    }
+  });
 
+  const written: string[] = [];
   try {
-    await esbuild({
-      entryPoints: [entry],
-      bundle: true,
-      platform: 'node',
-      format: 'cjs',
-      outfile,
-      minify: false,
-      treeShaking: false,
-      keepNames: true,
-      legalComments: 'inline',
-      logLevel: 'silent',
-      absWorkingDir: packageRoot,
-      // Captures the real directory of server/plugin.js. Per-file __dirname
-      // values are resolved from this at runtime so the bundle still works
-      // after the distributable is moved off the build machine.
-      banner: { js: 'var __kbnBundleDirname = __dirname;\n' },
-      plugins: [pluginServerBundlePlugin(closure, serverDir)],
-    });
-    await Fsp.rename(outfile, entry);
+    for (let index = 0; index < chunks.length; index++) {
+      const modules = chunks[index];
+      if (!modules) {
+        continue;
+      }
+      const filename = chunkFilename(index);
+      const outfile = Path.resolve(serverDir, index === 0 ? 'plugin.bundle.js' : filename);
+      written.push(outfile);
+      await buildChunk({
+        outfile,
+        packageRoot,
+        serverDir,
+        chunkModules: new Set(modules),
+        moduleChunk,
+        chunkFilename: filename,
+        entry: index === 0 ? entryReal : undefined,
+        modules: index === 0 ? undefined : modules,
+      });
+    }
+    await Fsp.rename(Path.resolve(serverDir, 'plugin.bundle.js'), entry);
   } catch (error) {
-    await Fsp.rm(outfile, { force: true });
+    await Promise.all(written.map((file) => Fsp.rm(file, { force: true })));
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`Failed to bundle server plugin at ${entry}: ${message}`);
   }
 }
 
-function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plugin {
+interface BuildChunkOptions {
+  outfile: string;
+  packageRoot: string;
+  serverDir: string;
+  chunkModules: Set<string>;
+  moduleChunk: Map<string, string>;
+  chunkFilename: string;
+  entry: string | undefined;
+  modules: string[] | undefined;
+}
+
+async function buildChunk(options: BuildChunkOptions): Promise<void> {
+  const plugin = pluginServerBundlePlugin(options);
+  const shared = {
+    bundle: true,
+    platform: 'node' as const,
+    format: 'cjs' as const,
+    outfile: options.outfile,
+    minify: false,
+    treeShaking: false,
+    keepNames: true,
+    legalComments: 'inline' as const,
+    logLevel: 'silent' as const,
+    absWorkingDir: options.packageRoot,
+    // Captures the real directory of the chunk, which lives next to plugin.js.
+    // Per-file __dirname values are resolved from this at runtime so the bundle
+    // still works after the distributable is moved off the build machine.
+    banner: { js: BUNDLE_BANNER },
+    plugins: [plugin],
+  };
+
+  if (options.entry) {
+    await esbuild({ ...shared, entryPoints: [options.entry] });
+    return;
+  }
+
+  await esbuild({
+    ...shared,
+    stdin: {
+      contents: virtualChunkEntry(options.modules ?? [], options.serverDir),
+      resolveDir: options.serverDir,
+      sourcefile: 'virtual-chunk-entry',
+      loader: 'js',
+    },
+  });
+}
+
+function virtualChunkEntry(modules: readonly string[], serverDir: string): string {
+  const lines = ['"use strict";', 'module.exports = {'];
+  for (const file of modules) {
+    const key = relativeKey(serverDir, file);
+    const specifier = relativeSpecifier(serverDir, file);
+    lines.push(`  ${JSON.stringify(key)}: require(${JSON.stringify(specifier)}),`);
+  }
+  lines.push('};', '');
+  return lines.join('\n');
+}
+
+function pluginServerBundlePlugin(options: BuildChunkOptions): Plugin {
+  const { chunkModules, serverDir, moduleChunk, chunkFilename: ownChunk } = options;
   return {
     name: 'plugin-server-bundle',
     setup(pluginBuild) {
@@ -114,7 +197,7 @@ function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plug
         }
 
         const resolved = resolveExisting(args.resolveDir, args.path);
-        if (resolved && closure.has(resolved)) {
+        if (resolved && chunkModules.has(resolved)) {
           return { path: resolved };
         }
 
@@ -123,16 +206,279 @@ function pluginServerBundlePlugin(closure: Set<string>, serverDir: string): Plug
       });
 
       pluginBuild.onLoad({ filter: /\.js$/ }, async (args) => {
-        const filename = Fs.realpathSync(args.path);
+        let filename: string;
+        try {
+          filename = Fs.realpathSync(args.path);
+        } catch {
+          return undefined;
+        }
+        if (!chunkModules.has(filename)) {
+          return undefined;
+        }
         const source = await Fsp.readFile(filename, 'utf8');
+        const rewritten = rewriteCrossChunkRequires(
+          source,
+          filename,
+          serverDir,
+          ownChunk,
+          moduleChunk
+        );
         return {
           loader: 'js',
           resolveDir: Path.dirname(filename),
-          contents: injectModulePaths(source, filename, serverDir),
+          contents: injectModulePaths(rewritten, filename, serverDir),
         };
       });
     },
   };
+}
+
+/**
+ * Split the eager graph so each emitted script stays under the large-object
+ * threshold. Requires that cross a chunk boundary point at a later chunk:
+ * a module is placed only after every file that requires it, and cycles stay
+ * in one chunk, so chunks never require each other in a circle.
+ */
+function packChunks(entry: string, inline: Set<string>): string[][] {
+  const deps = new Map<string, string[]>();
+  for (const file of inline) {
+    deps.set(file, chunkDependencies(file, inline));
+  }
+
+  const sccs = stronglyConnectedComponents(inline, deps);
+  const sccOf = new Map<string, number>();
+  sccs.forEach((files, index) => {
+    for (const file of files) sccOf.set(file, index);
+  });
+
+  const sccDeps: number[][] = sccs.map(() => []);
+  const incoming = sccs.map(() => 0);
+  const seenEdges = new Set<string>();
+  for (const [from, targets] of deps) {
+    const fromScc = sccOf.get(from);
+    if (fromScc === undefined) {
+      continue;
+    }
+    for (const target of targets) {
+      const toScc = sccOf.get(target);
+      if (toScc === undefined || toScc === fromScc) {
+        continue;
+      }
+      const edge = `${fromScc}>${toScc}`;
+      if (seenEdges.has(edge)) {
+        continue;
+      }
+      seenEdges.add(edge);
+      sccDeps[fromScc]?.push(toScc);
+      incoming[toScc] = (incoming[toScc] ?? 0) + 1;
+    }
+  }
+
+  const entryScc = sccOf.get(entry) ?? 0;
+  const ready = [entryScc];
+  const placed = new Set<number>();
+  const chunks: string[][] = [];
+  let current: string[] = [];
+  let currentSize = 0;
+
+  const flush = () => {
+    if (current.length === 0) {
+      return;
+    }
+    chunks.push(current);
+    current = [];
+    currentSize = 0;
+  };
+
+  const place = (sccIndex: number) => {
+    if (placed.has(sccIndex)) {
+      return;
+    }
+    placed.add(sccIndex);
+    const files = sccs[sccIndex] ?? [];
+    const size = files.reduce((sum, file) => sum + Fs.statSync(file).size, 0);
+    if (current.length > 0 && currentSize + size > CHUNK_SOURCE_BUDGET) {
+      flush();
+    }
+    current.push(...files);
+    currentSize += size;
+    if (currentSize >= CHUNK_SOURCE_BUDGET) {
+      flush();
+    }
+    for (const next of sccDeps[sccIndex] ?? []) {
+      incoming[next] = (incoming[next] ?? 1) - 1;
+      if (incoming[next] === 0) {
+        ready.push(next);
+      }
+    }
+  };
+
+  while (ready.length > 0) {
+    const next = ready.shift();
+    if (next !== undefined) {
+      place(next);
+    }
+  }
+  flush();
+
+  for (let index = 0; index < sccs.length; index++) {
+    if (!placed.has(index)) {
+      chunks.push(sccs[index] ?? []);
+    }
+  }
+
+  return chunks.filter((chunk) => chunk.length > 0);
+}
+
+function chunkDependencies(file: string, inline: Set<string>): string[] {
+  const targets: string[] = [];
+  let code: string;
+  try {
+    code = Fs.readFileSync(file, 'utf8');
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to read ${file} while bundling the server plugin: ${message}`);
+  }
+
+  // Every static require of an inlined module, including ones inside functions
+  // and branches. The target has to live in this file's chunk or a later one
+  // so the rewritten require and the eager require share one instance.
+  for (const call of collectRequireCalls(code, file, false)) {
+    if (!call.specifier.startsWith('.')) {
+      continue;
+    }
+    const resolved = resolveExisting(Path.dirname(file), call.specifier);
+    if (resolved && inline.has(resolved)) {
+      targets.push(resolved);
+    }
+  }
+  return targets;
+}
+
+function stronglyConnectedComponents(
+  nodes: Set<string>,
+  deps: Map<string, readonly string[]>
+): string[][] {
+  const reverse = new Map<string, string[]>();
+  for (const node of nodes) {
+    reverse.set(node, []);
+  }
+  for (const [from, targets] of deps) {
+    for (const target of targets) {
+      if (reverse.has(target)) {
+        reverse.get(target)?.push(from);
+      }
+    }
+  }
+
+  const visited = new Set<string>();
+  const order: string[] = [];
+  for (const start of nodes) {
+    if (visited.has(start)) {
+      continue;
+    }
+    const stack: Array<{ node: string; childIndex: number }> = [{ node: start, childIndex: 0 }];
+    visited.add(start);
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      if (!frame) {
+        break;
+      }
+      const children = deps.get(frame.node) ?? [];
+      if (frame.childIndex < children.length) {
+        const child = children[frame.childIndex];
+        frame.childIndex++;
+        if (child && !visited.has(child) && deps.has(child)) {
+          visited.add(child);
+          stack.push({ node: child, childIndex: 0 });
+        }
+      } else {
+        order.push(frame.node);
+        stack.pop();
+      }
+    }
+  }
+
+  const seen = new Set<string>();
+  const components: string[][] = [];
+  for (let index = order.length - 1; index >= 0; index--) {
+    const start = order[index];
+    if (!start || seen.has(start)) {
+      continue;
+    }
+    const component: string[] = [];
+    const stack = [start];
+    seen.add(start);
+    while (stack.length > 0) {
+      const node = stack.pop();
+      if (!node) {
+        continue;
+      }
+      component.push(node);
+      for (const next of reverse.get(node) ?? []) {
+        if (!seen.has(next)) {
+          seen.add(next);
+          stack.push(next);
+        }
+      }
+    }
+    components.push(component);
+  }
+  return components;
+}
+
+function chunkFilename(index: number): string {
+  return index === 0 ? 'plugin.js' : `plugin.chunk-${index}.js`;
+}
+
+function rewriteCrossChunkRequires(
+  source: string,
+  filename: string,
+  serverDir: string,
+  ownChunk: string,
+  moduleChunk: Map<string, string>
+): string {
+  const replacements: Array<{ start: number; end: number; text: string }> = [];
+  for (const call of collectRequireCalls(source, filename, false)) {
+    if (!call.specifier.startsWith('.')) {
+      continue;
+    }
+    const resolved = resolveExisting(Path.dirname(filename), call.specifier);
+    const targetChunk = resolved ? moduleChunk.get(resolved) : undefined;
+    if (!resolved || !targetChunk || targetChunk === ownChunk) {
+      continue;
+    }
+    const specifier = relativeSpecifier(
+      Path.dirname(filename),
+      Path.resolve(serverDir, targetChunk)
+    );
+    const key = relativeKey(serverDir, resolved);
+    replacements.push({
+      start: call.start,
+      end: call.end,
+      text: `require(${JSON.stringify(specifier)})[${JSON.stringify(key)}]`,
+    });
+  }
+  return applyReplacements(source, replacements);
+}
+
+function applyReplacements(
+  source: string,
+  replacements: ReadonlyArray<{ start: number; end: number; text: string }>
+): string {
+  if (replacements.length === 0) {
+    return source;
+  }
+  const bytes = Buffer.from(source);
+  const pieces: Buffer[] = [];
+  let cursor = 0;
+  for (const replacement of [...replacements].sort((a, b) => a.start - b.start)) {
+    pieces.push(bytes.subarray(cursor, replacement.start));
+    pieces.push(Buffer.from(replacement.text));
+    cursor = replacement.end;
+  }
+  pieces.push(bytes.subarray(cursor));
+  return Buffer.concat(pieces).toString('utf8');
 }
 
 function collectInlineGraph(entry: string, packageRoot: string): Set<string> {
@@ -210,7 +556,7 @@ function listPackageJsFiles(packageRoot: string): string[] {
         visit(abs);
         continue;
       }
-      if (!entry.isFile() || !entry.name.endsWith('.js') || entry.name === 'plugin.bundle.js') {
+      if (!entry.isFile() || !entry.name.endsWith('.js') || isBundleOutput(entry.name)) {
         continue;
       }
       const real = Fs.realpathSync(abs);
@@ -258,7 +604,42 @@ function collectStartupGraph(entry: string, packageRoot: string): Set<string> {
   return closure;
 }
 
+interface RequireCall {
+  specifier: string;
+  /** Inclusive start and exclusive end, as 0-based byte offsets into the source. */
+  start: number;
+  end: number;
+}
+
+interface AstNode {
+  type?: string;
+  span?: { start: number; end: number };
+  operator?: string;
+  value?: string;
+  raw?: string;
+  callee?: AstNode;
+  arguments?: AstNode[];
+  expression?: AstNode;
+  test?: AstNode | null;
+  consequent?: AstNode | AstNode[] | null;
+  alternate?: AstNode | null;
+  left?: AstNode;
+  right?: AstNode;
+  discriminant?: AstNode;
+  cases?: AstNode[];
+}
+
 function requireSpecifiers(code: string, filename: string, topLevelOnly: boolean): string[] {
+  return collectRequireCalls(code, filename, topLevelOnly).map((call) => call.specifier);
+}
+
+/**
+ * `topLevelOnly` stops at functions and at branches. A top-level `if`, `?:`,
+ * `&&` / `||` / `??`, or `switch` body stays a runtime `require` of the
+ * original file, so unused code is never loaded. The shared-module scan passes
+ * `false` and still sees those requires.
+ */
+function collectRequireCalls(code: string, filename: string, topLevelOnly: boolean): RequireCall[] {
   let body: unknown;
   try {
     body = parseSync(code, { syntax: 'ecmascript' }).body;
@@ -267,22 +648,53 @@ function requireSpecifiers(code: string, filename: string, topLevelOnly: boolean
     throw new Error(`Failed to parse ${filename} while bundling the server plugin: ${message}`);
   }
 
-  const specifiers: string[] = [];
-  const visit = (node: unknown) => {
+  // SWC spans are 1-based byte offsets plus a process-wide counter, so a later
+  // file is not numbered from 0. One string literal is enough to recover the
+  // shift for every span in this parse.
+  const source = Buffer.from(code);
+  const shift = spanShift(body, source);
+  const calls: RequireCall[] = [];
+  const visit = (node: unknown, conditional: boolean) => {
     if (!node || typeof node !== 'object') {
       return;
     }
     if (Array.isArray(node)) {
-      for (const child of node) visit(child);
+      for (const child of node) visit(child, conditional);
       return;
     }
 
-    const record = node as {
-      type?: string;
-      callee?: { type?: string; value?: string };
-      arguments?: Array<{ expression?: { type?: string; value?: string } }>;
-    };
+    const record = node as AstNode;
     if (topLevelOnly && record.type && FUNCTION_NODES.has(record.type)) {
+      return;
+    }
+    if (topLevelOnly && record.type === 'IfStatement') {
+      visit(record.test, conditional);
+      visit(record.consequent, true);
+      visit(record.alternate, true);
+      return;
+    }
+    if (topLevelOnly && record.type === 'ConditionalExpression') {
+      visit(record.test, conditional);
+      visit(record.consequent, true);
+      visit(record.alternate, true);
+      return;
+    }
+    if (
+      topLevelOnly &&
+      (record.type === 'BinaryExpression' || record.type === 'LogicalExpression') &&
+      record.operator &&
+      SHORT_CIRCUIT_OPERATORS.has(record.operator)
+    ) {
+      visit(record.left, conditional);
+      visit(record.right, true);
+      return;
+    }
+    if (topLevelOnly && record.type === 'SwitchStatement') {
+      visit(record.discriminant, conditional);
+      for (const switchCase of record.cases ?? []) {
+        visit(switchCase.test, conditional);
+        visit(switchCase.consequent, true);
+      }
       return;
     }
     if (
@@ -291,19 +703,78 @@ function requireSpecifiers(code: string, filename: string, topLevelOnly: boolean
       record.callee.value === 'require'
     ) {
       const arg = record.arguments?.[0]?.expression;
-      if (arg?.type === 'StringLiteral' && arg.value) {
-        specifiers.push(arg.value);
+      const span = record.span;
+      if (!conditional && arg?.type === 'StringLiteral' && arg.value && span) {
+        calls.push({
+          specifier: arg.value,
+          start: span.start - 1 - shift,
+          end: span.end - 1 - shift,
+        });
       }
+      visit(record.arguments, conditional);
       return;
     }
 
     for (const value of Object.values(record)) {
-      if (value && typeof value === 'object') visit(value);
+      if (value && typeof value === 'object') visit(value, conditional);
     }
   };
 
+  visit(body, false);
+  return calls;
+}
+
+function spanShift(body: unknown, source: Buffer): number {
+  const literals: Array<{ start: number; end: number; raw: Buffer }> = [];
+  const visit = (node: unknown) => {
+    if (!node || typeof node !== 'object') {
+      return;
+    }
+    if (Array.isArray(node)) {
+      for (const child of node) visit(child);
+      return;
+    }
+    const record = node as AstNode;
+    if (record.type === 'StringLiteral' && record.raw && record.span) {
+      literals.push({
+        start: record.span.start,
+        end: record.span.end,
+        raw: Buffer.from(record.raw),
+      });
+    }
+    for (const value of Object.values(record)) {
+      if (value && typeof value === 'object') visit(value);
+    }
+  };
   visit(body);
-  return specifiers;
+  const first = literals[0];
+  if (!first) {
+    return 0;
+  }
+
+  let from = 0;
+  while (from < source.length) {
+    const index = source.indexOf(first.raw, from);
+    if (index === -1) {
+      break;
+    }
+    const shift = first.start - 1 - index;
+    const aligned = literals.every((literal) => {
+      const start = literal.start - 1 - shift;
+      const end = literal.end - 1 - shift;
+      return start >= 0 && end <= source.length && source.subarray(start, end).equals(literal.raw);
+    });
+    if (aligned) {
+      return shift;
+    }
+    from = index + 1;
+  }
+
+  throw new Error('Failed to align parser spans with the source while bundling the server plugin');
+}
+
+function isBundleOutput(name: string): boolean {
+  return name === 'plugin.bundle.js' || /^plugin\.chunk-\d+\.js$/.test(name);
 }
 
 function resolveExisting(resolveDir: string, specifier: string): string | null {
@@ -327,6 +798,10 @@ function candidatePaths(resolveDir: string, specifier: string): string[] {
     Path.join(base, 'index.js'),
     Path.join(base, 'index.json'),
   ];
+}
+
+function relativeKey(fromDir: string, target: string): string {
+  return Path.relative(fromDir, target).split(Path.sep).join('/');
 }
 
 function relativeSpecifier(fromDir: string, target: string): string {
