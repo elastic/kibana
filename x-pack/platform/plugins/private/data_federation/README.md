@@ -17,6 +17,8 @@ When running on Elastic Cloud, data sources can authenticate using the workload 
 
 The issuer URL is injected by the kibana-controller via `xpack.dataFederation.workloadIdentityIssuerUrl`. If that config key is absent, the federated identity auth option is hidden and the read-only fields are not shown.
 
+For S3, the user can set up the AWS side either by running the manual AWS CLI steps, or by opening an Elastic-hosted CloudFormation template in the AWS console with the issuer and deployment/project ID prefilled.
+
 ## Advanced setting
 
 `dataFederation:enabled` (registered by this plugin, disabled by default) controls whether the management app is enabled in the browser. The app also requires the `manageFederatedData` capability and, in stateful, an Enterprise license. It only affects the UI: data sources and datasets keep working through the API and in ES|QL queries. It is the user-facing switch, as opposed to `xpack.dataFederation.enabled`, which is a deploy-time kill switch resolved by core: when it is `false` the plugin is not loaded at all, so neither the routes nor the advanced setting exist.

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 
 import type { ToastsStart } from '@kbn/core/public';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -17,6 +17,10 @@ import type { DatasetsClient } from '../datasets_client';
 import type { DataSource, S3DataSourceWithSecrets } from '../../common/datasource_types';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { authenticationStrings } from './create_data_source_flyout_authentication_i18n';
+import {
+  buildS3CloudFormationLaunchUrl,
+  s3FederatedIdentitySetupStrings,
+} from './federated_identity_s3_setup_content';
 import type { DataFederationKibanaServices } from '../types';
 import { UI_COUNTER_EVENTS } from '../ui_counters';
 
@@ -194,6 +198,34 @@ describe('CreateDataSourceFlyout', () => {
           selected: true,
         })
       ).toBeInTheDocument();
+    });
+
+    it('defaults to the CloudFormation setup and switches the role ARN help with the method', () => {
+      const cloudInfo = {
+        jwtIssuer: 'https://issuer.example.com',
+        deploymentId: 'deployment:abc123',
+        isServerless: false,
+      };
+      const { getByTestId, getByText, queryByTestId } = renderCreateFlyout(cloudInfo);
+
+      expect(getByTestId('createDataSourceFlyoutS3FederatedDeployLaunchButton')).toHaveAttribute(
+        'href',
+        buildS3CloudFormationLaunchUrl({
+          jwtIssuer: cloudInfo.jwtIssuer,
+          subject: cloudInfo.deploymentId,
+        })
+      );
+      expect(getByText(s3FederatedIdentitySetupStrings.deployRoleArnHelp)).toBeInTheDocument();
+
+      fireEvent.click(
+        within(getByTestId('createDataSourceFlyoutS3FederatedSetupMethod-manual')).getByRole(
+          'radio'
+        )
+      );
+
+      expect(queryByTestId('createDataSourceFlyoutS3FederatedDeployPanel')).not.toBeInTheDocument();
+      expect(getByTestId('createDataSourceFlyoutS3FederatedManualSteps')).toBeInTheDocument();
+      expect(getByText(s3FederatedIdentitySetupStrings.roleArnHelp)).toBeInTheDocument();
     });
 
     it('hides federated identity when no issuer is present', async () => {
@@ -431,6 +463,11 @@ describe('CreateDataSourceFlyout', () => {
       const onSave = jest.fn().mockResolvedValue(null);
       const { getByTestId } = renderFederatedS3EditFlyout(onSave);
 
+      fireEvent.click(
+        within(getByTestId('createDataSourceFlyoutS3FederatedSetupMethod-manual')).getByRole(
+          'radio'
+        )
+      );
       const setupSteps = getByTestId('createDataSourceFlyoutS3FederatedManualSteps');
       const annotationLikeButton = document.createElement('button');
       setupSteps.appendChild(annotationLikeButton);
