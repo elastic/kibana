@@ -25,7 +25,7 @@ const makeSignal = ({
   verdict?: SignalEntry['verdict'];
 } = {}): Extract<SignalEntry, { type: 'detection' }> => ({
   type: 'detection',
-  stream_name: 'logs.checkout',
+  source_id: 'logs.checkout',
   description: 'High latency',
   verdict,
   metadata: {
@@ -45,7 +45,7 @@ const makeStored = (
     event_id: 'checkout-stable',
     status: 'active',
     severity: 'high',
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     signals,
     causal_features: [],
     blast_radius: [],
@@ -66,7 +66,7 @@ const makeCandidate = (
   input: {
     event_id: 'checkout-stable',
     status: 'active',
-    stream_names: ['logs.checkout'],
+    source_ids: ['logs.checkout'],
     title: 'Checkout latency',
     symptom_hypothesis: 'Checkout requests are delayed.',
     summary: 'P99 latency breached SLO',
@@ -214,7 +214,7 @@ describe('computeEventFacts', () => {
       type: 'service',
       subtype: 'service',
       name: id,
-      stream_name: 'logs.checkout',
+      source_id: 'logs.checkout',
     });
 
     const result = facts({

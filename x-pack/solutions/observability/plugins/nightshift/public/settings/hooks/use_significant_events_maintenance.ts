@@ -15,7 +15,7 @@ import {
 } from '@kbn/significant-events-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 import { getActivityBlockTooltip } from '../utils/activity_block_tooltip';
-import { getFormattedError } from '../utils/errors';
+import { getFormattedError } from '../../common/errors';
 
 const MAINTENANCE_STATUS_QUERY_KEY = ['nightshiftMaintenanceStatus'] as const;
 
@@ -56,9 +56,8 @@ const partialFailuresText = (count: number) =>
     values: { count },
   });
 
-// The state is global (deployment-wide) and can be changed from another tab,
-// space, or user, so poll periodically and on window focus to avoid acting on a
-// stale status.
+// The state belongs to the current space and can be changed from another tab or
+// user, so poll periodically and on window focus to avoid acting on a stale status.
 const MAINTENANCE_STATUS_REFETCH_INTERVAL_MS = 30_000;
 
 /** Reads the persisted maintenance state. Cached under a shared key so every

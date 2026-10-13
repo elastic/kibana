@@ -9,11 +9,12 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { parse } from 'yaml';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { WORKER_ROLE_DEFINITIONS, getWorkerRoleName } from './worker_roles';
+import { WORKER_ROLE_DEFINITIONS, getWorkerRoleName } from '@kbn/alertzero-common';
 
 /**
  * Kibana's copies of the Serverless predefined worker roles, which elasticsearch-controller defines.
- * Regenerate them with `scripts/generate_worker_roles.js` after changing a role.
+ * Regenerate them with `x-pack/solutions/security/plugins/alertzero/scripts/generate_worker_roles.js`
+ * after changing a role.
  */
 const SERVERLESS_ROLE_MIRRORS = [
   'src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml',

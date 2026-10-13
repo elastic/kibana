@@ -80,6 +80,15 @@ export {
   buildWorkerUrl,
 } from './constants';
 
+export {
+  SECURITY_ROLE_API_VERSION,
+  WORKER_ROLE_DEFINITIONS,
+  SECURITY_ROLES_URL,
+  buildSecurityRoleUrl,
+  getWorkerRoleName,
+} from './worker_roles';
+export type { WorkerRoleDefinition, WorkerRolePayload } from './worker_roles';
+
 export type {
   ScanFailureWorker,
   ScanFailuresResponse,

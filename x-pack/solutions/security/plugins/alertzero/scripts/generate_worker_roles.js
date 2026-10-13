@@ -8,7 +8,7 @@
 
 /**
  * Generates every built-in copy of the AlertZero worker roles from WORKER_ROLE_DEFINITIONS
- * (common/worker_roles.ts), so they never drift apart. Workers run with these built-in roles:
+ * (@kbn/alertzero-common, worker_roles.ts), so they never drift apart. Workers run with these built-in roles:
  * Elasticsearch reserved roles on stateful, and elasticsearch-controller predefined roles on
  * Serverless. After changing a worker's role, run:
  *
@@ -33,7 +33,7 @@ require('@kbn/setup-node-env');
 const fs = require('fs');
 const path = require('path');
 const { isDeepStrictEqual } = require('util');
-const { WORKER_ROLE_DEFINITIONS, getWorkerRoleName } = require('../common/worker_roles');
+const { WORKER_ROLE_DEFINITIONS, getWorkerRoleName } = require('@kbn/alertzero-common');
 
 const outDir = process.argv[2];
 if (!outDir) {
