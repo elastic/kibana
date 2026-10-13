@@ -96,6 +96,7 @@ interface AssessmentFixture {
   normalizedDiff?: AssessPolicyChangeDto['assessment']['normalizedDiff'];
   sideEffects?: AssessPolicyChangeDto['assessment']['sideEffects'];
   globalBlockers?: AssessPolicyChangeDto['assessment']['globalBlockers'];
+  advisories?: AssessPolicyChangeDto['assessment']['advisories'];
   enrollment?: AssessPolicyChangeDto['enrollment'];
 }
 
@@ -145,6 +146,7 @@ const createDto = (overrides: AssessmentFixture = {}): AssessPolicyChangeDto => 
       normalizedDiff,
       sideEffects,
       globalBlockers: overrides.globalBlockers ?? [],
+      advisories: overrides.advisories ?? [],
     },
   };
 };
@@ -337,11 +339,19 @@ describe('createAssessPolicyChangeTool', () => {
         documentation: 'D'.repeat(200_000),
       },
     };
+    const advisory = {
+      code: 'protection_weakened' as const,
+      protection: 'malware' as const,
+      os: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac, PolicyOperatingSystem.linux],
+      to: 'off' as const,
+      text: 'Malware protection on Windows, macOS, Linux is turned off: this protection no longer detects or blocks threats.',
+    };
     mockedAssessChange.mockResolvedValue(
       createDto({
         changes: [hugeFact],
         normalizedDiff: [],
         sideEffects: [],
+        advisories: [advisory],
       })
     );
 
@@ -364,6 +374,7 @@ describe('createAssessPolicyChangeTool', () => {
     );
     expect(presented).not.toHaveProperty('requested_impact_value_truncated');
     expect(presented).not.toHaveProperty('requested_impact_value_total');
+    expect(presented.advisories).toEqual([advisory]);
     expect(fitsGuardedEnvelope(presented, 12_000)).toBe(true);
   });
 });
