@@ -273,6 +273,11 @@ export interface RegisterEscalationTemplateUIOptions {
    * attachments sync. Supplied by the caller so it can use Kibana HTTP hooks and toasts.
    */
   renderSyncIndicator?: RenderSyncIndicator;
+  /**
+   * Called by the flyout's "Copy link" button with the conversation's Agent Builder URL.
+   * See `RegisterAgenticInvestigationTemplateUIOptions.onCopyLink`.
+   */
+  onCopyLink: (url: string) => boolean;
 }
 
 /** Returns the tab ids registered by the escalation template. */
@@ -300,6 +305,7 @@ export const registerEscalationTemplateUI = ({
   renderStatus,
   renderLinkedInvestigations,
   renderSyncIndicator,
+  onCopyLink,
 }: RegisterEscalationTemplateUIOptions): void => {
   const [overviewTabId] = getEscalationTabIds(templateId);
 
@@ -321,11 +327,22 @@ export const registerEscalationTemplateUI = ({
     },
   }));
 
-  conversationTemplates.registerTemplateUIDefinition(templateId, () => ({
+  conversationTemplates.registerTemplateUIDefinition(templateId, ({ getConversationUrl }) => ({
     name,
     icon,
     tabs: [overviewTabId],
     detailsFlyout: {
+      trailingActions: ({ conversation }) => [
+        getCopyLinkFlyoutAction(() =>
+          onCopyLink(
+            getConversationUrl({
+              conversationId: conversation.id,
+              agentId: conversation.agent_id,
+              openDetails: true,
+            })
+          )
+        ),
+      ],
       header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
         return (
           <Suspense fallback={<ConversationTitle title={conversation.title} />}>

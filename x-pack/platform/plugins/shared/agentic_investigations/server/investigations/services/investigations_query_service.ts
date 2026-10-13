@@ -39,6 +39,7 @@ import type {
   ListInvestigationsQuery,
   ListInvestigationsResponse,
 } from '../../../common/investigations/investigation';
+import { countPendingProposals } from './count_pending_proposals';
 import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { isInvestigationTitlePending } from '../../../common/investigations/title';
 import type {
@@ -410,7 +411,13 @@ export class InvestigationsQueryService {
     const [subjects, impacts, pendingProposalCounts] = await Promise.all([
       this.deps.getSubjectsService().listByConversationIds(ids, spaceId),
       this.deps.getImpactService().listByConversationIds(ids, spaceId),
-      this.countPendingProposals(request, ids, spaceId),
+      countPendingProposals({
+        proposals: this.deps.getProposals(),
+        request,
+        conversationIds: ids,
+        spaceId,
+        logger: this.deps.logger,
+      }),
     ]);
     const subjectsByConversation = groupBy(subjects, ({ conversationId }) => conversationId);
     const impactByConversation = new Map(impacts.map((impact) => [impact.conversationId, impact]));
@@ -512,34 +519,6 @@ export class InvestigationsQueryService {
   }
 
   /**
-   * Pending proposals per conversation, in one aggregation. Undefined when the proposals plugin
-   * is absent or the caller may not read proposals, so a list does not need that privilege.
-   */
-  private async countPendingProposals(
-    request: KibanaRequest,
-    conversationIds: string[],
-    spaceId: string
-  ): Promise<Map<string, number> | undefined> {
-    const proposals = this.deps.getProposals();
-    if (!proposals) {
-      return undefined;
-    }
-    try {
-      await proposals.getProposalPrivileges().assertCanRead(request);
-    } catch {
-      return undefined;
-    }
-    try {
-      return await proposals
-        .getProposalsService()
-        .countPendingByConversationIds(conversationIds, spaceId);
-    } catch (error) {
-      this.deps.logger.debug(`Could not count pending proposals: ${errorMessage(error)}`);
-      return undefined;
-    }
-  }
-
-  /**
    * The investigation's live proposals. Empty when the proposals plugin is absent or the caller
    * may not read proposals, so an investigation read does not need the proposals privilege.
    */
@@ -562,6 +541,7 @@ export class InvestigationsQueryService {
         {
           conversationId,
           excludeSuperseded: true,
+          excludeUndecidedSuperseded: false,
           excludeExpired: false,
           size: MAX_INVESTIGATION_PROPOSALS,
           from: 0,
