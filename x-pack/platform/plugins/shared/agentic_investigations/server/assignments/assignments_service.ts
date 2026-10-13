@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { isPublicConversation, ConversationAccessControlRole } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
+import { ASSIGNEES_CHANGED_EVENT_TYPE } from '../../common/assignments/conversation_events';
 import { WrongTemplateError } from './errors';
 
 export { WrongTemplateError };
 
 export interface AssignmentsServiceDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  logger: Logger;
 }
 
 /** Casts a raw metadata value to `string[]`, ignoring non-string elements. */
@@ -28,8 +30,11 @@ export class AssignmentsService {
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
 
-  constructor({ getConversationClient }: AssignmentsServiceDeps) {
+  private readonly logger: Logger;
+
+  constructor({ getConversationClient, logger }: AssignmentsServiceDeps) {
     this.getConversationClient = getConversationClient;
+    this.logger = logger;
   }
 
   /**
@@ -56,6 +61,8 @@ export class AssignmentsService {
    * - A caller can remove themselves; the request succeeds but they lose access afterwards.
    * - The diff is computed from a read outside OCC, so concurrent reassigns can race (same
    *   as other multi-step writes in this plugin, e.g. linked_investigations).
+   * - The timeline event is best-effort: a caller who removed themselves from a private
+   *   conversation no longer has access, so its write fails and is only logged.
    * - An assignee who was never an ACL member (escalation created before add-sync) makes
    *   removeAccessControlEntries a no-op, which is safe.
    */
@@ -109,6 +116,36 @@ export class AssignmentsService {
       { access: 'converse' }
     );
 
+    if (added.length > 0 || removed.length > 0) {
+      await this.addAssigneesChangedEvent(client, conversationId, added, removed);
+    }
+
     return conversation;
+  }
+
+  /** Records the change on the timeline. Never throws. */
+  private async addAssigneesChangedEvent(
+    client: ConversationPublicClient,
+    conversationId: string,
+    added: string[],
+    removed: string[]
+  ): Promise<void> {
+    try {
+      await client.addEvents({
+        conversationId,
+        events: [
+          {
+            type: ASSIGNEES_CHANGED_EVENT_TYPE,
+            data: { added, removed },
+          },
+        ],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to add assignee change event to ${conversationId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
   }
 }

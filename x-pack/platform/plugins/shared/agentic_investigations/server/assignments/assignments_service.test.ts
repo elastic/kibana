@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
@@ -40,12 +41,16 @@ const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   addAccessControlEntries: jest.fn().mockResolvedValue({}),
   removeAccessControlEntries: jest.fn().mockResolvedValue({}),
   patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION_PUBLIC }),
+  addEvents: jest.fn().mockResolvedValue([]),
   ...overrides,
 });
 
-const makeService = (clientMock: ReturnType<typeof makeClient>) => {
+const makeService = (
+  clientMock: ReturnType<typeof makeClient>,
+  logger = loggingSystemMock.createLogger()
+) => {
   const getConversationClient = jest.fn().mockResolvedValue(clientMock);
-  return new AssignmentsService({ getConversationClient });
+  return new AssignmentsService({ getConversationClient, logger });
 };
 
 const request = httpServerMock.createKibanaRequest();
@@ -365,5 +370,57 @@ describe('AssignmentsService.assign', () => {
     });
 
     expect(result).toBe(updatedConv);
+  });
+});
+
+describe('AssignmentsService.assign timeline event', () => {
+  const assign = (service: AssignmentsService, assignees: string[]) =>
+    service.assign({
+      request,
+      conversationId: 'conv-1',
+      assignees,
+      expectedTemplate: 'escalation',
+    });
+
+  it('writes an event with the added and removed uids, after patchMetadata', async () => {
+    const order: string[] = [];
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PUBLIC, ['old'])),
+      patchMetadata: jest.fn().mockImplementation(async () => {
+        order.push('patch');
+        return { conversation: MOCK_CONVERSATION_PUBLIC };
+      }),
+      addEvents: jest.fn().mockImplementation(async () => {
+        order.push('event');
+        return [];
+      }),
+    });
+
+    await assign(makeService(client), ['new']);
+
+    expect(order).toEqual(['patch', 'event']);
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [{ type: 'assignees_changed', data: { added: ['new'], removed: ['old'] } }],
+    });
+  });
+
+  it('writes no event when the assignees are unchanged', async () => {
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue(withAssignees(MOCK_CONVERSATION_PUBLIC, ['a'])),
+    });
+
+    await assign(makeService(client), ['a']);
+
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('still resolves and logs a warning when the event cannot be written', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const client = makeClient({ addEvents: jest.fn().mockRejectedValue(new Error('denied')) });
+
+    await expect(assign(makeService(client, logger), ['u1'])).resolves.toBeDefined();
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('denied'));
   });
 });

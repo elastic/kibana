@@ -194,6 +194,11 @@ export {
   assignConversationRequestParamsSchema,
 } from './assignments/assignment';
 export type { AssignConversationRequest } from './assignments/assignment';
+export {
+  ASSIGNEES_CHANGED_EVENT_TYPE,
+  assigneesChangedEventSchema,
+} from './assignments/conversation_events';
+export type { AssigneesChangedEventData } from './assignments/conversation_events';
 
 export type {
   CreateEscalationRequest,
