@@ -128,7 +128,7 @@ describe('loadDashboardApi', () => {
     test('should strip restored change sources from initialState and seed the allowed ones', async () => {
       backupState = {
         query: lastSavedQuery,
-        changeSources: ['unknown', 'agent', 7, null] as unknown as DashboardChangeSource[],
+        changedBy: ['unknown', 'agent', 7, null] as unknown as DashboardChangeSource[],
       };
 
       await loadDashboardApi({
@@ -138,12 +138,12 @@ describe('loadDashboardApi', () => {
         savedObjectId: '12345',
       });
 
-      const [{ initialState, changeSources }] = getDashboardApiMock.mock.calls[0];
+      const [{ initialState, changedBy }] = getDashboardApiMock.mock.calls[0];
       expect(initialState).toEqual({
         ...DEFAULT_DASHBOARD_STATE,
         query: lastSavedQuery,
       });
-      expect(changeSources).toEqual(['agent']);
+      expect(changedBy).toEqual(['agent']);
     });
   });
 

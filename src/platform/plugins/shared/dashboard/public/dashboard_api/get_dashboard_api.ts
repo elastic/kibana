@@ -64,7 +64,7 @@ export function getDashboardApi({
   savedObjectId,
   user,
   isAccessControlEnabled,
-  changeSources,
+  changedBy,
 }: {
   creationOptions?: DashboardCreationOptions;
   panelFlyoutType?: EuiFlyoutProps['type'];
@@ -74,13 +74,13 @@ export function getDashboardApi({
   savedObjectId?: string;
   user?: DashboardUser;
   isAccessControlEnabled?: boolean;
-  changeSources?: readonly DashboardChangeSource[];
+  changedBy?: readonly DashboardChangeSource[];
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
   const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const onSave$ = new Subject<DashboardSaveEvent>();
-  const changeSourceTracker = initializeChangeSourceTracker(changeSources);
+  const changeSourceTracker = initializeChangeSourceTracker(changedBy);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
   const userActivity$ = new Subject<UserActivity>();
 
@@ -156,7 +156,7 @@ export function getDashboardApi({
   const approximationManager = initializeApproximationManager(initialState);
 
   async function setState(state: DashboardState, options?: DashboardSetStateOptions) {
-    changeSourceTracker.recordChange(options?.changeSources ?? []);
+    changeSourceTracker.recordChange(options?.changedBy ?? []);
     await layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
@@ -216,9 +216,9 @@ export function getDashboardApi({
     saveEvent: DashboardSaveEvent,
     latestChangeBySource: LatestChangeBySource
   ) => {
-    const savedChangeSources = changeSourceTracker.markSaved(latestChangeBySource);
+    const savedChangedBy = changeSourceTracker.markSaved(latestChangeBySource);
     onSave$.next(saveEvent);
-    reportDashboardSaved({ ...saveEvent, changeSources: savedChangeSources });
+    reportDashboardSaved({ ...saveEvent, changedBy: savedChangedBy });
   };
 
   const getHistoryState = (): DashboardHistoryState => ({

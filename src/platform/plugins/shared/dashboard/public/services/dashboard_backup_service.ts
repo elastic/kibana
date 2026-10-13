@@ -22,7 +22,7 @@ const DASHBOARD_STATE_SESSION_KEY = 'dashboardStateManagerPanels';
 
 export type DashboardBackupState = Partial<DashboardState> & {
   viewMode?: ViewMode;
-  changeSources?: DashboardChangeSource[];
+  changedBy?: DashboardChangeSource[];
 };
 
 export interface DashboardBackupService {

@@ -104,7 +104,7 @@ describe('useCreationOptions', () => {
       pathname: '/',
       search: '',
       hash: '',
-      state: { changeSources: ['agent', 'unknown', 42] },
+      state: { changedBy: ['agent', 'unknown', 42] },
     });
 
     const { result } = renderHook(() =>
@@ -120,7 +120,7 @@ describe('useCreationOptions', () => {
     const creationOptions = await result.current();
     creationOptions.getInitialInput?.();
 
-    expect(creationOptions.changeSources).toEqual(['agent']);
+    expect(creationOptions.changedBy).toEqual(['agent']);
     expect(history.location.state).toBeUndefined();
   });
 

@@ -96,13 +96,12 @@ export function initializeUnsavedChangesManager({
       if (storeUnsavedChanges) {
         const { time_restore, ...restOfDashboardChanges } = dashboardChanges;
         const hasEditsToBackUp = Object.keys(restOfDashboardChanges).length > 0;
-        const changeSourcesToBackUp = changeSourceTracker.getUnsavedSources();
+        const changedByToBackUp = changeSourceTracker.getUnsavedSources();
         const dashboardBackupState: DashboardBackupState = {
           // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
           viewMode,
           ...restOfDashboardChanges,
-          ...(hasEditsToBackUp &&
-            changeSourcesToBackUp.length > 0 && { changeSources: changeSourcesToBackUp }),
+          ...(hasEditsToBackUp && changedByToBackUp.length > 0 && { changedBy: changedByToBackUp }),
         };
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);
       }

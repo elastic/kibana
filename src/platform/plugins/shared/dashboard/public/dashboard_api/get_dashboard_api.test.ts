@@ -68,7 +68,7 @@ describe('dashboard_saved telemetry', () => {
       incomingEmbeddables: [],
       initialState: DEFAULT_DASHBOARD_STATE,
       savedObjectId: 'existing-id',
-      changeSources: ['agent'],
+      changedBy: ['agent'],
     });
 
     await api.runQuickSave();
@@ -81,7 +81,7 @@ describe('dashboard_saved telemetry', () => {
         {
           is_new: false,
           is_copy: false,
-          change_sources: ['agent'],
+          changed_by: ['agent'],
           panel_count: 0,
           panel_types: [],
         },
@@ -105,7 +105,7 @@ describe('dashboard_saved telemetry', () => {
     });
 
     const firstSave = api.runQuickSave();
-    api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+    api.setState(DEFAULT_DASHBOARD_STATE, { changedBy: ['agent'] });
     finishSave();
     await firstSave;
     await api.runQuickSave();
@@ -117,7 +117,7 @@ describe('dashboard_saved telemetry', () => {
         {
           is_new: false,
           is_copy: false,
-          change_sources: ['agent'],
+          changed_by: ['agent'],
           panel_count: 0,
           panel_types: [],
         },
@@ -144,7 +144,7 @@ describe('dashboard_saved telemetry', () => {
     });
 
     const firstSave = api.runQuickSave();
-    api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+    api.setState(DEFAULT_DASHBOARD_STATE, { changedBy: ['agent'] });
     const secondSave = api.runQuickSave();
     finishFirstSave();
     await firstSave;
@@ -159,7 +159,7 @@ describe('dashboard_saved telemetry', () => {
         {
           is_new: false,
           is_copy: false,
-          change_sources: ['agent'],
+          changed_by: ['agent'],
           panel_count: 0,
           panel_types: [],
         },
@@ -171,7 +171,7 @@ describe('dashboard_saved telemetry', () => {
     jest.mocked(saveDashboard).mockResolvedValue({ id: 'copy-id' });
     jest.mocked(openSaveModal).mockImplementation(({ onSave, serializeState }) => {
       const savedState = serializeState();
-      api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+      api.setState(DEFAULT_DASHBOARD_STATE, { changedBy: ['agent'] });
       onSave({ id: 'copy-id', savedState });
     });
     const { api } = getDashboardApi({
@@ -190,7 +190,7 @@ describe('dashboard_saved telemetry', () => {
         {
           is_new: false,
           is_copy: false,
-          change_sources: ['agent'],
+          changed_by: ['agent'],
           panel_count: 0,
           panel_types: [],
         },
@@ -224,7 +224,7 @@ describe('dashboard_saved telemetry', () => {
   describe('with undo and redo', () => {
     const agentSave = [
       'dashboard_saved',
-      { is_new: false, is_copy: false, change_sources: ['agent'], panel_count: 0, panel_types: [] },
+      { is_new: false, is_copy: false, changed_by: ['agent'], panel_count: 0, panel_types: [] },
     ];
     const handSave = [
       'dashboard_saved',
@@ -242,12 +242,12 @@ describe('dashboard_saved telemetry', () => {
 
     type Dashboard = ReturnType<typeof getDashboardApi>;
     const settle = () => jest.advanceTimersByTimeAsync(1000);
-    const setup = async (changeSources?: DashboardChangeSource[]) => {
+    const setup = async (changedBy?: DashboardChangeSource[]) => {
       const dashboard = getDashboardApi({
         incomingEmbeddables: [],
         initialState: DEFAULT_DASHBOARD_STATE,
         savedObjectId: 'existing-id',
-        changeSources,
+        changedBy,
       });
       await settle();
       return dashboard;
@@ -257,7 +257,7 @@ describe('dashboard_saved telemetry', () => {
       await settle();
     };
     const editByAgent = async ({ api }: Dashboard, title: string) => {
-      api.setState({ ...api.getSerializedState().attributes, title }, { changeSources: ['agent'] });
+      api.setState({ ...api.getSerializedState().attributes, title }, { changedBy: ['agent'] });
       await settle();
     };
     const undo = async ({ internalApi }: Dashboard) => {
@@ -354,7 +354,7 @@ describe('dashboard_saved telemetry', () => {
       const dashboard = await setup();
       await editByHand(dashboard, 'Hand title');
       dashboard.api.setState(dashboard.api.getSerializedState().attributes, {
-        changeSources: ['agent'],
+        changedBy: ['agent'],
       });
       await settle();
       await undo(dashboard);
@@ -374,7 +374,7 @@ describe('dashboard_saved telemetry', () => {
       savedObjectId: 'existing-id',
     });
 
-    api.setState(DEFAULT_DASHBOARD_STATE, { changeSources: ['agent'] });
+    api.setState(DEFAULT_DASHBOARD_STATE, { changedBy: ['agent'] });
     await api.runInteractiveSave();
 
     expect(getDashboardSavedEvents()).toEqual([
@@ -383,7 +383,7 @@ describe('dashboard_saved telemetry', () => {
         {
           is_new: true,
           is_copy: true,
-          change_sources: ['agent'],
+          changed_by: ['agent'],
           panel_count: 0,
           panel_types: [],
         },

@@ -75,7 +75,7 @@ export async function loadDashboardApi({
   }
 
   await initializeDashboardApiServices();
-  const { changeSources: restoredChangeSources, ...unsavedChanges } =
+  const { changedBy: restoredChangedBy, ...unsavedChanges } =
     (creationOptions?.useSessionStorageIntegration
       ? getDashboardBackupService().getState(savedObjectId)
       : undefined) ?? {};
@@ -103,10 +103,7 @@ export async function loadDashboardApi({
     savedObjectId,
     user,
     isAccessControlEnabled,
-    changeSources: [
-      ...(creationOptions?.changeSources ?? []),
-      ...parseChangeSources(restoredChangeSources),
-    ],
+    changedBy: [...(creationOptions?.changedBy ?? []), ...parseChangeSources(restoredChangedBy)],
   });
   const userActivityService = getDashboardUserActivityService(api);
 

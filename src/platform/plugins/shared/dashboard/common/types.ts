@@ -66,6 +66,6 @@ export type DashboardLocatorParams = Partial<
      * Labels for the integrations that supplied this state, e.g. `agent`. They are reported with
      * the next save of the opened dashboard.
      */
-    changeSources?: DashboardChangeSource[];
+    changedBy?: DashboardChangeSource[];
   }
 >;

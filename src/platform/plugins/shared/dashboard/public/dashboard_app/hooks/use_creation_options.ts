@@ -31,9 +31,9 @@ import { extractDashboardState, loadAndRemoveDashboardState } from '../url';
 
 type IncomingEmbeddables = EmbeddablePackageState[] | undefined;
 
-const extractChangeSources = (locationState: unknown): DashboardChangeSource[] =>
-  locationState && typeof locationState === 'object' && 'changeSources' in locationState
-    ? parseChangeSources(locationState.changeSources)
+const extractChangedBy = (locationState: unknown): DashboardChangeSource[] =>
+  locationState && typeof locationState === 'object' && 'changedBy' in locationState
+    ? parseChangeSources(locationState.changedBy)
     : [];
 
 interface UseCreationOptionsProps {
@@ -55,7 +55,7 @@ export const useCreationOptions = ({
 }: UseCreationOptionsProps) => {
   return useCallback((): Promise<DashboardCreationOptions> => {
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
-    const changeSources = extractChangeSources(getScopedHistory().location.state);
+    const changedBy = extractChangedBy(getScopedHistory().location.state);
 
     const getInitialInput = () => {
       const scopedHistory = getScopedHistory();
@@ -80,7 +80,7 @@ export const useCreationOptions = ({
       // Locator / navigateToApp store dashboard fields on `history.state`, which survives a full
       // reload. After merging them into the initial input, clear `location.state` so a refresh
       // does not re-apply stale overrides.
-      if (Object.keys(stateFromLocator).length > 0 || changeSources.length > 0) {
+      if (Object.keys(stateFromLocator).length > 0 || changedBy.length > 0) {
         try {
           scopedHistory.replace({
             ...scopedHistory.location,
@@ -107,7 +107,7 @@ export const useCreationOptions = ({
 
     return Promise.resolve<DashboardCreationOptions>({
       getIncomingEmbeddables: () => incomingEmbeddables,
-      changeSources,
+      changedBy,
 
       // integrations
       useSessionStorageIntegration: true,

@@ -357,7 +357,7 @@ describe('unsavedChangesManager', () => {
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel],
-        changeSources: ['agent'],
+        changedBy: ['agent'],
       });
     });
 
@@ -379,7 +379,7 @@ describe('unsavedChangesManager', () => {
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel],
-        changeSources: ['agent'],
+        changedBy: ['agent'],
       });
     });
 
@@ -393,7 +393,7 @@ describe('unsavedChangesManager', () => {
       expect(setBackupStateMock).toHaveBeenLastCalledWith('dashboard1234', {
         viewMode: 'edit',
         panels: [agentPanel],
-        changeSources: ['agent'],
+        changedBy: ['agent'],
       });
     });
   });

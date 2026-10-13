@@ -86,7 +86,7 @@ export interface DashboardSetStateOptions {
    * next save that includes this change, so a change that is undone, reset to the last saved
    * state, or discarded before a save is not reported.
    */
-  changeSources?: DashboardChangeSource[];
+  changedBy?: DashboardChangeSource[];
 }
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
@@ -109,9 +109,9 @@ export interface DashboardCreationOptions {
 
   /**
    * Labels for the integrations that supplied the initial state, e.g. `agent`. They are reported
-   * with the next save that includes this state, like `DashboardSetStateOptions.changeSources`.
+   * with the next save that includes this state, like `DashboardSetStateOptions.changedBy`.
    */
-  changeSources?: DashboardChangeSource[];
+  changedBy?: DashboardChangeSource[];
 
   /** Returns embeddables to add to the dashboard on load. */
   getIncomingEmbeddables?: () => EmbeddablePackageState[] | undefined;

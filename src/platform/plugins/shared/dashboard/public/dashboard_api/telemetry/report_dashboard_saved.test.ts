@@ -39,13 +39,13 @@ describe('reportDashboardSaved', () => {
       previousDashboardId: undefined,
       dashboardId: 'new-id',
       dashboardState,
-      changeSources: ['agent'],
+      changedBy: ['agent'],
     });
 
     expect(coreServices.analytics.reportEvent).toHaveBeenCalledWith('dashboard_saved', {
       is_new: true,
       is_copy: false,
-      change_sources: ['agent'],
+      changed_by: ['agent'],
       panel_count: 3,
       panel_types: ['lens', 'lens', 'search'],
     });
@@ -56,7 +56,7 @@ describe('reportDashboardSaved', () => {
       previousDashboardId: 'existing-id',
       dashboardId: 'existing-id',
       dashboardState: DEFAULT_DASHBOARD_STATE,
-      changeSources: [],
+      changedBy: [],
     });
 
     expect(coreServices.analytics.reportEvent).toHaveBeenCalledWith('dashboard_saved', {
@@ -72,7 +72,7 @@ describe('reportDashboardSaved', () => {
       previousDashboardId: 'existing-id',
       dashboardId: 'copy-id',
       dashboardState: DEFAULT_DASHBOARD_STATE,
-      changeSources: [],
+      changedBy: [],
     });
 
     expect(coreServices.analytics.reportEvent).toHaveBeenCalledWith('dashboard_saved', {
@@ -94,7 +94,7 @@ describe('reportDashboardSaved', () => {
         previousDashboardId: 'existing-id',
         dashboardId: 'existing-id',
         dashboardState: DEFAULT_DASHBOARD_STATE,
-        changeSources: [],
+        changedBy: [],
       })
     ).not.toThrow();
     expect(warnSpy).toHaveBeenCalledWith(
