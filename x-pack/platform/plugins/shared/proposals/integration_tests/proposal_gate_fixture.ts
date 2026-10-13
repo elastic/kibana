@@ -192,7 +192,15 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
     // Supplies the action metadata `create` and `get` resolve. No `triggers`,
     // so the best-effort action-input validation is skipped.
     getWorkflow: jest.fn().mockResolvedValue({
-      definition: { consts: { actionMetadata: { name: 'Create rule', category: 'tune' } } },
+      definition: {
+        consts: {
+          actionMetadata: {
+            name: 'Create rule',
+            category: 'tune',
+            approvalPolicy: 'autonomy-dependent',
+          },
+        },
+      },
     }),
     getWorkflowExecution: jest.fn(),
     resumeWorkflowExecution: jest.fn(),

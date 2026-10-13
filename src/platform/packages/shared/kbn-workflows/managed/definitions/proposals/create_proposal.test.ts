@@ -21,6 +21,7 @@ import {
   WorkflowExecuteStepSchema,
   WorkflowOutputStepSchema,
 } from '../../../spec/schema';
+import { ACTION_WORKFLOW_TAG } from '../../action_workflow';
 
 /** Local shape: the parsed YAML is untyped, and only these fields are asserted on. */
 interface WorkflowStep {
@@ -710,39 +711,52 @@ describe('create-investigation-proposal workflow', () => {
     );
 
     describe('identity by approval mode', () => {
+      it('branches on whether the proposal was gated', () => {
+        const branch = findStep(workflow.steps, 'execute_by_approval_mode');
+
+        expect(branch?.type).toBe('if');
+        expect(branch?.condition).toBe('${{ variables.needs_gate == true }}');
+        expect((branch?.steps ?? []).map(({ name }) => name)).toEqual([
+          'execute_as_approver',
+          'adopt_approver_result',
+        ]);
+        expect((branch?.else ?? []).map(({ name }) => name)).toEqual([
+          'execute_as_worker',
+          'adopt_worker_result',
+        ]);
+      });
+
       it('runs a human-approved action with the default identity, so as the approver', () => {
         const execute = findStep(workflow.steps, 'execute_as_approver');
 
-        expect(execute?.if).toBe('${{ variables.needs_gate == true }}');
         expect(execute?.with?.['run-as-mode']).toBeUndefined();
       });
 
       it("runs an auto-approved action as the caller's service account", () => {
         const execute = findStep(workflow.steps, 'execute_as_worker');
 
-        expect(execute?.if).toBe('${{ variables.needs_gate != true }}');
         expect(execute?.with?.['run-as-mode']).toBe('inherit');
       });
 
-      // Inheritance through a templated id needs a literal allowlist. A tag keeps this
-      // shared workflow product-agnostic: each product tags its own auto-approvable actions.
-      it('lets only actions tagged auto-approvable run as the service account', () => {
+      // Inheritance through a templated id needs a literal allowlist. The generic
+      // action tag keeps this shared workflow product-agnostic; `always-gate`
+      // actions never reach this branch because the gate holds them back.
+      it('lets only action workflows run as the service account', () => {
         const settings = findStep(workflow.steps, 'execute_as_worker')?.with;
 
-        expect(settings?.['allowed-workflow-tags']).toEqual(['auto-approvable']);
+        expect(settings?.['allowed-workflow-tags']).toEqual([ACTION_WORKFLOW_TAG]);
         expect(settings?.['allowed-workflow-ids']).toBeUndefined();
       });
 
       // A step that did not run this pass still returns its previous value, so
-      // each result is adopted under the same guard as the step that produced it.
+      // each branch adopts only the result of its own step.
       it.each([
         ['adopt_approver_result', 'execute_as_approver'],
         ['adopt_worker_result', 'execute_as_worker'],
-      ])('%s adopts only the result of %s, under the same guard', (adopt, execute) => {
+      ])('%s adopts only the result of %s', (adopt, execute) => {
         const adoptStep = findStep(workflow.steps, adopt);
 
         expect(adoptStep?.type).toBe('data.set');
-        expect(adoptStep?.if).toBe(findStep(workflow.steps, execute)?.if);
         expect(adoptStep?.with?.action_failed).toBe(`\${{ steps.${execute}.error != blank }}`);
         expect(adoptStep?.with?.action_error_message).toBe(`{{ steps.${execute}.error.message }}`);
       });

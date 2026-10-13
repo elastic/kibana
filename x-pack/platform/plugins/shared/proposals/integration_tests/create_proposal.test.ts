@@ -577,9 +577,20 @@ describe('create-investigation-proposal workflow execution', () => {
 
       await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
 
-      // Declaring the policy explicitly must behave like declaring nothing;
-      // only `always-gate` overrides the caller.
+      // Only `always-gate` overrides the caller.
       expect(fixture.proposals()[0].decision).toBe('approved');
+    });
+
+    it('should gate an action that declares no approval policy', async () => {
+      fixture.setActionMetadata({ name: 'Create rule', category: 'tune' });
+
+      await fixture.start({ actionWorkflowId: ACTION_WORKFLOW_ID, autoApprove: true });
+
+      // The policy is required, so metadata without one is invalid and reads
+      // as unresolved: an action whose author never said it may run unattended
+      // waits for a human.
+      expect(fixture.executionStatus()).toBe(ExecutionStatus.WAITING_FOR_INPUT);
+      expect(fixture.onlyProposal().decision).toBeUndefined();
     });
   });
 });

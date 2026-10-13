@@ -24,7 +24,11 @@ const mockProposal: ApprovalProposal = {
   impact: 'critical',
   status: 'pending',
   category: 'Response action',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', reversible: false },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    reversible: false,
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const baseProps: ProposedActionButtonProps = {
