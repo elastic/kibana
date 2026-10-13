@@ -200,21 +200,50 @@ const mgetUpdaterSources = async <TExecution extends { id: string }>(
       ...(includes ? { _source: { includes: [...includes, 'deleted'] } } : {}),
     });
 
-    for (const hit of searchResponse.hits.hits) {
-      if (
-        hit._id &&
-        hit._source &&
-        hit._seq_no !== undefined &&
-        hit._primary_term !== undefined &&
+    // Search is near-real-time, so its seq_no can lag a write on an older backing index.
+    // mget is real-time; use it for the version the compare-and-set update will send.
+    const realtimeCandidates = searchResponse.hits.hits.filter(
+      (
+        hit
+      ): hit is estypes.SearchHit<TExecution> & {
+        _id: string;
+        _index: string;
+        _source: TExecution;
+      } =>
+        typeof hit._id === 'string' &&
+        typeof hit._index === 'string' &&
+        hit._source !== undefined &&
         !foundById.has(hit._id) &&
         !isSoftDeleted(hit._source)
-      ) {
-        foundById.set(hit._id, {
-          source: { ...hit._source, id: hit._id } as TExecution,
-          seqNo: hit._seq_no,
-          primaryTerm: hit._primary_term,
-          index: hit._index,
-        });
+    );
+
+    if (realtimeCandidates.length > 0) {
+      const realtimeResponse = await esClient.mget<TExecution>({
+        docs: realtimeCandidates.map((hit) => ({
+          _index: hit._index,
+          _id: hit._id,
+          ...(includes ? { _source: { includes: [...includes, 'deleted'] } } : {}),
+        })),
+      });
+
+      for (const doc of realtimeResponse.docs) {
+        if (
+          'found' in doc &&
+          doc.found &&
+          doc._source &&
+          doc._id &&
+          doc._seq_no !== undefined &&
+          doc._primary_term !== undefined &&
+          !foundById.has(doc._id) &&
+          !isSoftDeleted(doc._source)
+        ) {
+          foundById.set(doc._id, {
+            source: { ...doc._source, id: doc._id } as TExecution,
+            seqNo: doc._seq_no,
+            primaryTerm: doc._primary_term,
+            index: doc._index,
+          });
+        }
       }
     }
   }

@@ -34,6 +34,9 @@ import { isBulkUpdaterItem } from '../../types';
 
 const DELETE_PAGE_SIZE = 1000;
 
+const isSoftDeleted = (source: object): boolean =>
+  (source as { deleted?: unknown }).deleted === true;
+
 export interface DataStreamDataClientDeps<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
   dataStreamName: string;
@@ -137,8 +140,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       if ('found' in doc && doc.found && doc._source && doc._id) {
         const docId = doc._id;
         // Soft-deleted documents are treated as missing.
-        const isDeleted = (doc._source as { deleted?: unknown }).deleted === true;
-        if (!isDeleted && !foundIds.has(docId)) {
+        if (!isSoftDeleted(doc._source) && !foundIds.has(docId)) {
           foundIds.add(docId);
           items.push({
             document: { ...doc._source, id: docId } as TExecution,
@@ -169,7 +171,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       });
 
       for (const hit of searchResponse.hits.hits) {
-        if (hit._id && hit._source) {
+        if (hit._id && hit._source && !isSoftDeleted(hit._source) && !foundIds.has(hit._id)) {
           foundIds.add(hit._id);
           items.push({
             document: { ...hit._source, id: hit._id } as TExecution,
@@ -211,6 +213,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     let deleted = 0;
     let batches = 0;
     let versionConflicts = 0;
+    let timedOut = false;
     const failures: estypes.BulkIndexByScrollFailure[] = [];
 
     // Data stream documents are soft-deleted (deleted: true), page by page. Soft-deleted
@@ -224,6 +227,10 @@ export class DataStreamDataClient<TExecution extends { id: string }>
         _source: false,
         ignore_unavailable: true,
       });
+      // A timed-out page is partial. Stop after it so callers do not treat the purge as finished.
+      if (searchResponse.timed_out) {
+        timedOut = true;
+      }
       const hits = searchResponse.hits.hits;
       if (hits.length === 0) {
         break;
@@ -262,8 +269,8 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       }
       deleted += pageDeleted;
 
-      // Stop on a short page, or when nothing in the page could be deleted (no progress).
-      hasMore = hits.length >= DELETE_PAGE_SIZE && pageDeleted > 0;
+      // Stop on a short page, a timed-out page, or when nothing in the page could be deleted.
+      hasMore = !timedOut && hits.length >= DELETE_PAGE_SIZE && pageDeleted > 0;
     }
 
     // Legacy plain indexes hold regular documents, which are hard-deleted.
@@ -277,6 +284,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       batches += legacyResponse.batches ?? 0;
       versionConflicts += legacyResponse.version_conflicts ?? 0;
       failures.push(...(legacyResponse.failures ?? []));
+      timedOut = timedOut || legacyResponse.timed_out === true;
     }
 
     return {
@@ -285,7 +293,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       version_conflicts: versionConflicts,
       noops: 0,
       retries: { bulk: 0, search: 0 },
-      timed_out: false,
+      timed_out: timedOut,
       took: Date.now() - startedAt,
       task: '',
       failures,
