@@ -16,6 +16,9 @@ export const TRIAGE_LOAD_ALERTS_STEP_ID = 'alertzero.triage.loadAlerts' as const
 
 const idSchema = z.string().trim().min(1).max(256);
 
+/** The longest sweep interval the Worker settings accept: `WorkerScheduleInterval` is at most five digits and a unit, so `99999d`. */
+const MAX_INTERVAL_MINUTES = 99_999 * 24 * 60;
+
 const headroomSchema = z.object({
   status: z.enum(['ok', 'behind', 'unknown']),
   in_flight: z.number().int().min(0).optional(),
@@ -51,7 +54,7 @@ const planSweepInputSchema = z.object({
     'Alert Analysis tag prefix. An alert carrying it was analysed outside this Worker.'
   ),
   budget_per_hour: z.number().int().min(1).max(100_000),
-  interval_minutes: z.number().int().min(1).max(1440),
+  interval_minutes: z.number().int().min(1).max(MAX_INTERVAL_MINUTES),
   lookback_hours: z.number().int().min(1).max(8760),
   headroom: headroomSchema.describe('Output of the headroom step.'),
 });
