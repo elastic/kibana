@@ -258,7 +258,7 @@ describe('getPrivateLocationAgentStats route', () => {
 
     expect(result[0].agentPolicyName).toBe('Policy One');
     expect(result[0].locationLabel).toBe('Location 1');
-    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].isShardingActive).toBe(false);
     expect(result[0].agents[0].monitorsAssigned).toBeNull();
     expect(mockListByAgentPolicy).not.toHaveBeenCalled();
   });
@@ -274,7 +274,7 @@ describe('getPrivateLocationAgentStats route', () => {
 
     const result = await run(routeContext);
 
-    expect(result[0].isAgentSharding).toBe(true);
+    expect(result[0].isShardingActive).toBe(true);
     expect(result[0].agents[0].monitorsAssigned).toBe(2);
     expect(mockListByAgentPolicy).toHaveBeenCalledWith({ agentPolicyId: 'policy-1' });
   });
@@ -433,7 +433,7 @@ describe('getPrivateLocationAgentStats route', () => {
 
     const result = await run(routeContext);
 
-    expect(result[0].isAgentSharding).toBe(false);
+    expect(result[0].isShardingActive).toBe(false);
     expect(result[0].agents[0].monitorsAssigned).toBeNull();
     expect(mockListByAgentPolicy).not.toHaveBeenCalled();
   });

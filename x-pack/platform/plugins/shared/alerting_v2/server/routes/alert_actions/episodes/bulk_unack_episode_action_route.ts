@@ -15,7 +15,7 @@ import { createBulkEpisodeActionRouteForType } from './create_bulk_episode_actio
 export const BulkUnackEpisodeActionRoute = createBulkEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.UNACK,
   pathSuffix: '_bulk_unack',
-  summary: 'Bulk unacknowledge alert episodes',
+  summary: 'Bulk unacknowledge alerts',
   bodySchema: bulkUnackEpisodeActionBodySchema,
   oasOperationObject: bulkUnackEpisodeActionOasExamples,
   access: 'public' as const,

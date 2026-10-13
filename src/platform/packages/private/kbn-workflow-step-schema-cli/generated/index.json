@@ -614,6 +614,7 @@
     "nightshift.memoryOptimize",
     "nightshift.obtainSandbox",
     "nightshift.resolveModel",
+    "nightshift.sendNotifications",
     "nightshift.triggerInvestigation",
     "notion.getDataSource",
     "notion.getPage",
@@ -1011,11 +1012,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "eaa70775859521790170b9381d47d795ab333d26ee311b1269e019a76e1e0aa6"
+      "sha256": "0d38bb7a53923b02eb075287ae7399e97df2b1da258ecbe4dcefc0bdf57f77e9"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "ce839edb63d3496b944bc8ce1b93e3a51e78a6c3bc0e3741f819882bd8536e64"
+      "sha256": "08f31756706a5afcf8676c845b8313d98b7e8e956e9600b64aa08ac29bd942ef"
     }
   }
 }
