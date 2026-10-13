@@ -298,7 +298,7 @@ export class WorkflowTaskManager {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
     const priority = getTaskPriority({ isUserInteractive });
 
-    await this.ensureExecutionTaskScheduled(
+    await this.taskManager.ensureScheduled(
       {
         id: taskId,
         taskType: WORKFLOW_RESUME_TASK_TYPE,
@@ -401,7 +401,7 @@ export class WorkflowTaskManager {
     runAs?: TaskInstance['runAs'];
     runAt?: Date;
   }): Promise<void> {
-    await this.ensureExecutionTaskScheduled(
+    await this.taskManager.ensureScheduled(
       {
         id: getWorkflowWakeTaskId(params.executionId),
         ...(params.runAs ? { runAs: params.runAs } : {}),
@@ -414,27 +414,6 @@ export class WorkflowTaskManager {
       },
       params.fakeRequest ? { request: params.fakeRequest, cloneApiKey: true } : undefined
     );
-  }
-
-  private async ensureExecutionTaskScheduled(
-    task: Parameters<TaskManagerStartContract['ensureScheduled']>[0],
-    options: Parameters<TaskManagerStartContract['ensureScheduled']>[1]
-  ): Promise<void> {
-    try {
-      await this.taskManager.ensureScheduled(task, options);
-    } catch (error) {
-      if (!task.runAs || !SavedObjectsErrorHelpers.isConflictError(error)) throw error;
-      const existing = await this.taskManager.get(task.id);
-      // Existing API-key tasks drain through the legacy execution bridge; never replace a claim.
-      if (
-        existing.credential ||
-        existing.taskType !== task.taskType ||
-        existing.params.workflowRunId !== task.params.workflowRunId ||
-        existing.params.spaceId !== task.params.spaceId
-      ) {
-        throw error;
-      }
-    }
   }
 
   /** Wakes an existing authenticated timer without creating a task lacking execution credentials. */

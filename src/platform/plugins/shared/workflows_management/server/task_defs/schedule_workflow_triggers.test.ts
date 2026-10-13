@@ -51,7 +51,31 @@ describe('scheduleWorkflowTriggers', () => {
       'wf-1',
       'default',
       expect.objectContaining({ type: 'scheduled' }),
-      mockRequest
+      mockRequest,
+      undefined
+    );
+  });
+
+  it('passes the configured service account when creating scheduled triggers', async () => {
+    const scheduler = makeMockScheduler();
+
+    await scheduleWorkflowTriggers({
+      workflowId: 'wf-sa',
+      definition: { ...baseDefinition, settings: { run_as: 'scheduled-sa' } },
+      enabled: true,
+      valid: true,
+      spaceId: 'space-1',
+      request: mockRequest,
+      taskScheduler: scheduler,
+      logger,
+    });
+
+    expect(scheduler.scheduleWorkflowTask).toHaveBeenCalledWith(
+      'wf-sa',
+      'space-1',
+      expect.objectContaining({ type: 'scheduled' }),
+      mockRequest,
+      'scheduled-sa'
     );
   });
 

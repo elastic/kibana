@@ -8,6 +8,7 @@
  */
 
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import type {
   EsWorkflowExecution,
   WorkflowExecuteStep,
@@ -77,23 +78,30 @@ const identity: NonNullable<EsWorkflowExecution['effectiveIdentity']> = {
 describe('inherited workflow execution identity', () => {
   const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
   const caller = httpServerMock.createKibanaRequest();
+  const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
   beforeEach(() => {
     jest.clearAllMocks();
     core.security.serviceAccounts.isEnabled.mockReturnValue(true);
-    core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
-      async (_params, run) => run(httpServerMock.createKibanaRequest())
-    );
+    jest
+      .mocked(runAs.withScopedRequest)
+      .mockImplementation(async (run) => run(httpServerMock.createKibanaRequest()));
   });
 
   it('inherits by default inside an SA execution', async () => {
-    await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      expect(
-        resolveInheritedWorkflowIdentity(request, child, {
-          ...context,
-          inheritParentIdentity: false,
-        })
-      ).toEqual(identity);
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(),
+      caller,
+      async (request) => {
+        expect(
+          resolveInheritedWorkflowIdentity(request, child, {
+            ...context,
+            inheritParentIdentity: false,
+          })
+        ).toEqual(identity);
+      },
+      runAs
+    );
   });
 
   it.each([undefined, 'default'] as const)(
@@ -127,22 +135,29 @@ describe('inherited workflow execution identity', () => {
               { ...context, inheritParentIdentity: false }
             )
           ).toThrow('Only managed child workflows');
-        }
+        },
+        runAs
       );
     }
   );
 
   it('does not treat the obsolete inheritRunAs flag as explicit delegation', async () => {
     const withInput = { 'workflow-id': child.id, inheritRunAs: true };
-    await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
-      const boundChild = {
-        ...child,
-        definition: { ...child.definition, settings: { run_as: 'child-account' } },
-      };
-      expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
-        'literal workflow-id and identity choice'
-      );
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(withInput),
+      caller,
+      async (request) => {
+        const boundChild = {
+          ...child,
+          definition: { ...child.definition, settings: { run_as: 'child-account' } },
+        };
+        expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
+          'literal workflow-id and identity choice'
+        );
+      },
+      runAs
+    );
   });
 
   it.each(['workflow.execute', 'workflow.executeAsync'] as const)(
@@ -150,9 +165,15 @@ describe('inherited workflow execution identity', () => {
     async (type) => {
       const execution = parent();
       execution.workflowDefinition.steps = [{ name: 'child', type, with: approval }];
-      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
-        expect(resolveInheritedWorkflowIdentity(request, child, context)).toEqual(identity);
-      });
+      await withWorkflowExecutionIdentity(
+        core,
+        execution,
+        caller,
+        async (request) => {
+          expect(resolveInheritedWorkflowIdentity(request, child, context)).toEqual(identity);
+        },
+        runAs
+      );
     }
   );
 
@@ -167,7 +188,8 @@ describe('inherited workflow execution identity', () => {
       core,
       parent(),
       caller,
-      async (scoped) => scoped
+      async (scoped) => scoped,
+      runAs
     );
     expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
       'requires a parent executing as a service account'
@@ -179,39 +201,63 @@ describe('inherited workflow execution identity', () => {
     { parentWorkflowExecutionId: 'other' },
     { spaceId: 'other' },
   ])('rejects a forged parent or cross-space invocation: %j', async (override) => {
-    await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      expect(() =>
-        resolveInheritedWorkflowIdentity(request, child, { ...context, ...override })
-      ).toThrow('calling workflow in the same space');
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(),
+      caller,
+      async (request) => {
+        expect(() =>
+          resolveInheritedWorkflowIdentity(request, child, { ...context, ...override })
+        ).toThrow('calling workflow in the same space');
+      },
+      runAs
+    );
   });
 
   it.each([
     { ...approval, 'workflow-id': '{{ inputs.child }}' },
     { ...approval, 'workflow-id': 'not-the-resolved-child' },
   ])('rejects missing, unsupported, or dynamic identity choices: %j', async (withInput) => {
-    await withWorkflowExecutionIdentity(core, parent(withInput), caller, async (request) => {
-      expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
-        'literal workflow-id and identity choice'
-      );
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(withInput),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
+          'literal workflow-id and identity choice'
+        );
+      },
+      runAs
+    );
   });
 
   it.each([false, undefined])('rejects unmanaged children (%s)', async (managed) => {
-    await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      expect(() =>
-        resolveInheritedWorkflowIdentity(request, { ...child, managed }, context)
-      ).toThrow('Only managed child workflows');
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(),
+      caller,
+      async (request) => {
+        expect(() =>
+          resolveInheritedWorkflowIdentity(request, { ...child, managed }, context)
+        ).toThrow('Only managed child workflows');
+      },
+      runAs
+    );
   });
 
   it('uses the latest managed definition without revision approval', async () => {
-    await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      const yaml = `${child.yaml}description: Updated by owning plugin\n`;
-      expect(resolveInheritedWorkflowIdentity(request, { ...child, yaml }, context)).toEqual(
-        identity
-      );
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(),
+      caller,
+      async (request) => {
+        const yaml = `${child.yaml}description: Updated by owning plugin\n`;
+        expect(resolveInheritedWorkflowIdentity(request, { ...child, yaml }, context)).toEqual(
+          identity
+        );
+      },
+      runAs
+    );
   });
 
   it('requires explicit override when the child has its own service account', async () => {
@@ -219,11 +265,17 @@ describe('inherited workflow execution identity', () => {
       ...child,
       definition: { ...child.definition, settings: { run_as: 'child-account' } },
     };
-    await withWorkflowExecutionIdentity(core, parent(), caller, async (request) => {
-      expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
-        'run-as-mode: override'
-      );
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      parent(),
+      caller,
+      async (request) => {
+        expect(() => resolveInheritedWorkflowIdentity(request, boundChild, context)).toThrow(
+          'run-as-mode: override'
+        );
+      },
+      runAs
+    );
     await withWorkflowExecutionIdentity(
       core,
       parent({ 'workflow-id': child.id, 'run-as-mode': 'override' }),
@@ -231,22 +283,33 @@ describe('inherited workflow execution identity', () => {
       async (request) => {
         expect(resolveInheritedWorkflowIdentity(request, boundChild, context)).toEqual(identity);
         expect(boundChild.definition.settings.run_as).toBe('child-account');
-      }
+      },
+      runAs
     );
   });
 
   it('checks managed eligibility at every inherited hop', async () => {
     const inheritedParent = { ...parent(), effectiveIdentity: identity };
-    await withWorkflowExecutionIdentity(core, inheritedParent, caller, async (request) => {
-      expect(() =>
-        resolveInheritedWorkflowIdentity(request, { ...child, managed: false }, context)
-      ).toThrow('Only managed child workflows');
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      inheritedParent,
+      caller,
+      async (request) => {
+        expect(() =>
+          resolveInheritedWorkflowIdentity(request, { ...child, managed: false }, context)
+        ).toThrow('Only managed child workflows');
+      },
+      runAs
+    );
   });
 
   it('remints from the root binding after the parent has finished', async () => {
-    const inherited = await withWorkflowExecutionIdentity(core, parent(), caller, async (request) =>
-      resolveInheritedWorkflowIdentity(request, child, context)
+    const inherited = await withWorkflowExecutionIdentity(
+      core,
+      parent(),
+      caller,
+      async (request) => resolveInheritedWorkflowIdentity(request, child, context),
+      runAs
     );
     const execution = {
       ...parent(),
@@ -255,21 +318,21 @@ describe('inherited workflow execution identity', () => {
       effectiveIdentity: inherited,
     };
     for (let resume = 0; resume < 2; resume++) {
-      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
-        expect(request).not.toBe(caller);
-        expect(getWorkflowTaskRunAs(execution)?.workloadId).toBe('parent');
-      });
+      await withWorkflowExecutionIdentity(
+        core,
+        execution,
+        caller,
+        async (request) => {
+          expect(request).not.toBe(caller);
+          expect(getWorkflowTaskRunAs(execution)?.workloadId).toBe('parent');
+        },
+        runAs
+      );
     }
-    expect(core.security.serviceAccounts.withScopedRequestForWorkload).toHaveBeenLastCalledWith(
-      {
-        workloadType: 'workflow',
-        workloadId: 'parent',
-        spaceId: 'default',
-        expectedServiceAccountId: 'account-a',
-      },
-      expect.any(Function)
-    );
-    expect(core.security.serviceAccounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(3);
+    expect(jest.mocked(runAs.withScopedRequest)).toHaveBeenLastCalledWith(expect.any(Function), {
+      expectedServiceAccountId: 'account-a',
+    });
+    expect(jest.mocked(runAs.withScopedRequest)).toHaveBeenCalledTimes(3);
   });
 
   it('retains the root workload binding across a further inherited child', async () => {
@@ -282,12 +345,18 @@ describe('inherited workflow execution identity', () => {
         },
       },
     };
-    await withWorkflowExecutionIdentity(core, inheritedParent, caller, async (request) => {
-      expect(resolveInheritedWorkflowIdentity(request, child, context)?.inheritedFrom).toEqual({
-        ...identity.inheritedFrom,
-        workloadId: 'root',
-      });
-    });
+    await withWorkflowExecutionIdentity(
+      core,
+      inheritedParent,
+      caller,
+      async (request) => {
+        expect(resolveInheritedWorkflowIdentity(request, child, context)?.inheritedFrom).toEqual({
+          ...identity.inheritedFrom,
+          workloadId: 'root',
+        });
+      },
+      runAs
+    );
   });
 
   it.each([false, undefined])(
@@ -301,7 +370,8 @@ describe('inherited workflow execution identity', () => {
           expect(() => resolveInheritedWorkflowIdentity(request, child, context)).toThrow(
             'Only managed parent'
           );
-        }
+        },
+        runAs
       );
     }
   );
@@ -319,15 +389,21 @@ describe('inherited workflow execution identity', () => {
           'on-failure': { fallback: [fallbackStep] },
         },
       };
-      await withWorkflowExecutionIdentity(core, execution, caller, async (request) => {
-        expect(
-          resolveInheritedWorkflowIdentity(request, child, {
-            ...context,
-            parentStepId: 'workflow-level-on-failure_fail_child',
-            parentStepName: 'child',
-          })
-        ).toEqual(identity);
-      });
+      await withWorkflowExecutionIdentity(
+        core,
+        execution,
+        caller,
+        async (request) => {
+          expect(
+            resolveInheritedWorkflowIdentity(request, child, {
+              ...context,
+              parentStepId: 'workflow-level-on-failure_fail_child',
+              parentStepName: 'child',
+            })
+          ).toEqual(identity);
+        },
+        runAs
+      );
     }
   );
 
@@ -378,16 +454,14 @@ describe('inherited workflow execution identity', () => {
       effectiveIdentity: identity,
     };
     const run = jest.fn();
-    core.security.serviceAccounts.withScopedRequestForWorkload.mockRejectedValue(
-      new Error('Binding revoked')
-    );
-    await expect(withWorkflowExecutionIdentity(core, execution, caller, run)).rejects.toThrow(
-      'Binding revoked'
-    );
+    jest.mocked(runAs.withScopedRequest).mockRejectedValue(new Error('Binding revoked'));
+    await expect(
+      withWorkflowExecutionIdentity(core, execution, caller, run, runAs)
+    ).rejects.toThrow('Binding revoked');
     core.security.serviceAccounts.isEnabled.mockReturnValue(false);
-    await expect(withWorkflowExecutionIdentity(core, execution, caller, run)).rejects.toThrow(
-      'disabled'
-    );
+    await expect(
+      withWorkflowExecutionIdentity(core, execution, caller, run, runAs)
+    ).rejects.toThrow('disabled');
     expect(run).not.toHaveBeenCalled();
   });
 });

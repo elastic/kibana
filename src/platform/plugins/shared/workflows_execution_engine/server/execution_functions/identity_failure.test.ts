@@ -40,9 +40,7 @@ const setup = () => {
   const dependencies = mockContextDependencies();
   const accounts = dependencies.coreStart.security.serviceAccounts;
   jest.spyOn(accounts, 'isEnabled').mockReturnValue(true);
-  jest
-    .spyOn(accounts, 'withScopedRequestForWorkload')
-    .mockRejectedValue(new Error('Binding changed'));
+  const runAs = { withScopedRequest: jest.fn().mockRejectedValue(new Error('Binding changed')) };
   let execution: EsWorkflowExecution = {
     id: 'child',
     workflowId: 'workflow',
@@ -105,7 +103,7 @@ const setup = () => {
   );
   jest.spyOn(meteringService, 'reportWorkflowExecution').mockResolvedValue(undefined);
   return {
-    accounts,
+    runAs,
     dataClient,
     setTestRun: () => {
       execution.isTestRun = true;
@@ -120,6 +118,7 @@ const setup = () => {
       logger: createMockLogger(),
       config: createMockWorkflowExecutionEngineConfig(),
       fakeRequest: createFakeKibanaRequest(),
+      runAs,
       dependencies,
       workflowsExecutionEngine: workflowsExecutionEngineMock.createStart(),
       internalResumeWorkflowExecution: jest.fn().mockResolvedValue(undefined),
@@ -209,7 +208,7 @@ describe.each([
     'terminal during step write',
     'terminal after last conflict',
   ] as const)('cancels waiting steps when cancellation wins %s', async (when) => {
-    const { params, accounts } = setup();
+    const { params, runAs } = setup();
     const approval = {
       id: 'approval-execution',
       stepId: 'approval',
@@ -273,7 +272,7 @@ describe.each([
         });
     }
     if (when === 'before cleanup') {
-      jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+      jest.mocked(runAs.withScopedRequest).mockImplementationOnce(async () => {
         await cancel();
         throw new Error('Binding changed');
       });
@@ -347,7 +346,7 @@ describe.each([
   });
 
   it('retries parent and queue cleanup after a transient post-execution read failure', async () => {
-    const { params, accounts } = setup();
+    const { params, runAs } = setup();
     const repository = params.workflowExecutionRepository;
     const execution = await repository.getWorkflowExecutionById('child', 'default');
     jest
@@ -364,7 +363,7 @@ describe.each([
 
     await execute(params);
 
-    expect(accounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
+    expect(runAs.withScopedRequest).toHaveBeenCalledTimes(1);
     expect(repository.tryUpdateWorkflowExecutionWithVersion).toHaveBeenCalledTimes(1);
     expect(repository.updateWorkflowExecution).toHaveBeenCalledTimes(1);
     expect({
@@ -377,7 +376,7 @@ describe.each([
   });
 
   it('keeps parent cleanup pending when wake-up and fail-closed recovery fail', async () => {
-    const { params, accounts } = setup();
+    const { params, runAs } = setup();
     const repository = params.workflowExecutionRepository;
     const read = jest.mocked(repository.getWorkflowExecutionById).getMockImplementation();
     if (!read) throw new Error('Missing test repository implementation');
@@ -395,7 +394,7 @@ describe.each([
     expect((await read('child', 'default'))?.context?.serviceAccountFailureCleanupPending).toBe(
       false
     );
-    expect(accounts.withScopedRequestForWorkload).toHaveBeenCalledTimes(1);
+    expect(runAs.withScopedRequest).toHaveBeenCalledTimes(1);
   });
 
   it.each([
@@ -404,10 +403,10 @@ describe.each([
     ExecutionStatus.CANCELLED,
     ExecutionStatus.SKIPPED,
   ])('does not remint or rewrite a terminal execution (%s)', async (status) => {
-    const { params, accounts, setStatus } = setup();
+    const { params, runAs, setStatus } = setup();
     setStatus(status);
     await execute(params);
-    expect(accounts.withScopedRequestForWorkload).not.toHaveBeenCalled();
+    expect(runAs.withScopedRequest).not.toHaveBeenCalled();
     expect(params.workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
     expect(params.stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
     expect(setupDependencies).not.toHaveBeenCalled();
@@ -443,7 +442,7 @@ describe.each([
   it.each(['during minting', 'during finalization'])(
     'preserves a cancellation committed %s',
     async (when) => {
-      const { params, accounts } = setup();
+      const { params, runAs } = setup();
       const cancel = async () =>
         params.workflowExecutionRepository.updateWorkflowExecution({
           id: 'child',
@@ -451,7 +450,7 @@ describe.each([
           cancelRequested: true,
         });
       if (when === 'during minting') {
-        jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+        jest.mocked(runAs.withScopedRequest).mockImplementationOnce(async () => {
           await cancel();
           throw new Error('Binding changed');
         });
@@ -470,8 +469,8 @@ describe.each([
   );
 
   it('finalizes a pending cancellation instead of emitting an identity-failure event', async () => {
-    const { params, accounts } = setup();
-    jest.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
+    const { params, runAs } = setup();
+    jest.mocked(runAs.withScopedRequest).mockImplementationOnce(async () => {
       await params.workflowExecutionRepository.updateWorkflowExecution({
         id: 'child',
         cancelRequested: true,

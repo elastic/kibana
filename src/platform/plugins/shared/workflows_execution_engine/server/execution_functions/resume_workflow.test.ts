@@ -46,20 +46,10 @@ const mockWorkflowExecutionLoop = workflowExecutionLoop as jest.MockedFunction<
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
 describe('resumeWorkflow', () => {
-  it.each([
-    { inherited: false, native: false },
-    { inherited: true, native: false },
-    { inherited: false, native: true },
-    { inherited: true, native: true },
-  ])('finalizes identity failure (%j)', async ({ inherited, native }) => {
+  it.each([false, true])('finalizes native identity failure (inherited: %s)', async (inherited) => {
     jest.clearAllMocks();
     const dependencies = mockContextDependencies();
     jest.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    jest
-      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
-      .mockRejectedValue(
-        new Error('The workload binding does not match the expected service account.')
-      );
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       createMockWorkflowDataClient()
     );
@@ -132,8 +122,8 @@ describe('resumeWorkflow', () => {
         dependencies,
         logger: createMockLogger(),
         config: createMockWorkflowExecutionEngineConfig(),
-        fakeRequest: native ? undefined : createFakeKibanaRequest(),
-        runAs: native ? runAs : undefined,
+        fakeRequest: undefined,
+        runAs,
         emitIdentityFailure,
         workflowsExecutionEngine: mockWorkflowExecutionEngine,
         workflowExecutionRepository,
@@ -150,7 +140,7 @@ describe('resumeWorkflow', () => {
       expect.objectContaining({ status: ExecutionStatus.FAILED, finishedAt: expect.any(String) }),
       { seqNo: 1, primaryTerm: 1 }
     );
-    expect(emitIdentityFailure).toHaveBeenCalledTimes(native ? 1 : 0);
+    expect(emitIdentityFailure).toHaveBeenCalledTimes(1);
     expect(mockSetupDependencies).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
   });

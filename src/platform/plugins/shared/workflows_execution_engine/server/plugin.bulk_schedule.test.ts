@@ -186,6 +186,46 @@ describe('bulkScheduleWorkflow', () => {
     }
   );
 
+  it.each(['executeWorkflow', 'scheduleWorkflow', 'bulkScheduleWorkflow'] as const)(
+    '%s schedules an SA task with its expected workload binding',
+    async (method) => {
+      const workflow = enableBoundWorkflow();
+      if (method === 'bulkScheduleWorkflow') {
+        mockBulkCreateWorkflowExecutions.mockResolvedValue([{ id: 'execution' }]);
+        await pluginStart.bulkScheduleWorkflow(
+          [{ workflow, context: { spaceId: 'default' } }],
+          request
+        );
+        expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({
+              runAs: {
+                workloadType: 'workflow',
+                workloadId: 'bound',
+                spaceId: 'default',
+                expectedServiceAccountId: 'account',
+              },
+            }),
+          ],
+          expect.anything()
+        );
+      } else {
+        await pluginStart[method](workflow, { spaceId: 'default' }, request);
+        expect(taskManager.schedule).toHaveBeenCalledWith(
+          expect.objectContaining({
+            runAs: {
+              workloadType: 'workflow',
+              workloadId: 'bound',
+              spaceId: 'default',
+              expectedServiceAccountId: 'account',
+            },
+          }),
+          expect.anything()
+        );
+      }
+    }
+  );
+
   it('makes a bound execution visible before admitting it and scheduling its task', async () => {
     const workflow = enableBoundWorkflow();
     let searchable = false;

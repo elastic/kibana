@@ -22,6 +22,13 @@ import {
 } from './service_account_execution';
 
 describe('workflow service account execution', () => {
+  const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest
+      .mocked(runAs.withScopedRequest)
+      .mockImplementation(async (run) => run(httpServerMock.createKibanaRequest()));
+  });
   const execution = (accountId?: string) => ({
     id: 'parent-execution',
     executedBy: 'initiating-user',
@@ -45,14 +52,14 @@ describe('workflow service account execution', () => {
     };
     const request = httpServerMock.createKibanaRequest();
     const run = jest.fn().mockResolvedValue('done');
-    await expect(withWorkflowExecutionIdentity(core, execution(), request, run)).resolves.toBe(
-      'done'
-    );
+    await expect(
+      withWorkflowExecutionIdentity(core, execution(), request, run, undefined)
+    ).resolves.toBe('done');
     expect(run).toHaveBeenCalledWith(request);
     expect(core.security.serviceAccounts.withScopedRequestForWorkload).not.toHaveBeenCalled();
   });
 
-  it('supports legacy tasks while keeping initiating-user metadata separate from identity', async () => {
+  it('keeps initiating-user metadata separate from native task identity', async () => {
     const core = {
       ...coreMock.createStart(),
       security: securityServiceMock.createStart(),
@@ -61,25 +68,23 @@ describe('workflow service account execution', () => {
     core.security.serviceAccounts.isEnabled.mockReturnValue(true);
     const request = httpServerMock.createKibanaRequest();
     const scoped = httpServerMock.createKibanaRequest();
-    core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
-      async (params, fn) => fn(scoped)
-    );
+    jest.mocked(runAs.withScopedRequest).mockImplementation(async (fn) => fn(scoped));
     const child = jest.fn().mockResolvedValue('child');
-    await withWorkflowExecutionIdentity(core, execution('account-a'), request, async (actual) => {
-      expect(actual).toBe(scoped);
-      expect(getWorkflowInitiatingUser(actual)).toBe('initiating-user');
-      await withWorkflowExecutionIdentity(core, execution(), actual, child);
-    });
-    expect(child).toHaveBeenCalledWith(scoped);
-    expect(core.security.serviceAccounts.withScopedRequestForWorkload).toHaveBeenCalledWith(
-      {
-        workloadType: 'workflow',
-        workloadId: 'workflow',
-        spaceId: 'space',
-        expectedServiceAccountId: 'account-a',
+    await withWorkflowExecutionIdentity(
+      core,
+      execution('account-a'),
+      request,
+      async (actual) => {
+        expect(actual).toBe(scoped);
+        expect(getWorkflowInitiatingUser(actual)).toBe('initiating-user');
+        await withWorkflowExecutionIdentity(core, execution(), actual, child, undefined);
       },
-      expect.any(Function)
+      runAs
     );
+    expect(child).toHaveBeenCalledWith(scoped);
+    expect(runAs.withScopedRequest).toHaveBeenCalledWith(expect.any(Function), {
+      expectedServiceAccountId: 'account-a',
+    });
     expect(getWorkflowInitiatingUser(scoped)).toBeUndefined();
   });
 
@@ -87,7 +92,6 @@ describe('workflow service account execution', () => {
     const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
     core.security.serviceAccounts.isEnabled.mockReturnValue(true);
     const request = httpServerMock.createKibanaRequest();
-    const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
     jest.mocked(runAs.withScopedRequest).mockImplementation(async (fn) => fn(request));
     const run = jest.fn().mockResolvedValue('done');
     await expect(
@@ -118,7 +122,6 @@ describe('workflow service account execution', () => {
 
   it('rejects a native service-account task for a non-SA execution', async () => {
     const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
-    const runAs = { withScopedRequest: jest.fn() };
     const run = jest.fn();
     await expect(
       withWorkflowExecutionIdentity(core, execution(), undefined, run, runAs)
@@ -136,16 +139,14 @@ describe('workflow service account execution', () => {
     const request = httpServerMock.createKibanaRequest();
     const run = jest.fn();
     core.security.serviceAccounts.isEnabled.mockReturnValue(false);
-    await expect(withWorkflowExecutionIdentity(core, execution('a'), request, run)).rejects.toThrow(
-      'disabled'
-    );
+    await expect(
+      withWorkflowExecutionIdentity(core, execution('a'), request, run, runAs)
+    ).rejects.toThrow('disabled');
     core.security.serviceAccounts.isEnabled.mockReturnValue(true);
-    core.security.serviceAccounts.withScopedRequestForWorkload.mockRejectedValue(
-      new Error('binding changed')
-    );
-    await expect(withWorkflowExecutionIdentity(core, execution('a'), request, run)).rejects.toThrow(
-      'binding changed'
-    );
+    jest.mocked(runAs.withScopedRequest).mockRejectedValue(new Error('binding changed'));
+    await expect(
+      withWorkflowExecutionIdentity(core, execution('a'), request, run, runAs)
+    ).rejects.toThrow('binding changed');
     expect(run).not.toHaveBeenCalled();
   });
 
@@ -156,9 +157,7 @@ describe('workflow service account execution', () => {
       const request = httpServerMock.createKibanaRequest();
       const scopedRequest = httpServerMock.createKibanaRequest();
       core.security.serviceAccounts.isEnabled.mockReturnValue(true);
-      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
-        async (_params, run) => run(scopedRequest)
-      );
+      jest.mocked(runAs.withScopedRequest).mockImplementation(async (run) => run(scopedRequest));
       core.userProfile.getCurrentProfileId.mockImplementation(async ({ request: actual }) =>
         actual === request ? profileId : null
       );
@@ -178,7 +177,8 @@ describe('workflow service account execution', () => {
             actual,
             core,
             { id: 'workflow-id', spaceId: 'space-a' }
-          )
+          ),
+        runAs
       );
 
       expect(allowed).toBe(false);
@@ -196,4 +196,32 @@ describe('workflow service account execution', () => {
       expect(core.userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request: scopedRequest });
     }
   );
+});
+
+it('rejects SA execution without native TM identity even when caller credentials exist', async () => {
+  const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+  core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+  const run = jest.fn();
+  await expect(
+    withWorkflowExecutionIdentity(
+      core,
+      {
+        id: 'execution',
+        workflowId: 'workflow',
+        spaceId: 'default',
+        workflowDefinition: {
+          version: '1',
+          name: 'SA',
+          enabled: true,
+          triggers: [{ type: 'manual' }],
+          steps: [],
+          settings: { run_as: 'account' },
+        },
+      },
+      httpServerMock.createKibanaRequest(),
+      run
+    )
+  ).rejects.toThrow('require a Task Manager identity');
+  expect(run).not.toHaveBeenCalled();
+  expect(core.security.serviceAccounts.withScopedRequestForWorkload).not.toHaveBeenCalled();
 });

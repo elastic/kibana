@@ -10,8 +10,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
+import type { RunContext, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { type EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { WORKFLOW_RESUME_TASK_TYPE } from './types';
@@ -118,9 +118,10 @@ describe('WorkflowTaskManager', () => {
       const serviceAccountRequest = httpServerMock.createKibanaRequest({
         headers: { authorization: 'Bearer short-lived-service-account-token' },
       });
-      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
-        async (_, execute) => execute(serviceAccountRequest)
-      );
+      const runAs: NonNullable<RunContext['runAs']> = { withScopedRequest: jest.fn() };
+      jest
+        .mocked(runAs.withScopedRequest)
+        .mockImplementation(async (execute) => execute(serviceAccountRequest));
       mockTaskManager.schedule.mockResolvedValue(taskManagerMock.createTask());
       const workflowExecution = createMockWorkflowExecution();
       workflowExecution.workflowDefinition.settings = { run_as: 'account-a' };
@@ -158,7 +159,8 @@ describe('WorkflowTaskManager', () => {
               });
               break;
           }
-        }
+        },
+        runAs
       );
 
       const calls = [
@@ -179,30 +181,11 @@ describe('WorkflowTaskManager', () => {
     }
   );
 
-  it.each([false, true])(
-    'preserves a legacy resume task but rejects a different SA binding (%s)',
-    async (hasCredential) => {
-      const conflict = SavedObjectsErrorHelpers.createConflictError('task', 'existing');
-      mockTaskManager.ensureScheduled.mockRejectedValue(conflict);
-      mockTaskManager.get.mockResolvedValue(
-        taskManagerMock.createTask({
-          taskType: WORKFLOW_RESUME_TASK_TYPE,
-          params: { workflowRunId: 'execution', spaceId: 'default' },
-          status: TaskStatus.Running,
-          ...(hasCredential
-            ? {
-                credential: {
-                  type: 'service_account',
-                  workloadType: 'workflow',
-                  workloadId: 'other',
-                  spaceId: 'default',
-                  expectedServiceAccountId: 'other-account',
-                },
-              }
-            : {}),
-        })
-      );
-      const result = workflowTaskManager.ensureWakeTask({
+  it('propagates conflicting task identity instead of accepting a caller-credential task', async () => {
+    const conflict = SavedObjectsErrorHelpers.createConflictError('task', 'existing');
+    mockTaskManager.ensureScheduled.mockRejectedValue(conflict);
+    await expect(
+      workflowTaskManager.ensureWakeTask({
         executionId: 'execution',
         spaceId: 'default',
         runAs: {
@@ -211,12 +194,11 @@ describe('WorkflowTaskManager', () => {
           spaceId: 'default',
           expectedServiceAccountId: 'account',
         },
-      });
-      if (hasCredential) await expect(result).rejects.toBe(conflict);
-      else await expect(result).resolves.toBeUndefined();
-      expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
-    }
-  );
+      })
+    ).rejects.toBe(conflict);
+    expect(mockTaskManager.get).not.toHaveBeenCalled();
+    expect(mockTaskManager.removeIfExists).not.toHaveBeenCalled();
+  });
 
   describe('scheduleResumeTask', () => {
     it('should schedule a resume task with correct parameters', async () => {

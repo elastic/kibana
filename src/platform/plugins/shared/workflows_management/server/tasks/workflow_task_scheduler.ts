@@ -82,7 +82,7 @@ export class WorkflowTaskScheduler {
     spaceId: string,
     trigger: WorkflowTrigger,
     request: KibanaRequest,
-    serviceAccountId?: string
+    serviceAccountId: string | undefined
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
     const taskId = `workflow:${workflowId}:${trigger.type}`;

@@ -177,18 +177,7 @@ export const withWorkflowExecutionIdentity = async <T>(
       executionContexts.delete(scopedRequest);
     }
   };
-  if (runAs) {
-    return runAs.withScopedRequest(scoped, { expectedServiceAccountId: serviceAccountId });
-  }
-  // Compatibility for pre-migration API-key tasks already stored in Task Manager.
-  if (!request) throw Boom.forbidden('Workflow task has no execution identity.');
-  return core.security.serviceAccounts.withScopedRequestForWorkload(
-    {
-      workloadType: WORKFLOW_SERVICE_ACCOUNT_TYPE,
-      workloadId: execution.effectiveIdentity?.inheritedFrom?.workloadId ?? execution.workflowId,
-      spaceId: execution.spaceId,
-      expectedServiceAccountId: serviceAccountId,
-    },
-    scoped
-  );
+  if (!runAs)
+    throw Boom.forbidden('Service account workflow tasks require a Task Manager identity.');
+  return runAs.withScopedRequest(scoped, { expectedServiceAccountId: serviceAccountId });
 };

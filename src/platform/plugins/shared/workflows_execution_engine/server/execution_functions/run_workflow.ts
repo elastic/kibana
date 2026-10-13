@@ -291,6 +291,7 @@ export const runWorkflow = async (
   params: Omit<Parameters<typeof runWorkflowWithRequest>[0], 'fakeRequest'> & {
     fakeRequest?: KibanaRequest;
     runAs?: RunContext['runAs'];
+    canStartExecution?: (request: KibanaRequest) => Promise<boolean>;
     emitIdentityFailure?: Parameters<
       typeof emitWorkflowIdentityFailureEvent
     >[0]['emitWithoutRequest'];
@@ -317,8 +318,9 @@ export const runWorkflow = async (
       params.dependencies.coreStart,
       execution,
       params.fakeRequest,
-      (fakeRequest) => {
+      async (fakeRequest) => {
         enteredExecution = true;
+        if (params.canStartExecution && !(await params.canStartExecution(fakeRequest))) return;
         return runWorkflowWithRequest({ ...params, fakeRequest });
       },
       params.runAs
