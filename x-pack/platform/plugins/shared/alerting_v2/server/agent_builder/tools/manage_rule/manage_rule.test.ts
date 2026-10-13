@@ -208,7 +208,7 @@ describe('manageRuleTool', () => {
 
       const { results } = result as { results: Array<{ data?: { warnings?: string[] } }> };
       expect(results[0].data?.warnings).toEqual([
-        expect.stringContaining('data stream `logs-nginx.access-default`'),
+        expect.stringContaining('base name `logs-nginx.access-default`'),
       ]);
       expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
     });

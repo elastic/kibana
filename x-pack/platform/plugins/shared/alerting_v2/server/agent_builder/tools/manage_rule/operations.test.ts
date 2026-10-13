@@ -345,7 +345,7 @@ describe('executeRuleOperations', () => {
 
       expect(result.data.query).toEqual({ base: backingIndexQuery });
       expect(result.warnings).toEqual([
-        expect.stringContaining('data stream `logs-nginx.access-default`'),
+        expect.stringContaining('base name `logs-nginx.access-default`'),
       ]);
     });
 
@@ -363,7 +363,7 @@ describe('executeRuleOperations', () => {
       );
 
       expect(result.queryColumns).toEqual([{ name: 'count', type: 'long' }]);
-      expect(result.warnings).toEqual([expect.stringContaining('backing index')]);
+      expect(result.warnings).toEqual([expect.stringContaining('generation index')]);
     });
 
     it('does not warn for wildcard patterns or data stream names', async () => {

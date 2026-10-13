@@ -9,13 +9,16 @@ import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 
 const BACKING_INDEX_PREFIX = '.ds-';
 // Data stream backing indices are named `.ds-<data-stream>-<yyyy.MM.dd>-<generation>`.
-const BACKING_INDEX_SUFFIX = /-\d{4}\.\d{2}\.\d{2}-\d{6}$/;
+// The date + 6-digit generation pair is specific enough to also recognise the same name
+// without its `.ds-` prefix (e.g. as users and tools often write it), whereas a bare
+// `-NNNNNN` or `-yyyy.MM.dd` suffix is also a common user-chosen name.
+const GENERATION_SUFFIX = /-\d{4}\.\d{2}\.\d{2}-\d{6}$/;
 
 export interface ConcreteIndexMatch {
   /** Source as written in the query (may include a CCS `remote:` prefix). */
   index: string;
-  /** Data stream the backing index belongs to, with the CCS prefix preserved. */
-  dataStream: string;
+  /** Name without the `.ds-` prefix and generation suffix, with the CCS prefix preserved. */
+  baseName: string;
 }
 
 const stripRemoteClusterPrefix = (source: string): { remote: string; local: string } => {
@@ -27,8 +30,9 @@ const stripRemoteClusterPrefix = (source: string): { remote: string; local: stri
 
 /**
  * Returns the `FROM`/`TS` sources of the query that are data stream backing
- * indices. Only the `.ds-` naming is matched: it is fixed by Elasticsearch, so
- * there are no false positives on user-chosen names such as `orders-202401`.
+ * indices: any `.ds-` name, or a name ending in the `-yyyy.MM.dd-NNNNNN`
+ * generation suffix. Both are fixed by Elasticsearch, so user-chosen names such
+ * as `orders-000123` or `logstash-2026.06.11` are not matched.
  */
 export const findBackingIndices = (esqlQuery: string): ConcreteIndexMatch[] =>
   getIndexPatternFromESQLQuery(esqlQuery)
@@ -37,11 +41,18 @@ export const findBackingIndices = (esqlQuery: string): ConcreteIndexMatch[] =>
     .flatMap((source) => {
       const { remote, local } = stripRemoteClusterPrefix(source);
       // A wildcard over backing indices still matches the ones created by future rollovers.
-      if (!local.startsWith(BACKING_INDEX_PREFIX) || /[*?]/.test(local)) {
+      if (/[*?]/.test(local)) {
         return [];
       }
-      const dataStream = local.slice(BACKING_INDEX_PREFIX.length).replace(BACKING_INDEX_SUFFIX, '');
-      return [{ index: source, dataStream: `${remote}${dataStream}` }];
+      const hasPrefix = local.startsWith(BACKING_INDEX_PREFIX);
+      if (!hasPrefix && !GENERATION_SUFFIX.test(local)) {
+        return [];
+      }
+      const baseName = (hasPrefix ? local.slice(BACKING_INDEX_PREFIX.length) : local).replace(
+        GENERATION_SUFFIX,
+        ''
+      );
+      return [{ index: source, baseName: `${remote}${baseName}` }];
     });
 
 /**
@@ -53,12 +64,13 @@ export const formatBackingIndexWarning = (
   queryName: string = 'The query'
 ): string => {
   const details = matches
-    .map(({ index, dataStream }) => `\`${index}\` (data stream \`${dataStream}\`)`)
+    .map(({ index, baseName }) => `\`${index}\` (base name \`${baseName}\`)`)
     .join(', ');
   return (
-    `${queryName} targets a data stream backing index: ${details}. Backing indices change on ` +
+    `${queryName} targets a rollover generation index: ${details}. Generation indices change on ` +
     `every rollover, so the rule will stop matching new data. If the user explicitly asked for ` +
     `this index, keep it and tell them about the risk. Otherwise call the operation again using ` +
-    `the data stream name or a wildcard pattern instead.`
+    `the base name when it is a data stream or alias, or a wildcard pattern such as ` +
+    `\`<base name>-*\` instead.`
   );
 };

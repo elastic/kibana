@@ -8,13 +8,13 @@
 import { findBackingIndices, formatBackingIndexWarning } from './concrete_index_warning';
 
 describe('findBackingIndices', () => {
-  it('detects a data stream backing index and derives its data stream', () => {
+  it('detects a data stream backing index and derives its base name', () => {
     expect(
       findBackingIndices('FROM .ds-logs-nginx.access-default-2026.06.11-000001 | STATS COUNT(*)')
     ).toEqual([
       {
         index: '.ds-logs-nginx.access-default-2026.06.11-000001',
-        dataStream: 'logs-nginx.access-default',
+        baseName: 'logs-nginx.access-default',
       },
     ]);
   });
@@ -25,7 +25,7 @@ describe('findBackingIndices', () => {
     ).toEqual([
       {
         index: 'remote:.ds-logs-app-default-2026.06.11-000042',
-        dataStream: 'remote:logs-app-default',
+        baseName: 'remote:logs-app-default',
       },
     ]);
   });
@@ -36,7 +36,7 @@ describe('findBackingIndices', () => {
     );
 
     expect(matches).toEqual([
-      { index: '.ds-logs-app-default-2026.06.11-000001', dataStream: 'logs-app-default' },
+      { index: '.ds-logs-app-default-2026.06.11-000001', baseName: 'logs-app-default' },
     ]);
   });
 
@@ -46,14 +46,14 @@ describe('findBackingIndices', () => {
     ).toEqual([
       {
         index: '.ds-metrics-system.cpu-default-2026.06.11-000001',
-        dataStream: 'metrics-system.cpu-default',
+        baseName: 'metrics-system.cpu-default',
       },
     ]);
   });
 
   it('keeps the name unchanged when a `.ds-` source has no generation suffix', () => {
     expect(findBackingIndices('FROM .ds-logs-app-default | LIMIT 1')).toEqual([
-      { index: '.ds-logs-app-default', dataStream: 'logs-app-default' },
+      { index: '.ds-logs-app-default', baseName: 'logs-app-default' },
     ]);
   });
 
@@ -64,9 +64,28 @@ describe('findBackingIndices', () => {
     ['a cross-cluster wildcard', 'FROM remote:logs-* | LIMIT 1'],
     ['a user-chosen name with a numeric suffix', 'FROM orders-000123 | LIMIT 1'],
     ['a daily index', 'FROM logstash-2026.06.11 | LIMIT 1'],
-    ['a rollover generation index', 'FROM logs-2026.06.11-000001 | LIMIT 1'],
+    ['a bare generation number', 'FROM logs-000001 | LIMIT 1'],
+    ['a date-only suffix on a six-digit name', 'FROM logs-2026.06.11 | LIMIT 1'],
+    ['a wildcard over a generation index', 'FROM logs-nginx-2026.06.11-* | LIMIT 1'],
   ])('does not flag %s', (_description, query) => {
     expect(findBackingIndices(query)).toEqual([]);
+  });
+
+  it('detects a generation index written without the `.ds-` prefix', () => {
+    expect(
+      findBackingIndices('FROM logs-nginx.access-default-2026.06.11-000001 | LIMIT 1')
+    ).toEqual([
+      {
+        index: 'logs-nginx.access-default-2026.06.11-000001',
+        baseName: 'logs-nginx.access-default',
+      },
+    ]);
+  });
+
+  it('detects a prefix-less generation index behind a cross-cluster prefix', () => {
+    expect(findBackingIndices('FROM remote:logs-app-2026.06.11-000007 | LIMIT 1')).toEqual([
+      { index: 'remote:logs-app-2026.06.11-000007', baseName: 'remote:logs-app' },
+    ]);
   });
 
   it('returns an empty list when the query has no source command', () => {
@@ -75,19 +94,19 @@ describe('findBackingIndices', () => {
 });
 
 describe('formatBackingIndexWarning', () => {
-  it('names every index with its data stream', () => {
+  it('names every index with its base name', () => {
     const warning = formatBackingIndexWarning([
-      { index: '.ds-logs-a-default-2026.06.11-000001', dataStream: 'logs-a-default' },
-      { index: '.ds-logs-b-default-2026.06.11-000001', dataStream: 'logs-b-default' },
+      { index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' },
+      { index: '.ds-logs-b-default-2026.06.11-000001', baseName: 'logs-b-default' },
     ]);
 
-    expect(warning).toContain('`.ds-logs-a-default-2026.06.11-000001` (data stream `logs-a-default`)');
-    expect(warning).toContain('`.ds-logs-b-default-2026.06.11-000001` (data stream `logs-b-default`)');
+    expect(warning).toContain('`.ds-logs-a-default-2026.06.11-000001` (base name `logs-a-default`)');
+    expect(warning).toContain('`.ds-logs-b-default-2026.06.11-000001` (base name `logs-b-default`)');
   });
 
   it('instructs the model to respect an explicit request and otherwise retry', () => {
     const warning = formatBackingIndexWarning([
-      { index: '.ds-logs-a-default-2026.06.11-000001', dataStream: 'logs-a-default' },
+      { index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' },
     ]);
 
     expect(warning).toContain('explicitly asked');
@@ -96,7 +115,7 @@ describe('formatBackingIndexWarning', () => {
 
   it('uses the given query name and defaults to a generic one', () => {
     const matches = [
-      { index: '.ds-logs-a-default-2026.06.11-000001', dataStream: 'logs-a-default' },
+      { index: '.ds-logs-a-default-2026.06.11-000001', baseName: 'logs-a-default' },
     ];
 
     expect(formatBackingIndexWarning(matches, 'The recovery query')).toMatch(
