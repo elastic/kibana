@@ -6,7 +6,7 @@
  */
 
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { platformSignificantEventsTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type {
@@ -36,8 +36,7 @@ export const SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATOR_CREATE_QUERY_TOOL_ID =
 const queryInputSchema = lazySchema(() =>
   upsertStreamQueryRequestSchema.extend({
     id: z.string().max(MAX_ID_LENGTH).optional(),
-    expires_at: z.iso
-      .datetime()
+    expires_at: isoDateTime()
       .optional()
       .describe(
         'Optional expiry deadline (ISO 8601). Provide to create a managed KI that expires at this date. ' +
