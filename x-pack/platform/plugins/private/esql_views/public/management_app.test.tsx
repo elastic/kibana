@@ -1030,7 +1030,7 @@ describe('ManagementApp', () => {
       });
     });
 
-    it('disables the action when the user cannot access Discover', async () => {
+    it('hides the action when the user cannot access Discover', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
       const discoverLocator = createDiscoverLocator();
@@ -1038,22 +1038,17 @@ describe('ManagementApp', () => {
       renderApp(client, { discoverLocator, isDiscoverAvailable: false });
       await screen.findByText('logs-view');
 
-      const action = within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction');
-      expect(action).toHaveAttribute('aria-disabled', 'true');
-      fireEvent.click(action);
-      expect(discoverLocator.navigateSync).not.toHaveBeenCalled();
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
 
-    it('disables the action when the Discover locator is unavailable', async () => {
+    it('hides the action when the Discover locator is unavailable', async () => {
       const client = createClient();
       client.getViews.mockResolvedValue(twoViews);
 
       renderApp(client);
       await screen.findByText('logs-view');
 
-      expect(
-        within(getRow('logs-view')).getByTestId('esqlViewsOpenInDiscoverAction')
-      ).toHaveAttribute('aria-disabled', 'true');
+      expect(within(getRow('logs-view')).queryByTestId('esqlViewsOpenInDiscoverAction')).toBeNull();
     });
   });
 

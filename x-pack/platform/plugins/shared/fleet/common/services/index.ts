@@ -178,6 +178,9 @@ export {
 
 export {
   hasVersionSuffix,
+  hasAgentVersionSuffix,
+  hasSentinelVersionSuffix,
+  getSentinelVersionPolicyId,
   removeVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsKuery,
   buildPolicyIdsOrVariantsKuery,

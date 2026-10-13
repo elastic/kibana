@@ -48,6 +48,9 @@ const rowLabel = (key: HuntThreatIntelSupplyStatus['workflows'][number]['key']):
 };
 
 const hardGateMessage = (reasonCodes: string[]): string => {
+  if (reasonCodes.includes('reports_index_unmanaged')) {
+    return settingsI18n.THREAT_INTEL_SUPPLY_HARD_GATE_UNMANAGED;
+  }
   if (reasonCodes.includes('embedding_endpoint_unavailable')) {
     return settingsI18n.THREAT_INTEL_SUPPLY_HARD_GATE_EMBEDDING;
   }

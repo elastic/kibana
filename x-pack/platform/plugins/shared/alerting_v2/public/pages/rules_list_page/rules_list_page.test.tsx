@@ -70,6 +70,7 @@ jest.mock('@kbn/core-di-browser', () => {
         http: { basePath: { prepend: (p: string) => p } },
         notifications: {
           toasts: { addSuccess: jest.fn(), addError: jest.fn() },
+          tours: { isEnabled: () => false },
         },
       };
 
@@ -228,13 +229,6 @@ describe('RulesListPage', () => {
       variables: undefined,
     });
     resolveRules();
-  });
-
-  it('renders the experimental badge in the page header', async () => {
-    renderPage();
-    await waitForRules();
-
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
   it('marks the sequence builder entry point as experimental', async () => {

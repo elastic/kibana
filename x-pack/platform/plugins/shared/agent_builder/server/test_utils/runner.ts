@@ -518,6 +518,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
       sendToSubAgent: jest.fn(),
       getExecution: jest.fn(),
     },
+    getExecutionService: jest.fn(),
     executionMode: AgentExecutionMode.conversation,
     interactivity: { enabled: true },
     parentExecutionId: undefined,

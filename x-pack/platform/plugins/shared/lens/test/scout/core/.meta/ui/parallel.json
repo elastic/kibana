@@ -1,5 +1,5 @@
 {
-  "sha1": "50ecc047cafbcd64c839c0c76b8babd9e2612947",
+  "sha1": "7dd51dd11a887cfcc41c4c9c4d64dd45bccea08b",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1688,8 +1688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 42,
-        "column": 14
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -1701,8 +1701,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 59,
-        "column": 27
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -1714,8 +1714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 84,
-        "column": 22
+        "line": 88,
+        "column": 30
       }
     },
     {
@@ -1727,8 +1727,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 110,
-        "column": 13
+        "line": 114,
+        "column": 27
       }
     },
     {
@@ -1740,8 +1740,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 135,
-        "column": 4
+        "line": 141,
+        "column": 5
       }
     },
     {
@@ -1753,8 +1753,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 158,
-        "column": 20
+        "line": 163,
+        "column": 4
       }
     },
     {
@@ -1766,7 +1766,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 187,
+        "line": 191,
         "column": 9
       }
     },
@@ -1779,8 +1779,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/core/ui/parallel_tests/show_underlying_data/editor.spec.ts",
-        "line": 233,
-        "column": 24
+        "line": 236,
+        "column": 44
       }
     },
     {
