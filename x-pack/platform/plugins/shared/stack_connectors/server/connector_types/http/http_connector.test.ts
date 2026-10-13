@@ -195,6 +195,17 @@ describe('sandbox credentials', () => {
     expect(await getHeaders(config, testSecrets)).toEqual(expected);
   });
 
+  test('getSandboxAuthHeaders: rejects secretQueryParams', async () => {
+    await expect(
+      getHeaders(
+        { hasAuth: true, authType: AuthType.Basic },
+        { ...secrets, secretQueryParams: { key: 'abc' } }
+      )
+    ).rejects.toThrow(
+      'HTTP connectors with secretQueryParams are not supported in the sandbox yet'
+    );
+  });
+
   test('getSandboxAuthHeaders: oauth2 client credentials returns the token as the Authorization header', async () => {
     (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValueOnce(
       bearerHeader.Authorization

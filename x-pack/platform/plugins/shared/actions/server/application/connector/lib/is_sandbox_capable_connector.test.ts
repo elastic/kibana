@@ -64,6 +64,17 @@ describe('isSandboxCapableConnector', () => {
     ).toBe(false);
   });
 
+  it('falls back to secrets.authType when config.authType is missing', () => {
+    expect(
+      isSandboxCapableConnector({
+        actionTypeId: '.github',
+        config: {},
+        secrets: { authType: 'bearer' },
+        actionTypeRegistry: createRegistry(),
+      })
+    ).toBe(true);
+  });
+
   it('returns false when config.authType is missing', () => {
     expect(
       isSandboxCapableConnector({

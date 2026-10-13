@@ -14,10 +14,13 @@ import type { ActionTypeRegistry } from '../../../action_type_registry';
 export const isSandboxCapableConnector = ({
   actionTypeId,
   config,
+  secrets,
   actionTypeRegistry,
 }: {
   actionTypeId: string;
   config?: Record<string, unknown>;
+  /** Only pass secrets that are already in memory (in-memory connectors); list paths omit it. */
+  secrets?: Record<string, unknown>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'get'>;
 }): boolean => {
   if (!actionTypeRegistry.has(actionTypeId)) {
@@ -29,13 +32,14 @@ export const isSandboxCapableConnector = ({
     return false;
   }
 
-  // Secrets are not decrypted at list time, so the predicate must work from config alone.
-  if (actionType.isSandboxCapable?.({ config: config ?? {}, secrets: {} })) {
+  // Stored secrets are not decrypted at list time, so the predicate works from config alone
+  // unless the caller already holds the secrets in memory.
+  if (actionType.isSandboxCapable?.({ config: config ?? {}, secrets: secrets ?? {} })) {
     return true;
   }
 
   const sandboxSupportedAuthTypes = actionType.sandboxSupportedAuthTypes ?? [];
-  const { authType } = config ?? {};
+  const authType = config?.authType ?? secrets?.authType;
   return (
     typeof authType === 'string' &&
     authType.length > 0 &&

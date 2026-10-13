@@ -39,6 +39,17 @@ const normalizeSecretHeaders = (secretHeaders: unknown): Record<string, string> 
   return headers;
 };
 
+/** Merges header records case-insensitively; a later record wins and keeps its own key casing. */
+const mergeHeaders = (...records: Array<Record<string, string>>): Record<string, string> => {
+  const merged = new Map<string, [string, string]>();
+  for (const record of records) {
+    for (const [key, value] of Object.entries(record)) {
+      merged.set(key.toLowerCase(), [key, value]);
+    }
+  }
+  return Object.fromEntries(merged.values());
+};
+
 /** Returns sandbox-injectable connector config and auth headers without exposing stored secrets. */
 export async function getSandboxCredentials(
   context: ActionsClientContext,
@@ -86,18 +97,18 @@ export async function getSandboxCredentials(
     profileUid,
   }).getAuthHeaders();
 
-  const headers = {
-    ...authHeaders,
-    ...(await actionType.getSandboxAuthHeaders?.({
+  const headers = mergeHeaders(
+    authHeaders,
+    (await actionType.getSandboxAuthHeaders?.({
       config,
       secrets: validatedSecrets,
       connectorId,
       connectorTokenClient: context.connectorTokenClient,
       configurationUtilities,
       logger: context.logger,
-    })),
-    ...normalizeSecretHeaders(validatedSecrets.secretHeaders),
-  };
+    })) ?? {},
+    normalizeSecretHeaders(validatedSecrets.secretHeaders)
+  );
 
   return {
     connectorId,

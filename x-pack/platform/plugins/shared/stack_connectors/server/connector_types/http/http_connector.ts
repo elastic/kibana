@@ -178,6 +178,15 @@ async function getSandboxAuthHeaders({
   configurationUtilities: ActionsConfigurationUtilities;
   logger: Logger;
 }): Promise<Record<string, string>> {
+  const { secretQueryParams } = secrets;
+  if (
+    secretQueryParams &&
+    typeof secretQueryParams === 'object' &&
+    Object.keys(secretQueryParams).length > 0
+  ) {
+    throw new Error('HTTP connectors with secretQueryParams are not supported in the sandbox yet');
+  }
+
   const { hasAuth, authType } = config;
   if (hasAuth === false) return {};
 

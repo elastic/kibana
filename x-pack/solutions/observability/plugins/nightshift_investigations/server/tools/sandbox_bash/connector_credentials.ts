@@ -63,12 +63,17 @@ const readAuthorizationHeader = (secretHeaders: unknown): string | undefined => 
 };
 
 const BASE64_PATTERN = /^[A-Za-z0-9+/]+={0,2}$/;
-const PRINTABLE_PATTERN = /^[\x20-\x7E]+$/;
+
+const hasControlCharacter = (value: string): boolean =>
+  [...value].some((char) => {
+    const code = char.charCodeAt(0);
+    return code <= 0x1f || code === 0x7f;
+  });
 
 const decodeBasicCredentials = (encoded: string): string | undefined => {
   if (!BASE64_PATTERN.test(encoded)) return undefined;
   const decoded = Buffer.from(encoded, 'base64').toString('utf8');
-  return PRINTABLE_PATTERN.test(decoded) ? decoded : undefined;
+  return decoded.length > 0 && !hasControlCharacter(decoded) ? decoded : undefined;
 };
 
 /**
@@ -142,11 +147,12 @@ export const buildConnectorEnv = ({
     if (envValue.length >= MIN_REDACTABLE_SECRET_LENGTH) secretValues.push(envValue);
   }
 
-  const authorization = Object.entries(headers).find(
-    ([key]) => key.toLowerCase() === 'authorization'
-  )?.[1];
-  if (authorization !== undefined)
-    secretValues.push(...deriveAuthorizationSecretValues(authorization));
+  // Every case variant maps to the same env var, so derive values from all of them.
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === 'authorization') {
+      secretValues.push(...deriveAuthorizationSecretValues(value));
+    }
+  }
 
   return { env, secretValues: [...new Set(secretValues)] };
 };
@@ -181,6 +187,17 @@ export const createConnectorCredentialResolver =
           `Connector '${connectorId}' is not assigned to this agent. ` +
           `Assigned connectors: ${callContext.allowedConnectorIds.join(', ') || 'none'}. ` +
           `Check /workspace/connectors.md.`,
+      };
+    }
+
+    // Tech preview is limited to preconfigured connectors so the shared output redactor, built
+    // from in-memory connector secrets, covers every injected value.
+    const inMemoryConnector = actions.inMemoryConnectors.find(({ id }) => id === connectorId);
+    if (!inMemoryConnector?.isPreconfigured) {
+      return {
+        errorMessage:
+          `Connector '${connectorId}' is not a preconfigured connector. Only connectors defined ` +
+          `in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.`,
       };
     }
 

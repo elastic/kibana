@@ -140,22 +140,7 @@ async function getAllHelper({
   }
 
   const mergedResult = [
-    ...savedObjectsActions,
-    ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
-      return {
-        id: connector.id,
-        actionTypeId: connector.actionTypeId,
-        name: connector.name,
-        isPreconfigured: connector.isPreconfigured,
-        isDeprecated: isConnectorDeprecated(connector),
-        isSystemAction: connector.isSystemAction,
-        isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
-        authMode: getAuthMode(connector.authMode),
-        ...(connector.exposeConfig ? { config: connector.config } : {}),
-      };
-    }),
-  ]
-    .filter((connector) =>
+    ...savedObjectsActions.filter((connector) =>
       sandboxCapableOnly
         ? isSandboxCapableConnector({
             actionTypeId: connector.actionTypeId,
@@ -163,8 +148,33 @@ async function getAllHelper({
             actionTypeRegistry: connectorTypeRegistry,
           })
         : true
-    )
-    .sort((a, b) => a.name.localeCompare(b.name));
+    ),
+    ...(await filterInferenceConnectors(esClient, inMemoryConnectors))
+      // Capability uses the raw config and secrets, before exposeConfig hides the config.
+      .filter((connector) =>
+        sandboxCapableOnly
+          ? isSandboxCapableConnector({
+              actionTypeId: connector.actionTypeId,
+              config: connector.config,
+              secrets: connector.secrets,
+              actionTypeRegistry: connectorTypeRegistry,
+            })
+          : true
+      )
+      .map((connector) => {
+        return {
+          id: connector.id,
+          actionTypeId: connector.actionTypeId,
+          name: connector.name,
+          isPreconfigured: connector.isPreconfigured,
+          isDeprecated: isConnectorDeprecated(connector),
+          isSystemAction: connector.isSystemAction,
+          isConnectorTypeDeprecated: connectorTypeRegistry.isDeprecated(connector.actionTypeId),
+          authMode: getAuthMode(connector.authMode),
+          ...(connector.exposeConfig ? { config: connector.config } : {}),
+        };
+      }),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
     kibanaIndices,

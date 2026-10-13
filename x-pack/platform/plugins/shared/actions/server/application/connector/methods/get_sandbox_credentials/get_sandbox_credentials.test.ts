@@ -488,6 +488,21 @@ describe('getSandboxCredentials()', () => {
       expect(result.headers).toEqual({ Authorization: `ApiKey ${apiKey}` });
     });
 
+    it('lets a differently cased secretHeaders key override the generated header', async () => {
+      mockConnector(
+        { url: 'https://es.example.com' },
+        {
+          user: 'elastic',
+          password: 'changeme',
+          secretHeaders: { authorization: `ApiKey ${apiKey}` },
+        }
+      );
+
+      const result = await actionsClient.getSandboxCredentials({ id: defaultConnectorId });
+
+      expect(result.headers).toEqual({ authorization: `ApiKey ${apiKey}` });
+    });
+
     it('rejects an instance the isSandboxCapable predicate refuses', async () => {
       mockConnector({ authType: 'webhook-authentication-ssl' }, { user: 'elastic' });
 

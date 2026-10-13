@@ -7,6 +7,7 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import {
   buildConnectorEnv,
@@ -53,6 +54,9 @@ const setup = ({
   }
   const actions = actionsMock.createStart();
   actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
+  actions.inMemoryConnectors = [
+    { id: CONNECTOR_ID, isPreconfigured: true } as ActionsPluginStart['inMemoryConnectors'][number],
+  ];
 
   const resolve = createConnectorCredentialResolver({
     getDeps: () => ({ actions: withActions ? actions : undefined }),
@@ -97,6 +101,20 @@ describe('buildConnectorEnv', () => {
       ...deriveAuthorizationSecretValues(BASIC_AUTHORIZATION),
     ]);
   });
+
+  it('derives values from every case variant of Authorization and keeps the later one in env', () => {
+    const { env, secretValues } = buildConnectorEnv({
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.http',
+      config: {},
+      headers: { Authorization: BEARER_AUTHORIZATION, authorization: 'ApiKey override-api-key-1' },
+    });
+
+    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe('ApiKey override-api-key-1');
+    expect(secretValues).toEqual(
+      expect.arrayContaining(['ghp_topsecrettokenvalue', 'override-api-key-1'])
+    );
+  });
 });
 
 describe('deriveAuthorizationSecretValues', () => {
@@ -109,6 +127,16 @@ describe('deriveAuthorizationSecretValues', () => {
       'Basic with decoded user and password',
       `Basic ${encode('elastic-user:p4ss:word')}`,
       [encode('elastic-user:p4ss:word'), 'elastic-user:p4ss:word', 'elastic-user', 'p4ss:word'],
+    ],
+    [
+      'Basic with a non-ASCII password',
+      `Basic ${encode('elastic-user:pässword123')}`,
+      [
+        encode('elastic-user:pässword123'),
+        'elastic-user:pässword123',
+        'elastic-user',
+        'pässword123',
+      ],
     ],
     ['Basic with invalid base64', 'Basic not*base64!value', ['not*base64!value']],
     ['too-short value', 'Bearer abc', []],
@@ -157,6 +185,7 @@ describe('createConnectorCredentialResolver', () => {
     actions.inMemoryConnectors = [
       {
         id: CONNECTOR_ID,
+        isPreconfigured: true,
         secrets: { token: 'should-not-leak', clientSecret: 'oauth-client-secret' },
       } as any,
     ];
@@ -184,6 +213,18 @@ describe('createConnectorCredentialResolver', () => {
       errorMessage: expect.stringContaining(
         "Connector 'other-connector' is not assigned to this agent"
       ),
+    });
+    expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
+  });
+
+  it('rejects an allow-listed connector that is not preconfigured', async () => {
+    const { resolve, actionsClient } = setup();
+
+    const result = await resolve('saved-object-1', createCallContext(['saved-object-1']));
+
+    expect(result).toEqual({
+      errorMessage:
+        "Connector 'saved-object-1' is not a preconfigured connector. Only connectors defined in kibana.yml (xpack.actions.preconfigured) can be used from the sandbox.",
     });
     expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
   });
