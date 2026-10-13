@@ -178,7 +178,7 @@ describe('buildCommentBody', () => {
     const README_LINK = 'See the [`@kbn/api-contracts` README]';
     const OPTIONAL_PROMPT = 'Optional: release note describing the change in the PR description';
     const BREAKING_CONTEXT =
-      'For a breaking change, also add `## Impact` and `## Action` sections to the PR description: who and what the change affects, and the steps or workarounds API users need to adapt.';
+      'Add `## Impact` and `## Action` sections to the PR description so API users know who and what the change affects, and the steps or workarounds they need to adapt.';
 
     it.each([
       ['stable', entry()],
