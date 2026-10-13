@@ -13,6 +13,8 @@ import type { LayoutDirection, TransformResult } from '@kbn/workflows';
 import {
   buildContainerDescendants,
   buildContainerMembers,
+  centreForkOwners,
+  containContainerContents,
   enforceForkBranchCompoundOrder,
   enforceForkLaneOrder,
   enforceTriggerLaneOrder,
@@ -159,10 +161,21 @@ export const computeWorkflowLayout = (
     containerDescendants
   );
 
-  // Post-dagre pass 2: enforce trigger lane declaration order.
-  const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
+  // Post-dagre pass 1c: re-centre each fork's lanes on its owner. Passes 1 and 1b
+  // move lane heads while the owner stays on the spine, so unequal-extent lanes
+  // leave the owner off-centre.
+  const { nodes: centredNodes, edges: centredEdges } = centreForkOwners(
     compactedNodes,
     compactedEdges,
+    transformed,
+    direction,
+    containerDescendants
+  );
+
+  // Post-dagre pass 2: enforce trigger lane declaration order.
+  const { nodes: triggeredNodes, edges: triggeredEdges } = enforceTriggerLaneOrder(
+    centredNodes,
+    centredEdges,
     transformed.nodeRefs,
     direction
   );
@@ -179,7 +192,14 @@ export const computeWorkflowLayout = (
   // Pass direct members as groupMemberIds (for inner PAVA sweeps) and the
   // transitive closure as groupDescendantIds (for outer-node exclusion and
   // carry-on-move) — these two roles require different granularities.
-  const repairedNodes = [...triggeredNodes];
+  // Grow container boxes first so the repair also separates them from outer nodes.
+  const repairedNodes = containContainerContents(
+    triggeredNodes,
+    transformed.foreachGroups,
+    direction,
+    containerDescendants,
+    WORKFLOW_COMPOUND_PADDING
+  );
   separatePositionedOverlapsInPlace(
     repairedNodes,
     crossAxis,
@@ -196,5 +216,14 @@ export const computeWorkflowLayout = (
   // pass compares cross-axis deltas only, as before.
   const finalEdges = reconcileEdgePoints(triggeredEdges, repairedNodes, initialCentres, crossAxis);
 
-  return { nodes: repairedNodes, edges: finalEdges };
+  // Post-dagre pass 5: the repair can push body nodes past a box again.
+  const containedNodes = containContainerContents(
+    repairedNodes,
+    transformed.foreachGroups,
+    direction,
+    containerDescendants,
+    WORKFLOW_COMPOUND_PADDING
+  );
+
+  return { nodes: containedNodes, edges: finalEdges };
 };

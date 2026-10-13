@@ -181,6 +181,28 @@ const computePackOffset = (
   return offset;
 };
 
+/**
+ * Midpoint between the outermost lane-head centres on the cross axis: the point
+ * dagre's barycenter pass centres a fork owner on.
+ */
+const laneHeadMidpointCross = (
+  heads: readonly string[],
+  mutableNodes: MutableNodes,
+  crossAxis: 'x' | 'y'
+): number => {
+  let min = Infinity;
+  let max = -Infinity;
+  for (const head of heads) {
+    const n = mutableNodes.get(head);
+    if (n) {
+      const centre = n[crossAxis] + (crossAxis === 'x' ? n.width : n.height) / 2;
+      if (centre < min) min = centre;
+      if (centre > max) max = centre;
+    }
+  }
+  return isFinite(min) ? (min + max) / 2 : 0;
+};
+
 /** Apply a cross-axis delta to all nodes in a lane (including container inner nodes). */
 const applyLaneDelta = (
   laneNodes: Set<string>,
@@ -570,9 +592,10 @@ export const enforceForkBranchCompoundOrder = (
       return visited;
     };
 
-    for (const [, heads] of outEdges) {
-      if (heads.length >= 2) {
-        // Build exclusive branch node sets (same logic as buildLaneSets).
+    // Build exclusive branch node sets per fork (same logic as buildLaneSets).
+    const forks = [...outEdges]
+      .filter(([, heads]) => heads.length >= 2)
+      .map(([owner, heads]) => {
         const perHeadReachable = new Map(heads.map((h) => [h, reachableFrom(h)]));
         const branchSets = new Map<string, Set<string>>();
         for (const head of heads) {
@@ -590,38 +613,44 @@ export const enforceForkBranchCompoundOrder = (
           }
           branchSets.set(head, exclusive);
         }
+        const size = [...branchSets.values()].reduce((sum, set) => sum + set.size, 0);
+        return { owner, heads, branchSets, size };
+      })
+      // Inner forks first: a nested fork's branches span fewer nodes than any fork
+      // containing it, and its lanes must be placed before its container carries them.
+      .sort((a, b) => a.size - b.size);
 
-        let prevBranchCrossEnd = -Infinity;
+    for (const { owner: forkOwner, heads, branchSets } of forks) {
+      // Nodes inside forks nested in this one: their lanes were placed by that
+      // fork's own pass and are carried rigidly here, not re-placed.
+      const nestedNodes = new Set<string>();
+      for (const nested of forks) {
+        if (nested.owner !== forkOwner && heads.some((h) => branchSets.get(h)?.has(nested.owner))) {
+          for (const set of nested.branchSets.values()) for (const id of set) nestedNodes.add(id);
+        }
+      }
 
-        for (let i = 0; i < heads.length; i++) {
-          const head = heads[i];
-          const branchSpineIds = branchSets.get(head) ?? new Set<string>();
+      let prevBranchCrossEnd = -Infinity;
 
-          // 1. Shift branch spine nodes to start immediately after the previous branch compound.
-          if (i > 0 && isFinite(prevBranchCrossEnd)) {
-            const headNode = mutableNodes.get(head);
-            if (headNode) {
-              const delta = prevBranchCrossEnd + nodeSep - headNode[crossAxis];
-              if (Math.abs(delta) >= 0.001) {
-                for (const spineId of branchSpineIds) {
-                  shiftNode(spineId, delta);
-                }
-              }
-            }
-          }
+      for (let i = 0; i < heads.length; i++) {
+        const head = heads[i];
+        const branchSpineIds = branchSets.get(head) ?? new Set<string>();
 
-          // 2. Collect lanes in this branch (BFS from spine node owners, then nested lane owners).
-          const branchLaneIds = new Set<string>();
-          const branchLanes: FallbackLane[] = [];
-          let queue = graphLanes.filter((l) => branchSpineIds.has(l.owner));
+        // Collect lanes in this branch (BFS from spine node owners, then nested lane owners).
+        const collectLanes = (startOwners: (id: string) => boolean) => {
+          const laneIds = new Set<string>();
+          const lanes: FallbackLane[] = [];
+          const seenHeads = new Set<string>();
+          let queue = graphLanes.filter((l) => startOwners(l.owner));
           while (queue.length > 0) {
             const next: FallbackLane[] = [];
             for (const lane of queue) {
-              if (!branchLaneIds.has(lane.head)) {
-                branchLanes.push(lane);
-                for (const id of lane.nodes) branchLaneIds.add(id);
+              if (!seenHeads.has(lane.head)) {
+                seenHeads.add(lane.head);
+                lanes.push(lane);
+                for (const id of lane.nodes) laneIds.add(id);
                 for (const nested of graphLanes) {
-                  if (lane.nodes.includes(nested.owner) && !branchLaneIds.has(nested.head)) {
+                  if (lane.nodes.includes(nested.owner) && !seenHeads.has(nested.head)) {
                     next.push(nested);
                   }
                 }
@@ -629,98 +658,124 @@ export const enforceForkBranchCompoundOrder = (
             }
             queue = next;
           }
+          return { laneIds, lanes };
+        };
+        // All lanes of the branch (carried on shift, counted in its extent) vs. the
+        // ones owned directly by it (re-placed below).
+        const { laneIds: branchLaneIds } = collectLanes((owner) => branchSpineIds.has(owner));
+        const { lanes: branchLanes } = collectLanes(
+          (owner) => branchSpineIds.has(owner) && !nestedNodes.has(owner)
+        );
 
-          // Sort shallowest-first, then by owner's main position.
-          branchLanes.sort((a, b) => {
-            if (a.depth !== b.depth) return a.depth - b.depth;
-            const aOwner = mutableNodes.get(a.owner);
-            const bOwner = mutableNodes.get(b.owner);
-            return (aOwner?.[mainAxis] ?? 0) - (bOwner?.[mainAxis] ?? 0);
-          });
-
-          // Re-place lanes using branch-local obstacles only.
-          interface Rect {
-            crossStart: number;
-            crossEnd: number;
-            mainStart: number;
-            mainEnd: number;
+        // 1. Shift branch spine nodes and their lanes to start immediately after the
+        // previous branch compound.
+        if (i > 0 && isFinite(prevBranchCrossEnd)) {
+          const headNode = mutableNodes.get(head);
+          if (headNode) {
+            const delta = prevBranchCrossEnd + nodeSep - headNode[crossAxis];
+            if (Math.abs(delta) >= 0.001) {
+              for (const spineId of branchSpineIds) {
+                shiftNode(spineId, delta);
+              }
+              for (const laneId of branchLaneIds) {
+                shiftNode(laneId, delta);
+              }
+            }
           }
-          const placedPlacements: Rect[] = [];
+        }
 
-          for (const lane of branchLanes) {
-            const lanePos = lane.nodes
+        // 2. Re-place the branch's directly owned lanes.
+
+        // Sort shallowest-first, then by owner's main position.
+        branchLanes.sort((a, b) => {
+          if (a.depth !== b.depth) return a.depth - b.depth;
+          const aOwner = mutableNodes.get(a.owner);
+          const bOwner = mutableNodes.get(b.owner);
+          return (aOwner?.[mainAxis] ?? 0) - (bOwner?.[mainAxis] ?? 0);
+        });
+
+        // Re-place lanes using branch-local obstacles only.
+        interface Rect {
+          crossStart: number;
+          crossEnd: number;
+          mainStart: number;
+          mainEnd: number;
+        }
+        const placedPlacements: Rect[] = [];
+
+        for (const lane of branchLanes) {
+          const lanePos = lane.nodes
+            .map((id) => mutableNodes.get(id))
+            .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined);
+          if (lanePos.length === 0) {
+            // Lane nodes not yet in mutableNodes — skip this lane.
+          } else {
+            const ownerNode = mutableNodes.get(lane.owner);
+            const bandMainStart = ownerNode
+              ? ownerNode[mainAxis]
+              : Math.min(...lanePos.map((n) => n[mainAxis]));
+            const bandMainEnd = Math.max(...lanePos.map((n) => n[mainAxis] + n[mainSpan]));
+
+            // Branch-local spine obstacles: only spine nodes in this branch.
+            const spineObstacles = [...branchSpineIds]
+              .map((id) => mutableNodes.get(id))
+              .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined)
+              .filter(
+                (n) => n[mainAxis] < bandMainEnd && bandMainStart < n[mainAxis] + n[mainSpan]
+              );
+
+            // Already-placed branch lane obstacles.
+            const laneObstacles = placedPlacements.filter(
+              (p) => p.mainStart < bandMainEnd && bandMainStart < p.mainEnd
+            );
+
+            const maxCrossEnd = Math.max(
+              ...spineObstacles.map((n) => n[crossAxis] + n[crossSpan]),
+              ...laneObstacles.map((p) => p.crossEnd),
+              -Infinity
+            );
+
+            const origin = maxCrossEnd === -Infinity ? 0 : maxCrossEnd + nodeSep;
+            const currentMin = Math.min(...lanePos.map((n) => n[crossAxis]));
+            const delta = origin - currentMin;
+
+            if (Math.abs(delta) >= 0.001) {
+              for (const id of lane.nodes) shiftNode(id, delta);
+            }
+
+            const updatedPos = lane.nodes
               .map((id) => mutableNodes.get(id))
               .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined);
-            if (lanePos.length === 0) {
-              // Lane nodes not yet in mutableNodes — skip this lane.
-            } else {
-              const ownerNode = mutableNodes.get(lane.owner);
-              const bandMainStart = ownerNode
-                ? ownerNode[mainAxis]
-                : Math.min(...lanePos.map((n) => n[mainAxis]));
-              const bandMainEnd = Math.max(...lanePos.map((n) => n[mainAxis] + n[mainSpan]));
-
-              // Branch-local spine obstacles: only spine nodes in this branch.
-              const spineObstacles = [...branchSpineIds]
-                .map((id) => mutableNodes.get(id))
-                .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined)
-                .filter(
-                  (n) => n[mainAxis] < bandMainEnd && bandMainStart < n[mainAxis] + n[mainSpan]
-                );
-
-              // Already-placed branch lane obstacles.
-              const laneObstacles = placedPlacements.filter(
-                (p) => p.mainStart < bandMainEnd && bandMainStart < p.mainEnd
-              );
-
-              const maxCrossEnd = Math.max(
-                ...spineObstacles.map((n) => n[crossAxis] + n[crossSpan]),
-                ...laneObstacles.map((p) => p.crossEnd),
-                -Infinity
-              );
-
-              const origin = maxCrossEnd === -Infinity ? 0 : maxCrossEnd + nodeSep;
-              const currentMin = Math.min(...lanePos.map((n) => n[crossAxis]));
-              const delta = origin - currentMin;
-
-              if (Math.abs(delta) >= 0.001) {
-                for (const id of lane.nodes) shiftNode(id, delta);
-              }
-
-              const updatedPos = lane.nodes
-                .map((id) => mutableNodes.get(id))
-                .filter((n): n is NonNullable<ReturnType<MutableNodes['get']>> => n !== undefined);
-              if (updatedPos.length > 0) {
-                placedPlacements.push({
-                  crossStart: Math.min(...updatedPos.map((n) => n[crossAxis])),
-                  crossEnd: Math.max(...updatedPos.map((n) => n[crossAxis] + n[crossSpan])),
-                  mainStart: Math.min(...updatedPos.map((n) => n[mainAxis])),
-                  mainEnd: Math.max(...updatedPos.map((n) => n[mainAxis] + n[mainSpan])),
-                });
-              }
-            } // end else (lanePos.length > 0)
-          }
-
-          // 3. Compute branch compound cross extent (spine + lanes).
-          let branchCrossEnd = -Infinity;
-          for (const id of branchSpineIds) {
-            const n = mutableNodes.get(id);
-            if (n) {
-              const end = n[crossAxis] + n[crossSpan];
-              if (end > branchCrossEnd) branchCrossEnd = end;
+            if (updatedPos.length > 0) {
+              placedPlacements.push({
+                crossStart: Math.min(...updatedPos.map((n) => n[crossAxis])),
+                crossEnd: Math.max(...updatedPos.map((n) => n[crossAxis] + n[crossSpan])),
+                mainStart: Math.min(...updatedPos.map((n) => n[mainAxis])),
+                mainEnd: Math.max(...updatedPos.map((n) => n[mainAxis] + n[mainSpan])),
+              });
             }
-          }
-          for (const id of branchLaneIds) {
-            const n = mutableNodes.get(id);
-            if (n) {
-              const end = n[crossAxis] + n[crossSpan];
-              if (end > branchCrossEnd) branchCrossEnd = end;
-            }
-          }
-
-          if (isFinite(branchCrossEnd)) prevBranchCrossEnd = branchCrossEnd;
+          } // end else (lanePos.length > 0)
         }
-      } // end if (heads.length >= 2)
+
+        // 3. Compute branch compound cross extent (spine + lanes).
+        let branchCrossEnd = -Infinity;
+        for (const id of branchSpineIds) {
+          const n = mutableNodes.get(id);
+          if (n) {
+            const end = n[crossAxis] + n[crossSpan];
+            if (end > branchCrossEnd) branchCrossEnd = end;
+          }
+        }
+        for (const id of branchLaneIds) {
+          const n = mutableNodes.get(id);
+          if (n) {
+            const end = n[crossAxis] + n[crossSpan];
+            if (end > branchCrossEnd) branchCrossEnd = end;
+          }
+        }
+
+        if (isFinite(branchCrossEnd)) prevBranchCrossEnd = branchCrossEnd;
+      }
     }
   };
 
@@ -744,6 +799,155 @@ export const enforceForkBranchCompoundOrder = (
   });
 
   return { nodes: resultNodes, edges: [...edges] };
+};
+
+/**
+ * Re-centre each fork's lanes on the fork owner.
+ *
+ * Dagre centres an owner on its lane heads, but the declaration-order and
+ * compound packing passes move the heads while the owner (on the spine) stays
+ * put, so lanes of unequal extent leave it off-centre. Every lane of the fork
+ * is shifted by the same delta, which keeps lane spacing and carries nested
+ * forks rigidly; the rejoin node belongs to no lane and does not move.
+ *
+ * Forks inside container bodies are centred too; `containContainerContents`
+ * then grows any container box the shifted body spilled out of.
+ *
+ * Skipped for forks with a fallback owner in one of their lanes: their lane
+ * nodes are packed with the branch and are not part of the lane sets.
+ */
+export const centreForkOwners = (
+  nodes: readonly DagPositionedNode[],
+  edges: readonly DagPositionedEdge[],
+  transformed: {
+    edges: readonly GraphEdge[];
+    fallbackLanes: readonly FallbackLane[];
+    foreachGroups: readonly ForeachGroup[];
+  },
+  direction: 'TB' | 'LR',
+  containerDescendants: ReadonlyMap<string, ReadonlySet<string>>
+): { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] } => {
+  const crossAxis: 'x' | 'y' = direction === 'TB' ? 'x' : 'y';
+  const crossSpan: 'width' | 'height' = crossAxis === 'x' ? 'width' : 'height';
+  const mutableNodes: MutableNodes = new Map(
+    nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
+  );
+  const fallbackOwners = new Set(transformed.fallbackLanes.map((l) => l.owner));
+
+  const centreForks = (graphEdges: readonly GraphEdge[]): void => {
+    const spineEdges = graphEdges.filter((e) => !e.isFailure && !e.isRejoin);
+    const headsByOwner = new Map<string, string[]>();
+    for (const e of spineEdges) {
+      if (mutableNodes.has(e.source)) {
+        const heads = headsByOwner.get(e.source);
+        if (heads) {
+          heads.push(e.target);
+        } else {
+          headsByOwner.set(e.source, [e.target]);
+        }
+      }
+    }
+
+    for (const [owner, forkHeads] of headsByOwner) {
+      const laneSets = buildLaneSets(forkHeads, spineEdges);
+      const heads = forkHeads.filter((h) => (laneSets?.get(h)?.size ?? 0) > 0);
+      const hasFallbackLane = [...(laneSets?.values() ?? [])].some((lane) =>
+        [...lane].some((id) => fallbackOwners.has(id))
+      );
+      const ownerNode = mutableNodes.get(owner);
+      if (laneSets && heads.length >= 2 && !hasFallbackLane && ownerNode) {
+        const ownerCentre = ownerNode[crossAxis] + ownerNode[crossSpan] / 2;
+        const delta = ownerCentre - laneHeadMidpointCross(heads, mutableNodes, crossAxis);
+        if (Math.abs(delta) >= 0.5) {
+          for (const head of heads) {
+            applyLaneDelta(
+              laneSets.get(head) ?? new Set<string>(),
+              mutableNodes,
+              containerDescendants,
+              crossAxis === 'x' ? delta : 0,
+              crossAxis === 'y' ? delta : 0
+            );
+          }
+        }
+      }
+    }
+  };
+
+  for (const group of transformed.foreachGroups) {
+    centreForks(group.innerEdges);
+  }
+  centreForks(transformed.edges);
+
+  const resultNodes = nodes.map((original) => {
+    const updated = mutableNodes.get(original.id);
+    if (!updated || (updated.x === original.x && updated.y === original.y)) return original;
+    return { ...original, x: updated.x, y: updated.y } as DagPositionedNode;
+  });
+
+  return { nodes: resultNodes, edges: [...edges] };
+};
+
+/**
+ * Grow each container box so it contains its descendants plus `compoundPadding`.
+ *
+ * Boxes are sized by dagre before the post-dagre passes, which can move body
+ * nodes past them (lane packing, fork-owner centring, overlap repair). Grow-only:
+ * a box that already contains its body is left untouched. Nested containers are
+ * handled innermost first so an outer box also contains a grown inner one.
+ */
+export const containContainerContents = (
+  nodes: readonly DagPositionedNode[],
+  foreachGroups: readonly ForeachGroup[],
+  direction: 'TB' | 'LR',
+  containerDescendants: ReadonlyMap<string, ReadonlySet<string>>,
+  compoundPadding: { top: number; right: number; bottom: number; left: number }
+): DagPositionedNode[] => {
+  const crossAxis: 'x' | 'y' = direction === 'TB' ? 'x' : 'y';
+  const crossSpan: 'width' | 'height' = crossAxis === 'x' ? 'width' : 'height';
+  const paddingStart = crossAxis === 'x' ? compoundPadding.left : compoundPadding.top;
+  const paddingEnd = crossAxis === 'x' ? compoundPadding.right : compoundPadding.bottom;
+  const mutableNodes: MutableNodes = new Map(
+    nodes.map((n) => [n.id, { x: n.x, y: n.y, width: n.width, height: n.height }])
+  );
+
+  // A nested container has fewer descendants than the container holding it.
+  const groupsInnermostFirst = [...foreachGroups].sort(
+    (a, b) =>
+      (containerDescendants.get(a.id)?.size ?? 0) - (containerDescendants.get(b.id)?.size ?? 0)
+  );
+  for (const group of groupsInnermostFirst) {
+    const box = mutableNodes.get(group.id);
+    let min = Infinity;
+    let max = -Infinity;
+    for (const id of containerDescendants.get(group.id) ?? []) {
+      const n = mutableNodes.get(id);
+      if (n) {
+        min = Math.min(min, n[crossAxis]);
+        max = Math.max(max, n[crossAxis] + n[crossSpan]);
+      }
+    }
+    if (box && isFinite(min)) {
+      const start = Math.min(box[crossAxis], min - paddingStart);
+      const end = Math.max(box[crossAxis] + box[crossSpan], max + paddingEnd);
+      if (start !== box[crossAxis] || end !== box[crossAxis] + box[crossSpan]) {
+        mutableNodes.set(group.id, { ...box, [crossAxis]: start, [crossSpan]: end - start });
+      }
+    }
+  }
+
+  return nodes.map((original) => {
+    const updated = mutableNodes.get(original.id);
+    if (
+      !updated ||
+      (updated.x === original.x &&
+        updated.width === original.width &&
+        updated.y === original.y &&
+        updated.height === original.height)
+    ) {
+      return original;
+    }
+    return { ...original, ...updated } as DagPositionedNode;
+  });
 };
 
 /**
