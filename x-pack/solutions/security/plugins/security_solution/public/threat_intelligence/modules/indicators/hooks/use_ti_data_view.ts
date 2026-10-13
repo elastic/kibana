@@ -79,7 +79,7 @@ export const useTIDataView = (): SelectedDataView => {
             title: dataView.title,
             id: dataView.id,
           },
-          loading: status !== 'ready',
+          loading: status === 'pristine' || status === 'loading',
           dataViewId: dataView.id,
           indicesExist: dataView.hasMatchedIndices(),
         },

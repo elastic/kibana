@@ -63,6 +63,8 @@ export const useIndicatorsTotalCount = () => {
             setIsLoading(false);
           }
         },
+        error: () => setIsLoading(false),
+        complete: () => setIsLoading(false),
       });
   }, [searchService, selectedPatterns]);
 

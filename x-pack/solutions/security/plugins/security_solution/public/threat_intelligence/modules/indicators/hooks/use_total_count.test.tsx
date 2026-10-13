@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { BehaviorSubject, EMPTY, throwError } from 'rxjs';
 import { useIndicatorsTotalCount } from './use_total_count';
 import { TestProvidersComponent, mockedSearchService } from '../../../mocks/test_providers';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -61,6 +61,36 @@ describe('useIndicatorsTotalCount()', () => {
 
       expect(result.current.count).toEqual(indicatorsResponse.rawResponse.hits.total);
       expect(result.current.isLoading).toEqual(false);
+    });
+  });
+
+  describe('when query fails', () => {
+    it('should stop loading', async () => {
+      jest
+        .mocked(mockedSearchService.search)
+        .mockReturnValue(throwError(() => new Error('search failed')));
+
+      const { result } = renderHook(() => useIndicatorsTotalCount(), {
+        wrapper: TestProvidersComponent,
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toEqual(false));
+
+      expect(result.current.count).toEqual(0);
+    });
+  });
+
+  describe('when query completes without a response', () => {
+    it('should stop loading', async () => {
+      jest.mocked(mockedSearchService.search).mockReturnValue(EMPTY);
+
+      const { result } = renderHook(() => useIndicatorsTotalCount(), {
+        wrapper: TestProvidersComponent,
+      });
+
+      await waitFor(() => expect(result.current.isLoading).toEqual(false));
+
+      expect(result.current.count).toEqual(0);
     });
   });
 });
